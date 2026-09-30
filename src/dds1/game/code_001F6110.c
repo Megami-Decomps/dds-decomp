@@ -106,9 +106,18 @@ typedef struct BtlList {
 } BtlList;
 
 typedef struct BtlState {
-    u8 unk_000[0x228];
+    u8 unk_000[0x1F4];
+    u32 battleFlags; /* 0x1F4 */
+    u8 unk_1F8[0x30];
     BtlUnit *units;
-    u8 unk_22C[0x70];
+    u8 unk_22C[0x24];
+    u32 value250; /* 0x250: queried by a battle script command */
+    u8 unk_254[8];
+    u16 value25C; /* 0x25C: queried by a battle script command */
+    u8 mode25E;   /* 0x25E */
+    u8 unk_25F[0x21];
+    s32 argument280; /* 0x280 */
+    u8 unk_284[0x18];
     BtlList *list;
     u8 unk_2A0[4];
     s32 slot;
@@ -129,6 +138,10 @@ typedef struct BtlCmdCtx {
     u8 unk_28[4];
     void *unk_2C;
     void *unk_30;
+    u8 unk_34[4];
+    u32 parameter38; /* 0x38 */
+    u8 unk_3C[0x50];
+    u32 parameter8C; /* 0x8C */
 } BtlCmdCtx;
 
 extern f32 btlUnitGetTopY(BtlUnit *);
@@ -817,25 +830,25 @@ typedef struct BtlScalarRange {
     f32 target;      /* 0x10 */
 } BtlScalarRange;
 
-void btlScalarRangeSetStartClearEnd(s32 arg0, f32 arg1) {
-    ((BtlScalarRange *)arg0)->start = arg1;
-    ((BtlScalarRange *)arg0)->end = 0;
+void btlScalarRangeSetStartClearEnd(s32 range, f32 start) {
+    ((BtlScalarRange *)range)->start = start;
+    ((BtlScalarRange *)range)->end = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7CD8);
 
-void btlScalarRangeInitQuadratic(s32 arg0, f32 arg1) {
+void btlScalarRangeInitQuadratic(s32 range, f32 start) {
     f32 zero;
 
-    ((BtlScalarRange *)arg0)->zero = 0.0f;
-    ((BtlScalarRange *)arg0)->start = arg1;
-    zero = ((BtlScalarRange *)arg0)->zero;
-    ((BtlScalarRange *)arg0)->end = arg1;
-    ((BtlScalarRange *)arg0)->target = zero;
-    if (arg1 == zero) {
+    ((BtlScalarRange *)range)->zero = 0.0f;
+    ((BtlScalarRange *)range)->start = start;
+    zero = ((BtlScalarRange *)range)->zero;
+    ((BtlScalarRange *)range)->end = start;
+    ((BtlScalarRange *)range)->target = zero;
+    if (start == zero) {
         return;
     }
-    ((BtlScalarRange *)arg0)->inverseSpan = 1.0f / (arg1 * arg1 * 0.25f);
+    ((BtlScalarRange *)range)->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001F7D80);
@@ -1020,8 +1033,8 @@ u32 func_001F84A8(void) {
     u32 second = scrReadIntParameter(1);
     ((BtlCmdCtx *)context)->commandMode = 2;
     ((BtlCmdCtx *)context)->commandValue = first;
-    *(u32 *)(context + 0x8c) = second;
-    *(u32 *)(context + 0x38) = second;
+    ((BtlCmdCtx *)context)->parameter8C = second;
+    ((BtlCmdCtx *)context)->parameter38 = second;
     return 1;
 }
 
@@ -1050,8 +1063,8 @@ u32 func_001F8578(void) {
     battle = func_001A17F0();
     func_0010D6A8();
     value = scrReadIntParameter(0);
-    *(u8 *)(battle + 0x25e) = 4;
-    *(s32 *)(battle + 0x280) = value;
+    ((BtlState *)battle)->mode25E = 4;
+    ((BtlState *)battle)->argument280 = value;
     return 1;
 }
 
@@ -1684,11 +1697,11 @@ u32 func_001F9F90(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xB000000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x1000000;
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x1000000;
         ((BtlCommandContext *)context)->choicesA[24] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x1000000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x1000000;
     }
     return 1;
 }
@@ -1697,11 +1710,11 @@ u32 func_001FA018(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x0b400000)) {
         func_0010D5F0(1);
-        *(u32 *)(context + 0x90) |= 0x04000000;
+        ((BtlCommandContext *)context)->selectionFlagsA |= 0x04000000;
         ((BtlCommandContext *)context)->choicesB[0] = scrReadIntParameter(0);
     } else {
         func_0010D5F0(0);
-        *(u32 *)(context + 0x90) &= ~0x04000000;
+        ((BtlCommandContext *)context)->selectionFlagsA &= ~0x04000000;
     }
     return 1;
 }
@@ -1831,7 +1844,7 @@ u32 func_001FA4D8(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    func_0010D5F0(*(u32 *)(battle + 0x250));
+    func_0010D5F0(((BtlState *)battle)->value250);
     return 1;
 }
 
@@ -1871,7 +1884,7 @@ u32 func_001FA5A8(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    func_0010D5F0(*(u16 *)(battle + 0x25c));
+    func_0010D5F0(((BtlState *)battle)->value25C);
     return 1;
 }
 
@@ -1922,8 +1935,8 @@ u32 func_001FA6D8(void) {
 
     context = func_0010D6A8();
     state = D_003BB3D8;
-    *(u32 *)(context + 0x20) = 0x10;
-    *(u32 *)(context + 0x24) = 0;
+    ((BtlCmdCtx *)context)->commandMode = 0x10;
+    ((BtlCmdCtx *)context)->commandValue = 0;
     *(u8 *)(state + 0x54) = 1;
     return 1;
 }
@@ -2129,8 +2142,8 @@ u32 func_001FADC0(void) {
     return 0;
 }
 
-u32 func_001FADD8(u32 arg0) {
-    return arg0;
+u32 func_001FADD8(u32 value) {
+    return value;
 }
 
 void func_001FADE0(void) {
@@ -2146,7 +2159,7 @@ extern void func_00221FF8(s32, s32);
 
 void func_001FADF8(void) {
     s32 state = func_001A17F0();
-    if ((*(u32 *)(state + 0x1f4) & 0x40000000) == 0) {
+    if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         BtlUnit *actor = ((BtlState *)state)->units;
         while (actor != 0) {
             if ((actor->flags & 2) != 0) {
@@ -2263,11 +2276,26 @@ void func_001FB1E8(void) {
 void func_001FB1F0(void) {
 }
 
-u8 *btlFindEntryByCommand(u8 *list, s32 command) {
+/* Packed command entries have a 0x18-byte stride. */
+typedef struct BtlCommandEntry {
+    u8 pad00[4];
+    u8 opcode; /* 0x04 */
+    u8 pad05[3];
+    s32 command; /* 0x08 */
+    u8 pad0C[0xC];
+} BtlCommandEntry;
+
+typedef struct BtlCommandEntryList {
+    u8 pad00[0x14];
+    u8 *entries; /* 0x14 */
+    s32 count;   /* 0x18 */
+} BtlCommandEntryList;
+
+u8 *btlFindEntryByCommand(BtlCommandEntryList *list, s32 command) {
     s32 i;
-    u8 *entry = *(u8 **)(list + 0x14);
-    for (i = 0; i < *(s32 *)(list + 0x18); i++) {
-        if (*(s32 *)(entry + 8) == command) {
+    u8 *entry = list->entries;
+    for (i = 0; i < list->count; i++) {
+        if (((BtlCommandEntry *)entry)->command == command) {
             return entry;
         }
         entry += 0x18;
@@ -2276,7 +2304,7 @@ u8 *btlFindEntryByCommand(u8 *list, s32 command) {
 }
 
 
-s32 btlCountNonPartOpcodes(u8 *list) {
+s32 btlCountNonPartOpcodes(BtlCommandEntryList *list) {
     u32 count;
     u8 *entry;
     u32 i;
@@ -2284,14 +2312,14 @@ s32 btlCountNonPartOpcodes(u8 *list) {
     if (list == NULL) {
         return 0;
     }
-    count = *(u32 *)(list + 0x18);
+    count = list->count;
     if (count == 0) {
         return 0;
     }
-    entry = *(u8 **)(list + 0x14);
+    entry = list->entries;
     found = 0;
     for (i = 0; i < count; i++) {
-        switch (entry[4]) {
+        switch (((BtlCommandEntry *)entry)->opcode) {
         case 0x14:
         case 0x15:
             break;

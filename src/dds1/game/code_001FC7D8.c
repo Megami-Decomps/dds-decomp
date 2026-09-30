@@ -1,4 +1,14 @@
 #include "common.h"
+#include "btl.h"
+
+typedef struct BtlJyokyoOwner {
+    u8 pad00[0x120];
+    u16 flags;       /* 0x120 */
+    u8 pad122[2];
+    u16 unk124;      /* 0x124 */
+    u8 pad126[8];
+    u16 statusFlags; /* 0x12E */
+} BtlJyokyoOwner;
 
 extern s32 func_001A2FD8(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
@@ -62,15 +72,17 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
 
 extern u32 func_001FFCD8(void);
 
-s32 func_001FCB50(u8 *arg0) {
+/* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
+ * If bit 5 is the sole low status bit, the final check uses an external value. */
+s32 func_001FCB50(BtlTask *task) {
     s32 result = 0;
-    u8 *unit = *(u8 **)(arg0 + 0x18);
+    BtlJyokyoOwner *unit = (BtlJyokyoOwner *)task->unit;
     u16 flags;
 
-    if (*(u32 *)(arg0 + 8) & 0x40) {
+    if (task->flags & 0x40) {
         return result;
     }
-    flags = *(u16 *)(unit + 0x12E);
+    flags = unit->statusFlags;
     if (!(flags & 0x20)) {
         return result;
     }
@@ -296,16 +308,12 @@ BtlEffObj *btlCreateEffObjA(BtlEffOwner *owner, s32 arg) {
     return obj;
 }
 
-typedef struct BtlJyokyoOwner {
-    u8 pad00[0x120];
-    u16 flags;       /* 0x120 */
-    u8 pad122[2];
-    u16 unk124;      /* 0x124 */
-} BtlJyokyoOwner;
 
 typedef struct BtlJyokyoState {
     u8 pad00[0x498];
     s32 id;          /* 0x498 */
+    s32 alternateId; /* 0x49C */
+    s32 thirdId;     /* 0x4A0 */
 } BtlJyokyoState;
 
 s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
@@ -349,15 +357,15 @@ s32 func_001FE500(BtlObjLink *link) {
     s32 work = func_001A17F0();
     s32 actor = link->owner;
 
-    if (actor != 0 && !(*(u16 *)(actor + 0x12E) & 1)) {
+    if (actor != 0 && !(((BtlJyokyoOwner *)actor)->statusFlags & 1)) {
         return 1;
     }
     if (link->unk8 == 0) {
         if (actor != 0) {
-            func_0019C590(*(s32 *)(work + 0x49C), 0, *(u16 *)(actor + 0x124),
-                          (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+            func_0019C590(((BtlJyokyoState *)work)->alternateId, 0, ((BtlJyokyoOwner *)actor)->unk124,
+                          (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
         }
-        func_001ADB78(*(s32 *)(work + 0x49C), link->arg);
+        func_001ADB78(((BtlJyokyoState *)work)->alternateId, link->arg);
     }
     if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
         return 1;
@@ -412,10 +420,10 @@ s32 func_001FE6F0(BtlObjLink *link) {
 
     if (link->unk8 == 0) {
         if (owner != NULL) {
-            func_0019C590(*(s32 *)((u8 *)state + 0x4A0), 0, owner->unk124,
+            func_0019C590(state->thirdId, 0, owner->unk124,
                           (owner->flags & 0x20) ? 1 : 2);
         }
-        func_001ADB78(*(s32 *)((u8 *)state + 0x4A0), link->arg);
+        func_001ADB78(state->thirdId, link->arg);
     }
     if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
         return 1;
@@ -448,9 +456,9 @@ s32 func_001FE820(BtlObjLink *link) {
 
     if (link->unk8 == 0) {
         if (link->owner != 0) {
-            func_0019C590(*(s32 *)(work + 0x498), 0, *(u16 *)&link->arg, 0xD);
+            func_0019C590(((BtlJyokyoState *)work)->id, 0, *(u16 *)&link->arg, 0xD);
         }
-        func_001ADB78(*(s32 *)(work + 0x498), 0x75);
+        func_001ADB78(((BtlJyokyoState *)work)->id, 0x75);
     }
     if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
         return 1;
@@ -542,7 +550,7 @@ s32 func_001FEAA8(s32 a0, s32 a1) {
 
 s32 btlAllocAndCheck(s32 object) {
     s32 allocation = func_002CFF68(0x10);
-    s32 actor = *(s32 *)(object + 0x18);
+    s32 actor = (s32)((BtlTask *)object)->unit;
 
     D_003BB87C = allocation;
     *(s32 *)allocation = object;
@@ -554,9 +562,9 @@ s32 btlAllocAndCheck(s32 object) {
     return 0;
 }
 
-u32 func_001FEB78(s32 arg0) {
-    *(u32 *)(arg0 + 0x20) = 0xb;
-    *(u32 *)(arg0 + 0x24) = 0xc2;
+u32 func_001FEB78(s32 task) {
+    ((BtlTask *)task)->result = 0xb;
+    ((BtlTask *)task)->arg = 0xc2;
     return 1;
 }
 
@@ -580,10 +588,10 @@ void btlClearNodeFlags(void) {
 
     if (node != NULL) {
         do {
-            if (*(s32 *)(node + 0x18) != 0) {
-                *(u8 *)(node + 0x146) = 0;
+            if (((BtlTask *)node)->unit != NULL) {
+                ((BtlHistObj *)node)->counter = 0;
             }
-            node = *(s32 *)(node + 0x16C);
+            node = (s32)((BtlTask *)node)->next;
         } while (node != NULL);
     }
     D_003BB870 = 0;
@@ -591,14 +599,14 @@ void btlClearNodeFlags(void) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 func_001FEC68(s32 a0, BtlJyokyoOwner *owner, s32 a2) {
+s32 func_001FEC68(s32 context, BtlJyokyoOwner *owner, s32 mask) {
     s32 *work = (s32 *)func_002CFF68(0x10);
     s32 result;
 
     D_003BB87C = (s32)work;
     work[1] = owner->unk124;
-    work[0] = a0;
-    result = btlDispatchPackedEffectAction((s32)owner, a2);
+    work[0] = context;
+    result = btlDispatchPackedEffectAction((s32)owner, mask);
     func_002CFF98(D_003BB87C);
     return result;
 }
@@ -631,28 +639,28 @@ void func_001FEDE0(u8 *work, s8 flag) {
     }
 }
 
-void btlCmdWithArgA(s32 arg0) {
-    func_00202668(arg0, 0);
+void btlCmdWithArgA(s32 context) {
+    func_00202668(context, 0);
 }
 
-void btlCmdWithArgB(s32 arg0) {
-    func_00202F90(arg0, 0);
+void btlCmdWithArgB(s32 context) {
+    func_00202F90(context, 0);
 }
 
-void btlCmdWithArgC(s32 arg0) {
-    func_00203248(arg0, 0);
+void btlCmdWithArgC(s32 context) {
+    func_00203248(context, 0);
 }
 
 void btlCmdSimpleA(void) {
     func_00203098();
 }
 
-void btlCmdWithArgD(s32 arg0) {
-    func_00203A80(arg0, 0);
+void btlCmdWithArgD(s32 context) {
+    func_00203A80(context, 0);
 }
 
-void btlCmdWithArgE(s32 arg0) {
-    func_00203BA8(arg0, 0);
+void btlCmdWithArgE(s32 context) {
+    func_00203BA8(context, 0);
 }
 
 void btlCmdSimpleB(void) {
@@ -687,8 +695,8 @@ void btlCmdSimpleI(void) {
     func_00203CA8();
 }
 
-void btlCmdWithArgF(s32 arg0) {
-    func_00204048(arg0, 0);
+void btlCmdWithArgF(s32 context) {
+    func_00204048(context, 0);
 }
 
 void btlCmdSimpleJ(void) {

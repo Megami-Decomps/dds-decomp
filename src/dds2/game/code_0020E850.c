@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 
 extern u32 D_00436CB0;
 
@@ -19,14 +20,25 @@ typedef struct BtlJyokyoOwner {
     u16 flags;       /* 0x120 */
     u8 pad122[2];
     u16 unk124;      /* 0x124 */
+    u8 pad126[8];
+    u16 statusFlags; /* 0x12E */
 } BtlJyokyoOwner;
+
+typedef struct BtlEffectSlots {
+    u8 pad00[0x21C];
+    u32 flags;       /* 0x21C */
+    u8 pad220[0x2AC];
+    s32 id;          /* 0x4CC */
+    s32 alternateId; /* 0x4D0 */
+    s32 thirdId;     /* 0x4D4 */
+} BtlEffectSlots;
 
 extern s32 func_00210EA0(s32 context, BtlJyokyoOwner *owner, s32 mask);
 
 
 extern s32 D_00436CB8;
 
-extern s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1);
+extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 extern s32 func_00328E18(s32);
 
@@ -130,6 +142,9 @@ typedef struct BtlHistObj {
     s8 counter;          /* 0x14E */
     u8 pad14F;
     s32 hist[8];         /* 0x150 */
+    s32 status170;        /* 0x170: reset along with the history counter */
+    u8 pad174[4];
+    struct BtlHistObj *next; /* 0x178 */
 } BtlHistObj;
 
 extern void func_00211018(BtlHistObj *obj, s8 flag);
@@ -193,15 +208,17 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EA18);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
-s32 func_0020EBD0(u8 *arg0) {
+/* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
+ * If bit 5 is the sole low status bit, the final check uses an external value. */
+s32 func_0020EBD0(BtlTask *task) {
     s32 result = 0;
-    u8 *unit = *(u8 **)(arg0 + 0x18);
+    BtlJyokyoOwner *unit = (BtlJyokyoOwner *)task->unit;
     u16 flags;
 
-    if (*(u32 *)(arg0 + 8) & 0x40) {
+    if (task->flags & 0x40) {
         return result;
     }
-    flags = *(u16 *)(unit + 0x12E);
+    flags = unit->statusFlags;
     if (!(flags & 0x20)) {
         return result;
     }
@@ -300,10 +317,10 @@ s32 func_0020FFB8(BtlEffLink *link) {
         s32 arg = link->arg;
 
         if (arg == 0) {
-            if ((*(u64 *)(actor + 0x110) & 0x1400) == 0 && (*(u16 *)(actor + 0x120) & 0x10) == 0) {
+            if ((*(u64 *)(actor + 0x110) & 0x1400) == 0 && (((BtlJyokyoOwner *)actor)->flags & 0x10) == 0) {
                 func_001B8580((s32)btlGetIndexedUiResource(actor));
-            } else if (*(u32 *)(work + 0x21C) & 0x400) {
-                if (*(u32 *)(actor + 0x110) & 0x400) {
+            } else if (((BtlEffectSlots *)work)->flags & 0x400) {
+                if (((BtlEffActor *)actor)->flags & 0x400) {
                     func_001B8580(D_003BEB60[0]);
                 } else {
                     func_001B8580(D_003BEB58[0]);
@@ -379,7 +396,7 @@ s32 func_00210258(BtlEffLink *link) {
             func_001B8580((s32)D_003BEB28);
             break;
         case 5: {
-            u32 flags = *(u32 *)(actor + 0x110);
+            u32 flags = ((BtlEffActor *)actor)->flags;
             if (flags & 0x200) {
                 if (!(flags & 0x1000)) {
                     func_001B8580(D_003BEB38[0]);
@@ -444,9 +461,9 @@ s32 func_002103F8(BtlEffLink *link) {
 
     if (link->unk08 == 0) {
         if (actor != 0) {
-            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+            func_001A45C0(((BtlEffectSlots *)work)->id, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
         }
-        func_001B8788(*(s32 *)(work + 0x4CC), link->arg);
+        func_001B8788(((BtlEffectSlots *)work)->id, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -478,14 +495,14 @@ s32 func_00210530(BtlEffLink *link) {
     s32 work = func_001AA6F8();
     s32 actor = link->actor;
 
-    if (actor != 0 && !(*(u16 *)(actor + 0x12E) & 1)) {
+    if (actor != 0 && !(((BtlJyokyoOwner *)actor)->statusFlags & 1)) {
         return 1;
     }
     if (link->unk08 == 0) {
         if (actor != 0) {
-            func_001A45C0(*(s32 *)(work + 0x4D0), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+            func_001A45C0(((BtlEffectSlots *)work)->alternateId, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
         }
-        func_001B8788(*(s32 *)(work + 0x4D0), link->arg);
+        func_001B8788(((BtlEffectSlots *)work)->alternateId, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -540,9 +557,9 @@ s32 func_00210720(BtlEffLink *link) {
 
     if (link->unk08 == 0) {
         if (actor != 0) {
-            func_001A45C0(*(s32 *)(work + 0x4D4), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 1 : 2);
+            func_001A45C0(((BtlEffectSlots *)work)->thirdId, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 1 : 2);
         }
-        func_001B8788(*(s32 *)(work + 0x4D4), link->arg);
+        func_001B8788(((BtlEffectSlots *)work)->thirdId, link->arg);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -573,9 +590,9 @@ s32 func_00210850(BtlEffLink *link) {
 
     if (link->unk08 == 0) {
         if (link->actor != 0) {
-            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)&link->arg, 0xD);
+            func_001A45C0(((BtlEffectSlots *)work)->id, 0, *(u16 *)&link->arg, 0xD);
         }
-        func_001B8788(*(s32 *)(work + 0x4CC), 0x75);
+        func_001B8788(((BtlEffectSlots *)work)->id, 0x75);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -646,11 +663,11 @@ s32 func_00210AA8(BtlEffLink *link) {
 
     if (link->unk08 == 0) {
         if (actor != 0) {
-            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+            func_001A45C0(((BtlEffectSlots *)work)->id, 0, ((BtlJyokyoOwner *)actor)->unk124, (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
             func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
-            func_001A4858(*(s32 *)(work + 0x4CC), 1, text);
+            func_001A4858(((BtlEffectSlots *)work)->id, 1, text);
         }
-        func_001B8788(*(s32 *)(work + 0x4CC), 0xD5);
+        func_001B8788(((BtlEffectSlots *)work)->id, 0xD5);
     }
     if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
         return 1;
@@ -729,7 +746,7 @@ s32 func_00210CE0(s32 lower, s32 upper) {
 
 s32 btlAllocAndCheck(s32 object) {
     s32 allocation = func_00328E18(0x10);
-    s32 actor = *(s32 *)(object + 0x18);
+    s32 actor = (s32)((BtlTask *)object)->unit;
 
     D_00436CB8 = allocation;
     *(s32 *)allocation = object;
@@ -741,9 +758,9 @@ s32 btlAllocAndCheck(s32 object) {
     return 0;
 }
 
-u32 func_00210DB0(s32 arg0) {
-    *(u32 *)(arg0 + 0x20) = 0xb;
-    *(u32 *)(arg0 + 0x24) = 0xc2;
+u32 func_00210DB0(s32 task) {
+    ((BtlTask *)task)->result = 0xb;
+    ((BtlTask *)task)->arg = 0xc2;
     return 1;
 }
 
@@ -757,14 +774,14 @@ void func_00210DC8(BtlHistObj *obj) {
 
 
 void func_00210E48(void) {
-    u8 *node = *(u8 **)(func_001AA6F8() + 0x248);
+    BtlHistObj *node = *(BtlHistObj **)(func_001AA6F8() + 0x248);
     if (node != 0) {
         do {
-            if (*(s32 *)(node + 0x18) != 0) {
-                node[0x14E] = 0;
-                *(s32 *)(node + 0x170) = 0;
+            if (node->actor != NULL) {
+                node->counter = 0;
+                node->status170 = 0;
             }
-            node = *(u8 **)(node + 0x178);
+            node = node->next;
         } while (node != 0);
     }
     D_00436CAC = 0;
@@ -813,24 +830,24 @@ void func_00211018(BtlHistObj *obj, s8 flag) {
     }
 }
 
-void btlCmdWithArgA(s32 arg0) {
-    func_002152D8(arg0, 0);
+void btlCmdWithArgA(s32 context) {
+    func_002152D8(context, 0);
 }
 
-void btlCmdWithArgB(s32 arg0) {
-    func_00215C70(arg0, 0);
+void btlCmdWithArgB(s32 context) {
+    func_00215C70(context, 0);
 }
 
-void btlCmdWithArgC(s32 arg0) {
-    func_00215F28(arg0, 0);
+void btlCmdWithArgC(s32 context) {
+    func_00215F28(context, 0);
 }
 
 void func_002110E8(void) {
     func_00216D50();
 }
 
-void func_00211108(s32 arg0) {
-    func_00216ED0(arg0, 0);
+void func_00211108(s32 context) {
+    func_00216ED0(context, 0);
 }
 
 extern void func_00215D78(s32, s32);
@@ -839,12 +856,12 @@ void btlCmdSimpleA(s32 context, s32 value) {
     func_00215D78(context, value);
 }
 
-void btlCmdWithArgD(s32 arg0) {
-    func_00216760(arg0, 0);
+void btlCmdWithArgD(s32 context) {
+    func_00216760(context, 0);
 }
 
-void btlCmdWithArgE(s32 arg0) {
-    func_00216888(arg0, 0);
+void btlCmdWithArgE(s32 context) {
+    func_00216888(context, 0);
 }
 
 extern void func_00217028(s32, s32);
@@ -887,8 +904,8 @@ void btlCmdSimpleI(void) {
     func_00216988();
 }
 
-void btlCmdWithArgF(s32 arg0) {
-    func_00216E98(arg0, 0);
+void btlCmdWithArgF(s32 context) {
+    func_00216E98(context, 0);
 }
 
 extern void func_00216F08(s32, s32);
