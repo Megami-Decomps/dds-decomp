@@ -51,6 +51,11 @@ extern s32 *func_00123DD0();
 extern void dds3SetCameraValue(s32, f32);
 extern void fldToggleWorldNodeState(s32);
 extern void func_0012C880(void);
+extern void func_00131278(void);
+extern void func_0012D528(void);
+extern void func_0012D3D8(void);
+extern void func_0012DD70(void);
+extern void func_0012E510(void);
 extern s32 func_00125DF8(s32);
 extern u8 *func_00112888(s32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
@@ -169,6 +174,10 @@ extern s32 D_0032E3B0[];
 extern u32 D_0032E538[];
 extern u32 D_0032E544[];
 extern u32 D_0032E570[];
+extern s16 D_00333910[];
+extern s16 D_00333912[];
+extern u8 D_0033391C[];
+extern s32 D_003BAE38;
 extern u32 D_0032E59C[];
 extern u32 D_0032E5A8[];
 extern u32 D_00324B48[];
@@ -2080,7 +2089,38 @@ void func_0012E6F8(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012E878);
+s32 func_0012E878(void) {
+    FldCamWork *cam;
+    s32 *world = func_00123DD0();
+    if (*world != 0 && D_003BAB34 != 0) {
+        func_00131278();
+        if (func_0012E488() != 0) {
+            fldToggleWorldNodeState(1);
+            func_0012E510();
+            func_00131218();
+            return 0;
+        }
+        func_0012C880();
+        cam = (FldCamWork *)D_0032E3B0;
+        dds3SetCameraValue(*world, D_0032FA10[cam->rowIdx].fov * 3.14f / 180.0f);
+        switch (cam->mode) {
+        case 0:
+            func_0012D528();
+            if (cam->dist < 50.0f) {
+                func_0012D528();
+            }
+            break;
+        case 1:
+            func_0012DD70();
+            break;
+        case 4:
+            func_0012D3D8();
+            break;
+        }
+        func_0012E6F8();
+    }
+    return 0;
+}
 
 void func_0012E9D0(void) {
     D_003BAD38 = 0;

@@ -2208,7 +2208,43 @@ void func_00130C28(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00130DE0);
+extern void func_00133A78(void);
+extern void func_00130A40(void);
+extern void func_0012FA58(void);
+extern void func_001302A0(void);
+extern void func_0012F908(void);
+s32 func_00130DE0(void) {
+    FldCamWork *cam;
+    s32 *world = func_00125F28();
+    if (*world != 0 && D_00435F0C != 0) {
+        func_00133A78();
+        if (func_001309B8() != 0) {
+            fldToggleWorldNodeState(1);
+            func_00130A40();
+            func_00133A00();
+            return 0;
+        }
+        func_0012EDB0();
+        cam = (FldCamWork *)D_00389770;
+        dds3SetCameraValue(*world, D_0038AEB0[cam->rowIdx].fov * 3.14f / 180.0f);
+        switch (cam->mode) {
+        case 0:
+            func_0012FA58();
+            if (cam->dist < 50.0f) {
+                func_0012FA58();
+            }
+            break;
+        case 1:
+            func_001302A0();
+            break;
+        case 4:
+            func_0012F908();
+            break;
+        }
+        func_00130C28();
+    }
+    return 0;
+}
 
 s32 fldSyncObjectFlagsB(void) {
     s32 result;
