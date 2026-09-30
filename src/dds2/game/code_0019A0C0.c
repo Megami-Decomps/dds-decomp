@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 /* Small channel object (0x18 bytes, created by func_001936A8): float block
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
@@ -40,12 +41,6 @@ typedef struct EffPrim {
     struct EffCntRec *counterRecords; /* 0x168 */
     s32 *unk16C;      /* 0x16C: base for func_0018E200 */
 } EffPrim;
-
-/* 8-byte counter record at EffPrim.counterRecords. */
-typedef struct EffCntRec {
-    s32 randomIndex; /* 0x0: advanced by effFillRandRecords */
-    u32 unk4; /* 0x4: id released by func_00192638 */
-} EffCntRec;
 
 /* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
 typedef struct EffRec38 {

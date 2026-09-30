@@ -1,21 +1,5 @@
 #include "common.h"
-
-typedef struct AdminWork AdminWork;
-
-struct AdminWork {
-    u32 flags;
-    u32 unk04;
-    s8 unk08;
-    s8 unk09;
-    u8 historyIndex;
-    u8 pad0B;
-    s8 signedHistory[8];
-    u8 unsignedHistory[8];
-    void* unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 pad22[2];
-};
+#include "dds3Admin.h"
 
 extern AdminWork* func_00102790(void);
 

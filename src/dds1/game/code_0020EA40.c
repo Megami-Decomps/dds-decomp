@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 #include "ee_mmi.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -64,19 +65,6 @@ extern void func_003014F0();
 
 extern s32 func_001A17F0(void);
 
-typedef struct BattleEffectState {
-    u32 actor, flags, value;
-    u16 timer;
-    u8 active, phase;
-    u32 effect;
-    f32 speed;
-} BattleEffectState;
-
-typedef struct BtlUnitModel {
-    u8 unk_00[0x8C];
-    u32 *flags;
-} BtlUnitModel;
-
 typedef struct BtlUnit {
     u8 unk_00[0x90];
     s32 position90; /* 0x90 */
@@ -116,20 +104,6 @@ typedef struct BtlUnit {
     u8 unk_324[0x20];
     struct BtlUnit *next;
 } BtlUnit;
-
-typedef struct BtlTask {
-    u8 unk_00[8];
-    u32 flags;
-    u8 unk_0C[0xC];
-    BtlUnit *unit;
-    u8 unk_1C[4];
-    s32 result;
-    s32 arg;
-    u8 unk_28[0x38];
-    s32 unk_60;
-    u8 unk_64[0x108];
-    struct BtlTask *next;
-} BtlTask;
 
 typedef struct BtlState {
     u8 unk_000[0x1C0];
