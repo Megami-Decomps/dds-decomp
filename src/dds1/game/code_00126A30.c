@@ -252,7 +252,7 @@ typedef struct {
 } FldS16Row; /* 0x20 bytes */
 extern FldS16Row D_00337C60[];
 extern u32 *D_003307B0[];
-extern void fldDrawMarkerQuad(u32 value);
+extern void fldDrawMarkerQuad(f32 *pos);
 
 typedef struct {
     s16 unk0;
@@ -310,7 +310,32 @@ s32 func_001277A8(s32 arg0) {
     return arg0 + 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldRelocatePackedWords);
+void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
+    u8 *p = data;
+    s32 code;
+    s32 i;
+
+    while (p - data < size) {
+        code = *p++;
+        if ((code & 1) == 0) {
+            code >>= 1;
+        } else if ((code & 2) == 0) {
+            code = (code | (*p++ << 8)) >> 2;
+        } else if ((code & 4) == 0) {
+            code = (code | (p[0] << 8) | (p[1] << 16)) >> 3;
+            p += 2;
+        } else {
+            code = (code >> 3) + 2;
+            for (i = 0; i < code; i++) {
+                table++;
+                *table -= base;
+            }
+            continue;
+        }
+        table += code;
+        *table -= base;
+    }
+}
 
 /* Relocate the words described by this packed-resource transfer chunk. */
 void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk) {
@@ -318,7 +343,7 @@ void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk) {
 }
 
 void func_001278C0(u32 buffer, FldTransferChunk *chunk) {
-    fldRelocatePackedWords(buffer, buffer, (s32)buffer + chunk->offset, chunk->size);
+    fldRelocatePackedWords((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
 void fldSetAreaResourceRequest(u32 arg0, u32 arg1) {
@@ -350,7 +375,49 @@ s32 fldLoadAreaResource(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldRequestAreaResource);
+extern s32 fldGetLocationCoordinateValue(s32, s32);
+extern void sdfRaiseDeviceThreadPriority(void);
+extern s32 D_003BAC80;
+extern void fldFreeDisplayObjects(void);
+
+typedef struct FldAreaResourceState {
+    s32 pad00[30];
+    s32 resourceFlag;     /* 0x78 */
+    s32 area;             /* 0x7C */
+    s32 room;             /* 0x80 */
+} FldAreaResourceState;
+
+s32 fldRequestAreaResource(s32 area, s32 room) {
+    char directory[64];
+    char path[80];
+
+    if (D_0032E3B0[4] != area) {
+        return 1;
+    }
+    if (((FldAreaResourceState *)D_0032E3B0)->resourceFlag == 1) {
+        return 1;
+    }
+    if (((FldAreaResourceState *)D_0032E3B0)->area == area &&
+        ((FldAreaResourceState *)D_0032E3B0)->room == room) {
+        ((FldAreaResourceState *)D_0032E3B0)->resourceFlag = 2;
+        return 1;
+    }
+    fldFreeDisplayObjects();
+    ((FldAreaResourceState *)D_0032E3B0)->area = area;
+    ((FldAreaResourceState *)D_0032E3B0)->room = room;
+    if (fldGetLocationCoordinateValue(area, room) & 0x10) {
+        D_003BAC80 = 1;
+    } else {
+        D_003BAC80 = 0;
+    }
+    sdfRaiseDeviceThreadPriority();
+    D_003BA734 = 1;
+    fldFormatAreaDirectory(directory, area, 1);
+    func_003014F0(path, D_0039FE38, directory, area, room);
+    D_003BAC3C = func_00288A80(path);
+    ((FldAreaResourceState *)D_0032E3B0)->resourceFlag = 1;
+    return 1;
+}
 
 typedef struct FldAreaResourceNode {
     struct FldAreaResourceNode *next; /* 0x00 */
@@ -1156,9 +1223,76 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B090);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012B2B0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldDrawMarkerQuad);
+typedef struct FldMarkerPacket {
+    f32 pos[3];
+    s32 pad0C;
+    s16 rot[8];
+    f32 quad[8];
+    s32 color;
+    f32 scale;
+} FldMarkerPacket;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldDrawMarkerQuadColored);
+void fldDrawMarkerQuad(f32 *pos) {
+    FldMarkerPacket packet;
+    f32 half = 36.0f;
+
+    packet.rot[0] = 0;
+    packet.rot[1] = 0;
+    packet.rot[2] = 0x200;
+    packet.rot[3] = 0;
+    packet.rot[4] = 0x200;
+    packet.rot[5] = 0x200;
+    packet.rot[6] = 0;
+    packet.rot[7] = 0x200;
+    packet.quad[0] = -half;
+    packet.quad[1] = -half;
+    packet.quad[2] = half;
+    packet.quad[3] = -half;
+    packet.quad[4] = half;
+    packet.quad[5] = half;
+    packet.quad[6] = -half;
+    packet.quad[7] = half;
+    packet.color = 0x8080FF80;
+    packet.pos[0] = pos[0];
+    packet.pos[1] = pos[1];
+    packet.pos[2] = pos[2];
+    packet.scale = 0.0f;
+    func_00129720(0x39);
+    fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
+    func_00129900(0);
+    fldSubmitModelPacket(D_003BACF0, (u8 *)&packet);
+}
+
+void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
+    FldMarkerPacket packet;
+    f32 half = 36.0f;
+
+    packet.rot[0] = 0;
+    packet.rot[1] = 0;
+    packet.rot[2] = 0x200;
+    packet.rot[3] = 0;
+    packet.rot[4] = 0x200;
+    packet.rot[5] = 0x200;
+    packet.rot[6] = 0;
+    packet.rot[7] = 0x200;
+    packet.quad[0] = -half;
+    packet.quad[1] = -half;
+    packet.quad[2] = half;
+    packet.quad[3] = -half;
+    packet.quad[4] = half;
+    packet.quad[5] = half;
+    packet.quad[6] = -half;
+    packet.quad[7] = half;
+    packet.color = color;
+    packet.pos[0] = pos[0];
+    packet.pos[1] = pos[1];
+    packet.pos[2] = pos[2];
+    packet.scale = 0.0f;
+    func_00129720(0x39);
+    fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
+    func_00129900(0);
+    fldSubmitModelPacket(D_003BACF0, (u8 *)&packet);
+}
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -2614,8 +2748,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013A9B0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AC10);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AE28);
-
 typedef struct FldRoomPlanes {
     f32 plane[6][4];
     f32 limit[6];
@@ -2623,6 +2755,47 @@ typedef struct FldRoomPlanes {
 } FldRoomPlanes;
 extern FldRoomPlanes D_003C9470[];
 extern f32 fldDotVector(f32 *, f32 *);
+
+typedef struct FldRoomState {
+    u8 pad0[0x120];
+    s32 unk120;
+    u8 pad124[0xE];
+    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
+    u8 pad134[2];
+    s16 mode;
+    s16 unk138;
+    s16 axisMode;
+    s32 unk13C;
+} FldRoomState; /* 0x140 bytes */
+extern FldRoomState D_003C93E0[];
+
+s32 func_0013AE28(f32 *direction, s32 index) {
+    f32 probe[3];
+    f32 planar[2];
+    s32 i;
+
+    if (D_003C93E0[index].axisMode == 0) {
+        probe[0] = 0.0f;
+        probe[1] = direction[1];
+        probe[2] = direction[2];
+        planar[0] = direction[1];
+        planar[1] = direction[2];
+    } else {
+        probe[0] = direction[0];
+        probe[1] = direction[1];
+        probe[2] = 0.0f;
+        planar[0] = direction[0];
+        planar[1] = direction[1];
+    }
+    for (i = 0; i < 4; i++) {
+        if (fldDotVector(probe, D_003C9470[index].plane[i + 1]) - D_003C9470[index].limit[i + 1] < 0.0f) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+
 
 s32 fldRoomContainsPoint(f32 *point, s32 room) {
     FldRoomPlanes *planes = &D_003C9470[room];
@@ -2687,7 +2860,7 @@ void func_0013BD70(void) {
     if (count > 0) {
         u32 **entry = D_003307B0;
         do {
-            fldDrawMarkerQuad((*entry)[4]);
+            fldDrawMarkerQuad((f32 *)(*entry)[4]);
             i++;
             entry++;
         } while (i < D_003BAE14);
@@ -2719,16 +2892,7 @@ s32 fldFindTaskRecordId(u32 task) {
     return -1;
 }
 
-typedef struct FldRoomState {
-    u8 pad0[0x120];
-    s32 unk120;
-    u8 pad124[0xE];
-    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
-    u8 pad134[2];
-    s16 mode;
-    u8 pad138[8];
-} FldRoomState; /* 0x140 bytes */
-extern FldRoomState D_003C93E0[];
+
 extern s32 D_003BAE14;
 s32 fldFindRoomByTask(u32 task) {
     s32 i;
@@ -2837,6 +3001,9 @@ void fldLoadInfoTable(s32 field) {
 void func_0013D598(const void *source) {
     memcpy(D_00332E30, source, 0x3B80);
 }
+
+extern s32 D_003BAE40;
+extern u8 *fldFindActorEntryByName(const char *);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
 
@@ -3135,7 +3302,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013EF10);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F100);
 
-extern void fldRequestAreaResource();
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 
 s32 fldGetActorStat0(s32 mode) {

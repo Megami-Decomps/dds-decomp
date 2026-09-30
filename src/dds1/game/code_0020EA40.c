@@ -258,7 +258,28 @@ s32 btlGetAlternatePhaseCommand(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020EC20);
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020ECF8);
+extern s32 D_003BAA34;
+
+s32 func_0020ECF8(u8 *unit) {
+    BtlState *battle;
+    u16 *entry;
+    u32 id;
+    u32 i;
+
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)func_001A17F0();
+    i = 0;
+    entry = (u16 *)(battle->battleMode * 0x28 + D_003BAA34 + 6);
+    id = *(u16 *)(unit + 0x124);
+    for (; i < 0xB; i++) {
+        if (*entry++ == id) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020ED90);
 

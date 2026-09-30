@@ -1,5 +1,21 @@
 #include "common.h"
 
+extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
+extern void *sdfAllocPacketAligned(s32);
+extern void *func_0033A2D8(void *, s32, s32, s64, s32);
+extern u64 *func_0033A2D0(void *);
+extern void sdfAppendPacket();
+
+extern s32 D_00435E6C;
+extern s32 D_00435E70;
+extern void func_0019B8B0(s32);
+extern s32 func_0019FA08(s32, s32, s32, u32, s32, s32);
+extern s32 func_0019E5D8();
+extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
+extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
+extern void func_001A0438(void);
+
 extern u32 D_0043658C;
 
 extern u32 D_00438F24;
@@ -28,7 +44,9 @@ typedef struct TextSub {
 } TextSub;
 
 typedef struct TextStream {
-    u8 unk0[0xC]; /* 0x0 */
+    s32 x;           /* 0x0 */
+    s32 y;           /* 0x4 */
+    s32 z;           /* 0x8 */
     s8 unkC;         /* 0xC: set by opcode 0xF206 */
     s8 unkD;         /* 0xD: set by opcode 0xF202 */
     s8 unkE;         /* 0xE: set by opcode 0xF209 */
@@ -37,19 +55,8 @@ typedef struct TextStream {
     TextSub *sub;    /* 0x14 */
     s32 offset;      /* 0x18: current byte position */
     s8 unk1C;        /* 0x1C: set once an opcode has run */
+    s8 unk1D;        /* 0x1D */
 } TextStream;
-
-typedef struct TextDrawArgs {
-    s32 x;         /* 0x00 */
-    s32 y;         /* 0x04 */
-    s32 z;         /* 0x08 */
-    u8 color[4];   /* 0x0C */
-    s32 unk10;     /* 0x10 */
-    s32 unk14;     /* 0x14 */
-    s32 unk18;     /* 0x18 */
-    u8 unk1C;      /* 0x1C */
-    u8 unk1D;      /* 0x1D */
-} TextDrawArgs;
 
 s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
@@ -161,7 +168,22 @@ void func_0019E800(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     func_0019E848(arg0, arg1, 0, arg2 & 0xFF, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6, arg7);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E848);
+s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    TextStream args;
+    args.x = arg0;
+    args.y = arg1;
+    args.z = arg2 << 4;
+    args.unkC = arg3;
+    args.unkD = arg4;
+    args.unkE = arg5;
+    args.unkF = arg6;
+    args.bytes = (u8 *)arg7;
+    args.sub = (TextSub *)arg8;
+    args.offset = 0;
+    args.unk1C = 1;
+    args.unk1D = 1;
+    return func_0019E5D8(&args);
+}
 
 extern s8 D_00436550;
 
@@ -196,26 +218,45 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EC00);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 
-extern void func_0019EDC0();
-
-void itfInitTextDrawArgs(s32 arg0, s32 arg1) {
-    TextDrawArgs args;
+void itfInitTextDrawArgs(u8 *arg0, TextSub *arg1) {
+    TextStream args;
     args.x = 0;
     args.y = 0;
     args.z = 0;
-    args.color[0] = 0;
-    args.color[1] = 0;
-    args.color[2] = 0;
-    args.color[3] = 0;
-    args.unk10 = arg0;
-    args.unk14 = arg1;
-    args.unk18 = 0;
+    args.unkC = 0;
+    args.unkD = 0;
+    args.unkE = 0;
+    args.unkF = 0;
+    args.bytes = arg0;
+    args.sub = arg1;
+    args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
     func_0019EDC0(&args);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EF38);
+u64 func_0019EF38(u64 arg0, u64 arg1, s32 arg2, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
+    u64 glyph;
+    s32 kind = 4;
+
+    if (alt) {
+        kind = 5;
+    }
+    frFontSetEntryFlag(kind, entryFlag);
+    func_0019D1D0(1);
+    func_0019D1E0(2);
+    func_0019D1E0(0x10);
+    glyph = func_0019CE10(source, kind, 0, 0, 0);
+    func_0019D1D0(0x10);
+    func_0019D1D0(2);
+    func_0019D1E0(1);
+    frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
+    func_0019D100(glyph, arg0, arg1);
+    func_0019D110(glyph, arg2 << 4);
+    frFontSetChildColors(glyph, colors);
+    frFontSetChainFlag(glyph, 5);
+    return glyph;
+}
 
 void mnuLoadStaffFonts(void) {
     func_0019BE20(4, "/font/staff1.fnt");
@@ -361,7 +402,24 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FC38);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FE00);
+s32 func_0019FE00(s32 arg0, s32 arg1, s32 arg2, s8 arg3, u16 arg4, s32 arg5) {
+    s32 result = 0;
+
+    func_0019B8B0(0x13);
+    switch (arg3) {
+    case 0:
+        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E6C, arg5);
+        break;
+    case 1:
+        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E70, arg5);
+        break;
+    case 2:
+        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E6C, arg5);
+        break;
+    }
+    func_0019B8B0(-1);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FEF8);
 
@@ -502,7 +560,11 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A03D8);
+void func_001A03D8(void) {
+    itfLoadBackgroundSprite();
+    kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, func_001A0438, 0);
+    D_00436590 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
+}
 
 void func_001A0438(void) {
     func_0019C490(D_0043658C);
@@ -659,25 +721,199 @@ u64 itfLoadTextureFromAsset(const char *path) {
     return textureHandle;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawTriFlat3);
+typedef struct DrawVertex {
+    s32 x;
+    s32 y;
+} DrawVertex;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawQuadFlat4);
+typedef struct DrawColorRec {
+    u32 word[4];
+} DrawColorRec;
+
+/* Pack each RGBA/XYZ pair into GS qwords; the 0x7000/0x7900 biases place
+ * vertex coordinates in the GS screen-space origin. */
+void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    func_0033A2D8(packet, 0x4B, 2, 0x51, 3);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < 3; i++) {
+        dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+        dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+        colors++;
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertices->x + xOffset + 0x7000) | ((u64)(vertices->y + yOffset + 0x7900) << 32);
+        vertices++;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
+
+void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    func_0033A2D8(packet, 0x4D, 2, 0x51, 4);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < 4; i++) {
+        DrawVertex *vertex = &vertices[*vertexIndex++];
+        DrawColorRec *color = &colors[*colorIndex++];
+
+        dst[0] = (u64)color->word[0] | ((u64)color->word[1] << 32);
+        dst[1] = (u64)color->word[2] | ((u64)color->word[3] << 32);
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertex->x + 0x7000) | ((u64)(vertex->y + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A09C0);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfDrawQuadTextured4);
+void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 4));
+    func_0033A2D8(packet, (flag << 9) | 0x5D, 3, 0x512, 4);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < 4; i++) {
+        f32 *uvDst = (f32 *)dst;
+
+        uvDst[0] = uvs[0];
+        uvDst[1] = uvs[1];
+        uvDst[2] = uvs[2];
+        uvs += 4;
+        dst += 2;
+        dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+        dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+        colors++;
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertices->x + 0x7000) | ((u64)(vertices->y + 0x7900) << 32);
+        vertices++;
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0CA0);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0E20);
+void func_001A0E20(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 x0, y0, x1, y1;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_001A0F88);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    func_0033A2D8(packet, (flag << 9) | 0x15E, 5, 0x53531, 1);
+    x0 = vertices[0].x + 0x7000;
+    y0 = vertices[0].y + 0x7900;
+    x1 = vertices[1].x + 0x7000;
+    y1 = vertices[1].y + 0x7900;
+    dst = func_0033A2D0(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst[2] = (u64)uv->word[0] | ((u64)uv->word[1] << 32);
+    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
+    dst[5] = (u64)tail;
+    dst[6] = (u64)uv->word[2] | ((u64)uv->word[3] << 32);
+    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
+    dst[9] = (u64)tail;
+    sdfAppendPacket(command, packet);
+}
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListWide);
+void func_001A0F88(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
+    void *packet;
+    u64 *dst;
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListA);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
+    func_0033A2D8(packet, (flag << 9) | 0x46, 3, 0x551, 1);
+    dst = func_0033A2D0(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst += 2;
+    dst[1] = (u64)tail;
+    dst[0] = (u64)(u32)(vertices[0].x + 0x7000) | ((u64)(vertices[0].y + 0x7900) << 32);
+    dst += 2;
+    dst[1] = (u64)tail;
+    dst[0] = (u64)(u32)(vertices[1].x + 0x7000) | ((u64)(vertices[1].y + 0x7900) << 32);
+    sdfAppendPacket(command, packet);
+}
 
-INCLUDE_ASM(const s32, "game/code_0019E138", itfEmitQuadListB);
+void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 half = count >> 1;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, half));
+    func_0033A2D8(packet, 0x4C, 4, 0x5151, half);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < count; i++) {
+        DrawVertex *vertex = &vertices[*vertexIndex++];
+        DrawColorRec *color = &colors[*colorIndex++];
+
+        dst[0] = (u64)color->word[0] | ((u64)color->word[1] << 32);
+        dst[1] = (u64)color->word[2] | ((u64)color->word[3] << 32);
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertex->x + 0x7000) | ((u64)(vertex->y + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
+
+void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    func_0033A2D8(packet, 0x14A, 2, 0x51, count);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < count; i++) {
+        DrawVertex *vertex = &vertices[*vertexIndex++];
+        DrawColorRec *color = &colors[*colorIndex++];
+
+        dst[0] = (u64)color->word[0] | ((u64)color->word[1] << 32);
+        dst[1] = (u64)color->word[2] | ((u64)color->word[3] << 32);
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertex->x + 0x7000) | ((u64)(vertex->y + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
+
+void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, void *command) {
+    void *packet;
+    u64 *dst;
+    s32 i;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    func_0033A2D8(packet, 0x49, 2, 0x51, count);
+    dst = func_0033A2D0(packet);
+    for (i = 0; i < count; i++) {
+        DrawVertex *vertex = &vertices[*vertexIndex++];
+        DrawColorRec *color = &colors[*colorIndex++];
+
+        dst[0] = (u64)color->word[0] | ((u64)color->word[1] << 32);
+        dst[1] = (u64)color->word[2] | ((u64)color->word[3] << 32);
+        dst += 2;
+        dst[1] = (u64)tail;
+        dst[0] = (u64)(u32)(vertex->x + 0x7000) | ((u64)(vertex->y + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket(command, packet);
+}
 
 extern void *sdfAllocPacketAligned(s32);
 extern u8 *func_0033A290(void *, s32);
