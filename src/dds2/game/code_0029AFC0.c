@@ -148,7 +148,14 @@ u32 func_0029BBC0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029BBE0);
+extern s32 mdlFlagTest(s32);
+
+s32 func_0029BBE0(void) {
+    if (mdlFlagTest(0x31)) return 8;
+    if (mdlFlagTest(0x25)) return 1;
+    if (mdlFlagTest(0x1C)) return 2;
+    return mdlFlagTest(0x13) ? 5 : 1;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0029AFC0", D_004379B8);
 

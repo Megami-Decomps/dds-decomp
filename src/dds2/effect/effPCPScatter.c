@@ -225,7 +225,33 @@ void func_001787E0(u64 table) {
     func_001784F8(params, resource, options);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterSharedDuplicate);
+PcpScatterWork1 *effPcpScatterSharedDuplicate(src)
+    PcpScatterWork1 *src;
+{
+    PcpScatterWork1 *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_001784F8(src, 0, 0);
+    effPcpScatterSharePoolResource(work->childWork, src->childWork);
+    if (work->duplicateParticles != 0) {
+        work->duplicatedCount = work->particleCount / work->particlesPerGroup;
+        if (work->particleCount % work->particlesPerGroup != 0) {
+            work->duplicatedCount = work->duplicatedCount + 1;
+        }
+        count = work->duplicatedCount;
+        handle = func_003292A8(count * 4);
+        buf = sdfResourceRetainAddress(handle);
+        work->duplicateAllocation = handle;
+        work->duplicatedHandles = buf;
+        for (i = 0; i < count; i++) {
+            work->duplicatedHandles[i] = effParamWorkDuplicate(*src->duplicatedHandles);
+        }
+    }
+    return work;
+}
 
 typedef struct PcpScatterParticles {
     PcpScatterPool *pool;
@@ -288,7 +314,57 @@ void func_00179438(u64 table) {
     func_001791A8(params, resource, options);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterLinkedDuplicate);
+/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (func_00179180
+   scales the same word as a float). */
+typedef struct {
+    u8 pad00[0x20];
+    u32 particleCount;
+    u8 pad24[0x18];
+    f32 unk3C;
+    u32 unk40;
+    u32 unk44;
+    u32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    u8 pad54[4];
+    u8 duplicateParticles;
+    u8 pad69[7];
+    u32 particlesPerGroup;
+    u8 pad6C[0xC];
+    PcpScatterPool *childWork;
+    u32 ownedResource;
+    u32 duplicatedCount;
+    u32 *duplicatedHandles;
+    u32 duplicateAllocation;
+} PcpScatterWork8Copy;
+
+PcpScatterWork8Copy *effPcpScatterLinkedDuplicate(src)
+    PcpScatterWork8Copy *src;
+{
+    PcpScatterWork8Copy *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_001791A8(src, 0, 0);
+    effPcpScatterSharePoolResource(work->childWork, src->childWork);
+    if (work->duplicateParticles != 0) {
+        work->duplicatedCount = work->particleCount / work->particlesPerGroup;
+        if (work->particleCount % work->particlesPerGroup != 0) {
+            work->duplicatedCount = work->duplicatedCount + 1;
+        }
+        count = work->duplicatedCount;
+        handle = func_003292A8(count * 4);
+        buf = sdfResourceRetainAddress(handle);
+        work->duplicateAllocation = handle;
+        work->duplicatedHandles = buf;
+        for (i = 0; i < count; i++) {
+            work->duplicatedHandles[i] = effParamWorkDuplicate(*src->duplicatedHandles);
+        }
+    }
+    return work;
+}
 
 typedef struct PcpScatterSharedWork {
     u8 pad00[0x70];

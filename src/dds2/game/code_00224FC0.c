@@ -17,6 +17,8 @@ extern u32 btlGetIndexListEntry(u32, u32);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
+extern void btlFlagAllUnitDefeatCandidatesTask(void);
+
 extern void func_00224EE8(u32);
 
 extern void btlInitMotionTransformFromComponents(u32, f32, f32, f32, f32, f32, f32, f32, f32);
@@ -96,9 +98,42 @@ u32 func_00225798(BattleActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225828);
+extern void func_00217378(s32, s32);
+extern void func_00224F88(u32);
+
+s32 func_00225828(BattleActionUnit *unit) {
+    BattleActor *actor = unit->actor;
+    if (actor->owner->flags & 0x200) {
+        if (btlGetIndexListCount(actor->targetIndexList) == 1) {
+            s32 owner = btlGetIndexListEntry(actor->targetIndexList, 0);
+            if (((BattleActionUnit *)owner)->flags & 0x400) {
+                if ((actor->owner->flags & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217378(unit, unit);
+                return 1;
+            }
+        }
+    } else {
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_00224F88(unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002258D8);
+
+typedef struct BattleActionTableEntry {
+    u8 pad00[3];
+    u8 resourceType; /* 0x03: selects the resource class for the action */
+    u16 displayCode; /* 0x04: label formatting parameter */
+    u8 pad06[0x16];
+    u16 flags;       /* 0x1C: special action handling */
+    u8 pad1E[2];
+} BattleActionTableEntry;
+
+extern u8 *D_00435E30;
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002259A0);
 
@@ -106,7 +141,30 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225B48);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225BF8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002260E0);
+s32 func_002260E0(BattleActionUnit *unit) {
+    u16 flags = ((BattleActionTableEntry *)D_00435E30)[unit->type].flags;
+
+    if (flags & 0x1000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        if ((flags & 0x10) == 0) {
+            func_00224F88((u32)unit);
+        } else {
+            func_00224F88((u32)unit);
+        }
+        return 1;
+    }
+    if (flags & 0x2000) {
+        if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00224EE8((u32)unit);
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_00224F88((u32)unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002261A8);
 
@@ -255,7 +313,27 @@ void func_002269E0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226A60);
+/* This effect path keeps its own view of the unit word at +0x12E. */
+typedef struct BattleEffectUnitMask {
+    u8 pad00[0x110];
+    u32 flags;
+    u8 pad114[0x1A];
+    u16 statusFlags; /* 0x12E */
+} BattleEffectUnitMask;
+
+/* Park this unit in the battle effect slot and drop the 0x100 and 0x8 flags. */
+void func_00226A60(BattleActionUnit *unit) {
+    BattleEffectUnitMask *view = (BattleEffectUnitMask *)unit;
+    BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
+    u32 flags = view->flags & ~0x100;
+    u16 status = view->statusFlags;
+
+    flags &= ~8;
+    status &= 0x4000;
+    *(BattleActionUnit **)battle->effect = unit;
+    view->flags = flags;
+    view->statusFlags = status;
+}
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226AB0);
 
