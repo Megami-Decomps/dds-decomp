@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 D_00435E5C;
 
@@ -289,10 +289,6 @@ extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 extern s32 func_003292A8(s32);
 
 extern s32 *sdfResourceRetainAddress(s32);
-
-static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
-}
 
 extern void func_0026C900(void);
 

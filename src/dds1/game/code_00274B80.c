@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 
 
@@ -354,10 +354,6 @@ void mnuUpdateStaffFade(s32 opening, StaffFadeState *state) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276018);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_002761C0);
-
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
 
 s64 func_00276250(s32 callback) {
     return menuRunPanel(func_00101A70(), 2, callback);

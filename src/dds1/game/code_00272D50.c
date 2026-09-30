@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 mnuUseStaffItem(s32, s32);
 
@@ -86,10 +86,6 @@ s32 mnuStaffFreeDisplayResources(void) {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002734C0);
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273670);
-
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
 
 s64 mnuStaffRunPanel2b(u64 request) {
     s32 state = func_00101A70();
