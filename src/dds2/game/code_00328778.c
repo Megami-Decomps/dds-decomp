@@ -1,9 +1,5 @@
 #include "common.h"
-
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
-    s32 threadId;               /* 0x04 */
-} SdfThreadNode;
+#include "sdf.h"
 
 extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
 extern s32 WaitSema(s32);

@@ -1,9 +1,5 @@
 #include "common.h"
-
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next;
-    s32 threadId;
-} SdfThreadNode;
+#include "sdf.h"
 
 extern s32 D_003BD998;
 extern SdfThreadNode *D_003BD99C;

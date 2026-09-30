@@ -181,4 +181,10 @@ typedef struct SdfAssetEntry {
     u64 unk48;
 } SdfAssetEntry;
 
+/* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
+typedef struct SdfThreadNode {
+    struct SdfThreadNode *next; /* 0x00 */
+    s32 threadId;               /* 0x04 */
+} SdfThreadNode;
+
 #endif /* SDF_H */
