@@ -118,6 +118,14 @@ extern s32 btlCreateResourceDescriptor(s32);
 
 extern void func_001FBF30(s32, s32, s32);
 
+extern s32 *func_002DA730(void);
+
+extern void func_002DA420(void *, f32);
+
+extern u16 D_003DC9E0[];
+
+extern u32 func_002A3BD8(u32, u32, u32);
+
 extern void func_001FBA38(s32);
 
 extern s32 func_001FBF48(s32);
@@ -1121,7 +1129,72 @@ RefObj *func_0029C408(RefObj *obj) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C420);
+typedef struct EffAnimSegment {
+    u32 length;     // 0x00
+    u8 pad_04[0xC];
+} EffAnimSegment;
+
+typedef struct EffAnimSet {
+    u8 pad_00[4];
+    u32 count;                 // 0x04
+    u32 flags;                 // 0x08: 1 loop, 4 double speed
+    u8 pad_0C[4];
+    EffAnimSegment *segments;  // 0x10
+    u8 pad_14[4];
+    u32 length;                // 0x18
+} EffAnimSet;
+
+typedef struct EffAnimSample {
+    f32 weight;     // 0x00
+    f32 speed;      // 0x04
+    u32 pad_08;
+    s32 segment;    // 0x0C
+} EffAnimSample;
+
+void func_0029C420(EffAnimSet *set, u32 frame, EffAnimSample *out) {
+    u32 count = set->count;
+    u32 local = 0;
+    s32 segment = -1;
+    EffAnimSegment *seg;
+    u32 acc;
+    u32 i;
+
+    if (count == 1) {
+        segment = 0;
+    } else {
+        if (set->flags & 1) {
+            local = frame % set->length;
+        } else if (frame >= set->length) {
+            segment = count - 1;
+        } else {
+            local = frame;
+        }
+        if (segment == -1) {
+            seg = set->segments;
+            acc = 0;
+            for (i = 0; i < count; i++) {
+                acc += seg->length;
+                if (acc >= local) {
+                    segment = i;
+                    break;
+                }
+                acc++;
+                seg++;
+            }
+        }
+    }
+    out->weight = 1.0f;
+    {
+        f32 speed = 2.0f;
+
+        if (!(set->flags & 4)) {
+            speed = 1.0f;
+        }
+        out->segment = segment;
+        out->speed = speed;
+    }
+    out->pad_08 = 0;
+}
 
 void func_0029C500(s32 owner, u32 target, s32 indexSource) {
     func_0029C048(target, *(u32 *)(*(s32 *)(indexSource + 0xc) * 4 + *(s32 *)(owner + 0x14)));
@@ -1993,21 +2066,6 @@ void effClearBillFrames(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E7D8);
-
-void func_0029E868(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    func_002D0918(((EffFrameState *)work)->allocation);
-}
-
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E898);
-
-extern void effMiscQuaternionToMatrixVU(void);
-
-extern u8 D_0037E0E0[];
-
-extern void func_002A3E10(u8 *, void *);
-
 /* Billboard configuration shared by the frame builders and draw callbacks. */
 typedef struct EffBillConfig {
     u8 pad_00[0x28];
@@ -2031,6 +2089,22 @@ typedef struct EffBillConfig {
     u8 pad_90[0x29];
     u8 alternateMode;   // 0xB9, animation variants use this instead of mode
 } EffBillConfig;
+
+INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E7D8);
+
+void func_0029E868(s32 work) {
+    effReleaseResourceRefs(((EffFrameState *)work)->asset);
+    func_002D0918(((EffFrameState *)work)->allocation);
+}
+
+INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E898);
+
+extern void effMiscQuaternionToMatrixVU(void);
+
+extern u8 D_0037E0E0[];
+
+extern void func_002A3E10(u8 *, void *);
+
 typedef struct EffBillOutput {
     u32 textureId;      // 0x00
     u32 color;          // 0x04
@@ -2354,8 +2428,6 @@ void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
         transform[7] = 1.0f;
     }
 }
-
-extern u32 func_002A3BD8(u32, u32, u32);
 
 u8 *billCreateAnimatedTransform(u8 *config, u32 resource) {
     u8 *node = func_002A0440(config);
@@ -3147,7 +3219,85 @@ void func_002A3A38(Matrix4 *mat, float value) {
 
 INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2B10);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A3A40);
+typedef struct EffTrackSet {
+    u32 type;      // 0x00
+    u32 color;     // 0x04
+    s32 rows;      // 0x08
+    u16 kind;      // 0x0C
+    u8 pad_0E[2];
+    s32 count;     // 0x10
+    u8 flag;       // 0x14
+    u8 pad_15[3];
+    void *unk18;
+    u8 *buffer;    // 0x1C
+    u8 *columns;   // 0x20
+    u8 *tail;      // 0x24
+    s32 *handle;   // 0x28
+    u8 *allocation; // 0x2C
+} EffTrackSet;
+
+EffTrackSet *func_002A3A40(s32 count, u16 kind) {
+    s32 rows;
+    s32 cols;
+    s32 size;
+    u8 *base;
+    u8 *data;
+    EffTrackSet *set;
+
+    switch (kind) {
+    case 0:
+        cols = 0;
+        rows = count * 5;
+        break;
+    case 1:
+        cols = 0;
+        rows = count * 13;
+        break;
+    case 2:
+        rows = count * 4;
+        cols = 0;
+        break;
+    case 3:
+        rows = count * 4;
+        cols = rows;
+        break;
+    case 4:
+        rows = count * 4;
+        cols = rows;
+        break;
+    default:
+        rows = 0;
+        cols = 0;
+        break;
+    }
+    size = ((rows * 2 + cols) * 2 + rows) * 4;
+    size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
+    base = func_002D03F8(size + 0x30);
+    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    set = (EffTrackSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    if (cols > 0) {
+        set->columns = data;
+        data += cols * 8;
+    } else {
+        set->columns = 0;
+    }
+    set->color = 0x80808080;
+    set->type = 2;
+    set->tail = data;
+    set->rows = rows;
+    set->kind = kind;
+    set->count = count;
+    set->allocation = base;
+    set->flag = 0;
+    set->unk18 = 0;
+    set->handle = func_002DA730();
+    func_002DA420(set->handle, 1.0f);
+    memset(D_003DC9E0, 0, 0x2C);
+    D_003DC9E0[2] = 0x4000;
+    return set;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A3BD8);
 
@@ -3500,7 +3650,46 @@ void func_002A5538(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A5540);
+/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
+typedef struct EffPointSet {
+    u32 type;       // 0x00
+    u32 color;      // 0x04
+    s32 rows;       // 0x08
+    u8 flag;        // 0x0C
+    u8 pad_0D[3];
+    u8 *buffer;     // 0x10
+    u8 *tail;       // 0x14
+    s32 *handle;    // 0x18
+    u8 *allocation; // 0x1C
+} EffPointSet;
+
+extern u16 D_003DCA10[];
+
+u8 *func_002A5540(u32 count) {
+    s32 rows = count * 4 + 4;
+    s32 size = rows * 20;
+    u8 *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = func_002D03F8(size + 0x20);
+    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = func_002DA730();
+    func_002DA420(set->handle, 1.0f);
+    memset(D_003DCA10, 0, 0x2C);
+    D_003DCA10[2] = 0x4000;
+    return (u8 *)set;
+}
 
 /* Common asset-and-allocation handles in the class cleanup callbacks. */
 typedef struct EffAssetOwner {
@@ -4170,7 +4359,33 @@ void func_002AABD8(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AABE0);
+extern u16 D_003DCAD0[];
+
+EffPointSet *func_002AABE0(s32 count) {
+    s32 rows = count * 5 + 5;
+    s32 size = rows * 20;
+    u8 *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = func_002D03F8(size + 0x20);
+    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = func_002DA730();
+    func_002DA420(set->handle, 1.0f);
+    memset(D_003DCAD0, 0, 0x2C);
+    D_003DCAD0[2] = 0x4000;
+    return set;
+}
 
 void func_002AACD0(s32 work) {
     sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
@@ -5599,7 +5814,33 @@ void func_002B2318(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B2320);
+extern u16 D_003DCB60[];
+
+EffPointSet *func_002B2320(s32 count) {
+    s32 rows = count * 3 + 3;
+    s32 size = rows * 20;
+    u8 *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = func_002D03F8(size + 0x20);
+    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = func_002DA730();
+    func_002DA420(set->handle, 1.0f);
+    memset(D_003DCB60, 0, 0x2C);
+    D_003DCB60[2] = 0x4000;
+    return set;
+}
 
 void func_002B2410(s32 work) {
     sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);

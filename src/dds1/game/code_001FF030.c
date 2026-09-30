@@ -53,6 +53,8 @@ extern u32 func_00208C68(void);
 
 extern s32 func_001A17F0(void);
 
+extern void func_001D6300(void *, void *);
+
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 typedef struct AiSlot {
     u8 weight;
@@ -3469,7 +3471,43 @@ s32 btlNormalizeActionForSkill(s32 battler, s32 action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D858);
+void func_0020D858(void) {
+    BtlState *work = (BtlState *)func_001A17F0();
+    BtlUnit *unit;
+    BtlUnit *lead = 0;
+    f32 shift;
+    f32 pos[4];
+
+    for (unit = work->units; unit != 0; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->mode == 0x137) {
+                    lead = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (lead != 0) {
+        func_001D6300(lead, pos);
+        shift = -pos[0];
+        pos[0] = 0;
+        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        btlSetUnitPosition(lead, pos);
+        for (unit = work->units; unit != 0; unit = unit->next) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit != lead) {
+                        func_001D6300(unit, pos);
+                        pos[0] = pos[0] + shift;
+                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        btlSetUnitPosition(unit, pos);
+                    }
+                }
+            }
+        }
+    }
+}
 
 u32 func_0020D998(s32 action) {
     u32 result;
