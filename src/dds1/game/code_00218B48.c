@@ -534,17 +534,18 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
     entry->state = entry->state + 1;
 }
 
+/* Resolve a fixed-size viewer slot after checking the slot table's bounds. */
 s32 func_00219EA0(MdlViewerResource *resource, s32 index) {
-    s32 slotTable;
+    s32 slotsAddress;
 
-    slotTable = resource->data->slotTable;
-    if (slotTable == 0) {
+    slotsAddress = resource->data->slotTable;
+    if (slotsAddress == 0) {
         return 0;
     }
-    if (index >= ((MdlViewerSlots *)slotTable)->count) {
+    if (index >= ((MdlViewerSlots *)slotsAddress)->count) {
         return 0;
     }
-    return ((MdlViewerSlots *)slotTable)->first + index * 0x10;
+    return ((MdlViewerSlots *)slotsAddress)->first + index * 0x10;
 }
 
 typedef struct MdlPartRec {
@@ -566,6 +567,7 @@ typedef struct MdlPartItem {
 
 extern void *sdfChunkFindRecordById(void *chunk, s32 id);
 
+/* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 void func_00219ED8(MdlResourceOwner *owner, MdlPartRec *rec, s32 option, s32 type, s32 (*create)(MdlPartEntry *)) {
     MdlPartEntry *part = (MdlPartEntry *)func_00219EA0((MdlViewerResource *)owner, rec->partIndex);
 
