@@ -119,7 +119,8 @@ typedef struct MenuGauge {
 } MenuGauge;
 
 typedef struct MenuRecord {
-    u8 pad0[0xC];
+    s32 visibleCount; /* 0x00: threshold for highlighted slots */
+    u8 pad4[8];
     s32 partyIndex;
     MenuGauge gauge;
 } MenuRecord;
@@ -189,8 +190,18 @@ extern s32 func_00101A70();
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
+/* Selected child window and page of the party skill-menu runtime. */
+typedef struct MenuPartyRuntime {
+    u8 pad00[4];
+    s32 selectionList; /* 0x04: list whose cursor selects the active window */
+    u8 pad08[0x1C];
+    s32 selectedWindow; /* 0x24 */
+    u8 pad28[4];
+    s32 selectedPage;   /* 0x2C */
+} MenuPartyRuntime;
+
 void func_00279CC0(s32 menu, s32 target) {
-    s32 *entry = (s32 *)menu + **(s32 **)(*(s32 *)(menu + 4) + 0x1C);
+    s32 *entry = (s32 *)menu + **(s32 **)(((MenuPartyRuntime *)menu)->selectionList + 0x1C);
     s32 list = entry[2];
     s32 delta = target - *(s32 *)(*(s32 *)(list + 0x14) + 0x24);
     s32 dir;
@@ -304,8 +315,8 @@ u32 func_0027A778() {
 
     window = func_00101A70();
     window = *(s32 *)(window + 0x90c);
-    mnuDestroyWindowContainer(*(u32 *)(window + 0x24));
-    *(u32 *)(window + 0x24) = 0;
+    mnuDestroyWindowContainer(((MenuPartyRuntime *)window)->selectedWindow);
+    ((MenuPartyRuntime *)window)->selectedWindow = 0;
     return 1;
 }
 
@@ -317,7 +328,7 @@ s32 mnuResetSelection(s32 selection) {
     menu = *(s32 *)(context + 0x90C);
     ptySkillMenuBuildLinkageSkills(selection);
     mnuFlagActiveWindows(context + 0x15C);
-    *(s32 *)(menu + 0x2C) = 0;
+    ((MenuPartyRuntime *)menu)->selectedPage = 0;
     return 1;
 }
 
@@ -409,8 +420,8 @@ void mnuCampMenuDrawStatus(s32 param) {
     mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
-    func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20), 0x53);
-    node = *(s32 *)(*(s32 *)(slots + *(s32 *)(menu + 0x2C) * 4 + 0x20) + 0x14);
+    func_0027CDD0(0x1C0, 0x3D0, 0, *(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20), 0x53);
+    node = *(s32 *)(*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20) + 0x14);
     label = *(s32 *)(*(s32 *)(node + 0x1C) + 0x60);
     func_0027A9A8(context);
     if (label != 0) {
@@ -605,7 +616,8 @@ struct MenuListNode {
     u32 flags48;        /* 0x48 */
     u8 pad4C[4];
     s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
-    u8 pad54[4];
+    u8 selectionByte54; /* 0x54: cleared on moving the list selection */
+    u8 pad55[3];
     struct MenuListNode *next;
     struct MenuListNode *prev;
     u32 sortKeyPrimary;   /* 0x60 */
@@ -970,7 +982,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, s32 menu, s32 panel, s32 drawAr
     MenuSpriteGrid *grid = (MenuSpriteGrid *)panel;
     u32 i = 0;
     do {
-        s32 selected = panel == *(s32 *)(menu + 0x1C);
+        s32 selected = panel == (s32)((MenuList *)menu)->cursor;
         s32 index = selected * 4 + i;
         s32 sprite = grid->slots[index].sprite;
         if (sprite != 0) {
@@ -981,8 +993,8 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, s32 menu, s32 panel, s32 drawAr
 }
 
 s32 mnuDispatchByFlag(s32 value, s32 node) {
-    return func_002C1630((*(s32 *)(node + 0x48) & 1) ? 0x89BDC940 : 0x89BDC980,
-                         value, *(s32 *)(node + 0x50));
+    return func_002C1630((((MenuListNode *)node)->flags48 & 1) ? 0x89BDC940 : 0x89BDC980,
+                         value, ((MenuListNode *)node)->animationTimer);
 }
 
 typedef struct MenuSlotEntry {
@@ -1139,7 +1151,7 @@ void func_0027C6A0(s32 window) {
 s32 mnuAdvanceListSelection(s32 window, s32 direction) {
     s32 item = (s32)func_0027BBF0(((MenuWindowContainer *)window)->list, direction, 0);
     if (item != 0) {
-        *(u8 *)(item + 0x54) = 0;
+        ((MenuListNode *)item)->selectionByte54 = 0;
         mnuClearEntryFlags(window + 0x4c);
     }
     return item;
@@ -1148,7 +1160,7 @@ s32 mnuAdvanceListSelection(s32 window, s32 direction) {
 s32 mnuReverseListSelection(s32 window, s32 direction) {
     s32 item = (s32)func_0027BD48(((MenuWindowContainer *)window)->list, direction, 0);
     if (item != 0) {
-        *(u8 *)(item + 0x54) = 0;
+        ((MenuListNode *)item)->selectionByte54 = 0;
         mnuClearEntryFlags(window + 0x4c);
     }
     return item;
@@ -1201,7 +1213,7 @@ void func_0027CCD0(s32 x, s32 base, s32 depth, s32 menu, s32 param) {
         if (*(u32 *)node & 8) {
             flag = 1;
         }
-        base += *(s32 *)(node + 0x24) * *(s32 *)(node + 0x28);
+        base += ((MenuList *)node)->windowOffset * ((MenuList *)node)->rowStep;
         func_0027DCE8(x, base, depth, texture, (u32 *)panel, flag, param);
         mnuHideWindowHandles(panel);
         if (window->flags & 4) {
@@ -1268,13 +1280,13 @@ typedef struct MenuWindowSpriteGroup {
     s32 sprites[7];
 } MenuWindowSpriteGroup;
 
-u32 mnuCreateWindowState(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
+u32 mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
     s32 handle = func_002D03F8(sizeof(MenuWindowSpriteGroup));
     MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(handle);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->resourceHandle = handle;
-    func_0027CF28((s32 *)group, arg0, arg1, arg2, arg3);
+    func_0027CF28((s32 *)group, source, mode, variant, option);
     return (u32)group;
 }
 
@@ -2169,7 +2181,7 @@ void mnuUpdateHandleStates(s32 obj) {
 
         offset += 0x34;
         if (((MenuRecord *)entry)->gauge.id >= 0) {
-            if (i < **(s32 **)(obj + 8)) {
+            if (i < ((MenuWindow *)obj)->records->visibleCount) {
                 func_0027FCA0(obj, i, 1);
             } else {
                 func_0027FCA0(obj, i, 2);
