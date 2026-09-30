@@ -31,15 +31,11 @@ extern char D_003BB8A0[];
 
 extern char D_003BB898[];
 
-extern char D_003BB8A8[];
-
 extern s32 D_003BAA60;
 
 extern s8 D_003A5A80[];
 
 extern s8 D_003A5AA8[];
-
-extern void func_003014F0();
 
 extern u32 func_0020A3F0(void);
 
@@ -60,9 +56,11 @@ extern u8 *D_003BAA50;
 extern s8 *D_003BAA4C;
 
 extern s32 mdlFlagTest(s32);
+
 extern u8 *func_001D9BA0(u8 *, f32);
 
 extern void btlSetUnitPosition(BtlUnit *, void *);
+
 extern void btlSetUnitRotation(BtlUnit *, void *);
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
@@ -213,26 +211,38 @@ typedef struct BtlState {
 
 extern s32 func_0020B348();
 
-extern s32 func_0020DC38();
-
 extern s32 btlAnyUnitHasActionInSlots();
 
 extern s32 func_001A8CE0(s32);
+
 extern u32 func_001A9488(s32);
+
 extern u8 D_00360EE0[];
+
 extern u8 D_00360EF0[];
+
 extern void btlInitMotionTransformFromVectors(s32, u8 *, u8 *);
 
 extern void *func_002CFF68(s32);
+
 extern void func_002CFF98(void *);
+
 extern s32 btlRunAiAction();
+
 extern u32 btlPickWeightedAiSlot();
+
 extern u32 btlNextScaledRandom(u32);
+
 extern u32 D_003BB878;
+
 extern s32 func_001FFE30(BtlTask *, s32, u16 *, s32 *);
+
 extern void (*D_00360E38[])(BtlTask *, u32, s32);
+
 extern void btlCopyIndexList(s32, s32);
+
 extern void *memset(void *, s32, u32);
+
 extern s32 func_002024A8(s32, u16 *, u16);
 
 void btlRunWeightedAiAction(BtlTask *task, s32 row) {
@@ -491,7 +501,9 @@ s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
 }
 
 extern s32 D_00360E98[];
+
 extern s32 btlActorEntryIsExpired();
+
 extern s32 btlGetActorEntryCode();
 
 /* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own
@@ -2393,9 +2405,13 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
 }
 
 extern s32 btlCreateCommandSoundUpdateTask();
+
 extern s32 btlCreateSecondaryCommandSoundTask();
+
 extern s32 btlCreateCommandSoundTask();
+
 extern s32 btlCreateEffObjB();
+
 extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
 s32 btlEffectTaskStartFinale(BtlTask *task) {
@@ -2591,8 +2607,11 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207718);
 
 extern void btlCopyMotionTransform();
+
 extern void btlSetActorEffectParameterOrMuzzlePosition();
+
 extern void btlInterpolateVectorStep();
+
 extern void func_001DB698();
 
 typedef struct BtlAimUnit {
@@ -3474,6 +3493,7 @@ void func_00209A28(void) {
 }
 
 extern void fldAppendSceneGroupHandle();
+
 extern void btlAppendIndexListEntry();
 
 typedef struct BtlMarkState {
@@ -3767,11 +3787,21 @@ s32 func_0020AF00(u8 *unit, s32 action) {
     }
 }
 
+extern void btlFlagAllUnitDefeatCandidatesTask(void);
+
+extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+
+extern char D_003A5FF0[];
+
+extern char D_003A6018[];
+
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6018);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020AFB8);
+
+extern void func_0020AFB8();
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B190);
 
@@ -3835,13 +3865,7 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6358);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020BE30);
 
-extern void btlFlagAllUnitDefeatCandidatesTask(void);
-
-extern void func_0020AFB8();
-
 extern void func_0020B190(u8 *, void *);
-
-extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* 0x20-byte action metadata entries referenced by a unit's action index. */
 typedef struct BtlActionTableRow {
@@ -3864,45 +3888,6 @@ u32 func_0020CB28(s32 action) {
     return result;
 }
 
-extern void btlClearRuntimeFlag2000(void);
-
-s32 btlDispatchActionAnimationB(u8 *unit) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
-    if (flags & 0x4000) {
-        btlFlagAllUnitDefeatCandidatesTask();
-        if (!(flags & 0x10)) {
-            func_0020AFB8(unit);
-        } else {
-            btlSetEffectCameraKeys(unit, 59.2f, -700.6f, -1901.2f,
-                           0.092f, 0.023f, -0.009f, 0.987f,
-                           59.2f, -160.6f, -1901.2f, -0.106f,
-                           0.025f, -0.014f, 0.985f, 45.0f, 30.0f);
-        }
-        ((BtlUnit *)unit)->flags = 0;
-    } else if (flags & 0x8000) {
-        btlFlagAllUnitDefeatCandidatesTask();
-        func_0020B348(unit, unit, 0);
-    } else if (flags & 8) {
-        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->unk_60, 0);
-            btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190(unit, other);
-            ((BtlUnit *)unit)->flags = 0;
-        } else {
-            btlFlagAllUnitDefeatCandidatesTask();
-            func_0020AFB8(unit);
-        }
-    } else {
-        return 0;
-    }
-    btlClearRuntimeFlag2000();
-    return 1;
-}
-
-void func_0020CCA8(void) {
-    func_0020ADA8();
-}
-
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6398);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A63C0);
@@ -3917,336 +3902,6 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", jtbl_003A6460);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", jtbl_003A6480);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020CCC0);
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D168);
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D2E0);
-
-s32 btlAllowsSpeciesCondition(u8 *unit, u8 *other, s32 condition) {
-    s32 kind;
-    if ((((BtlUnit *)unit)->flags & 0x200) == 0) {
-        return 1;
-    }
-    if (condition != 0) {
-        return 0;
-    }
-    kind = ((BtlUnit *)other)->mode;
-    switch (kind) {
-    case 0x13d:
-    case 0x13e:
-        return 0;
-    default:
-        return 1;
-    }
-}
-
-void btlFormatBattleEffectResourceName(s32 record, s32 action, s32 pathBuffer) {
-    if (action != 0xd5) {
-        return;
-    }
-    func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(D_003BAA60 + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
-}
-
-u32 func_0020D548(void) {
-    return 7;
-}
-
-s32 func_0020D550(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
-        return -1;
-    }
-    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
-        return -1;
-    }
-    if (((BtlUnit *)unit)->mode == 0x114) {
-        return 11;
-    }
-    return -1;
-}
-
-s32 func_0020D598(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
-        return -1;
-    }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
-        return -1;
-    }
-    if (((BtlUnit *)unit)->mode == 0x111) {
-        return 11;
-    }
-    return -1;
-}
-
-s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
-    BtlTask *link = *(BtlTask **)((u8 *)unit + 0xF4);
-    BtlUnit *other;
-    f32 pos[4] __attribute__((aligned(16)));
-
-    if (link == 0) {
-        return 1;
-    }
-    other = link->unit;
-    if ((other->flags & 0x400) == 0) {
-        return 0;
-    }
-    if (other->mode != 0x111) {
-        return 0;
-    }
-    if (unit->unk_114 == 0x175) {
-        PCP_COPY_VECTOR(pos, (u8 *)other + 0x30);
-        pos[2] += 600.0f;
-        btlSetUnitPosition(other, pos);
-    }
-    return 0;
-}
-
-extern s32 func_0020D5E0();
-
-s64 func_0020D668(void *unit, s8 unused1, s8 unused2) {
-    return func_0020D5E0(unit, unused1, unused2);
-}
-
-s32 func_0020D690(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
-        return -1;
-    }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
-        return -1;
-    }
-    if (((BtlUnit *)unit)->mode == 0x109) {
-        return 11;
-    }
-    return -1;
-}
-
-s32 func_0020D6D8(void) {
-    BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
-    BtlUnit *head = unit;
-    s32 result = -1;
-    for (; unit != NULL; unit = unit->next) {
-        if (unit->flags & 1) {
-            if (unit->flags & 0x400) {
-                if (unit->mode == 0x13C) {
-                    if (unit->flags & 0x20) {
-                        result = 1;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    if (result != -1) {
-        for (unit = head; unit != NULL; unit = unit->next) {
-            if (unit->flags & 1) {
-                if (unit->flags & 0x400) {
-                    if (unit->flags & 2) {
-                        if (!(unit->flags & 0xE0)) {
-                            if (unit->mode != 0x13C) {
-                                btlStartTask(func_001D8DE8(unit, 6, 0xA));
-                                unit->flags &= ~1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return result;
-}
-
-s32 btlNormalizeActionForSkill(s32 battler, s32 action) {
-    if ((((BtlUnit *)battler)->flags & 0x400) == 0 || ((BtlUnit *)battler)->mode != 0x13c) {
-        return action;
-    }
-    switch (action) {
-    case 2: return 0;
-    case 13: return -1;
-    default: return action;
-    }
-}
-
-void btlRecenterUnitsOnLead(void) {
-    BtlState *work = (BtlState *)func_001A17F0();
-    BtlUnit *unit;
-    BtlUnit *lead = 0;
-    f32 shift;
-    f32 pos[4];
-
-    for (unit = work->units; unit != 0; unit = unit->next) {
-        if (unit->flags & 1) {
-            if (unit->flags & 0x400) {
-                if (unit->mode == 0x137) {
-                    lead = unit;
-                    break;
-                }
-            }
-        }
-    }
-    if (lead != 0) {
-        func_001D6300(lead, pos);
-        shift = -pos[0];
-        pos[0] = 0;
-        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
-        btlSetUnitPosition(lead, pos);
-        for (unit = work->units; unit != 0; unit = unit->next) {
-            if (unit->flags & 1) {
-                if (unit->flags & 0x400) {
-                    if (unit != lead) {
-                        func_001D6300(unit, pos);
-                        pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
-                        btlSetUnitPosition(unit, pos);
-                    }
-                }
-            }
-        }
-    }
-}
-
-u32 btlMapActionToCode(s32 action) {
-    u32 result;
-
-    result = 0x7d;
-    if (action != 0x143) {
-        result = 0;
-    }
-    return result;
-}
-
-u8 func_0020D9A8(s32 action) {
-    return action != 0xd3;
-}
-
-s32 btlNormalizeActionForStatus(s32 battler, s32 action) {
-    if ((((BtlUnit *)battler)->flags & 0x400) == 0 || ((BtlUnit *)battler)->mode != 0x115) {
-        return action;
-    }
-    switch (action) {
-    case 2: return 0;
-    case 13: return -1;
-    default: return action;
-    }
-}
-
-s32 func_0020D9F8(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
-        return -1;
-    }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
-        return -1;
-    }
-    if (((BtlUnit *)unit)->mode == 0x113) {
-        return 11;
-    }
-    return -1;
-}
-
-extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern char D_003A5FF0[];
-extern char D_003A6018[];
-
-void func_0020DA40(u8 *unit) {
-    btlFlagAllUnitDefeatCandidatesTask();
-    switch (effMiscRandMod(0, 2)) {
-    case 0:
-        func_003003F0(D_003A5FF0);
-        btlSetEffectCameraKeys(unit, -307.2f, -72.7f, -1292.7f, -0.096f, -0.085f, -0.004f, 0.983f, 148.3f, -84.1f, -1407.1f,
-                      -0.079f, 0.064f, -0.018f, 0.986f, 40.0f, 25.0f);
-        break;
-    case 1:
-        func_003003F0(D_003A6018);
-        btlSetEffectCameraKeys(unit, -207.7f, -76.6f, -1176.0f, -0.108f, -0.099f, -0.002f, 0.98f, -282.2f, -106.6f, -1451.2f,
-                      -0.071f, -0.1f, -0.006f, 0.984f, 40.0f, 25.0f);
-        break;
-    }
-}
-
-extern void func_00204838(void *, void *, void *, s32, s32, f32, f32, f32);
-
-extern void func_001DB698(void *);
-
-void func_0020DB90(u8 *actor) {
-    u8 *position = actor + 0x30;
-    u8 *rotation = actor + 0xc0;
-    func_00204838(actor, position, rotation, 0, 1, 0.25f, 0.0f, 0.5f);
-    ((BtlLinkedCommand *)actor)->value130 = 30.0f;
-    ((BtlLinkedCommand *)actor)->flags |= 0x41;
-    ((BtlLinkedCommand *)actor)->coordinate50 += 500.0f;
-    ((BtlLinkedCommand *)actor)->coordinateE0 += 500.0f;
-    func_001DB698(position);
-    func_001DB698(rotation);
-}
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020DC38);
-
-s64 func_0020DE50(void) {
-    return func_0020DC38();
-}
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020DE70);
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E058);
-
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020E170);
-
-extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-
-extern void func_0020DA40(u8 *);
-
-s32 func_0020E868(u8 *unit) {
-    u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
-    u8 *other;
-    if (((BtlTask *)entry)->unit->flags & 0x200) {
-        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
-            if ((((BtlUnit *)other)->flags & 0x400) == 0) {
-                return 0;
-            }
-            func_0020DB90(unit);
-        } else {
-            btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DC38(unit, unit, 0);
-            ((BtlUnit *)unit)->flags = 0;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-extern void btlFlagAllUnitDefeatCandidatesTask(void);
-
-s32 func_0020E910(u8 *unit) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
-    if (flags & 0x1000) {
-        btlFlagAllUnitDefeatCandidatesTask();
-        if (!(flags & 0x10)) {
-            func_0020DA40(unit);
-        } else {
-            btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
-                           0.124f, -0.07f, -0.021f, 0.981f,
-                           -203.0f, -46.1f, -1259.0f, -0.144f,
-                           -0.066f, -0.003f, 0.978f, 45.0f, 30.0f);
-        }
-        return 1;
-    }
-    if (flags & 0x2000) {
-        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
-            btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DB90(unit);
-        } else {
-            btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DA40(unit);
-        }
-        return 1;
-    }
-    return 0;
-}
-
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB880);
 
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB888);
@@ -4256,198 +3911,4 @@ INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB890);
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB898);
 
 INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8A8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B4);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8B8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8C8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8D8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8E8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB8F8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB900);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB908);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB910);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB918);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB920);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB928);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB930);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB938);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB93E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB940);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB948);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB950);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB958);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB960);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB968);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB970);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB978);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB980);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB988);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB990);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB998);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9A8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9B8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9C8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9D8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9E8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BB9F8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA00);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA08);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA10);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA18);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA20);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA28);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA30);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA38);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA40);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA48);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA50);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA58);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA60);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA68);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA70);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA78);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA80);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA88);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA90);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBA98);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAA8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAB8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAC8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAD8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAE8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF0);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBAF8);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB00);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB08);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0D);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB0F);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB10);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB14);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB18);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1C);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB1E);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB20);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB24);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB28);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB2C);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB30);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB38);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB40);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB48);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB50);
-
-INCLUDE_SDATA(const s32, "game/code_001FF030", D_003BBB58);
 
