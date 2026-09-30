@@ -1,28 +1,231 @@
-#include "common.h"
-
-extern s32 func_00101A70(void);
-extern s64 func_00285670(s32, s32 *, u32, s32);
+#include "mnu.h"
 
 extern s32 func_00101A70();
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279328);
+extern void mnuCampMenuHandleInput(s32);
+extern void ptySkillMenuHandleSelection(s32);
+extern void ptySkillMenuHandleSlotReorder(s32);
+extern void func_00272778(s32);
+extern void mnuCreateStaffImageSprite(s32);
+extern void func_002723B0(s32, s32);
+extern void ptySkillMenuCopyPageState(s32);
+extern void mnuDrawStaffCampScreen(s32, s32);
+extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
+extern void func_00272668(s32, s32, s32, s32, s32, s32);
+extern void func_0027CDD0(s32, s32, s32, s32, s32);
+extern u32 func_00278BF0(s32);
+extern s32 D_003BAA98;
+extern s32 D_003BAA00;
+extern s32 func_00286540(u16, s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
+extern void func_002865B8(s32, s32);
+extern void mnuInitPartyPanelSlots(s32);
+extern void mnuUpdateHandleStates(s32);
+extern void func_00280048(s32);
+extern u32 func_00285B20(u32);
+extern s32 func_00286648(u16);
+extern void func_00280978();
+extern void func_002858E8(s32 *, char *);
+extern char D_0037CC58[];
+extern void mnuClearListFlags();
+extern void mnuPlayInputSound(s32, u32, s32);
+
+typedef struct SkillListNode {
+    s32 index;                   /* 0x00 */
+    u8 pad04[0x44];
+    u32 flags;                   /* 0x48 */
+    u8 pad4C[0xC];
+    struct SkillListNode *next;  /* 0x58 */
+    u8 pad5C[4];
+    u32 sortKey;                 /* 0x60 */
+} SkillListNode;
+
+typedef struct SkillList {
+    u32 flags;                   /* 0x00 */
+    u8 pad04[0xC];
+    SkillListNode *first;        /* 0x10 */
+    u8 pad14[8];
+    SkillListNode *cursor;       /* 0x1C */
+} SkillList;
+
+typedef struct SkillListWindow {
+    u8 pad00[0x14];
+    SkillList *list;             /* 0x14 */
+} SkillListWindow;
+
+/* Skill menu work: the party list, one window per page and the active one. */
+typedef struct SkillMenuState {
+    u8 pad00[0xC];
+    SkillList *partyList;        /* 0x0C */
+    SkillListWindow *window[3];  /* 0x10 */
+    u8 pad1C[8];
+    SkillListWindow *selected;   /* 0x24 */
+    u8 pad28[8];
+    u32 selectionFlags;          /* 0x30 */
+} SkillMenuState;
+
+typedef struct SkillMenuContext {
+    u8 pad00[0x78];
+    s32 actor;                   /* 0x78 */
+    u8 pad7C[0xA8];
+    SkillListWindow *panel;      /* 0x124 */
+    u8 pad128[0x34];
+    u32 actionFlags;             /* 0x15C */
+    u8 pad160[0x678];
+    SkillList *selection;        /* 0x7D8 */
+    SkillList *target;           /* 0x7DC */
+    u8 pad7E0[0x12C];
+    SkillMenuState *menu;        /* 0x90C */
+} SkillMenuContext;
+
+s64 func_00279328(s32 callback) {
+    s32 context = func_00101A70();
+    SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
+    s64 state = menuRunPanel(context, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    if (((SkillMenuContext *)context)->panel->list->cursor->index == 0) {
+        mnuCampMenuHandleInput(callback);
+    } else if (menu->selectionFlags == 0) {
+        ptySkillMenuHandleSelection(callback);
+    } else {
+        ptySkillMenuHandleSlotReorder(callback);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuCopyPageState);
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279568);
+s64 func_00279568(s32 callback) {
+    s32 context = func_00101A70();
+    SkillMenuContext *work = (SkillMenuContext *)context;
+    SkillMenuState *menu = work->menu;
+    s32 label;
+    if (work->panel->list->cursor->index == 0) {
+        func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+    } else {
+        func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+        ptySkillMenuCopyPageState(context);
+    }
+    mnuDrawStaffCampScreen(1, callback);
+    if (work->panel->list->cursor->index == 0) {
+        mnuCreateStaffImageSprite(2);
+    } else if (menu->selectionFlags != 0) {
+        if (func_00278BF0(callback) == 0) {
+            mnuCreateStaffImageSprite(0xE);
+        } else {
+            mnuCreateStaffImageSprite(0xF);
+        }
+    } else if (((SkillListWindow *)*(s32 *)((s32)menu + 0x10 + (menu->partyList->cursor->index << 2)))->list->cursor->index == 0) {
+        mnuCreateStaffImageSprite(0xD);
+    } else {
+        mnuCreateStaffImageSprite(0xC);
+    }
+    label = menu->selected->list->cursor->sortKey;
+    if (label != 0xFFFF && label != 0) {
+        func_00272518(1, label, D_003BAA98, context, 1, 1, 0x53);
+    } else {
+        func_00272668(1, 0, 0, context, 1, 0x53);
+    }
+    func_002723B0(0, work->actor);
+    return menuRunPanel(context, 1, callback);
+}
 
 void func_00279728(s32 selection) {
     s32 context = func_00101A70();
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuUseSelectedInField);
+s32 ptySkillMenuUseSelectedInField(id, context)
+    u16 id;
+    s32 context;
+{
+    s32 window = context + 0x15C;
+    s32 slotA = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    s32 slotB = D_003BAA00 + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
+    if (func_00286540(id, slotA) != 0) {
+        return 0;
+    }
+    if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
+        func_002865B8(id, slotA);
+        mnuInitPartyPanelSlots(context + 0x7EC);
+        mnuUpdateHandleStates(window);
+        func_00280048(window);
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279860);
+/* Same node as SkillListNode, read through its low halfword id. */
+typedef struct SkillLink {
+    u8 unk0[0x48];
+    u32 flags;
+    u8 unk4C[0xC];
+    struct SkillLink *next;
+    u8 unk5C[4];
+    u16 id;
+} SkillLink;
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_002798F8);
+void func_00279860(s32 context) {
+    s32 slot = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
+    if (link != NULL) {
+        do {
+            if (func_00286540(link->id, slot)) {
+                link->flags |= 1;
+            }
+            link = link->next;
+        } while (link != NULL);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_00279328", func_00279A30);
+s64 func_002798F8(s32 callback) {
+    s32 context = func_00101A70();
+    SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
+    s32 *popup = (s32 *)(context + 0x54);
+    u32 buttons = func_00285B20(3);
+    s64 state;
+    s32 label;
+    u16 code;
+    s32 window;
+    state = func_00285670(context + 8, popup, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    label = menu->selected->list->cursor->sortKey;
+    code = label;
+    if (func_00286648(code) == 2) {
+        ((SkillMenuContext *)context)->actionFlags |= 0x10;
+    }
+    if (func_00286648(code) == 3) {
+        ((SkillMenuContext *)context)->actionFlags |= 0x20;
+    }
+    window = context + 0x15C;
+    func_00280978(8, window);
+    if (buttons & 1) {
+        buttons = ptySkillMenuUseSelectedInField(label, context) == 0 ? 0x8000 : 0;
+        func_00279860(context);
+    }
+    if (buttons & 2) {
+        func_002858E8(popup, D_0037CC58);
+        mnuClearListFlags(1, window);
+    }
+    mnuPlayInputSound(0, buttons, 0);
+    return 0;
+}
+
+s64 func_00279A30(s32 callback) {
+    s32 context = func_00101A70();
+    SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
+    func_00272778(callback);
+    mnuCreateStaffImageSprite(3);
+    func_00272518(1, menu->selected->list->cursor->sortKey, D_003BAA98, context, 1, 1, 0x53);
+    menu->selected->list->flags &= ~8;
+    func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+    func_002723B0(0, ((SkillMenuContext *)context)->actor);
+    return menuRunPanel(context, 1, callback);
+}
 
 void func_00279AF8(s32 selection) {
     s32 context = func_00101A70();
@@ -33,22 +236,11 @@ extern void mnuSelectPage(void *, u32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
-/* Selected party slot is reached through the menu's list at +0x7D8. */
-typedef struct SkillMenuSelection {
-    u8 pad00[0x1C];
-    u32 *index;          /* 0x1C */
-} SkillMenuSelection;
-
-typedef struct SkillMenuContext {
-    u8 pad00[0x7D8];
-    SkillMenuSelection *selection; /* 0x7D8 */
-} SkillMenuContext;
-
 s32 func_00279B30(s32 menu) {
     u8 *ctx = (u8 *)func_00101A70();
     u32 *panel = (u32 *)(ctx + 0x15C);
 
-    mnuSelectPage(panel, *((SkillMenuContext *)ctx)->selection->index);
+    mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
     *panel |= 0x400;
     ptySkillMenuBuildEquippedSlots(0, menu);
     ptySkillMenuInitPages(ctx);
