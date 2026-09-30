@@ -102,7 +102,39 @@ void mnuStopResourceTask(void) {
     D_003BC4CC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F800);
+/* One of the two 0x14-byte slots of a mantra source entry. */
+typedef struct {
+    s32 value;      /* 0x00 */
+    u8 pad04[8];
+    u32 unk0C;      /* 0x0C */
+    u8 pad10[4];
+} MnuSourceSlot;
+
+/* Mantra source entry behind func_002CE9E0 (0x54 bytes). */
+typedef struct {
+    u8 pad00[0x2C];
+    u32 unk2C;             /* 0x2C */
+    u8 pad30[4];
+    MnuSourceSlot slot[2]; /* 0x34 */
+} MnuSourceEntry;
+
+extern MnuSourceEntry *func_002CE9E0(u16 index);
+
+/* Pick the value of the first active slot, preferring slot 0. */
+s32 func_0024F800(u16 index) {
+    s32 result = 0;
+    MnuSourceEntry *entry = func_002CE9E0(index);
+    s32 slot = 0;
+
+    if (entry->unk2C & 0x20) {
+        slot = 0;
+    } else if (entry->slot[0].unk0C & 0x20) {
+        slot = 1;
+    } else {
+        return result;
+    }
+    return entry->slot[slot].value;
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
 
