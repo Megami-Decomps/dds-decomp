@@ -74,6 +74,12 @@ typedef struct FileRecordSlots {
     u32 handle;
 } FileRecordSlots;
 
+/* The record's signed +0x54 mode is consumed by every billboard opener. */
+typedef struct FileBillboardRecord {
+    u8 pad0[0x54];
+    s16 mode; /* 0x54 */
+} FileBillboardRecord;
+
 typedef struct FileRecordType {
     void (*acquire)(void *);
     u32 unk4;
@@ -478,7 +484,8 @@ typedef struct LoadObj {
     void *owner;        /* 0x00 */
     u32 color;          /* 0x04 */
     f32 scale;          /* 0x08 */
-    u8 unkC[0x28];     /* 0x0C */
+    u32 selector;       /* 0x0C: secondary job buffer operation */
+    u8 pad10[0x24];
     void *deviceHandle; /* 0x34 */
     u32 unk38;          /* 0x38 */
     u32 unk3C;          /* 0x3C */
@@ -698,11 +705,11 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A5E8);
 INCLUDE_ASM(const s32, "game/code_0028A0E0", fileShowStatusDialog);
 
 void func_0028AB30(u32 arg0) {
-    s32 temp_v0;
+    s32 previous;
 
-    temp_v0 = D_003BC850;
+    previous = D_003BC850;
     D_003BC850 = arg0;
-    if (temp_v0 == 0) {
+    if (previous == 0) {
         D_003BC860 = 0;
     }
 }
@@ -888,10 +895,10 @@ u32 fileAbortSlotFlow(void) {
 }
 
 u32 mcdEnterDefaultFileFlow(void) {
-    u32 temp_v0 [4];
+    u32 mode[4];
 
-    temp_v0[0] = 0;
-    func_001028E8(2, temp_v0, 4, 0);
+    mode[0] = 0;
+    func_001028E8(2, mode, 4, 0);
     return 0;
 }
 
@@ -2072,9 +2079,20 @@ s32 func_002913B8(void) {
     return 0;
 }
 
+/* Save/config task context: its four resource slots start at +0x10. */
+typedef struct FileConfigTask {
+    u8 pad0[0xC];
+    u32 frame;      /* 0x0C: passed to menu window drawing */
+    u32 slots[4];   /* 0x10 */
+    u8 pad20[4];
+    s32 result;     /* 0x24: negative when the queued load failed */
+    u8 pad28[0xC];
+    u32 pending;    /* 0x34: zero when no load can start */
+} FileConfigTask;
+
 u32 func_002913F0(s32 arg0) {
     if (arg0 < 4) {
-        return *(u32 *)((s32)arg0 * 4 + D_003BD938 + 0x10);
+        return ((FileConfigTask *)D_003BD938)->slots[arg0];
     }
     return 0;
 }
@@ -2086,25 +2104,25 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29E8);
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00291418);
 
 s32 fileStartQueuedLoad(void) {
-    if (*(u32 *)(D_003BD938 + 0x34) == 0) {
+    if (((FileConfigTask *)D_003BD938)->pending == 0) {
         return 0;
     }
-    if (*(s32 *)(D_003BD938 + 0x24) < 0) {
+    if (((FileConfigTask *)D_003BD938)->result < 0) {
         return -1;
     }
     func_00292720((void *)D_003BD938);
-    mnuCallInitWide(0x400, 0x400, 0, *(u32 *)(D_003BD938 + 0xC), 0x53);
+    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)D_003BD938)->frame, 0x53);
     return 0;
 }
 
 u32 func_002918D8(void) {
-    u32 temp_v0;
+    u32 result;
 
-    temp_v0 = 0xffffffff;
-    if ((*(u32 *)(D_003BD938 + 0x24) & 0x80000000) == 0) {
-        temp_v0 = 0;
+    result = 0xffffffff;
+    if ((((FileConfigTask *)D_003BD938)->result & 0x80000000) == 0) {
+        result = 0;
     }
-    return temp_v0;
+    return result;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002918F8);
@@ -2231,9 +2249,9 @@ FileJob *fileJobCreateFromJob(FileJob *request) {
 }
 
 void fileJobDestroy(FileJob *job) {
-    void *data = *(void **)((u8 *)job + 8);
+    void *data = job->data;
     if (data != NULL) {
-        u16 index = *(u16 *)((u8 *)job + 4);
+        u16 index = job->type;
         D_0037E148[index].destroy(data);
     }
     fileJobFreePrimaryBuffer(job);
@@ -2277,49 +2295,49 @@ void fileJobNotifyPair(FileJob *left, FileJob *right) {
 }
 
 void fileJobNotifyComplete(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    u16 idx = ((FileJob *)arg0)->type;
     void (*cb)(void *) = D_0037E14C[idx].cb10;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8));
+        cb(((FileJob *)arg0)->data);
     }
 }
 
 void func_002936A8(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
-    void *data = *(void **)((u8 *)arg0 + 8);
+    u16 idx = ((FileJob *)arg0)->type;
+    void *data = ((FileJob *)arg0)->data;
 
     D_0037E14C[idx].cb(data);
 }
 
 void func_002936E0(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    u16 idx = ((FileJob *)arg0)->type;
     void (*cb)(void *) = D_0037E14C[idx].cb14;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8));
+        cb(((FileJob *)arg0)->data);
     }
 }
 
 void func_00293720(void *arg0, void *extra) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    u16 idx = ((FileJob *)arg0)->type;
     void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8), extra);
+        cb(((FileJob *)arg0)->data, extra);
     }
 }
 
 void func_00293760(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    u16 idx = ((FileJob *)arg0)->type;
     void (*cb)(void *) = D_0037E14C[idx].cb1C;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8));
+        cb(((FileJob *)arg0)->data);
     }
 }
 
 void func_002937A0(void *arg0) {
-    u16 idx = *(u16 *)((u8 *)arg0 + 4);
+    u16 idx = ((FileJob *)arg0)->type;
     void (*cb)(void *) = D_0037E14C[idx].cb20;
     if (cb != NULL) {
-        cb(*(void **)((u8 *)arg0 + 8));
+        cb(((FileJob *)arg0)->data);
     }
 }
 
@@ -2340,20 +2358,20 @@ void fileJobSetPrimaryData(job, src, size, option)
 }
 
 void func_00293880(u64 arg0, u64 arg1, u16 arg2) {
-    s64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
-    u64 temp_v3;
+    s64 command;
+    u64 size;
+    u64 handle;
+    u64 address;
 
-    temp_v0 = sdfDevCreateCommandState(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = func_002E5C88(temp_v0);
-        temp_v2 = func_002D03F8(temp_v1);
-        temp_v3 = sdfResourceRetainAddress(temp_v2);
-        func_002E5C68(temp_v0, temp_v3, temp_v1);
-        func_002E5C38(temp_v0);
-        fileJobSetPrimaryData(arg0, temp_v3, temp_v1, arg2);
-        func_002D0918(temp_v2);
+    command = sdfDevCreateCommandState(arg1);
+    if (command != 0) {
+        size = func_002E5C88(command);
+        handle = func_002D03F8(size);
+        address = sdfResourceRetainAddress(handle);
+        func_002E5C68(command, address, size);
+        func_002E5C38(command);
+        fileJobSetPrimaryData(arg0, address, size, arg2);
+        func_002D0918(handle);
         return;
     }
 }
@@ -2375,20 +2393,20 @@ void fileJobSetSecondaryData(job, src, size, selector)
 }
 
 void func_00293A00(u64 arg0, u64 arg1, u16 arg2) {
-    s64 temp_v0;
-    u64 temp_v1;
-    u64 temp_v2;
-    u64 temp_v3;
+    s64 command;
+    u64 size;
+    u64 handle;
+    u64 address;
 
-    temp_v0 = sdfDevCreateCommandState(arg1);
-    if (temp_v0 != 0) {
-        temp_v1 = func_002E5C88(temp_v0);
-        temp_v2 = func_002D03F8(temp_v1);
-        temp_v3 = sdfResourceRetainAddress(temp_v2);
-        func_002E5C68(temp_v0, temp_v3, temp_v1);
-        func_002E5C38(temp_v0);
-        fileJobSetSecondaryData(arg0, temp_v3, temp_v1, arg2);
-        func_002D0918(temp_v2);
+    command = sdfDevCreateCommandState(arg1);
+    if (command != 0) {
+        size = func_002E5C88(command);
+        handle = func_002D03F8(size);
+        address = sdfResourceRetainAddress(handle);
+        func_002E5C68(command, address, size);
+        func_002E5C38(command);
+        fileJobSetSecondaryData(arg0, address, size, arg2);
+        func_002D0918(handle);
         return;
     }
 }
@@ -2782,7 +2800,7 @@ LoadObj *loadObjectCreateFromJob(FileJob *job) {
             fileReplaceReferenceHolder((s32)obj, (u32)secondary);
             break;
         }
-        *(u32 *)((u8 *)obj + 0xC) = job->slots[0].selector;
+        obj->selector = job->slots[0].selector;
     }
     return obj;
 }
@@ -2792,7 +2810,7 @@ void loadObjectDestroy(LoadObj *obj) {
         billDispatchByKind(obj->deviceHandle);
     }
     if (obj->unk3C != 0) {
-        u32 count = *(u32 *)((u8 *)obj->recordWork + 8);
+        u32 count = ((FileRecordSlots *)obj->recordWork)->count;
         u32 i;
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJob **)obj->unk38)[i]);
@@ -2817,7 +2835,7 @@ LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
 }
 
 void func_002961B0(LoadObj *dst, LoadObj *src) {
-    u32 selector = *(u32 *)((u8 *)src + 0xC);
+    u32 selector = src->selector;
 
     switch (selector) {
     case 1:
@@ -2829,12 +2847,12 @@ void func_002961B0(LoadObj *dst, LoadObj *src) {
         dst->deviceHandle = func_00151E60(src->deviceHandle);
         func_001523B0(dst->deviceHandle);
         if (dst->recordWork != NULL) {
-            void *record = *(void **)((u8 *)dst->recordWork + 0x20);
-            effBillSetMode(dst->deviceHandle, *(s16 *)((u8 *)record + 0x54));
+            FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)dst->recordWork)->data0;
+            effBillSetMode(dst->deviceHandle, record->mode);
         }
         break;
     case 5: {
-        u32 count = *(u32 *)((u8 *)src->recordWork + 8);
+        u32 count = ((FileRecordSlots *)src->recordWork)->count;
         s32 size;
         u32 i;
 
@@ -2867,7 +2885,7 @@ void func_002961B0(LoadObj *dst, LoadObj *src) {
         dst->referenceHolder = func_0029C408(src->referenceHolder);
         break;
     }
-    *(u32 *)((u8 *)dst + 0xC) = *(u32 *)((u8 *)src + 0xC);
+    dst->selector = src->selector;
 }
 
 void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
@@ -2885,8 +2903,8 @@ void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
     handle = effRetainResource(name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
-        effBillSetMode(handle, *(s16 *)((u8 *)record + 0x54));
+        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
+        effBillSetMode(handle, record->mode);
     }
 }
 
@@ -2898,8 +2916,8 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     handle = billCreateIndexed(0, name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
-        effBillSetMode(handle, *(s16 *)((u8 *)record + 0x54));
+        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
+        effBillSetMode(handle, record->mode);
     }
 }
 
@@ -2910,13 +2928,13 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     obj->deviceHandle = billCreateIndexed(1, name);
     func_001523B0(obj->deviceHandle);
     if (obj->recordWork != NULL) {
-        void *record = *(void **)((u8 *)obj->recordWork + 0x20);
-        effBillSetMode(obj->deviceHandle, *(s16 *)((u8 *)record + 0x54));
+        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
+        effBillSetMode(obj->deviceHandle, record->mode);
     }
 }
 
 void func_00296530(LoadObj *obj, FileJob *job) {
-    u32 count = *(u32 *)((u8 *)obj->recordWork + 8);
+    u32 count = ((FileRecordSlots *)obj->recordWork)->count;
     u32 i;
     s32 size;
 
@@ -3182,7 +3200,7 @@ void *func_0029A5E0(u16 type, u32 count, void *data) {
 }
 
 void func_0029A730(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 + 0x28));
+    func_002D0918(((FileRecordSlots *)arg0)->handle);
 }
 
 void fileClearRecordReferences(FileRecordSlots *record) {

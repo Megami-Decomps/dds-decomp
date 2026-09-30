@@ -24,9 +24,9 @@ void func_00270030(void);
 void func_00270068(void);
 
 typedef struct EventViewerState {
-    u8 pad0[4];
+    u32 resourceHandle; /* 0x00 */
     u32 flags;
-    s32 unk8;
+    s32 windowContext;  /* 0x08: owns the message-window handle at +0x104 */
     u8 padC[8];
     s32 glyphAdvanceLimit;    /* 0x14 */
     s32 glyphAdvancePosition; /* 0x18 */
@@ -50,7 +50,13 @@ typedef struct EventViewerState {
     s32 unk22AC;
     u8 pad22B0[4];
     s32 unk22B4;
-    u8 pad22B8[0x50];
+    u8 pad22B8[0x14];
+    s32 commandResetA; /* 0x22CC: cleared on command mode three */
+    s32 commandResetB; /* 0x22D0 */
+    u8 commandResetC;  /* 0x22D4 */
+    u8 pad22D5[0xB];
+    u8 commandResetD;  /* 0x22E0 */
+    u8 pad22E1[0x27];
     struct EvtViewSel *sel; /* 0x2308 */
     u8 pad230C[4];
     u32 commandValue; /* 0x2310: value of the active command */
@@ -73,6 +79,9 @@ typedef struct EventViewerState {
     u8 slotFlag; /* 0x2421 */
     u8 pad2422[2];
     f32 slotValue; /* 0x2424 */
+    s32 pendingWork;  /* 0x2428: reset when pendingResource is released */
+    s32 pendingResource; /* 0x242C */
+    u8 pad2430[0x60]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
 typedef struct EvtViewSel {
@@ -165,6 +174,30 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E5A0);
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
 
+/* The viewer follows two lists within the same world layer. These partial
+ * layouts name only offsets traversed here; the owning world remains opaque. */
+typedef struct EvtWorldRoot {
+    u8 pad0[0x18];
+    s32 scene; /* 0x18 */
+} EvtWorldRoot;
+
+typedef struct EvtWorldScene {
+    u8 pad0[8];
+    s32 layer; /* 0x08 */
+} EvtWorldScene;
+
+typedef struct EvtWorldLayer {
+    u8 pad0[0x28];
+    s32 movieObjects; /* 0x28 */
+    u8 pad2C[0x14];
+    s32 groupObjects; /* 0x40 */
+} EvtWorldLayer;
+
+typedef struct EvtWorldLink {
+    u8 pad0[0x20];
+    s32 next; /* 0x20 */
+} EvtWorldLink;
+
 void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
     s32 scene;
     s32 world;
@@ -173,11 +206,11 @@ void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
     s32 time;
 
     if (dds3GetWorldObject() != 0) {
-        scene = *(s32 *)(dds3GetWorldObject() + 0x18);
+        scene = ((EvtWorldRoot *)dds3GetWorldObject())->scene;
         if (scene != 0) {
-            world = *(s32 *)(scene + 8);
+            world = ((EvtWorldScene *)scene)->layer;
             if (world != 0) {
-                object = *(s32 *)(world + 0x28);
+                object = ((EvtWorldLayer *)world)->movieObjects;
                 if (object != 0) {
                     do {
                         node = viewer->nodes;
@@ -196,7 +229,7 @@ void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
                             }
                             node = node->next;
                         }
-                        object = *(s32 *)(object + 0x20);
+                        object = ((EvtWorldLink *)object)->next;
                     } while (object != 0);
                 }
             }
@@ -214,7 +247,7 @@ void evtViewerSyncWorldGroups(s32 arg0, EventViewerState *viewer) {
     EvtViewNode *found;
 
     if (dds3GetWorldObject() != 0) {
-        object = *(s32 *)(*(s32 *)(*(s32 *)(dds3GetWorldObject() + 0x18) + 8) + 0x40);
+        object = ((EvtWorldLayer *)((EvtWorldScene *)((EvtWorldRoot *)dds3GetWorldObject())->scene)->layer)->groupObjects;
         if (object != 0) {
             do {
                 node = viewer->nodes;
@@ -229,7 +262,7 @@ void evtViewerSyncWorldGroups(s32 arg0, EventViewerState *viewer) {
                 if (found != NULL) {
                     func_0022EB10(arg0, object, node, viewer, 0);
                 }
-                object = *(s32 *)(object + 0x20);
+                object = ((EvtWorldLink *)object)->next;
             } while (object != 0);
         }
     }
@@ -445,10 +478,10 @@ void func_0022FF30(s32 mode, s32 arg1, s32 arg2, s32 viewerAddr) {
     if (mode > 0) {
         if (mode >= 3) {
             if (mode == 3) {
-                *(s32 *)((u8 *)viewer + 0x22CC) = 0;
-                *(s32 *)((u8 *)viewer + 0x22D0) = 0;
-                *(u8 *)((u8 *)viewer + 0x22D4) = 0;
-                *(u8 *)((u8 *)viewer + 0x22E0) = 0;
+                viewer->commandResetA = 0;
+                viewer->commandResetB = 0;
+                viewer->commandResetC = 0;
+                viewer->commandResetD = 0;
             }
         }
     }
@@ -475,7 +508,7 @@ void func_002300B8(s32 arg0) {
     s32 v0;
     s32 v1;
 
-    v0 = *(s32 *)(arg0 + 8);
+    v0 = ((EventViewerState *)arg0)->windowContext;
     if (v0 == 0) {
         return;
     }
@@ -484,14 +517,14 @@ void func_002300B8(s32 arg0) {
         return;
     }
     itfMesCleanupWindow(v1, 1);
-    v0 = *(s32 *)(arg0 + 8);
+    v0 = ((EventViewerState *)arg0)->windowContext;
     func_0019B4A0(*(s32 *)(v0 + 0x104));
-    v0 = *(s32 *)(arg0 + 8);
+    v0 = ((EventViewerState *)arg0)->windowContext;
     itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
-    v0 = *(s32 *)(arg0 + 8);
+    v0 = ((EventViewerState *)arg0)->windowContext;
     itfMesResetWindow(*(s32 *)(v0 + 0x104));
     ((EventViewerState *)arg0)->windowActive = 0;
-    *(u8 *)(arg0 + 0x23c4) = 0;
+    ((EventViewerState *)arg0)->pad23C4 = 0;
 }
 
 void func_00230128(EventViewerState *viewer) {
@@ -729,8 +762,8 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
 u32 func_002323E8(u32 arg0, u32 arg1, u32 arg2) {
     if (func_0022BE40(arg2) != 0) {
-        *(s32 *)(arg2 + 0x22ac) = 0;
-        *(s32 *)(arg2 + 0x22b4) = 0;
+        ((EventViewerState *)arg2)->unk22AC = 0;
+        ((EventViewerState *)arg2)->unk22B4 = 0;
         func_0022FF30(0xa, 0x9c, 0x54, arg2);
         return 0;
     }
@@ -749,7 +782,7 @@ void *func_002329A0(s32 task) {
     void *viewer;
 
     viewer = func_00101A70();
-    func_0022E5A0(*(s32 *)((u8 *)viewer + 0x18), viewer);
+    func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     D_003BA904 |= 0x2000000;
     return (void *)func_00232720;
@@ -798,19 +831,19 @@ void evtViewerReleaseResources(viewer)
     func_0014A298(0);
     func_00105888();
     D_00324590[0] = D_00324590[1] = D_00324590[2] = D_00324590[3] = 0.0f;
-    if (*(s32 *)((u8 *)viewer + 0x2414) == 1) {
+    if (viewer->timedActive == 1) {
         func_00270030();
-        *(s32 *)((u8 *)viewer + 0x2414) = 0;
+        viewer->timedActive = 0;
     }
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     evtDestroySecondaryWorldNode();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    if (*(s32 *)((u8 *)viewer + 0x242C) != 0) {
-        func_002D0A10(*(s32 *)((u8 *)viewer + 0x242C));
-        *(s32 *)((u8 *)viewer + 0x242C) = 0;
-        *(s32 *)((u8 *)viewer + 0x2428) = 0;
+    if (viewer->pendingResource != 0) {
+        func_002D0A10(viewer->pendingResource);
+        viewer->pendingResource = 0;
+        viewer->pendingWork = 0;
     }
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
@@ -819,7 +852,7 @@ void evtViewerReleaseResources(viewer)
     }
     func_0022C4F0(viewer);
     func_0022C478(viewer);
-    func_002D0918(*(s32 *)viewer);
+    func_002D0918(viewer->resourceHandle);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_00134CF0();
