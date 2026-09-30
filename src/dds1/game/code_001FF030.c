@@ -3799,9 +3799,33 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6018);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020AFB8);
+/* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
+   file: retail's func_0020C9E8 sees it as nothrow (bnez vs bnel in the branch slot). */
+void func_0020AFB8(unit)
+    u8 *unit;
+{
+    u32 kind;
 
-extern void func_0020AFB8();
+    btlFlagAllUnitDefeatCandidatesTask();
+    kind = effMiscRandMod(0, 3);
+    switch (kind) {
+    case 0:
+        func_003003F0(D_003A5FF0);
+        btlSetEffectCameraKeys(unit, -34.8f, -203.4f, -1877.1f, -0.042f, 0.006f, -0.012f, 0.99f, 59.4f, -184.8f, -2072.9f,
+                      -0.041f, 0.024f, -0.013f, 0.99f, 40.0f, 20.0f);
+        break;
+    case 1:
+        func_003003F0(D_003A6018);
+        btlSetEffectCameraKeys(unit, -391.6f, -567.8f, -2206.8f, 0.032f, -0.062f, -0.014f, 0.989f, -407.1f, -447.8f, -2343.8f,
+                      -0.003f, -0.062f, -0.012f, 0.989f, 40.0f, 20.0f);
+        break;
+    case 2:
+        func_003003F0("A-E:2++++++++++++++++++++++++++\n");
+        btlSetEffectCameraKeys(unit, 479.7f, -240.2f, -2018.3f, -0.023f, 0.105f, -0.016f, 0.985f, 552.2f, -250.7f, -2300.2f,
+                      -0.023f, 0.105f, -0.016f, 0.985f, 40.0f, 20.0f);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B190);
 
@@ -3876,7 +3900,32 @@ typedef struct BtlActionTableRow {
     u8 pad1E[2];
 } BtlActionTableRow;
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_0020C9E8);
+s32 func_0020C9E8(u8 *unit) {
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
+    if (flags & 0x1000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        if (!(flags & 0x10)) {
+            func_0020AFB8(unit);
+        } else {
+            btlSetEffectCameraKeys(unit, 59.2f, -700.6f, -1901.2f,
+                           0.092f, 0.023f, -0.009f, 0.987f,
+                           59.2f, -160.6f, -1901.2f, -0.106f,
+                           0.025f, -0.014f, 0.985f, 45.0f, 30.0f);
+        }
+        return 1;
+    } else if (flags & 0x2000) {
+        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
+            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->unk_60, 0);
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_0020B190(unit, other);
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_0020AFB8(unit);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 u32 func_0020CB28(s32 action) {
     u32 result;
