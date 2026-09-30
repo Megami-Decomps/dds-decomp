@@ -236,6 +236,16 @@ typedef struct {
     u32 key;        /* 0xE4 */
 } EffCmdWork;
 
+typedef struct FldSceneParamRow {
+    s32 unk0;
+    s16 unk4;
+    s16 unk6;
+    s32 unk8;
+    s32 unkC;
+} FldSceneParamRow; /* 0x10 bytes */
+
+extern FldSceneParamRow D_003A8EB0[];
+
 extern void func_0014BF98(s32 handle);
 
 extern s32 func_0023CC00(s32 param);
@@ -3945,19 +3955,31 @@ s32 fldSetFlagFromWorld2(void) {
     return 1;
 }
 
-typedef struct FldSceneParamRow {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s32 unk8;
-    s32 unkC;
-} FldSceneParamRow; /* 0x10 bytes */
-
-extern FldSceneParamRow D_003A8EB0[];
-
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldCmdPushSceneParam);
+s32 fldCmdPushSceneParam(void) {
+    s32 room;
+
+    room = fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key);
+    switch (scrReadIntParameter(0)) {
+    case 0:
+        func_0010D818(D_003A8EB0[room].unk0);
+        break;
+    case 1:
+        func_0010D818(D_003A8EB0[room].unk4);
+        break;
+    case 2:
+        func_0010D818(D_003A8EB0[room].unk6);
+        break;
+    case 3:
+        func_0010D818(D_003A8EB0[room].unk8);
+        break;
+    case 4:
+        func_0010D818(D_003A8EB0[room].unkC);
+        break;
+    }
+    return 1;
+}
 
 u32 fldCmdActivateTaskRoomObject(void) {
     s32 task;
