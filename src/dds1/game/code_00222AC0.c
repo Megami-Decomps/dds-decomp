@@ -65,7 +65,7 @@ typedef struct {
 extern Entry270 *D_003BAA20;
 
 extern void *dds3GetWorldObject(void);
-extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
+extern void effObjSetInnerThirdVec(void *object, void *vector);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
@@ -129,7 +129,7 @@ extern s32 func_00222298(EvtUnit *unit);
 extern void func_00115970(void *arg0);
 extern void func_00110928(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
-extern void func_00222B70(EvtUnit *work, s32 arg1, s128 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+extern void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7);
 extern void dds3FreePathObject(s32);
 extern s32 func_00116D38(void *);
 extern void func_00116F38(s32);
@@ -140,25 +140,25 @@ extern void func_002E7F20(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
 
-extern void dds3SetObjectFlags(void *arg0, s32 arg1);
-extern void dds3ClearObjectFlags(void *arg0, s32 arg1);
+extern void dds3SetObjectFlags(void *object, s32 flags);
+extern void dds3ClearObjectFlags(void *object, s32 flags);
 extern void func_00113478(void *arg0);
 extern void func_00113438(void *arg0, s32 arg1);
 extern s32 func_0010D6A0(void);
 extern void func_0010AC10(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
-extern s32 evtFindTaskById(s32 arg0);
+extern s32 evtFindTaskById(s32 taskId);
 extern void func_00101A80(s32 arg0, s32 arg1);
 extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_00222340(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_003003F0();
 extern u8 D_003AC480[];
-extern void evtSetUnitValueTransition(EvtUnit *unit, void *arg1, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
 extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void func_00115318(void *arg0, u32 arg1);
-extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
+extern void effObjSetInnerFirstVec(void *object, void *vector);
 extern f32 bfWaitReadArgFloat(s32 idx);
 
 /* World object views used by the model-parameter opcodes. */
@@ -239,11 +239,11 @@ typedef struct EvtLodUnit {
 
 extern s32 sdfGetLodChunkValue();
 extern s32 scrGetWindow(void);
-extern void func_0019CB98(s32 arg0, void (*arg1)(void));
+extern void func_0019CB98(s32 window, void (*callback)(void));
 extern void func_00222300(EvtUnit *unit, s32 arg1, s32 arg2);
 extern s32 scrReadStringParameter(s32 idx);
 extern void *func_00115858(s32 arg0, s32 arg1);
-extern void effObjSetFlags(void *arg0, s32 arg1);
+extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00114FA0(s32 arg0, void *arg1, void *arg2);
 extern u8 D_003AC520[];
 extern void *func_001152B0(s32 arg0, void *arg1, void *arg2);
@@ -281,30 +281,30 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
     }
 }
 
-void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_00222B70(EvtUnit *work, s32 arg1, s128 *vector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
     work->unkB0 = arg1;
     work->unkAC = 1;
     work->unkAE = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(&work->unk70, vector);
-    work->unkB4 = arg4;
+    work->unkB4 = frames;
     work->unkB6 = arg5;
     work->unk94 = arg6;
     work->unkB2 = 0;
 }
 
-void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_00222BA8(EvtUnit *work, s32 arg1, s32 objectId, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
     EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222B70(work, arg1, worldUnit->transform, arg3, arg4, arg5, arg6, arg7);
+        func_00222B70(work, arg1, worldUnit->transform, arg3, frames, arg5, arg6, arg7);
         work->unkAE = 1;
         work->linkedUnit = worldUnit;
     }
 }
 
-void func_00222C68(EvtUnit *work, s32 objectId, s32 arg2, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
+void func_00222C68(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
     void *pathSource;
     s32 path;
 
@@ -363,17 +363,17 @@ void func_00222C68(EvtUnit *work, s32 objectId, s32 arg2, s32 arg3, s32 mode, s3
     work->linkedUnit = pathSource;
     func_00116F38(path);
     VU0_STORE_VF($vf10, &work->unk70);
-    work->unkB4 = arg2;
+    work->unkB4 = frames;
     work->unkB6 = arg3;
     work->unk94 = 0;
     work->unkB2 = 0;
 }
 
-s32 func_00222EB0(EvtUnit *work, s32 arg1) {
+s32 func_00222EB0(EvtUnit *work, s32 value) {
     s32 ret = 0;
 
-    if (arg1 != 0) {
-        work->unk94 = arg1;
+    if (value != 0) {
+        work->unk94 = value;
         work->unkB2 = 0;
         work->unkAC = 4;
         ret = 1;
@@ -980,11 +980,11 @@ u32 func_00224880(void) {
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = scrReadIntParameter(2);
-        s32 arg2 = scrReadIntParameter(1);
-        s32 arg3 = scrReadIntParameter(3);
+        s32 mode = scrReadIntParameter(2);
+        s32 objectId = scrReadIntParameter(1);
+        s32 frames = scrReadIntParameter(3);
         s32 arg4 = scrReadIntParameter(4);
-        func_00222BA8(unit, arg1, arg2, -1, arg3, arg4, 0, 0);
+        func_00222BA8(unit, mode, objectId, -1, frames, arg4, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         func_002227C8(unit);
@@ -1001,13 +1001,13 @@ u32 func_00224948(void) {
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(5);
+        s32 objectId = scrReadIntParameter(1);
+        s32 frames = scrReadIntParameter(5);
         s32 arg3 = scrReadIntParameter(6);
         s32 arg4 = scrReadIntParameter(2);
         s32 arg5 = scrReadIntParameter(4);
         s32 arg6 = scrReadIntParameter(3);
-        func_00222C68(unit, arg1, arg2, arg3, arg4, arg5, arg6);
+        func_00222C68(unit, objectId, frames, arg3, arg4, arg5, arg6);
     }
     return 1;
 }

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0023D5B0(s32 arg0, void * arg1, s32 arg2);
+extern void func_0023D5B0(s32 output, void *data, s32 size);
 
 extern void *func_00101A70();
 extern s32 func_0018FDA8(void);
@@ -8,20 +8,20 @@ extern s32 func_002E92C0(s32 arg0);
 extern void func_002E9340(s32 arg0);
 extern s32 func_00235540(s32 *task);
 extern s32 evtAllocateContext(void);
-extern void evtSetConvertedContextValue(s32 arg0, s32 arg1);
+extern void evtSetConvertedContextValue(s32 context, s32 value);
 extern void func_002351E0(void);
 extern void func_00235228(void);
 extern s32 evtFindTaskById();
 extern void func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 arg0, void *arg1);
-extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern void kwlnTaskCreate(void *name, s32 taskId, s32, s32, void *update, void *destroy, void *data);
 extern void *memset(void *, s32, u32);
-extern void effObjSetFlags(void *arg0, s32 arg1);
+extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
 extern void func_00190308(void *target, f32 scale);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
-extern void fldSetSwayMode(s32 arg0);
+extern void fldSetSwayMode(s32 mode);
 extern void func_00132B70(s32 arg0);
 extern void func_00132B80(s32 arg0);
 extern s16 func_00132B90(void);
@@ -29,14 +29,14 @@ extern void fldSetFadeTarget(s32 arg0, s32 arg1, s32 arg2);
 extern void func_00132010(void);
 extern void func_00129720(s32 arg0);
 extern void func_0012AEB0(void);
-extern void sdfAppendPacket(s32 arg0, s32 arg1);
-extern void sndStartTrackDefault(s32 arg0);
-extern void sndStartTrackExtended(s32 arg0);
+extern void sdfAppendPacket(s32 list, s32 packet);
+extern void sndStartTrackDefault(s32 track);
+extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 arg0);
 extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 arg0);
 extern void func_002E8DD0(u32 arg0);
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern s32 func_002E4960();
 extern u32 itfMesGetEntryCount(s32 window);
 extern u8 D_003BBF80[];
@@ -224,8 +224,8 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235598);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
-s32 func_00235768(s32 arg0, s32 arg1, s32 arg2) {
-    sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+s32 func_00235768(s32 list, s32 x, s32 y) {
+    sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -233,8 +233,8 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_002357B8);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00235978);
 
-s32 func_00235AE0(s32 arg0, s32 arg1, s32 arg2) {
-    sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+s32 func_00235AE0(s32 list, s32 x, s32 y) {
+    sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -331,9 +331,9 @@ extern void func_00236180();
 extern void func_00237130();
 extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 
-s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
-    func_00235598(packets, arg0, arg1, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
+    func_00235598(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 1) {
         return 0;
@@ -369,7 +369,7 @@ s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtDrawWork *work) {
     return 2;
 }
 
-void func_00236510(s32 arg0, s32 arg1, s32 arg2, s32 index, EvtDrawWork *work) {
+void func_00236510(s32 list, s32 x, s32 y, s32 index, EvtDrawWork *work) {
     s32 color;
 
     if (index < work->unk22C0) {
@@ -378,11 +378,11 @@ void func_00236510(s32 arg0, s32 arg1, s32 arg2, s32 index, EvtDrawWork *work) {
         } else {
             color = 0;
         }
-        sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, color, D_003BC090, work->unk22C8[index]));
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, color, D_003BC090, work->unk22C8[index]));
     }
 }
 
-s32 func_002365A0(s32 arg0, s32 arg1, EvtDrawWork *work) {
+s32 func_002365A0(s32 x, s32 y, EvtDrawWork *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 width = 10;
 
@@ -392,7 +392,7 @@ s32 func_002365A0(s32 arg0, s32 arg1, EvtDrawWork *work) {
             width = 6;
         }
     }
-    func_00235598(packets, arg0, arg1, width, work->unk22C0 + 3, 0, work->unk22C0, (u8 *)work, evtDrawStringEntry, func_00236510);
+    func_00235598(packets, x, y, width, work->unk22C0 + 3, 0, work->unk22C0, (u8 *)work, evtDrawStringEntry, func_00236510);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (work->unk2280 != 2) {
         return 0;
@@ -402,8 +402,8 @@ s32 func_002365A0(s32 arg0, s32 arg1, EvtDrawWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002366A0);
 
-void func_00236728(s32 arg0, s32 arg1, s32 arg2, s32 row, EvtDrawWork *work) {
-    s32 x = arg1 + 0xC0;
+void func_00236728(s32 list, s32 xPosition, s32 y, s32 row, EvtDrawWork *work) {
+    s32 x = xPosition + 0xC0;
     u8 *table = &D_003688B8[row * 0xC];
     s32 i = 0;
     s32 color;
@@ -419,7 +419,7 @@ void func_00236728(s32 arg0, s32 arg1, s32 arg2, s32 row, EvtDrawWork *work) {
         drawX = x;
         x += 0xC0;
         i++;
-        sdfAppendPacket(arg0, func_002E4960(drawX, arg2, 0xFEFFFF, color, D_003BC0A0, ch));
+        sdfAppendPacket(list, func_002E4960(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
     } while (i < 0xB);
 }
 
@@ -448,12 +448,12 @@ void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
-s32 func_00237348(s32 arg0, s32 arg1, u8 *work) {
+s32 func_00237348(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
     s32 shown;
 
-    func_00235598(packets, arg0, arg1, 8, 0x1D, ((EvtRuntime *)work)->entryFirst, ((EvtRuntime *)work)->entryCount, work, 0, func_00237130);
+    func_00235598(packets, x, y, 8, 0x1D, ((EvtRuntime *)work)->entryFirst, ((EvtRuntime *)work)->entryCount, work, 0, func_00237130);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 4) {
         return 0;
@@ -497,7 +497,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00238BE8);
 
 extern void func_00238BE8();
 
-s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 rows;
     switch (*((EvtRuntime *)work)->tableRowIndex) {
@@ -510,7 +510,7 @@ s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     default:
         return -1;
     }
-    func_00235598(packets, arg0, arg1, 0x1C, rows, 0, rows, work, 0, func_00238BE8);
+    func_00235598(packets, x, y, 0x1C, rows, 0, rows, work, 0, func_00238BE8);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 0xC) {
         return 0;
@@ -518,9 +518,9 @@ s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
 }
 
-s32 mnuDrawMessageMenuLabel(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
-    s32 count = itfMesGetEntryCount(*(s32 *)(*(s32 *)(arg3 + 8) + 0x104));
-    sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
+s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, u8 *work) {
+    s32 count = itfMesGetEntryCount(*(s32 *)(*(s32 *)(work + 8) + 0x104));
+    sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
 
@@ -565,8 +565,8 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_002393A0);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002395A8);
 
-s32 func_00239770(s32 *arg0) {
-    return D_00368950[*arg0].unk0 != 0;
+s32 func_00239770(s32 *index) {
+    return D_00368950[*index].unk0 != 0;
 }
 
 s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
@@ -623,10 +623,10 @@ void func_0023B848(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
 
 extern s8 D_00324510[];
 
-s32 mnuDrawTimedPrompt(s32 arg0, s32 arg1, u8 *work) {
+s32 mnuDrawTimedPrompt(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
-    func_00235598(packets, arg0, arg1, 0x19, 2, 0, 1, work, 0, func_0023B848);
+    func_00235598(packets, x, y, 0x19, 2, 0, 1, work, 0, func_0023B848);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 0x14) {
         return 0;
@@ -726,8 +726,8 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
     return D_00368B48[index](x, y, runtime);
 }
 
-void func_0023D5B0(s32 arg0, void *arg1, s32 arg2) {
-    func_0030F190(arg0, arg1, arg2);
+void func_0023D5B0(s32 output, void *data, s32 size) {
+    func_0030F190(output, data, size);
 }
 
 s32 func_0023D5C8(EvtRuntime *runtime) {
@@ -1089,39 +1089,39 @@ typedef struct EvtExtendedRow {
     u8 pad08[0x24];
 } EvtExtendedRow;
 
-u16 func_0023ED08(s32 arg0, s32 arg1) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->value;
+u16 func_0023ED08(s32 table, s32 row) {
+    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->value;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->value;
+    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->value;
 }
 
-s16 func_0023ED58(s32 arg0, s32 arg1) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->variant;
+s16 func_0023ED58(s32 table, s32 row) {
+    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->variant;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->variant;
+    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->variant;
 }
 
-u16 func_0023EDA8(s32 arg0, s32 arg1) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->parameter;
+u16 func_0023EDA8(s32 table, s32 row) {
+    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->parameter;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->parameter;
+    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->parameter;
 }
 
-u16 func_0023EDF8(s32 arg0, s32 arg1) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->flags;
+u16 func_0023EDF8(s32 table, s32 row) {
+    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->flags;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->flags;
+    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->flags;
 }
 
-s32 func_0023EE48(s32 arg0, s32 arg1) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
-        return ((EvtRowTable *)arg0)->compactRows + arg1 * 0x10 + 8;
+s32 func_0023EE48(s32 table, s32 row) {
+    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
+        return ((EvtRowTable *)table)->compactRows + row * 0x10 + 8;
     }
-    return ((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c + 0xc;
+    return ((EvtRowTable *)table)->extendedRows + row * 0x2c + 0xc;
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023EE98);
