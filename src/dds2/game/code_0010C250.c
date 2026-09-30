@@ -6,8 +6,11 @@ typedef struct ScriptContext {
     u8 pad0[0x18];
     s32 pc; /* 0x18 */
     s32 stackDepth; /* 0x1C: number of stack values */
-    u8 stackTypes[28];
-    u32 stackValues[28];
+    u8 stackTypes[28]; /* 0x20 */
+    union {
+        u32 stackValues[28];
+        f32 stackFloats[28];
+    } stack; /* 0x3C */
     u8 padAC[0x10];
     u32 *instructions; /* 0xBC */
     u8 padC0[0x30];
@@ -46,21 +49,26 @@ INCLUDE_ASM(const s32, "game/code_0010C250", bfTaskUpdate);
 
 void scrPushInteger(ScriptContext *script, u32 value) {
     script->stackTypes[script->stackDepth] = 0;
-    script->stackValues[script->stackDepth] = value;
+    script->stack.stackValues[script->stackDepth] = value;
     script->stackDepth = script->stackDepth + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C250", bfStackPushFloat);
+void bfStackPushFloat(ScriptContext *script, f32 value) {
+    script->stackTypes[script->stackDepth] = 1;
+    script->stack.stackFloats[script->stackDepth] = value;
+    script->stackDepth = script->stackDepth + 1;
+}
+
 
 void scrPushString(ScriptContext *script, u32 value) {
     script->stackTypes[script->stackDepth] = 5;
-    script->stackValues[script->stackDepth] = value;
+    script->stack.stackValues[script->stackDepth] = value;
     script->stackDepth = script->stackDepth + 1;
 }
 
 void scrPushTypeFourValue(ScriptContext *script, u32 value) {
     script->stackTypes[script->stackDepth] = 4;
-    script->stackValues[script->stackDepth] = value;
+    script->stack.stackValues[script->stackDepth] = value;
     script->stackDepth = script->stackDepth + 1;
 }
 

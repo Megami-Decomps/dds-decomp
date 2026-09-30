@@ -10,7 +10,7 @@ extern void func_002C44E8(s32);
 
 extern void mnuTitleRenderFadeAndPanels(s32);
 
-extern void func_002C4038(s32, s32, s32, s32);
+extern s64 func_002C4038(s32, s32, s32, s32);
 
 extern s32 brsTaskIsUiUpdateAllowed(s32);
 
@@ -38,6 +38,8 @@ typedef struct MenuItemScene {
     u32 slots[5];
 } MenuItemScene;
 
+/* Parked: build/parked/dds2/game/code_00299D58/brsMessageInputStep.c (delay-slot
+   fill differs from retail by one word; every source shape tried agrees). */
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
 void mnuStaffRunPanel1(s32 input) {
@@ -134,7 +136,13 @@ void func_0029A5D8(s32 request) {
     func_002C4038(context + 8, context + 0x54, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", mnuResetItemSelectionMarkers);
+s32 mnuResetItemSelectionMarkers(void) {
+    s32 *context = (s32 *)func_00101958();
+
+    context[0x99] = 0;
+    context[0xFA] = 0;
+    return 1;
+}
 
 u32 func_0029A650(void) {
     return 1;
@@ -142,7 +150,12 @@ u32 func_0029A650(void) {
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A658);
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A748);
+u32 func_0029A748(u32 kind) {
+    if (kind == 1) {
+        return 1;
+    }
+    return (kind ^ 8) < 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A768);
 

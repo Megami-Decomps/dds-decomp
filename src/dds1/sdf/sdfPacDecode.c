@@ -405,7 +405,14 @@ void sdfPacStartNextAllocationEntry(PacState *state) {
 }
 
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE900);
+/* Reset the output cursor to the current allocation entry and hook the copy
+   and completion callbacks. */
+void func_002EE900(PacState *state) {
+    state->outputCursor = (u8 *)state->allocation + 0x10;
+    state->pendingBytes = 0x10;
+    state->onInput = sdfPacCopyPendingBytes;
+    state->onComplete = sdfPacStartNextAllocationEntry;
+}
 
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {

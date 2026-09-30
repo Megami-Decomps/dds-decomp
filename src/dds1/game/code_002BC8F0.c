@@ -560,9 +560,35 @@ void func_002BD640(u32 work, u32 index) {
     func_002BD620(work, index, entry);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD6A8);
+u32 func_002BD6A8(TexHandleSet *set, u8 *data, s32 release, s32 only) {
+    u32 i = 0;
+    u8 *entry = data;
 
-extern u32 func_002BD6A8(u32 *, u32, s32, s32);
+    entry += *(u32 *)(entry + 0xC);
+
+    if (set->count != 0) {
+        do {
+            s32 *resource = (s32 *)(data + *(u32 *)(entry + 4));
+
+            entry += 8;
+            if (release == 0) {
+                if (only == -1 || only == (s32)i) {
+                    if (set->handles[i] == 0) {
+                        set->handles[i] = (void *)func_002D3288(resource);
+                    }
+                } else {
+                    set->handles[i] = 0;
+                }
+            } else {
+                set->handles[i] = 0;
+            }
+            i++;
+        } while (i < set->count);
+    }
+    return (u32)entry;
+}
+
+extern u32 func_002D3288(s32 *);
 
 void effResolveAndReleaseResource(u32 *handle) {
     if (*handle != 0) {
