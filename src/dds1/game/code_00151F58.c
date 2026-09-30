@@ -15,7 +15,8 @@ typedef struct EffTemplatePacketList {
     f32 z; /* 0x18 */
     u8 pad1C[4];
     u32 packetCount;
-    u8 pad24[0xC];
+    s32 packetTag; /* 0x24: cleared when cloning a prefix */
+    u8 pad28[8];
     u16 kind; /* 0x30: resource type */
     u8 pad32[2];
     u16 subrecordCount; /* 0x34: subrecords per packet */
@@ -152,6 +153,13 @@ typedef struct EffBillEntry {
     u8 pad10[4];
 } EffBillEntry; /* 0x14 */
 
+/* Each effect scene object owns a billboard and an asset reference. */
+typedef struct EffUnitObject {
+    u8 matrix[0x80];
+    s32 billboard;  /* 0x80 */
+    void *resource; /* 0x84 */
+} EffUnitObject;
+
 void effBillSetMode(BillObj *effect, s32 mode) {
     s32 count;
     s32 remaining;
@@ -169,12 +177,12 @@ void effBillSetMode(BillObj *effect, s32 mode) {
             entry = (s32)effect->unk60 + 0xc;
             do {
                 s32 node = *(s32 *)entry;
-                u32 flags = *(u32 *)(node + 0x10) & ~6;
-                *(u32 *)(node + 0x10) = flags;
+                u32 flags = ((EffBillFrame *)node)->flags & ~6;
+                ((EffBillFrame *)node)->flags = flags;
                 if (mode == 2) {
-                    *(u32 *)(node + 0x10) = flags | 2;
+                    ((EffBillFrame *)node)->flags = flags | 2;
                 } else if (mode == 3) {
-                    *(u32 *)(node + 0x10) = flags | 4;
+                    ((EffBillFrame *)node)->flags = flags | 4;
                 }
                 entry += 0x14;
             } while (--remaining != 0);
@@ -190,6 +198,25 @@ typedef struct BillEntryList {
     s32 *entries;
 } BillEntryList;
 
+/* Kind-zero billboard payload stores its variant after a 32-bit value. */
+typedef struct BillChildPayload {
+    s32 value;
+    union {
+        s16 signedVariant;
+        u16 variant;
+    };
+    u8 pad06[0x1E];
+    f32 halfWidth;  /* 0x24 */
+    f32 halfHeight; /* 0x28 */
+} BillChildPayload;
+
+typedef struct BillKindOneView {
+    u8 pad00[0x2C];
+    u16 kind;
+    u8 pad2E[0x26];
+    u32 flags; /* 0x54 */
+} BillKindOneView;
+
 void func_00152100(BillObj *effect, s32 value) {
     s32 count;
     s32 *entries;
@@ -198,7 +225,7 @@ void func_00152100(BillObj *effect, s32 value) {
     value = (s16)value;
     switch (effect->unk2C) {
     case 0:
-        *(s16 *)((u8 *)effect->unk30 + 4) = value;
+        ((BillChildPayload *)effect->unk30)->signedVariant = value;
         break;
     case 1:
         count = ((BillEntryList *)effect->unk30)->count;
@@ -206,7 +233,7 @@ void func_00152100(BillObj *effect, s32 value) {
         if (count > 0) {
             entry = entries;
             do {
-                *(s16 *)(*entry + 4) = value;
+                ((BillChildPayload *)*entry)->signedVariant = value;
                 entry++;
                 count--;
             } while (count != 0);
@@ -217,7 +244,7 @@ void func_00152100(BillObj *effect, s32 value) {
 
 s32 func_00152170(BillObj *effect) {
     if (effect->unk2C == 0) {
-        return *(s32 *)effect->unk30;
+        return ((BillChildPayload *)effect->unk30)->value;
     }
     return 0;
 }
@@ -231,7 +258,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 
     switch (effect->unk2C) {
     case 0:
-        *(s16 *)((u8 *)effect->unk30 + 4) = v;
+        ((BillChildPayload *)effect->unk30)->signedVariant = v;
         break;
     case 1:
         effect->unk3C = v;
@@ -242,7 +269,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 u16 billGetVariantValue(BillObj *effect) {
     switch (effect->unk2C) {
     case 0:
-        return *(u16 *)((u8 *)effect->unk30 + 4);
+        return ((BillChildPayload *)effect->unk30)->variant;
     case 1:
         return effect->unk3C;
     default:
@@ -331,23 +358,23 @@ u16 func_00152370(BillObj *effect) {
 }
 
 s32 func_00152390(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(arg0 + 0x54);
+    if (((BillKindOneView *)arg0)->kind == 1) {
+        return ((BillKindOneView *)arg0)->flags;
     }
     return 0;
 }
 
 void func_001523B0(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        *(s32 *)(arg0 + 0x54) |= 0x1000000;
+    if (((BillKindOneView *)arg0)->kind == 1) {
+        ((BillKindOneView *)arg0)->flags |= 0x1000000;
     }
 }
 
 void func_001523D8(s32 arg0, float arg1, float arg2) {
-    if (*(u16 *)(arg0 + 0x2c) == 0) {
-        s32 tmp = *(s32 *)(arg0 + 0x30);
-        *(float *)(tmp + 0x24) = arg1 * 0.5f;
-        *(float *)(tmp + 0x28) = arg2 * 0.5f;
+    if (((BillKindOneView *)arg0)->kind == 0) {
+        s32 tmp = (s32)((BillObj *)arg0)->unk30;
+        ((BillChildPayload *)tmp)->halfWidth = arg1 * 0.5f;
+        ((BillChildPayload *)tmp)->halfHeight = arg2 * 0.5f;
     }
 }
 
@@ -358,9 +385,9 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 u8 *billCreateUnitObject(s32 arg0) {
     u8 *obj = func_002CFEB8(0x88);
 
-    *(s32 *)(obj + 0x80) = billCreateIndexed(1, arg0);
-    *(void **)(obj + 0x84) = func_002DA730();
-    func_002DA420(*(void **)(obj + 0x84), 1.0f);
+    ((EffUnitObject *)obj)->billboard = billCreateIndexed(1, arg0);
+    ((EffUnitObject *)obj)->resource = func_002DA730();
+    func_002DA420(((EffUnitObject *)obj)->resource, 1.0f);
     EE_MMI_UNIT_MATRIX(obj + 0x40);
     return obj;
 }
@@ -368,29 +395,29 @@ u8 *billCreateUnitObject(s32 arg0) {
 u8 *billCloneUnitObject(u8 *src) {
     u8 *obj = func_002CFEB8(0x88);
 
-    *(s32 *)(obj + 0x80) = func_00151E60(*(s32 *)(src + 0x80));
-    *(void **)(obj + 0x84) = func_002DA730();
-    func_002DA420(*(void **)(obj + 0x84), 1.0f);
-    func_002DA3D8(*(void **)(obj + 0x84), 0x80808080);
-    func_002DA3C0(*(void **)(obj + 0x84), 0x80808080);
-    func_002DA3F0(*(void **)(obj + 0x84), 0x80808080);
+    ((EffUnitObject *)obj)->billboard = func_00151E60(((EffUnitObject *)src)->billboard);
+    ((EffUnitObject *)obj)->resource = func_002DA730();
+    func_002DA420(((EffUnitObject *)obj)->resource, 1.0f);
+    func_002DA3D8(((EffUnitObject *)obj)->resource, 0x80808080);
+    func_002DA3C0(((EffUnitObject *)obj)->resource, 0x80808080);
+    func_002DA3F0(((EffUnitObject *)obj)->resource, 0x80808080);
     EE_MMI_UNIT_MATRIX(obj + 0x40);
     EE_MMI_UNIT_MATRIX(obj);
     return obj;
 }
 
 void effDestroy(u32 arg0) {
-    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x84));
-    billDispatchByKind(*(u32 *)(arg0 + 0x80));
+    sdfQueueAssetRelease((u32)((EffUnitObject *)arg0)->resource);
+    billDispatchByKind(((EffUnitObject *)arg0)->billboard);
     func_002CFF98(arg0);
 }
 
 void func_00152758(s32 arg0, s128 *arg1) {
-    effCopyVector(*(s128 **)(arg0 + 0x80), arg1);
+    effCopyVector((s128 *)((EffUnitObject *)arg0)->billboard, arg1);
 }
 
 void billSetChildScale2(s32 arg0, float arg1) {
-    func_00152000(*(s32 *)(arg0 + 0x80), arg1, arg1);
+    func_00152000(((EffUnitObject *)arg0)->billboard, arg1, arg1);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -401,7 +428,7 @@ void effCopyMatrixToNext(u8 *dst, void *src) {
 }
 
 void billSetChildValue(s32 arg0, u32 arg1) {
-    func_00152010(*(s32 *)(arg0 + 0x80), arg1);
+    func_00152010(((EffUnitObject *)arg0)->billboard, arg1);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -938,7 +965,7 @@ s32 func_001579B0(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     ((EffTemplatePacketList *)copy)->packetCount = 1;
-    *(s32 *)(copy + 0x24) = 0;
+    ((EffTemplatePacketList *)copy)->packetTag = 0;
     func_00153740(copy);
     return copy;
 }

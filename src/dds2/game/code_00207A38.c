@@ -18,12 +18,14 @@ typedef struct BtlUnit {
     u32 unk_114;
     u8 unk_118[8];
     u16 unk_120;
-    u8 unk_122[2];
+    u16 unk_122; /* 0x122: script-controlled unit parameter */
     u16 mode;
-    u8 unk_126[0x1F6];
+    u8 unk_126[0xE];
+    u16 unk_134; /* 0x134: queried unit parameter */
+    u8 pad136[0x1E6];
     u32 unk_31C;
     u8 unk_320p[0x20];
-    u32 unk_320;
+    u32 effectHandle; /* 0x340: attached effect released during cleanup */
     u8 unk_324[0x20];
     struct BtlUnit *next;
 } BtlUnit;
@@ -49,9 +51,18 @@ typedef struct BtnSurface {
 } BtnSurface;
 
 typedef struct BtlState {
-    u8 unk_000[0x24C];
+    u8 unk_000[0x218];
+    u32 flags; /* 0x218 */
+    u8 pad21C[0x30];
     BtlUnit *units;
-    u8 unk_250[0x70];
+    u8 unk_250[0x24];
+    u32 field274;
+    u8 pad278[8];
+    u16 field280;
+    u8 pad282[2];
+    u8 pad284[0x20];
+    s32 field2A4;
+    u8 pad2A8[0x18];
     BtlList *list;
     u8 unk_2C4[4];
     s32 slot;
@@ -72,7 +83,10 @@ typedef struct BtlCommandCtx {
     u8 pad1C[4];
     u32 commandMode;
     u32 commandValue;
-    u8 pad28[0x70];
+    u8 pad28[0x10];
+    s32 selectedValue; /* 0x38: command selection */
+    u8 pad3C[0x58];
+    s32 pendingValue;  /* 0x94: mirrored command selection */
     u32 selectionFlagsA;
     u32 selectionFlagsB;
     u32 choicesA[8];
@@ -1059,8 +1073,8 @@ u32 func_00209F28(void) {
     if (kind == 0x196) {
         value = func_0021F698();
     }
-    *(s32 *)((u8 *)context + 0x94) = value;
-    *(s32 *)((u8 *)context + 0x38) = value;
+    context->pendingValue = value;
+    context->selectedValue = value;
     return 1;
 }
 
@@ -1073,8 +1087,8 @@ u32 func_00209FA0(void) {
     context->commandMode = 5;
     context->commandValue = 0;
     value = btlPickWeightedEntry((u16)value);
-    *(s32 *)((u8 *)context + 0x94) = value;
-    *(s32 *)((u8 *)context + 0x38) = value;
+    context->pendingValue = value;
+    context->selectedValue = value;
     return 1;
 }
 
@@ -1086,8 +1100,8 @@ u32 func_00209FF8(void) {
     value = scrReadIntParameter(0);
     context->commandMode = 5;
     context->commandValue = 0;
-    *(s32 *)((u8 *)context + 0x94) = value;
-    *(s32 *)((u8 *)context + 0x38) = value;
+    context->pendingValue = value;
+    context->selectedValue = value;
     return 1;
 }
 
@@ -1110,7 +1124,7 @@ u32 func_0020A0A0(void) {
 
     context = func_0010D8D0();
     value = scrReadIntParameter(0);
-    *(u16 *)(*(s32 *)(context + 0x18) + 0x122) = value;
+    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk_122 = value;
     return 1;
 }
 
@@ -1122,7 +1136,7 @@ u32 func_0020A0E0(void) {
     func_0010D8D0();
     value = scrReadIntParameter(0);
     *(u8 *)(battle + 0x282) = 4;
-    *(s32 *)(battle + 0x2A4) = value;
+    ((BtlState *)battle)->field2A4 = value;
     return 1;
 }
 
@@ -2073,7 +2087,7 @@ u32 func_0020C508(void) {
     s32 battle;
 
     battle = func_001AA6F8();
-    func_0010D818(*(u32 *)(battle + 0x274));
+    func_0010D818(((BtlState *)battle)->field274);
     return 1;
 }
 
@@ -2081,7 +2095,7 @@ u32 func_0020C530(void) {
     s32 context;
 
     context = func_0010D8D0();
-    func_0010D818(*(u16 *)(*(s32 *)(context + 0x18) + 0x134));
+    func_0010D818(((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk_134);
     return 1;
 }
 
@@ -2113,7 +2127,7 @@ u32 func_0020C5C0(void) {
     s32 battle;
 
     battle = func_001AA6F8();
-    func_0010D818(*(u16 *)(battle + 0x280));
+    func_0010D818(((BtlState *)battle)->field280);
     return 1;
 }
 
@@ -2173,8 +2187,8 @@ u32 func_0020C720(void) {
 
     temp_v1 = func_0010D8D0();
     temp_v0 = D_004367F4;
-    *(u32 *)(temp_v1 + 0x20) = 0x10;
-    *(u32 *)(temp_v1 + 0x24) = 0;
+    ((BtlCommandCtx *)temp_v1)->commandMode = 0x10;
+    ((BtlCommandCtx *)temp_v1)->commandValue = 0;
     *(u8 *)(temp_v0 + 0x54) = 1;
     return 1;
 }
@@ -2406,16 +2420,16 @@ void func_0020CE70(void) {
 
 void func_0020CE78(void) {
     s32 state = func_001AA6F8();
-    if ((*(u32 *)(state + 0x218) & 0x40000000) == 0) {
-        s32 actor = *(s32 *)(state + 0x24C);
+    if ((((BtlState *)state)->flags & 0x40000000) == 0) {
+        s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {
-            if ((*(u32 *)(actor + 0x110) & 2) != 0) {
-                s32 effect = *(s32 *)(actor + 0x340);
+            if ((((BtlUnit *)actor)->flags & 2) != 0) {
+                s32 effect = ((BtlUnit *)actor)->effectHandle;
                 if (effect != 0) {
                     func_0023CB68(effect, 0);
                 }
             }
-            actor = *(s32 *)(actor + 0x364);
+            actor = (s32)((BtlUnit *)actor)->next;
         }
     }
 }
