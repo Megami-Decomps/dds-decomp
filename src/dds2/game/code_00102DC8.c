@@ -61,6 +61,8 @@ extern s32 func_0033D810();
 
 extern void sdfAppendPacket();
 
+extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
+
 extern void func_00104180(void);
 
 extern void func_001044E8(void);
@@ -167,9 +169,15 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_001034E8);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001036B0);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103790);
+void func_00103790(void *list, s32 col, s32 row, s32 cols, s32 rows) {
+    s32 cw = 0xC0, ch = 0x60;
+    sdfAppendPacket(list, func_0011F250(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF, cols * cw + ch, rows * ch + 0x30, 0x60000000, 0x40806020));
+}
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001037F8);
+void func_001037F8(void *list, s32 col, s32 row, s32 cols, s32 rows, s32 z) {
+    s32 cw = 0xC0, ch = 0x60;
+    sdfAppendPacket(list, func_0011F250(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, z, cols * cw + ch, rows * ch + 0x30, 0x60000000, 0x40806020));
+}
 
 s32 kwlnDebugPulseColors(void) {
     if (kwlnTaskGetTimer() % 0x4650 == 0) {

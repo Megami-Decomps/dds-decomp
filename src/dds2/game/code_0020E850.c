@@ -75,7 +75,7 @@ extern s32 (*D_003BF4A0[])(s32, u32);
 typedef struct BtlEffLink {
     s32 actor;  /* 0x00 */
     s32 arg;    /* 0x04 */
-    s32 unk08;  /* 0x08 */
+    u32 unk08;  /* 0x08 */
 } BtlEffLink;
 
 typedef struct BtlEffTask {
@@ -121,26 +121,46 @@ typedef struct BtlHistObj {
     s32 mode;            /* 0x20 */
     s32 unk24;           /* 0x24 */
     u8 pad28[0x126];
-    u8 counter;          /* 0x14E */
+    s8 counter;          /* 0x14E */
     u8 pad14F;
     s32 hist[8];         /* 0x150 */
 } BtlHistObj;
 
 extern void func_00211018(BtlHistObj *obj, s8 flag);
-extern u8 D_00436CAC;
+extern s8 D_00436CAC;
 
 typedef struct BtlPackedCtx {
     s32 context;
     s32 unk4;
 } BtlPackedCtx;
+extern s32 D_00435E5C;
+extern void func_001A45C0(s32, s32, s32, s32);
+extern void func_001B8580(s32);
+extern void func_001B8788(s32, s32);
+extern u32 func_001B8538(void);
+extern u32 func_001B8740(void);
+extern char D_00436CA8[];
+extern s32 func_0035C860();
+extern void func_001A4858(s32, s32, char *);
+extern s32 D_00435E64;
+extern u8 D_003BEB28[];
+extern u8 D_003BEB30[];
+extern s32 D_003BEB38[];
+extern s32 D_003BEB48[];
+extern s32 D_003BEB4C[];
+extern s32 D_003BEB50[];
+extern s32 D_003BEB58[];
+extern s32 D_003BEB60[];
+extern void *btlGetIndexedUiResource();
+extern u32 func_00211DE0(void);
 extern s32 func_00210258();
 extern s32 func_0020FFB8();
 extern void func_0020FA98();
-extern void func_00210148();
-extern void func_002103F8();
-extern void func_00210530();
-extern void func_00210720();
-extern void func_00210850();
+extern s32 func_00210148(BtlEffLink *link);
+extern s32 func_002103F8();
+extern s32 func_00210530();
+extern s32 func_00210720();
+extern s32 func_00210850(BtlEffLink *link);
 extern s32 func_00210AA8();
 
 typedef struct BtlEffLinkEx {
@@ -167,7 +187,23 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EA18);
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EBD0);
+s32 func_0020EBD0(u8 *arg0) {
+    s32 result = 0;
+    u8 *unit = *(u8 **)(arg0 + 0x18);
+    u16 flags;
+
+    if (*(u32 *)(arg0 + 8) & 0x40) {
+        return result;
+    }
+    flags = *(u16 *)(unit + 0x12E);
+    if (!(flags & 0x20)) {
+        return result;
+    }
+    if ((flags & 0x7FFF) != 0x20) {
+        return 1;
+    }
+    return func_00211DE0() < 0x46;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0020E850", D_00419910);
 
@@ -250,7 +286,35 @@ BtlEffTask *btlCreateEffectCounterTask(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FFB8);
+s32 func_0020FFB8(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+    s32 actor = link->actor;
+
+    if (link->unk08 == 0) {
+        s32 arg = link->arg;
+
+        if (arg == 0) {
+            if ((*(u64 *)(actor + 0x110) & 0x1400) == 0 && (*(u16 *)(actor + 0x120) & 0x10) == 0) {
+                func_001B8580((s32)btlGetIndexedUiResource(actor));
+            } else if (*(u32 *)(work + 0x21C) & 0x400) {
+                if (*(u32 *)(actor + 0x110) & 0x400) {
+                    func_001B8580(D_003BEB60[0]);
+                } else {
+                    func_001B8580(D_003BEB58[0]);
+                }
+            } else {
+                func_001B8580(D_003BEB58[0]);
+            }
+        } else {
+            func_001B8580(D_00435E64 + arg * 17);
+        }
+    }
+    if (func_001B8538() == 0 || link->unk08 >= 0x1E) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -269,7 +333,17 @@ BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210148);
+s32 func_00210148(BtlEffLink *link) {
+    func_001AA6F8();
+    if (link->unk08 == 0) {
+        func_001B8580(D_00435E5C + link->arg * 25);
+    }
+    if (func_001B8538() == 0 || link->unk08 >= 0x1E) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *func_002101C8(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -288,7 +362,56 @@ BtlEffTask *func_002101C8(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210258);
+s32 func_00210258(BtlEffLink *link) {
+    s32 actor;
+
+    func_001AA6F8();
+    actor = link->actor;
+    if (link->unk08 == 0) {
+        switch (link->arg) {
+        case 10:
+            func_001B8580((s32)D_003BEB28);
+            break;
+        case 5: {
+            u32 flags = *(u32 *)(actor + 0x110);
+            if (flags & 0x200) {
+                if (!(flags & 0x1000)) {
+                    func_001B8580(D_003BEB38[0]);
+                    break;
+                }
+            }
+            func_001B8580(D_003BEB48[0]);
+            break;
+        }
+        case 6:
+            func_001B8580((s32)D_003BEB30);
+            break;
+        case 9:
+            func_001B8580(D_003BEB4C[0]);
+            break;
+        case 11:
+            func_001B8580(D_003BEB50[0]);
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 7:
+        case 8:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        default:
+            return 1;
+        }
+    }
+    if (func_001B8538() == 0 || link->unk08 >= 0x1E) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -309,7 +432,22 @@ BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_002103F8);
+s32 func_002103F8(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+    s32 actor = link->actor;
+
+    if (link->unk08 == 0) {
+        if (actor != 0) {
+            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+        }
+        func_001B8788(*(s32 *)(work + 0x4CC), link->arg);
+    }
+    if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -330,7 +468,25 @@ BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210530);
+s32 func_00210530(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+    s32 actor = link->actor;
+
+    if (actor != 0 && !(*(u16 *)(actor + 0x12E) & 1)) {
+        return 1;
+    }
+    if (link->unk08 == 0) {
+        if (actor != 0) {
+            func_001A45C0(*(s32 *)(work + 0x4D0), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+        }
+        func_001B8788(*(s32 *)(work + 0x4D0), link->arg);
+    }
+    if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *btlCreateEffObjC(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -372,7 +528,22 @@ BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210720);
+s32 func_00210720(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+    s32 actor = link->actor;
+
+    if (link->unk08 == 0) {
+        if (actor != 0) {
+            func_001A45C0(*(s32 *)(work + 0x4D4), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 1 : 2);
+        }
+        func_001B8788(*(s32 *)(work + 0x4D4), link->arg);
+    }
+    if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -391,7 +562,21 @@ BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210850);
+s32 func_00210850(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+
+    if (link->unk08 == 0) {
+        if (link->actor != 0) {
+            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)&link->arg, 0xD);
+        }
+        func_001B8788(*(s32 *)(work + 0x4CC), 0x75);
+    }
+    if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -448,7 +633,25 @@ BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210AA8);
+s32 func_00210AA8(BtlEffLink *link) {
+    s32 work = func_001AA6F8();
+    s32 actor = link->actor;
+    char text[0x100];
+
+    if (link->unk08 == 0) {
+        if (actor != 0) {
+            func_001A45C0(*(s32 *)(work + 0x4CC), 0, *(u16 *)(actor + 0x124), (*(u16 *)(actor + 0x120) & 0x20) ? 0xE : 0xF);
+            func_0035C860(text, D_00436CA8, link->arg < 0 ? -link->arg : link->arg);
+            func_001A4858(*(s32 *)(work + 0x4CC), 1, text);
+        }
+        func_001B8788(*(s32 *)(work + 0x4CC), 0xD5);
+    }
+    if (func_001B8740() == 0 || link->unk08 >= 0x2D) {
+        return 1;
+    }
+    link->unk08++;
+    return 0;
+}
 
 BtlEffTask *func_00210B78(BtlEffActor *owner, s32 arg) {
     BtlEffTask *obj = btlAllocTask(0xC);
@@ -538,7 +741,13 @@ u32 func_00210DB0(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210DC8);
+void func_00210DC8(BtlHistObj *obj) {
+    obj->counter++;
+    obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
+    func_00211018(obj, 0);
+    D_00436CAC++;
+    D_00436CAC = D_00436CAC <= 0 ? 0 : D_00436CAC >= 0x21 ? 0x20 : D_00436CAC;
+}
 
 
 void func_00210E48(void) {
