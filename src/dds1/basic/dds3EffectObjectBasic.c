@@ -4,17 +4,17 @@
 typedef struct {
     void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
-    s32 unk8;    /* 0x8 cleared ^6 by func_001158B8 */
+    s32 state;   /* 0x8: checked for states 5 (node update) and 6 (parameter access) */
     void *bill;   /* 0xC passed to func_00151E60/billSetKind1Entry */
     u32 unk10;   /* 0x10 cleared by func_00115BB8 */
     u32 unk14;   /* 0x14 cleared by func_00115BB8 */
     void *unk18; /* 0x18 cleared by func_00115BB8 */
     u8 pad1C[4]; /* 0x1C */
-    void *unk20; /* 0x20 set to the owner by func_00115BB8 */
-    u16 unk24;   /* 0x24 */
-    u16 unk26;   /* 0x26 kind copied from +0xF */
-    void *unk28; /* 0x28 vector passed to func_00190130 */
-    void *unk2C; /* 0x2C node handle owned by func_00115318 */
+    void *owner; /* 0x20 owning effect object */
+    u16 entryId; /* 0x24 forwarded to the bill parameter lookup */
+    u16 ownerKind; /* 0x26 copied from owner's kind */
+    void *vector; /* 0x28 passed to func_00190130 */
+    void *node; /* 0x2C released and replaced by func_00115318 */
 } EffectData; /* 0x30 bytes */
 
 typedef struct {
@@ -24,9 +24,9 @@ typedef struct {
 
 typedef struct {
     u8 pad0[4];              /* 0x0 */
-    u32 unk4;                /* 0x4 world counter copied by func_00114A78 */
+    u32 worldCounter; /* 0x4 copied from the constructor's worldCounter */
     u8 pad8[7];              /* 0x8 */
-    u8 unkF;                 /* 0xF kind checked ==7 by func_001158B8 */
+    u8 kind;                 /* 0xF checked ==7 by func_001158B8 */
     u8 pad10[8];             /* 0x10 */
     EffectData *data;         /* 0x18 */
     EffectParameters *params; /* 0x1C vector base read by func_001158F0/effObjGetIntParam */
@@ -38,18 +38,18 @@ void func_00111840(void *arg);
 void func_002CFF98(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to func_00114A78. */
-void func_00114B18(void *arg0, void *vec, s32 arg2);
+void func_00114B18(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
-void func_00114CE8(void *arg0, void *vec, s32 arg2);
-void func_00114E90(void *arg0, void *vec, s32 arg2);
-void func_00114FE0(void *arg0, void *vec, s32 arg2);
+void func_00114CE8(void *bill, void *vec, s32 extra);
+void func_00114E90(void *bill, void *vec, s32 extra);
+void func_00114FE0(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
 void *func_00115478();
 EffectData *func_001158B8(EffectObj *obj);
 void *func_002D0918(void *arg);
-void *func_002EB028(void *arg0, u32 *arg1, s32 arg2);
+void *func_002EB028(void *resource, u32 *resolvedId, s32 options);
 
 extern void *func_0014FE28(void);
 
@@ -57,9 +57,9 @@ extern void *func_0014FE48(void);
 
 extern void *func_0014FD20(void);
 
-extern void *billCreateFromResource(s32 arg0, s32 arg1);
+extern void *billCreateFromResource(s32 kind, s32 resourceId);
 
-extern void *billCreateIndexed(s32 arg0, u32 arg1);
+extern void *billCreateIndexed(s32 kind, u32 billId);
 
 extern void *func_00151E60(void *arg);
 
@@ -99,7 +99,7 @@ void *effObjGetObjectHandle(EffectObj *obj) {
     return obj->data->objectHandle;
 }
 
-EffectObj *func_00114A78(u32 arg0, void *arg1, void *arg2) {
+EffectObj *func_00114A78(u32 worldCounter, void *firstVec, void *secondVec) {
     EffectObj *obj;
     EffectData *data;
 
@@ -107,18 +107,18 @@ EffectObj *func_00114A78(u32 arg0, void *arg1, void *arg2) {
     if (obj == NULL) {
         return NULL;
     }
-    obj->unk4 = arg0;
+    obj->worldCounter = worldCounter;
     dds3EnsureSlotData(obj);
-    effObjSetInnerFirstVec(obj, arg1);
-    effObjSetInnerSecondVec(obj, arg2);
+    effObjSetInnerFirstVec(obj, firstVec);
+    effObjSetInnerSecondVec(obj, secondVec);
     effObjInnerVecBackup(obj->params);
     data = obj->data;
     data->flags = 0;
-    data->unk8 = 0;
+    data->state = 0;
     data->bill = NULL;
-    data->unk20 = NULL;
-    data->unk24 = 0;
-    data->unk26 = 0;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
     return obj;
 }
 
@@ -177,27 +177,27 @@ void effObjCreateResourceKindZero(s32 billId, void *vec, s32 extra) {
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114E90);
 
-void func_00114F60(u32 arg0, void *vec, s32 arg2) {
+void func_00114F60(u32 unused, void *vec, s32 extra) {
     void *handle;
 
     handle = func_0014FD20();
-    func_00114E90(handle, vec, arg2);
+    func_00114E90(handle, vec, extra);
 }
 
-void func_00114FA0(u32 arg0, void *vec, s32 arg2) {
+void func_00114FA0(u32 unused, void *vec, s32 extra) {
     void *handle;
 
     handle = func_0014FE48();
-    func_00114E90(handle, vec, arg2);
+    func_00114E90(handle, vec, extra);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114FE0);
 
-void func_001150B0(u32 arg0, void *vec, s32 arg2) {
+void func_001150B0(u32 unused, void *vec, s32 extra) {
     void *handle;
 
     handle = func_0014FE28();
-    func_00114FE0(handle, vec, arg2);
+    func_00114FE0(handle, vec, extra);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001150F0);
@@ -206,36 +206,36 @@ void func_00115298(void) {
     func_001150F0();
 }
 
-void *func_001152B0(void *arg0, void *arg1, void *arg2) {
-    u32 local;
-    void *result;
-    void *result2;
+void *func_001152B0(void *resource, void *vec, void *extra) {
+    u32 resolvedId;
+    void *resourceHandle;
+    void *created;
 
-    local = 0;
-    result = func_002EB028(arg0, &local, 0);
-    result2 = func_001150F0(local, arg1, arg2);
-    func_002D0918(result);
-    return result2;
+    resolvedId = 0;
+    resourceHandle = func_002EB028(resource, &resolvedId, 0);
+    created = func_001150F0(resolvedId, vec, extra);
+    func_002D0918(resourceHandle);
+    return created;
 }
 
-void func_00115318(EffectObj *obj, u32 arg1) {
+void func_00115318(EffectObj *obj, u32 entryId) {
     EffectData *data;
 
     data = obj->data;
-    if (data->unk8 != 5) {
+    if (data->state != 5) {
         return;
     }
-    if (data->unk28 == NULL) {
+    if (data->vector == NULL) {
         return;
     }
     if (data->bill == NULL) {
         return;
     }
-    if (data->unk2C != NULL) {
-        effEventReleaseNode(data->unk2C);
-        data->unk2C = NULL;
+    if (data->node != NULL) {
+        effEventReleaseNode(data->node);
+        data->node = NULL;
     }
-    data->unk2C = func_00190130(data->bill, arg1 & 0xFFFF, data->unk28);
+    data->node = func_00190130(data->bill, entryId & 0xFFFF, data->vector);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
@@ -250,16 +250,16 @@ void func_00115840(void) {
     func_00115478();
 }
 
-void *func_00115858(s32 kind, void *arg1) {
-    u32 local;
-    void *result;
-    void *result2;
+void *func_00115858(s32 kind, void *resource) {
+    u32 resolvedId;
+    void *resourceHandle;
+    void *created;
 
-    local = 0;
-    result = func_002EB028(arg1, &local, 0);
-    result2 = func_00115478(kind, local);
-    func_002D0918(result);
-    return result2;
+    resolvedId = 0;
+    resourceHandle = func_002EB028(resource, &resolvedId, 0);
+    created = func_00115478(kind, resolvedId);
+    func_002D0918(resourceHandle);
+    return created;
 }
 
 EffectData *func_001158B8(EffectObj *obj) {
@@ -269,11 +269,11 @@ EffectData *func_001158B8(EffectObj *obj) {
     if (obj == NULL) {
         return data;
     }
-    if (obj->unkF != 7) {
+    if (obj->kind != 7) {
         return data;
     }
     data = obj->data;
-    if (data->unk8 != 6) {
+    if (data->state != 6) {
         data = NULL;
     }
     return data;
@@ -310,22 +310,22 @@ void effObjClearFlags(EffectObj *obj, s32 flags) {
     obj->data->flags &= ~flags;
 }
 
-s32 func_00115BB8(EffectObj *arg0, EffectObj *arg1) {
+s32 func_00115BB8(EffectObj *obj, EffectObj *owner) {
     EffectData *data;
     u8 kind;
 
-    kind = arg1->unkF;
+    kind = owner->kind;
     if (kind < 4 || (kind >= 10 && kind != 0x11)) {
         return 0;
     }
-    data = arg0->data;
+    data = obj->data;
     data->unk18 = NULL;
-    data->unk20 = arg1;
-    data->unk24 = 0;
+    data->owner = owner;
+    data->entryId = 0;
     data->flags |= 4;
     data->flags &= ~8;
     data->unk10 = 0;
-    data->unk26 = arg1->unkF;
+    data->ownerKind = owner->kind;
     data->unk14 = 0;
     return 1;
 }
@@ -333,13 +333,13 @@ s32 func_00115BB8(EffectObj *arg0, EffectObj *arg1) {
 /* Billboard payload: state word and the SDF parameter block it was built from. */
 typedef struct {
     u8 pad0[8];   /* 0x0 */
-    u32 unk8;     /* 0x8 */
-    void *unkC;   /* 0xC */
+    u32 state;     /* 0x8: only zero permits forwarding the lookup */
+    void *params;  /* 0xC: parameter block */
 } BillPayload;
 
 typedef struct {
     u8 pad0[0x18]; /* 0x0 */
-    void *unk18;   /* 0x18 */
+    void *param;   /* 0x18: forwarded to func_002D9E58 */
 } BillParam;
 
 void func_00115C20(EffectObj *obj) {
@@ -349,25 +349,25 @@ void func_00115C20(EffectObj *obj) {
 
     data = obj->data;
     if (data->flags & 8) {
-        owner = data->unk20;
-        if (owner->unkF == 5) {
+        owner = data->owner;
+        if (owner->kind == 5) {
             bill = owner->data->bill;
-            if (bill->unk8 != 0) {
+            if (bill->state != 0) {
                 return;
             }
-            func_002D9E58(((BillParam *)bill->unkC)->unk18, data->unk24);
+            func_002D9E58(((BillParam *)bill->params)->param, data->entryId);
         }
     }
 }
 
-s32 func_00115C80(EffectObj *obj, EffectObj *arg1, s32 arg2) {
+s32 func_00115C80(EffectObj *obj, EffectObj *owner, s32 entryId) {
     EffectData *data;
 
-    if (func_00115BB8(obj, arg1) == 0) {
+    if (func_00115BB8(obj, owner) == 0) {
         return 1;
     }
     data = obj->data;
-    data->unk24 = arg2;
+    data->entryId = entryId;
     data->flags |= 8;
     return 1;
 }
