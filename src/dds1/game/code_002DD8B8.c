@@ -46,13 +46,86 @@ void func_002DDA68(const RwV3d* axis, f32 angle)
     VU0_LOAD_MATRIX_B(&matrix);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDA98);
+extern f32 func_002F9F60(f32 angle);
+extern f32 func_002FA060(f32 angle);
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDAF8);
+/* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
+void func_002DDA98(f32 angle)
+{
+    f32 c = func_002F9F60(angle);
+    f32 s = func_002FA060(angle);
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDB58);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "mfc1 $2, %1\n"
+        "qmtc2.ni $3, $vf3\n"
+        "qmtc2.ni $2, $vf2\n"
+        "vmove.xyzw $vf4, $vf29\n"
+        "vmulax.xyzw ACC, $vf29, $vf3x\n"
+        "vmaddx.xyzw $vf29, $vf30, $vf2x\n"
+        "vmulax.xyzw ACC, $vf30, $vf3x\n"
+        "vmsubx.xyzw $vf30, $vf4, $vf2x\n"
+        ".set reorder\n"
+        : : "f"(c), "f"(s) : "$2", "$3");
+}
 
-INCLUDE_ASM(const s32, "game/code_002DD8B8", func_002DDBB8);
+/* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
+void func_002DDAF8(f32 angle)
+{
+    f32 c = func_002F9F60(angle);
+    f32 s = func_002FA060(angle);
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "mfc1 $2, %1\n"
+        "qmtc2.ni $3, $vf3\n"
+        "qmtc2.ni $2, $vf2\n"
+        "vmove.xyzw $vf4, $vf28\n"
+        "vmulax.xyzw ACC, $vf28, $vf3x\n"
+        "vmsubx.xyzw $vf28, $vf30, $vf2x\n"
+        "vmulax.xyzw ACC, $vf4, $vf2x\n"
+        "vmaddx.xyzw $vf30, $vf30, $vf3x\n"
+        ".set reorder\n"
+        : : "f"(c), "f"(s) : "$2", "$3");
+}
+
+/* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
+void func_002DDB58(f32 angle)
+{
+    f32 c = func_002F9F60(angle);
+    f32 s = func_002FA060(angle);
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "mfc1 $2, %1\n"
+        "qmtc2.ni $3, $vf3\n"
+        "qmtc2.ni $2, $vf2\n"
+        "vmove.xyzw $vf4, $vf28\n"
+        "vmulax.xyzw ACC, $vf28, $vf3x\n"
+        "vmaddx.xyzw $vf28, $vf29, $vf2x\n"
+        "vmulax.xyzw ACC, $vf29, $vf3x\n"
+        "vmsubx.xyzw $vf29, $vf4, $vf2x\n"
+        ".set reorder\n"
+        : : "f"(c), "f"(s) : "$2", "$3");
+}
+
+extern void func_002DD608(f32 angle);
+extern void func_002DD968(f32 angle);
+extern void func_002DD9E8(f32 angle);
+extern void func_002DDC50(void);
+
+/* Compose the three axis rotations of a per-axis angle vector into the VU0 matrix. */
+void func_002DDBB8(const RwV3d *rot)
+{
+    func_002DD608(rot->x);
+    func_002DD968(rot->y);
+    func_002DDC50();
+    func_002DD9E8(rot->z);
+    func_002DDC50();
+}
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
 void func_002DDBF8(void)

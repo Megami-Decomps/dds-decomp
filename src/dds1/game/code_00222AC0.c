@@ -132,6 +132,9 @@ extern void func_00116F38(s32);
 extern f32 func_00220830(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_00117568(s32, s32);
+extern void func_002E7F20(f32, f32, f32);
+extern void effMiscQuatMultiplyVU();
+extern void effObjSetInnerSecondVec(void *, void *);
 
 extern void dds3SetObjectFlags(void *arg0, s32 arg1);
 extern void dds3ClearObjectFlags(void *arg0, s32 arg1);
@@ -717,7 +720,34 @@ u32 evtSetWorldUnitFirstVector(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224048);
+u32 func_00224048(void) {
+    f32 v[4];
+    void *ctx;
+    s32 id;
+    void *unit;
+    f32 toRad;
+    f32 x;
+    f32 y;
+
+    memset(v, 0, 0x10);
+    v[3] = 1.0f;
+    ctx = dds3GetWorldObject();
+    id = scrReadIntParameter(0);
+    unit = func_00110A48(ctx, id, 5);
+    if (unit == NULL) {
+        return 1;
+    }
+    toRad = 0.017453293f;
+    x = bfWaitReadArgFloat(1) * toRad;
+    y = bfWaitReadArgFloat(2) * toRad;
+    func_002E7F20(x, y, 0.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF($vf10, v);
+    effObjSetInnerSecondVec(unit, v);
+    return 1;
+}
 
 u32 evtSetWorldUnitThirdVector(void) {
     f32 v[4];
@@ -1383,7 +1413,29 @@ u32 func_00225E40(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00225F08);
+u32 func_00225F08(void) {
+    f32 v[4];
+    EvtModelObj *obj;
+    f32 toRad;
+    f32 x;
+    f32 y;
+
+    memset(v, 0, 0x10);
+    v[3] = 1.0f;
+    obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (!(obj->header->flags & 4)) {
+        toRad = 0.017453293f;
+        x = bfWaitReadArgFloat(1) * toRad;
+        y = bfWaitReadArgFloat(2) * toRad;
+        func_002E7F20(x, y, 0.0f);
+        VU0_MOVE_VF(vf11, vf10);
+        func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF($vf10, v);
+        effObjSetInnerSecondVec(obj, v);
+    }
+    return 1;
+}
 
 u32 func_00225FE8(void) {
     EvtModelObj *obj;

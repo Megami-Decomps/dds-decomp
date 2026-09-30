@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "ee_mmi.h"
 
 typedef struct EventUnitData {
@@ -62,12 +63,15 @@ typedef struct EvtUnit {
     u32 color50;       /* 0x50 */
     u8 pad54[0x18];   /* 0x54 */
     u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
-    u8 pad70[0x14];   /* 0x70 */
+    u8 pad70[0x10];   /* 0x70 */
+    void *effObj;      /* 0x80: effect object the vectors are written to */
     s32 currentTransitionValue; /* 0x84 */
     s32 previousTransitionValue; /* 0x88 */
     u8 pad8C[8];      /* 0x8c */
     s32 unk94;         /* 0x94 */
-    u8 pad98[0x10];   /* 0x98 */
+    u8 pad98[8];      /* 0x98 */
+    s32 pathId;        /* 0xa0 */
+    u8 padA4[4];      /* 0xa4 */
     u32 flags;         /* 0xa8 */
     s16 unkAC;         /* 0xac */
     u8 padAE[4];      /* 0xae */
@@ -90,6 +94,14 @@ typedef struct EvtUnit {
     s16 transitionElapsed; /* 0x1bc */
     s16 transitionDuration; /* 0x1be */
 } EvtUnit;
+
+extern void func_00117728(s32 path);
+extern void func_001171A0(s32 path);
+extern void dds3PreparePathVectorPair(s32 path);
+extern void effObjSetInnerFirstVec(void *obj, void *vec);
+extern void effObjSetInnerSecondVec(void *obj, void *vec);
+extern void func_00340DC8(f32, f32, f32);
+extern void effMiscQuatMultiplyVU();
 
 void func_0023C870(EvtUnit *unit, s32 a, s32 b, s32 c);
 
@@ -404,6 +416,22 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D360);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D5B8);
+s32 func_0023D5B8(EvtUnit *unit) {
+    f32 v[4];
+
+    func_00117728(unit->pathId);
+    func_001171A0(unit->pathId);
+    VU0_STORE_VF($vf10, v);
+    effObjSetInnerFirstVec(unit->effObj, v);
+    if (unit->flags & 0x10) {
+        dds3PreparePathVectorPair(unit->pathId);
+        VU0_MOVE_VF(vf11, vf10);
+        func_00340DC8(0.0f, 3.14159265f, 0.0f);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF($vf10, v);
+        effObjSetInnerSecondVec(unit->effObj, v);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D640);
