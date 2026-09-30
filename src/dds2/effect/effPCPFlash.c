@@ -30,8 +30,8 @@ struct PcpFlashWork1 {
     u8 pad2C[0x04];
     struct PcpFlashParticle10 *parts;
     s32 updateCount;
-    u32 unk38;
-    f32 unk3C;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -75,15 +75,15 @@ struct PcpFlashWork2 {
     u32 randomRange;
     u32 colorA;
     u32 colorB;
-    f32 unk2C;
-    f32 unk30;
+    f32 upSpan;
+    f32 acrossSpan;
     f32 maxScale;
-    f32 unk38;
+    f32 initialAngleSpread;
     u8 pad3C[0x04];
     PcpFlashRotatingParticle *parts;
     s32 updateCount;
-    u32 unk48;
-    f32 unk4C;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -94,8 +94,8 @@ struct PcpFlashPtc14 {
     u32 color;
     s32 age;
     f32 scale;
-    f32 unk0C;
-    f32 accumulator;
+    f32 initialScale;
+    f32 angle;
 };
 
 typedef struct PcpFlashWork3 PcpFlashWork3;
@@ -112,17 +112,17 @@ struct PcpFlashWork3 {
     u32 randomRange;
     u32 colorA;
     u32 colorB;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 orbitRadius;
     f32 maxScale;
-    f32 unk3C;
+    f32 tilt;
     f32 increment;
     u32 unk44;
     PcpFlashPtc14 *parts;
-    u32 unk4C;
-    u32 unk50;
-    f32 unk54;
+    u32 updateCount;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -164,8 +164,8 @@ struct PcpFlashWork4 {
     u32 unk4C;
     PcpFlashPtc1C *parts;
     u32 unk54;
-    u32 unk58;
-    f32 unk5C;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -208,12 +208,12 @@ struct PcpFlashWork5 {
     u32 unk54;
     PcpFlashPtc10 *parts;
     u32 unk5C;
-    u32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
+    u32 colorParam;
+    f32 renderScale;
+    f32 orbitRadius;
+    f32 normalSpan;
+    f32 upSpan;
+    f32 acrossSpan;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -224,11 +224,11 @@ struct PcpFlashPtc20A {
     u32 color;
     s32 age;
     f32 increment;
-    f32 unk0C;
-    f32 accumulator;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    f32 scale;
+    f32 angle;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 initialScale;
 };
 
 typedef struct PcpFlashWork6 PcpFlashWork6;
@@ -248,15 +248,15 @@ struct PcpFlashWork6 {
     s32 fadeOutTime;
     u32 colorA;
     u32 colorB;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 maxScale;
+    f32 angularSpread;
     u8 pad48[0x04];
     PcpFlashPtc20A *parts;
-    u32 unk50;
-    u32 unk54;
-    f32 unk58;
+    u32 updateCount;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -275,14 +275,14 @@ struct PcpFlashWork7 {
     s32 fadeOutTime;
     u32 colorA;
     u32 colorB;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
     u8 pad38[0x04];
     PcpFlashPtc10 *parts;
     s32 updateCount;
-    u32 unk44;
-    f32 unk48;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -293,11 +293,11 @@ struct PcpFlashPtc20B {
     u32 color;
     s32 age;
     f32 increment;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 accumulator;
-    f32 unk1C;
+    f32 thickness;
+    f32 radius;
+    f32 radialSpeed;
+    f32 angle;
+    f32 span;
 };
 
 typedef struct PcpFlashWork8 PcpFlashWork8;
@@ -317,16 +317,16 @@ struct PcpFlashWork8 {
     u32 colorB;
     f32 unk30;
     f32 unk34;
-    f32 unk38;
+    f32 maxScale;
     f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
     u8 pad4C[0x84];
     PcpFlashPtc20B *parts;
-    u32 unkD4;
-    u32 unkD8;
-    f32 unkDC;
+    u32 updateCount;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -347,17 +347,17 @@ struct PcpFlashWork9 {
     s32 fadeOutTime;
     u32 colorA;
     u32 colorB;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 orbitRadius;
     f32 maxScale;
-    f32 unk44;
+    f32 tilt;
     f32 increment;
     u32 unk4C;
     PcpFlashPtc14 *parts;
-    u32 unk54;
-    u32 unk58;
-    f32 unk5C;
+    u32 updateCount;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -376,15 +376,15 @@ struct PcpFlashWork10 {
     s32 fadeOutTime;
     u32 colorA;
     u32 colorB;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
+    f32 originOffset;
     u8 pad3C[0x04];
     PcpFlashPtc10 *parts;
     s32 updateCount;
-    u32 unk48;
-    f32 unk4C;
+    u32 colorParam;
+    f32 renderScale;
     u32 ownedBuffer;
     u32 resourceHandle;
 };
@@ -396,9 +396,9 @@ struct PcpFlashRotatingParticle {
     f32 scale;
     f32 position[3];
     f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 initialScale;
 };
 
 typedef struct PcpFlashRotationWork {
@@ -408,10 +408,10 @@ typedef struct PcpFlashRotationWork {
 
 extern void func_00336768(f32 angle, void *orientation);
 
-void func_00171E00(u64 arg0) {
+void func_00171E00(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00171CE0(effectParams);
 }
 
@@ -429,12 +429,12 @@ void func_00171E68(void *dst, void *src) {
 }
 
 void func_00171E78(PcpFlashWork1 *work, u32 value) {
-    work->unk38 = value;
+    work->colorParam = value;
 }
 
 void func_00171E80(PcpFlashWork1 *work, f32 value)
 {
-    work->unk3C = value;
+    work->renderScale = value;
 }
 
 /* Two vertices inherit color B, while the third receives color A with full alpha. */
@@ -508,7 +508,7 @@ typedef struct PcpFlashHandle {
     u8 pad00[0x40];
     f32 origin[3];
     u8 pad4C[0x10];
-    f32 unk5C;
+    f32 renderScale;
 } PcpFlashHandle;
 
 void effFlashUpdateWork1(PcpFlashWork1 *work) {
@@ -545,7 +545,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
     ramp = work->rampTime;
     maxScale = work->maxScale;
     restart = work->restartRandomly;
-    fadeParam = work->unk38;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
         s32 color;
@@ -593,16 +593,16 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk3C;
+    handle->renderScale = work->renderScale;
     func_00177CD0(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172318);
 
-void func_001724B0(u64 arg0) {
+void func_001724B0(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00172318(effectParams);
 }
 
@@ -620,12 +620,12 @@ void func_00172518(void *dst, void *src) {
 }
 
 void func_00172528(PcpFlashWork2 *work, u32 value) {
-    work->unk48 = value;
+    work->colorParam = value;
 }
 
 void func_00172530(PcpFlashWork2 *work, f32 value)
 {
-    work->unk4C = value;
+    work->renderScale = value;
 }
 
 extern s32 func_00177B78(s32 base);
@@ -704,12 +704,12 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     part->position[2] = direction[2];
     factor = func_00341240(D_003AA868) * 0.3f + 0.7f;
     scale = work->maxScale * factor;
-    part->unk28 = scale;
+    part->initialScale = scale;
     part->scale = scale;
     factor = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
-    part->unk20 = work->unk2C * factor;
-    part->unk24 = work->unk30 * factor;
-    part->angle = work->unk38 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
+    part->upSpan = work->upSpan * factor;
+    part->acrossSpan = work->acrossSpan * factor;
+    part->angle = work->initialAngleSpread * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
 }
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
@@ -729,11 +729,11 @@ void func_001727A0(PcpFlashWork2 *work, s32 index, void *view)
     f32 upLen;
 
     size = part->scale;
-    ratio = size / part->unk28;
+    ratio = size / part->initialScale;
     VEC3_SPLAT(scale, size);
-    acrossLen = part->unk24 * ratio;
+    acrossLen = part->acrossSpan * ratio;
     VEC3_SPLAT(across, acrossLen);
-    upLen = part->unk20 * ratio;
+    upLen = part->upSpan * ratio;
     VEC3_SPLAT(up, upLen);
     center[0] = part->position[0];
     center[1] = part->position[1];
@@ -829,7 +829,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
     maxScale = work->maxScale;
     restart = work->restartRandomly;
     range = work->randomRange;
-    fadeParam = work->unk48;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
         s32 color;
@@ -879,16 +879,16 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk4C;
+    handle->renderScale = work->renderScale;
     func_001778B0(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00172C48);
 
-void func_00172E68(u64 arg0) {
+void func_00172E68(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00172C48(effectParams);
 }
 
@@ -906,12 +906,12 @@ void func_00172ED0(void *dst, void *src) {
 }
 
 void func_00172EE0(PcpFlashWork3 *work, u32 value) {
-    work->unk50 = value;
+    work->colorParam = value;
 }
 
 void func_00172EE8(PcpFlashWork3 *work, f32 value)
 {
-    work->unk54 = value;
+    work->renderScale = value;
 }
 
 void func_00172EF0(PcpFlashWork3 *work, s32 flag, s32 param) {
@@ -955,20 +955,20 @@ void func_00172FE0(PcpFlashWork3 *work, s32 index)
     f32 widthC;
 
     size = part->scale;
-    ratio = size / part->unk0C;
+    ratio = size / part->initialScale;
     VEC3_SPLAT(scaleA, size);
-    widthB = work->unk30 * ratio;
-    widthC = work->unk2C * ratio;
+    widthB = work->acrossSpan * ratio;
+    widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = func_003407A0(part->accumulator);
+    unit[0] = func_003407A0(part->angle);
     unit[1] = 0;
-    sinv = sdfSinPoly(part->accumulator);
+    sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
-    offset[0] = unit[0] * work->unk34;
+    offset[0] = unit[0] * work->orbitRadius;
     offset[1] = 0;
-    offset[2] = sinv * work->unk34;
-    height = work->unk3C;
+    offset[2] = sinv * work->orbitRadius;
+    height = work->tilt;
     D_003B1240[0] = unit[0] * height;
     D_003B1240[1] = height + -1.0f;
     D_003B1240[2] = sinv * height;
@@ -1013,7 +1013,7 @@ void func_001731C8(PcpFlashWork3 *work, s32 index) {
     PcpFlashPtc14 *part;
 
     part = &work->parts[index];
-    part->accumulator += work->increment;
+    part->angle += work->increment;
 }
 
 void effFlashUpdateWork3(PcpFlashWork3 *work) {
@@ -1037,14 +1037,14 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
     maxScale = work->maxScale;
     restart = work->restartRandomly;
     range = work->randomRange;
-    fadeParam = work->unk50;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
         s32 color;
         f32 blend;
 
         if (part->age == 0) {
-            part->unk0C = maxScale;
+            part->initialScale = maxScale;
             if (ramp == 0) {
                 part->scale = maxScale;
             } else {
@@ -1084,19 +1084,19 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
     }
     handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
-    work->unk4C = work->unk4C + 1;
+    work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk54;
+    handle->renderScale = work->renderScale;
     func_001778B0(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173458);
 
-void func_00173690(u64 arg0) {
+void func_00173690(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00173458(effectParams);
 }
 
@@ -1114,12 +1114,12 @@ void func_001736F8(void *dst, void *src) {
 }
 
 void func_00173708(PcpFlashWork4 *work, u32 value) {
-    work->unk58 = value;
+    work->colorParam = value;
 }
 
 void func_00173710(PcpFlashWork4 *work, f32 value)
 {
-    work->unk5C = value;
+    work->renderScale = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173718);
@@ -1137,10 +1137,10 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173AA0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173D40);
 
-void func_00173F90(u64 arg0) {
+void func_00173F90(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00173D40(effectParams);
 }
 
@@ -1158,12 +1158,12 @@ void func_00173FF8(void *dst, void *src) {
 }
 
 void func_00174008(PcpFlashWork5 *work, u32 value) {
-    work->unk60 = value;
+    work->colorParam = value;
 }
 
 void func_00174010(PcpFlashWork5 *work, f32 value)
 {
-    work->unk64 = value;
+    work->renderScale = value;
 }
 
 void func_00174018(PcpFlashWork5 *work, s32 flag, s32 param) {
@@ -1202,16 +1202,16 @@ void func_00174108(PcpFlashWork5 *work, s32 index)
     f32 sinv;
     f32 height;
 
-    VEC3_SPLAT(scaleA, work->unk6C);
-    VEC3_SPLAT(scaleB, work->unk74);
-    VEC3_SPLAT(scaleC, work->unk70);
+    VEC3_SPLAT(scaleA, work->normalSpan);
+    VEC3_SPLAT(scaleB, work->acrossSpan);
+    VEC3_SPLAT(scaleC, work->upSpan);
     unit[0] = func_003407A0(part->accumulator);
     unit[1] = 0;
     sinv = sdfSinPoly(part->accumulator);
     unit[2] = sinv;
-    offset[0] = unit[0] * work->unk68;
+    offset[0] = unit[0] * work->orbitRadius;
     offset[1] = 0;
-    offset[2] = sinv * work->unk68;
+    offset[2] = sinv * work->orbitRadius;
     height = part->unk0C;
     D_003B1260[0] = unit[0] * height;
     D_003B1260[1] = height + -1.0f;
@@ -1264,10 +1264,10 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174648);
 
-void func_00174808(u64 arg0) {
+void func_00174808(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00174648(effectParams);
 }
 
@@ -1285,12 +1285,12 @@ void func_00174870(void *dst, void *src) {
 }
 
 void func_00174880(PcpFlashWork6 *work, u32 value) {
-    work->unk54 = value;
+    work->colorParam = value;
 }
 
 void func_00174888(PcpFlashWork6 *work, f32 value)
 {
-    work->unk58 = value;
+    work->renderScale = value;
 }
 
 void func_00174890(PcpFlashWork6 *work, s32 flag, s32 param) {
@@ -1322,15 +1322,15 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     f32 factor;
     f32 scale;
 
-    part->accumulator = func_00341240(D_003AA868) * 6.2831853f;
+    part->angle = func_00341240(D_003AA868) * 6.2831853f;
     factor = func_00341240(D_003AA868) * 0.3f + 0.7f;
-    scale = work->unk40 * factor;
-    part->unk1C = scale;
-    part->unk0C = scale;
+    scale = work->maxScale * factor;
+    part->initialScale = scale;
+    part->scale = scale;
     factor = (func_00341240(D_003AA868) * 0.5f + 0.5f) * 0.5f;
-    part->unk14 = work->unk38 * factor;
-    part->unk18 = work->unk3C * factor;
-    part->increment = work->unk44 * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
+    part->upSpan = work->upSpan * factor;
+    part->acrossSpan = work->acrossSpan * factor;
+    part->increment = work->angularSpread * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
 }
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
@@ -1349,14 +1349,14 @@ void func_00174A58(PcpFlashWork6 *work, s32 index, void *view)
     f32 acrossLen;
     f32 upLen;
 
-    size = part->unk0C;
-    ratio = size / part->unk1C;
+    size = part->scale;
+    ratio = size / part->initialScale;
     VEC3_SPLAT(scale, size);
-    acrossLen = part->unk18 * ratio;
+    acrossLen = part->acrossSpan * ratio;
     VEC3_SPLAT(across, acrossLen);
-    upLen = part->unk14 * ratio;
+    upLen = part->upSpan * ratio;
     VEC3_SPLAT(up, upLen);
-    func_00336768(part->accumulator, view);
+    func_00336768(part->angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1403,7 +1403,7 @@ void effFlashAdvanceOrbitPhase(PcpFlashWork6 *work, s32 index, void *orientation
     PcpFlashPtc20A *part;
 
     part = &work->parts[index];
-    part->accumulator += part->increment;
+    part->angle += part->increment;
 }
 
 void effFlashUpdateWork6(PcpFlashWork6 *work) {
@@ -1429,12 +1429,12 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     part = work->parts;
     lifetime = work->lifetime;
     ramp = work->rampTime;
-    maxScale = work->unk40;
+    maxScale = work->maxScale;
     fadeIn = work->fadeInTime;
     fadeOut = work->fadeOutTime;
     restart = work->restartRandomly;
     range = work->randomRange;
-    fadeParam = work->unk54;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
         s32 color;
@@ -1445,9 +1445,9 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
             func_00174A58(work, index, &axis);
             func_00174890(work, index, 0);
             if (ramp == 0) {
-                part->unk0C = maxScale;
+                part->scale = maxScale;
             } else {
-                part->unk0C = 0.0f;
+                part->scale = 0.0f;
             }
             part->color = 0x80808080;
         } else {
@@ -1461,11 +1461,11 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
                 s32 remain;
 
                 if (ramp == 0) {
-                    part->unk0C = maxScale;
+                    part->scale = maxScale;
                 } else {
-                    part->unk0C = (maxScale * (f32)part->age) / (f32)ramp;
-                    if (maxScale < part->unk0C) {
-                        part->unk0C = maxScale;
+                    part->scale = (maxScale * (f32)part->age) / (f32)ramp;
+                    if (maxScale < part->scale) {
+                        part->scale = maxScale;
                     }
                 }
                 effFlashAdvanceOrbitPhase(work, index, &axis);
@@ -1489,19 +1489,19 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     }
     handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
-    work->unk50 = work->unk50 + 1;
+    work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk58;
+    handle->renderScale = work->renderScale;
     func_001778B0(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174F00);
 
-void func_00175038(u64 arg0) {
+void func_00175038(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00174F00(effectParams);
 }
 
@@ -1519,12 +1519,12 @@ void func_001750A0(void *dst, void *src) {
 }
 
 void func_001750B0(PcpFlashWork7 *work, u32 value) {
-    work->unk44 = value;
+    work->colorParam = value;
 }
 
 void func_001750B8(PcpFlashWork7 *work, f32 value)
 {
-    work->unk48 = value;
+    work->renderScale = value;
 }
 
 void func_001750C0(PcpFlashWork7 *work, s32 index, s32 param)
@@ -1621,13 +1621,13 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     count = work->particleCount;
     part = work->parts;
     lifetime = work->lifetime;
-    startA = work->unk2C;
-    startB = work->unk30;
-    decay = work->unk34;
+    startA = work->initialRadius;
+    startB = work->initialRadialSpeed;
+    decay = work->radialDamping;
     fadeIn = work->fadeInTime;
     fadeOut = work->fadeOutTime;
     restart = work->restartRandomly;
-    fadeParam = work->unk44;
+    fadeParam = work->colorParam;
     active = 0;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
@@ -1674,7 +1674,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk48;
+    handle->renderScale = work->renderScale;
     if (active != 0) {
         func_00177CD0(handle);
     }
@@ -1682,10 +1682,10 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175598);
 
-void func_00175770(u64 arg0) {
+void func_00175770(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00175598(effectParams);
 }
 
@@ -1703,12 +1703,12 @@ void func_001757D8(void *dst, void *src) {
 }
 
 void func_001757E8(PcpFlashWork8 *work, u32 value) {
-    work->unkD8 = value;
+    work->colorParam = value;
 }
 
 void func_001757F0(PcpFlashWork8 *work, f32 value)
 {
-    work->unkDC = value;
+    work->renderScale = value;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001757F8);
@@ -1734,15 +1734,15 @@ void func_001759C0(PcpFlashWork8 *work, s32 index, void *view)
     f32 span;
     f32 *mirror;
 
-    center = part->unk10;
+    center = part->radius;
     VEC3_SPLAT(middle, center);
-    outerEdge = center + part->unk0C;
+    outerEdge = center + part->thickness;
     VEC3_SPLAT(outer, outerEdge);
-    innerEdge = center - part->unk0C;
+    innerEdge = center - part->thickness;
     VEC3_SPLAT(inner, innerEdge);
-    span = part->unk1C;
+    span = part->span;
     VEC3_SPLAT(size, span);
-    func_00336768(part->accumulator, view);
+    func_00336768(part->angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1797,7 +1797,7 @@ void func_00175BE8(PcpFlashWork8 *work, s32 index, void *orientation) {
     PcpFlashPtc20B *part;
 
     part = &work->parts[index];
-    part->accumulator += part->increment;
+    part->angle += part->increment;
 }
 
 extern void func_001758E8();
@@ -1826,15 +1826,15 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
     count = work->particleCount;
     part = work->parts;
     lifetime = work->lifetime;
-    maxScale = work->unk38;
+    maxScale = work->maxScale;
     fadeIn = work->fadeInTime;
     fadeOut = work->fadeOutTime;
-    startA = work->unk40;
-    startB = work->unk44;
-    decay = work->unk48;
+    startA = work->initialRadius;
+    startB = work->initialRadialSpeed;
+    decay = work->radialDamping;
     restart = work->restartRandomly;
     range = work->randomRange;
-    fadeParam = work->unkD8;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
 
@@ -1845,17 +1845,17 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
                 func_001758E8(work, index, &axis);
                 func_001759C0(work, index, &axis);
                 func_001757F8(work, index, 0);
-                part->unk0C = maxScale;
-                part->unk10 = startA;
-                part->unk14 = startB;
+                part->thickness = maxScale;
+                part->radius = startA;
+                part->radialSpeed = startB;
                 part->color = 0x80808080;
             } else if (age > 0) {
-                f32 speed = part->unk14;
+                f32 speed = part->radialSpeed;
                 s32 remain;
                 f32 blend;
 
-                part->unk14 = speed * decay;
-                part->unk10 = part->unk10 + speed;
+                part->radialSpeed = speed * decay;
+                part->radius = part->radius + speed;
                 func_00175BE8(work, index, &axis);
                 func_001759C0(work, index, &axis);
                 age = part->age;
@@ -1881,19 +1881,19 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
     }
     handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
-    work->unkD4 = work->unkD4 + 1;
+    work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unkDC;
+    handle->renderScale = work->renderScale;
     func_00177FD8(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00175EE8);
 
-void func_00176118(u64 arg0) {
+void func_00176118(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00175EE8(effectParams);
 }
 
@@ -1911,12 +1911,12 @@ void func_00176180(void *dst, void *src) {
 }
 
 void func_00176190(PcpFlashWork9 *work, u32 value) {
-    work->unk58 = value;
+    work->colorParam = value;
 }
 
 void func_00176198(PcpFlashWork9 *work, f32 value)
 {
-    work->unk5C = value;
+    work->renderScale = value;
 }
 
 void func_001761A0(PcpFlashWork9 *work, s32 flag, s32 param) {
@@ -1960,20 +1960,20 @@ void func_00176290(PcpFlashWork9 *work, s32 index)
     f32 widthC;
 
     size = part->scale;
-    ratio = size / part->unk0C;
+    ratio = size / part->initialScale;
     VEC3_SPLAT(scaleA, size);
-    widthB = work->unk38 * ratio;
-    widthC = work->unk34 * ratio;
+    widthB = work->acrossSpan * ratio;
+    widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = func_003407A0(part->accumulator);
+    unit[0] = func_003407A0(part->angle);
     unit[1] = 0;
-    sinv = sdfSinPoly(part->accumulator);
+    sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
-    offset[0] = unit[0] * work->unk3C;
+    offset[0] = unit[0] * work->orbitRadius;
     offset[1] = 0;
-    offset[2] = sinv * work->unk3C;
-    height = work->unk44;
+    offset[2] = sinv * work->orbitRadius;
+    height = work->tilt;
     D_003B1290[0] = unit[0] * height;
     D_003B1290[1] = height + -1.0f;
     D_003B1290[2] = sinv * height;
@@ -2018,7 +2018,7 @@ void func_00176478(PcpFlashWork9 *work, s32 index) {
     PcpFlashPtc14 *part;
 
     part = &work->parts[index];
-    part->accumulator += work->increment;
+    part->angle += work->increment;
 }
 
 void effFlashUpdateWork9(PcpFlashWork9 *work) {
@@ -2044,7 +2044,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
     maxScale = work->maxScale;
     restart = work->restartRandomly;
     range = work->randomRange;
-    fadeParam = work->unk58;
+    fadeParam = work->colorParam;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
 
@@ -2052,7 +2052,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
             func_001761A0(work, index, 0);
         } else {
             if (age == 0) {
-                part->unk0C = maxScale;
+                part->initialScale = maxScale;
                 if (ramp == 0) {
                     part->scale = maxScale;
                 } else {
@@ -2097,19 +2097,19 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
     }
     handle = (PcpFlashHandle *)work->resourceHandle;
     handle->origin[0] = work->origin[0];
-    work->unk54 = work->unk54 + 1;
+    work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
-    handle->unk5C = work->unk5C;
+    handle->renderScale = work->renderScale;
     func_001778B0(handle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176758);
 
-void func_00176898(u64 arg0) {
+void func_00176898(u64 table) {
     u64 effectParams;
 
-    effectParams = effParamTableGetBlock(arg0, 0);
+    effectParams = effParamTableGetBlock(table, 0);
     func_00176758(effectParams);
 }
 
@@ -2127,12 +2127,12 @@ void func_00176900(void *dst, void *src) {
 }
 
 void func_00176910(PcpFlashWork10 *work, u32 value) {
-    work->unk48 = value;
+    work->colorParam = value;
 }
 
 void func_00176918(PcpFlashWork10 *work, f32 value)
 {
-    work->unk4C = value;
+    work->renderScale = value;
 }
 
 void func_00176920(PcpFlashWork10 *work, s32 index, s32 param)
@@ -2230,13 +2230,13 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
     count = work->particleCount;
     part = work->parts;
     lifetime = work->lifetime;
-    startA = work->unk2C;
-    startB = work->unk30;
-    decay = work->unk34;
+    startA = work->initialRadius;
+    startB = work->initialRadialSpeed;
+    decay = work->radialDamping;
     fadeIn = work->fadeInTime;
     fadeOut = work->fadeOutTime;
     restart = work->restartRandomly;
-    fadeParam = work->unk48;
+    fadeParam = work->colorParam;
     active = 0;
     for (index = 0; index < count; index++, part++) {
         s32 age = part->age;
@@ -2278,13 +2278,13 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
             }
         }
     }
-    scale = work->unk38 * work->unk4C;
+    scale = work->originOffset * work->renderScale;
     handle = (PcpFlashHandle *)work->resourceHandle;
     work->updateCount = work->updateCount + 1;
     handle->origin[0] = work->origin[0] + axis[0] * scale;
     handle->origin[1] = work->origin[1] + axis[1] * scale;
     handle->origin[2] = work->origin[2] + axis[2] * scale;
-    handle->unk5C = work->unk4C;
+    handle->renderScale = work->renderScale;
     if (active != 0) {
         func_00177CD0(handle);
     }
