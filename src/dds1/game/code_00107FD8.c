@@ -97,6 +97,12 @@ typedef struct {
     f32 w;
 } DrawVec4;
 
+/* The allocated draw state's float at +0x1C is initialized to 1. */
+typedef struct EvtDrawState {
+    u8 pad00[0x1C];
+    f32 value1C;
+} EvtDrawState;
+
 extern DrawVec4 D_00324790;
 
 extern DrawVec4 D_003C2C20;
@@ -220,12 +226,12 @@ void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
 void evtEnsureDrawVectorState(void) {
     if (D_003BD6B0 == NULL) {
         D_003BD6B0 = func_002DA730();
-        *(f32 *)((u8 *)D_003BD6B0 + 0x1C) = 1.0f;
+        ((EvtDrawState *)D_003BD6B0)->value1C = 1.0f;
     }
 }
 
-void evtSetDrawSurfaceIndex(u32 arg0) {
-    D_003BA8E8 = arg0;
+void evtSetDrawSurfaceIndex(u32 surfaceIndex) {
+    D_003BA8E8 = surfaceIndex;
 }
 
 typedef struct EvtDrawSurface {
@@ -233,6 +239,13 @@ typedef struct EvtDrawSurface {
     void (*submit)(struct EvtDrawSurface *, void *);
     u8 unk_14[0xC];
 } EvtDrawSurface;
+
+/* GS AD packet payload starts after the 0x20-byte command header. */
+typedef struct EvtGsCommand {
+    u8 pad00[0x20];
+    u64 data;
+    u64 registerId;
+} EvtGsCommand;
 
 extern EvtDrawSurface D_00324B48[];
 
@@ -252,35 +265,35 @@ extern void sdfPktInit(void *, s32, s32, s32, s32);
 
 extern void *func_002E4908();
 
-void evtSubmitGsRegister47(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
-    u8 *command;
+    EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = func_002E13E0(packet, 0x30);
-    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
-    *(u64 *)(command + 0x28) = 0x47;
+    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
+    command->registerId = 0x47;
     sdfAppendPacket(list, packet);
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
-void evtSubmitGsRegister48(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
-    u8 *command;
+    EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = func_002E13E0(packet, 0x30);
-    *(u64 *)(command + 0x20) = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
-    *(u64 *)(command + 0x28) = 0x48;
+    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
+    command->registerId = 0x48;
     sdfAppendPacket(list, packet);
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
@@ -289,16 +302,16 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_00108CB8);
 void evtSubmitTexturePacket(s32 value) {
     void *list = sdfAllocPacketAligned(0x20);
     void *packet;
-    u8 *command;
+    EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = func_002E13E0(packet, 0x30);
-    *(u64 *)(command + 0x20) = ((u64)value << 32) | 0x64;
-    *(u64 *)(command + 0x28) = 0x42;
+    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command->data = ((u64)value << 32) | 0x64;
+    command->registerId = 0x42;
     sdfAppendPacket(list, packet);
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
@@ -318,8 +331,8 @@ void func_00108E60(void) {
     func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
     func_002D40E8(list, texture);
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
@@ -333,8 +346,8 @@ void func_00108F00(void) {
     func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
     func_002D40E8(list, texture);
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
@@ -372,24 +385,24 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_002EF2B0(D_003245B0, D_003245D0, 2, 0x80));
     {
-        u8 *surface = (u8 *)D_00324B48 + (D_003BA8E8 << 5);
-        (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+        EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
+        surface->submit(surface, list);
     }
 }
 
-void func_00109AF0(s32 x, s32 y, s32 arg2, s32 arg3) {
+void func_00109AF0(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     u8 pkt[16];
     void *list;
     void *packet;
-    u8 *surface;
+    EvtDrawSurface *surface;
     list = (void *)sdfCreateResetPacketList();
     packet = sdfAllocPacketAligned(0x40);
     func_002D5608(packet);
     sdfAppendPacket(list, packet);
-    sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, arg2);
-    sdfAppendPacket(list, func_002E4908(pkt, arg3));
-    surface = D_00325748;
-    (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
+    sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
+    sdfAppendPacket(list, func_002E4908(pkt, drawArg));
+    surface = (EvtDrawSurface *)D_00325748;
+    surface->submit(surface, list);
 }
 
 void func_00109BC0(s32 width, s32 height, u64 first, u64 second) {
@@ -412,7 +425,7 @@ typedef struct EvtSelState {
     s32 count;
 } EvtSelState;
 
-s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
+s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
     EvtSelState *node;
     if (frames == 0) {
         return 0;
@@ -427,8 +440,8 @@ s32 evtSelStateCreate(s32 limit, s16 frames, s32 arg2, s32 arg3) {
     } else {
         node->limit = limit;
     }
-    ((EvtSelState *)D_003BD760)->unk_08 = arg2;
-    ((EvtSelState *)D_003BD760)->unk_0C = arg3;
+    ((EvtSelState *)D_003BD760)->unk_08 = value08;
+    ((EvtSelState *)D_003BD760)->unk_0C = value0C;
     ((EvtSelState *)D_003BD760)->unk_10 = frames;
     ((EvtSelState *)D_003BD760)->unk_12 = frames;
     ((EvtSelState *)D_003BD760)->unk_14 = frames;
@@ -504,12 +517,12 @@ u8 evtWaitFileMenuTaskThree(void) {
     return operationResult == 0;
 }
 
-void func_0010A288(u32 arg0, s32 arg1) {
-    if (arg1 == 0) {
+void func_0010A288(u32 unused, u32 *value) {
+    if (value == 0) {
         func_0026BCE8(0);
         return;
     }
-    func_0026BCE8(*(u32 *)arg1);
+    func_0026BCE8(*value);
 }
 
 u32 func_0010A2B8(void) {
@@ -580,9 +593,9 @@ u8 func_0010A3E8(void) {
     return operationResult == 0;
 }
 
-void evtStartAreaFromSelection(u32 arg0, u32 arg1) {
+void evtStartAreaFromSelection(u32 selection, u32 area) {
     kwlnFadeBackgroundStartOut(0);
-    func_00125E08(arg1, arg0);
+    func_00125E08(area, selection);
 }
 
 u32 evtPollSelectedAreaReady(void) {
@@ -716,13 +729,13 @@ u8 func_0010A668(void) {
     return taskResult == 0;
 }
 
-void evtDispatchSelectionCommand(s32 arg0, s32 *arg1) {
-    if (arg0 == 0) {
-        if (arg1 == NULL) {
+void evtDispatchSelectionCommand(s32 source, s32 *params) {
+    if (source == 0) {
+        if (params == NULL) {
             func_001A11F0(1, 0, 0);
         }
         else {
-            func_001A11F0(0, arg1[0], arg1[1]);
+            func_001A11F0(0, params[0], params[1]);
         }
     }
     else {
@@ -824,9 +837,9 @@ u8 func_0010A890(void) {
     return campState == 0;
 }
 
-void evtCreateSkyAndCampTasks(u32 arg0, u32 arg1) {
+void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
     evtCreateSkyTask();
-    func_002449F0(arg1);
+    func_002449F0(campMode);
 }
 
 u32 evtDestroySkyAndCampTasks(void) {
@@ -843,10 +856,10 @@ u8 func_0010A908(void) {
     return taskState == 0;
 }
 
-void evtCreateSkyAndFieldTasks(u32 arg0, s32 arg1) {
+void evtCreateSkyAndFieldTasks(u32 unused, u32 *fieldArgs) {
     evtCreateSkyTask();
-    if (arg1 != 0) {
-        func_00249FA8(*(u32 *)arg1, ((u32 *)arg1)[1]);
+    if (fieldArgs != 0) {
+        func_00249FA8(fieldArgs[0], fieldArgs[1]);
         return;
     }
     func_00249FA8(0, 1);
@@ -941,12 +954,12 @@ u32 func_0010AB00(void) {
     return 0;
 }
 
-void evtSelectFontResource(s32 arg0, s32 *arg1) {
-    if (arg1 == NULL) {
+void evtSelectFontResource(s32 unused, s32 *lmapArgs) {
+    if (lmapArgs == NULL) {
         fldStartLmapTask(0);
     }
     else {
-        fldStartLmapTask(arg1[0]);
+        fldStartLmapTask(lmapArgs[0]);
     }
     D_0032E3C0[0] = 0x3E7;
 }

@@ -2,9 +2,12 @@
 
 #include "pcp_vu0.h"
 
-extern s32 D_003BB014;
+typedef struct ParListNode ParListNode;
+typedef struct ParCellNode ParCellNode;
 
-extern s32 D_003BB010;
+extern ParCellNode *D_003BB014;
+
+extern ParListNode *D_003BB010;
 
 /* Particle object (layout mirrors effect/parManager.c ParObj, which owns
  * the type; only the fields this TU touches are named here). */
@@ -41,6 +44,15 @@ typedef struct ParDispatch {
     u32 unk8;        /* 0x8 */
 } ParDispatch; /* 0xC */
 
+/* Kind resource owner: release flag and handles at +0x10/+0x40. */
+typedef struct ParReleaseRecord {
+    u16 released;       /* 0x00 */
+    u8 pad02[0x0E];
+    u32 allocation;     /* 0x10 */
+    u8 pad14[0x2C];
+    u32 asset;          /* 0x40 */
+} ParReleaseRecord;
+
 /* 20-byte cell initialized by parCellInit (grey plus zeros). */
 typedef struct ParCell {
     u128 *history;   /* 0x00 */
@@ -49,6 +61,17 @@ typedef struct ParCell {
     s32 unk0C;       /* 0x0C cleared */
     u32 color;       /* 0x10 set to grey 0x80808080 */
 } ParCell; /* 0x14 */
+
+/* Free-list links mirror the DDS2 particle unit. */
+struct ParListNode {
+    u8 pad00[0x54];
+    ParListNode *next;
+};
+
+struct ParCellNode {
+    u8 pad00[0x24];
+    ParCellNode *next;
+};
 
 extern ParDispatch D_0034E250[];
 
@@ -271,19 +294,19 @@ extern void func_0015B058(s32, s32, u32);
 
 extern void func_0015B148(s32, s32, u32);
 
-void parDispatchKindUpdate(void *work, s32 index, u32 color) {
-    switch (*(u16 *)work) {
+void parDispatchKindUpdate(ParSystem *work, s32 index, u32 color) {
+    switch ((u16)work->kind) {
     case 1:
-        func_00159CF0(*(s32 *)((u8 *)work + 8));
+        func_00159CF0(work->vertexWordCount);
         return;
     case 2:
-        func_0015AF70(*(s32 *)((u8 *)work + 0x10), index, color);
+        func_0015AF70(work->handle, index, color);
         return;
     case 3:
-        func_0015B058(*(s32 *)((u8 *)work + 0x14), index, color);
+        func_0015B058((s32)work->cells, index, color);
         return;
     case 4:
-        func_0015B148(*(s32 *)((u8 *)work + 0x14), index, color);
+        func_0015B148((s32)work->cells, index, color);
         break;
     }
 }
@@ -292,19 +315,19 @@ extern void parClearSlotFlag(s32);
 
 extern void func_00188510(s32);
 
-void parDispatchKindInit(void *work, s32 index) {
-    switch (*(u16 *)work) {
+void parDispatchKindInit(ParSystem *work, s32 index) {
+    switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag(*(s32 *)((u8 *)work + 8));
+        parClearSlotFlag(work->vertexWordCount);
         return;
     case 2:
-        parCellInit((void *)*(s32 *)((u8 *)work + 0x10), index);
+        parCellInit((void *)work->handle, index);
         return;
     case 3:
-        parCellInit((void *)*(s32 *)((u8 *)work + 0x14), index);
+        parCellInit((void *)work->cells, index);
         return;
     case 4:
-        func_00188510(*(s32 *)((u8 *)work + 0x14));
+        func_00188510((s32)work->cells);
         break;
     }
 }
@@ -425,21 +448,21 @@ void func_0015B250(void) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
 
-void func_0015B3D8(u16 *arg0) {
-    *arg0 = 1;
-    sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
-    func_002D0918(*(u32 *)(arg0 + 8));
+void func_0015B3D8(ParReleaseRecord *record) {
+    record->released = 1;
+    sdfQueueAssetRelease(record->asset);
+    func_002D0918(record->allocation);
 }
 
-void func_0015B410(s32 arg0) {
-    *(s32 *)(arg0 + 0x54) = D_003BB010;
-    D_003BB010 = arg0;
+void func_0015B410(ParListNode *node) {
+    node->next = D_003BB010;
+    D_003BB010 = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
 
-void func_0015B648(s32 arg0) {
-    func_002DA438(*(u32 *)(arg0 + 0x40));
+void func_0015B648(ParReleaseRecord *record) {
+    func_002DA438(record->asset);
 }
 
 void parControlInit(void) {
@@ -511,17 +534,17 @@ void func_0015B8B8(ParSystem *system) {
     func_002D0918(system->handle);
 }
 
-void parCellInit(void *work, s32 index) {
-    ParCell *cell = (ParCell *)(index * 20 + *(u32 *)((u8 *)work + 0x14));
+void parCellInit(ParSystem *system, s32 index) {
+    ParCell *cell = (ParCell *)(index * 20 + (u32)system->cells);
 
     cell->color = 0x80808080;
     cell->unk0C = 0;
     cell->vertexCount = 0;
 }
 
-void func_0015B918(s32 arg0) {
-    *(s32 *)(arg0 + 0x24) = D_003BB014;
-    D_003BB014 = arg0;
+void func_0015B918(ParCellNode *node) {
+    node->next = D_003BB014;
+    D_003BB014 = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B928);
@@ -754,8 +777,8 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CDF0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CEF8);
 
-void func_0015D078(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 2) = arg1;
+void func_0015D078(s32 recordAddress, u16 value) {
+    *(u16 *)(recordAddress + 2) = value;
 }
 
 void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
