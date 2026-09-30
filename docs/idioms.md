@@ -503,6 +503,9 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_MOVE_VF(dst, src)` | `vmove.xyzw dst,src` between calls (keeping vf10's result in vf11) |
 | `VU0_APPLY_MATRIX(dst, src)` | `vmulax.xyzw ACC,vf28,srcx; vmadday vf29,srcy; vmaddaz vf30,srcz; vmaddw dst,vf31,srcw`: primary matrix times a vector (libvu0 `sceVu0ApplyMatrix` core) |
 | `VU0_ROTATE_VEC(dst, src)` | `vmulax.xyzw ACC,vf28,srcx; vmadday vf29,srcy; vmaddz.xyzw dst,vf30,srcz`: rotation part of the primary matrix times a vector (emitter init/update in `code_00151F58` / `code_00159B48`) |
+| `VU0_TRANSFORM_POINT(dst, src)` | as `VU0_APPLY_MATRIX` but `vmaddw dst,vf31,vf0w`: primary matrix times a point (w = 1) |
+| `VU0_PERSPECTIVE_DIVIDE_VF10()` | `vdiv Q,vf0w,vf10w; vmove.w vf10,vf0; vwaitq; vmulq.xyzw vf10,vf10,Q` |
+| `VU0_SCALE_MATRIX_ROWS(src)` | `vmulx.xyzw vf28,vf28,srcx; vmuly.xyzw vf29,vf29,srcy; vmulz.xyzw vf30,vf30,srcz`: scale the primary matrix rows |
 | `VU0_SUB(dst, a, b)` / `VU0_ADD` / `VU0_MUL` | `vsub.xyzw` / `vadd.xyzw` / `vmul.xyzw dst,a,b` between calls (position differences, blend sums) |
 | `VU0_CLEAR_W(vf)` / `VU0_SET_W_ONE(vf)` | `vmulx.w vf,vf,vf0x` (w = 0) / `vmove.w vf,vf0` (w = 1): the w fix-up before a colour pack or point store |
 | `VU0_SET_AXIS_CLEAR_W(f, axis)` | `mfc1 $2,f; qmtc2.ni $2,vf2; vaddx.axis vf10,vf0,vf2x; vmulx.w vf10,vf10,vf0x` as one block: vf10.axis = f, w = 0 (event unit path/aim vectors; separate `VU0_SCALAR_OP` + `VU0_CLEAR_W` moves a neighbouring `daddu`) |

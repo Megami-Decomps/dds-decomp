@@ -119,6 +119,18 @@
 #define VU0_ROTATE_VEC(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
     "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder")
+/* dst = primary matrix times the point src (w taken as 1: vmaddw with vf0w). */
+#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+/* vf10 /= vf10.w, then w = 1: the perspective divide after a point transform. */
+#define VU0_PERSPECTIVE_DIVIDE_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvdiv Q, vf0w, vf10w\n\tvmove.w vf10, vf0\n\tvwaitq\n\t" \
+    "vmulq.xyzw vf10, vf10, Q\n\t.set reorder")
+/* Scale the rows of the primary matrix by src.xyz (vf28 *= x, vf29 *= y, vf30 *= z). */
+#define VU0_SCALE_MATRIX_ROWS(src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw vf28, vf28, " #src "x\n\tvmuly.xyzw vf29, vf29, " #src "y\n\t" \
+    "vmulz.xyzw vf30, vf30, " #src "z\n\t.set reorder")
 /* dst = a - b, dst = a + b, dst = a * b on all four components
  * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
 #define VU0_SUB(dst, a, b) __asm__ volatile ( \
