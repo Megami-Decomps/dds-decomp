@@ -78,6 +78,36 @@ extern void ptyClearProfileRecords(void);
 
 extern void ptyRebuildAllProfiles(void);
 
+extern void func_002B7F80(u8 *, s32);
+
+extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern void func_002BB510(s32, s32, s32, s32, s32);
+
+extern void func_002C0718(s32, s32, s32, u8 *, s32);
+
+extern void func_002AA530(s32, s32, s32, s32, u8 *, s32);
+
+extern s32 mdlFlagTest(u32);
+
+extern s32 func_0035C860(char *, const char *, ...);
+
+extern u32 func_00309138(u32, u32, s32);
+
+extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
+
+extern char D_00437B80[];
+
+extern u32 func_00303D70(u32 *);
+
+extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
+
+extern u32 D_003E6858[][2];
+
+extern u32 D_003E68D8[][2];
+
+extern u32 D_003E6900[][2];
+
 void func_002A9068(void) {
     s32 offset = 0;
     s32 i = 4;
@@ -398,7 +428,22 @@ void func_002A95B0(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     func_002BE6E8(arg0, arg1[1]);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9640);
+void func_002A9640(u32 *list, u32 *state) {
+    s32 i;
+    s32 flag;
+
+    func_002A91A0(state);
+    flag = func_00303D70(list) == 1;
+    for (i = 0; i < 16; i++) {
+        effAppendListEntry(list, D_0042A950, D_003E6858[i][flag], 1, state + 0x10 / 4 + i);
+    }
+    for (i = 0; i < 5; i++) {
+        effAppendListEntry(list, D_0042A950, D_003E68D8[i][flag], 1, state + 0x50 / 4 + i);
+    }
+    for (i = 0; i < 2; i++) {
+        effAppendListEntry(list, "/camp/spr/n_sta/", D_003E6900[i][flag], 1, state + 0x8 / 4 + i);
+    }
+}
 
 /* Releases the sprite handle groups held by the movie/title effect work. */
 void func_002A9788(u32 *work) {
@@ -724,7 +769,48 @@ u8 mnuIsFadeIdle(void) {
     return temp_v0 == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA530);
+void func_002AA530(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *work, s32 arg5) {
+    char buffer[16];
+    s32 object;
+    s32 offset;
+    s32 magnitude;
+
+    if (mdlFlagTest(0x290) == 0) {
+        return;
+    }
+    func_00306CD0((*(s32 *)(work + 0xB1D8) + 0x1A) << 4, 0xCB8, 0, *(s32 *)(work + 0xB1D4), 1, arg3, 0x3F, arg5);
+    func_0035C860(buffer, D_00437B80, *(s32 *)(D_00435DD0 + 0x3C));
+    object = func_0019F798((*(s32 *)(work + 0xB1D8) + 0x33) << 4, 0xCD8, arg2,
+                           func_00309138(0xA09DC380, 0xA09DC300, *(s32 *)(work + 0xB1D4)), buffer, 0);
+    func_0019D550(object, 1, arg5);
+    func_0019C5B0(object);
+    offset = *(s32 *)(work + 0xB1D8);
+    magnitude = offset;
+    if (offset < 0) {
+        magnitude = -offset;
+    }
+    if (offset < 0) {
+        *(s32 *)(work + 0xB1D8) = offset + magnitude / 5 + 1;
+    }
+    if (*(s32 *)(work + 0xB1D8) > 0) {
+        *(s32 *)(work + 0xB1D8) = 0;
+    }
+    if (*(s32 *)(work + 0xB1D0) == 0) {
+        if (*(s32 *)(work + 0xB1D4) < 0x100) {
+            *(s32 *)(work + 0xB1D4) += 0x14;
+        }
+        if (*(s32 *)(work + 0xB1D4) > 0x100) {
+            *(s32 *)(work + 0xB1D4) = 0x100;
+        }
+    } else {
+        if (*(s32 *)(work + 0xB1D4) > 0) {
+            *(s32 *)(work + 0xB1D4) -= 0x1E;
+        }
+        if (*(s32 *)(work + 0xB1D4) < 0) {
+            *(s32 *)(work + 0xB1D4) = 0;
+        }
+    }
+}
 
 extern u32 D_003E5710[];
 
@@ -749,7 +835,41 @@ void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
     func_002AAC70(a, b, c, d, e, 0, f);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002AACB8);
+void func_002AACB8(s32 kind, s32 task) {
+    u8 *work = (u8 *)func_00101958(task);
+    s32 ctx;
+    s32 sub;
+
+    func_002B7F80(work + 0x11C, 0x20);
+    switch (kind) {
+    case 2:
+        func_00306CD0(0, 0, 0, *(s32 *)(work + 0xB1DC), 0, *(s32 *)(work + 0x60), 0x19, 0x53);
+        ctx = *(s32 *)(work + 0x60);
+        sub = *(s32 *)(ctx + 0x18);
+        *(s32 *)(sub + 0xE6C) = (*(s32 *)(sub + 0xEDC) + 0x40) << 4;
+        func_00306CD0(0xD40, 0x2E0, 0, *(s32 *)(work + 0xB1DC), 0, ctx, 0x17, 0x53);
+        if (*(s32 *)(work + 0xB1DC) < 0x100) {
+            *(s32 *)(work + 0xB1DC) += 0x10;
+        }
+        if (*(s32 *)(work + 0xB1DC) > 0x100) {
+            *(s32 *)(work + 0xB1DC) = 0x100;
+        }
+        break;
+    case 1:
+        ctx = *(s32 *)(work + 0x60);
+        sub = *(s32 *)(ctx + 0x18);
+        *(s32 *)(sub + 0xE6C) = *(s32 *)(sub + 0xEDC) << 4;
+        func_00306CD0(0x1140, 0x2E0, 0, *(s32 *)(work + 0x288), 0, ctx, 0x17, 0x53);
+    default:
+        *(s32 *)(work + 0xB1DC) = 0;
+        break;
+    }
+    if (func_002A9AB8(task) != 0) {
+        func_002BB510(-0x10, -8, 0, *(s32 *)(work + 0x118), 0x53);
+        func_002C0718(0, 0, 0, work + 0x284, 0x53);
+        func_002AA530(0, 0, 0, *(s32 *)(work + 0x64), work, 0x53);
+    }
+}
 
 void func_002AAE80(u32 arg0) {
     func_002AACB8(0, arg0);

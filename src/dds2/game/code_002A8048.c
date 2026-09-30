@@ -4,7 +4,7 @@ extern u64 scrReadIntParameter(u64);
 
 extern u16 D_00435BAC;
 
-extern u32 D_00437AE8;
+extern s32 D_00437AE8;
 
 extern u8 D_003E5608[];
 
@@ -48,9 +48,45 @@ u32 func_002A80F0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A8048", func_002A8120);
+extern s8 D_0037F530[];
+extern s32 func_0010F058(void);
+extern void kwlnDrawSetDc8Second(u32);
+extern void kwlnDrawSetDc8First(u32);
+extern void kwlnDrawSetupDc8(s32);
+extern s32 itfPanelReleaseHold(void);
+extern void func_0010D818(s32);
 
-INCLUDE_ASM(const s32, "game/code_002A8048", func_002A81C8);
+s32 func_002A8120(void) {
+    if (D_00437AE8 == 0 && func_0010F058() == 1 && D_0037F530[0] < 0) {
+        D_00437AE8 = 1;
+        kwlnDrawSetDc8Second(0x44);
+        kwlnDrawSetDc8First(0x80000000);
+        kwlnDrawSetupDc8(0x1E);
+        itfPanelReleaseHold();
+    }
+    if (D_00437AE8 > 0) {
+        if (D_00437AE8 == 0x1E) {
+            func_002A7FD0();
+            func_0010D818(0);
+            return 1;
+        }
+        D_00437AE8 = D_00437AE8 + 1;
+    }
+    func_0010D818(func_002A8008() == 0);
+    return 1;
+}
+
+extern u8 func_002A8028(void);
+extern u8 func_002A8038(void);
+
+s32 func_002A81C8(void) {
+    if (func_002A8028() == 2) {
+        if (func_002A8038() != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct MovieList {
     u32 task;

@@ -131,7 +131,19 @@ typedef struct MdlLoadCmd {
     u32 handle;    /* 0x14 */
 } MdlLoadCmd;
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_00231A80);
+extern u32 fileGetResourceHandle(u32);
+extern u64 func_002C8110();
+extern void func_002C7D00();
+extern void mdlExecuteAndFreeJob(void *job);
+
+void func_00231A80(s32 arg0, MdlLoadCmd *cmd) {
+    cmd->handle = fileGetResourceHandle(arg0);
+    cmd->size = func_00344010(func_002C8110(arg0));
+    func_002C7D00(arg0);
+    if (cmd->deferred == 0) {
+        mdlExecuteAndFreeJob(cmd);
+    }
+}
 
 extern u32 func_00344098(u64);
 
@@ -141,7 +153,12 @@ typedef struct MdlLoadJob {
     u32 handle;    /* 0x1C */
 } MdlLoadJob;
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_00231AF8);
+void func_00231AF8(s32 arg0, MdlLoadJob *job) {
+    job->handle = fileGetResourceHandle(arg0);
+    job->sizeWord = func_00344098(func_002C8110(arg0));
+    func_002C7D00(arg0);
+    mdlExecuteAndFreeJob(job);
+}
 
 char *mdlBuildPrefixedString(char *dst, const char *src) {
     *(Hdr8 *)dst = *(Hdr8 *)D_00436FA0;
