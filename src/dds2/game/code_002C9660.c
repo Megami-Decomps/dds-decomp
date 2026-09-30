@@ -141,7 +141,7 @@ extern u32 D_00439020;
 
 extern void mcdFinishFileDetection(void);
 
-extern void *fileBeginDetectionRequest(u32 arg0);
+extern void *fileBeginDetectionRequest(u32 callback);
 
 extern void func_002CB740(void);
 
@@ -614,12 +614,12 @@ void fileReloadSaveBuffer(void) {
     *(s32 *)(D_00435DD0 + 0x30) = saved;
 }
 
-u8 fileIsLoadedAndConditionTrue(s32 arg0) {
-    return arg0 != 0 && D_00437CE4 == 1;
+u8 fileIsLoadedAndConditionTrue(s32 condition) {
+    return condition != 0 && D_00437CE4 == 1;
 }
 
-u8 func_002C97F8(s32 arg0) {
-    return arg0 != 0 && D_00437CE4 == 1;
+u8 func_002C97F8(s32 condition) {
+    return condition != 0 && D_00437CE4 == 1;
 }
 
 void func_002C9818(s32 x, s32 y, u64 width, u64 height) {
@@ -637,13 +637,13 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u64 width, u64 height) {
     func_0019C5B0(D_00439008);
 }
 
-void mcdCreateFontDrawHandle(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
+void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     func_0019D1D0(1);
-    D_0043900C = func_0019CE78(arg3, 0, 0, 0, 0);
+    D_0043900C = func_0019CE78(glyphSource, 0, 0, 0, 0);
     func_0019D1E0(1);
     frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
-    func_0019D100(D_0043900C, arg0 << 4, arg1 << 3);
-    frFontSetChildColors(D_0043900C, arg2);
+    func_0019D100(D_0043900C, x << 4, y << 3);
+    frFontSetChildColors(D_0043900C, colors);
     func_0019D550(D_0043900C, 0, 0x56);
     func_0019C5B0(D_0043900C);
     func_0019D1F8(0x54);
@@ -1165,6 +1165,7 @@ void *fileUpdateWait(void) {
     return NULL;
 }
 
+/* Keep arg0: renaming it changes fileAcquireRecord's full-unit codegen. */
 void *func_002CB660(u32 arg0) {
     D_00439020 = arg0;
     D_00437D40 = 0;
@@ -1188,8 +1189,8 @@ void mcdFinishFileDetection(void) {
     }
 }
 
-void *fileBeginDetectionRequest(u32 arg0) {
-    D_00439020 = arg0;
+void *fileBeginDetectionRequest(u32 callback) {
+    D_00439020 = callback;
     D_00437D40 = 0;
     fileReqBegin(D_00437CD0);
     return func_002CB740;
@@ -2063,8 +2064,8 @@ void mcdFinishFileDetectionWithAudio(void) {
     }
 }
 
-void *fileCreateDetectionAudioCallback(u32 arg0) {
-    D_00439020 = arg0;
+void *fileCreateDetectionAudioCallback(u32 callback) {
+    D_00439020 = callback;
     D_00437D40 = 0;
     return mcdFinishFileDetectionWithAudio;
 }
@@ -2106,7 +2107,7 @@ typedef struct MenuWork {
     u8 unk30;
     u8 unk31;
     u16 unk32;
-    u16 unk34;
+    u16 startBranchFlag; /* 0x34: selects one of two initial menu flows */
     u16 unk36;
     u16 unk38;
     u16 unk3A;
@@ -2215,7 +2216,7 @@ void *fileMenuWorkStart(void) {
     if (kwlnFadeIsActive()) {
         kwlnFadeStartIn(0x10);
     }
-    if (((MenuWork *)D_00437D84)->unk34 == 0) {
+    if (((MenuWork *)D_00437D84)->startBranchFlag == 0) {
         return func_002D0920;
     }
     ((MenuWork *)D_00437D84)->unk30 = 1;
@@ -2223,7 +2224,7 @@ void *fileMenuWorkStart(void) {
 }
 
 
-void fileMenuWorkCreate(u32 arg0) {
+void fileMenuWorkCreate(u32 startBranchFlag) {
     u32 buffer = func_003292A8(0x40);
     MenuWork *work;
 
@@ -2232,7 +2233,7 @@ void fileMenuWorkCreate(u32 arg0) {
     work = (MenuWork *)D_00437D84;
     work->unk30 = 0;
     work->unk3C = buffer;
-    work->unk34 = arg0;
+    work->startBranchFlag = startBranchFlag;
     work->unk38 = 0;
     ((MenuWork *)D_00437D84)->unk31 = 0;
 }
@@ -2265,14 +2266,14 @@ INCLUDE_RODATA(const s32, "game/code_002C9660", D_0042B938);
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D0B08);
 
-void fileCopySaveHeaderNumbers(s32 arg0) {
+void fileCopySaveHeaderNumbers(FileSaveState *source) {
     s32 state;
 
     state = D_00435DD0;
-    ((FileSaveState *)D_00435DD0)->money = ((FileSaveState *)arg0)->money;
-    ((FileSaveState *)state)->header24 = ((FileSaveState *)arg0)->header24;
-    ((FileSaveState *)state)->header28 = ((FileSaveState *)arg0)->header28;
-    ((FileSaveState *)state)->header2C = ((FileSaveState *)arg0)->header2C;
+    ((FileSaveState *)D_00435DD0)->money = source->money;
+    ((FileSaveState *)state)->header24 = source->header24;
+    ((FileSaveState *)state)->header28 = source->header28;
+    ((FileSaveState *)state)->header2C = source->header2C;
 }
 
 typedef struct {
@@ -2344,8 +2345,8 @@ s32 fileTestSlotFlagsBit(kind, flags)
     }
 }
 
-void fileTestSavedSlotFlags(u32 arg0) {
-    fileTestSlotFlagsBit(arg0, D_00435DD0 + 0xa54);
+void fileTestSavedSlotFlags(u32 kind) {
+    fileTestSlotFlagsBit(kind, D_00435DD0 + 0xa54);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D1058);
@@ -2401,9 +2402,9 @@ typedef struct FileConfigTask {
     u32 pending;    /* 0x38: zero when no load can start */
 } FileConfigTask;
 
-u32 fileGetConfigTaskSlot(s32 arg0) {
-    if (arg0 < 4) {
-        return ((FileConfigTask *)D_00439058)->slots[arg0];
+u32 fileGetConfigTaskSlot(s32 slot) {
+    if (slot < 4) {
+        return ((FileConfigTask *)D_00439058)->slots[slot];
     }
     return 0;
 }
@@ -2449,20 +2450,20 @@ void func_002D2C50(void) {
     func_002D2CA8();
 }
 
-void fileSetRenderFlag(u32 arg0) {
-    D_00437E08 = D_00437E08 | arg0;
+void fileSetRenderFlag(u32 mask) {
+    D_00437E08 = D_00437E08 | mask;
 }
 
-void fileClearRenderFlag(u32 arg0) {
-    D_00437E08 = D_00437E08 & ~arg0;
+void fileClearRenderFlag(u32 mask) {
+    D_00437E08 = D_00437E08 & ~mask;
 }
 
 void func_002D2CA8(void) {
     D_00437E08 = 0;
 }
 
-u32 func_002D2CB0(s32 arg0) {
-    return D_003E9150[arg0];
+u32 func_002D2CB0(s32 index) {
+    return D_003E9150[index];
 }
 
 void mnuProjectViewPoint(void) {
@@ -2607,9 +2608,9 @@ void fileJobNotifyComplete(void *work) {
     }
 }
 
-void func_002D3710(void *arg0) {
-    u16 idx = ((FileJob *)arg0)->type;
-    void *data = ((FileJob *)arg0)->data;
+void func_002D3710(FileJob *work) {
+    u16 idx = work->type;
+    void *data = work->data;
 
     D_003E916C[idx].cb(data);
 }
@@ -2662,20 +2663,20 @@ void fileJobSetPrimaryData(job, src, size, option)
     }
 }
 
-void func_002D38E8(u64 arg0, u64 arg1, u16 arg2) {
+void func_002D38E8(u64 job, u64 commandId, u16 option) {
     s64 command;
     u64 size;
     u64 handle;
     u64 address;
 
-    command = sdfDevCreateCommandState(arg1);
+    command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = func_0033EB30(command);
         handle = func_003292A8(size);
         address = sdfResourceRetainAddress(handle);
         func_0033EB10(command, address, size);
         func_0033EAE0(command);
-        fileJobSetPrimaryData(arg0, address, size, arg2);
+        fileJobSetPrimaryData(job, address, size, option);
         func_003297C8(handle);
         return;
     }
@@ -2697,20 +2698,20 @@ void fileJobSetSecondaryData(job, src, size, selector)
     }
 }
 
-void func_002D3A68(u64 arg0, u64 arg1, u16 arg2) {
+void func_002D3A68(u64 job, u64 commandId, u16 selector) {
     s64 command;
     u64 size;
     u64 handle;
     u64 address;
 
-    command = sdfDevCreateCommandState(arg1);
+    command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = func_0033EB30(command);
         handle = func_003292A8(size);
         address = sdfResourceRetainAddress(handle);
         func_0033EB10(command, address, size);
         func_0033EAE0(command);
-        fileJobSetSecondaryData(arg0, address, size, arg2);
+        fileJobSetSecondaryData(job, address, size, selector);
         func_003297C8(handle);
         return;
     }
@@ -2718,18 +2719,18 @@ void func_002D3A68(u64 arg0, u64 arg1, u16 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3B48);
 
-void fileWriteToPfs(s32 arg0, s32 arg1) {
+void fileWriteToPfs(s32 data, s32 slotIndex) {
     char path[0xD0];
     s32 fd;
 
     if (D_00438B66 != 0) {
-        func_0035C860(path, D_00437E10, arg1);
+        func_0035C860(path, D_00437E10, slotIndex);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, func_0033EC18(), arg1);
+        func_0035C860(path, D_00437E18, func_0033EC18(), slotIndex);
         fd = func_00369B70(path, 0x602);
     }
-    func_002D3B48(fd, arg0);
+    func_002D3B48(fd, data);
     func_00369DF8(fd);
     func_0036BCD0(D_00437E20, 0);
 }
@@ -2791,16 +2792,16 @@ u32 fileJobSerializedSize(FileJob *job) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D3F08);
 
-void func_002D3F80(u32 arg0) {
-    s32 queue;
+void func_002D3F80(FileJob *job) {
+    s32 jobAddr;
 
-    memset(arg0, 0, 0x90);
-    queue = (s32)arg0;
-    *(u32 *)(queue + 0x84) = 1;
-    *(u8 *)(queue + 0x88) = 8;
-    *(u8 *)(queue + 0x89) = 0;
-    *(u8 *)(queue + 0x8a) = 0;
-    func_002D3F08(arg0);
+    memset(job, 0, 0x90);
+    jobAddr = (s32)job;
+    *(u32 *)(jobAddr + 0x84) = 1;
+    *(u8 *)(jobAddr + 0x88) = 8;
+    *(u8 *)(jobAddr + 0x89) = 0;
+    *(u8 *)(jobAddr + 0x8a) = 0;
+    func_002D3F08(job);
 }
 
 void fileQueueAppend(FileQueue *queue, FileJob *job) {
@@ -3213,7 +3214,7 @@ void func_002D6160(EffectSurfaceNode *node) {
         effReleaseReferenceHolder((s32)node->referenceHolder);
     }
     if (node->active != 0) {
-        func_002DC028(node->active);
+        func_002DC028((FileSlotTable *)node->active);
     }
     func_00328E48(node);
 }
@@ -3303,7 +3304,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
 
 void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
-        func_002DC028(node->active);
+        func_002DC028((FileSlotTable *)node->active);
     }
     node->active = func_002DBED8((u16)entryId, node->percent, resource);
 }
@@ -3405,7 +3406,7 @@ void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
 
 void fileClearLoadObjectReferences(LoadObj *obj) {
     if (obj->recordWork != NULL) {
-        fileClearRecordReferences((s32)obj->recordWork);
+        fileClearRecordReferences((FileSlotTable *)obj->recordWork);
         return;
     }
 }
@@ -3418,9 +3419,9 @@ s32 func_002D6980(LoadObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D69B8);
 
-void func_002D7398(u32 arg0) {
-    func_002D6980((LoadObj *)arg0);
-    func_002D69B8(arg0);
+void func_002D7398(u32 objectAddr) {
+    func_002D6980((LoadObj *)objectAddr);
+    func_002D69B8(objectAddr);
 }
 
 void fileSendLoadObjectRecordVector(LoadObj *obj) {
@@ -3431,13 +3432,13 @@ void fileCopyLoadObjectRecordVector(LoadObj *obj) {
     func_002DC0F0((u32)obj->recordWork);
 }
 
-void fileSetRecordWordFour(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 4) = arg1;
+void fileSetRecordWordFour(s32 record, u32 value) {
+    *(u32 *)(record + 4) = value;
 }
 
-void fileSetLoadObjectScale(LoadObj *arg0, f32 arg1) {
-    arg0->scale = arg1;
-    dds3DispatchIndexedCallback(arg0->recordWork);
+void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
+    obj->scale = scale;
+    dds3DispatchIndexedCallback(obj->recordWork);
 }
 
 
@@ -3712,12 +3713,12 @@ u32 func_002DBED8(u16 type, u32 count, void *data) {
     return (u32)rec;
 }
 
-void func_002DC028(s32 arg0) {
-    func_003297C8(((FileSlotTable *)arg0)->handle);
+void func_002DC028(FileSlotTable *record) {
+    func_003297C8(record->handle);
 }
 
-void fileClearRecordReferences(s32 arg0) {
-    ((FileSlotTable *)arg0)->references = 0;
+void fileClearRecordReferences(FileSlotTable *record) {
+    record->references = 0;
 }
 
 void fileAcquireRecord(FileSlotTable *record) {

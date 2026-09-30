@@ -39,7 +39,7 @@ typedef struct DevState {
     u8 operation; /* 0x15 */
     s8 state; /* 0x16 */
     u8 pad17; /* 0x17 */
-    s32 unk18; /* 0x18 */
+    s32 operationArg; /* 0x18 */
     s32 requestExtra; /* 0x1C */
     void *requestData; /* 0x20 */
     s32 options; /* 0x24 */
@@ -280,7 +280,7 @@ extern s32 D_004391BC;
 extern s32 func_0034D430(s32 arg, u8 *options);
 extern s32 sceCdStatus(void);
 
-void func_0033DBF8(s32 arg0) {
+void func_0033DBF8(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -294,7 +294,7 @@ void func_0033DBF8(s32 arg0) {
     options[3] = 0;
     for (;;) {
         WaitSema(D_004391B8);
-        ready = func_0034D430(arg0, options);
+        ready = func_0034D430(request, options);
         SignalSema(D_004391B8);
         if (ready != 0) {
             break;
@@ -305,7 +305,7 @@ void func_0033DBF8(s32 arg0) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_004391BC = arg0;
+    D_004391BC = request;
 }
 
 void sdfDevSignalPendingSemaphore(void) {
@@ -315,7 +315,7 @@ void sdfDevSignalPendingSemaphore(void) {
     }
 }
 
-void func_0033DCD0(s32 arg0) {
+void func_0033DCD0(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -331,7 +331,7 @@ void func_0033DCD0(s32 arg0) {
         WaitSema(D_004391B8);
         D_00438AC8 = 1;
         WaitSema(D_004391C4);
-        ready = func_0034D430(arg0, options);
+        ready = func_0034D430(request, options);
         SignalSema(D_004391B8);
         if (ready != 0) {
             break;
@@ -342,7 +342,7 @@ void func_0033DCD0(s32 arg0) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_004391BC = arg0;
+    D_004391BC = request;
 }
 
 extern s32 func_0034D500(s32 size, s32 buffer, s32 count, s32 *status);
@@ -545,10 +545,10 @@ DevState *sdfDevCreateCommandState(s32 command) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPathExists);
 
-void func_0033EAE0(u32 arg0) {
+void func_0033EAE0(DevState *state) {
     sdfDevQueueActiveOperation();
     WaitSema(D_00438AE4);
-    sdfDevQueueReleaseState(arg0);
+    sdfDevQueueReleaseState(state);
 }
 
 void func_0033EB10(void) {
@@ -694,23 +694,23 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     return state;
 }
 
-s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
-    if (arg0->state != 7) {
+s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
+    if (state->state != 7) {
         return -1;
     }
-    arg0->unk18 = arg1;
-    arg0->options = arg2;
-    arg0->operation = 3;
-    SignalSema(D_0040BA14[arg0->workerIndex].sema);
+    state->operationArg = operationArg;
+    state->options = options;
+    state->operation = 3;
+    SignalSema(D_0040BA14[state->workerIndex].sema);
     return 0;
 }
 
-s32 func_0033FB98(DevState *arg0) {
-    if (arg0->state != 7) {
+s32 func_0033FB98(DevState *state) {
+    if (state->state != 7) {
         return -1;
     }
-    arg0->operation = 4;
-    SignalSema(D_0040BA14[arg0->workerIndex].sema);
+    state->operation = 4;
+    SignalSema(D_0040BA14[state->workerIndex].sema);
     return 0;
 }
 
@@ -736,23 +736,23 @@ s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
     return 0;
 }
 
-s32 sdfDevReactivate(DevState *arg0) {
-    if (arg0->state != 9) {
+s32 sdfDevReactivate(DevState *state) {
+    if (state->state != 9) {
         return -1;
     }
-    arg0->result = 0;
-    arg0->state = 7;
+    state->result = 0;
+    state->state = 7;
     return 0;
 }
 
-s32 sdfDevQueueActiveOperation(DevState *arg0) {
-    s8 state = arg0->state;
+s32 sdfDevQueueActiveOperation(DevState *request) {
+    s8 state = request->state;
 
     if (state != 7) {
         return -1;
     }
-    arg0->operation = state;
-    SignalSema(D_0040BA14[arg0->workerIndex].sema);
+    request->operation = state;
+    SignalSema(D_0040BA14[request->workerIndex].sema);
     return 0;
 }
 
@@ -778,7 +778,7 @@ DevState *sdfDevCreateRequest(s32 path, void *data, s32 extra,
     state = sdfDevAllocState(resource, id, 8, completion, completionContext);
     state->requestExtra = extra;
     state->requestData = data;
-    state->unk18 = 0;
+    state->operationArg = 0;
     func_0033EC48(state);
     return state;
 }
@@ -797,7 +797,7 @@ DevState *sdfDevOpenRequest(s32 path, void *data, s32 extra,
     state->requestExtra = extra;
     state->requestData = data;
     state->options = options != 0 ? options : D_00438B24;
-    state->unk18 = 0;
+    state->operationArg = 0;
     func_0033EC48(state);
     return state;
 }
@@ -849,11 +849,11 @@ void sdfTickThreadPriorityOverride(void) {
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FF98);
 
-void sdfPowerOffLoop(s32 arg0) {
+void sdfPowerOffLoop(s32 semaphore) {
     s32 status;
 
     for (;;) {
-        WaitSema(arg0);
+        WaitSema(semaphore);
         func_0036C330(D_00438B50, 0x5003, 0, 0, 0, 0);
         func_0036C330(D_00438B58, 0x4806, 0, 0, 0, 0);
         sceCdPowerOff(&status);
@@ -887,27 +887,27 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340298);
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfClearQuadwords);
 
-char *sdfStrDup(const char *arg0) {
-    u32 len;
-    char *buf;
+char *sdfStrDup(const char *text) {
+    u32 length;
+    char *copy;
 
-    if (arg0 == NULL) {
+    if (text == NULL) {
         return NULL;
     }
-    len = strlen(arg0);
-    buf = func_00328D68(len + 1);
-    memcpy(buf, arg0, len);
-    buf[len] = 0;
-    return buf;
+    length = strlen(text);
+    copy = func_00328D68(length + 1);
+    memcpy(copy, text, length);
+    copy[length] = 0;
+    return copy;
 }
 
-s32 sdfBcdStrToInt(s32 arg0) {
+s32 sdfBcdStrToInt(s32 packedDigits) {
     s32 place = 1;
     s32 acc = 0;
 
-    while (arg0 > 0) {
-        acc += (arg0 & 0xf) * place;
-        arg0 >>= 4;
+    while (packedDigits > 0) {
+        acc += (packedDigits & 0xf) * place;
+        packedDigits >>= 4;
         place *= 10;
     }
     return acc;
@@ -1016,8 +1016,8 @@ f32 sdfSinPoly(f32 angle) {
     return t * 1.5707963f + t3 * -0.64596367f + t5 * 0.07968968f + t7 * -0.0046737656f + t9 * 0.00015148419f;
 }
 
-void func_003407A0(f32 arg0) {
-    sdfSinPoly(arg0 + 1.5707963f);
+void func_003407A0(f32 angle) {
+    sdfSinPoly(angle + 1.5707963f);
 }
 
 /* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
@@ -1048,32 +1048,32 @@ f32 sdfTableInterpolate(f32 value, f32 *table, s32 count) {
     return mid * unit + (value - lower) * unit / (upper - lower);
 }
 
-f32 sdfAtan2Poly(f32 arg0) {
-    f32 x2 = arg0 * arg0;
-    f32 x3 = x2 * arg0;
+f32 sdfAtan2Poly(f32 ratio) {
+    f32 x2 = ratio * ratio;
+    f32 x3 = x2 * ratio;
     f32 x5 = x2 * x3;
 
-    return arg0 * 0.99999977f + x3 * -0.33325735f + x5 * 0.19388643f;
+    return ratio * 0.99999977f + x3 * -0.33325735f + x5 * 0.19388643f;
 }
 
-f32 sdfAtan2(f32 arg0, f32 arg1) {
+f32 sdfAtan2(f32 y, f32 x) {
     s32 sx = 0;
     s32 sy;
     f32 r;
 
-    if (arg1 < 0.0f) {
-        arg1 = -arg1;
+    if (x < 0.0f) {
+        x = -x;
         sx = 1;
     }
     sy = 0;
-    if (arg0 < 0.0f) {
-        arg0 = -arg0;
+    if (y < 0.0f) {
+        y = -y;
         sy = 1;
     }
-    if (arg0 < arg1) {
-        r = sdfAtan2Poly(arg0 / arg1);
+    if (y < x) {
+        r = sdfAtan2Poly(y / x);
     } else {
-        r = 1.5707963f - sdfAtan2Poly(arg1 / arg0);
+        r = 1.5707963f - sdfAtan2Poly(x / y);
     }
     if (sx != 0) {
         r = 3.1415926f - r;
