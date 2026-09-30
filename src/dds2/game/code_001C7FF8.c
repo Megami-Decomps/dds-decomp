@@ -66,7 +66,8 @@ typedef struct SceneControl {
 } SceneControl;
 
 typedef struct SceneDescriptor {
-    u8 pad00[0x20];
+    s8 unk00;
+    u8 pad01[0x1F];
     u16 flags;
     u8 pad22[6];
 } SceneDescriptor;
@@ -210,6 +211,7 @@ typedef struct BattleSceneWork {
     s32 (*sceneCallback)();
 } BattleSceneWork;
 extern SceneControl *D_004367FC;
+extern s16 *D_00438F48;
 extern SceneDescriptor *D_00435E04;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
@@ -220,6 +222,7 @@ extern s32 btlCountTasksForOwner(s64);
 extern SceneInitializer D_003B6938[];
 
 extern u32 btlCountFlaggedSceneActors(void);
+extern void btlRemoveTaskFromSceneGroup(SceneTask *);
 
 extern s32 func_001AC750(s32, void *);
 
@@ -405,7 +408,23 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C98E8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9BE8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9DC8);
+void func_001C9DC8(s32 unused) {
+    char text[8] = "Retreat";
+    s32 color;
+    s32 handle;
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+
+    if (D_00435E04[scene->mode].unk00 != 0) {
+        color = D_00438F48[1] | 0x504F6100;
+    } else {
+        color = D_00438F48[1] | 0x89FEFF00;
+    }
+    func_0019B8B0(0x13);
+    handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
+    func_0019D530(handle, 1);
+    func_0019C5B0(handle);
+    func_0019B8B0(-1);
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9EA0);
 
@@ -1260,7 +1279,32 @@ void fldCompactSceneSlots(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3520);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3690);
+void func_001D3690(s32 count) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    s32 kind;
+    s32 used;
+    s32 i;
+
+    kind = scene->variant == 1 ? 1 : 2;
+    used = fldCountSceneSlots();
+    if (used + count >= 8) {
+        count = 8 - used;
+    }
+    if (count <= 0) {
+        return;
+    }
+    for (i = used + count - 1; i != count - 1; i--) {
+        scene->slots[i].a = scene->slots[i - count].a;
+        scene->slots[i].b = scene->slots[i - count].b;
+        scene->slots[i].id = i + 1;
+    }
+    for (; i != -1; i--) {
+        scene->slots[i].a = kind;
+        scene->slots[i].b = 0x32;
+        scene->slots[i].id = i + 1;
+    }
+    func_001CF500();
+}
 
 void fldSwapSceneSlots(s32 index) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
@@ -1375,7 +1419,37 @@ void fldAppendSceneGroupHandle(s32 handle) {
     *slot = handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3C00);
+void func_001D3C00(SceneTask *task) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    SceneActor *actor;
+    s32 kind;
+
+    if ((task->flags & 0x40) == 0) {
+        actor = task->actor;
+        kind = (actor->status.words.activeFlags & 0x200) != 0 ? 1 : 2;
+        scene->groupHandleCount++;
+        if (kind == 1) {
+            scene->activeGroupCount++;
+        }
+        if (scene->currentTask == task && scene->variant == kind) {
+            scene->flags |= 8;
+        }
+        if ((*(u64 *)&task->flags & 0x400000100LL) == 0) {
+            if (func_001AD1C0((u8 *)actor + 0x120, 0xDE) != 0) {
+                task->options |= 4;
+            }
+        } else {
+            task->options &= ~4;
+        }
+        if ((scene->flags & 0x40) != 0 && (task->options & 4) == 0) {
+            btlMoveTaskToGroupTail(task);
+        }
+    } else {
+        btlRemoveTaskFromSceneGroup(task);
+        scene->flags |= 8;
+        task->flags &= ~0x40;
+    }
+}
 
 void btlRemoveTaskFromSceneGroup(SceneTask *task) {
     SceneTask **group = fldGetActorSceneGroupResource(task);
@@ -1430,7 +1504,29 @@ s32 fldGetSceneGroupEntry(s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3ED8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4020);
+void func_001D4020(void) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    u32 i;
+
+    for (i = 0; i < 8; i++) {
+        scene->slots[i].a = 0;
+        scene->slots[i].b = 0;
+        scene->slots[i].id = 0;
+    }
+    for (i = 0; i < 20; i++) {
+        scene->groupPrimary[i] = 0;
+    }
+    for (i = 0; i < 45; i++) {
+        scene->groupSecondary[i] = 0;
+    }
+    for (i = 0; i < 15; i++) {
+        scene->groupTertiary[i] = 0;
+    }
+    for (i = 0; i < 8; i++) {
+        scene->groupHandles[i] = 0;
+    }
+    func_001D3E28();
+}
 
 u32 func_001D4120(s32 *request) {
     u8 groupIndex;
@@ -1793,7 +1889,48 @@ extern s32 btlCreateCommandSoundTask();
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5368);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D54B8);
+void func_001D54B8(u8 *task) {
+    s32 selection;
+
+    ((SceneTask *)task)->flags &= ~4;
+    switch (((SceneTask *)task)->command) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+        if (((SceneTask *)task)->command == 4) {
+            selection = func_001AC098(*(s32 *)(task + 0x28));
+        } else {
+            selection = ((SceneTask *)task)->commandValue;
+        }
+        switch (func_0022C1B0(task, selection)) {
+        case 2:
+            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0x82));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 6:
+            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xB0));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 8:
+            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xB2));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        case 10:
+            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xD0));
+            sndSetStationedSeVolume(0xD);
+            btlDispatchStateHandler(task, 6);
+            return;
+        }
+        break;
+    }
+    fldCreateSceneSpriteTask((s32)task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5668);
 
@@ -1961,8 +2098,6 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436858);
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436860);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436870);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436878);
 
