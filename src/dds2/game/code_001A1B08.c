@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 /* 0x10-byte packet record in the work object buffer. */
 typedef struct PktRec {
@@ -91,13 +91,6 @@ typedef struct PanelVert {
     s32 x;
     s32 y;
 } PanelVert;
-
-static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
-    vec[0] = red;
-    vec[1] = green;
-    vec[2] = blue;
-    vec[3] = alpha;
-}
 
 void itfPanelDispatchHandler(PanelObj *panel) {
     D_003B4448[panel->handlerIndex](panel);

@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s64 func_002ACF38(void);
 
@@ -100,10 +100,6 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACBF8);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
-
-static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
-}
 
 s64 func_002ACF00(s32 callback) {
     return menuSetHandler(func_00101958(), 2, callback);

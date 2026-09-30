@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
@@ -103,10 +103,6 @@ u32 func_002633D8(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
-
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
 
 s64 func_00263570(s32 request) {
     s32 context = func_00101A70();

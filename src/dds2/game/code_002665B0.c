@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern void func_00266C08();
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -797,10 +797,6 @@ s32 fldPollSceneState(void) {
         D_00437858 = 0;
     }
     return 0;
-}
-
-static inline s64 menuSetHandler(s32 context, u64 mode, s32 callback) {
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, callback);
 }
 
 s64 func_002684F0(s32 callback) {

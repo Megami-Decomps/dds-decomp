@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 /* 0x10-byte packet record in the work object buffer. */
 typedef struct PktRec {
@@ -181,13 +181,6 @@ void func_00199ED8(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
         v->y = ys[1];
         v++;
     }
-}
-
-static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
-    vec[0] = red;
-    vec[1] = green;
-    vec[2] = blue;
-    vec[3] = alpha;
 }
 
 /* Write the same RGB at two offsets, with a transparent first color. */
