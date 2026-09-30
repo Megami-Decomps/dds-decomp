@@ -75,4 +75,42 @@
     ".set reorder" \
     : "=r"(out) : "f"(128.0f) : "$3")
 
+/*
+ * Unaligned three-float vector at p -> vf register (w undefined):
+ *     ldr $2,0(p); ldl $2,7(p)      ; low 8 bytes
+ *     lw $3,8(p)                    ; third float
+ *     pcpyld $2,$3,$2; qmtc2.ni $2,vfN
+ * Scratch $2/$3 are hard-coded, as in the SDK macros. Tried: a packed-struct
+ * s64 load (gcc emits ldl before ldr, retail has ldr first) and u128 C
+ * shifts (no pcpyld).
+ */
+#define EE_MMI_LOAD_VEC3(vf, p) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "lw $3, 8(%0)\n\t" \
+    "pcpyld $2, $3, $2\n\t" \
+    "qmtc2.ni $2, " #vf "\n\t" \
+    ".set reorder" \
+    : : "r"(p) : "$2", "$3")
+
+/*
+ * Four s16 at p (unaligned) -> vf register as floats with 12 fractional bits
+ * (quaternion keys):
+ *     ldr $2,0(p); ldl $2,7(p)
+ *     pextlh $2,$2,$0; psraw $2,$2,16   ; halfwords -> sign-extended words
+ *     qmtc2.ni $2,vfN; vitof12.xyzw vfN,vfN
+ * Scratch $2 is hard-coded as in EE_MMI_LOAD_VEC3.
+ */
+#define EE_MMI_LOAD_S16X4_FIXED12(vf, p) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "pextlh $2, $2, $0\n\t" \
+    "psraw $2, $2, 16\n\t" \
+    "qmtc2.ni $2, " #vf "\n\t" \
+    "vitof12.xyzw " #vf ", " #vf "\n\t" \
+    ".set reorder" \
+    : : "r"(p) : "$2")
+
 #endif

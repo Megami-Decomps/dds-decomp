@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 typedef struct {
     void *unk0;
@@ -271,6 +272,8 @@ void func_002DB7C8(void *a0, KeyOut *out, f32 t);
 s32 func_002DB958(KeyOut *a0);
 void func_002DBA80(void *tmp, void *src, void *tbl, s32 x);
 void func_002DC360(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
+extern void effMiscQuaternionNlerpVU(f32 amount);
+extern void effMiscQuaternionToMatrixVU(void);
 extern s32 (*D_003981B8[])(void *a0, s32 a1);
 extern s32 (*D_00398248[])(void *a0, s32 a1);
 extern void *D_003981D0[];
@@ -383,9 +386,29 @@ void *func_002DBAD0(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBB30);
+/* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
+void func_002DBB30(HasSub *a0, f32 t) {
+    KeyOut b;
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBBB0);
+    func_002DB7C8(a0, &b, t);
+    EE_MMI_LOAD_VEC3(vf10, b.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, b.secondKey);
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x60));
+}
+
+/* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with sub->vec by t2 into sub+0x60 */
+void func_002DBBB0(HasSub *a0, f32 t1, f32 t2) {
+    KeyOut b;
+
+    func_002DB7C8(a0, &b, t1);
+    EE_MMI_LOAD_VEC3(vf10, b.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, b.secondKey);
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0 + 0x10));
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(t2));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x60));
+}
 
 void *func_002DBC60(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -407,9 +430,29 @@ void *func_002DBE60(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBEC0);
+/* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
+void func_002DBEC0(HasSub *a0, f32 t) {
+    KeyOut b;
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBF40);
+    func_002DB7C8(a0, &b, t);
+    EE_MMI_LOAD_VEC3(vf10, b.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, b.secondKey);
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
+}
+
+/* vu0 routine: as func_002DBBB0, stored to sub+0x70 */
+void func_002DBF40(HasSub *a0, f32 t1, f32 t2) {
+    KeyOut b;
+
+    func_002DB7C8(a0, &b, t1);
+    EE_MMI_LOAD_VEC3(vf10, b.firstKey);
+    EE_MMI_LOAD_VEC3(vf11, b.secondKey);
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0 + 0x10));
+    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(t2));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
+}
 
 void *func_002DBFF0(void *a0, s32 a1, s32 a2) {
     void *r;
@@ -419,9 +462,52 @@ void *func_002DBFF0(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC050);
+/* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
+void func_002DC050(HasSub *a0, f32 t) {
+    KeyOut b;
+    u8 *sub;
+    u8 *matrix;
+    f32 *key;
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC0E8);
+    func_002DB7C8(a0, &b, t);
+    key = b.firstKey;
+    EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
+    key = b.secondKey;
+    EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
+    effMiscQuaternionNlerpVU(b.weight);
+    sub = a0->sub;
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(sub + 0x50));
+    matrix = sub + 0x80;
+    effMiscQuaternionToMatrixVU();
+    __asm__ volatile(".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r"(matrix));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x10));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x20));
+}
+
+/* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
+void func_002DC0E8(HasSub *a0, f32 t1, f32 t2) {
+    KeyOut b;
+    u8 *sub;
+    u8 *matrix;
+    f32 *key;
+
+    func_002DB7C8(a0, &b, t1);
+    key = b.firstKey;
+    EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
+    key = b.secondKey;
+    EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
+    effMiscQuaternionNlerpVU(b.weight);
+    sub = a0->sub;
+    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0 + 0x10));
+    effMiscQuaternionNlerpVU(t2);
+    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(sub + 0x50));
+    matrix = sub + 0x80;
+    effMiscQuaternionToMatrixVU();
+    __asm__ volatile(".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r"(matrix));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x10));
+    __asm__ volatile(".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x20));
+}
 
 void *func_002DC1A0(void *a0, s32 a1, s32 a2) {
     void *r;

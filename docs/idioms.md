@@ -452,6 +452,8 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `EE_MMI_UNIT_MATRIX(dst)` | `qmfc2.ni $5,vf0; pextuw $4,$0,$5; pextuw $2,$0,$4; pextuw $3,$4,$0; sq $2..$5` to `dst`, `+0x10`, `+0x20`, `+0x30` | libvu0 `sceVu0UnitMatrix` (scratch `$2`-`$5` hard-coded by the SDK) |
 | `EE_MMI_RGBA_UNPACK(src, unit)` | `lw $2,0(src); pextlb $2,$0,$2; pextlh $2,$0,$2; qmtc2.ni $2,vf10; vitof0 vf10,vf10; qmtc2.ni unit,vf2; vmulx vf10,vf10,vf2x` | RGBA8888 word to floats in vf10 (colour modulate/blend routines) |
 | `EE_MMI_RGBA_PACK(out)` | `mfc1 $3,128.0f; qmtc2.ni $3,vf2; vmulx vf10,vf10,vf2x; vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out` | vf10 floats back to an RGBA8888 word |
+| `EE_MMI_LOAD_VEC3(vf, p)` | `ldr $2,0(p); ldl $2,7(p); lw $3,8(p); pcpyld $2,$3,$2; qmtc2.ni $2,vf` | packed vec3 into a VU0 register (sdf motion blend); retail's ldr-before-ldl order is not gcc's packed-struct load |
+| `EE_MMI_LOAD_S16X4_FIXED12(vf, p)` | `ldr; ldl; pextlh; psraw 16; qmtc2.ni; vitof12` | four s16 fixed-point 4.12 keys into floats (sdf motion keys) |
 
 `include/pcp_vu0.h` (COP2 and 128-bit copies):
 
@@ -480,6 +482,9 @@ line above the definition):
   register convention documented in "VU0" above; hard-coded scratch registers
   (`$2`, `$3`, and `$8`-`$15` in the transposes) are the ones the SDK code
   uses. Loops, calls and address arithmetic stay C around it.
+  The sdf blend routines write that scratch (`mfc1 $2, %0; qmtc2.ni $2, vf2`)
+  without declaring a `$2` clobber, as the Sony samples do; nothing is live in
+  `$2` across those blocks, and declaring it moves gcc's next temporary to `$3`.
 
 ## Float constants and strings
 
