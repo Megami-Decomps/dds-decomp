@@ -274,7 +274,23 @@ INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnTextureCountIncompleteResources);
+s32 kwlnTextureCountIncompleteResources(void) {
+    KwlnResourceNode *node = (KwlnResourceNode *)D_003BD308;
+    KwlnResourceNode *next;
+    s32 count = 0;
+    while (node != NULL) {
+        while (node->ready != NULL && *node->ready != 0) {
+            next = node->next;
+            if (next == NULL) {
+                return count;
+            }
+            node = next;
+        }
+        count++;
+        node = node->next;
+    }
+    return count;
+}
 
 u32 kwlnTextureGetPageIndex(void) {
     return D_003BA8DC;

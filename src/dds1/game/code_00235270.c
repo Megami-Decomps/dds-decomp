@@ -42,6 +42,7 @@ extern u32 itfMesGetEntryCount(s32 window);
 extern u8 D_003BBF80[];
 extern u8 D_003BBF90[];
 extern u8 D_003BC360[];
+extern char D_003BC058[]; /* "     %d" */
 extern u16 D_003BD898;
 extern u16 D_003BD89A;
 extern s16 D_003BD89C;
@@ -91,7 +92,11 @@ typedef struct EvtRuntime {
     s32 entryFirst;  /* 0x22F8 */
     u8 pad22FC[0xC];
     s32 *tableRowIndex; /* 0x2308 */
-    u8 pad230C[0xBC];
+    u8 pad230C[0x4];
+    s32 value; /* 0x2310 */
+    s32 valueMin; /* 0x2314 */
+    s32 valueMax; /* 0x2318 */
+    u8 pad231C[0xAC];
     s32 tableColumn; /* 0x23C8 */
     u8 pad23CC[0x14];
     s32 selectedEntry; /* 0x23E0 */
@@ -241,9 +246,75 @@ INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003ADE60);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00235B30);
+typedef struct MenuGfxCallback {
+    u8 unknown[0x10];
+    void (*invoke)(void *, void *);
+} MenuGfxCallback;
+extern MenuGfxCallback D_00325748;
+extern u32 sdfCreateResetPacketList(void);
+extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
+extern s8 D_00324510[];
+extern char D_003ADE40[];
+extern char D_003ADE50[];
+extern char D_003ADE78[];
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00235C68);
+void func_00235B30(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    switch (index) {
+    case 0:
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
+        return;
+    case 2:
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003ADE78));
+        return;
+    case 3:
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+        return;
+    case 4:
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003ADE40));
+        return;
+    case 5:
+        sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003ADE50));
+        break;
+    }
+}
+
+s32 func_00235C68(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 step;
+
+    list = sdfCreateResetPacketList();
+    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, func_00235AE0, func_00235B30);
+    D_00325748.invoke(&D_00325748, (void *)list);
+    if (ctx->actionMode != 7) {
+        return 0;
+    }
+    if (D_00324510[0x21] < 0) {
+        return 1;
+    }
+    if (D_00324510[0x23] < 0) {
+        return -1;
+    }
+    if (D_00324510[0x24] & 2) {
+        step = -1;
+    } else if (D_00324510[0x25] & 2) {
+        step = 1;
+    } else {
+        step = 0;
+    }
+    if (D_00324510[0x26] & 2) {
+        step = -10;
+    } else if (D_00324510[0x27] & 2) {
+        step = 10;
+    }
+    ctx->value += step;
+    if (ctx->value < ctx->valueMin) {
+        ctx->value = ctx->valueMin;
+    }
+    if (ctx->value >= ctx->valueMax) {
+        ctx->value = ctx->valueMax;
+    }
+    return 0;
+}
 
 s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
     sdfAppendPacket(target, func_002E4960(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
@@ -256,13 +327,6 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235FC8);
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236180);
 
-typedef struct MenuGfxCallback {
-    u8 unknown[0x10];
-    void (*invoke)(void *, void *);
-} MenuGfxCallback;
-extern MenuGfxCallback D_00325748;
-extern u32 sdfCreateResetPacketList(void);
-extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
 extern void func_00236180();
 extern void func_00237130();
 extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
