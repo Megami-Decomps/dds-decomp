@@ -602,13 +602,40 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC020);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC438);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CC7C8);
+typedef struct BtlPanelInner {
+    u8 pad00[0xDCC];
+    s32 fDCC;
+    u8 padDD0[0x6C];
+    s32 fE3C;
+} BtlPanelInner;
+
+typedef struct BtlPanelRes {
+    u8 pad00[0x18];
+    BtlPanelInner *inner;
+} BtlPanelRes;
+
+typedef struct BtlPanelBlock {
+    u8 pad00[0x18];
+    BtlPanelRes *res;
+} BtlPanelBlock;
+
+extern BtlPanelBlock *D_00436804;
+extern void func_00306C28(s32, s32, s32, u8 *, s32, BtlPanelRes *, s32, s32);
+
+void func_001CC7C8(s32 width) {
+    u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    s32 half = width / 2;
+    s32 x = width - half + 0x105;
+    func_00306C28(x * 0x10, 0x200, 0, color, 0, D_00436804->res, 0x17, 0x53);
+    D_00436804->res->inner->fDCC = width << 4;
+    func_00306C28((0x100 - half) * 0x10, 0x200, 0, color, 0, D_00436804->res, 0x16, 0x53);
+    D_00436804->res->inner->fDCC = D_00436804->res->inner->fE3C << 4;
+    func_00306C28((0x92 - half) * 0x10, 0x200, 0, color, 0, D_00436804->res, 0x15, 0x53);
+}
 
 extern s32 btlGetEffectActive();
 extern void func_001CC020();
 extern void func_001CC438();
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416D28);
 
 s32 fldStepSceneStateMachine(s32 handle) {
     BattleSceneWork *work = (BattleSceneWork *)func_001AA6F8();
