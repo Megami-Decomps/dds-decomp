@@ -52,6 +52,11 @@ typedef struct EventUnit {
     s8 valueD1;
 } EventUnit;
 
+typedef struct EvtEffObj {
+    u8 pad00[0x1C];
+    u8 *data;          /* 0x1c: point/direction records (+0x40, +0x50) */
+} EvtEffObj;
+
 /* Event unit: flag bits at 0xa8 drive status queries below. */
 typedef struct EvtUnit {
     u32 color;         /* 0x0 */
@@ -63,8 +68,8 @@ typedef struct EvtUnit {
     u32 color50;       /* 0x50 */
     u8 pad54[0x18];   /* 0x54 */
     u32 value;         /* 0x6c: changed by evtSetUnitValueAndFlag */
-    u8 pad70[0x10];   /* 0x70 */
-    void *effObj;      /* 0x80: effect object the vectors are written to */
+    f32 vec70[4];      /* 0x70 */
+    EvtEffObj *effObj; /* 0x80: effect object the vectors are written to */
     s32 currentTransitionValue; /* 0x84 */
     s32 previousTransitionValue; /* 0x88 */
     u8 pad8C[8];      /* 0x8c */
@@ -76,7 +81,9 @@ typedef struct EvtUnit {
     s16 unkAC;         /* 0xac */
     u8 padAE[4];      /* 0xae */
     s16 unkB2;         /* 0xb2 */
-    u8 padB4[8];      /* 0xb4 */
+    s16 unkB4;         /* 0xb4 */
+    s16 unkB6;         /* 0xb6 */
+    u8 padB8[4];      /* 0xb8 */
     u16 unkBC;         /* 0xbc */
     u8 padBE[6];      /* 0xbe */
     s16 unkC4;         /* 0xc4 */
@@ -102,6 +109,12 @@ extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
 extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
+extern void effMiscQuaternionToMatrixVU(void);
+extern void effObjAddInnerFirstVec(void *obj, void *vec);
+extern void func_0023B170(EvtUnit *unit);
+s32 func_0023D030(EvtUnit *unit, f32 *dir, f32 angle);
+extern f32 evtGetValueScaleFactor(s32 path);
+extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
 void func_0023C870(EvtUnit *unit, s32 a, s32 b, s32 c);
 
@@ -118,7 +131,31 @@ struct PcpScatterWork4 {
     u32 ownedBuffer;
 };
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B3A0);
+/* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
+f32 func_0023B3A0(s32 path) {
+    f32 saved;
+    f32 length = 0.0f;
+    f32 step = 0.05f;
+    f32 t = step;
+    f32 segment;
+
+    saved = evtGetValueScaleFactor(path);
+    evtScaleValueByMultiplier(path, 0.0f);
+    func_001171A0(path);
+    do {
+        VU0_MOVE_VF(vf11, vf10);
+        evtScaleValueByMultiplier(path, t);
+        func_001171A0(path);
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(segment);
+        length += segment;
+        VU0_MOVE_VF(vf10, vf12);
+        t += step;
+    } while (t <= 1.0f);
+    evtScaleValueByMultiplier(path, saved);
+    return length;
+}
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B480);
 
@@ -404,9 +441,44 @@ void func_0023CF70(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D030);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D1F0);
+/* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with func_0023D030. */
+s32 func_0023D1F0(EvtUnit *unit, f32 *quat, f32 angle) {
+    f32 v[4];
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D298);
+    VU0_LOAD_VF(vf10, quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_SET_AXIS_CLEAR_W(0.0f, y);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, unit->effObj->data + 0x40);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, v);
+    return func_0023D030(unit, v, angle);
+}
+
+s32 func_0023D298(EvtUnit *unit) {
+    f32 v[4];
+    f32 scale;
+    EvtEffObj *obj;
+
+    func_0023D030(unit, unit->vec70, unit->unkB6 * 0.01f);
+    if (unit->unkB6 != 0) {
+        func_0023B170(unit);
+        obj = unit->effObj;
+    } else {
+        VU0_LOAD_VF(vf10, unit->vec70);
+        obj = unit->effObj;
+        VU0_LOAD_VF(vf11, obj->data + 0x40);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+    }
+    scale = unit->unkB4 * 0.1f;
+    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, v);
+    effObjAddInnerFirstVec(obj, v);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215D0);
 

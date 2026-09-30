@@ -76,6 +76,43 @@
     : "=r"(out) : "f"(128.0f) : "$3")
 
 /*
+ * vf10 (floats) -> RGBA8888 word with the scale in a GPR:
+ *     qmtc2.ni unit,vf2; vmulx.xyzw vf10,vf10,vf2x; vftoi0.xyzw vf10,vf10;
+ *     qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
+ * Retail keeps `unit` (0x43000000 = 128.0f) in one register for several packs.
+ * out is earlyclobber: retail never shares it with unit.
+ */
+#define EE_MMI_RGBA_PACK_UNIT(out, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "qmtc2.ni %1, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    "vftoi0.xyzw vf10, vf10\n" \
+    "qmfc2.ni %0, vf10\n" \
+    "ppach %0, $0, %0\n" \
+    "ppacb %0, $0, %0\n" \
+    ".set reorder" \
+    : "=&r"(out) : "r"(unit))
+
+/*
+ * vf10 (floats) -> RGBA8888 word, scale 128.0f through `mfc1 $2` (the event
+ * opcodes' pack; EE_MMI_RGBA_PACK uses `$3`):
+ *     mfc1 $2,128.0f; qmtc2.ni $2,vf2; vmulx.xyzw vf10,vf10,vf2x;
+ *     vftoi0.xyzw vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out
+ * $2 is not declared clobbered, like VU0_SCALAR_OP.
+ */
+#define EE_MMI_RGBA_PACK_F128(out) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "mfc1 $2, %1\n" \
+    "qmtc2.ni $2, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    "vftoi0.xyzw vf10, vf10\n" \
+    "qmfc2.ni %0, vf10\n" \
+    "ppach %0, $0, %0\n" \
+    "ppacb %0, $0, %0\n" \
+    ".set reorder" \
+    : "=r"(out) : "f"(128.0f))
+
+/*
  * Unaligned three-float vector at p -> vf register (w undefined):
  *     ldr $2,0(p); ldl $2,7(p)      ; low 8 bytes
  *     lw $3,8(p)                    ; third float

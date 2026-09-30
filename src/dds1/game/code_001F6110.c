@@ -412,9 +412,10 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 if (target != unit) {
                     if (unit->flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
-                        __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(targetPos.f[1]) : "$2");
+                        VU0_SCALAR_OP(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
                         VU0_LOAD_VF($vf11, &targetPos);
-                        __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(distance) : : "$2");
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(distance);
                         if (first) {
                             nearestDistance = distance;
                             nearest = unit;
@@ -443,23 +444,10 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
             if (!(unit->flags & 0xC0)) {
                 if (unit->flags & mask) {
                     btlUnitGetMuzzlePosVU(unit);
-                    __asm__ volatile(
-                        ".set noreorder\n\t"
-                        "mfc1 $2, %2\n\t"
-                        "qmtc2.ni $2, vf2\n\t"
-                        "vaddx.y vf10, vf0, vf2x\n\t"
-                        "lqc2 vf11, 0(%1)\n\t"
-                        "vsub.xyzw vf10, vf10, vf11\n\t"
-                        "vmul.xyz vf2, vf10, vf10\n\t"
-                        "vaddy.x vf2, vf2, vf2y\n\t"
-                        "vaddz.x vf2, vf2, vf2z\n\t"
-                        "vsqrt Q, vf2x\n\t"
-                        "vwaitq\n\t"
-                        "cfc2.ni $2, $vi22\n\t"
-                        "mtc1 $2, %0\n\t"
-                        ".set reorder"
-                        : "=f"(distance)
-                        : "r"(point), "f"(point[1]));
+                    VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
+                    VU0_LOAD_VF(vf11, point);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(distance);
                     if (farthestDistance < distance) {
                         farthestDistance = distance;
                         farthest = unit;

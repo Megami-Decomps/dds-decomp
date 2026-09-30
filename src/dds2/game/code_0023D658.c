@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 extern u32 D_004371EC;
@@ -230,6 +231,9 @@ extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *func_0023CC00(s32 idx);
+extern void func_0023C870(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
+extern void func_0023C978(EvtUnit *unit, s32 arg, u32 color);
+extern void func_0023CA60(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 func_0023CE30(EvtUnit *unit);
 
@@ -1222,15 +1226,64 @@ u8 evtUnitHasNoStatusFlags(void) {
     return active == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FE68);
+u32 func_0023FE68(void) {
+    EvtUnit *unit;
+    s32 color1[4];
+    s32 color2[4];
+    u32 packed1;
+    u32 packed2;
+    u32 scale;
+
+    unit = func_0023CC00(scrReadIntParameter(0));
+    VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vaddx.x vf10, vf0, vf2x");
+    VU0_SCALAR_OP(bfWaitReadArgFloat(3), "vaddx.y vf10, vf0, vf2x");
+    VU0_SCALAR_OP(bfWaitReadArgFloat(4), "vaddx.z vf10, vf0, vf2x");
+    VU0_CLEAR_W(vf10);
+    scale = 0x43000000;
+    EE_MMI_RGBA_PACK_UNIT(packed1, scale);
+    color1[0] = packed1;
+    VU0_SCALAR_OP(bfWaitReadArgFloat(5), "vaddx.x vf10, vf0, vf2x");
+    VU0_SCALAR_OP(bfWaitReadArgFloat(6), "vaddx.y vf10, vf0, vf2x");
+    VU0_SCALAR_OP(bfWaitReadArgFloat(7), "vaddx.z vf10, vf0, vf2x");
+    VU0_SET_W_ONE(vf10);
+    EE_MMI_RGBA_PACK_UNIT(packed2, scale);
+    color2[0] = packed2;
+    func_0023C870(unit, scrReadIntParameter(1), packed1, packed2);
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_004219F0);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FF90);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240068);
+u32 func_00240068(void) {
+    EvtUnit *unit;
+    s32 color[4];
+    u32 packed;
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240128);
+    unit = func_0023CC00(scrReadIntParameter(0));
+    VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vaddx.x vf10, vf0, vf2x");
+    VU0_SCALAR_OP(bfWaitReadArgFloat(3), "vaddx.y vf10, vf0, vf2x");
+    VU0_SET_AXIS_CLEAR_W(bfWaitReadArgFloat(4), z);
+    EE_MMI_RGBA_PACK_F128(packed);
+    color[0] = packed;
+    func_0023C978(unit, scrReadIntParameter(1), packed);
+    return 1;
+}
+
+u32 func_00240128(void) {
+    EvtUnit *unit;
+    s32 color[4];
+    u32 packed;
+
+    unit = func_0023CC00(scrReadIntParameter(0));
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vmulx.w vf10, vf0, vf2x");
+    EE_MMI_RGBA_PACK_F128(packed);
+    color[0] = packed;
+    func_0023CA60(unit, scrReadIntParameter(1), packed);
+    return 1;
+}
 
 u32 func_002401C0(void) {
     s32 id;
