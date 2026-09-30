@@ -70,7 +70,11 @@ extern s32 func_00222450();
 extern s32 func_00224598();
 
 typedef struct ActionUnit {
-    u8 pad0[0xF8];
+    u8 pad0[0x50];
+    f32 cameraPointAHeight; /* 0x50 */
+    u8 pad54[0x8C];
+    f32 cameraPointBHeight; /* 0xE0 */
+    u8 padE4[0x14];
     s16 motionStateA; /* 0xF8: cleared before restoring the unit's motion */
     s16 motionStateB; /* 0xFA: exact meaning not established */
     s32 savedMotionIndex; /* 0xFC: passed as the motion table index */
@@ -88,11 +92,21 @@ typedef struct ActionUnit {
     u32 action;
     u8 pad138[4];
     s32 actionTimer;
-    u8 pad140[0x200];
+    u8 pad140[0x14];
+    f32 cameraOffset; /* 0x154 */
+    u8 pad158[0x1E8];
     u32 rendererHandle;
     u8 pad344[0x20];
     struct ActionUnit *next;
 } ActionUnit;
+
+/* The state at unit +0x114 links its owner to a selected target handle. */
+typedef struct ActionStateLink {
+    u8 pad00[0x18];
+    u32 owner;          /* 0x18: ActionUnit address */
+    u8 pad1C[0x44];
+    u32 targetHandle;   /* 0x60 */
+} ActionStateLink;
 
 typedef struct BattleActionScene {
     u8 pad00[0x24C];
@@ -1006,10 +1020,10 @@ s64 btlUnitWrapA(void) {
 void btlUnitSetCameraOffset(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
                   0.8f, -0.65f, 0.5f);
-    *(f32 *)(unit + 0x50) += 650.0f;
-    *(f32 *)(unit + 0xe0) += 650.0f;
-    *(f32 *)(unit + 0x154) = 30.0f;
-    *(u32 *)(unit + 0x110) |= 0x41;
+    ((ActionUnit *)unit)->cameraPointAHeight += 650.0f;
+    ((ActionUnit *)unit)->cameraPointBHeight += 650.0f;
+    ((ActionUnit *)unit)->cameraOffset = 30.0f;
+    ((ActionUnit *)unit)->flags |= 0x41;
 }
 
 extern s32 effMiscRandMod(s32, s32);
@@ -1056,11 +1070,11 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222A08);
 
 u32 func_00222D18(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
-    u32 owner = *(u32 *)(actor + 0x18);
-    if (*(u32 *)(owner + 0x110) & 0x200) {
-        if (func_001E8058(*(u32 *)(actor + 0x60)) == 1) {
-            u32 target = func_001E8060(*(u32 *)(actor + 0x60), 0);
-            if ((*(u32 *)(target + 0x110) & 0x400) == 0) {
+    u32 owner = ((ActionStateLink *)actor)->owner;
+    if (((ActionUnit *)owner)->flags & 0x200) {
+        if (func_001E8058(((ActionStateLink *)actor)->targetHandle) == 1) {
+            u32 target = func_001E8060(((ActionStateLink *)actor)->targetHandle, 0);
+            if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
             func_001E9A88();
@@ -1074,13 +1088,13 @@ u32 func_00222D18(ActionUnit *unit) {
 
 extern void func_00217378(s32, s32);
 s32 func_00222DA8(s32 object) {
-    s32 state = *(s32 *)(object + 0x114);
+    s32 state = ((ActionUnit *)object)->stateFlags;
 
-    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
-        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
+        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+                if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
                 func_00217378(object, object);
@@ -1097,13 +1111,13 @@ s32 func_00222DA8(s32 object) {
 
 extern void func_00217470(s32, s32, f32, f32, f32);
 s32 func_00222E58(s32 object) {
-    s32 state = *(s32 *)(object + 0x114);
+    s32 state = ((ActionUnit *)object)->stateFlags;
 
-    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
-        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
+        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+                if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
                 func_00217470(object, object, -0.8f, 0.5f, 35.0f);
@@ -1217,10 +1231,10 @@ u32 func_00224010(u32 unused, s32 motion) {
 void func_00224020(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
                   0.8f, 1.5f, 0.25f);
-    *(f32 *)(unit + 0x50) += 650.0f;
-    *(f32 *)(unit + 0xe0) += 650.0f;
-    *(u32 *)(unit + 0x110) |= 0x41;
-    *(f32 *)(unit + 0x154) = 30.0f;
+    ((ActionUnit *)unit)->cameraPointAHeight += 650.0f;
+    ((ActionUnit *)unit)->cameraPointBHeight += 650.0f;
+    ((ActionUnit *)unit)->flags |= 0x41;
+    ((ActionUnit *)unit)->cameraOffset = 30.0f;
     func_001E88A8(unit + 0x30);
     func_001E88A8(unit + 0xc0);
 }
@@ -1232,11 +1246,11 @@ void func_002240C0(u32 unit) {
 
 u32 func_002240F8(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
-    u32 owner = *(u32 *)(actor + 0x18);
-    if (*(u32 *)(owner + 0x110) & 0x200) {
-        if (func_001E8058(*(u32 *)(actor + 0x60)) == 1) {
-            u32 target = func_001E8060(*(u32 *)(actor + 0x60), 0);
-            if ((*(u32 *)(target + 0x110) & 0x400) == 0) {
+    u32 owner = ((ActionStateLink *)actor)->owner;
+    if (((ActionUnit *)owner)->flags & 0x200) {
+        if (func_001E8058(((ActionStateLink *)actor)->targetHandle) == 1) {
+            u32 target = func_001E8060(((ActionStateLink *)actor)->targetHandle, 0);
+            if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
             func_001E9A88();
@@ -1249,13 +1263,13 @@ u32 func_002240F8(ActionUnit *unit) {
 }
 
 s32 func_00224188(s32 object) {
-    s32 state = *(s32 *)(object + 0x114);
+    s32 state = ((ActionUnit *)object)->stateFlags;
 
-    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
-        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
+        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+                if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
                 func_00217378(object, object);
@@ -1271,13 +1285,13 @@ s32 func_00224188(s32 object) {
 }
 
 s32 func_00224238(s32 object) {
-    s32 state = *(s32 *)(object + 0x114);
+    s32 state = ((ActionUnit *)object)->stateFlags;
 
-    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0) {
-        if (func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-            s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-            if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-                if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
+        if (func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+            s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+            if ((((ActionUnit *)owner)->flags & 0x400) != 0) {
+                if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
                 func_00217470(object, object, -0.8f, 0.225f, 35.0f);
@@ -1333,10 +1347,10 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224DF0);
 void func_00224EE8(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
                   0.8f, 1.0f, 0.3f);
-    *(f32 *)(unit + 0x50) += 750.0f;
-    *(f32 *)(unit + 0xe0) += 750.0f;
-    *(u32 *)(unit + 0x110) |= 0x41;
-    *(f32 *)(unit + 0x154) = 30.0f;
+    ((ActionUnit *)unit)->cameraPointAHeight += 750.0f;
+    ((ActionUnit *)unit)->cameraPointBHeight += 750.0f;
+    ((ActionUnit *)unit)->flags |= 0x41;
+    ((ActionUnit *)unit)->cameraOffset = 30.0f;
     func_001E88A8(unit + 0x30);
     func_001E88A8(unit + 0xc0);
 }
