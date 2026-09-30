@@ -15,7 +15,7 @@ void dds3SetSlotValue(void *arg0, void *arg1);
 void dds3SetSlotKey(void *arg0, void *arg1);
 void dds3ReplaceObjectResource(void *arg0);
 void mdlDestroyContext(s32 arg0, s32 arg1);
-void func_00222200(u32 arg0);
+void evtReleaseUnitTransitionWork(u32 arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
 

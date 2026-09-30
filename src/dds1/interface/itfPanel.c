@@ -3,7 +3,7 @@
 
 extern void func_002D0918(void *arg0);
 
-void func_00199900(EffPrim *arg0) {
+void itfPanelReleasePrimitiveResources(EffPrim *arg0) {
     if (arg0 != NULL) {
         if (arg0->recordCount != 0) {
             func_002D0918(arg0->unk4);

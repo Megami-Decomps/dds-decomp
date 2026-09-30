@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 typedef struct MenuLayoutContext {
     u8 pad00[0x9C];
@@ -29,7 +29,7 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
 }
 
 void func_0029AA48(MenuLayoutContext *context) {
-    func_002B7F80((s32)context->menuList, 0x20);
+    mnuDrawCampIconBackdrop((s32)context->menuList, 0x20);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AA68);
@@ -37,7 +37,7 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AA68);
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 
 s64 func_0029AD98(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (func_002993D0(context) != 0) {
         return 0;
@@ -48,7 +48,7 @@ s64 func_0029AD98(s32 request) {
 }
 
 s64 func_0029AE10(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (func_002993D0(context) != 0) {
         return 0;
@@ -67,7 +67,7 @@ u32 mnuResetSelectionWidthsFromConfig(void) {
     s32 selectionWidth;
     s32 reservedWidth;
 
-    context = (MenuLayoutContext *)func_00101958();
+    context = (MenuLayoutContext *)kwlnTaskGetUserValue();
     reservedWidth = 0;
     remaining = 4;
     selectionWidth = context->config[1] * 3;
@@ -91,7 +91,7 @@ u32 mnuResetSelectionWidthsFromConfig(void) {
         widthSlot = widthSlot + -1;
     } while (-1 < remaining);
     if (context->visible != 0) {
-        func_002C0CF8(context->resource, 0);
+        mnuSetPanelGroupSelection(context->resource, 0);
     }
     return 1;
 }

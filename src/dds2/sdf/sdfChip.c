@@ -36,14 +36,14 @@ s32 func_0036DE70(void);
 s32 EIntr(void);
 void sdfAdvanceNodeCursor(SdfChipOwner *owner);
 
-void func_00328E18(s32 size) {
+void sdfAllocAndClearQuadwords(s32 size) {
     u64 allocation;
 
     allocation = func_00328D68();
     sdfClearQuadwords(allocation, (size + 0xf) >> 4);
 }
 
-void func_00328E48(void *arg0) {
+void sdfReleaseChipBlock(void *arg0) {
     SdfCursorSlot *slot;
     SdfChipOwner *owner;
     SdfChipBlock *block = arg0;

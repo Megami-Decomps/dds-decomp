@@ -244,7 +244,7 @@ void fldApplyLightSetIndex(s32 index) {
     func_00108138(0, vec);
 }
 
-void func_00136C90(s32 enable) {
+void fldActivateCameraColorSetting(s32 enable) {
     FldCameraSetting *setting;
     FldColorParams *color;
 

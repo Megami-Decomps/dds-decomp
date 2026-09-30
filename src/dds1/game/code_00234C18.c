@@ -2,7 +2,7 @@
 
 extern u32 itfLoadTextureFromAsset(u32);
 
-extern u32 func_00101A70(void);
+extern u32 kwlnTaskGetUserValue(void);
 
 extern u32 func_002CFEB8(u32);
 
@@ -22,14 +22,14 @@ typedef struct {
 void evtSetContextFlag(void) {
     EventContext *context;
 
-    context = (EventContext *)func_00101A70();
+    context = (EventContext *)kwlnTaskGetUserValue();
     context->flags = context->flags | 1;
 }
 
 void evtClearContextFlag(void) {
     EventContext *context;
 
-    context = (EventContext *)func_00101A70();
+    context = (EventContext *)kwlnTaskGetUserValue();
     context->flags = context->flags & 0xfffffffe;
 }
 

@@ -252,7 +252,7 @@ void effPCPThunderFree2(EffPCPThunderWork *work) {
     func_002D0918(work->unk60);
 }
 
-void func_00164000(void *data) {
+void effThunderCreateWorkFromPackedParams(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
@@ -281,7 +281,7 @@ u32 func_00164070(u32 arg0) {
 }
 
 /* Restart a cell (same routine as effThunderCellRestart, for the second effect). */
-void func_00164078(EffThunderWork4C *work, s32 index) {
+void effThunderRestartIndexedCell(EffThunderWork4C *work, s32 index) {
     EffThunderCell2C *cell = work->cells + index;
     f32 dir[4];
 
@@ -469,7 +469,7 @@ void effPCPThunderFree3(EffPCPThunderWorkB *work) {
     func_002D0918(work->unk64);
 }
 
-void func_00165600(u8 *p, void *src) {
+void effThunderShiftOriginByVectorDelta(u8 *p, void *src) {
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
     __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");

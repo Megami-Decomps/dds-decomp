@@ -102,7 +102,7 @@ typedef struct Cb3714C {
 
 extern Cb3714C D_003B0044[];
 
-extern void func_00159BF0(f32 arg0, f32 arg1);
+extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern u8 D_00380828[];
 
@@ -110,7 +110,7 @@ extern void func_00232390(void *arg0, void *arg1);
 
 extern EffDispatchEntry D_003B01B8[];
 
-extern void func_00328E48(void *p);
+extern void sdfReleaseChipBlock(void *p);
 
 extern EffDispatchEntry D_003B01B4[];
 
@@ -202,7 +202,7 @@ void func_0016A8B0(u32 index) {
 }
 
 void effParamDispatchFloat(f32 value) {
-    func_00159BF0(value, value);
+    billSetChildScaleComponents(value, value);
 }
 
 void effParamInitWork(EffInitWork *work) {
@@ -306,7 +306,7 @@ INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AB48);
 
 void func_0016ABF8(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B8[work->id].func)(work->data);
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
 }
 
 void func_0016AC40(EffParamWorkEx *work) {

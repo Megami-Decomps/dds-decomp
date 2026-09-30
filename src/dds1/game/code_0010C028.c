@@ -15,30 +15,30 @@ typedef struct ScriptContext {
     void *actor; /* 0xF0: battle actor associated with the active script */
 } ScriptContext;
 
-extern s32 func_00101A70(void);
+extern s32 kwlnTaskGetUserValue(void);
 
 void scrSetCurrentActor(u32 unused, void *actor) {
     ScriptContext *context;
 
-    context = (ScriptContext *)func_00101A70();
+    context = (ScriptContext *)kwlnTaskGetUserValue();
     context->actor = actor;
 }
 
 u32 scrGetCurrentActor(void) {
     ScriptContext *context;
 
-    context = (ScriptContext *)func_00101A70();
+    context = (ScriptContext *)kwlnTaskGetUserValue();
     return (u32)context->actor;
 }
 
 void scrReplaceCurrentTask(u32 task) {
     s64 previousContext;
 
-    previousContext = func_00101A70();
+    previousContext = kwlnTaskGetUserValue();
     if (previousContext != 0) {
         scrProcDestroyTask(previousContext);
     }
-    func_00101A68(task, 0);
+    kwlnTaskSetUserValue(task, 0);
 }
 
 void bfStepContext(void) {

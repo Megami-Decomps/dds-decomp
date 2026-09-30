@@ -44,7 +44,7 @@ extern s64 func_00101740();
 
 extern s64 kwlnTaskIsRegistered(s64);
 
-extern u32 func_00101958();
+extern u32 kwlnTaskGetUserValue();
 
 extern u32 D_004367E8;
 
@@ -484,15 +484,15 @@ void func_001A5F08(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
 void btlReleaseEffectResourceHandles(BattleEffect *effect) {
     u32 *handles = effect->resourceHandles;
     if (handles[0] != 0) {
-        func_001A1930(handles[0]);
+        itfPanelReleasePrimitiveResources(handles[0]);
         handles[0] = 0;
     }
     if (handles[1] != 0) {
-        func_001A1930(handles[1]);
+        itfPanelReleasePrimitiveResources(handles[1]);
         handles[1] = 0;
     }
     if (handles[2] != 0) {
-        func_001A1930(handles[2]);
+        itfPanelReleasePrimitiveResources(handles[2]);
         handles[2] = 0;
     }
     effect->flags &= ~0xF00;
@@ -749,12 +749,12 @@ extern u8 D_003B4A28[];
 
 extern s32 scrCreateTaskForProcessId();
 
-extern void func_001A4BB8();
+extern void itfMesSetWindowCallbackAddress();
 
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    func_001A4BB8(*(s32 *)(func_00101958(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
+    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_003B4A28, 0)) + 0xCC), func_001A8918);
     kwlnTaskCreate((s32)"TestMsgMngC", 0x3EF, 0, 0, func_001A8848, 0, 0);
     kwlnTaskCreate((s32)"TestMsgMngD", 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
@@ -1081,7 +1081,7 @@ void func_001AA850(void) {
 }
 
 void func_001AA868(void) {
-    func_001197A8();
+    datClearUnitStatusBits();
 }
 
 void func_001AA880(UiObject *actor, u32 value) {
@@ -2443,7 +2443,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6438);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6A20);
 
 void func_001B6C80(void) {
-    func_00328E48(D_004367FC);
+    sdfReleaseChipBlock(D_004367FC);
     D_004367FC = 0;
 }
 
@@ -2639,7 +2639,7 @@ extern u32 D_004367B8;
 s64 btlSetTaskPhase2(void) {
     s64 task = func_00101740(D_004367B8);
     if (task != 0) {
-        *(s32 *)func_00101958(task) = 2;
+        *(s32 *)kwlnTaskGetUserValue(task) = 2;
         return 1;
     }
     return task;
@@ -2672,7 +2672,7 @@ void func_001B7E08(void) {
 
     temp_v0 = func_00101740(D_004367E4);
     if (temp_v0 != 0) {
-        puVar1 = (u8 *)func_00101958(temp_v0);
+        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
         *puVar1 = 2;
     }
 }
@@ -2700,7 +2700,7 @@ s32 func_001B8000(void) {
     if (func_001B7FB8() == 0) {
         return 0x80;
     }
-    return *(s8 *)func_00101958(func_00101740(D_004367E8));
+    return *(s8 *)kwlnTaskGetUserValue(func_00101740(D_004367E8));
 }
 
 u32 func_001B8038(void) {
@@ -2709,7 +2709,7 @@ u32 func_001B8038(void) {
 
     temp_v0 = func_00101740(D_004367E8);
     if (temp_v0 != 0) {
-        puVar1 = (u8 *)func_00101958(temp_v0);
+        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
         *puVar1 = 2;
     }
     return 1;
@@ -2723,7 +2723,7 @@ void func_001B81B0(void) {
 
     temp_v0 = func_00101740(D_004367E0);
     if (temp_v0 != 0) {
-        puVar1 = (u8 *)func_00101958(temp_v0);
+        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
         *puVar1 = 2;
     }
 }
@@ -2754,7 +2754,7 @@ typedef struct BtlPhaseTask {
 void btlSetTaskPhase5(void) {
     s64 task = func_00101740(D_004367BC);
     if (task != 0) {
-        ((BtlPhaseTask *)func_00101958(task))->phase = 5;
+        ((BtlPhaseTask *)kwlnTaskGetUserValue(task))->phase = 5;
         *D_004367FC = 3;
     }
 }
@@ -2763,7 +2763,7 @@ void func_001B8278(s32 mode) {
     s32 task = func_001B88C8(7);
     s32 *state;
     if (task != 0) {
-        state = (s32 *)func_00101958(task);
+        state = (s32 *)kwlnTaskGetUserValue(task);
         state[2] = mode;
         if (mode == 0) {
             state[1] = 1;
@@ -2778,7 +2778,7 @@ void func_001B8278(s32 mode) {
 
 void func_001B82E8(void) {
     func_001AA6F8();
-    func_00101958(func_001B88C8(7));
+    kwlnTaskGetUserValue(func_001B88C8(7));
     *(u8 *)(D_004367F4 + 0x48) = 0;
 }
 
@@ -2859,7 +2859,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 
 extern void itfMesCleanupWindow(s32, s32);
 
-extern s32 func_001A39D0();
+extern s32 itfMesDestroyWindowIfPresent();
 
 typedef struct MesWindowSet {
     u32 unk0;
@@ -2872,14 +2872,14 @@ void itfMesCloseAllWindows(s32 handle) {
     MesWindowSet *set;
     s32 i;
     func_001AA6F8();
-    set = (MesWindowSet *)func_00101958(handle);
+    set = (MesWindowSet *)kwlnTaskGetUserValue(handle);
     for (i = 0; i < 9; i++) {
         if (set->active[i][0] != 0) {
             itfMesCleanupWindow(set->handle[i], 0);
-            func_001A39D0(set->handle[i]);
+            itfMesDestroyWindowIfPresent(set->handle[i]);
         }
     }
-    func_00328E48(set);
+    sdfReleaseChipBlock(set);
     func_001B88E0(0xA, 0);
 }
 
@@ -2897,16 +2897,16 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8E68);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
 
-extern void func_001FFF68(s32, s32, s32);
+extern void btlInitCursorAndApplyAction(s32, s32, s32);
 
 void func_001B9A10(s32 handle) {
     u8 *work = (u8 *)func_001AA6F8();
     u8 *actor;
-    func_00328E48(func_00101958(handle));
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     func_001B88E0(0xB, 0);
     actor = *(u8 **)(work + 0x184);
     if (*(u16 *)(*(u8 **)(actor + 0x18) + 0x12E) & 0x80) {
-        func_001FFF68((s32)work + 0x70, (s32)work + 0x70, (s32)actor);
+        btlInitCursorAndApplyAction((s32)work + 0x70, (s32)work + 0x70, (s32)actor);
     }
     *(u32 *)(work + 0x218) |= 0x100000;
 }
@@ -2972,9 +2972,9 @@ u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB5C0);
 
 void func_001BB888(void) {
-    u8 *window = (u8 *)func_00101958();
+    u8 *window = (u8 *)kwlnTaskGetUserValue();
     itfMesCleanupWindow(*(s32 *)(window + 0x24), 0);
-    func_00328E48(window);
+    sdfReleaseChipBlock(window);
     func_001B88E0(9, 0);
 }
 
@@ -3010,11 +3010,11 @@ extern void func_001BBA80();
 
 extern void func_001BC108();
 
-extern void *func_00328E18(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
 void func_001BB9E8(void) {
     u8 *work = (u8 *)func_001AA6F8();
-    s32 task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, func_001BC108, func_00328E18(0x20));
+    s32 task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, func_001BC108, sdfAllocAndClearQuadwords(0x20));
     func_00101968(*(s32 *)(work + 0x2C4), task);
     func_001B88E0(7, task);
 }
@@ -3029,7 +3029,7 @@ void func_001BBA60(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BBA80);
 
 void func_001BC108(void) {
-    func_00328E48(func_00101958());
+    sdfReleaseChipBlock(kwlnTaskGetUserValue());
     func_001B88E0(7, 0);
 }
 
@@ -3070,7 +3070,7 @@ extern void func_001BC8A8();
 extern void func_001BCFB0();
 
 s32 func_001BD618(void) {
-    s32 *state = (s32 *)func_00101958();
+    s32 *state = (s32 *)kwlnTaskGetUserValue();
     s32 frame;
     if ((u32)((func_001C7D48() - 1) & 0xFF) < 2U) {
         return 0;
@@ -3089,7 +3089,7 @@ s32 func_001BD618(void) {
 }
 
 void func_001BD6B8(void) {
-    func_00328E48(func_00101958());
+    sdfReleaseChipBlock(kwlnTaskGetUserValue());
     func_001B88E0(6, 0);
 }
 
@@ -3100,8 +3100,8 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004164C8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BD6E8);
 
 void func_001BD978(void) {
-    func_00328E48(D_00438F4C);
-    func_00328E48(D_00438F50);
+    sdfReleaseChipBlock(D_00438F4C);
+    sdfReleaseChipBlock(D_00438F50);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416520);
@@ -3117,7 +3117,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BE9E8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEBD0);
 
 void func_001BEEF8(void) {
-    func_00328E48(func_00101958());
+    sdfReleaseChipBlock(kwlnTaskGetUserValue());
     func_001B88E0(5, 0);
 }
 
@@ -3127,7 +3127,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF3C8);
 
 void func_001BF600(s32 handle) {
     func_001AA6F8();
-    func_00328E48(func_00101958(handle));
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     func_001B88E0(1, 0);
 }
 
@@ -3148,16 +3148,16 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF690);
 void func_001BF8B8(s32 handle) {
     u8 *window;
     func_001AA6F8();
-    window = (u8 *)func_00101958(handle);
+    window = (u8 *)kwlnTaskGetUserValue(handle);
     itfMesCleanupWindow(*(s32 *)(window + 4), 0);
-    func_00328E48(window);
+    sdfReleaseChipBlock(window);
     func_001B88E0(0, 0);
 }
 
 void btlCreateMessageWindow(void) {
     u8 *window;
     func_001AA6F8();
-    window = (u8 *)func_00328E18(0x40);
+    window = (u8 *)sdfAllocAndClearQuadwords(0x40);
     D_004367F8 = (u32)window;
     *(s32 *)(window + 0x10) = 0x14;
     *(s32 *)(window + 0x18) = 0x1800080;
@@ -3191,7 +3191,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BFB58);
 
 void func_001BFFD8(void) {
     func_001AA6F8();
-    func_00328E48(D_004367F8);
+    sdfReleaseChipBlock(D_004367F8);
     D_004367F8 = 0;
     func_001B88E0(4, 0);
 }
@@ -3218,7 +3218,7 @@ extern s32 func_001C0080(s32);
 s64 btlGetTaskState6(void) {
     s64 task = func_00101740(D_004367BC);
     if (task != 0) {
-        s32 *state = *(s32 **)(func_00101958(task) + 0x2C);
+        s32 *state = *(s32 **)(kwlnTaskGetUserValue(task) + 0x2C);
         return func_001C0080(state[6]);
     }
     return task;
@@ -3239,7 +3239,7 @@ s64 btlClearFlagEntries(void) {
     FlagEntry *entries;
     s32 i;
     if (task != 0) {
-        entries = func_001C8A28(func_00101958(task), &count);
+        entries = func_001C8A28(kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
             func_001B7940(entries[i].id, 0);
         }
@@ -3272,7 +3272,7 @@ extern s32 func_0026C710();
 
 void func_001C05D0(s32 handle) {
     u8 *work = (u8 *)func_001AA6F8();
-    func_00328E48(func_00101958(handle));
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     func_001B88E0(0xC, 0);
     *(u32 *)(work + 0x218) |= 0x100000;
     func_0026C710();
@@ -3300,7 +3300,7 @@ s64 btlDestroyTaskD(void) {
 
 void func_001C0DD0(s32 handle) {
     BattleController *battle = (BattleController *)func_001AA6F8();
-    func_00328E48(func_00101958(handle));
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     func_001B88E0(0xD, 0);
     battle->flags |= 0x100000;
     *(u32 *)(D_004367F4 + 0x3C) &= ~0x100;
@@ -3317,7 +3317,7 @@ void btlInitSoundSlotTable(void) {
     s16 *state;
     s32 i;
     memcpy(initial, D_004166F0, sizeof(initial));
-    allocated = func_00328E18(0x30);
+    allocated = sdfAllocAndClearQuadwords(0x30);
     D_00438F48 = (u32)allocated;
     state = (s16 *)(allocated + 2);
     destination = (u32 *)(allocated + 0x10);
@@ -3343,7 +3343,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1300);
 
 void func_001C14E8(void) {
     if (func_001B88C8(2) != 0) {
-        func_00328E48(D_00438F48);
+        sdfReleaseChipBlock(D_00438F48);
     }
     func_001B88E0(2, 0);
 }
@@ -3361,7 +3361,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void func_001C2390(void) {
-    func_003297C8(*(u32 *)func_00101958());
+    func_003297C8(*(u32 *)kwlnTaskGetUserValue());
     func_001B88E0(3, 0);
 }
 
@@ -3422,7 +3422,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
 void func_001C35B8(void) {
-    func_003297C8(*(u32 *)(func_00101958(func_00101740(D_004367CC)) + 0x1200));
+    func_003297C8(*(u32 *)(kwlnTaskGetUserValue(func_00101740(D_004367CC)) + 0x1200));
     func_001B88E0(8, 0);
 }
 

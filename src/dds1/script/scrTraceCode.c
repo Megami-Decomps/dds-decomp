@@ -116,7 +116,7 @@ u32 func_0010C7E0(ScrData *scr)
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
 
-u32 func_0010C898(ScrData *scr)
+u32 scrReturnToStackAddress(ScrData *scr)
 {
     if (scr->sp == 0) {
         return 0;
@@ -153,28 +153,28 @@ u32 scrJumpLabel(ScrData *scr)
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpBinaryEval);
 
-u32 func_0010CE90(ScrData *scr)
+u32 scrOpAdd(ScrData *scr)
 {
     bfOpBinaryEval(scr, 0);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010CEC8(ScrData *scr)
+u32 scrOpSubtract(ScrData *scr)
 {
     bfOpBinaryEval(scr, 1);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010CF00(ScrData *scr)
+u32 scrOpMultiply(ScrData *scr)
 {
     bfOpBinaryEval(scr, 2);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010CF38(ScrData *scr)
+u32 scrOpDivide(ScrData *scr)
 {
     bfOpBinaryEval(scr, 3);
     scr->pc++;
@@ -221,56 +221,56 @@ u32 bfOpNot(ScrData *scr) {
     return 1;
 }
 
-u32 func_0010D100(ScrData *scr)
+u32 scrOpLogicalOr(ScrData *scr)
 {
     bfOpBinaryEval(scr, 4);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D138(ScrData *scr)
+u32 scrOpLogicalAnd(ScrData *scr)
 {
     bfOpBinaryEval(scr, 5);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D170(ScrData *scr)
+u32 scrOpCompareEqual(ScrData *scr)
 {
     bfOpBinaryEval(scr, 6);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D1A8(ScrData *scr)
+u32 scrOpCompareNotEqual(ScrData *scr)
 {
     bfOpBinaryEval(scr, 7);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D1E0(ScrData *scr)
+u32 scrOpCompareLess(ScrData *scr)
 {
     bfOpBinaryEval(scr, 8);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D218(ScrData *scr)
+u32 scrOpCompareGreater(ScrData *scr)
 {
     bfOpBinaryEval(scr, 9);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D250(ScrData *scr)
+u32 scrOpCompareLessEqual(ScrData *scr)
 {
     bfOpBinaryEval(scr, 10);
     scr->pc++;
     return 1;
 }
 
-u32 func_0010D288(ScrData *scr)
+u32 scrOpCompareGreaterEqual(ScrData *scr)
 {
     bfOpBinaryEval(scr, 11);
     scr->pc++;
@@ -362,13 +362,13 @@ char *scrReadStringParameter(s32 paramIdx)
     return NULL;
 }
 
-void func_0010D5F0(s32 retVal)
+void scrSetIntegerReturnValue(s32 retVal)
 {
     D_003BD78C->stackTypes[SCR_STACK_RET] = 0;
     D_003BD78C->stackValues[SCR_STACK_RET].i = retVal;
 }
 
-void func_0010D608(f32 retVal)
+void scrSetFloatReturnValue(f32 retVal)
 {
     D_003BD78C->stackTypes[SCR_STACK_RET] = 1;
     D_003BD78C->stackValues[SCR_STACK_RET].f = retVal;

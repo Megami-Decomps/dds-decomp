@@ -2,7 +2,7 @@
 
 extern s32 func_002C4038();
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 typedef struct {
     u8 pad0[6];
@@ -37,7 +37,7 @@ typedef struct {
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029BFB8);
 
 s64 itfRunPanelMode1(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
     func_0029AA48(context);
@@ -46,7 +46,7 @@ s64 itfRunPanelMode1(s32 request) {
 }
 
 s64 itfRunPanelMode2(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
     func_0026C8E8(0);
@@ -132,7 +132,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, u8 *res, s32 arg5,
     sprite = func_0019F6C8(x, y, z, packed, name, 0);
     frFontSetChainFlag(sprite, 3);
     func_0019D550(sprite, 1, arg5);
-    func_0019C5B0(sprite);
+    frFontQueueGlyphInSelectedSlot(sprite);
     color[0] = alpha;
     color[1] = alpha;
     color[2] = alpha;

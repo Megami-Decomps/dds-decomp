@@ -85,11 +85,11 @@ extern u16 D_003BB044;
 
 extern void *func_002CFEB8(s32 size);
 
-extern void func_002CFF98(void *p);
+extern void sdfReleaseChipBlock(void *p);
 
 extern void mdlBroadcastMasked();
 
-extern void func_00152000(f32 arg0, f32 arg1);
+extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern void func_00217878(void *arg0, void *arg1);
 
@@ -205,7 +205,7 @@ void func_00162C80(u32 index) {
 }
 
 void effParamDispatchFloat(f32 value) {
-    func_00152000(value, value);
+    billSetChildScaleComponents(value, value);
 }
 
 void effParamInitWork(EffInitWork *work) {
@@ -323,7 +323,7 @@ INCLUDE_ASM(const s32, "game/code_001624D0", func_00162EF0);
 
 void func_00162FA0(EffParamWorkEx *work) {
     ((void (*)(void *))D_00353888[work->id].func)(work->data);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 void func_00162FE8(EffParamWorkEx *work) {

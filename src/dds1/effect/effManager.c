@@ -69,7 +69,7 @@ EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
 
 void effDestroyNode(EffNode *node) {
     D_0034DE18[node->type].destroy(node->instance);
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 void effUpdateNode(EffNode *node) {

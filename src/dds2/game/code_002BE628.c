@@ -24,7 +24,7 @@ extern s32 D_00435E20;
 
 extern s32 D_00435E1C;
 
-extern void func_002C42B0(s32, s32);
+extern void mnuSetPopupEntry(s32, s32);
 
 extern f32 D_0037F5E0[];
 
@@ -32,7 +32,7 @@ extern s8 D_003E7970[];
 extern u8 D_003E7978[];
 
 extern void func_002C7508(u32, f32, f32);
-extern void func_002C76A8(s32);
+extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void func_00203E18(s32);
 extern void func_00232390(s32, s32);
@@ -96,7 +96,7 @@ extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 
 extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
-extern void func_002C7568(void);
+extern void evtStageTestAdvanceMotionQueue(void);
 
 extern s32 mdlGetNodeRefHalf(u32 node, s32 index);
 
@@ -111,7 +111,7 @@ extern u8 D_00437CB0[];
 
 extern void func_002C2AD0();
 
-extern void func_00328E48();
+extern void sdfReleaseChipBlock();
 
 extern u32 effMiscRand(s32);
 
@@ -496,7 +496,7 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     if (resourceHandle != 0) {
         mnuReleaseResourceList(resourceHandle);
     }
-    func_00328E48(panel);
+    sdfReleaseChipBlock(panel);
 }
 
 void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
@@ -543,7 +543,7 @@ void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, u32 x,
     panel->thirdValueC = additionalValue;
 }
 
-void func_002C0950(MenuPanelState *panel, u32 state) {
+void mnuSetPanelState(MenuPanelState *panel, u32 state) {
     panel->state = state;
 }
 
@@ -561,9 +561,9 @@ typedef struct MenuPanelGroup {
     s32 initialValue;  /* 0x28: initialized to 0x100 */
 } MenuPanelGroup;
 
-extern void func_002C0D00(MenuPanelGroup *);
+extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
-s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
+s32 mnuCreatePanelGroup(s32 owner, s32 texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)func_00328D68(0x2C);
     s32 *slot = group->entries;
     s32 index;
@@ -572,7 +572,7 @@ s32 func_002C0B80(s32 owner, s32 texture, s32 mode) {
         func_002C26D8(entry, owner, texture, mode, index);
         *slot++ = entry;
     }
-    func_002C0D00(group);
+    mnuClearPanelGroupSelection(group);
     group->texture = texture;
     group->initialValue = 0x100;
     return (s32)group;
@@ -584,7 +584,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
     for (i = 0; i < 5; i++) {
         func_002C2AD0(group->entries[i]);
     }
-    func_00328E48(group);
+    sdfReleaseChipBlock(group);
 }
 
 void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 data) {
@@ -595,15 +595,15 @@ void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 data) {
     }
 }
 
-void func_002C0CF8(MenuPanelGroup *group, u32 selection) {
+void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection) {
     group->selection = selection;
 }
 
-void func_002C0D00(MenuPanelGroup *group) {
+void mnuClearPanelGroupSelection(MenuPanelGroup *group) {
     group->selection = 0xffffffff;
 }
 
-u32 func_002C0D10(MenuPanelGroup *group) {
+u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
@@ -613,8 +613,8 @@ void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selected, u32 fl
     /* Required to match: retain byte-offset indexing for the child slot. */
     s32 offset = index * 4 + 0x10;
     u32 *entry = (u32 *)((u8 *)group + offset);
-    func_002C2AB0(*entry, selected);
-    func_002C2AC8(*entry, flags);
+    mnuSetPanelItemSelection(*entry, selected);
+    mnuSetPanelItemOption(*entry, flags);
 }
 
 void func_002C0F48(MenuPanelGroup *group, s32 index, u32 value) {
@@ -660,7 +660,7 @@ void *mnuCreateSpriteState(s32 x, s32 y, s32 z) {
 }
 
 void func_002C1050(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 /* The sequel selects its draw variant from the range index plus eight. */
@@ -685,7 +685,7 @@ void *func_002C1660(s32 x, s32 y, s32 z) {
 }
 
 void func_002C16D8(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C16F0);
@@ -782,7 +782,7 @@ void mnuCreatePairedEffects(MenuEffectPair *pair) {
     pair->second = (MenuEffectNode *)effectHandle;
 }
 
-void func_002C1FA0(s32 *list) {
+void mnuReleasePairedEffectBatches(s32 *list) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
@@ -800,7 +800,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B220);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B270);
 
-void func_002C2128(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture) {
+void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture) {
     s32 tableA[7] = {0x29, 0x23, 0x24, 0x25, 0x25, 0x2A, 0x2C};
     s32 tableB[7] = {0x29, 0x26, 0x27, 0x28, 0x28, 0x2B, 0x2C};
 
@@ -811,20 +811,20 @@ void func_002C2128(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture)
     }
 }
 
-void func_002C21F8(u32 *group) {
+void mnuReleaseSpriteTextures(u32 *group) {
     u32 *entry = group + 7;
     u32 index = 0;
     do {
         effDestroyResourceSlotSet(*entry++);
         index++;
     } while (index < 7);
-    func_002C1FA0(group);
+    mnuReleasePairedEffectBatches(group);
 }
 
-u32 func_002C2258(s32 useDefault, s32 index, s32 option) {
+u32 mnuGetPanelRatioColor(s32 useDefault, s32 index, s32 option) {
     u32 color = 0xA09DC380;
     if (!useDefault) {
-        switch (func_002C5CD0(index, option)) {
+        switch (mnuClassifyQuarterHalfPercent(index, option)) {
         case 1:
             color = 0xB4A06480;
             break;
@@ -904,31 +904,31 @@ void func_002C2AA8(MenuPanelItem *item, u32 value) {
     item->value28 = value;
 }
 
-void func_002C2AB0(MenuPanelItem *item, s32 selection) {
+void mnuSetPanelItemSelection(MenuPanelItem *item, s32 selection) {
     if (item->selection != selection) {
         item->selectionRamp = 0x100;
     }
     item->selection = selection;
 }
 
-void func_002C2AC8(MenuPanelItem *item, u32 option) {
+void mnuSetPanelItemOption(MenuPanelItem *item, u32 option) {
     item->option = option;
 }
 
 void func_002C2AD0(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3010);
 
-void func_002C32A0(MenuPanelItem *item, s32 value, s32 option) {
+void mnuSetProfilePanelValues(MenuPanelItem *item, s32 value, s32 option) {
     item->value10 = value;
     item->value14 = option;
 }
 
-u32 *func_002C32B0(s32 source) {
+u32 *mnuCreateProfilePanel(s32 source) {
     u32 *item = (u32 *)func_00328D68(0x48);
     s32 first;
     u32 second;
@@ -937,7 +937,7 @@ u32 *func_002C32B0(s32 source) {
     memset(item, 0, 0x48);
     first = func_00314B78(source);
     second = ptyGetCurrentProfileRecord(source);
-    func_002C32A0(item, func_00314690((u16)first), *(u32 *)second);
+    mnuSetProfilePanelValues(item, func_00314690((u16)first), *(u32 *)second);
     for (i = 0; i < 5; i++) {
         item[11 + i] = effMiscRand(0) % 0xC0 + 0x40;
     }
@@ -946,7 +946,7 @@ u32 *func_002C32B0(s32 source) {
 }
 
 void func_002C3390(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 void mnuSetGroupProperties(u32 *entry, u32 first, u32 second, u32 third, u32 fourth) {
@@ -958,7 +958,7 @@ void mnuSetGroupProperties(u32 *entry, u32 first, u32 second, u32 third, u32 fou
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
 
-void func_002C3E08(s32 x, s32 y, s32 z, u32 *item, s32 option) {
+void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *item, s32 option) {
     s32 previous;
     s32 next;
 
@@ -981,7 +981,7 @@ void func_002C3E58(u32 item) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C3E78);
 
-void func_002C3FC8(u32 item, u32 option) {
+void mnuDrainPanelTransitions(u32 item, u32 option) {
     s32 currentValue;
 
     currentValue = *(s32 *)item;
@@ -997,11 +997,11 @@ s32 func_002C4020(s32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4038);
 
-u8 func_002C42A0(s32 item, s32 value) {
+u8 mnuIsPopupEntryValue(s32 item, s32 value) {
     return *(s32 *)(item + 0x44) == value;
 }
 
-void func_002C42B0(s32 out, s32 entry) {
+void mnuSetPopupEntry(s32 out, s32 entry) {
     u16 lowHalf;
 
     lowHalf = *(u16 *)entry;
@@ -1009,7 +1009,7 @@ void func_002C42B0(s32 out, s32 entry) {
     *(s32 *)entry = lowHalf;
 }
 
-void func_002C42C0(s32 out, s32 entry) {
+void mnuSetPopupEntryFlagged(s32 out, s32 entry) {
     u16 lowHalf;
 
     lowHalf = *(u16 *)entry;
@@ -1017,7 +1017,7 @@ void func_002C42C0(s32 out, s32 entry) {
     *(s32 *)entry = lowHalf | 0x20000;
 }
 
-void func_002C42D8(s32 out, s32 entry) {
+void mnuAttachAndMarkMenuEntry(s32 out, s32 entry) {
     u16 lowHalf;
 
     lowHalf = *(u16 *)entry;
@@ -1025,9 +1025,9 @@ void func_002C42D8(s32 out, s32 entry) {
     *(s32 *)entry = lowHalf | 0x60000;
 }
 
-void func_002C42F0(s32 item, u32 out) {
+void mnuBindPresentMenuEntry(s32 item, u32 out) {
     if (*(s32 *)(item + 0x44) != 0) {
-        func_002C42C0(out, *(s32 *)(item + 0x44));
+        mnuSetPopupEntryFlagged(out, *(s32 *)(item + 0x44));
         return;
     }
 }
@@ -1071,7 +1071,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C44E8);
 
-void func_002C47C8(s32 active, u8 *menu, u32 *buttons) {
+void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
     s32 top = 0;
     s32 bottom = 0;
     u8 *list = *(u8 **)(menu + 0x18);
@@ -1099,7 +1099,7 @@ void func_002C47C8(s32 active, u8 *menu, u32 *buttons) {
 }
 
 void func_002C48C8(u32 item, u32 option) {
-    func_002C47C8(*(u32 *)((s32)item + 0x90), item, option);
+    mnuHandleListPageJumpInput(*(u32 *)((s32)item + 0x90), item, option);
 }
 
 void mnuPlayInputSound(s32 unused, s32 buttons, s32 *state) {
@@ -1294,7 +1294,7 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
     return scale;
 }
 
-s32 func_002C4EB8(u16 id, s32 item) {
+s32 mnuCanAffordEntryCost(u16 id, s32 item) {
     u16 minimum = ((RangeEntry *)D_00435E20)[id].value;
     s32 kind = mnuGetRangeEntryKind(id);
 
@@ -1313,16 +1313,16 @@ s32 func_002C4EB8(u16 id, s32 item) {
     return 1;
 }
 
-extern s32 func_002C4EB8(u16, s32);
+extern s32 mnuCanAffordEntryCost(u16, s32);
 
-s32 func_002C4F50(s32 context, u16 id) {
-    if (func_002C4EB8(id, context) == 0) return -1;
+s32 mnuGetEntryUseStatus(s32 context, u16 id) {
+    if (mnuCanAffordEntryCost(id, context) == 0) return -1;
     if ((((RangeEntry *)(D_00435E20 + id * 56))->flags & 1) == 0) return 1;
     if (id < 0x220) return 0;
     return 1;
 }
 
-s32 func_002C4FB8(u16 id, s32 object) {
+s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
     s32 kind = ((RangeEntry *)D_00435E20)[id].kind;
     u16 value = ((RangeEntry *)D_00435E20)[id].value;
 
@@ -1341,7 +1341,7 @@ s32 func_002C4FB8(u16 id, s32 object) {
     return 0;
 }
 
-s32 func_002C5030(s32 id, u8 *cursor) {
+s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
     RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
     u16 amount = record->value;
 
@@ -1363,7 +1363,7 @@ s32 func_002C5030(s32 id, u8 *cursor) {
     }
 }
 
-s32 func_002C50C0(u16 ability) {
+s32 mnuGetAbilityByteCategory(u16 ability) {
     u8 value;
     if (ability == 0) {
         return 1;
@@ -1390,11 +1390,11 @@ u32 func_002C5140(void) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", ptySkillApplyFieldUseEffect);
 
-u8 func_002C5338(u32 id) {
+u8 mnuIsAbilityValueMarked(u32 id) {
     return *(s8 *)((id & 0xffff) * 2 + D_00435E1C) == '\x01';
 }
 
-s32 func_002C5358(s32 affinityId, s32 index) {
+s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
     s32 flags = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (flags == -1) {
@@ -1433,7 +1433,7 @@ s32 func_002C5358(s32 affinityId, s32 index) {
     return -1;
 }
 
-s32 func_002C5428(s32 affinityId, s32 index) {
+s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
     s32 value = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (value == -1) {
@@ -1445,7 +1445,7 @@ s32 func_002C5428(s32 affinityId, s32 index) {
     return value;
 }
 
-s32 func_002C5480(s32 id) {
+s32 mnuIsBulletItemId(s32 id) {
     if (id < 0xA0) {
         return 0;
     }
@@ -1467,9 +1467,9 @@ s32 func_002C54B0(s32 id) {
 }
 
 
-extern u16 func_002C5580(s32);
+extern u16 mnuGetPartyEntryMenuValue(s32);
 
-u32 func_002C54C8(s32 id) {
+u32 ptyCountBulletItem(s32 id) {
     u32 value;
     s32 index;
     if (id < 0xA0) return 0;
@@ -1477,23 +1477,23 @@ u32 func_002C54C8(s32 id) {
     value = *(u8 *)(id + (s32)D_00435DD0 + 0x1340);
     for (index = 0; index < 5; index++) {
         MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60) + index;
-        if (id == func_002C5580((s32)entry)) {
+        if (id == mnuGetPartyEntryMenuValue((s32)entry)) {
             value++;
         }
     }
     return value;
 }
 
-u32 func_002C5570(s32 entry, u16 value) {
+u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
     ((MenuPanelEntry *)entry)->menuValue = value;
     return 1;
 }
 
-u16 func_002C5580(s32 entry) {
+u16 mnuGetPartyEntryMenuValue(s32 entry) {
     return ((MenuPanelEntry *)entry)->menuValue;
 }
 
-u32 func_002C5588(u32 entry, u32 id) {
+u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
     ((MenuPanelEntry *)entry)->currentId = (s16)id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
@@ -1504,7 +1504,7 @@ u16 func_002C55C0(s32 entry) {
     return ((MenuPanelEntry *)entry)->currentId;
 }
 
-MenuPanelEntry *func_002C55C8(u32 id) {
+MenuPanelEntry *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
     MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60);
     for (index = 0; index < 5; index++, entry++) {
@@ -1515,7 +1515,7 @@ MenuPanelEntry *func_002C55C8(u32 id) {
     return 0;
 }
 
-MenuPanelEntry *func_002C5618(u32 id) {
+MenuPanelEntry *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
     MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0x1CA10);
     for (index = 0; index < 16; index++, entry++) {
@@ -1557,7 +1557,7 @@ s32 func_002C5700(void) {
     return 0;
 }
 
-s32 func_002C5758(u32 id, s32 mode) {
+s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     u16 *entry = D_003E78D8;
     u32 i;
 
@@ -1629,7 +1629,7 @@ s32 mnuGetMatchingPartyEntryMask(s32 object) {
     return 0;
 }
 
-s32 func_002C5CD0(s32 amount, s32 divisor) {
+s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     s32 percent;
 
     if (divisor != 0) {
@@ -1707,12 +1707,12 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
         return 3;
     }
     if (ptyGetSkillNibbleState(target, id) != 0) {
-        if (func_002C4FB8(id, target) != 0) {
+        if (mnuIsEntryCostUnaffordable(id, target) != 0) {
             return 0;
         }
         if (commit != 0) {
             ptySkillApplyFieldUseEffect(skill, id & 0xFFFF, target, (s32)entry);
-            func_002C5030(id & 0xFFFF, (u8 *)target);
+            mnuConsumeEntryCost(id & 0xFFFF, (u8 *)target);
             mnuInitPartyPanelSlots((PartyPanel *)partyPanel);
             func_002BCA98(skill);
             func_002BCAB0(skill);
@@ -1724,7 +1724,7 @@ s32 mnuTryUseFieldSkill(s32 partyPanel, s32 skill, s32 target, s32 commit) {
 
 /* Give flag-bit-1 entries precedence, then compare their 10-bit fixed-point
  * field-6/field-8 ratios without converting to floating point. */
-s32 func_002C5F78(u32 *left, u32 *right) {
+s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
     MenuItemCounts *a = (MenuItemCounts *)*left;
     MenuItemCounts *b = (MenuItemCounts *)*right;
     s32 leftRatio = (a->primary << 10) / a->denominator;
@@ -1785,7 +1785,7 @@ u8 func_002C6480(void) {
     return D_00437C9C != 0;
 }
 
-void func_002C6490(s32 enabled) {
+void evtStageTestSetModelScalingEnabled(s32 enabled) {
     if (enabled == 0) {
         D_00457EB0.flag = 0;
     } else {
@@ -1793,11 +1793,11 @@ void func_002C6490(s32 enabled) {
     }
 }
 
-u32 func_002C64B8(void) {
+u32 evtStageTestGetActiveModel(void) {
     return D_00457EB0.model;
 }
 
-u32 func_002C64C8(void) {
+u32 evtStageTestGetSlotModelId(void) {
     return D_00457EB0.slot[0].modelId;
 }
 
@@ -1916,7 +1916,7 @@ void evtStageTestStop(void) {
     }
     state->pendingEffect = -1;
     if (state->effect != 0) {
-        func_002C76F0();
+        evtStageTestDestroyModelEffect();
     }
     if (state->model != 0) {
         mdlDestroyContext(state->model);
@@ -1931,14 +1931,14 @@ void mnuResetWorkFloats(void) {
     D_0037F5E0[5] = 2048.0f;
 }
 
-void func_002C6AC0(s32 resource, s32 modelId, s32 option) {
+void evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
     D_00457EB0.unk04 = mdlRequestAsset();
 }
 
 void mnuForwardTableByte(s32 encodedIndex) {
     StageTestSlot *slot = D_00457EB0.slot;
 
-    func_002C6AC0(slot->unk04, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
+    evtStageTestRequestModelAsset(slot->unk04, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
 u32 func_002C6B28(u32 *flags) {
@@ -1964,7 +1964,7 @@ s32 mnuCommitPendingBlock(MenuBlockState *object) {
     return 1;
 }
 
-void func_002C6BB8(void) {
+void evtStageTestClearPendingFlag(void) {
     D_00457EB0.flags &= ~1;
 }
 
@@ -1995,7 +1995,7 @@ s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
     return 1;
 }
 
-void func_002C6CC8(u16 id, u32 option) {
+void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option) {
     evtStageTestSelectEntry(id, 0xffffffffffffffff, option);
 }
 
@@ -2140,14 +2140,14 @@ s8 evtStageTestUpdate(s32 frame) {
                 D_00457EB0.unk70 = 1;
             } else {
                 if (D_00457EB0.pendingEffect >= 0) {
-                    func_002C76A8(D_00457EB0.pendingEffect);
+                    evtStageTestCreateModelEffect(D_00457EB0.pendingEffect);
                     D_00457EB0.pendingEffect = -1;
                 }
                 if (D_00457EB0.effect != 0) {
                     func_00203E18(D_00457EB0.effect);
                 }
                 func_00232390(D_00457EB0.model, frame);
-                func_002C7568();
+                evtStageTestAdvanceMotionQueue();
             }
         }
     }
@@ -2212,7 +2212,7 @@ void func_002C7530(void) {
     D_00457EB0.slot[0].state = 4;
 }
 
-s32 func_002C7540(void) {
+s32 evtStageTestHasPendingMotion(void) {
     s32 state = D_00457EB0.slot[0].state;
 
     if ((state == 0) || (state == 3)) {
@@ -2221,12 +2221,12 @@ s32 func_002C7540(void) {
     return 1;
 }
 
-void func_002C7568(void) {
+void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *slot = D_00457EB0.slot;
     s32 index;
     s32 node;
 
-    if (slot->state != 0 && slot->state != 3 && (node = func_002C64B8()) != 0) {
+    if (slot->state != 0 && slot->state != 3 && (node = evtStageTestGetActiveModel()) != 0) {
         if (slot->state == 1) {
             index = slot->index;
 
@@ -2245,14 +2245,14 @@ void func_002C7568(void) {
     }
 }
 
-void func_002C76A8(s32 unused) {
+void evtStageTestCreateModelEffect(s32 unused) {
     if (D_00457EB0.effect != 0) {
-        func_002C76F0();
+        evtStageTestDestroyModelEffect();
     }
     D_00457EB0.effect = sndCreateSystemEffectHandle(D_00457EB0.model, 0x30);
 }
 
-void func_002C76F0(void) {
+void evtStageTestDestroyModelEffect(void) {
     StageTestState *stage = &D_00457EB0;
     u32 effectHandle = stage->effect;
 
@@ -2263,11 +2263,11 @@ void func_002C76F0(void) {
     stage->effect = 0;
 }
 
-void func_002C7730(u32 effect) {
+void evtStageTestSetPendingEffect(u32 effect) {
     D_00457EB0.pendingEffect = effect;
 }
 
-s32 func_002C7740(void) {
+s32 evtStageTestHasModelEffect(void) {
     return D_00457EB0.effect != 0;
 }
 
@@ -2330,7 +2330,7 @@ void func_002C7C00(void) {
     evtDestroySecondaryWorldNode();
 }
 
-void func_002C7C18(void) {
+void evtBattleStageTestStopTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_0042B610, 1);
     kwlnDebugGraphSetEnabled(0);
 }
@@ -2360,8 +2360,8 @@ s32 btlDestroyStageTask(object)
             sdfDevQueueReleaseState(resource);
         }
         func_00346AF8(object->payload);
-        func_00328E48(object->allocation);
-        func_00328E48((void *)object);
+        sdfReleaseChipBlock(object->allocation);
+        sdfReleaseChipBlock((void *)object);
         return 0;
     }
     return 1;

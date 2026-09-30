@@ -537,11 +537,11 @@ void itfSetGridDimensions(GridTextWidget *work, s32 columns, s32 rows) {
 u32 itfDestroyGridTextWidget(GridTextWidget *widget) {
     s64 next;
 
-    func_002CFF98(widget->text);
+    sdfReleaseChipBlock(widget->text);
     do {
         next = func_002C1B30(widget);
     } while (next != 0);
-    func_002CFF98(widget);
+    sdfReleaseChipBlock(widget);
     return 1;
 }
 
@@ -578,7 +578,7 @@ typedef struct GridScrollControl {
 u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     u32 list;
 
-    func_002CFF98(widget->text);
+    sdfReleaseChipBlock(widget->text);
     list = (u32)widget->children;
     if (list != 0) {
         do {
@@ -589,7 +589,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
             list = func_002C1B30(widget);
         } while (list != 0);
     }
-    func_002CFF98(widget);
+    sdfReleaseChipBlock(widget);
     return 1;
 }
 
@@ -651,7 +651,7 @@ void func_002C1CC8(GridTextWidget *widget, u8 *node, const char *text) {
     s32 allocation;
     char *copy;
 
-    func_002CFF98(((GridTextWidget *)node)->text);
+    sdfReleaseChipBlock(((GridTextWidget *)node)->text);
     length = strlen(text);
     allocation = length + 1;
     copy = (char *)func_002CFEB8(allocation);

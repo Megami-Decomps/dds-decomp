@@ -12,7 +12,7 @@ typedef struct {
 
 s32 func_002D0A80(s32 arg);
 void func_002D0A10(s32 arg);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
 void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     ModelRangeData *data;
@@ -23,5 +23,5 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     if (resource != 0) {
         func_002D0A10(func_002D0A80(resource));
     }
-    func_002CFF98(data);
+    sdfReleaseChipBlock(data);
 }

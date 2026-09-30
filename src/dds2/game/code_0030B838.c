@@ -151,7 +151,7 @@ extern void func_0030C250(s32, s32);
 extern void func_0030CC68();
 extern u8 D_00400AF0[];
 
-extern void func_00328E48();
+extern void sdfReleaseChipBlock();
 extern void mnuDestroyListState();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
@@ -335,10 +335,10 @@ void func_0030C5D8(SdfCounterRuntime *rt) {
 
     if (rt != NULL) {
         for (channel = rt->first; channel != NULL; channel = channel->next) {
-            func_00328E48(channel->display);
+            sdfReleaseChipBlock(channel->display);
             channel->display = NULL;
         }
-        func_00328E48(rt->timer);
+        sdfReleaseChipBlock(rt->timer);
         rt->timer = NULL;
         mnuDestroyListState(rt);
     }
@@ -517,7 +517,7 @@ s32 func_0030D780(u64 arg0) {
 
     temp_v0 = func_0019F448(0, 0, 0, 0, arg0, 0);
     temp_v1 = frFontMeasureLines(temp_v0);
-    func_0019C5B0(temp_v0);
+    frFontQueueGlyphInSelectedSlot(temp_v0);
     return temp_v1;
 }
 

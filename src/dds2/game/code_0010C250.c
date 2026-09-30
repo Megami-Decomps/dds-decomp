@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958(void);
+extern s32 kwlnTaskGetUserValue(void);
 
 typedef struct ScriptContext {
     u8 pad0[0x18];
@@ -20,25 +20,25 @@ typedef struct ScriptContext {
 void scrSetCurrentActor(u32 unused, u32 actor) {
     ScriptContext *context;
 
-    context = (ScriptContext *)func_00101958();
+    context = (ScriptContext *)kwlnTaskGetUserValue();
     context->actor = (void *)actor;
 }
 
 u32 scrGetCurrentActor(void) {
     ScriptContext *context;
 
-    context = (ScriptContext *)func_00101958();
+    context = (ScriptContext *)kwlnTaskGetUserValue();
     return (u32)context->actor;
 }
 
 void scrReplaceCurrentTask(u32 task) {
     s64 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     if (context != 0) {
         scrProcDestroyTask(context);
     }
-    func_00101950(task, 0);
+    kwlnTaskSetUserValue(task, 0);
 }
 
 void bfStepContext(void) {

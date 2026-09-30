@@ -78,11 +78,11 @@ extern ParDispatch D_0034E250[];
 
 extern s32 func_00151E60(s32);
 
-extern void func_00152000(s32, f32, f32);
+extern void billSetChildScaleComponents(s32, f32, f32);
 
 extern void billSetBillboardMode(s32, s16);
 
-extern void func_001523B0(s32);
+extern void billMarkKindOneFlag(s32);
 
 extern ParDispatch D_0034E258[];
 
@@ -218,9 +218,9 @@ ParObj *parInstantiateKind(ParObj *work) {
     particle->dispatchIndex = work->dispatchIndex;
     if (work->unk28 == -1) {
         s32 transform = func_00151E60(work->billId);
-        func_00152000(transform, particle->unk10, particle->unk14);
+        billSetChildScaleComponents(transform, particle->unk10, particle->unk14);
         billSetBillboardMode(transform, particle->unk2C);
-        func_001523B0(transform);
+        billMarkKindOneFlag(transform);
         particle->billId = transform;
     }
     return particle;
@@ -322,7 +322,7 @@ void parDispatchKindUpdate(ParSystem *work, s32 index, u32 color) {
 
 extern void parClearSlotFlag(s32);
 
-extern void func_00188510(s32);
+extern void effTrackPolyResetIndexedWork(s32);
 
 void parDispatchKindInit(ParSystem *work, s32 index) {
     switch ((u16)work->kind) {
@@ -336,7 +336,7 @@ void parDispatchKindInit(ParSystem *work, s32 index) {
         parCellInit((void *)work->cells, index);
         return;
     case 4:
-        func_00188510((s32)work->cells);
+        effTrackPolyResetIndexedWork((s32)work->cells);
         break;
     }
 }
@@ -411,7 +411,7 @@ void func_0015B058(s32 particle, s32 index, u32 color) {
 
 extern void func_001884E8(s32, s32, void *);
 
-extern void func_00188538(s32, s32, u32);
+extern void effTrackPolySetIndexedColor(s32, s32, u32);
 
 void func_0015B148(s32 particle, s32 index, u32 color) {
     u128 axis[2];
@@ -439,7 +439,7 @@ void func_0015B148(s32 particle, s32 index, u32 color) {
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
     __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
     func_001884E8(particle, index, axis);
-    func_00188538(particle, index, (color & 0xFF000000) | 0x808080);
+    effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
 u32 func_0015B220(void) {

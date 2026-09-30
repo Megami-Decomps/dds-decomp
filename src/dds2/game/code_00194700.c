@@ -32,7 +32,7 @@ extern void func_0035C860();
 
 extern s32 sceDopen(void *path);
 
-extern void func_00328E48(void *allocation);
+extern void sdfReleaseChipBlock(void *allocation);
 
 extern char D_00436450[];
 
@@ -74,7 +74,7 @@ void effTypeDispatch(EffWork *work) {
 
 void effTypeDispatchFree(EffWork *work) {
     D_003B2068[work->type].handler(work->unk4);
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
@@ -303,12 +303,12 @@ void effFreeWorkList(EffWork *root) {
     if (node != NULL) {
         do {
             EffWork *next = node->unk38;
-            func_00328E48(node);
+            sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    func_00328E48(root->unk4);
-    func_00328E48(root);
+    sdfReleaseChipBlock(root->unk4);
+    sdfReleaseChipBlock(root);
 }
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195060);
@@ -323,7 +323,7 @@ void effFreeWork(EffWork *work) {
         sdfTexReleaseReferenceViaHandler(soundHandle);
         work->unk3C = 0;
     }
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
 }
 
 void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {

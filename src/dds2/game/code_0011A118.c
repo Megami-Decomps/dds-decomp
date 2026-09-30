@@ -100,7 +100,7 @@ extern void func_0011CA88(Entry1A4 *entry);
 
 extern s32 D_0043E5C8[];
 
-extern s32 func_0010D818();
+extern s32 scrSetIntegerReturnValue();
 
 extern s32 D_0043E5CC[];
 
@@ -122,7 +122,7 @@ extern s32 D_0043E5C0[];
 
 extern s32 D_0043E5D0[];
 
-extern void func_0010D830(f32 value);
+extern void scrSetFloatReturnValue(f32 value);
 
 extern s32 effMiscRandMod(u32 stream, u32 modulus);
 
@@ -144,7 +144,7 @@ extern s32 D_00435E3C;
 
 extern s32 D_00386288[];
 
-extern void func_002C5588(Entry1A4 *, s32);
+extern void mnuSetPartyEntryCurrentId(Entry1A4 *, s32);
 
 extern s32 func_0011AEE0(s32);
 
@@ -250,7 +250,7 @@ s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     return 0;
 }
 
-void func_0011A7F8(s32 counterAddress, s32 increment) {
+void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
     *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
@@ -292,7 +292,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AB38);
 
-u16 func_0011AE60(s32 tableIndex) {
+u16 evtGetIndexedEventRecordId(s32 tableIndex) {
     return ((EventIndexRecord *)D_00435E38)[tableIndex].index;
 }
 
@@ -528,7 +528,7 @@ void func_0011D3B8(s32 base, s32 offset, s32 amount) {
 
 void func_0011D3E8(Entry1A4 *entry) {
     s32 value = D_00386288[entry->rosterIndex];
-    func_002C5588(entry, value);
+    mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
         *(u8 *)(value + D_00435DD0 + 0x1340) = 1;
     }
@@ -569,42 +569,42 @@ void dds3WorkInit(void) {
     memset(D_0043E5C0, 0, 0x18);
 }
 
-u32 func_0011D588(void) {
+u32 scrGetWorkTaskHandle(void) {
     return D_00435E88;
 }
 
-void func_0011D590(void) {
+void scrDestroyWorkTask(void) {
     scrProcDestroyTask(D_00435E88);
     D_00435E88 = 0;
 }
 
 s32 func_0011D5B8(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->index14);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->index14);
     return 1;
 }
 
 s32 func_0011D5E0(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->index14);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->index14);
     return 1;
 }
 
 s32 func_0011D608(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->value6);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->value6);
     return 1;
 }
 
 s32 func_0011D630(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->value6);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->value6);
     return 1;
 }
 
 s32 func_0011D658(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5C8[0])->value8);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->value8);
     return 1;
 }
 
 s32 func_0011D680(void) {
-    func_0010D818(((EventScriptEntry *)D_0043E5CC[0])->value8);
+    scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->value8);
     return 1;
 }
 
@@ -619,14 +619,14 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D8B0);
 s32 func_0011D958(void) {
     s32 val = scrReadIntParameter(0);
 
-    func_0010D818(func_00119A78(D_0043E5C8[0], val));
+    scrSetIntegerReturnValue(func_00119A78(D_0043E5C8[0], val));
     return 1;
 }
 
 s32 func_0011D990(void) {
     s32 val = scrReadIntParameter(0);
 
-    func_0010D818(func_00119A78(D_0043E5CC[0], val));
+    scrSetIntegerReturnValue(func_00119A78(D_0043E5CC[0], val));
     return 1;
 }
 
@@ -639,11 +639,11 @@ s32 func_0011D9C8(void) {
     } else {
         value = ((EventStatRecord *)D_00435E20)[index].stat11;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DA50(void) {
+s32 evtPushSelectedScaledStat(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
     value = ((EventStatRecord *)D_00435E20)[index].stat25;
@@ -651,12 +651,12 @@ s32 func_0011DA50(void) {
         u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
         value = (s32)((f32)value * ((EventRosterStat *)D_00435DE8)[id].multiplier);
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DAE0(void) {
-    func_0010D818(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat2D);
+s32 evtPushSelectedStatGrade(void) {
+    scrSetIntegerReturnValue(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat2D);
     return 1;
 }
 
@@ -675,11 +675,11 @@ s32 evtSelectScriptStatValue(void) {
         value = 0;
         break;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DBA0(void) {
+s32 evtPushEntryIndexedStatOption(void) {
     s32 *work = D_0043E5C0;
     s32 value;
     u16 mode = ((EventScriptEntry *)work)->index14;
@@ -695,7 +695,7 @@ s32 func_0011DBA0(void) {
         value = 0;
         break;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -708,16 +708,16 @@ s32 func_0011DC38(void) {
     } else {
         value = ((EventStatRecord *)D_00435E20)[index].stat34;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DCC0(void) {
-    func_0010D818(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat36);
+s32 evtPushSelectedStatMaximum(void) {
+    scrSetIntegerReturnValue(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat36);
     return 1;
 }
 
-s32 func_0011DD00(void) {
+s32 evtStoreScriptParameterResult(void) {
     u16 bits = ((EventScriptEntry *)D_0043E5C0)->flags | 1;
 
     ((EventScriptEntry *)D_0043E5C0)->flags = bits;
@@ -726,12 +726,12 @@ s32 func_0011DD00(void) {
 }
 
 s32 func_0011DD40(void) {
-    func_0010D818(D_0043E5D0[0]);
+    scrSetIntegerReturnValue(D_0043E5D0[0]);
     return 1;
 }
 
-s32 func_0011DD68(void) {
-    func_0010D818((((((EventScriptEntry *)D_0043E5C8[0])->flags) >> 5) ^ 1) & 1);
+s32 evtPushEntryFlagBitInverted(void) {
+    scrSetIntegerReturnValue((((((EventScriptEntry *)D_0043E5C8[0])->flags) >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -740,7 +740,7 @@ s32 evtRollRandomScale(void) {
     s32 range = scrReadIntParameter(0);
     s32 roll = effMiscRandMod(0, range * 2);
 
-    func_0010D830((f32)(roll - range + 100) / 100.0f);
+    scrSetFloatReturnValue((f32)(roll - range + 100) / 100.0f);
     return 1;
 }
 
@@ -754,7 +754,7 @@ s32 func_0011DE08(void) {
     else {
         value = 0;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -768,7 +768,7 @@ s32 func_0011DE58(void) {
     else {
         value = 0;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -782,11 +782,11 @@ s32 func_0011DEA8(void) {
     else {
         value = 0;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DEF8(void) {
+s32 evtPushAvailableChoiceRatio(void) {
     s32 available = func_001AA308();
     u64 value;
     if (available) {
@@ -798,29 +798,29 @@ s32 func_0011DEF8(void) {
     else {
         value = 0;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011DF60(void) {
+s32 evtPushAvailableFloatValue(void) {
     s32 v0 = func_001AA308();
     f32 val = 0.0f;
 
     if (v0 != 0) {
         val = func_001AD978();
     }
-    func_0010D830(val);
+    scrSetFloatReturnValue(val);
     return 1;
 }
 
-s32 func_0011DFA0(void) {
+s32 evtPushAvailableIntegerValue(void) {
     s32 v0 = func_001AA308();
     s32 val = 0;
 
     if (v0 != 0) {
         val = func_001ADA10();
     }
-    func_0010D818(val);
+    scrSetIntegerReturnValue(val);
     return 1;
 }
 
@@ -829,14 +829,14 @@ extern s32 D_00435E44;
 s32 func_0011DFE0(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)((D_00435E44 - 4) + index * 4));
+    scrSetFloatReturnValue(*(f32 *)((D_00435E44 - 4) + index * 4));
     return 1;
 }
 
 s32 func_0011E018(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x188));
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x188));
     return 1;
 }
 
@@ -845,28 +845,28 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E050);
 s32 func_0011E128(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x360));
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x360));
     return 1;
 }
 
 s32 func_0011E160(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x4EC));
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x4EC));
     return 1;
 }
 
 s32 func_0011E198(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x678));
     return 1;
 }
 
 s32 func_0011E1D0(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    func_0010D830(*(f32 *)(D_00435E44 + index * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x678));
     return 1;
 }
 
@@ -877,13 +877,13 @@ s32 func_0011E208(void) {
     } else {
         value = effMiscRandMod(0, 0x30) != 0 ? 0 : 0x80;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011E268(void) {
+s32 evtPushRosterBaseValue(void) {
     u16 index = ((EventScriptEntry *)D_0043E5C8[0])->rosterIndex;
-    func_0010D818(((EventRosterStat *)D_00435DE8)[index].base);
+    scrSetIntegerReturnValue(((EventRosterStat *)D_00435DE8)[index].base);
     return 1;
 }
 
@@ -900,11 +900,11 @@ s32 func_0011E430(void) {
         s32 index = ((EventScriptEntry *)entry)->rosterIndex;
         result = ((EventRosterRecord *)D_00435DEC)[index].panelValue;
     }
-    func_0010D818(result);
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
-s32 func_0011E498(u32 flags) {
+s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
     u32 type = flags >> 16;
     switch (type) {
     case 0:
@@ -959,7 +959,7 @@ s32 func_0011EC00(void) {
     } else {
         state = func_0011AEE0(value);
     }
-    func_0010D818(state == 1);
+    scrSetIntegerReturnValue(state == 1);
     return 1;
 }
 

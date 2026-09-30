@@ -248,8 +248,8 @@ typedef struct FuncTab {
     void (*w10)(void *a0, f32 t1, f32 t2);
 } FuncTab;
 
-void *func_002CFF68(s32 size);
-void func_002CFF98(void *a0);
+void *sdfAllocAndClearQuadwords(s32 size);
+void sdfReleaseChipBlock(void *a0);
 void *func_002CFEB8(s32 size);
 ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
 s32 func_002DB1C8(void *a0, s32 a1, s32 a2);
@@ -270,8 +270,8 @@ void func_002DB3D0(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
 f32 sdfInterpolateMotionKeys(KeyOut *a0);
 void func_002DB7C8(void *a0, KeyOut *out, f32 t);
 s32 func_002DB958(KeyOut *a0);
-void func_002DBA80(void *tmp, void *src, void *tbl, s32 x);
-void func_002DC360(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
+void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
+void sdfMotionBindIndexedTrack(Dst360 *a0, Src360 *a1, void *a2, s32 a3);
 extern void effMiscQuaternionNlerpVU(f32 amount);
 extern void effMiscQuaternionToMatrixVU(void);
 extern s32 (*D_003981B8[])(void *a0, s32 a1);
@@ -350,11 +350,11 @@ void sdfDestroyMotion(MotionNode *node)
         sdfInvokeMotionObjectCallback(cb[i]);
     }
     sdfDestroyDevRequest(node->request);
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB3D0);
-void func_002DB518(void *a0, s32 a1, s32 a2) {
+void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
     func_002DB3D0(a0, a1, a2, 0.0f, 0.0f);
 }
 
@@ -380,7 +380,7 @@ void sdfMotionResume(Motion *motion) {
 }
 
 void func_002DB7A8(void *a0) {
-    func_002CFF98(a0);
+    sdfReleaseChipBlock(a0);
 }
 
 void sdfSetMotionOutputValue(Triple *a0, s32 a1) {
@@ -413,7 +413,7 @@ void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
     } while (i != 5);
 }
 
-void func_002DBA28(KeyOut *src, f32 *dst) {
+void sdfMotionBlendFiveKeyValues(KeyOut *src, f32 *dst) {
     sdfMotionBlendFiveFloats(dst, src->firstKey, src->secondKey, src->weight);
 }
 
@@ -421,21 +421,21 @@ s32 sdfDispatchMotionBySelector(void *a0, s32 a1) {
     return D_003981B8[(u16)a1](a0, a1);
 }
 
-void func_002DBA80(void *tmp, void *src, void *tbl, s32 x) {
+void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
     sdfSetMotionPointerPair(tmp, src, tbl);
     ((TmpBuf *)tmp)->unkC = sdfModelFindDrawNode(((HasPtr4 *)src)->unk4, x);
 }
 
-void *func_002DBAD0(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x20);
-    func_002DBA80(r, a0, D_003981D0, a2);
+    sdfMotionBindDrawNode(r, a0, D_003981D0, a2);
     return r;
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
-void func_002DBB30(HasSub *a0, f32 t) {
+void sdfMotionBlendDrawVector(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
@@ -446,7 +446,7 @@ void func_002DBB30(HasSub *a0, f32 t) {
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with sub->vec by t2 into sub+0x60 */
-void func_002DBBB0(HasSub *a0, f32 t1, f32 t2) {
+void sdfMotionBlendDrawVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t1);
@@ -462,7 +462,7 @@ void *func_002DBC60(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x20);
-    func_002DBA80(r, a0, D_003981E8, a2);
+    sdfMotionBindDrawNode(r, a0, D_003981E8, a2);
     return r;
 }
 
@@ -470,16 +470,16 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBCC0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBD80);
 
-void *func_002DBE60(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x20);
-    func_002DBA80(r, a0, D_00398200, a2);
+    sdfMotionBindDrawNode(r, a0, D_00398200, a2);
     return r;
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
-void func_002DBEC0(HasSub *a0, f32 t) {
+void sdfMotionBlendScaleVector(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
@@ -489,8 +489,8 @@ void func_002DBEC0(HasSub *a0, f32 t) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
 }
 
-/* vu0 routine: as func_002DBBB0, stored to sub+0x70 */
-void func_002DBF40(HasSub *a0, f32 t1, f32 t2) {
+/* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
+void sdfMotionBlendScaleVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t1);
@@ -502,16 +502,16 @@ void func_002DBF40(HasSub *a0, f32 t1, f32 t2) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
 }
 
-void *func_002DBFF0(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x20);
-    func_002DBA80(r, a0, D_00398218, a2);
+    sdfMotionBindDrawNode(r, a0, D_00398218, a2);
     return r;
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
-void func_002DC050(HasSub *a0, f32 t) {
+void sdfMotionBlendQuaternionToMatrix(HasSub *a0, f32 t) {
     KeyOut b;
     u8 *sub;
     u8 *matrix;
@@ -533,7 +533,7 @@ void func_002DC050(HasSub *a0, f32 t) {
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
-void func_002DC0E8(HasSub *a0, f32 t1, f32 t2) {
+void sdfMotionBlendKeyQuaternionWithBase(HasSub *a0, f32 t1, f32 t2) {
     KeyOut b;
     u8 *sub;
     u8 *matrix;
@@ -557,15 +557,15 @@ void func_002DC0E8(HasSub *a0, f32 t1, f32 t2) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x20));
 }
 
-void *func_002DC1A0(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DBA80(r, a0, D_00398230, a2);
+    sdfMotionBindDrawNode(r, a0, D_00398230, a2);
     return r;
 }
 
-void func_002DC200(HasSubU *a0, f32 t) {
+void sdfMotionUpdateKeyFlag(HasSubU *a0, f32 t) {
     KeyOut b;
     SubU *s;
 
@@ -591,19 +591,19 @@ void func_002DC258(HasSubU *a0, f32 t) {
     }
 }
 
-void func_002DC2B0(CmdB *a0) {
+void sdfMotionReadKeyFlag(CmdB *a0) {
     a0->res = (s8)(((a0->sub->u14 >> 4) ^ 1) & 1);
 }
 
-void func_002DC2D0(void *work) {
+void sdfMotionCaptureDrawVector(void *work) {
     PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x60);
 }
 
-void func_002DC2F0(void *work) {
+void sdfMotionCaptureQuaternion(void *work) {
     PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x50);
 }
 
-void func_002DC310(void *work) {
+void sdfMotionCaptureScaleVector(void *work) {
     PCP_COPY_VECTOR((u8 *)work + 0x10, *(u8 **)((u8 *)work + 0xC) + 0x70);
 }
 
@@ -611,7 +611,7 @@ s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
     return D_00398248[(u16)a1](a0, a1);
 }
 
-void func_002DC360(Dst360 *a0, Src360 *a1, void *a2, s32 a3) {
+void sdfMotionBindIndexedTrack(Dst360 *a0, Src360 *a1, void *a2, s32 a3) {
     sdfSetMotionPointerPair(&a0->pair, a1, a2);
     a0->unkC = a1->unk4->unkC->arr[a3];
 }
@@ -620,7 +620,7 @@ void *func_002DC3B8(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_00398270, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398270, a2);
     return r;
 }
 
@@ -641,7 +641,7 @@ void *func_002DC518(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_00398288, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398288, a2);
     return r;
 }
 
@@ -654,7 +654,7 @@ void func_002DC578(HasSub *a0, f32 t) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DC5B8);
 
-void func_002DC668(CmdI *a0) {
+void sdfMotionReadBoundTrackInteger(CmdI *a0) {
     a0->res = a0->sub->i10;
 }
 
@@ -662,7 +662,7 @@ void *func_002DC678(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_003982A0, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_003982A0, a2);
     return r;
 }
 
@@ -683,7 +683,7 @@ void *func_002DC7D8(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_003982B8, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_003982B8, a2);
     return r;
 }
 
@@ -700,96 +700,96 @@ void func_002DC928(CmdI *a0) {
     a0->res = a0->sub->i28;
 }
 
-void *func_002DC938(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateFloatBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_003982D0, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_003982D0, a2);
     return r;
 }
 
-void func_002DC998(HasSub *a0, f32 t) {
+void sdfMotionApplyInterpolatedFloat(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
     func_002DA420(a0->sub, sdfInterpolateMotionKeys(&b));
 }
 
-void func_002DC9D8(HasSubF *a0, f32 t1, f32 t2) {
+void sdfMotionBlendInterpolatedFloat(HasSubF *a0, f32 t1, f32 t2) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t1);
     func_002DA420(a0->sub, (a0->f10 + sdfInterpolateMotionKeys(&b) * t2) - (a0->f10 * t2));
 }
 
-void func_002DCA30(CmdF *a0) {
+void sdfMotionReadBoundFloat(CmdF *a0) {
     a0->res = a0->sub->f1C;
 }
 
-void *func_002DCA40(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateTextBlendBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x24);
-    func_002DC360(r, a0, D_003982E8, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_003982E8, a2);
     return r;
 }
 
-void func_002DCAA0(HasSub *a0, f32 t) {
+void sdfMotionApplyFiveFloatKeys(HasSub *a0, f32 t) {
     KeyOut b0;
     f32 b1[5];
 
     func_002DB7C8(a0, &b0, t);
-    func_002DBA28(&b0, b1);
+    sdfMotionBlendFiveKeyValues(&b0, b1);
     func_002DA548(a0->sub, b1);
 }
 
-void func_002DCAF0(HasArr *a0, f32 t1, f32 t2) {
+void sdfMotionBlendFiveFloatKeys(HasArr *a0, f32 t1, f32 t2) {
     KeyOut b0;
     f32 b1[5];
     f32 b2[5];
 
     func_002DB7C8(a0, &b0, t1);
-    func_002DBA28(&b0, b2);
+    sdfMotionBlendFiveKeyValues(&b0, b2);
     sdfMotionBlendFiveFloats(b1, a0->f10, b2, t2);
     func_002DA548(a0->sub, b1);
 }
 
-void func_002DCB68(DstBlk *a0) {
+void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
     Blk *p;
 
     p = sdfEnsurePrimaryTextSubParam(a0->sub);
     a0->blk = *p;
 }
 
-void *func_002DCBB8(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateSecondaryTextBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x24);
-    func_002DC360(r, a0, D_00398300, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398300, a2);
     return r;
 }
 
-void func_002DCC18(HasSub *a0, f32 t) {
+void sdfMotionApplySecondaryTextKeys(HasSub *a0, f32 t) {
     KeyOut b0;
     f32 b1[5];
 
     func_002DB7C8(a0, &b0, t);
-    func_002DBA28(&b0, b1);
+    sdfMotionBlendFiveKeyValues(&b0, b1);
     func_002DA6B0(a0->sub, b1);
 }
 
-void func_002DCC68(HasArr *a0, f32 t1, f32 t2) {
+void sdfMotionBlendSecondaryTextKeys(HasArr *a0, f32 t1, f32 t2) {
     KeyOut b0;
     f32 b1[5];
     f32 b2[5];
 
     func_002DB7C8(a0, &b0, t1);
-    func_002DBA28(&b0, b1);
+    sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfMotionBlendFiveFloats(b2, a0->f10, b1, t2);
     func_002DA6B0(a0->sub, b2);
 }
 
-void func_002DCCE0(DstBlk *a0) {
+void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
     Blk *p;
 
     p = sdfEnsureSecondaryTextSubParam(a0->sub);
@@ -800,11 +800,11 @@ void *func_002DCD30(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x14);
-    func_002DC360(r, a0, D_00398318, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398318, a2);
     return r;
 }
 
-void func_002DCD90(HasSub *a0, f32 t) {
+void sdfMotionApplyInterpolatedKey(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
@@ -817,22 +817,22 @@ void sdfCopyMotionTargetValue(CmdI *a0) {
     a0->res = a0->sub->i18;
 }
 
-void *func_002DCE90(void *a0, s32 a1, s32 a2) {
+void *sdfMotionCreateDirectTextKeyBinding(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x24);
-    func_002DC360(r, a0, D_00398330, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398330, a2);
     return r;
 }
 
-void func_002DCEF0(HasSub *a0, f32 t) {
+void sdfMotionApplySelectedTextKey(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
     func_002DA548(a0->sub, b.firstKey);
 }
 
-void func_002DCF28(HasSub *a0, f32 t) {
+void sdfMotionApplySampleToTarget(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
@@ -846,11 +846,11 @@ void *func_002DCF68(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x24);
-    func_002DC360(r, a0, D_00398348, a2);
+    sdfMotionBindIndexedTrack(r, a0, D_00398348, a2);
     return r;
 }
 
-void func_002DCFC8(HasSub *a0, f32 t) {
+void sdfMotionApplySampledSecondaryTextValue(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);

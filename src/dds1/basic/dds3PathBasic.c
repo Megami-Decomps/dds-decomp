@@ -59,11 +59,11 @@ void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
 void effFreeBuffers(s32 arg);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
 void dds3FreePathObject(PathObj *path) {
     effFreeBuffers(path->bufferHandle);
-    func_002CFF98(path);
+    sdfReleaseChipBlock(path);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_00116F38);

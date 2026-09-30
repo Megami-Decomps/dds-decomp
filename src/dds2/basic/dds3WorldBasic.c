@@ -24,7 +24,7 @@ void *func_00110680(void *arg);
 
 s32 func_001106D8(void *arg);
 
-void func_00328E48(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
 void func_00110348(IndexObj *arg);
 
@@ -174,7 +174,7 @@ void dds3DestroyWorldIndexNode(NodeB *node) {
     } else {
         node->next->previous = node->previous;
     }
-    func_00328E48(node);
+    sdfReleaseChipBlock(node);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110240);

@@ -213,7 +213,7 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void func_0020DA40(u8 *);
+extern void btlSelectRandomDefeatCamera(u8 *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 extern s32 kwlnTaskIsRegistered(s32);
@@ -222,14 +222,14 @@ extern void func_00105618(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern s32 func_001061E8(void);
 
-void func_0020DB90(u8 *actor);
+void btlRaiseLinkedActionPose(u8 *actor);
 
 s32 btlDispatchActionAnimation(u8 *unit) {
     u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->actionRecordIndex * 32 + 0x1c);
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            func_0020DA40(unit);
+            btlSelectRandomDefeatCamera(unit);
         } else {
             btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
                            0.124f, -0.07f, -0.021f, 0.981f,
@@ -243,11 +243,11 @@ s32 btlDispatchActionAnimation(u8 *unit) {
     } else if (flags & 8) {
         if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DB90(unit);
+            btlRaiseLinkedActionPose(unit);
             ((BtlUnit *)unit)->flags = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DA40(unit);
+            btlSelectRandomDefeatCamera(unit);
         }
     } else {
         return 0;
@@ -526,7 +526,7 @@ void btlReleaseEventAssets(void) {
     btlBossDebugPrintf(D_003A6838);
 }
 
-extern s32 func_00241BF0(s16, s32);
+extern s32 evtFindTaskResourceEntryByKey(s16, s32);
 
 s32 btlCommandSelectEventAction(void) {
     s32 first = scrReadIntParameter(0);
@@ -547,7 +547,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battle = (BtlState *)func_001A17F0();
-    result = func_00241BF0(battle->eventTaskId, action);
+    result = evtFindTaskResourceEntryByKey(battle->eventTaskId, action);
     if (result == 0) {
         return 1;
     }
@@ -650,7 +650,7 @@ typedef struct BattleTaskData {
     s32 finished;
 } BattleTaskData;
 extern BattleTask *btlAllocTask(s32);
-extern BattleTaskData *func_001D47D8(BattleTask *);
+extern BattleTaskData *btlGetTaskArguments(BattleTask *);
 extern s32 func_00210670(void *);
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210670);
@@ -663,7 +663,7 @@ void *btlCreateActionTask(void *battler, s32 action) {
     task->kind = 0x62;
     task->update = func_00210670;
     task->phase = 0;
-    data = func_001D47D8(task);
+    data = btlGetTaskArguments(task);
     data->battler = battler;
     data->action = action;
     data->finished = 0;
@@ -948,10 +948,10 @@ typedef struct BattleModelEntry {
     struct BattleModelEntry *next;
 } BattleModelEntry;
 
-extern void *func_002CFF68(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *entry = func_002CFF68(sizeof(BattleModelEntry));
+    BattleModelEntry *entry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
     BtlState *battle;
     BattleModelEntry *head;
     entry->refs = 1;
@@ -975,7 +975,7 @@ extern void func_00288788(void *);
 
 extern void sndReleaseSlotOwner(void *);
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 void btlReleaseModelEntry(BattleModelEntry *entry) {
     if (--entry->refs != 0) {
@@ -995,7 +995,7 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
     } else {
         ((BtlState *)func_001A17F0())->modelEntries = entry->next;
     }
-    func_002CFF98(entry);
+    sdfReleaseChipBlock(entry);
     btlBossDebugPrintf(D_003A68F8, entry->kind, entry->id);
 }
 
@@ -1186,7 +1186,7 @@ void btlInitVisibilityGrid(void) {
 void btlReleaseOwnedData(void) {
     void *data = D_003D7580.ownedData;
     if (data != 0) {
-        func_002CFF98(data);
+        sdfReleaseChipBlock(data);
         D_003D7580.ownedData = 0;
     }
 }
@@ -1627,12 +1627,12 @@ extern void *func_00197748(s32, s32, u32, u32, s32, s32);
 
 extern void func_001958A0(void *, s32, s32);
 
-extern s32 func_00194920(void *);
+extern s32 frFontQueueGlyphInSelectedSlot(void *);
 
 s32 func_00214438(s32 width, s32 height, s32 mode) {
     void *packet = func_00197748(width << 4, height << 3, 0xff0000, 0xa09dc380, mode, 0);
     func_001958A0(packet, 0, 0x60);
-    return func_00194920(packet);
+    return frFontQueueGlyphInSelectedSlot(packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00214490);
@@ -1866,7 +1866,7 @@ void btlRemoveGroupId(s32 group, s32 id) {
     do {
         if (*(entry + 1) == id) {
             *link = *entry;
-            func_002CFF98(entry);
+            sdfReleaseChipBlock(entry);
             break;
         } else {
             link = entry;
@@ -1935,7 +1935,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
 
 extern void mdlDestroyContext(s32);
 
-extern void func_00219CE8(s32);
+extern void mdlDestroyPartList(s32);
 
 extern void func_002D0918(s32);
 
@@ -1976,9 +1976,9 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
             }
         }
     }
-    func_00219CE8(node->unk_A8);
+    mdlDestroyPartList(node->unk_A8);
     func_002D0918(node->unk_A0);
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 void func_00216A70(void) {

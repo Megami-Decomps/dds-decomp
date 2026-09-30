@@ -34,20 +34,20 @@ extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
 
-s32 func_0010D768(void)
+s32 scrCommandStoreRandomCondition(void)
 {
-    func_0010D5F0(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
+    scrSetIntegerReturnValue(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
     return 1;
 }
 
-s32 func_0010D7A0(void)
+s32 scrCommandWaitForTimerStart(void)
 {
     return scrGetCommandTimer() != 0;
 }
 
 /* Succeed when the command timer reaches the requested tick count; a
  * nonpositive request completes immediately. */
-s32 func_0010D7C0(void) {
+s32 scrCommandWaitForTimerLimit(void) {
     if (scrReadIntParameter(0) <= 0) {
         return 1;
     }
@@ -57,13 +57,13 @@ s32 func_0010D7C0(void) {
     return 1;
 }
 
-s32 func_0010D808(void)
+s32 scrCommandPrintInteger(void)
 {
     func_0010AC10("PUT -> %d\n", scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010D838(void)
+s32 scrCommandPrintString(void)
 {
     func_0010AC10(D_0039F4D8, scrReadStringParameter(0));
     return 1;
@@ -115,7 +115,7 @@ s32 bfWaitCbScreenFadeB(void)
     return 1;
 }
 
-s32 func_0010D9A8(void)
+s32 scrCommandFadeBackgroundOut(void)
 {
     if (scrGetCommandTimer() == 0)
     {
@@ -125,7 +125,7 @@ s32 func_0010D9A8(void)
     return 1;
 }
 
-s32 func_0010D9E8(void)
+s32 scrCommandFadeBackgroundIn(void)
 {
     if (scrGetCommandTimer() == 0)
     {
@@ -135,7 +135,7 @@ s32 func_0010D9E8(void)
     return 1;
 }
 
-s32 func_0010DA28(void)
+s32 scrCommandJumpToIndexedLabel(void)
 {
     s32 argumentIndex;
     s32 label;
@@ -153,15 +153,15 @@ s32 func_0010DA28(void)
     return 1;
 }
 
-s32 func_0010DA80(void)
+s32 scrCommandTestIndexedCodeNegative(void)
 {
-    func_0010D5F0(D_00398628[scrReadIntParameter(0)] < 0);
+    scrSetIntegerReturnValue(D_00398628[scrReadIntParameter(0)] < 0);
     return 1;
 }
 
-s32 func_0010DAB8(void)
+s32 scrCommandTestIndexedCodeBit(void)
 {
-    func_0010D5F0(D_00398628[scrReadIntParameter(0)] & 1);
+    scrSetIntegerReturnValue(D_00398628[scrReadIntParameter(0)] & 1);
     return 1;
 }
 
@@ -175,7 +175,7 @@ s32 func_0010DAF0(void)
     return 1;
 }
 
-s32 func_0010DB48(void)
+s32 scrCommandSetCameraFov(void)
 {
     f32 fovy;
 
@@ -206,7 +206,7 @@ typedef struct BfWaitContext {
 } BfWaitContext;
 
 s32 func_0010D6A0(void);
-s32 func_0010BCB8(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
+s32 scrCreateTaskFromContextParameters(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
 
 s32 bfWaitCbCreateTask(void)
 {
@@ -227,14 +227,14 @@ s32 bfWaitCbCreateTask(void)
     {
         return 1;
     }
-    func_0010D5F0(func_0010BCB8(
+    scrSetIntegerReturnValue(scrCreateTaskFromContextParameters(
         ctx->record->basePriority + scrReadIntParameter(1), ctx->base.unkAC,
         ctx->base.unkB0, ctx->base.procedures, ctx->base.labels,
         ctx->base.instructions, ctx->base.unkC0, ctx->base.strings, index));
     return 1;
 }
 
-s32 func_0010DC80(void)
+s32 scrCommandDestroyRegisteredTask(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -246,20 +246,20 @@ s32 func_0010DC80(void)
     return 1;
 }
 
-s32 func_0010DCC8(void)
+s32 scrCommandWaitForTaskRemoval(void)
 {
     return kwlnTaskIsRegistered(scrReadIntParameter(0)) == 0;
 }
 
-s32 func_0010DCF0(void)
+s32 scrCommandStoreTaskPresence(void)
 {
     if (kwlnTaskIsRegistered(scrReadIntParameter(0)) != 0)
     {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     }
     else
     {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -271,16 +271,16 @@ u32 scrCommand_SCR_GET_TIMER()
     task = (KwlnTask*)scrReadIntParameter(0);
     if (!kwlnTaskIsRegistered(task))
     {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     else
     {
-        func_0010D5F0(kwlnTaskGetTimer(task));
+        scrSetIntegerReturnValue(kwlnTaskGetTimer(task));
     }
     return 1;
 }
 
-s32 func_0010DD98(void)
+s32 scrCommandSetupFadeFrames(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -345,7 +345,7 @@ s32 func_0010DF90(void)
     return 1;
 }
 
-s32 func_0010DFE8(void)
+s32 scrCommandSetDrawVectorTarget(void)
 {
     s32 p0;
     f32 x;
@@ -362,7 +362,7 @@ s32 func_0010DFE8(void)
     return 1;
 }
 
-s32 func_0010E120(void)
+s32 scrCommandToggleSavedDrawVectors(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -370,7 +370,7 @@ s32 func_0010E120(void)
     return 1;
 }
 
-s32 func_0010E178(void)
+s32 scrCommandSetDrawOffsetTransition(void)
 {
     s32 p0;
     s32 p1;
@@ -809,7 +809,7 @@ s32 func_0010ED40(void)
     return 1;
 }
 
-s32 func_0010ED68(void)
+s32 scrCommandResetDrawEffects(void)
 {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawEnableD88(0);
@@ -820,30 +820,30 @@ s32 func_0010ED68(void)
     return 1;
 }
 
-s32 func_0010EDB8(void)
+s32 scrCommandResetFieldEffects(void)
 {
     kwlnDrawEnableDc8(0);
     kwlnDrawEnableE08(0);
     fldSetSwayMode(0);
-    func_00132B70(0x80);
+    fldSetSkyDrawState(0x80);
     func_00132B80(0);
     fldSetFadeTarget(0, 1, 0);
     return 1;
 }
 
-s32 func_0010EE08(void)
+s32 scrCommandClearProcessControlFlag(void)
 {
     D_003BAA00->unk388 = 0;
     return 1;
 }
 
-s32 func_0010EE18(void)
+s32 scrCommandSetProcessControlFlag(void)
 {
     D_003BAA00->unk388 = 1;
     return 1;
 }
 
-s32 func_0010EE30(void)
+s32 scrCommandIsProcessControlFlagClear(void)
 {
     return D_003BAA00->unk388 == 0;
 }
@@ -856,9 +856,9 @@ s32 func_0010EE40(void)
     return 1;
 }
 
-s32 func_0010EE80(void)
+s32 scrCommandAddPartyCurrency(void)
 {
-    func_001198B8(scrReadIntParameter(0));
+    datAddCurrencyClamped(scrReadIntParameter(0));
     return 1;
 }
 
@@ -867,13 +867,13 @@ u32 scrCommand_SCR_EXISTS()
 {
     KwlnTask* task;
     task = (KwlnTask*)scrReadIntParameter(0);
-    if (func_001198E8(task))
+    if (datHasEnoughCurrency(task))
     {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     }
     else
     {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }

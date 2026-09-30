@@ -3,9 +3,9 @@
 extern void func_00266C08();
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 func_0026BC80();
-extern void func_0023AC80(s32);
+extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
-extern void func_0026CA80(s32, s32);
+extern void evtSetBoundedDisplayValue(s32, s32);
 extern s8 D_00437859;
 
 typedef struct MenuSlotState {
@@ -24,7 +24,7 @@ typedef struct MenuSlotState {
 } MenuSlotState;
 
 extern void evtLoadResourcePair(const char *, u8 *);
-extern void func_0026C538(s32);
+extern void evtCreateMessageWindowIfMissing(s32);
 extern void func_002680E0(s32);
 extern void func_002A91A0(u8 *);
 extern void func_002673B8();
@@ -55,7 +55,7 @@ extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 mdlFlagTest(u32);
 
-extern s64 func_0026C768(void);
+extern s64 evtGetMessageWindowControlState(void);
 
 extern s32 fldGetModeFrameRecordIndex(s32);
 
@@ -67,9 +67,9 @@ extern void func_002686F0(s32);
 
 extern s8 D_00437858;
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
-extern s32 func_002C3E08(s32, s32, s32, s32);
+extern s32 mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32);
 
 extern void func_002C1B70(s32, s32);
 
@@ -85,13 +85,13 @@ extern s32 func_003292A8(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
-extern s32 func_00303D00(s32);
+extern s32 mnuAllocateValueRecord(s32);
 
 extern void mnuInitPartyPanelSlots(s32);
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
 
-extern s32 func_002C32B0(void);
+extern s32 mnuCreateProfilePanel(void);
 
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 
@@ -123,7 +123,7 @@ extern s32 func_00328D68(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
-extern void func_002C2128(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern s32 effDestroyPackedBatch(s32);
 extern void func_002C3390(s32);
@@ -192,7 +192,7 @@ typedef struct MenuProgressHost {
     s32 currentEffect;        /* 0xA828 */
 } MenuProgressHost;
 
-extern void func_002C42B0(s32 *, void *);
+extern void mnuSetPopupEntry(s32 *, void *);
 
 extern u8 D_003CE944[];
 
@@ -255,7 +255,7 @@ void func_002669B0(u32 address) {
 
 extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
 extern void func_0019D550(s32, s32, s32);
-extern void func_0019C5B0(s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
 extern u8 D_003A41A8[];
 extern u8 D_003A47E8[];
 
@@ -270,7 +270,7 @@ void func_002669C8(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
     }
     handle = func_0019F460(a0 - 0x120, a1, a2, a3, (s32)entry, 0);
     func_0019D550(handle, 1, 0x52);
-    func_0019C5B0(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 typedef struct BoxRecord {
@@ -330,7 +330,7 @@ void mnuCreateNumberSprite(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s3
     func_0035C860(buf, D_00437860, a4);
     handle = func_0019F5E8(a0, a1, a2, uiBlendColors(color, color & ~0xFF, a3), (s32)buf, 0);
     func_0019D550(handle, 1, priority);
-    func_0019C5B0(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
@@ -339,10 +339,10 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
 s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
     s32 panel = func_00328D68(0xa0);
-    func_002C2128(panel, 0, 0, 0x1e,
+    mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(resource->firstA, resource->firstB),
         host->panelStyle);
-    func_002C2128(panel + 0x50, 1, 0, 0x1e,
+    mnuDrawPanelSequenceByRow(panel + 0x50, 1, 0, 0x1e,
         mnuPercentOrHundred(resource->secondA, resource->secondB),
         host->panelStyle);
     return panel;
@@ -350,9 +350,9 @@ s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
 
 void func_00267008(s32 panel) {
     if (panel != 0) {
-        func_002C21F8();
-        func_002C21F8(panel + 0x50);
-        func_00328E48(panel);
+        mnuReleaseSpriteTextures();
+        mnuReleaseSpriteTextures(panel + 0x50);
+        sdfReleaseChipBlock(panel);
         return;
     }
 }
@@ -552,18 +552,18 @@ void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
             } else if (mdlFlagTest(0x429) != 0 || func_0026BC80() != 0 || func_002665C8(scene) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 0xF);
             } else {
-                func_0023AC80(0x322);
+                evtCreateEventScriptProcess(0x322);
             }
         } else if (mdlFlagTest(0x429) != 0 || func_0026BC80() != 0 || func_002665C8(scene) != 0) {
             kwlnFadeOutStart(0, 0, 0, 0xF);
         } else {
-            func_0023AC80(0x322);
+            evtCreateEventScriptProcess(0x322);
         }
     } else {
-        func_0023AC80(0x322);
+        evtCreateEventScriptProcess(0x322);
     }
     evtClearActiveFlag(0);
-    func_0026CA80(1, 1);
+    evtSetBoundedDisplayValue(1, 1);
 }
 
 void func_002679E8(u8 *work) {
@@ -578,7 +578,7 @@ s32 mnuCreateProgressHost(void) {
     MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
     memset((void *)host, 0, 0xa82c);
     host->heapHandle = heap;
-    host->titleEffectHandle = func_00303D00(1);
+    host->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots((s32)host + 0x70);
     mnuAppendCampSpriteRequests(host->titleEffectHandle, (s32)host + 8);
     host->loadState = 1;
@@ -586,7 +586,7 @@ s32 mnuCreateProgressHost(void) {
 }
 
 void func_00267A80(u32 *hostWords) {
-    func_002B2860(hostWords + 2);
+    mnuReleaseStaffMenuTextureHandles(hostWords + 2);
     mnuReleaseTitleEffectSprites(hostWords + 2);
     func_00303D58(hostWords[1]);
     func_003297C8(*hostWords);
@@ -614,7 +614,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 
 void func_00267D30(s32 unused, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
-        s32 effect = func_002C32B0();
+        s32 effect = mnuCreateProfilePanel();
         host->currentEffect = effect;
         mnuSetGroupProperties(effect, host->resourceHandle, *(s32 *)((u8 *)host + 0x14), 1, 2);
     }
@@ -626,7 +626,7 @@ void func_00267DA0(MenuProgressHost *host) {
 }
 
 s32 func_00267DE0(s32 x, s32 y, s32 mode, MenuProgressHost *host) {
-    return func_002C3E08(x, y, mode, host->currentEffect);
+    return mnuDrawAndAdvanceProfilePanel(x, y, mode, host->currentEffect);
 }
 
 s32 func_00267E00(s32 resource, MenuProgressHost *host, s32 mode) {
@@ -651,7 +651,7 @@ extern void sndStartTrackExtended(s32);
 extern void func_00342580(s32);
 
 void mnuTerminalSetTrack(s8 mode, s8 enable) {
-    s32 address = func_00101958(D_0043785C);
+    s32 address = kwlnTaskGetUserValue(D_0043785C);
     MenuFadeWork *work = (MenuFadeWork *)address;
 
     if (mode == 1) {
@@ -764,7 +764,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     ((MenuSlotState *)obj)->slotCopy = slot;
     mnuTerminalBuildMenus((MenuProgressHost *)obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
-    func_0026C538(*(s32 *)(obj + 0x60));
+    evtCreateMessageWindowIfMissing(*(s32 *)(obj + 0x60));
     for (i = 0; i < 2; i++) {
         (&((MenuSlotState *)obj)->cur)[i] = -1;
     }
@@ -778,9 +778,9 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268278);
 
 s32 func_00268318(void) {
-    s32 context = func_00101958() + 0x3e8;
+    s32 context = kwlnTaskGetUserValue() + 0x3e8;
     func_002C1B70(context, 0x53);
-    if (func_0026C768() != 0) {
+    if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(context, 1);
     } else {
         func_002C1B68(context, 0);
@@ -818,18 +818,18 @@ s32 fldPollSceneState(void) {
 }
 
 s64 func_002684F0(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
-    func_002C42B0((s32 *)(context + 0x54), D_003CE944);
+    mnuSetPopupEntry((s32 *)(context + 0x54), D_003CE944);
     return menuSetHandler(context, 0, callback);
 }
 
 s64 func_00268550(s32 callback) {
-    return menuSetHandler(func_00101958(), 1, callback);
+    return menuSetHandler(kwlnTaskGetUserValue(), 1, callback);
 }
 
 s64 func_00268588(s32 callback) {
-    return menuSetHandler(func_00101958(), 2, callback);
+    return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
 s32 func_002685C0(void) {
@@ -838,7 +838,7 @@ s32 func_002685C0(void) {
     if (fadeActive != 0) {
         return 0;
     }
-    return func_0026C768() == 0;
+    return evtGetMessageWindowControlState() == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002685F0);

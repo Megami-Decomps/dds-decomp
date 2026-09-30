@@ -47,7 +47,7 @@ void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 
 void dds3FreePathObject(PathObj *path) {
     effFreeBuffers(path->unk10);
-    func_00328E48(path);
+    sdfReleaseChipBlock(path);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", func_001171A0);

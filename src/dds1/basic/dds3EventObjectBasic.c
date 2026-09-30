@@ -12,7 +12,7 @@ typedef struct {
 
 void effObjFreeInner(void *arg);
 void func_00111840(s32 arg);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 s32 effObjTestNodeFlags(void *arg, s32 arg1);
 void effObjClearNodeFlags(void *arg, s32 arg1);
 void effObjInnerVecBackup(void *arg);
@@ -24,7 +24,7 @@ void dds3ReleaseEventData(EventObj *event) {
     effObjFreeInner(event);
     data = event->eventData;
     func_00111840(data->handle);
-    func_002CFF98(data);
+    sdfReleaseChipBlock(data);
 }
 
 /* Snapshot the node's vectors once its pending flag is observed. */

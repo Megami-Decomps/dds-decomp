@@ -81,7 +81,7 @@ u32 scrOpcodeTestModelFlag(void) {
 
     flagId = scrReadIntParameter(0);
     flagId = mdlFlagTest(flagId);
-    func_0010D818(flagId);
+    scrSetIntegerReturnValue(flagId);
     return 1;
 }
 

@@ -81,7 +81,7 @@ void func_002A3C90(s32 steps) {
     if (0 < steps) {
         do {
             steps = steps - 1;
-            func_002B8CF0(((SpriteMenuState *)D_00437A40)->list);
+            mnuAdvanceListCursorDefault(((SpriteMenuState *)D_00437A40)->list);
         } while (steps != 0);
     }
 }

@@ -81,7 +81,7 @@ typedef struct EvtRange {
 } EvtRange;
 
 void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
-void func_00328E48(void *ptr);
+void sdfReleaseChipBlock(void *ptr);
 void sdfTexReleaseReference(s32 tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 void effInitCh71Id(void);
@@ -120,11 +120,11 @@ void evtEventViewerReleaseNode(EvtEvEntry *entry, EvtEvNode *node) {
     evtUnlinkListNode(entry, node);
     if (node->buf != NULL) {
         if (entry->id != 0x12) {
-            func_00328E48(node->buf);
+            sdfReleaseChipBlock(node->buf);
         }
         node->buf = NULL;
     }
-    func_00328E48(node);
+    sdfReleaseChipBlock(node);
 }
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_00246878);
@@ -271,7 +271,7 @@ void evtEventViewerDestroyEntry(EvtEvEntry *entry, EvtViewer *viewer) {
         }
     }
     evtEventViewerUnlinkEntry(entry, viewer);
-    func_00328E48(entry);
+    sdfReleaseChipBlock(entry);
 }
 
 void evtViewerSetMinimumFromCurrent(EvtRange *range) {

@@ -15,7 +15,7 @@ extern void *func_002CFEB8(s32 size);
 extern EffParamWork *effParamWorkCreate(s32 kind, void *params);
 extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
 extern void func_001629F0(EffParamWork *handle);
-extern void func_002CFF98(void *work);
+extern void sdfReleaseChipBlock(void *work);
 extern u32 func_001619E8(void);
 extern u32 func_00161860(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
@@ -197,7 +197,7 @@ void effBossDestroy(EffBossWork *work) {
     }
     func_0015B8B8(work->system);
     func_001629F0(work->paramWork);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184BC8);
@@ -252,7 +252,7 @@ EffPCPBossWork *effBossBeamClone(EffPCPBossWork *src) {
 void effPCPBossFree(EffPCPBossWork *work) {
     func_001629F0(work->resource2C);
     func_001629F0(work->resource28);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 /* Per-frame update: basis from the muzzle position (or identity) fed to both parameter works. */
@@ -462,7 +462,7 @@ EffBossWork *effBossCreateWithGroups(EffBossParams *src, void *param1) {
     return work;
 }
 
-void func_00185AB8(void *data) {
+void effBossCreateGroupsFromPackedParams(void *data) {
     void *work0;
     void *work1;
 

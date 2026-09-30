@@ -80,11 +80,11 @@ void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
 }
 
 /* Read or write the console's unidentified byte at offset 0x14. */
-u8 func_0033D058(DevConsState *console) {
+u8 sdfDevConsGetControlByte(DevConsState *console) {
     return console->unk14;
 }
 
-void func_0033D060(DevConsState *console, u8 value) {
+void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
     console->unk14 = value;
 }
 

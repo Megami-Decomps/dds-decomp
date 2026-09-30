@@ -191,8 +191,8 @@ void func_0030F2A8(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 temp_v0;
 
     temp_v0 = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    func_0019D530(temp_v0, 1);
-    func_0019C5B0(temp_v0);
+    frFontDrawGlyphWithSharedFlags(temp_v0, 1);
+    frFontQueueGlyphInSelectedSlot(temp_v0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F2F8);

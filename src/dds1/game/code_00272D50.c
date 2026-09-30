@@ -2,7 +2,7 @@
 
 extern s32 mnuUseStaffItem(s32, s32);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern s32 D_003BAA00;
 
@@ -75,7 +75,7 @@ void func_002733B0() {
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002733B8);
 
 s32 mnuStaffFreeDisplayResources(void) {
-    StaffDisplayContext *context = (StaffDisplayContext *)func_00101A70();
+    StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue();
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
@@ -88,14 +88,14 @@ INCLUDE_ASM(const s32, "game/code_00272D50", func_002734C0);
 INCLUDE_ASM(const s32, "game/code_00272D50", func_00273670);
 
 s64 mnuStaffRunPanel2b(u64 request) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
 
     return menuRunPanel(state, 2, request);
 }
 
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
-extern s32 func_0011A568(s32);
+extern s32 evtGetIndexedEventRecordId(s32);
 extern void func_00119900(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
@@ -123,7 +123,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         if (result == 2) {
             return 0;
         }
-        if (ptySkillApplyFieldUseEffect(partyPanel, func_0011A568(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+        if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
             return 0;
         }
     }

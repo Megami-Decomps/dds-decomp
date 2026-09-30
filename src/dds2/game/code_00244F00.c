@@ -95,7 +95,7 @@ u32 func_00245818(void) {
 }
 
 void func_00245820(void) {
-    func_0010BFE0();
+    scrDestroyAllNamedProcesses();
 }
 
 void evtStartTestTask(void) {

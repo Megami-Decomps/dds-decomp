@@ -32,14 +32,14 @@ typedef struct {
 /* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
     func_00160B00(work->effect);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 void effEventCopyFileRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
     *destination = *source;
 }
 
-void func_001902A0(const FileRecordHeader *source, FileRecordHeader *destination) {
+void effEventCopyBillParticle(const FileRecordHeader *source, FileRecordHeader *destination) {
     *destination = *source;
 }
 
@@ -247,7 +247,7 @@ extern f32 func_002E8398(void *state);
 extern u8 D_0034DF38[];
 
 /* Randomize one billboard particle: delays, spin rates, radius and two unit direction vectors. */
-void func_00190D18(EffEventBillSet *work, s32 index) {
+void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     EffEventBillParticle *p = &work->particles[index];
     f32 dir[4];
     f32 scale;
@@ -301,7 +301,7 @@ void effEventCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00192028(EffEventWork *work, u8 value) {
+void effEventSetWorkFlag(EffEventWork *work, u8 value) {
     work->flag = value;
 }
 
@@ -322,7 +322,7 @@ void func_00192110(EffEventBlock7C *destination, const EffEventBlock7C *source) 
     }
 }
 
-void func_00192230(void) {
+void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003563F0);
 }
 

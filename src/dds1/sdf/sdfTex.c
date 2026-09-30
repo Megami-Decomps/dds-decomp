@@ -10,7 +10,7 @@ extern u8 D_003BD9F0;
 void *func_002CF530(s32 arg0);
 void *memcpy(void *arg0, void *arg1, u32 arg2);
 void func_002D1B90(void *arg0);
-void func_002CFF98(void *arg0);
+void sdfReleaseChipBlock(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 void sdfPendingQueuePush(void *arg0, void *arg1);
 void *sdfTexCreateResourcePacket(SdfTex *arg0, s32 arg1);
@@ -50,8 +50,8 @@ void sdfTexRelease(SdfTex *texture) {
         func_002D1B90(texture->primaryResource);
     }
     func_002D1B90(texture->secondaryResource);
-    func_002CFF98(texture->unk28);
-    func_002CFF98(texture->unk2C);
+    sdfReleaseChipBlock(texture->unk28);
+    sdfReleaseChipBlock(texture->unk2C);
     next = texture->next;
     prev = texture->prev;
     if (prev != NULL) {
@@ -64,8 +64,8 @@ void sdfTexRelease(SdfTex *texture) {
     }
     sdfFreeMemoryFromEitherHeap(texture->data);
     sdfFreeMemoryFromEitherHeap(texture->unk3C);
-    func_002CFF98(texture->reference);
-    func_002CFF98(texture);
+    sdfReleaseChipBlock(texture->reference);
+    sdfReleaseChipBlock(texture);
 }
 
 /* Release a texture when the final ordinary reference is dropped. */

@@ -46,7 +46,7 @@ typedef struct {
 } EffBlurWork2; /* 0x38 */
 extern void *func_003292A8(s32 size);
 extern void *sdfResourceRetainAddress(void *allocation);
-extern u32 func_00159BB8(s32 index);
+extern u32 effGetResourceFirstWord(s32 index);
 
 
 extern void func_0018EFE0(EffBlurWork2 *work, EffBlurSlot2 *slot);
@@ -73,7 +73,7 @@ EffBlurWork2 *func_0018F098(EffBlurWork2 *src) {
     memcpy(work, src, 0x2C);
     work->resource = allocation;
     work->slots = (EffBlurSlot2 *)((u8 *)work + 0x38);
-    work->setting = func_00159BB8(3);
+    work->setting = effGetResourceFirstWord(3);
     slot = work->slots;
     while (i < count) {
         func_0018EFE0(work, slot);

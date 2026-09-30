@@ -6,9 +6,9 @@ extern s8 D_00324510[];
 
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
 
-extern void func_00195880(u32, s32);
+extern void frFontDrawGlyphWithSharedFlags(u32, s32);
 
-extern void func_00194920(u32);
+extern void frFontQueueGlyphInSelectedSlot(u32);
 
 extern s32 frFontMeasureGlyphChain(u32);
 
@@ -18,9 +18,9 @@ extern u32 func_001951C8(u32, u32, s32, u32, u32);
 
 extern void frFontSetChildColors(u32, u32);
 
-extern void func_00195450(u32, s32, s32);
+extern void frFontSetContextPair(u32, s32, s32);
 
-extern void func_00195460(u32, u32);
+extern void frFontStoreShiftedContextValue(u32, u32);
 
 extern void frFontSetChainFlag(u32, u8);
 
@@ -325,15 +325,15 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 
 void sdfFontRegisterShort(s32 x, s32 y, u32 first, u32 second) {
     u32 handle = func_00197760(x << 4, y << 3, 0, first, second, 0);
-    func_00195880(handle, 1);
-    func_00194920(handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 s32 func_002CA708(s32 x, s32 y, u32 first, u32 second, u32 third, s32 option) {
     u32 handle = func_00197760(x << 4, y << 3, first, second, third, 0);
     s32 result = frFontMeasureGlyphChain(handle);
     func_001958A0(handle, 1, option);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -341,13 +341,13 @@ s32 func_002CA778(s32 x, s32 y, u32 first, u32 second, s8 type, u32 name, s32 fl
     u32 handle = func_001951C8(name, 0, type, 0, 0);
     s32 result = 0;
     frFontSetChildColors(handle, second);
-    func_00195450(handle, x << 4, y << 3);
-    func_00195460(handle, first);
+    frFontSetContextPair(handle, x << 4, y << 3);
+    frFontStoreShiftedContextValue(handle, first);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, option);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -362,7 +362,7 @@ s32 func_002CA858(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u3
         result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, color);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -379,7 +379,7 @@ s32 func_002CA8F0(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u3
         result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, color);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -396,7 +396,7 @@ s32 func_002CA988(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u3
         result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, color);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -409,7 +409,7 @@ s32 func_002CAA20(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, u3
         result = frFontMeasureGlyphChain(handle);
     }
     func_001958A0(handle, 1, option);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     return result;
 }
 
@@ -538,7 +538,7 @@ SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     }
     neighbour = func_002CAEC8(list, node);
     list->onRemove(node->index, node->value);
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
     return neighbour;
 }
 
@@ -568,7 +568,7 @@ void sdfClearTaskList(TaskList *list) {
                 TaskListNode *current = node;
                 node = node->next;
                 list->onRemove(current->handle, current->value);
-                func_002CFF98(current);
+                sdfReleaseChipBlock(current);
             } while (node != NULL);
         }
         list->count = 0;
@@ -787,8 +787,8 @@ typedef struct SdfTaskResourceWork {
 void sdfDestroyTaskResourceWork(SdfTaskResourceWork *work) {
     if (work != NULL) {
         sdfDestroyTaskWork(work->taskWork);
-        func_002CFF98(work->firstBuffer);
-        func_002CFF98(work->secondBuffer);
+        sdfReleaseChipBlock(work->firstBuffer);
+        sdfReleaseChipBlock(work->secondBuffer);
         func_002D0918(work->allocation);
     }
 }
@@ -808,7 +808,7 @@ void sdfDestroyCallbackWork(SdfCallbackWork *work) {
     if (work != NULL) {
         void (*destroy)(u32, u32) = work->destroy;
         destroy(work->firstArg, work->secondArg);
-        func_002CFF98(work);
+        sdfReleaseChipBlock(work);
     }
 }
 
@@ -826,7 +826,7 @@ typedef struct SdfTaskEntry {
     s32 arg1;                    /* 0x18 */
 } SdfTaskEntry;
 
-extern void *func_00101A70(void);
+extern void *kwlnTaskGetUserValue(void);
 
 s32 sdfTaskWorkStepEntry(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
@@ -892,7 +892,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
 }
 
 s32 sdfTaskWorkRunAllEntries(void) {
-    TaskWork *work = func_00101A70();
+    TaskWork *work = kwlnTaskGetUserValue();
 
     if (work->firstItemHandle == 0) {
         return -1;
@@ -903,7 +903,7 @@ s32 sdfTaskWorkRunAllEntries(void) {
 }
 
 s32 sdfTaskWorkRunAll(void) {
-    TaskWork *work = func_00101A70();
+    TaskWork *work = kwlnTaskGetUserValue();
 
     if (work->firstItemHandle == 0) {
         return -1;
@@ -914,7 +914,7 @@ s32 sdfTaskWorkRunAll(void) {
 }
 
 void func_002CB990(void) {
-    sdfDestroyTaskResourceWork(func_00101A70());
+    sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
 }
 
 void func_002CB9B8(void) {

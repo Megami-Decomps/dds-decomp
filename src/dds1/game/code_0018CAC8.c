@@ -24,7 +24,7 @@ extern char *D_003557A8[];
 extern s32 func_00310320(void);
 extern u32 func_002D3288(u32);
 extern u64 func_002EB028(u64, u32 *, u64);
-extern void func_002CFF98(void *arg0);
+extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern void func_002D0918(u64 arg0);
 extern void func_001028E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -64,7 +64,7 @@ void effTypeDispatch(EffWork *work) {
 
 void effTypeDispatchFree(EffWork *work) {
     D_00355738[work->type].handler(work->unk4);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
@@ -301,12 +301,12 @@ void effFreeWorkList(EffWork *root) {
     if (node != NULL) {
         do {
             EffWork *next = node->unk38;
-            func_002CFF98(node);
+            sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    func_002CFF98(root->unk4);
-    func_002CFF98(root);
+    sdfReleaseChipBlock(root->unk4);
+    sdfReleaseChipBlock(root);
 }
 
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D428);
@@ -318,7 +318,7 @@ void effFreeWork(EffWork *work) {
         sdfTexReleaseReferenceViaHandler(work->unk3C);
         work->unk3C = 0;
     }
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {

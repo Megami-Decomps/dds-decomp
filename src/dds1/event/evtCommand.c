@@ -3,7 +3,7 @@
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrReadIntParameter(s32 idx);
 
-void func_0010D5F0(s32 value);
+void scrSetIntegerReturnValue(s32 value);
 
 s32 scrGetCommandTimer(void);
 
@@ -17,7 +17,7 @@ void func_00220560(s32 which, s32 value);
 
 void func_001028E8(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
-void func_00102A18(void);
+void dds3AdminSetControlFlag(void);
 
 void evtSubmitEventRequest(s32 eventId, s32 mode);
 
@@ -39,7 +39,7 @@ void func_0010AC10(const char *fmt, ...);
 
 void func_003003F0(const char *fmt, ...);
 
-void func_0010BDB8(void);
+void scrDestroyAllNamedProcesses(void);
 
 void func_0021FE70(void);
 
@@ -93,7 +93,7 @@ void func_00220300(void *unit, s32 value);
 
 void func_00220458(void *unit, s32 enabled);
 
-u32 func_00123DE0(void);
+u32 fldGetPlayerSceneState(void);
 
 void func_001109B8(s32 world, u32 unit);
 
@@ -193,7 +193,7 @@ s32 evtCommandEnablePathUnit(void)
     return 1;
 }
 
-s32 func_002262F8(void) {
+s32 evtCommandAssignEffectObjectOwner(void) {
     void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 found;
     s32 i;
@@ -209,11 +209,11 @@ s32 func_002262F8(void) {
     if (found == 0) {
         return 1;
     }
-    func_00115BB8(path, found);
+    effObjBindValidatedOwner(path, found);
     return 1;
 }
 
-s32 func_00226388(void) {
+s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     s32 found;
     s32 i;
@@ -229,7 +229,7 @@ s32 func_00226388(void) {
     if (found == 0) {
         return 1;
     }
-    func_00115C80(path, found, scrReadIntParameter(2));
+    effObjBindOwnerBillEntry(path, found, scrReadIntParameter(2));
     return 1;
 }
 
@@ -260,7 +260,7 @@ s32 func_00226470(void)
     return 1;
 }
 
-s32 func_002264B0(void) {
+s32 evtCommandAttachLightToUnitPath(void) {
     void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     void *target;
 
@@ -283,16 +283,16 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
 
-s32 func_002265B8(void) {
+s32 evtCommandReadSecondaryWorldIdValue(void) {
     EvtIdNode *node;
 
     node = func_00110F80(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
     if (node == NULL) {
         func_003003F0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         func_0010AC10("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     } else {
-        func_0010D5F0(node->value);
+        scrSetIntegerReturnValue(node->value);
     }
     return 1;
 }
@@ -315,18 +315,18 @@ s32 func_002266B0(void)
     return 1;
 }
 
-s32 func_002266E0(void)
+s32 evtCommandSubmitPairedAdminRequest(void)
 {
     s32 args[2];
 
     args[0] = scrReadIntParameter(0);
     args[1] = scrReadIntParameter(1);
     func_001028E8(0x15, (s32)args, 8, 0);
-    func_0010D5F0(0);
+    scrSetIntegerReturnValue(0);
     return 1;
 }
 
-s32 func_00226730(void) {
+s32 evtCommandDeferFieldTransition(void) {
     s32 a = scrReadIntParameter(0);
     s32 b = scrReadIntParameter(1);
     s32 c = scrReadIntParameter(2);
@@ -345,14 +345,14 @@ s32 evtCommandCallEvent(void)
     eventId = scrReadIntParameter(0);
     func_003003F0("call_event:%d\n", eventId);
     func_001028E8(6, (s32)&eventId, 4, 0);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
     return 1;
 }
 
-s32 func_00226800(void)
+s32 evtCommandSignalAdminAtTimerZero(void)
 {
     if (scrGetCommandTimer() == 0) {
-        func_00102A18();
+        dds3AdminSetControlFlag();
     }
     return 0;
 }
@@ -367,7 +367,7 @@ void evtSubmitEventRequest(s32 eventId, s32 mode)
     args[0] = 0;
     args[1] = eventId;
     func_001028E8(0xe, (s32)args, 8, mode > 0);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
 }
 
 s32 evtCommandSubmitEvent(void)
@@ -389,7 +389,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     args[0] = 0;
     args[1] = eventId;
     func_001028E8(0xe, (s32)args, 8, 1);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
 }
 
 s32 evtCommandSubmitEventImmediate(void)
@@ -412,7 +412,7 @@ s32 evtCommandSubmitEventWithMode(void)
     return 1;
 }
 
-s32 func_00226988(void)
+s32 evtCommandRequestFieldSequence(void)
 {
     s32 firstArg;
     s32 secondArg;
@@ -425,11 +425,11 @@ s32 func_00226988(void)
     textArg = scrReadStringParameter(2);
     fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
     func_001028E8(5, (s32)request, 0xa0, 0);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
     return 1;
 }
 
-s32 func_00226A08(void)
+s32 evtCommandRequestCurrentGroupSequence(void)
 {
     s32 firstArg;
     char *textArg;
@@ -439,7 +439,7 @@ s32 func_00226A08(void)
     textArg = scrReadStringParameter(1);
     fldInitializeSequenceAndResetFlags((s32)request, D_0032E3C0[0], firstArg, textArg);
     func_001028E8(5, (s32)request, 0xa0, 0);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
     return 1;
 }
 
@@ -452,7 +452,7 @@ s32 func_00226A70(void)
     return 1;
 }
 
-s32 func_00226AA8(void)
+s32 evtCommandRequestAlternateFieldSequence(void)
 {
     s32 firstArg;
     char *textArg;
@@ -462,7 +462,7 @@ s32 func_00226AA8(void)
     textArg = scrReadStringParameter(1);
     fldInitializeAlternateSequence((s32)request, D_0032E3C0[0], firstArg, textArg);
     func_001028E8(5, (s32)request, 0xa0, 0);
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
     return 1;
 }
 
@@ -479,7 +479,7 @@ s32 evtCommandDispatchFieldBE(void)
     return 1;
 }
 
-s32 func_00226B68(void)
+s32 evtCommandHandleChangedSecondaryWorldKey(void)
 {
     s32 highPart;
     s32 lowPart;
@@ -550,7 +550,7 @@ s32 evtCommandClearAllUnits(void)
     return 1;
 }
 
-s32 func_00226D50(void)
+s32 evtCommandClearAllUnitsAndWait(void)
 {
     func_0021FE70();
     while (sdfCheckPendingWorkWithInterrupts()) {
@@ -560,11 +560,11 @@ s32 func_00226D50(void)
     return 1;
 }
 
-s32 func_00226D98(void) {
+s32 evtCommandAddEffectUnitToWorld(void) {
     void *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)func_00123DE0();
+        unit = (void *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -575,11 +575,11 @@ s32 func_00226D98(void) {
     return 1;
 }
 
-s32 func_00226E10(void) {
+s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     void *unit;
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)func_00123DE0();
+        unit = (void *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
         ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
@@ -595,7 +595,7 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226E98);
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226F38);
 
-s32 func_00226FC0(void) {
+s32 evtCommandCreateWorldEffectObject(void) {
     f32 pos[4];
     f32 rot[4];
     s32 world;
@@ -605,7 +605,7 @@ s32 func_00226FC0(void) {
     rot[3] = 1.0f;
     world = dds3AdvanceWorldCounter();
     effObjSetInnerFloat(func_00112C08(world, pos, rot), 1.0f);
-    func_0010D5F0(world);
+    scrSetIntegerReturnValue(world);
     return 1;
 }
 
@@ -623,13 +623,13 @@ s32 func_00227050(void)
     return 1;
 }
 
-s32 func_00227090(void) {
+s32 evtCommandSetEffectUnitFirstVector(void) {
     void *unit;
     f32 vec[4];
 
     memset(vec, 0, sizeof(vec));
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)func_00123DE0();
+        unit = (void *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -645,12 +645,12 @@ s32 func_00227090(void) {
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00227138);
 
-s32 func_00227210(void) {
+s32 evtCommandSetEffectUnitSecondVector(void) {
     void *unit;
     f32 vec[4];
 
     if (scrReadIntParameter(0) < 0) {
-        unit = (void *)func_00123DE0();
+        unit = (void *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
     }
@@ -691,13 +691,13 @@ s32 func_00227728(void)
 
 s32 evtCommandReadMirroredSolarPhase(void)
 {
-    func_0010D5F0(evtGetMirroredSolarPhase());
+    scrSetIntegerReturnValue(evtGetMirroredSolarPhase());
     return 1;
 }
 
 s32 evtCommandReadSolarPhase(void)
 {
-    func_0010D5F0(evtGetSolarPhase());
+    scrSetIntegerReturnValue(evtGetSolarPhase());
     return 1;
 }
 
@@ -756,7 +756,7 @@ s32 evtCommandTestCampTaskReady(void) {
     } else {
         ok = 0;
     }
-    func_0010D5F0(ok);
+    scrSetIntegerReturnValue(ok);
     return 1;
 }
 
@@ -793,7 +793,7 @@ s32 evtCommandStartPolygonMovie(void) {
     func_0010AC10(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
     func_00101A80((s32)work->campTask, result);
     evtPolygonMovieSetFlagBits(result, 1);
-    func_0010D5F0(result);
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
@@ -803,7 +803,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 
     movieId = scrReadIntParameter(0);
     evtPolygonMovieClearFlagBits(movieId, 1);
-    func_0010D5F0(movieId);
+    scrSetIntegerReturnValue(movieId);
     return 1;
 }
 
@@ -824,11 +824,11 @@ s32 evtCommandCreatePolygonMovie(void) {
     b = scrReadIntParameter(1);
     result = func_00234F18(work->campTask->resource, a, b);
     func_00101A80((s32)work->campTask, result);
-    func_0010D5F0(result);
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
-s32 func_00227BB8(void) {
+s32 evtCommandSetWorldSlotStatusFlag(void) {
     s32 found;
     s32 i = 4;
 
@@ -846,7 +846,7 @@ s32 func_00227BB8(void) {
     return 1;
 }
 
-s32 func_00227C38(void) {
+s32 evtCommandClearWorldSlotStatusFlag(void) {
     s32 found;
     s32 i = 4;
 
@@ -864,7 +864,7 @@ s32 func_00227C38(void) {
     return 1;
 }
 
-s32 func_00227CB8(void) {
+s32 evtCommandSetUnitRoomFloatState(void) {
     u8 *unit;
     s32 count;
     char *owner;
@@ -896,7 +896,7 @@ s32 func_00227CB8(void) {
     return 1;
 }
 
-s32 func_00227DD0(void) {
+s32 evtCommandSetUnitRoomIntegerState(void) {
     u8 *unit;
     s32 count;
     char *owner;
@@ -928,7 +928,7 @@ s32 func_00227DD0(void) {
     return 1;
 }
 
-s32 func_00227EE0(void)
+s32 evtCommandSetUnitScaledValueFlag(void)
 {
     s32 unitType;
     void *unit;
@@ -948,7 +948,7 @@ s32 func_00227EE0(void)
     return 1;
 }
 
-s32 func_00227F60(void)
+s32 evtCommandClearUnitScaledValueFlag(void)
 {
     s32 unitType;
     void *unit;
@@ -968,7 +968,7 @@ s32 func_00227F60(void)
     return 1;
 }
 
-s32 func_00227FE0(void) {
+s32 evtCommandMoveLightAlongPathOrWarn(void) {
     void *path = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
 
     if (func_00220340(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {

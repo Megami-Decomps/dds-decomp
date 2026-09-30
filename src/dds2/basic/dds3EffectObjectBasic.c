@@ -46,7 +46,7 @@ typedef struct {
     u16 entryId; /* 0x24 forwarded to the bill parameter lookup */
     u16 ownerKind; /* 0x26 copied from owner's kind */
     void *vector; /* 0x28 passed to func_00197D68 */
-    void *node; /* 0x2C released and replaced by func_00115580 */
+    void *node; /* 0x2C released and replaced by effObjReplaceActiveEventNode */
 } EffectData; /* 0x30 bytes */
 
 typedef struct {
@@ -58,13 +58,13 @@ typedef struct {
     u8 pad0[4];       /* 0x0 */
     u32 worldCounter; /* 0x4 copied from the constructor's worldCounter */
     u8 pad8[7];       /* 0x8 */
-    u8 kind;           /* 0xF checked ==7 by func_00115B20 */
+    u8 kind;           /* 0xF checked ==7 by effObjGetReadyData */
     u8 pad10[8];       /* 0x10 */
     EffectData *data; /* 0x18 */
     EffectParameters *params; /* 0x1C vector base; scalar parameter at +0x60 */
 } EffectObj;
 
-EffectData *func_00115B20(EffectObj *obj);
+EffectData *effObjGetReadyData(EffectObj *obj);
 
 /* Release the effect's dependent resources before clearing its data handle. */
 void effObjReleaseObjectData(u32 object) {
@@ -76,7 +76,7 @@ void effObjReleaseObjectData(u32 object) {
     func_00114640(data);
     effObjFreeInner(object);
     func_00111A68((u32)data->objectHandle);
-    func_00328E48((u32)obj->data);
+    sdfReleaseChipBlock((u32)obj->data);
     obj->data = NULL;
 }
 
@@ -88,7 +88,7 @@ u32 effObjGetObjectHandle(EffectObj *obj) {
     return (u32)obj->data->objectHandle;
 }
 
-EffectObj *func_00114CE0(u32 worldCounter, void *firstVec, void *secondVec) {
+EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secondVec) {
     EffectObj *obj;
     EffectData *data;
 
@@ -200,7 +200,7 @@ void func_00115500(void) {
     func_00115358();
 }
 
-void *func_00115518(void *resource, void *vector, void *extra) {
+void *effObjCreateFromResolvedResource(void *resource, void *vector, void *extra) {
     u32 resolvedId;
     void *resourceHandle;
     void *created;
@@ -212,7 +212,7 @@ void *func_00115518(void *resource, void *vector, void *extra) {
     return created;
 }
 
-void func_00115580(EffectObj *obj, u32 entryId) {
+void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
     EffectData *data;
 
     data = obj->data;
@@ -244,7 +244,7 @@ void func_00115AA8(void) {
     func_001156E0();
 }
 
-void *func_00115AC0(s32 kind, void *resource) {
+void *effObjCreateKindFromResource(s32 kind, void *resource) {
     u32 resolvedId;
     void *resourceHandle;
     void *created;
@@ -256,7 +256,7 @@ void *func_00115AC0(s32 kind, void *resource) {
     return created;
 }
 
-EffectData *func_00115B20(EffectObj *obj) {
+EffectData *effObjGetReadyData(EffectObj *obj) {
     EffectData *data;
 
     data = NULL;
@@ -273,8 +273,8 @@ EffectData *func_00115B20(EffectObj *obj) {
     return data;
 }
 
-s32 func_00115B58(EffectObj *obj) {
-    if (func_00115B20(obj) == NULL) {
+s32 effObjLoadReadyParameterVector(EffectObj *obj) {
+    if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
     VU0_LOAD_VF(vf10, (u8 *)obj->params + 0x40);
@@ -285,7 +285,7 @@ s32 func_00115B58(EffectObj *obj) {
 s32 effObjGetIntParam(EffectObj *obj) {
     EffectParameters *parameters;
 
-    if (func_00115B20(obj) == NULL) {
+    if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
     parameters = obj->params;
@@ -304,7 +304,7 @@ void effObjClearFlags(EffectObj *obj, u32 flags) {
     obj->data->flags = obj->data->flags & ~flags;
 }
 
-s32 func_00115E20(EffectObj *obj, EffectObj *owner) {
+s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
     EffectData *data;
     u8 kind;
 
@@ -336,7 +336,7 @@ typedef struct {
     void *param;   /* 0x18: forwarded to func_00332D08 */
 } BillParam;
 
-void func_00115E88(EffectObj *obj) {
+void effObjForwardOwnerBillEntry(EffectObj *obj) {
     EffectData *data;
     EffectObj *owner;
     BillPayload *bill;
@@ -354,10 +354,10 @@ void func_00115E88(EffectObj *obj) {
     }
 }
 
-s32 func_00115EE8(EffectObj *obj, EffectObj *owner, s32 entryId) {
+s32 effObjBindOwnerBillEntry(EffectObj *obj, EffectObj *owner, s32 entryId) {
     EffectData *data;
 
-    if (func_00115E20(obj, owner) == 0) {
+    if (effObjBindValidatedOwner(obj, owner) == 0) {
         return 1;
     }
     data = obj->data;

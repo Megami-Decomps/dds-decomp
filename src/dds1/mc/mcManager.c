@@ -1,7 +1,7 @@
 #include "common.h"
 
 /* Poll an asynchronous memory-card request: only status zero succeeds. */
-s32 func_00289D68(void) {
+s32 mcPollStrictSuccess(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);
@@ -40,7 +40,7 @@ void mcMakeDirectory(u32 port, u32 path) {
 }
 
 /* Treat SDK errors below -10 as a distinct memory-card failure. */
-s32 func_00289E38(void) {
+s32 mcPollWithExtendedErrors(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);
@@ -141,7 +141,7 @@ void func_0028A070(void) {
 }
 
 /* Like the result poll, but only report completion, not the SDK result. */
-s32 func_0028A088(void) {
+s32 mcPollCompletionStatus(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);

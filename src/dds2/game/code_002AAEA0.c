@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -8,7 +8,7 @@ extern s64 fileConsumeConfigTaskReady(void);
 
 extern u8 D_003E7034[];
 
-extern void func_002C42C0();
+extern void mnuSetPopupEntryFlagged();
 
 extern u8 D_003E7200[];
 
@@ -43,7 +43,7 @@ typedef struct {
 u32 func_002AAEA0(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     if (mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 0) == 0) {
         ((MtrRoot *)*(u32 *)(context + 0x104))->mid->sub->flags |= 1;
     } else {
@@ -58,7 +58,7 @@ u32 func_002AAEA0(void) {
 u32 func_002AAF40(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     *(u32 *)(context + 0xb1d0) = 1;
     return 1;
 }
@@ -70,16 +70,16 @@ INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
 s64 func_002AB1B0(s32 arg0) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
 }
 
 u32 func_002AB1E8(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     func_002A9460(5, context);
-    func_002BB498(*(u32 *)(context + 0x118), *(u32 *)(context + 0xF0), 0, 0);
+    mnuConfigurePanelResource(*(u32 *)(context + 0x118), *(u32 *)(context + 0xF0), 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -88,19 +88,19 @@ u32 func_002AB1E8(void) {
 u32 func_002AB240(void) {
     s32 context;
 
-    context = func_00101958();
-    func_002BB498(*(u32 *)(context + 0x118), *(u32 *)(context + 0x60), 0, 1);
+    context = kwlnTaskGetUserValue();
+    mnuConfigurePanelResource(*(u32 *)(context + 0x118), *(u32 *)(context + 0x60), 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
 s64 func_002AB278(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s64 state = func_002C4038(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
-            func_002C42C0(dispatchEntry, D_003E7034);
+            mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);
         }
         return 0;
     }
@@ -110,8 +110,8 @@ s64 func_002AB278(s32 callback) {
 s64 func_002AB2E8(s32 arg0) {
     s32 context;
 
-    context = func_00101958();
-    func_002B7F80(context + 0x11C, 0x20);
+    context = kwlnTaskGetUserValue();
+    mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
     func_002BB510(-0x10, -8, 0, *(u32 *)(context + 0x118), 0x54);
     mnuCreateStaffImageSprite(0x18);
     func_002AA7A0(2, *(u32 *)(context + 0x60));
@@ -121,7 +121,7 @@ s64 func_002AB2E8(s32 arg0) {
 s64 func_002AB368(s32 arg0) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
 }
 
@@ -138,13 +138,13 @@ s64 func_002AB3C8(s32 arg0) {
     s32 context;
     s64 state;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     state = func_002C4038(context + 8, (s32 *)(context + 0x54), 0, arg0);
     if (state != 0) {
         return state;
     }
     mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 1);
-    func_002C42B0(context + 0x54, D_003E7034);
+    mnuSetPopupEntry(context + 0x54, D_003E7034);
     return 0;
 }
 
@@ -153,7 +153,7 @@ INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
 s64 func_002AB518(s32 arg0) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
 }
 

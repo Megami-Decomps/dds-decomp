@@ -127,7 +127,7 @@ extern char D_003BD2C0[];
 extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
 extern void frFontSetChildColors(u32, u32);
 extern void func_001958A0(u32, s32, s32);
-extern void func_00194920(u32);
+extern void frFontQueueGlyphInSelectedSlot(u32);
 extern u32 fileResolvePrimaryBuffer(void);
 extern void func_0029CE50(u32);
 extern s32 ptyTestProfileFlag0(s32, u16);
@@ -724,7 +724,7 @@ void func_002CEA10(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_00197C40(x, y, first, width, (u32)D_00394680, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 u8 *func_002CEA80(void) {

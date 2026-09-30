@@ -22,8 +22,8 @@ typedef struct Dds3Node {
 } Dds3Node;
 
 extern s32 func_001951C8(u32, s32, s32, s32, s32);
-extern void func_00195450(s32, u32, u32);
-extern s32 func_002CFF68(s32);
+extern void frFontSetContextPair(s32, u32, u32);
+extern s32 sdfAllocAndClearQuadwords(s32);
 extern u32 D_003BAAD0;
 
 /* Shared glyph owner layout: handle at +0x10, released by the font routines. */
@@ -35,7 +35,7 @@ typedef struct GlyphOwner {
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
 u32 func_0011CEB8(void) {
-    func_0010D5F0(ptyRemoveUnit(scrReadIntParameter(0)) == 1);
+    scrSetIntegerReturnValue(ptyRemoveUnit(scrReadIntParameter(0)) == 1);
     return 1;
 }
 
@@ -47,7 +47,7 @@ u32 func_0011CEF0(void) {
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
     firstOperand = func_0011B140(firstOperand, secondOperand);
-    func_0010D5F0(firstOperand);
+    scrSetIntegerReturnValue(firstOperand);
     return 1;
 }
 
@@ -57,12 +57,12 @@ u32 func_0011CF38(void) {
 
     firstOperand = scrReadIntParameter(0);
     secondOperand = scrReadIntParameter(1);
-    func_0010D5F0(func_0011B148(firstOperand, secondOperand) == 1);
+    scrSetIntegerReturnValue(func_0011B148(firstOperand, secondOperand) == 1);
     return 1;
 }
 
 u32 func_0011CF88(void) {
-    func_0010D5F0(func_0011B150(scrReadIntParameter(0)) == 1);
+    scrSetIntegerReturnValue(func_0011B150(scrReadIntParameter(0)) == 1);
     return 1;
 }
 
@@ -141,8 +141,8 @@ void func_0011D138(void) {
 }
 
 void func_0011D178(GlyphOwner *owner) {
-    func_00194920(owner->glyph);
-    func_002CFF98(owner);
+    frFontQueueGlyphInSelectedSlot(owner->glyph);
+    sdfReleaseChipBlock(owner);
 }
 
 void func_0011D1A8(GlyphOwner *owner) {
@@ -157,8 +157,8 @@ Dds3Node *func_0011D1C0(u32 arg0, u32 arg1, u32 arg2) {
     if (arg0 == 0x800000) {
         arg0 = (0x200 - *(s32 *)(obj + 0xC)) * 8;
     }
-    func_00195450(obj, arg0, arg1);
-    node = (Dds3Node *)func_002CFF68(0x14);
+    frFontSetContextPair(obj, arg0, arg1);
+    node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
     node->unk10 = obj;
     func_0011D030(node, (Dds3NodeVTable *)&D_003BAAD0);
     return node;
@@ -169,7 +169,7 @@ void func_0011D258(GlyphOwner *owner, u8 value) {
 }
 
 void func_0011D278(void) {
-    func_002CFF98();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_SDATA(const s32, "game/code_0011CEB8", D_003BAAD0);

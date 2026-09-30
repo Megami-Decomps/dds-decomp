@@ -27,7 +27,7 @@ typedef struct DatGameCounters {
     s32 currency;        /* 0x3C: clamped to 0..9,999,999 */
 } DatGameCounters;
 
-void func_001197A8(u8 *work, s32 mask) {
+void datClearUnitStatusBits(u8 *work, s32 mask) {
     *(u16 *)(work + 0xE) &= ~mask;
 }
 
@@ -71,22 +71,22 @@ INCLUDE_ASM(const s32, "newdata/datCalc", func_00119BA0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119C78);
 
-u32 func_00119F20(void) {
+u32 datReadLowHalfOfCalculatedValue(void) {
     return (u16)func_00119C78();
 }
 
-u32 func_00119F40(void) {
+u32 datReadHighHalfOfCalculatedValue(void) {
     return func_00119C78() & 0xFFFF0000;
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119F68);
 
-s32 func_0011A098(UiObject *object) {
+s32 datIsValueBelowQuarterMax(UiObject *object) {
     return *(u16 *)((u8 *)object + 6) * 100 / *(u16 *)((u8 *)object + 8) < 25;
 }
 
 /* Add to the party's currency counter, saturating at either bound. */
-s32 func_0011A0D0(s32 delta) {
+s32 datAddCurrencyClamped(s32 delta) {
     s32 value = ((DatGameCounters *)D_00435DD0)->currency + delta;
     if (value < 0) {
         value = 0;
@@ -98,7 +98,7 @@ s32 func_0011A0D0(s32 delta) {
     return value;
 }
 
-s32 func_0011A100(s32 value) {
+s32 datHasEnoughCurrency(s32 value) {
     if (*(s32 *)(D_00435DD0 + 0x3C) < value) {
         return 0;
     }

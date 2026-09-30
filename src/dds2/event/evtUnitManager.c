@@ -132,7 +132,7 @@ struct PcpScatterWork4 {
 };
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
-f32 func_0023B3A0(s32 path) {
+f32 evtMeasurePathTrajectoryLength(s32 path) {
     f32 saved;
     f32 length = 0.0f;
     f32 step = 0.05f;
@@ -160,7 +160,7 @@ f32 func_0023B3A0(s32 path) {
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023B480);
 
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
-void func_0023C400(EvtUnit *unit) {
+void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
     EvtTargetInfo *info = 0;
     s32 ownVector = 0;
     s32 color;
@@ -184,7 +184,7 @@ void func_0023C400(EvtUnit *unit) {
 }
 
 /* vu0 routine: as above for the second colour (flag 0x200) and the vectors at +0x40 */
-void func_0023C4B0(EvtUnit *unit) {
+void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     EvtTargetInfo *info = 0;
     s32 ownVector = 0;
     s32 color;
@@ -208,7 +208,7 @@ void func_0023C4B0(EvtUnit *unit) {
 }
 
 /* vu0 routine: load vf10 with the unit's vector, or the default one */
-void func_0023C568(EvtUnit *unit) {
+void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     s32 ownVector = 0;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
@@ -271,8 +271,8 @@ void evtClearUnitValueChangeFlag(EvtUnit *unit) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C870);
 
-/* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from func_0023C568 to vec20 */
-void func_0023C908(EvtUnit *unit, s32 arg) {
+/* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
+void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
     unit->unk1B2 = arg;
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -286,7 +286,7 @@ void func_0023C908(EvtUnit *unit, s32 arg) {
         "vmulq.xyz vf10, vf10, Q\n\t"
         ".set reorder");
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec30));
-    func_0023C568(unit);
+    evtLoadUnitDirectionVectorVU(unit);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec20));
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
@@ -303,7 +303,7 @@ void evtSetUnitStatusFlags(EventUnit *unit) {
     unit->flags = unit->flags | 0x300;
 }
 
-void func_0023CB68(EvtUnit *unit, s32 arg) {
+void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
     if (arg == 0) {
         unit->flags &= ~0x700;
         unit->flags &= ~0x5000;
@@ -312,12 +312,12 @@ void func_0023CB68(EvtUnit *unit, s32 arg) {
         func_0023C870(unit, arg, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
         __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
-        func_0023C908(unit, arg);
+        evtSetUnitNormalizedDirection(unit, arg);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
 }
 
-s32 func_0023CC00(s32 id) {
+s32 evtGetWorldUnitNestedValue(s32 id) {
     u8 *obj = (u8 *)func_00110C70(dds3GetWorldObject(), id, 5);
 
     if (obj != NULL) {
@@ -335,7 +335,7 @@ s32 evtUnitGetNestedValue(EventUnit *unit) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023CC60);
 
-s32 func_0023CD98(u8 *work) {
+s32 evtReleaseUnitTransitionWork(u8 *work) {
     s32 handle;
 
     if (work == NULL) {
@@ -344,18 +344,18 @@ s32 func_0023CD98(u8 *work) {
     handle = *(s32 *)(work + 0x68);
     *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
     if (handle != 0) {
-        func_00328E48(handle);
+        sdfReleaseChipBlock(handle);
         *(s32 *)(work + 0x68) = 0;
     }
     if (*(s32 *)(work + 0xA0) != 0) {
         dds3FreePathObject(*(s32 *)(work + 0xA0));
         *(s32 *)(work + 0xA0) = 0;
     }
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
     return 1;
 }
 
-s32 func_0023CE08(EventUnit *unit) {
+s32 evtGetUnitMotionState(EventUnit *unit) {
     return unit->valueAC;
 }
 
@@ -367,13 +367,13 @@ void func_0023CE18(EventUnit *unit, f32 value) {
     unit->valueB8 = value;
 }
 
-void func_0023CE20(EventUnit *unit, s32 a, s32 b) {
+void evtStoreUnitMotionShortParameters(EventUnit *unit, s32 a, s32 b) {
     unit->valueBE = a;
     unit->valueC0 = b;
 }
 
-s32 func_0023CE30(EventUnit *unit) {
-    s32 state = func_0023CE08(unit);
+s32 evtIsUnitMotionIdleOrTimedMode(EventUnit *unit) {
+    s32 state = evtGetUnitMotionState(unit);
 
     if (state == 0) {
         return 1;
@@ -384,16 +384,16 @@ s32 func_0023CE30(EventUnit *unit) {
     return 0;
 }
 
-void func_0023CE98(EventUnit *unit, s32 first, s32 second) {
+void evtStoreUnitMotionSlotSelection(EventUnit *unit, s32 first, s32 second) {
     unit->valueD0 = first;
     unit->valueD1 = second;
 }
 
-void func_0023CEA8(u8 *work) {
-    func_0023CED8(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
+void evtActivateStoredUnitMotionSlot(u8 *work) {
+    evtConfigureUnitMotionSlot(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
 }
 
-void func_0023CED8(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
+void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
     unit->slotFlags[slot] = 3;
     unit->slotA[slot] = a;
     unit->slotB[slot] = b;
@@ -411,7 +411,7 @@ void func_0023CED8(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
     }
 }
 
-void func_0023CF70(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
+void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
     unit->flags &= ~0x40;
@@ -442,7 +442,7 @@ void func_0023CF70(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D030);
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with func_0023D030. */
-s32 func_0023D1F0(EvtUnit *unit, f32 *quat, f32 angle) {
+s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
     VU0_LOAD_VF(vf10, quat);
@@ -457,7 +457,7 @@ s32 func_0023D1F0(EvtUnit *unit, f32 *quat, f32 angle) {
     return func_0023D030(unit, v, angle);
 }
 
-s32 func_0023D298(EvtUnit *unit) {
+s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 v[4];
     f32 scale;
     EvtEffObj *obj;
@@ -506,6 +506,6 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     return 1;
 }
 
-void func_0023D640(void *work, void *src) {
+void evtCopyUnitTargetVector(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x70, src);
 }

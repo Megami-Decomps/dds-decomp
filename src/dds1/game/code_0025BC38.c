@@ -104,7 +104,7 @@ u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
 
 void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet(work->resourceHandle);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
@@ -224,7 +224,7 @@ MenuListNode *mnuFreeMenuListNodeAndGetNext(MenuListNode *node) {
     MenuListNode *next;
 
     next = node->next;
-    func_002CFF98();
+    sdfReleaseChipBlock();
     return next;
 }
 

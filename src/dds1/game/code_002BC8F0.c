@@ -240,7 +240,7 @@ extern u32 D_003BD064;
 
 extern void *func_002CFEB8(u32);
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern char D_003BD198[];
 
@@ -393,7 +393,7 @@ s32 effRemoveSlotRecord(EffectOwnerRecord *list, EffectSlotOwner *work, s32 slot
             if (record == list->entries[bucket]) {
                 list->entries[bucket] = record->next;
             }
-            func_002CFF98(record);
+            sdfReleaseChipBlock(record);
             return 1;
         }
         record = record->next;
@@ -419,7 +419,7 @@ EffectOwnerRecord *list;
             if (record == *entry) {
                 *entry = record->next;
             }
-            func_002CFF98(record);
+            sdfReleaseChipBlock(record);
             record = record->next;
         }
         ++entry;
@@ -450,7 +450,7 @@ u32 effDispatchRecordBuckets(u32 active, EffectOwnerRecord *list, s32 option) {
 
 u32 effDestroyOwnerRecordList(u32 list) {
     effReleaseRecordBuckets();
-    func_002CFF98(list);
+    sdfReleaseChipBlock(list);
     return 1;
 }
 
@@ -571,10 +571,10 @@ typedef struct PackedEffectBatch {
 u32 effDestroyPackedBatch(PackedEffectBatch *batch) {
     s32 i;
     for (i = 0; i < batch->count; i++) {
-        func_002CFF98(batch->records[i].storage);
+        sdfReleaseChipBlock(batch->records[i].storage);
     }
     func_002D0918(batch->job);
-    func_002CFF98(batch);
+    sdfReleaseChipBlock(batch);
     return 1;
 }
 
@@ -708,7 +708,7 @@ u32 *effCreatePayload(u32 count) {
 
 u32 effDestroyPayload(u32 payload) {
     func_002D0918(*(u32 *)payload);
-    func_002CFF98(payload);
+    sdfReleaseChipBlock(payload);
     return 1;
 }
 
@@ -757,7 +757,7 @@ u32 effDestroyResourceSlotSet(u32 work) {
     }
     func_002D0918(words[3]);
     effReleaseSlotWorkAllocation(work);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
     return 1;
 }
 

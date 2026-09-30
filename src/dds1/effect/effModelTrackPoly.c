@@ -38,7 +38,7 @@ typedef struct {
 /* Release both owned resources before freeing this track. */
 void effTrackPolyRelease(EffTrackPolyWork *work) {
     effTrackPolyFreeData(work->data);
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
 }
 
 void effTrackPolyReset(EffTrackPolyWork *work) {
@@ -91,11 +91,11 @@ void func_001884E8(EffTrackPolyWork ***tables, s32 index, void *data) {
     func_001882D8((*tables)[index], data);
 }
 
-void func_00188510(EffTrackPolyWork ***tables, s32 index) {
+void effTrackPolyResetIndexedWork(EffTrackPolyWork ***tables, s32 index) {
     effTrackPolyReset((*tables)[index]);
 }
 
-void func_00188538(EffTrackPolyWork ***tables, s32 index, u32 value) {
+void effTrackPolySetIndexedColor(EffTrackPolyWork ***tables, s32 index, u32 value) {
     effTrackPolySetColor((*tables)[index], value);
 }
 
@@ -112,7 +112,7 @@ void func_00188560(EffTrackPolyWork ***list) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
-void func_001885C0(f32 (*p)[4], f32 t)
+void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 {
     f32 tan[2][4];
     f32 half[4];

@@ -151,13 +151,13 @@ u32 func_0024FA18(void) {
 void mnuStopResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
     mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
-    func_0027BEB0(*(s32 *)(object + 0xC));
+    mnuRetreatListCursorDefault(*(s32 *)(object + 0xC));
 }
 
 void mnuResetResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
     mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
-    func_0027BE90(*(s32 *)(object + 0xC));
+    mnuAdvanceListCursorDefault(*(s32 *)(object + 0xC));
 }
 
 extern s32 func_002D03F8(s32);
@@ -177,7 +177,7 @@ u32 *func_0024FAC8(void) {
     return block;
 }
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 extern void mnuDestroyListState(void *);
 extern void func_00249930(s32);
 extern void func_002D0918(s32);
@@ -203,10 +203,10 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);
 
     while (node != NULL) {
-        func_002CFF98(node->resource);
+        sdfReleaseChipBlock(node->resource);
         node = node->next;
     }
-    func_002CFF98(owner->resource);
+    sdfReleaseChipBlock(owner->resource);
     mnuDestroyListState(owner);
     func_00249930(*(s32 *)(record + 0x24));
     func_002D0918(taskData[0]);

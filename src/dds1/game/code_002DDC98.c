@@ -1566,7 +1566,7 @@ void sdfDevConsListRemove(ConsNode *node) {
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
     func_002D0918(node->bufferHandle);
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 void sdfDevConsNodeClear(ConsNode *node) {

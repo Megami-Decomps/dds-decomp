@@ -2,7 +2,7 @@
 
 extern char *scrReadStringParameter(s32 idx);
 
-extern void func_0010D5F0(s32 value);
+extern void scrSetIntegerReturnValue(s32 value);
 
 extern s32 fldGetTaskRecordValue(u32 key);
 
@@ -42,7 +42,7 @@ extern s32 fldFindEffectByName(char *str);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern s32 func_00222090(s32 param);
+extern s32 evtGetWorldUnitNestedValue(s32 param);
 
 /* Script command context: +0xE4 is the task-record lookup key. */
 typedef struct {
@@ -62,7 +62,7 @@ extern s32 fldIsSceneStateEight(void);
 extern s32 D_0032E3D8[];
 
 s32 fldCmdQuerySceneValue(void) {
-    func_0010D5F0(func_0013DB58(scrReadIntParameter(0)));
+    scrSetIntegerReturnValue(func_0013DB58(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -81,7 +81,7 @@ s32 func_0014F110(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    func_0010D5F0(func_0013CEB0(param0, param1));
+    scrSetIntegerReturnValue(func_0013CEB0(param0, param1));
     return 1;
 }
 
@@ -89,12 +89,12 @@ s32 func_0014F158(void) {
     s32 param0 = scrReadIntParameter(0);
     s32 param1 = scrReadIntParameter(1);
 
-    func_0010D5F0(fldGetActorSlotAttribute(param0, param1));
+    scrSetIntegerReturnValue(fldGetActorSlotAttribute(param0, param1));
     return 1;
 }
 
 void func_0014F1A0(void) {
-    func_0010D5F0(func_0013CBA8(1));
+    scrSetIntegerReturnValue(func_0013CBA8(1));
 }
 
 s32 func_0014F1C0(void) {
@@ -191,12 +191,12 @@ s32 fldCmdApplyTaskRecordEntry(void) {
 }
 
 s32 func_0014F440(void) {
-    func_0010D5F0(func_0013DB28());
+    scrSetIntegerReturnValue(func_0013DB28());
     return 1;
 }
 
 s32 func_0014F468(void) {
-    func_00147DB0(func_00222090(scrReadIntParameter(0)));
+    func_00147DB0(evtGetWorldUnitNestedValue(scrReadIntParameter(0)));
     return 1;
 }
 
@@ -204,6 +204,6 @@ s32 func_0014F468(void) {
 s32 fldCommandFindEffectByName(void) {
     char *effectName = scrReadStringParameter(0);
 
-    func_0010D5F0(fldFindEffectByName(effectName));
+    scrSetIntegerReturnValue(fldFindEffectByName(effectName));
     return 1;
 }

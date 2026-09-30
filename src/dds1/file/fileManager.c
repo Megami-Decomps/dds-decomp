@@ -24,7 +24,7 @@ typedef struct FileRequest {
     u16 unk68;
 } FileRequest;
 
-extern s32 func_00288BA8(FileRequest *file);
+extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002887A0);
 
@@ -84,7 +84,7 @@ u32 func_00288BA0(FileWork *work) {
 }
 
 /* A request is ready once its state byte reaches 6, but only for mode 1. */
-s32 func_00288BA8(FileRequest *file) {
+s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
     s32 result;
 
     if (file->pad00 == 1) {
@@ -107,7 +107,7 @@ s32 fileRequestIsReady(FileRequest *file) {
 
 /* Keep the device scheduler and file manager running while a request finishes. */
 void fileWaitReady(u32 id) {
-    while (func_00288BA8(id) == 0) {
+    while (fileIsRequestReadyInCurrentMode(id) == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }

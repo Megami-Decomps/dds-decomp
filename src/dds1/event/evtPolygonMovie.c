@@ -2,7 +2,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
-/* Global event state behind func_00101A70; the polygon-movie word at 0x0 and
+/* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
 typedef struct EvtGlobal {
     u32 movieFlags; /* 0x0 */
@@ -95,7 +95,7 @@ typedef struct EvtBlendH {
     s32 z[3];     /* 0x2C */
 } EvtBlendH;
 
-s32 func_00101A70(void);
+s32 kwlnTaskGetUserValue(void);
 u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 
 typedef struct ObjectFlagsTarget {
@@ -215,21 +215,21 @@ extern EvtBlendE D_00368640;
 extern EvtBlendF D_00368670;
 extern EvtBlendA D_003686A0;
 extern s32 itfMesCreateWindow(u8 *arg);
-extern void func_0019B9A0(s32 handle);
+extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern void func_002887A0(s32 arg);
 extern void func_002D0918(s32 arg);
 extern s32 func_00269710(void);
 extern void func_002696F8(void);
 extern void func_003003F0(const char *fmt, ...);
-extern void func_002CFF98(void *ptr);
+extern void sdfReleaseChipBlock(void *ptr);
 
 s32 evtPolygonMovieTestFlag(void)
 {
     EvtGlobal *state;
     s32 set;
 
-    state = (EvtGlobal *)func_00101A70();
+    state = (EvtGlobal *)kwlnTaskGetUserValue();
     set = 0;
     if (state->movieFlags & 8) {
         set = 1;
@@ -585,7 +585,7 @@ void evtPolygonMovieSetFlagBits(s32 unused, u32 bits)
 {
     EvtGlobal *state;
 
-    state = (EvtGlobal *)func_00101A70();
+    state = (EvtGlobal *)kwlnTaskGetUserValue();
     *state->flags = *state->flags | bits;
 }
 
@@ -593,7 +593,7 @@ void evtPolygonMovieClearFlagBits(s32 unused, u32 bits)
 {
     EvtGlobal *state;
 
-    state = (EvtGlobal *)func_00101A70();
+    state = (EvtGlobal *)kwlnTaskGetUserValue();
     *state->flags = *state->flags & ~bits;
 }
 
@@ -868,10 +868,10 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 {
     if (work != NULL) {
         if (work->buffer != NULL) {
-            func_002CFF98(work->buffer);
+            sdfReleaseChipBlock(work->buffer);
         }
         if (work->handle >= 0) {
-            func_0019B9A0(work->handle);
+            itfMesDestroyWindowIfPresent(work->handle);
             work->handle = -1;
         }
         fileWaitIdle();
@@ -894,7 +894,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
             func_002696F8();
         }
         func_003003F0("sound stop all. \n");
-        func_002CFF98(work);
+        sdfReleaseChipBlock(work);
     }
 }
 

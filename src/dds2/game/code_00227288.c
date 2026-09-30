@@ -35,7 +35,7 @@ extern s32 func_001AA6F8(void);
 
 extern s32 btlCountTasksByKind(u32);
 
-extern void *func_00328E18(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void func_002C7CE8(void *);
 
@@ -146,7 +146,7 @@ extern s32 D_003C86F0[];
 
 extern s32 D_003C8710[];
 
-extern void func_0010D818();
+extern void scrSetIntegerReturnValue();
 
 extern void func_0011A118(u32, u32);
 
@@ -154,7 +154,7 @@ extern s32 func_0022D2F8(u32, u32);
 
 extern u32 btlAllocTask(u32);
 
-extern u32 func_001E14F8(u32);
+extern u32 btlGetTaskArguments(u32);
 
 extern void func_0022BA08(void);
 
@@ -209,7 +209,7 @@ typedef struct BattleScriptTaskData {
     u32 frames;
 } BattleScriptTaskData;
 
-extern void *func_001E5DA8(void *, s32, s32);
+extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern void func_0035C860(char *, const char *, const char *, s32);
 extern s32 kwlnTaskIsRegistered(s32);
@@ -222,7 +222,7 @@ extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 
 extern char D_00436D08[];
 
-extern s32 func_0025D008(s16, s32);
+extern s32 evtFindTaskResourceEntryByKey(s16, s32);
 
 extern char D_0041B7E0[];
 
@@ -434,7 +434,7 @@ extern void *func_0019F448(s32, s32, u32, u32, s32, s32);
 
 extern void func_0019D550(void *, s32, s32);
 
-extern s32 func_0019C5B0(void *);
+extern s32 frFontQueueGlyphInSelectedSlot(void *);
 
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
@@ -457,17 +457,17 @@ typedef struct BtlMenuDrawer {
 
 extern BtlMenuDrawer D_00380748;
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern void func_003298C0(void *);
 
 extern void mdlDestroyContext(s32);
 
-extern void func_00234858(s32);
+extern void mdlDestroyPartList(s32);
 
 extern void sdfResourceListRelease(void *, s32);
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 void func_00227288(void) {
     func_00226F58();
@@ -756,7 +756,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
         }
         other = other->next;
     }
-    btlStartTask(func_001E5DA8(unit, 8, 10));
+    btlStartTask(btlCreateUnitFadeOutTask(unit, 8, 10));
     unit->flags &= ~0x100;
     return 1;
 }
@@ -907,7 +907,7 @@ s32 func_002291C0(void) {
     return effect->linkedUnit == unit;
 }
 
-void func_00229248(void) {
+void btlArmEventResourceTrigger(void) {
     u8 *puVar1;
     BattleEffectContext *battle;
 
@@ -1023,7 +1023,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_002294D0);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
-s32 btlUnitInEncounterList(u8 *unit) {
+s32 btlIsActionIdListed(u8 *unit) {
     BtlState *battle;
     u16 *entry;
     u32 id;
@@ -1253,7 +1253,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battle = (BattleScriptResources *)func_001AA6F8();
-    result = func_0025D008(battle->scriptGroup, action);
+    result = evtFindTaskResourceEntryByKey(battle->scriptGroup, action);
     if (result == 0) {
         return 1;
     }
@@ -1334,7 +1334,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
     return 1;
 }
 
-/* Optional hook: it reads its argument (100) straight from $a0 and returns the value passed to func_0010D818. */
+/* Optional hook: it reads its argument (100) straight from $a0 and returns the value passed to scrSetIntegerReturnValue. */
 s32 func_0022B760(void) {
     BtlState *state = (BtlState *)func_001AA6F8();
     s32 value = 100;
@@ -1342,7 +1342,7 @@ s32 func_0022B760(void) {
     if (state->unk_6EC != NULL) {
         value = state->unk_6EC();
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -1354,7 +1354,7 @@ typedef struct BtlFlagSlot {
 extern BtlFlagSlot D_003BF960[];
 extern s32 effMiscRandMod();
 
-/* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to func_0010D818. */
+/* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
 s32 func_0022B7A0(void) {
     u32 value = scrReadIntParameter(0);
     s32 count;
@@ -1390,7 +1390,7 @@ s32 func_0022B7A0(void) {
     } else {
         value = 0;
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -1400,7 +1400,7 @@ u32 func_0022B8E0(void) {
     if (index < 100) {
         value = D_003BF961[index * 4];
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -1420,7 +1420,7 @@ u32 btlCommandCountModelFlags(void) {
             count = count + 1;
         }
     } while (index < 100);
-    func_0010D818(count);
+    scrSetIntegerReturnValue(count);
     return 1;
 }
 
@@ -1430,7 +1430,7 @@ u32 func_0022B988(void) {
     if (index < 100) {
         value = D_003BF962[index * 2];
     }
-    func_0010D818(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -1453,7 +1453,7 @@ u32 btlCreateScriptResourceTask(u32 object, u32 group) {
     task->kind = 0x68;
     task->callback = func_0022BA08;
     task->startFlag = 0;
-    data = (BattleScriptTaskData *)func_001E14F8((u32)task);
+    data = (BattleScriptTaskData *)btlGetTaskArguments((u32)task);
     data->object = object;
     data->group = group;
     data->frames = 0;
@@ -1501,7 +1501,7 @@ void *btlCreateActionTask(void *battler, s32 action) {
     task->kind = 0x69;
     task->update = (s32 (*)(void *))btlUpdateScriptResourceTask;
     task->phase = 0;
-    data = (BattleActionTaskData *)func_001E14F8((u32)task);
+    data = (BattleActionTaskData *)btlGetTaskArguments((u32)task);
     data->battler = battler;
     data->action = action;
     data->finished = 0;
@@ -1775,7 +1775,7 @@ typedef struct BattleModelEntry {
 } BattleModelEntry;
 
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *entry = func_00328E18(sizeof(BattleModelEntry));
+    BattleModelEntry *entry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
     u8 *battle;
     BattleModelEntry *head;
     entry->refs = 1;
@@ -1811,7 +1811,7 @@ void btlReleaseModelEntry(BattleModelEntry *entry) {
     } else {
         *(BattleModelEntry **)((u8 *)func_001AA6F8() + 0x264) = entry->next;
     }
-    func_00328E48(entry);
+    sdfReleaseChipBlock(entry);
     btlBossDebugPrintf("btl:pack free[%X,%X]\n", entry->kind, entry->id);
 }
 
@@ -2333,7 +2333,7 @@ s32 mnuListMoveCursor(MenuList *list) {
 s32 func_0022ED38(s32 width, s32 height, s32 mode) {
     void *packet = func_0019F448(width << 4, height << 3, 0xff0000, 0xa09dc380, mode, 0);
     func_0019D550(packet, 0, 0x60);
-    return func_0019C5B0(packet);
+    return frFontQueueGlyphInSelectedSlot(packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022ED90);
@@ -2505,7 +2505,7 @@ void btlRemoveGroupId(s32 group, s32 id) {
     do {
         if (*(node + 1) == id) {
             *link = *node;
-            func_00328E48(node);
+            sdfReleaseChipBlock(node);
             break;
         } else {
             link = node;
@@ -2580,9 +2580,9 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
             }
         }
     }
-    func_00234858(node->unk_A8);
+    mdlDestroyPartList(node->unk_A8);
     func_003297C8(node->unk_A0);
-    func_00328E48(node);
+    sdfReleaseChipBlock(node);
 }
 
 void func_00231588(void) {

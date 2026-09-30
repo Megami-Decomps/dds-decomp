@@ -122,7 +122,7 @@ extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
 extern s8 D_00324530[];
 
-extern u32 func_00101A70(s64);
+extern u32 kwlnTaskGetUserValue(s64);
 
 extern s8 D_00358308[13];
 
@@ -278,15 +278,15 @@ void func_0019DED8(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
 void btlReleaseEffectResourceHandles(u8 *effect) {
     u32 *handles = (u32 *)(effect + 0xA4);
     if (handles[0] != 0) {
-        func_00199900(handles[0]);
+        itfPanelReleasePrimitiveResources(handles[0]);
         handles[0] = 0;
     }
     if (handles[1] != 0) {
-        func_00199900(handles[1]);
+        itfPanelReleasePrimitiveResources(handles[1]);
         handles[1] = 0;
     }
     if (handles[2] != 0) {
-        func_00199900(handles[2]);
+        itfPanelReleasePrimitiveResources(handles[2]);
         handles[2] = 0;
     }
     *(u32 *)effect &= ~0xF00;
@@ -527,7 +527,7 @@ extern s32 D_003BA8EC;
 
 extern s32 scrCreateTaskForProcessId(s32, u8 *, s32);
 
-extern void func_0019CB98(s32, void (*)(void));
+extern void itfMesSetWindowCallbackAddress(s32, void (*)(void));
 
 extern void sndCycleTestMessageResource(void);
 
@@ -540,7 +540,7 @@ extern s32 sndUpdateTestMsgTask(void);
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    func_0019CB98(*(s32 *)(func_00101A70(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)) + 0xCC), func_0019FCA8);
+    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)) + 0xCC), func_0019FCA8);
     kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))func_0019FBD8, 0, 0);
     kwlnTaskCreate((u32)D_003A1500, 0x2AFE, 0, 0, (s32 (*)(s64))sndUpdateTestMsgTask, 0, 0);
 }

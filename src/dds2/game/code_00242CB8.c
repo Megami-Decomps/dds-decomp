@@ -10,7 +10,7 @@ extern u32 D_004371F8;
 
 extern u32 D_00437200;
 
-extern u64 func_00101958(void);
+extern u64 kwlnTaskGetUserValue(void);
 
 extern char D_00437208[];
 
@@ -22,7 +22,7 @@ s32 func_0010D8C8(void);
 
 char *scrReadStringParameter(s32 idx);
 
-void func_0010D818(s32 value);
+void scrSetIntegerReturnValue(s32 value);
 
 extern char D_00422050[];
 
@@ -30,7 +30,7 @@ void *func_00328D68(s32 size);
 
 void evtInitializeVisualData(s32 arg0);
 
-void func_00101950(s32 arg0, void *arg1);
+void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
 void func_00243430(void);
 
@@ -64,7 +64,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
     }
     childTask = evtCreateTask(0x2afe, scrReadStringParameter(0));
     func_00101968(work->taskKey, childTask);
-    func_0010D818(childTask);
+    scrSetIntegerReturnValue(childTask);
     return 1;
 }
 
@@ -110,7 +110,7 @@ u32 evtOpcodeSetFadeTarget(void) {
     u64 duration;
 
     fldSetSwayMode(0);
-    func_00135578(0x80);
+    fldSetSkyDrawState(0x80);
     area = scrReadIntParameter(0);
     target = scrReadIntParameter(1);
     duration = scrReadIntParameter(2);
@@ -307,16 +307,16 @@ void *evtCreateSolarOverlayWork(s32 task) {
     overlay = func_00328D68(0x104);
     evtInitializeVisualData((s32)overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
-    func_00101950(task, overlay);
+    kwlnTaskSetUserValue(task, overlay);
     return (void *)func_00243430;
 }
 
 void evtFreeSolarOverlayWork(void) {
     u64 overlay;
 
-    overlay = func_00101958();
+    overlay = kwlnTaskGetUserValue();
     evtReleaseSolarNoiseSprite(overlay);
-    func_00328E48(overlay);
+    sdfReleaseChipBlock(overlay);
     D_00437200 = 0;
 }
 

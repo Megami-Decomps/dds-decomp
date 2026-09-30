@@ -29,7 +29,7 @@ typedef struct LightSlotDesc {
 
 void effObjFreeInner(void *arg);
 void func_00111840(s32 arg);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 void func_002E1938(void *arg0, LightSlotDesc *desc, f32 *color);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
@@ -40,9 +40,9 @@ void lightReleaseObject(LightObject *light) {
     LightData *data;
 
     data = light->data;
-    func_002CFF98(data->buffer);
+    sdfReleaseChipBlock(data->buffer);
     func_00111840(data->resource);
-    func_002CFF98(light->data);
+    sdfReleaseChipBlock(light->data);
     light->data = NULL;
     effObjFreeInner(light);
 }

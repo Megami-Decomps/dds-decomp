@@ -9,7 +9,7 @@ INCLUDE_ASM(const s32, "game/code_001890D8", func_001890D8);
 
 void effReleaseMagatuhiOwner(SceneResource *resource) {
     effMagatuhiReleaseResource(resource->handle);
-    func_002CFF98(resource);
+    sdfReleaseChipBlock(resource);
 }
 
 void func_001891A8(SceneResource *resource) {

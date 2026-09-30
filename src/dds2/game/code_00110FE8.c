@@ -101,7 +101,7 @@ s32 dds3ExchangeAreaSlot(void *arg);
 
 void dds3DestroyWorldIndexNode(u32 node);
 
-void func_00328E48(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
 void func_00111278(WorldObjectPointer *object) {
     u32 *p;
@@ -113,7 +113,7 @@ void func_00111278(WorldObjectPointer *object) {
     for (i = 0; i < 2; i++) {
         dds3DestroyWorldIndexNode(p[i]);
     }
-    func_00328E48(p);
+    sdfReleaseChipBlock(p);
 }
 
 u32 func_001112F8(void) {

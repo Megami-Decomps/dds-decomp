@@ -79,7 +79,7 @@ typedef struct EvtViewBuf {
 } EvtViewBuf;
 
 void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
-void func_002CFF98(void *ptr);
+void sdfReleaseChipBlock(void *ptr);
 void sdfTexReleaseReference(s32 tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
@@ -130,11 +130,11 @@ void evtEventViewerReleaseNode(EvtEvEntry *entry, EvtEvNode *node)
     evtUnlinkListNode(entry, node);
     if (node->buf != NULL) {
         if (entry->id != 0x12) {
-            func_002CFF98(node->buf);
+            sdfReleaseChipBlock(node->buf);
         }
         node->buf = NULL;
     }
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022BF00);
@@ -289,7 +289,7 @@ void evtEventViewerDestroyEntry(EvtEvEntry *entry, EvtViewer *viewer)
         }
     }
     evtEventViewerUnlinkEntry(entry, viewer);
-    func_002CFF98(entry);
+    sdfReleaseChipBlock(entry);
 }
 
 void evtViewerSetMinimumFromCurrent(EvtRange *range)

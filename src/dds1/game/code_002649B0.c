@@ -13,7 +13,7 @@ typedef struct {
 } PanelDispatchContext;
 
 s64 itfRunPanelMode1(u64 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
     mnuDrawItemPanelBackdrop(context);
@@ -22,12 +22,12 @@ s64 itfRunPanelMode1(u64 request) {
 }
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DC98(s32);
 
 s64 itfRunPanelMode2(u64 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     PanelDispatchContext *panel = (PanelDispatchContext *)context;
 
     func_0024DC98(0);
@@ -99,9 +99,9 @@ extern char D_003BC568[];
 extern void func_003014F0(char *, char *, s32);
 extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
 extern s32 frFontMeasureLines(u32);
-extern void func_00195450(u32, s32, s32);
+extern void frFontSetContextPair(u32, s32, s32);
 extern void func_001958A0(u32, s32, s32);
-extern void func_00194920(u32);
+extern void frFontQueueGlyphInSelectedSlot(u32);
 
 void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
     char text[32];
@@ -109,9 +109,9 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
 
     func_003014F0(text, D_003BC568, *(s32 *)(info + 0x10));
     handle = func_001979C8(x, y, z, w, text, 0);
-    func_00195450(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
+    frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
     func_001958A0(handle, 1, color);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 void func_002652E0(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
@@ -120,9 +120,9 @@ void func_002652E0(s32 x, s32 y, s32 z, s32 w, u8 *info, s32 color) {
 
     func_003014F0(text, D_003BC568, *(s32 *)(info + 0xC));
     handle = func_001979C8(x, y, z, w, text, 0);
-    func_00195450(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
+    frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
     func_001958A0(handle, 1, color);
-    func_00194920(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002649B0", D_003AFB20);

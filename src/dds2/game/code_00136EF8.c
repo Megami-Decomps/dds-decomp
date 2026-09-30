@@ -66,7 +66,7 @@ extern void *sdfResourceRetainAddress(void *p);
 
 extern u32 D_0038BD50[];
 
-extern s32 func_0010C100(u32 task);
+extern s32 scrFindNamedProcessNode(u32 task);
 
 extern s32 evtDestroyNamedTask(u64 world, u32 task);
 
@@ -111,7 +111,7 @@ extern s32 func_00127320(void);
 extern s32 func_00127348(void);
 extern s32 func_00127370(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u32 func_00101958(void *);
+extern u32 kwlnTaskGetUserValue(void *);
 extern void func_0012DDC0(s32, s32, u32, const u8 *);
 
 extern s16 D_00444C68[];
@@ -170,7 +170,7 @@ extern u32 func_00343ED0(const char *, u32 *, s32);
 extern u32 func_002DEB80(const void *);
 
 
-extern void func_001379C0(FldCameraSetting *setting);
+extern void fldUpdateCameraColorEffect(FldCameraSetting *setting);
 
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -363,7 +363,7 @@ void func_00137818(void) {
         func_003298C0(D_00438ECC);
         D_00438ECC = 0;
     }
-    func_001379C0(D_004360F4);
+    fldUpdateCameraColorEffect(D_004360F4);
     D_004360FC = 1;
 }
 
@@ -371,7 +371,7 @@ void func_00137888(void) {
     func_00136EF8();
 }
 
-void func_001378A0(void) {
+void fldReleaseCameraColorEffect(void) {
     D_004360FC = 0;
     if (D_00436100 != 0) {
         sdfTexReleaseReferenceViaHandler(D_00436100);
@@ -394,7 +394,7 @@ void fldCopyCameraSetting(FldSaveHeader *dst) {
 }
 
 
-void func_001379C0(FldCameraSetting *setting) {
+void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
@@ -435,7 +435,7 @@ void fldAllocateRecordStorage(void) {
     memset(storage, 0, 0x4A00);
 }
 
-void func_00137BC8(void) {
+void fldReleaseRecordStorage(void) {
     func_00329910(D_00436190);
     func_003298C0(D_00436190);
     D_00436180 = 0;
@@ -530,7 +530,7 @@ void fldResetRecordState(void) {
     D_00436188 = 0;
     D_0043617C = 0;
     if (D_00436180 != 0) {
-        func_00137BC8();
+        fldReleaseRecordStorage();
     }
 }
 
@@ -733,7 +733,7 @@ void fldResetTaskSlots(void) {
             info = *(FldTaskInfo **)(D_0038BC50[i] + 8);
             if (info->slot >= 0) {
                 id = dds3GetPathState(func_00110C70(world, *(u32 *)D_00444A30[info->slot], 0xD));
-                if (func_0010C100(id) != 0) {
+                if (scrFindNamedProcessNode(id) != 0) {
                     evtDestroyNamedTask(dds3GetWorldObject(), id);
                 }
             }
@@ -795,9 +795,9 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DBB0);
 
-s32 func_0013DC70(u32 flag, u32 slot) {
+s32 fldDestroyFlaggedNamedTask(u32 flag, u32 slot) {
     D_0038BD50[slot] = 0;
-    if (func_0010C100(flag) != 0) {
+    if (scrFindNamedProcessNode(flag) != 0) {
         evtDestroyNamedTask(dds3GetWorldObject(), flag);
         return 0;
     }
@@ -818,7 +818,7 @@ extern s8 D_00387D60[];
 extern u8 D_00435F24;
 extern u8 *func_001406E8(void);
 
-s32 func_0013DD18(void) {
+s32 fldRestartSceneResourceTask(void) {
     u8 *object;
     u32 state = D_00435F24;
     if (!(state & 1)) {
@@ -830,7 +830,7 @@ s32 func_0013DD18(void) {
     D_00387D60[0] = 0;
     D_00435F24 = 0;
     object = func_001406E8();
-    if (func_0010C100((u32)object) == 0) {
+    if (scrFindNamedProcessNode((u32)object) == 0) {
         evtStartSceneResourceTask(dds3GetWorldObject(), object);
     }
     return 1;
@@ -838,7 +838,7 @@ s32 func_0013DD18(void) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013DDC0);
 
-void func_0013E958(void) {
+void fldDrawTaskMarkers(void) {
     s32 count = D_004361A4;
     s32 i = 0;
     if (count > 0) {
@@ -979,10 +979,10 @@ void func_00140180(FldSaveBlock *src) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
 
-INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
-
 /* Resolve a named actor in the current area to its template; the selected
  * template kind is also recorded for the caller in D_004361FC. */
+INCLUDE_RODATA(const s32, "game/code_00136EF8", D_00413448);
+
 u8 *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
     FldActorEntry *entry;
@@ -1213,7 +1213,7 @@ u8 fldIsSceneStateEight(void) {
     return D_004361F8 == 8;
 }
 
-void func_00140B90(s8 *actorEntry) {
+void fldApplySceneRoomSelection(s8 *actorEntry) {
     if (actorEntry[0x53] != 0) {
         D_00389770[0x22] = actorEntry[0x53] - 1;
     }
@@ -1594,7 +1594,7 @@ s32 func_00144028(void *task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    menu = (FldMenuState *)func_00101958(task);
+    menu = (FldMenuState *)kwlnTaskGetUserValue(task);
     if (menu->pending != 0) {
         func_00143D90(menu->position);
         func_00143F78(D_00399F60[menu->choice] - 9, 0x130);
@@ -1610,7 +1610,7 @@ s32 func_00144028(void *task) {
 }
 
 extern void *func_00328D68(s32 size);
-extern void func_00101950(s32, void *);
+extern void kwlnTaskSetUserValue(s32, void *);
 
 void *func_00144178(s32 task) {
     s16 *node = func_00328D68(8);
@@ -1618,7 +1618,7 @@ void *func_00144178(s32 task) {
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
-    func_00101950(task, node);
+    kwlnTaskSetUserValue(task, node);
     return func_00144028;
 }
 

@@ -19,7 +19,7 @@ extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 void effFreePairedResources(PairedEffectResources *resources) {
     func_0016EFA8(resources->resource[1]);
     func_0016EFA8(resources->resource[0]);
-    func_00328E48(resources);
+    sdfReleaseChipBlock(resources);
 }
 
 void effUpdatePairedResources(PairedEffectResources *work) {

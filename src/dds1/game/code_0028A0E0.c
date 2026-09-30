@@ -35,7 +35,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 
 
-extern void *func_0028D978(void);
+extern void *fileStartMemoryCardDetection(void);
 extern s32 mnuSelectFileBranch(void);
 
 
@@ -54,7 +54,7 @@ extern void fileReqSetSelectedSlot(u32 ctx, s32 arg);
 
 extern void *(*D_003BD8FC)(s32);
 extern s32 D_003BC814;
-extern s32 func_00288BA8(u32, void *);
+extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
 extern u32 fileGetResourceHandle(u32);
 extern u32 func_00288B90(u32);
 extern u32 fileGetResourceSize(u32);
@@ -173,13 +173,13 @@ extern s32 D_003BD91C;
 
 extern u32 D_003BD920;
 
-extern s32 func_0028A088(void);
+extern s32 mcPollCompletionStatus(void);
 
 extern void func_0028A008(s32);
 
 extern void *fileStoreSlotHeader(void);
 
-extern s32 func_00289E38(void);
+extern s32 mcPollWithExtendedErrors(void);
 
 extern void *fileCreateMainBegin(void);
 
@@ -310,7 +310,7 @@ extern s32 fileSlotSelectPoll(void);
 
 extern void fileOnAllWritten(void);
 
-extern void func_0028BE78(void);
+extern void mcdFinishFileDetection(void);
 
 extern s32 D_003BC808;
 
@@ -359,15 +359,15 @@ extern void func_00293158(void *src);
 
 extern void *func_002CFEB8(s32 size);
 
-extern void *func_002CFF68(s32 size);
+extern void *sdfAllocAndClearQuadwords(s32 size);
 
-extern void func_002CFF98();
+extern void sdfReleaseChipBlock();
 
 extern void fileClearRecordReferences(FileRecordSlots *record);
 
 extern void mnuRecordSetVector(void *record, const u128 *vector);
 
-extern void func_0029A7F8(void *record, const u128 *vector);
+extern void fileSetRecordSecondVector(void *record, const u128 *vector);
 
 extern void func_001028E8(s32 kind, void *data, s32 size, s32 flags);
 
@@ -443,11 +443,11 @@ extern void *effRetainResource(void *name);
 
 extern void *billCreateIndexed(s32 mode, void *name);
 
-extern void func_001523B0(void *handle);
+extern void billMarkKindOneFlag(void *handle);
 
 extern void billSetBillboardMode(void *handle, s16 index);
 
-extern void *func_0029A5E0(u16 type, u32 count, void *src);
+extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
 extern void *func_00151E60(void *handle);
 
@@ -503,7 +503,7 @@ typedef struct LoadObj {
     u32 unk38;          /* 0x38 */
     u32 unk3C;          /* 0x3C */
     void *referenceHolder; /* 0x40: released by effReleaseReferenceHolder */
-    void *recordWork;     /* 0x44: created by func_0029A5E0 */
+    void *recordWork;     /* 0x44: created by fileAllocateGridRecordSlots */
     s16 unk48;          /* 0x48 */
     u16 unk4A;
 } LoadObj;
@@ -562,7 +562,7 @@ extern void fileJobFreeSecondaryBuffer(FileJob *job);
 
 extern FileJob *fileJobCreate(void);
 
-extern void func_0029A730(s32 record);
+extern void fileReleaseGridRecordHandle(s32 record);
 
 typedef struct FileQueue {
     f32 offset[4];
@@ -653,34 +653,34 @@ u8 fileIsLoadedAndConditionTrue(s32 loaded) {
     return loaded != 0 && D_003BC7FC == 1;
 }
 
-u8 func_0028A268(s32 loaded) {
+u8 fileIsLoadedWithActiveFlow(s32 loaded) {
     return loaded != 0 && D_003BC7FC == 1;
 }
 
 void func_0028A288(s32 x, s32 y, u32 first, u32 second) {
     D_003BD8EC = func_00197760(x << 4, y << 3, 0, first, second, 0);
-    func_00195880(D_003BD8EC, 1);
-    func_00194920(D_003BD8EC);
+    frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
+    frFontQueueGlyphInSelectedSlot(D_003BD8EC);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
-    func_00195520(1);
+    frFontAddSharedGlyphFlags(1);
     D_003BD8F0 = func_001951C8(font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(D_003BD8F0, 1);
-    func_00195450(D_003BD8F0, x << 4, y << 3);
+    frFontSetContextPair(D_003BD8F0, x << 4, y << 3);
     frFontSetChildColors(D_003BD8F0, color);
     func_001958A0(D_003BD8F0, 0, 0x56);
-    func_00194920(D_003BD8F0);
-    func_00195548(0x54);
+    frFontQueueGlyphInSelectedSlot(D_003BD8F0);
+    frFontSetSharedRenderFlags(0x54);
 }
 
 void fileDrawMenuImageAtPoint(s32 x, s32 y, u64 first, u64 second) {
     u64 imageHandle;
 
     imageHandle = func_001978E8(x << 4, y << 3, 0, first, second, 0);
-    func_00195880(imageHandle, 1);
-    func_00194920(imageHandle);
+    frFontDrawGlyphWithSharedFlags(imageHandle, 1);
+    frFontQueueGlyphInSelectedSlot(imageHandle);
 }
 
 extern f32 D_003BC88C;
@@ -801,7 +801,7 @@ void *fileReadSlotPreviewBegin(void) {
 }
 
 void *fileReadSlotPreviewWait(void) {
-    s32 status = func_0028A088();
+    s32 status = mcPollCompletionStatus();
     if (status == 0) {
         return NULL;
     }
@@ -936,7 +936,7 @@ s32 func_0028B508(void) {
     return mcdEnterDefaultFileFlow();
 }
 
-s32 func_0028B520(void) {
+s32 mcdEnterSelectedFileFlow(void) {
     u32 v = 2;
 
     D_003BC84C = 1;
@@ -980,9 +980,9 @@ void *fileScanSlotStates(void) {
     return fileSlotBrowserUpdate;
 }
 
-void func_0028B658(void) {
+void fileResolveAbortSlotFlow(void) {
     if (D_003BC848 == 1 && kwlnTaskGetTaskByName(D_003B2658) == NULL) {
-        func_0028B520();
+        mcdEnterSelectedFileFlow();
     } else {
         fileSetMenuFlowState(0);
         fileBeginWait(&fileAbortSlotFlow);
@@ -1035,7 +1035,7 @@ void *fileSlotStatusPoll(void) {
             fileSetMenuFlowState(0);
             D_003BC854 = 0;
             D_003BC834 = 2;
-            return (void *)fileBeginPromptDialog(func_0028D978, mnuSelectFileBranch, 1);
+            return (void *)fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
         }
         fileSetMenuFlowState(0);
         D_003BC854 = 7;
@@ -1178,13 +1178,13 @@ void *fileUpdateWait(void) {
     return NULL;
 }
 
-void *func_0028BE60(u32 callback) {
+void *fileSetMenuCallbackAndClearResult(u32 callback) {
     D_003BD904 = callback;
     D_003BC858 = 0;
-    return func_0028BE78;
+    return mcdFinishFileDetection;
 }
 
-void func_0028BE78(void) {
+void mcdFinishFileDetection(void) {
     if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
         fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
         fileSetMenuFlowState(0);
@@ -1301,7 +1301,7 @@ void *mcResetSlotMetadata(void) {
     }
 }
 
-void *func_0028C3F0(void) {
+void *fileBeginSaveSlotIconScan(void) {
     u8 buf[0x50];
 
     buf[0] = 0x2F;
@@ -1373,7 +1373,7 @@ void *fileScanSlotStatesAdvance(void) {
         D_003BC854 = 0;
         return (void *)fileBeginSlotPromptSix();
     }
-    return func_0028C3F0();
+    return fileBeginSaveSlotIconScan();
 }
 
 void *mcClearSlotMetadata(void) {
@@ -1389,7 +1389,7 @@ void *mcClearSlotMetadata(void) {
         fileReqClearSlotFlags(D_003BC7E8, index);
         index++;
     } while (index < 10);
-    return func_0028C3F0();
+    return fileBeginSaveSlotIconScan();
 }
 
 void *mcPrepareDirectory(void) {
@@ -1420,7 +1420,7 @@ void *fileCreateMainBegin(void) {
 }
 
 void *mcHandleSearchResult(void) {
-    s32 status = func_00289E38();
+    s32 status = mcPollWithExtendedErrors();
     if (status == 0) {
         return NULL;
     }
@@ -1566,7 +1566,7 @@ void *fileFinishRequest(void) {
 }
 
 void *mcHandleDetectionResult(void) {
-    s32 status = func_00289D68();
+    s32 status = mcPollStrictSuccess();
     if (status == 0) {
         return NULL;
     }
@@ -1580,7 +1580,7 @@ void *mcHandleDetectionResult(void) {
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-void *func_0028D978(void) {
+void *fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
     func_001005B8();
     func_00289D50(D_003BC7E8);
@@ -1638,7 +1638,7 @@ void *fileLoadMainBlobBegin(void) {
 }
 
 void *mcHandleSetupResult(void) {
-    s32 status = func_0028A088();
+    s32 status = mcPollCompletionStatus();
     if (status == 0) {
         return NULL;
     }
@@ -1673,7 +1673,7 @@ void *mcdHandleSaveSetupDone(void) {
             fileRestoreSlotFlagsToState();
         }
         fileSetMenuFlowState(13);
-        return func_0028BE60(-1);
+        return fileSetMenuCallbackAndClearResult(-1);
     }
     func_002D0918(D_003BD920);
     fileSetMenuFlowState(0);
@@ -1709,7 +1709,7 @@ void *fileRunMenuState(s32 arg) {
         cur = next;
     }
     D_003BD8FC = cur;
-    if (job != 0 && func_00288BA8(job, next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode(job, next) != 0) {
         D_003BC7F8 = 0;
         D_003BD910 = fileGetResourceHandle(job);
         D_003BD914 = func_00288B90(job);
@@ -1865,7 +1865,7 @@ void fileSetPreviewLocation(s16 x, s16 y) {
     work->previewY = y;
 }
 
-void func_002904A8(u32 value) {
+void fileSetMenuValueAndInitializeFlags(u32 value) {
     D_0037D4D0[0] = value;
     D_0037D4A0.unkC = 0x80;
     D_0037D4A0.unk4 = 0;
@@ -2125,7 +2125,7 @@ typedef struct FileConfigTask {
 extern void mnuReleaseEffectResource(u32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 
-void func_002911B8(void) {
+void fileConfigTaskDestroy(void) {
     s32 request = 1;
     FileConfigListNode *node;
     s32 i;
@@ -2139,7 +2139,7 @@ void func_002911B8(void) {
         }
         node = ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->head;
         for (i = 0; i < ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->count; i++) {
-            func_002CFF98(node->resource);
+            sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
         mnuDestroyListState(((FileConfigTask *)D_003BD938)->frame);
@@ -2168,7 +2168,7 @@ void mnuCreateConfigTasks(void) {
         D_003BD938 = func_00290FE0();
         kwlnTaskCreate(D_003BC8E8, 0x3F2, 1, 1, func_00291418, NULL, D_003BD938);
         kwlnTaskCreate(D_003B29D8, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, D_003BD938);
-        kwlnTaskCreate(D_003B29E8, 0x520B, 1, 1, fileGetConfigTaskFailure, func_002911B8, D_003BD938);
+        kwlnTaskCreate(D_003B29E8, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, D_003BD938);
         D_003BC8D5 = 1;
     }
 }
@@ -2242,7 +2242,7 @@ void fileManagerResetSubsystems(void) {
     func_003003F0(D_003BC910);
     effLoadScalyTexture();
     func_003003F0(D_003BC918);
-    func_00292C40();
+    fileResetRenderFlags();
     func_003003F0(D_003BC920);
 }
 
@@ -2254,7 +2254,7 @@ void fileClearRenderFlag(u32 bits) {
     D_003BC8F8 &= ~bits;
 }
 
-void func_00292C40(void) {
+void fileResetRenderFlags(void) {
     D_003BC8F8 = 0;
 }
 
@@ -2312,7 +2312,7 @@ extern s32 func_00292CE0();
 
 /* vu0 routine: distance between the projected view point and a second point offset perpendicular to
    the camera axis by rate; 0 when either projection (func_00292CE0) fails. Point comes in vf10. */
-f32 func_00292E50(f32 rate) {
+f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     f32 scale[4];
     f32 second[4];
     f32 first[4];
@@ -2472,7 +2472,7 @@ void fileJobDestroy(FileJob *job) {
     }
     fileJobFreePrimaryBuffer(job);
     fileJobFreeSecondaryBuffer(job);
-    func_002CFF98(job);
+    sdfReleaseChipBlock(job);
 }
 
 void fileJobFreePrimaryBuffer(FileJob *job) {
@@ -2503,12 +2503,7 @@ FileJob *fileJobCreateChild(FileJob *request) {
     return job;
 }
 
-void fileJobNotifyPair(FileJob *left, FileJob *right) {
-    void (*cb)(void *, void *) = D_0037E14C[right->type].cbC;
-    if (cb != NULL) {
-        cb(left->data, right->data);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0028A0E0", fileJobNotifyPair);
 
 void fileJobNotifyComplete(FileJob *job) {
     u16 idx = ((FileJob *)job)->type;
@@ -2518,14 +2513,14 @@ void fileJobNotifyComplete(FileJob *job) {
     }
 }
 
-void func_002936A8(FileJob *job) {
+void fileJobInvokeTypeCallback(FileJob *job) {
     u16 idx = ((FileJob *)job)->type;
     void *data = ((FileJob *)job)->data;
 
     D_0037E14C[idx].cb(data);
 }
 
-void func_002936E0(FileJob *job, void *extra) {
+void fileJobInvokePositionCallback(FileJob *job, void *extra) {
     u16 idx = ((FileJob *)job)->type;
     void (*cb)(void *, void *) = D_0037E14C[idx].cb14;
     if (cb != NULL) {
@@ -2533,7 +2528,7 @@ void func_002936E0(FileJob *job, void *extra) {
     }
 }
 
-void func_00293720(FileJob *job, void *extra) {
+void fileJobInvokeRotationCallback(FileJob *job, void *extra) {
     u16 idx = ((FileJob *)job)->type;
     void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
@@ -2541,7 +2536,7 @@ void func_00293720(FileJob *job, void *extra) {
     }
 }
 
-void func_00293760(FileJob *job, f32 scale) {
+void fileJobInvokeScaleCallback(FileJob *job, f32 scale) {
     u16 idx = ((FileJob *)job)->type;
     void (*cb)(void *, f32) = D_0037E14C[idx].cb1C;
     if (cb != NULL) {
@@ -2573,7 +2568,7 @@ void fileJobSetPrimaryData(job, src, size, option)
     }
 }
 
-void func_00293880(u64 job, u64 state, u16 option) {
+void fileJobCopyCommandIntoPrimaryData(u64 job, u64 state, u16 option) {
     s64 command;
     u64 size;
     u64 handle;
@@ -2608,7 +2603,7 @@ void fileJobSetSecondaryData(job, src, size, selector)
     }
 }
 
-void func_00293A00(u64 job, u64 state, u16 selector) {
+void fileJobCopyCommandIntoSecondaryData(u64 job, u64 state, u16 selector) {
     s64 command;
     u64 size;
     u64 handle;
@@ -2737,7 +2732,7 @@ void fileQueueInitTransform(void *queue)
     view->unk68 = 0x80;
 }
 
-void func_00293F18(FileJob *job) {
+void fileJobResetAndInitTransform(FileJob *job) {
     memset(job, 0, 0x90);
     job->scaleFlags = 1;
     job->unk88[0] = 8;
@@ -2798,12 +2793,12 @@ FileQueue *fileQueueCreate(void) {
 FileJob *fileJobCreate(void) {
     FileJob *job = func_002CFEB8(0xC0);
     memset(job, 0, 0xC0);
-    func_00293F18(job);
+    fileJobResetAndInitTransform(job);
     return job;
 }
 
 void func_002940B8(FileJob *job) {
-    func_002CFF98(job);
+    sdfReleaseChipBlock(job);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002940D0);
@@ -2853,18 +2848,18 @@ void fileQueueUpdate(FileQueue *queue)
             }
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-            func_002936E0((FileJob *)job->id, pos);
+            fileJobInvokePositionCallback((FileJob *)job->id, pos);
         }
         if (job->xformFlags & 0x60) {
             camAimRotation(job, aimQuat);
-            func_00293720((FileJob *)job->id, aimQuat);
+            fileJobInvokeRotationCallback((FileJob *)job->id, aimQuat);
         }
-        func_002936A8((FileJob *)job->id);
+        fileJobInvokeTypeCallback((FileJob *)job->id);
     }
     queue->unk84++;
 }
 
-void func_002944D8(FileQueue *queue) {
+void fileQueueDestroy(FileQueue *queue) {
     FileJob *job = queue->tail;
     while (job != NULL) {
         FileJob *next = job->next;
@@ -2874,7 +2869,7 @@ void func_002944D8(FileQueue *queue) {
         func_002940B8(job);
         job = next;
     }
-    func_002CFF98(queue);
+    sdfReleaseChipBlock(queue);
 }
 
 extern void fileQueueSetPosition(FileQueue *queue, void *vec);
@@ -2911,7 +2906,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     return queue;
 }
 
-void func_00294630(FileQueue *queue) {
+void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
     FileJob *job;
 
     for (job = queue->tail; job != NULL; job = job->next) {
@@ -2950,7 +2945,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
         VU0_ROTATE_VEC(vf11, vf11);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-        func_002936E0((FileJob *)job->id, pos);
+        fileJobInvokePositionCallback((FileJob *)job->id, pos);
     }
 }
 
@@ -2973,7 +2968,7 @@ void fileQueueSetRotation(FileQueue *queue, void *rot)
         VU0_LOAD_VF(vf11, quat);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-        func_00293720((FileJob *)job->id, pos);
+        fileJobInvokeRotationCallback((FileJob *)job->id, pos);
     }
     fileQueueSetPosition(queue, queue->position);
 }
@@ -2992,7 +2987,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
         if (job->scaleFlags & 1) {
             jobScale = jobScale * total;
         }
-        func_00293760((FileJob *)job->id, jobScale);
+        fileJobInvokeScaleCallback((FileJob *)job->id, jobScale);
         if (job->xformFlags & 0x80) {
             VU0_LOAD_VF(vf10, queue->position);
             VU0_LOAD_VF(vf11, queue->offset);
@@ -3004,14 +2999,14 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            func_002936E0((FileJob *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJob *)job->id, &pos);
         }
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294938);
 
-void func_00294A18(void *dst, void *src) {
+void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
     func_00293158(src);
     __asm__ volatile (
@@ -3043,7 +3038,7 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
     FileJob *job = fileJobCreate();
 
     memcpy(job, src, 0xC0);
-    func_00293F18(job);
+    fileJobResetAndInitTransform(job);
     job->flags |= 1;
     job->id = src->id;
     fileQueueInsertAfter(queue, src, job);
@@ -3053,7 +3048,7 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
 extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
-extern void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref);
+extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref);
 
 /* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
 static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *owner, FileJob *leader) {
@@ -3061,15 +3056,15 @@ static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *ow
 
     leader->sector = 0;
     leader->flags &= ~2;
-    func_00294C30(queue, leader, leader);
+    fileQueueLinkJobToSectorLeader(queue, leader, leader);
     next = fileQueueFindBySector(queue, owner->id);
     while (next != NULL) {
-        func_00294C30(queue, next, leader);
+        fileQueueLinkJobToSectorLeader(queue, next, leader);
         next = fileQueueFindBySector(queue, owner->id);
     }
 }
 
-void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref) {
+void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref) {
     FileJob *node;
     FileJob *found;
     FileJob *source;
@@ -3079,7 +3074,7 @@ void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref) {
     if (!(job->flags & 1)) {
         for (node = queue->tail; node != NULL; node = node->next) {
             if ((node->flags & 1) && node->id == job->id) {
-                func_00294C30(queue, node, ref);
+                fileQueueLinkJobToSectorLeader(queue, node, ref);
             }
         }
     }
@@ -3101,12 +3096,12 @@ void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref) {
         found = fileQueueFindBySector(queue, ref->id);
         if (found != NULL) {
             fileQueueRechainSectorFollowers(queue, ref, found);
-            func_00294C30(queue, ref, found);
+            fileQueueLinkJobToSectorLeader(queue, ref, found);
         }
     }
 }
 
-void func_00294DA0(FileQueue *queue, FileJob *job) {
+void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job) {
     u32 flags = job->flags;
     FileJob *first;
 
@@ -3120,14 +3115,14 @@ void func_00294DA0(FileQueue *queue, FileJob *job) {
     job->sector = 0;
 }
 
-void func_00294E50(FileQueue *queue, FileJob *job) {
+void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job) {
     FileJob *first;
 
     fileQueueRemove(queue, job);
     if (!(job->flags & 1)) {
         first = fileQueueFindFlaggedById(queue, job->id);
         while (first != NULL) {
-            func_00294E50(queue, first);
+            fileQueueRemoveAndDestroyJob(queue, first);
             first = fileQueueFindFlaggedById(queue, job->id);
         }
         if (!(job->flags & 2)) {
@@ -3298,7 +3293,7 @@ void camAimRotation(CamAim *obj, void *dst)
 }
 
 LoadObj *fileLoadObjectCreate(void *owner) {
-    LoadObj *obj = func_002CFF68(0x4C);
+    LoadObj *obj = sdfAllocAndClearQuadwords(0x4C);
     obj->owner = owner;
     obj->color = 0x80808080;
     obj->scale = 1.0f;
@@ -3374,9 +3369,9 @@ void effLoadObjectDestroy(LoadObj *obj) {
         effReleaseReferenceHolder((s32)obj->referenceHolder);
     }
     if (obj->recordWork != NULL) {
-        func_0029A730((s32)obj->recordWork);
+        fileReleaseGridRecordHandle((s32)obj->recordWork);
     }
-    func_002CFF98(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
@@ -3398,7 +3393,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
             billDispatchByKind(dst->deviceHandle);
         }
         dst->deviceHandle = func_00151E60(src->deviceHandle);
-        func_001523B0(dst->deviceHandle);
+        billMarkKindOneFlag(dst->deviceHandle);
         if (dst->recordWork != NULL) {
             FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)dst->recordWork)->data0;
             billSetBillboardMode(dst->deviceHandle, record->mode);
@@ -3443,9 +3438,9 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
 
 void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
     if (obj->recordWork != NULL) {
-        func_0029A730((s32)obj->recordWork);
+        fileReleaseGridRecordHandle((s32)obj->recordWork);
     }
-    obj->recordWork = func_0029A5E0(type, (u32)obj->owner, data);
+    obj->recordWork = fileAllocateGridRecordSlots(type, (u32)obj->owner, data);
 }
 
 void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
@@ -3479,7 +3474,7 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
         billDispatchByKind(obj->deviceHandle);
     }
     obj->deviceHandle = billCreateIndexed(1, name);
-    func_001523B0(obj->deviceHandle);
+    billMarkKindOneFlag(obj->deviceHandle);
     if (obj->recordWork != NULL) {
         FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
         billSetBillboardMode(obj->deviceHandle, record->mode);
@@ -3546,7 +3541,7 @@ void fileSendLoadObjectRecordVector(LoadObj *obj, u128 *vector) {
 }
 
 void fileCopyLoadObjectRecordVector(LoadObj *obj, u128 *vector) {
-    func_0029A7F8(obj->recordWork, vector);
+    fileSetRecordSecondVector(obj->recordWork, vector);
 }
 
 void fileSetRecordWordFour(s32 record, u32 value) {
@@ -3807,7 +3802,7 @@ void effLoadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
     dst->unkE4 = src->unkE4 * scale;
 }
 
-void *func_0029A5E0(u16 type, u32 count, void *data) {
+void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     FileGridDimensions *src = data;
     u32 slotCount = count * src->columns * src->rows + count;
     u32 slotBytes = slotCount << 5;
@@ -3850,7 +3845,7 @@ void *func_0029A5E0(u16 type, u32 count, void *data) {
     return rec;
 }
 
-void func_0029A730(s32 record) {
+void fileReleaseGridRecordHandle(s32 record) {
     func_002D0918(((FileRecordSlots *)record)->handle);
 }
 
@@ -3874,11 +3869,11 @@ void mnuRecordSetVector(void *record, const u128 *value) {
     PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20), value);
 }
 
-void func_0029A7E0(void *record, u128 *out) {
+void fileReadRecordSecondVector(void *record, u128 *out) {
     PCP_COPY_VECTOR(out, *(u128 **)((u8 *)record + 0x20) + 1);
 }
 
-void func_0029A7F8(void *record, const u128 *value) {
+void fileSetRecordSecondVector(void *record, const u128 *value) {
     PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20) + 1, value);
 }
 

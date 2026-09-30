@@ -22,7 +22,7 @@ extern s32 D_003BD9F8[2];
 extern SdfResource *D_003BD308;
 
 extern u32 func_002CFEB8(u32);
-extern void func_002CFF98(void *allocation);
+extern void sdfReleaseChipBlock(void *allocation);
 
 extern u32 sdfCreateReferenceDmaNode(u32);
 
@@ -76,7 +76,7 @@ typedef struct SdfDevSlot {
     u128 unk70;
 } SdfDevSlot;
 
-extern void *func_002CFF68(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void *sdfDevCreateBufferedRequest(s32, s32, s32);
 
@@ -234,13 +234,13 @@ void sdfPendingQueueFlush(SdfPendingNode *node) {
                         i++;
                     } while (i < count);
                     nextBuffer = buffer->next;
-                    func_002CFF98(buffer);
+                    sdfReleaseChipBlock(buffer);
                     buffer = nextBuffer;
                     count = 0x3F;
                 } while (buffer != NULL);
             }
             nextNode = node->next;
-            func_002CFF98(node);
+            sdfReleaseChipBlock(node);
             node = nextNode;
         } while (node != NULL);
     }
@@ -1376,7 +1376,7 @@ void sdfEnsureFreeRootWorkspace(SdfFreeRoot *root) {
 }
 
 extern void func_002D0918(s32 allocation);
-extern void func_002CFF98(void *allocation);
+extern void sdfReleaseChipBlock(void *allocation);
 
 void sdfFreeNodeLists(SdfFreeRoot *root) {
     SdfFreeNode **lists = root->lists;
@@ -1389,7 +1389,7 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
             if (node->allocation != 0) {
                 func_002D0918(node->allocation);
             } else {
-                func_002CFF98(node);
+                sdfReleaseChipBlock(node);
             }
             node = next;
         }
@@ -1400,16 +1400,16 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
 
 void sdfReleaseFreeRoot(SdfFreeRoot *root) {
     sdfFreeNodeLists(root);
-    func_002CFF98(root->workspace);
+    sdfReleaseChipBlock(root->workspace);
     root->workspace = NULL;
-    func_002CFF98(root);
+    sdfReleaseChipBlock(root);
 }
 
 /* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
 SdfDevSlot *func_002D79C0(void) {
     SdfDevSlot *slot;
 
-    slot = func_002CFF68(0x9C);
+    slot = sdfAllocAndClearQuadwords(0x9C);
     slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX((u8 *)&slot->pad20[0]);
     VU0_STORE_VF(vf0, (u8 *)&slot->unk60);
@@ -1434,7 +1434,7 @@ void sdfDestroyObjectList(SdfObjectList **owner) {
         sdfReleaseFreeRoot((*owner)->elements[i]);
     }
     sdfDestroyDevRequest(*owner);
-    func_002CFF98(owner);
+    sdfReleaseChipBlock(owner);
 }
 
 void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
@@ -1451,7 +1451,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
         sdfPendingQueuePush((SdfPendingOwner *)&D_003BDA08, (u32)slot);
     } else {
         sdfDestroyDevRequest((void *)slot->request);
-        func_002CFF98(slot);
+        sdfReleaseChipBlock(slot);
     }
 }
 

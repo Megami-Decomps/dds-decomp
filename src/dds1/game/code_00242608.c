@@ -4,10 +4,10 @@ extern s32 func_002D03F8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
 extern void func_00285490(u8 *);
 extern void evtLoadResourcePair(const char *, u8 *);
-extern s32 func_0024D9D8(s32);
+extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
 extern s32 D_003BC520;
-extern s32 func_0019D208(s32, s32);
+extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
@@ -24,7 +24,7 @@ s32 effDestroyResourceSlotSet(u32 sprite);
 
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern char D_003BC3A0[]; /* "camp" */
 
@@ -234,7 +234,7 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
         node = node->next;
     }
     world->unk1C -= 1;
-    func_002300B8(world, delta, threshold, base, offset, ubase, node);
+    evtViewerCleanupMessageWindow(world, delta, threshold, base, offset, ubase, node);
     evtViewerDispatchFlagMode(world);
 }
 
@@ -347,7 +347,7 @@ s32 campAnyPackedFlagSet(CampWorld *scene) {
         if (node->kind == 4) {
             for (child = node->children; child != NULL; child = child->next) {
                 mnuUnpackNibbleFields(child, &low, &high);
-                if (func_0019D208(scene->owner->handle, low) == 1) {
+                if (itfMesGetWindowEntryItems(scene->owner->handle, low) == 1) {
                     return 1;
                 }
             }
@@ -503,18 +503,18 @@ void func_00243A18(CampScene *scene) {
 
 extern s32 D_00368BD8[];
 extern s32 func_001951C8(s32 *resources, s32, s32, s32, s32);
-extern void func_00195450(s32 resource, s32 width, s32 height);
+extern void frFontSetContextPair(s32 resource, s32 width, s32 height);
 
 void mnuCampInitFontResource(CampScene *scene) {
     s32 resource;
     scene->fontResource = 0;
     resource = func_001951C8(D_00368BD8, 0, 0, 0, 0);
     scene->fontResource = resource;
-    func_00195450(resource, 0x960, 0x70);
+    frFontSetContextPair(resource, 0x960, 0x70);
 }
 
 void mnuCampLinkFontGlyph(CampScene *scene) {
-    func_00194920(scene->fontResource);
+    frFontQueueGlyphInSelectedSlot(scene->fontResource);
     scene->fontResource = 0;
 }
 
@@ -801,7 +801,7 @@ typedef struct ShopSprite {
 } ShopSprite;
 
 extern void mnuDestroyWindowContainer();
-extern void func_002CFF98();
+extern void sdfReleaseChipBlock();
 
 void mnuShopReleaseSprites(ShopScene *scene) {
     ShopSprite **slot = (ShopSprite **)&scene->sprite;
@@ -811,7 +811,7 @@ void mnuShopReleaseSprites(ShopScene *scene) {
         ShopSprite *sprite = *slot;
 
         if (sprite->data->buffer != NULL) {
-            func_002CFF98(sprite->data->buffer);
+            sdfReleaseChipBlock(sprite->data->buffer);
             sprite = *slot;
             sprite->data->buffer = NULL;
         }
@@ -875,27 +875,27 @@ ShopScene *mnuShopCreateScene(void) {
     mnuShopLoadSpriteAssets(obj);
     func_00244258(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
-    func_0024D9D8(obj->pairedHandle);
+    evtCreateMessageWindowIfMissing(obj->pairedHandle);
     D_003BC520 = obj->spriteResource;
     obj->count98 = func_00244848();
     obj->count8C = func_00244898();
     return obj;
 }
 
-extern s32 func_00101A70();
-extern void func_00285600();
+extern s32 kwlnTaskGetUserValue();
+extern void mnuDrainPanelTransitions();
 extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
 extern void func_002D0918();
 
 void mnuShopDestroyScene(s32 arg) {
-    ShopScene *scene = (ShopScene *)func_00101A70();
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue();
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
         func_00244360(scene);
         mnuShopReleaseSceneObjects(scene);
-        func_00285600((u8 *)scene + 8, arg);
+        mnuDrainPanelTransitions((u8 *)scene + 8, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
         func_002D0918(scene->resourceHandle);
@@ -944,13 +944,13 @@ s32 mnuPollTaskState(void) {
     return 0;
 }
 
-extern void func_002858E8(s32 *, void *);
+extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0036AB48[];
 
 s64 mnuCampRunPanel0(u64 request) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     s32 *panel = (s32 *)(state + 0x54);
-    func_002858E8(panel, D_0036AB48);
+    mnuSetPopupEntry(panel, D_0036AB48);
     return func_00285670(state + 8, panel, 0, request);
 }
 
@@ -959,12 +959,12 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
 }
 
 s64 mnuCampRunPanel1(u64 request) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     return menuRunPanel(state, 1, request);
 }
 
 s64 mnuCampRunPanel2(u64 request) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     return menuRunPanel(state, 2, request);
 }
 
@@ -1022,7 +1022,7 @@ extern void frFontSetChildColors(s32, u32);
 
 extern void func_001958A0(s32, s32, s32);
 
-extern void func_00194920(s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
 
 void func_00245C00(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
     s32 handle;
@@ -1031,7 +1031,7 @@ void func_00245C00(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
         handle = func_00197C40(0x970, 0xB58, 1, (u16)a0, a1, a4);
         frFontSetChildColors(handle, 0x80808040);
         func_001958A0(handle, 0, a5);
-        func_00194920(handle);
+        frFontQueueGlyphInSelectedSlot(handle);
     }
 }
 

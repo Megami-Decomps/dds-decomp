@@ -10,7 +10,7 @@ u32 func_0014F4C8(void) {
     u64 value;
 
     value = func_0014A250();
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -47,7 +47,7 @@ s32 fldCommandClearSelectedFlag(void) {
         }
         break;
     }
-    func_0010D5F0(changed);
+    scrSetIntegerReturnValue(changed);
     return 1;
 }
 
@@ -61,9 +61,9 @@ extern s32 D_0034DDF0[];
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = D_0034DDF0[evtGetMirroredSolarPhase()];
     if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -89,7 +89,7 @@ u32 fldCommandIsSoundBusy(void) {
     u64 busy;
 
     busy = sdfSoundIsCommandBusy();
-    func_0010D5F0(busy);
+    scrSetIntegerReturnValue(busy);
     return 1;
 }
 

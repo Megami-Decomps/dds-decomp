@@ -34,7 +34,7 @@ extern void func_00101B08(KwlnTask* task);
 
 extern void* func_002CFEB8(s32 arg0);
 
-extern void func_002CFF98(void* ptr);
+extern void sdfReleaseChipBlock(void* ptr);
 
 extern void func_003003F0();
 
@@ -118,7 +118,7 @@ void kwlnTaskFinalizeDestroy(KwlnTask* task)
     }
     task->flags &= ~KWLN_TASK_STATE_MASK;
     func_00101B08(task);
-    func_002CFF98(task);
+    sdfReleaseChipBlock(task);
 }
 
 void kwlnTaskRequestDestroy(KwlnTask* task)
@@ -341,12 +341,12 @@ u32 kwlnTaskGetTimer(KwlnTask* task)
     return task->timer;
 }
 
-void func_00101A68(KwlnTask* task, u32 value)
+void kwlnTaskSetUserValue(KwlnTask* task, u32 value)
 {
     task->unk38 = value;
 }
 
-u32 func_00101A70(KwlnTask* task)
+u32 kwlnTaskGetUserValue(KwlnTask* task)
 {
     return task->unk38;
 }

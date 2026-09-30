@@ -37,7 +37,7 @@ typedef struct BDWork2C {
 
 extern BDWork2C *D_00438F10;
 
-extern u32 func_00159BB8(s32 arg);
+extern u32 effGetResourceFirstWord(s32 arg);
 
 extern BDWork2C *D_00438F0C;
 
@@ -197,7 +197,7 @@ extern void sdfInitPacketList(void *);
 extern void *func_0033D810(s32, s32, s32, s32, s32);
 extern void sdfAppendPacket(void *, void *);
 
-void func_001966A0(s32 x, s32 y, s32 arg2, s32 arg3) {
+void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0033D810(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, arg2, arg3));
@@ -212,7 +212,7 @@ INCLUDE_ASM(const s32, "game/code_00195E50", func_00196B08);
 
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
-void func_00196F18(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
+void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
     void *list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011F250(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
@@ -256,7 +256,7 @@ void effSetCh71Id(u32 id) {
 }
 
 void effInitCh71Id(void) {
-    D_00438F10->id = func_00159BB8(2);
+    D_00438F10->id = effGetResourceFirstWord(2);
 }
 
 void func_00197118(void) {
@@ -280,7 +280,7 @@ void effSetCh72Id(u32 id) {
 }
 
 void effInitCh72Id(void) {
-    D_00438F0C->id = func_00159BB8(2);
+    D_00438F0C->id = effGetResourceFirstWord(2);
 }
 
 void func_001971D0(void) {
@@ -304,7 +304,7 @@ void effSetCh76Id(u32 id) {
 }
 
 void effInitCh76Id(void) {
-    D_00438F18->id = func_00159BB8(3);
+    D_00438F18->id = effGetResourceFirstWord(3);
 }
 
 void func_00197288(void) {
@@ -360,7 +360,7 @@ void effSetCh75Id(u32 id) {
 }
 
 void effInitCh75Id(void) {
-    D_00438F14->id = func_00159BB8(0);
+    D_00438F14->id = effGetResourceFirstWord(0);
 }
 
 void effInitWorks(void) {

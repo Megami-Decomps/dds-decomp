@@ -1,6 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
-extern void *func_001E5DA8(void *, s32, s32);
+extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 extern s64 btlStartTask(void *);
 
 extern s32 func_001AA6F8(void);
@@ -351,7 +351,7 @@ s32 btlStartOtherMarkedUnitTasks(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x115) {
-                                btlStartTask(func_001E5DA8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }

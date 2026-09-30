@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_002686F0(s32);
 
@@ -8,7 +8,7 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0026C900(void);
 
-extern s64 func_0026C768(void);
+extern s64 evtGetMessageWindowControlState(void);
 
 extern s32 D_00435DD0;
 
@@ -89,8 +89,8 @@ s32 dspStartFlagEvent(s32 context) {
 }
 
 
-s32 func_0026B8F0(void) {
-    s32 *state = (s32 *)func_00101958();
+s32 mnuPrepareTerminalPanelState(void) {
+    s32 *state = (s32 *)kwlnTaskGetUserValue();
 
     func_002680E0(state);
     func_00268128(0, state);
@@ -104,14 +104,14 @@ u32 func_0026B930(void) {
 INCLUDE_ASM(const s32, "game/code_0026B6A8", dspUpdateFlagEvent);
 
 void func_0026B9D0(s32 request) {
-    s32 state = func_00101958();
+    s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
     func_002C4038(state + 8, state + 0x54, 1, request);
 }
 
 void func_0026BA20(s32 request) {
-    s32 state = func_00101958();
+    s32 state = kwlnTaskGetUserValue();
 
     func_0026C900();
     func_002C4038(state + 8, state + 0x54, 2, request);
@@ -120,7 +120,7 @@ void func_0026BA20(s32 request) {
 u32 func_0026BA68(void) {
     s32 state;
 
-    state = func_00101958();
+    state = kwlnTaskGetUserValue();
     /* Keep both branches: this control-flow shape is required to match. */
     if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
@@ -131,8 +131,8 @@ u32 func_0026BA68(void) {
     return 1;
 }
 
-s32 func_0026BAB8(void) {
-    s32 state = func_00101958();
+s32 mnuStartTerminalPanelFadeOut(void) {
+    s32 state = kwlnTaskGetUserValue();
 
     func_00268128(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -145,12 +145,12 @@ extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
 s64 func_0026BAF8(u64 request) {
-    s32 state = func_00101958();
+    s32 state = kwlnTaskGetUserValue();
     s32 *panelState = (s32 *)(state + 0x54);
     s64 result = func_002C4038(state + 8, panelState, 0, request);
     if (result == 0) {
         if (*panelState == 0 && kwlnFadeIsActive() == 0) {
-            func_002C42C0(panelState, D_003CE998);
+            mnuSetPopupEntryFlagged(panelState, D_003CE998);
         }
         result = 0;
     }
@@ -158,7 +158,7 @@ s64 func_0026BAF8(u64 request) {
 }
 
 void func_0026BB78(s32 request) {
-    s32 state = func_00101958();
+    s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
     func_002C4038(state + 8, state + 0x54, 1, request);
@@ -168,16 +168,16 @@ void func_0026BB78(s32 request) {
    jal tail here but sibcalls in the identical sibling func_0026BA20). */
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BBC8);
 
-u32 func_0026BC00(void) {
+u32 mnuClearTerminalPanelSelection(void) {
     s32 state;
 
-    state = func_00101958();
+    state = kwlnTaskGetUserValue();
     *(u32 *)(state + 0x98) = 0;
     return 1;
 }
 
-s32 func_0026BC28(void) {
-    s32 *state = (s32 *)func_00101958();
+s32 mnuRebuildTerminalMenuResources(void) {
+    s32 *state = (s32 *)kwlnTaskGetUserValue();
 
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);
@@ -217,7 +217,7 @@ u32 func_0026C168(void) {
     return 0xffffffff;
 }
 
-s32 func_0026C170(s32 id, s32 dst) {
+s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
     s32 src = func_001110F8(dds3GetWorldSecondaryObject(), 9, id);
     if (src != 0) {
         *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);

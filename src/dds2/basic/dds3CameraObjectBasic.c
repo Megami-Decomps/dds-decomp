@@ -52,7 +52,7 @@ void dds3DestroyCameraData(CameraObject *camera) {
     effObjFreeInner();
     data = camera->data;
     func_00111A68(data->handle);
-    func_00328E48(data);
+    sdfReleaseChipBlock(data);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112C20);
@@ -87,7 +87,7 @@ void func_001130B8(void *obj, void *src) {
     PCP_COPY_VECTOR(*(u8 **)((u8 *)obj + 0x18) + 0x60, src);
 }
 
-void func_001130D0(EEF0Node *arg0) {
+void dds3LoadCameraVectorVU(EEF0Node *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x60;
 
     __asm__ volatile (

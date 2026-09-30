@@ -36,7 +36,7 @@ void itfEmitSelectedGlyph(ItfGlyphDisplayContext *context, u64 unused, u64 paren
                               parentGlyph);
         frFontSetChildColors(glyph, color);
         func_001958A0(glyph, 1, glyphAttribute);
-        func_00194920(glyph);
+        frFontQueueGlyphInSelectedSlot(glyph);
         return;
     }
 }

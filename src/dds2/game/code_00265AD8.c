@@ -4,7 +4,7 @@ extern void func_0025FD78(s32);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -49,7 +49,7 @@ extern s64 kwlnFadeIsActive(void);
 
 extern u8 D_003CE6AC[];
 
-extern void func_002C42C0();
+extern void mnuSetPopupEntryFlagged();
 
 typedef struct EventMenuSelection {
     u8 pad00[0x60];
@@ -92,7 +92,7 @@ typedef struct EventDispatchState {
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
 s64 func_00265E78(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (*(s32 *)(context + 0xE0) != 0) {
         func_0025FD78(context);
@@ -104,7 +104,7 @@ s64 func_00265E78(s32 callback) {
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s64 func_00265EE8(s32 callback) {
-    s32 eventContext = func_00101958();
+    s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
 }
@@ -122,15 +122,15 @@ u32 func_00265F58(void) {
 extern u8 D_003CE690[];
 
 s64 func_00265F60(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
     s64 state = func_002C4038(context + 0xC, window, 0, callback);
 
     if (state == 0) {
         if (*window == 0) {
-            if (func_0026C768() == 0) {
+            if (evtGetMessageWindowControlState() == 0) {
                 func_0026C710();
-                func_002C42C0(window, D_003CE690);
+                mnuSetPopupEntryFlagged(window, D_003CE690);
             }
         }
         return 0;
@@ -139,22 +139,22 @@ s64 func_00265F60(s32 callback) {
 }
 
 s64 func_00265FE8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
     return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
 }
 
 s64 func_00266038(s32 callback) {
-    s32 eventContext = func_00101958();
+    s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
 }
 
 u32 func_00266080(void) {
     evtClearActiveFlag(0);
-    func_0026CA80(0, 1);
-    func_0026CA80(1, 0);
+    evtSetBoundedDisplayValue(0, 1);
+    evtSetBoundedDisplayValue(1, 0);
     kwlnFadeInStart(0, 0, 0, 0xF);
     func_00342580(0x300000);
     return 1;
@@ -166,13 +166,13 @@ u32 evtStartFadeOut(void) {
 }
 
 s64 func_00266108(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
     s64 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
             if (kwlnFadeIsActive() == 0) {
-                func_002C42C0(window, D_003CE6AC);
+                mnuSetPopupEntryFlagged(window, D_003CE6AC);
             }
         }
         return 0;
@@ -181,14 +181,14 @@ s64 func_00266108(s32 callback) {
 }
 
 s64 func_00266188(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
     return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
 }
 
 s64 evtDispatchSync(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 2, callback);
 }

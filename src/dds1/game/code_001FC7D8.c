@@ -19,8 +19,8 @@ extern s32 func_001A17F0();
 extern s8 D_003BB870;
 extern s32 D_003BB87C;
 extern s32 btlIsLowHpActionReady(s32, s32);
-extern s32 func_002CFF68(s32);
-extern void func_002CFF98(s32);
+extern s32 sdfAllocAndClearQuadwords(s32);
+extern void sdfReleaseChipBlock(s32);
 
 extern u32 D_003BB874;
 
@@ -151,7 +151,7 @@ typedef struct BtlEffObj {
 } BtlEffObj;
 
 extern BtlEffObj *btlAllocTask(s32);
-extern BtlObjLink *func_001D47D8(BtlEffObj *);
+extern BtlObjLink *btlGetTaskArguments(BtlEffObj *);
 extern void func_001FD5C8();
 
 /* Link block hung off a freshly created effect object. */
@@ -182,7 +182,7 @@ BtlEffObj *func_001FD9B0(BtlEffOwner *owner, s32 arg, u8 kind) {
     obj->ownerData = owner->ownerData;
     obj->update = func_001FD5C8;
     obj->destroy = effDecrementFirstCountdown;
-    link = (BtlEffLinkEx *)func_001D47D8(obj);
+    link = (BtlEffLinkEx *)btlGetTaskArguments(obj);
     link->kind = kind;
     link->owner = owner;
     link->arg = arg;
@@ -222,7 +222,7 @@ BtlEffObj *btlCreateEffectCounterTask(BtlEffOwner *owner, s32 arg) {
     obj->ownerData = owner->ownerData;
     obj->update = func_001FDA78;
     obj->destroy = effDecrementSecondCountdown;
-    link = (BtlExtendedLink *)func_001D47D8(obj);
+    link = (BtlExtendedLink *)btlGetTaskArguments(obj);
     link->parameter = arg;
     link->owner = owner;
     link->state = 0;
@@ -243,7 +243,7 @@ BtlEffObj *btlCreateEffObjD(BtlEffOwner *owner, s32 arg) {
     obj->id = 0x40;
     obj->ownerData = owner->ownerData;
     obj->update = func_001FDF98;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -278,7 +278,7 @@ BtlEffObj *func_001FE198(BtlEffOwner *owner, s32 arg) {
     obj->id = 0x41;
     obj->ownerData = owner->ownerData;
     obj->update = func_001FE118;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -301,7 +301,7 @@ BtlEffObj *btlCreateEffObjA(BtlEffOwner *owner, s32 arg) {
         obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE228;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -346,7 +346,7 @@ BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
         obj->ownerData = owner->ownerData;
     }
     obj->update = btlJyokyoEffectUpdate;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -386,7 +386,7 @@ BtlEffObj *btlCreateEffObjC(BtlEffOwner *owner, s32 arg) {
         obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE500;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -407,7 +407,7 @@ BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
     obj->id = 0x3E;
     obj->ownerData = owner->ownerData;
     obj->update = func_001FE658;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     *(u16 *)&link->arg = arg;
     link->unk8 = 0;
@@ -444,7 +444,7 @@ BtlEffObj *func_001FE790(BtlEffOwner *owner, s32 arg) {
     obj->id = 0x3F;
     obj->ownerData = owner->ownerData;
     obj->update = func_001FE6F0;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
     link->unk8 = 0;
@@ -479,7 +479,7 @@ BtlEffObj *btlCreateEffectWaitTask(BtlEffOwner *owner, u16 arg) {
         obj->ownerData = owner->ownerData;
     }
     obj->update = func_001FE820;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     *(u16 *)&link->arg = arg;
     link->unk8 = 0;
@@ -522,7 +522,7 @@ BtlEffObj *btlCreateEffectTask44(BtlEffOwner *owner) {
     obj->id = 0x44;
     obj->ownerData = owner->ownerData;
     obj->update = btlWaitEffectTask;
-    link = func_001D47D8(obj);
+    link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = 0;
     return obj;
@@ -549,16 +549,16 @@ s32 func_001FEAA8(s32 a0, s32 a1) {
 }
 
 s32 btlAllocAndCheck(s32 object) {
-    s32 allocation = func_002CFF68(0x10);
+    s32 allocation = sdfAllocAndClearQuadwords(0x10);
     s32 actor = (s32)((BtlTask *)object)->unit;
 
     D_003BB87C = allocation;
     *(s32 *)allocation = object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        func_002CFF98(D_003BB87C);
+        sdfReleaseChipBlock(D_003BB87C);
         return 1;
     }
-    func_002CFF98(D_003BB87C);
+    sdfReleaseChipBlock(D_003BB87C);
     return 0;
 }
 
@@ -600,14 +600,14 @@ void btlClearNodeFlags(void) {
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 s32 func_001FEC68(s32 context, BtlJyokyoOwner *owner, s32 mask) {
-    s32 *work = (s32 *)func_002CFF68(0x10);
+    s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
     D_003BB87C = (s32)work;
     work[1] = owner->unk124;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    func_002CFF98(D_003BB87C);
+    sdfReleaseChipBlock(D_003BB87C);
     return result;
 }
 

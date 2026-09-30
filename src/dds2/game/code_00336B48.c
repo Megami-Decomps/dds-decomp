@@ -1580,7 +1580,7 @@ void sdfDevConsListRemove(node)
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
     func_003297C8(node->bufferHandle);
-    func_00328E48(node);
+    sdfReleaseChipBlock(node);
 }
 
 void sdfDevConsNodeClear(ConsNode *node) {

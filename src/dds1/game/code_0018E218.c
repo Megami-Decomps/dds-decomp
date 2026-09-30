@@ -90,7 +90,7 @@ extern BDWork2C *D_003BD808;
 extern s8 D_003BB071;
 
 extern s8 D_003BB070;
-extern u32 func_00151FC8(s32 arg);
+extern u32 effGetResourceFirstWord(s32 arg);
 extern u8 D_003558D8[];
 extern u8 D_003558A8[];
 extern u8 D_00355948[];
@@ -166,7 +166,7 @@ INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E810);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E938);
 
-void func_0018EA68(s32 x, s32 y, s32 arg2, s32 arg3) {
+void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *task = sdfAllocPacketAligned(0x20);
     u8 *scene;
 
@@ -184,7 +184,7 @@ INCLUDE_ASM(const s32, "game/code_0018E218", func_0018EED0);
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0018F2E0(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
+void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
     void *list = sdfAllocPacketAligned(0x20);
     u8 *scene;
 
@@ -231,7 +231,7 @@ void effSetCh71Id(u32 id) {
 }
 
 void effInitCh71Id(void) {
-    D_003BD808->id = func_00151FC8(2);
+    D_003BD808->id = effGetResourceFirstWord(2);
 }
 
 void func_0018F4E0(void) {
@@ -255,7 +255,7 @@ void effSetCh72Id(u32 id) {
 }
 
 void effInitCh72Id(void) {
-    D_003BD804->id = func_00151FC8(2);
+    D_003BD804->id = effGetResourceFirstWord(2);
 }
 
 void func_0018F598(void) {
@@ -279,7 +279,7 @@ void effSetCh76Id(u32 id) {
 }
 
 void effInitCh76Id(void) {
-    D_003BD810->id = func_00151FC8(3);
+    D_003BD810->id = effGetResourceFirstWord(3);
 }
 
 void func_0018F650(void) {
@@ -335,7 +335,7 @@ void effSetCh75Id(u32 id) {
 }
 
 void effInitCh75Id(void) {
-    D_003BD80C->id = func_00151FC8(0);
+    D_003BD80C->id = effGetResourceFirstWord(0);
 }
 
 void effInitWorks(void) {

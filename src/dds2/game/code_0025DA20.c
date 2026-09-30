@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_0024B040(u32);
+extern s32 evtViewerTestIndexedCondition(u32);
 
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -12,7 +12,7 @@ extern void func_003421E8(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 func_00261198();
 extern s32 func_002613C8();
-extern s32 func_002C54C8(s32);
+extern s32 ptyCountBulletItem(s32);
 
 extern s8 D_003CD8D8[34];
 
@@ -29,7 +29,7 @@ extern CampFlagRow D_003C9A40[];
 
 extern s32 mdlFlagTest(u32);
 
-extern void func_002C42B0(s32 *, void *);
+extern void mnuSetPopupEntry(s32 *, void *);
 
 extern u8 D_003CE658[];
 
@@ -45,11 +45,11 @@ extern s32 strcmp(const char *a, const char *b);
 
 extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
 
-extern void func_0019D100(s32, s32, s32);
+extern void frFontSetContextPair(s32, s32, s32);
 
 extern s32 D_003C99B8[];
 
-extern void func_0024ACC0();
+extern void evtViewerCleanupMessageWindow();
 
 extern void evtViewerDispatchFlagMode();
 
@@ -73,23 +73,23 @@ extern s8 D_00437837;
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_00260380();
 
-extern void func_00328E48();
+extern void sdfReleaseChipBlock();
 
 extern void mnuDestroyWindowContainer();
 
 extern void func_0025FCD8();
 
-extern void func_002B99D8();
+extern void mnuReleaseWindowTextures();
 
 extern void effDestroyResourceSlotSet();
 
 extern s32 mnuShopReleaseSceneObjects(u8 *);
 
-extern void func_002C3FC8(s32, s32);
+extern void mnuDrainPanelTransitions(s32, s32);
 
 extern void dspCloseChannel(void);
 
@@ -101,7 +101,7 @@ extern void func_002C1B70(s32, s32);
 
 extern void func_002C1B68(s32, s32);
 
-extern s32 func_0026C768(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern u8 D_003CD8D0[];
 
@@ -126,7 +126,7 @@ extern void kwlnTaskCreate(void *name, s32 priority, s32 mode, s32 flags, void *
 extern void func_0025D8C8(void);
 
 extern s32 func_002C54B0(s32);
-extern s32 func_002C5480(s32);
+extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C5498(s32);
 extern u8 *D_00435E38;
 
@@ -337,7 +337,7 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
         node = node->next;
     }
     world->unk1C -= 1;
-    func_0024ACC0(world, delta, threshold, base, offset, ubase, node);
+    evtViewerCleanupMessageWindow(world, delta, threshold, base, offset, ubase, node);
     evtViewerDispatchFlagMode(world);
 }
 
@@ -485,7 +485,7 @@ void func_0025E6F0(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNo
         *out1 = track->fallback;
     }
     if (track->type == 2) {
-        while (*out1 != 0 && func_0024B040((*out1)->condition) != 1) {
+        while (*out1 != 0 && evtViewerTestIndexedCondition((*out1)->condition) != 1) {
             *out1 = (*out1)->alt;
         }
     }
@@ -642,11 +642,11 @@ void mnuCampInitFontResource(CampScene *scene) {
     scene->fontDrawHandle = 0;
     fontHandle = func_0019CE78(D_003C99B8, 0, 0, 0, 0);
     scene->fontDrawHandle = fontHandle;
-    func_0019D100(fontHandle, 0x960, 0x70);
+    frFontSetContextPair(fontHandle, 0x960, 0x70);
 }
 
 void mnuCampLinkFontGlyph(CampScene *scene) {
-    func_0019C5B0(scene->fontDrawHandle);
+    frFontQueueGlyphInSelectedSlot(scene->fontDrawHandle);
     scene->fontDrawHandle = 0;
 }
 
@@ -892,7 +892,7 @@ void func_0025FCD8(s32 scene) {
     s32 i;
     s32 *slot = ((ShopSceneCleanup *)scene)->handles;
 
-    func_002B99D8(((ShopSceneCleanup *)scene)->resourceHandle);
+    mnuReleaseWindowTextures(((ShopSceneCleanup *)scene)->resourceHandle);
     for (i = 1; i >= 0; i--) {
         effDestroyResourceSlotSet(*slot++);
     }
@@ -918,7 +918,7 @@ s32 func_0025FE70(void) {
     s32 i;
 
     for (i = 0; i < 0x100; i++) {
-        if (func_002C5480(i) != 0) {
+        if (mnuIsBulletItemId(i) != 0) {
             continue;
         }
         if (func_002C54B0(i) != 0) {
@@ -1011,7 +1011,7 @@ void func_00260380(s32 keepExtra, ShopScene *scene) {
         sprite = *slot;
         if (sprite != NULL) {
             if (sprite->data->buffer != NULL) {
-                func_00328E48(sprite->data->buffer);
+                sdfReleaseChipBlock(sprite->data->buffer);
                 sprite = *slot;
                 sprite->data->buffer = NULL;
             }
@@ -1022,7 +1022,7 @@ void func_00260380(s32 keepExtra, ShopScene *scene) {
     if (keepExtra == 0) {
         if (scene->extra != NULL) {
             if (scene->extra->data->buffer != NULL) {
-                func_00328E48(scene->extra->data->buffer);
+                sdfReleaseChipBlock(scene->extra->data->buffer);
                 scene->extra->data->buffer = NULL;
             }
             mnuDestroyWindowContainer(scene->extra);
@@ -1115,13 +1115,13 @@ u8 *mnuTerminalCreateContext(void) {
 }
 
 void func_00260620(s32 arg) {
-    s32 scene = func_00101958();
+    s32 scene = kwlnTaskGetUserValue();
 
     if (scene != 0) {
         func_00260380(0, scene);
         func_0025FCD8(scene);
         mnuShopReleaseSceneObjects((u8 *)scene);
-        func_002C3FC8(scene + 0xC, arg);
+        mnuDrainPanelTransitions(scene + 0xC, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene + 0x60);
         func_003297C8(*(s32 *)scene);
@@ -1130,9 +1130,9 @@ void func_00260620(s32 arg) {
 }
 
 s32 func_002606A0(void) {
-    s32 state = func_00101958() + 0x37C;
+    s32 state = kwlnTaskGetUserValue() + 0x37C;
     func_002C1B70(state, 0x53);
-    if (func_0026C768() != 0) {
+    if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(state, 1);
     } else {
         func_002C1B68(state, 0);
@@ -1173,17 +1173,17 @@ static inline s64 campSetHandler(s32 context, u64 mode, s32 callback) {
 }
 
 s64 func_00260880(s32 callback) {
-    s32 context = func_00101958();
-    func_002C42B0((s32 *)(context + 0x58), D_003CE658);
+    s32 context = kwlnTaskGetUserValue();
+    mnuSetPopupEntry((s32 *)(context + 0x58), D_003CE658);
     return campSetHandler(context, 0, callback);
 }
 
 s64 func_002608E0(s32 callback) {
-    return campSetHandler(func_00101958(), 1, callback);
+    return campSetHandler(kwlnTaskGetUserValue(), 1, callback);
 }
 
 s64 func_00260918(s32 callback) {
-    return campSetHandler(func_00101958(), 2, callback);
+    return campSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260950);
@@ -1333,7 +1333,7 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     s32 value = *(s32 *)(record + 0x9C);
 
     if (mode == 1) {
-        value -= func_002C54C8(id);
+        value -= ptyCountBulletItem(id);
     } else if (mode == 3) {
         value = 1 - *(u8 *)(id + D_00435DD0 + 0x1340);
     } else if (mode == 2) {
@@ -1399,7 +1399,7 @@ void func_00261D78(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fon
         handle = func_0019FC38(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
         func_0019D550(handle, 0, flags);
-        func_0019C5B0(handle);
+        frFontQueueGlyphInSelectedSlot(handle);
     }
 }
 
