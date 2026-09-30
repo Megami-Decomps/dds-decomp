@@ -103,11 +103,61 @@ void scrProcDestroyTask(ScrProcTask *process) {
     func_002CFF98(process);
 }
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BDB8);
+/* Node of the script-name table walked by func_0010BDB8. */
+typedef struct ScriptNameNode {
+    char name[1];                 /* 0x0: the name text is stored in place */
+    u8 pad01[0xE3];
+    s32 unkE4;                    /* 0xE4: task id, or 0 for a plain process */
+    u8 padE8[4];
+    struct ScriptNameNode *next;   /* 0xEC */
+} ScriptNameNode;
+
+extern ScriptNameNode *D_003BA994;
+extern s32 strcmp(const char *a, const char *b);
+
+extern s32 func_00118140(void *);
+extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+
+/* Walk the script-name table, releasing each node's task or process. */
+void func_0010BDB8(void)
+{
+    ScriptNameNode *node;
+    ScriptNameNode *next;
+
+    node = D_003BA994;
+    if (node == NULL) {
+        return;
+    }
+    while (1) {
+        next = node->next;
+        if (func_00118140(node) == 0) {
+            if (node->unkE4 != 0) {
+                kwlnTaskDestroyWithHierarchy(node->unkE4, 0);
+            } else {
+                scrProcDestroyTask((ScrProcTask *)node);
+            }
+        }
+        node = next;
+        if (node == NULL) {
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE30);
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BED8);
+/* Find the node whose name matches, or NULL when the table is exhausted. */
+ScriptNameNode *func_0010BED8(char *name) {
+    ScriptNameNode *node = D_003BA994;
+
+    while (node != NULL) {
+        if (strcmp(name, node->name) == 0) {
+            return node;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "script/scrScriptProcess", bfFindScriptIndexByName);
 
