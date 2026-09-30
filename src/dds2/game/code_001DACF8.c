@@ -131,7 +131,8 @@ typedef struct BtlWork {
     s32 (*hook618)(BtlUnit *);
     u8 pad61C[0x1C];
     void (*hook638)(BtlUnit *);
-    u8 pad63C[0x14];
+    u8 pad63C[0x10];
+    s32 (*hook64C)(BtlUnit *);
     s32 (*hook650)(BtlUnit *);
     s32 (*hook654)(BtlUnit *);
     s32 (*hook658)(BtlUnit *);
@@ -737,6 +738,9 @@ extern s32 D_003BC0C0[];
 extern s32 D_003BC0C8[];
 
 extern void func_001F02E0(s32, s32);
+extern void func_001F0690(s32);
+extern void func_001F3E48(s32);
+extern void func_001FF820(s32, s32);
 
 extern void func_001FA480(s32, s32, s32);
 
@@ -5370,7 +5374,26 @@ void func_001EAC28(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EAC30);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EADC0);
+void func_001EADC0(ActionUnit *action) {
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    if (work->hook64C != 0 && work->hook64C((BtlUnit *)action) != 0) {
+        return;
+    }
+    switch (action->stepKind) {
+    case 9:
+        func_001F02E0((s32)action, (s32)action);
+        break;
+    case 0xA:
+        func_001F0690((s32)action);
+        break;
+    case 0xB:
+        func_001FF820((s32)action, (s32)action);
+        break;
+    case 0xC:
+        func_001F3E48((s32)action);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EAE88);
 
@@ -5449,7 +5472,35 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EBE30);
 void func_001EC190(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EC198);
+extern void func_001EE690(ActionUnit *, f32 *, s32, f32, f32);
+
+void func_001EC198(ActionUnit *action) {
+    BtlUnit *target;
+    s32 kind;
+    f32 pos[4];
+    if (btlGetIndexListCount(action->actorIndices) != 1) {
+        return;
+    }
+    target = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+    if (action->link->unit->flags & 0x200) {
+        func_001F17C8(action, action, target, 0);
+        return;
+    }
+    if (btlHasActorCategoryFlag100((s32)action) != 0) {
+        return;
+    }
+    btlUnitGetBodyPosVU(target);
+    VU0_STORE_VF(vf10, pos);
+    if (pos[0] > 0.0f) {
+        kind = 2;
+    } else {
+        kind = 3;
+    }
+    func_001EE690(action, (f32 *)action + 12, kind, 45.0f, 0.25f);
+    func_001EE690(action, (f32 *)((u8 *)action + 0xC0), kind, 1.0f, 0.5f);
+    ((BattlePoseBlendState *)action)->duration = 30.0f;
+    action->flags |= 0x41;
+}
 
 void func_001EC2A0(void) {
 }
@@ -8052,7 +8103,7 @@ typedef struct SoundSlotOwner {
     s32 category;
     s32 id;
     s32 refCount;
-    u8 pad10[8];
+    s32 load[2];
     s32 slot[0x1D];
     s32 handle[0x1D];
     struct SoundSlotOwner *prev;
@@ -8140,11 +8191,43 @@ s32 sndHasActiveFileLoad(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204D80);
+typedef struct SoundSlotTableEntry {
+    u16 unk0;
+    u16 fileId;
+} SoundSlotTableEntry;
+
+extern SoundSlotTableEntry *func_001AC050(s32, s32);
+
+void func_00204D80(SoundTaskArgs *args) {
+    SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
+    SoundSlotTableEntry *table;
+    SoundSlotTableEntry *entry;
+    if (owner == 0) {
+        return;
+    }
+    if (owner->flags & 1) {
+        return;
+    }
+    if (!(owner->flags & 2)) {
+        return;
+    }
+    if (owner->handle[args->unk_08] == 0) {
+        return;
+    }
+    table = func_001AC050(owner->category, owner->id);
+    entry = &table[args->unk_08];
+    args->option = entry->fileId;
+    if (args->unk_08 != 0xB) {
+        owner->load[0] = func_002048C8(owner, args->unk_08);
+        owner->load[1] = args->unk_08;
+        owner->flags |= 4;
+        owner->flags &= ~8;
+        owner->flags &= ~0x10;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00204E50);
 
-extern void func_00204D80(u32);
 extern u32 func_00204E50(u32 *);
 
 struct SoundTask *func_00205018(unit, option)
@@ -8582,7 +8665,47 @@ void func_00206570(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206840);
+void func_00206840(BattleActionLinkState *link, BtlUnit *a, BtlUnit *b) {
+    BtlUnit *front = 0;
+    BtlUnit *back = 0;
+    BtlUnit *target;
+    s128 vec[3];
+    u32 count;
+    if (link->unit->flags & 0x1000) {
+        back = link->unit;
+    } else {
+        front = link->unit;
+    }
+    if (a != 0) {
+        if (a->flags & 0x1000) {
+            back = a;
+        } else {
+            front = a;
+        }
+    }
+    if (b != 0) {
+        if (b->flags & 0x1000) {
+            back = b;
+        } else {
+            front = b;
+        }
+    }
+    count = btlGetIndexListCount(link->actorIndices);
+    target = (BtlUnit *)btlGetIndexListEntry(link->actorIndices, 0);
+    if (count == 1) {
+        btlUnitFaceTarget(front, target);
+    } else {
+        btlUnitGetMuzzlePosVU(front);
+        VU0_STORE_VF(vf10, &vec[0]);
+        func_00208000(target->flags & 0x600, 0, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
+        if (btlAimHorizontalDirectionVU(&vec[0], &vec[1]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
+            btlSetUnitRotation(front, &vec[2]);
+        }
+    }
+    btlUnitFaceTarget(back, front);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206970);
 
