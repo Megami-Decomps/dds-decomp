@@ -20,6 +20,13 @@ extern s32 dds3GetWorldObject();
 extern void func_00110860();
 extern void fileWaitReady();
 extern void sdfReleaseMemorySlot();
+extern u8 D_00324690[];
+extern u8 D_00324680[];
+extern u8 D_003246A0[];
+extern f32 func_002FA1C0(f32);
+extern f32 func_002FA1F0(f32, f32);
+extern void func_002E7F20(f32, f32, f32);
+extern void effMiscQuatMultiplyVU(void);
 
 
 
@@ -2229,9 +2236,83 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292CE0);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292E50);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292F48);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002930C0);
+/* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
+void func_00292F48(f32 (*p)[4], f32 t)
+{
+    f32 tan[2][4];
+    f32 half[4];
+    f32 h[4][4];
+    f32 t2 = t * t;
+    f32 t3 = t2 * t;
+
+    VEC3_SPLAT(half, 0.5f);
+    VU0_LOAD_VF(vf10, p[1]);
+    VU0_LOAD_VF(vf11, p[0]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, p[2]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_LOAD_VF(vf11, half);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, tan[0]);
+    VU0_LOAD_VF(vf10, p[2]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, p[3]);
+    VU0_LOAD_VF(vf11, p[2]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_LOAD_VF(vf11, half);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, tan[1]);
+    VEC3_SPLAT(h[0], 2.0f * t3 - 3.0f * t2 + 1.0f);
+    VEC3_SPLAT(h[1], t3 - 2.0f * t2 + t);
+    VEC3_SPLAT(h[2], t3 - t2);
+    VEC3_SPLAT(h[3], -2.0f * t3 + 3.0f * t2);
+    VU0_LOAD_VF(vf10, h[0]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, h[1]);
+    VU0_LOAD_VF(vf11, tan[0]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf12, vf12, vf10);
+    VU0_LOAD_VF(vf10, h[2]);
+    VU0_LOAD_VF(vf11, tan[1]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf12, vf12, vf10);
+    VU0_LOAD_VF(vf10, h[3]);
+    VU0_LOAD_VF(vf11, p[2]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+}
+#undef VEC3_SPLAT
+
+/* vu0 routine: camera basis rows vf28-vf31 from eye D_00324690, target D_00324680 and up D_003246A0 */
+void func_002930C0(void)
+{
+    VU0_LOAD_VF(vf10, D_00324690);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_00324680);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_003246A0);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf29, vf10);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293158);
 
@@ -2794,9 +2875,83 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295D08);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295E00);
+typedef struct CamFollow {
+    u8 pad00[0x40];
+    f32 pos[4];
+    u8 pad50[0x18];
+    u32 flags;
+} CamFollow;
+
+/* vu0 routine: dst = |pos| * unit(D_00324690 - D_00324680); flag 0x10 flattens y, then puts pos.y back */
+void func_00295D08(CamFollow *obj, void *dst)
+{
+    f32 len[4];
+    f32 length;
+    u32 flags = obj->flags;
+
+    if ((flags & 0x18) == 0) {
+        PCP_COPY_VECTOR(dst, obj->pos);
+        return;
+    }
+    VU0_LOAD_VF(vf10, obj->pos);
+    if (obj->flags & 0x10) {
+        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+    }
+    VU0_LENGTH_VF10(length);
+    VEC3_SPLAT(len, length);
+    VU0_LOAD_VF(vf10, D_00324690);
+    VU0_LOAD_VF(vf11, D_00324680);
+    VU0_SUB(vf10, vf10, vf11);
+    if (obj->flags & 0x10) {
+        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+    }
+    VU0_NORMALIZE_VF10();
+    VU0_LOAD_VF(vf11, len);
+    VU0_MUL(vf10, vf10, vf11);
+    if (obj->flags & 0x10) {
+        VU0_SCALAR_OP(obj->pos[1], "vaddx.y vf10, vf0, vf2x");
+    }
+    VU0_STORE_VF(vf10, dst);
+}
+#undef VEC3_SPLAT
+
+typedef struct CamAim {
+    u8 pad00[0x50];
+    f32 quat[4];
+    u8 pad60[8];
+    u32 flags;
+} CamAim;
+
+/* dst = rotation facing unit(D_00324690 - D_00324680) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
+void func_00295E00(CamAim *obj, void *dst)
+{
+    f32 v[4];
+    f32 pitch;
+    u32 flags = obj->flags;
+
+    if ((flags & 0x60) == 0) {
+        PCP_COPY_VECTOR(dst, obj->quat);
+        return;
+    }
+    VU0_LOAD_VF(vf10, D_00324690);
+    VU0_LOAD_VF(vf11, D_00324680);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, v);
+    pitch = 0.0f;
+    if ((flags & 0x40) == 0) {
+        pitch = -func_002FA1C0(-v[1]);
+    }
+    func_002E7F20(pitch, func_002FA1F0(v[0], v[2]), 0.0f);
+    if (obj->flags & 0x40) {
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, obj->quat);
+        effMiscQuatMultiplyVU();
+    }
+    VU0_STORE_VF(vf10, dst);
+}
 
 LoadObj *fileLoadObjectCreate(void *owner) {
     LoadObj *obj = func_002CFF68(0x4C);
