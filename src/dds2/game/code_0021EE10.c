@@ -70,17 +70,27 @@ extern s32 func_00222450();
 extern s32 func_00224598();
 
 typedef struct ActionUnit {
-    u8 pad0[0x50];
+    u8 pad0[8];
+    u32 sequenceFlags; /* 0x08 */
+    u32 actorFlags;    /* 0x0C */
+    u8 pad10[8];
+    s32 parentUnit;    /* 0x18: owner of this action */
+    u8 pad1C[4];
+    f32 verticalOffset; /* 0x20: lifted for special action visual */
+    s32 parentAction;  /* 0x24 */
+    u8 pad28[0x28];
     f32 cameraPointAHeight; /* 0x50 */
     u8 pad54[0x8C];
     f32 cameraPointBHeight; /* 0xE0 */
-    u8 padE4[0x14];
+    u8 padE4[8];
+    s32 actionStatus; /* 0xEC: checked before action 0x10 */
+    u8 padF0[8];
     s16 motionStateA; /* 0xF8: cleared before restoring the unit's motion */
     s16 motionStateB; /* 0xFA: exact meaning not established */
     s32 savedMotionIndex; /* 0xFC: passed as the motion table index */
     s32 savedMotionB; /* 0x100: passed to the motion setter */
     f32 savedMotionScale; /* 0x104 */
-    u8 pad108[8];
+    u64 ownerId;        /* 0x108: parent battle unit owner */
     u32 flags;
     u32 stateFlags;
     u8 pad118[8];
@@ -109,7 +119,9 @@ typedef struct ActionStateLink {
 } ActionStateLink;
 
 typedef struct BattleActionScene {
-    u8 pad00[0x24C];
+    u8 pad00[0x208];
+    s32 soundSequence; /* 0x208: base ID for stationed sound */
+    u8 pad20C[0x40];
     ActionUnit *units;
     u8 pad250[0x50];
     u32 mode;
@@ -129,6 +141,55 @@ typedef struct BattleActionFlagState {
     u16 phase; /* 0x02 */
 } BattleActionFlagState;
 
+/* Signed byte view used when comparing action transitions and actor activity. */
+typedef struct BattleActionByteState {
+    s8 current;       /* 0x00 */
+    s8 previous;      /* 0x01 */
+    u8 pad02[6];
+    s8 markedActive;  /* 0x08 */
+} BattleActionByteState;
+
+/* Each action-table entry is 0x20 bytes; only the observed words are exposed. */
+typedef struct BattleActionTableEntry {
+    u8 pad00[4];
+    u16 displayCode; /* 0x04: label formatting parameter */
+    u8 pad06[0x16];
+    u16 flags;       /* 0x1C: special action handling */
+    u8 pad1E[2];
+} BattleActionTableEntry;
+
+typedef struct BattleActorResource {
+    u8 pad00[0xC4];
+    u32 kind;  /* 0xC4: model/resource kind */
+    u32 index; /* 0xC8: model/resource index */
+} BattleActorResource;
+
+typedef struct BattleActionScaleTable {
+    u8 pad00[0xC00];
+    f32 actionScale;
+    f32 ratioMultiplier;
+    f32 ratioMaximum;
+} BattleActionScaleTable;
+
+typedef struct BattleActionTask {
+    u8 pad00[0x28];
+    s32 delay;         /* 0x28 */
+    u8 pad2C[0x14];
+    u64 resourceOwner; /* 0x40 */
+} BattleActionTask;
+
+/* Handle returned by btlFindUnitByActor; these fields drive its action task. */
+typedef struct BattleActorHandle {
+    u8 pad00[0xC];
+    u32 flags;       /* 0x0C */
+    u8 pad10[8];
+    u32 owner;       /* 0x18 */
+    u8 pad1C[4];
+    s32 phase;       /* 0x20 */
+    u8 pad24[0x3C];
+    s32 actorIndices; /* 0x60 */
+} BattleActorHandle;
+
 extern void func_001E2758(ActionUnit *);
 extern void func_001E22D8(ActionUnit *, s32, s32, f32);
 /* When the action-state byte changes, restore the marked unit's saved motion. */
@@ -137,7 +198,7 @@ void func_0021EE10(void) {
     u8 *state = scene->state;
     ActionUnit *unit;
 
-    if (*(s8 *)(state + 1) != *(s8 *)state) {
+    if (((BattleActionByteState *)state)->previous != ((BattleActionByteState *)state)->current) {
         state[1] = state[0];
         unit = scene->units;
         if (unit != 0) {
@@ -164,7 +225,7 @@ void func_0021EE10(void) {
 void func_0021EEF8(u32 unused, u32 actor) {
     u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     if (*(u32 *)(actor + 0x28) & 0x8000) {
-        if (*(s8 *)(state + 1) != 0) {
+        if (((BattleActionByteState *)state)->previous != 0) {
             *state = 0;
         } else {
             *state = 1;
@@ -219,7 +280,7 @@ void func_0021F040(s32 unit, u32 action, char *buffer) {
         default:
             return;
         }
-        func_0035C860(buffer, D_0041AAC8, D_00436CF0, *(u16 *)(D_00435E30 + action * 32 + 4), value);
+        func_0035C860(buffer, D_0041AAC8, D_00436CF0, ((BattleActionTableEntry *)D_00435E30)[action].displayCode, value);
     }
 }
 
@@ -555,15 +616,15 @@ void func_00220C38(ActionUnit *unit) {
 
     if (*slot != 0) {
         task = btlCreateScriptResourceTask(*slot, (*slot)->mode == 0x10E ? 0x61 : 0x62);
-        *(u64 *)(task + 0x40) = *(u64 *)(*(s32 *)((u8 *)unit + 0x18) + 0x108);
-        *(s32 *)(task + 0x28) = 0xE;
+        ((BattleActionTask *)task)->resourceOwner = ((ActionUnit *)unit->parentUnit)->ownerId;
+        ((BattleActionTask *)task)->delay = 0xE;
         btlStartTask(task);
-        sound = sndCreateStationedSeTask(*(s32 *)((u8 *)scene + 0x208) + ((*slot)->mode == 0x10E ? 3 : 2));
+        sound = sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
         sound[0] = 5;
         *(u64 *)(sound + 8) = *(u64 *)(task + 0x38);
         btlStartTask(sound);
         *slot = 0;
-        *(u32 *)((u8 *)unit + 0xC) &= ~8;
+        unit->actorFlags &= ~8;
     }
 }
 
@@ -611,7 +672,7 @@ f32 btlGetActionScaleFactor(ActionUnit *unit, ActionUnit *other) {
     }
     state = (BattleActionFlagState *)((BattleActionScene *)func_001AA6F8())->state;
     if (state->active != 0 && state->phase < 4) {
-        return *(f32 *)(D_00435E44 + 0xc00);
+        return ((BattleActionScaleTable *)D_00435E44)->actionScale;
     }
     return 1.0f;
 }
@@ -638,7 +699,7 @@ s32 func_00220F68(ActionUnit *unit) {
         if (found == 0) {
             return -1;
         }
-        return *(s32 *)((u8 *)found + 0xEC) == 0x10 ? 0x10 : -1;
+        return found->actionStatus == 0x10 ? 0x10 : -1;
     }
     if ((unit->flags & 0x400) == 0) {
         return -1;
@@ -672,7 +733,7 @@ u32 func_002210D0(ActionUnit *unit) {
         unit->flags |= 0x800;
         func_001E9F30((u32)unit);
         func_00208DA0();
-        btlFlagUnitDefeatCandidate(*(u32 *)(unit->stateFlags + 0x18));
+        btlFlagUnitDefeatCandidate(((ActionStateLink *)unit->stateFlags)->owner);
         return 1;
     }
     return 0;
@@ -707,19 +768,19 @@ u32 func_002213E0(ActionUnit *unit) {
     return 0;
 }
 u32 btlTickAction6B(u32 unit) {
-    if (*(u32 *)(unit + 0x134) != 0x6b) {
+    if (((ActionUnit *)unit)->action != 0x6b) {
         return 0;
     }
     /* The callee takes no arguments (see code_001DACF8.c), so retail
      * leaves $a0 holding the compared constant across these calls. */
-    if (*(s32 *)(unit + 0x13c) >= 0) {
-        if (*(s32 *)(unit + 0x13c) >= 0xF) {
+    if (((ActionUnit *)unit)->actionTimer >= 0) {
+        if (((ActionUnit *)unit)->actionTimer >= 0xF) {
             func_001E9890();
             func_001ECBF8(unit, unit);
         } else {
             func_001E98C0();
         }
-        ++*(s32 *)(unit + 0x13c);
+        ++((ActionUnit *)unit)->actionTimer;
     } else {
         func_001E98C0();
     }
@@ -769,14 +830,14 @@ void btlDestroyActionActor(void) {
 }
 
 u32 func_00221828(u32 unit) {
-    if (*(u32 *)(unit + 0xc4) == 1 && *(u32 *)(unit + 0xc8) == 0x10b) {
+    if (((BattleActorResource *)unit)->kind == 1 && ((BattleActorResource *)unit)->index == 0x10b) {
         return 0;
     }
     return 1;
 }
 
 u32 func_00221858(u32 unit) {
-    if (*(u32 *)(unit + 0xc4) == 1 && *(u32 *)(unit + 0xc8) == 0x10b) {
+    if (((BattleActorResource *)unit)->kind == 1 && ((BattleActorResource *)unit)->index == 0x10b) {
         return 0;
     }
     return 1;
@@ -804,14 +865,14 @@ s32 func_00221988(ActionUnit *unit) {
     f32 *state;
     u8 *table;
 
-    if (*(u32 *)((u8 *)unit + 8) & 8) {
-        if (*(u32 *)(*(s32 *)((u8 *)unit + 0x18) + 0x110) & 0x400) {
+    if (unit->sequenceFlags & 8) {
+        if (((ActionUnit *)unit->parentUnit)->flags & 0x400) {
             state = (f32 *)((BattleActionScene *)func_001AA6F8())->state;
-            if (*(s32 *)((u8 *)unit + 0x24) == 0x19F) {
+            if (unit->parentAction == 0x19F) {
                 table = D_00435E44;
-                state[1] = state[1] * *(f32 *)(table + 0xC04);
-                if (*(f32 *)(table + 0xC08) < state[1]) {
-                    state[1] = *(f32 *)(table + 0xC08);
+                state[1] = state[1] * ((BattleActionScaleTable *)table)->ratioMultiplier;
+                if (((BattleActionScaleTable *)table)->ratioMaximum < state[1]) {
+                    state[1] = ((BattleActionScaleTable *)table)->ratioMaximum;
                 }
                 func_0020D128("btl:boss BRAHMA ratio = %f\n", state[1]);
             }
@@ -939,7 +1000,7 @@ s32 func_00222028(void) {
     s32 handle;
     s32 mode;
 
-    if (*(s8 *)(scene->state + 8) == 0) {
+    if (((BattleActionByteState *)scene->state)->markedActive == 0) {
         return -1;
     }
     found = 0;
@@ -963,9 +1024,9 @@ s32 func_00222028(void) {
     }
     handle = btlFindUnitByActor(found);
     fldAppendSceneGroupHandle(handle);
-    *(s32 *)(handle + 0x20) = 0x11;
-    *(u32 *)(handle + 0xC) |= 8;
-    func_001E8030(*(s32 *)(handle + 0x60), *(u32 *)(handle + 0x18));
+    ((BattleActorHandle *)handle)->phase = 0x11;
+    ((BattleActorHandle *)handle)->flags |= 8;
+    func_001E8030(((BattleActorHandle *)handle)->actorIndices, ((BattleActorHandle *)handle)->owner);
     return -1;
 }
 
@@ -1121,7 +1182,7 @@ s32 func_00222E58(s32 object) {
                     return 0;
                 }
                 func_00217470(object, object, -0.8f, 0.5f, 35.0f);
-                *(f32 *)(object + 0x20) += 500.0f;
+                ((ActionUnit *)object)->verticalOffset += 500.0f;
                 return 1;
             }
         }
@@ -1138,7 +1199,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223350);
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223BD8);
 
 s32 func_00223D10(ActionUnit *unit) {
-    u32 flags = *(u16 *)(D_00435E30 + unit->action * 32 + 0x1C);
+    u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
         func_001E9A88();
@@ -1151,7 +1212,7 @@ s32 func_00223D10(ActionUnit *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (func_001E8058(*(u32 *)(unit->stateFlags + 0x60)) == 1) {
+        if (func_001E8058(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             func_001E9A88();
             btlUnitSetCameraOffset((u32)unit);
             return 1;
@@ -1187,16 +1248,16 @@ void func_00223ED0(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
             kind = 0xFC;
             break;
         }
-        task = btlCreateEffObjB(*(s32 *)((u8 *)unit + 0x18), kind);
+        task = btlCreateEffObjB(unit->parentUnit, kind);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
         *(s64 *)(task + 0x40) = func_001A9920();
         btlStartTask(task);
-        task = btlCreateEffObjD(*(s32 *)((u8 *)unit + 0x18), 0x19F);
+        task = btlCreateEffObjD(unit->parentUnit, 0x19F);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
         value = func_001A9920();
-        *(s32 *)(task + 0x28) = 0x26;
+        ((BattleActionTask *)task)->delay = 0x26;
         *(s64 *)(task + 0x40) = value;
         btlStartTask(task);
         state[3] += 1;
@@ -1295,7 +1356,7 @@ s32 func_00224238(s32 object) {
                     return 0;
                 }
                 func_00217470(object, object, -0.8f, 0.225f, 35.0f);
-                *(f32 *)(object + 0x20) += 500.0f;
+                ((ActionUnit *)object)->verticalOffset += 500.0f;
                 func_001E88A8(object);
                 return 1;
             }
@@ -1317,7 +1378,7 @@ s64 btlUnitWrapB(void) {
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247D0);
 
 s32 func_00224D28(ActionUnit *unit) {
-    u32 flags = *(u16 *)(D_00435E30 + unit->action * 32 + 0x1C);
+    u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
         func_001E9A88();
@@ -1330,7 +1391,7 @@ s32 func_00224D28(ActionUnit *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (func_001E8058(*(u32 *)(unit->stateFlags + 0x60)) == 1) {
+        if (func_001E8058(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             func_001E9A88();
             func_00224020((u32)unit);
             return 1;

@@ -283,6 +283,28 @@ typedef struct {
     u32 unk18;    /* 0x18 resource released on destroy */
 } EffPCPWork1C;
 
+/* Shared 0x10-byte task prefix, zeroed when paired resource work is created. */
+typedef struct EffPCPTaskHeader {
+    u32 word00;
+    u32 word04;
+    u32 word08;
+    u8 pad0C[4];
+} EffPCPTaskHeader;
+
+/* Four groups of duplicated handles share a count and two allocation handles. */
+typedef struct EffPCPBatchWork {
+    u8 pad00[0x58];
+    u32 count;            /* 0x58: handles per group */
+    u8 pad5C[0x30];
+    u8 activeGroups[4];  /* 0x8C */
+    u8 pad90[0xD4];
+    u32 *entries;         /* 0x164: six-word records */
+    u8 pad168[0xC];
+    u32 *duplicates;      /* 0x174: four groups of handles */
+    u32 duplicateHandle;  /* 0x178 */
+    u32 workHandle;       /* 0x17C */
+} EffPCPBatchWork;
+
 typedef struct {
     u8 flags;
     u8 pad01[3];
@@ -775,9 +797,9 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
     } while (i < 8);
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -807,9 +829,9 @@ EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
     } while (i < 8);
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1048,9 +1070,9 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -1083,9 +1105,9 @@ EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
     }
     work->unk10 = 0x80808080;
     work->unk14 = 1.0f;
-    *(u32 *)work = 0;
-    *(u32 *)((u8 *)work + 4) = 0;
-    *(u32 *)((u8 *)work + 8) = 0;
+    ((EffPCPTaskHeader *)work)->word00 = 0;
+    ((EffPCPTaskHeader *)work)->word04 = 0;
+    ((EffPCPTaskHeader *)work)->word08 = 0;
     return work;
 }
 
@@ -4177,8 +4199,8 @@ u8 *func_00181538(u8 *work) {
     u8 *flags;
     u32 i;
 
-    if (*(u32 *)(work + 0x174) != 0) {
-        count = *(u32 *)(work + 0x58);
+    if (((EffPCPBatchWork *)work)->duplicates != 0) {
+        count = ((EffPCPBatchWork *)work)->count;
         size = count * 16;
         stride = count * 4;
         group = 0;
@@ -4191,7 +4213,7 @@ u8 *func_00181538(u8 *work) {
             u32 *slot = (u32 *)(*(u8 **)(copy + 0x174) + offset);
 
             if (*flags != 0) {
-                u32 first = *(u32 *)(offset + *(u32 *)(work + 0x174));
+                u32 first = *(u32 *)(offset + (u32)((EffPCPBatchWork *)work)->duplicates);
                 for (i = 0; i < count; i++) {
                     *slot++ = effParamWorkDuplicate(first);
                 }
@@ -4205,8 +4227,8 @@ u8 *func_00181538(u8 *work) {
 
 void func_00181650(u8 *work) {
     u32 i = 0;
-    u32 count = *(u32 *)(work + 0x58);
-    u32 *entry = *(u32 **)(work + 0x164);
+    u32 count = ((EffPCPBatchWork *)work)->count;
+    u32 *entry = ((EffPCPBatchWork *)work)->entries;
     u32 *list;
     u32 *p;
 
@@ -4218,7 +4240,7 @@ void func_00181650(u8 *work) {
             effPCPThunderFree3(handle);
         } while (i < count);
     }
-    list = *(u32 **)(work + 0x174);
+    list = ((EffPCPBatchWork *)work)->duplicates;
     count = count * 4;
     if (list != NULL) {
         p = list;
@@ -4232,9 +4254,9 @@ void func_00181650(u8 *work) {
                 i++;
             } while (i < count);
         }
-        func_002D0918(*(u32 *)(work + 0x178));
+        func_002D0918(((EffPCPBatchWork *)work)->duplicateHandle);
     }
-    func_002D0918(*(u32 *)(work + 0x17C));
+    func_002D0918(((EffPCPBatchWork *)work)->workHandle);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181708);
