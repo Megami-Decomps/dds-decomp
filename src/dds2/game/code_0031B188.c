@@ -13,7 +13,9 @@ typedef struct SoundSlotPool {
 
 /* Nodes passed to the menu model helpers are 0x50-byte records. */
 typedef struct MnuModelNode {
-    u8 pad00[0x30];
+    f32 primary[4];  /* 0x00 */
+    f32 secondary[4]; /* 0x10 */
+    f32 tertiary[4]; /* 0x20 */
     f32 x;           /* 0x30 */
     f32 y;           /* 0x34 */
     f32 z;           /* 0x38 */
@@ -25,7 +27,14 @@ typedef struct MnuModelNode {
     f32 modelZ;      /* 0x4C */
 } MnuModelNode;
 
+typedef struct MnuNodeList {
+    MnuModelNode *nodes; /* 0x00 */
+    s32 count;           /* 0x04 */
+} MnuNodeList;
+
 extern void mdlBroadcastMasked(u32 sprite);
+extern void mdlStorePrimaryVectorVU(void *model);
+extern void mdlStoreTertiaryVectorVU(void *model);
 
 extern u32 *D_00438940;
 
@@ -245,9 +254,35 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C3C8);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C458);
+/* Set the model Z of every active node. */
+void func_0031C458(MnuNodeList *list, f32 z) {
+    MnuModelNode *node = list->nodes;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C4A0);
+    for (i = 0; i < list->count; i++) {
+        u32 active = node->flags & 1;
+
+        if (active == 1) {
+            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = z;
+        }
+        node++;
+    }
+}
+
+/* Restore each active node's model Z from its saved modelZ. */
+void func_0031C4A0(MnuNodeList *list) {
+    MnuModelNode *node = list->nodes;
+    s32 i;
+
+    for (i = 0; i < list->count; i++) {
+        u32 active = node->flags & 1;
+
+        if (active == 1) {
+            *(f32 *)(*(u8 **)((u8 *)node->model + 0x1c) + 0x20) = node->modelZ;
+        }
+        node++;
+    }
+}
 
 void mnuCreateNodeModelEntry(u8 *node, s32 first, s32 second, s32 flag, f32 x, f32 y, f32 z) {
     u8 *model = func_00232198(first, second);
@@ -278,15 +313,45 @@ void mnuSetNodePosition(u8 *node, f32 x, f32 y, f32 z) {
     ((MnuModelNode *)node)->positionFlag = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C5B8);
+/* Set the primary (0x00) vector and load it into the model. */
+void func_0031C5B8(u8 *node, f32 x, f32 y, f32 z) {
+    MnuModelNode *n = (MnuModelNode *)node;
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C5E8);
+    n->primary[0] = x;
+    n->primary[1] = y;
+    n->primary[2] = z;
+    n->primary[3] = 0;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->primary));
+    mdlStorePrimaryVectorVU(n->model);
+}
+
+/* Translate the primary (0x00) vector and load it into the model. */
+void func_0031C5E8(u8 *node, f32 x, f32 y, f32 z) {
+    MnuModelNode *n = (MnuModelNode *)node;
+
+    n->primary[3] = 0;
+    n->primary[0] += x;
+    n->primary[1] += y;
+    n->primary[2] += z;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->primary));
+    mdlStorePrimaryVectorVU(n->model);
+}
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C630);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C850);
+/* Fill the tertiary (0x20) vector with one value and load it into the model. */
+void func_0031C850(u8 *node, f32 value) {
+    MnuModelNode *n = (MnuModelNode *)node;
+
+    n->tertiary[0] = value;
+    n->tertiary[1] = value;
+    n->tertiary[2] = value;
+    n->tertiary[3] = 0;
+    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->tertiary));
+    mdlStoreTertiaryVectorVU(n->model);
+}
 
 void func_0031C888(u8 *node) {
     mdlBroadcastMasked((u32)((MnuModelNode *)node)->model);

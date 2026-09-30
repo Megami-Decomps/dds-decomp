@@ -29,6 +29,8 @@ typedef struct Slot60 {
 
 typedef struct SlotTab {
     Slot60 *slots;
+    u32 count;
+    s32 handle;
 } SlotTab;
 
 /* Per-channel work copies this 0x2C-byte prefix before its separate ID word.
@@ -63,6 +65,7 @@ extern Work30 D_00355E48;
 extern Work18 D_00355F88;
 extern Work24 D_00356088;
 extern Work2C D_003561C8;
+extern void *memcpy(void *, const void *, u32);
 
 extern BDWork24 *D_003BD80C;
 
@@ -90,6 +93,11 @@ extern u8 D_003558D8[];
 extern u8 D_003558A8[];
 extern u8 D_00355948[];
 extern u8 D_00355970[];
+extern u8 D_00325748[];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket();
+extern s32 func_002E4960();
 
 extern BDWork2C *func_00186C18(void *arg);
 extern BDWork2C *func_00186F90(void *arg);
@@ -102,7 +110,30 @@ extern void func_00187598(BDWork2C *arg);
 extern void func_00187988(Work30 *arg);
 extern void func_00187C08(Work18 *arg);
 extern void func_00188068(BDWork24 *arg);
-INCLUDE_ASM(const s32, "game/code_0018E218", effCreateSlotArray);
+extern s32 func_002D03F8(s32);
+extern u8 *sdfResourceRetainAddress(s32);
+
+/* Allocate contiguous slots followed by their count and allocation handle. */
+SlotTab *effCreateSlotArray(u32 count) {
+    s32 slotBytes = count * 0x60;
+    s32 handle = func_002D03F8(slotBytes + 0xC);
+    Slot60 *slot = (Slot60 *)sdfResourceRetainAddress(handle);
+    SlotTab *table = (SlotTab *)((u8 *)slot + slotBytes);
+    u32 index = 0;
+    table->handle = handle;
+    table->slots = slot;
+    table->count = count;
+    if (count != 0) {
+        do {
+            index++;
+            slot->unk54 = 0;
+            slot->unk58 = 0;
+            slot->unk5C = 0.05f;
+            slot++;
+        } while (index < count);
+    }
+    return table;
+}
 
 void effReleaseArrayAllocation(EffArrHdr *header) {
     func_002D0918((u32)header->unk8);
@@ -133,7 +164,15 @@ INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E810);
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018E938);
 
-INCLUDE_ASM(const s32, "game/code_0018E218", func_0018EA68);
+void func_0018EA68(s32 x, s32 y, s32 arg2, s32 arg3) {
+    void *task = sdfAllocPacketAligned(0x20);
+    u8 *scene;
+
+    sdfInitPacketList(task);
+    sdfAppendPacket(task, func_002E4960((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, arg2, arg3));
+    scene = D_00325748;
+    (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
+}
 
 INCLUDE_ASM(const s32, "game/code_0018E218", func_0018EB08);
 
@@ -327,7 +366,6 @@ typedef struct ChState {
 extern ChState D_00355AB8;
 extern s8 D_003BB0BD;
 extern s8 D_0039862B[];
-extern void *memcpy(void *, const void *, u32);
 extern void func_0018CDD0(void *);
 extern void func_0018CDF8(void);
 extern void func_0018CDF0(void *);

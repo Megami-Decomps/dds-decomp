@@ -54,8 +54,6 @@ typedef struct ShortPair2C {
     s16 h2E;           // 0x2E
 } ShortPair2C; // 0x30
 
-extern void func_002CAF78(void *, void *);
-
 extern u32 func_002CB5F0(u32 *);
 
 extern u32 func_002CAD30(u32, u32, u32);
@@ -81,6 +79,8 @@ typedef struct SdfList {
     u32 count;                  /* 0x04 */
     SdfListNode *head;          /* 0x08 */
     SdfListNode *tail;          /* 0x0C */
+    u32 pad10;
+    void (*onRemove)(u32, s32); /* 0x14 */
 } SdfList;
 
 float sdfQuatLengthSquared(float *arg0) {
@@ -398,7 +398,18 @@ SdfListNode *func_002CAEC8(SdfList *list, SdfListNode *node) {
     return node->prev;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CAF78);
+/* Unlink a node, hand it to the list's removal callback, free it, return its neighbour. */
+SdfListNode *func_002CAF78(SdfList *list, SdfListNode *node) {
+    SdfListNode *neighbour;
+
+    if (node == NULL) {
+        return NULL;
+    }
+    neighbour = func_002CAEC8(list, node);
+    list->onRemove(node->index, node->value);
+    func_002CFF98(node);
+    return neighbour;
+}
 
 typedef struct TaskListNode {
     u32 handle; /* 0x00 */
@@ -413,7 +424,7 @@ typedef struct {
     u32 tail;  /* 0x04 */
     TaskListNode *head; /* 0x08 */
     u32 count; /* 0x0C */
-    u32 pad10;
+    u32 current; /* 0x10 */
     void (*onRemove)(u32, u32); /* 0x14 */
 } TaskList;
 
@@ -620,13 +631,57 @@ void func_002CB6F8(u32 unused, SdfCallbackWork *work) {
     sdfDestroyCallbackWork(work);
 }
 
+typedef struct SdfTaskEntry {
+    u32 flags;                   /* 0x00 */
+    s32 arg0;                    /* 0x04 */
+    u8 pad08[0xC];
+    void (*callback)(s32, s32);  /* 0x14 */
+    s32 arg1;                    /* 0x18 */
+} SdfTaskEntry;
+
+extern void *func_00101A70(void);
+
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB718);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB850);
+/* Advance the work's cursor one node and run the node's callback when flagged. */
+s32 func_002CB850(TaskWork *work) {
+    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfTaskEntry *entry;
+    u32 flags;
+
+    if (node == NULL) {
+        work->firstItemHandle = (u32)work->list->head;
+        return 0;
+    }
+    entry = (SdfTaskEntry *)node->value;
+    flags = entry->flags;
+    work->firstItemHandle = (u32)node->next;
+    switch (flags & 0xFFFF0000) {
+    case 0x10000:
+        if (flags & 2) {
+            entry->callback(entry->arg0, entry->arg1);
+        }
+        break;
+    case 0x20000:
+        break;
+    case 0x100000:
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB8E0);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB938);
+s32 func_002CB938(void) {
+    TaskWork *work = func_00101A70();
+
+    if (work->firstItemHandle == 0) {
+        return -1;
+    }
+    while (func_002CB850(work) == 1) {
+    }
+    return 0;
+}
 
 void func_002CB990(void) {
     sdfDestroyTaskResourceWork(func_00101A70());
@@ -670,7 +725,15 @@ typedef struct SdfGrid {
     void (*releaseCell)(u32, u32); /* 0x1C */
 } SdfGrid;
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBB68);
+SdfGridCell *func_002CBB68(SdfGrid *grid, s32 column, s32 row) {
+    u32 cellIndex;
+
+    cellIndex = row * grid->width + column;
+    if (cellIndex >= grid->cellCount) {
+        return NULL;
+    }
+    return &grid->cells[cellIndex];
+}
 
 void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
     SdfGridCell *cell = grid->cursor;
@@ -678,7 +741,15 @@ void sdfGridGetCursorCoordinates(SdfGrid *grid, u32 *mod, u32 *div) {
     *div = cell->index / grid->width;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBBD8);
+u32 func_002CBBD8(SdfGrid *grid, s32 column, s32 row) {
+    u32 cellIndex;
+
+    cellIndex = row * grid->width + column;
+    if (cellIndex >= grid->cellCount) {
+        return 0;
+    }
+    return grid->cells[cellIndex].value;
+}
 
 void sdfGridSetCellValue(SdfGrid *grid, s32 column, s32 row, u32 value) {
     u32 cellIndex;
