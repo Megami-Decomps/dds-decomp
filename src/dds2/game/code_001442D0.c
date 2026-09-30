@@ -906,16 +906,16 @@ void fldSetSequenceVolume(s32 category, s32 volume) {
     }
 }
 
-void fldSelectBgmMode(s32 arg0) {
+void fldSelectBgmMode(s32 selection) {
     s32 volume;
     if (D_003899D8[0] == 0) {
         return;
     }
-    switch (arg0) {
+    switch (selection) {
     case -1:
-        if (D_00436228 != arg0) {
+        if (D_00436228 != selection) {
             func_00341C78(D_00436228);
-            D_00436228 = arg0;
+            D_00436228 = selection;
         }
         break;
     case 0:
@@ -1000,12 +1000,12 @@ s32 fldPollArchiveLoad(s32 id) {
     return 0;
 }
 
-void fldSetArchiveSoundVolumePan(s32 arg0, s32 arg1) {
-    sndSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
+void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {
+    sndSetSequenceVolumePan(archiveId * 0x10000 + soundId + 0x30000000, 0x7f, 0x3f);
 }
 
-void fldPlayArchiveSound(s32 arg0, s32 arg1) {
-    func_00341C78(arg0 * 0x10000 + arg1 + 0x30000000);
+void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
+    func_00341C78(archiveId * 0x10000 + soundId + 0x30000000);
 }
 
 void fldResetArchiveLoadPhase(void) {
@@ -1103,7 +1103,7 @@ void fldCacheMapLabelLengths(s32 world) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145698);
 
-void fldSetSceneRecordChunk(s32 arg0, s32 arg1) {
+void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
     /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
@@ -1111,12 +1111,12 @@ void fldSetSceneRecordChunk(s32 arg0, s32 arg1) {
         s32 count; /* 0x08: number of scene rows */
     } SceneHeader;
     if (D_00389780[0] < 0xC8) {
-        s32 source = arg0;
-        s32 resource = arg1;
+        s32 source = chunk;
+        s32 resource = resourceId;
         s32 transferStart = source + 8;
 
         D_00436278 = resource;
-        fldRelocatePackedTransferChunk(arg0, transferStart);
+        fldRelocatePackedTransferChunk(chunk, transferStart);
         {
             s32 header = func_00129D60(transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
@@ -1473,11 +1473,11 @@ void fldCenterCameraOnEntry(void) {
     D_0037FB30.unk10 = 0x808080;
 }
 
-void fldSetSceneLocation(s32 arg0, s32 arg1, s32 arg2) {
-    D_00389770[4] = arg0;
-    D_00389770[6] = arg2;
-    D_00436248 = D_00389770[5] = arg1;
-    D_00436244 = arg0 % 100;
+void fldSetSceneLocation(s32 stage, s32 room, s32 entrance) {
+    D_00389770[4] = stage;
+    D_00389770[6] = entrance;
+    D_00436248 = D_00389770[5] = room;
+    D_00436244 = stage % 100;
 }
 
 extern s32 D_00387CE0[];
@@ -1544,19 +1544,19 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     }
 }
 
-void func_0014AC18(s32 arg0) {
-    if (arg0 >= 0x40) {
+void func_0014AC18(s32 index) {
+    if (index >= 0x40) {
         D_00389834[0] = -1;
     } else {
-        D_00389834[0] = arg0;
+        D_00389834[0] = index;
     }
 }
 
-void func_0014AC40(s32 arg0) {
-    if (arg0 >= 0x40) {
+void func_0014AC40(s32 index) {
+    if (index >= 0x40) {
         D_00389838[0] = -1;
     } else {
-        D_00389838[0] = arg0;
+        D_00389838[0] = index;
     }
 }
 
@@ -1619,9 +1619,9 @@ void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     s32 entry = D_00436270;
     for (i = 0; i < (s32)D_00436274; i++, entry += 0x14) {
         if (i == index) {
-            f32 *position = *(f32 **)(entry + 0x10);
-            *x = position[0];
-            *z = position[2];
+            FldPoint *position = ((FldSceneRecord *)entry)->pos;
+            *x = position->x;
+            *z = position->z;
             return;
         }
     }
@@ -1823,18 +1823,18 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
     }
 }
 
-void fldQueuePrimaryEffectPosition(f32 arg0, f32 arg1, f32 arg2) {
+void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z) {
     D_00436340 = 1;
-    D_003A8E90[0] = arg0;
-    D_003A8E90[1] = arg1;
-    D_003A8E90[2] = arg2;
+    D_003A8E90[0] = x;
+    D_003A8E90[1] = y;
+    D_003A8E90[2] = z;
 }
 
-void fldQueueSecondaryEffectPosition(f32 arg0, f32 arg1, f32 arg2) {
+void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z) {
     D_00436344 = 1;
-    D_003A8EA0[0] = arg0;
-    D_003A8EA0[1] = arg1;
-    D_003A8EA0[2] = arg2;
+    D_003A8EA0[0] = x;
+    D_003A8EA0[1] = y;
+    D_003A8EA0[2] = z;
 }
 
 void mnuReleaseResourceEntries(void) {
@@ -2219,8 +2219,8 @@ s32 func_0014E620(void) {
     return 0;
 }
 
-void func_0014E668(u32 arg0) {
-    D_00436364 = arg0;
+void func_0014E668(u32 value) {
+    D_00436364 = value;
 }
 
 s32 fldTitleIsActive(void) {

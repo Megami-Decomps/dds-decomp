@@ -327,8 +327,8 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423380);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423390);
 
-s32 func_00250508(s32 arg0, s32 arg1, s32 arg2) {
-    sdfAppendPacket(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+s32 func_00250508(s32 list, s32 x, s32 y) {
+    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -372,8 +372,8 @@ s32 func_00250718(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-s32 func_00250880(s32 arg0, s32 arg1, s32 arg2) {
-    sdfAppendPacket(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));
+s32 func_00250880(s32 list, s32 x, s32 y) {
+    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -788,6 +788,7 @@ extern char D_004376B0[]; /* "   %s" */
 extern s32 evtEventViewerGetPendingNode();
 extern EvtWorldNode *func_001111A8(EvtWorldObject *world, char *name);
 
+/* The pending-node's signed slot indices begin at +0xC (also used in DDS1). */
 void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtWorldNode *node;
     s32 color;
@@ -837,8 +838,19 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_00423EC0[]; /* "MESSAGE MENU (MESMAX %3d)" */
 
-s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, u8 *ctx) {
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(*(s32 *)(*(u8 **)(ctx + 8) + 0x104))));
+/* The message-menu work references a window whose entry handle lives at +0x104. */
+typedef struct EvtMessageWindow {
+    u8 pad00[0x104];
+    s32 entryHandle;
+} EvtMessageWindow;
+
+typedef struct EvtMessageMenuWork {
+    u8 pad00[8];
+    EvtMessageWindow *window;
+} EvtMessageMenuWork;
+
+s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtMessageMenuWork *ctx) {
+    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->window->entryHandle)));
     return 2;
 }
 
@@ -885,12 +897,12 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00254250);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254458);
 
-s32 func_00254620(s32 *arg0) {
-    return D_003C9730[*arg0].unk0 != 0;
+s32 func_00254620(s32 *index) {
+    return D_003C9730[*index].unk0 != 0;
 }
 
-s32 mnuGetSelectedTableValue(s32 arg0) {
-    return D_003C9732[((EvtRuntime *)arg0)->tableColumn + ((EvtRuntime *)arg0)->frameList->kind * 10];
+s32 mnuGetSelectedTableValue(EvtRuntime *runtime) {
+    return D_003C9732[runtime->tableColumn + runtime->frameList->kind * 10];
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254678);
@@ -996,10 +1008,10 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *ctx) {
     return -1;
 }
 
-void evtSetRuntimeCommandValues(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    ((EvtRuntime *)arg0)->frames = arg1;
-    ((EvtRuntime *)arg0)->text0 = (char *)arg2;
-    ((EvtRuntime *)arg0)->text1 = (char *)arg3;
+void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 frames, char *firstText, char *secondText) {
+    runtime->frames = frames;
+    runtime->text0 = firstText;
+    runtime->text1 = secondText;
 }
 
 extern char D_00437768[]; /* "CURRENT" */
@@ -1112,7 +1124,7 @@ s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, void *runtime) {
     return D_003C9928[index](x, y, runtime);
 }
 
-void func_002588A0(s32 arg0, s32 arg1, s32 arg2) {
+void func_002588A0(s32 output, s32 data, s32 size) {
     func_0036A420();
 }
 
@@ -1271,28 +1283,28 @@ typedef struct EvtSerializedState {
     s32 metadata; /* 0x243C */
 } EvtSerializedState;
 
-void evtWriteRuntimeHeaderValues(s32 arg0, u8 *arg1) {
+void evtWriteRuntimeHeaderValues(s32 output, EvtSerializedState *state) {
     s32 buffer[4];
-    buffer[0] = ((EvtSerializedState *)arg1)->first;
-    buffer[1] = ((EvtSerializedState *)arg1)->second;
-    buffer[2] = ((EvtSerializedState *)arg1)->third;
-    buffer[3] = ((EvtSerializedState *)arg1)->metadata;
-    func_002588A0(arg0, buffer, 0x10);
+    buffer[0] = state->first;
+    buffer[1] = state->second;
+    buffer[2] = state->third;
+    buffer[3] = state->metadata;
+    func_002588A0(output, buffer, 0x10);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00259298);
 
-void evtWriteFixedSizeEntries(s32 arg0, u8 *arg1) {
+void evtWriteFixedSizeEntries(s32 output, EvtSerializedState *table) {
     s32 i;
     u8 *entry;
     i = 0;
-    if (((EvtSerializedState *)arg1)->count > 0) {
-        entry = ((EvtSerializedState *)arg1)->records;
+    if (table->count > 0) {
+        entry = table->records;
         do {
-            func_002588A0(arg0, entry, 0x20);
+            func_002588A0(output, entry, 0x20);
             entry += 0x20;
             i++;
-        } while (i < ((EvtSerializedState *)arg1)->count);
+        } while (i < table->count);
     }
 }
 
@@ -1418,17 +1430,27 @@ void func_00259958(s32 output, EvtRuntime *runtime) {
     }
 }
 
+/* On-disk group header: two bytes followed by two little-endian halfwords. */
+typedef struct EvtGroupMetadata {
+    u8 type;
+    u8 flag;
+    u16 entry;
+    u16 value;
+    u8 extra1;
+    u8 extra2;
+} EvtGroupMetadata;
+
 void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
-    u8 record[8];
+    EvtGroupMetadata record;
     for (group = runtime->groups; group != 0; group = group->next) {
-        record[0] = *(u8 *)&group->type;
-        record[1] = group->value04;
-        *(u16 *)(record + 2) = *(u16 *)&group->value08;
-        *(u16 *)(record + 4) = group->value1C;
-        record[6] = group->value1E;
-        record[7] = group->value1F;
-        func_002588A0(output, record, 8);
+        record.type = *(u8 *)&group->type;
+        record.flag = group->value04;
+        record.entry = *(u16 *)&group->value08;
+        record.value = group->value1C;
+        record.extra1 = group->value1E;
+        record.extra2 = group->value1F;
+        func_002588A0(output, &record, 8);
     }
 }
 
@@ -1551,17 +1573,17 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_0025A280);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025CAF8);
 
-s32 evtEncodeBgmSoundCode(s32 arg0, s32 arg1) {
-    s32 temp_v0;
+s32 evtEncodeBgmSoundCode(s32 eventId, s32 variation) {
+    s32 sequenceId;
 
-    temp_v0 = 0xC7;
-    if (arg0 != 0x31F) {
-        temp_v0 = arg0 - 0x259;
-        if (arg0 >= 0x320) {
-            temp_v0 = (arg0 < 0x384) ? (arg0 - 0x258) : (arg0 - 0x29E);
+    sequenceId = 0xC7;
+    if (eventId != 0x31F) {
+        sequenceId = eventId - 0x259;
+        if (eventId >= 0x320) {
+            sequenceId = (eventId < 0x384) ? (eventId - 0x258) : (eventId - 0x29E);
         }
     }
-    return ((temp_v0 + 0x100) << 0x10) + arg1;
+    return ((sequenceId + 0x100) << 0x10) + variation;
 }
 
 s32 evtPreloadBgm(s32 id) {
