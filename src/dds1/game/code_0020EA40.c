@@ -905,7 +905,7 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
-s32 func_002114E8(u8 *task) {
+s8 func_002114E8(u8 *task) {
     s32 result;
     if (*(s8 *)(task + 0xc) != 0) {
         return 1;
@@ -918,7 +918,7 @@ s32 func_002114E8(u8 *task) {
         return 1;
     }
     result = fileRequestIsReady(*(void **)(task + 0x10));
-    return (s8)result;
+    return result;
 }
 
 s32 btlFindModelEntry(kind, id)
@@ -964,7 +964,13 @@ s32 btlGetEntryState(s32 kind, s32 value) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_002118A8);
+s32 func_002118A8(s32 kind, s32 id) {
+    s32 entry = btlFindModelEntry(kind, id);
+    if (entry != 0) {
+        return func_002114E8((u8 *)entry);
+    }
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_002118D8);
 

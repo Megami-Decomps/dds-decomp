@@ -169,7 +169,9 @@ extern void *evtBattleStageTestScreen(void);
 
 typedef struct MenuStageTestState {
     u32 flags;
-    u8 pad04[0x680];
+    u8 pad04[4];
+    s32 *layout;       /* 0x08: two counts, summed for the list length */
+    u8 pad0C[0x678];
     s32 selectedPanel; /* 0x684 */
     s32 scrollOffset;  /* 0x688 */
 } MenuStageTestState;
@@ -250,7 +252,24 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00282B08);
+void func_00282B08(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
+    s32 positionOffset[2];
+    s32 *layout = menu->layout;
+    s32 count;
+    s32 i;
+
+    count = layout[0];
+    count += layout[1];
+    if (menu->selectedPanel >= 0) {
+        mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
+    } else {
+        for (i = 0; i < count; i++) {
+            func_002828D0(positionOffset, menu, i);
+            func_00282850(x + positionOffset[0], y + positionOffset[1], z, menu, i, param);
+        }
+    }
+    mnuAdvancePanelTransition((s32)menu);
+}
 
 void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_00282B08(arg0, arg1, arg2, 0, arg3, arg4);
