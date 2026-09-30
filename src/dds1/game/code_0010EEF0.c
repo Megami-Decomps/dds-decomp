@@ -260,7 +260,15 @@ void effObjAddInnerFirstVec(EffTransformNode *arg0, void *arg1) {
     EEF0_STORE_V10(dst, inner, 0x40);
 }
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", effObjQuatMulInnerSecondVec);
+void effObjQuatMulInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
+    EffTransformNode *inner = arg0->inner;
+
+    inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
+    VU0_LOAD_VF($vf10, &inner->vec50);
+    VU0_LOAD_VF($vf11, arg1);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF($vf10, &inner->vec50);
+}
 
 void effObjMulInnerThirdVec(EffTransformNode *arg0, void *arg1) {
     EffTransformNode *inner = arg0->inner;

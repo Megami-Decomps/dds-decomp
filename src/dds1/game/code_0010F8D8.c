@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     u8 pad0[8];
@@ -12,7 +13,20 @@ typedef struct {
 
 extern u32 D_003BA9B8;
 
-INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010F8D8);
+extern void func_0010F880(void *, void *, void *);
+
+void func_0010F8D8(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x1C);
+    u32 flags = *(u32 *)(obj + 0xC0);
+
+    if (flags & 2) {
+        VU0_LOAD_MATRIX(obj);
+    } else {
+        *(u32 *)(obj + 0xC0) = flags | 2;
+        func_0010F880(obj + 0x60, obj + 0x50, obj + 0x40);
+        VU0_STORE_MATRIX(obj);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0010F8D8", func_0010F948);
 

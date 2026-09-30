@@ -81,6 +81,23 @@ extern s32 D_00435CA8;
 
 extern s32 kwlnTextureViewerHandlePad(void);
 
+typedef struct {
+    u8 pad00[0x12];
+    s8 unk12;
+    s8 unk13;
+    u8 unk14;   /* 0x14: +1 on the page cursor */
+    u8 unk15;   /* 0x15: -1 on the page cursor */
+    u8 pad16[2];
+    u8 unk18;   /* 0x18: -10 on the page cursor */
+    u8 unk19;
+    u8 unk1A;   /* 0x1A: +10 on the page cursor */
+    u8 unk1B;
+} KwlnViewerPadState;
+
+extern KwlnViewerPadState D_0040B7D8;
+
+extern s32 func_00104908(s32);
+
 extern void func_00104AA8(void *data, s32 handle);
 
 extern u8 D_00380748[];
@@ -286,7 +303,25 @@ u32 kwlnTextureGetPageIndex(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104908);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnTextureViewerHandlePad);
+s32 kwlnTextureViewerHandlePad(void) {
+    if (D_0040B7D8.unk13 < 0) {
+        return 0;
+    }
+    if (D_0040B7D8.unk14 & 2) {
+        D_00435CAC -= 1;
+    } else if (D_0040B7D8.unk15 & 2) {
+        D_00435CAC += 1;
+    } else if ((D_0040B7D8.unk18 & 2) || (D_0040B7D8.unk19 & 2)) {
+        D_00435CAC -= 10;
+    } else if ((D_0040B7D8.unk1A & 2) || (D_0040B7D8.unk1B & 2)) {
+        D_00435CAC += 10;
+    }
+    D_00435CAC = func_00104908(D_00435CAC);
+    if (D_0040B7D8.unk12 < 0) {
+        D_00435C60 ^= 1;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104AA8);
 

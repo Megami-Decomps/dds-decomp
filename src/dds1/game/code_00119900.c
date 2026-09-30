@@ -93,7 +93,7 @@ extern s32 D_003C2E80[];
 
 extern s32 scrCreateTaskWithDefaultOption(void);
 extern s32 scrReadIntParameter(s32 idx);
-extern s32 func_0010D5F0(s32 arg0);
+extern s32 func_0010D5F0();
 extern void func_0010D608(f32 arg0);
 extern Entry1A4 *dds3FindEntry(s32 arg0);
 extern void func_00119900(s32 arg0, s32 arg1);
@@ -548,7 +548,26 @@ s32 evtSelectScriptStatValue(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011BF50);
+s32 func_0011BF50(void) {
+    s32 *work = D_003C2E70;
+    s32 value;
+    u16 mode = *(u16 *)((u8 *)work + 0x14);
+    u16 index = *(u16 *)(D_003BAA68 + ((Entry1A4 *)work[2])->tableValue * 8 + 2);
+
+    switch (mode) {
+    case 1:
+        value = *(s16 *)(D_003BAA50 + index * 0x38 + 0x18);
+        break;
+    case 2:
+        value = *(s16 *)(D_003BAA50 + index * 0x38 + 0x1C);
+        break;
+    default:
+        value = 0;
+        break;
+    }
+    func_0010D5F0(value);
+    return 1;
+}
 
 s32 func_0011BFE8(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
@@ -637,7 +656,21 @@ s32 func_0011C258(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011C2A8);
+s32 func_0011C2A8(void) {
+    s32 available = func_001A1438();
+    u64 value;
+    if (available) {
+        s32 choice = scrReadIntParameter(0);
+        s32 divisor = scrReadIntParameter(1);
+        s32 dividend = choice ? 0x20 : 4;
+        value = (u64)dividend / divisor;
+    }
+    else {
+        value = 0;
+    }
+    func_0010D5F0(value);
+    return 1;
+}
 
 s32 func_0011C310(void) {
     s32 v0 = func_001A1438();
@@ -768,7 +801,26 @@ void evtSelectFineStatGrade(void) {
     func_0010D608(*(f32 *)(D_003BAA6C + grade * 4 + 0x338));
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011C700);
+extern s32 evtGetMirroredSolarPhase(void);
+
+s32 func_0011C700(u32 flags) {
+    u32 type = flags >> 16;
+    switch (type) {
+    case 0:
+        break;
+    case 1:
+        if (flags & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (mdlFlagTest(flags & 0xFFFF)) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00119900", func_0011C790);
 
