@@ -667,6 +667,14 @@ computed. Natural source shapes that flip it:
    `move $3,$2; move $4,$3; addu $3,$3,$17`). Where retail does give
    `headerSize` the higher register (DDS2 `func_002E24A8`) the sum form is right.
 
+Unresolved: a saved register initialised as a copy of another holding the same
+constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
+`func_00203BA8`, DDS2 `func_00216888`, `func_00215C70`, `func_002CBA90`). cse
+always folds a plain `i = best` to the constant (a CONST_INT costs 0). The copy
+survives only when `fold_rtx` reduces an if-converted select with a known
+condition to one register arm; the matching test shapes all had a dead second
+arm, which is a lever, so these stay asm until the real construct is found.
+
 ### FP registers: local-alloc before global-alloc
 
 A pseudo born and dying once inside one basic block is a local qty, allocated
