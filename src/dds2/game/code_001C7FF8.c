@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 func_001AA6F8(void);
 
@@ -42,6 +43,11 @@ extern s32 D_003B6940[];
 extern s32 func_00230978(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern s32 func_001B4040();
+extern s32 func_001B4210();
+extern void func_0022AF90();
+extern void func_00229728();
+extern void func_00203F08();
 
 typedef struct {
     void (*initialize)(s32);
@@ -862,7 +868,27 @@ u32 func_001CFF00(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFF08);
+void func_001CFF08(u8 *arg0) {
+    u32 id = *(u32 *)(arg0 + 0x2A0);
+
+    if (id < 0x400 && (D_00435E04[id].flags & 0x8000) != 0) {
+        *(u32 *)(arg0 + 0x21C) |= 8;
+        kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
+    }
+    if (func_001B4040() == 0) {
+        if (func_001B4210() == 0) {
+            *(u8 *)(arg0 + 0x26E) = 0;
+        } else {
+            *(u8 *)(arg0 + 0x26E) = 2;
+        }
+    } else {
+        *(u8 *)(arg0 + 0x26E) = 3;
+    }
+    func_0022AF90();
+    func_00229728(*(u32 *)(arg0 + 0x2A0));
+    func_00203F08(*(u32 *)(arg0 + 0x294), *(u32 *)(arg0 + 0x2A0));
+    VU0_STORE_VF($vf0, arg0);
+}
 
 s32 func_001CFFC8(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&

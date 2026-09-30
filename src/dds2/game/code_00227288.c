@@ -9,6 +9,23 @@ extern s32 mdlFlagTest(s32);
 
 extern s32 D_00435DD0;
 
+extern s32 D_00435E04;
+
+typedef struct BtlLightParams {
+    f32 r;
+    f32 g;
+    f32 b;
+    u8 pad0C[4];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+} BtlLightParams;
+
+extern BtlLightParams D_0037FA50;
+extern BtlLightParams D_0037FA90;
+extern BtlLightParams D_0037FAD0;
+extern BtlLightParams D_0037FB20;
+
 extern s32 func_001AA6F8(void);
 
 extern s32 btlCountTasksByKind(u32);
@@ -270,7 +287,9 @@ typedef struct BtlState {
     BtlUnit *units;
     u8 unk_22C[0x20];
     u16 unk_24C;
-    u8 unk_24E[0x4A6];
+    u8 unk_24E[0x2E];
+    s32 battleMode;
+    u8 unk_2A4[0x474];
     struct BattleLinkedEffectState *effect;
     u8 unk_698[0xC];
     s32 unk_6A4;
@@ -898,7 +917,26 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_002294D0);
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00229690);
+s32 func_00229690(u8 *unit) {
+    BtlState *battle;
+    u16 *entry;
+    u32 id;
+    u32 i;
+
+    if ((*(u32 *)(unit + 0x110) & 0x400) == 0) {
+        return 0;
+    }
+    battle = (BtlState *)func_001AA6F8();
+    i = 0;
+    entry = (u16 *)(battle->battleMode * 0x28 + D_00435E04 + 6);
+    id = *(u16 *)(unit + 0x124);
+    for (; i < 0xB; i++) {
+        if (*entry++ == id) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00229728);
 
@@ -1520,7 +1558,7 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
     }
 }
 
-s32 func_0022C948(u8 *task) {
+s8 func_0022C948(u8 *task) {
     s32 result;
     if (*(s8 *)(task + 0xc) != 0) {
         return 1;
@@ -1533,7 +1571,7 @@ s32 func_0022C948(u8 *task) {
         return 1;
     }
     result = fileRequestIsReady(*(void **)(task + 0x10));
-    return (s8)result;
+    return result;
 }
 
 s32 btlFindModelEntry(kind, id)
@@ -1579,7 +1617,13 @@ s32 btlGetEntryState(s32 kind, s32 value) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022CD30);
+s32 func_0022CD30(s32 kind, s32 id) {
+    s32 entry = btlFindModelEntry(kind, id);
+    if (entry != 0) {
+        return func_0022C948((u8 *)entry);
+    }
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022CD60);
 
@@ -1590,7 +1634,29 @@ void func_0022CF58(s32 packet, s32 first, s32 second, s32 color) {
                   0x8700, 0x9000, 0x8700, color, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022CFB0);
+void func_0022CFB0(void) {
+    D_0037FA50.r = 1.75f;
+    D_0037FA50.g = 1.75f;
+    D_0037FA50.b = 1.75f;
+    D_0037FA50.unk10 = 0.8660254f;
+    D_0037FA50.unk14 = 0.5f;
+    D_0037FA50.unk18 = 0;
+    D_0037FA90.r = 0;
+    D_0037FA90.g = 0;
+    D_0037FA90.b = 0;
+    D_0037FA90.unk10 = 0;
+    D_0037FA90.unk14 = 0;
+    D_0037FA90.unk18 = 0;
+    D_0037FAD0.r = 0;
+    D_0037FAD0.g = 0;
+    D_0037FAD0.b = 0;
+    D_0037FAD0.unk10 = 0;
+    D_0037FAD0.unk14 = 0;
+    D_0037FAD0.unk18 = 0;
+    D_0037FB20.r = 1.15f;
+    D_0037FB20.g = 1.15f;
+    D_0037FB20.b = 1.15f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022D040);
 
