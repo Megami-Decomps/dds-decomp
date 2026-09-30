@@ -110,6 +110,17 @@ typedef struct EventViewerState {
     u8 pad2430[0x8C]; /* allocated as 0x24BC bytes */
 } EventViewerState;
 
+/* Handles retained by the viewer and by its owning task context. */
+typedef struct EvtWindowContext {
+    u8 pad00[0x104];
+    s32 windowHandle;
+} EvtWindowContext;
+
+typedef struct EvtTaskContext {
+    u8 pad00[0x10C];
+    s32 taskId;
+} EvtTaskContext;
+
 typedef struct EvtViewSel {
     s32 fieldSelector; /* 0x00: one-based selector for command parameter field */
 } EvtViewSel;
@@ -256,7 +267,7 @@ typedef struct EvtWorldLink {
     s32 next; /* 0x20 */
 } EvtWorldLink;
 
-void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
+void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 scene;
     s32 world;
     s32 object;
@@ -290,7 +301,7 @@ void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
                                     time = node->time;
                                     extra = 0;
                                 }
-                                func_0024F130(object, 0, time, arg0, extra);
+                                func_0024F130(object, 0, time, endTime, extra);
                                 break;
                             }
                             node = node->next;
@@ -305,7 +316,7 @@ void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_002496B0);
 
-void evtViewerSyncWorldGroups(u32 arg0, EventViewerState *viewer) {
+void evtViewerSyncWorldGroups(u32 position, EventViewerState *viewer) {
     u8 *list;
     EvtViewNode *node;
     EvtViewNode *found;
@@ -321,7 +332,7 @@ void evtViewerSyncWorldGroups(u32 arg0, EventViewerState *viewer) {
                 }
             }
             if (found != 0) {
-                func_002496B0(arg0, list, node, viewer, 0);
+                func_002496B0(position, list, node, viewer, 0);
             }
             list = (u8 *)((EvtWorldLink *)list)->next;
         }
@@ -381,8 +392,8 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249EE8);
 
-s32 evtViewerHasUpdateFlag(s32 arg0) {
-    return (*(s32 *)(arg0 + 4) & 0x10) > 0;
+s32 evtViewerHasUpdateFlag(s32 viewer) {
+    return (*(s32 *)(viewer + 4) & 0x10) > 0;
 }
 
 
@@ -458,11 +469,11 @@ void evtViewerDispatchFlagMode(u32 viewerAddr) {
     s32 viewer;
 
     viewer = (s32)viewerAddr;
-    if ((*(u32 *)(viewer + 4) & 1) != 0) {
-        func_0024A738(0, *(u32 *)(viewer + 0x18), viewerAddr);
+    if ((((EventViewerState *)viewer)->flags & 1) != 0) {
+        func_0024A738(0, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
         return;
     }
-    func_0024A738(1, *(u32 *)(viewer + 0x18), viewerAddr);
+    func_0024A738(1, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
 }
 
 s32 evtViewFindNextGlyph(EventViewerState *viewer) {
@@ -525,15 +536,15 @@ s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
     return (s32)result;
 }
 
-void func_0024AB38(s32 mode, s32 arg1, s32 arg2, s32 viewerAddr) {
+void func_0024AB38(s32 mode, s32 first, s32 second, s32 viewerAddr) {
     EventViewerState *viewer = (EventViewerState *)viewerAddr;
     s32 count = viewer->historyCount + 1;
 
     viewer->currentId = mode;
     viewer->historyCount = count;
     viewer->history[count].id = mode;
-    viewer->history[count].a = arg1;
-    viewer->history[count].b = arg2;
+    viewer->history[count].a = first;
+    viewer->history[count].b = second;
     if (mode > 0) {
         if (mode >= 3) {
             if (mode == 3) {
@@ -563,27 +574,27 @@ u16 evtViewerPopHistory(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024ABD0);
 
-void func_0024ACC0(s32 arg0) {
+void func_0024ACC0(s32 viewerAddr) {
     s32 v0;
     s32 v1;
 
-    v0 = ((EventViewerState *)arg0)->windowContext;
+    v0 = ((EventViewerState *)viewerAddr)->windowContext;
     if (v0 == 0) {
         return;
     }
-    v1 = *(s32 *)(v0 + 0x104);
+    v1 = ((EvtWindowContext *)v0)->windowHandle;
     if (v1 == -1) {
         return;
     }
     itfMesCleanupWindow(v1, 1);
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    func_001A34D0(*(s32 *)(v0 + 0x104));
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    itfMesResetWindow(*(s32 *)(v0 + 0x104));
-    ((EventViewerState *)arg0)->windowActive = 0;
-    ((EventViewerState *)arg0)->pad23C4 = 0;
+    v0 = ((EventViewerState *)viewerAddr)->windowContext;
+    func_001A34D0(((EvtWindowContext *)v0)->windowHandle);
+    v0 = ((EventViewerState *)viewerAddr)->windowContext;
+    itfPanelSetPairFirst(((EvtWindowContext *)v0)->windowHandle, 0);
+    v0 = ((EventViewerState *)viewerAddr)->windowContext;
+    itfMesResetWindow(((EvtWindowContext *)v0)->windowHandle);
+    ((EventViewerState *)viewerAddr)->windowActive = 0;
+    ((EventViewerState *)viewerAddr)->pad23C4 = 0;
 }
 
 void func_0024AD30(EventViewerState *viewer) {
@@ -596,12 +607,12 @@ void func_0024AD40(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024AD48);
 
-s32 func_0024B040(u32 arg0) {
+s32 func_0024B040(u32 encodedId) {
     u32 idx;
     u32 lo;
 
-    idx = (arg0 << 16) >> 28;
-    lo = arg0 & 0xfff;
+    idx = (encodedId << 16) >> 28;
+    lo = encodedId & 0xfff;
     if (idx == 0) {
         return 1;
     }
@@ -624,8 +635,8 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024B080);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024B268);
 
-u32 func_0024B678(u32 arg0, u32 arg1, u32 arg2) {
-    func_0024AB38(5, 0x90, 0x48, arg2);
+u32 func_0024B678(u32 unused0, u32 unused1, u32 viewerAddr) {
+    func_0024AB38(5, 0x90, 0x48, viewerAddr);
     return 0;
 }
 
@@ -674,7 +685,7 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024C540);
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
-s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
     s32 value = viewer->commandValue;
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
@@ -749,7 +760,7 @@ u32 func_0024C9D8(u32 unused0, u32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CA28);
 
-u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
+u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, u8 *scene) {
     u8 *record = (u8 *)evtEventViewerGetPendingNode((s32)scene);
     if (record != NULL) {
         f32 *dst = *(f32 **)(record + 0x2C);
@@ -763,7 +774,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
             src++;
             dst++;
         } while (index >= 0);
-        func_00249088(*(s32 *)(scene + 0x18), scene);
+        func_00249088(((EventViewerState *)scene)->glyphAdvancePosition, scene);
         evtViewerPopHistory((EventViewerState *)scene);
         return 0;
     }
@@ -771,7 +782,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 }
 
 /* Transfer a selected two-component viewer position to the command entry. */
-s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
@@ -787,15 +798,15 @@ s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
     return 0;
 }
 
-u32 func_0024CC08(u32 arg0, u32 arg1, u32 arg2) {
-    evtViewerPopHistory((EventViewerState *)arg2);
+u32 func_0024CC08(u32 unused0, u32 unused1, u32 viewerAddr) {
+    evtViewerPopHistory((EventViewerState *)viewerAddr);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CC28);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
-s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     entry->p0C.b[0] = viewer->slotType;
@@ -807,7 +818,7 @@ s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
 }
 
 /* Apply one of three viewer selection modes to the selected slots. */
-s32 evtViewCmdSelectMode(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EventViewerState *viewer) {
     u8 *ctx = (u8 *)viewer;
     s32 handled = 0;
     s32 mode = viewer->selectionMode;
@@ -832,11 +843,11 @@ s32 evtViewCmdSelectMode(s32 arg0, s32 arg1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CE18);
 
-u32 func_0024D0F8(u32 arg0, u32 arg1, u32 arg2) {
-    if (evtEventViewerGetPendingNode(arg2) != 0) {
-        ((EventViewerState *)arg2)->unk22AC = 0;
-        ((EventViewerState *)arg2)->unk22B4 = 0;
-        func_0024AB38(0xa, 0x9c, 0x54, arg2);
+u32 func_0024D0F8(u32 unused0, u32 unused1, u32 viewerAddr) {
+    if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
+        ((EventViewerState *)viewerAddr)->unk22AC = 0;
+        ((EventViewerState *)viewerAddr)->unk22B4 = 0;
+        func_0024AB38(0xa, 0x9c, 0x54, viewerAddr);
         return 0;
     }
 }
@@ -872,7 +883,7 @@ void *func_0024D710(void) {
 }
 
 s32 func_0024D760(u8 *ctx) {
-    s32 id = *(s32 *)(ctx + 0x10C);
+    s32 id = ((EvtTaskContext *)ctx)->taskId;
 
     if (id == 0x28B || id == 0x28E) {
         return 1;
@@ -884,8 +895,8 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024D788);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D878);
 
-u8 func_0024D908(s32 arg0) {
-    return *(s32 *)(arg0 + 0x10c) == 0x263;
+u8 func_0024D908(s32 task) {
+    return ((EvtTaskContext *)task)->taskId == 0x263;
 }
 
 extern f32 D_0037F590[];

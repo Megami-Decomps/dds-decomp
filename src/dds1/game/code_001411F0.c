@@ -588,12 +588,12 @@ s32 fldPollArchiveLoad(s32 id) {
     return 0;
 }
 
-void fldSetArchiveSoundVolumePan(s32 arg0, s32 arg1) {
-    sndSetSequenceVolumePan(arg0 * 0x10000 + arg1 + 0x30000000, 0x7f, 0x3f);
+void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {
+    sndSetSequenceVolumePan(archiveId * 0x10000 + soundId + 0x30000000, 0x7f, 0x3f);
 }
 
-void fldPlayArchiveSound(s32 arg0, s32 arg1) {
-    func_002E8DD0(arg0 * 0x10000 + arg1 + 0x30000000);
+void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
+    func_002E8DD0(archiveId * 0x10000 + soundId + 0x30000000);
 }
 
 void fldResetArchiveLoadPhase(void) {
@@ -634,17 +634,17 @@ extern char D_0033F06C[][0x1C], D_0034286C[][0x1C], D_0034606C[][0x1C];
 extern char D_0033EC90[][0x18];
 extern s16 D_003D43B0[], D_003D4408[], D_003D4460[];
 extern s16 D_003BD7D0;
-void fldCacheMapLabelLengths(s32 arg0) {
+void fldCacheMapLabelLengths(s32 map) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_003D43B0[i] = strlen(D_0033F06C[func_00121818(arg0, i)]);
+        D_003D43B0[i] = strlen(D_0033F06C[func_00121818(map, i)]);
     }
     for (i = 0; i < 24; i++) {
-        D_003D4460[i] = strlen(D_0034286C[func_00121870(arg0, i)]);
+        D_003D4460[i] = strlen(D_0034286C[func_00121870(map, i)]);
     }
     for (i = 0; i < 41; i++) {
-        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(arg0, i)]);
+        D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(map, i)]);
     }
     i = 0;
     if (D_0032E3C0[0] < 100) {
@@ -656,7 +656,7 @@ void fldCacheMapLabelLengths(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142408);
 
 
-void fldSetSceneRecordChunk(s32 arg0, s32 arg1) {
+void fldSetSceneRecordChunk(s32 chunk, s32 resourceHandle) {
     /* Descriptor from func_001277A8 precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
@@ -664,12 +664,12 @@ void fldSetSceneRecordChunk(s32 arg0, s32 arg1) {
         s32 count; /* 0x08: number of scene rows */
     } SceneHeader;
     if (D_0032E3C0[0] < 0xC8) {
-        s32 source = arg0;
-        s32 resource = arg1;
+        s32 source = chunk;
+        s32 resource = resourceHandle;
         s32 transferStart = source + 8;
 
         D_003BAEE4 = resource;
-        fldRelocatePackedTransferChunk(arg0, transferStart);
+        fldRelocatePackedTransferChunk(chunk, transferStart);
         {
             s32 header = func_001277A8(transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
@@ -1061,11 +1061,11 @@ void fldCenterCameraOnEntry(void) {
 }
 
 
-void fldSetSceneLocation(s32 arg0, s32 arg1, s32 arg2) {
-    D_0032E3B0[4] = arg0;
-    D_0032E3B0[6] = arg2;
-    D_003BAEB4 = D_0032E3B0[5] = arg1;
-    D_003BAEB0 = arg0 % 100;
+void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
+    D_0032E3B0[4] = area;
+    D_0032E3B0[6] = stage;
+    D_003BAEB4 = D_0032E3B0[5] = floor;
+    D_003BAEB0 = area % 100;
 }
 
 
@@ -1126,20 +1126,20 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
 }
 
 
-void func_00146CA8(s32 arg0) {
-    if (arg0 >= 0x40) {
+void func_00146CA8(s32 index) {
+    if (index >= 0x40) {
         D_0032E474[0] = -1;
     } else {
-        D_0032E474[0] = arg0;
+        D_0032E474[0] = index;
     }
 }
 
 
-void func_00146CD0(s32 arg0) {
-    if (arg0 >= 0x40) {
+void func_00146CD0(s32 index) {
+    if (index >= 0x40) {
         D_0032E478[0] = -1;
     } else {
-        D_0032E478[0] = arg0;
+        D_0032E478[0] = index;
     }
 }
 
@@ -1382,19 +1382,19 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
 }
 
 
-void fldQueuePrimaryEffectPosition(f32 arg0, f32 arg1, f32 arg2) {
+void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z) {
     D_003BAF8C = 1;
-    D_0034C8D0[0] = arg0;
-    D_0034C8D0[1] = arg1;
-    D_0034C8D0[2] = arg2;
+    D_0034C8D0[0] = x;
+    D_0034C8D0[1] = y;
+    D_0034C8D0[2] = z;
 }
 
 
-void fldQueueSecondaryEffectPosition(f32 arg0, f32 arg1, f32 arg2) {
+void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z) {
     D_003BAF90 = 1;
-    D_0034C8E0[0] = arg0;
-    D_0034C8E0[1] = arg1;
-    D_0034C8E0[2] = arg2;
+    D_0034C8E0[0] = x;
+    D_0034C8E0[1] = y;
+    D_0034C8E0[2] = z;
 }
 
 void mnuReleaseResourceEntries(void) {
@@ -1864,8 +1864,8 @@ s32 func_0014A250(void) {
     return D_003D46C0[index].unk0[1];
 }
 
-void func_0014A298(u32 arg0) {
-    D_003BAFB0 = arg0;
+void func_0014A298(u32 value) {
+    D_003BAFB0 = value;
 }
 
 
@@ -1894,13 +1894,13 @@ extern u32 D_003BAFAC;
 extern u32 D_003BAF9C;
 extern s32 func_002EB028();
 extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
-void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
+void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
     s32 size;
     s32 handle;
 
-    D_003BAFA8 = arg1;
-    D_003BAFAC = arg2;
+    D_003BAFA8 = mode;
+    D_003BAFAC = option;
     D_003BAFA4 = field;
     D_003BAF9C = 0;
     D_003BAFA0 = 0;
@@ -2023,13 +2023,13 @@ void func_0014B5F8(void) {
 }
 
 
-void *func_0014B648(s32 arg0, s32 arg1) {
+void *func_0014B648(s32 key0, s32 key1) {
     FldEnt110 *entry = D_003BAA48;
     s32 index = 0;
 
     while (index < 8) {
-        if (entry->unk0 == arg0) {
-            if (entry->unk2 == arg1) {
+        if (entry->unk0 == key0) {
+            if (entry->unk2 == key1) {
                 return entry;
             }
         }
@@ -2276,6 +2276,12 @@ void func_0014D0E8(void) {
 }
 
 
+/* Script execution state retains the task id used by the room lookup. */
+typedef struct FldScriptTask {
+    u8 pad00[0xE4];
+    s32 taskId; /* 0xE4 */
+} FldScriptTask;
+
 s32 func_0014D100(void) {
     return *(s16 *)((u8 *)D_003D62A4[0] + 0xC);
 }
@@ -2290,7 +2296,7 @@ s32 func_0014D110(void) {
         func_0010D5F0(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         func_0010D5F0(0);
         return 1;
@@ -2324,7 +2330,7 @@ s32 func_0014D1E8(void) {
         func_0010D5F0(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         func_0010D5F0(0);
         return 1;
@@ -2376,7 +2382,7 @@ s32 func_0014D320(void) {
         func_0010D5F0(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(*(s32 *)(func_0010D6A0() + 0xE4)), 0x11);
+    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         func_0010D5F0(0);
         return 1;
@@ -3106,7 +3112,7 @@ typedef struct FldSceneParam {
 } FldSceneParam;
 extern FldSceneParam D_0034C8F0[];
 s32 fldCmdPushSceneParam(void) {
-    s32 room = fldFindRoomByTask(*(s32 *)(func_0010D6A0() + 0xE4));
+    s32 room = fldFindRoomByTask(((FldScriptTask *)func_0010D6A0())->taskId);
 
     switch (scrReadIntParameter(0)) {
     case 0:

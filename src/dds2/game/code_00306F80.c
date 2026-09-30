@@ -67,6 +67,15 @@ typedef struct GridTextWidget {
     u8 pad34[0xC];
 } GridTextWidget;
 
+typedef struct GridListNode {
+    u8 pad00[6];
+    u16 key;            /* 0x06, also used as a span in list traversal */
+    u8 pad08[0x14];
+    u8 *next;           /* 0x1C */
+    u32 child;          /* 0x20: child widget for tree traversal */
+} GridListNode;
+
+
 typedef struct GridDrawWork {
     u8 pad00[0xC];
     s16 width;               /* 0x0C */
@@ -189,9 +198,8 @@ void itfGridStorePosition(s32 *position, s32 x, s32 y) {
     position[1] = y;
 }
 
-void func_00307398(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4) {
-    sdfCreateDescriptorPacket(arg4, arg0, 0, 0, arg1, arg2, arg3, 0);
+void func_00307398(u32 packetHandle, u32 width, u32 height, u32 data, u32 context) {
+    sdfCreateDescriptorPacket(context, packetHandle, 0, 0, width, height, data, 0);
 }
 
 /* The overlay packet is present only when this work flag is set. */
@@ -313,8 +321,8 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308288(u8 arg0, u32 arg1) {
-    itfGridDrawBooleanDescriptor(arg0, 0, arg1);
+void func_00308288(u8 value, u32 kind) {
+    itfGridDrawBooleanDescriptor(value, 0, kind);
 }
 
 void func_003082A8(s32 data, s32 alternate, s32 kind) {
@@ -338,11 +346,11 @@ void func_003082A8(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308380(arg0, arg1)
-    u32 arg0;
-    u32 arg1;
+void func_00308380(data, kind)
+    u32 data;
+    u32 kind;
 {
-    func_003082A8(arg0, 0, arg1);
+    func_003082A8(data, 0, kind);
 }
 
 void func_003083A0(s32 data, s32 alternate, s32 kind) {
@@ -366,8 +374,8 @@ void func_003083A0(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308478(u32 arg0, u32 arg1) {
-    func_003083A0(arg0, 0, arg1);
+void func_00308478(u32 data, u32 kind) {
+    func_003083A0(data, 0, kind);
 }
 
 void func_00308498(s32 data, s32 kind) {
@@ -502,10 +510,10 @@ void func_00309050(s32 context) {
     func_00308478(0x44, context);
 }
 
-void func_00309090(u32 arg0) {
-    func_00308380(0x30000, arg0);
-    func_00308478(0x44, arg0);
-    func_00308808(0, 0, 0, 0x2000, 0xe00, 0, arg0);
+void func_00309090(u32 context) {
+    func_00308380(0x30000, context);
+    func_00308478(0x44, context);
+    func_00308808(0, 0, 0, 0x2000, 0xe00, 0, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_003090E8);
@@ -522,11 +530,11 @@ u32 func_003091F8(void) {
     return 0;
 }
 
-s32 func_00309200(s32 arg0) {
-    if (arg0 == 0) {
+s32 func_00309200(s32 widget) {
+    if (widget == 0) {
         return 0;
     }
-    *(s32 *)(arg0 + 0xC) = (*(s32 *)(arg0 + 0xC) & -2) | 2;
+    ((GridTextWidget *)widget)->flags = (((GridTextWidget *)widget)->flags & -2) | 2;
     return 1;
 }
 
@@ -535,12 +543,12 @@ s32 itfSetWidgetFlagsAndActivateChild(u8 *object, u32 flags) {
     if (object == 0) {
         return 0;
     }
-    *(u32 *)(object + 0xc) = (*(u32 *)(object + 0xc) & ~2) | flags;
-    child = *(s32 *)(object + 0x18);
+    ((GridTextWidget *)object)->flags = (((GridTextWidget *)object)->flags & ~2) | flags;
+    child = (s32)((GridTextWidget *)object)->children;
     if (child != 0) {
-        s32 node = *(s32 *)(child + 0x20);
+        s32 node = ((GridListNode *)child)->child;
         if (node != 0) {
-            *(u32 *)(node + 0xc) |= 2;
+            ((GridTextWidget *)node)->flags |= 2;
         }
     }
     return 1;
@@ -605,7 +613,7 @@ u32 itfDestroyGridTextWidgetTree(GridTextWidget *widget) {
     list = (u32)widget->children;
     if (list != 0) {
         do {
-            u32 child = *(u32 *)(list + 0x20);
+            u32 child = ((GridListNode *)list)->child;
             if (child != 0) {
                 itfDestroyGridTextWidgetTree((GridTextWidget *)child);
             }
@@ -677,13 +685,27 @@ void itfAdvanceGridScrollPosition(u32 owner, u32 key, s32 steps) {
     }
 }
 
-void func_00309A90(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+typedef struct GridScrollOwner {
+    u8 pad00[0xC];
+    u32 flags;
+    u8 pad10[8];
+    u8 *selected;     /* 0x18: node whose key supplies the scroll base */
+    u8 pad1C[0x20];
+    s32 keyOffset;    /* 0x3C */
+} GridScrollOwner;
 
-    temp_v0 = (s32)arg0;
-    if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        itfAdvanceGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
-                                    arg1);
+typedef struct GridScrollKey {
+    u8 pad00[6];
+    u16 key;
+} GridScrollKey;
+
+void func_00309A90(u32 owner, u32 steps) {
+    s32 widgetAddr;
+
+    widgetAddr = (s32)owner;
+    if ((((GridScrollOwner *)widgetAddr)->flags & 1) != 0) {
+        itfAdvanceGridScrollPosition(owner, (u32)((GridScrollKey *)((GridScrollOwner *)widgetAddr)->selected)->key + ((GridScrollOwner *)widgetAddr)->keyOffset,
+                                    steps);
         return;
     }
 }
@@ -709,31 +731,31 @@ void itfReverseGridScrollPosition(u32 owner, u32 key, s32 steps) {
     }
 }
 
-void func_00309B48(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_00309B48(u32 owner, u32 steps) {
+    s32 widgetAddr;
 
-    temp_v0 = (s32)arg0;
-    if ((*(u32 *)(temp_v0 + 0xc) & 1) != 0) {
-        itfReverseGridScrollPosition(arg0, (u32)*(u16 *)(*(s32 *)(temp_v0 + 0x18) + 6) + *(s32 *)(temp_v0 + 0x3c),
-                                    arg1);
+    widgetAddr = (s32)owner;
+    if ((((GridScrollOwner *)widgetAddr)->flags & 1) != 0) {
+        itfReverseGridScrollPosition(owner, (u32)((GridScrollKey *)((GridScrollOwner *)widgetAddr)->selected)->key + ((GridScrollOwner *)widgetAddr)->keyOffset,
+                                    steps);
         return;
     }
 }
 
 s32 func_00309B90(u8 *widget, u32 target) {
-    u32 flags = *(u32 *)(widget + 0xC);
+    u32 flags = ((GridTextWidget *)widget)->flags;
 
     if (flags & 2) {
-        if (target == *(u32 *)(widget + 0x18)) {
+        if (target == (u32)((GridTextWidget *)widget)->children) {
             return (flags & 1) ? 6 : 4;
         }
         return 0;
     }
     if (flags & 0x80) {
-        if (target == *(u32 *)(widget + 0x18)) {
+        if (target == (u32)((GridTextWidget *)widget)->children) {
             return 12;
         }
-    } else if (target == *(u32 *)(widget + 0x18) && (flags & 1)) {
+    } else if (target == (u32)((GridTextWidget *)widget)->children && (flags & 1)) {
         return 6;
     }
     return 0;
@@ -743,50 +765,62 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00309C00);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309DF8);
 
+/* The list cursor and its nodes overlap the common grid widget prefix. */
+typedef struct GridListCursor {
+    u8 pad00[6];
+    u16 span;           /* 0x06 */
+    u16 skipped;        /* 0x08 */
+    s16 count;          /* 0x0A */
+    u8 pad0C[4];
+    u8 *current;        /* 0x10 */
+    u8 *first;          /* 0x14 */
+    u8 *selected;       /* 0x18 */
+} GridListCursor;
+
 s32 itfFindGridNodeByKey(u32 key, u32 head) {
     u32 n;
 
-    n = *(u32 *)(head + 0x14);
-    while (n != 0 && *(u16 *)(n + 6) != key) {
-        n = *(u32 *)(n + 0x1C);
+    n = (u32)((GridListCursor *)head)->first;
+    while (n != 0 && ((GridListNode *)n)->key != key) {
+        n = (u32)((GridListNode *)n)->next;
     }
     return n;
 }
 
 s32 func_0030A070(s32 index, u8 *widget) {
-    s16 count = *(s16 *)(widget + 0xA);
+    s16 count = ((GridListCursor *)widget)->count;
     u16 width;
     u8 *first;
 
     if (index >= count) {
         return 0;
     }
-    first = *(u8 **)(widget + 0x14);
-    *(u16 *)(widget + 8) = 0;
-    *(u8 **)(widget + 0x10) = first;
-    *(u8 **)(widget + 0x18) = first;
+    first = ((GridListCursor *)widget)->first;
+    ((GridListCursor *)widget)->skipped = 0;
+    ((GridListCursor *)widget)->current = first;
+    ((GridListCursor *)widget)->selected = first;
     if (index > 0) {
-        width = *(u16 *)(widget + 6);
+        width = ((GridListCursor *)widget)->span;
         do {
-            u8 *current = *(u8 **)(widget + 0x10);
-            if (width >= count - *(u16 *)(current + 6)) {
-                (*(u16 *)(widget + 8))++;
+            u8 *current = ((GridListCursor *)widget)->current;
+            if (width >= count - ((GridListNode *)current)->key) {
+                ((GridListCursor *)widget)->skipped++;
             } else {
-                *(u8 **)(widget + 0x10) = *(u8 **)(current + 0x1C);
+                ((GridListCursor *)widget)->current = ((GridListNode *)current)->next;
             }
-            current = *(u8 **)(widget + 0x18);
-            *(u8 **)(widget + 0x18) = *(u8 **)(current + 0x1C);
+            current = ((GridListCursor *)widget)->selected;
+            ((GridListCursor *)widget)->selected = ((GridListNode *)current)->next;
         } while (--index != 0);
     }
     return 1;
 }
 
-void func_0030A0E8(u32 arg0) {
-    func_0030A070(0, arg0);
+void func_0030A0E8(u32 widget) {
+    func_0030A070(0, widget);
 }
 
 void func_0030A108(u8 *entry) {
-    func_0030A070(*(s16 *)(entry + 0xA) - 1, entry);
+    func_0030A070(((GridListCursor *)entry)->count - 1, entry);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438868);
