@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 typedef struct BtlUnit {
     u8 unk_00[0x70];
@@ -24,7 +25,8 @@ typedef struct BtlUnit {
     u16 unk_134; /* 0x134: queried unit parameter */
     u8 pad136[0x1E6];
     u32 unk_31C;
-    u8 unk_320p[0x20];
+    u8 unk_320p[0x1C];
+    u32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     u32 effectHandle; /* 0x340: attached effect released during cleanup */
     u8 unk_324[0x20];
     struct BtlUnit *next;
@@ -391,7 +393,31 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
         : "r"(pos));
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlUnitGetEffectPosVU);
+void btlUnitGetEffectPosVU(BtlUnit *unit) {
+    f32 pos[4];
+    if (!(unit->flags & 2)) {
+        btlUnitGetMuzzlePosVU(unit);
+        return;
+    }
+    effObjFetchInnerFirstVec(unit->effectObject);
+    VU0_STORE_VF(vf10, pos);
+    VU0_LOAD_VF(vf10, unit->unk_70);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, unit->muzzleOffset);
+    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "vmulx.xyzw vf10, vf10, vf2x\n\t"
+        "vmulax.xyzw ACC, vf28, vf10x\n\t"
+        "vmadday.xyzw ACC, vf29, vf10y\n\t"
+        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
+        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
+        "lqc2 vf11, 0(%0)\n\t"
+        "vadd.xyzw vf10, vf10, vf11\n\t"
+        ".set reorder"
+        :
+        : "r"(pos));
+}
 
 f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
     f32 second;
@@ -665,7 +691,21 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlAimHorizontalDirectionVU);
+extern void func_00340DC8(f32, f32, f32);
+extern f32 func_003532E8(f32, f32);
+extern u128 D_003BE0D0;
+
+s32 btlAimHorizontalDirectionVU(f32 *from, f32 *to) {
+    f32 delta[4];
+    delta[0] = to[0] - from[0];
+    delta[2] = to[2] - from[2];
+    if (delta[0] != 0.0f || delta[2] != 0.0f) {
+        func_00340DC8(0.0f, func_003532E8(delta[0], delta[2]), 0.0f);
+        return 1;
+    }
+    VU0_LOAD_VF($vf10, &D_003BE0D0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 

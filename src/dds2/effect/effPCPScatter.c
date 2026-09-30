@@ -134,9 +134,19 @@ typedef struct PcpScatterRes PcpScatterRes;
 
 extern u32 effParamWorkDuplicate(u32 param);
 
+extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src);
+
 extern u32 func_003292A8(u32 size);
 
 extern u32 *sdfResourceRetainAddress(u32 handle);
+
+extern void *memset(void *dst, s32 value, u32 size);
+
+extern u8 D_00452020[0x2C];
+
+extern u32 func_003335E0(void);
+
+extern void func_003332D0(u32 res, f32 scale);
 
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
    another unit). Each is entered with and without spawn arguments, so they
@@ -378,7 +388,37 @@ void func_0017A058(u64 table) {
     func_00179DB0(params, resource, options);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterTableDuplicate);
+
+PcpScatterWork2Copy *effPcpScatterTableDuplicate(src)
+    PcpScatterWork2Copy *src;
+{
+    PcpScatterWork2Copy *work;
+    u32 count;
+    u32 handle;
+    u32 *buf;
+    u32 i;
+
+    work = func_00179DB0(src, 0, 0);
+    effPcpScatterSharePoolResource(work->unk58, src->unk58);
+    if (work->unk40 != 0) {
+        if (work->unk48 == 0) {
+            work->unk48 = 1;
+        }
+        work->unk60 = work->unk20 / work->unk48;
+        if (work->unk20 % work->unk48 != 0) {
+            work->unk60 = work->unk60 + 1;
+        }
+        count = work->unk60;
+        handle = func_003292A8(count * 4);
+        buf = sdfResourceRetainAddress(handle);
+        work->unk68 = handle;
+        work->unk64 = buf;
+        for (i = 0; i < count; i++) {
+            work->unk64[i] = effParamWorkDuplicate(*src->unk64);
+        }
+    }
+    return work;
+}
 
 typedef struct PcpScatterLinkedWork {
     u8 pad00[0x58];
@@ -414,7 +454,37 @@ void func_0017A8B0(s32 arg0, u32 arg1) {
 void func_0017A8B8(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", effPcpScatterPoolCreate);
+PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
+    PcpScatterPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 slots;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    slots = groups * 3;
+    first = slots * 8;
+    second = slots * 2;
+    size = (first + second) * 4 + 0x34;
+    handle = func_003292A8(size);
+    block = sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (PcpScatterPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->unk10 = 1;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->unk18 = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->color = 0x80808080;
+    pool->sharedResource = 0;
+    pool->resource = func_003335E0();
+    func_003332D0(pool->resource, 1.0f);
+    memset(D_00452020, 0, 0x2C);
+    *(u16 *)(D_00452020 + 4) = 0x4000;
+    return pool;
+}
 
 void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
     if (pool->sharedResource != NULL) {
