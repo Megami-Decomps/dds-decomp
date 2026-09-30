@@ -3614,7 +3614,58 @@ void func_002E6B30(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E6B68);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002E6CB8);
+extern void effRunClassPostFrame(s32);
+
+void func_002E6CB8(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[2];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = func_002D7458(config, config + 0x24, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_UNCLOBBERED(packed);
+    blended[0] = packed;
+    *(u32 *)(out + 4) = packed;
+    if (packed & 0xFF000000) {
+        EffClassWork *dst = (EffClassWork *)list[1];
+
+        dst->color = work->baseColor;
+        dst->scale = work->scale;
+        PCP_COPY_VECTOR(dst->transform, work);
+        PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
+        effRunClassPostFrame((s32)dst);
+        *(u32 *)out = ((EffBillConfig *)config)->textureId;
+        out[0x14] = *(u8 *)(config + 0x3C);
+        VU0_LOAD_VF(vf10, work->transform);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9100);
+        VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALE_MATRIX_ROWS(vf10);
+        VU0_LOAD_VF(vf10, work);
+        VU0_SET_W_ONE(vf10);
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(mtx);
+        func_002E5E88(out, mtx);
+    }
+}
 
 void func_002E6E60(s32 work) {
     *(u32 *)(**(s32 **)(work + 0x30) + 4) = 0;
