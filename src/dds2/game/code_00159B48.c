@@ -75,7 +75,8 @@ typedef struct EffTemplatePacketList {
     f32 z; /* 0x18 */
     u8 pad1C[4];
     u32 packetCount; /* 0x20 */
-    u8 pad24[0xC];
+    u32 packetTag; /* 0x24: cleared when cloning a template */
+    u8 pad28[8];
     u16 kind; /* 0x30: resource type */
     u8 pad32[2];
     u16 subrecordCount; /* 0x34: subrecords per packet */
@@ -128,15 +129,15 @@ typedef struct EffBillEntry {
 
 extern s32 D_00451EE0[];
 
-s32 sdfAllocPacketAligned(s32 arg0);
+s32 sdfAllocPacketAligned(s32 size);
 
-void sdfInitPacketList(s32 arg0);
+void sdfInitPacketList(s32 packet);
 
-void func_0015AA30(s32 arg0, s32 arg1);
+void func_0015AA30(s32 packet, s32 source);
 
-void func_0015AD18(s32 arg0, s32 arg1);
+void func_0015AD18(s32 packet, s32 source);
 
-void func_0015B330(s32 arg0);
+void func_0015B330(s32 effect);
 
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect);
 
@@ -148,7 +149,7 @@ extern void *func_00328D68(s32 size);
 
 extern EffectConfig D_003AA884[];
 
-s32 billCreateIndexed(s32 arg0, s32 arg1);
+s32 billCreateIndexed(s32 kind, s32 index);
 
 s32 func_003292A8(s32 size);
 
@@ -156,9 +157,15 @@ EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
 void func_0015E1D0(EffTemplatePacketList *effect);
 
+/* Resource-table entry holds a reference-counted resource at +0x30. */
+typedef struct EffResourceRef {
+    u8 pad00[0x30];
+    s32 *resource;
+} EffResourceRef;
+
 void effRetainResource(s32 index) {
     s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].unk00, 0);
-    s32 *resource = *(s32 **)(D_00451EE0[index] + 0x30);
+    s32 *resource = ((EffResourceRef *)D_00451EE0[index])->resource;
     s32 references = resource[2];
 
     effect[12] = (s32)resource;
@@ -169,8 +176,8 @@ u32 func_00159BB0(void) {
     return 0xf;
 }
 
-s32 func_00159BB8(s32 arg0) {
-    return *(s32 *)(*(s32 *)(D_00451EE0[arg0] + 0x30));
+s32 func_00159BB8(s32 index) {
+    return *(s32 *)((EffResourceRef *)D_00451EE0[index])->resource;
 }
 
 void effCopyVector(dst, src)
@@ -233,7 +240,10 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
 
 typedef struct EffSlot {
     u8 pad00[4];
-    s16 value; /* 0x04 */
+    union {
+        s16 value;   /* 0x04 */
+        u16 variant; /* Same halfword read unsigned */
+    };
 } EffSlot;
 
 typedef struct EffSlotList {
@@ -282,7 +292,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 
     switch (effect->unk2C) {
     case 0:
-        *(s16 *)((u8 *)effect->unk30 + 4) = v;
+        ((EffSlot *)effect->unk30)->value = v;
         break;
     case 1:
         effect->unk3C = v;
@@ -293,7 +303,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 u16 billGetVariantValue(BillObj *effect) {
     switch (effect->unk2C) {
     case 0:
-        return *(u16 *)((u8 *)effect->unk30 + 4);
+        return ((EffSlot *)effect->unk30)->variant;
     case 1:
         return effect->unk3C;
     default:
@@ -316,9 +326,20 @@ s32 billGetKindOneEntry(BillObj *effect) {
     return 0;
 }
 
-s32 func_00159E50(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(*(s32 *)(*(s32 *)(arg0 + 0x30) + 4) + 4);
+/* Kind-one payload's +4 link leads to another +4 value word. */
+typedef struct BillLinkedValue {
+    s32 unk00;
+    s32 value;
+} BillLinkedValue;
+
+typedef struct BillValueLink {
+    s32 unk00;
+    BillLinkedValue *target;
+} BillValueLink;
+
+s32 func_00159E50(s32 billboard) {
+    if (((BillObj *)billboard)->unk2C == 1) {
+        return ((BillValueLink *)((BillObj *)billboard)->unk30)->target->value;
     }
     return 0;
 }
@@ -380,24 +401,39 @@ u16 func_00159F60(BillObj *effect) {
     return 0;
 }
 
-s32 func_00159F80(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        return *(s32 *)(arg0 + 0x54);
+/* Kind-one flag view and kind-zero dimensions, shared with the DDS1 twin. */
+typedef struct BillKindOneView {
+    u8 pad00[0x2C];
+    u16 kind;
+    u8 pad2E[0x26];
+    u32 flags; /* 0x54 */
+} BillKindOneView;
+
+typedef struct BillChildPayload {
+    s32 value;
+    u8 pad04[0x20];
+    f32 halfWidth;  /* 0x24 */
+    f32 halfHeight; /* 0x28 */
+} BillChildPayload;
+
+s32 func_00159F80(s32 billboard) {
+    if (((BillKindOneView *)billboard)->kind == 1) {
+        return ((BillKindOneView *)billboard)->flags;
     }
     return 0;
 }
 
-void func_00159FA0(s32 arg0) {
-    if (*(u16 *)(arg0 + 0x2c) == 1) {
-        *(s32 *)(arg0 + 0x54) |= 0x1000000;
+void func_00159FA0(s32 billboard) {
+    if (((BillKindOneView *)billboard)->kind == 1) {
+        ((BillKindOneView *)billboard)->flags |= 0x1000000;
     }
 }
 
-void func_00159FC8(s32 arg0, float arg1, float arg2) {
-    if (*(u16 *)(arg0 + 0x2c) == 0) {
-        s32 tmp = *(s32 *)(arg0 + 0x30);
-        *(float *)(tmp + 0x24) = arg1 * 0.5f;
-        *(float *)(tmp + 0x28) = arg2 * 0.5f;
+void func_00159FC8(s32 billboard, float width, float height) {
+    if (((BillKindOneView *)billboard)->kind == 0) {
+        s32 tmp = (s32)((BillObj *)billboard)->unk30;
+        ((BillChildPayload *)tmp)->halfWidth = width * 0.5f;
+        ((BillChildPayload *)tmp)->halfHeight = height * 0.5f;
     }
 }
 
@@ -467,22 +503,28 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A4B0);
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AA30);
 
-void func_0015ACB0(s32 arg0, s32 arg1) {
+/* Effect owner installs a callback at +0x10 to accept a new packet list. */
+typedef struct EffPacketSink {
+    u8 pad00[0x10];
+    void (*submit)(s32 owner, s32 packet);
+} EffPacketSink;
+
+void func_0015ACB0(s32 sink, s32 source) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(tmp);
-    func_0015AA30(tmp, arg1);
-    ((void (*)(s32, s32))*(s32 *)(arg0 + 0x10))(arg0, tmp);
+    func_0015AA30(tmp, source);
+    ((EffPacketSink *)sink)->submit(sink, tmp);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015AD18);
 
-void func_0015B208(s32 arg0, s32 arg1) {
+void func_0015B208(s32 sink, s32 source) {
     s32 tmp = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(tmp);
-    func_0015AD18(tmp, arg1);
-    ((void (*)(s32, s32))*(s32 *)(arg0 + 0x10))(arg0, tmp);
+    func_0015AD18(tmp, source);
+    ((EffPacketSink *)sink)->submit(sink, tmp);
 }
 
 void func_0015B270(void) {
@@ -512,8 +554,8 @@ EffectBufferTail *effAllocateBuffer(s32 count) {
     return tail;
 }
 
-void func_0015B318(u32 *arg0) {
-    func_003297C8(*arg0);
+void func_0015B318(u32 *allocationSlot) {
+    func_003297C8(*allocationSlot);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
@@ -580,9 +622,9 @@ s32 func_0015B680(EffTemplatePacketList *source) {
     return obj;
 }
 
-void func_0015B700(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015B700(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B728);
@@ -625,9 +667,9 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015BD50(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015BD50(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015BD78);
@@ -670,9 +712,9 @@ s32 func_0015C320(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015C3A0(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015C3A0(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015C3C8);
@@ -723,9 +765,9 @@ s32 func_0015CEC8(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015CF48(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015CF48(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015CF70);
@@ -767,9 +809,9 @@ s32 func_0015D4A8(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015D528(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015D528(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015D550);
@@ -812,9 +854,9 @@ s32 func_0015DBB8(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015DC38(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015DC38(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015DC60);
@@ -862,9 +904,9 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     return obj;
 }
 
-void func_0015E2F8(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015E2F8(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E320);
@@ -907,9 +949,9 @@ s32 func_0015E820(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015E8A0(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015E8A0(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015E8C8);
@@ -950,9 +992,9 @@ s32 func_0015EDC8(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015EE48(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015EE48(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EE70);
@@ -977,14 +1019,14 @@ void *func_0015F5A0(EffTemplatePacketList *source) {
     memcpy(copy, source, source->templateSize);
     memcpy((u8 *)copy + 0x150, (u8 *)source + source->templateSize, tailLen);
     copy->packetCount = 1;
-    *(u32 *)((u8 *)copy + 0x24) = 0;
+    copy->packetTag = 0;
     func_0015B330((s32)copy);
     return copy;
 }
 
-void func_0015F620(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015F620(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 extern u8 D_003AA868[];
@@ -1070,9 +1112,9 @@ s32 func_0015F870(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015F8F0(u32 arg0) {
-    effDestroyResources((EffResourceOwner *)arg0);
-    func_00328E48(arg0);
+void func_0015F8F0(u32 effect) {
+    effDestroyResources((EffResourceOwner *)effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015F918);
@@ -1119,10 +1161,10 @@ void *func_001603A0(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_00160438(u32 arg0) {
-    func_003297C8(((EffTemplatePacketList *)arg0)->auxiliaryAllocation);
-    effDestroyResources(arg0);
-    func_00328E48(arg0);
+void func_00160438(u32 effect) {
+    func_003297C8(((EffTemplatePacketList *)effect)->auxiliaryAllocation);
+    effDestroyResources(effect);
+    func_00328E48(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_00160470);

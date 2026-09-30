@@ -239,15 +239,22 @@ extern void effUpdateNode(s32 handle);
 
 extern void func_0018FF50(s32 handle);
 
-void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* The package request helpers fill a 0x40-byte buffer with a handle at +0x30. */
+typedef struct MdlPackageRequest {
+    u8 pad00[0x30];
+    s32 handle;
+    u8 pad34[0xC];
+} MdlPackageRequest;
+
+void mdlLoadViewerPackage(s32 arg0, s32 arg1, s32 flags, s32 arg3, s32 arg4) {
     u8 buffer[0x40];
 
     func_00346A80(buffer, 0);
-    if (arg2 & 2) {
+    if (flags & 2) {
         func_00346AD8(buffer);
     }
     func_00346CF0(buffer, arg3, arg4);
-    func_00233280(*(s32 *)(buffer + 0x30), arg0, arg1, arg2);
+    func_00233280(((MdlPackageRequest *)buffer)->handle, arg0, arg1, flags);
     func_00346AF8(buffer);
 }
 
@@ -329,6 +336,25 @@ typedef struct MdlRecord {
     u16 field10;    /* 0x10 */
 } MdlRecord;
 
+/* The viewer resource holds a pointer to the table container at +0x0C. */
+typedef struct MdlViewerData {
+    u8 pad00[0xA4];
+    s32 *records;  /* 0xA4: relative-linked model records */
+    s32 slotTable; /* 0xA8: indexable object slots */
+} MdlViewerData;
+
+typedef struct MdlViewerResource {
+    u8 pad00[0x0C];
+    MdlViewerData *data;
+} MdlViewerResource;
+
+typedef struct MdlViewerSlots {
+    u8 pad00[4];
+    s16 count; /* 0x04 */
+    u8 pad06[6];
+    s32 first; /* 0x0C: base of 0x10-byte slot entries */
+} MdlViewerSlots;
+
 typedef struct MdlObj {
     s32 unk0;             /* 0x00 */
     s32 handle;           /* 0x04 */
@@ -373,10 +399,17 @@ typedef struct MdlResourceItem {
     u8 pad0C[0x14];
 } MdlResourceItem;
 
+/* A resource owner's counter source exposes the current scalar at +0x1C. */
+typedef struct MdlCounterSource {
+    u8 pad00[0x1C];
+    f32 value;
+} MdlCounterSource;
+
 typedef struct {
     u8 pad00[0x14];
     MdlResourceItem *first; /* 0x14 */
     void *chunk;            /* 0x18 */
+    MdlCounterSource *counterSource; /* 0x1C */
 } MdlResourceOwner;
 
 /* Read the model record's payload word without advancing its relative link. */
@@ -389,8 +422,8 @@ u16 func_00233E38(MdlRecord *record) {
 }
 
 /* Follow relative links in the resource's record table to find an ID. */
-s32 *mdlFindViewerRecord(s32 arg0, s32 key) {
-    s32 *list = *(s32 **)(*(s32 *)(arg0 + 0xC) + 0xA4);
+s32 *mdlFindViewerRecord(s32 resource, s32 key) {
+    s32 *list = ((MdlViewerResource *)resource)->data->records;
     s32 *entry;
     s32 remaining;
 
@@ -534,10 +567,10 @@ void mdlObjDestroy(MdlObj *obj) {
     func_00328E48(obj);
 }
 
-void mdlObjInit(MdlObj *obj, s32 arg1, s32 arg2) {
+void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
-        sdfStreamCreateWithParams((s32)obj->data, arg2, obj->unk0, obj->unk10, arg1);
+        sdfStreamCreateWithParams((s32)obj->data, attributes, obj->unk0, obj->unk10, data);
     }
 }
 
@@ -589,39 +622,61 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
     entry->state = entry->state + 1;
 }
 
-s32 func_00234A10(s32 arg0, s32 arg1) {
+s32 func_00234A10(s32 resource, s32 index) {
     s32 tmp;
 
-    tmp = *(s32 *)(*(s32 *)(arg0 + 0xc) + 0xa8);
+    tmp = ((MdlViewerResource *)resource)->data->slotTable;
     if (tmp == 0) {
         return 0;
     }
-    if (arg1 >= *(s16 *)(tmp + 4)) {
+    if (index >= ((MdlViewerSlots *)tmp)->count) {
         return 0;
     }
-    return *(s32 *)(tmp + 0xc) + arg1 * 0x10;
+    return ((MdlViewerSlots *)tmp)->first + index * 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234A48);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234B48);
 
-s32 func_00234BF8(u32 arg0, s32 arg1) {
-    func_00231E28(arg0, *(u16 *)(arg1 + 8), *(u16 *)(arg1 + 10),
-                                *(u32 *)(arg1 + 0xc), *(u32 *)(arg1 + 0x10));
+/* Kind-four model record: two selectors and two 32-bit stream parameters. */
+typedef struct MdlStreamRecord {
+    s32 kind;
+    u32 size;
+    u16 selectorA; /* 0x08 */
+    u16 selectorB; /* 0x0A */
+    u32 value0C;
+    u32 value10;
+} MdlStreamRecord;
+
+s32 func_00234BF8(u32 owner, s32 record) {
+    func_00231E28(owner, ((MdlStreamRecord *)record)->selectorA,
+                  ((MdlStreamRecord *)record)->selectorB,
+                  ((MdlStreamRecord *)record)->value0C,
+                  ((MdlStreamRecord *)record)->value10);
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00234C20);
 
-void mdlCondInitEntry(s32 arg0) {
-    s32 v = *(s32 *)(arg0 + 0xC);
-    if (*(u8 *)(v + 9) == 0) {
-        s32 count = *(s32 *)(arg0 + 0x14);
-        f32 f = *(f32 *)(*(s32 *)(*(s32 *)(arg0 + 8) + 0x1C) + 0x1C);
+/* Same conditional object-entry offsets as the DDS1 model viewer. */
+typedef struct MdlObjItem {
+    u8 pad00[8];
+    MdlResourceOwner *owner; /* 0x08 */
+    s32 obj;                 /* 0x0C */
+    s32 data;                /* 0x10 */
+    s32 param;               /* 0x14 */
+    u8 attr[8];              /* 0x18 */
+} MdlObjItem;
+
+void mdlCondInitEntry(s32 entry) {
+    s32 v = ((MdlObjItem *)entry)->obj;
+    if (((MdlObj *)v)->initialized == 0) {
+        s32 count = ((MdlObjItem *)entry)->param;
+        f32 f = ((MdlObjItem *)entry)->owner->counterSource->value;
         if ((u32)(s32)f < (u32)count) {
             return;
         }
-        mdlObjInit((MdlObj *)v, *(s32 *)(arg0 + 0x10), arg0 + 0x18);
+        mdlObjInit((MdlObj *)v, ((MdlObjItem *)entry)->data, entry + 0x18);
     }
 }
 
@@ -1110,19 +1165,19 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_002382F0);
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 
 void func_00238650(u8 *obj) {
-    s32 count = sdfCountMapPositionRecords(*(s32 *)(obj + 0x18));
+    s32 count = sdfCountMapPositionRecords((s32)((MdlResourceOwner *)obj)->chunk);
 
     if (count > 0) {
         s32 i = 0;
         s32 list = sdfCreateResetPacketList();
-        s32 record = sdfChunkFindByTag(*(s32 *)(obj + 0x18), 0x534F504D) + 0x10;
+        s32 record = sdfChunkFindByTag((s32)((MdlResourceOwner *)obj)->chunk, 0x534F504D) + 0x10;
 
         do {
             s32 current = record;
 
             i++;
             record += 0x40;
-            sdfSetLookAtBasisFromRecord(*(s32 *)(obj + 0x18), current);
+            sdfSetLookAtBasisFromRecord((s32)((MdlResourceOwner *)obj)->chunk, current);
             sdfAppendPacket(list, func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (i != count);
         D_00380048.submit(&D_00380048, list);
@@ -1205,12 +1260,18 @@ void func_0023A028(void) {
     evtDisableSolarPhaseAdvance();
 }
 
+/* Model flag words are stored directly in the global work area at +0x840. */
+typedef struct MdlFlagBank {
+    u8 pad00[0x840];
+    u32 words[0x80];
+} MdlFlagBank;
+
 void mdlFlagClearAll(void) {
     u32 *puVar1;
     s32 temp_v0;
 
     temp_v0 = 0x7f;
-    puVar1 = (u32 *)(D_00435DD0 + 0x840);
+    puVar1 = ((MdlFlagBank *)D_00435DD0)->words;
     do {
         temp_v0 = temp_v0 - 1;
         *puVar1 = 0;
@@ -1229,22 +1290,20 @@ void mdlClearFlagRanges(void) {
     } while (i < 0x1000);
 }
 
-void mdlFlagSet(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    *(u32 *)(D_00435DD0 + off) |= 1 << arg0;
+/* Signed flag indices need a bias before arithmetic right shift divides by 32. */
+void mdlFlagSet(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    ((MdlFlagBank *)D_00435DD0)->words[adjustedFlag >> 5] |= 1 << flag;
 }
 
-void mdlFlagClear(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    *(u32 *)(D_00435DD0 + off) &= ~(1 << arg0);
+void mdlFlagClear(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    ((MdlFlagBank *)D_00435DD0)->words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
-s32 mdlFlagTest(s32 arg0) {
-    s32 temp_v0 = (arg0 < 0) ? arg0 + 0x1f : arg0;
-    s32 off = (temp_v0 >> 5) * 4 + 0x840;
-    return (*(s32 *)(D_00435DD0 + off) >> arg0) & 1;
+s32 mdlFlagTest(s32 flag) {
+    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
+    return (((s32)((MdlFlagBank *)D_00435DD0)->words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004214E8);
