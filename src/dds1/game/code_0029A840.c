@@ -945,10 +945,10 @@ u32 effDuplicateSmallHeader(source)
 }
 
 void func_0029C570(void) {
-    u64 temp_v0;
+    u64 resource;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    effDuplicateSmallHeader(temp_v0);
+    resource = fileResolvePrimaryBuffer();
+    effDuplicateSmallHeader(resource);
 }
 
 void func_0029C590(u32 arg0) {
@@ -964,15 +964,15 @@ void func_0029C5D0(u32 *arg0) {
     *arg0 = 0;
 }
 
-void func_0029C5D8(s32 *arg0) {
-    s32 temp_v0;
+void func_0029C5D8(s32 *counter) {
+    s32 frame;
 
-    temp_v0 = *arg0;
-    if (temp_v0 == 0) {
-        kwlnFadeSetupFrames(arg0[1], arg0[2]);
-        temp_v0 = *arg0;
+    frame = *counter;
+    if (frame == 0) {
+        kwlnFadeSetupFrames(counter[1], counter[2]);
+        frame = *counter;
     }
-    *arg0 = temp_v0 + 1;
+    *counter = frame + 1;
 }
 
 u8 *func_0029C620(source)
@@ -986,10 +986,10 @@ const u8 *source;
 }
 
 void func_0029C6F0(void) {
-    u64 temp_v0;
+    u64 resource;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    func_0029C620(temp_v0);
+    resource = fileResolvePrimaryBuffer();
+    func_0029C620(resource);
 }
 
 void func_0029C710(void) {
@@ -1014,22 +1014,22 @@ void func_0029CDF0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x14) = arg1;
 }
 
-void func_0029CDF8(s32 arg0) {
-    u32 temp_v0;
-    u32 *puVar2;
-    u32 temp_v1;
+void func_0029CDF8(s32 work) {
+    u32 count;
+    u32 *entries;
+    u32 index;
 
-    temp_v1 = 0;
-    temp_v0 = *(u32 *)(arg0 + 0x4c);
-    puVar2 = *(u32 **)(arg0 + 8);
-    if (temp_v0 != 0) {
+    index = 0;
+    count = *(u32 *)(work + 0x4c);
+    entries = *(u32 **)(work + 8);
+    if (count != 0) {
         do {
-            temp_v1 = temp_v1 + 1;
-            *puVar2 = 0xffffffff;
-            puVar2 = puVar2 + 2;
-        } while (temp_v1 < temp_v0);
+            index = index + 1;
+            *entries = 0xffffffff;
+            entries = entries + 2;
+        } while (index < count);
     }
-    memset(*(u32 *)(arg0 + 0x10), 0, temp_v0 << 3);
+    memset(*(u32 *)(work + 0x10), 0, count << 3);
 }
 
 void func_0029CE50(void *arg0) {
@@ -1080,10 +1080,10 @@ u32 effDuplicatePayloadHeader(source)
 }
 
 void func_0029CF88(void) {
-    u64 temp_v0;
+    u64 resource;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    effDuplicatePayloadHeader(temp_v0);
+    resource = fileResolvePrimaryBuffer();
+    effDuplicatePayloadHeader(resource);
 }
 
 void func_0029CFA8(u32 arg0) {
@@ -1099,15 +1099,15 @@ void func_0029CFE8(u32 *arg0) {
     *arg0 = 0;
 }
 
-void func_0029CFF0(s32 *arg0) {
-    s32 temp_v0;
+void func_0029CFF0(s32 *counter) {
+    s32 frame;
 
-    temp_v0 = *arg0;
-    if (temp_v0 == 0) {
-        evtSelStateCreate(arg0[1], (s16)arg0[2], arg0[3], arg0[4]);
-        temp_v0 = *arg0;
+    frame = *counter;
+    if (frame == 0) {
+        evtSelStateCreate(counter[1], (s16)counter[2], counter[3], counter[4]);
+        frame = *counter;
     }
-    *arg0 = temp_v0 + 1;
+    *counter = frame + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029D040);
@@ -1408,14 +1408,14 @@ u8 *effCreateBillboardWork(u8 *source) {
     return work;
 }
 
-void func_0029E4C0(u32 arg0) {
-    s32 temp_v0;
+void func_0029E4C0(u32 work) {
+    s32 billboard;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 100);
-    if (temp_v0 != 0) {
-        billDispatchByKind(temp_v0);
+    billboard = *(s32 *)((s32)work + 100);
+    if (billboard != 0) {
+        billDispatchByKind(billboard);
     }
-    func_002CFF98(arg0);
+    func_002CFF98(work);
 }
 
 u8 *effDuplicateBillState(const u8 *source) {
@@ -1425,14 +1425,14 @@ u8 *effDuplicateBillState(const u8 *source) {
     return effect;
 }
 
-void func_0029E5B0(s32 arg0, s32 arg1) {
-    u32 temp_v0;
+void func_0029E5B0(s32 dst, s32 src) {
+    u32 billboard;
 
-    if (*(s32 *)(arg0 + 100) != 0) {
-        billDispatchByKind(*(s32 *)(arg0 + 100));
+    if (*(s32 *)(dst + 100) != 0) {
+        billDispatchByKind(*(s32 *)(dst + 100));
     }
-    temp_v0 = func_00151E60(*(u32 *)(arg1 + 100));
-    *(u32 *)(arg0 + 100) = temp_v0;
+    billboard = func_00151E60(*(u32 *)(src + 100));
+    *(u32 *)(dst + 100) = billboard;
 }
 
 void func_0029E600(s32 arg0) {
@@ -2789,12 +2789,12 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     }
 }
 
-void func_002A4850(s32 arg0) {
-    u32 temp_v0;
+void func_002A4850(s32 work) {
+    u32 effect;
 
-    temp_v0 = *(u32 *)(*(s32 *)(arg0 + 0x30) + 4);
-    *(u32 *)(*(s32 *)(*(s32 *)(arg0 + 0x30) + 8) + 4) = 0;
-    func_002A5410(temp_v0);
+    effect = *(u32 *)(*(s32 *)(work + 0x30) + 4);
+    *(u32 *)(*(s32 *)(*(s32 *)(work + 0x30) + 8) + 4) = 0;
+    func_002A5410(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002A4878);
@@ -2943,11 +2943,11 @@ u8 *func_002A5288(u16 kind, void *source) {
     return effect;
 }
 
-void func_002A5378(s32 arg0) {
-    void *temp_v0;
+void func_002A5378(s32 request) {
+    void *source;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    func_002A5288(*(u16 *)(arg0 + 0xc), temp_v0);
+    source = fileResolvePrimaryBuffer();
+    func_002A5288(*(u16 *)(request + 0xc), source);
 }
 
 void func_002A53A8(u8 *work) {
@@ -3467,11 +3467,11 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002AA748);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AA928);
 
-void func_002AAA18(s32 arg0) {
-    u64 temp_v0;
+void func_002AAA18(s32 request) {
+    u64 source;
 
-    temp_v0 = fileResolvePrimaryBuffer();
-    func_002AA928(*(u16 *)(arg0 + 0xc), temp_v0);
+    source = fileResolvePrimaryBuffer();
+    func_002AA928(*(u16 *)(request + 0xc), source);
 }
 
 void func_002AAA48(u8 *work) {
@@ -3783,12 +3783,12 @@ u8 *func_002ABD50(u8 *work) {
     return node;
 }
 
-void func_002ABDB0(s32 arg0) {
-    s32 temp_v0;
+void func_002ABDB0(s32 work) {
+    s32 state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x30);
-    func_002AE3C8(*(u32 *)(temp_v0 + 4));
-    func_002D0918(*(u32 *)(temp_v0 + 8));
+    state = *(s32 *)(work + 0x30);
+    func_002AE3C8(*(u32 *)(state + 4));
+    func_002D0918(*(u32 *)(state + 8));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002ABDE0);
@@ -3974,12 +3974,12 @@ u8 *func_002AC9B0(u8 *work) {
     return node;
 }
 
-void func_002ACA10(s32 arg0) {
-    s32 temp_v0;
+void func_002ACA10(s32 work) {
+    s32 state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x30);
-    func_002AE3C8(*(u32 *)(temp_v0 + 4));
-    func_002D0918(*(u32 *)(temp_v0 + 8));
+    state = *(s32 *)(work + 0x30);
+    func_002AE3C8(*(u32 *)(state + 4));
+    func_002D0918(*(u32 *)(state + 8));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002ACA40);
@@ -4164,12 +4164,12 @@ u8 *func_002AD628(u8 *work) {
     return node;
 }
 
-void func_002AD688(s32 arg0) {
-    s32 temp_v0;
+void func_002AD688(s32 work) {
+    s32 state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x30);
-    func_002AE3C8(*(u32 *)(temp_v0 + 4));
-    func_002D0918(*(u32 *)(temp_v0 + 8));
+    state = *(s32 *)(work + 0x30);
+    func_002AE3C8(*(u32 *)(state + 4));
+    func_002D0918(*(u32 *)(state + 8));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AD6B8);
@@ -4455,12 +4455,12 @@ u32 *effPrepareOwnedTextureAnimation(u8 *work) {
     return buffer;
 }
 
-void func_002AEC30(s32 arg0) {
-    s32 temp_v0;
+void func_002AEC30(s32 work) {
+    s32 state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x30);
-    func_002B0B08(*(u32 *)(temp_v0 + 4));
-    func_002D0918(*(u32 *)(temp_v0 + 8));
+    state = *(s32 *)(work + 0x30);
+    func_002B0B08(*(u32 *)(state + 4));
+    func_002D0918(*(u32 *)(state + 8));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002AEC60);
@@ -4610,12 +4610,12 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *work) {
     return buffer;
 }
 
-void func_002B0360(s32 arg0) {
-    s32 temp_v0;
+void func_002B0360(s32 work) {
+    s32 state;
 
-    temp_v0 = *(s32 *)(arg0 + 0x30);
-    func_002B0B08(*(u32 *)(temp_v0 + 4));
-    func_002D0918(*(u32 *)(temp_v0 + 8));
+    state = *(s32 *)(work + 0x30);
+    func_002B0B08(*(u32 *)(state + 4));
+    func_002D0918(*(u32 *)(state + 8));
 }
 
 void effOffsetNodeRowsVU(u8 *work) {
@@ -5068,13 +5068,13 @@ u32 effCreateInitializedObject(u32 type, u32 parameter, u32 index) {
     return (u32)effect;
 }
 
-u32 func_002B35C8(s32 arg0) {
-    u32 temp_v0;
+u32 func_002B35C8(s32 work) {
+    u32 effect;
 
-    temp_v0 = func_002B3390(*(u32 *)(arg0 + 0x38), **(u32 **)(arg0 + 0x30),
-                                                (*(u32 **)(arg0 + 0x30))[1]);
-    func_002B3420(temp_v0);
-    return temp_v0;
+    effect = func_002B3390(*(u32 *)(work + 0x38), **(u32 **)(work + 0x30),
+                                                (*(u32 **)(work + 0x30))[1]);
+    func_002B3420(effect);
+    return effect;
 }
 
 void effReleaseTargetSlots(u8 *work) {
@@ -5153,11 +5153,11 @@ void effReportResourceStatus(u8 *work) {
 }
 
 void func_002B3C20(void) {
-    s32 temp_v0;
+    s32 actor;
 
-    temp_v0 = func_001A17F0();
-    if ((*(u32 *)(temp_v0 + 500) & 0x6000000) != 0) {
-        func_001EFD58(temp_v0 + 0x50, temp_v0 + 0x60, 0);
+    actor = func_001A17F0();
+    if ((*(u32 *)(actor + 500) & 0x6000000) != 0) {
+        func_001EFD58(actor + 0x50, actor + 0x60, 0);
         return;
     }
 }
@@ -5197,67 +5197,67 @@ void effSetActiveSlot(u32 index, u8 color, u32 value) {
 }
 
 void func_002B40E0(void) {
-    s32 temp_v0;
+    s32 actor;
 
-    temp_v0 = func_001A17F0();
-    if ((*(u32 *)(temp_v0 + 500) & 0x6000000) != 0) {
+    actor = func_001A17F0();
+    if ((*(u32 *)(actor + 500) & 0x6000000) != 0) {
         effResetSlots();
         return;
     }
 }
 
-void func_002B4118(s32 arg0) {
-    s32 temp_v0;
-    u32 temp_v1;
-    u32 *puVar3;
-    u8 *puVar4;
-    u32 temp_v2;
+void func_002B4118(s32 work) {
+    s32 elapsed;
+    u32 duration;
+    u32 *slotData;
+    u8 *slotColor;
+    u32 index;
 
-    temp_v2 = 0;
+    index = 0;
     func_001A17F0();
-    temp_v0 = *(s32 *)(arg0 + 0x28);
-    puVar4 = (u8 *)(*(s32 *)(arg0 + 0x38) + 0x18);
-    puVar3 = (u32 *)(*(s32 *)(arg0 + 0x38) + 0x10);
+    elapsed = *(s32 *)(work + 0x28);
+    slotColor = (u8 *)(*(s32 *)(work + 0x38) + 0x18);
+    slotData = (u32 *)(*(s32 *)(work + 0x38) + 0x10);
     do {
-        temp_v1 = puVar3[-4];
-        if (temp_v1 < *puVar3) {
+        duration = slotData[-4];
+        if (duration < *slotData) {
             return;
         }
-        if (temp_v0 == 0) {
-            effSetActiveSlot(temp_v2, *puVar4, puVar3[-2]);
-            temp_v1 = puVar3[-4];
+        if (elapsed == 0) {
+            effSetActiveSlot(index, *slotColor, slotData[-2]);
+            duration = slotData[-4];
         }
-        if ((temp_v1 != 0) && (temp_v0 == temp_v1 - *puVar3)) {
-            effSetDormantSlot(temp_v2, *puVar4, *puVar3);
+        if ((duration != 0) && (elapsed == duration - *slotData)) {
+            effSetDormantSlot(index, *slotColor, *slotData);
         }
-        temp_v2 = temp_v2 + 1;
-        puVar4 = puVar4 + 1;
-        puVar3 = puVar3 + 1;
-    } while (temp_v2 < 2);
+        index = index + 1;
+        slotColor = slotColor + 1;
+        slotData = slotData + 1;
+    } while (index < 2);
 }
 
 void func_002B41D8(void) {
     func_001EF9D8(0xc);
 }
 
-void effUpdateSlotTimerPair(u8 *arg0) {
-    u32 *puVar3;
-    u32 temp_v0;
-    u32 temp_v1;
+void effUpdateSlotTimerPair(u8 *work) {
+    u32 *slotData;
+    u32 elapsed;
+    u32 duration;
 
     func_001A17F0();
-    temp_v0 = *(u32 *)(arg0 + 0x28);
-    puVar3 = *(u32 **)(arg0 + 0x38);
-    temp_v1 = puVar3[0];
-    if (temp_v1 < puVar3[3]) {
+    elapsed = *(u32 *)(work + 0x28);
+    slotData = *(u32 **)(work + 0x38);
+    duration = slotData[0];
+    if (duration < slotData[3]) {
         return;
     }
-    if (temp_v0 == 0) {
-        func_001EF990(puVar3[1], *(u16 *)(puVar3 + 2));
-        temp_v1 = puVar3[0];
+    if (elapsed == 0) {
+        func_001EF990(slotData[1], *(u16 *)(slotData + 2));
+        duration = slotData[0];
     }
-    if (temp_v1 != 0 && temp_v0 == temp_v1 - puVar3[3]) {
-        func_001EF9D8(*(u16 *)(puVar3 + 3));
+    if (duration != 0 && elapsed == duration - slotData[3]) {
+        func_001EF9D8(*(u16 *)(slotData + 3));
     }
 }
 

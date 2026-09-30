@@ -212,25 +212,25 @@ u32 effLoadIndexedResource(const char *base, const char *name, u32 retainResourc
     return result;
 }
 
-void func_002BC978(u64 arg0, u32 *arg1) {
-    u32 temp_v0;
-    u32 temp_v1;
+void func_002BC978(u64 job, u32 *out) {
+    u32 resource;
+    u32 instance;
 
-    temp_v0 = fileGetResourceHandle();
-    temp_v1 = func_002BD9C0(temp_v0, 0);
-    *arg1 = temp_v1;
-    func_002D0918(temp_v0);
-    func_002887A0(arg0);
+    resource = fileGetResourceHandle();
+    instance = func_002BD9C0(resource, 0);
+    *out = instance;
+    func_002D0918(resource);
+    func_002887A0(job);
 }
 
-void func_002BC9D0(u64 arg0, u32 *arg1) {
-    u32 temp_v0;
-    u32 temp_v1;
+void func_002BC9D0(u64 job, u32 *out) {
+    u32 resource;
+    u32 instance;
 
-    temp_v0 = fileGetResourceHandle();
-    temp_v1 = func_002BD9C0(temp_v0, 1);
-    *arg1 = temp_v1;
-    func_002887A0(arg0);
+    resource = fileGetResourceHandle();
+    instance = func_002BD9C0(resource, 1);
+    *out = instance;
+    func_002887A0(job);
 }
 
 extern s32 func_003014F0(char *, const char *, ...);
@@ -262,17 +262,17 @@ u32 effLoadMappedResource(const char *base, const char *name) {
     return value;
 }
 
-void func_002BCB18(u64 arg0, u32 *arg1) {
-    u32 temp_v0;
-    u32 temp_v1;
-    u32 temp_v2;
+void func_002BCB18(u64 job, u32 *out) {
+    u32 resource;
+    u32 address;
+    u32 mapped;
 
-    temp_v0 = fileGetResourceHandle();
-    temp_v1 = sdfResourceRetainAddress(temp_v0);
-    temp_v2 = func_002BD1F8(temp_v1);
-    *arg1 = temp_v2;
-    func_002D0918(temp_v0);
-    func_002887A0(arg0);
+    resource = fileGetResourceHandle();
+    address = sdfResourceRetainAddress(resource);
+    mapped = func_002BD1F8(address);
+    *out = mapped;
+    func_002D0918(resource);
+    func_002887A0(job);
 }
 
 void effRequestMappedResource(const char *base, const char *name, u32 *out) {
@@ -477,16 +477,16 @@ u32 func_002BD378(s32 arg0) {
     return 1;
 }
 
-s32 func_002BD398(s32 arg0, s32 arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
+s32 func_002BD398(s32 work, s32 index) {
+    s32 alternate;
+    s32 entry;
 
-    temp_v1 = arg1 * 0xa0 + *(s32 *)(arg0 + 0x18);
-    temp_v0 = *(s32 *)(temp_v1 + 0x9c);
-    if (temp_v0 != 0) {
-        temp_v1 = temp_v0;
+    entry = index * 0xa0 + *(s32 *)(work + 0x18);
+    alternate = *(s32 *)(entry + 0x9c);
+    if (alternate != 0) {
+        entry = alternate;
     }
-    return temp_v1;
+    return entry;
 }
 
 void func_002BD3B8(BdWork *p) {
@@ -516,12 +516,12 @@ void func_002BD620(void *a0, s32 a1, BdWork *p) {
     func_002BD3D8(a0, a1, p);
 }
 
-void func_002BD640(u32 arg0, u32 arg1) {
-    s32 temp_v0;
+void func_002BD640(u32 work, u32 index) {
+    s32 entry;
 
-    temp_v0 = *(s32 *)((s32)arg0 + 0x18) + (s32)arg1 * 0xa0;
-    memset(temp_v0, 0, 0xa0);
-    func_002BD620(arg0, arg1, temp_v0);
+    entry = *(s32 *)((s32)work + 0x18) + (s32)index * 0xa0;
+    memset(entry, 0, 0xa0);
+    func_002BD620(work, index, entry);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD6A8);
