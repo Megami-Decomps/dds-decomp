@@ -5,7 +5,7 @@
 
 extern u32 btlGetEffectActor(void);
 
-extern u32 func_001A3360(u64, u64, u64);
+extern u32 func_001A3360(s32, s32, s32);
 
 extern void *btlAllocateIndexList(s32);
 
@@ -55,6 +55,15 @@ extern s32 func_001A17F0(void);
 
 extern void func_001D6300(void *, void *);
 
+extern u8 *D_003BAA50;
+
+extern s8 *D_003BAA4C;
+
+extern s32 mdlFlagTest(s32);
+
+extern void btlSetUnitPosition(BtlUnit *, void *);
+extern void btlSetUnitRotation(BtlUnit *, void *);
+
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 typedef struct AiSlot {
     u8 weight;
@@ -94,7 +103,11 @@ typedef struct BtlUnit {
     s32 displaySpecies; /* 0xE0 */
     u8 unk_E4[8];
     s32 unk_EC;
-    u8 unk_F0[0x18];
+    u32 unk_F0;
+    BtlTask *task;       /* 0xF4 */
+    BtlUnit *linkedA;    /* 0xF8 */
+    BtlUnit *linkedB;    /* 0xFC */
+    u8 unk_100[8];
     u64 identity; /* 0x108: compared to exclude the current actor */
     u32 flags;
     u32 unk_114;
@@ -1307,7 +1320,53 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00202668);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00202F90);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00203098);
+/* Picks the target with the lowest nonzero health value among units that block the
+ * element query; when none qualifies, every listed unit is a candidate. */
+s32 func_00203098(s32 actor, s32 action) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u32 best;
+    u32 bestIndex;
+    u16 found;
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        found = 0;
+        best = 0x7FFF;
+        bestIndex = 0;
+        for (i = 0; i < count; i++) {
+            s32 unit = btlGetIndexListEntry((void *)list, i);
+            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
+                u16 current = func_001A17F8(&((BtlUnit *)unit)->unk_120);
+                if (best >= current && current != 0) {
+                    best = current;
+                    found++;
+                    bestIndex = i;
+                }
+            }
+        }
+        if (found != 0) {
+            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, btlGetIndexListEntry((void *)list, bestIndex));
+        } else {
+            u32 n = count;
+            for (i = 0; i < n; i++) {
+                flags[i] = 1;
+            }
+            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        }
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
 
 s32 btlSelectLowestHealthRateTarget(s32 actor) {
     u32 matching;
@@ -1402,7 +1461,31 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002035E0);
+s32 func_002035E0(s32 actor, s32 mode) {
+    u32 matching;
+    u32 count;
+    u16 flags[12];
+    s32 list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    u16 i;
+
+    switch (matching) {
+    case 0:
+        memset(flags, 0, sizeof(flags));
+        for (i = 0; i < count; i++) {
+            if (((BtlUnit *)btlGetIndexListEntry((void *)list, i))->mode == mode) {
+                flags[i] = 1;
+            }
+        }
+        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        break;
+    }
+    btlFreeIndexList((void *)list);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002036E8);
 
@@ -1594,7 +1677,19 @@ u32 func_00204AC0(void) {
     return 0xffffffff;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00204AC8);
+s32 func_00204AC8(s32 unused, s32 unit, s32 index) {
+    s32 result = 0;
+    if (!(((BtlUnit *)unit)->flags & 0x400)) {
+        return result;
+    }
+    if (D_003BAA50[index * 0x38 + 2] == 2) {
+        if (func_001A8050(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
+            return 1;
+        }
+        return 4;
+    }
+    return 0;
+}
 
 u32 func_00204B40(void) {
     return 0xffffffff;
@@ -1774,7 +1869,43 @@ void func_00204FE0(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00205070);
+void func_00205070(void) {
+    BtlUnit *target = NULL;
+    BtlState *state = (BtlState *)func_001A17F0();
+    BtlUnit *unit;
+    f32 position[4];
+    f32 shift;
+
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                if (unit->mode == 0x105) {
+                    target = unit;
+                    break;
+                }
+            }
+        }
+    }
+    if (target != NULL) {
+        func_001D6300(target, position);
+        shift = -position[0];
+        position[0] = 0.0f;
+        PCP_COPY_VECTOR((u8 *)target + 0x30, position);
+        btlSetUnitPosition(target, position);
+        for (unit = state->units; unit != NULL; unit = unit->next) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x400) {
+                    if (unit != target) {
+                        func_001D6300(unit, position);
+                        position[0] += shift;
+                        PCP_COPY_VECTOR((u8 *)unit + 0x30, position);
+                        btlSetUnitPosition(unit, position);
+                    }
+                }
+            }
+        }
+    }
+}
 
 s32 btlDisableUnitsIfSpeciesFlagged(void) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
@@ -1824,7 +1955,12 @@ typedef struct BtlSlotEntry {
     u8 unk_52[0x1A4 - 0x52];
 } BtlSlotEntry;
 
-extern BtlSlotEntry *D_003BAA00;
+typedef struct BtlSlotTable {
+    u8 unk_000[0xA60];
+    BtlSlotEntry entry[5];
+} BtlSlotTable;
+
+extern BtlSlotTable *D_003BAA00;
 
 void btlSelectSlotEntries(void) {
     s32 *effect = *(s32 **)((u8 *)func_001A17F0() + 0x694);
@@ -1832,7 +1968,7 @@ void btlSelectSlotEntries(void) {
     BtlSlotEntry *ready = NULL;
     BtlSlotEntry *active = NULL;
     u32 i;
-    entry = (BtlSlotEntry *)((u8 *)D_003BAA00 + 0xA60);
+    entry = D_003BAA00->entry;
     for (i = 0; i < 5; i++) {
         u16 flags = entry->flags;
         effect[i] = flags;
@@ -1860,7 +1996,26 @@ void btlSelectSlotEntries(void) {
     active->unk_06 = active->unk_08;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00205420);
+void func_00205420(void) {
+    s32 *effect = *(s32 **)((u8 *)func_001A17F0() + 0x694);
+    BtlSlotEntry *selected = NULL;
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        if (effect[i] & 1) {
+            if (effect[i] & 2) {
+                D_003BAA00->entry[i].flags |= 2;
+            } else {
+                D_003BAA00->entry[i].flags &= ~2;
+            }
+            if (D_003BAA00->entry[i].kind == 1) {
+                selected = &D_003BAA00->entry[i];
+            }
+        }
+    }
+    memcpy(selected->data, (u8 *)effect + 0x14, 0x30);
+    selected->unk_06 = selected->unk_08;
+}
 
 void func_00205520(u8 *unit) {
     u8 *battle = (u8 *)func_001A17F0();
@@ -1931,7 +2086,16 @@ s64 btlInitResourcesWrap(s32 unused, s32 resource) {
     return btlInitializeResources(unused, resource);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002056E0);
+void func_002056E0(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)func_001A17F0();
+    u32 flags = unit->flags & ~0x100;
+    u16 status = unit->unk_12E;
+    flags &= ~8;
+    status &= 0x4000;
+    *(BtlUnit **)battle->effect = unit;
+    unit->flags = flags;
+    unit->unk_12E = status;
+}
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205730);
 
@@ -1971,8 +2135,6 @@ void btlResetEffectState(void) {
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5D50);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00205918);
-
-extern u8 *D_003BAA50;
 
 s32 func_00205B18(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
     BattleEffectState *effect;
@@ -2942,7 +3104,41 @@ void btlStepFocusAngle(void) {
     func_00221EF0(((BtlUnit *)*(u32 **)slot)->model, 0, slot[1]);
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00209140);
+typedef struct BtlEffectTarget {
+    u8 pad00[8];
+    u32 flags;    /* 0x08 */
+    s32 targetId; /* 0x0C */
+} BtlEffectTarget;
+
+s32 func_00209140(BtlUnit *actor, BtlUnit *target, s32 command) {
+    BtlEffectTarget *effect = (BtlEffectTarget *)((BtlState *)func_001A17F0())->effect;
+    s32 unit;
+    u32 blocked;
+
+    if (!(actor->flags & 0x200)) {
+        return 0;
+    }
+    if (!(target->flags & 0x400)) {
+        return 0;
+    }
+    if (D_003BAA4C[command * 2 + 1] != 1) {
+        unit = btlFindUnitByActor(actor);
+        if (unit == 0) {
+            return 0;
+        }
+        blocked = func_001A3360(unit, 0, 0);
+    } else {
+        blocked = D_003BAA50[command * 0x38 + 8];
+    }
+    if (blocked != 0) {
+        return 4;
+    }
+    if (target->lookupId != effect->targetId) {
+        return 4;
+    }
+    effect->flags |= 1;
+    return 0;
+}
 
 u32 func_00209220(u32 unused, s32 unit) {
     u32 result;
@@ -3079,8 +3275,6 @@ s32 func_00209818(u8 *unit, s32 command, u8 mode) {
     return command;
 }
 
-extern void btlSetUnitPosition(BtlUnit *, void *);
-extern void btlSetUnitRotation(BtlUnit *, void *);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 
 typedef struct BtlEffectLink {
