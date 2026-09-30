@@ -7,6 +7,7 @@
 extern s32 fldGetSceneStatusCode(void);
 extern void func_001442A0(s32);
 extern void func_00144270(s32);
+extern f32 fldAngleDifference(f32, f32);
 
 /* Field work area (D_00389770) fields reached through a pointer. */
 typedef struct FldWorkView {
@@ -2871,7 +2872,25 @@ void fldCalcTargetDistanceYaw(f32 *distance, f32 *angle) {
     *angle = yaw;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00151918);
+f32 func_00151918(f32 cur, f32 target, f32 speed, f32 minStep) {
+    f32 delta = fldAngleDifference(cur, target);
+    f32 step = delta / speed;
+
+    if (step < 0.0f) {
+        step = -step;
+    }
+    if (step < minStep) {
+        step = minStep;
+    }
+    if ((delta >= 0.0f && delta <= step) || (delta <= 0.0f && -step <= delta)) {
+        delta = target;
+    } else if (delta < 0.0f) {
+        delta = cur - step;
+    } else {
+        delta = cur + step;
+    }
+    return delta;
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001519E8);
 
