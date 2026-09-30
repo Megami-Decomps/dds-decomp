@@ -2,6 +2,8 @@
 
 #include "fpu.h"
 
+extern s8 D_0037F510[];
+
 extern s32 func_003292A8(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
@@ -14,7 +16,7 @@ extern void func_00328E48();
 
 extern void sdfClearTaskList();
 
-extern s32 sdfDestroyCallbackWork();
+extern void sdfDestroyCallbackWork();
 
 extern u64 func_0019F460(s32, s32, u64, u64, u64, u64);
 
@@ -26,14 +28,22 @@ typedef struct ShortPair2C {
     s16 h2E;           // 0x2E
 } ShortPair2C; // 0x30
 
-extern u32 func_00312A48(u32 *);
+/* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */
+typedef struct SdfTaskItemDesc {
+    s32 key;                         /* 0x00 */
+    s32 (*init)(void);               /* 0x04 */
+    void (*destroy)(s32, s32);       /* 0x08 */
+    s32 (*update)(s32, s32);         /* 0x0C */
+    void (*callback)(s32, s32);      /* 0x10 */
+} SdfTaskItemDesc;
+
+extern u32 func_00312A48(SdfTaskItemDesc *);
 
 
-extern u32 func_00312188(u32, u32, u32);
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern s32 func_003139D8();
+extern void func_003139D8();
 
 extern f32 func_003532B8(f32);
 
@@ -85,6 +95,16 @@ typedef struct TaskWork {
     TaskList *list;
     u32 firstItemHandle;
 } TaskWork;
+
+typedef struct SdfTaskEntry {
+    u32 flags;                   /* 0x00 */
+    s32 arg0;                    /* 0x04 */
+    s32 (*init)(void);           /* 0x08 */
+    void (*destroy)(s32, s32);   /* 0x0C */
+    s32 (*update)(s32, s32);     /* 0x10 */
+    void (*callback)(s32, s32);  /* 0x14 */
+    s32 arg1;                    /* 0x18 */
+} SdfTaskEntry;
 
 typedef struct SdfGridOwner {
     u32 handle;        /* 0x00 */
@@ -167,15 +187,15 @@ extern u32 strlen(const char *);
 extern void func_0035C860(char *, char *, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
-extern s64 func_00312B50();
+extern void func_00312B50();
 
-extern void func_00312D48();
+extern s32 func_00312D48(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
 extern void func_00312DF8(void);
-extern void func_00312D48();
+extern s32 func_00312D48(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void func_00312DF8(void);
 extern void kwlnTaskCreate();
@@ -576,7 +596,47 @@ void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312578);
+u32 func_00312578(void) {
+    u32 flags = 0;
+
+    if (D_0037F510[0x26] < 0) {
+        flags |= 1;
+    }
+    if (D_0037F510[0x26] & 2) {
+        flags |= 1;
+    }
+    if (D_0037F510[0x26]) {
+        flags |= 2;
+    }
+    if (D_0037F510[0x27] < 0) {
+        flags |= 4;
+    }
+    if (D_0037F510[0x27] & 2) {
+        flags |= 4;
+    }
+    if (D_0037F510[0x27]) {
+        flags |= 8;
+    }
+    if (D_0037F510[0x24] < 0) {
+        flags |= 0x10;
+    }
+    if (D_0037F510[0x24] & 2) {
+        flags |= 0x10;
+    }
+    if (D_0037F510[0x24]) {
+        flags |= 0x20;
+    }
+    if (D_0037F510[0x25] < 0) {
+        flags |= 0x40;
+    }
+    if (D_0037F510[0x25] & 2) {
+        flags |= 0x40;
+    }
+    if (D_0037F510[0x25]) {
+        flags |= 0x80;
+    }
+    return flags;
+}
 
 TaskWork *func_00312620(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
     TaskWork *work;
@@ -611,8 +671,8 @@ s32 kwlnTaskExists(u32 name) {
     return func_00101740(name) != 0;
 }
 
-void sdfAttachTaskItem(TaskWork *work, u32 *item) {
-    u32 result = func_00312188((u32)work->list, *item, func_00312A48(item));
+void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
+    u32 result = (u32)func_00312188((SdfList *)work->list, item->key, func_00312A48(item));
     if (work->firstItemHandle == 0) {
         work->firstItemHandle = result;
     }
@@ -674,26 +734,55 @@ s64 sdfDestroyTaskResourceWork(TaskWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312A48);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfDestroyCallbackWork);
-
-s64 func_00312B50(a, b)
-s32 a;
-s32 b;
-{
-    return sdfDestroyCallbackWork(b);
+void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
+    if (entry != NULL) {
+        void (*destroy)(s32, s32) = entry->destroy;
+        destroy(entry->arg0, entry->arg1);
+        func_00328E48(entry);
+    }
 }
 
-typedef struct SdfTaskEntry {
-    u32 flags;                   /* 0x00 */
-    s32 arg0;                    /* 0x04 */
-    u8 pad08[0xC];
-    void (*callback)(s32, s32);  /* 0x14 */
-    s32 arg1;                    /* 0x18 */
-} SdfTaskEntry;
+void func_00312B50(u32 unused, SdfTaskEntry *entry) {
+    sdfDestroyCallbackWork(entry);
+}
 
 extern void *func_00101958(void);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312B70);
+s32 func_00312B70(TaskWork *work) {
+    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfTaskEntry *entry;
+    u32 flags;
+
+    if (node == NULL) {
+        work->firstItemHandle = (u32)work->list->head;
+        return 0;
+    }
+    entry = (SdfTaskEntry *)node->value;
+    flags = entry->flags;
+    work->firstItemHandle = (u32)node->next;
+    switch (flags & 0xFFFF0000) {
+    case 0x10000:
+        if (flags & 4) {
+            entry->arg1 = entry->init();
+            flags = entry->flags &= ~4;
+        }
+        if (flags & 0x8000) {
+            sdfRemoveTaskItem(work, entry->arg0);
+            return 1;
+        }
+        if (flags & 1) {
+            if (entry->update(entry->arg0, entry->arg1) == -1) {
+                entry->flags |= 0x8000;
+            }
+        }
+        break;
+    case 0x20000:
+        break;
+    case 0x100000:
+        break;
+    }
+    return 1;
+}
 
 /* Advance the work's cursor one node and run the node's callback when flagged. */
 s32 sdfTaskWorkStep(TaskWork *work) {
@@ -723,7 +812,16 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312D48);
+s32 func_00312D48(void) {
+    TaskWork *work = func_00101958();
+
+    if (work->firstItemHandle == 0) {
+        return -1;
+    }
+    while (func_00312B70(work) == 1) {
+    }
+    return 0;
+}
 
 s32 sdfTaskWorkRunAll(void) {
     TaskWork *work = func_00101958();
@@ -758,8 +856,8 @@ s64 sdfDestroyGridWork(SdfGridOwner *owner) {
     }
 }
 
-s64 func_00312FB0(void) {
-    return func_003139D8();
+void func_00312FB0(void) {
+    func_003139D8();
 }
 
 SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {
@@ -851,7 +949,19 @@ u8 *sdfGridCursorRight(u8 *grid) {
     return cell;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313210);
+SdfGridCell *func_00313210(SdfGrid *grid, u32 column, u32 row) {
+    SdfGridCell *result = NULL;
+
+    if (column >= grid->width) {
+        return result;
+    }
+    if (row >= grid->cellCount / grid->width) {
+        return result;
+    }
+    grid->cursor = sdfGridGetCell(grid, column, row);
+    func_00313A58((u8 *)grid);
+    return grid->cursor;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313280);
 
@@ -861,11 +971,46 @@ INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313538);
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_003136A0);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313810);
+SdfGridCell *func_00313810(SdfGrid *grid, u32 column, u32 row) {
+    SdfGridCell *result = NULL;
+    SdfGridCell *cell;
+
+    if (column >= grid->width) {
+        return result;
+    }
+    if (row >= grid->cellCount / grid->width) {
+        return result;
+    }
+    cell = sdfGridGetCell(grid, column, row);
+    if (cell->value == 0) {
+        return NULL;
+    }
+    grid->cursor = cell;
+    func_00313A58((u8 *)grid);
+    return cell;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313898);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_003139D8);
+void func_003139D8(SdfGrid *grid) {
+    u32 i = 0;
+    SdfGridCell *cells = grid->cells;
+    SdfGridCell *cell;
+
+    if (grid->cellCount != 0) {
+        cell = cells;
+        do {
+            u32 value = cell->value;
+            cell->index = i;
+            if (value != 0) {
+                grid->releaseCell(i, value);
+                cell->value = 0;
+            }
+            i++;
+            cell++;
+        } while (i < grid->cellCount);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313A58);
 
