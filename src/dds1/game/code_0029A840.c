@@ -11,6 +11,7 @@ extern char D_003B3B88[]; /* "/tool/effect/mat/" */
 extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 extern u32 sdfResourceRetainAddress(u32);
+extern void *func_002D03F8(u32);
 
 extern u32 D_003BD11C;
 
@@ -44,7 +45,7 @@ extern s32 D_003BD05C;
 
 extern s32 func_001A17F0(void);
 
-extern u32 func_002B3390(u32, u32, u32);
+extern u32 func_002B3390(u32, u32, s32);
 
 extern void billDispatchByKind(void *);
 
@@ -2090,7 +2091,19 @@ typedef struct EffBillConfig {
     u8 alternateMode;   // 0xB9, animation variants use this instead of mode
 } EffBillConfig;
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E7D8);
+u8 *func_0029E7D8(u8 *config, u32 resource) {
+    u32 count = ((EffBillConfig *)config)->frames.count;
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 0, resource);
+    return node;
+}
 
 void func_0029E868(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
@@ -2203,7 +2216,19 @@ void billResetCellIndices(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029F0A8);
+u8 *func_0029F0A8(u8 *config, u32 resource) {
+    u32 count = ((EffBillConfig *)config)->frames.count;
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(count * 0x1C + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
+    return node;
+}
 
 void func_0029F138(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
@@ -2292,7 +2317,19 @@ void billResetParticleIndices(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029FA80);
+u8 *func_0029FA80(u8 *config, u32 resource) {
+    u32 count = ((EffBillConfig *)config)->frames.count;
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
+    return node;
+}
 
 void func_0029FB18(s32 work) {
     effReleaseResourceRefs(((EffFrameState *)work)->asset);
@@ -2380,8 +2417,6 @@ void effClearAnimatedFrames(u8 *work) {
         }
     }
 }
-
-extern void *func_002D03F8(u32);
 
 u8 *func_002A0440(u8 *config) {
     u32 headerSize = 0x10;
@@ -2542,7 +2577,17 @@ void billResetEmitterIndices(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A0DC0);
+u8 *func_002A0DC0(u8 *config) {
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(((EffBillConfig *)config)->frames.count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    return node;
+}
 
 void billInitializeEmitterRows(u8 *node, u8 *config) {
     u32 count = ((EffBillConfig *)config)->frames.count;
@@ -2679,7 +2724,17 @@ void effClearStripFrames(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A1768);
+u8 *func_002A1768(u8 *config) {
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(((EffBillConfig *)config)->frames.count * 0x28 + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    return node;
+}
 
 void billInitializeStripRows(u8 *node, u8 *config) {
     u32 count = ((EffBillConfig *)config)->frames.count;
@@ -2839,7 +2894,18 @@ void billResetTrailIndices(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A21E8);
+u8 *func_002A21E8(u8 *config, u32 resource) {
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(*(u32 *)(config + 0x38) * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(*(u32 *)(config + 0x38), 0, resource);
+    return node;
+}
 
 void func_002A2288(s32 work) {
     effReleaseResourceRefs(*(u32 *)(work + 4));
@@ -2948,7 +3014,17 @@ void billResetQuadIndices(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002A2C40);
+u8 *func_002A2C40(u8 *config) {
+    u32 headerSize = 0x10;
+    u8 *base = func_002D03F8(((EffBillConfig *)config)->frames.count * 0x20 + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    *(u8 **)(node + 8) = base;
+    *(u8 **)node = body;
+    return node;
+}
 
 void billInitializeQuadRows(u8 *node, u8 *config) {
     u32 count = ((EffBillConfig *)config)->frames.count;
@@ -3217,8 +3293,6 @@ void func_002A3A38(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2B10);
-
 typedef struct EffTrackSet {
     u32 type;      // 0x00
     u32 color;     // 0x04
@@ -3235,6 +3309,8 @@ typedef struct EffTrackSet {
     s32 *handle;   // 0x28
     u8 *allocation; // 0x2C
 } EffTrackSet;
+
+INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2B10);
 
 EffTrackSet *func_002A3A40(s32 count, u16 kind) {
     s32 rows;
@@ -6079,7 +6155,23 @@ void effResetObjectSlots(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3390);
+u32 func_002B3390(u32 owner, u32 source, s32 size) {
+    u32 headerSize = 0x40;
+    u8 *base = func_002D03F8(size + headerSize);
+    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = body;
+
+    body += headerSize;
+    if (size <= 0) {
+        body = 0;
+    }
+    *(u8 **)(node + 0x38) = base;
+    *(s32 *)(node + 4) = size;
+    *(u8 **)node = body;
+    *(u32 *)(node + 8) = 0;
+    memcpy(body, (void *)source, size);
+    return (u32)node;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3420);
 
