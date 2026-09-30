@@ -16,6 +16,8 @@ extern void *btlAllocateIndexList(s32);
 
 extern u32 btlGetIndexListCount();
 
+extern void btlBossDebugPrintf();
+
 extern s8 D_003D7588[];
 
 typedef struct BattleRuntimeState {
@@ -179,6 +181,8 @@ typedef struct BtlState {
 extern s32 func_0020DC38();
 
 extern s32 btlGetIndexListEntry(void *, u32);
+
+extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern void btlFreeIndexList(void *);
 
@@ -703,15 +707,66 @@ s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210928);
+s32 func_00210928(void *list, s32 code, u32 mask) {
+    u32 matched = 0;
+    u32 i;
+    u32 count = btlGetIndexListCount(list);
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210A18);
+    for (i = 0; i < count; i++) {
+        switch (btlMatchActorEntryCode(btlGetIndexListEntry(list, i), code)) {
+        case 1:
+            if (mask & 0x2555) {
+                matched++;
+            }
+            break;
+        case 2:
+            if (mask & 0x2AA) {
+                matched++;
+            }
+            break;
+        }
+    }
+    return matched == count;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A6838);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A6848);
 
-INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A6860);
+s32 func_00210A18(void *list, s32 command) {
+    s32 codes[5] = {0, 1, 2, 3, 4};
+    s32 count = btlGetIndexListCount(list);
+    s32 i;
+    u32 j;
+    void *entry;
+    s32 flags;
+
+    for (i = 0; i < count; i++) {
+        entry = btlGetIndexListEntry(list, i);
+        flags = *(s32 *)(D_003BAA50 + command * 0x38 + 0x28);
+        switch (flags) {
+        case 0x800:
+            for (j = 0; j < 5; j++) {
+                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
+                    if (btlGetActorEntryCode(entry, codes[j]) > 0) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        case 0x1000:
+            for (j = 0; j < 5; j++) {
+                if (btlActorEntryIsExpired(entry, codes[j]) != 0) {
+                    if (btlGetActorEntryCode(entry, codes[j]) < 0) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return 1;
+}
 
 u16 func_00210BA8(u8 **entries, s32 count, s32 unused, s32 command) {
     s32 result = -1;
@@ -945,7 +1000,29 @@ void func_002115E8(void) {
     btlReleaseAllModelEntries();
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00211600);
+void func_00211600(s32 kind, s32 id) {
+    char path[128];
+    BattleModelEntry *entry = (BattleModelEntry *)btlFindModelEntry(kind, id);
+
+    if (entry == 0) {
+        entry = btlCreateModelEntry();
+        entry->kind = kind;
+        entry->id = id;
+        mdlRequestAsset(kind, id, 0);
+        if (sndFindListNodeForChannel(kind, id) == 0) {
+            btlFormatModelResourcePath(kind, id, path);
+            entry->resource = (void *)func_00288A80(path);
+            btlBossDebugPrintf("btl:pack load start[%s][%X,%X]\n", path, kind, id);
+        } else {
+            entry->resource = 0;
+            entry->actor = 0;
+            btlBossDebugPrintf("btl:pack load start[same motSE find][%X,%X]\n", kind, id);
+        }
+    } else {
+        btlBossDebugPrintf("btl:same pack find[%X,%X]\n", kind, id);
+        entry->refs++;
+    }
+}
 
 void func_00211708(void) {
     s32 entry;

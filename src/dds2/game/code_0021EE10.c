@@ -97,7 +97,9 @@ typedef struct ActionUnit {
     u16 statusFlags;
     u8 pad122[2];
     u16 mode;
-    u8 pad126[0xA];
+    u8 pad126[6];
+    u16 motionRequest; /* 0x12C */
+    u8 pad12E[2];
     u32 pendingAction;
     u32 action;
     u8 pad138[4];
@@ -151,7 +153,8 @@ typedef struct BattleActionByteState {
 
 /* Each action-table entry is 0x20 bytes; only the observed words are exposed. */
 typedef struct BattleActionTableEntry {
-    u8 pad00[4];
+    u8 pad00[3];
+    u8 resourceType; /* 0x03: selects the resource class for the action */
     u16 displayCode; /* 0x04: label formatting parameter */
     u8 pad06[0x16];
     u16 flags;       /* 0x1C: special action handling */
@@ -1032,7 +1035,26 @@ s32 func_00222028(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222100);
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222298);
+s32 func_00222298(ActionUnit *unit, s32 action) {
+    if ((unit->flags & 0x400) == 0) {
+        return -1;
+    }
+    if (((BattleActionTableEntry *)D_00435E30)[action].resourceType == 0) {
+        return -1;
+    }
+    if (((BattleActionTableEntry *)D_00435E30)[action].resourceType >= 0xB &&
+        ((BattleActionTableEntry *)D_00435E30)[action].resourceType <= 0x19) {
+        return -1;
+    }
+    switch (((BattleActionTableEntry *)D_00435E30)[action].resourceType) {
+    case 3: return 0xF;
+    case 4: return 0x13;
+    case 5: return 0x12;
+    case 6: return 0x10;
+    case 7: return 0x11;
+    default: return 0xB;
+    }
+}
 
 void btlRefreshSpecialActionUnits(void) {
     ActionUnit *unit = ((BattleActionScene *)func_001AA6F8())->units;
