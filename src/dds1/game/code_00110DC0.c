@@ -10,6 +10,8 @@ s32 func_001104F8(s32 object, s32 (*callback)(void *));
 
 s32 dds3ExchangeAreaSlot(void *arg);
 
+extern s32 dds3InvokeAreaCallback(void *arg);
+
 void dds3DestroyWorldIndexNode(u32 node);
 
 void func_002CFF98(void *arg);
@@ -119,4 +121,7 @@ u32 func_001110D0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00110DC0", func_001110D8);
+s32 func_001110D8(WorldObjectPointer *object) {
+    func_001104F8(*object->value, dds3InvokeAreaCallback);
+    return 1;
+}

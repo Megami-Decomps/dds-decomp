@@ -165,9 +165,14 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AB08);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AC38);
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD68);
+void func_0019AD68(EffPrim *primitive) {
+    primitive->cursorIndex = 0;
+    primitive->cursorPosition = 0.0f;
+}
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AD78);
+void func_0019AD78(EffPrim *primitive, f32 step) {
+    primitive->cursorStep = step;
+}
 
 /* Build a temporary record array and dispatch it through the selected path. */
 void effBuildAndDispatch(EffPrim *primitive, s32 variant) {

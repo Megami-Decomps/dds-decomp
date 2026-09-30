@@ -24,6 +24,13 @@ typedef struct {
     s16 mapTimerPrimary;   /* 0x0C */
     s16 mapTimerSecondary; /* 0x0E */
     s32 y;             /* 0x10 */
+    s16 startX;        /* 0x14 */
+    s16 startY;        /* 0x16 */
+    s16 targetX;       /* 0x18 */
+    s16 targetY;       /* 0x1A */
+    s16 curX;          /* 0x1C */
+    s16 curY;          /* 0x1E */
+    s32 frames;        /* 0x20 */
 } SdfCounterTimer;
 
 typedef struct {
@@ -35,12 +42,14 @@ typedef struct {
 } SdfCounterChannel;
 
 typedef struct {
-    u8 pad00[0x10];
+    u8 pad00[0xC];
+    s32 base;                          /* 0x0C */
     SdfCounterChannel *first;          /* 0x10 */
-    u8 pad14[4];
+    SdfCounterChannel *last;           /* 0x14 */
     SdfCounterChannel *selected;       /* 0x18 */
     SdfCounterChannel *channel;        /* 0x1C */
-    u8 pad20[8];
+    s32 active;                        /* 0x20 */
+    u8 pad24[4];
     s32 posX;                          /* 0x28 */
     u8 pad2C[4];
     SdfCounterTimer *timer;            /* 0x30 */
@@ -277,9 +286,27 @@ void mnuTickMapTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5BF8);
+s32 func_002C5BF8(void) {
+    SdfCounterRuntime *rt = (SdfCounterRuntime *)D_003BD274;
+    s32 count;
+    s32 done;
+    if (rt->active == 0) {
+        return 0;
+    }
+    count = rt->selected->index;
+    done = count != 0;
+    return ((count + rt->base - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
+}
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5C40);
+void func_002C5C40(s16 x, s16 y) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+
+    timer->startX = timer->curX;
+    timer->startY = timer->curY;
+    timer->targetX = x;
+    timer->targetY = y;
+    timer->frames = 3;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5C70);
 

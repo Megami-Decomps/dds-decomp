@@ -22,7 +22,11 @@ typedef struct PanelDefinition {
     s32 a14;
     s32 a18;
     s32 a1C;
-    u8 pad20[0x1C];
+    u8 pad20[0xC];
+    s32 a2C;
+    s32 a30;
+    s32 a34;
+    s32 a38;
     u8 kind; /* 0x3C: index into the handler table */
 } PanelDefinition;
 
@@ -42,7 +46,17 @@ void func_001A1980(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s
 
 INCLUDE_ASM(const s32, "interface/itfPanel", func_001A19C8);
 
-INCLUDE_ASM(const s32, "interface/itfPanel", func_001A1A50);
+extern void (*D_003B4420[])(void *);
+
+void func_001A1A50(PanelDefinition *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
+    panel->a2C = a2C;
+    panel->a30 = a30;
+    panel->a34 = a34;
+    panel->a38 = a38;
+    if (D_003B4420[panel->kind] != 0) {
+        D_003B4420[panel->kind](panel->context);
+    }
+}
 
 
 extern void *sdfAllocPacketAligned(s32);

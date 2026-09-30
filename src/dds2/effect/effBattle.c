@@ -6,7 +6,9 @@ typedef struct BattleEffect {
     u32 inputValue;    /* 0x14 */
     u32 selectedValue; /* 0x18 */
     u16 mode;          /* 0x1C: 1 keeps the smaller selected value */
-    u8 pad1E[0xFA];
+    u8 pad1E[6];
+    void *unk24;          /* 0x24: pointer to a table whose +0x48 word is returned */
+    u8 pad28[0xF0];
     u32 value118;
     u32 value11C;
     u32 value120;
@@ -34,7 +36,9 @@ void func_001687A0(BattleEffect *effect, u32 value) {
     effect->value11C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_001687A8);
+u32 func_001687A8(BattleEffect *effect) {
+    return *(u32 *)((u8 *)effect->unk24 + 0x48);
+}
 
 void effBattleSetInputValue(BattleEffect *effect, s32 value) {
     effect->inputValue = value;

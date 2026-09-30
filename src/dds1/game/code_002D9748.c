@@ -842,7 +842,11 @@ void func_002DB158(SdfResourceList *first, SdfResourceList *second) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D9748", func_002DB1C8);
+extern s32 (*D_003981A8[])(u32, u32);
+
+s32 func_002DB1C8(u32 context, u32 command) {
+    D_003981A8[command >> 16](context, command);
+}
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", D_003BD348);
 

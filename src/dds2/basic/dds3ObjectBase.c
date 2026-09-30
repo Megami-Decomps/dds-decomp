@@ -48,7 +48,9 @@ u8 dds3TestObjectFlags(u32 unused, u32 flags) {
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetExtData);
+void *dds3GetExtData(void) {
+    return ((ObjBase *)dds3GetObjectOwnedHandle())->extData;
+}
 
 void *dds3SetSlotByKind(ObjBase *object, ObjData *data) {
     if (data == NULL) {
@@ -65,7 +67,9 @@ void *dds3ExchangeSlot(void *obj, void *data, s32 index) {
     return old;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetSlot);
+void *dds3GetSlot(void *obj, s32 index) {
+    return ((ObjBase *)dds3GetObjectOwnedHandle(obj))->slots[index];
+}
 
 u32 dds3GetUnk04(void) {
     ObjBase *base;
@@ -74,7 +78,9 @@ u32 dds3GetUnk04(void) {
     return base->unk4;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetUnk0C);
+u32 dds3GetUnk0C(void) {
+    return ((ObjBase *)dds3GetObjectOwnedHandle())->unkC;
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111D68);
 

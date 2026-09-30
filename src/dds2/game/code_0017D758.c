@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 effPcpScatterResCreate(u32);
 
@@ -33,7 +34,9 @@ struct PcpScatterWork4 {
     u32 ownedBuffer;
 };
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D758);
+void func_0017D758(void *dst, void *src) {
+    PCP_COPY_VECTOR((u8 *)dst + 0x40, src);
+}
 
 /* Store the float parameter beside the scatter object's trailing control word. */
 void func_0017D770(ScatterObject *object, f32 value) {
@@ -44,7 +47,10 @@ void func_0017D778(ScatterObject *object, u32 value) {
     object->value130 = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D780);
+/* vu0 routine: copy a 4x4 matrix through vf28-vf31 */
+void func_0017D780(void *dst, void *src) {
+    VU0_COPY_MATRIX(dst, src);
+}
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
 
@@ -90,6 +96,10 @@ u32 effGetScatterEntry(ScatterObject *object, s32 index) {
     return object->entries[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DD20);
+/* vu0 routine: copy a 4x4 matrix into the destination's second slot */
+void func_0017DD20(void *dst, void *src) {
+    VU0_LOAD_MATRIX(src);
+    VU0_STORE_MATRIX((u8 *)dst + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DD50);

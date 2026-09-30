@@ -69,7 +69,9 @@ void effUpdatePairedResources(PairedEffectResources *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018DC68);
+void func_0018DC68(PairedEffectResources *dst, PairedEffectResources *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_0018DC78(PairedEffectResources *resources, u32 value) {
     resources->value7C = value;
