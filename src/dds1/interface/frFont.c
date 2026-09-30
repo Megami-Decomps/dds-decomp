@@ -288,24 +288,24 @@ void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 f
 }
 
 /* Reset a glyph as a standalone chain head (0x80 is the empty glyph sentinel). */
-void frFontInitGlyph(FrFontGlyph *arg0) {
-    arg0->u0.b.b0 = -0x80;
-    arg0->x = 0;
-    arg0->y = 0;
-    arg0->u0.b.b1 = 0;
-    arg0->advance = 0;
-    arg0->u14.w = 0;
-    arg0->previous = NULL;
-    arg0->next = NULL;
-    arg0->chainHead = arg0;
-    arg0->firstChild = NULL;
-    arg0->unk20 = NULL;
-    arg0->unk18.w = 0;
-    arg0->unk30 = 0;
-    arg0->unk34 = 0;
-    arg0->unk38 = 0;
-    arg0->unk3C = 0;
-    arg0->unk40 = 0;
+void frFontInitGlyph(FrFontGlyph *glyph) {
+    glyph->u0.b.b0 = -0x80;
+    glyph->x = 0;
+    glyph->y = 0;
+    glyph->u0.b.b1 = 0;
+    glyph->advance = 0;
+    glyph->u14.w = 0;
+    glyph->previous = NULL;
+    glyph->next = NULL;
+    glyph->chainHead = glyph;
+    glyph->firstChild = NULL;
+    glyph->unk20 = NULL;
+    glyph->unk18.w = 0;
+    glyph->unk30 = 0;
+    glyph->unk34 = 0;
+    glyph->unk38 = 0;
+    glyph->unk3C = 0;
+    glyph->unk40 = 0;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195010);
@@ -341,17 +341,17 @@ void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 flag) {
     ctx->uC.w = frFontMeasureGlyphChain(ctx);
 }
 
-void func_001953D8(FrFontGlyph *glyph, s32 arg1, s32 arg2) {
+void func_001953D8(FrFontGlyph *glyph, s32 advance, s32 height) {
     FrFontGlyph *head = glyph;
     FrFontGlyph *child;
 
-    head->u10.half[0] = arg1;
-    head->u10.half[1] = arg2;
+    head->u10.half[0] = advance;
+    head->u10.half[1] = height;
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
-            child->advance = arg1;
-            child->unk18.b[0] = arg1;
-            child->unk18.b[1] = arg2;
+            child->advance = advance;
+            child->unk18.b[0] = advance;
+            child->unk18.b[1] = height;
         }
     }
     head->advance = frFontMeasureGlyphChain(head);
@@ -423,12 +423,12 @@ s32 func_00195550(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001955D8);
 
-void func_00195868(FrFontGlyph *arg0) {
-    func_00195880(arg0, 0);
+void func_00195868(FrFontGlyph *glyph) {
+    func_00195880(glyph, 0);
 }
 
-void func_00195880(FrFontGlyph *arg0, s8 arg1) {
-    func_001958A0(arg0, arg1, D_003BB178);
+void func_00195880(FrFontGlyph *glyph, s8 mode) {
+    func_001958A0(glyph, mode, D_003BB178);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
@@ -443,8 +443,8 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     return 0;
 }
 
-FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1) {
-    return frFontLinkGlyph(arg0, arg1, 1);
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next) {
+    return frFontLinkGlyph(previous, next, 1);
 }
 
 /* Splice chains; optionally place the new head after the previous glyph's advance. */
@@ -489,8 +489,8 @@ s32 frFontCountChars(s8 *str) {
 }
 
 /* Sum child advances, including one spacing value per child (even the last). */
-u32 frFontMeasureGlyphChain(void *arg0) {
-    FrFontGlyph *glyph = arg0;
+u32 frFontMeasureGlyphChain(void *chain) {
+    FrFontGlyph *glyph = chain;
     FrFontGlyph *node = glyph->firstChild;
     s32 total = 0;
 
@@ -528,8 +528,8 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
 
-u32 func_00195DC8(u8 arg0) {
-    s32 index = arg0;
+u32 func_00195DC8(u8 fontIndex) {
+    s32 index = fontIndex;
 
     if (index < 2) {
         if (index >= 0) {
@@ -539,8 +539,8 @@ u32 func_00195DC8(u8 arg0) {
     return D_003D6C84[index].val->unk10;
 }
 
-u32 func_00195E08(u8 arg0) {
-    s32 index = arg0;
+u32 func_00195E08(u8 fontIndex) {
+    s32 index = fontIndex;
 
     if (index < 2) {
         if (index >= 0) {

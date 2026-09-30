@@ -480,8 +480,8 @@ void *func_0029A8D8(u32 first, u32 second) {
     return model;
 }
 
-void func_0029A938(s32 arg0) {
-    *(u32 *)(*(s32 *)(arg0 + 0x18) + 0x80) = 0;
+void func_0029A938(s32 model) {
+    *(u32 *)(*(s32 *)(model + 0x18) + 0x80) = 0;
     func_002177D0();
 }
 
@@ -542,8 +542,8 @@ void recreateEffectModelFromSource(u32 *work, u8 *source) {
     owner->model = (u32)model;
 }
 
-void func_0029AB28(s32 arg0) {
-    func_002DB538(*(void **)(*(s32 *)(arg0 + 4) + 0x1c), 0.0f);
+void func_0029AB28(s32 owner) {
+    func_002DB538(*(void **)(*(s32 *)(owner + 4) + 0x1c), 0.0f);
 }
 
 extern u8 D_00325828[];
@@ -564,28 +564,28 @@ void func_0029AB48(u8 *work) {
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
-void func_0029ABA0(s32 arg0, void *vec) {
+void func_0029ABA0(s32 owner, void *vec) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (vec));
-    mdlStorePrimaryVectorVU(*(void **)(arg0 + 4));
+    mdlStorePrimaryVectorVU(*(void **)(owner + 4));
 }
 
-void effApplyModelVecB(s32 arg0, void *vec) {
+void effApplyModelVecB(s32 owner, void *vec) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (vec));
-    func_00217FB8(*(void **)(arg0 + 4));
+    func_00217FB8(*(void **)(owner + 4));
 }
 
-void effBroadcastModelMask(s32 arg0) {
-    mdlBroadcastMasked(*(u32 *)(arg0 + 4));
+void effBroadcastModelMask(s32 owner) {
+    mdlBroadcastMasked(*(u32 *)(owner + 4));
 }
 
-void func_0029ABF8(s32 arg0, float scale) {
+void func_0029ABF8(s32 model, float scale) {
     float v[3];
     float t;
 
-    t = *(float *)arg0 * scale;
+    t = *(float *)model * scale;
     v[0] = v[1] = v[2] = t;
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (v));
-    mdlStoreTertiaryVectorVU(*(void **)(arg0 + 4));
+    mdlStoreTertiaryVectorVU(*(void **)(model + 4));
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AC30);
@@ -6664,9 +6664,9 @@ typedef struct EffMappingObject {
     s32 valueF4;       // 0xF4
 } EffMappingObject;
 
-s32 func_002BA058(s32 arg0) {
+s32 func_002BA058(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F7D8;
     D_0038F898.count = 8;
@@ -6676,9 +6676,9 @@ s32 func_002BA058(s32 arg0) {
     return result;
 }
 
-s32 func_002BA0C0(s32 arg0) {
+s32 func_002BA0C0(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F7D8;
     D_0038F898.count = 8;
@@ -6688,10 +6688,10 @@ s32 func_002BA0C0(s32 arg0) {
     return result;
 }
 
-void func_002BA128(s32 arg0) {
+void func_002BA128(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->valueB8.bits);
 }
 
@@ -6699,9 +6699,9 @@ s32 func_002BA148(void) {
     return func_002B9320((s32)D_003DE148, (s32)D_003DE148 + 0x24, ((EffMappingObject *)D_003DE148)->value34.signedValue);
 }
 
-s32 func_002BA170(s32 arg0) {
+s32 func_002BA170(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F7D8;
     D_0038F898.count = 8;
@@ -6711,30 +6711,30 @@ s32 func_002BA170(s32 arg0) {
     return result;
 }
 
-void func_002BA1D0(s32 arg0) {
+void func_002BA1D0(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA1F0(s32 arg0) {
+void func_002BA1F0(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value38);
 }
 
-void func_002BA210(s32 arg0) {
+void func_002BA210(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-s32 func_002BA230(s32 arg0) {
+s32 func_002BA230(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F718;
     D_0038F898.count = 8;
@@ -6744,23 +6744,23 @@ s32 func_002BA230(s32 arg0) {
     return result;
 }
 
-void func_002BA290(s32 arg0) {
+void func_002BA290(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA2B0(s32 arg0) {
+void func_002BA2B0(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-s32 func_002BA2D0(s32 arg0) {
+s32 func_002BA2D0(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F7D8;
     D_0038F898.count = 8;
@@ -6770,37 +6770,37 @@ s32 func_002BA2D0(s32 arg0) {
     return result;
 }
 
-void func_002BA338(s32 arg0) {
+void func_002BA338(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA358(s32 arg0) {
+void func_002BA358(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
-void func_002BA380(s32 arg0) {
+void func_002BA380(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA3A0(s32 arg0) {
+void func_002BA3A0(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
-s32 func_002BA3C8(s32 arg0) {
+s32 func_002BA3C8(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F7D8;
     D_0038F898.count = 8;
@@ -6810,30 +6810,30 @@ s32 func_002BA3C8(s32 arg0) {
     return result;
 }
 
-void func_002BA430(s32 arg0) {
+void func_002BA430(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value70);
 }
 
-void func_002BA450(s32 arg0) {
+void func_002BA450(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA470(s32 arg0) {
+void func_002BA470(s32 request) {
     s32 object;
 
-    object = ((EffMappingRequest *)arg0)->object;
+    object = ((EffMappingRequest *)request)->object;
     func_002B9320(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
 }
 
-s32 func_002BA498(s32 arg0) {
+s32 func_002BA498(s32 request) {
     s32 result;
-    s32 object = ((EffMappingRequest *)arg0)->object;
+    s32 object = ((EffMappingRequest *)request)->object;
 
     D_0038F898.table = D_0038F718;
     D_0038F898.count = 8;

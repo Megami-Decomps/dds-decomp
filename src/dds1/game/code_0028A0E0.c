@@ -2988,21 +2988,21 @@ void func_00296E98(s32 arg0) {
     func_002966D8(arg0);
 }
 
-void func_00296EC0(LoadObj *arg0, u128 *arg1) {
-    menuRecordSetVector(arg0->recordWork, arg1);
+void func_00296EC0(LoadObj *obj, u128 *vector) {
+    menuRecordSetVector(obj->recordWork, vector);
 }
 
-void func_00296ED8(LoadObj *arg0, u128 *arg1) {
-    func_0029A7F8(arg0->recordWork, arg1);
+void func_00296ED8(LoadObj *obj, u128 *vector) {
+    func_0029A7F8(obj->recordWork, vector);
 }
 
 void func_00296EF0(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 4) = arg1;
 }
 
-void fileSetLoadObjectScale(LoadObj *arg0, f32 arg1) {
-    arg0->scale = arg1;
-    dds3DispatchIndexedCallback(arg0->recordWork);
+void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
+    obj->scale = scale;
+    dds3DispatchIndexedCallback(obj->recordWork);
 }
 
 void fileResetSlotStates(FileRecordSlots *record) {

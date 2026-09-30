@@ -141,12 +141,12 @@ void func_00222AC0(EvtUnit *work, s128 *vector, s32 frames) {
     }
 }
 
-void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 arg2) {
+void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
     EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222AC0(work, worldUnit->transform + 1, arg2);
+        func_00222AC0(work, worldUnit->transform + 1, frames);
         work->linkedUnit = worldUnit;
     }
 }
