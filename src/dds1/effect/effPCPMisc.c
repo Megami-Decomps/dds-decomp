@@ -447,7 +447,29 @@ extern EffPCPWork *D_003BD7FC;
 
 extern void *func_002CFEB8(s32 size);
 
-extern EffPCPWork *func_0017CA60(void *param0, void *param1);
+typedef struct EffPCPSpanHead {
+    u32 word[8];
+} EffPCPSpanHead;
+
+typedef struct EffPCPSpanParams {
+    EffPCPSpanHead head;
+    u32 unk20;
+} EffPCPSpanParams;
+
+typedef struct EffPCPSpanWork {
+    u128 matrix[4];
+    u32 head[8];
+    u32 unk60;
+    u32 color;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    u32 optionalHandle;
+} EffPCPSpanWork;
+
+extern EffPCPSpanWork *func_0017CA60(void *params, void *handleParams);
+extern u32 func_0014FD20(u32 param);
+extern f32 D_003B927C;
 extern u32 func_0014FEB0(u32 handle);
 extern void effDestroyNode(s32 handle);
 extern void func_00186CB8(u32 handle);
@@ -479,7 +501,23 @@ typedef struct {
 
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
 extern void effPcpDelayedPairsRerollSlot(void *work, s32 index);
-extern void func_0017DBB0(s32 id);
+/* The 0x10C block-set work released by func_0017DBB0. */
+typedef struct EffPCPBlockSetWork {
+    u8 pad00[0x7C];
+    u32 groupSize[3];
+    u8 pad88[0x2C];
+    u32 count;
+    u8 padB8[8];
+    u32 headHandle;
+    u32 handleA[5];
+    u32 *list[3];
+    u32 handleB[5];
+    u32 tailHandle;
+    u32 alloc[3];
+    u32 shared;
+} EffPCPBlockSetWork;
+
+extern void func_0017DBB0(EffPCPBlockSetWork *work);
 extern void effPcpCopyVector60(void *dst, void *src);
 extern void func_0017E4C8(void *dst, void *src);
 extern void func_002DDBF8(void);
@@ -498,6 +536,10 @@ extern void effParamWorkCallback3(u32 handle, u32 value);
 extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern void *func_00163540(u32 handle);
+extern u8 *func_00165638(u32 handle);
+extern void func_00165D80(u32 handle);
+extern u32 sdfCountMapPositionRecords(void *model);
+extern u32 func_00190130(EffPCPEventOwner *owner, s32 kind, void *place);
 
 
 extern u8 D_00355008[];
@@ -1414,7 +1456,40 @@ void *func_00179010(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00179048);
+/* Work whose position offsets a list of thunder objects (starting at 0x1C). */
+typedef struct EffPCPThunderShift {
+    f32 pos[4];
+    u8 pad10[0xC];
+    u32 handle[30];
+} EffPCPThunderShift;
+
+/* Shifts the first `count` handles' objects by the work position for the
+ * duration of their update, then puts the original vectors back. */
+static inline void effPcpShiftThunderHandles(EffPCPThunderShift *work, s32 count) {
+    u128 saved[2];
+    u8 *obj;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        obj = func_00165638(work->handle[i]);
+        VU0_LOAD_VF($vf10, obj + 0x10);
+        VU0_STORE_VF($vf10, &saved[1]);
+        VU0_LOAD_VF($vf11, work);
+        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_STORE_VF($vf10, obj + 0x10);
+        VU0_LOAD_VF($vf10, obj);
+        VU0_STORE_VF($vf10, &saved[0]);
+        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_STORE_VF($vf10, obj);
+        func_00165D80(work->handle[i]);
+        PCP_COPY_VECTOR(obj, &saved[0]);
+        PCP_COPY_VECTOR(obj + 0x10, &saved[1]);
+    }
+}
+
+void func_00179048(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 void func_00179138(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1517,7 +1592,9 @@ void *func_00179488(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001794C0);
+void func_001794C0(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 void func_001795B0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1618,7 +1695,9 @@ void *func_00179920(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00179958);
+void func_00179958(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 30);
+}
 
 void func_00179A48(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1720,7 +1799,9 @@ void *func_00179D98(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00179DD0);
+void func_00179DD0(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 void func_00179EC0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1789,7 +1870,9 @@ void *func_0017A108(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017A140);
+void func_0017A140(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 void func_0017A230(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -1870,7 +1953,9 @@ void *func_0017A478(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017A4B0);
+void func_0017A4B0(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 8);
+}
 
 void func_0017A5A0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -2053,7 +2138,9 @@ void *func_0017AB60(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017AB98);
+void func_0017AB98(EffPCPThunderShift *work) {
+    effPcpShiftThunderHandles(work, 30);
+}
 
 void func_0017AC88(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -2244,6 +2331,15 @@ void effSetSharedScale(u32 unused, f32 value) {
     ((EffPCPWorkF1C *)D_003BD7FC)->unk1C = value;
 }
 
+typedef struct EffPCPTrailParams {
+    u32 count;
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    u32 objParams;
+    u32 color;
+} EffPCPTrailParams;
+
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B180);
 
 void effPcpTrailRelease(EffPCPWork *work) {
@@ -2375,6 +2471,34 @@ void func_0017B498(EffPCPWork *work) {
     func_002CFF98(work);
 }
 
+typedef struct EffPCPLerpObj {
+    s32 size;
+    s32 x;
+    s32 y;
+    u32 color;
+} EffPCPLerpObj;
+
+/* Update work whose size runs from `base` to `target` over `duration` frames
+ * while its colour fades in and out. */
+typedef struct EffPCPLerpWork {
+    f32 pos[4];
+    u8 fixed;
+    u8 pad11[3];
+    u32 colorFrom;
+    u32 colorTo;
+    s32 frame;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    u8 pad34[4];
+    EffPCPLerpObj *obj;
+} EffPCPLerpWork;
+
+extern void func_0018DBD8();
+extern void func_00188068(EffPCPLerpObj *obj);
+
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B4C8);
 
 void func_0017B670(void *dst, void *src) {
@@ -2443,6 +2567,22 @@ void func_0017B7F0(EffPCPWork *work) {
     func_00186CB8(work->unk38);
     func_002CFF98(work);
 }
+
+typedef struct EffPCPLerpWorkB {
+    f32 pos[4];
+    u8 fixed;
+    u8 pad11[3];
+    u32 colorFrom;
+    u32 colorTo;
+    s32 frame;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    u8 pad34[4];
+    EffPCPTrailObj *obj;
+} EffPCPLerpWorkB;
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017B820);
 
@@ -2874,7 +3014,33 @@ void *func_0017C858(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017C890);
+/* Scales the target through two frame windows and fades the colour out from
+ * frame 60. */
+void func_0017C890(EffPCPFadeWork *work) {
+    EffPCPFadeTarget *target;
+    f32 phase;
+    u32 handle;
+
+    if (work->frame < 0x2E) {
+        target = func_00163540(work->handle);
+        phase = (f32)work->frame / 45.0f;
+        target->unk20 = target->unk1C = phase * 950.0f + 200.0f;
+    } else if (work->frame >= 0x3C && work->frame < 0x4C) {
+        target = func_00163540(work->handle);
+        phase = (f32)(work->frame - 0x3C) / 15.0f;
+        target->unk20 = target->unk1C = phase * 150.0f + 1050.0f;
+    }
+    if (work->frame >= 0x3C) {
+        phase = (f32)(work->frame - 0x3C) / 15.0f;
+        handle = effBlendColor(work->unk14, 0, phase);
+    } else {
+        handle = work->unk14;
+    }
+    effPCPThunderSetParam50(work->handle, handle);
+    func_00163508(work->handle, work);
+    func_00163CD0(work->handle);
+    work->frame++;
+}
 
 void func_0017CA40(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -2899,8 +3065,8 @@ void func_0017CB88(void *args) {
     func_0017CA60(param0, param1);
 }
 
-EffPCPWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
-    EffPCPWork *child;
+EffPCPSpanWork *effPcpCloneWithOptionalHandle(EffPCPWork *work) {
+    EffPCPSpanWork *child;
     u32 handle;
 
     child = func_0017CA60(&work->pad3C[4], NULL);
@@ -2965,7 +3131,6 @@ typedef struct {
     u32 handleC[7];
 } EffPCPTripleWork;
 
-extern u32 func_0014FD20(u32 param);
 extern u32 func_0014FEB0(u32 handle);
 
 void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
@@ -3126,7 +3291,34 @@ EffPCPBlockCloneWork *func_0017DA58(EffPCPBlockCloneWork *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017DBB0);
+void func_0017DBB0(EffPCPBlockSetWork *work) {
+    u32 i;
+    u32 j;
+    u32 n;
+
+    if (work->shared == 0) {
+        func_001629F0(work->headHandle);
+        for (j = 0; j < 5; j++) {
+            func_001629F0(work->handleA[j]);
+        }
+        for (i = 0; i < 3; i++) {
+            if (work->alloc[i] != 0) {
+                n = work->count * work->groupSize[i];
+                for (j = 0; j < n; j++) {
+                    if (work->list[i][j] != 0) {
+                        func_001629F0(work->list[i][j]);
+                    }
+                }
+                func_002D0918(work->alloc[i]);
+            }
+        }
+        for (j = 0; j < 5; j++) {
+            func_001629F0(work->handleB[j]);
+        }
+        func_001629F0(work->tailHandle);
+    }
+    func_002CFF98(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017DCF8);
 
@@ -3277,7 +3469,7 @@ void effPcpRotateRelease(EffPCPRotateWork *work) {
 
     id = work->ids;
     for (i = 0; i < 3; i++) {
-        func_0017DBB0(id[i]);
+        func_0017DBB0((EffPCPBlockSetWork *)id[i]);
     }
     func_002CFF98(work);
 }
@@ -3790,6 +3982,37 @@ void func_0017FE48(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
+typedef struct {
+    f32 pos[3];
+    u32 word0C[4];
+    f32 scaleA;
+    f32 scaleB;
+    u32 word24[10];
+} EffPCPRes76;
+
+typedef struct {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    s32 unk0C;
+    u32 unk10;
+    EffPCPRes76 res;
+} EffPCPParams76;
+
+typedef struct {
+    f32 pos[3];
+    u8 pad0C[4];
+    u32 unk10;
+    u32 unk14;
+    u32 unk18;
+    u32 unk1C;
+    u32 unk20;
+    u32 color;
+    u32 unk28;
+    f32 scale;
+    u32 handle;
+} EffPCPScaledWork;
+
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FE50);
 
 void func_0017FF10(void *args) {
@@ -3799,18 +4022,6 @@ void func_0017FF10(void *args) {
     func_0017FE50(param0);
 }
 
-typedef struct {
-    u32 word[19];
-} EffPCPRes76;
-
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    EffPCPRes76 res;
-} EffPCPParams76;
 
 typedef struct {
     u8 pad00[0x10];
@@ -3823,7 +4034,6 @@ typedef struct {
     u32 resource;
 } EffPCPSrc76;
 
-extern void func_0017FE50(EffPCPParams76 *params);
 
 void effPcpScaledRespawn(EffPCPSrc76 *work) {
     EffPCPParams76 params;
@@ -3843,6 +4053,21 @@ void func_00180050(EffPCPWork *work) {
     effPCPThunderFree(work->unk30);
     func_002CFF98(work);
 }
+
+typedef struct EffPCPGrowWork {
+    u8 pad00[0x10];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    u32 color;
+    s32 frame;
+    f32 scale;
+    u32 handle;
+} EffPCPGrowWork;
+
+extern void effPCPThunderScale(u32 handle, f32 scale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180080);
 
@@ -4403,7 +4628,47 @@ void effPcpEventGroupRelease(EffPCPEventGroup18 *work) {
     func_002D0918(work->handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182660);
+typedef struct EffPCPDriftSlot {
+    u8 pad00[8];
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+} EffPCPDriftSlot;
+
+typedef struct EffPCPDriftWork {
+    u8 pad00[0x54];
+    s32 count;
+    u32 steps;
+    u8 pad5C[0xC];
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    u8 pad7C[4];
+    f32 unk80;
+    u8 pad84[0x80];
+    EffPCPDriftSlot *slots;
+    u8 pad108[8];
+    f32 scale;
+} EffPCPDriftWork;
+
+void func_00182660(EffPCPDriftWork *work, s32 index) {
+    EffPCPDriftSlot *slot;
+    f32 spread;
+    f32 scale;
+
+    slot = &work->slots[index];
+    scale = work->scale;
+    spread = work->unk70;
+    slot->unk08 = work->unk68 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread)) * scale;
+    spread = work->unk74;
+    slot->unk0C = (work->unk6C * (func_002E8398(D_0034DF38) * spread + (1.0f - spread)) * scale - slot->unk08) / (f32)work->count;
+    slot->unk10 = 6.2831852f / (f32)work->steps * (f32)index;
+    spread = work->unk80;
+    slot->unk14 = work->unk78 * (func_002E8398(D_0034DF38) * spread + (1.0f - spread));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001827D0);
 
@@ -4627,7 +4892,72 @@ typedef struct {
     u32 color;
 } EffPCPEventWork32;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183DC0);
+typedef struct EffPCPEventModelInfo {
+    u8 pad00[0x20];
+    f32 unk20;
+    u8 pad24[0xA];
+    u16 unk2E;
+} EffPCPEventModelInfo;
+
+typedef struct EffPCPEventModel {
+    u8 pad00[0x18];
+    void *unk18;
+    EffPCPEventModelInfo *info;
+} EffPCPEventModel;
+
+/* Placement block handed to every spawned event entry. */
+typedef struct EffPCPEventPlace {
+    f32 pos[7];
+    f32 scaleA;
+    f32 scaleB;
+    f32 scaleC;
+    f32 scaleD;
+    u32 color;
+} EffPCPEventPlace;
+
+void func_00183DC0(EffPCPEventWork32 *work) {
+    EffPCPEventPlace place;
+    u32 i = 0;
+    u32 count;
+    EffPCPEventModel *model;
+    EffPCPEventEntry32 *entry;
+
+    model = effParamWorkGetData(work->resource);
+    model->info->unk20 = work->unk18;
+    mdlAddEntryPlain(model, 0, 0);
+    work->unk34 = model->info->unk2E;
+    count = sdfCountMapPositionRecords(model->unk18);
+    work->count = count;
+    work->handle = (u32)func_002D03F8(count << 5);
+    entry = sdfResourceRetainAddress((void *)work->handle);
+    work->entries = entry;
+    place.pos[0] = 0;
+    place.pos[1] = 0;
+    place.pos[2] = 0;
+    place.pos[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    place.color = 0x80808080;
+    for (; i < count; i++) {
+        entry->unk10 = 0;
+        entry->unk14 = 0;
+        entry->unk18 = 0;
+        entry->event = (void *)func_00190130(work->owner, 2, &place);
+        entry++;
+    }
+}
+
+typedef struct {
+    u32 word[7];
+} EffPCPEventHead28;
+
+extern u32 effParamWorkCreate(s32 kind, void *params);
+extern EffPCPEventOwner *func_00190100(void *params);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183EE0);
 
