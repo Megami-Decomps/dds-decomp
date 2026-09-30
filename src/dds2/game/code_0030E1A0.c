@@ -74,6 +74,16 @@ extern void *memset(void *, s32, u32);
 typedef struct SdfMat4 {
     f32 m[16];
 } SdfMat4;
+/* The map-request queue stores its cursor at +8 and two halfword timers at +0x14. */
+typedef struct MapRequestQueue {
+    u8 pad00[8];
+    u32 *cursor;   /* 0x08: five-word request entry */
+    u8 pad0C[8];
+    s16 interval;  /* 0x14 */
+    s16 elapsed;   /* 0x16 */
+    s32 callback;  /* 0x18: handler installed after queue creation */
+} MapRequestQueue;
+
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E1A0);
 
@@ -86,10 +96,10 @@ void func_0030E880(void) {
     s32 handler;
     handler = func_0030EE40(0x14, 0xC);
     D_004390AC = handler;
-    *(s32 *)(D_004390AC + 0x18) = (s32)func_0030E940;
+    ((MapRequestQueue *)D_004390AC)->callback = (s32)func_0030E940;
     fldSetMapRequestInterval(handler, 0);
     D_004390B0 = func_0030EE40(0x14, 0x18);
-    *(s32 *)(D_004390B0 + 0x18) = (s32)func_0030E958;
+    ((MapRequestQueue *)D_004390B0)->callback = (s32)func_0030E958;
     D_004390A8 = 5;
     D_004390A4 = 0;
 }
@@ -101,8 +111,8 @@ s64 func_0030E8E8(void) {
     return func_0030EF18(D_004390B0);
 }
 
-s64 func_0030E910(s32 arg0, s32 arg1, s32 arg2) {
-    return func_0030E010(arg0, arg1, 0, arg2, 0x20, 0, 0x54);
+s64 func_0030E910(s32 map, s32 request, s32 value) {
+    return func_0030E010(map, request, 0, value, 0x20, 0, 0x54);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E940);
@@ -128,26 +138,26 @@ s64 func_0030EF18(u32 *sprite) {
     }
 }
 
-void fldAdvanceMapRequest(s32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    u32 *puVar1;
+void fldAdvanceMapRequest(s32 queue, u32 first, u32 second, u32 third) {
+    u32 *entry;
 
-    puVar1 = *(u32 **)(arg0 + 8);
-    if (*(s16 *)(arg0 + 0x16) == *(s16 *)(arg0 + 0x14)) {
-        if (puVar1[3] == 0) {
-            *puVar1 = arg1;
-            puVar1[1] = arg2;
-            puVar1[2] = arg3;
-            *(u32 *)(arg0 + 8) = puVar1[4];
-            puVar1[3] = 1;
+    entry = ((MapRequestQueue *)queue)->cursor;
+    if (((MapRequestQueue *)queue)->elapsed == ((MapRequestQueue *)queue)->interval) {
+        if (entry[3] == 0) {
+            *entry = first;
+            entry[1] = second;
+            entry[2] = third;
+            ((MapRequestQueue *)queue)->cursor = (u32 *)entry[4];
+            entry[3] = 1;
         }
-        *(u16 *)(arg0 + 0x16) = 0;
+        ((MapRequestQueue *)queue)->elapsed = 0;
         return;
     }
-    *(s16 *)(arg0 + 0x16) = *(s16 *)(arg0 + 0x16) + 1;
+    ((MapRequestQueue *)queue)->elapsed = ((MapRequestQueue *)queue)->elapsed + 1;
 }
 
-void fldSetMapRequestInterval(s32 arg0, u16 arg1) {
-    *(u16 *)(arg0 + 0x14) = arg1;
+void fldSetMapRequestInterval(s32 queue, u16 interval) {
+    ((MapRequestQueue *)queue)->interval = interval;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EF90);
@@ -167,10 +177,10 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     return 1;
 }
 
-u32 fldReleaseMapResource(s32 *arg0) {
-    if (*arg0 != 0) {
-        sdfTexReleaseReferenceViaHandler(*arg0);
-        *arg0 = 0;
+u32 fldReleaseMapResource(s32 *image) {
+    if (*image != 0) {
+        sdfTexReleaseReferenceViaHandler(*image);
+        *image = 0;
     }
     return 1;
 }
@@ -296,33 +306,34 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310648);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310888);
 
-void sdfVec4Add(float *arg0, float *arg1, float *arg2) {
-    *arg0 = *arg1 + *arg2;
-    arg0[1] = arg1[1] + arg2[1];
-    arg0[2] = arg1[2] + arg2[2];
-    arg0[3] = arg1[3] + arg2[3];
+void sdfVec4Add(float *out, float *left, float *right) {
+    *out = *left + *right;
+    out[1] = left[1] + right[1];
+    out[2] = left[2] + right[2];
+    out[3] = left[3] + right[3];
 }
 
-void sdfQuatMultiply(float *arg0, float *arg1, float *arg2) {
-    *arg0 = (arg1[3] * *arg2 + *arg1 * arg2[3] + arg1[1] * arg2[2]) -
-                          arg1[2] * arg2[1];
-    arg0[1] = (arg1[3] * arg2[1] + arg1[1] * arg2[3] + arg1[2] * *arg2) -
-                              *arg1 * arg2[2];
-    arg0[2] = (arg1[3] * arg2[2] + arg1[2] * arg2[3] + *arg1 * arg2[1]) -
-                              arg1[1] * *arg2;
-    arg0[3] = ((arg1[3] * arg2[3] - *arg1 * *arg2) - arg1[1] * arg2[1]) -
-                              arg1[2] * arg2[2];
+void sdfQuatMultiply(float *out, float *left, float *right) {
+    *out = (left[3] * *right + *left * right[3] + left[1] * right[2]) -
+                          left[2] * right[1];
+    out[1] = (left[3] * right[1] + left[1] * right[3] + left[2] * *right) -
+                              *left * right[2];
+    out[2] = (left[3] * right[2] + left[2] * right[3] + *left * right[1]) -
+                              left[1] * *right;
+    out[3] = ((left[3] * right[3] - *left * *right) - left[1] * right[1]) -
+                              left[2] * right[2];
 }
 
-float sdfQuatDot(float *arg0, float *arg1) {
-    return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2] +
-                  arg0[3] * arg1[3];
+float sdfQuatDot(float *left, float *right) {
+    return *left * *right + left[1] * right[1] + left[2] * right[2] +
+                  left[3] * right[3];
 }
 
-float func_00310B60(float *arg0, float *arg1) {
-    return (arg0[1] * arg1[2] - arg0[2] * arg1[1]) +
-                  (arg0[2] * *arg1 - *arg0 * arg1[2]) +
-                  (*arg0 * arg1[1] - arg0[1] * *arg1);
+/* Sum the three components of the cross product. */
+float func_00310B60(float *left, float *right) {
+    return (left[1] * right[2] - left[2] * right[1]) +
+                  (left[2] * *right - *left * right[2]) +
+                  (*left * right[1] - left[1] * *right);
 }
 
 float fldVec4ArcCosDot(float *a, float *b) {
