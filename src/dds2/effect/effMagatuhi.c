@@ -5,7 +5,7 @@
 /* Small work area: type id and count, an id block, a result table plus an
  * object released on cleanup. */
 typedef struct {
-    s32   type;         /* 0x00 effect type (== 3 in func_00194668) */
+    s32   type;         /* 0x00 effect type (== 3 in effMagatuhiDispatchByKind) */
     u16   count04;      /* 0x04 loop count */
     u8    pad06[2];     /* 0x06 */
     void *ptr08;        /* 0x08 id block / source block */
@@ -122,7 +122,7 @@ void effMagatuhiSetValue(EffMagatuhiWork *work, s32 index, u32 value) {
 }
 
 /* Fill the result table with `count04` blends from colorA to colorB. */
-void func_001917E0(EffMagatuhiWork *work, u32 colorA, u32 colorB) {
+void effMagatuhiFillColorTable(EffMagatuhiWork *work, u32 colorA, u32 colorB) {
     f32 t = 0.0f;
     u32 count = work->count04;
     u32 *out = work->out18;
@@ -181,7 +181,7 @@ extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
-EffMagatuhiWideFirst *func_001918D0(EffMagatuhiHeadFirst *src) {
+EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiParticleFirst);
     u32 handle = func_003292A8(size + sizeof(EffMagatuhiWideFirst));
@@ -229,7 +229,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiWork *work, EffMagatuhiSrc *src) {
     dst->f50 = src->f24;
 }
 
-EffMagatuhiWideSecond *func_001922B0(EffMagatuhiHeadSecond *src) {
+EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * 4 + sizeof(EffMagatuhiWideSecond));
     EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress(handle);
@@ -299,7 +299,7 @@ typedef struct {
     void *buffer;          /* 0x128 */
 } EffMagatuhiWideFourth;
 
-EffMagatuhiWideFourth *func_00192C20(EffMagatuhiHeadThird *src) {
+EffMagatuhiWideFourth *effMagatuhiCreateFourth(EffMagatuhiHeadThird *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * sizeof(EffMagatuhiElemA) + sizeof(EffMagatuhiWideFourth));
     EffMagatuhiWideFourth *work = (EffMagatuhiWideFourth *)sdfResourceRetainAddress(handle);
@@ -329,7 +329,7 @@ void func_00192E08(EffMagatuhiMidWork *work) {
     func_003297C8(work->buffer);
 }
 
-void func_00192E38(EffMagatuhiFamilyA *work, s32 index) {
+void effMagatuhiInitParticleA(EffMagatuhiFamilyA *work, s32 index) {
     EffMagatuhiElemA *elem = &work->elems[index];
     f32 blend;
     f32 t;
@@ -388,7 +388,7 @@ typedef struct {
     void *buffer;          /* 0x12C */
 } EffMagatuhiWideFifth;
 
-EffMagatuhiWideFifth *func_00193488(EffMagatuhiHeadFifth *src) {
+EffMagatuhiWideFifth *effMagatuhiCreateFifth(EffMagatuhiHeadFifth *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * sizeof(EffMagatuhiParticleFifth) + sizeof(EffMagatuhiWideFifth));
     EffMagatuhiWideFifth *work = (EffMagatuhiWideFifth *)sdfResourceRetainAddress(handle);
@@ -446,7 +446,7 @@ typedef struct {
     void *buffer;          /* 0x128 */
 } EffMagatuhiWideThird;
 
-EffMagatuhiWideThird *func_00193CF8(EffMagatuhiHeadThird *src) {
+EffMagatuhiWideThird *effMagatuhiCreateThird(EffMagatuhiHeadThird *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiParticleFirst);
     u32 handle = func_003292A8(size + sizeof(EffMagatuhiWideThird));
@@ -498,7 +498,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194428);
 
 extern u32 func_001947F8(void *block);
 
-s32 func_00194668(EffMagatuhiWork *work) {
+s32 effMagatuhiDispatchByKind(EffMagatuhiWork *work) {
     if (work->type == 3) {
         switch (func_001947F8(work->ptr08)) {
         case 0:

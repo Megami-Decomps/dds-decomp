@@ -57,7 +57,7 @@ INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C120);
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C3F0);
 
-extern u32 func_00309138(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity is latched at 0x80; later fade steps leave it untouched. */
 void itfUpdateFadeColor(TitleMenuWork *work) {
@@ -66,7 +66,7 @@ void itfUpdateFadeColor(TitleMenuWork *work) {
     if (work->opacityReady != 0) {
         return;
     }
-    opacity = func_00309138(0x80808080, 0x80808000, remaining) & 0xFF;
+    opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
     work->opacity = opacity;
     if (opacity >= 0x80) {
         work->opacityReady = 1;

@@ -88,7 +88,7 @@ void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
 void func_002EE418(PacState *state);
 void func_002EE4A8(PacState *state);
 void func_002EE828(PacState *state);
-void func_002EE900(PacState *state);
+void sdfPacResetOutputToAllocationEntry(PacState *state);
 void sdfPacAdvanceAllocationEntry(PacState *state);
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
 void func_002EE478(PacState *state, PacHead *packet);
@@ -407,7 +407,7 @@ void sdfPacStartNextAllocationEntry(PacState *state) {
 
 /* Reset the output cursor to the current allocation entry and hook the copy
    and completion callbacks. */
-void func_002EE900(PacState *state) {
+void sdfPacResetOutputToAllocationEntry(PacState *state) {
     state->outputCursor = (u8 *)state->allocation + 0x10;
     state->pendingBytes = 0x10;
     state->onInput = sdfPacCopyPendingBytes;
@@ -425,7 +425,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
             func_002CFF98(allocation);
             func_002EDD98(state);
         } else {
-            func_002EE900(state);
+            sdfPacResetOutputToAllocationEntry(state);
         }
     }
 }
@@ -444,6 +444,6 @@ void sdfPacSkipAllocationEntryBytes(PacState *state) {
             return;
         }
     }
-    func_002EE900(state);
+    sdfPacResetOutputToAllocationEntry(state);
 }
 

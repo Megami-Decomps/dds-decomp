@@ -368,7 +368,7 @@ void func_0023D740(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames
     }
 }
 
-void func_0023D800(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
+void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
     void *pathSource;
     s32 path;
 
@@ -457,7 +457,7 @@ void func_0023E178(void) {
     }
 }
 
-void func_0023E220(s32 index, s32 state, s32 id, f32 *a, f32 *b, f32 *c) {
+void evtSetSlotVectors(s32 index, s32 state, s32 id, f32 *a, f32 *b, f32 *c) {
     if (index < 10) {
         D_004536D8[index].vec[0] = a[0];
         D_004536D8[index].state = state;
@@ -728,7 +728,7 @@ u32 func_0023EA90(void) {
     return 1;
 }
 
-u32 func_0023EAE8(void) {
+u32 evtOpModelLodChg(void) {
     s32 lod;
     void *world;
     EvtLodUnit *unit;
@@ -879,7 +879,7 @@ void func_0023EFF8(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421810);
 
-void func_0023F010(s32 id, s32 motion) {
+void evtLipsExecFunction(s32 id, s32 motion) {
     void *unit = NULL;
     EvtLipsModel *model = NULL;
     EvtLipsNode *node;
@@ -907,7 +907,7 @@ void func_0023F010(s32 id, s32 motion) {
     func_0035B6E0("<lips %d %d> \n", id, motion);
 }
 
-void func_0023F168(void) {
+void evtLipsStopFunction(void) {
     void *unit = NULL;
     EvtLipsModel *model = NULL;
     EvtLipsNode *node;
@@ -1065,7 +1065,7 @@ u32 func_0023F580(void) {
         s32 mode = scrReadIntParameter(2);
         s32 dirFlag = scrReadIntParameter(4);
         s32 sideMode = scrReadIntParameter(3);
-        func_0023D800(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
+        evtSetUnitPathFollow(unit, objectId, frames, valueB6, mode, dirFlag, sideMode);
     }
     return 1;
 }

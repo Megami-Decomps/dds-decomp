@@ -46,15 +46,15 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_002862B0);
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00286350);
+INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPush);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00286410);
+INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPop);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_002864D0);
+INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitResetUnit);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00286530);
+INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitReset);
 
-void func_002865A8(void) {
+void mtrMantraEventBitReset(void) {
     s32 i;
 
     for (i = 0; i < 0x70; i++) {

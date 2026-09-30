@@ -94,7 +94,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern u32 func_00309138(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
 
@@ -110,7 +110,7 @@ extern u32 D_003E68D8[][2];
 
 extern u32 D_003E6900[][2];
 
-void func_002A9068(void) {
+void ptyResetPartyRecordsAndProfiles(void) {
     s32 offset = 0;
     s32 i = 4;
 
@@ -150,7 +150,7 @@ void mnuLoadCampResources(void) {
     }
 }
 
-extern void func_00305068(u32);
+extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 extern void effResolveAndReleaseResource(u32);
 
@@ -166,7 +166,7 @@ void func_002A9200(u32 *destination) {
     s32 remaining = 1;
     u32 offset = 0;
     do {
-        func_00305068(*(u32 *)((u8 *)D_00438FF8 + offset));
+        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)D_00438FF8 + offset));
         *(u32 *)((u8 *)destination + offset) = 0;
         offset += 4;
     } while (--remaining >= 0);
@@ -371,7 +371,7 @@ void func_002A93F8(s32 kind, u8 *work) {
     if (count > 0) {
         u32 *handles = (u32 *)buffer;
         do {
-            func_00305068(*handles++);
+            effReleaseTextureHandlesAndResetSlots(*handles++);
         } while (++i < count);
     }
 }
@@ -426,14 +426,14 @@ void movLoadTitleEffects(u8 *work) {
     s32 *data;
 
     ((CampVisualWork *)work)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
-    ((CampVisualWork *)work)->motion[0] = func_00304998(6);
+    ((CampVisualWork *)work)->motion[0] = effCreateStatusBatch(6);
     data = ((CampVisualWork *)work)->motion[0]->sub->data;
     data[0] = 0xF;
     data[1] = 0;
     data[2] = 0;
     data[3] = 0;
     data[4] = 0;
-    ((CampVisualWork *)work)->motion[1] = func_00304998(1);
+    ((CampVisualWork *)work)->motion[1] = effCreateStatusBatch(1);
     data = ((CampVisualWork *)work)->motion[1]->sub->data;
     data[0] = 0xF;
     data[1] = 0;
@@ -455,10 +455,10 @@ void func_002A95B0(u32 container, u32 *resources, u32 unused, u32 mode) {
     func_002BC600(container, resources + 0xc);
     mnuRegisterResourceHandles(container, resources + 0x14);
     func_002BCA98(container);
-    func_002BE6E8(container, resources[1]);
+    mnuSetPanelSlotValues(container, resources[1]);
 }
 
-void func_002A9640(u32 *list, u32 *state) {
+void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 i;
     s32 flag;
 
@@ -476,7 +476,7 @@ void func_002A9640(u32 *list, u32 *state) {
 }
 
 /* Releases the sprite handle groups held by the movie/title effect work. */
-void func_002A9788(u32 *work) {
+void mnuReleaseTitleEffectSprites(u32 *work) {
     s32 i;
     u32 *group0;
     u32 *group1;
@@ -485,15 +485,15 @@ void func_002A9788(u32 *work) {
     func_002A9200(work);
     group0 = work + 0x10 / 4;
     for (i = 0xF; i >= 0; i--) {
-        func_003054E8(*group0++);
+        effDestroyResourceSlotSet(*group0++);
     }
     group1 = work + 0x50 / 4;
     for (i = 4; i >= 0; i--) {
-        func_003054E8(*group1++);
+        effDestroyResourceSlotSet(*group1++);
     }
     group2 = work + 0x8 / 4;
     for (i = 1; i >= 0; i--) {
-        func_003054E8(*group2++);
+        effDestroyResourceSlotSet(*group2++);
     }
 }
 
@@ -501,7 +501,7 @@ s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
     u32 *entry;
     u32 *tail;
     s32 i;
-    func_00303E88(mode);
+    effPollResourceList(mode);
     i = 0;
     entry = state;
     for (; i < 2; i++) {
@@ -616,7 +616,7 @@ typedef struct ListSlotWork {
     u16 slotOfC[0x75];  /* 0xB020: skill ids 0x1AB..0x21F */
 } ListSlotWork;
 
-void func_002A9F78(ListSlotWork *work) {
+void mnuBuildListSlotTableA(ListSlotWork *work) {
     u16 *slot;
     s32 id;
     s32 i;
@@ -629,7 +629,7 @@ void func_002A9F78(ListSlotWork *work) {
     }
 }
 
-void func_002A9FF0(ListSlotWork *work) {
+void mnuBuildListSlotTableB(ListSlotWork *work) {
     u16 *slot;
     s32 i;
     s32 idx;
@@ -643,7 +643,7 @@ void func_002A9FF0(ListSlotWork *work) {
     }
 }
 
-void func_002AA068(ListSlotWork *work) {
+void mnuBuildSkillSlotTable(ListSlotWork *work) {
     u16 *slot;
     s32 id;
     s32 i;
@@ -658,7 +658,7 @@ void func_002AA068(ListSlotWork *work) {
     }
 }
 
-u8 *func_002AA0D8(void) {
+u8 *mnuCreateStaffMenuWork(void) {
     s32 handle;
     u8 *work;
     u8 *effects;
@@ -681,9 +681,9 @@ u8 *func_002AA0D8(void) {
     movLoadTitleEffects(work);
     func_002A9908(work);
     func_002C1B58(work + 0xAA50, 0x60);
-    func_002A9F78((ListSlotWork *)work);
-    func_002A9FF0((ListSlotWork *)work);
-    func_002AA068((ListSlotWork *)work);
+    mnuBuildListSlotTableA((ListSlotWork *)work);
+    mnuBuildListSlotTableB((ListSlotWork *)work);
+    mnuBuildSkillSlotTable((ListSlotWork *)work);
     func_003425B0();
     return work;
 }
@@ -697,7 +697,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     func_002A9F08(work);
     func_002BB418(((CampVisualWork *)work)->modelHandle);
     mnuShutdownContext(work + 0x284);
-    func_0026C728();
+    dspCloseChannel();
     mnuDestroyEffectResources(work + 0x11c);
     func_002A9A40(work);
     movReleaseTitleEffects(work);
@@ -758,11 +758,11 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA08);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA18);
 
-void func_002AA360(void) {
+void mnuCreateCampTasks(void) {
     s32 work;
     s32 draw;
 
-    work = (s32)func_002AA0D8();
+    work = (s32)mnuCreateStaffMenuWork();
     kwlnTaskCreate(D_00437B78, 0x3F2, 1, 0, func_002AAF70, 0, work);
     draw = kwlnTaskCreate(D_0042AA08, 0x2B07, 1, 0, func_002AB0E0, 0, work);
     kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, func_002AB1B0, mnuDestroyStaffMenuTask, work);
@@ -814,7 +814,7 @@ void func_002AA530(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 
     func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
     func_0035C860(buffer, D_00437B80, *(s32 *)(D_00435DD0 + 0x3C));
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
-                           func_00309138(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
+                           uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
     func_0019D550(object, 1, layer);
     func_0019C5B0(object);
     offset = visual->titleSlide;

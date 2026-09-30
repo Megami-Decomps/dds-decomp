@@ -91,7 +91,7 @@ void func_001565E0(EffTemplatePacketList *effect);
 
 typedef struct EffEmitterD EffEmitterD;
 
-void func_00155380(EffEmitterD *effect, u32 index);
+void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index);
 
 typedef struct EffResourceOwner {
     u8 pad00[0x30];
@@ -663,7 +663,7 @@ extern f32 func_002E78F8(f32);
 
 void parDispatchKindInit(void *work, s32 index);
 
-void func_00153B38(EffEmitterA *effect, u32 index) {
+void effEmitterRingSpawn(EffEmitterA *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 rem;
     f32 phase;
@@ -712,7 +712,7 @@ void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
 
 /* vf12 keeps the packet's previous position and vf10 the new one for
  * parDispatchKindUpdate, which reads them as implicit arguments. */
-void func_00153D98(EffEmitterA *effect) {
+void effEmitterRingUpdate(EffEmitterA *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -738,7 +738,7 @@ void func_00153D98(EffEmitterA *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00153B38(effect, i);
+            effEmitterRingSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -848,7 +848,7 @@ typedef struct EffEmitterB {
 
 extern u32 effMiscRand(void *state);
 
-void func_00154188(EffEmitterB *effect, u32 index) {
+void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 scale;
@@ -895,7 +895,7 @@ void func_00154188(EffEmitterB *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00154430(EffEmitterB *effect) {
+void effEmitterDiscUpdate(EffEmitterB *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -921,7 +921,7 @@ void func_00154430(EffEmitterB *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00154188(effect, i);
+            effEmitterDiscSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -1033,7 +1033,7 @@ typedef struct EffEmitterC {
 void func_001547D8(EffEmitterC *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_001547D8);
 
-void func_00154FD8(EffEmitterC *effect) {
+void effEmitterBallisticUpdate(EffEmitterC *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     u32 mode;
@@ -1111,7 +1111,7 @@ void func_00155200(EffTemplatePacketList *effect) {
     record = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            func_00155380((EffEmitterD *)effect, i);
+            effEmitterLookAtRingSpawn((EffEmitterD *)effect, i);
             record->unk20 = tag;
             next = i + 1;
             record = record + 1;
@@ -1164,7 +1164,7 @@ extern u8 D_003246A0[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void func_002DD520(void);
 
-void func_00155380(EffEmitterD *effect, u32 index) {
+void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 period = 0;
     f32 angle;
@@ -1215,7 +1215,7 @@ void func_00155380(EffEmitterD *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00155618(EffEmitterD *effect) {
+void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 spin;
@@ -1263,7 +1263,7 @@ void func_00155618(EffEmitterD *effect) {
         age++;
         if (age >= frames) {
             if (loop) {
-                func_00155380((EffEmitterD *)effect, i);
+                effEmitterLookAtRingSpawn((EffEmitterD *)effect, i);
                 age = packet->age;
             } else {
                 parDispatchKindInit(&effect->head.sub, i);
@@ -1331,7 +1331,7 @@ typedef struct EffEmitterE {
     f32 jitterB;     /* 0x168 */
 } EffEmitterE;
 
-void func_00155960(EffEmitterE *effect, u32 index) {
+void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 speed;
@@ -1417,7 +1417,7 @@ void func_00155CC0(EffEmitterE *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00155960(effect, i);
+            effEmitterBurstSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -1533,7 +1533,7 @@ typedef struct EffEmitterF {
     f32 f178;
 } EffEmitterF;
 
-void func_00156070(EffEmitterF *effect, u32 index) {
+void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 radius;
@@ -1581,7 +1581,7 @@ void func_00156070(EffEmitterF *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00156378(EffEmitterF *effect) {
+void effEmitterSphereUpdate(EffEmitterF *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -1607,7 +1607,7 @@ void func_00156378(EffEmitterF *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00156070(effect, i);
+            effEmitterSphereSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -1716,7 +1716,7 @@ typedef struct EffEmitterG {
     f32 spinRate;    /* 0x164 */
 } EffEmitterG;
 
-void func_00156730(EffEmitterG *effect, u32 index) {
+void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 tmp[4];
     f32 jitter;
@@ -1753,7 +1753,7 @@ void func_00156730(EffEmitterG *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00156920(EffEmitterG *effect) {
+void effEmitterExpandRingUpdate(EffEmitterG *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -1781,7 +1781,7 @@ void func_00156920(EffEmitterG *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00156730(effect, i);
+            effEmitterExpandRingSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -1890,7 +1890,7 @@ typedef struct EffEmitterH {
     f32 degrees;     /* 0x174 */
 } EffEmitterH;
 
-void func_00156CD8(EffEmitterH *effect, s32 index) {
+void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 gravity;
     f32 sweep;
@@ -1940,7 +1940,7 @@ void func_00156CD8(EffEmitterH *effect, s32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00156F30(EffEmitterH *effect) {
+void effEmitterConeUpdate(EffEmitterH *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 tmp[4];
@@ -1962,7 +1962,7 @@ void func_00156F30(EffEmitterH *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00156CD8(effect, i);
+            effEmitterConeSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {
@@ -2210,7 +2210,7 @@ typedef struct EffEmitterJ {
 void func_00157D28(EffEmitterJ *effect, s32 index);
 INCLUDE_ASM(const s32, "game/code_00151F58", func_00157D28);
 
-void func_001584B8(EffEmitterJ *effect) {
+void effEmitterOffsetGravityUpdate(EffEmitterJ *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     u32 mode;
@@ -2347,7 +2347,7 @@ typedef struct EffEmitterK {
     f32 (*aux)[4];   /* 0x178: 16 bytes per packet */
 } EffEmitterK;
 
-void func_00158880(EffEmitterK *effect, u32 index) {
+void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     f32 (*aux)[4] = effect->aux;
     f32 tmp[4];
@@ -2394,7 +2394,7 @@ void func_00158880(EffEmitterK *effect, u32 index) {
     parDispatchKindInit(&effect->head.sub, index);
 }
 
-void func_00158B10(EffEmitterK *effect) {
+void effEmitterDiscAuxUpdate(EffEmitterK *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 (*aux)[4] = effect->aux;
@@ -2423,7 +2423,7 @@ void func_00158B10(EffEmitterK *effect) {
         s32 age = packet->age;
 
         if (age == 0xF0000001) {
-            func_00158880(effect, i);
+            effEmitterDiscAuxSpawn(effect, i);
             age = packet->age;
         }
         if (age >= 0) {

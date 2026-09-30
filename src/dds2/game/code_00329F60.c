@@ -40,7 +40,7 @@ extern SdfTex *D_004389F8;
 
 extern u8 D_00439148;
 
-void func_0032CAE0(void *request, s32 value);
+void sdfPendingQueuePush(void *request, s32 value);
 
 typedef struct SdfTexHead {
     SdfTex *unk0; /* 0x0 */
@@ -258,7 +258,7 @@ s32 func_0032AA40(SdfTexBlock *block) {
 }
 
 void func_0032AAB8(s32 value) {
-    func_0032CAE0(&D_00439148, value);
+    sdfPendingQueuePush(&D_00439148, value);
 }
 
 void sdfTexInitializeLists(void) {

@@ -43,7 +43,7 @@ typedef struct {
 
 extern void func_002CFF98(void *);
 
-extern void func_0027B368(SdfCounterRuntime *);
+extern void mnuDestroyListState(SdfCounterRuntime *);
 
 extern s32 D_003BD274;
 
@@ -144,7 +144,7 @@ void func_002C45C8(SdfCounterRuntime *rt) {
         }
         func_002CFF98(rt->timer);
         rt->timer = NULL;
-        func_0027B368(rt);
+        mnuDestroyListState(rt);
     }
 }
 

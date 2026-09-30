@@ -4,7 +4,7 @@ u32 effLoadIndexedResource(void *resourceTable, const char *fileName, s32 index)
 
 extern u32 D_00437210[];
 
-void func_003054E8(u32 sprite);
+void effDestroyResourceSlotSet(u32 sprite);
 
 void func_00308380(s32 property, s32 object);
 
@@ -46,7 +46,7 @@ void evtLoadSolarNoiseSprite(u32 *sprite) {
 }
 
 void evtReleaseSolarNoiseSprite(u32 *sprite) {
-    func_003054E8(*sprite);
+    effDestroyResourceSlotSet(*sprite);
 }
 
 void evtInitializeSolarOverlay(s32 object) {

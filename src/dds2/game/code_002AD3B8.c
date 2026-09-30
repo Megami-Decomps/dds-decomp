@@ -18,7 +18,7 @@ extern void func_002ABEB0(s32);
 extern void func_002AC660(s32);
 extern void func_002ACA98(s32);
 extern void func_002B2C88(s32, s32, s32, s32);
-extern void func_002BD2E0(s32);
+extern void mnuClearPageSelectionHandles(s32);
 extern void mnuClearEntries(s32);
 extern void mnuDestroyPanelGroup(s32);
 extern void func_002C1050(s32);
@@ -43,7 +43,7 @@ extern s32 D_00435E48;
 extern s32 func_002C5580();
 extern s32 func_002C55C0();
 extern void func_0026C918(s32, s32);
-extern void func_0026C5B8(s32);
+extern void dspStartEntry(s32);
 extern void func_0011A118();
 extern void func_002AD330();
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -67,13 +67,13 @@ extern void mnuClearListFlagsOneAndTwo();
 extern void mnuSeekListNode();
 extern void mnuResetListNodeFadeCounters();
 extern void sndSetSequenceVolumePan();
-extern void func_002BD1D0(u32 *, s32);
+extern void mnuSelectPage(u32 *, s32);
 extern void func_002ABD60(void *);
 extern void func_002AC408(void *);
 extern void func_002AC8F0(void *);
 extern s32 mdlFlagTest();
 extern void func_002BB9C8(s32, s32);
-extern void func_002B2818(s32 *);
+extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
 extern void func_002BC078(s32, u32 *, s32, s32);
 extern void *func_002C0B80(s32, s32, s32);
@@ -178,7 +178,7 @@ u32 func_002AD510(void) {
     return 1;
 }
 
-s64 func_002AD518(s32 callback) {
+s64 mnuStaffImageInputA(s32 callback) {
     s32 context = func_00101958();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -377,7 +377,7 @@ s64 func_002ADB48(s32 callback) {
     return 0;
 }
 
-s64 func_002ADC70(s32 callback) {
+s64 mnuStaffImageEnterD(s32 callback) {
     s32 context = func_00101958();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
@@ -434,9 +434,9 @@ s32 func_002AE0B0(s32 unused) {
     u32 *window = &context->windowFlags;
     s32 index = **(s32 **)(context->selection + 0x1C);
 
-    func_002BD1D0(window, index);
+    mnuSelectPage(window, index);
     func_002ABD60(context);
-    func_002B2818(&context->group);
+    mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, 0, 0);
     func_002BC078(index, window, 1, 0);
     context->panelHandle = func_002C0B80(context->spriteArg0, context->spriteArg1, 0);
@@ -456,7 +456,7 @@ s32 func_002AE1F0(s32 unused) {
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ABEB0(context);
     func_002B2C88(entryList, 0, 0, 0);
-    func_002BD2E0(entryList);
+    mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
@@ -480,7 +480,7 @@ void func_002AE2D0(s32 context, u8 *entry, s32 target) {
         func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
         func_0026C918(1, D_00435E5C + current * 0x19);
         func_0026C918(2, D_00435E5C + target * 0x19);
-        func_0026C5B8(0);
+        dspStartEntry(0);
         if (current != 0) {
             func_0011A118(current, 1);
         }
@@ -489,13 +489,13 @@ void func_002AE2D0(s32 context, u8 *entry, s32 target) {
         ((MenuStaffChoices *)menu)->requested = target;
     } else {
         func_0026C918(0, D_00435E5C + current * 0x19);
-        func_0026C5B8(1);
+        dspStartEntry(1);
         ((MenuStaffChoices *)menu)->previous = 0;
         ((MenuStaffChoices *)menu)->requested = 0;
     }
 }
 
-s32 func_002AE408(s32 callback) {
+s32 mnuStaffListInput(s32 callback) {
     s32 context = func_00101958();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
@@ -543,7 +543,7 @@ s32 func_002AE408(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE580);
 
-void func_002AE7C8(s32 id, u8 *panel) {
+void mnuDrawStaffCaption(s32 id, u8 *panel) {
     char buf[16];
     s32 handle;
 
@@ -573,9 +573,9 @@ s32 func_002AEAA0(s32 unused) {
     s32 index = **(s32 **)(context->selection + 0x1C);
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
-    func_002BD1D0(window, index);
+    mnuSelectPage(window, index);
     func_002AC408(context);
-    func_002B2818(&context->group);
+    mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
                          context->spriteArg2);
     func_002BC078(index, window, 0, 2);
@@ -599,7 +599,7 @@ s32 func_002AEC10(s32 unused) {
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002AC660(context);
     func_002B2C88(entryList, 0, 0, 0);
-    func_002BD2E0(entryList);
+    mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
@@ -614,7 +614,7 @@ s32 func_002AEC10(s32 unused) {
     return 1;
 }
 
-void func_002AECF0(s32 context, u8 *entry, s32 target) {
+void mnuStaffEntrySwapLabels(s32 context, u8 *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current = func_002C55C0(entry);
 
@@ -622,7 +622,7 @@ void func_002AECF0(s32 context, u8 *entry, s32 target) {
     if (target == 0) {
         func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
         func_0026C918(1, D_00435E5C + current * 0x19);
-        func_0026C5B8(6);
+        dspStartEntry(6);
         ((MenuStaffChoices *)menu)->alternatePrevious = current;
         ((MenuStaffChoices *)menu)->alternateRequested = 0;
     } else if (current != target) {
@@ -630,17 +630,17 @@ void func_002AECF0(s32 context, u8 *entry, s32 target) {
             func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
             func_0026C918(1, D_00435E5C + current * 0x19);
             func_0026C918(2, D_00435E5C + target * 0x19);
-            func_0026C5B8(3);
+            dspStartEntry(3);
         } else {
             func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
             func_0026C918(1, D_00435E5C + target * 0x19);
-            func_0026C5B8(4);
+            dspStartEntry(4);
         }
         ((MenuStaffChoices *)menu)->alternatePrevious = current;
         ((MenuStaffChoices *)menu)->alternateRequested = target;
     } else {
         func_0026C918(0, D_00435E5C + current * 0x19);
-        func_0026C5B8(5);
+        dspStartEntry(5);
         ((MenuStaffChoices *)menu)->alternatePrevious = 0;
         ((MenuStaffChoices *)menu)->alternateRequested = 0;
     }
@@ -716,9 +716,9 @@ s32 func_002AF8E0(s32 unused) {
     s32 index = **(s32 **)(context->selection + 0x1C);
     u8 *slot = (u8 *)context + index * 0x2138 + 0x2FC;
 
-    func_002BD1D0(window, index);
+    mnuSelectPage(window, index);
     func_002AC8F0(context);
-    func_002B2818(&context->group);
+    mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
                          context->spriteArg2);
     func_002BC078(index, window, 0, 2);
@@ -745,7 +745,7 @@ s32 func_002AFA58(s32 unused) {
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ACA98(context);
     func_002B2C88(entryList, 0, 0, 0);
-    func_002BD2E0(entryList);
+    mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
@@ -776,9 +776,9 @@ void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
     func_0035C860(buf, D_00437BD8, func_002BDA78(current) - base);
     func_0026C918(3, (s32)buf);
     if (flag == 0) {
-        func_0026C5B8(9);
+        dspStartEntry(9);
     } else {
-        func_0026C5B8(0xA);
+        dspStartEntry(0xA);
     }
 }
 
@@ -832,7 +832,7 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFDD0);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AFE18);
 
-void func_002B0170(MenuSceneConfig *cfg, s32 row) {
+void mnuSetPanelItemsFromRow(MenuSceneConfig *cfg, s32 row) {
     char *slots = D_003E7207 + row * 0x1C;
     char *flags;
     s32 *entry;

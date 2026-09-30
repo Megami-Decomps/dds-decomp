@@ -18,7 +18,7 @@ extern void func_0011E280(s32, f32, f32, f32, f32);
 extern s32 func_001A17F0();
 extern s8 D_003BB870;
 extern s32 D_003BB87C;
-extern s32 func_002011C8(s32, s32);
+extern s32 btlIsLowHpActionReady(s32, s32);
 extern s32 func_002CFF68(s32);
 extern void func_002CFF98(s32);
 
@@ -26,20 +26,20 @@ extern u32 D_003BB874;
 
 extern void func_00202668(s32, s32);
 extern void func_00202F90(s32, s32);
-extern void func_00203248(s32, s32);
+extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void func_00203098();
 extern void func_00203A80(s32, s32);
 extern void func_00203BA8(s32, s32);
-extern void func_002041A0();
-extern void func_002033C0();
-extern void func_002034D0();
+extern void btlSelectTargetsPassingCheck();
+extern void btlSelectTargetsByActionMask();
+extern void btlSelectTargetsWithoutActionMask();
 extern void func_002035E0();
 extern void func_00204008();
 extern void func_00204028();
 extern void func_00203F98();
 extern void func_00203CA8();
-extern void func_00204048(s32, s32);
-extern void func_00204080();
+extern void btlAppendEffectActorToCommandIndices(s32, s32);
+extern void btlSelectTargetsBlockingElement();
 typedef struct EffChildCounters {
     u8 pad00[0x318];
     u8 firstCountdown;
@@ -70,7 +70,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC998);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
 
-extern u32 func_001FFCD8(void);
+extern u32 btlRollAiBucket(void);
 
 /* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
  * If bit 5 is the sole low status bit, the final check uses an external value. */
@@ -89,7 +89,7 @@ s32 func_001FCB50(BtlTask *task) {
     if ((flags & 0x7FFF) != 0x20) {
         return 1;
     }
-    return func_001FFCD8() < 0x46;
+    return btlRollAiBucket() < 0x46;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001FC7D8", D_003A57E0);
@@ -554,7 +554,7 @@ s32 btlAllocAndCheck(s32 object) {
 
     D_003BB87C = allocation;
     *(s32 *)allocation = object;
-    if (func_002011C8(actor, 0) != 0) {
+    if (btlIsLowHpActionReady(actor, 0) != 0) {
         func_002CFF98(D_003BB87C);
         return 1;
     }
@@ -648,7 +648,7 @@ void btlCmdWithArgB(s32 context) {
 }
 
 void btlCmdWithArgC(s32 context) {
-    func_00203248(context, 0);
+    btlSelectLowestHealthRateTarget(context, 0);
 }
 
 void btlCmdSimpleA(void) {
@@ -664,15 +664,15 @@ void btlCmdWithArgE(s32 context) {
 }
 
 void btlCmdSimpleB(void) {
-    func_002041A0();
+    btlSelectTargetsPassingCheck();
 }
 
 void btlCmdSimpleC(void) {
-    func_002033C0();
+    btlSelectTargetsByActionMask();
 }
 
 void btlCmdSimpleD(void) {
-    func_002034D0();
+    btlSelectTargetsWithoutActionMask();
 }
 
 void btlCmdSimpleE(void) {
@@ -696,11 +696,11 @@ void btlCmdSimpleI(void) {
 }
 
 void btlCmdWithArgF(s32 context) {
-    func_00204048(context, 0);
+    btlAppendEffectActorToCommandIndices(context, 0);
 }
 
 void btlCmdSimpleJ(void) {
-    func_00204080();
+    btlSelectTargetsBlockingElement();
 }
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB840);

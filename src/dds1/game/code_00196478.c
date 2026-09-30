@@ -21,7 +21,7 @@ extern void frFontSetEntryFlag(s32 kind, u64 flag);
 
 extern void func_00195520(u64 value);
 
-extern void func_00195530(u64 value);
+extern void frFontClearFlagBits(u64 value);
 
 extern void frFontSetChainFlag(u64 glyph, u64 value);
 
@@ -259,12 +259,12 @@ u64 func_00197238(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFl
     }
     frFontSetEntryFlag(kind, entryFlag);
     func_00195520(1);
-    func_00195530(2);
-    func_00195530(0x10);
+    frFontClearFlagBits(2);
+    frFontClearFlagBits(0x10);
     glyph = func_00195160(source, kind, 0, 0, 0);
     func_00195520(0x10);
     func_00195520(2);
-    func_00195530(1);
+    frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
     func_00195450(glyph, x, y);
     func_00195460(glyph, depth << 4);

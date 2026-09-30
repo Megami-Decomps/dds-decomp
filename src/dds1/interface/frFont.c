@@ -391,7 +391,7 @@ void func_00195520(s32 flags) {
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */
-u8 func_00195530(u8 mask) {
+u8 frFontClearFlagBits(u8 mask) {
     u8 old = D_003BB174;
 
     D_003BB174 = old & ~mask;

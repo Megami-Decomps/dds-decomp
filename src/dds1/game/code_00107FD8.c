@@ -659,7 +659,7 @@ u32 func_0010A540(void) {
 }
 
 void func_0010A548(void) {
-    func_002720B0();
+    mnuCreateCampTasks();
 }
 
 u32 evtDestroyCampTasks(void) {
@@ -822,7 +822,7 @@ u32 func_0010A850(void) {
 }
 
 void func_0010A858(void) {
-    func_002720B0();
+    mnuCreateCampTasks();
 }
 
 u32 func_0010A870(void) {

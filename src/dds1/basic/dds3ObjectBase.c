@@ -4,7 +4,7 @@
 extern void *dds3SpawnSlotRingObj3(void *arg);
 extern void *dds3GetSlot(void *arg0, s32 index);
 
-extern ObjBase *func_00112888(void *obj);
+extern ObjBase *dds3GetObjectOwnedHandle(void *obj);
 
 s32 func_00111758(u8 arg);
 void *dds3GetExtData(void *obj);
@@ -17,35 +17,35 @@ void dds3ReplaceObjectResource(void *arg0);
 void mdlDestroyContext(s32 arg0, s32 arg1);
 void func_00222200(u32 arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
-void func_002DB308(void *arg);
+void sdfDestroyMotion(void *arg);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111840);
 
 void dds3SetObjectFlags(void *obj, s32 flags) {
     ObjBase *base;
 
-    base = func_00112888(obj);
+    base = dds3GetObjectOwnedHandle(obj);
     base->flags = base->flags | flags;
 }
 
 void dds3ClearObjectFlags(void *obj, s32 flags) {
     ObjBase *base;
 
-    base = func_00112888(obj);
+    base = dds3GetObjectOwnedHandle(obj);
     base->flags = base->flags & ~flags;
 }
 
 u8 dds3TestObjectFlags(void *obj, s32 flags) {
     ObjBase *base;
 
-    base = func_00112888(obj);
+    base = dds3GetObjectOwnedHandle(obj);
     return (base->flags & flags) != 0;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001119A0);
 
 void *dds3GetExtData(void *obj) {
-    return func_00112888(obj)->extData;
+    return dds3GetObjectOwnedHandle(obj)->extData;
 }
 
 void *dds3SetSlotByKind(void *obj, ObjData *data) {
@@ -59,20 +59,20 @@ void *dds3ExchangeSlot(void *obj, void *data, s32 index) {
     void *old;
 
     old = dds3GetSlot(obj, index);
-    func_00112888(obj)->slots[index] = data;
+    dds3GetObjectOwnedHandle(obj)->slots[index] = data;
     return old;
 }
 
 void *dds3GetSlot(void *obj, s32 index) {
-    return func_00112888(obj)->slots[index];
+    return dds3GetObjectOwnedHandle(obj)->slots[index];
 }
 
 u32 dds3GetUnk04(void *obj) {
-    return func_00112888(obj)->unk4;
+    return dds3GetObjectOwnedHandle(obj)->unk4;
 }
 
 u32 dds3GetUnk0C(void *obj) {
-    return func_00112888(obj)->unkC;
+    return dds3GetObjectOwnedHandle(obj)->unkC;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111B40);

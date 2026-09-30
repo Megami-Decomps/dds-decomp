@@ -154,7 +154,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
 
 void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
     MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
-    if (func_002747B0(object->selectionController, selection) != 0) {
+    if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
         u32 flags;
         u32 option;
         func_00289128(object, selection);
@@ -168,7 +168,7 @@ void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
 
 void mnuSetPanelSelection(MenuPanelObject *object, s8 selection) {
     MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
-    if (func_002747B0(object->selectionController, selection) != 0) {
+    if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
         func_00289128(object, selection);
         state->flags = (state->flags & 0xf0ffffff)
             | ((selection & 0xf) << 24);

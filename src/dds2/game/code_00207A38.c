@@ -108,7 +108,7 @@ typedef struct BtlCommandCtx {
     u32 choicesC[12]; /* 0x11C–0x148 */
 } BtlCommandCtx;
 
-extern s32 func_00211DE0(void);
+extern s32 btlRollAiBucket(void);
 
 extern s32 func_001AA6F8(void);
 
@@ -126,9 +126,9 @@ extern u64 func_00220958(void);
 
 extern s32 D_004367F4;
 
-extern u64 func_001E66D8(void);
+extern u64 btlCreateCommandSoundUpdateTask(void);
 
-extern u64 func_001E6740(void);
+extern u64 btlCreateSecondaryCommandSoundTask(void);
 
 extern u64 btlCreateCommandSoundTask(u64, u64);
 
@@ -154,7 +154,7 @@ extern void btlCmdSimpleJ(s32, u16);
 
 extern s8 D_00436CAC;
 
-extern void func_002112C8(s32, u16);
+extern void btlRunWeightedAiAction(s32, u16);
 
 extern s8 D_00419570[];
 
@@ -206,7 +206,7 @@ extern void func_00207A10(void);
 
 extern void btlFlagUnitDefeatCandidate(s32 actor);
 
-extern void func_001E2220(s32 actor);
+extern void btlClearUnitDefeatCandidate(s32 actor);
 
 extern u32 btlGetIndexListCount(s32 actor);
 
@@ -615,11 +615,11 @@ void btlFlagAllUnitsDefeatCandidate(void) {
     }
 }
 
-void func_00208DA0(void) {
+void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
     BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
     for (unit = work->unitList; unit != NULL; unit = unit->next) {
-        func_001E2220((s32)unit);
+        btlClearUnitDefeatCandidate((s32)unit);
     }
 }
 
@@ -637,14 +637,14 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     }
 }
 
-void func_00208E48(s32 mask) {
+void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     BtlUnit *unit;
 
     unit = ((BtlState *)func_001AA6F8())->units;
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
-                func_001E2220((s32)unit);
+                btlClearUnitDefeatCandidate((s32)unit);
             }
             unit = unit->next;
         } while (unit != NULL);
@@ -662,12 +662,12 @@ void btlFlagActorUnitsDefeatCandidate(s32 actor) {
     }
 }
 
-void func_00208F10(s32 actor) {
+void btlClearActorUnitDefeatCandidates(s32 actor) {
     u32 i = 0;
     u32 count = btlGetIndexListCount(actor);
     if (count != 0) {
         do {
-            func_001E2220(btlGetIndexListEntry(actor, i));
+            btlClearUnitDefeatCandidate(btlGetIndexListEntry(actor, i));
             i++;
         } while (i < count);
     }
@@ -1023,7 +1023,7 @@ void btlReleaseButtonTexture(void) {
     state->buttonTextureHandle = 0;
 }
 
-u32 func_00209D78(void) {
+u32 btlScriptSelectEmptyCommand(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
@@ -1041,7 +1041,7 @@ u32 func_00209DA8(void) {
     return 1;
 }
 
-u32 func_00209DD8(void) {
+u32 btlScriptSelectModeDValueOne(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
@@ -1059,7 +1059,7 @@ u32 btlCmdSetContextFlagOne(void) {
     return 1;
 }
 
-u32 func_00209E38(void) {
+u32 btlScriptSelectModeAValueOne(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
@@ -1172,7 +1172,7 @@ u32 func_0020A0A0(void) {
     return 1;
 }
 
-u32 func_0020A0E0(void) {
+u32 btlScriptSetBattleWorkParameter(void) {
     s32 battle;
     s16 value;
 
@@ -1184,60 +1184,60 @@ u32 func_0020A0E0(void) {
     return 1;
 }
 
-u32 func_0020A130(void) {
+u32 btlScriptCmdWithArgA(void) {
     btlCmdWithArgA(func_0010D8D0());
     return 1;
 }
 
-u32 func_0020A158(void) {
+u32 btlScriptCmdSimpleB(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleB(context, value);
     return 1;
 }
 
-u32 func_0020A198(void) {
+u32 btlScriptCmdWithArgB(void) {
     btlCmdWithArgB(func_0010D8D0());
     return 1;
 }
 
-u32 func_0020A1C0(void) {
+u32 btlScriptCmdWithArgC(void) {
     btlCmdWithArgC(func_0010D8D0());
     return 1;
 }
 
-u32 func_0020A1E8(void) {
+u32 btlScriptCmdSimpleA(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleA(context, value);
     return 1;
 }
 
-u32 func_0020A228(void) {
+u32 btlScriptCmdWithArgE(void) {
     btlCmdWithArgE(func_0010D8D0());
     return 1;
 }
 
-u32 func_0020A250(void) {
+u32 btlScriptCmdWithArgD(void) {
     btlCmdWithArgD(func_0010D8D0());
     return 1;
 }
 
-u32 func_0020A278(void) {
+u32 btlScriptCmdSimpleC(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleC(context, value);
     return 1;
 }
 
-u32 func_0020A2B8(void) {
+u32 btlScriptCmdSimpleD(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleD(context, value);
     return 1;
 }
 
-u32 func_0020A2F8(void) {
+u32 btlScriptCmdSimpleE(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleE(context, value);
@@ -1249,17 +1249,17 @@ u32 func_0020A338(void) {
     return 1;
 }
 
-u32 func_0020A360(void) {
+u32 btlScriptCmdSimpleG(void) {
     btlCmdSimpleG(func_0010D8D0(), 0);
     return 1;
 }
 
-u32 func_0020A390(void) {
+u32 btlScriptCmdSimpleF(void) {
     func_00211228(func_0010D8D0(), 0);
     return 1;
 }
 
-u32 func_0020A3C0(void) {
+u32 btlScriptCmdSimpleH(void) {
     btlCmdSimpleH(func_0010D8D0(), 0);
     return 1;
 }
@@ -1270,7 +1270,7 @@ s32 func_0020A3F0(void) {
     return 1;
 }
 
-u32 func_0020A430(void) {
+u32 btlScriptCmdWithArgF(void) {
     btlCmdWithArgF(func_0010D8D0());
     return 1;
 }
@@ -1280,14 +1280,14 @@ s32 func_0020A458(void) {
     return 1;
 }
 
-u32 func_0020A480(void) {
+u32 btlScriptCmdSimpleJ(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
     btlCmdSimpleJ(context, value);
     return 1;
 }
 
-u32 func_0020A4C0(void) {
+u32 btlScriptCmdSimpleI(void) {
     btlCmdSimpleI(func_0010D8D0(), 0);
     return 1;
 }
@@ -1348,7 +1348,7 @@ s32 func_0020A6A0(void) {
     return 1;
 }
 
-s32 func_0020A730(void) {
+s32 btlCmdSelectChoiceSlot2Code0C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0xc00000)) {
@@ -1376,7 +1376,7 @@ s32 func_0020A7C0(void) {
     return 1;
 }
 
-s32 func_0020A850(void) {
+s32 btlCmdSelectChoiceSlot3Code1C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (func_00210EA0((s32)context, context->actor, choice | 0x1c00000)) {
@@ -2119,7 +2119,7 @@ s32 func_0020C4A0(void) {
     return 1;
 }
 
-u32 func_0020C4E0(void) {
+u32 btlScriptReturnBattleValue(void) {
     u64 result;
 
     result = func_001B76F0();
@@ -2127,7 +2127,7 @@ u32 func_0020C4E0(void) {
     return 1;
 }
 
-u32 func_0020C508(void) {
+u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
     battle = func_001AA6F8();
@@ -2151,7 +2151,7 @@ u32 func_0020C568(void) {
     return 1;
 }
 
-u32 func_0020C570(void) {
+u32 btlScriptReturnEffectActive(void) {
     u32 active;
 
     active = btlGetEffectActive();
@@ -2175,7 +2175,7 @@ u32 func_0020C5C0(void) {
     return 1;
 }
 
-u32 func_0020C5E8(void) {
+u32 btlScriptReturnEffectValue(void) {
     u32 value;
 
     value = btlGetEffectValue();
@@ -2183,7 +2183,7 @@ u32 func_0020C5E8(void) {
     return 1;
 }
 
-u32 func_0020C610(void) {
+u32 btlCmdGetSubtaskTargetMode(void) {
     u32 mode;
 
     mode = btlGetSubtaskTargetMode();
@@ -2191,7 +2191,7 @@ u32 func_0020C610(void) {
     return 1;
 }
 
-u32 func_0020C638(void) {
+u32 btlScriptReturnContextSignedByte(void) {
     s32 context;
 
     context = func_0010D8D0();
@@ -2199,7 +2199,7 @@ u32 func_0020C638(void) {
     return 1;
 }
 
-u32 func_0020C660(void) {
+u32 btlScriptReturnGlobalDebugValue(void) {
     func_0010D818(D_00436CAC);
     return 1;
 }
@@ -2213,10 +2213,10 @@ u32 func_0020C690(void) {
     return 1;
 }
 
-u32 func_0020C6B8(void) {
+u32 btlScriptSetBattleCommand(void) {
     s32 context = func_0010D8D0();
     u16 value = scrReadIntParameter(0);
-    func_002112C8(context, value);
+    btlRunWeightedAiAction(context, value);
     return 1;
 }
 
@@ -2242,24 +2242,24 @@ u32 func_0020C760(void) {
     return 1;
 }
 
-u32 func_0020C780(void) {
+u32 btlScriptBeginSceneTransition(void) {
     fldBeginSceneTransition();
     return 1;
 }
 
-u32 func_0020C7A0(void) {
+u32 btlScriptFlagAllUnitsDefeatCandidates(void) {
     btlFlagAllUnitsDefeatCandidate();
     return 1;
 }
 
 u32 func_0020C7C0(void) {
-    func_00208DA0();
+    btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x200);
     return 1;
 }
 
 u32 func_0020C7E8(void) {
-    func_00208DA0();
+    btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x400);
     return 1;
 }
@@ -2274,38 +2274,38 @@ u32 btlCmdCameraMove(void) {
     target[1] = bfWaitReadArgFloat(4);
     target[2] = bfWaitReadArgFloat(5);
     target[3] = bfWaitReadArgFloat(6);
-    btlStartTask(func_001E66D8());
-    btlStartTask(func_001E6740());
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateFloatTask28(0, pos[0], pos[1], pos[2], target[0], target[1], target[2], target[3], 40.0f));
     btlStartTask(btlScheduleContextReset());
     return 1;
 }
 
-u32 func_0020C8E0(void) {
+u32 btlScriptQueueActorCommandSound(void) {
     u64 task;
 
-    task = func_001E66D8();
+    task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
-    task = func_001E6740();
+    task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
     task = btlCreateCommandSoundTask(func_0010D8D0(), 0x11);
     btlStartTask(task);
     return 1;
 }
 
-u32 func_0020C938(void) {
+u32 btlScriptQueueUnboundCommandSound(void) {
     u64 task;
 
-    task = func_001E66D8();
+    task = btlCreateCommandSoundUpdateTask();
     btlStartTask(task);
-    task = func_001E6740();
+    task = btlCreateSecondaryCommandSoundTask();
     btlStartTask(task);
     task = btlCreateCommandSoundTask(0, 3);
     btlStartTask(task);
     return 1;
 }
 
-s32 func_0020C988(void) {
+s32 btlScriptSetCameraBlendStart(void) {
     D_00452F90[0] = bfWaitReadArgFloat(0);
     D_00452F90[1] = bfWaitReadArgFloat(1);
     D_00452F90[2] = bfWaitReadArgFloat(2);
@@ -2316,7 +2316,7 @@ s32 func_0020C988(void) {
     return 1;
 }
 
-s32 func_0020CA10(void) {
+s32 btlScriptSetCameraBlendEnd(void) {
     D_00452F90[4] = bfWaitReadArgFloat(0);
     D_00452F90[5] = bfWaitReadArgFloat(1);
     D_00452F90[6] = bfWaitReadArgFloat(2);
@@ -2330,8 +2330,8 @@ s32 func_0020CA10(void) {
 u32 btlCmdCameraMoveBlend(void) {
     f32 timeA = bfWaitReadArgFloat(0);
     f32 timeB = bfWaitReadArgFloat(1);
-    btlStartTask(func_001E66D8());
-    btlStartTask(func_001E6740());
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateFloatTask29(0, D_00452F90[0], D_00452F90[1], D_00452F90[2], D_00452FB0[0], D_00452FB0[1],
                                 D_00452FB0[2], D_00452FB0[3], D_00452F90[4], D_00452F90[5], D_00452F90[6],
                                 D_00452FB0[4], D_00452FB0[5], D_00452FB0[6], D_00452FB0[7], timeA, timeB));
@@ -2403,7 +2403,7 @@ u32 func_0020CD30(void) {
 u32 func_0020CD50(void) {
     s32 index;
 
-    index = func_00211DE0();
+    index = btlRollAiBucket();
     func_0010D818(index + 1);
     return 1;
 }
@@ -2462,7 +2462,7 @@ void func_0020CE68(void) {
 void func_0020CE70(void) {
 }
 
-void func_0020CE78(void) {
+void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = func_001AA6F8();
     if ((((BtlState *)state)->flags & 0x40000000) == 0) {
         s32 actor = (s32)((BtlState *)state)->units;
@@ -2714,7 +2714,7 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 
-s32 func_0020D320(s32 path) {
+s32 btlOpenPfsDebugDirectory(s32 path) {
     char buf[0x70];
 
     if (D_00438B66 != 0) {
@@ -2732,7 +2732,7 @@ void func_0020D370(s32 dir) {
     func_0036B420();
 }
 
-s32 func_0020D3A0(s32 unused, BtlReader *reader) {
+s32 btlReadBattleResourceDirectoryEntry(s32 unused, BtlReader *reader) {
     if (D_00438B66 != 0) {
         return func_0036B588();
     }
@@ -2830,7 +2830,7 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void func_0020DFB0(s32 record, s32 first, s32 second) {
+void btlSetResourceNameHeaderPair(s32 record, s32 first, s32 second) {
     ((BtlResourceNameRecord *)record)->word00 = first;
     ((BtlResourceNameRecord *)record)->word04 = second;
 }
@@ -2894,7 +2894,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
 
-s32 func_0020E300(s32 name) {
+s32 btlCreateResourceNameRecord(s32 name) {
     s32 recordAddress;
 
     recordAddress = (s32)func_00328D68(0x38);
@@ -2915,7 +2915,7 @@ void func_0020E368(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
-void func_0020E7A0(s32 record, s32 first, s32 second) {
+void btlSetResourceNameHeaderPairAlternate(s32 record, s32 first, s32 second) {
     ((BtlResourceNameRecord *)record)->word00 = first;
     ((BtlResourceNameRecord *)record)->word04 = second;
 }
@@ -2924,16 +2924,16 @@ u32 func_0020E7B0(s32 record) {
     return ((BtlResourceNameRecord *)record)->word08;
 }
 
-void func_0020E7B8(char *record, char *name) {
+void btlResourceRecordSetName(char *record, char *name) {
     strcpy(record + 0x21, name);
     ((BtlResourceNameRecord *)record)->nameLength = strlen(name);
 }
 
-void func_0020E7F8(s32 record, void *output) {
+void btlFormatResourceNameWithPrefix(s32 record, void *output) {
     func_0035C860(output, D_00436C50, record + 0x21, record + 0x1c);
 }
 
-void func_0020E828(s32 record, void *output) {
+void btlFormatResourceNameWithoutPrefix(s32 record, void *output) {
     func_0035C860(output, D_00436C58, record + 0x21);
 }
 

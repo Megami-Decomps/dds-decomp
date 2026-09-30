@@ -96,7 +96,7 @@ typedef struct EvtBlendH {
 } EvtBlendH;
 
 s32 func_00101A70(void);
-u32 func_002330D8(s32 enable, f32 t, u32 a, u32 b);
+u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 
 typedef struct ObjectFlagsTarget {
     u8 pad[0x8C];
@@ -214,9 +214,9 @@ extern EvtBlendD D_00368610;
 extern EvtBlendE D_00368640;
 extern EvtBlendF D_00368670;
 extern EvtBlendA D_003686A0;
-extern s32 func_0019B8A8(u8 *arg);
+extern s32 itfMesCreateWindow(u8 *arg);
 extern void func_0019B9A0(s32 handle);
-extern void func_00288C68(void);
+extern void fileWaitIdle(void);
 extern void func_002887A0(s32 arg);
 extern void func_002D0918(s32 arg);
 extern s32 func_00269710(void);
@@ -224,7 +224,7 @@ extern void func_002696F8(void);
 extern void func_003003F0(const char *fmt, ...);
 extern void func_002CFF98(void *ptr);
 
-s32 func_00232F88(void)
+s32 evtPolygonMovieTestFlag(void)
 {
     EvtGlobal *state;
     s32 set;
@@ -264,7 +264,7 @@ u32 func_00233020(s32 enable, f32 t, u32 a, u32 b)
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
-u32 func_002330D8(s32 enable, f32 t, u32 a, u32 b)
+u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b)
 {
     s32 color1[4];
     s32 color2[4];
@@ -288,7 +288,7 @@ u32 func_002330D8(s32 enable, f32 t, u32 a, u32 b)
 }
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
-void func_002331A0(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
+void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
 {
     if (enable == 0) {
         t = 0.0f;
@@ -340,7 +340,7 @@ void func_002331A0(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_00233308);
 
-void func_002335D8(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
+void evtBlendParamsA(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
 {
     s32 i;
     s32 j;
@@ -354,7 +354,7 @@ void func_002335D8(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out
     if (b == NULL) {
         b = &D_00368590;
     }
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
     out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
     out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
@@ -368,7 +368,7 @@ void func_002335D8(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out
     }
 }
 
-void func_00233748(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out)
+void evtBlendParamsB(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out)
 {
     s32 i;
     s32 j;
@@ -383,7 +383,7 @@ void func_00233748(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out
         b = &D_003685C0;
     }
     out->u0 = func_00233020(enable, t, a->u0, b->u0);
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
     out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
     out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
@@ -397,7 +397,7 @@ void func_00233748(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out
     }
 }
 
-void func_002338F0(s32 enable, f32 t, EvtBlendG *a, EvtBlendG *b, EvtBlendG *out)
+void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EvtBlendG *a, EvtBlendG *b, EvtBlendG *out)
 {
     s32 i;
     s32 j;
@@ -416,11 +416,11 @@ void func_002338F0(s32 enable, f32 t, EvtBlendG *a, EvtBlendG *b, EvtBlendG *out
             out->m[i][j] = func_00232FE0(enable, t, a->m[i][j], b->m[i][j]);
         }
     }
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
 }
 
-void func_00233A10(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out)
+void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out)
 {
     s32 i;
 
@@ -437,11 +437,11 @@ void func_00233A10(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
 }
 
-void func_00233B20(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out)
+void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out)
 {
     s32 i;
 
@@ -457,7 +457,7 @@ void func_00233B20(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out
     out->u0 = func_00233020(enable, t, a->u0, b->u0);
     out->u1 = func_00233020(enable, t, a->u1, b->u1);
     out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
     out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
     out->f2 = func_00232FB0(enable, t, a->f2, b->f2);
@@ -468,7 +468,7 @@ void func_00233B20(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out
     out->u3 = func_00233020(enable, t, a->u3, b->u3);
 }
 
-void func_00233CC8(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out)
+void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out)
 {
     s32 i;
 
@@ -484,7 +484,7 @@ void func_00233CC8(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out
     out->u0 = func_00233020(enable, t, a->u0, b->u0);
     out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
     out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
     out->f2 = func_00232FB0(enable, t, a->f2, b->f2);
     out->f3 = func_00232FB0(enable, t, a->f3, b->f3);
@@ -495,7 +495,7 @@ void func_00233CC8(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out
     out->u1 = func_00233020(enable, t, a->u1, b->u1);
 }
 
-void func_00233E48(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
+void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
 {
     s32 i;
     s32 j;
@@ -509,7 +509,7 @@ void func_00233E48(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out
     if (b == NULL) {
         b = &D_003686A0;
     }
-    out->color = func_002330D8(enable, t, a->color, b->color);
+    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
     out->word = a->word;
     out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
     out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
@@ -523,7 +523,7 @@ void func_00233E48(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out
     }
 }
 
-void func_00233FB8(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out)
+void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out)
 {
     s32 i;
 
@@ -542,7 +542,7 @@ void func_00233FB8(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *out
     }
 }
 
-void func_00234120(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags)
+void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags)
 {
     switch (mode) {
     case 0:
@@ -598,7 +598,7 @@ void evtPolygonMovieClearFlagBits(s32 unused, u32 bits)
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 func_002342F8(PolyMovieObject *movie, s32 undo, s32 start, s32 end)
+s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, s32 end)
 {
     PolyMovieClip *clip;
     s32 frame;
@@ -643,7 +643,7 @@ void evtPolygonMovieClampTime(PolyMovieObject *movie, s32 unused, s32 start, s32
 }
 
 /* Allocate and clear a polygon-movie event work block. */
-void *func_002343D8(void)
+void *evtPolygonMovieAllocWork(void)
 {
     void *work;
 
@@ -655,7 +655,7 @@ void *func_002343D8(void)
     return work;
 }
 
-PolyMovieWork *func_00234418(PolyMovieWork *work, PmdHeader *data, PmdHeader *sub, PmdHeader *sub2)
+PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, PmdHeader *sub, PmdHeader *sub2)
 {
     s32 i;
 
@@ -717,7 +717,7 @@ PolyMovieWork *func_00234418(PolyMovieWork *work, PmdHeader *data, PmdHeader *su
             if (work->entries[i].value == 0) {
                 work->handle = -1;
             } else {
-                work->handle = func_0019B8A8(work->ptr4C);
+                work->handle = itfMesCreateWindow(work->ptr4C);
             }
             break;
         case 7:
@@ -864,7 +864,7 @@ PolyMovieWork *func_00234418(PolyMovieWork *work, PmdHeader *data, PmdHeader *su
     return work;
 }
 
-void func_00234A30(PolyMovieWork *work)
+void evtPolygonMovieFreeWork(PolyMovieWork *work)
 {
     if (work != NULL) {
         if (work->buffer != NULL) {
@@ -874,7 +874,7 @@ void func_00234A30(PolyMovieWork *work)
             func_0019B9A0(work->handle);
             work->handle = -1;
         }
-        func_00288C68();
+        fileWaitIdle();
         if (work->res04 != 0) {
             func_002887A0(work->res04);
         }
@@ -899,7 +899,7 @@ void func_00234A30(PolyMovieWork *work)
 }
 
 /* Allocate a resource block holding a fresh "PMD2" header; returns the handle. */
-s32 func_00234B30(void **out)
+s32 evtPolygonMovieCreateHeader(void **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 size;

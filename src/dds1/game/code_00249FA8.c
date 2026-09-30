@@ -129,7 +129,7 @@ s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
     return frames >= 60 ? 2 : 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A4A0);
+INCLUDE_ASM(const s32, "game/code_00249FA8", mnuTerminalConfigureEffects);
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A570);
 

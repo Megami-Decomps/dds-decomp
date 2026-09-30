@@ -285,7 +285,7 @@ extern void func_0024A728(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 extern void func_0024AB70(s32, s32);
 extern void func_0024DBB0(void);
-extern void func_0024DBC8(void);
+extern void dspCloseChannel(void);
 extern void func_002E96D8(u32);
 
 u32 func_0024C2E0(void) {
@@ -299,7 +299,7 @@ u32 func_0024C2E0(void) {
     ((EvtBContext *)context)->exitPending = 1;
     *(s32 *)(context + 0x98) = 0;
     func_0024DBB0();
-    func_0024DBC8();
+    dspCloseChannel();
     func_002E96D8(((EvtBContext *)context)->resourceHandle);
     return 1;
 }
@@ -323,8 +323,8 @@ typedef struct MenuEntry32 {
 extern MenuEntry32 D_00347C68[];
 extern void mnuSelectFirstListNode(s32);
 extern void func_0024DD90(s32, void *);
-extern void func_0024DDC0(s32);
-extern void func_0024DA58(s32);
+extern void dspSetActive(s32);
+extern void dspStartEntry(s32);
 extern void func_0024DAE8(s32);
 extern void func_0024DAB8(s32);
 
@@ -337,8 +337,8 @@ u32 evtPrepareSelectedMenuEntry(void) {
         mnuSelectFirstListNode(owner);
     }
     func_0024DD90(0, &D_00347C68[*selectionIndex]);
-    func_0024DDC0(1);
-    func_0024DA58(0);
+    dspSetActive(1);
+    dspStartEntry(0);
     func_0024DAE8(1);
     func_0024DAB8(6);
     return 1;
@@ -367,19 +367,19 @@ void evtBSetupDispatchSyncF(s32 request) {
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
-extern void func_0024DDC0(s32);
-extern void func_0024DA58(s32);
+extern void dspSetActive(s32);
+extern void dspStartEntry(s32);
 
 u32 evtBCheckPanelMode(void) {
     s32 context = func_00101A70();
 
-    func_0024DDC0(1);
+    dspSetActive(1);
     switch (((EvtBContext *)context)->panelMode) {
     case 1:
-        func_0024DA58(1);
+        dspStartEntry(1);
         break;
     case 2:
-        func_0024DA58(2);
+        dspStartEntry(2);
         break;
     }
     return 1;
@@ -445,7 +445,7 @@ u32 func_0024CA58(void) {
 }
 
 extern void mnuReleaseWorkResources(s32);
-extern void func_00249498(s32);
+extern void mnuTerminalBuildMenus(s32);
 extern void func_0024A728(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 extern void func_0024AB70(s32, s32);
@@ -455,7 +455,7 @@ u32 func_0024CB00(void) {
     s32 context = func_00101A70();
 
     mnuReleaseWorkResources(context);
-    func_00249498(context);
+    mnuTerminalBuildMenus(context);
     func_0024A728(1, context);
     func_0024A570(1, 0, context);
     func_0024AB70(1, context);

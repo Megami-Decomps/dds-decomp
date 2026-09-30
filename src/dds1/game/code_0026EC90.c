@@ -184,7 +184,7 @@ void func_0026FD88(void) {
 }
 
 void func_0026FDD8(void) {
-    func_002BDD60(D_003BC610[1]);
+    effDestroyResourceSlotSet(D_003BC610[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
@@ -483,7 +483,7 @@ u32 mnuGetMovieListNodeAtOffset(void) {
     return (u32)entry;
 }
 
-void func_00270558(void) {
+void mnuDrawMovieList(void) {
     MovieListNode *node;
     s32 packets;
     s32 selected;
@@ -552,7 +552,7 @@ void func_00270B10(void) {
     }
 }
 
-s32 func_00270BC8(void) {
+s32 mnuUpdateIpuRegisterViewer(void) {
     s32 packets;
     s32 n;
     s32 i;
@@ -661,7 +661,7 @@ void mnuReleaseStaffImageHandles(u32 *resources) {
     s32 index;
     for (index = 0; index < 7; index++) {
         u32 *slot = &resources[index];
-        func_002BD870(D_003DC5C8[index]);
+        effReleaseTextureHandlesAndResetSlots(D_003DC5C8[index]);
         *slot = 0;
     }
 }
@@ -868,7 +868,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
     }
 }
 
-extern void func_002BD870(u32);
+extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 void func_002712A0(kind, work)
 s32 kind;
@@ -881,7 +881,7 @@ u8 *work;
     if (count > 0) {
         u32 *handles = (u32 *)buffer;
         do {
-            func_002BD870(*handles++);
+            effReleaseTextureHandlesAndResetSlots(*handles++);
         } while (++i < count);
     }
 }
@@ -930,7 +930,7 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     mnuUpdateHandleStates(arg0);
 }
 
-void func_00271500(u32 *list, u32 *state) {
+void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 i;
     s32 flag;
 
@@ -953,13 +953,13 @@ void mnuReleaseStaffResourceGroups(u32 *resources) {
 
     mnuReleaseStaffImageHandles(resources);
     for (i = 0; i < 16; i++) {
-        func_002BDD60(resources[9 + i]);
+        effDestroyResourceSlotSet(resources[9 + i]);
     }
     for (i = 0; i < 5; i++) {
-        func_002BDD60(inner[24 + i]);
+        effDestroyResourceSlotSet(inner[24 + i]);
     }
     for (i = 0; i < 2; i++) {
-        func_002BDD60(resources[7 + i]);
+        effDestroyResourceSlotSet(resources[7 + i]);
     }
 }
 
@@ -973,7 +973,7 @@ typedef struct StaffSlots {
 s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
     s32 i;
 
-    func_002BC748();
+    effPollResourceList();
     for (i = 0; i < 7; i++) {
         if (slots->baseResources[i] == 0) {
             return 0;
@@ -1004,15 +1004,15 @@ s64 func_00271948(u32 *resources) {
 
     mnuReleaseStaffResourceGroups(resources + 0x18);
     for (i = 0; i < 2; i++) {
-        func_002BDD60(resources[54 + i]);
+        effDestroyResourceSlotSet(resources[54 + i]);
     }
     for (i = 0; i < 4; i++) {
-        func_002BDD60(resources[56 + i]);
+        effDestroyResourceSlotSet(resources[56 + i]);
     }
     for (i = 0; i < 9; i++) {
-        func_002BDD60(resources[60 + i]);
+        effDestroyResourceSlotSet(resources[60 + i]);
     }
-    return func_002BDD60(resources[69]);
+    return effDestroyResourceSlotSet(resources[69]);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002719F0);
@@ -1061,7 +1061,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     func_00271DF8((StaffSpriteHandles *)work);
     func_0027E690(*(u32 *)(work + 0x138));
     mnuShutdownContext(work + 0x15C);
-    func_0024DBC8();
+    dspCloseChannel();
     mnuReleaseAssets(work + 0x13C);
     func_00271948(work);
     mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
@@ -1106,7 +1106,7 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B20C0);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B20D0);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_002720B0);
+INCLUDE_ASM(const s32, "game/code_0026EC90", mnuCreateCampTasks);
 
 void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);

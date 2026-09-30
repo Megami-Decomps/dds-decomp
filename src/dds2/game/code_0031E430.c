@@ -27,11 +27,11 @@ typedef struct FadeEntry {
     s32 secondaryParameter;
 } FadeEntry;
 extern const FadeOffset D_0040B088[];
-extern s32 func_0031E410(s32 index);
+extern s32 mnuGetIndexedFadeTexture(s32 index);
 
 /* Draw the indexed glyph at its per-glyph origin with the current tint. */
 s32 mnuDrawIndexedFadeGlyph(s32 x, s32 y, s32 width, s32 index, s32 effect) {
-    s32 texture = func_0031E410(index);
+    s32 texture = mnuGetIndexedFadeTexture(index);
     return func_00306CD0(x + D_0040B088[index].x,
                          y + D_0040B088[index].y,
                          0, width * 2, 0, D_0043895C, texture, effect);

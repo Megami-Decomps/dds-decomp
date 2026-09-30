@@ -110,8 +110,8 @@ s64 func_00265EE8(s32 callback) {
 }
 
 u32 func_00265F30(void) {
-    func_0026C948(1);
-    func_0026C5B8(0xd);
+    dspSetActive(1);
+    dspStartEntry(0xd);
     return 1;
 }
 

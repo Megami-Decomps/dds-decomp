@@ -32,7 +32,7 @@ extern void func_002C3E58(u8 *);
 extern void func_002C1B58(u8 *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 func_00309138(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern char D_00437860[];
 
@@ -51,7 +51,7 @@ typedef struct EffectObject {
     EffectInner *inner; /* 0x08 */
 } EffectObject;
 
-extern EffectObject *func_00304998(s32);
+extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -77,7 +77,7 @@ extern void func_002C1B68(s32, s32);
 
 extern s32 movAreTitleEffectsReady(s32, s32);
 
-extern void func_002B2818(s32);
+extern void mnuReleaseStaffMenuResources(s32);
 
 extern s32 D_00435DD0;
 
@@ -89,17 +89,17 @@ extern s32 func_00303D00(s32);
 
 extern void mnuInitPartyPanelSlots(s32);
 
-extern void func_002A9640(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, s32);
 
 extern s32 func_002C32B0(void);
 
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 
-extern void func_002C0630(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
 extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_00267EA0(s8, s8);
+extern void mnuTerminalSetTrack(s8, s8);
 
 extern s32 mnuWalkNodeList(s32, s32);
 
@@ -121,7 +121,7 @@ extern u8 D_00437870[];
 
 extern s32 func_00328D68(s32);
 
-extern s32 func_002BC460(u16, u16);
+extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void func_002C2128(s32, s32, s32, s32, s32, s32);
 
@@ -196,7 +196,7 @@ extern void func_002C42B0(s32 *, void *);
 
 extern u8 D_003CE944[];
 
-extern void func_002B81C8(u32);
+extern void mnuDestroyListState(u32);
 
 extern void func_002A9200(u8 *);
 
@@ -283,7 +283,7 @@ typedef struct BoxRecord {
     u16 flags; /* 0x0E */
 } BoxRecord;
 
-s32 func_00266A48(BoxRecord *box) {
+s32 mnuTerminalScoreBox(BoxRecord *box) {
     f32 w = box->x1 - box->x0;
     f32 h = box->y1 - box->y0;
     s32 bonus = 0;
@@ -323,12 +323,12 @@ void mnuRefreshThresholdNodeFlags(MenuProgressList *list) {
     }
 }
 
-void func_00266B48(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
+void mnuCreateNumberSprite(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s32 priority) {
     char buf[16];
     s32 handle;
 
     func_0035C860(buf, D_00437860, a4);
-    handle = func_0019F5E8(a0, a1, a2, func_00309138(color, color & ~0xFF, a3), (s32)buf, 0);
+    handle = func_0019F5E8(a0, a1, a2, uiBlendColors(color, color & ~0xFF, a3), (s32)buf, 0);
     func_0019D550(handle, 1, priority);
     func_0019C5B0(handle);
 }
@@ -340,10 +340,10 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
     s32 panel = func_00328D68(0xa0);
     func_002C2128(panel, 0, 0, 0x1e,
-        func_002BC460(resource->firstA, resource->firstB),
+        mnuPercentOrHundred(resource->firstA, resource->firstB),
         host->panelStyle);
     func_002C2128(panel + 0x50, 1, 0, 0x1e,
-        func_002BC460(resource->secondA, resource->secondB),
+        mnuPercentOrHundred(resource->secondA, resource->secondB),
         host->panelStyle);
     return panel;
 }
@@ -380,7 +380,7 @@ typedef struct ThresholdEntry {
     s32 requiredAmount;
 } ThresholdEntry;
 
-void func_00267110(MenuProgressHost *host) {
+void mnuBuildTerminalNodeList(MenuProgressHost *host) {
     MenuProgressList *list;
     s32 i;
 
@@ -393,7 +393,7 @@ void func_00267110(MenuProgressHost *host) {
         BoxRecord *box = (BoxRecord *)(D_00435DD0 + i * 0x1C4 + 0xA60);
 
         if ((u16)(box->status & 1)) {
-            s32 score = func_00266A48(box);
+            s32 score = mnuTerminalScoreBox(box);
 
             if (score != 0) {
                 MenuProgressNode *node = (MenuProgressNode *)mnuListAppendNode((s32)host->progressList, (s32)D_00437870);
@@ -409,7 +409,7 @@ void func_00267110(MenuProgressHost *host) {
 }
 
 void func_002671E8(MenuProgressHost *host) {
-    func_002B81C8((s32)host->progressList);
+    mnuDestroyListState((s32)host->progressList);
 }
 
 void func_00267200(MenuProgressHost *host) {
@@ -427,7 +427,7 @@ u32 func_002674F8(void) {
     return 0;
 }
 
-void func_00267500(s32 x, s32 y, s32 unused, MenuProgressList *list, MenuProgressNode *node, s32 priority) {
+void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuProgressList *list, MenuProgressNode *node, s32 priority) {
     s32 width = list->visible;
     MenuSlotState *host = (MenuSlotState *)list->callback;
     s32 index = node->entryId;
@@ -448,7 +448,7 @@ s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback)
     MenuProgressList *list = (MenuProgressList *)mnuCreateListState(0, count, 0x16, callback);
     s32 i;
     list->callback = callback;
-    list->updateCallback = (s32)func_00267500;
+    list->updateCallback = (s32)mnuThresholdNodeDrawCallback;
     list->visible = 0;
     for (i = 0; i < count; i++) {
         if (i != excluded) {
@@ -490,7 +490,7 @@ void func_002676F0(MenuProgressHost *host) {
     }
 }
 
-void func_00267768(MenuProgressHost *host) {
+void mnuTerminalBuildMenus(MenuProgressHost *host) {
     s32 table[3][5] = {
         {0xB, 0xD, 0xF, 0x11, 0x13},
         {0xB, 0xD, 0x2E, 0x30, 0},
@@ -521,7 +521,7 @@ void func_00267768(MenuProgressHost *host) {
         break;
     }
     host->menuList = mnuBuildThresholdNodeList(table[row], count, excluded, (s32)host);
-    func_00267110(host);
+    mnuBuildTerminalNodeList(host);
     func_002A91A0((u8 *)host + 0xE8);
     mnuCreateThresholdNodePanels(host);
     func_002673B8(host);
@@ -534,15 +534,15 @@ void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
-        func_002B81C8(((s32 *)&host->menuList)[i]);
+        mnuDestroyListState(((s32 *)&host->menuList)[i]);
     }
     mnuDestroyThresholdNodePanels((s32)work);
     func_002A9200(work + 0xE8);
     func_002671E8((s32)work);
-    func_002B81C8((s32)host->secondaryList);
+    mnuDestroyListState((s32)host->secondaryList);
 }
 
-void func_00267938(s32 flag, s32 scene) {
+void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
     if (flag == 0) {
         s32 state = ((MenuProgressHost *)scene)->state;
 
@@ -580,14 +580,14 @@ s32 mnuCreateProgressHost(void) {
     host->heapHandle = heap;
     host->titleEffectHandle = func_00303D00(1);
     mnuInitPartyPanelSlots((s32)host + 0x70);
-    func_002A9640(host->titleEffectHandle, (s32)host + 8);
+    mnuAppendCampSpriteRequests(host->titleEffectHandle, (s32)host + 8);
     host->loadState = 1;
     return (s32)host;
 }
 
 void func_00267A80(u32 *hostWords) {
     func_002B2860(hostWords + 2);
-    func_002A9788(hostWords + 2);
+    mnuReleaseTitleEffectSprites(hostWords + 2);
     func_00303D58(hostWords[1]);
     func_003297C8(*hostWords);
 }
@@ -603,7 +603,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (movAreTitleEffectsReady(host->titleEffectHandle, (s32)host + 8) == 0) {
         return 1;
     }
-    func_002B2818((s32)host + 8);
+    mnuReleaseStaffMenuResources((s32)host + 8);
     host->loadState = 2;
     return 0;
 }
@@ -634,7 +634,7 @@ s32 func_00267E00(s32 resource, MenuProgressHost *host, s32 mode) {
         return 0;
     }
     host->drawFlags |= 0x280;
-    func_002C0630(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->drawFlags, mode);
+    mnuDrawListPanels(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->drawFlags, mode);
     func_002C16F0(0, 0, 0, resource, *(u8 *)(resource + 0x55),
                    host->effectResource, mode);
     return 1;
@@ -650,7 +650,7 @@ typedef struct MenuFadeWork {
 extern void sndStartTrackExtended(s32);
 extern void func_00342580(s32);
 
-void func_00267EA0(s8 mode, s8 enable) {
+void mnuTerminalSetTrack(s8 mode, s8 enable) {
     s32 address = func_00101958(D_0043785C);
     MenuFadeWork *work = (MenuFadeWork *)address;
 
@@ -674,37 +674,37 @@ void func_00267EA0(s8 mode, s8 enable) {
 }
 
 void func_00267F68(s8 index) {
-    func_00267EA0(index, 1);
+    mnuTerminalSetTrack(index, 1);
 }
 
-void func_00267F88(MenuSlotState *state) {
+void mnuTerminalCreateEffects(MenuSlotState *state) {
     EffectObject *obj;
 
-    obj = func_00304998(1);
+    obj = effCreateStatusBatch(1);
     state->effect[0] = (s32)obj;
     obj->inner->pair->a = 0x14;
     obj->inner->pair->b = 1;
-    obj = func_00304998(1);
+    obj = effCreateStatusBatch(1);
     state->effect[1] = (s32)obj;
     obj->inner->pair->a = 0xF;
     obj->inner->pair->b = 0;
-    obj = func_00304998(8);
+    obj = effCreateStatusBatch(8);
     state->effect[2] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 1;
-    obj = func_00304998(8);
+    obj = effCreateStatusBatch(8);
     state->effect[3] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 0;
-    obj = func_00304998(1);
+    obj = effCreateStatusBatch(1);
     state->effect[4] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 1;
-    obj = func_00304998(1);
+    obj = effCreateStatusBatch(1);
     state->effect[5] = (s32)obj;
     obj->inner->pair->a = 6;
     obj->inner->pair->b = 0;
-    obj = func_00304998(1);
+    obj = effCreateStatusBatch(1);
     state->effect[6] = (s32)obj;
     obj->inner->pair->a = 0x78;
     obj->inner->pair->b = 0;
@@ -747,7 +747,7 @@ void func_00268128(s32 mode, MenuFadeHost *host) {
     }
 }
 
-u8 *func_00268178(s32 reduced, s32 slot) {
+u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     s32 handle;
     u8 *obj;
     u32 i;
@@ -757,12 +757,12 @@ u8 *func_00268178(s32 reduced, s32 slot) {
     memset(obj, 0, 0x3F8);
     *(s32 *)obj = handle;
     func_002C3E58(obj + 8);
-    func_00267F88((MenuSlotState *)obj);
+    mnuTerminalCreateEffects((MenuSlotState *)obj);
     ((MenuSlotState *)obj)->reduced = reduced;
     ((MenuSlotState *)obj)->mode = reduced;
     ((MenuSlotState *)obj)->slot = slot;
     ((MenuSlotState *)obj)->slotCopy = slot;
-    func_00267768((MenuProgressHost *)obj);
+    mnuTerminalBuildMenus((MenuProgressHost *)obj);
     evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
     func_0026C538(*(s32 *)(obj + 0x60));
     for (i = 0; i < 2; i++) {
@@ -881,7 +881,7 @@ s32 fldClassifyRemainingFrames(SceneTimerView *timer) {
     return frames >= 60 ? 2 : 1;
 }
 
-void func_002689D0(u32 mode, MenuSlotState *state) {
+void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
     s32 *slot = &state->cur;
 
     if (*slot < 0) {
@@ -903,7 +903,7 @@ void func_002689D0(u32 mode, MenuSlotState *state) {
     }
 }
 
-void func_00268AA0(s32 ctx, s32 index, MenuSlotState *state) {
+void mnuTerminalSelectSlot(s32 ctx, s32 index, MenuSlotState *state) {
     s32 table[5] = {3, 1, 2, 0x2D, 0x52};
 
     if (state->mode == 1 && index == state->mode) {
@@ -915,7 +915,7 @@ void func_00268AA0(s32 ctx, s32 index, MenuSlotState *state) {
     } else if (index == -2) {
         state->prev = -1;
     }
-    func_002689D0(ctx, state);
+    mnuTerminalConfigureEffects(ctx, state);
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268B48);

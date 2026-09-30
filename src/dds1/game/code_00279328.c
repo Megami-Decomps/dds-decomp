@@ -13,7 +13,7 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void func_0027CDD0(s32, s32, s32, s32, s32);
-extern u32 func_00278BF0(s32);
+extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern s32 D_003BAA00;
 extern s32 func_00286540(u16, s32);
@@ -78,7 +78,7 @@ typedef struct SkillMenuContext {
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
 
-s64 func_00279328(s32 callback) {
+s64 ptySkillMenuUpdate(s32 callback) {
     s32 context = func_00101A70();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s64 state = menuRunPanel(context, 0, callback);
@@ -97,7 +97,7 @@ s64 func_00279328(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuCopyPageState);
 
-s64 func_00279568(s32 callback) {
+s64 ptySkillMenuEnterPage(s32 callback) {
     s32 context = func_00101A70();
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
@@ -112,7 +112,7 @@ s64 func_00279568(s32 callback) {
     if (work->panel->list->cursor->index == 0) {
         mnuCreateStaffImageSprite(2);
     } else if (menu->selectionFlags != 0) {
-        if (func_00278BF0(callback) == 0) {
+        if (mnuHasSelectedListNodeId(callback) == 0) {
             mnuCreateStaffImageSprite(0xE);
         } else {
             mnuCreateStaffImageSprite(0xF);
@@ -167,7 +167,7 @@ typedef struct SkillLink {
     u16 id;
 } SkillLink;
 
-void func_00279860(s32 context) {
+void mnuFlagMatchingEntries(s32 context) {
     s32 slot = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
@@ -180,7 +180,7 @@ void func_00279860(s32 context) {
     }
 }
 
-s64 func_002798F8(s32 callback) {
+s64 ptySkillMenuHandleFieldUse(s32 callback) {
     s32 context = func_00101A70();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
@@ -205,7 +205,7 @@ s64 func_002798F8(s32 callback) {
     func_00280978(8, window);
     if (buttons & 1) {
         buttons = ptySkillMenuUseSelectedInField(label, context) == 0 ? 0x8000 : 0;
-        func_00279860(context);
+        mnuFlagMatchingEntries(context);
     }
     if (buttons & 2) {
         func_002858E8(popup, D_0037CC58);
@@ -215,7 +215,7 @@ s64 func_002798F8(s32 callback) {
     return 0;
 }
 
-s64 func_00279A30(s32 callback) {
+s64 ptySkillMenuEnterConfirm(s32 callback) {
     s32 context = func_00101A70();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     func_00272778(callback);

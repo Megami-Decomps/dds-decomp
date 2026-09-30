@@ -79,7 +79,7 @@ extern SdfSubParam *sdfSubParamCreate(void);
 
 void *func_00328D68(s32 size);
 
-void func_0032CAE0(void *queue, s32 assetId);
+void sdfPendingQueuePush(void *queue, s32 assetId);
 
 void sdfDestroyDevRequest(void *);
 
@@ -225,7 +225,7 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 extern void func_00336C10(void *);
 /* vu0 routine: look-at basis rows in vf28-vf31 from the resource vectors (+0x10, +0x20, +0x30), then transform by the matrix */
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
-    u8 *matrix = func_00330C18(param, *(u32 *)resource);
+    u8 *matrix = sdfModelFindDrawNode(param, *(u32 *)resource);
     u8 *p;
 
     p = (u8 *)resource + 0x20;
@@ -263,9 +263,9 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     func_00336C10(matrix + 0xC0);
 }
 
-extern u8 *func_00330C18(SdfTextParam *, u32);
+extern u8 *sdfModelFindDrawNode(SdfTextParam *, u32);
 void func_00332C30(SdfTextParam *param, void *resource) {
-    u8 *matrix = func_00330C18(param, *(u32 *)resource) + 0xC0;
+    u8 *matrix = sdfModelFindDrawNode(param, *(u32 *)resource) + 0xC0;
 
     VU0_LOAD_MATRIX(matrix);
     __asm__ volatile(
@@ -452,7 +452,7 @@ void sdfReleaseQueuedResource(void *resource, s32 retained) {
         return;
     }
     if (retained != 0) {
-        func_0032CAE0(&D_00439170, (s32)resource);
+        sdfPendingQueuePush(&D_00439170, (s32)resource);
     } else {
         sdfDestroyDevRequest(resource);
     }
@@ -684,7 +684,7 @@ void sdfQueueAssetRelease(s32 assetId) {
     s32 id = assetId;
 
     if (id != 0) {
-        func_0032CAE0(&D_00439178, id);
+        sdfPendingQueuePush(&D_00439178, id);
     }
 }
 

@@ -15,7 +15,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void func_00336B00(void);
-extern void func_00336A68(f32 *rot);
+extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 extern s32 effGetScatterWideBlock(u32 object, s32 index);
 extern s32 effGetScatterNarrowBlock(u32 object, s32 index);
 
@@ -335,7 +335,7 @@ typedef struct PcpScatterWork10 {
 } PcpScatterWork10;
 
 /* Init sprite `index`: random spin, jittered start and end distances, and a random unit direction. */
-void func_00179618(PcpScatterWork10 *work, s32 index)
+void effScatterSpriteSpawn(PcpScatterWork10 *work, s32 index)
 {
     PcpScatterSprite *sprite = &work->sprites[index];
     f32 dir[4];
@@ -699,7 +699,7 @@ typedef struct PcpScatterWork11 {
 } PcpScatterWork11;
 
 /* Advance ring `index`: rebuild the rotation matrix, then lay the ring's vertex pairs around it. */
-void func_0017B390(PcpScatterWork11 *work, s32 index)
+void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterRing *ring;
@@ -873,8 +873,8 @@ typedef struct PcpScatterWork12 {
     u32 scatterObject;
 } PcpScatterWork12;
 
-/* Same ring update as func_0017B390, with the ring's 0x20 radius step scaled as well. */
-void func_0017BE08(PcpScatterWork12 *work, s32 index)
+/* Same ring update as effScatterRingUpdate, with the ring's 0x20 radius step scaled as well. */
+void effScatterRingUpdateScaled(PcpScatterWork12 *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterRing *ring;
@@ -1049,8 +1049,8 @@ typedef struct PcpScatterWork13 {
     u32 scatterObject;
 } PcpScatterWork13;
 
-/* Same ring update as func_0017BE08 on a work area with a longer header. */
-void func_0017C988(PcpScatterWork13 *work, s32 index)
+/* Same ring update as effScatterRingUpdateScaled on a work area with a longer header. */
+void effScatterRingUpdateScaledLong(PcpScatterWork13 *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterRing *ring;
@@ -1170,7 +1170,7 @@ typedef struct PcpScatterWork14 {
 } PcpScatterWork14;
 
 /* Advance ring `index` and lay its vertex pairs around a flat circle rotated by the ring's own angles. */
-void func_0017D3D8(PcpScatterWork14 *work, s32 index)
+void effScatterFlatRingUpdate(PcpScatterWork14 *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterRingB *ring;
@@ -1192,7 +1192,7 @@ void func_0017D3D8(PcpScatterWork14 *work, s32 index)
     if (ring->age >= work->radialDecayStart) {
         ring->radialSpeed *= work->radialDamping;
     }
-    func_00336A68(ring);
+    vu0RotMatrixXYZFromVec3(ring);
     ring->radius = radius;
     ring->angle = angle;
     ring->angularSpeed *= work->angularDamping;

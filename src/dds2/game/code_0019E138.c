@@ -250,12 +250,12 @@ u64 func_0019EF38(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFl
     }
     frFontSetEntryFlag(kind, entryFlag);
     func_0019D1D0(1);
-    func_0019D1E0(2);
-    func_0019D1E0(0x10);
+    frFontClearFlagBits(2);
+    frFontClearFlagBits(0x10);
     glyph = func_0019CE10(source, kind, 0, 0, 0);
     func_0019D1D0(0x10);
     func_0019D1D0(2);
-    func_0019D1E0(1);
+    frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
     func_0019D100(glyph, x, y);
     func_0019D110(glyph, depth << 4);

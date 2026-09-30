@@ -188,13 +188,13 @@ u32 func_002284E0(void) {
 
 u32 func_00228520(void) {
     func_002E9708();
-    func_001F3448();
+    btlAdvanceTitleStateWithAudioCleanupTask();
     return 1;
 }
 
 u32 func_00228548(void) {
     func_002E9730();
-    func_001F3448();
+    btlAdvanceTitleStateWithAudioCleanupTask();
     return 1;
 }
 

@@ -19,7 +19,7 @@ extern u32 btlHasMarkedEntry14(u32);
 
 extern void func_001E9F30(u32);
 
-extern void func_00208DA0(void);
+extern void btlClearAllUnitDefeatCandidates(void);
 
 extern void btlFlagUnitDefeatCandidate(u32);
 
@@ -35,7 +35,7 @@ extern u32 btlGetIndexListCount(u32);
 
 extern u32 btlGetIndexListEntry(u32, u32);
 
-extern void func_001E9A88(void);
+extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
 extern void btlUnitSetCameraOffset(u32);
 
@@ -45,7 +45,7 @@ extern void func_00224EE8(u32);
 
 extern void func_001E88A8(u32);
 
-extern void func_001E9660(u32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlInitMotionTransformFromComponents(u32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_00217898(u32, u32, u32, u32, u32, f32, f32, f32);
 
@@ -735,7 +735,7 @@ u32 func_002210D0(ActionUnit *unit) {
     if (unit->action == 0x1a4) {
         unit->flags |= 0x800;
         func_001E9F30((u32)unit);
-        func_00208DA0();
+        btlClearAllUnitDefeatCandidates();
         btlFlagUnitDefeatCandidate(((ActionStateLink *)unit->stateFlags)->owner);
         return 1;
     }
@@ -1035,7 +1035,7 @@ s32 func_00222028(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222100);
 
-s32 func_00222298(ActionUnit *unit, s32 action) {
+s32 btlActionResourceTypeToMotionId(ActionUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
         return -1;
     }
@@ -1112,19 +1112,19 @@ void btlUnitSetCameraOffset(u32 unit) {
 extern s32 effMiscRandMod(s32, s32);
 extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
-extern void func_001E96C8(u32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(u32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 void func_00222768(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
-        func_001E9A88();
-        func_001E96C8(unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetEffectCameraKeys(unit, -1823.5f, -270.6f, -1359.2f, -0.137f, -0.247f, 0.027f, 0.95f, -1302.8f,
                       -42.7f, -2059.2f, -0.123f, -0.148f, 0.011f, 0.972f, 40.0f, 30.0f);
         break;
     case 1:
         btlBossDebugPrintf(D_0041ACC0);
-        func_001E9A88();
-        func_001E96C8(unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetEffectCameraKeys(unit, 149.7f, -65.4f, -1514.7f, -0.168f, 0.02f, -0.011f, 0.976f, 1438.0f,
                       -482.6f, -1234.3f, -0.099f, 0.195f, -0.027f, 0.966f, 40.0f, 30.0f);
         break;
     }
@@ -1138,12 +1138,12 @@ void func_002228C0(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
         btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
-        func_001E96C8(unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
+        btlSetEffectCameraKeys(unit, 723.9f, -139.3f, -1529.8f, 0.05f, -0.176f, 0.018f, -0.973f, 677.2f,
                       -17.3f, -1980.7f, 0.098f, -0.114f, 0.02f, -0.979f, 40.0f, 30.0f);
         break;
     case 1:
         btlBossDebugPrintf("BRAHMA:ALL-1 ++++\n");
-        func_001E96C8(unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
+        btlSetEffectCameraKeys(unit, -803.2f, -117.2f, -1426.5f, -0.072f, -0.187f, 0.001f, 0.971f, -738.1f,
                       -78.6f, -1749.6f, -0.1f, -0.138f, 0.001f, 0.977f, 40.0f, 20.0f);
         break;
     }
@@ -1160,7 +1160,7 @@ u32 func_00222D18(ActionUnit *unit) {
             if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
-            func_001E9A88();
+            btlFlagAllUnitDefeatCandidatesTask();
             btlUnitSetCameraOffset((u32)unit);
             unit->pendingAction = 0;
             return 1;
@@ -1185,7 +1185,7 @@ s32 func_00222DA8(s32 object) {
             }
         }
     } else {
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         func_002228C0(object);
         return 1;
     }
@@ -1224,7 +1224,7 @@ s32 func_00223D10(ActionUnit *unit) {
     u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
         if ((flags & 0x10) == 0) {
             func_002228C0((u32)unit);
@@ -1235,11 +1235,11 @@ s32 func_00223D10(ActionUnit *unit) {
     }
     if (flags & 0x2000) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
-            func_001E9A88();
+            btlFlagAllUnitDefeatCandidatesTask();
             btlUnitSetCameraOffset((u32)unit);
             return 1;
         }
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         func_002228C0((u32)unit);
         return 1;
     }
@@ -1323,7 +1323,7 @@ void func_00224020(u32 unit) {
 }
 
 void func_002240C0(u32 unit) {
-    func_001E9660(unit, -851.6f, -144.4f, -2098.0f, -0.068f,
+    btlInitMotionTransformFromComponents(unit, -851.6f, -144.4f, -2098.0f, -0.068f,
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
 
@@ -1336,7 +1336,7 @@ u32 func_002240F8(ActionUnit *unit) {
             if ((((ActionUnit *)target)->flags & 0x400) == 0) {
                 return 0;
             }
-            func_001E9A88();
+            btlFlagAllUnitDefeatCandidatesTask();
             func_00224020((u32)unit);
             unit->pendingAction = 0;
             return 1;
@@ -1360,7 +1360,7 @@ s32 func_00224188(s32 object) {
             }
         }
     } else {
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         func_002240C0(object);
         return 1;
     }
@@ -1403,7 +1403,7 @@ s32 func_00224D28(ActionUnit *unit) {
     u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
         if ((flags & 0x10) == 0) {
             func_002240C0((u32)unit);
@@ -1414,11 +1414,11 @@ s32 func_00224D28(ActionUnit *unit) {
     }
     if (flags & 0x2000) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
-            func_001E9A88();
+            btlFlagAllUnitDefeatCandidatesTask();
             func_00224020((u32)unit);
             return 1;
         }
-        func_001E9A88();
+        btlFlagAllUnitDefeatCandidatesTask();
         func_002240C0((u32)unit);
         return 1;
     }
@@ -1439,7 +1439,7 @@ void func_00224EE8(u32 unit) {
 }
 
 void func_00224F88(u32 unit) {
-    func_001E9660(unit, 81.4f, -37.8f, -1866.2f, -0.112f,
+    btlInitMotionTransformFromComponents(unit, 81.4f, -37.8f, -1866.2f, -0.112f,
                     0.01f, -0.017f, 0.982f, 40.0f);
 }
 

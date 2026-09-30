@@ -119,7 +119,7 @@ void sdfQuaternionNormalize(float *values) {
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002C9948);
 
 /* Quaternion rotating direction `from` onto `to`. */
-void func_002C9A08(f32 *out, f32 *from, f32 *to) {
+void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
     f32 cross[4];
     f32 scale;
 
@@ -134,7 +134,7 @@ void func_002C9A08(f32 *out, f32 *from, f32 *to) {
 }
 
 /* Quaternion from Euler angles: half angles are negated. */
-void func_002C9AD0(f32 *out, f32 x, f32 y, f32 z) {
+void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     f32 half;
     f32 cx;
     f32 sx;
@@ -170,7 +170,7 @@ void sdfQuaternionBlendNormalize(float *out, float *from, float *to, float fract
 }
 
 /* Spherical interpolation along the shorter arc; falls back to a normalized blend for near-parallel inputs. */
-void func_002C9D98(f32 *out, f32 *from, f32 *to, f32 fraction) {
+void sdfQuatSlerp(f32 *out, f32 *from, f32 *to, f32 fraction) {
     f32 target[4];
     f32 angle = sdfQuatDot(from, to);
     f32 firstWeight;
@@ -302,7 +302,7 @@ f32 func_002CA508(f32 *direction, f32 *target) {
 }
 
 /* Intersect the rotated Z axis with the plane at height plane[1]; write the hit vector to out. */
-void func_002CA598(f32 *plane, f32 *rotation, f32 *out) {
+void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     f32 matrix[16];
     f32 forward[4] = {0, 0, 1.0f, 0};
     f32 up[4] = {0, 1.0f, 0, 0};
@@ -449,7 +449,7 @@ void sdfSetTaskDestroyCallback(SdfTaskHeader *work, s32 callback) {
     }
 }
 
-SdfListNode *func_002CAD30(SdfList *list, s32 key, void *value) {
+SdfListNode *sdfListAppend(SdfList *list, s32 key, void *value) {
     SdfListNode *node = func_002CFEB8(0x14);
 
     memset(node, 0, 0x14);
@@ -467,7 +467,7 @@ SdfListNode *func_002CAD30(SdfList *list, s32 key, void *value) {
 }
 
 /* Insert a new node after `after`, bumping the index of every later node. */
-SdfListNode *func_002CADD0(SdfList *list, SdfListNode *after, s32 key, void *value) {
+SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void *value) {
     SdfListNode *node = func_002CFEB8(0x14);
     SdfListNode *it;
 
@@ -684,18 +684,18 @@ typedef struct TaskWork {
     u32 firstItemHandle;
 } TaskWork;
 
-extern s32 func_002CB8E0(void);
+extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void func_002CB990(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_002CB4B8();
 
-TaskWork *func_002CB1C8(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
     TaskWork *work;
 
     work = func_002CB4B8(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, func_002CB8E0, func_002CB990, work);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, func_002CB990, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
     return work;
 }
@@ -724,7 +724,7 @@ s32 kwlnTaskExists(u32 name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, u32 *item) {
-    u32 result = (u32)func_002CAD30((SdfList *)work->list, *item, (void *)func_002CB5F0(item));
+    u32 result = (u32)sdfListAppend((SdfList *)work->list, *item, (void *)func_002CB5F0(item));
     if (work->firstItemHandle == 0) {
         work->firstItemHandle = result;
     }
@@ -828,7 +828,7 @@ typedef struct SdfTaskEntry {
 
 extern void *func_00101A70(void);
 
-s32 func_002CB718(TaskWork *work) {
+s32 sdfTaskWorkStepEntry(TaskWork *work) {
     TaskListNode *node = (TaskListNode *)work->firstItemHandle;
     SdfTaskEntry *entry;
     u32 flags;
@@ -891,13 +891,13 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 func_002CB8E0(void) {
+s32 sdfTaskWorkRunAllEntries(void) {
     TaskWork *work = func_00101A70();
 
     if (work->firstItemHandle == 0) {
         return -1;
     }
-    while (func_002CB718(work) == 1) {
+    while (sdfTaskWorkStepEntry(work) == 1) {
     }
     return 0;
 }
@@ -929,14 +929,14 @@ void func_002CBAF0(ShortPair2C *p, s32 a, s32 b) {
 
 void sdfDestroyGridWork(u8 *work) {
     if (work != NULL) {
-        func_002CC570();
+        sdfGridReleaseAllCells();
         (*(void (**)(s32, u32))(work + 0x20))(0, *(u32 *)(work + 0x30));
         func_002D0918(*(u32 *)work);
     }
 }
 
 void func_002CBB48(void) {
-    func_002CC570();
+    sdfGridReleaseAllCells();
 }
 
 typedef struct SdfGridCell {
@@ -1044,7 +1044,7 @@ SdfGridCell *sdfGridCursorRight(SdfGrid *grid) {
     return cell;
 }
 
-SdfGridCell *func_002CBDA8(SdfGrid *grid, u32 column, u32 row) {
+SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
     SdfGridCell *result = NULL;
 
     if (column >= grid->width) {
@@ -1066,7 +1066,7 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC0D0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC238);
 
-SdfGridCell *func_002CC3A8(SdfGrid *grid, u32 column, u32 row) {
+SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     SdfGridCell *result = NULL;
     SdfGridCell *cell;
 
@@ -1087,7 +1087,7 @@ SdfGridCell *func_002CC3A8(SdfGrid *grid, u32 column, u32 row) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC430);
 
-void func_002CC570(SdfGrid *grid) {
+void sdfGridReleaseAllCells(SdfGrid *grid) {
     u32 i = 0;
     SdfGridCell *cells = grid->cells;
     SdfGridCell *cell;

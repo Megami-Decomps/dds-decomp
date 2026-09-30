@@ -14,7 +14,7 @@ typedef struct PairedEffectResources {
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void func_0016F6D0(u32 handle);
-extern void func_001E31F0(u32 unit, s32 arg1);
+extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *resources) {
     func_0016EFA8(resources->resource[1]);
@@ -22,7 +22,7 @@ void effFreePairedResources(PairedEffectResources *resources) {
     func_00328E48(resources);
 }
 
-void func_0018DAA8(PairedEffectResources *work) {
+void effUpdatePairedResources(PairedEffectResources *work) {
     s32 total = work->total;
     s32 frame = work->frame;
     s32 fadeIn = work->fadeIn;
@@ -47,7 +47,7 @@ void func_0018DAA8(PairedEffectResources *work) {
             color = effBlendColor(work->value7C & 0xFFFFFF, work->value7C, t);
             i = 0;
             do {
-                func_001E31F0(obj, 0xB);
+                btlSetActorEffectParameterOrMuzzlePosition(obj, 0xB);
                 VU0_STORE_VF(vf10, vec);
                 record = (u8 *)func_0016F018(work->resource[i]);
                 VU0_LOAD_VF(vf10, vec);

@@ -10,7 +10,7 @@ extern void func_0029AA48(s32);
 
 extern void func_0029AC20(s32, s32);
 
-extern s32 func_002C7168(void);
+extern s32 evtStageTestUpdateCamera(void);
 
 extern s64 func_0026C768(void);
 
@@ -72,7 +72,7 @@ u32 func_0029B3C0(void) {
 
     context = func_00101958();
     func_002C0CF8(*(u32 *)(context + 0xad34), 0xffffffffffffffff);
-    func_0026C5B8(0x17);
+    dspStartEntry(0x17);
     func_0026C648(0);
     func_0026C618(0xa3);
     return 1;
@@ -111,7 +111,7 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
     s32 *panelState = (s32 *)(context + 0x54);
     s64 result;
 
-    func_002C7168();
+    evtStageTestUpdateCamera();
     result = func_002C4038(context + 8, panelState, 0, request);
     if (result == 0) {
         if ((*panelState == 0) && (result = func_0026C768(), result == 0)) {

@@ -22,7 +22,7 @@ typedef struct WorldInnerOwner {
 } WorldInnerOwner;
 
 /* Each object kind keeps its handle in a different structure. */
-s32 func_00112AB0(object)
+s32 dds3GetObjectOwnedHandle(object)
     WorldInnerOwner *object;
 {
     s32 handle;
@@ -43,7 +43,7 @@ s32 func_00112AB0(object)
 void func_00112B58(u32 unused, u32 value) {
     WorldInnerState *inner;
 
-    inner = (WorldInnerState *)func_00112AB0();
+    inner = (WorldInnerState *)dds3GetObjectOwnedHandle();
     inner->value44 = value;
 }
 

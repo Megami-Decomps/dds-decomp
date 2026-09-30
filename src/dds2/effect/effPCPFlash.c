@@ -501,7 +501,7 @@ extern void func_00171F28();
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
 extern s32 effBlendColor(s32, s32, f32);
-extern void func_001727A0(PcpFlashWork2 *, s32, void *);
+extern void effFlashBillboardQuad(PcpFlashWork2 *, s32, void *);
 extern void func_00177CD0(void *);
 
 typedef struct PcpFlashHandle {
@@ -715,7 +715,7 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
-void func_001727A0(PcpFlashWork2 *work, s32 index, void *view)
+void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
     f32 *quad = func_00177B60(work->resourceHandle, index);
@@ -837,7 +837,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
 
         if (part->age == 0) {
             effFlashSpawnRotatingParticle(work, index, &axis);
-            func_001727A0(work, index, &axis);
+            effFlashBillboardQuad(work, index, &axis);
             effFlashColorSlot5Set(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
@@ -862,7 +862,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
                     }
                 }
                 effRotateFlashParticlePosition((PcpFlashRotationWork *)work, index, &axis);
-                func_001727A0(work, index, &axis);
+                effFlashBillboardQuad(work, index, &axis);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
                 } else {
@@ -938,7 +938,7 @@ void func_00172EF0(PcpFlashWork3 *work, s32 flag, s32 param) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
-void func_00172FE0(PcpFlashWork3 *work, s32 index)
+void effFlashArcQuadScaling(PcpFlashWork3 *work, s32 index)
 {
     PcpFlashPtc14 *part = &work->parts[index];
     f32 *quad = func_00177B60(work->resourceHandle, index);
@@ -1050,7 +1050,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
             } else {
                 part->scale = 0.0f;
             }
-            func_00172FE0(work, index);
+            effFlashArcQuadScaling(work, index);
             func_00172EF0(work, index, 0);
             part->color = 0x80808080;
         } else {
@@ -1070,7 +1070,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
                     }
                 }
                 func_001731C8(work, index);
-                func_00172FE0(work, index);
+                effFlashArcQuadScaling(work, index);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
                 } else {
@@ -1190,7 +1190,7 @@ void func_00174018(PcpFlashWork5 *work, s32 flag, s32 param) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: billboard corner offsets for a particle on an arc, built from a normalised direction and its perpendicular */
-void func_00174108(PcpFlashWork5 *work, s32 index)
+void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
 {
     PcpFlashPtc10 *part = &work->parts[index];
     f32 *quad = func_00177B60(work->resourceHandle, index);
@@ -1336,7 +1336,7 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
-void func_00174A58(PcpFlashWork6 *work, s32 index, void *view)
+void effFlashRotatedQuad(PcpFlashWork6 *work, s32 index, void *view)
 {
     PcpFlashPtc20A *part = &work->parts[index];
     f32 *quad = func_00177B60(work->resourceHandle, index);
@@ -1442,7 +1442,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
 
         if (part->age == 0) {
             effFlashSpawnParticle6(work, index, &axis);
-            func_00174A58(work, index, &axis);
+            effFlashRotatedQuad(work, index, &axis);
             func_00174890(work, index, 0);
             if (ramp == 0) {
                 part->scale = maxScale;
@@ -1469,7 +1469,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
                     }
                 }
                 effFlashAdvanceOrbitPhase(work, index, &axis);
-                func_00174A58(work, index, &axis);
+                effFlashRotatedQuad(work, index, &axis);
                 age = part->age;
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
@@ -1544,7 +1544,7 @@ void func_001750C0(PcpFlashWork7 *work, s32 index, s32 param)
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
-void func_00175160(PcpFlashWork7 *work, s32 index, void *view)
+void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
 {
     PcpFlashPtc10 *part = &work->parts[index];
     f32 *quad = func_00177E78(work->resourceHandle, index);
@@ -1636,7 +1636,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
             func_001750C0(work, index, 0);
         } else {
             if (age == 0) {
-                func_00175160(work, index, &axis);
+                effFlashRotatedTriangle(work, index, &axis);
                 func_001750C0(work, index, 0);
                 part->accumulator = startA;
                 part->unk0C = startB;
@@ -1648,7 +1648,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
 
                 part->unk0C = speed * decay;
                 part->accumulator = part->accumulator + speed;
-                func_00175160(work, index, &axis);
+                effFlashRotatedTriangle(work, index, &axis);
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
                 } else {
@@ -1718,7 +1718,7 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001758E8);
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
-void func_001759C0(PcpFlashWork8 *work, s32 index, void *view)
+void effFlashRotatedStripPair(PcpFlashWork8 *work, s32 index, void *view)
 {
     PcpFlashPtc20B *part = &work->parts[index];
     f32 *quad = func_00178190(work->resourceHandle, index * 2);
@@ -1843,7 +1843,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
         } else {
             if (age == 0) {
                 func_001758E8(work, index, &axis);
-                func_001759C0(work, index, &axis);
+                effFlashRotatedStripPair(work, index, &axis);
                 func_001757F8(work, index, 0);
                 part->thickness = maxScale;
                 part->radius = startA;
@@ -1857,7 +1857,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
                 part->radialSpeed = speed * decay;
                 part->radius = part->radius + speed;
                 func_00175BE8(work, index, &axis);
-                func_001759C0(work, index, &axis);
+                effFlashRotatedStripPair(work, index, &axis);
                 age = part->age;
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
@@ -1943,7 +1943,7 @@ void func_001761A0(PcpFlashWork9 *work, s32 flag, s32 param) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
-void func_00176290(PcpFlashWork9 *work, s32 index)
+void effFlashArcQuadScalingB(PcpFlashWork9 *work, s32 index)
 {
     PcpFlashPtc14 *part = &work->parts[index];
     f32 *quad = func_00177B60(work->resourceHandle, index);
@@ -2058,7 +2058,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
                 } else {
                     part->scale = 0.0f;
                 }
-                func_00176290(work, index);
+                effFlashArcQuadScalingB(work, index);
                 func_001761A0(work, index, 0);
                 part->color = 0x80808080;
             } else if (age > 0) {
@@ -2074,7 +2074,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
                     }
                 }
                 func_00176478(work, index);
-                func_00176290(work, index);
+                effFlashArcQuadScalingB(work, index);
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
                 } else {
@@ -2152,7 +2152,7 @@ void func_00176920(PcpFlashWork10 *work, s32 index, s32 param)
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
-void func_001769C0(PcpFlashWork10 *work, s32 index, void *view)
+void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
 {
     PcpFlashPtc10 *part = &work->parts[index];
     f32 *quad = func_00177E78(work->resourceHandle, index);
@@ -2245,7 +2245,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
             func_00176920(work, index, 0);
         } else {
             if (age == 0) {
-                func_001769C0(work, index, axis);
+                effFlashRotatedTriangleB(work, index, axis);
                 func_00176920(work, index, 0);
                 part->accumulator = startA;
                 part->unk0C = startB;
@@ -2257,7 +2257,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
 
                 part->unk0C = speed * decay;
                 part->accumulator = part->accumulator + speed;
-                func_001769C0(work, index, axis);
+                effFlashRotatedTriangleB(work, index, axis);
                 if (age < fadeIn && fadeIn != 0) {
                     blend = (f32)age / (f32)fadeIn;
                 } else {

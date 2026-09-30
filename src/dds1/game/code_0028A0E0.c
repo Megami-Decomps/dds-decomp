@@ -352,7 +352,7 @@ extern void func_00289D50(u32 handle);
 
 extern void *mcHandleDetectionResult(void);
 
-extern void func_00293EA0(void *queue);
+extern void fileQueueInitTransform(void *queue);
 
 extern void func_00293158(void *src);
 
@@ -451,7 +451,7 @@ extern void *func_0029A5E0(u16 type, u32 count, void *src);
 
 extern void *func_00151E60(void *handle);
 
-extern void *func_0029C408(void *holder);
+extern void *effReferenceObjectRetain(void *holder);
 
 /* Init record at D_0037D4E0. */
 typedef struct Init374E0 {
@@ -666,7 +666,7 @@ void func_0028A288(s32 x, s32 y, u32 first, u32 second) {
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     func_00195520(1);
     D_003BD8F0 = func_001951C8(font, 0, 0, 0, 0);
-    func_00195530(1);
+    frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(D_003BD8F0, 1);
     func_00195450(D_003BD8F0, x << 4, y << 3);
     frFontSetChildColors(D_003BD8F0, color);
@@ -2142,11 +2142,11 @@ void func_002911B8(void) {
             func_002CFF98(node->resource);
             node = node->next;
         }
-        func_0027B368(((FileConfigTask *)D_003BD938)->frame);
+        mnuDestroyListState(((FileConfigTask *)D_003BD938)->frame);
         ((FileConfigTask *)D_003BD938)->frame = 0;
         for (i = 0; i < 4; i++) {
             if (((FileConfigTask *)D_003BD938)->slots[i] != 0) {
-                func_002BDD60(((FileConfigTask *)D_003BD938)->slots[i]);
+                effDestroyResourceSlotSet(((FileConfigTask *)D_003BD938)->slots[i]);
                 ((FileConfigTask *)D_003BD938)->slots[i] = 0;
             }
         }
@@ -2350,7 +2350,7 @@ f32 func_00292E50(f32 rate) {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
-void func_00292F48(f32 (*p)[4], f32 t)
+void vuCatmullRomPoint(f32 (*p)[4], f32 t)
 {
     f32 tan[2][4];
     f32 half[4];
@@ -2405,7 +2405,7 @@ void func_00292F48(f32 (*p)[4], f32 t)
 #undef VEC3_SPLAT
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye D_00324690, target D_00324680 and up D_003246A0 */
-void func_002930C0(void)
+void vuBuildLookAtBasis(void)
 {
     VU0_LOAD_VF(vf10, D_00324690);
     VU0_MOVE_VF(vf31, vf10);
@@ -2709,7 +2709,7 @@ u32 fileJobSerializedSize(FileJob *job) {
     return size;
 }
 
-/* View block initialised by func_00293EA0: (0,0,0,1) vectors, grey colour. */
+/* View block initialised by fileQueueInitTransform: (0,0,0,1) vectors, grey colour. */
 typedef struct FileViewBlock {
     u8 pad00[0x44];
     f32 unk44;
@@ -2721,7 +2721,7 @@ typedef struct FileViewBlock {
     f32 unk74;
 } FileViewBlock;
 
-void func_00293EA0(void *queue)
+void fileQueueInitTransform(void *queue)
 {
     FileViewBlock *view = queue;
 
@@ -2743,7 +2743,7 @@ void func_00293F18(FileJob *job) {
     job->unk88[0] = 8;
     job->unk88[1] = 0;
     job->unk88[2] = 0;
-    func_00293EA0(job);
+    fileQueueInitTransform(job);
 }
 
 void fileQueueAppend(FileQueue *queue, FileJob *job) {
@@ -2791,7 +2791,7 @@ FileQueue *fileQueueCreate(void) {
     memset(queue, 0, 0x90);
     queue->count = 0;
     queue->unk84 = 0;
-    func_00293EA0(queue);
+    fileQueueInitTransform(queue);
     return queue;
 }
 
@@ -2813,7 +2813,7 @@ void func_00294318(u32 unused, u32 handle) {
 }
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start time (job+0x80) has been reached. */
-void func_00294330(FileQueue *queue)
+void fileQueueUpdate(FileQueue *queue)
 {
     f32 pos[4];
     f32 aimQuat[4];
@@ -2824,8 +2824,8 @@ void func_00294330(FileQueue *queue)
 
     if (queue->unk68 & 0x60) {
         PCP_COPY_VECTOR(savedQuat, queue->quat);
-        func_00295E00(queue, aimQuat);
-        func_00294798(queue, aimQuat);
+        camAimRotation(queue, aimQuat);
+        fileQueueSetRotation(queue, aimQuat);
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
     total = queue->scale * queue->baseScale;
@@ -2838,7 +2838,7 @@ void func_00294330(FileQueue *queue)
             continue;
         }
         if (job->xformFlags & 0x18) {
-            func_00295D08(job, pos);
+            camFollowOffsetVec(job, pos);
             VU0_LOAD_VF(vf10, queue->quat);
             effMiscQuaternionToMatrixVU();
             VU0_LOAD_VF(vf10, queue->position);
@@ -2856,7 +2856,7 @@ void func_00294330(FileQueue *queue)
             func_002936E0((FileJob *)job->id, pos);
         }
         if (job->xformFlags & 0x60) {
-            func_00295E00(job, aimQuat);
+            camAimRotation(job, aimQuat);
             func_00293720((FileJob *)job->id, aimQuat);
         }
         func_002936A8((FileJob *)job->id);
@@ -2877,10 +2877,10 @@ void func_002944D8(FileQueue *queue) {
     func_002CFF98(queue);
 }
 
-extern void func_00294670(FileQueue *queue, void *vec);
-extern void func_00294798(FileQueue *queue, void *rot);
+extern void fileQueueSetPosition(FileQueue *queue, void *vec);
+extern void fileQueueSetRotation(FileQueue *queue, void *rot);
 extern void effMiscQuaternionToMatrixVU(void);
-extern void func_00294850(FileQueue *queue, f32 scale);
+extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_00294938(FileQueue *queue, u32 color);
 extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
 
@@ -2904,9 +2904,9 @@ FileQueue *fileQueueClone(FileQueue *source) {
         "sqc2 vf0, 0(%0)\n"
         ".set reorder"
         : : "r"(&vec) : "memory");
-    func_00294670(queue, &vec);
-    func_00294798(queue, &vec);
-    func_00294850(queue, 1.0f);
+    fileQueueSetPosition(queue, &vec);
+    fileQueueSetRotation(queue, &vec);
+    fileQueueSetScale(queue, 1.0f);
     func_00294938(queue, 0x80808080);
     return queue;
 }
@@ -2920,7 +2920,7 @@ void func_00294630(FileQueue *queue) {
 }
 
 /* Moves the queue to *vec and repositions every job: position = *vec + offset, plus each job's offset rotated by the queue quaternion (scaled when flag 0x80, y lowered by 5 for flag 0x04). */
-void func_00294670(FileQueue *queue, void *vec)
+void fileQueueSetPosition(FileQueue *queue, void *vec)
 {
     f32 rot[16];
     f32 base[4];
@@ -2955,7 +2955,7 @@ void func_00294670(FileQueue *queue, void *vec)
 }
 
 /* Sets the queue rotation to *rot: stores it as queue->quat, rotates queue->axis into queue->offset, notifies each job with its quat multiplied by *rot, then repositions the jobs at queue->position. */
-void func_00294798(FileQueue *queue, void *rot)
+void fileQueueSetRotation(FileQueue *queue, void *rot)
 {
     f32 quat[4];
     f32 pos[4];
@@ -2975,10 +2975,10 @@ void func_00294798(FileQueue *queue, void *rot)
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         func_00293720((FileJob *)job->id, pos);
     }
-    func_00294670(queue, queue->position);
+    fileQueueSetPosition(queue, queue->position);
 }
 
-void func_00294850(FileQueue *queue, f32 scale)
+void fileQueueSetScale(FileQueue *queue, f32 scale)
 {
     s128 pos;
     FileJob *job;
@@ -3019,7 +3019,7 @@ void func_00294A18(void *dst, void *src) {
         "sqc2 vf10, 0(%0)\n"
         ".set reorder"
         : : "r"(&vec) : "memory");
-    func_00294798(dst, &vec);
+    fileQueueSetRotation(dst, &vec);
 }
 
 FileJob *fileAppendJob(FileQueue *queue, u32 id) {
@@ -3146,7 +3146,7 @@ typedef struct CamFollow {
 } CamFollow;
 
 /* vu0 routine: dst = |pos| * unit(D_00324690 - D_00324680); flag 0x10 flattens y, then puts pos.y back */
-void func_00295D08(CamFollow *obj, void *dst)
+void camFollowOffsetVec(CamFollow *obj, void *dst)
 {
     f32 len[4];
     f32 length;
@@ -3186,7 +3186,7 @@ typedef struct CamAim {
 } CamAim;
 
 /* dst = rotation facing unit(D_00324690 - D_00324680) (pitch and yaw); flag 0x40 composes it onto obj->quat, no flag 0x60 copies obj->quat */
-void func_00295E00(CamAim *obj, void *dst)
+void camAimRotation(CamAim *obj, void *dst)
 {
     f32 v[4];
     f32 pitch;
@@ -3236,7 +3236,7 @@ typedef struct FileCellGrid {
     u32 layers;
 } FileCellGrid;
 
-LoadObj *func_00295F58(FileCellGrid *grid) {
+LoadObj *fileCreateGridLoaderRecord(FileCellGrid *grid) {
     u32 cols = grid->cols;
     u32 count = (cols != 0 ? cols : grid->rows) * (cols != 0 ? grid->rows : grid->layers);
 
@@ -3247,7 +3247,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2A18);
 
 LoadObj *effLoadObjectCreateFromJob(FileJob *job) {
     void *primary = fileResolvePrimaryBuffer(job);
-    LoadObj *obj = func_00295F58(primary);
+    LoadObj *obj = fileCreateGridLoaderRecord(primary);
     void *secondary;
 
     fileLoadObjectSetResource(obj, job->option, primary);
@@ -3298,7 +3298,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     LoadObj *source = (LoadObj *)((FileRecordSlots *)owner->recordWork)->data1;
-    LoadObj *result = func_00295F58(source);
+    LoadObj *result = fileCreateGridLoaderRecord(source);
     fileLoadObjectSetResource(result, ((FileRecordSlots *)owner->recordWork)->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
@@ -3352,7 +3352,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (dst->referenceHolder != NULL) {
             effReleaseReferenceHolder((s32)dst->referenceHolder);
         }
-        dst->referenceHolder = func_0029C408(src->referenceHolder);
+        dst->referenceHolder = effReferenceObjectRetain(src->referenceHolder);
         break;
     }
     dst->selector = src->selector;
@@ -3492,7 +3492,7 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296F58);
 
 INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297270);
 
-/* Output of func_002973E8: a view-space position, the sampled frame, colour, scale and heading. */
+/* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
 typedef struct FileKeyOut {
     f32 pos[4];
     s32 frame;
@@ -3517,7 +3517,7 @@ extern s32 func_00296F58(void *, void *, s32, s32);
 extern f32 func_00297270(void *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target */
-void func_002973E8(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
+void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
 {
     f32 delta[4];
 
@@ -3567,7 +3567,7 @@ typedef struct FileSlotGroup {
 } FileSlotGroup;
 
 /* Invalidates the cells x rows slots of the group that starts at `slot`. */
-void func_00297558(FileSlotGroup *group, u8 *slot) {
+void fileInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
     FileGridDimensions *dims = group->dims;
     s32 rows = dims->rows;
     s32 columns = dims->columns;
@@ -3586,7 +3586,7 @@ void func_00297558(FileSlotGroup *group, u8 *slot) {
 }
 
 /* Same, but first copies the slot at `slot` over the group's first slot. */
-void func_002975C8(FileSlotGroup *group, u8 *slot) {
+void fileCopyAndInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
     FileGridDimensions *dims = group->dims;
     s32 rows = dims->rows;
     s32 columns = dims->columns;

@@ -155,7 +155,7 @@ typedef struct {
     void *unk4;
 } HasPtr4;
 
-s32 func_00330C18(void *a0, s32 a1);
+s32 sdfModelFindDrawNode(void *a0, s32 a1);
 
 void func_00334930(void *tmp, void *src, void *tbl, s32 x);
 
@@ -242,7 +242,7 @@ typedef struct MotionNode {
 } MotionNode;
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
-void func_003341B8(MotionNode *node)
+void sdfDestroyMotion(MotionNode *node)
 {
     Link *prev;
     Link *cur;
@@ -347,7 +347,7 @@ s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
 
 void func_00334930(void *tmp, void *src, void *tbl, s32 x) {
     sdfSetMotionPointerPair(tmp, src, tbl);
-    ((TmpBuf *)tmp)->unkC = func_00330C18(((HasPtr4 *)src)->unk4, x);
+    ((TmpBuf *)tmp)->unkC = sdfModelFindDrawNode(((HasPtr4 *)src)->unk4, x);
 }
 
 void *func_00334980(void *a0, s32 a1, s32 a2) {

@@ -59,7 +59,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274430);
 
 extern u16 func_00286AD0(s32);
 extern void func_0024DD90(s32, void *);
-extern void func_0024DA58(s32);
+extern void dspStartEntry(s32);
 extern void func_00283BF0(s32, s32);
 extern void func_00119900(s32, s32);
 extern u8 *D_003BAA70;
@@ -93,7 +93,7 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
         func_0024DD90(0, D_003BAA70 + ((MnuEquipUnit *)unit)->unitId * 17);
         func_0024DD90(1, D_003BAA84 + equipped * 25);
         func_0024DD90(2, D_003BAA84 + itemId * 25);
-        func_0024DA58(0);
+        dspStartEntry(0);
         if (equipped != 0) {
             func_00119900(equipped, 1);
         }
@@ -102,7 +102,7 @@ void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
         equipContext->selectedItem = itemId;
     } else {
         func_0024DD90(0, D_003BAA84 + equipped * 25);
-        func_0024DA58(1);
+        dspStartEntry(1);
         equipContext->previousItem = 0;
         equipContext->selectedItem = 0;
     }

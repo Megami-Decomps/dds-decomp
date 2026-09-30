@@ -17,7 +17,7 @@ extern s32 D_00435DD0;
 extern s32 D_003CE148[];
 extern u8 D_003CE4EC[];
 extern void func_00297220(s32, u32);
-extern s32 func_00261480(s32, s32);
+extern s32 mnuCampAdvanceCounter(s32, s32);
 
 extern void func_002C42B0(s32, s32);
 
@@ -38,7 +38,7 @@ extern u8 D_003CE400[];
 extern s32 func_00297898();
 extern s32 mdlFlagTest();
 extern void mdlFlagSet();
-extern void func_0026C5B8();
+extern void dspStartEntry();
 extern u8 D_003CE1A8[];
 typedef struct EvtSlot {
     u32 threshold;
@@ -394,9 +394,9 @@ s32 evtShowResultText(void) {
     func_0035C860(text, D_00437840, evtGetRemainingSlotThreshold(((EvtProgressState *)D_00435DD0)->slotIndex + 1));
     func_0026C918(3, text);
     if (evtGetRemainingSlotThreshold(((EvtProgressState *)D_00435DD0)->slotIndex + 1) >= 0) {
-        func_0026C5B8(((EvtProgressState *)D_00435DD0)->slotIndex + 0x1a);
+        dspStartEntry(((EvtProgressState *)D_00435DD0)->slotIndex + 0x1a);
     } else {
-        func_0026C5B8(0x21);
+        dspStartEntry(0x21);
     }
     return 1;
 }
@@ -509,7 +509,7 @@ s64 evtSetupDispatchSyncE(s32 callback) {
 s32 func_00263880(void) {
     EvtStateTableContext *context = (EvtStateTableContext *)func_00101958();
     context->entryMultiplier = 1;
-    func_00261480(-1, (s32)context);
+    mnuCampAdvanceCounter(-1, (s32)context);
     return 1;
 }
 
@@ -632,13 +632,13 @@ s64 func_002642B8(s32 callback) {
 
 s32 evtPlayDispatchModeCue(void) {
     s32 context = func_00101958();
-    func_0026C948(1);
+    dspSetActive(1);
     switch (((EvtStateTableContext *)context)->dispatchMode) {
     case 1:
-        func_0026C5B8(5);
+        dspStartEntry(5);
         break;
     case 2:
-        func_0026C5B8(6);
+        dspStartEntry(6);
         break;
     }
     return 1;
@@ -725,7 +725,7 @@ u32 evtUpdateSlotAdvanceCount(void) {
     advancedSlots = evtAdvanceSlotFlags();
     ((EvtStateTableContext *)context)->advancedSlots = advancedSlots;
     if ((((EvtStateTableContext *)context)->unkC8 == 0) && (((EvtStateTableContext *)context)->followupMode == '\x01')) {
-        func_0026C5B8(0x22);
+        dspStartEntry(0x22);
     }
     return 1;
 }
@@ -771,7 +771,7 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
             u32 flag = entry->flag;
             if (mdlFlagTest(flag) == 0) {
                 mdlFlagSet(flag);
-                func_0026C5B8(entry->cue);
+                dspStartEntry(entry->cue);
                 return 1;
             }
         }
@@ -787,9 +787,9 @@ s32 evtShowSlotText(void) {
         func_0026C918(1, text);
         func_0026C918(2, D_003C9A20[((EvtProgressState *)D_00435DD0)->slotIndex]);
         if (evtGetRemainingSlotThreshold(((EvtProgressState *)D_00435DD0)->slotIndex + 1) >= 0) {
-            func_0026C5B8(0x24);
+            dspStartEntry(0x24);
         } else {
-            func_0026C5B8(0x25);
+            dspStartEntry(0x25);
         }
     }
     return 1;

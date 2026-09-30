@@ -53,9 +53,9 @@ extern void func_001F3188(s32);
 extern void func_00217878(s32, s32);
 extern void mnuApplyModelCamera(s32);
 extern void evtStageTestApplyEntryRotation(s32);
-extern void func_00287C20(void);
+extern void evtStageTestUpdateCamera(void);
 extern s32 func_00100518(void);
-extern void func_002E1718(void *);
+extern void sdfCameraBuildProjection(void *);
 extern void func_002E14D8(void *packet, void *node, void *matrix);
 extern void func_002E15D0(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
@@ -107,7 +107,7 @@ extern s32 D_003BAA4C;
 
 extern s32 D_003BAA50;
 
-extern u32 func_002BD258(u32);
+extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -265,7 +265,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
 }
 
-void func_00282B08(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
+void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *menu, s32 param) {
     s32 positionOffset[2];
     s32 *layout = menu->layout;
     s32 count;
@@ -285,7 +285,7 @@ void func_00282B08(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestState *m
 }
 
 void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_00282B08(arg0, arg1, arg2, 0, arg3, arg4);
+    mnuDrawStageTestList(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
 typedef struct MenuPoint {
@@ -569,9 +569,9 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00283EE0);
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
 
-    effectHandle = func_002BD258(3);
+    effectHandle = effCreateStatusBatch(3);
     pair->first = (MenuEffectNode *)effectHandle;
-    effectHandle = func_002BD258(3);
+    effectHandle = effCreateStatusBatch(3);
     pair->second = (MenuEffectNode *)effectHandle;
 }
 
@@ -606,7 +606,7 @@ void func_00284258(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture)
 void mnuReleaseSpriteTextures(s32 *object) {
     u32 i;
     for (i = 0; i < 9; i++) {
-        func_002BDD60(object[i + 7]);
+        effDestroyResourceSlotSet(object[i + 7]);
     }
     func_002840B8(object);
 }
@@ -1243,7 +1243,7 @@ u16 func_00286AD0(s32 entry) {
 }
 
 extern u16 D_0037CE00[];
-extern void func_0024DA58(s32);
+extern void dspStartEntry(s32);
 
 s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     u16 *entry = D_0037CE00;
@@ -1258,7 +1258,7 @@ s32 sndPlayPartyItemSe(u32 id, s32 mode) {
                 id = entry[1];
                 id += 10;
             }
-            func_0024DA58(id);
+            dspStartEntry(id);
             return 1;
         }
     }
@@ -1482,10 +1482,10 @@ void func_00287678(void) {
     D_003DC5E8.flags &= ~1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00287698);
+INCLUDE_ASM(const s32, "game/code_00282850", evtStageTestSelectEntry);
 
 void func_00287788(u16 id, u32 option) {
-    func_00287698(id, 0xffffffffffffffff, option);
+    evtStageTestSelectEntry(id, 0xffffffffffffffff, option);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002877A8);
@@ -1557,7 +1557,7 @@ void evtStageTestApplyEntryRotation(s32 model) {
 }
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
-void func_00287C20(void)
+void evtStageTestUpdateCamera(void)
 {
     s128 eye;
     s128 at;
@@ -1568,7 +1568,7 @@ void func_00287C20(void)
     PCP_COPY_VECTOR(D_00324690, D_0037CE70);
     PCP_COPY_VECTOR(D_00324680, D_0037CE60);
     PCP_COPY_VECTOR(D_003246A0, D_0037CE80);
-    func_002E1718(D_003245E0);
+    sdfCameraBuildProjection(D_003245E0);
     VU0_LOAD_VF(vf10, D_00324680);
     VU0_LOAD_VF(vf11, D_00324690);
     VU0_SUB(vf10, vf10, vf11);
@@ -1597,7 +1597,7 @@ s8 evtStageTestUpdate(s32 frame) {
         if (D_003DC5E8.model != 0) {
             mnuApplyModelCamera(D_003DC5E8.model);
             evtStageTestApplyEntryRotation(D_003DC5E8.model);
-            func_00287C20();
+            evtStageTestUpdateCamera();
             if (D_003DC5E8.pendingEffect >= 0) {
                 func_00288148(D_003DC5E8.pendingEffect);
                 D_003DC5E8.pendingEffect = -1;
@@ -1766,7 +1766,7 @@ extern s32 D_003BC7D4;
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
-extern void func_001038A0(void *, s32, s32, s32, s32);
+extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern s32 func_002E4960();
 extern void func_0021FEC0(s32, s32);
 
@@ -1774,7 +1774,7 @@ void *evtBattleStageTestScreen(void) {
     void *packets = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(packets);
-    func_001038A0(packets, 0x84, 0x46, 0x14, 9);
+    kwlnDrawSpriteCell(packets, 0x84, 0x46, 0x14, 9);
     sdfAppendPacket(packets, func_002E4960(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
     sdfAppendPacket(packets, func_002E4960(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
     sdfAppendPacket(packets, func_002E4960(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));

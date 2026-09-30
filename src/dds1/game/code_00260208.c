@@ -202,7 +202,7 @@ void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) 
     brsApplyPartyRewards(partyWork, rewardState);
 }
 
-extern void func_002762D8(s32 *);
+extern void mnuReleaseStaffMenuResources(s32 *);
 extern void func_00271480(s32, s32 *, s32, s32);
 extern s32 mnuCreatePanelGroup(s32);
 extern void mnuUpdateFiveListEntries(s32, s32);
@@ -249,7 +249,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     s32 *group = work->group;
     s32 panel;
 
-    func_002762D8(group);
+    mnuReleaseStaffMenuResources(group);
     func_00271480((s32)work + 0x680, group, 0, (s32)work + 0x574);
     panel = mnuCreatePanelGroup(work->panelGroup);
     work->panelHandle = panel;
@@ -267,9 +267,9 @@ void brsCloseSkillPackagePanel(s32 work) {
     BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
     s32 panelContext = work + 0x680;
 
-    func_002BDD60(ctx->unitHandle);
+    effDestroyResourceSlotSet(ctx->unitHandle);
     mnuClearEntries(panelContext);
-    func_0027FA20(panelContext);
+    mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
     func_002832F8(ctx->spriteHandle);
@@ -283,7 +283,7 @@ extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void func_002E9340(s32);
 extern void mnuInitPartyPanelSlots(s32);
-extern void func_00271500(s32, s32);
+extern void mnuAppendCampSpriteRequests(s32, s32);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
 extern void mnuRequestBaseAssets(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -294,7 +294,7 @@ s32 mnuStaffInitPanel(s32 work) {
     }
     func_002E9340(0x50000);
     mnuInitPartyPanelSlots(work + 0x574);
-    func_00271500(*(s32 *)(work + 0x58), work + 0x4F8);
+    mnuAppendCampSpriteRequests(*(s32 *)(work + 0x58), work + 0x4F8);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, work + 0x90);
     mnuRequestBaseAssets(work + 0xD1C);
     *(s32 *)(work + 0x570) = 1;
@@ -413,21 +413,21 @@ extern void func_00285600(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void brsCloseSkillPackagePanel(s32);
 extern void func_002BC618(s32);
-extern void func_0024DBC8(void);
+extern void dspCloseChannel(void);
 extern void func_002D0918(s32);
 
 void brsStaffTaskDestroy(s32 arg0) {
     s32 context = func_00101A70();
 
     if (*(s32 *)(context + 0xD44) != 0) {
-        func_002BDD60(*(s32 *)(context + 0xD44));
+        effDestroyResourceSlotSet(*(s32 *)(context + 0xD44));
     }
     func_00285600(context + 8, arg0);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
     func_002BC618(*(s32 *)(context + 0x58));
-    func_0024DBC8();
+    dspCloseChannel();
     func_002D0918(*(s32 *)context);
     D_003BC528 = 2;
 }

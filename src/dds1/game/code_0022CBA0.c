@@ -722,7 +722,7 @@ u32 func_00231EF8(u32 unused0, u32 unused1, u32 viewerAddr) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231F18);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewCmdResolveSlot);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
@@ -741,7 +741,7 @@ extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern void func_003014F0();
 extern void func_0023E7F8(s32 slot, EventViewerState *viewer);
-extern void func_002416E0(s32 slot, EventViewerState *viewer);
+extern void evtReloadEventViewer(s32 slot, EventViewerState *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
 s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
@@ -755,9 +755,9 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
                 func_0023E7F8(0, viewer);
                 func_0023E7F8(1, viewer);
             } else if (viewer->selectionMode == 1) {
-                func_002416E0(0, viewer);
+                evtReloadEventViewer(0, viewer);
             } else if (viewer->selectionMode == 2) {
-                func_002416E0(1, viewer);
+                evtReloadEventViewer(1, viewer);
             }
             applied = 1;
         }
@@ -780,7 +780,7 @@ INCLUDE_RODATA(const s32, "game/code_0022CBA0", D_003ADA98);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232438);
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_002326F8);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232720);
 
@@ -807,7 +807,7 @@ void *func_00232A00(void) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *func_00232A50(void) {
+void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)func_00101A70();
     s32 flags;
 
@@ -835,7 +835,7 @@ void *func_00232A50(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232B30);
+INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerStartUpdate);
 
 extern f32 D_00324590[];
 extern void func_002441E8();

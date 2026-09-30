@@ -72,7 +72,7 @@ void mnuReleaseResourceSlots(void) {
     s32 i;
     for (i = 0; i < 14; ++i) {
         if (D_0036C698[i] != 0) {
-            func_002BDD60(D_0036C698[i]);
+            effDestroyResourceSlotSet(D_0036C698[i]);
             D_0036C698[i] = 0;
         }
     }
@@ -86,7 +86,7 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
-    D_003BC4CC = func_002CB1C8(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
+    D_003BC4CC = sdfCreateTaskWorker(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
 s32 mnuCheckResourceTask(void) {
@@ -121,7 +121,7 @@ typedef struct {
 extern MnuSourceEntry *func_002CE9E0(u16 index);
 
 /* Pick the value of the first active slot, preferring slot 0. */
-s32 func_0024F800(u16 index) {
+s32 mnuGetMantraSourceValue(u16 index) {
     s32 result = 0;
     MnuSourceEntry *entry = func_002CE9E0(index);
     s32 slot = 0;
@@ -178,7 +178,7 @@ u32 *func_0024FAC8(void) {
 }
 
 extern void func_002CFF98(void *);
-extern void func_0027B368(void *);
+extern void mnuDestroyListState(void *);
 extern void func_00249930(s32);
 extern void func_002D0918(s32);
 
@@ -207,7 +207,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
         node = node->next;
     }
     func_002CFF98(owner->resource);
-    func_0027B368(owner);
+    mnuDestroyListState(owner);
     func_00249930(*(s32 *)(record + 0x24));
     func_002D0918(taskData[0]);
 }

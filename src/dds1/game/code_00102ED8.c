@@ -118,7 +118,7 @@ typedef struct KwlnGraphicsSink {
 } KwlnGraphicsSink;
 extern KwlnGraphicsSink D_00325708;
 
-extern void func_002E1718(void *arg0);
+extern void sdfCameraBuildProjection(void *arg0);
 
 extern void sdfDevConsSetEntryPair(s32 arg0, s32 arg1, s32 arg2);
 
@@ -181,14 +181,14 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001035F8);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001037C0);
 
-void func_001038A0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void kwlnDrawSpriteCell(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 cw = 0xC0, ch = 0x60;
     sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, 0xFEFFFF,
                                            arg3 * cw + ch, arg4 * ch + 0x30,
                                            0x60000000, 0x40806020));
 }
 
-void func_00103908(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void kwlnDrawSpriteCellZ(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     s32 cw = 0xC0, ch = 0x60;
     sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, arg5,
                                            arg3 * cw + ch, arg4 * ch + 0x30,
@@ -383,8 +383,8 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105150);
 
 void func_00105320(void) {
     sdfGraphSetDisplayMode(1);
-    func_002E1718(&D_003245E0);
-    func_002E1718(&D_00324980);
+    sdfCameraBuildProjection(&D_003245E0);
+    sdfCameraBuildProjection(&D_00324980);
     func_00105150(0);
     func_00105150(1);
     func_00105890();

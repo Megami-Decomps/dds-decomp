@@ -106,7 +106,7 @@ void func_0030E880(void) {
 
 extern s32 func_0030E010(s32, s32, s32, s32, s32, s32, s32);
 
-s64 func_0030E8E8(void) {
+s64 fldReleaseMapRequestQueues(void) {
     func_0030EF18(D_004390AC);
     return func_0030EF18(D_004390B0);
 }

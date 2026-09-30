@@ -2,7 +2,7 @@
 
 extern s32 func_002CFEB8(u32);
 
-void func_002BDD60(u32);
+void effDestroyResourceSlotSet(u32);
 
 typedef struct DspListNode {
     u8 pad00[0x10];
@@ -103,7 +103,7 @@ u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
 }
 
 void mnuReleaseEffectResource(MenuResourceWork *work) {
-    func_002BDD60(work->resourceHandle);
+    effDestroyResourceSlotSet(work->resourceHandle);
     func_002CFF98(work);
 }
 

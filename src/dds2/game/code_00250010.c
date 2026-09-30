@@ -189,7 +189,7 @@ extern char D_004374A0[]; /* "     %d" */
 extern s32 sdfCreateResetPacketList(void);
 extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, s32 total, EvtRuntime *ctx,
                           EvtMenuHeaderFn header, EvtMenuRowFn row);
-extern void func_00103790(s32 list, s32 x, s32 y, s32 w, s32 h);
+extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
 extern s32 func_001036B0(s32, s32, s32, s32, s32, s32, s32 *, s32, s32 *);
 
 extern void func_003421E8(s32 arg0);
@@ -316,16 +316,16 @@ void evtCreateSkyTask(void) {
     kwlnTaskCreate(D_004373D0, 0x2B0E, 1, 1, (s32)evtUpdateSkyTask, (s32)evtResetSkyTaskFlags, 0);
 }
 
-/* Parked: build/parked/dds2/game/code_00250010/func_002502E0.c (needs a 4-word
+/* Parked: build/parked/dds2/game/code_00250010/evtUpdateFrameVariableTask.c (needs a 4-word
    stack local; an unused buffer matches but is a codegen lever, not source). */
-INCLUDE_ASM(const s32, "game/code_00250010", func_002502E0);
+INCLUDE_ASM(const s32, "game/code_00250010", evtUpdateFrameVariableTask);
 
 extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
-extern s32 func_002502E0();
+extern s32 evtUpdateFrameVariableTask();
 extern char D_00423380[]; /* "FrameVar" */
 
 void evtCreateFrameVariableTask(void) {
-    kwlnTaskCreate(D_00423380, 0x2AF9, 1, 1, (s32)func_002502E0, 0, 0);
+    kwlnTaskCreate(D_00423380, 0x2AF9, 1, 1, (s32)evtUpdateFrameVariableTask, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250338);
@@ -342,7 +342,7 @@ s32 func_00250508(s32 list, s32 x, s32 y) {
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
 
 extern s32 func_00250558(s32, s32, s32, s32, EvtRuntime *);
-s32 func_00250718(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     f32 step;
 
@@ -458,7 +458,7 @@ s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
     return 2;
 }
 
-void func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
@@ -491,14 +491,14 @@ void func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
 
 extern void evtViewerDispatchFlagMode();
 extern void func_00249088();
-extern void func_00250BA0(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
+extern void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
 
-s32 func_00250D68(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 step;
 
     list = sdfCreateResetPacketList();
-    func_00250338(list, x, y, 0x16, 0xB, 0, 1, ctx, mnuDrawFrameChangeLabel, func_00250BA0);
+    func_00250338(list, x, y, 0x16, 0xB, 0, 1, ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
     D_00380748.submit(&D_00380748, list);
     if (ctx->mode != 6) {
         return 0;
@@ -618,7 +618,7 @@ s32 func_00251340(s32 x, s32 y, EvtRuntime *ctx) {
 extern char D_004374E0[];
 extern char D_004374D0[];
 
-s32 func_00251440(s32 list, s32 x, s32 y, u8 *ctx) {
+s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     func_0035C860(text, D_004374E0, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
     sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, text));
@@ -628,7 +628,7 @@ s32 func_00251440(s32 list, s32 x, s32 y, u8 *ctx) {
 extern s8 D_003C9688[];
 extern char D_004374E8[]; /* "%c" */
 
-void func_002514C8(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+void evtDrawKeyboardRow(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 color;
 
@@ -656,7 +656,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423678);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423688);
 
-s32 func_002517E0(s32 list, s32 x, s32 y) {
+s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     char text[32];
     func_0035C860(text, "[E%3d_%03d.PM1+2+3]", D_004372B0, D_004372B2);
     sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, text));
@@ -671,7 +671,7 @@ extern char D_00437510[]; /* "NAME:" */
 
 void func_00251DE8(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;
-    func_00103790(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket(list, func_0033D810(x, 0x7AE0, 0xFEFFFF, 0xE, D_00437510));
     if (sel[2] >= 0) {
         sdfAppendPacket(list, func_0033D810(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_004374D0, base + sel[2] * 32 + 0x24));
@@ -730,7 +730,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00252378);
 
 extern void func_00252378(s32 list, s32 x, s32 y, s32 color, EvtFrameNode *node, EvtRuntime *ctx);
 
-s32 func_002534B0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtFrameNode *node;
     s32 color;
     s32 i;
@@ -788,7 +788,7 @@ typedef struct EvtWorldObject {
 extern EvtWorldObject *dds3GetWorldObject();
 extern char D_004374D8[]; /* " %s" */
 
-void func_002537A8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     s32 color;
     s32 count;
     s32 i;
@@ -826,7 +826,7 @@ extern s32 evtEventViewerGetPendingNode();
 extern EvtWorldNode *func_001111A8(EvtWorldObject *world, char *name);
 
 /* The pending-node's signed slot indices begin at +0xC (also used in DDS1). */
-void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtWorldNode *node;
     s32 color;
     s32 slot;
@@ -848,7 +848,7 @@ void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-extern void func_00253A98(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
+extern void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx);
 
 s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
@@ -865,7 +865,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *ctx) {
     default:
         return -1;
     }
-    func_00250338(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, func_00253A98);
+    func_00250338(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, evtViewerDrawPendingNodeRow);
     D_00380748.submit(&D_00380748, list);
     if (ctx->mode != 0xC) {
         return 0;
@@ -963,7 +963,7 @@ extern char D_00424090[]; /* "UNIT ALL" */
 extern char D_004376E8[]; /* "ALL" */
 extern char D_004376F0[]; /* "DISABLE" */
 
-void func_00255360(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 color;
     s32 n;
@@ -1058,7 +1058,7 @@ extern char D_00437768[]; /* "CURRENT" */
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004241A0);
 
-void func_00256898(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawGroupRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 color;
     s32 n;
@@ -1590,7 +1590,7 @@ typedef struct EvtLink {
 
 extern s32 strcmp(const char *a, const char *b);
 
-void func_0025A188(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *link) {
+void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *link) {
     s32 i;
     EvtRuntimeGroup *group;
 
@@ -1628,7 +1628,7 @@ extern void evtEventViewerReset(EvtRuntime *runtime);
 extern s32 func_0024FB48(u16 a, u16 b, s32 mode);
 extern void func_0025A280(s32 handle, EvtRuntime *runtime);
 
-s32 func_0025CAF8(s32 mode, EvtRuntime *runtime) {
+s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path0[0x80];
     char path1[0x80];
     char path2[0x80];
@@ -1890,7 +1890,7 @@ extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115500(void *obj, void *vecA, void *vecB);
 extern void func_00197F40(void *target, f32 scale);
 
-void *func_0025D140(s32 taskId, s32 key, s32 index) {
+void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;

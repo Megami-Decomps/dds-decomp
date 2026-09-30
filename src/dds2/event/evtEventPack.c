@@ -44,7 +44,7 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D7E0);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D8C8);
 
-extern void func_002C81E8(void);
+extern void fileWaitIdle(void);
 extern void effInitCh72Id(void);
 extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
@@ -76,7 +76,7 @@ void evtReleaseEventPackResources(void) {
     s32 state = func_00101958();
     EvtPackResources *resources = (EvtPackResources *)state;
 
-    func_002C81E8();
+    fileWaitIdle();
     if (state != 0) {
         if (resources->effect72 != 0) {
             effInitCh72Id();

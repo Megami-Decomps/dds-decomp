@@ -80,17 +80,17 @@ extern void mnuSelectFirstListNode(s32);
 
 extern void func_0026C918(s32, void *);
 
-extern void func_0026C948(s32);
+extern void dspSetActive(s32);
 
-extern void func_0026C5B8(s32);
+extern void dspStartEntry(s32);
 
 extern void func_0026C648(s32);
 
 extern void func_0026C618(s32);
 
-extern void func_0026C948(s32);
+extern void dspSetActive(s32);
 
-extern void func_0026C5B8(s32);
+extern void dspStartEntry(s32);
 
 extern s32 func_00268C08(s32);
 
@@ -164,7 +164,7 @@ void evtBSetupDispatchSync(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-extern void func_00267EA0(s32, s32);
+extern void mnuTerminalSetTrack(s32, s32);
 
 extern void func_0026C710(void);
 
@@ -172,7 +172,7 @@ s32 evtClearDispatchVisualFlag(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
     evtRememberDispatchCallback(0, (s32)state);
     state->visualState->statusFlag = 0;
-    func_00267EA0(0, 0);
+    mnuTerminalSetTrack(0, 0);
     func_0026C710();
     return 1;
 }
@@ -181,7 +181,7 @@ extern void func_002690A8(s32, s32);
 
 extern void func_00269230(void);
 
-extern void func_00268AA0(s32, s32, s32);
+extern void mnuTerminalSelectSlot(s32, s32, s32);
 
 extern void mnuReleaseResourceGroup(s32);
 
@@ -189,8 +189,8 @@ s32 func_00269FC8(void) {
     s32 state = func_00101958();
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);
-    func_00268AA0(0, -2, state);
-    func_00267EA0(1, 0);
+    mnuTerminalSelectSlot(0, -2, state);
+    mnuTerminalSetTrack(1, 0);
     mnuReleaseResourceGroup(state);
     kwlnFadeOutStart(0, 0, 0, 15);
     return 1;
@@ -220,7 +220,7 @@ u32 func_0026A1B8(void) {
         evtRememberDispatchCallback((s32)func_00269638, (s32)context);
         func_00269478(3, (s32)context);
         func_002690A8(4, (s32)context);
-        func_00268AA0(3, 1, (s32)context);
+        mnuTerminalSelectSlot(3, 1, (s32)context);
     }
     context->menuActive = 0;
     evtClearActiveFlag(0);
@@ -236,7 +236,7 @@ u32 func_0026A258(void) {
         evtRememberDispatchCallback((s32)func_00269230, (s32)context);
         func_00269478(4, (s32)context);
         func_002690A8(3, (s32)context);
-        func_00268AA0(3, 0, (s32)context);
+        mnuTerminalSelectSlot(3, 0, (s32)context);
         func_0026C710();
     }
     context->menuActive = 0;
@@ -269,7 +269,7 @@ u32 func_0026A4B0(void) {
 
     mnuRefreshThresholdNodeFlags((s32)context->thresholdOwner);
     mnuSelectFirstListNode((s32)context->thresholdOwner);
-    func_00268AA0(3, 2, (s32)context);
+    mnuTerminalSelectSlot(3, 2, (s32)context);
     func_002698A0(3, (s32)context);
     func_002690A8(4, (s32)context);
     evtRememberDispatchCallback((s32)func_00269978, (s32)context);
@@ -279,7 +279,7 @@ u32 func_0026A4B0(void) {
 u32 evtBEnterStateA(void) {
     s32 context = func_00101958();
 
-    func_00268AA0(3, 0, context);
+    mnuTerminalSelectSlot(3, 0, context);
     func_002698A0(4, context);
     func_002690A8(3, context);
     evtRememberDispatchCallback((s32)func_00269230, context);
@@ -336,18 +336,18 @@ extern void func_002A9200(s32);
 
 extern void func_00268C48(s32, s32);
 
-extern void func_0026C728(void);
+extern void dspCloseChannel(void);
 
 s32 func_0026AAC0(void) {
     s32 state = func_00101958();
     func_002A9200(state + 0xE8);
     func_00268C48(2, state);
-    func_00268AA0(3, 4, state);
+    mnuTerminalSelectSlot(3, 4, state);
     func_002690A8(2, state);
     evtRememberDispatchCallback(0, state);
     *(u32 *)(state + 0xA0) = 0;
     func_0026C710();
-    func_0026C728();
+    dspCloseChannel();
     return 1;
 }
 
@@ -359,7 +359,7 @@ s32 func_0026AB38(void) {
     s32 state = func_00101958();
     func_002A91A0(state + 0xE8);
     func_00268C48(1, state);
-    func_00268AA0(3, 0, state);
+    mnuTerminalSelectSlot(3, 0, state);
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);
     func_0026C538(*(s32 *)(state + 0x60));
@@ -440,8 +440,8 @@ u32 evtPrepareSelectedMenuEntry(void) {
         mnuSelectFirstListNode((s32)owner);
     }
     func_0026C918(0, &D_003A41A8[*slot]);
-    func_0026C948(1);
-    func_0026C5B8(0);
+    dspSetActive(1);
+    dspStartEntry(0);
     func_0026C648(1);
     func_0026C618(6);
     return 1;
@@ -475,13 +475,13 @@ void evtBSetupDispatchSyncF(s32 request) {
 u32 evtBCheckPanelMode(void) {
     EventDispatchState *state = (EventDispatchState *)func_00101958();
 
-    func_0026C948(1);
+    dspSetActive(1);
     switch (state->displayMode) {
     case 1:
-        func_0026C5B8(1);
+        dspStartEntry(1);
         break;
     case 2:
-        func_0026C5B8(2);
+        dspStartEntry(2);
         break;
     }
     return 1;
@@ -528,10 +528,10 @@ u32 func_0026B120(void) {
 
     func_00268CC0(2, (s32)context);
     if (context->selectionStep >= 2) {
-        func_00268AA0(2, -1, (s32)context);
+        mnuTerminalSelectSlot(2, -1, (s32)context);
         func_00269478(2, (s32)context);
     } else {
-        func_00268AA0(2, -1, (s32)context);
+        mnuTerminalSelectSlot(2, -1, (s32)context);
         func_002690A8(2, (s32)context);
     }
     evtRememberDispatchCallback(0, (s32)context);
@@ -545,9 +545,9 @@ u32 func_0026B120(void) {
 s32 func_0026B1C8(void) {
     s32 state = func_00101958();
     mnuReleaseWorkResources(state);
-    func_00267768(state);
+    mnuTerminalBuildMenus(state);
     func_00268CC0(1, state);
-    func_00268AA0(1, 0, state);
+    mnuTerminalSelectSlot(1, 0, state);
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);
     ((EventDispatchState *)state)->stage = 1;
@@ -583,7 +583,7 @@ void evtBDispatchSyncB(s32 request) {
     func_002C4038((s32)state->dispatchWork, &state->dispatchStatus, 2, request);
 }
 
-extern void func_00267938(s32, s32);
+extern void mnuTerminalFadeOrClose(s32, s32);
 
 extern void evtClearActiveFlag(s32);
 
@@ -594,7 +594,7 @@ extern void mnuStartMantraSpriteLoad(void);
 s32 func_0026B430(void) {
     s32 state = func_00101958();
     s32 mode;
-    func_00267938(0, state);
+    mnuTerminalFadeOrClose(0, state);
     evtClearActiveFlag(0);
     func_0026CA80(0, 0);
     mode = ((EventDispatchState *)state)->menuMode;

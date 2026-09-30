@@ -152,7 +152,7 @@ extern void func_0030CC68();
 extern u8 D_00400AF0[];
 
 extern void func_00328E48();
-extern void func_002B81C8();
+extern void mnuDestroyListState();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
 extern void func_0030D938(s32, s32);
@@ -338,7 +338,7 @@ void func_0030C5D8(SdfCounterRuntime *rt) {
         }
         func_00328E48(rt->timer);
         rt->timer = NULL;
-        func_002B81C8(rt);
+        mnuDestroyListState(rt);
     }
 }
 
@@ -633,7 +633,7 @@ void func_0030DAE8(void) {
     u32 *slot = D_0045C7C0;
     do {
         if (*slot != 0) {
-            func_003054E8(*slot);
+            effDestroyResourceSlotSet(*slot);
         }
         *slot++ = 0;
     } while (--remaining >= 0);

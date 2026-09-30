@@ -85,13 +85,13 @@ extern void func_0025FCD8();
 
 extern void func_002B99D8();
 
-extern void func_003054E8();
+extern void effDestroyResourceSlotSet();
 
 extern s32 mnuShopReleaseSceneObjects(u8 *);
 
 extern void func_002C3FC8(s32, s32);
 
-extern void func_0026C728(void);
+extern void dspCloseChannel(void);
 
 extern void evtReleaseResourcePairHandle();
 
@@ -143,7 +143,7 @@ extern f32 D_00453CB0[];
 extern f32 D_00453CA0[];
 extern f32 D_00453C90[];
 extern s32 D_004377F0;
-extern u8 *func_00304998(s32 kind);
+extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
@@ -569,7 +569,7 @@ typedef struct CampCue {
     struct CampCue *link; /* 0x34 */
 } CampCue;
 
-void func_0025E8D0(CampScene *scene, CampCue *cue) {
+void campResolvePendingValue(CampScene *scene, CampCue *cue) {
     CampCue *next;
     s32 kind;
     u16 id;
@@ -650,7 +650,7 @@ void mnuCampLinkFontGlyph(CampScene *scene) {
 extern void func_00329A00(s32 *);
 
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
-void func_0025EEC0(void) {
+void mnuCampCheckClockDivisor(void) {
     s32 info[8];
     s32 quotient;
 
@@ -817,7 +817,7 @@ void func_0025F7F0(u8 *scene) {
     s32 *params;
     s32 defaultValue = 15;
     ((ShopEffectScene *)scene)->state = 0;
-    object = func_00304998(6);
+    object = effCreateStatusBatch(6);
     graphics = (u8 *)((ShopEffectObject *)object)->graphics;
     ((ShopEffectScene *)scene)->objects[0] = object;
     params = ((ShopEffectGraphics *)graphics)->params;
@@ -826,7 +826,7 @@ void func_0025F7F0(u8 *scene) {
     params[2] = 0;
     params[3] = 0;
     params[4] = 0;
-    object = func_00304998(1);
+    object = effCreateStatusBatch(1);
     graphics = (u8 *)((ShopEffectObject *)object)->graphics;
     ((ShopEffectScene *)scene)->objects[1] = object;
     params = ((ShopEffectGraphics *)graphics)->params;
@@ -891,10 +891,10 @@ void func_0025FCD8(s32 scene) {
 
     func_002B99D8(((ShopSceneCleanup *)scene)->resourceHandle);
     for (i = 1; i >= 0; i--) {
-        func_003054E8(*slot++);
+        effDestroyResourceSlotSet(*slot++);
     }
-    func_003054E8(((ShopSceneCleanup *)scene)->handles[2]);
-    func_003054E8(((ShopSceneCleanup *)scene)->handles[3]);
+    effDestroyResourceSlotSet(((ShopSceneCleanup *)scene)->handles[2]);
+    effDestroyResourceSlotSet(((ShopSceneCleanup *)scene)->handles[3]);
     switch (((ShopSceneCleanup *)scene)->mode) {
     case 1:
     case 3:
@@ -1089,7 +1089,7 @@ void func_00260538(void) {
     } while (index < 3);
 }
 
-u8 *func_00260570(void) {
+u8 *mnuTerminalCreateContext(void) {
     s32 handle;
     u8 *obj;
 
@@ -1118,7 +1118,7 @@ void func_00260620(s32 arg) {
         func_0025FCD8(scene);
         mnuShopReleaseSceneObjects((u8 *)scene);
         func_002C3FC8(scene + 0xC, arg);
-        func_0026C728();
+        dspCloseChannel();
         evtReleaseResourcePairHandle(scene + 0x60);
         func_003297C8(*(s32 *)scene);
         D_00437837 = 2;
@@ -1325,7 +1325,7 @@ s32 func_002610C0(s32 row, s32 column) {
     return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
 }
 
-s32 func_002610E8(s32 mode, s32 id, s32 record) {
+s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     s32 value = *(s32 *)(record + 0x9C);
 
     if (mode == 1) {
@@ -1353,7 +1353,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261310);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
 
-s32 func_00261480(s32 delta, u8 *scene) {
+s32 mnuCampAdvanceCounter(s32 delta, u8 *scene) {
     s32 max = func_00261198(scene);
     CampCounterSlot *slot = &((ShopScene *)scene)->extra->data->state->counter;
     s32 sum = ((ShopScene *)scene)->quantity + delta;

@@ -79,7 +79,7 @@ typedef struct EffEventLight {
 
 extern struct EffEventWork *func_00190130();
 
-EffEventLight *func_00190640(u32 arg, f32 param) {
+EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));
 
     work->init.scale = 1.0f;
@@ -102,7 +102,7 @@ EffEventLight *func_00190640(u32 arg, f32 param) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190708);
 
-EffEventLight *func_00190748(EffEventLight *src) {
+EffEventLight *effEventLightClone(EffEventLight *src) {
     EffEventInit *block = &src->init;
     EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));
 
@@ -117,7 +117,7 @@ void func_00190810(EffEventWork *work) {
     func_00190328(work->owner);
 }
 
-void func_00190828(EffEventLight *work, f32 *vec) {
+void effEventLightSetPosition(EffEventLight *work, f32 *vec) {
     work->init.pos[0] = vec[0];
     work->init.pos[1] = vec[1] - work->init.rangeFar * 0.5f;
     work->init.pos[2] = vec[2];
@@ -199,7 +199,7 @@ extern void *billCreateFromResource(s32 kind, const char *path);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
 
-EffEventBillSet *func_00190AD8(EffEventBlock7C *src) {
+EffEventBillSet *effEventBillSetCreate(EffEventBlock7C *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffEventBillParticle);
     u32 handle = func_002D03F8(size + sizeof(EffEventBillSet));
@@ -323,7 +323,7 @@ void func_00192110(EffEventBlock7C *destination, const EffEventBlock7C *source) 
 }
 
 void func_00192230(void) {
-    func_00190AD8(D_003563F0);
+    effEventBillSetCreate(D_003563F0);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00192250);
@@ -332,7 +332,7 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 effParamTableGetWord2(void *data, s32 index);
 extern void func_00192250(void *src, u16 kind, void *params);
 
-void func_00192420(void *data) {
+void effEventParticleSetCreateFromTable(void *data) {
     void *block0 = effParamTableGetBlock(data, 0);
     void *block1 = effParamTableGetBlock(data, 1);
 

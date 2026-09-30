@@ -233,11 +233,11 @@ void func_00266130(u32 fontContext) {
     frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
 }
 
-extern u32 func_002C1630(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, s32);
 
 u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     ptyGetCurrentProfileId(*(u32 *)(resource + 8));
-    return func_002C1630(0x80808080, 0x80808000, blend);
+    return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
 INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildActiveUnitProgressRows);

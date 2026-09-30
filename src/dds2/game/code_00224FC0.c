@@ -19,7 +19,7 @@ extern void btlFlagAllUnitsDefeatCandidate(void);
 
 extern void func_00224EE8(u32);
 
-extern void func_001E9660(u32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlInitMotionTransformFromComponents(u32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_001E2758(void *);
 
@@ -172,7 +172,7 @@ s32 btlFilterRestrictedCommand(BattleActionUnit *battler, s32 command) {
 }
 
 /* This command selector ignores the unit and tests only the requested command. */
-u8 func_002266A8(u32 unusedUnit, s32 command) {
+u8 btlIsCommandCodeF(u32 unusedUnit, s32 command) {
     return command == 0xf;
 }
 
@@ -226,7 +226,7 @@ u32 func_00226868(BattleActionUnit *unit) {
     if (btlHasMarkedEntry14((u32)unit)) {
         if (unit->frameCounter >= 0x34) {
             btlClearRuntimeFlag2000();
-            func_001E9660((u32)unit, 517.3f, -476.0f, -947.2f, 0.177f,
+            btlInitMotionTransformFromComponents((u32)unit, 517.3f, -476.0f, -947.2f, 0.177f,
                            0.283f, 0.042f, 0.933f, 40.0f);
         }
         ++unit->frameCounter;

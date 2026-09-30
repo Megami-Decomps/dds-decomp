@@ -61,7 +61,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E980);
 
-void func_0018EA00(EffBlurParams *dst, EffBlurParams *src) {
+void effBlurCopyParams(EffBlurParams *dst, EffBlurParams *src) {
     *dst = *src;
 }
 
@@ -90,7 +90,7 @@ void effBlurReleaseFirstResource(EffBlurWork *work) {
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018ECD0);
 
 /* Copy the parameter block but keep the destination's own first word. */
-void func_0018EED8(EffBlurParams *dst, EffBlurParams *src) {
+void effBlurCopyParamsKeepHeader(EffBlurParams *dst, EffBlurParams *src) {
     u32 first = dst->word[0];
 
     *dst = *src;
@@ -109,7 +109,7 @@ void effBlurAcquireSecondHandle(EffBlurWork *work) {
     work->setting = setting;
 }
 
-void func_0018EF78(EffBlurWork2 *work, EffBlurSlot2 *slot) {
+void effBlurSecondUpdateSlotRect(EffBlurWork2 *work, EffBlurSlot2 *slot) {
     f32 size = (f32)work->size * slot->phase * 16.0f;
     s32 cx = (work->x + 0x100) << 4;
     s32 cy = (work->y + 0xE0) << 3;

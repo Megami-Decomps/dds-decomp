@@ -217,7 +217,7 @@ struct SdfPendingOwner {
 };
 
 /* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */
-void func_0032CAE0(SdfPendingOwner *owner, u32 entry) {
+void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
     SdfPendingNode *node;
     SdfPendingBuffer *buffer;
     s32 remaining;
@@ -271,7 +271,7 @@ SdfLink *sdfDetachQueue(void) {
 }
 
 /* Run each node's handler over its queued entries, freeing chunks and nodes. */
-void func_0032CBF0(SdfPendingNode *node) {
+void sdfPendingQueueFlush(SdfPendingNode *node) {
     SdfPendingNode *nextNode;
     SdfPendingBuffer *buffer;
     SdfPendingBuffer *nextBuffer;
@@ -311,7 +311,7 @@ void sdfRotatePendingSlots(void) {
 
     D_00439164 = 1;
     WaitSema(D_004389FC);
-    func_0032CBF0(D_00439158[0]);
+    sdfPendingQueueFlush(D_00439158[0]);
     for (i = 0; i < 1; i++) {
         D_00439158[i] = D_00439158[i + 1];
     }
@@ -1467,7 +1467,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
         sdfDestroyDevRequest(slot->device);
     }
     if (recycle != 0) {
-        func_0032CAE0((SdfPendingOwner *)&D_00439168, (u32)slot);
+        sdfPendingQueuePush((SdfPendingOwner *)&D_00439168, (u32)slot);
     } else {
         sdfDestroyDevRequest((void *)slot->request);
         func_00328E48(slot);

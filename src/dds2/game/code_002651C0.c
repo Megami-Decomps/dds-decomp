@@ -39,9 +39,9 @@ extern void mdlFlagSet();
 extern void mdlFlagClear();
 extern void func_0026C7F8();
 extern s32 func_002604A0();
-extern void func_0026C948();
+extern void dspSetActive();
 extern void func_0026C918();
-extern void func_0026C5B8();
+extern void dspStartEntry();
 extern void func_0011A0D0();
 extern void func_0011A118();
 extern s32 func_0035C860(char *, const char *, ...);
@@ -197,10 +197,10 @@ u32 evtMenuSetProgressFlag(s32 context) {
 void func_002659E0(void) {
     char text[0x40];
     s32 index = func_002604A0();
-    func_0026C948(1);
+    dspSetActive(1);
     func_0035C860(text, D_00437840, index);
     func_0026C918(0, text);
-    func_0026C5B8(0x19);
+    dspStartEntry(0x19);
     func_0011A0D0(index);
     func_0011A118(0x81, -*(u8 *)(D_00435DD0 + 0x13c1));
     mdlFlagClear(0xa01);

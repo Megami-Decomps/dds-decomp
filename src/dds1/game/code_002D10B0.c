@@ -43,7 +43,7 @@ struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
 void func_002D1B90(void *arg0);
 void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
-void func_002D3C30(void *arg0, s32 arg1);
+void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *func_002CFF68(s32 size);
 
@@ -215,7 +215,7 @@ void func_002D1B90(void *arg0) {
 }
 
 void func_002D1C08(s32 arg0) {
-    func_002D3C30(&D_003BD9E8, arg0);
+    sdfPendingQueuePush(&D_003BD9E8, arg0);
 }
 
 void sdfTexInitializeLists(void) {

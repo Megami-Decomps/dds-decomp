@@ -92,7 +92,7 @@ typedef struct MdlNode {
 
 extern u32 D_003C86B4[][2];
 
-extern void func_003341B8(void *arg);
+extern void sdfDestroyMotion(void *arg);
 
 /* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
 typedef struct Hdr8 {
@@ -136,7 +136,7 @@ extern u64 func_002C8110();
 extern void func_002C7D00();
 extern void mdlExecuteAndFreeJob(void *job);
 
-void func_00231A80(s32 arg0, MdlLoadCmd *cmd) {
+void mdlFinishLoadCmd(s32 arg0, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(arg0);
     cmd->size = func_00344010(func_002C8110(arg0));
     func_002C7D00(arg0);
@@ -153,7 +153,7 @@ typedef struct MdlLoadJob {
     u32 handle;    /* 0x1C */
 } MdlLoadJob;
 
-void func_00231AF8(s32 arg0, MdlLoadJob *job) {
+void mdlFinishLoadJob(s32 arg0, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(arg0);
     job->sizeWord = func_00344098(func_002C8110(arg0));
     func_002C7D00(arg0);
@@ -230,7 +230,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     u32 *next;
 
     while (inner->list != NULL) {
-        func_003341B8(inner->list);
+        sdfDestroyMotion(inner->list);
     }
     sdfResourceListRelease(inner->resourceHandle, 1);
     for (node = ctx->list14; node != NULL; node = next) {
@@ -454,7 +454,7 @@ void func_00232C18(MdlCtx *ctx, f32 amount) {
 }
 
 /* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
-void func_00232C70(MdlCtx *ctx, void *point)
+void mdlProjectPointVU(MdlCtx *ctx, void *point)
 {
     VU0_LOAD_MATRIX(D_003846F0);
     func_00336C10(D_0037F610);
@@ -475,7 +475,7 @@ void func_00232C70(MdlCtx *ctx, void *point)
 }
 
 /* Project `count` points through the model's scaled matrix and the camera. */
-void func_00232D40(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
+void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
 {
     s32 i;
 
