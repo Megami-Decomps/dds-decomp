@@ -77,13 +77,27 @@ struct BattleUnit {
     u8 pad118[8];
     u8 stats[4]; /* +0x120: shared HP/MP/status accessor base */
     u16 mode;
-    u8 pad126[8];
+    u8 pad126[4];
+    u16 actionGate; /* 0x12A: zero required by func_00214658 */
+    u8 pad12C[2];
     u16 conditionFlags;
-    u8 pad130[0x210];
+    u8 pad130[4];
+    u32 actionCode; /* 0x134 */
+    u8 pad138[4];
+    s32 actionTimer; /* 0x13C */
+    u8 pad140[0x200];
     BattleNamedResource *namedResource;
     u8 pad344[0x20];
     BattleUnit *nextActor;
 };
+
+/* Same action-state link layout used by code_0021EE10.c. */
+typedef struct ActionStateLink {
+    u8 pad00[0x18];
+    u32 owner; /* 0x18: BattleUnit address */
+    u8 pad1C[0x44];
+    u32 targetHandle; /* 0x60 */
+} ActionStateLink;
 
 extern BattleCtx **D_00436CB8;
 
@@ -400,10 +414,10 @@ s32 func_002125B0(s32 unused, u32 limit) {
 }
 
 u8 func_00212620(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_001B2CC0();
-    return temp_v0 != 0;
+    result = func_001B2CC0();
+    return result != 0;
 }
 
 s32 btlValidateItemStillAvailable(s32 item) {
@@ -537,9 +551,9 @@ s32 func_00212E60(s32 battler) {
 }
 
 s32 func_00212F20(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if (((*(u64 *)&battler->flags) & 0x221) == 0x201 &&
             func_00212B38(battler, arg)) {
             return 1;
         }
@@ -548,9 +562,9 @@ s32 func_00212F20(s32 unused, s32 arg) {
 }
 
 s32 func_00212FA0(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
             func_00212B38(battler, arg)) {
             return 1;
         }
@@ -559,24 +573,24 @@ s32 func_00212FA0(s32 unused, s32 arg) {
 }
 
 u8 func_00213020(u32 arg0, u32 arg1) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_00212CB8(arg0, arg1, 0);
-    return temp_v0 != 0;
+    result = func_00212CB8(arg0, arg1, 0);
+    return result != 0;
 }
 
 u8 func_00213040(u32 arg0, u32 arg1) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_00212CB8(arg0, arg1, 1);
-    return temp_v0 != 0;
+    result = func_00212CB8(arg0, arg1, 1);
+    return result != 0;
 }
 
 s32 func_00213060(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            func_00212CB8(battler, arg, 0)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            func_00212CB8((s32)battler, arg, 0)) {
             return 1;
         }
     }
@@ -584,10 +598,10 @@ s32 func_00213060(s32 unused, s32 arg) {
 }
 
 s32 func_002130E8(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            func_00212CB8(battler, arg, 1)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            func_00212CB8((s32)battler, arg, 1)) {
             return 1;
         }
     }
@@ -595,10 +609,10 @@ s32 func_002130E8(s32 unused, s32 arg) {
 }
 
 s32 func_00213170(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            func_00212CB8(battler, arg, 0)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            func_00212CB8((s32)battler, arg, 0)) {
             return 1;
         }
     }
@@ -606,10 +620,10 @@ s32 func_00213170(s32 unused, s32 arg) {
 }
 
 s32 func_002131F8(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            func_00212CB8(battler, arg, 1)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            func_00212CB8((s32)battler, arg, 1)) {
             return 1;
         }
     }
@@ -617,10 +631,10 @@ s32 func_002131F8(s32 unused, s32 arg) {
 }
 
 s32 func_00213280(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            func_00212CB8(battler, arg, 0) == 0) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            func_00212CB8((s32)battler, arg, 0) == 0) {
             return 1;
         }
     }
@@ -628,10 +642,10 @@ s32 func_00213280(s32 unused, s32 arg) {
 }
 
 s32 func_00213308(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            func_00212CB8(battler, arg, 0) == 0) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            func_00212CB8((s32)battler, arg, 0) == 0) {
             return 1;
         }
     }
@@ -639,10 +653,10 @@ s32 func_00213308(s32 unused, s32 arg) {
 }
 
 s32 func_00213390(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            !(*(u32 *)(battler + 0x110) & 0x1000)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            !(battler->flags & 0x1000)) {
             return 1;
         }
     }
@@ -650,10 +664,10 @@ s32 func_00213390(void) {
 }
 
 u8 func_002133F8(u32 arg0) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_00212B38(arg0, 10);
-    return temp_v0 != 0;
+    result = func_00212B38(arg0, 10);
+    return result != 0;
 }
 
 s32 func_00213418(void) {
@@ -753,10 +767,10 @@ s32 func_002136D8(s32 battler, u32 limit) {
 }
 
 u8 func_00213728(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_001B33C8();
-    return temp_v0 != 0;
+    result = func_001B33C8();
+    return result != 0;
 }
 
 s32 func_00213748(u8 *unit) {
@@ -788,17 +802,17 @@ s32 func_00213900(s32 arg0) {
 }
 
 u8 func_00213910(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_001ABB10();
-    return temp_v0 == 0;
+    result = func_001ABB10();
+    return result == 0;
 }
 
 u8 func_00213930(void) {
-    s64 temp_v0;
+    s64 result;
 
-    temp_v0 = func_001B2D38();
-    return temp_v0 != 0;
+    result = func_001B2D38();
+    return result != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", btlElementToBitIndex);
@@ -832,10 +846,10 @@ s32 func_00213A58(void *unit, s32 mask) {
 }
 
 s32 func_00213B38(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x401) == 0x401 &&
-            func_00213A58((void *)battler, arg)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x401) == 0x401 &&
+            func_00213A58(battler, arg)) {
             return 1;
         }
     }
@@ -843,9 +857,9 @@ s32 func_00213B38(s32 unused, s32 arg) {
 }
 
 s32 func_00213BB8(s32 unused, s32 mask) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x201) == 0x201 &&
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x201) == 0x201 &&
             func_00213A58(battler, mask)) {
             return 1;
         }
@@ -854,10 +868,10 @@ s32 func_00213BB8(s32 unused, s32 mask) {
 }
 
 s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 mode) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            *(u16 *)(battler + 0x124) != mode) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            battler->mode != mode) {
             return 1;
         }
     }
@@ -865,18 +879,18 @@ s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 mode) {
 }
 
 s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
-    s32 battler;
+    BattleUnit *battler;
     s32 resolvedSelection;
     if (selection != 0) {
         resolvedSelection = selection;
     } else {
-        resolvedSelection = *(u16 *)(actor + 0x124);
+        resolvedSelection = ((BattleUnit *)actor)->mode;
     }
-    battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            *(u16 *)(battler + 0x124) != resolvedSelection &&
-            *(u64 *)(battler + 0x108) != *(u64 *)(actor + 0x108)) {
+    battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            battler->mode != resolvedSelection &&
+            battler->unitId != ((BattleUnit *)actor)->unitId) {
             return 1;
         }
     }
@@ -884,8 +898,8 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
 }
 
 s32 battleAnyUnitPassesCheck200(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x200) == 0) {
             return 1;
         }
@@ -894,8 +908,8 @@ s32 battleAnyUnitPassesCheck200(s32 unused, s32 action) {
 }
 
 s32 func_00213DA0(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x200) == 1) {
             return 0;
         }
@@ -904,8 +918,8 @@ s32 func_00213DA0(s32 unused, s32 action) {
 }
 
 s32 battleAnyUnitPassesCheck400(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x400) == 0) {
             return 1;
         }
@@ -914,8 +928,8 @@ s32 battleAnyUnitPassesCheck400(s32 unused, s32 action) {
 }
 
 s32 func_00213E80(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x400) == 1) {
             return 0;
         }
@@ -979,10 +993,10 @@ s64 btlAnyGroup400HasAction(void) {
 }
 
 s32 func_002141A8(s32 unused, s32 arg) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            func_00213F58(arg, *(s16 *)(battler + 0x2d0), 0)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            func_00213F58(arg, *(s16 *)((u8 *)battler + 0x2d0), 0)) {
             return 1;
         }
     }
@@ -1003,10 +1017,10 @@ s32 func_00214230(s32 unused, s32 battler) {
 }
 
 s32 func_002142C0(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            func_00212E60(battler)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            func_00212E60((s32)battler)) {
             return 1;
         }
     }
@@ -1014,10 +1028,10 @@ s32 func_002142C0(void) {
 }
 
 s32 func_00214330(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x421) == 0x401 &&
-            func_00212E60(battler)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x421) == 0x401 &&
+            func_00212E60((s32)battler)) {
             return 1;
         }
     }
@@ -1083,25 +1097,25 @@ s32 btlHasUnitWithStatusBit(s32 battler, s32 scanAll) {
 }
 
 s32 btlAreUnitsMissingStatusFlag(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
     while (battler != 0) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            (*(u32 *)(battler + 0x110) & 0x1000) != 0) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            (battler->flags & 0x1000) != 0) {
             return 0;
         }
-        battler = *(s32 *)(battler + 0x364);
+        battler = battler->nextActor;
     }
     return 1;
 }
 
 s32 btlAreUnitsHoldingStatusFlag(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
     while (battler != 0) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            (*(u32 *)(battler + 0x110) & 0x1000) == 0) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            (battler->flags & 0x1000) == 0) {
             return 0;
         }
-        battler = *(s32 *)(battler + 0x364);
+        battler = battler->nextActor;
     }
     return 1;
 }
@@ -1111,9 +1125,9 @@ s32 func_002145E0(void) {
 }
 
 s32 func_002145F0(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if (btlUnitBlocksElementQuery(battler, action, 0x200)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if (btlUnitBlocksElementQuery((s32)battler, action, 0x200)) {
             return 1;
         }
     }
@@ -1121,10 +1135,10 @@ s32 func_002145F0(s32 unused, s32 action) {
 }
 
 s32 func_00214658(void) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
-        if ((*(u64 *)(battler + 0x110) & 0x221) == 0x201 &&
-            *(u16 *)(battler + 0x12a) == 0) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
+        if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
+            battler->actionGate == 0) {
             return 1;
         }
     }
@@ -1177,7 +1191,7 @@ s64 func_00214928(void) {
 }
 
 s32 func_00214948(u8 *unit, s32 action, u32 mask) {
-    u32 flags = *(u32 *)(unit + 0x110);
+    u32 flags = ((BattleUnit *)unit)->flags;
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
@@ -1210,8 +1224,8 @@ s32 func_00214948(u8 *unit, s32 action, u32 mask) {
 }
 
 s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x200) == 0) {
             return 0;
         }
@@ -1220,8 +1234,8 @@ s32 battleAllUnitsPassCheck200(s32 unused, s32 action) {
 }
 
 s32 battleAllUnitsPassCheck400(s32 unused, s32 action) {
-    s32 battler = *(s32 *)(func_001AA6F8() + 0x24c);
-    for (; battler != 0; battler = *(s32 *)(battler + 0x364)) {
+    BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
+    for (; battler != 0; battler = battler->nextActor) {
         if (func_00214948((u8 *)battler, action, 0x400) == 0) {
             return 0;
         }
@@ -1241,7 +1255,7 @@ s32 func_00214B60(void *unit) {
 
 s32 btlActionMatchesUnit(s32 unit, s32 action) {
     if ((*D_00436CB8)->action == action) {
-        if (*(u32 *)(unit + 0x114) & 0x1000) {
+        if (((BattleUnit *)unit)->stateFlags & 0x1000) {
             return 1;
         }
     }
@@ -1265,15 +1279,15 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00214DF8);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00215118);
 
 u64 func_00215268(u64 arg0, u32 *arg1, u32 *arg2) {
-    u32 temp_v0;
-    u64 temp_v1;
+    u32 value;
+    u64 indexList;
 
-    temp_v1 = btlAllocateIndexList(0xd);
-    temp_v0 = func_001AC360(arg0, temp_v1, 0);
-    *arg1 = temp_v0;
-    temp_v0 = func_001E8058(temp_v1);
-    *arg2 = temp_v0;
-    return temp_v1;
+    indexList = btlAllocateIndexList(0xd);
+    value = func_001AC360(arg0, indexList, 0);
+    *arg1 = value;
+    value = func_001E8058(indexList);
+    *arg2 = value;
+    return indexList;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_00419BE0);
@@ -1352,10 +1366,10 @@ u32 func_00216E98(s32 arg0) {
 }
 
 u32 func_00216ED0(s32 arg0) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = func_00219318();
-    func_001E8030(*(u32 *)(arg0 + 0x60), temp_v0);
+    value = func_00219318();
+    func_001E8030(*(u32 *)(arg0 + 0x60), value);
     return 1;
 }
 
@@ -1412,15 +1426,15 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00217DC8);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00217EB8);
 
 u32 func_00217FE8(void) {
-    s32 temp_v0;
-    u32 temp_v1;
+    s32 battle;
+    u32 value;
 
-    temp_v0 = func_001AA6F8();
-    temp_v1 = 0;
-    if (**(s8 **)(temp_v0 + 0x718) == '\0') {
-        temp_v1 = 100;
+    battle = func_001AA6F8();
+    value = 0;
+    if (**(s8 **)(battle + 0x718) == '\0') {
+        value = 100;
     }
-    return temp_v1;
+    return value;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218018);
@@ -1466,10 +1480,10 @@ s32 func_00218150(void) {
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002181E8);
 
 void func_00218250(void) {
-    s32 temp_v0;
+    s32 battle;
 
-    temp_v0 = func_001AA6F8();
-    **(u32 **)(temp_v0 + 0x718) = 0;
+    battle = func_001AA6F8();
+    **(u32 **)(battle + 0x718) = 0;
 }
 
 s64 func_00218278(s32 battler, s32 task) {
@@ -1861,15 +1875,15 @@ s32 func_00219950(u8 *unit) {
 }
 
 s32 func_002199C8(s32 object) {
-    s32 state = *(s32 *)(object + 0x114);
-    if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x200) != 0 &&
-        func_001E8058(*(s32 *)(state + 0x60)) == 1) {
-        s32 owner = func_001E8060(*(s32 *)(state + 0x60), 0);
-        if ((*(u32 *)(owner + 0x110) & 0x400) != 0) {
-            if ((*(u32 *)(*(s32 *)(state + 0x18) + 0x110) & 0x1000) == 0) {
+    s32 state = ((BattleUnit *)object)->stateFlags;
+    if ((((BattleUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0 &&
+        func_001E8058(((ActionStateLink *)state)->targetHandle) == 1) {
+        s32 owner = func_001E8060(((ActionStateLink *)state)->targetHandle, 0);
+        if ((((BattleUnit *)owner)->flags & 0x400) != 0) {
+            if ((((BattleUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                 return 0;
             }
-            if (*(u16 *)(owner + 0x124) != 0x136) {
+            if (((BattleUnit *)owner)->mode != 0x136) {
                 return 0;
             }
             func_00217378(object, object);
@@ -1916,15 +1930,15 @@ extern void func_001E9890(void);
 extern void func_001EC868(s32, s32, f32);
 
 s32 btlAdvanceTimedActionState(s32 battler) {
-    if (*(u32 *)(battler + 0x134) != 0x10c) {
+    if (((BattleUnit *)battler)->actionCode != 0x10c) {
         return 0;
     }
     if (btlHasMarkedEntry14(battler, 0x10c) != 0) {
-        if (*(s32 *)(battler + 0x13c) >= 0x12) {
+        if (((BattleUnit *)battler)->actionTimer >= 0x12) {
             func_001E9890();
             func_001EC868(battler, battler, 0.0f);
         }
-        (*(s32 *)(battler + 0x13c))++;
+        ((BattleUnit *)battler)->actionTimer++;
     }
     return 1;
 }
@@ -2088,14 +2102,14 @@ s32 btlResolveBoundActionCode(s32 battler, s32 action) {
 }
 
 s32 btlMotionOffsetForActor(s32 actor, s32 base) {
-    u32 flags = *(u32 *)(actor + 0x110);
+    u32 flags = ((BattleUnit *)actor)->flags;
     if ((flags & 1) == 0) {
         return base;
     }
     if ((flags & 0x400) == 0) {
         return base;
     }
-    switch (*(u16 *)(actor + 0x124)) {
+    switch (((BattleUnit *)actor)->mode) {
     case 0x110:
         return base;
     case 0x111:
