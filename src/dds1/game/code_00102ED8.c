@@ -81,6 +81,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void func_00105010(void *, s32, s32);
 extern void sdfAppendPacket();
+extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern u32 kwlnTaskGetTimer(void);
 extern s32 effMiscRandMod(s32, s32);
 extern void func_00104068(s32, u8, s32);
@@ -180,9 +181,19 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001035F8);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001037C0);
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001038A0);
+void func_001038A0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 cw = 0xC0, ch = 0x60;
+    sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, 0xFEFFFF,
+                                           arg3 * cw + ch, arg4 * ch + 0x30,
+                                           0x60000000, 0x40806020));
+}
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103908);
+void func_00103908(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 cw = 0xC0, ch = 0x60;
+    sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, arg5,
+                                           arg3 * cw + ch, arg4 * ch + 0x30,
+                                           0x60000000, 0x40806020));
+}
 
 s32 kwlnDebugPulseColors(void) {
     if (kwlnTaskGetTimer() % 0x4650 == 0) {

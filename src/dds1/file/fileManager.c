@@ -24,7 +24,7 @@ typedef struct FileRequest {
     u16 unk68;
 } FileRequest;
 
-extern s32 func_00288BA8(u32);
+extern s32 func_00288BA8(FileRequest *file);
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002887A0);
 
@@ -37,7 +37,15 @@ void filePrependNode(FileWork *list, FileNode *node) {
     list->head = node;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288998);
+/* Unlink a node from the list threaded through +0x4. */
+void func_00288998(FileWork *list, FileNode *node) {
+    FileNode **link = &list->head;
+    FileNode *cur;
+    while ((cur = *link) != node) {
+        link = &cur->next;
+    }
+    *link = node->next;
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002889D8);
 
@@ -75,7 +83,19 @@ u32 func_00288BA0(FileWork *work) {
     return work->unk10;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288BA8);
+/* A request is ready once its state byte reaches 6, but only for mode 1. */
+s32 func_00288BA8(FileRequest *file) {
+    s32 result;
+
+    if (file->pad00 == 1) {
+        result = 0;
+        if (file->unk68 != 0) {
+            result = file->state == 6;
+        }
+        return result;
+    }
+    return file->state == 6;
+}
 
 s32 fileRequestIsReady(FileRequest *file) {
     s32 result = 0;
@@ -97,7 +117,23 @@ void func_00288C50(u32 id) {
     fileWaitReady(id);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288C68);
+/* Work area behind the fileMan task (see game/code_00288E70). */
+typedef struct FileManWork {
+    u8 pad00[8];
+    void *unk8;  /* 0x08 */
+    u8 pad0C[0xC];
+    u32 unk18;   /* 0x18 */
+} FileManWork;
+
+extern FileManWork D_003DC658;
+
+/* Spin until the file manager has no work left. */
+void func_00288C68(void) {
+    FileManWork *work = &D_003DC658;
+    while (work->unk8 != 0 || work->unk18 != 0) {
+        fileManUpdate();
+    }
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_00288CB8);
 

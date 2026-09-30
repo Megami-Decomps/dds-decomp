@@ -281,7 +281,16 @@ s32 func_002A47E8(s32 position) {
     return 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4870);
+s32 func_002A4870(s32 segment) {
+    s32 i = 0;
+    s32 total = 0;
+    s32 duration = func_002A4728();
+
+    while (i < segment + 1) {
+        total += func_002A46C8(i++);
+    }
+    return (total << 12) / duration;
+}
 
 void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     s32 segment = func_002A47E8(position);

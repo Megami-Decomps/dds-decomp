@@ -6,6 +6,10 @@ extern char D_003AFD80[]; /* "titleProc" */
 
 extern u32 D_003DA180[];
 
+extern u32 D_003DA1C0[];
+
+extern void func_002D0A10(s32);
+
 extern u32 D_003D9140[];
 
 extern u32 D_003BD8D0;
@@ -458,7 +462,16 @@ void func_0026A8A0(void) {
     SignalSema(D_003BD8D0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A900);
+/* Release the title stream request and reset the playback state. */
+void func_0026A900(void) {
+    if (D_003D9140[8] != 0) {
+        func_002D0A10(D_003D9140[8]);
+        D_003D9140[9] = 0;
+        D_003D9140[8] = 0;
+        D_003D9140[5] = 0;
+        D_003D9140[6] = (u32)D_003DA1C0;
+    }
+}
 
 void func_0026A950(void) {
     WaitSema(D_003BD8D0);

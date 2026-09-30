@@ -49,6 +49,27 @@ extern float func_002FA1C0(float);
 
 extern u32 D_003BD984;
 
+typedef struct MapRequestNode {
+    u32 value;
+    u32 argument1;
+    u32 argument2;
+    s32 active;
+    struct MapRequestNode *next;
+} MapRequestNode;
+
+typedef struct {
+    u8 pad00[8];
+    MapRequestNode *next; /* 0x08 */
+    u8 pad0C[8];
+    s16 interval;         /* 0x14 */
+    s16 elapsed;          /* 0x16 */
+    void (*callback)(void); /* 0x18 */
+} MapRequestState;
+
+extern MapRequestState *D_003BD988;
+
+extern MapRequestState *D_003BD98C;
+
 extern u32 D_003DFED0[];
 
 extern u32 D_003DFEE0[];
@@ -273,9 +294,28 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6948);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6EC8);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7000);
+extern MapRequestState *func_002C7A60(s16, s16);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7058);
+extern void func_002C7180(void);
+
+extern void func_002C7430(void);
+
+void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
+
+/* Allocate the two map request queues and install their dispatch callbacks. */
+void func_002C7000(void) {
+    D_003BD988 = func_002C7A60(0x14, 0xC);
+    D_003BD988->callback = func_002C7180;
+    fldSetMapRequestInterval(D_003BD988, 0);
+    D_003BD98C = func_002C7A60(0x14, 0x18);
+    D_003BD98C->callback = func_002C7430;
+}
+
+/* Release both map request queues. */
+s64 func_002C7058(void) {
+    func_002C7B38(D_003BD988);
+    return func_002C7B38(D_003BD98C);
+}
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7080);
 
@@ -301,22 +341,6 @@ s64 func_002C7B38(u32 *sprite) {
         return func_002D0A10(*sprite);
     }
 }
-
-typedef struct MapRequestNode {
-    u32 value;
-    u32 argument1;
-    u32 argument2;
-    s32 active;
-    struct MapRequestNode *next;
-} MapRequestNode;
-
-typedef struct {
-    u8 pad00[8];
-    MapRequestNode *next; /* 0x08 */
-    u8 pad0C[8];
-    s16 interval;         /* 0x14 */
-    s16 elapsed;          /* 0x16 */
-} MapRequestState;
 
 /* Dispatch one queued request per interval; inactive nodes are reused. */
 void fldAdvanceMapRequest(MapRequestState *state, u32 value, u32 argument1, u32 argument2) {
