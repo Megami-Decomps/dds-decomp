@@ -831,9 +831,18 @@ u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
     return blended[0];
 }
 
+/* Scalar interpolation state shared by the initialization routines below. */
+typedef struct BtlScalarRange {
+    f32 start;       /* 0x00 */
+    f32 end;         /* 0x04 */
+    f32 inverseSpan; /* 0x08 */
+    f32 zero;        /* 0x0C */
+    f32 target;      /* 0x10 */
+} BtlScalarRange;
+
 void func_002096B8(s32 arg0, f32 arg1) {
-    *(f32 *)(arg0 + 0) = arg1;
-    *(s32 *)(arg0 + 4) = 0;
+    ((BtlScalarRange *)arg0)->start = arg1;
+    ((BtlScalarRange *)arg0)->end = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
@@ -841,15 +850,15 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
 void func_00209720(s32 arg0, f32 arg1) {
     f32 temp_f0;
 
-    *(f32 *)(arg0 + 0xc) = 0.0f;
-    *(f32 *)(arg0 + 0) = arg1;
-    temp_f0 = *(f32 *)(arg0 + 0xc);
-    *(f32 *)(arg0 + 4) = arg1;
-    *(f32 *)(arg0 + 0x10) = temp_f0;
+    ((BtlScalarRange *)arg0)->zero = 0.0f;
+    ((BtlScalarRange *)arg0)->start = arg1;
+    temp_f0 = ((BtlScalarRange *)arg0)->zero;
+    ((BtlScalarRange *)arg0)->end = arg1;
+    ((BtlScalarRange *)arg0)->target = temp_f0;
     if (arg1 == temp_f0) {
         return;
     }
-    *(f32 *)(arg0 + 0x8) = 1.0f / (arg1 * arg1 * 0.25f);
+    ((BtlScalarRange *)arg0)->inverseSpan = 1.0f / (arg1 * arg1 * 0.25f);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209770);
@@ -2601,17 +2610,29 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
     func_00328E48(resource);
 }
 
+/* Header of the 0x38-byte resource-name record; trailing bytes hold the name. */
+typedef struct BtlResourceNameRecord {
+    s32 word00;     /* 0x00: initialized to 8 */
+    s32 word04;     /* 0x04: initialized to 8 */
+    u32 word08;     /* 0x08 */
+    s32 word0C;     /* 0x0C */
+    s32 nameLength; /* 0x10: length of text written at 0x21 */
+    u32 word14;     /* 0x14: initialized to 9 */
+    s32 word18;     /* 0x18 */
+    char name[0x1C]; /* 0x1C */
+} BtlResourceNameRecord;
+
 void func_0020DFB0(s32 arg0, s32 arg1, s32 arg2) {
-    *(s32 *)(arg0 + 0) = arg1;
-    *(s32 *)(arg0 + 4) = arg2;
+    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
+    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
 }
 
 u32 func_0020DFC0(s32 arg0) {
-    return *(u32 *)(arg0 + 0x14);
+    return ((BtlResourceNameRecord *)arg0)->word14;
 }
 
 u32 func_0020DFC8(s32 arg0) {
-    return *(u32 *)(arg0 + 8);
+    return ((BtlResourceNameRecord *)arg0)->word08;
 }
 
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *resource, char *output) {
@@ -2665,19 +2686,19 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *resource, s32 name) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
 
-s32 func_0020E300(s32 arg0) {
-    s32 temp_v0;
+s32 func_0020E300(s32 name) {
+    s32 recordAddress;
 
-    temp_v0 = (s32)func_00328D68(0x38);
-    *(s32 *)(temp_v0 + 0x14) = 9;
-    *(s32 *)(temp_v0 + 0) = 8;
-    *(s32 *)(temp_v0 + 4) = 8;
-    *(s32 *)(temp_v0 + 8) = 0;
-    *(s32 *)(temp_v0 + 0x10) = 0;
-    *(s32 *)(temp_v0 + 0xc) = 0;
-    *(s32 *)(temp_v0 + 0x18) = 0;
-    strcpy(temp_v0 + 0x1c, arg0);
-    return temp_v0;
+    recordAddress = (s32)func_00328D68(0x38);
+    ((BtlResourceNameRecord *)recordAddress)->word14 = 9;
+    ((BtlResourceNameRecord *)recordAddress)->word00 = 8;
+    ((BtlResourceNameRecord *)recordAddress)->word04 = 8;
+    ((BtlResourceNameRecord *)recordAddress)->word08 = 0;
+    ((BtlResourceNameRecord *)recordAddress)->nameLength = 0;
+    ((BtlResourceNameRecord *)recordAddress)->word0C = 0;
+    ((BtlResourceNameRecord *)recordAddress)->word18 = 0;
+    strcpy(recordAddress + 0x1c, name);
+    return recordAddress;
 }
 
 void func_0020E368(void) {
@@ -2687,17 +2708,17 @@ void func_0020E368(void) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
 void func_0020E7A0(s32 arg0, s32 arg1, s32 arg2) {
-    *(s32 *)(arg0 + 0) = arg1;
-    *(s32 *)(arg0 + 4) = arg2;
+    ((BtlResourceNameRecord *)arg0)->word00 = arg1;
+    ((BtlResourceNameRecord *)arg0)->word04 = arg2;
 }
 
 u32 func_0020E7B0(s32 arg0) {
-    return *(u32 *)(arg0 + 8);
+    return ((BtlResourceNameRecord *)arg0)->word08;
 }
 
 void func_0020E7B8(char *arg0, char *arg1) {
     strcpy(arg0 + 0x21, arg1);
-    *(s32 *)(arg0 + 0x10) = strlen(arg1);
+    ((BtlResourceNameRecord *)arg0)->nameLength = strlen(arg1);
 }
 
 void func_0020E7F8(s32 arg0, void *arg1) {

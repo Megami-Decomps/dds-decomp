@@ -233,7 +233,7 @@ extern void func_001DC760(void);
 void func_0020DB90(u8 *actor);
 
 s32 battleDispatchActionAnimation(u8 *unit) {
-    u16 flags = *(u16 *)((u8 *)D_003BAA60 + *(s32 *)(unit + 0x114) * 32 + 0x1c);
+    u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->unk_114 * 32 + 0x1c);
     if (flags & 0x4000) {
         func_001DC760();
         if (!(flags & 0x10)) {
@@ -244,7 +244,7 @@ s32 battleDispatchActionAnimation(u8 *unit) {
                            -203.0f, -46.1f, -1259.0f, -0.144f,
                            -0.066f, -0.003f, 0.978f, 45.0f, 30.0f);
         }
-        *(s32 *)(unit + 0x110) = 0;
+        ((BtlUnit *)unit)->flags = 0;
     } else if (flags & 0x8000) {
         func_001DC760();
         func_0020DC38(unit, unit, 0);
@@ -252,7 +252,7 @@ s32 battleDispatchActionAnimation(u8 *unit) {
         if (func_001DAE48(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
             func_001DC760();
             func_0020DB90(unit);
-            *(s32 *)(unit + 0x110) = 0;
+            ((BtlUnit *)unit)->flags = 0;
         } else {
             func_001DC760();
             func_0020DA40(unit);
@@ -655,10 +655,19 @@ s32 btlHasRestrictedUnit(void) {
     return 0;
 }
 
+typedef struct BtlListStatus {
+    u8 pad00[6];
+    u16 primaryCurrent;   /* 0x06 */
+    u16 primaryLimit;     /* 0x08 */
+    u16 secondaryCurrent; /* 0x0A */
+    u16 secondaryLimit;   /* 0x0C */
+    u16 flags;            /* 0x0E */
+} BtlListStatus;
+
 s32 btlListHasMarkedFlag(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) == 0x4000) {
+        if ((((BtlListStatus *)entries[i])->flags & 0x7fff) == 0x4000) {
             return 1;
         }
     }
@@ -668,7 +677,7 @@ s32 btlListHasMarkedFlag(u8 **entries, s32 count) {
 s32 btlListCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if (*(u16 *)(entries[i] + 6) < *(u16 *)(entries[i] + 8)) {
+        if (((BtlListStatus *)entries[i])->primaryCurrent < ((BtlListStatus *)entries[i])->primaryLimit) {
             return 0;
         }
     }
@@ -678,7 +687,7 @@ s32 btlListCountersWithinLimits(u8 **entries, s32 count) {
 s32 btlListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if (*(u16 *)(entries[i] + 0xa) < *(u16 *)(entries[i] + 0xc)) {
+        if (((BtlListStatus *)entries[i])->secondaryCurrent < ((BtlListStatus *)entries[i])->secondaryLimit) {
             return 0;
         }
     }
@@ -688,7 +697,7 @@ s32 btlListSecondaryCountersWithinLimits(u8 **entries, s32 count) {
 s32 btlListHasMatchingFlag(u8 **entries, s32 count, u32 flags) {
     s32 i;
     for (i = 0; i < count; i++) {
-        if ((*(u16 *)(entries[i] + 0xe) & 0x7fff) & flags) {
+        if ((((BtlListStatus *)entries[i])->flags & 0x7fff) & flags) {
             return 1;
         }
     }
@@ -955,7 +964,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_00211740);
 s32 btlGetEntryState(s32 kind, s32 value) {
     u8 *entry = (u8 *)btlFindModelEntry(kind, value);
     if (entry != 0) {
-        return *(s8 *)(entry + 0xc);
+        return ((BattleModelEntry *)entry)->state;
     }
     return 0;
 }
@@ -1497,8 +1506,15 @@ extern void func_001FB140(u8 *, u8 *, s32, s32, u32, u32);
 
 extern s32 func_00214490(u8 *, u8 *, s32, u8 *, s32);
 
+typedef struct BtlMenuSelection {
+    u8 pad00[4];
+    u32 selected; /* 0x04 */
+    u32 first;    /* 0x08 */
+    s32 count;    /* 0x0C */
+} BtlMenuSelection;
+
 s32 func_00214588(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
-    s32 offset = *(s32 *)(settings + 0xc) * 24 + 4;
+    s32 offset = ((BtlMenuSelection *)settings)->count * 24 + 4;
     func_001FB140(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
     return func_00214490(first, second, mode, settings, extra);
 }
@@ -1526,14 +1542,14 @@ s32 func_00214618(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
     u32 end;
     u32 selected;
     s32 rowY;
-    func_001FB140(x - 4, y - 4, mode, *(s32 *)(menu + 0xC) * 24 + 4, 0x80806020, 0x30000000);
+    func_001FB140(x - 4, y - 4, mode, ((BtlMenuSelection *)menu)->count * 24 + 4, 0x80806020, 0x30000000);
     handle = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(handle);
-    first = *(u32 *)(menu + 8);
-    count = *(u32 *)(menu + 0xC);
+    first = ((BtlMenuSelection *)menu)->first;
+    count = ((BtlMenuSelection *)menu)->count;
     end = first + count;
     index = first;
-    selected = *(u32 *)(menu + 4);
+    selected = ((BtlMenuSelection *)menu)->selected;
     if (index < end) {
         rowY = (s32)y * 8 + 0x7900;
         for (; index < end; index++) {

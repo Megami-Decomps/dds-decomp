@@ -1443,9 +1443,15 @@ void func_002B7790(u32 first, u32 second, u32 *menu) {
     menu[15] = second;
 }
 
+typedef struct MenuEffectResources {
+    MapPacket packet;      /* 0x00–0x3B */
+    u32 animationHandle;   /* 0x3C */
+} MenuEffectResources;
+
 void func_002B77A0(s32 arg0) {
-    func_003059E0(*(u32 *)(arg0 + 8), *(u32 *)(arg0 + 0x1c),
-                                *(u32 *)(arg0 + 0x3c), 0, 4);
+    func_003059E0(((MenuEffectResources *)arg0)->packet.unk_08,
+                   ((MenuEffectResources *)arg0)->packet.items[4],
+                   ((MenuEffectResources *)arg0)->animationHandle, 0, 4);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AD38);
@@ -1481,8 +1487,8 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 void mnuLoadEffectResources(u8 *effect) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, (MapPacket *)effect);
     func_002B7740((s32)D_003E7858, (s32)effect);
-    *(u32 *)(effect + 8) = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
-    *(u32 *)(effect + 0x3c) = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
+    ((MenuEffectResources *)effect)->packet.unk_08 = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
+    ((MenuEffectResources *)effect)->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     func_002B77A0((s32)effect);
 }
 
@@ -1509,7 +1515,7 @@ void mnuDestroyEffectResources(u8 *ctx) {
     for (i = 0; i < 1; i++) {
         func_003054E8(*(u32 *)(ctx + 8 + i * 4));
     }
-    effDestroyPackedBatch(*(u32 *)(ctx + 0x3c));
+    effDestroyPackedBatch(((MenuEffectResources *)ctx)->animationHandle);
 }
 
 typedef struct MenuSparkSet {
@@ -1947,14 +1953,24 @@ void func_002B95D0(u32 first, u32 *menu, u32 second, u32 third, u32 fourth) {
     menu[10] = fourth;
 }
 
+typedef struct MenuPanelBounds {
+    u8 pad00[4];
+    u32 flags;     /* 0x04 */
+    u8 pad08[0x74];
+    u32 left;      /* 0x7C */
+    u32 top;       /* 0x80 */
+    u32 right;     /* 0x84 */
+    u32 bottom;    /* 0x88 */
+} MenuPanelBounds;
+
 void func_002B95E8(u8 *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom) {
     memcpy(panel + 0x58, layout, 0x38);
-    *(u32 *)(panel + 0x7c) = left;
-    *(u32 *)(panel + 0x80) = top;
-    *(u32 *)(panel + 0x84) = right;
-    *(u32 *)(panel + 0x88) = bottom;
-    *(u32 *)(panel + 4) |= 4;
+    ((MenuPanelBounds *)panel)->left = left;
+    ((MenuPanelBounds *)panel)->top = top;
+    ((MenuPanelBounds *)panel)->right = right;
+    ((MenuPanelBounds *)panel)->bottom = bottom;
+    ((MenuPanelBounds *)panel)->flags |= 4;
 }
 
 void mnuCreateListWithDefaults(u8 *menu, u32 first, u32 second, u32 third, u32 fourth) {
@@ -2258,13 +2274,20 @@ void func_002BA7C0(u32 a0, u32 a1, u32 a2, s32 arg3, s32 arg4) {
     func_002BA7A8(a0, a1, a2, 0x100, arg3, 0, arg4);
 }
 
+typedef struct MenuGridHandles {
+    u32 kind; /* 0x00 */
+    u8 pad04[8];
+    s32 compact[2]; /* 0x0C–0x10 */
+    s32 expanded[4]; /* 0x14–0x20 */
+} MenuGridHandles;
+
 void func_002BA7E8(u32 obj) {
-    switch (*(u32 *)obj) {
+    switch (((MenuGridHandles *)obj)->kind) {
     case 4:
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x14), 0);
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x18), 0);
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x1C), 0);
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x20), 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->expanded[0], 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->expanded[1], 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->expanded[2], 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->expanded[3], 0);
         return;
     case 0:
     case 1:
@@ -2272,8 +2295,8 @@ void func_002BA7E8(u32 obj) {
     case 3:
         break;
     case 5:
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0xC), 0);
-        itfGridLookupValueOrDefault(*(s32 *)(obj + 0x10), 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->compact[0], 0);
+        itfGridLookupValueOrDefault(((MenuGridHandles *)obj)->compact[1], 0);
         break;
     }
 }
@@ -2517,20 +2540,28 @@ void mnuUpdateFade(s32 *list) {
     }
 }
 
+typedef struct MenuFadeFields {
+    u8 pad00[0xB4];
+    u32 initial; /* 0xB4 */
+    u32 opacity; /* 0xB8 */
+    u32 offset;  /* 0xBC */
+    u32 step;    /* 0xC0 */
+} MenuFadeFields;
+
 void func_002BAF10(u8 *menu) {
     memset(menu, 0, 0x98);
-    *(u32 *)(menu + 0xb4) = 0;
-    *(u32 *)(menu + 0xb8) = 0x200;
-    *(u32 *)(menu + 0xbc) = 0;
-    *(u32 *)(menu + 0xc0) = 0;
+    ((MenuFadeFields *)menu)->initial = 0;
+    ((MenuFadeFields *)menu)->opacity = 0x200;
+    ((MenuFadeFields *)menu)->offset = 0;
+    ((MenuFadeFields *)menu)->step = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BAF50);
 
 void func_002BB0D0(u8 *menu) {
-    *(u32 *)(menu + 0xbc) = 0;
-    *(u32 *)(menu + 0xb8) = 0x200;
-    *(u32 *)(menu + 0xc0) = 0;
+    ((MenuFadeFields *)menu)->offset = 0;
+    ((MenuFadeFields *)menu)->opacity = 0x200;
+    ((MenuFadeFields *)menu)->step = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB0E8);
@@ -2603,15 +2634,26 @@ void func_002BB418(u32 arg0) {
     func_00328E48(arg0);
 }
 
-void func_002BB440(s32 arg0) {
-    s32 temp_v0;
+typedef struct MenuSlotResourceState {
+    u8 pad00[0x2C];
+    s32 activeHandle;  /* 0x2C */
+    u32 activeValue;   /* 0x30 */
+    s32 pendingHandle; /* 0x34 */
+    u32 pendingValue;  /* 0x38 */
+    u8 pad3C[8];
+    u32 settings;      /* 0x44 */
+} MenuSlotResourceState;
 
-    temp_v0 = *(s32 *)(arg0 + 0x34);
-    *(s32 *)(arg0 + 0x2c) = temp_v0;
-    *(u32 *)(arg0 + 0x30) = *(u32 *)(arg0 + 0x38);
-    *(u32 *)(arg0 + 0x34) = 0;
-    if (temp_v0 != 0) {
-        effConfigureWithDefaultSetting(temp_v0, *(u32 *)(arg0 + 0x38), *(u32 *)(arg0 + 0x44), 0, 10, 2);
+void func_002BB440(s32 context) {
+    s32 pendingHandle;
+
+    pendingHandle = ((MenuSlotResourceState *)context)->pendingHandle;
+    ((MenuSlotResourceState *)context)->activeHandle = pendingHandle;
+    ((MenuSlotResourceState *)context)->activeValue = ((MenuSlotResourceState *)context)->pendingValue;
+    ((MenuSlotResourceState *)context)->pendingHandle = 0;
+    if (pendingHandle != 0) {
+        effConfigureWithDefaultSetting(pendingHandle, ((MenuSlotResourceState *)context)->pendingValue,
+                                       ((MenuSlotResourceState *)context)->settings, 0, 10, 2);
         return;
     }
 }
@@ -2625,7 +2667,7 @@ void func_002BB498(u32 *menu, u32 model, u32 value, u32 color) {
 }
 
 u8 func_002BB500(s32 arg0) {
-    return *(s32 *)(arg0 + 0x2c) != 0;
+    return ((MenuSlotResourceState *)arg0)->activeHandle != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002BB510);
@@ -2677,13 +2719,22 @@ void func_002BB8D8(s32 arg0) {
     } while (temp_v1 < 5);
 }
 
+typedef struct MenuPartySlotValues {
+    u8 pad00[0x60];
+    u32 mainScale; /* 0x60 */
+    u32 mainFade;  /* 0x64 */
+    u8 pad68[0x48];
+    u32 backScale; /* 0xB0 */
+    u32 backFade;  /* 0xB4 */
+} MenuPartySlotValues;
+
 void func_002BB998(u8 *menu, s32 index, u32 unused, u32 preserve) {
     u8 *entry = menu + index * 0x2138 + 0x78;
-    *(u32 *)(entry + 0x64) = 0;
-    *(u32 *)(entry + 0xb4) = 0;
+    ((MenuPartySlotValues *)entry)->mainFade = 0;
+    ((MenuPartySlotValues *)entry)->backFade = 0;
     if (preserve == 0) {
-        *(u32 *)(entry + 0x60) = 0x100;
-        *(u32 *)(entry + 0xb0) = 0x100;
+        ((MenuPartySlotValues *)entry)->mainScale = 0x100;
+        ((MenuPartySlotValues *)entry)->backScale = 0x100;
     }
 }
 
