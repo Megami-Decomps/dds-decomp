@@ -7,8 +7,9 @@ typedef struct SdfTexHead {
     void *unk8; /* 0x8 */
     void *unkC; /* 0xC */
     s32 unk10; /* 0x10 */
-    void *unk14; /* 0x14 */
-    void *unk18; /* 0x18 */
+    s16 width; /* 0x14 */
+    s16 height; /* 0x16 */
+    s32 format; /* 0x18 */
 } SdfTexHead;
 
 extern SdfTexHead *D_003BD9E4;
@@ -25,6 +26,7 @@ extern u32 D_003BD2F8;
 
 void *func_002CFEB8(s32 size);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
+struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
 void func_002D1B90(void *arg0);
 void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
@@ -81,9 +83,54 @@ void sdfWaitAndSelectBuffer(void) {
     func_002E1218();
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D16F0);
+s32 func_002D16F0(u32 format) {
+    switch (format) {
+    case 0x0:
+    case 0x1:
+    case 0x1B:
+    case 0x24:
+    case 0x2C:
+    case 0x30:
+    case 0x31:
+        return 0x20;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        return 0x10;
+    case 0x13:
+        return 8;
+    case 0x14:
+        return 4;
+    default:
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1740);
+s32 func_002D1740(u32 format) {
+    switch (format) {
+    case 0x0:
+    case 0x30:
+        return 0x20;
+    case 0x1:
+    case 0x31:
+        return 0x18;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        return 0x10;
+    case 0x13:
+    case 0x1B:
+        return 8;
+    case 0x14:
+    case 0x24:
+    case 0x2C:
+        return 4;
+    default:
+        return 0;
+    }
+}
 
 s32 sdfTexListContains(SdfTex *target) {
     SdfTex *node = (SdfTex *)D_003BD9E0;
@@ -130,7 +177,30 @@ void sdfTexInitializeLists(void) {
     sdfInitializeSynchronizedRequest(&D_003BD9E8, func_002D1B90);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1C70);
+SdfTexHead *func_002D1C70(s32 width, s32 height, s32 format) {
+    s32 alignedWidth = (width + 0x3F) & -0x40;
+    s32 alignedHeight = (height + 0x1F) & -0x20;
+    SdfTexHead *node;
+
+    switch (format) {
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        alignedWidth >>= 1;
+        break;
+    case 0x0:
+    case 0x1:
+    case 0x30:
+    case 0x31:
+        break;
+    }
+    node = func_002D17D8((alignedWidth * alignedHeight + 0x7FF) & -0x800, 1);
+    node->width = width;
+    node->height = height;
+    node->format = format;
+    return node;
+}
 
 SdfTexHead *func_002D1D10(void) {
     return D_003BD9E0;
@@ -140,7 +210,35 @@ SdfTexHead *func_002D1D18(void) {
     return D_003BD9E4;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D20);
+s32 func_002D1D20(u32 format, s32 width, s32 height) {
+    s32 bits;
+
+    switch (format) {
+    case 0x1:
+    case 0x31:
+        bits = 0x18;
+        break;
+    case 0x2:
+    case 0xA:
+    case 0x32:
+    case 0x3A:
+        bits = 0x10;
+        break;
+    case 0x13:
+    case 0x1B:
+        bits = 8;
+        break;
+    case 0x14:
+    case 0x24:
+    case 0x2C:
+        bits = 4;
+        break;
+    default:
+        bits = 0x20;
+        break;
+    }
+    return (bits * width * height) >> 7;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
 
@@ -221,7 +319,22 @@ u32 sdfTexGetPrimaryResourceWord(SdfTex *texture) {
     return texture->primaryResource->word;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D23C0);
+s32 func_002D23C0(u32 format) {
+    switch (format) {
+    case 0:
+        return 0x20;
+    case 1:
+        return 0x18;
+    case 2:
+    case 10:
+        return 0x10;
+    case 19:
+    case 27:
+        return 8;
+    default:
+        return 4;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2410);
 

@@ -35,6 +35,10 @@ extern MapResource D_003906F0;
 
 extern MapResource D_00390700;
 
+extern s32 fldLoadMapResource(const char *, MapResource *);
+
+extern s32 func_003014F0(char *, const char *, ...);
+
 extern u32 fldReleaseMapResource(s32 *);
 
 extern u32 func_002EB028(const char *, void *, s32);
@@ -211,7 +215,21 @@ s32 func_002C60F8(MapSelectionContext *context) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C62D8);
+/* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
+s32 func_002C62D8(void) {
+    char name[32];
+    s32 i;
+    MapResource *item = D_00390710;
+
+    for (i = 0; i < 10; i++) {
+        func_003014F0(name, "/lmap/sname_%02d.tmx", i + 1);
+        fldLoadMapResource(name, item);
+        item++;
+    }
+    fldLoadMapResource("/lmap/1006.tmx", &D_003906F0);
+    fldLoadMapResource("/lmap/l_map00.tmx", &D_00390700);
+    return 1;
+}
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;

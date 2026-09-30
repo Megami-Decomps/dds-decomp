@@ -46,6 +46,10 @@ extern s32 (*D_00360D10[])(s32, u32);
 extern s32 btlWaitEffectTask();
 extern void func_001FDA78();
 extern void func_001FE820();
+extern s32 func_001ADB30();
+extern void func_001ADB78(s32, s32);
+extern void func_0019C590(s32, s32, s32, s32);
+extern void func_003003F0(const char *fmt, ...);
 extern s8 D_00324510[];
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC7D8);
 
@@ -224,9 +228,35 @@ BtlEffObj *btlCreateEffObjA(BtlEffOwner *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE3B8);
+typedef struct BtlJyokyoOwner {
+    u8 pad00[0x120];
+    u16 flags;       /* 0x120 */
+    u8 pad122[2];
+    u16 unk124;      /* 0x124 */
+} BtlJyokyoOwner;
 
-extern void func_001FE3B8();
+typedef struct BtlJyokyoState {
+    u8 pad00[0x498];
+    s32 id;          /* 0x498 */
+} BtlJyokyoState;
+
+s32 func_001FE3B8(BtlObjLink *link) {
+    BtlJyokyoState *state = (BtlJyokyoState *)func_001A17F0();
+    BtlJyokyoOwner *owner = link->owner;
+
+    if (link->unk8 == 0) {
+        if (owner != NULL) {
+            func_0019C590(state->id, 0, owner->unk124, (owner->flags & 0x20) ? 0xE : 0xF);
+        }
+        func_003003F0("JYOKYO ID : %d\n", state->id);
+        func_001ADB78(state->id, link->arg);
+    }
+    if (func_001ADB30() == 0 || (u32)link->unk8 >= 0x2D) {
+        return 1;
+    }
+    link->unk8++;
+    return 0;
+}
 
 BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
