@@ -633,6 +633,14 @@ List walks with a shared increment block (`b test; L: lw next; test: beqz node;
 (`u32 key = node->sortKey;` before the `flags & 1` test) so reorg fills the
 `bnez` slot with that load; otherwise both slots take a copy of the increment.
 
+A `b` into the middle of a loop that lands on a *call* in the body (one
+`jal work` for the first item and the rest, `nop` in its slot) is a written-out
+first iteration plus a priming-read `while`, merged by the final jump pass's
+cross-jump: `work(q, first, first); next = find(q, id); while (next) {
+work(q, next, first); next = find(q, id); }` (DDS2 `func_002D4CF0`/`E60`/`F10`
+and DDS1 twins). A call in the loop condition blocks `duplicate_loop_exit_test`
+and gives a `b` onto the `find` call instead.
+
 ### Tail call kept as `jal` + epilogue: loop notes
 
 Any loop construct around the last call leaves NOTE_INSN_LOOP notes and the call
