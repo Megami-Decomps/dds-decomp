@@ -601,7 +601,9 @@ u32 func_0027B368(u32 list) {
 struct MenuListNode {
     s32 index;
     s32 value;
-    u8 pad8[0x48];
+    u8 pad8[0x40];
+    u32 flags48;        /* 0x48 */
+    u8 pad4C[4];
     s32 animationTimer; /* 0x50: stepped down to zero while a list is visible */
     u8 pad54[4];
     struct MenuListNode *next;
@@ -795,9 +797,121 @@ s32 mnuRetreatListWindowStart(MenuList *list) {
     return (s32)cursor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BBF0);
+MenuListNode *func_0027BBF0(MenuList *list, s32 noScroll, s32 keepFade) {
+    s32 count = list->count;
+    MenuListNode *cursor = list->cursor;
+    MenuListNode *last;
+    MenuListNode *next;
+    s32 offset;
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027BD48);
+    if (count < 2) {
+        list->unk0 |= 2;
+    }
+    if (list->unk0 & 2) {
+        list->unk0 &= ~1;
+        return NULL;
+    }
+    if (count == 1) {
+        return cursor;
+    }
+    last = list->last;
+    if (cursor == last) {
+        mnuSelectFirstListNode(list);
+        mnuUpdateListScrollFlags(list);
+        cursor = list->cursor;
+    } else {
+        if (cursor == NULL) {
+            return NULL;
+        }
+        next = cursor->next;
+        if (next == NULL) {
+            return NULL;
+        }
+        if (keepFade == 0) {
+            cursor->animationTimer = 0x100;
+        }
+        offset = list->windowOffset;
+        cursor = next;
+        list->cursor = cursor;
+        list->windowOffset = offset + 1;
+        if (list->windowOffset >= list->visibleCount - 1) {
+            if (noScroll == 0) {
+                cursor = (MenuListNode *)mnuAdvanceListWindowStart(list);
+                last = list->last;
+            } else if (cursor != last) {
+                cursor = cursor->prev;
+                list->windowOffset = offset;
+                list->cursor = cursor;
+            }
+        }
+        if (cursor == last) {
+            list->unk0 |= 3;
+        }
+        if (cursor->next == last && (cursor->next->flags48 & 2)) {
+            list->unk0 |= 3;
+        }
+        mnuUpdateListScrollFlags(list);
+    }
+    return cursor;
+}
+
+MenuListNode *func_0027BD48(MenuList *list, s32 noScroll, s32 keepFade) {
+    s32 count = list->count;
+    MenuListNode *cursor = list->cursor;
+    MenuListNode *first;
+    MenuListNode *prev;
+    s32 offset;
+
+    if (count < 2) {
+        list->unk0 |= 2;
+    }
+    if (list->unk0 & 2) {
+        list->unk0 &= ~1;
+        return NULL;
+    }
+    if (count == 1) {
+        return cursor;
+    }
+    first = list->first;
+    if (cursor == first) {
+        mnuSelectLastListNode(list);
+        mnuUpdateListScrollFlags(list);
+        cursor = list->cursor;
+    } else {
+        if (cursor == NULL) {
+            return NULL;
+        }
+        prev = cursor->prev;
+        if (prev == NULL) {
+            return NULL;
+        }
+        if (keepFade == 0) {
+            cursor->animationTimer = 0x100;
+        }
+        offset = list->windowOffset;
+        cursor = prev;
+        list->cursor = cursor;
+        list->windowOffset = offset - 1;
+        if (list->windowOffset <= 0) {
+            if (noScroll == 0) {
+                cursor = (MenuListNode *)mnuRetreatListWindowStart(list);
+                first = list->first;
+            } else if (cursor != first) {
+                cursor = cursor->next;
+                list->windowOffset = offset;
+                list->cursor = cursor;
+            }
+        }
+        if (cursor == first) {
+            list->unk0 |= 3;
+        }
+        if (cursor->prev == first && (cursor->prev->flags48 & 2)) {
+            list->unk0 |= 3;
+        }
+        mnuUpdateListScrollFlags(list);
+    }
+    return cursor;
+}
 
 void func_0027BE90(u32 list) {
     func_0027BBF0(list, 0, 0);
@@ -1023,7 +1137,7 @@ void func_0027C6A0(s32 window) {
 }
 
 s32 mnuAdvanceListSelection(s32 window, s32 direction) {
-    s32 item = func_0027BBF0(((MenuWindowContainer *)window)->list, direction, 0);
+    s32 item = (s32)func_0027BBF0(((MenuWindowContainer *)window)->list, direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
         mnuClearEntryFlags(window + 0x4c);
@@ -1032,7 +1146,7 @@ s32 mnuAdvanceListSelection(s32 window, s32 direction) {
 }
 
 s32 mnuReverseListSelection(s32 window, s32 direction) {
-    s32 item = func_0027BD48(((MenuWindowContainer *)window)->list, direction, 0);
+    s32 item = (s32)func_0027BD48(((MenuWindowContainer *)window)->list, direction, 0);
     if (item != 0) {
         *(u8 *)(item + 0x54) = 0;
         mnuClearEntryFlags(window + 0x4c);
