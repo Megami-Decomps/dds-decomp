@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     f32 unk0[4];
@@ -19,10 +21,16 @@ typedef struct {
     LightData *data;
 } LightObject;
 
+typedef struct LightSlotDesc {
+    void *points;
+    s32 unk4;
+    s32 unk8;
+} LightSlotDesc;
+
 void effObjFreeInner(void *arg);
 void func_00111840(s32 arg);
 void func_002CFF98(void *arg);
-void func_002E1938(void *arg0, void *arg1);
+void func_002E1938(void *arg0, LightSlotDesc *desc, f32 *color);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *D_00324780[];
