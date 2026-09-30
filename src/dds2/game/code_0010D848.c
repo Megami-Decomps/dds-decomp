@@ -25,6 +25,8 @@ extern ScriptState *D_00438E8C;
 
 extern u64 scrReadIntParameter(u64);
 
+extern s8 D_0040B7D9[];
+
 extern u64 mdlFlagTest(u64);
 
 u32 scrGetProcedureAddress(s32 index) {
@@ -55,13 +57,23 @@ u32 scrGetWindow(void) {
     return D_00438E8C->window;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8C8);
+s32 func_0010D8C8(void) {
+    return (s32)D_00438E8C;
+}
 
 u32 func_0010D8D0(void) {
     return D_00438E8C->unkF0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010D848", func_0010D8E0);
+s32 func_0010D8E0(void) {
+    if (scrGetCommandTimer() == 0) {
+        return 0;
+    }
+    if (D_0040B7D9[0] < 0) {
+        return 1;
+    }
+    return 0;
+}
 
 /* Evaluate a script-supplied model flag and push the test result. */
 u32 scrOpcodeTestModelFlag(void) {

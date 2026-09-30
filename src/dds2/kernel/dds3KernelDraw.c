@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 D_0037F770[4];
 
@@ -215,7 +216,9 @@ extern void func_00196FE8(void);
 
 extern u128 D_0037F780;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyRow128);
+void kwlnDrawCopyRow128(u128 *row) {
+    PCP_COPY_VECTOR(&D_0037F780, row);
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyWords20);
 

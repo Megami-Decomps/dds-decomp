@@ -240,7 +240,9 @@ void evtClearSolarOverlayControl(void) {
     ((SolarWorldState *)D_00435DD0)->overlayFlag = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243320);
+void func_00243320(void) {
+    ((SolarWorldState *)D_00435DD0)->unkA4C = 0;
+}
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {

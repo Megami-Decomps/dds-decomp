@@ -16,10 +16,15 @@ u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341650);
 
-void func_003417A0(void) {
+void func_003417A0(u32 unused) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00341650", func_003417A8);
+u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size) {
+    u32 result = func_00341650(command, channel, packet, size);
+
+    func_003417A0(result);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_003417E0);
 

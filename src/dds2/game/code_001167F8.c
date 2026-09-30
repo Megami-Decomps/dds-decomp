@@ -25,6 +25,8 @@ extern ActionObj *func_00110AA8();
 
 extern void dds3EnsureSlotData();
 
+extern void *func_00328D68(s32 size);
+
 u32 func_001167F8(void) {
     return 1;
 }
@@ -63,4 +65,9 @@ INCLUDE_ASM(const s32, "game/code_001167F8", func_00116978);
 
 INCLUDE_ASM(const s32, "game/code_001167F8", func_00116A20);
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116A88);
+
+s32 func_00116A88(WorldUnitOwner *obj) {
+    obj->state = func_00328D68(0x1C);
+    memset(obj->state, 0, 0x1C);
+    return 1;
+}

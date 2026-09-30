@@ -31,6 +31,8 @@ extern u32 D_00435CBC;
 
 void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
 
+extern s32 D_0043722C;
+
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
 
 /* Seed both visual-value tables and cache the current raw solar phase. */
@@ -109,7 +111,9 @@ void evtStopTestTasks(void) {
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_002458B8);
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F80);
+void func_00245F80(void) {
+    D_0043722C = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245F88);
 

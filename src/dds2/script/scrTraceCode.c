@@ -103,7 +103,14 @@ u32 func_0010CA08(ScrData *scr) {
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", func_0010CAC0);
+u32 func_0010CAC0(ScrData *scr)
+{
+    if (scr->sp == 0) {
+        return 0;
+    }
+    scr->pc = bfStackPopInt(scr) + 1;
+    return 1;
+}
 
 u32 scrJumpProcedure(ScrData *scr) {
     scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;

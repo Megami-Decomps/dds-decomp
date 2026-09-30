@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 typedef struct EffectResourceWork {
@@ -49,7 +50,9 @@ INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FD90);
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FE18);
 
-INCLUDE_ASM(const s32, "game/code_0016EDD0", func_00171580);
+void func_00171580(void *dst, void *src) {
+    PCP_COPY_VECTOR(dst, src);
+}
 
 void func_00171590(s32 work, u32 value) {
     *(u32 *)(work + 0x54) = value;

@@ -101,9 +101,19 @@ void func_0029C808(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C810);
 
-INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C848);
+/* Row base plus a negative index: the fade field of one record far into the
+ * large status array addressed by the work pointer. */
+s32 func_0029C848(s32 *work) {
+    s32 *row = work + 0x4000;
 
-INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C860);
+    return row[-0x1248];
+}
+
+void func_0029C860(s32 *work) {
+    s32 *row = work + 0x4000;
+
+    row[-0x1248] = 0;
+}
 
 void func_0029C878(void) {
 }
