@@ -34,6 +34,7 @@ extern void func_002E96D8(u32 arg0);
 extern void func_002E8DD0(u32 arg0);
 extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 extern s32 func_002E4960();
+extern u32 itfMesGetEntryCount(s32 window);
 extern u8 D_003BBF80[];
 extern u8 D_003BBF90[];
 extern u8 D_003BC360[];
@@ -243,8 +244,9 @@ typedef struct MenuGfxCallback {
 } MenuGfxCallback;
 extern MenuGfxCallback D_00325748;
 extern u32 sdfCreateInitializedPacketList(void);
-extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, s32, void *);
+extern void func_00235598(u32, s32, s32, s32, s32, s32, s32, u8 *, void *, void *);
 extern void func_00236180();
+extern void func_00237130();
 extern s32 func_001037C0(s32, s32, s32, s32, s32, s32, s32, s32, u8 *);
 
 s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
@@ -258,6 +260,9 @@ s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
 }
 
 extern char D_003BC088[];
+extern char D_003BC090[];
+extern char D_003BC0A0[];
+extern u8 D_003688B8[];
 
 typedef struct EvtDrawWork {
     u8 pad00[0x2280];
@@ -265,27 +270,76 @@ typedef struct EvtDrawWork {
     u8 pad2284[0x38];
     s32 unk22BC;
     s32 unk22C0;
-    s32 labelValue;
+    char *label;
     s32 *unk22C8;
     s32 unk22CC;
     s32 unk22D0;
+    u8 pad22D4[0x114];
+    char *name0;
+    char *name1;
 } EvtDrawWork;
 
 s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtDrawWork *work) {
-    if (work->labelValue == 0) {
+    if (work->label == 0) {
         return 0;
     }
-    sdfAppendPacket(output, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->labelValue));
+    sdfAppendPacket(output, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->label));
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236510);
+void func_00236510(s32 arg0, s32 arg1, s32 arg2, s32 index, EvtDrawWork *work) {
+    s32 color;
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002365A0);
+    if (index < work->unk22C0) {
+        if (work->unk22BC == index) {
+            color = work->unk2280 == 2 ? 4 : 5;
+        } else {
+            color = 0;
+        }
+        sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, color, D_003BC090, work->unk22C8[index]));
+    }
+}
+
+s32 func_002365A0(s32 arg0, s32 arg1, EvtDrawWork *work) {
+    u32 packets = sdfCreateInitializedPacketList();
+    s32 width = 10;
+
+    if (work->label != 0) {
+        width = strlen(work->label);
+        if (width < 6) {
+            width = 6;
+        }
+    }
+    func_00235598(packets, arg0, arg1, width, work->unk22C0 + 3, 0, work->unk22C0, (u8 *)work, evtDrawStringEntry, func_00236510);
+    D_00325748.invoke(&D_00325748, (void *)packets);
+    if (work->unk2280 != 2) {
+        return 0;
+    }
+    return func_001037C0(0, 1, work->unk22C0, 1, work->unk22C0, 0, 0, 0, (u8 *)work + 0x22BC);
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_002366A0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236728);
+void func_00236728(s32 arg0, s32 arg1, s32 arg2, s32 row, EvtDrawWork *work) {
+    s32 x = arg1 + 0xC0;
+    u8 *table = &D_003688B8[row * 0xC];
+    s32 i = 0;
+    s32 color;
+    s8 ch;
+    s32 drawX;
+
+    do {
+        color = 0;
+        if (work->unk22D0 == row && work->unk22CC == i) {
+            color = work->unk2280 == 3 ? 4 : 5;
+        }
+        ch = *table++;
+        drawX = x;
+        x += 0xC0;
+        i++;
+        sdfAppendPacket(arg0, func_002E4960(drawX, arg2, 0xFEFFFF, color, D_003BC0A0, ch));
+    } while (i < 0xB);
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00236828);
 
@@ -312,7 +366,26 @@ void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00237348);
+s32 func_00237348(s32 arg0, s32 arg1, u8 *work) {
+    u32 packets = sdfCreateInitializedPacketList();
+    s32 count;
+    s32 shown;
+
+    func_00235598(packets, arg0, arg1, 8, 0x1D, *(s32 *)(work + 0x22F8), *(s32 *)(work + 0x2030), work, 0, func_00237130);
+    D_00325748.invoke(&D_00325748, (void *)packets);
+    if (*(s32 *)(work + 0x2280) != 4) {
+        return 0;
+    }
+    count = *(s32 *)(work + 0x2030);
+    if (count == 0) {
+        return 0;
+    }
+    shown = 0x1D;
+    if (count < 0x1D) {
+        shown = count;
+    }
+    return func_001037C0(0, 1, count, 1, shown, 0, (s32)(work + 0x22F8), 0, work + 0x22F4);
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
 
@@ -363,7 +436,11 @@ s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00238E58);
+s32 func_00238E58(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
+    s32 count = itfMesGetEntryCount(*(s32 *)(*(s32 *)(arg3 + 8) + 0x104));
+    sdfAppendPacket(arg0, func_002E4960(arg1, arg2, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
+    return 2;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE8D0);
 
@@ -447,9 +524,21 @@ void func_0023B1F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023B200);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023B848);
+void func_0023B848(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
+    switch (kind) {
+    case 0:
+        if (work->name0 != 0) {
+            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->name0));
+        }
+        return;
+    case 1:
+        if (work->name1 != 0) {
+            sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 0, D_003BC088, work->name1));
+        }
+        break;
+    }
+}
 
-extern void func_0023B848();
 extern s8 D_00324510[];
 
 s32 mnuDrawTimedPrompt(s32 arg0, s32 arg1, u8 *work) {

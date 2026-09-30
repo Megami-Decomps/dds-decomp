@@ -45,6 +45,7 @@ extern void fldStepIntByPad(u32, u32, u32, u32, u32, u32, u8 *);
 extern void fldStepColorChannelByPad(u32 *arg0, s32 arg1, u8 *arg2);
 extern s32 fldTestDrawUpdate(void);
 extern void fldClearCameraMoveMode(void);
+extern void fldSetCameraMoveMode(s32);
 extern void func_0013E5A8(u32 arg0);
 extern u32 func_001462D0(void);
 extern s32 func_0010BED8(const char *arg0);
@@ -200,7 +201,30 @@ void func_0011DE00(u32 *arg0, s32 arg1) {
     fldStepColorChannelByPad(arg0, arg1, D_00324530);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DE20);
+/* Formats a time in seconds as "d.dd" (digits saturate at 9.99). */
+void func_0011DE20(char *digits, f32 value) {
+    s32 whole;
+    s32 tenths;
+    s32 hundredths;
+
+    value += 0.005f;
+    whole = (s32)value;
+    if (whole >= 10) {
+        tenths = 9;
+        hundredths = 9;
+    } else {
+        value -= (f32)whole;
+        value *= 10.0f;
+        tenths = (s32)value;
+        value -= (f32)tenths;
+        hundredths = (s32)(value * 10.0f);
+    }
+    digits[0] = whole + '0';
+    digits[1] = '.';
+    digits[2] = tenths + '0';
+    digits[3] = hundredths + '0';
+    digits[4] = 0;
+}
 
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011DEB0);
@@ -275,7 +299,20 @@ void func_0011E960(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E998);
+s32 func_0011E998(void) {
+    if (D_003BAB20 == 1) {
+        return 2;
+    }
+    if (D_003BAB1C != -999 && D_003BAB08 == D_003BAB14) {
+        if (D_003BAB0C < D_003BAB08) {
+            fldSetCameraMoveMode(2);
+        } else {
+            fldSetCameraMoveMode(-2);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
@@ -972,7 +1009,30 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->options = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001230D0);
+void func_001230D0(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+                    s32 code, s32 link, const char *subname) {
+    if (kwlnTaskGetTaskByName(D_0039FBC0) != NULL) {
+        if (D_0032E3B0[4] == stage) {
+            D_0032E3B0[8] = 1;
+        } else {
+            dds3WorkClear();
+        }
+    }
+    record->unk_30 = 0;
+    record->unk_3c = 0;
+    record->unk_38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->enabled = 1;
+    record->kind = kind;
+    record->code = code;
+    record->link = link;
+    record->mode = 2;
+    record->unk_62 = 0;
+    strcpy(record->detail, subname);
+    memset(record->note, 0, sizeof(record->note));
+    record->options = 0;
+}
 
 void fldInitializeSequenceRecordWithNote(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, const char *subname) {
