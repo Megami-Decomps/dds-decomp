@@ -367,8 +367,8 @@ void func_00127788(u32 *request) {
     func_00126A30(request[1], *request, 1);
 }
 
-s32 func_001277A8(s32 arg0) {
-    return arg0 + 0xc;
+s32 func_001277A8(s32 record) {
+    return record + 0xc;
 }
 
 void fldRelocatePackedWords(u32 *table, u32 base, u8 *data, s32 size) {
@@ -913,7 +913,7 @@ typedef struct FldSpriteVertex {
     FldSpriteCorner corner[2];
 } FldSpriteVertex;
 
-void func_00129000(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 arg9) {
+void func_00129000(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 packetFlags) {
     s32 handle = sdfConsAllocateColumnPacket(1);
     FldSpriteVertex *vtx = (FldSpriteVertex *)func_002E1420(handle);
     s32 ubase = u * 16;
@@ -941,7 +941,7 @@ void func_00129000(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32
     vtx->corner[1].flag = 0;
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
-    sdfConsCreateDrawPacket(command, arg9, 0);
+    sdfConsCreateDrawPacket(command, packetFlags, 0);
     sdfAppendPacket(command, handle);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
     descriptor->open(descriptor, command);
@@ -1120,8 +1120,8 @@ void func_001296B8(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstY = result[1];
 }
 
-void func_00129720(u32 arg0) {
-    D_003BACD0 = arg0;
+void func_00129720(u32 displayRow) {
+    D_003BACD0 = displayRow;
 }
 
 
@@ -1143,7 +1143,7 @@ void func_00129728(s32 lower, s32 bits, u64 upper) {
 }
 
 extern void sdfAppendPacket(u64, u64);
-void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 packet;
     u64 *data;
@@ -1152,7 +1152,7 @@ void fldSubmitFrameQuad(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
     sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     data = func_002E13E0(packet, 0x30);
-    data[4] = (arg7 << 17) | 0x10000 | (arg5 << 15) | (arg4 << 14) | (arg3 << 12) | (arg2 << 4) | (arg1 << 1) | arg0;
+    data[4] = (bit17 << 17) | 0x10000 | (bit15 << 15) | (bit14 << 14) | (bit12 << 12) | (bit4 << 4) | (bit1 << 1) | bit0;
     data[5] = 0x47;
     sdfAppendPacket(command, packet);
     descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
@@ -1902,8 +1902,8 @@ s32 func_0012C648(void) {
     return result;
 }
 
-void func_0012C688(u32 arg0) {
-    D_003BACF8 = arg0;
+void func_0012C688(u32 value) {
+    D_003BACF8 = value;
 }
 
 s32 fldEncProc(void) {
@@ -2020,6 +2020,11 @@ void fldClearCameraMoveMode(void) {
     D_003BAD1C = 0;
 }
 
+typedef struct FldModelMatrices {
+    u8 pad00[0xC];
+    u8 **rows; /* 0x0C: slot-indexed matrix blocks */
+} FldModelMatrices;
+
 void func_0012E6F8(void) {
     f32 vec[4];
     s32 slot;
@@ -2038,7 +2043,7 @@ void func_0012E6F8(void) {
     modelRef = *(u8 ***)(D_003BAB38 + 0x18);
     if (slot >= 0) {
         model = *modelRef;
-        matrices = *(u8 ***)(model + 0xC);
+        matrices = ((FldModelMatrices *)model)->rows;
         __asm__ volatile (
             ".set noreorder\n"
             "lqc2 vf28, 0(%0)\n"
@@ -2084,21 +2089,21 @@ void func_0012E9D0(void) {
     D_003BAD40 = 0;
 }
 
-void func_0012E9E8(u32 arg0) {
-    if (arg0 == 0) {
+void func_0012E9E8(u32 enabled) {
+    if (enabled == 0) {
         D_003BAD40 = 0;
         if (D_003BAB38 != 0) {
             func_00218368(D_003BAB38);
         }
     } else {
-        D_003BAD40 = arg0;
+        D_003BAD40 = enabled;
         func_00218320(D_003BAB38);
     }
 }
 
-void func_0012EA40(u32 arg0, u32 arg1) {
-    D_003BAD34 = arg0;
-    D_003BAD38 = arg1;
+void func_0012EA40(u32 index, u32 value) {
+    D_003BAD34 = index;
+    D_003BAD38 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EA50);
@@ -2176,12 +2181,18 @@ typedef struct FldCameraModel {
     s16 nodeId;
     u8 pad14[4];
     u8 *renderData;
+    u8 *child; /* 0x1C: node used by the model scale setter */
 } FldCameraModel;
 
 typedef struct FldCameraRenderData {
     u8 pad00[0x1C];
     u32 color;
 } FldCameraRenderData;
+typedef struct FldCameraChild {
+    u8 pad00[0x20];
+    f32 scale; /* 0x20 */
+} FldCameraChild;
+
 
 s32 func_00131098(void) {
     s16 node;
@@ -2293,7 +2304,7 @@ extern s32 D_003BAB38;
 extern s32 mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 s32 func_001314C0(s32 value) {
     s32 object = D_003BAB38;
-    *(f32 *)(*(s32 *)(object + 0x1C) + 0x20) = 1.0f;
+    ((FldCameraChild *)((FldCameraModel *)object)->child)->scale = 1.0f;
     return mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
 }
 
@@ -2502,26 +2513,26 @@ void fldSetSwayMode(u32 mode) {
     D_003BAD84 = 0;
 }
 
-void func_00132B70(u32 arg0) {
-    D_003BAD78 = arg0;
+void func_00132B70(u32 value) {
+    D_003BAD78 = value;
 }
 
 u32 func_00132B78(void) {
     return D_003BAD78;
 }
 
-void func_00132B80(u32 arg0) {
-    D_0032E5A8[0] = arg0;
+void func_00132B80(u32 value) {
+    D_0032E5A8[0] = value;
 }
 
 u32 func_00132B90(void) {
     return D_0032E5A8[0];
 }
 
-void func_00132BA0(u32 arg0) {
+void func_00132BA0(u32 value) {
     u32 previousValue = D_0032E59C[0];
 
-    D_003BAD9C = arg0;
+    D_003BAD9C = value;
     D_003BADA0 = 0;
     D_003BADA4 = previousValue;
     func_00132FD0(previousValue, 1);
@@ -2551,8 +2562,8 @@ void func_00133280(s32 speed) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_001332E8);
 
-void func_00133600(s32 arg0) {
-    if (arg0 == 0) {
+void func_00133600(s32 enabled) {
+    if (enabled == 0) {
         dds3ClearObjectFlags(D_003BAB34, 0x100);
         return;
     }
@@ -2914,8 +2925,8 @@ void func_00135018(void) {
     D_003BADE8 = 0;
 }
 
-float fldDotVector(float *arg0, float *arg1) {
-    return *arg0 * *arg1 + arg0[1] * arg1[1] + arg0[2] * arg1[2];
+float fldDotVector(float *left, float *right) {
+    return *left * *right + left[1] * right[1] + left[2] * right[2];
 }
 
 f32 fldCalculateVectorLength(const f32 *vector) {
@@ -3537,10 +3548,10 @@ s32 func_0013DB28(void) {
     return D_00337D12[D_003BAE64 * 54];
 }
 
-s32 func_0013DB58(s32 arg0) {
+s32 func_0013DB58(s32 query) {
     FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
 
-    if (arg0 == 0 && entry->kind == 1) {
+    if (query == 0 && entry->kind == 1) {
         if (entry->motion == 5 || entry->secondaryMotion == 5 || entry->motion == 6
             || entry->secondaryMotion == 6 || entry->motion == 7 || entry->secondaryMotion == 7
             || entry->motion == 8 || entry->secondaryMotion == 8) {
@@ -3548,7 +3559,7 @@ s32 func_0013DB58(s32 arg0) {
         }
         return 0x14;
     }
-    if (arg0 == 1) {
+    if (query == 1) {
         return fldTestBits(entry->flags54, 8);
     }
     return 0;
@@ -3567,13 +3578,13 @@ extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void func_00140AB8(s32);
 extern u32 D_003CE3E0[][23];
 extern s32 D_0032E530[];
-void func_0013DC08(s32 arg0) {
+void func_0013DC08(s32 checkTaskRecord) {
     s32 index;
     s32 kind;
     s32 record;
     FldActorEntry *entry;
 
-    if (arg0 != 0) {
+    if (checkTaskRecord != 0) {
         record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D6A0())->key);
         if (record == 0) {
             return;
@@ -3627,11 +3638,11 @@ u8 func_0013DF18(void) {
     return D_003BAE68 == 8;
 }
 
-void func_0013DF28(s8 *arg0) {
-    if (arg0[0x53] != 0) {
-        D_0032E3B0[0x22] = arg0[0x53] - 1;
+void func_0013DF28(s8 *scene) {
+    if (scene[0x53] != 0) {
+        D_0032E3B0[0x22] = scene[0x53] - 1;
     }
-    D_0032E3B0[0x16] = arg0[0x45];
+    D_0032E3B0[0x16] = scene[0x45];
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DF60);
@@ -3953,14 +3964,14 @@ s32 func_00140F70(u32 task) {
     return 0;
 }
 
-void * func_00141098(u32 arg0) {
+void * func_00141098(u32 task) {
     u16 *ticket = func_002CFEB8(8);
 
     ticket[1] = 1;
     ticket[0] = 0;
     ticket[2] = 0;
     ticket[3] = 0;
-    func_00101A68(arg0, ticket);
+    func_00101A68(task, ticket);
     return (void *)func_00140F70;
 }
 

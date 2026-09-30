@@ -31,7 +31,9 @@
 typedef struct PartyEntryCopy {
     u16 flags;
     u16 pad02;
-    u32 word[0x68];
+    u16 displayId; /* 0x04: used to select a party display asset */
+    u16 pad06;
+    u32 word[0x67];
 } PartyEntryCopy; /* 0x1A4 bytes */
 
 typedef struct PartyMenuData {
@@ -61,7 +63,9 @@ typedef struct CampMenuContext {
     s32 panelList;            /* 0x12C */
     u8 pad130[8];
     s32 display;              /* 0x138 */
-    u8 pad13C[0x69C];
+    u8 pad13C[0x540];
+    struct MenuSelectionList *partySelection; /* 0x67C */
+    u8 pad680[0x158];
     s32 selectionList;        /* 0x7D8 */
     u8 pad7DC[0x10];
     s32 activePanel;          /* 0x7EC: active party panel */
@@ -199,8 +203,8 @@ extern void mnuDestroyWindowContainer(u32);
 extern s64 func_00285670(s32, s32 *, u64, u64);
 extern u8 D_0037CA58[];
 
-void func_00274B80(u32 arg0) {
-    mnuSetStaffDisplayMode(4, arg0);
+void func_00274B80(u32 context) {
+    mnuSetStaffDisplayMode(4, context);
 }
 
 void func_00274BA0(s32 context) {
@@ -217,8 +221,8 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274D48);
 
-void func_00274EE0(s32 arg0) {
-    mnuDestroyWindowContainer((u32)((PartyMenuHead *)((CampMenuContext *)arg0)->menu)->selection);
+void func_00274EE0(s32 context) {
+    mnuDestroyWindowContainer((u32)((PartyMenuHead *)((CampMenuContext *)context)->menu)->selection);
 }
 
 /* Snapshot five party entries; at most three active slots are displayed. */
@@ -404,8 +408,8 @@ u8 mnuIsStateNotOne(void) {
     return result != 1;
 }
 
-void func_002762B0(u32 arg0) {
-    mnuSetStaffDisplayMode(3, arg0);
+void func_002762B0(u32 context) {
+    mnuSetStaffDisplayMode(3, context);
 }
 
 void func_002762D0() {
@@ -436,16 +440,16 @@ s32 func_00276428(void) {
     return 1;
 }
 
-void func_00276478(u32 arg0) {
-    func_00276368(arg0, 1);
+void func_00276478(u32 context) {
+    func_00276368(context, 1);
 }
 
 void func_00276490(void) {
     func_00276428();
 }
 
-void func_002764A8(u32 arg0) {
-    func_00276368(arg0, 0);
+void func_002764A8(u32 context) {
+    func_00276368(context, 0);
 }
 
 void func_002764C0(void) {
@@ -467,7 +471,7 @@ s64 func_002764D8(s32 callback) {
         window = context + 0x15C;
         func_00280978(4, window);
         if (buttons & 1) {
-            *(s32 *)(menu + 0x18) = **(s32 **)(((CampMenuContext *)context)->selectionList + 0x1C);
+            *(s32 *)(menu + 0x18) = *((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot;
             func_002858E8(popup, D_0037CAB0);
             *(s32 *)(menu + 0x24) = 1;
         }
@@ -489,15 +493,15 @@ extern void func_002723B0();
 extern void func_00272668();
 extern void func_0027CDD0();
 
-s64 func_002765E8(s32 arg0) {
+s64 func_002765E8(s32 callback) {
     s32 context = func_00101A70();
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
 
     if (func_002BD8F8(work->resource) != 0) {
-        mnuDrawStaffCampScreen(0, arg0);
+        mnuDrawStaffCampScreen(0, callback);
     } else {
-        mnuDrawStaffCampScreen(1, arg0);
+        mnuDrawStaffCampScreen(1, callback);
     }
     if (menu->staffImage == 0) {
         mnuCreateStaffImageSprite(0x12);
@@ -511,7 +515,7 @@ s64 func_002765E8(s32 arg0) {
 
         func_00272668(1, *slot, D_0037C3A8, context, 1, 0x53, slot);
     }
-    return menuRunPanel(context, 1, arg0);
+    return menuRunPanel(context, 1, callback);
 }
 
 s64 func_002766E8(s32 callback) {
@@ -566,31 +570,31 @@ s32 mnuStaffReleasePanelScene(s32 unused) {
     return 1;
 }
 
-void func_00276B10(s32 arg0) {
+void func_00276B10(s32 context) {
     *(u32 *)
-      (*(s32 *)(**(s32 **)(*(s32 *)(arg0 + 0x7d8) + 0x1c) * 0x134 + arg0 + 0x2b4) + 0x3c) = 0x100
+      (*(s32 *)(*(((MenuSelectionList *)((CampMenuContext *)context)->selectionList)->selectedSlot) * 0x134 + context + 0x2b4) + 0x3c) = 0x100
     ;
 }
 
-s32 func_00276B38(s32 arg0) {
+s32 func_00276B38(s32 contextArg) {
     s32 context = func_00101A70();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 changed = 0;
     u32 input = func_00285B20(0x300);
 
     if (input & 0x100) {
-        mnuStaffReleasePanelScene(arg0);
-        func_0027BEB0(*(s32 *)(context + 0x7D8));
+        mnuStaffReleasePanelScene(contextArg);
+        func_0027BEB0(((CampMenuContext *)context)->selectionList);
         changed = 1;
     }
     if (input & 0x200 && changed == 0) {
-        mnuStaffReleasePanelScene(arg0);
-        func_0027BE90(*(s32 *)(context + 0x7D8));
+        mnuStaffReleasePanelScene(contextArg);
+        func_0027BE90(((CampMenuContext *)context)->selectionList);
         changed = 1;
     }
-    mnuClearListFlagsOneAndTwo(*(s32 *)(context + 0x7D8));
+    mnuClearListFlagsOneAndTwo(((CampMenuContext *)context)->selectionList);
     if (changed != 0) {
-        func_00276898(arg0);
+        func_00276898(contextArg);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
         menu->activeMark = 0;
         if (menu->staffMode == 1) {
@@ -604,7 +608,7 @@ s32 func_00276B38(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276C28);
 
 void func_00276DA0(s32 x, s32 context) {
-    s32 slot = D_003BAA00 + **(s32 **)(*(s32 *)(context + 0x67C) + 0x1c) * 0x1a4 + 0xa60;
+    s32 slot = D_003BAA00 + *(((CampMenuContext *)context)->partySelection->selectedSlot) * 0x1a4 + 0xa60;
     s32 i;
     s32 y;
     s32 handle;
@@ -613,7 +617,7 @@ void func_00276DA0(s32 x, s32 context) {
     x = x * 8;
     y = x + 0xbc0;
     for (i = 0; i < 3; i++, y += 0xa8) {
-        handle = func_00197EC8(0x190, y, 0, 0xa09dc359, D_003BAA7C + *(u16 *)(slot + 4) * 45, i);
+        handle = func_00197EC8(0x190, y, 0, 0xa09dc359, D_003BAA7C + ((PartyEntryCopy *)slot)->displayId * 45, i);
         if (handle != 0) {
             func_001958A0(handle, 1, 0x53);
             func_00194920(handle);
@@ -674,9 +678,9 @@ void func_00277220(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 s
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00285440(s32, s32, s32, s32, s32);
 
-void func_00277328(s32 obj, s32 unused1, s32 arg2, s32 arg3, s32 unused4, s32 arg5) {
-    func_00283838(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, arg2, arg5);
-    func_00285440(0x1200, 0x730, 0, arg3, arg5);
+void func_00277328(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
+    func_00283838(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);
+    func_00285440(0x1200, 0x730, 0, drawGroup, spriteFlags);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277390);
@@ -773,13 +777,13 @@ void func_00277CB8(void) {
     }
 }
 
-u32 ptySkillMenuRebuildAfterMutation(s32 arg0, s32 arg1) {
-    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)func_00101A70(arg1))->menu;
+u32 ptySkillMenuRebuildAfterMutation(s32 actor, s32 contextArg) {
+    StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)func_00101A70(contextArg))->menu;
     s32 selected = *((MenuSelectionState *)menu->selectedList)->list->selectedSlot;
     s32 state;
 
-    func_00277C80(arg1);
-    ptySkillMenuBuildEquippedSlots(arg0, arg1);
+    func_00277C80(contextArg);
+    ptySkillMenuBuildEquippedSlots(actor, contextArg);
     mnuSeekListNode(selected, (s32)((MenuSelectionState *)menu->selectedList)->list);
     state = menu->selectedList;
     *(s32 *)(state + 0x44) = 0x200;
@@ -787,8 +791,8 @@ u32 ptySkillMenuRebuildAfterMutation(s32 arg0, s32 arg1) {
     return state;
 }
 
-void func_00277DD0(u32 arg0) {
-    mnuSetStaffDisplayMode(1, arg0);
+void func_00277DD0(u32 context) {
+    mnuSetStaffDisplayMode(1, context);
 }
 
 void func_00277DF0(s32 context) {
@@ -881,12 +885,12 @@ s32 mnuCampMenuInit(void) {
     return 1;
 }
 
-s32 func_00278868(s32 arg0) {
+s32 func_00278868(s32 contextArg) {
     s32 context = func_00101A70();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->selectedList != 0) {
-        func_00277C80(arg0);
+        func_00277C80(contextArg);
     }
     func_00277DF0(context);
     func_002D0918(menu->handle);
@@ -964,8 +968,8 @@ void mnuAddPartySkillIfMissing(s32 obj, s32 id, s32 slot) {
     }
 }
 
-void mnuClearPartySkillSlot(s32 arg0, s32 arg1) {
-    ((PartySkillSlots *)arg0)->code[arg1] = 0;
+void mnuClearPartySkillSlot(s32 actor, s32 slot) {
+    ((PartySkillSlots *)actor)->code[slot] = 0;
     ptyRecomputeMaxHpMp();
 }
 
