@@ -15,10 +15,16 @@ extern f32 D_00354900[];
 extern f32 D_00354910[];
 extern f32 D_00354960[];
 extern f32 D_00354930[];
+extern f32 D_00354940[];
+extern f32 D_00354950[];
+extern f32 D_003548F0[];
+extern f32 D_00354970[];
+extern f32 *func_00170220(u32 handle, s32 index);
+extern f32 *func_00170538(u32 handle, s32 index);
 extern f32 func_002E78F8(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
-extern void func_002DD8B8(void *orientation, f32 angle);
+extern void func_002DD8B8(f32 angle, void *orientation);
 
 
 /* Effect initializers implemented in assembly below. Each is entered both with
@@ -437,11 +443,11 @@ extern void func_0016B388(PcpFlashWork3 *, s32);
    known; each struct's size is the element stride used to index its array. */
 typedef struct PcpFlashPtc10 PcpFlashPtc10;
 
-extern void func_0016D508();
+extern void func_0016D508(PcpFlashWork7 *, s32, void *);
 
 extern void func_0016E638(PcpFlashWork9 *, s32);
 
-extern void func_0016ED68();
+extern void func_0016ED68(PcpFlashWork10 *, s32, void *);
 
 void func_0016A1A8(void *data)
 {
@@ -487,7 +493,50 @@ void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016A2D0);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
+void func_0016A2D0(PcpFlashWork1 *work, s32 index, void *view)
+{
+    PcpFlashParticle10 *part = &work->parts[index];
+    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 base[4];
+    f32 size[4];
+    f32 step;
+    f32 angle;
+    f32 radius;
+
+    step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
+    radius = part->scale;
+    VEC3_SPLAT(size, radius);
+    angle = step * (f32)index;
+    base[0] = 0;
+    base[1] = 1.0f;
+    base[2] = 0;
+    VU0_LOAD_VF(vf10, base);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, base);
+    func_002DD8B8(angle, view);
+    VU0_LOAD_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_003548F0);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    func_002DD8B8(angle + step, view);
+    VU0_LOAD_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_003548F0);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void effFlashUpdateWork1(PcpFlashWork1 *work) {
     f32 axis[4];
@@ -762,7 +811,7 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
     position[0] = part->position[0];
     position[1] = part->position[1];
     position[2] = part->position[2];
-    func_002DD8B8(orientation, part->angle);
+    func_002DD8B8(part->angle, orientation);
     __asm__ volatile (
         ".set noreorder\n"
         "lqc2 vf10, 0(%0)\n"
@@ -1318,7 +1367,71 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     part->increment = work->unk44 * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016CE00);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
+void func_0016CE00(PcpFlashWork6 *work, s32 index, void *view)
+{
+    PcpFlashPtc20A *part = &work->parts[index];
+    f32 *quad = func_0016FF08(work->resourceHandle, index);
+    f32 base[4];
+    f32 scale[4];
+    f32 across[4];
+    f32 up[4];
+    f32 ratio;
+    f32 size;
+    f32 acrossLen;
+    f32 upLen;
+
+    size = part->unk0C;
+    ratio = size / part->unk1C;
+    VEC3_SPLAT(scale, size);
+    acrossLen = part->unk18 * ratio;
+    VEC3_SPLAT(across, acrossLen);
+    upLen = part->unk14 * ratio;
+    VEC3_SPLAT(up, upLen);
+    func_002DD8B8(part->accumulator, view);
+    base[0] = 0;
+    base[1] = 1.0f;
+    base[2] = 0;
+    VU0_LOAD_VF(vf10, base);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, view);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, across);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, across);
+    VU0_LOAD_VF(vf10, up);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, up);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scale);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, D_00354940);
+    VU0_LOAD_VF(vf11, up);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, D_00354940);
+    VU0_LOAD_VF(vf11, across);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void effFlashAdvanceOrbitPhase(PcpFlashWork6 *work, s32 index, void *orientation)
 {
@@ -1327,8 +1440,6 @@ void effFlashAdvanceOrbitPhase(PcpFlashWork6 *work, s32 index, void *orientation
     part = &work->parts[index];
     part->accumulator += part->increment;
 }
-
-extern void func_0016CE00(void *, s32, void *);
 
 void effFlashUpdateWork6(PcpFlashWork6 *work) {
     s128 axis;
@@ -1466,7 +1577,50 @@ void func_0016D468(PcpFlashWork7 *work, s32 index, s32 param)
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D508);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
+void func_0016D508(PcpFlashWork7 *work, s32 index, void *view)
+{
+    PcpFlashPtc10 *part = &work->parts[index];
+    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 base[4];
+    f32 size[4];
+    f32 step;
+    f32 angle;
+    f32 radius;
+
+    step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
+    radius = part->accumulator;
+    VEC3_SPLAT(size, radius);
+    angle = step * (f32)index;
+    func_002DD8B8(angle, view);
+    base[0] = 0;
+    base[1] = 1.0f;
+    base[2] = 0;
+    VU0_LOAD_VF(vf10, base);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_00354950);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    func_002DD8B8(angle + step, view);
+    VU0_LOAD_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00354950);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void effFlashUpdateWork7(PcpFlashWork7 *work) {
     s128 axis;
@@ -1596,7 +1750,83 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DBA0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DC90);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DD68);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
+void func_0016DD68(PcpFlashWork8 *work, s32 index, void *view)
+{
+    PcpFlashPtc20B *part = &work->parts[index];
+    f32 *quad = func_00170538(work->resourceHandle, index * 2);
+    f32 base[4];
+    f32 size[4];
+    f32 spare[4];
+    f32 middle[4];
+    f32 outer[4];
+    f32 inner[4];
+    f32 center;
+    f32 outerEdge;
+    f32 innerEdge;
+    f32 span;
+    f32 *mirror;
+
+    center = part->unk10;
+    VEC3_SPLAT(middle, center);
+    outerEdge = center + part->unk0C;
+    VEC3_SPLAT(outer, outerEdge);
+    innerEdge = center - part->unk0C;
+    VEC3_SPLAT(inner, innerEdge);
+    span = part->unk1C;
+    VEC3_SPLAT(size, span);
+    func_002DD8B8(part->accumulator, view);
+    base[0] = 0;
+    base[1] = 1.0f;
+    base[2] = 0;
+    VU0_LOAD_VF(vf10, base);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    /* retail multiplies the (never written) `spare` slot here and stores it back */
+    VU0_LOAD_VF(vf11, spare);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, spare);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, size);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, outer);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, outer);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, inner);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, inner);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, middle);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, size);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_LOAD_VF(vf10, outer);
+    VU0_STORE_VF(vf10, quad);
+    mirror = func_00170538(work->resourceHandle, index * 2 + 1);
+    PCP_COPY_VECTOR(mirror + 8, quad + 8);
+    PCP_COPY_VECTOR(mirror + 4, quad + 4);
+    PCP_COPY_VECTOR(mirror + 12, quad + 12);
+    VU0_LOAD_VF(vf10, inner);
+    VU0_STORE_VF(vf10, mirror);
+}
+#undef VEC3_SPLAT
 
 void func_0016DF90(PcpFlashWork8 *work, s32 index, void *orientation)
 {
@@ -1607,7 +1837,6 @@ void func_0016DF90(PcpFlashWork8 *work, s32 index, void *orientation)
 }
 
 extern void func_0016DC90(void *, s32, void *);
-extern void func_0016DD68(void *, s32, void *);
 extern void func_0016DBA0(void *, s32, s32);
 
 void effFlashUpdateWork8(PcpFlashWork8 *work) {
@@ -1961,7 +2190,50 @@ void func_0016ECC8(PcpFlashWork10 *work, s32 index, s32 param)
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016ED68);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
+void func_0016ED68(PcpFlashWork10 *work, s32 index, void *view)
+{
+    PcpFlashPtc10 *part = &work->parts[index];
+    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 base[4];
+    f32 size[4];
+    f32 step;
+    f32 angle;
+    f32 radius;
+
+    step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
+    radius = part->accumulator;
+    VEC3_SPLAT(size, radius);
+    angle = step * (f32)index;
+    func_002DD8B8(angle, view);
+    base[0] = 0;
+    base[1] = 1.0f;
+    base[2] = 0;
+    VU0_LOAD_VF(vf10, base);
+    VU0_LOAD_VF(vf11, view);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, D_00354970);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    func_002DD8B8(angle + step, view);
+    VU0_LOAD_VF(vf10, base);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_LOAD_VF(vf11, size);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00354970);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
+#undef VEC3_SPLAT
 
 void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 axis[4];

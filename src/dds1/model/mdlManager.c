@@ -1,4 +1,12 @@
 #include "common.h"
+#include "pcp_vu0.h"
+
+extern u8 D_003296F0[];
+extern u8 D_00324610[];
+extern u8 D_00324650[];
+extern u8 D_00324660[];
+extern void func_002DDD60(void *);
+extern void func_002DDC50(void);
 
 /* Sub-record behind MdlCtx.sub (+0x8/+0xA read by func_002183D0/E0). */
 typedef struct MdlSub {
@@ -566,9 +574,48 @@ void func_00218100(MdlCtx *ctx, f32 amount) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218158);
+/* vu0 routine: project `point` through the camera and the model's scaled matrix, result left in vf10 */
+void func_00218158(MdlCtx *ctx, void *point)
+{
+    VU0_LOAD_MATRIX(D_003296F0);
+    func_002DDD60(D_00324610);
+    VU0_MOVE_VF(vf24, vf28);
+    VU0_MOVE_VF(vf25, vf29);
+    VU0_MOVE_VF(vf26, vf30);
+    VU0_MOVE_VF(vf27, vf31);
+    VU0_LOAD_MATRIX(&ctx->inner->vector20);
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    func_002DDC50();
+    VU0_LOAD_VF(vf10, point);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF(vf11, D_00324650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00324660);
+    VU0_ADD(vf10, vf10, vf11);
+}
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218228);
+/* Project `count` points through the model's scaled matrix and the camera. */
+void func_00218228(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
+{
+    s32 i;
+
+    VU0_LOAD_MATRIX(&ctx->inner->vector20);
+    VU0_LOAD_VF(vf10, &ctx->inner->vector70);
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    func_002DDD60(D_003296F0);
+    func_002DDD60(D_00324610);
+    for (i = 0; i < count; i++) {
+        VU0_LOAD_VF(vf10, in[i]);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_PERSPECTIVE_DIVIDE_VF10();
+        VU0_LOAD_VF(vf11, D_00324610 + 0x40);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, D_00324610 + 0x50);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[i]);
+    }
+}
 
 void func_00218320(MdlCtx *ctx) {
     MdlNode *node;

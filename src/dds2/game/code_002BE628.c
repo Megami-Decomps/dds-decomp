@@ -1,5 +1,5 @@
 #include "common.h"
-
+#include "pcp_vu0.h"
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
@@ -2027,7 +2027,49 @@ void evtStageTestApplyEntryRotation(s32 model) {
     func_00232AD0(model);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7168);
+extern s32 func_00100400(void);
+extern void func_0033A5C8(void *);
+extern void func_0033A388(void *packet, void *node, void *matrix);
+extern void func_0033A480(void *node, void *matrix);
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern u8 D_003E7960[];
+extern u8 D_0037F690[];
+extern u8 D_0037F680[];
+extern u8 D_0037F6A0[];
+extern u8 D_0037F590[];
+extern u8 D_003846F0[];
+extern u8 D_003820F0[];
+
+/* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
+void func_002C7168(void)
+{
+    s128 eye;
+    s128 at;
+    s32 slot;
+
+    slot = func_00100400();
+    func_002C6790();
+    PCP_COPY_VECTOR(D_0037F690, D_003E7950);
+    PCP_COPY_VECTOR(D_0037F680, D_003E7940);
+    PCP_COPY_VECTOR(D_0037F6A0, D_003E7960);
+    func_0033A5C8(D_0037F5E0);
+    VU0_LOAD_VF(vf10, D_0037F680);
+    VU0_LOAD_VF(vf11, D_0037F690);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F590);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &eye);
+    VU0_LOAD_VF(vf10, D_0037F690);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &at);
+    sdfVuBuildLookAtBasis(&eye, &at, D_0037F6A0);
+    VU0_STORE_MATRIX_UNCLOBBERED(D_003846F0);
+    func_0033A388(D_003820F0 + slot * 8000, D_0037F5E0, D_003846F0);
+    func_0033A480(D_0037F5E0, D_003846F0);
+}
 
 s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002C6CE8();
