@@ -87,7 +87,18 @@ s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF9E0);
+extern void func_002BD3D8(void *, s32, void *);
+
+void func_002BF9E0(u8 *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+    GridQuantizedEntry *entry = (GridQuantizedEntry *)(*(u8 **)(object + 0x10) + index * 0x80);
+    s32 record = func_002BD398((s32)object, index);
+
+    entry->x = x >> 4;
+    entry->y = y >> 3;
+    entry->width = width >> 4;
+    entry->height = height >> 3;
+    func_002BD3D8(object, index, (void *)(s32)record);
+}
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
 void itfGridSetQuantizedBounds(u8 *object, s32 index, s32 x, s32 y,

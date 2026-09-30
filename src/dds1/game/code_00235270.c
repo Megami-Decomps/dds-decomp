@@ -12,7 +12,7 @@ extern void evtSetConvertedContextValue(s32 arg0, s32 arg1);
 extern void func_002351E0(void);
 extern void func_00235228(void);
 extern s32 evtFindTaskById();
-extern void func_003014F0(void *arg0, void *arg1, s32 arg2);
+extern void func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 arg0, void *arg1);
 extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern void *memset(void *, s32, u32);
@@ -238,14 +238,6 @@ s32 func_00235AE0(s32 arg0, s32 arg1, s32 arg2) {
     return 2;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
-
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
-
-INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003ADE60);
-
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
-
 typedef struct MenuGfxCallback {
     u8 unknown[0x10];
     void (*invoke)(void *, void *);
@@ -257,6 +249,14 @@ extern s8 D_00324510[];
 extern char D_003ADE40[];
 extern char D_003ADE50[];
 extern char D_003ADE78[];
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003ADE60);
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 
 void func_00235B30(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {

@@ -10,11 +10,21 @@ extern void func_002D09B8(void *);
 
 extern void (*D_003BD2D4)(void);
 
-extern u64 func_002CF530(u64);
+extern void *sdfResourceRetainAddress(void *);
+
+extern void *func_002D03F8(void);
+
+extern void *func_002CFEB8();
 
 extern u32 D_003BD2CC;
 
-INCLUDE_ASM(const s32, "game/code_002CF530", func_002CF530);
+s64 func_002CF530(s64 size) {
+    if (size >= 0x401) {
+        sdfResourceRetainAddress(func_002D03F8());
+    } else {
+        func_002CFEB8(size);
+    }
+}
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {

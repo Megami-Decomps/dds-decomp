@@ -439,7 +439,28 @@ u32 effSumRecordStatuses(u32 *payload) {
 
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD028);
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", effCreateMappedResource);
+typedef struct {
+    s32 count;
+    void *records;
+    void *allocation;
+} EffMappedResource;
+
+typedef struct {
+    u8 pad00[0x14];
+    s32 count;
+} EffMappedHeader;
+
+extern void *func_002BD028(u32 source, EffMappedHeader *header);
+
+u32 effCreateMappedResource(u32 source) {
+    EffMappedResource *work = (EffMappedResource *)func_002CFEB8(0xC);
+    EffMappedHeader header;
+
+    work->records = func_002BD028(source, &header);
+    work->allocation = (void *)sdfResourceRetainAddress((u32)work->records);
+    work->count = header.count;
+    return (u32)work;
+}
 
 u32 *func_002BD258(u32 kind) {
     u32 *header = func_002CFEB8(0xC);

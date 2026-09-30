@@ -506,4 +506,6 @@ s32 func_0023D5B8(EvtUnit *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D640);
+void func_0023D640(void *work, void *src) {
+    PCP_COPY_VECTOR((u8 *)work + 0x70, src);
+}
