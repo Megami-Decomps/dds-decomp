@@ -115,13 +115,13 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 extern u8 D_003CD8DD[];
 
-extern void evtFormatTaskName(s32 arg0, void *arg1);
+extern void evtFormatTaskName(s32 taskId, void *name);
 
 extern void *func_00328D68(s32 size);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
+extern void kwlnTaskCreate(void *name, s32 priority, s32 mode, s32 flags, void *update, void *destroy, void *data);
 
 extern void func_0025D8C8(void);
 
@@ -531,7 +531,8 @@ typedef struct {
     s32 descriptorHandle; /* 0x2428: submitted to the drawing packet */
     u8 pad242C[4];
     u32 menuState; /* 0x2430 */
-    u8 pad2434[8];
+    u8 pad2434[4];
+    u32 linkedHandle; /* 0x2438: passed to func_0025F130 */
     u32 optionFlags; /* 0x243C */
     u8 pad2440[4];
     s32 idCount; /* 0x2444 */
@@ -686,8 +687,8 @@ void mnuShopSubmitDescriptor(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F130);
 
-void func_0025F2B0(s32 arg0) {
-    func_0025F130(*(u32 *)(arg0 + 0x2438));
+void func_0025F2B0(CampScene *scene) {
+    func_0025F130(scene->linkedHandle);
 }
 
 void func_0025F2C8(void) {
@@ -786,31 +787,55 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
+typedef struct ShopEffectGraphics {
+    u8 pad00[0x20];
+    s32 *params; /* 0x20 */
+} ShopEffectGraphics;
+
+typedef struct ShopEffectObject {
+    u8 pad00[8];
+    ShopEffectGraphics *graphics; /* 0x08 */
+} ShopEffectObject;
+
+typedef struct ShopEffectScene {
+    s32 resourceHandle; /* 0x00 */
+    u8 pad04[0x74];
+    s32 state;          /* 0x78 */
+    u8 pad7C[8];
+    u8 *objects[2];    /* 0x84 */
+    u8 pad8C[0x10];
+    s32 availableCount; /* 0x9C */
+    u8 padA0[0xC];
+    u32 options;        /* 0xAC */
+    u8 padB0[0x34];
+    s32 mode;           /* 0xE4 */
+} ShopEffectScene;
+
 void func_0025F7F0(u8 *scene) {
     u8 *object;
     u8 *graphics;
     s32 *params;
     s32 defaultValue = 15;
-    *(s32 *)(scene + 0x78) = 0;
+    ((ShopEffectScene *)scene)->state = 0;
     object = func_00304998(6);
-    graphics = *(u8 **)(object + 8);
-    *(u8 **)(scene + 0x84) = object;
-    params = *(s32 **)(graphics + 0x20);
+    graphics = (u8 *)((ShopEffectObject *)object)->graphics;
+    ((ShopEffectScene *)scene)->objects[0] = object;
+    params = ((ShopEffectGraphics *)graphics)->params;
     params[0] = defaultValue;
     params[1] = 0;
     params[2] = 0;
     params[3] = 0;
     params[4] = 0;
     object = func_00304998(1);
-    graphics = *(u8 **)(object + 8);
-    *(u8 **)(scene + 0x88) = object;
-    params = *(s32 **)(graphics + 0x20);
+    graphics = (u8 *)((ShopEffectObject *)object)->graphics;
+    ((ShopEffectScene *)scene)->objects[1] = object;
+    params = ((ShopEffectGraphics *)graphics)->params;
     params[0] = defaultValue;
     params[1] = 0;
 }
 
 s32 mnuShopReleaseSceneObjects(u8 *scene) {
-    s32 *objects = (s32 *)(scene + 0x84);
+    s32 *objects = (s32 *)((ShopEffectScene *)scene)->objects;
     s32 result;
     u32 i;
     for (i = 0; i < 2; i++) {
@@ -843,25 +868,34 @@ INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424AC0);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F8B8);
 
-void func_0025FA10(s32 arg0) {
-    effDestroyPackedBatch(*(u32 *)(arg0 + 0x3c));
+void func_0025FA10(s32 object) {
+    effDestroyPackedBatch(*(u32 *)(object + 0x3c));
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FC08);
 
+typedef struct ShopSceneCleanup {
+    u8 pad00[8];
+    s32 mode;             /* 0x08 */
+    u8 pad0C[0x5C];
+    s32 handles[4];       /* 0x68 through 0x74 */
+    u8 pad78[0x300];
+    s32 resourceHandle;   /* 0x378 */
+} ShopSceneCleanup;
+
 void func_0025FCD8(s32 scene) {
     s32 i;
-    s32 *slot = (s32 *)(scene + 0x68);
+    s32 *slot = ((ShopSceneCleanup *)scene)->handles;
 
-    func_002B99D8(*(s32 *)(scene + 0x378));
+    func_002B99D8(((ShopSceneCleanup *)scene)->resourceHandle);
     for (i = 1; i >= 0; i--) {
         func_003054E8(*slot++);
     }
-    func_003054E8(*(s32 *)(scene + 0x70));
-    func_003054E8(*(s32 *)(scene + 0x74));
-    switch (*(s32 *)(scene + 8)) {
+    func_003054E8(((ShopSceneCleanup *)scene)->handles[2]);
+    func_003054E8(((ShopSceneCleanup *)scene)->handles[3]);
+    switch (((ShopSceneCleanup *)scene)->mode) {
     case 1:
     case 3:
         func_0025FA10(scene + 0x210);
@@ -931,9 +965,22 @@ s32 mnuCampFindActiveSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260250);
 
+typedef struct CampCounterSlot {
+    s32 value;  /* 0x00 */
+    u8 pad04[4];
+    s32 limit;  /* 0x08 */
+} CampCounterSlot;
+
+typedef struct ShopWindowState {
+    u8 pad00[0x60];
+    CampCounterSlot counter; /* 0x60 */
+} ShopWindowState;
+
 typedef struct ShopBuf {
-    u8 unk0[0x30];
-    void *buffer;    /* 0x30 */
+    u8 unk0[0x1C];
+    ShopWindowState *state; /* 0x1C */
+    u8 pad20[0x10];
+    void *buffer;           /* 0x30 */
 } ShopBuf;
 
 typedef struct ShopSprite {
@@ -1049,12 +1096,12 @@ u8 *func_00260570(void) {
     handle = func_003292A8(0x38C);
     obj = sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
-    *(s32 *)obj = handle;
+    ((ShopEffectScene *)obj)->resourceHandle = handle;
     func_002C3E58(obj + 0xC);
     func_0025F7F0(obj);
-    *(u32 *)(obj + 0xAC) = func_00260460();
-    *(s32 *)(obj + 0x9C) = func_00260468();
-    *(s32 *)(obj + 0xE4) = 0xF;
+    ((ShopEffectScene *)obj)->options = func_00260460();
+    ((ShopEffectScene *)obj)->availableCount = func_00260468();
+    ((ShopEffectScene *)obj)->mode = 0xF;
     func_002945B8(obj);
     func_002C1B58(obj + 0x37C, 0x60);
     func_00260538();
@@ -1182,8 +1229,8 @@ s32 itmClaimFreeSlot(s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260C28);
 
-s32 func_00260C38(s32 arg0, s32 arg1) {
-    return arg1 * 2 + arg0;
+s32 func_00260C38(s32 slot, s32 row) {
+    return row * 2 + slot;
 }
 
 u32 func_00260C48(s32 row) {
@@ -1306,15 +1353,9 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261310);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_002613C8);
 
-typedef struct CampCounterSlot {
-    s32 value;  /* 0x00 */
-    u8 pad04[4];
-    s32 limit;  /* 0x08 */
-} CampCounterSlot;
-
 s32 func_00261480(s32 delta, u8 *scene) {
     s32 max = func_00261198(scene);
-    CampCounterSlot *slot = (CampCounterSlot *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x80) + 0x18) + 0x1C) + 0x60);
+    CampCounterSlot *slot = &((ShopScene *)scene)->extra->data->state->counter;
     s32 sum = ((ShopScene *)scene)->quantity + delta;
     s32 cur;
 
@@ -1330,7 +1371,7 @@ s32 func_00261480(s32 delta, u8 *scene) {
     } else {
         ((ShopScene *)scene)->atLimit = 0;
     }
-    if (*(s32 *)(*(u8 **)(*(u8 **)(*(u8 **)(scene + 0x7C) + 0x18) + 0x1C) + 0x60) == 3) {
+    if (((ShopScene *)scene)->sprites[0]->data->state->counter.value == 3) {
         slot->value = func_002613C8(cur, slot->limit);
         cur = ((ShopScene *)scene)->quantity;
     }
@@ -1347,13 +1388,13 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_002619A8);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);
 
-void func_00261D78(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+void func_00261D78(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
     s32 handle;
 
-    if (a1 != 0) {
-        handle = func_0019FC38(0x970, 0xB58, 1, (u16)a0, a1, a4);
+    if (enabled != 0) {
+        handle = func_0019FC38(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
-        func_0019D550(handle, 0, a5);
+        func_0019D550(handle, 0, flags);
         func_0019C5B0(handle);
     }
 }

@@ -116,9 +116,9 @@ extern s32 func_0019F770(UiSprite *sprite);
 
 extern s32 func_0019EA88();
 
-extern void func_0019D958(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_0019D958(s32 sequence, s32 index, s32 count, s32 selected);
 
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
 extern s8 D_00324530[];
 
@@ -200,19 +200,35 @@ void func_0019DDD0(UiCursor *cur, s32 resetPos) {
     cur->unk8 = 0;
 }
 
-void func_0019DE18(s32 object) {
-    *(u32 *)(object + 0) = 0x560;
-    *(u32 *)(object + 4) = 0xC48;
-    *(s32 *)(object + 8) = 0;
-    *(s32 *)(object + 0xC) = 0;
-    *(s16 *)(object + 0x10) = 0;
-    *(s16 *)(object + 0x12) = -1;
-    *(s16 *)(object + 0x14) = -1;
-    *(s16 *)(object + 0x16) = 0;
-    *(s32 *)(object + 0x18) = 0;
-    *(s32 *)(object + 0x1C) = 0;
-    *(s16 *)(object + 0x20) = 0;
-    *(s16 *)(object + 0x22) = 0;
+/* Distinct from UiCursor: this reset block has four trailing halfwords. */
+typedef struct UiCursorResetBlock {
+    u32 x;
+    u32 y;
+    s32 unk08;
+    s32 unk0C;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s32 unk18;
+    s32 unk1C;
+    s16 unk20;
+    s16 unk22;
+} UiCursorResetBlock;
+
+void func_0019DE18(UiCursorResetBlock *cursor) {
+    cursor->x = 0x560;
+    cursor->y = 0xC48;
+    cursor->unk08 = 0;
+    cursor->unk0C = 0;
+    cursor->unk10 = 0;
+    cursor->unk12 = -1;
+    cursor->unk14 = -1;
+    cursor->unk16 = 0;
+    cursor->unk18 = 0;
+    cursor->unk1C = 0;
+    cursor->unk20 = 0;
+    cursor->unk22 = 0;
 }
 
 void func_0019DE58(u32 *object) {
@@ -308,11 +324,11 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
 
-void func_0019E0F8(u32 arg0) {
+void func_0019E0F8(u32 object) {
     func_0019E130();
-    func_0019E320(arg0);
-    func_0019E4F8(arg0);
-    btlUpdateFadeIndicator(arg0);
+    func_0019E320(object);
+    func_0019E4F8(object);
+    btlUpdateFadeIndicator(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E130);
@@ -457,28 +473,35 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F4C8);
 
+typedef struct SoundQueueNode {
+    s32 unk00;
+    s32 next;    /* 0x04 */
+    s32 window;  /* 0x08: released when flushing the message queue */
+    u32 object;  /* 0x0C: updated by the sound-queue visitor */
+} SoundQueueNode;
+
 s32 sndVisitQueuedResources(void) {
     s32 node = *(s32 *)D_003D6EB0;
     while (node != 0) {
-        func_0019E0F8(*(u32 *)(node + 0xC));
-        node = *(s32 *)(node + 4);
+        func_0019E0F8(((SoundQueueNode *)node)->object);
+        node = ((SoundQueueNode *)node)->next;
     }
     return 0;
 }
 
-extern void itfMesDestroyWindow(s32 arg0);
+extern void itfMesDestroyWindow(s32 window);
 
-extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(s32 texture);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F6A0);
 
 void sndFlushMessageQueue(void) {
     u32 node = D_003D6EA0.unk10;
-    s32 arg;
+    s32 window;
     while (node != 0) {
-        arg = *(s32 *)(node + 8);
-        node = *(u32 *)(node + 4);
-        itfMesDestroyWindow(arg);
+        window = ((SoundQueueNode *)node)->window;
+        node = ((SoundQueueNode *)node)->next;
+        itfMesDestroyWindow(window);
     }
     sdfTexReleaseReferenceViaHandler(D_003D6EA0.allocation);
     D_003D6EA0.allocation = 0;
@@ -557,9 +580,9 @@ extern s32 sdfAllocPacketAligned(s32 size);
 
 extern void sdfInitPacketList(s32 mem);
 
-extern void itfSendTablePacket(s32 arg0, s32 arg1, s32 arg2);
+extern void itfSendTablePacket(s32 packet, s32, s32);
 
-extern void func_00198C70(void *arg0, void *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern void func_00198C70(void *, void *, void *, s32, s32, s32, s32);
 
 s32 sndUpdateTestMsgTask(void) {
     s32 mem;
