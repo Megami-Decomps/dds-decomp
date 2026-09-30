@@ -58,7 +58,7 @@ typedef struct MdlViewState {
     s16 unk34;
     s16 unk36;
     u8 pad38[2];
-    s16 unk3A;
+    s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     u8 pad3C[6];
     s16 unk42;
     u8 pad44[4];
@@ -973,7 +973,7 @@ void func_002353F0(void) {
     if (loaded->flags1C != 0) {
         mdlAddEntryFlagged(loaded, 0, 0);
     }
-    D_00453550.unk3A = 0;
+    D_00453550.nodeCursor = 0;
 }
 
 void func_00235460(void) {
@@ -1160,7 +1160,7 @@ void func_00237210(void) {
     node = ((MdlLoaded *)D_00453550.resources[0])->info->first;
     if (node != NULL) {
         if (node->count > 0) {
-            func_002351D0(&D_00453550.unk3A, node->count);
+            func_002351D0(&D_00453550.nodeCursor, node->count);
         }
     }
 }
