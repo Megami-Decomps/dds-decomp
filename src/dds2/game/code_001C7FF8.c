@@ -126,7 +126,8 @@ typedef struct SceneTask {
     u8 pad1C[4];
     s32 command;
     s32 commandValue;         /* 0x24 */
-    u8 pad28[0x20];
+    s32 commandReference;      /* 0x28: resolved for command 4 */
+    u8 pad2C[0x1C];
     void (*onUpdate)(void);   /* 0x48 */
     void (*onComplete)(void); /* 0x4C */
     u16 actionStage;          /* 0x50 */
@@ -162,6 +163,12 @@ typedef struct SceneFadingRecord {
     s32 target;
 } SceneFadingRecord;
 
+typedef struct SceneLinkedNode {
+    s32 state;
+    u8 pad04[0x174];
+    struct SceneLinkedNode *next; /* 0x178: scene-linked chain */
+} SceneLinkedNode;
+
 typedef struct BattleSceneWork {
     u8 pad00[0x218];
     u32 flags;
@@ -173,7 +180,7 @@ typedef struct BattleSceneWork {
     s32 frame;
     s32 sceneState;
     u8 pad23C[0xC];
-    void *linkedNodes;
+    SceneLinkedNode *linkedNodes;
     SceneActor *actors;
     u8 pad250[0x1E];
     u8 phaseFlag;
@@ -580,9 +587,9 @@ void func_001CB190(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416BB8);
-
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB278);
+
+INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416BB8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CB498);
 
@@ -929,24 +936,24 @@ u32 func_001CFF00(void) {
 }
 
 void func_001CFF08(u8 *scene) {
-    u32 id = *(u32 *)(scene + 0x2A0);
+    u32 id = ((BattleSceneWork *)scene)->mode;
 
     if (id < 0x400 && (D_00435E04[id].flags & 0x8000) != 0) {
-        *(u32 *)(scene + 0x21C) |= 8;
+        ((BattleSceneWork *)scene)->subFlags |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
     if (func_001B4040() == 0) {
         if (func_001B4210() == 0) {
-            *(u8 *)(scene + 0x26E) = 0;
+            ((BattleSceneWork *)scene)->phaseFlag = 0;
         } else {
-            *(u8 *)(scene + 0x26E) = 2;
+            ((BattleSceneWork *)scene)->phaseFlag = 2;
         }
     } else {
-        *(u8 *)(scene + 0x26E) = 3;
+        ((BattleSceneWork *)scene)->phaseFlag = 3;
     }
     func_0022AF90();
-    func_00229728(*(u32 *)(scene + 0x2A0));
-    func_00203F08(*(u32 *)(scene + 0x294), *(u32 *)(scene + 0x2A0));
+    func_00229728(((BattleSceneWork *)scene)->mode);
+    func_00203F08(((BattleSceneWork *)scene)->effectLayer, ((BattleSceneWork *)scene)->mode);
     VU0_STORE_VF($vf0, scene);
 }
 
@@ -1108,12 +1115,12 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D28D8);
 void fldMarkLinkedSceneActors(u8 *scene) {
     u8 *node;
     btlAdvanceTitleStateWithAudioCleanup(scene);
-    node = *(u8 **)(scene + 0x248);
+    node = (u8 *)((BattleSceneWork *)scene)->linkedNodes;
     while (node != 0) {
-        if (*(s32 *)node != 0x1F) {
+        if (((SceneLinkedNode *)node)->state != 0x1F) {
             btlDispatchStateHandler(node, 0x1F);
         }
-        node = *(u8 **)(node + 0x178);
+        node = (u8 *)((SceneLinkedNode *)node)->next;
     }
     btlFlagTasksForUpdate();
 }
@@ -1593,7 +1600,7 @@ u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     *(s16 *)(object + 0x20) = 0x61;
     object[0x10] = 0;
     if (actor != 0) {
-        *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
+        *(u64 *)(object + 0x40) = ((SceneTask *)actor)->actor->ownerId;
     }
     ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4120;
     ((SceneTask *)object)->onUpdate = 0;
@@ -1629,7 +1636,7 @@ u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     *(s16 *)(object + 0x20) = 0x62;
     object[0x10] = 0;
     if (actor != 0) {
-        *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
+        *(u64 *)(object + 0x40) = ((SceneTask *)actor)->actor->ownerId;
     }
     ((SceneTask *)object)->onUpdate = (void (*)(void))func_001D4200;
     ((SceneTask *)object)->onComplete = (void (*)(void))fldActivateRequestedSceneActor;
@@ -1942,7 +1949,7 @@ void func_001D54B8(u8 *task) {
     case 7:
     case 8:
         if (((SceneTask *)task)->command == 4) {
-            selection = func_001AC098(*(s32 *)(task + 0x28));
+            selection = func_001AC098(((SceneTask *)task)->commandReference);
         } else {
             selection = ((SceneTask *)task)->commandValue;
         }
@@ -2108,7 +2115,7 @@ void btlCommandPrintAndFetchOwner(SceneTask *task) {
 extern void func_00201828();
 
 void func_001D5EE8(u8 *task) {
-    u8 *arg = task + 0x20;
+    u8 *commandData = task + 0x20;
     u8 *work = (u8 *)func_001AA6F8();
     s32 owner = (s32)((SceneTask *)task)->actor;
     void (*hook)(u8 *);
@@ -2116,12 +2123,12 @@ void func_001D5EE8(u8 *task) {
         if (((SceneTask *)task)->actionStage == 2) {
             btlStartTask(btlCreateEffObjB(owner, ((SceneTask *)task)->effect));
         }
-        func_00201828(task, arg);
+        func_00201828(task, commandData);
         hook = *(void (**)(u8 *))(work + 0x634);
         if (hook != 0) {
             hook(task);
         }
-        func_001DD390(task, arg);
+        func_001DD390(task, commandData);
     }
 }
 

@@ -99,7 +99,8 @@ typedef struct MantraMenuValues {
 } MantraMenuValues;
 
 typedef struct MantraPanelSpriteView {
-    u8 pad00[0x20];
+    u8 pad00[0x1E];
+    s16 animationStep; /* 0x1E: signed step of panel opacity/size transition */
     u8 stateA;         /* 0x20 */
     u8 stateB;         /* 0x21 */
     u8 stateC;         /* 0x22 */
@@ -165,7 +166,7 @@ typedef struct MantraCountStateB {
 } MantraCountStateB;
 
 typedef struct MantraFadeData {
-    u8 *iconList;
+    MantraIconPool *iconPool;
     u16 state;
     u16 elapsed;
     f32 scale;
@@ -649,10 +650,10 @@ u32 mnuQueueNextMantraSelection(u32 state) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F778);
 
 u32 mnuAppendDisplayListNode(u32 state) {
-    MantraDisplayNode *node = *(MantraDisplayNode **)(state + 4);
+    MantraDisplayNode *node = ((MantraListState *)state)->head;
     if (node == 0) {
         node = mnuAllocateDisplayListNode();
-        *(MantraDisplayNode **)(state + 4) = node;
+        ((MantraListState *)state)->head = node;
     } else {
         while (node->next != 0) {
             node = node->next;
@@ -664,7 +665,7 @@ u32 mnuAppendDisplayListNode(u32 state) {
 }
 
 void mnuReleaseDisplayListNodes(u32 state) {
-    MantraDisplayNode *node = *(MantraDisplayNode **)(state + 4);
+    MantraDisplayNode *node = ((MantraListState *)state)->head;
     while (node != 0) {
         node = (MantraDisplayNode *)mnuReleaseDisplayListNodeAndGetNext(node);
     }
@@ -673,7 +674,7 @@ void mnuReleaseDisplayListNodes(u32 state) {
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F8A0);
 
 void func_0026FAA8(s32 state) {
-    *(u32 *)(state + 0x2c) = 0x1e;
+    ((MantraListState *)state)->unk2C = 0x1e;
 }
 
 u32 func_0026FAB8(void) {
@@ -801,7 +802,7 @@ void mnuUpdateMantraDrawPool(u8 *pool) {
     s32 i;
     s32 ready = 0;
     s32 count = ((MantraDrawPool *)pool)->count;
-    DrawItem *item = *(DrawItem **)(pool + 4);
+    DrawItem *item = (DrawItem *)((MantraDrawPool *)pool)->items;
 
     for (i = 0; i < count; i++, item = (DrawItem *)((u8 *)item + 0x24)) {
         if (!item->active) {
@@ -935,7 +936,7 @@ typedef struct MantraCursorFade {
 } MantraCursorFade;
 
 s32 func_00270210(s32 unused, s32 item) {
-    MantraCursorFade *fade = *(MantraCursorFade **)(item + 0x20);
+    MantraCursorFade *fade = (MantraCursorFade *)((MantraDrawItem *)item)->data;
 
     fade->clock += 1;
     if ((s16)fade->clock >= 0x79) {
@@ -1104,7 +1105,7 @@ s32 func_00270DD8(s32 unused, s32 item) {
 }
 
 s32 func_00270F10(s32 unused, s32 item) {
-    u8 *data = *(u8 **)(item + 0x20);
+    u8 *data = (u8 *)((MantraDrawItem *)item)->data;
     s32 amount = ((MantraPulseFade *)data)->scale * 128.0f;
     f32 wave = sdfSinPoly((f32)*(s16 *)(data + 4) / 120.0f * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f));
 
@@ -1194,7 +1195,7 @@ void func_00271348(u32 obj) {
 
 
 s32 func_00271368(s32 unused, s32 item) {
-    MantraFadeState *fade = *(MantraFadeState **)(item + 0x20);
+    MantraFadeState *fade = (MantraFadeState *)((MantraDrawItem *)item)->data;
 
     fade->clock += 1;
     if (fade->clock >= 0x79) {
@@ -1342,7 +1343,7 @@ void mnuReleaseMantraTitleDraw(u32 obj) {
 
 
 s32 func_00272DA8(s32 unused, s32 item) {
-    MantraBlinkState *blink = *(MantraBlinkState **)(item + 0x20);
+    MantraBlinkState *blink = (MantraBlinkState *)((MantraDrawItem *)item)->data;
 
     blink->clock += 1;
     if (blink->clock >= 0x25) {
@@ -1459,7 +1460,7 @@ void mnuReleaseMantraInfoDraw(u32 obj) {
 
 
 s32 func_00273668(s32 unused, s32 item) {
-    MantraPulseState *pulse = *(MantraPulseState **)(item + 0x20);
+    MantraPulseState *pulse = (MantraPulseState *)((MantraDrawItem *)item)->data;
 
     pulse->clock += 1;
     if (pulse->clock >= 0x3D) {
@@ -1602,7 +1603,7 @@ typedef struct MantraGaugeState {
 #define GAUGE_BITS(g) (*(u32 *)((u8 *)(g) + 8))
 
 s32 func_002741D0(s32 unused, s32 item) {
-    MantraGaugeState *gauge = *(MantraGaugeState **)(item + 0x20);
+    MantraGaugeState *gauge = (MantraGaugeState *)((MantraDrawItem *)item)->data;
     s32 i;
 
     if (GAUGE_BITS(gauge) & 0x1FE0000) {
@@ -1665,7 +1666,7 @@ s32 func_002741D0(s32 unused, s32 item) {
 s32 mnuDrawMantraGauge(s32 unused, s32 item) {
     s32 icons[4] = {0x3F, 0x40, 0x41, 0x42};
     s32 glowIcons[4] = {0x43, 0x44, 0x45, 0x46};
-    MantraGaugeState *gauge = *(MantraGaugeState **)(item + 0x20);
+    MantraGaugeState *gauge = (MantraGaugeState *)((MantraDrawItem *)item)->data;
     s32 alpha = gauge->value * 128.0f;
     f32 wave;
     f32 level;
@@ -1789,7 +1790,7 @@ void func_00274890(u32 obj) {
 
 
 s32 func_002748D0(s32 unused, s32 item) {
-    MantraLampState *lamp = *(MantraLampState **)(item + 0x20);
+    MantraLampState *lamp = (MantraLampState *)((MantraDrawItem *)item)->data;
     u32 bits;
     u16 hold;
 
@@ -2061,7 +2062,7 @@ s32 mnuUpdateMantraIconList(u8 *list) {
     MantraIconEntry *entry;
     s32 i;
 
-    entry = *(MantraIconEntry **)(list + 4);
+    entry = ((MantraIconPool *)list)->entries;
     if (entry == 0) {
         return 0;
     }
@@ -2274,89 +2275,89 @@ void func_00278DF8(s16 x, s16 y, u32 pool) {
 }
 
 void func_00278E50(u32 a, u32 b, u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(a, b, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x10);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x10);
     }
 }
 
 void func_00278EA8(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x18);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x18);
     }
 }
 
 void func_00278EE0(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x14);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x14);
     }
 }
 
 void func_00278F18(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x11);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x11);
         mnuStorePanelEntry(0x20003, 5);
     }
 }
 
 void func_00278F60(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x91);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x91);
         mnuStorePanelEntry(0x20003, 5);
     }
 }
 
 void func_00278FA8(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x92);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x92);
         mnuStorePanelEntry(0x20002, 0);
     }
 }
 
 void func_00278FF0(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x12);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x12);
     }
 }
 
 void func_00279028(u32 a, u32 b, u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(a, b, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x20);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x20);
     }
 }
 
 void func_00279080(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x28);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x28);
     }
 }
 
 void func_002790B8(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x24);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x24);
     }
 }
 
 void func_002790F0(u32 a, u32 b, u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(a, b, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x21);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x21);
     }
 }
 
 void func_00279148(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 2);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x22);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 2);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x22);
     }
 }
 
@@ -2379,14 +2380,14 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
 
 void mnuReleaseMantraFadeData(s32 obj) {
     MantraFadeData *fade = (MantraFadeData *)((MantraDrawItem *)obj)->data;
-    mnuReleaseMantraIconSprite((u32 *)fade->iconList);
+    mnuReleaseMantraIconSprite((u32 *)fade->iconPool);
     func_00328E48(fade);
 }
 
 s32 mnuUpdateMantraFadeA(s32 unused, s32 item) {
     MantraFadeData *fade = (MantraFadeData *)((MantraDrawItem *)item)->data;
 
-    mnuUpdateMantraIconList(fade->iconList);
+    mnuUpdateMantraIconList((u8 *)fade->iconPool);
     switch (fade->state) {
     case 1:
     case 6:
@@ -2426,7 +2427,7 @@ u32 func_00279440(u32 unused, u32 obj) {
     u32 data = (u32)((MantraDrawItem *)obj)->data;
     s32 scale = (s32)(((MantraFadeData *)data)->scale * 128.0f);
     func_002758B8(((MantraFadeData *)data)->x, ((MantraFadeData *)data)->y, 0,
-                  scale, *(MantraIconPool **)data);
+                  scale, ((MantraFadeData *)data)->iconPool);
     return 0;
 }
 
@@ -2495,44 +2496,44 @@ void func_002797F0(s16 x, s16 y, u32 pool) {
 }
 
 void func_00279848(u32 a, u32 b, u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(a, b, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x50);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x50);
     }
 }
 
 void func_002798A0(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x58);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x58);
     }
 }
 
 void func_002798D8(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x54);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x54);
     }
 }
 
 void func_00279910(u32 a, u32 b, u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(a, b, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x60);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(a, b, ((MantraFadeData *)item->data)->iconPool, 0x60);
     }
 }
 
 void func_00279968(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x68);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x68);
     }
 }
 
 void func_002799A0(u32 pool) {
-    s32 obj = mnuFindMantraDrawItemByKind(pool, 3);
-    if (obj != 0) {
-        mnuSpawnMantraIcon(0, 0, *(MantraIconPool **)((MantraDrawItem *)obj)->data, 0x64);
+    MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
+    if (item != 0) {
+        mnuSpawnMantraIcon(0, 0, ((MantraFadeData *)item->data)->iconPool, 0x64);
     }
 }
 
@@ -2828,23 +2829,23 @@ s32 func_0027C2F0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 p
 
     switch ((*(u32 *)object >> 19) & 0xF) {
     case 6:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
@@ -2912,32 +2913,32 @@ void func_0027DE38(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027DE40);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425BC8);
-
 extern s32 func_0027DE40(s32, s32, s32, s32, s32, u8 *, s32);
+
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425BC8);
 
 s32 func_0027E0E0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
     switch ((*(u32 *)object >> 19) & 0xF) {
     case 6:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         amount = amount * scale;
         func_0027DE40(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         amount = amount * scale;
         func_0027DE40(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_0027DE40(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_0027DE40(x, y, z, amount, unused, object, packet);
@@ -3003,23 +3004,23 @@ s32 func_0027FC90(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 p
 
     switch ((*(u32 *)object >> 19) & 0xF) {
     case 6:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 8:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 7:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
         break;
     case 9:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
@@ -3070,32 +3071,32 @@ void func_002817C0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002817C8);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CF8);
-
 extern s32 func_002817C8(s32, s32, s32, s32, s32, u8 *, s32);
+
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CF8);
 
 s32 func_00281B60(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
     f32 scale;
 
     switch ((*(u32 *)object >> 19) & 0xF) {
     case 6:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_002817C8(x, y, z, amount, unused, object, packet);
@@ -3161,23 +3162,23 @@ s32 func_00284298(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 p
 
     switch ((*(u32 *)object >> 19) & 0xF) {
     case 6:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 8:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 7:
-        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);
         break;
     case 9:
-        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = ((MantraPanelSpriteView *)object)->animationStep / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
         func_00283FA8(x, y, z, amount, unused, object, packet);

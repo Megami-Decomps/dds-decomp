@@ -4,8 +4,8 @@ extern void func_0023D5B0(s32 output, void *data, s32 size);
 
 extern void *func_00101A70();
 extern s32 func_0018FDA8(void);
-extern s32 func_002E92C0(s32 arg0);
-extern void func_002E9340(s32 arg0);
+extern s32 func_002E92C0(s32 sequence);
+extern void func_002E9340(s32 sequence);
 extern s32 func_00235540(s32 *task);
 extern s32 evtAllocateContext(void);
 extern void evtSetConvertedContextValue(s32 context, s32 value);
@@ -13,7 +13,7 @@ extern void func_002351E0(void);
 extern void func_00235228(void);
 extern s32 evtFindTaskById();
 extern void func_003014F0(char *, char *, ...);
-extern void evtFormatTaskName(s32 arg0, void *arg1);
+extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern void kwlnTaskCreate(void *name, s32 taskId, s32, s32, void *update, void *destroy, void *data);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
@@ -22,20 +22,20 @@ extern void func_00190308(void *target, f32 scale);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern void fldSetSwayMode(s32 mode);
-extern void func_00132B70(s32 arg0);
-extern void func_00132B80(s32 arg0);
+extern void func_00132B70(s32 value);
+extern void func_00132B80(s32 value);
 extern s16 func_00132B90(void);
-extern void fldSetFadeTarget(s32 arg0, s32 arg1, s32 arg2);
+extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void func_00132010(void);
-extern void func_00129720(s32 arg0);
+extern void func_00129720(s32 id);
 extern void func_0012AEB0(void);
 extern void sdfAppendPacket(s32 list, s32 packet);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
-extern void func_002E9758(s32 arg0);
+extern void func_002E9758(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
-extern void func_002E96D8(u32 arg0);
-extern void func_002E8DD0(u32 arg0);
+extern void func_002E96D8(u32 sequence);
+extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern s32 func_002E4960();
 extern u32 itfMesGetEntryCount(s32 window);
@@ -118,6 +118,8 @@ typedef struct EvtRuntime {
     s32 commandFirst; /* 0x23E4 */
     s32 commandSecond; /* 0x23E8 */
     s32 commandThird; /* 0x23EC */
+    u8 pad23F0[0x4C];
+    s32 headerMetadata; /* 0x243C: fourth serialized header word */
 } EvtRuntime;
 
 typedef struct {
@@ -859,9 +861,9 @@ void evtSetRuntimeCommandValues(EvtRuntime *runtime, s32 first, s32 second, s32 
     runtime->commandThird = third;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB90);
-
 extern char D_003BC300[]; /* "CURRENT" */
+
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEB90);
 
 void func_0023B9E8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
@@ -1115,7 +1117,7 @@ void evtWriteRuntimeHeaderValues(s32 output, s32 *state) {
     s32 first = state[4];
     s32 second = state[5];
     s32 third = state[3];
-    s32 metadata = *(s32 *)((u8 *)state + 0x243C);
+    s32 metadata = ((EvtRuntime *)state)->headerMetadata;
     s32 buf[4];
 
     buf[0] = first;
@@ -1573,9 +1575,9 @@ s32 func_00241BF0(u32 taskId, s32 key) {
     return task;
 }
 
-extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
-extern s32 func_002D3288(s32 arg0);
-extern void effSetCh72Id(s32 arg0);
+extern void sdfTexReleaseReferenceViaHandler(s32 handle);
+extern s32 func_002D3288(s32 resource);
+extern void effSetCh72Id(s32 id);
 
 void evtRefreshTaskData(s32 taskId, s32 key) {
     EvtTaskData *data = evtGetTaskData(taskId);
@@ -1599,9 +1601,14 @@ typedef struct Entry270 {
     u8 pad1C[0x254];
 } Entry270;
 
+typedef struct EvtEffectInner {
+    u8 pad00[0x2C];
+    void *scaledObject; /* 0x2C: object passed to the scale setter */
+} EvtEffectInner;
+
 typedef struct EvtEffectObject {
     u8 pad00[0x18];
-    u8 *inner;
+    EvtEffectInner *inner;
 } EvtEffectObject;
 
 extern Entry270 *D_003BAA10;
@@ -1612,7 +1619,7 @@ void *func_00241D28(s32 taskId, s32 key, s32 index) {
     u8 vecB[16];
     void *found;
     void *obj;
-    u8 *inner;
+    EvtEffectInner *inner;
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
@@ -1623,7 +1630,7 @@ void *func_00241D28(s32 taskId, s32 key, s32 index) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {
                 inner = ((EvtEffectObject *)obj)->inner;
-                func_00190308(*(void **)(inner + 0x2C), D_003BAA20[index].unk18 / D_003BAA10->unk18);
+                func_00190308(inner->scaledObject, D_003BAA20[index].unk18 / D_003BAA10->unk18);
             }
             return obj;
         }
