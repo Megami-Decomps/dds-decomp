@@ -138,6 +138,26 @@ typedef struct FldTransferChunk {
     u32 size;
 } FldTransferChunk;
 
+typedef struct FldLoadRecord {
+    u32 unk_0;
+    u32 unk_4;
+    void *unk_8;
+    void *unk_c;
+    void *unk_10;
+    void *unk_14;
+} FldLoadRecord;
+
+typedef struct FldLoadRequest {
+    u32 unk_0;
+    u32 unk_4;
+    FldLoadRecord *record;
+} FldLoadRequest;
+
+extern u32 D_00444920[], D_00444930[], D_00444940[];
+extern char D_00435FD0[];
+extern u32 func_00343ED0(const char *, u32 *, s32);
+extern void func_001289A8(u32, u32);
+
 extern f32 D_003897DC[];
 
 extern s32 D_00389770[];
@@ -180,13 +200,11 @@ extern u32 D_0037FB48[];
 
 extern void sdfInitPacketList(u64);
 
-extern void sdfAppendPacket(u64, u64);
-
-extern void sdfAppendPacket(u64, u64);
-
-extern void sdfAppendPacket(u64, u64);
-
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern s32 sdfConsAllocateColumnPacket(s32);
+
+extern void sdfConsCreateDrawPacket(u64, s32, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
@@ -398,8 +416,6 @@ typedef struct FldAreaResourceState {
     s32 room;             /* 0x80 */
 } FldAreaResourceState;
 
-extern void func_0012B518(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
-
 extern void btlActivateRuntime(s32 mode);
 
 extern void func_00110A88(u64, s8);
@@ -483,7 +499,31 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129660);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129940);
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00129B40);
+void func_00129B40(FldLoadRequest *request) {
+    char directory[32];
+    char path[64];
+    s32 i;
+
+    fldSetDisplayState(request->record->unk_4);
+    D_00444920[0] = (u32)request->record->unk_8;
+    D_00444920[1] = (u32)request->record->unk_c;
+    D_00444920[2] = (u32)request->record->unk_10;
+    D_00444920[3] = (u32)request->record->unk_14;
+    for (i = 0; i < 4; i++) {
+        D_00444930[i] = 0;
+        D_00444940[i] = 0;
+    }
+    if (D_00389770[4] < 500) {
+        for (i = 0; i < 4; i++) {
+            if (D_00444920[i] != 0) {
+                fldFormatAreaDirectory(directory, D_00389770[4], D_00389770[5] + 1);
+                func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
+                D_00444930[i] = func_00343ED0(path, &D_00444940[i], 0);
+            }
+        }
+    }
+    func_001289A8(request->unk_4, request->unk_0);
+}
 
 /* Handle a field request, creating the player only in non-special scene states. */
 void fldProcessFieldRequest(u32 *request) {
@@ -1055,7 +1095,54 @@ u32 *fldGetDisplayTableRow(void) {
     return &D_0037FB48[D_00436060 * 8];
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B518);
+typedef struct FldSpriteCorner {
+    s32 u, v;
+    u8 pad08[8];
+    s32 x, y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} FldSpriteCorner;
+
+/* Sprite vertex record (0x50 bytes): colour, then two corners of the quad. */
+typedef struct FldSpriteVertex {
+    s32 r, g, b, a;
+    FldSpriteCorner corner[2];
+} FldSpriteVertex;
+
+void func_0012B518(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 arg9) {
+    s32 handle = sdfConsAllocateColumnPacket(1);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)func_0033A2D0(handle);
+    s32 ubase = u * 16;
+    s32 xl = x * 16 + 0x7000;
+    s32 vbase = v * 16;
+    s32 yt = y * 8 + 0x7900;
+    u64 command;
+    FieldBufferDescriptor *descriptor;
+
+    vtx->r = color & 0xFF;
+    vtx->g = (color >> 8) & 0xFF;
+    vtx->b = (color >> 16) & 0xFF;
+    vtx->a = (color >> 24) & 0xFF;
+    vtx->corner[0].u = ubase;
+    vtx->corner[0].v = vbase;
+    vtx->corner[0].x = xl;
+    vtx->corner[0].y = yt;
+    vtx->corner[0].mask = -1;
+    vtx->corner[0].flag = 0;
+    vtx->corner[1].u = ubase + uw * 16;
+    vtx->corner[1].v = vbase + vh * 16;
+    vtx->corner[1].x = xl + w * 16;
+    vtx->corner[1].y = yt + h * 8;
+    vtx->corner[1].mask = -1;
+    vtx->corner[1].flag = 0;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    sdfConsCreateDrawPacket(command, arg9, 0);
+    sdfAppendPacket(command, handle);
+    descriptor = (FieldBufferDescriptor *)&D_0037FB48[D_00436060 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B690);
 
@@ -1222,6 +1309,8 @@ void func_0012BBD0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstX = result[0];
     *dstY = result[1];
 }
+
+extern void sdfAppendPacket(u64, u64);
 
 void func_0012BC38(u32 arg0) {
     D_00436060 = arg0;

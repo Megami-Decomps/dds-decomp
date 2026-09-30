@@ -288,6 +288,26 @@ typedef struct FldTransferChunk {
     u32 size;
 } FldTransferChunk;
 
+typedef struct FldLoadRecord {
+    u32 unk_0;
+    u32 unk_4;
+    void *unk_8;
+    void *unk_c;
+    void *unk_10;
+    void *unk_14;
+} FldLoadRecord;
+
+typedef struct FldLoadRequest {
+    u32 unk_0;
+    u32 unk_4;
+    FldLoadRecord *record;
+} FldLoadRequest;
+
+extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
+extern char D_003BAC40[];
+extern u32 func_002EB028(const char *, u32 *, s32);
+extern void func_001263F0(u32, u32);
+
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
 
 void fldSpawnActionObjects(FldActionSpawn *spawn, u32 count) {
@@ -307,7 +327,31 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001270A8);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00127388);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00127588);
+void func_00127588(FldLoadRequest *request) {
+    char directory[32];
+    char path[64];
+    s32 i;
+
+    fldSetDisplayState(request->record->unk_4);
+    D_003C91D0[0] = (u32)request->record->unk_8;
+    D_003C91D0[1] = (u32)request->record->unk_c;
+    D_003C91D0[2] = (u32)request->record->unk_10;
+    D_003C91D0[3] = (u32)request->record->unk_14;
+    for (i = 0; i < 4; i++) {
+        D_003C91E0[i] = 0;
+        D_003C91F0[i] = 0;
+    }
+    if (D_0032E3B0[4] < 500) {
+        for (i = 0; i < 4; i++) {
+            if (D_003C91D0[i] != 0) {
+                fldFormatAreaDirectory(directory, D_0032E3B0[4], D_0032E3B0[5] + 1);
+                func_003014F0(path, D_003BAC40, directory, D_003C91D0[i]);
+                D_003C91E0[i] = func_002EB028(path, &D_003C91F0[i], 0);
+            }
+        }
+    }
+    func_001263F0(request->unk_4, request->unk_0);
+}
 
 /* Handle a field request, creating the player only in non-special scene states. */
 void fldProcessFieldRequest(u32 *request) {
@@ -704,8 +748,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_001281E0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00128780);
 
-extern u32 D_003C91E0[];
-extern u32 D_003C91F0[];
 extern s32 D_003BAC10;
 extern s32 D_003BAC14;
 extern FldTransferChunk *D_003BAC18;
@@ -856,7 +898,54 @@ u32 *fldGetDisplayTableRow(void) {
     return &D_00324B48[D_003BACD0 * 8];
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00129000);
+typedef struct FldSpriteCorner {
+    s32 u, v;
+    u8 pad08[8];
+    s32 x, y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} FldSpriteCorner;
+
+/* Sprite vertex record (0x50 bytes): colour, then two corners of the quad. */
+typedef struct FldSpriteVertex {
+    s32 r, g, b, a;
+    FldSpriteCorner corner[2];
+} FldSpriteVertex;
+
+void func_00129000(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, u32 arg9) {
+    s32 handle = sdfConsAllocateColumnPacket(1);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)func_002E1420(handle);
+    s32 ubase = u * 16;
+    s32 xl = x * 16 + 0x7000;
+    s32 vbase = v * 16;
+    s32 yt = y * 8 + 0x7900;
+    u64 command;
+    FieldBufferDescriptor *descriptor;
+
+    vtx->r = color & 0xFF;
+    vtx->g = (color >> 8) & 0xFF;
+    vtx->b = (color >> 16) & 0xFF;
+    vtx->a = (color >> 24) & 0xFF;
+    vtx->corner[0].u = ubase;
+    vtx->corner[0].v = vbase;
+    vtx->corner[0].x = xl;
+    vtx->corner[0].y = yt;
+    vtx->corner[0].mask = -1;
+    vtx->corner[0].flag = 0;
+    vtx->corner[1].u = ubase + uw * 16;
+    vtx->corner[1].v = vbase + vh * 16;
+    vtx->corner[1].x = xl + w * 16;
+    vtx->corner[1].y = yt + h * 8;
+    vtx->corner[1].mask = -1;
+    vtx->corner[1].flag = 0;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    sdfConsCreateDrawPacket(command, arg9, 0);
+    sdfAppendPacket(command, handle);
+    descriptor = (FieldBufferDescriptor *)&D_00324B48[D_003BACD0 * 8];
+    descriptor->open(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00129178);
 
@@ -1546,8 +1635,6 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
 }
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
-
-extern void func_00129000(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32);
 
 void func_0012B638(s32 x, s32 y, s32 width, s32 height) {
     func_00129000(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_003BACF0);
@@ -3774,7 +3861,40 @@ void fldCopyActorWaypointTable(const void *source) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00140AB8);
+void func_00140AB8(s32 id) {
+    s32 i;
+    u32 *task;
+    FldActorEntry *actor;
+
+    if (id != 0) {
+        if (id != -1) {
+            for (i = 0; i < 256; i++) {
+                actor = (FldActorEntry *)(D_00337D00 + i * 108);
+                task = D_003CE3E0[i];
+                if (task[0] == 1 && task[1] == id) {
+                    task[0] = 2;
+                    task[7] = 0;
+                    task[8] = 0;
+                    task[9] = 0;
+                    if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6
+                        || actor->secondaryMotion == 6 || actor->motion == 7 || actor->secondaryMotion == 7
+                        || actor->motion == 8 || actor->secondaryMotion == 8) {
+                        task[10] = 0x28;
+                    } else {
+                        task[10] = 0x14;
+                    }
+                    task[11] = 0;
+                    task[12] = 0;
+                    task[13] = 0;
+                    task[17] = 0;
+                    task[18] = 0;
+                    task[19] = 0;
+                    fldApplyPendingCameraHeading();
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0380);
 
