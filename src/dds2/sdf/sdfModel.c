@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* 16-byte packet, written at quadword, word, halfword and byte granularity. */
 typedef struct {
@@ -51,9 +52,14 @@ typedef struct SdfDrawNode {
     struct SdfDrawNode *next; /* 0x04 */
     u8 pad08[4];
     struct SdfDrawNode *children; /* 0x0C */
-    u8 pad10[0x20];
+    u8 pad10[8];
+    s32 unk18; /* 0x18 */
+    u8 pad1C[0x14];
     u32 address; /* 0x30 */
-    u8 pad34[0x2C];
+    s32 unk34; /* 0x34 */
+    void *unk38; /* 0x38: item this node was built from */
+    u8 pad3C[0x14];
+    u8 quaternion[0x10]; /* 0x50 */
     u8 vectors[5][0x10]; /* 0x60-0xAF */
     u8 padB0[0x10];
     u8 transformed[0x40]; /* 0xC0: four COP2 output vectors */
@@ -63,7 +69,6 @@ extern void sdfFreeNodeLists(void);
 
 extern void sdfEnsureFreeRootWorkspace(void *arg0);
 
-extern void func_003314B0(void *arg0);
 
 extern void func_003312A8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
@@ -79,9 +84,27 @@ typedef struct {
     SdfItemList *items;   /* 0x00 */
 } SdfItemListRef;
 
+/* Per-item record applied to a draw node by func_00331500 (0x50 bytes). */
+typedef struct {
+    u8 pad00[8];
+    s32 unk8;         /* 0x08 */
+    u8 pad0C[4];
+    f32 x;            /* 0x10 */
+    f32 y;            /* 0x14 */
+    f32 z;            /* 0x18 */
+    u8 pad1C[4];
+    u128 vec20;       /* 0x20 */
+    u128 vec30;       /* 0x30 */
+    s32 unk40;        /* 0x40 */
+} SdfItem;
+
+extern void effMiscQuaternionToMatrixVU(void);
+extern void func_00340DC8(f32 x, f32 y, f32 z);
+void func_003314B0(SdfDrawNode *node);
+void func_00331500(SdfDrawNode *node, SdfItem *item);
+
 extern SdfModel *func_003317C8(void *arg0, void *arg1);
 
-extern void func_00331500(void *arg0, void *arg1);
 
 extern void func_00336B00(void);
 
@@ -148,9 +171,24 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331238);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003312A8);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_003314B0);
+void func_003314B0(SdfDrawNode *node) {
+    VU0_LOAD_VF(vf10, node->quaternion);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf31, node->vectors[0]);
+    VU0_STORE_MATRIX(node->vectors[2]);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331500);
+void func_00331500(SdfDrawNode *node, SdfItem *item) {
+    node->unk38 = item;
+    node->unk18 = item->unk8;
+    func_00340DC8(item->x, item->y, item->z);
+    VU0_STORE_VF(vf10, node->quaternion);
+    PCP_COPY_VECTOR(node->vectors[0], &item->vec20);
+    PCP_COPY_VECTOR(node->vectors[1], &item->vec30);
+    ((f32 *)node->vectors[0])[3] = 1.0f;
+    func_003314B0(node);
+    node->unk34 = item->unk40;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331590);
 
@@ -162,7 +200,7 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     model->unk38 = arg1;
     sdfFreeNodeLists();
     sdfEnsureFreeRootWorkspace(model);
-    func_003314B0(model);
+    func_003314B0((SdfDrawNode *)model);
     /* Required to match: reinitialize both loop counters after setting up the model. */
     i = 0;
     j = 0;
@@ -209,7 +247,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     item = &list->firstItem;
     if (count != i) {
         do {
-            func_00331500(model->list->entries[i], item);
+            func_00331500(model->list->entries[i], (SdfItem *)item);
             item += 0x50;
             i++;
         } while (i != count);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
@@ -7,10 +8,8 @@ extern void func_002EFD30(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(void);
 extern void sdfEnsureFreeRootWorkspace(void *arg0);
-extern void func_002D8600(void *arg0);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
-extern void func_002D8650(void *arg0, void *arg1);
 extern void func_002DDC50(void);
 extern void func_002E1FF8(u32 arg0);
 extern vu8 D_003BD2EA;
@@ -55,7 +54,8 @@ typedef struct {
     u8 unk19;          /* 0x19 */
     u8 pad_0x1A[0x06]; /* 0x1A */
     u8 transformStart; /* 0x20: COP2 reads 0x40 bytes across following fields */
-    u8 pad_0x21[0x0F];
+    u8 pad_0x21[0x07];
+    struct SdfNode *nodes[2]; /* 0x28: per-slot node lists */
     s32 packetAddressBase; /* 0x30: base of 128-byte indexed address packets */
     u8 pad_0x34[0x04]; /* 0x34 */
     s32 unk38;         /* 0x38 */
@@ -69,9 +69,14 @@ typedef struct SdfDrawNode {
     struct SdfDrawNode *next;     /* 0x04 */
     u8 pad08[4];
     struct SdfDrawNode *children; /* 0x0C */
-    u8 pad10[0x20];
+    u8 pad10[8];
+    s32 unk18;                    /* 0x18 */
+    u8 pad1C[0x14];
     u32 address;                  /* 0x30 */
-    u8 pad34[0x2C];
+    s32 unk34;                    /* 0x34 */
+    void *unk38;                  /* 0x38: item this node was built from */
+    u8 pad3C[0x14];
+    u8 quaternion[0x10];          /* 0x50 */
     u8 vectors[5][0x10];         /* 0x60-0xAF: COP2 inputs */
     u8 padB0[0x10];
     u8 transformed[0x40];        /* 0xC0: four COP2 output vectors */
@@ -94,7 +99,7 @@ typedef struct {
     u32 unk8;
 } SdfInfo;
 
-typedef struct {
+typedef struct SdfNode {
     void *unk0;       /* 0x0 */
     u8 unk4;          /* 0x4 */
     s8 unk5;          /* 0x5 */
@@ -144,7 +149,25 @@ typedef struct {
     SdfItemList *items;   /* 0x00 */
 } SdfItemListRef;
 
+/* Per-item record applied to a draw node by func_002D8650 (0x50 bytes). */
+typedef struct {
+    u8 pad00[8];
+    s32 unk8;         /* 0x08 */
+    u8 pad0C[4];
+    f32 x;            /* 0x10 */
+    f32 y;            /* 0x14 */
+    f32 z;            /* 0x18 */
+    u8 pad1C[4];
+    u128 vec20;       /* 0x20 */
+    u128 vec30;       /* 0x30 */
+    s32 unk40;        /* 0x40 */
+} SdfItem;
+
 extern SdfModel *func_002D8918(void *arg0, void *arg1);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void func_002E7F20(f32 x, f32 y, f32 z);
+void func_002D8600(SdfDrawNode *node);
+void func_002D8650(SdfDrawNode *node, SdfItem *item);
 
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D7D68);
@@ -183,9 +206,24 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8388);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8600);
+void func_002D8600(SdfDrawNode *node) {
+    VU0_LOAD_VF(vf10, node->quaternion);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf31, node->vectors[0]);
+    VU0_STORE_MATRIX(node->vectors[2]);
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8650);
+void func_002D8650(SdfDrawNode *node, SdfItem *item) {
+    node->unk38 = item;
+    node->unk18 = item->unk8;
+    func_002E7F20(item->x, item->y, item->z);
+    VU0_STORE_VF(vf10, node->quaternion);
+    PCP_COPY_VECTOR(node->vectors[0], &item->vec20);
+    PCP_COPY_VECTOR(node->vectors[1], &item->vec30);
+    ((f32 *)node->vectors[0])[3] = 1.0f;
+    func_002D8600(node);
+    node->unk34 = item->unk40;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
 
@@ -197,7 +235,7 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     model->unk38 = arg1;
     sdfFreeNodeLists();
     sdfEnsureFreeRootWorkspace(model);
-    func_002D8600(model);
+    func_002D8600((SdfDrawNode *)model);
     /* The re-initialization below is load-bearing for a byte-identical build. */
     i = 0;
     j = 0;
@@ -244,7 +282,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     item = &list->firstItem;
     if (count != i) {
         do {
-            func_002D8650(model->list->entries[i], item);
+            func_002D8650(model->list->entries[i], (SdfItem *)item);
             item += 0x50;
             i++;
         } while (i != count);
