@@ -3051,14 +3051,97 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 }
 
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
+extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
+extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
+extern void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294C30);
+/* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
+static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *owner, FileJob *leader) {
+    FileJob *next;
 
-extern void func_00294C30(FileQueue *queue, FileJob *job, FileJob *first);
+    leader->sector = 0;
+    leader->flags &= ~2;
+    func_00294C30(queue, leader, leader);
+    next = fileQueueFindBySector(queue, owner->id);
+    while (next != NULL) {
+        func_00294C30(queue, next, leader);
+        next = fileQueueFindBySector(queue, owner->id);
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294DA0);
+void func_00294C30(FileQueue *queue, FileJob *job, FileJob *ref) {
+    FileJob *node;
+    FileJob *found;
+    FileJob *source;
+    u32 refIndex;
+    u32 flags;
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294E50);
+    if (!(job->flags & 1)) {
+        for (node = queue->tail; node != NULL; node = node->next) {
+            if ((node->flags & 1) && node->id == job->id) {
+                func_00294C30(queue, node, ref);
+            }
+        }
+    }
+    if (job == ref) {
+        return;
+    }
+    flags = job->flags;
+    if (!(flags & 1)) {
+        fileJobFreeSecondaryBuffer((FileJob *)job->id);
+        source = (FileJob *)ref->id;
+        fileJobSetSecondaryData((FileJob *)job->id, (void *)source->slots[1].offset, source->slots[1].size,
+                                source->slots[0].selector);
+        flags = job->flags;
+    }
+    job->flags = flags | 2;
+    job->sector = ref->id;
+    refIndex = fileFindQueuedJobIndex(queue, ref);
+    if (fileFindQueuedJobIndex(queue, job) < refIndex) {
+        found = fileQueueFindBySector(queue, ref->id);
+        if (found != NULL) {
+            fileQueueRechainSectorFollowers(queue, ref, found);
+            func_00294C30(queue, ref, found);
+        }
+    }
+}
+
+void func_00294DA0(FileQueue *queue, FileJob *job) {
+    u32 flags = job->flags;
+    FileJob *first;
+
+    job->flags = flags & ~2;
+    if (!(flags & 1)) {
+        first = fileQueueFindBySector(queue, job->id);
+        if (first != NULL) {
+            fileQueueRechainSectorFollowers(queue, job, first);
+        }
+    }
+    job->sector = 0;
+}
+
+void func_00294E50(FileQueue *queue, FileJob *job) {
+    FileJob *first;
+
+    fileQueueRemove(queue, job);
+    if (!(job->flags & 1)) {
+        first = fileQueueFindFlaggedById(queue, job->id);
+        while (first != NULL) {
+            func_00294E50(queue, first);
+            first = fileQueueFindFlaggedById(queue, job->id);
+        }
+        if (!(job->flags & 2)) {
+            first = fileQueueFindBySector(queue, job->id);
+            if (first != NULL) {
+                fileQueueRechainSectorFollowers(queue, job, first);
+            }
+        }
+        if (!(job->flags & 1)) {
+            fileJobDestroy((FileJob *)job->id);
+        }
+    }
+    func_002940B8(job);
+}
 
 void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
