@@ -103,7 +103,7 @@ typedef struct PcpScatterWork8 {
     f32 unk4C;
     f32 unk50;
     u8 pad54[0x28];
-    u32 *unk7C;
+    u32 *values; /* assigned by func_00179178; element meaning not yet known */
 } PcpScatterWork8;
 
 typedef struct PcpScatterWork2 {
@@ -291,7 +291,7 @@ void func_00179168(void *dst, void *src) {
 }
 
 void func_00179178(PcpScatterWork8 *work, u32 *values) {
-    work->unk7C = values;
+    work->values = values;
 }
 
 void effScatterScaleParticleValues(float scale, PcpScatterWork8 *work) {
@@ -314,12 +314,13 @@ void func_00179438(u64 table) {
     func_001791A8(params, resource, options);
 }
 
-/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (effScatterScaleParticleValues
-   scales the same word as a float). */
+/* Work8 as seen by its copy constructor. The float parameters also occur
+   in PcpScatterWork8 and are scaled by effScatterScaleParticleValues. */
 typedef struct {
     u8 pad00[0x20];
     u32 particleCount;
     u8 pad24[0x18];
+    /* These floats are scaled together; their individual roles are not yet known. */
     f32 unk3C;
     u32 unk40;
     u32 unk44;

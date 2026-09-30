@@ -841,7 +841,8 @@ typedef struct BtlCommandRecord {
     u16 restriction;
     u8 unk_0E[0x16];
     u32 attributeBits;
-    u8 unk_28[0x10];
+    u32 requiredEntryFlags; /* 0x28: entry-code pair mask, or 0x800/0x1000 expiry rule */
+    u8 unk_2C[0xC];
 } BtlCommandRecord;
 
 extern s8 *D_003BAA4C;
@@ -913,7 +914,7 @@ s32 func_002110B8(void *list, s32 row) {
     if (row <= 0) {
         return result;
     }
-    flags = *(u32 *)(D_003BAA50 + row * 0x38 + 0x28);
+    flags = ((BtlCommandRecord *)D_003BAA50)[row].requiredEntryFlags;
     if (flags == 0) {
         return result;
     }
