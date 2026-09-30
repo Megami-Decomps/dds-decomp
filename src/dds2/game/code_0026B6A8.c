@@ -10,11 +10,84 @@ extern void func_0026C900(void);
 
 extern s64 func_0026C768(void);
 
-extern u8 D_003CE848[];
+extern s32 D_00435DD0;
 
-extern void func_002C42C0();
+typedef struct SceneFlagEntry {
+    s32 needFlag;    /* 0x00 */
+    s32 doneFlag;    /* 0x04 */
+    u16 areaIndex;   /* 0x08 */
+    u8 nameIndex;    /* 0x0A */
+    u8 pad0B;
+    u16 dialogIndex; /* 0x0C */
+    u16 pad0E;
+} SceneFlagEntry;
 
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026B6A8);
+typedef struct PartyFlagPair {
+    s32 needFlag;
+    s32 doneFlag;
+} PartyFlagPair;
+
+typedef struct PartySlotHeader {
+    u16 flags;
+    u16 pad02;
+    u16 id;
+} PartySlotHeader;
+
+extern SceneFlagEntry D_003CE6E8[4];
+extern PartyFlagPair D_003CE728[];
+extern s32 D_00435E5C;
+extern s32 D_00435E50;
+extern s32 D_00435E4C;
+extern s32 D_00435E48;
+
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagSet(s32);
+extern void func_0026B680(s32);
+extern void func_0026C918(s32, void *);
+extern void func_0026C948();
+
+s32 func_0026B6A8(s32 context) {
+    s32 kind = *(s32 *)(context + 0x84);
+    s32 i;
+    PartySlotHeader *slot;
+
+    if (kind < 2) {
+        if (kind >= 0) {
+            if (mdlFlagTest(0x1B1) != 0 && mdlFlagTest(0x916) == 0) {
+                func_0026C948(1);
+                func_0026C5B8(5);
+                mdlFlagSet(0x916);
+                return 1;
+            }
+            for (i = 0; i < sizeof(D_003CE6E8) / sizeof(D_003CE6E8[0]); i++) {
+                if (mdlFlagTest(D_003CE6E8[i].needFlag) != 0 && mdlFlagTest(D_003CE6E8[i].doneFlag) == 0) {
+                    func_0026B680(context);
+                    func_0026C948(1);
+                    func_0026C918(0, (void *)(D_00435E5C + D_003CE6E8[i].areaIndex * 0x19));
+                    func_0026C918(1, (void *)(D_00435E50 + D_003CE6E8[i].nameIndex * 0x13));
+                    func_0026C918(2, (void *)(D_00435E4C + D_003CE6E8[i].dialogIndex * 0x11));
+                    func_0026C5B8(3);
+                    mdlFlagSet(D_003CE6E8[i].doneFlag);
+                    return 1;
+                }
+            }
+            for (i = 0; i < 5; i++) {
+                slot = (PartySlotHeader *)(D_00435DD0 + i * 0x1C4 + 0xA60);
+                if ((slot->flags & 1) != 0 && mdlFlagTest(D_003CE728[slot->id].needFlag) != 0
+                    && mdlFlagTest(D_003CE728[slot->id].doneFlag) == 0) {
+                    func_0026B680(context);
+                    func_0026C948(1);
+                    func_0026C918(0, (void *)(D_00435E48 + slot->id * 0x11));
+                    func_0026C5B8(4);
+                    mdlFlagSet(D_003CE728[slot->id].doneFlag);
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 
 s32 func_0026B8F0(void) {
     s32 *state = (s32 *)func_00101958();
@@ -91,6 +164,8 @@ void func_0026BB78(s32 request) {
     func_002C4038(state + 8, state + 0x54, 1, request);
 }
 
+/* Parked: build/parked/dds2/game/code_0026B6A8/func_0026BBC8.c (retail keeps a
+   jal tail here but sibcalls in the identical sibling func_0026BA20). */
 INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BBC8);
 
 u32 func_0026BC00(void) {

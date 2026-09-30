@@ -309,6 +309,8 @@ void evtCreateSkyTask(void) {
     kwlnTaskCreate(D_004373D0, 0x2B0E, 1, 1, (s32)evtUpdateSkyTask, (s32)evtResetSkyTaskFlags, 0);
 }
 
+/* Parked: build/parked/dds2/game/code_00250010/func_002502E0.c (needs a 4-word
+   stack local; an unused buffer matches but is a codegen lever, not source). */
 INCLUDE_ASM(const s32, "game/code_00250010", func_002502E0);
 
 extern s32 kwlnTaskCreate(char *name, s32 arg1, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);
@@ -332,7 +334,43 @@ s32 func_00250508(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00250558);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00250718);
+extern s32 func_00250558(s32, s32, s32, s32, EvtRuntime *);
+s32 func_00250718(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    f32 step;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x16, 9, 0, 1, ctx, func_00250508, func_00250558);
+    D_00380748.submit(&D_00380748, list);
+    if (ctx->mode != 8) {
+        return 0;
+    }
+    if (D_0037F510.confirm < 0) {
+        return 1;
+    }
+    if (D_0037F510.cancel < 0) {
+        return -1;
+    }
+    step = 0.0f;
+    if (D_0037F510.decOne & 2) {
+        step = -0.1f;
+    } else if (D_0037F510.incOne & 2) {
+        step = 0.1f;
+    }
+    if (D_0037F510.decTen & 2) {
+        step = -1.0f;
+    } else if (D_0037F510.incTen & 2) {
+        step = 1.0f;
+    }
+    ctx->fvalue += step;
+    if (ctx->fvalue < ctx->fvalueMin) {
+        ctx->fvalue = ctx->fvalueMin;
+    }
+    if (ctx->fvalue >= ctx->fvalueMax) {
+        ctx->fvalue = ctx->fvalueMax;
+    }
+    return 0;
+}
 
 s32 func_00250880(s32 arg0, s32 arg1, s32 arg2) {
     sdfAppendPacket(arg0, func_0033D810(arg1, arg2, 0xFEFFFF, 0, "VALUE CHANGE."));

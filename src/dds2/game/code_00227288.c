@@ -1384,6 +1384,8 @@ u32 func_0022B9D0(void) {
     return 1;
 }
 
+/* Parked: build/parked/dds2/game/code_00227288/func_0022BA08.c (the frames test
+   lands one word late; structure, frame and every field offset are confirmed). */
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022BA08);
 
 u32 btlCreateScriptResourceTask(u32 object, u32 group) {
@@ -1531,10 +1533,6 @@ s32 func_0022BDC0(void *list, s32 code, u32 mask) {
     return matched == count;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7D0);
-
-INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7E0);
-
 typedef struct BtlCommandRecord {
     u8 flags;
     u8 unk_01[8];
@@ -1550,6 +1548,10 @@ typedef struct BtlCommandRecord {
     s32 requirementBits; /* +0x28: selects the action-entry condition */
     u8 unk_2C[0xC];
 } BtlCommandRecord;
+
+INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7D0);
+
+INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7E0);
 
 s32 func_0022BEB0(void *list, s32 command) {
     s32 codes[5] = {0, 1, 2, 3, 4};

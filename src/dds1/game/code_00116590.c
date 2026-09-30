@@ -70,4 +70,10 @@ INCLUDE_ASM(const s32, "game/code_00116590", func_00116710);
 
 INCLUDE_ASM(const s32, "game/code_00116590", func_001167B8);
 
-INCLUDE_ASM(const s32, "game/code_00116590", func_00116820);
+u32 func_00116820(ObjWithWork *obj) {
+    void *work = func_002CFEB8(0x1C);
+
+    obj->work = work;
+    memset(work, 0, 0x1C);
+    return 1;
+}
