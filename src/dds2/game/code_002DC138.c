@@ -7683,7 +7683,7 @@ s32 *func_002FA5B8(s32 *source) {
 
 extern void effRebuildResourceEntries(u8 *, u32, s32 *);
 extern void func_002FABA8(s32, u32, u32);
-extern void func_002FAC38(s32 *, s32);
+extern void func_002FAC38(EffectSlotNode80 *, s32);
 
 s32 *func_002FA5F0(u8 *request) {
     u8 *buffer = fileResolvePrimaryBuffer(request);
@@ -7844,7 +7844,30 @@ void func_002FABA8(s32 work, u32 kind, u32 config) {
     ((EffectSlotNode80 *)work)->deviceSlot = deviceSlot;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FAC38);
+/* Rebuilds the surface job queue of one record bucket and clones the first job. */
+void func_002FAC38(EffectSlotNode80 *obj, s32 secondary) {
+    u32 count = ((EffRecordBucket *)obj->record)->count;
+    u32 i;
+    s32 size;
+
+    if (obj->entryAllocation != 0) {
+        for (i = 0; i < count; i++) {
+            fileQueueDestroy((s32)(u32)((void **)obj->resourceEntries)[i]);
+        }
+        func_003297C8(obj->entryAllocation);
+        obj->resourceEntries = 0;
+        obj->entryAllocation = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        obj->entryAllocation = (u32)func_003292A8(size);
+        obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
+        ((void **)obj->resourceEntries)[0] = (void *)func_002D4138(secondary);
+        for (i = 1; i < count; i++) {
+            ((void **)obj->resourceEntries)[i] = fileQueueClone(((void **)obj->resourceEntries)[0]);
+        }
+    }
+}
 
 void effClearSurfaceRecordReferences(s32 node) {
     if (((EffectSlotNode80 *)node)->record != 0) {

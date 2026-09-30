@@ -469,7 +469,20 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8BD0);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8E30);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8F40);
+extern void *memcpy(void *, const void *, u32);
+
+f32 *func_002C8F40(f32 *vec, f32 *mat) {
+    f32 out[4];
+    f32 x = vec[0];
+    f32 y = vec[1];
+    f32 z = vec[2];
+
+    out[0] = x * mat[0] + y * mat[4] + z * mat[8];
+    out[1] = x * mat[1] + y * mat[5] + z * mat[9];
+    out[2] = x * mat[2] + y * mat[6] + z * mat[10];
+    memcpy(vec, out, 16);
+    return vec;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8FE8);
 
