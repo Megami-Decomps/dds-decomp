@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern u8 D_003BD39C;
 
@@ -15,11 +16,6 @@ extern void sdfTickThreadPriorityOverride(void);
 extern s32 CancelWakeupThread(u64);
 
 extern u64 GetThreadId(void);
-
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
-    s32 threadId;               /* 0x04 */
-} SdfThreadNode;
 
 extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
 
