@@ -115,6 +115,12 @@ typedef struct BtlUnit {
     struct BtlUnit *next;
 } BtlUnit;
 
+/* The group scans load both adjacent status words in one 64-bit access. */
+typedef struct BtlUnitStatus {
+    u8 pad_000[0x110];
+    u64 combinedFlags;
+} BtlUnitStatus;
+
 typedef struct BtlState {
     u8 unk_000[0x1C0];
     s16 unk_1C0;
@@ -274,7 +280,7 @@ s32 btlIsUnitAtOrBelowHealthRate(u8 *unit, s32 multiplier) {
 s32 btlHasBossAtOrBelowHealthRate(s32 unused, s32 multiplier) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x401) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (btlIsUnitAtOrBelowHealthRate(unit, multiplier) != 0) {
                 return 1;
             }
@@ -299,7 +305,7 @@ s32 btlIsGroup400CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             count++;
         }
         unit = *(u8 **)(unit + 0x344);
@@ -314,7 +320,7 @@ s32 btlIsGroup200EligibleCountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->unk_12E & 0x800) == 0) {
                 count++;
             }
@@ -338,7 +344,7 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 limit) {
     u32 count = 0;
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             count++;
         }
         unit = *(u8 **)(unit + 0x344);
@@ -356,7 +362,7 @@ s32 btlUnitHasActionMask(s32 unit, s32 mask) {
 s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x401) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
@@ -369,7 +375,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 action) {
 s32 btlAnyGroup200HasActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasActionMask((s32)unit, action) != 0) {
                 return 1;
             }
@@ -382,7 +388,7 @@ s32 btlAnyGroup200HasActionMask(s32 unused, s32 action) {
 s32 btlAllGroup200HaveActionMask(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasActionMask((s32)unit, action) == 0) {
                 return 0;
             }
@@ -396,7 +402,7 @@ s32 btlAllGroup200HaveActionMask(s32 unused, s32 action) {
 s32 btlHasGroup200UnitMode(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->mode == kind) {
                 return 1;
             }
@@ -410,7 +416,7 @@ s32 btlHasGroup200UnitMode(s32 unused, s32 kind) {
 s32 btlHasOtherGroup400UnitMode(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (((BtlUnit *)unit)->mode == kind) {
                 if (((BtlUnit *)unit)->identity != ((BtlUnit *)actor)->identity) {
                     return 1;
@@ -445,7 +451,7 @@ s32 btlUnitHasAllTenActions(void *actor) {
 s32 func_00200A08(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_00200628((s32)unit, action) != 0) {
                 return 1;
             }
@@ -458,7 +464,7 @@ s32 func_00200A08(s32 unused, s32 action) {
 s32 func_00200A88(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_00200628((s32)unit, action) != 0) {
                 return 1;
             }
@@ -468,24 +474,24 @@ s32 func_00200A88(s32 unused, s32 action) {
     return 0;
 }
 
-u8 func_00200B08(u32 arg0, u32 arg1) {
+u8 func_00200B08(u32 unit, u32 action) {
     s32 result;
 
-    result = func_002007A8(arg0, arg1, 0);
+    result = func_002007A8(unit, action, 0);
     return result != 0;
 }
 
-u8 func_00200B28(u32 arg0, u32 arg1) {
+u8 func_00200B28(u32 unit, u32 action) {
     s32 result;
 
-    result = func_002007A8(arg0, arg1, 1);
+    result = func_002007A8(unit, action, 1);
     return result != 0;
 }
 
 s32 func_00200B48(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 0) != 0) {
                 return 1;
             }
@@ -498,7 +504,7 @@ s32 func_00200B48(s32 unused, u32 action) {
 s32 func_00200BD0(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 1) != 0) {
                 return 1;
             }
@@ -511,7 +517,7 @@ s32 func_00200BD0(s32 unused, u32 action) {
 s32 func_00200C58(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 0) != 0) {
                 return 1;
             }
@@ -524,7 +530,7 @@ s32 func_00200C58(s32 unused, u32 action) {
 s32 func_00200CE0(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 1) != 0) {
                 return 1;
             }
@@ -537,7 +543,7 @@ s32 func_00200CE0(s32 unused, u32 action) {
 s32 func_00200D68(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_002007A8((u32)unit, action, 0) == 0) {
                 return 1;
             }
@@ -550,7 +556,7 @@ s32 func_00200D68(s32 unused, u32 action) {
 s32 func_00200DF0(s32 unused, u32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_002007A8((u32)unit, action, 0) == 0) {
                 return 1;
             }
@@ -563,7 +569,7 @@ s32 func_00200DF0(s32 unused, u32 action) {
 s32 btlAnyGroup200LacksFlag1000(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) == 0) {
                 return 1;
             }
@@ -573,10 +579,10 @@ s32 btlAnyGroup200LacksFlag1000(void) {
     return 0;
 }
 
-u8 func_00200EE0(u32 arg0) {
+u8 func_00200EE0(u32 unit) {
     s32 result;
 
-    result = func_00200628(arg0, 10);
+    result = func_00200628(unit, 10);
     return result != 0;
 }
 
@@ -762,7 +768,7 @@ extern s32 func_00201408(void *, s32);
 s32 func_002014E8(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x401) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x401) == 0x401) {
             if (func_00201408(unit, action) != 0) {
                 return 1;
             }
@@ -775,7 +781,7 @@ s32 func_002014E8(s32 unused, s32 action) {
 s32 func_00201568(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x201) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x201) == 0x201) {
             if (func_00201408(unit, action) != 0) {
                 return 1;
             }
@@ -788,7 +794,7 @@ s32 func_00201568(s32 unused, s32 action) {
 s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->mode != kind) {
                 return 1;
             }
@@ -801,7 +807,7 @@ s32 btlHasGroup200DifferentUnitMode(s32 unused, s32 kind) {
 s32 btlHasOtherGroup400DifferentUnitMode(u8 *actor, s32 kind) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (((BtlUnit *)unit)->mode != kind) {
                 if (((BtlUnit *)unit)->identity != ((BtlUnit *)actor)->identity) {
                     return 1;
@@ -926,7 +932,7 @@ s64 btlAnyGroup400HasAction(s32 unused, s32 action) {
 s32 func_00201B50(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (func_00201900(action, ((BtlUnit *)unit)->actionSlot, 0) != 0) {
                 return 1;
             }
@@ -939,7 +945,7 @@ s32 func_00201B50(s32 unused, s32 action) {
 s32 func_00201BD8(s32 unused, s32 action) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (func_00201900(action, ((BtlUnit *)unit)->actionSlot, 0) != 0) {
                 return 1;
             }
@@ -952,7 +958,7 @@ s32 func_00201BD8(s32 unused, s32 action) {
 s32 func_00201C60(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
@@ -965,7 +971,7 @@ s32 func_00201C60(void) {
 s32 func_00201CD0(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x421) == 0x401) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
             if (btlUnitHasAllTenActions(unit) != 0) {
                 return 1;
             }
@@ -978,7 +984,7 @@ s32 func_00201CD0(void) {
 s32 btlAreUnitsMissingStatusFlag(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) != 0) {
                 return 0;
             }
@@ -991,7 +997,7 @@ s32 btlAreUnitsMissingStatusFlag(void) {
 s32 btlAreUnitsHoldingStatusFlag(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if ((((BtlUnit *)unit)->flags & 0x1000) == 0) {
                 return 0;
             }
@@ -1021,7 +1027,7 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
 s32 func_00201E88(void) {
     u8 *unit = *(u8 **)(func_001A17F0() + 0x228);
     while (unit != 0) {
-        if ((*(u64 *)(unit + 0x110) & 0x221) == 0x201) {
+        if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
             if (((BtlUnit *)unit)->unk_12A == 0) {
                 return 1;
             }
@@ -1190,7 +1196,7 @@ extern s32 func_001A8A30(void *, s32);
 
 s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     func_001A17F0();
-    if ((*(u64 *)((u8 *)unit + 0x110) & 0x421) == 0x401) {
+    if ((((BtlUnitStatus *)unit)->combinedFlags & 0x421) == 0x401) {
         if (func_001A8A30(unit, action) != 0) {
             return 1;
         }
@@ -1200,15 +1206,15 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002024A8);
 
-u64 btlBuildActorIndexListAndCount(u64 arg0, u32 *arg1, u32 *arg2) {
+u64 btlBuildActorIndexListAndCount(u64 actor, u32 *matchingCount, u32 *listCount) {
     u32 result;
     u64 list;
 
     list = btlAllocateIndexList(0xd);
-    result = func_001A3360(arg0, list, 0);
-    *arg1 = result;
+    result = func_001A3360(actor, list, 0);
+    *matchingCount = result;
     result = btlGetIndexListCount(list);
-    *arg2 = result;
+    *listCount = result;
     return list;
 }
 
@@ -2489,8 +2495,8 @@ void func_00208C20(void) {
     func_001F53F0();
 }
 
-u32 func_00208C38(u32 arg0, u32 arg1, s32 arg2) {
-    if ((0x171 < arg2) && ((arg2 < 0x175 || (arg2 == 0x1a1)))) {
+u32 func_00208C38(u32 unused0, u32 unused1, s32 action) {
+    if ((0x171 < action) && ((action < 0x175 || (action == 0x1a1)))) {
         return 200;
     }
     return 100;
@@ -3231,11 +3237,11 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020BE30);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020C9E8);
 
-u32 func_0020CB28(s32 arg0) {
+u32 func_0020CB28(s32 action) {
     u32 result;
 
     result = 2;
-    if (arg0 != 0x1d7) {
+    if (action != 0x1d7) {
         result = 0;
     }
     return result;
@@ -3335,11 +3341,11 @@ s32 btlAllowsSpeciesCondition(u8 *unit, u8 *other, s32 condition) {
     }
 }
 
-void func_0020D4F0(s32 arg0, s32 arg1, s32 arg2) {
-    if (arg1 != 0xd5) {
+void func_0020D4F0(s32 record, s32 action, s32 pathBuffer) {
+    if (action != 0xd5) {
         return;
     }
-    func_003014F0(arg2, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(D_003BAA60 + 0x1aa4), *(s32 *)(arg0 + 0x38) - 0x13d);
+    func_003014F0(pathBuffer, "%s%03X_%02X.BED", D_003BB8A8, *(u16 *)(D_003BAA60 + 0x1aa4), *(s32 *)(record + 0x38) - 0x13d);
 }
 
 u32 func_0020D548(void) {
@@ -3374,7 +3380,7 @@ s32 func_0020D598(s32 battler, s32 action) {
     return -1;
 }
 
-s32 func_0020D5E0(BtlUnit *unit, s32 arg1, s32 arg2) {
+s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
     BtlTask *link = *(BtlTask **)((u8 *)unit + 0xF4);
     BtlUnit *other;
     f32 pos[4] __attribute__((aligned(16)));
@@ -3399,8 +3405,8 @@ s32 func_0020D5E0(BtlUnit *unit, s32 arg1, s32 arg2) {
 
 extern s32 func_0020D5E0();
 
-s64 func_0020D668(void *unit, s8 arg1, s8 arg2) {
-    return func_0020D5E0(unit, arg1, arg2);
+s64 func_0020D668(void *unit, s8 unused1, s8 unused2) {
+    return func_0020D5E0(unit, unused1, unused2);
 }
 
 s32 func_0020D690(s32 battler, s32 action) {
@@ -3465,18 +3471,18 @@ s32 btlNormalizeActionForSkill(s32 battler, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020D858);
 
-u32 func_0020D998(s32 arg0) {
+u32 func_0020D998(s32 action) {
     u32 result;
 
     result = 0x7d;
-    if (arg0 != 0x143) {
+    if (action != 0x143) {
         result = 0;
     }
     return result;
 }
 
-u8 func_0020D9A8(s32 arg0) {
-    return arg0 != 0xd3;
+u8 func_0020D9A8(s32 action) {
+    return action != 0xd3;
 }
 
 s32 btlNormalizeActionForStatus(s32 battler, s32 action) {
