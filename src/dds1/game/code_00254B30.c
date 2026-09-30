@@ -132,7 +132,28 @@ void itfDspSignalE(void) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255838);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_002559F8);
+extern f32 func_002E8398(s32);
+
+extern void func_00255838(void *);
+
+void func_002559F8(s32 *state) {
+    u8 *particle;
+    s32 value;
+    s32 i;
+
+    state[0] = state[0] - 1;
+    if (state[0] < 0) {
+        value = func_002E8398(0) * 60.0f + 60.0f;
+        state[1] = value;
+        state[0] = value;
+        *(f32 *)(state + 2) = func_002E8398(0) * 0.20000005f + 0.4f;
+    }
+    particle = (u8 *)(state + 3);
+    for (i = 7; i >= 0; i--) {
+        func_00255838(particle);
+        particle += 12;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255A98);
 

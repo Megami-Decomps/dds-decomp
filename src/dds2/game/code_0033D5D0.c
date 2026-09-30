@@ -543,7 +543,27 @@ DevState *sdfDevCreateCommandState(s32 command) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfPathExists);
+extern char *func_0033E818();
+
+extern s32 func_00369B70();
+
+extern void func_00369DF8(s32);
+
+extern void func_00328E48(void *);
+
+s32 sdfPathExists(char *path) {
+    char *resolved = func_0033E818(path);
+    s32 fd;
+
+    if (*resolved == '/') {
+        return sdfPacketExists((u32)resolved);
+    }
+
+    fd = func_00369B70(resolved, 1);
+    func_00369DF8(fd);
+    func_00328E48(resolved);
+    return fd >= 0;
+}
 
 void func_0033EAE0(DevState *state) {
     sdfDevQueueActiveOperation();

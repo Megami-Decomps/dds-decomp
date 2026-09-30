@@ -713,7 +713,26 @@ typedef struct MdlEffectParams {
 
 extern s32 func_0018FD88(MdlEffectParams *params);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00234B48);
+s32 func_00234B48(MdlResourceOwner *owner, MdlEffectRec *rec, s32 option) {
+    MdlResourceItem *item;
+    MdlEffectParams params;
+
+    params.owner = owner;
+    params.effectId = rec->effectId;
+    params.param0C = rec->param0C;
+    params.scaleX = rec->scaleX;
+    params.scaleY = rec->scaleY;
+    params.value14 = rec->value14;
+    params.value16 = rec->value16;
+    params.mode = 3;
+    params.value17 = rec->value17;
+    params.value18 = rec->value18;
+    params.value1C = rec->value1C;
+    params.value20 = rec->value20;
+    params.value24 = rec->value24;
+    item = mdlInsertResourceItem(owner, 2, option);
+    return item->resource = func_0018FD88(&params);
+}
 
 /* Kind-four model record: two selectors and two 32-bit stream parameters. */
 typedef struct MdlStreamRecord {
@@ -1275,7 +1294,26 @@ void mdlViewerTaskDestroy(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002382F0);
+typedef struct MdlViewerTaskDef {
+    const char *name;
+    void *update;
+    s32 data;
+} MdlViewerTaskDef;
+
+extern MdlViewerTaskDef D_003C87F0[];
+
+extern s32 kwlnTaskCreate(const char *name, s32 id, s32, s32, void *update, void *destroy, s32 data);
+
+extern void func_00101968(s32, s32);
+
+void func_002382F0(void) {
+    mdlViewerTaskDestroy();
+    D_00453550.viewerTask =
+        kwlnTaskCreate(D_003C87F0[D_00453550.unk0A - 1].name, 0x2B00, 1, 0,
+                       D_003C87F0[D_00453550.unk0A - 1].update, 0,
+                       D_003C87F0[D_00453550.unk0A - 1].data);
+    func_00101968(D_00453550.unk00, D_00453550.viewerTask);
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);
 

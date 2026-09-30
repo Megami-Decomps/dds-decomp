@@ -1,10 +1,10 @@
 #include "common.h"
 
 typedef struct MenuFadeHost {
-    u8 pad00[0x84];
-    s32 reduced;      /* 0x84 */
-    u8 pad88[0xCC];
-    s32 fadeColor;    /* 0x154 */
+    u8 pad00[0x7C];
+    s32 reduced;      /* 0x7C */
+    u8 pad80[0xE0];
+    s32 fadeColor;    /* 0x160 */
 } MenuFadeHost;
 
 extern void sndStartTrackExtended(s32);
@@ -14,6 +14,7 @@ extern void func_002E9708(void);
 extern void func_002E96D8(s32);
 
 extern void func_002E9730(void);
+
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024A728);
 
@@ -49,7 +50,19 @@ void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B2E0);
 
-INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B358);
+void func_0024B358(s32 mode, MenuFadeHost *host) {
+    if (mode == 0) {
+        if (host->reduced == 0) {
+            sndStartTrackExtended(host->fadeColor);
+        } else {
+            func_002E9708();
+        }
+    } else if (host->reduced == 0) {
+        func_002E96D8(host->fadeColor);
+    } else {
+        func_002E9730();
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0024A728", D_003AF6B0);
 

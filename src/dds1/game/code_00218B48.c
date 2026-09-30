@@ -126,7 +126,7 @@ void func_00102A18(void);
 
 void func_00101A80(s32, s32);
 
-void func_0021E3C0(MdlViewState *);
+void func_0021E3C0();
 
 void func_002EDBD8(void *buffer, s32);
 
@@ -1368,7 +1368,14 @@ u32 func_0021D568(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D590);
+s32 func_0021D590(void) {
+    if (D_003D7A50.unk08 == 0) {
+        D_003D7A50.unk08 = 1;
+        func_0021E3C0();
+        func_00102A18();
+    }
+    return 0;
+}
 
 typedef struct MdlDrawDevice {
     u8 pad00[0x10];

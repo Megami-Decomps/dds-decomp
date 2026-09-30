@@ -59,7 +59,7 @@ extern s32 func_0027FA70(u16, u16);
 
 extern void func_00284258(s32, s32, s32, s32, s32, s32);
 
-extern s32 mnuCreateListState(s32, s32, s32, s32);
+extern s32 mnuCreateListState();
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -84,12 +84,12 @@ extern void func_00194920(s32);
 typedef struct MenuSlotState {
     u8 pad00[0x64];
     s32 batch;     /* 0x64 */
-    u8 pad68[0x40];
-    s32 effect[7]; /* 0xA8 */
-    s32 cur;       /* 0xC4 */
-    s32 prev;      /* 0xC8 */
-    u8 padCC[0x18];
-    s32 mode;      /* 0xE4 */
+    u8 pad68[0x38];
+    s32 effect[7]; /* 0xA0 */
+    s32 cur;       /* 0xBC */
+    s32 prev;      /* 0xC0 */
+    u8 padC4[0x18];
+    s32 mode;      /* 0xDC */
 } MenuSlotState;
 
 typedef struct EffectPair {
@@ -202,7 +202,51 @@ void mnuDestroyThresholdNodePanels(s32 owner) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248D40);
+typedef struct MenuProgressList {
+    u8 pad00[0x2C];
+    s32 updateCallback; /* 0x2C */
+    s32 callback;       /* 0x30 */
+    u8 pad34[8];
+    s32 visible;        /* 0x3C */
+} MenuProgressList;
+
+typedef struct MenuThresholdEntry {
+    s32 entryId;        /* 0x00 */
+    s32 requiredAmount; /* 0x04 */
+} MenuThresholdEntry;
+
+extern s32 func_00248658(s32);
+
+extern s32 func_00248810(s32);
+
+void func_00248D40(MenuProgressWork *host) {
+    MenuProgressList *list;
+    s32 i;
+
+    list = (MenuProgressList *)mnuCreateListState(0, 5, 0x24);
+    list->callback = (s32)host;
+    *(s32 *)&host->list = (s32)list;
+    list->updateCallback = (s32)func_00248810;
+    list->visible = 0;
+    for (i = 0; i < 5; i++) {
+        s32 box = D_003BAA00 + i * 0x1A4 + 0xA60;
+
+        if ((u16)(*(u16 *)box & 1)) {
+            s32 score = func_00248658(box);
+
+            if (score != 0) {
+                MenuProgressNode *node =
+                    (MenuProgressNode *)mnuListAppendNode(host->list, (s32)D_003BC3F8);
+                MenuThresholdEntry *entry = (MenuThresholdEntry *)&node->itemIndex;
+
+                node->panel = 0;
+                entry->requiredAmount = score;
+                entry->entryId = i;
+            }
+        }
+    }
+    mnuRefreshThresholdNodeFlags(host->list);
+}
 
 void func_00248E18(s32 arg0) {
     func_0027B368((u32)((MenuProgressWork *)arg0)->list);
@@ -228,7 +272,7 @@ u8 func_00249198(void) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_002491B8);
 
-extern s32 mnuCreateListState(s32, s32, s32, s32);
+extern s32 mnuCreateListState();
 
 extern s32 mnuListAppendNode(s32, s32);
 
@@ -435,7 +479,38 @@ void func_00249C08(s8 enabled) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249C78);
+void func_00249C78(MenuSlotState *state) {
+    EffectObject *obj;
+
+    obj = func_002BD258(1);
+    state->effect[0] = (s32)obj;
+    obj->inner->pair->a = 0x14;
+    obj->inner->pair->b = 1;
+    obj = func_002BD258(1);
+    state->effect[1] = (s32)obj;
+    obj->inner->pair->a = 0xF;
+    obj->inner->pair->b = 0;
+    obj = func_002BD258(8);
+    state->effect[2] = (s32)obj;
+    obj->inner->pair->a = 6;
+    obj->inner->pair->b = 1;
+    obj = func_002BD258(8);
+    state->effect[3] = (s32)obj;
+    obj->inner->pair->a = 6;
+    obj->inner->pair->b = 0;
+    obj = func_002BD258(1);
+    state->effect[4] = (s32)obj;
+    obj->inner->pair->a = 6;
+    obj->inner->pair->b = 1;
+    obj = func_002BD258(1);
+    state->effect[5] = (s32)obj;
+    obj->inner->pair->a = 6;
+    obj->inner->pair->b = 0;
+    obj = func_002BD258(1);
+    state->effect[6] = (s32)obj;
+    obj->inner->pair->a = 0x78;
+    obj->inner->pair->b = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249D80);
 
@@ -445,7 +520,43 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249E20);
+extern void func_00285490(void *);
+
+extern void mnuLoadResourceHandles(s32);
+
+extern void func_00249498(s32);
+
+extern void evtLoadResourcePair(const char *, void *);
+
+extern void func_0024D9D8(s32);
+
+extern void func_00249DD0(s32);
+
+u8 *func_00249E20(s32 reduced, s32 slot) {
+    s32 handle;
+    u8 *obj;
+    u32 i;
+
+    handle = func_002D03F8(0x164);
+    obj = (u8 *)sdfResourceRetainAddress(handle);
+    memset(obj, 0, 0x164);
+    *(s32 *)obj = handle;
+    func_00285490(obj + 8);
+    mnuLoadResourceHandles(obj);
+    func_00249C78((s32)obj);
+    *(s32 *)(obj + 0x7C) = reduced;
+    *(s32 *)(obj + 0xDC) = reduced;
+    *(s32 *)(obj + 0x80) = slot;
+    *(s32 *)(obj + 0xD8) = slot;
+    func_00249498(obj);
+    evtLoadResourcePair("/facility/msg/terminal/mes_data.bmd", obj + 0x5C);
+    func_0024D9D8(*(s32 *)(obj + 0x60));
+    for (i = 0; i < 2; i++) {
+        *(s32 *)(obj + 0xBC + i * 4) = -1;
+    }
+    func_00249DD0(obj);
+    return obj;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249F08);
 

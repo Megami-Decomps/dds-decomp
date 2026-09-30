@@ -977,7 +977,24 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245A40);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245C00);
+extern s32 func_00197C40(s32, s32, s32, s32, s32, s32);
+
+extern void frFontSetChildColors(s32, u32);
+
+extern void func_001958A0(s32, s32, s32);
+
+extern void func_00194920(s32);
+
+void func_00245C00(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+    s32 handle;
+
+    if (a1 != 0) {
+        handle = func_00197C40(0x970, 0xB58, 1, (u16)a0, a1, a4);
+        frFontSetChildColors(handle, 0x80808040);
+        func_001958A0(handle, 0, a5);
+        func_00194920(handle);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
