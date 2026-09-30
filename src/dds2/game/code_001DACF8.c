@@ -12,7 +12,7 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 D_0037F550[];
 extern void func_001EC5F0(u32);
 extern void func_001EF030(void *, void *);
-extern void func_001E88A8(u8 *);
+extern s32 func_001E88A8(u8 *);
 extern void func_00232390(void *, void *);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
@@ -4317,7 +4317,33 @@ void func_001E81A8(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8258);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E8428);
+void func_001E8428(ActionUnit *action) {
+    f32 *key = (f32 *)action;
+    u32 flags = action->flags;
+    u32 i;
+    if (flags & 2) {
+        for (i = 0; i < 4; i++, key += 12) {
+            f32 *pos = key + 12;
+            VU0_LOAD_VF(vf10, key + 16);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_LOAD_VF(vf11, pos);
+            VU0_SCALAR_OP(key[20] - 1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, pos);
+            key[20] = 1.0f;
+        }
+    } else if (flags & 4) {
+        f32 *src = key + 12;
+        f32 *dst = key + 24;
+        for (i = 1; i < 4; i++, dst += 12) {
+            f32 delta = dst[8] - src[8];
+            dst[0] -= dst[4] * delta;
+            dst[1] -= dst[5] * delta;
+            dst[2] -= dst[6] * delta;
+            dst[8] = src[8];
+        }
+    }
+}
 
 void func_001E8510(f32 *src) {
     f32 vec[4];
@@ -5581,11 +5607,67 @@ void func_001ECC18(void *unit, f32 *pose, u8 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ECCB0);
 
+extern f32 func_00353228(f32);
+
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417D70);
 
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417E30);
-
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED008);
+void func_001ED008(ActionUnit *action, XformData *from, XformData *to) {
+    f32 quat[4];
+    f32 poses[4][12] = {
+        {0.0f, -0.94f, 0.02f, 0.3f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
+        {0.06f, -0.94f, -0.18f, 0.25f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
+        {0.0f, -0.94f, 0.02f, -0.3f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
+        {-0.06f, -0.94f, -0.18f, -0.25f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
+    };
+    BtlUnit *unit = action->link->unit;
+    u32 flags = unit->flags;
+    s32 pose;
+    f32 fov;
+    f32 half;
+    f32 span;
+    f32 dist;
+    if (flags & 2) {
+        func_00208DA0();
+        btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quat);
+        pose = effMiscRandMod(0, 4);
+        fov = ((XformData *)action)->f24;
+        from->f24 = fov;
+        to->f24 = fov;
+        span = func_00208000(flags & 0x600, 0, 0) * 1.25f;
+        VU0_STORE_VF(vf10, &from->vec0);
+        if (func_001E3230(unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        VU0_STORE_VF(vf10, &to->vec0);
+        VU0_LOAD_VF(vf11, &from->vec0);
+        VU0_LERP_VF10(0.5f);
+        VU0_STORE_VF(vf10, &from->vec0);
+        half = fov * 0.5f;
+        dist = span / func_00353228(half);
+        from->f20 = dist;
+        dist = unit->unkC0 * unit->scale / func_00353228(half);
+        to->f20 = dist * poses[pose][8];
+        VU0_LOAD_VF(vf10, poses[pose]);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, &from->vec1);
+        VU0_LOAD_VF(vf10, &poses[pose][4]);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, &to->vec1);
+        func_001E88A8((u8 *)from);
+        func_001E88A8((u8 *)to);
+        action->unk154 = poses[pose][9];
+        action->flags |= 0x41;
+    }
+}
 
 void func_001ED300(u8 *fx) {
     BtlUnit *unit = ((ActionUnit *)fx)->link->unit;
@@ -5619,8 +5701,6 @@ void func_001ED610(ActionUnit *action) {
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED6C8);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED9A0);
-
-extern f32 func_00353228(f32);
 
 void func_001EDAF8(ActionUnit *action, XformData *from, XformData *to) {
     f32 quat[4];
@@ -5794,26 +5874,6 @@ void func_001F2740(u8 *unit, f32 *vec) {
     func_001EC868(unit, vec, 0.0f);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417EF0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418330);
-
-INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418338);
-
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F2758);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F2AE8);
@@ -5879,6 +5939,26 @@ void func_001F4D70(s32 action, s32 state) {
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417EF0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418320);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418330);
+
+INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418338);
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00418398);
 
@@ -8169,7 +8249,7 @@ typedef struct BtlAt3LoadArgs {
 typedef struct BtlAt3Entry {
     u8 volume;
     u8 pad01[3];
-    char file[12];
+    char fileName[12];
 } BtlAt3Entry;
 
 extern BtlAt3Entry D_003E0F60[];
@@ -8180,7 +8260,7 @@ s32 func_002054B8(BtlAt3LoadArgs *args) {
     s32 data;
     s32 size;
     if (args->state == 0) {
-        func_0035C860(path, "/soundat3/%s.at3", D_003E0F60[args->index].file);
+        func_0035C860(path, "/soundat3/%s.at3", D_003E0F60[args->index].fileName);
         args->loadHandle = (s32)func_002C80C8(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
     } else if (func_002C8128(args->loadHandle) != 0) {
