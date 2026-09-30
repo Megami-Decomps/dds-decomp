@@ -2,6 +2,8 @@
 
 #include "fpu.h"
 
+extern s8 D_00324510[];
+
 extern u32 func_00197760(s32, s32, s32, u32, u32, s32);
 
 extern void func_00195880(u32, s32);
@@ -503,9 +505,47 @@ void *sdfFindTaskListNodeByKey(TaskList *list, s32 key) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB120);
+u32 func_002CB120(void) {
+    u32 flags = 0;
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB1C8);
+    if (D_00324510[0x26] < 0) {
+        flags |= 1;
+    }
+    if (D_00324510[0x26] & 2) {
+        flags |= 1;
+    }
+    if (D_00324510[0x26]) {
+        flags |= 2;
+    }
+    if (D_00324510[0x27] < 0) {
+        flags |= 4;
+    }
+    if (D_00324510[0x27] & 2) {
+        flags |= 4;
+    }
+    if (D_00324510[0x27]) {
+        flags |= 8;
+    }
+    if (D_00324510[0x24] < 0) {
+        flags |= 0x10;
+    }
+    if (D_00324510[0x24] & 2) {
+        flags |= 0x10;
+    }
+    if (D_00324510[0x24]) {
+        flags |= 0x20;
+    }
+    if (D_00324510[0x25] < 0) {
+        flags |= 0x40;
+    }
+    if (D_00324510[0x25] & 2) {
+        flags |= 0x40;
+    }
+    if (D_00324510[0x25]) {
+        flags |= 0x80;
+    }
+    return flags;
+}
 
 typedef struct TaskWork {
     u32 handle;
@@ -514,6 +554,22 @@ typedef struct TaskWork {
     TaskList *list;
     u32 firstItemHandle;
 } TaskWork;
+
+extern s32 func_002CB8E0(void);
+extern s32 sdfTaskWorkRunAll(void);
+extern void func_002CB990(void);
+extern void kwlnTaskCreate();
+extern TaskWork *func_002CB4B8();
+
+TaskWork *func_002CB1C8(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
+    TaskWork *work;
+
+    work = func_002CB4B8(name, destroyCallback, userData);
+    sdfAttachTaskItem(work, item);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, func_002CB8E0, func_002CB990, work);
+    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
+    return work;
+}
 
 void sdfDestroyTaskWorkerTasks(TaskWork *work) {
     if (work != NULL) {
@@ -634,14 +690,50 @@ void func_002CB6F8(u32 unused, SdfCallbackWork *work) {
 typedef struct SdfTaskEntry {
     u32 flags;                   /* 0x00 */
     s32 arg0;                    /* 0x04 */
-    u8 pad08[0xC];
+    s32 (*init)(void);           /* 0x08 */
+    u8 pad0C[4];
+    s32 (*update)(s32, s32);     /* 0x10 */
     void (*callback)(s32, s32);  /* 0x14 */
     s32 arg1;                    /* 0x18 */
 } SdfTaskEntry;
 
 extern void *func_00101A70(void);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB718);
+s32 func_002CB718(TaskWork *work) {
+    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfTaskEntry *entry;
+    u32 flags;
+
+    if (node == NULL) {
+        work->firstItemHandle = (u32)work->list->head;
+        return 0;
+    }
+    entry = (SdfTaskEntry *)node->value;
+    flags = entry->flags;
+    work->firstItemHandle = (u32)node->next;
+    switch (flags & 0xFFFF0000) {
+    case 0x100000:
+        flags = entry->flags = (flags & 0xFFEFFFFF) | 0x10000;
+    case 0x10000:
+        if (flags & 4) {
+            entry->arg1 = entry->init();
+            flags = entry->flags &= ~4;
+        }
+        if (flags & 0x8000) {
+            sdfRemoveTaskItem(work, entry->arg0);
+            return 1;
+        }
+        if (flags & 1) {
+            if (entry->update(entry->arg0, entry->arg1) == -1) {
+                entry->flags |= 0x8000;
+            }
+        }
+        break;
+    case 0x20000:
+        break;
+    }
+    return 1;
+}
 
 /* Advance the work's cursor one node and run the node's callback when flagged. */
 s32 sdfTaskWorkStep(TaskWork *work) {
@@ -670,7 +762,16 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB8E0);
+s32 func_002CB8E0(void) {
+    TaskWork *work = func_00101A70();
+
+    if (work->firstItemHandle == 0) {
+        return -1;
+    }
+    while (func_002CB718(work) == 1) {
+    }
+    return 0;
+}
 
 s32 sdfTaskWorkRunAll(void) {
     TaskWork *work = func_00101A70();
@@ -814,7 +915,19 @@ SdfGridCell *sdfGridCursorRight(SdfGrid *grid) {
     return cell;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBDA8);
+SdfGridCell *func_002CBDA8(SdfGrid *grid, u32 column, u32 row) {
+    SdfGridCell *result = NULL;
+
+    if (column >= grid->width) {
+        return result;
+    }
+    if (row >= grid->cellCount / grid->width) {
+        return result;
+    }
+    grid->cursor = sdfGridGetCell(grid, column, row);
+    func_002CC5F0((u8 *)grid);
+    return grid->cursor;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBE18);
 
@@ -824,7 +937,24 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC0D0);
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC238);
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC3A8);
+SdfGridCell *func_002CC3A8(SdfGrid *grid, u32 column, u32 row) {
+    SdfGridCell *result = NULL;
+    SdfGridCell *cell;
+
+    if (column >= grid->width) {
+        return result;
+    }
+    if (row >= grid->cellCount / grid->width) {
+        return result;
+    }
+    cell = sdfGridGetCell(grid, column, row);
+    if (cell->value == 0) {
+        return NULL;
+    }
+    grid->cursor = cell;
+    func_002CC5F0((u8 *)grid);
+    return cell;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC430);
 
