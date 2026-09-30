@@ -2503,7 +2503,12 @@ FileJob *fileJobCreateChild(FileJob *request) {
     return job;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileJobNotifyPair);
+void fileJobNotifyPair(FileJob *left, FileJob *right) {
+    Cb3714C *entry = &D_0037E14C[right->type];
+    if (entry->cbC != NULL) {
+        entry->cbC(left->data, right->data);
+    }
+}
 
 void fileJobNotifyComplete(FileJob *job) {
     u16 idx = ((FileJob *)job)->type;
