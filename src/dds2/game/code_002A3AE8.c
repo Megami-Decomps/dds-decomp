@@ -18,6 +18,21 @@ extern s16 D_003E3792[];
 typedef struct { s16 gfx; s16 unk2; s16 x; s16 y; } SprEntry;
 typedef struct { s32 unk0; s32 gfx[1]; } SprWork;
 
+/* View of the sprite work area used by the list and handle helpers. */
+typedef struct SpriteMenuState {
+    u8 pad00[8];
+    s32 spriteHandle; /* 0x08 */
+    u8 pad0C[0x18];
+    s32 list;         /* 0x24 */
+} SpriteMenuState;
+
+typedef struct SpriteMenuList {
+    u8 pad00[0x1C];
+    u32 *selected;    /* 0x1C */
+    u8 pad20[0xC];
+    void (*callback)(void); /* 0x2C */
+} SpriteMenuList;
+
 extern SprEntry D_003E3790[];
 
 s32 mnuSpriteGraphicHandle(u32 index) {
@@ -42,32 +57,32 @@ extern void func_002A5A78();
 void func_002A3BE0(void) {
     s32 i;
     s32 node;
-    if (*(s32 *)(D_00437A40 + 0x24) != 0) {
-        func_002B81C8(*(s32 *)(D_00437A40 + 0x24));
+    if (((SpriteMenuState *)D_00437A40)->list != 0) {
+        func_002B81C8(((SpriteMenuState *)D_00437A40)->list);
     }
     node = mnuCreateListState(0, 3, 0);
-    *(s32 *)(D_00437A40 + 0x24) = node;
-    *(void **)(node + 0x2C) = func_002A5A78;
+    ((SpriteMenuState *)D_00437A40)->list = node;
+    ((SpriteMenuList *)node)->callback = func_002A5A78;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(*(s32 *)(D_00437A40 + 0x24), 0);
+        mnuListAppendNode(((SpriteMenuState *)D_00437A40)->list, 0);
     }
 }
 
 void func_002A3C58(void) {
-    func_002B81C8(*(s32 *)(D_00437A40 + 0x24));
+    func_002B81C8(((SpriteMenuState *)D_00437A40)->list);
 }
 
 u32 func_002A3C78(void) {
-    return **(u32 **)(*(s32 *)(D_00437A40 + 0x24) + 0x1c);
+    return *((SpriteMenuList *)((SpriteMenuState *)D_00437A40)->list)->selected;
 }
 
-void func_002A3C90(s32 arg0) {
-    mnuSelectFirstListNode(*(u32 *)(D_00437A40 + 0x24));
-    if (0 < arg0) {
+void func_002A3C90(s32 steps) {
+    mnuSelectFirstListNode(((SpriteMenuState *)D_00437A40)->list);
+    if (0 < steps) {
         do {
-            arg0 = arg0 - 1;
-            func_002B8CF0(*(u32 *)(D_00437A40 + 0x24));
-        } while (arg0 != 0);
+            steps = steps - 1;
+            func_002B8CF0(((SpriteMenuState *)D_00437A40)->list);
+        } while (steps != 0);
     }
 }
 
@@ -107,18 +122,18 @@ void func_002A3DE8(void) {
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3E38);
 
 u8 mnuHasSpriteHandle(void) {
-    return *(s32 *)(D_00437A40 + 8) != 0;
+    return ((SpriteMenuState *)D_00437A40)->spriteHandle != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (*(s32 *)(D_00437A40 + 8) != 0) {
-        func_003054E8(*(s32 *)(D_00437A40 + 8));
-        *(u32 *)(D_00437A40 + 8) = 0;
+    if (((SpriteMenuState *)D_00437A40)->spriteHandle != 0) {
+        func_003054E8(((SpriteMenuState *)D_00437A40)->spriteHandle);
+        ((SpriteMenuState *)D_00437A40)->spriteHandle = 0;
     }
 }
 
-s64 mnuStartMovieMenuSfx16(s32 arg0) {
-    return mnuDrawSprite(0, 0, 0, arg0, 0, 0x1F, 0x53);
+s64 mnuStartMovieMenuSfx16(s32 work) {
+    return mnuDrawSprite(0, 0, 0, work, 0, 0x1F, 0x53);
 }
 
 void mnuStartMovieMenuSfx17(u32 work) {
@@ -167,8 +182,8 @@ void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4208);
 
-void func_002A4380(s32 arg0) {
-    *(u8 *)(arg0 + 8) = 0;
+void func_002A4380(s32 bar) {
+    *(u8 *)(bar + 8) = 0;
 }
 
 typedef struct PickEntry {
@@ -321,12 +336,12 @@ extern void func_002A4B70(SlideBar *, s32);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void mnuAdvanceSlideBar(SlideBar *bar, s32 arg1) {
+void mnuAdvanceSlideBar(SlideBar *bar, s32 drawContext) {
     if (bar->active != 0 || bar->pos != 0) {
         mnuTitlePickRandomSlot();
-        func_002A44C0(bar, arg1);
-        mnuDrawSprite(0, 0, 0, bar->pos, 0, 0x16, arg1);
-        func_002A4B70(bar, arg1);
+        func_002A44C0(bar, drawContext);
+        mnuDrawSprite(0, 0, 0, bar->pos, 0, 0x16, drawContext);
+        func_002A4B70(bar, drawContext);
         if (bar->active != 0) {
             bar->pos += 8;
         } else {
@@ -358,7 +373,7 @@ void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer) {
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
+void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 drawContext) {
     if (bar->timer > 0) {
         bar->timer--;
         if (bar->timer == 0) {
@@ -368,7 +383,7 @@ void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    mnuDrawSprite(0, 0, 0, bar->pos / 4, 0, 0x12, arg1);
+    mnuDrawSprite(0, 0, 0, bar->pos / 4, 0, 0x12, drawContext);
     if (bar->active != 0) {
         bar->pos += 0x10;
     } else {
@@ -382,17 +397,17 @@ void mnuAdvanceTimedSlideBar(SlideBarTimed *bar, s32 arg1) {
     }
 }
 
-void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 arg1) {
+void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 drawContext) {
     s32 half;
 
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
     half = bar->pos / 4;
-    mnuDrawSprite(0, 0, 0, half, 0, 0x13, arg1);
-    mnuDrawSprite(0, 0, 0, half, 0, 0x1A, arg1);
-    mnuDrawSprite(0, 0, 0, half, 0, 0x1B, arg1);
-    mnuDrawSprite(0, 0, 0, half, 0, 0x1C, arg1);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x13, drawContext);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1A, drawContext);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1B, drawContext);
+    mnuDrawSprite(0, 0, 0, half, 0, 0x1C, drawContext);
     if (bar->active != 0) {
         bar->pos += 0x1B;
     } else {
@@ -408,8 +423,8 @@ void mnuAdvanceMultiSpriteSlideBar(SlideBar *bar, s32 arg1) {
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A5040);
 
-void func_002A50E8(s32 arg0, s32 arg1, u8 arg2) {
-    *(u8 *)(arg0 + arg1) = arg2;
+void func_002A50E8(s32 buffer, s32 index, u8 value) {
+    *(u8 *)(buffer + index) = value;
 }
 
 void func_002A50F8(u8 *work) {
@@ -426,7 +441,7 @@ typedef struct {
     s32 pos[2];
 } SlideBarPair;
 
-void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 arg1) {
+void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 drawContext) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
@@ -434,11 +449,11 @@ void mnuAdvancePairedSlideBars(SlideBarPair *bars, s32 arg1) {
 
         switch (i) {
         case 0:
-            mnuDrawSprite(0, 0, 0, pos, 0, 0xF, arg1);
-            mnuDrawSprite(0, 0, 0, pos, 0, 0x10, arg1);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0xF, drawContext);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0x10, drawContext);
             break;
         case 1:
-            mnuDrawSprite(0, 0, 0, pos, 0, 0x11, arg1);
+            mnuDrawSprite(0, 0, 0, pos, 0, 0x11, drawContext);
             break;
         }
         if (bars->active[i] == 0) {

@@ -100,7 +100,31 @@ typedef struct MenuCallbackNode {
     void (*callback)(u32, s32);
 } MenuCallbackNode;
 
-void func_003214D0(u32 arg0, s32 arg1);
+typedef struct MenuWordPair {
+    u32 first;
+    u32 second;
+    u8 pad08[8];
+} MenuWordPair;
+
+typedef struct MenuTaggedRecord {
+    u8 pad00[4];
+    u32 tag;          /* 0x04 */
+    u8 pad08[0x24];
+    s16 recordIndex;  /* 0x2C: indexes 16-byte records */
+} MenuTaggedRecord;
+
+typedef struct MenuRegistry {
+    u8 pad00[0xC];
+    u32 *table; /* 0x0C */
+} MenuRegistry;
+
+typedef struct MenuRegistryTable {
+    u32 flags;
+    u8 pad04[0xC];
+    u32 recordBase; /* 0x10 */
+} MenuRegistryTable;
+
+void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
 u32 mnuCreateReleaseCallbackNode(void) {
@@ -162,14 +186,14 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00321C60);
 
 void func_00321E18(u32 first, u32 second) {
     memset(D_0045C870, 0, 16);
-    *(u32 *)(D_0045C870 + 0) = first;
-    *(u32 *)(D_0045C870 + 4) = second;
+    ((MenuWordPair *)D_0045C870)->first = first;
+    ((MenuWordPair *)D_0045C870)->second = second;
 }
 
 void func_00321E70(u32 first, u32 second) {
     memset(D_0045C880, 0, 16);
-    *(u32 *)(D_0045C880 + 0) = first;
-    *(u32 *)(D_0045C880 + 4) = second;
+    ((MenuWordPair *)D_0045C880)->first = first;
+    ((MenuWordPair *)D_0045C880)->second = second;
 }
 
 u8 *func_00321EC8(void) {
@@ -244,9 +268,9 @@ u16 *func_003224C8(s32 index) {
     return &D_0040B248[index];
 }
 
-void func_003224E0(u32 arg0, u32 arg1) {
-    D_004390D0 = arg0;
-    D_004390D4 = arg1;
+void func_003224E0(u32 records, u32 count) {
+    D_004390D0 = records;
+    D_004390D4 = count;
 }
 
 u8 *func_003224F0(u32 taggedIndex) {
@@ -254,18 +278,18 @@ u8 *func_003224F0(u32 taggedIndex) {
     return (u8 *)D_004390D0 + index * 28;
 }
 
-void func_00322510(u32 arg0, u32 arg1) {
-    D_004390DC = arg0;
-    D_004390E0 = arg1;
+void func_00322510(u32 records, u32 count) {
+    D_004390DC = records;
+    D_004390E0 = count;
 }
 
 u8 *func_00322520(u16 index) {
     return (u8 *)D_004390DC + index * 24;
 }
 
-void func_00322540(u32 arg0, u32 arg1) {
-    D_004390E4 = arg0;
-    D_004390E8 = arg1;
+void func_00322540(u32 records, u32 count) {
+    D_004390E4 = records;
+    D_004390E8 = count;
 }
 
 u8 *func_00322550(u8 index) {
@@ -297,15 +321,15 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
 u32 func_00322610(u32 record) {
     u32 registry;
     u32 table;
-    if ((*(u32 *)(record + 4) & 0xffff0000) != 0x2010000) {
+    if ((((MenuTaggedRecord *)record)->tag & 0xffff0000) != 0x2010000) {
         return 0;
     }
-    registry = (u32)func_003224F0(*(u32 *)(record + 4));
+    registry = (u32)func_003224F0(((MenuTaggedRecord *)record)->tag);
     if (registry == 0) {
         return 0;
     }
-    table = *(u32 *)(registry + 0xc);
-    return *(u32 *)(table + 0x10) + *(s16 *)(record + 0x2c) * 16;
+    table = (u32)((MenuRegistry *)registry)->table;
+    return ((MenuRegistryTable *)table)->recordBase + ((MenuTaggedRecord *)record)->recordIndex * 16;
 }
 
 typedef struct ShortRecordList2 {
@@ -334,9 +358,9 @@ u8 *func_00322670(ShortRecordList2 *list) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003226D8);
 
-void func_00322D08(u32 arg0, u32 arg1) {
-    D_004390C8 = arg0;
-    D_004390CC = arg1;
+void func_00322D08(u32 entries, u32 count) {
+    D_004390C8 = entries;
+    D_004390CC = count;
 }
 
 void func_00322D18(void) {
@@ -368,15 +392,15 @@ u32 func_00322D98(void) {
 }
 
 /* A flagged registry entry offsets its base value by the running clock. */
-f32 mnuEvaluateTimedValue(u8 *entry) {
-    u8 *registry = func_003224F0(*(u32 *)(entry + 4));
-    if ((**(u32 **)(registry + 0xc) & 1) != 0) {
+f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
+    u8 *registry = func_003224F0(entry->tag);
+    if ((((MenuRegistryTable *)((MenuRegistry *)registry)->table)->flags & 1) != 0) {
         u8 *clock = func_00321238();
-        u8 *segment = mnuGetResourceRecordByIndex(*(s32 *)(entry + 8));
-        return *(f32 *)(entry + 0x14) +
+        u8 *segment = mnuGetResourceRecordByIndex(entry->unk08);
+        return entry->y0 +
             (f32)((s32)*(u16 *)(clock + 2) - *(s32 *)(segment + 0xc));
     }
-    return *(f32 *)(entry + 0x14);
+    return entry->y0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
@@ -417,24 +441,24 @@ void mnuVisitActiveRecords(s32 context) {
     }
 }
 
-void func_00323918(u8 *arg0) {
-    D_004389A0 = arg0;
+void func_00323918(u8 *records) {
+    D_004389A0 = records;
 }
 
-void func_00323920(u8 *arg0) {
-    D_004389A4 = arg0;
+void func_00323920(u8 *records) {
+    D_004389A4 = records;
 }
 
-void func_00323928(u8 *arg0) {
-    D_004389A8 = arg0;
+void func_00323928(u8 *records) {
+    D_004389A8 = records;
 }
 
-void func_00323930(u8 *arg0) {
-    D_004389AC = arg0;
+void func_00323930(u8 *records) {
+    D_004389AC = records;
 }
 
-void func_00323938(u8 *arg0) {
-    D_004389B0 = arg0;
+void func_00323938(u8 *records) {
+    D_004389B0 = records;
 }
 
 u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
@@ -465,10 +489,10 @@ u32 func_00324268(void) {
 void func_00324270(u32 node) {
     memset((void *)node, 0, 0x48);
     func_003242D0(node, 0);
-    *(u32 *)(node + 0x40) |= 0x4010;
-    *(u32 *)(node + 4) = 0x1000000;
-    *(u16 *)(node + 0x36) = 1;
-    *(f32 *)(node + 0x18) = 1.5707963f;
+    ((MenuWorkEntry *)node)->flags |= 0x4010;
+    ((MenuWorkEntry *)node)->tag = 0x1000000;
+    ((MenuWorkEntry *)node)->remaining = 1;
+    ((MenuWorkEntry *)node)->scale0 = 1.5707963f;
     D_004390D8 = node;
 }
 
@@ -495,7 +519,7 @@ u32 mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
     u32 node = (u32)mnuFindUnusedWorkEntry();
     if (node != 0) {
         func_00322E18(node, context, 0, (s32)x, (s32)y, progress);
-        *(u32 *)(node + 0x40) |= 0x10;
+        ((MenuWorkEntry *)node)->flags |= 0x10;
     }
     return node;
 }

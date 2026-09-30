@@ -24,9 +24,9 @@ extern s32 D_00438D1C;
 
 extern u32 D_00438D20;
 
-u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_00341650(u32, u32, void *, u32);
 
-u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 func_003417A8(u32, u32, void *, u32);
 
 extern u32 D_00438B84;
 
@@ -96,6 +96,19 @@ typedef struct SdfRelocResource {
     u32 relocationCount;
     u8 payload[1];
 } SdfRelocResource;
+
+typedef struct SdfResourceList {
+    u8 pad00[0x10];
+    s32 count;        /* 0x10 */
+    s32 offsets[1];   /* 0x14: relative to the resource base */
+} SdfResourceList;
+
+typedef struct SdfStreamHeader {
+    u8 pad00[8];
+    u16 width;        /* 0x08 */
+    u16 height;       /* 0x0A */
+    s32 sourceBytes;  /* 0x0C */
+} SdfStreamHeader;
 
 typedef struct MidiPlaybackState {
     u8 pad00[0x13];
@@ -326,19 +339,19 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00343E18);
 
 extern u64 func_00343E18(u64, u32 *, u64, u64);
 
-u64 func_00343ED0(u64 arg0, u32 *info, u64 arg2) {
-    return func_00343E18(arg0, info, arg2, 0);
+u64 func_00343ED0(u64 source, u32 *info, u64 options) {
+    return func_00343E18(source, info, options, 0);
 }
 
-u64 func_00343EE8(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_00343EE8(u64 source) {
+    u64 buffer;
+    u64 result;
+    u32 info[4];
 
-    temp_v0 = func_00343ED0(arg0, temp_v2, 0);
-    temp_v1 = func_0032C138(temp_v2[0]);
-    func_003297C8(temp_v0);
-    return temp_v1;
+    buffer = func_00343ED0(source, info, 0);
+    result = func_0032C138(info[0]);
+    func_003297C8(buffer);
+    return result;
 }
 
 extern s32 func_00332E58(s32);
@@ -346,7 +359,7 @@ extern void func_00332F08(s32, u64);
 
 u64 func_00343F38(u32 resource) {
     s32 i = 0;
-    s32 count = *(s32 *)(resource + 0x10);
+    s32 count = ((SdfResourceList *)resource)->count;
     s32 handle = func_00332E58(count);
     s32 *entry;
     if (count != i) {
@@ -360,15 +373,15 @@ u64 func_00343F38(u32 resource) {
     return handle;
 }
 
-u64 func_00343FC0(u64 arg0) {
-    u64 temp_v0;
-    u64 temp_v1;
-    u32 temp_v2 [4];
+u64 func_00343FC0(u64 source) {
+    u64 buffer;
+    u64 result;
+    u32 info[4];
 
-    temp_v0 = func_00343ED0(arg0, temp_v2, 0);
-    temp_v1 = func_00343F38(temp_v2[0]);
-    func_003297C8(temp_v0);
-    return temp_v1;
+    buffer = func_00343ED0(source, info, 0);
+    result = func_00343F38(info[0]);
+    func_003297C8(buffer);
+    return result;
 }
 
 s32 func_00344010(SdfRelocResource *resource) {
@@ -380,9 +393,9 @@ s32 func_00344010(SdfRelocResource *resource) {
     return payload;
 }
 
-u64 func_00344050(u64 arg0, s32 *out) {
+u64 func_00344050(u64 source, s32 *out) {
     u32 info[4];
-    u64 buffer = func_00343ED0(arg0, info, 0);
+    u64 buffer = func_00343ED0(source, info, 0);
     *out = func_00344010(info[0]);
     return buffer;
 }
@@ -396,9 +409,9 @@ s32 func_00344098(SdfRelocResource *resource) {
     return payload;
 }
 
-u64 func_003440D8(u64 arg0, s32 *out) {
+u64 func_003440D8(u64 source, s32 *out) {
     u32 info[4];
-    u64 buffer = func_00343ED0(arg0, info, 0);
+    u64 buffer = func_00343ED0(source, info, 0);
     *out = func_00344098(info[0]);
     return buffer;
 }
@@ -513,9 +526,17 @@ typedef struct SdfStreamFrameNode {
     u8 pad17[5];
     s32 bufferSize;   /* 0x1C */
     s32 buffers[2];   /* 0x20 */
-    u8 pad28[0x14];
+    u8 pad28[0xC];
+    s32 resourceWord; /* 0x34: retained resource handle */
+    u8 pad38[4];
     u16 width;        /* 0x3C */
     u16 height;       /* 0x3E */
+    s32 sourceBytes;  /* 0x40: from stream header */
+    u8 pad44[0x10];
+    s32 scratchBuffer; /* 0x54 */
+    u8 pad58[4];
+    s32 firstParam;   /* 0x5C */
+    s32 secondParam;  /* 0x60 */
 } SdfStreamFrameNode;
 
 extern s32 func_003283E0(s32);
@@ -565,12 +586,12 @@ void sdfSoundInitNodeFromFormat(u8 *dst, u8 *src) {
 
 extern void func_00344420();
 
-void sdfStreamOpen(u8 *state, s32 arg1, u8 *src, s32 size) {
+void sdfStreamOpen(u8 *state, s32 format, u8 *src, s32 size) {
     s32 interruptsEnabled;
-    sdfSoundInitNodeFromFormat(state, arg1);
-    *(u16 *)(state + 0x3C) = *(u16 *)(src + 8);
-    *(s32 *)(state + 0x40) = *(s32 *)(src + 0xC);
-    *(u16 *)(state + 0x3E) = *(u16 *)(src + 0xA);
+    sdfSoundInitNodeFromFormat(state, format);
+    ((SdfStreamFrameNode *)state)->width = ((SdfStreamHeader *)src)->width;
+    ((SdfStreamFrameNode *)state)->sourceBytes = ((SdfStreamHeader *)src)->sourceBytes;
+    ((SdfStreamFrameNode *)state)->height = ((SdfStreamHeader *)src)->height;
     sdfAllocateStreamFrameBuffers(state);
     func_00344420(state, src + 0x10, size - 0x10);
     interruptsEnabled = func_0036DE70();
@@ -584,12 +605,12 @@ void sdfStreamOpen(u8 *state, s32 arg1, u8 *src, s32 size) {
 extern s32 func_003283E0(s32);
 extern void sdfSoundInitNodeFromFormat();
 
-void sdfSoundInitFormattedNode(u8 *state, s32 arg1, s32 arg2, s32 arg3) {
-    sdfSoundInitNodeFromFormat(state, arg1);
-    *(s32 *)(state + 0x5C) = arg2;
-    *(s32 *)(state + 0x60) = arg3;
+void sdfSoundInitFormattedNode(u8 *state, s32 format, s32 first, s32 second) {
+    sdfSoundInitNodeFromFormat(state, format);
+    ((SdfStreamFrameNode *)state)->firstParam = first;
+    ((SdfStreamFrameNode *)state)->secondParam = second;
     state[0xC] = 1;
-    *(s32 *)(state + 0x54) = func_003283E0(0x10100) + 0x100;
+    ((SdfStreamFrameNode *)state)->scratchBuffer = func_003283E0(0x10100) + 0x100;
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003448D0);
@@ -689,9 +710,9 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345488);
 
-void sdfSoundInitAndAppendNode(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    sdfStreamOpen(state, arg1, arg2, arg3);
-    *(s32 *)(state + 0x34) = arg4;
+void sdfSoundInitAndAppendNode(u8 *state, s32 format, s32 source, s32 size, s32 resource) {
+    sdfStreamOpen(state, format, source, size);
+    ((SdfStreamFrameNode *)state)->resourceWord = resource;
     sdfSoundAppendNode((SoundNode *)state);
 }
 
@@ -704,9 +725,9 @@ typedef struct SdfStreamParams {
 
 extern s32 sdfTexGetPrimaryResourceWord();
 
-void sdfStreamCreateWithParams(s32 arg0, SdfStreamParams *params, s32 arg2, s32 arg3, u8 *source) {
+void sdfStreamCreateWithParams(s32 state, SdfStreamParams *params, s32 source, s32 size, u8 *resource) {
     SdfStreamParams local = *params;
-    switch (source[0x1A]) {
+    switch (resource[0x1A]) {
     case 0:
         local.mode = 0;
         break;
@@ -714,12 +735,12 @@ void sdfStreamCreateWithParams(s32 arg0, SdfStreamParams *params, s32 arg2, s32 
         local.mode = 1;
         break;
     }
-    sdfSoundInitAndAppendNode(arg0, &local, arg2, arg3, sdfTexGetPrimaryResourceWord(source));
+    sdfSoundInitAndAppendNode(state, &local, source, size, sdfTexGetPrimaryResourceWord(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    sdfSoundInitFormattedNode(state, arg1, arg2, arg3);
-    *(s32 *)(state + 0x34) = arg4;
+void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format, s32 first, s32 second, s32 resource) {
+    sdfSoundInitFormattedNode(state, format, first, second);
+    ((SdfStreamFrameNode *)state)->resourceWord = resource;
     sdfSoundAppendNode((SoundNode *)state);
 }
 
@@ -773,16 +794,16 @@ void func_003457F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345810);
 
-void func_003458E8(u32 arg0) {
-    D_00438D0C = arg0;
+void func_003458E8(u32 value) {
+    D_00438D0C = value;
 }
 
-void func_003458F0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4) {
-    D_00438D10 = arg0 * 0x10 + 0x7000;
-    D_00438D14 = arg1 * 8 + 0x7900;
-    D_00438D18 = D_00438D10 + arg2 * 0x10;
-    D_00438D1C = D_00438D14 + arg3 * 8;
-    D_00438D20 = arg4;
+void func_003458F0(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value) {
+    D_00438D10 = firstStart * 0x10 + 0x7000;
+    D_00438D14 = secondStart * 8 + 0x7900;
+    D_00438D18 = D_00438D10 + firstLength * 0x10;
+    D_00438D1C = D_00438D14 + secondLength * 8;
+    D_00438D20 = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345928);
