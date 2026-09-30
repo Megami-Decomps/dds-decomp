@@ -21,6 +21,30 @@ typedef struct PolyEntryPool {
     s32 *records; /* 0xF8: five words per entry; -0xFFFFFF marks inactive */
 } PolyEntryPool;
 
+/* Point buffer of one strip; `count` is copied from the strip's own count. */
+typedef struct {
+    u32 points;   /* 0x0 */
+    u32 unk4;     /* 0x4 */
+    s32 count;    /* 0x8 */
+    u32 unkC;     /* 0xC */
+    u32 unk10;    /* 0x10 */
+} PolyStripEntry; /* 0x14 bytes */
+
+typedef struct {
+    u8 pad00[8];             /* 0x0 */
+    s32 count;               /* 0x8 */
+    u8 pad0C[8];             /* 0xC */
+    PolyStripEntry *entries; /* 0x14 */
+} PolyStrip;
+
+/* Node with a scale at 0xD0 and its strip at 0xDC. */
+typedef struct {
+    u8 pad00[0xD0];     /* 0x0 */
+    f32 scale;          /* 0xD0 */
+    u8 padD4[8];        /* 0xD4 */
+    PolyStrip *strip;   /* 0xDC */
+} PolyScaledStripNode;
+
 extern f32 func_003407A0(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
@@ -48,7 +72,36 @@ void func_00165838(s32 work) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165860);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_001659B8);
+/* Push each point pair of the strip entry apart along its own direction, by the node's scale. */
+void func_001659B8(PolyScaledStripNode *obj, s32 index) {
+    PolyStrip *strip = obj->strip;
+    PolyStripEntry *entry = &strip->entries[index];
+    f32 scale[4];
+    f32 *p;
+    s32 pairs;
+    s32 i;
+
+    p = (f32 *)entry->points;
+    pairs = strip->count / 2;
+    scale[0] = scale[1] = scale[2] = obj->scale;
+    VU0_LOAD_VF(vf12, scale);
+    for (i = 0; i < pairs; i++) {
+        VU0_LOAD_VF(vf10, p + 4);
+        VU0_LOAD_VF(vf11, p);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_MOVE_VF(vf11, vf12);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, p);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, p);
+        VU0_LOAD_VF(vf10, p + 4);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, p + 4);
+        p += 8;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165A78);
 
@@ -64,22 +117,6 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165CF0);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165D38);
 
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
-/* Point buffer of one strip; `count` is copied from the strip's own count. */
-typedef struct {
-    u32 points;   /* 0x0 */
-    u32 unk4;     /* 0x4 */
-    s32 count;    /* 0x8 */
-    u32 unkC;     /* 0xC */
-    u32 unk10;    /* 0x10 */
-} PolyStripEntry; /* 0x14 bytes */
-
-typedef struct {
-    u8 pad00[8];             /* 0x0 */
-    s32 count;               /* 0x8 */
-    u8 pad0C[8];             /* 0xC */
-    PolyStripEntry *entries; /* 0x14 */
-} PolyStrip;
 
 /* Band node: an origin, a transform, the ring's segment count and a strip at 0xF0. */
 typedef struct {
@@ -142,7 +179,74 @@ void func_00165E28(PolyBand *obj, s32 index, f32 width)
 }
 #undef VEC3_SPLAT
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_00165FC8);
+typedef struct {
+    u32 unk0;
+    f32 width;
+} PolyRing2Rec; /* 8 bytes */
+
+typedef struct {
+    f32 origin[4];      /* 0x0 */
+    u8 pad10[0x10];     /* 0x10 */
+    f32 matrix[16];     /* 0x20 */
+    u8 pad60[0x64];     /* 0x60 */
+    u32 segments;       /* 0xC4 */
+    u8 padC8[0x14];     /* 0xC8 */
+    f32 lift;           /* 0xDC */
+    u8 padE0[0x10];     /* 0xE0 */
+    PolyStrip *strip;   /* 0xF0 */
+    PolyRing2Rec *recs; /* 0xF4 */
+} PolyRing2;
+
+/* Lay a ring of point pairs for strip entry `index`, scaled per axis and lifted along y. */
+void func_00165FC8(PolyRing2 *obj, s32 index) {
+    PolyStrip *strip = obj->strip;
+    PolyRing2Rec *rec = &obj->recs[index];
+    PolyStripEntry *entry = &strip->entries[index];
+    f32 dir[4];
+    f32 scale[4];
+    f32 lift[4];
+    f32 step;
+    f32 angle;
+    f32 *out;
+    f32 *first;
+    s32 pairs;
+    s32 i;
+
+    entry->count = strip->count;
+    out = (f32 *)entry->points;
+    pairs = strip->count >> 1;
+    scale[2] = scale[1] = scale[0] = rec->width;
+    lift[1] = obj->lift;
+    lift[2] = lift[0] = 0;
+    step = 3.14159265f * 2.0f / (f32)obj->segments;
+    VU0_LOAD_MATRIX(obj->matrix);
+    angle = 0.0f;
+    for (i = 0; i < pairs - 1; i++) {
+        dir[0] = func_003407A0(angle);
+        dir[1] = 0;
+        dir[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, scale);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, lift);
+        VU0_APPLY_MATRIX(vf11, vf11);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_LOAD_VF(vf11, out + 4);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out + 4);
+        VU0_MOVE_VF(vf10, vf12);
+        VU0_LOAD_VF(vf11, out);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out);
+        out += 8;
+        angle += step;
+    }
+    first = (f32 *)entry->points;
+    PCP_COPY_VECTOR(out, first);
+    PCP_COPY_VECTOR(out + 4, first + 4);
+}
 
 void effPolyScaleFourComponents(float factor, PolyTransform *transform) {
     transform->scaleC8 = transform->scaleC8 * factor;

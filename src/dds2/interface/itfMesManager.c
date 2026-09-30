@@ -116,14 +116,26 @@ typedef struct ItfMesBlk40 {
     u16 unk10;           /* +0x10 */
     s16 unk12;           /* +0x12 */
     u16 unk14;           /* +0x14 */
-    u16 unk16;           /* +0x16 */
+    s16 unk16;           /* +0x16: number of rows */
 } ItfMesBlk40;
+
+/* Block at ItfMesState +0xA4. */
+typedef struct ItfMesBlkA4 {
+    u8 unk0[4];          /* +0x0 */
+    void *unk4;          /* +0x4 */
+    u32 unk8;            /* +0x8: handle */
+    u8 unkC[0x1C];       /* +0xC */
+    u32 unk28;           /* +0x28 */
+} ItfMesBlkA4;
 
 /* Message-window state behind each ItfMesSlot. */
 typedef struct ItfMesState {
     u32 flags;          /* 0x0: low half status, high half mask */
     ItfMesSub *sub;     /* 0x4 */
-    u8 unk8[0xC];       /* 0x8 */
+    u8 unk8[4];         /* 0x8 */
+    s32 unkC;           /* 0xC */
+    s16 unk10;          /* 0x10 */
+    s16 unk12;          /* 0x12 */
     ItfMesBlk14 blk14;    /* 0x14: passed to func_0019DDA8 */
     ItfMesBlk24 blk24;    /* 0x24: passed to func_0019DDD0 */
     u8 unk38;             /* 0x38 */
@@ -132,7 +144,8 @@ typedef struct ItfMesState {
     s16 unk3C;          /* 0x3C: read by func_0019C548 */
     s16 unk3E;          /* 0x3E: read by func_0019C528 */
     ItfMesBlk40 blk40;  /* 0x40 */
-    u8 unk58[0x78];     /* 0x58 */
+    u8 unk58[0x4C];     /* 0x58 */
+    ItfMesBlkA4 blkA4;  /* 0xA4 */
     u32 tableD0[1];  /* 0xD0: indexed by func_0019C568 (true length unknown) */
     u8 unkD4[0x108]; /* 0xD4 */
     u32 unk1DC;      /* 0x1DC: set by func_0019CB98 */
@@ -233,6 +246,30 @@ extern s32 sndVisitQueuedResources(void);
 extern void sndFlushMessageQueue(void);
 
 extern void func_001A76C8(void);
+
+extern struct ItfMesPoolNode *itfAcquirePoolNode();
+
+extern u32 func_003292A8();
+
+extern u32 sdfResourceRetainAddress();
+
+extern void func_001A5E48();
+
+extern void func_001A5E88();
+
+extern void func_001A5EB8();
+
+extern void func_001A5EE8();
+
+extern void func_0019DD48();
+
+extern s32 func_0019DBA8();
+
+extern s32 func_001A1858();
+
+extern void func_001A1980();
+
+extern void func_001A1A50();
 
 /* Glyph/record chain walked by func_001958A0/frFontLinkGlyph. */
 typedef struct FrFontGlyph {
@@ -456,7 +493,32 @@ void itfMesClearFlags(u32 arg0) {
     D_004365E8 = D_004365E8 & ~arg0;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A38D8);
+s32 func_001A38D8(ItfMesSub *sub) {
+    ItfMesPoolNode *node = itfAcquirePoolNode(&D_00452940.pool);
+    s32 window = node->index;
+    ItfMesState *mes;
+    u32 handle;
+
+    handle = func_003292A8(0x1E0);
+    node->unk10 = handle;
+    mes = (ItfMesState *)sdfResourceRetainAddress(handle);
+    node->unkC = (s32)mes;
+    mes->sub = NULL;
+    itfMesSetSubResource(window, sub);
+    mes->flags = 0;
+    mes->unk10 = 0x53;
+    mes->unkC = 0xFFFFF0;
+    mes->unk12 = 0;
+    mes->unk1DC = 0;
+    func_001A5DD8(&mes->blk14, 1);
+    func_001A5E00(&mes->blk24, 1);
+    func_001A5E48(&mes->blk40);
+    func_001A5E88(&mes->blkA4);
+    func_001A5EB8(mes->tableD0);
+    func_001A5EE8((u8 *)mes + 0x1D0, 0);
+    D_00452940.unk0++;
+    return window;
+}
 
 void func_001A39D0(s32 window) {
     if (window >= 0 && D_0045296C[window].mes != NULL) {
@@ -496,9 +558,62 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
     func_001A5DD8(blk14, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3DA8);
+void func_001A3DA8(ItfMesState *mes) {
+    ItfMesBlk40 *blk = &mes->blk40;
+    ItfMesBlkA4 *blkA4 = &mes->blkA4;
+    s32 rect[4];
+    s32 width = 0;
+    s32 height;
+    s32 half;
+    s32 i;
+    s32 w;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A3EE0);
+    func_0019DD48(0x1000, 0x4B0, blk->unk8);
+    height = blk->unk16 * 25 * 8;
+    for (i = 0; i < blk->unk16; i++) {
+        w = func_0019DBA8(i, blk->unk8);
+        if (width < w) {
+            width = w;
+        }
+    }
+    half = width / 2;
+    rect[0] = 0xE00 - half;
+    rect[1] = 0x430;
+    rect[2] = 0x1200 + half;
+    rect[3] = 0x530 + height;
+    blkA4->unk8 = func_001A1858(9, D_00452940.unk4);
+    func_001A1980(blkA4->unk8, rect[0], rect[1], rect[2], rect[3], mes->unkC);
+    func_001A1A50(blkA4->unk8, 0, 0, 0, 0);
+    mes->flags = (mes->flags & ~0xC00) | 0x400;
+}
+
+void func_001A3EE0(s32 window, s32 entryIndex) {
+    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesBlk40 *blk = &mes->blk40;
+    ItfMesEntry *entry = itfMesGetEntry(mes, entryIndex);
+    ItfMesTable *table;
+    s32 count;
+    s32 y;
+
+    if (blk->unk8 != NULL) {
+        func_0019C5B0(blk->unk8);
+        blk->unk8 = NULL;
+    }
+    table = entry->table;
+    count = itfMesCountZeroBits(table->unk1A, blk->panelValue);
+    y = blk->unk4 - ((count - 1) * 25 << 3);
+    itfMesInitCharTable((s32 *)mes->tableD0);
+    if (*(s32 *)&mes->unk8[0] != 0) {
+        func_0019D8A8(*(s32 *)&mes->unk8[0]);
+    }
+    blk->unk8 = (FrFontGlyph *)func_001A5670((u32 *)((u8 *)table + 0x20), table->unk1A, blk->panelValue, blk->unk0, y, mes->unkC);
+    blk->unk16 = count;
+    mes->flags = (mes->flags & ~0x38) | 0x10;
+    if (mes->unk12 == 3) {
+        func_001A3DA8(mes);
+    }
+    blk->unk10 = 1;
+}
 
 void itfMesResetWindow(s32 window) {
     ItfMesState *mes = D_0045296C[window].mes;
