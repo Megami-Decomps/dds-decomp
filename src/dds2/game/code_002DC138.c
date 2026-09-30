@@ -555,9 +555,9 @@ extern u8 *effAllocateBlockWithModel(u16, void *);
 extern u32 func_002F5358(u16, void *, void *, u32);
 
 void effInitModelVUState(void *model) {
-    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
-    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    VU0_MOVE_VF(vf10, vf0);
     func_00232AD0(model);
     VU0_SET_ONES_XYZ(vf10);
     mdlStoreTertiaryVectorVU(model);
@@ -1645,7 +1645,7 @@ void func_002E0F30(BillCellDrawWork *work) {
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
@@ -1734,7 +1734,7 @@ void func_002E1908(BillCellDrawWork *work) {
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");

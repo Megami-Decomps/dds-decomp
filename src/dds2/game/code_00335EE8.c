@@ -113,68 +113,50 @@ void func_00336270(void *dst) {
 
 /* vu0 routine: vf24-vf27 = vf28-vf31 */
 void func_00336288(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf24, vf28);
+    VU0_MOVE_VF(vf25, vf29);
+    VU0_MOVE_VF(vf26, vf30);
+    VU0_MOVE_VF(vf27, vf31);
 }
 
 /* vu0 routine: vf20-vf23 = vf28-vf31 */
 void func_003362A0(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf20, vf28\n"
-        "vmove.xyzw vf21, vf29\n"
-        "vmove.xyzw vf22, vf30\n"
-        "vmove.xyzw vf23, vf31\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf20, vf28);
+    VU0_MOVE_VF(vf21, vf29);
+    VU0_MOVE_VF(vf22, vf30);
+    VU0_MOVE_VF(vf23, vf31);
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 */
 void func_003362B8(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf28, vf24\n"
-        "vmove.xyzw vf29, vf25\n"
-        "vmove.xyzw vf30, vf26\n"
-        "vmove.xyzw vf31, vf27\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf28, vf24);
+    VU0_MOVE_VF(vf29, vf25);
+    VU0_MOVE_VF(vf30, vf26);
+    VU0_MOVE_VF(vf31, vf27);
 }
 
 /* vu0 routine: vf20-vf23 = vf24-vf27 */
 void func_003362D0(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf20, vf24\n"
-        "vmove.xyzw vf21, vf25\n"
-        "vmove.xyzw vf22, vf26\n"
-        "vmove.xyzw vf23, vf27\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf20, vf24);
+    VU0_MOVE_VF(vf21, vf25);
+    VU0_MOVE_VF(vf22, vf26);
+    VU0_MOVE_VF(vf23, vf27);
 }
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 */
 void func_003362E8(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf28, vf20\n"
-        "vmove.xyzw vf29, vf21\n"
-        "vmove.xyzw vf30, vf22\n"
-        "vmove.xyzw vf31, vf23\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf28, vf20);
+    VU0_MOVE_VF(vf29, vf21);
+    VU0_MOVE_VF(vf30, vf22);
+    VU0_MOVE_VF(vf31, vf23);
 }
 
 /* vu0 routine: vf24-vf27 = vf20-vf23 */
 void func_00336300(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf20\n"
-        "vmove.xyzw vf25, vf21\n"
-        "vmove.xyzw vf26, vf22\n"
-        "vmove.xyzw vf27, vf23\n"
-        ".set reorder\n");
+    VU0_MOVE_VF(vf24, vf20);
+    VU0_MOVE_VF(vf25, vf21);
+    VU0_MOVE_VF(vf26, vf22);
+    VU0_MOVE_VF(vf27, vf23);
 }
 
 void sdfSetPrimaryIdentityMatrixVU(void) {

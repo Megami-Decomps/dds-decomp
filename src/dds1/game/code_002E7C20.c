@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct EffRandState
 {
@@ -218,7 +219,7 @@ void effMiscQuaternionNlerpVU(f32 amount)
             "vmsubw.xyzw vf12, vf11, vf0w\n"
             ".set reorder\n");
     } else {
-        __asm__ volatile ("vmove.xyzw vf12, vf11");
+        VU0_MOVE_VF(vf12, vf11);
     }
     {
         f32 remaining = 1.0f - amount;

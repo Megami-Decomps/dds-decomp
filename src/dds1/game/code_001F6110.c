@@ -767,7 +767,7 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
     unit = 0x3C000000;
     color1[0] = colorB;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = colorA;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (
@@ -803,13 +803,7 @@ u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
         "lqc2 vf11, 0(%1)\n\t"
         ".set reorder"
         : : "r"(a), "r"(b));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $2, %0\n\t"
-        "qmtc2.ni $2, vf2\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        ".set reorder"
-        : : "f"(1.0f - t));
+    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
     __asm__ volatile(
         ".set noreorder\n\t"
         "mfc1 $3, %0\n\t"

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ee_mmi.h"
+#include "pcp_vu0.h"
 #include "eff.h"
 
 /* 0x44-byte init record built by func_0018D428. */
@@ -485,7 +486,7 @@ u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
     unit = 0x3C000000;
     color1[0] = colorB;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = colorA;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (
@@ -518,7 +519,7 @@ u32 func_0018DDF8(u32 colorA, u32 colorB) {
     u32 unit = 0x3C000000;
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");

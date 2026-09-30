@@ -459,7 +459,7 @@ extern u32 func_00151FC8(u32);
 extern void func_002B0B70(u8 *, void *);
 
 void effInitModelVUState(void *model) {
-    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+    VU0_MOVE_VF(vf10, vf0);
     mdlStorePrimaryVectorVU(model);
     __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
     func_00217FB8(model);
@@ -1588,7 +1588,7 @@ void func_0029EEC8(BillCellDrawWork *work) {
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
     EE_MMI_RGBA_UNPACK(color2, unit);
     __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");

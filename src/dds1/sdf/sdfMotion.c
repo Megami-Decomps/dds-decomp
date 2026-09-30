@@ -498,7 +498,7 @@ void func_002DC0E8(HasSub *a0, f32 t1, f32 t2) {
     EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
     effMiscQuaternionNlerpVU(b.weight);
     sub = a0->sub;
-    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0 + 0x10));
     effMiscQuaternionNlerpVU(t2);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(sub + 0x50));
