@@ -111,6 +111,16 @@ extern void kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *updat
 
 extern void func_0025D8C8(void);
 
+extern s32 func_002C54B0(s32);
+
+extern u8 D_003CDA88[];
+
+extern s32 func_0019FC38(s32, s32, u64, u64, u64, u64);
+
+extern void frFontSetChildColors(s32, u32);
+
+extern s32 func_0019D550(s32, s32, u32);
+
 extern void evtReleaseEventPackResources(void);
 
 #define CAMP_TASK_PRIORITY 0x3EC
@@ -202,8 +212,10 @@ typedef struct FxChild {
     u8 pad02[6];
     s16 fadeA;            /* 0x08 */
     s16 fadeB;            /* 0x0A */
-    u8 pad0C[0x24];
+    s16 cond;             /* 0x0C */
+    u8 pad0E[0x22];
     struct FxChild *next; /* 0x30 */
+    struct FxChild *link; /* 0x34 */
 } FxChild;
 
 typedef struct FxNode {
@@ -212,7 +224,8 @@ typedef struct FxNode {
     s16 base;             /* 0x1C */
     u8 pad1E[0x36];
     FxChild *children;    /* 0x54 */
-    u8 pad58[0x24];
+    FxChild *fallback;    /* 0x58 */
+    u8 pad5C[0x20];
     struct FxNode *next;  /* 0x7C */
 } FxNode;
 
@@ -430,7 +443,8 @@ void func_0025E7B8(PackedPair *pair, s32 *low, s32 *high) {
 typedef struct CampEntryNode {
     u8 pad00[8];
     s32 nameIndex; /* 0x08: 32-byte name in the owning scene */
-    u8 pad0C[0x1C];
+    u8 pad0C[0x18];
+    s32 value; /* 0x24 */
     u32 status; /* 0x28 */
     u8 pad2C[0x50];
     struct CampEntryNode *next; /* 0x7C */
@@ -439,7 +453,9 @@ typedef struct CampEntryNode {
 typedef struct {
     u8 pad00[0x2034];
     CampEntryNode *entries; /* 0x2034 */
-    u8 pad2038[0x3D4];
+    u8 pad2038[0x3A8];
+    s32 pendingValue; /* 0x23E0 */
+    u8 pad23E4[0x28];
     u32 state; /* 0x240C */
     u32 effectHandle; /* 0x2410 */
     u8 pad2414[0x30];
@@ -847,7 +863,27 @@ s32 func_00260468(void) {
     return temp_v2;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002604A0);
+typedef struct CampTier {
+    u32 threshold;
+    s32 value;
+} CampTier;
+
+extern CampTier D_003CE408[];
+
+s32 func_002604A0(void) {
+    u32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (i + 1 < 3) {
+            if (D_003CE408[i].threshold > *(u32 *)(D_00435DD0 + 0x1E650)) {
+                break;
+            }
+        } else if (D_003CE408[i].threshold <= *(u32 *)(D_00435DD0 + 0x1E650)) {
+            break;
+        }
+    }
+    return D_003CE408[i].value;
+}
 
 void func_00260538(void) {
     u16 temp_v0;
@@ -1041,7 +1077,15 @@ u8 func_00261018(s32 row, s32 column) {
     return D_003CD8F4[column * 8 + row * 0x44];
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261040);
+s32 func_00261040(s32 row, s32 column) {
+    u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
+    s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
+
+    if (entry[1] == 0 && func_002C54B0(id) != 0 && *(u8 *)(id + D_00435DD0 + 0x1340) != 0) {
+        id = *(u16 *)(entry + 8);
+    }
+    return id;
+}
 
 s32 func_002610C0(s32 row, s32 column) {
     return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
@@ -1069,7 +1113,16 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_002619A8);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261D78);
+void func_00261D78(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
+    s32 handle;
+
+    if (a1 != 0) {
+        handle = func_0019FC38(0x970, 0xB58, 1, (u16)a0, a1, a4);
+        frFontSetChildColors(handle, 0x80808040);
+        func_0019D550(handle, 0, a5);
+        func_0019C5B0(handle);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_004377F0);
 
