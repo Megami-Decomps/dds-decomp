@@ -11,28 +11,28 @@ typedef struct EvtUnit {
     u8 pad08[0x60];     /* 0x08 */
     s32 unk68;          /* 0x68 */
     u32 value;          /* 0x6C: matches evtUnitManager */
-    s128 unk70;          /* 0x70: 16-byte vector copied by the setup helpers */
+    s128 vector;         /* 0x70: target vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
     u32 *flagWord;       /* 0x8C: status opcodes update its first bit */
     void *linkedUnit;    /* 0x90: world unit attached by setup helpers */
     s32 unk94;          /* 0x94 */
     s32 unk98;          /* 0x98 */
     s32 unk9C;          /* 0x9C */
-    s32 unkA0;          /* 0xA0 */
-    f32 unkA4;          /* 0xA4 */
+    s32 pathHandle;      /* 0xA0: freed and replaced when following another path */
+    f32 pathSpeed;       /* 0xA4: signed path speed */
     u32 flags;          /* 0xA8 */
-    s16 unkAC;          /* 0xAC */
+    s16 mode;            /* 0xAC: 1 = active source, 3 = bounded transition, 4 = value transition */
     s16 unkAE;          /* 0xAE */
     s16 unkB0;          /* 0xB0 */
     s16 unkB2;          /* 0xB2 */
-    s16 unkB4;          /* 0xB4 */
+    s16 frameCount;      /* 0xB4: transition duration in frames */
     s16 unkB6;          /* 0xB6 */
     u8 padB8[0x04];     /* 0xB8 */
     u16 unkBC;          /* 0xBC */
     s16 unkBE;          /* 0xBE */
     s16 unkC0;          /* 0xC0 */
     u8 padC2[0x2E];     /* 0xC2 */
-    s16 unkF0[1];       /* 0xF0 */
+    s16 tableValues[1];  /* 0xF0: script-indexed entries (length not established in DDS1) */
 } EvtUnit;
 
 /* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
@@ -166,21 +166,21 @@ typedef struct EvtModelHeader {
     u8 pad00[0x04];
     u32 flags;          /* 0x04: bit 2 selects the header transform */
     u8 pad08[0x08];
-    f32 unk10;          /* 0x10 */
-    f32 unk14;          /* 0x14 */
-    f32 unk18;          /* 0x18 */
+    f32 positionX;      /* 0x10: script-supplied translation */
+    f32 positionY;      /* 0x14 */
+    f32 positionZ;      /* 0x18 */
 } EvtModelHeader;
 
 typedef struct EvtModelParams {
     u8 pad00[0x40];
-    f32 unk40;          /* 0x40 */
-    f32 unk44;          /* 0x44 */
-    f32 unk48;          /* 0x48 */
+    f32 positionX;      /* 0x40: script-supplied translation */
+    f32 positionY;      /* 0x44 */
+    f32 positionZ;      /* 0x48 */
     u8 pad4C[0x04];
-    f32 unk50;          /* 0x50 */
-    f32 unk54;          /* 0x54 */
-    f32 unk58;          /* 0x58 */
-    f32 unk5C;          /* 0x5C */
+    f32 rotationX;      /* 0x50: copied from the source's second vector */
+    f32 rotationY;      /* 0x54 */
+    f32 rotationZ;      /* 0x58 */
+    f32 rotationW;      /* 0x5C */
     u8 pad60[0x60];
     u32 flagsC0;        /* 0xC0 */
 } EvtModelParams;
@@ -192,14 +192,14 @@ typedef struct EvtModelObj {
 } EvtModelObj;
 
 typedef struct EvtSourceVec {
-    f32 unk00;          /* 0x00 */
-    f32 unk04;          /* 0x04 */
-    f32 unk08;          /* 0x08 */
+    f32 positionX;      /* 0x00: copied into model position */
+    f32 positionY;      /* 0x04 */
+    f32 positionZ;      /* 0x08 */
     u8 pad0C[0x04];
-    f32 unk10;          /* 0x10 */
-    f32 unk14;          /* 0x14 */
-    f32 unk18;          /* 0x18 */
-    f32 unk1C;          /* 0x1C */
+    f32 rotationX;      /* 0x10: copied into model rotation */
+    f32 rotationY;      /* 0x14 */
+    f32 rotationZ;      /* 0x18 */
+    f32 rotationW;      /* 0x1C */
 } EvtSourceVec;
 
 typedef struct EvtSourceObj {
@@ -262,9 +262,9 @@ typedef struct EvtWorldUnitRef {
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
-        work->unkAC = 3;
-        PCP_COPY_VECTOR(&work->unk70, vector);
-        work->unkB4 = frames;
+        work->mode = 3;
+        PCP_COPY_VECTOR(&work->vector, vector);
+        work->frameCount = frames;
         work->unkB6 = 0;
         work->unk94 = 0;
         work->unkB2 = 0;
@@ -283,11 +283,11 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 
 void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     work->unkB0 = mode;
-    work->unkAC = 1;
+    work->mode = 1;
     work->unkAE = 0;
     work->linkedUnit = NULL;
-    PCP_COPY_VECTOR(&work->unk70, vector);
-    work->unkB4 = frames;
+    PCP_COPY_VECTOR(&work->vector, vector);
+    work->frameCount = frames;
     work->unkB6 = valueB6;
     work->unk94 = value94;
     work->unkB2 = 0;
@@ -312,19 +312,19 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     if (pathSource == NULL) {
         return;
     }
-    if (work->unkA0 != 0) {
-        dds3FreePathObject(work->unkA0);
+    if (work->pathHandle != 0) {
+        dds3FreePathObject(work->pathHandle);
     }
     path = func_00116D38(pathSource);
-    work->unkA0 = path;
-    work->unkA4 = 40.0f / func_00220830(path);
+    work->pathHandle = path;
+    work->pathSpeed = 40.0f / func_00220830(path);
     if (dirFlag == 0) {
         evtScaleValueByMultiplier(path, 0.0f);
         func_00117568(path, 0);
     } else {
         evtScaleValueByMultiplier(path, 1.0f);
         func_00117568(path, 1);
-        work->unkA4 = -work->unkA4;
+        work->pathSpeed = -work->pathSpeed;
     }
     switch (mode) {
     case 0:
@@ -358,12 +358,12 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         work->flags |= 0x10;
         break;
     }
-    work->unkAC = 1;
+    work->mode = 1;
     work->unkAE = 2;
     work->linkedUnit = pathSource;
     func_00116F38(path);
-    VU0_STORE_VF($vf10, &work->unk70);
-    work->unkB4 = frames;
+    VU0_STORE_VF($vf10, &work->vector);
+    work->frameCount = frames;
     work->unkB6 = valueB6;
     work->unk94 = 0;
     work->unkB2 = 0;
@@ -375,7 +375,7 @@ s32 func_00222EB0(EvtUnit *work, s32 value) {
     if (value != 0) {
         work->unk94 = value;
         work->unkB2 = 0;
-        work->unkAC = 4;
+        work->mode = 4;
         ret = 1;
     }
     return ret;
@@ -1022,7 +1022,7 @@ u32 evtOpSetUnitTableEntry(void) {
     {
         s32 index = scrReadIntParameter(1);
         s32 value = scrReadIntParameter(2);
-        unit->unkF0[index] = value;
+        unit->tableValues[index] = value;
     }
     return 1;
 }
@@ -1071,8 +1071,8 @@ u32 func_00224B28(void) {
 u32 func_00224B98(void) {
     s32 id;
     EvtUnit *unit;
-    s32 param1;
-    s32 param2;
+    s32 objectId;
+    s32 frames;
 
     id = scrReadIntParameter(0);
     unit = func_00222090(id);
@@ -1080,9 +1080,9 @@ u32 func_00224B98(void) {
         return 1;
     }
     unit->unkB2 = 0;
-    param1 = scrReadIntParameter(1);
-    param2 = scrReadIntParameter(2);
-    evtAttachSecondaryWorldUnit(unit, param1, param2);
+    objectId = scrReadIntParameter(1);
+    frames = scrReadIntParameter(2);
+    evtAttachSecondaryWorldUnit(unit, objectId, frames);
     return 1;
 }
 
@@ -1454,13 +1454,13 @@ u32 func_00225E40(void) {
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     header = obj->header;
     if (header->flags & 4) {
-        header->unk10 = bfWaitReadArgFloat(1);
-        header->unk14 = bfWaitReadArgFloat(2);
-        header->unk18 = bfWaitReadArgFloat(3);
+        header->positionX = bfWaitReadArgFloat(1);
+        header->positionY = bfWaitReadArgFloat(2);
+        header->positionZ = bfWaitReadArgFloat(3);
     } else {
-        obj->params->unk40 = bfWaitReadArgFloat(1);
-        obj->params->unk44 = bfWaitReadArgFloat(2);
-        obj->params->unk48 = bfWaitReadArgFloat(3);
+        obj->params->positionX = bfWaitReadArgFloat(1);
+        obj->params->positionY = bfWaitReadArgFloat(2);
+        obj->params->positionZ = bfWaitReadArgFloat(3);
         obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
     }
     return 1;
@@ -1507,13 +1507,13 @@ u32 func_00225FE8(void) {
     vec = source->vec;
     if (!(obj->header->flags & 4)) {
         params = obj->params;
-        params->unk40 = vec->unk00;
-        params->unk44 = vec->unk04;
-        params->unk48 = vec->unk08;
-        params->unk50 = vec->unk10;
-        params->unk54 = vec->unk14;
-        params->unk58 = vec->unk18;
-        params->unk5C = vec->unk1C;
+        params->positionX = vec->positionX;
+        params->positionY = vec->positionY;
+        params->positionZ = vec->positionZ;
+        params->rotationX = vec->rotationX;
+        params->rotationY = vec->rotationY;
+        params->rotationZ = vec->rotationZ;
+        params->rotationW = vec->rotationW;
     }
     obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
     return 1;
