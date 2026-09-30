@@ -155,7 +155,25 @@ void func_00196AE8(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 c
     func_00196B30(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196B30);
+extern s32 func_001968C0(TextDrawArgs *);
+
+s32 func_00196B30(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+    TextDrawArgs args;
+
+    args.x = x;
+    args.y = y;
+    args.z = depth << 4;
+    args.color[0] = channel0;
+    args.color[1] = channel1;
+    args.color[2] = channel2;
+    args.color[3] = channel3;
+    args.encodedText = encodedText;
+    args.sub = sub;
+    args.offset = 0;
+    args.unk1C = 1;
+    args.unk1D = 1;
+    return func_001968C0(&args);
+}
 
 void itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
                    s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
@@ -471,7 +489,16 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_001983A8);
+extern s32 kwlnTaskCreate(s32, s32, s32, s32, s32, s32, s32);
+extern s32 scrCreateProcessTaskFromResource(s32, char *, s32);
+extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
+extern void func_00198408(void);
+
+void func_001983A8(void) {
+    itfLoadBackgroundSprite();
+    kwlnTaskCreate((s32)"test_font", 0x2B06, 0, 0, (s32)itfDrawBackgroundAndGetTaskReadyMask, (s32)func_00198408, 0);
+    D_003BB190 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
+}
 
 void func_00198408(void) {
     func_00194800(D_003BB18C);
