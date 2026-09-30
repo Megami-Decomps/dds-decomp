@@ -12,6 +12,16 @@ extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 extern u32 sdfResourceRetainAddress(u32);
 extern void *func_002D03F8(u32);
+extern void effMiscQuaternionToMatrixVU(void);
+extern s32 billGetFirstEntryFramePeriod(u32);
+extern void billSetEntryFrameMode1(u32, s32);
+extern f32 func_00152408(u8 *, void *);
+extern f32 func_00152560(u8 *, void *);
+extern void func_00152000(u32, f32, f32);
+extern void func_00151FF8(u32, f32);
+extern void effCopyVector(u32, u8 *);
+extern void billInvokeCallback(u32);
+extern u8 D_003B2B10[];
 
 extern u32 D_003BD11C;
 
@@ -311,7 +321,8 @@ typedef struct FnTbl24 {
 typedef struct FnTbl24Create {
     void (*fn)();
     u32 (*createResource)();
-    u8 pad_0x08[0x10]; // 0x08
+    u8 pad_0x08[0xC]; // 0x08
+    u32 resourceSize; // 0x14
 } FnTbl24Create; // 0x18
 
 typedef struct EffectResourceSizeEntry24 {
@@ -2010,7 +2021,52 @@ void effBillboardEntryFrameReset(s32 work) {
     ((EffBillboardWork *)work)->frame = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E630);
+/* Billboard beam work: rotation quaternion at 0x10, scale factors in the payload. */
+typedef struct EffBeamWork {
+    u8 pad_00[0x10];
+    u8 rotation[0x10];
+    f32 scale;
+    u32 color;
+    s32 frame;
+    f32 heightScale; // 0x2C
+    f32 widthScale;  // 0x30
+    u8 pad_34[0x30];
+    u32 billboard;
+} EffBeamWork;
+
+void func_0029E630(EffBeamWork *work) {
+    u128 vec;
+    f32 length;
+    f32 scale;
+    f32 width;
+    f32 height;
+    s32 frame;
+    s32 limit;
+
+    limit = billGetFirstEntryFramePeriod(work->billboard);
+    frame = work->frame;
+    if (frame < limit) {
+        billSetEntryFrameMode1(work->billboard, frame);
+        VU0_LOAD_VF(vf10, work->rotation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003B2B10);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, &vec);
+        length = func_00152408((u8 *)work, &vec);
+        scale = func_00152560((u8 *)work, &vec);
+        if (scale < 0.3f) {
+            scale = 0.3f;
+        }
+        scale *= work->scale;
+        width = scale * work->widthScale;
+        height = work->heightScale * work->scale;
+        func_00152000(work->billboard, width, height);
+        func_00151FF8(work->billboard, length);
+        effCopyVector(work->billboard, (u8 *)work);
+        billInvokeCallback(work->billboard);
+        work->frame++;
+    }
+}
 
 void func_0029E728(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -2116,8 +2172,6 @@ void func_0029E868(s32 work) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029E898);
-
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern u8 D_0037E0E0[];
 
@@ -5907,16 +5961,10 @@ INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1560);
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1D68);
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B1F58);
-
-u32 func_002B2088(u8 *work) {
-    void *first = fileResolvePrimaryBuffer();
-    void *second = fileResolveSecondaryBuffer(work);
-    return func_002B1F58(((EffFileRequest *)work)->kind, first, second, ((EffFileRequest *)work)->resourceParam);
-}
-
 typedef struct EffModelResource {
-    u8 pad0[0x28];
+    u8 transform[0x20];
+    f32 scale;
+    u32 color;
     s32 updateCount;
     s32 kind;
     void *model;
@@ -5924,6 +5972,34 @@ typedef struct EffModelResource {
     u32 childResource;
     void *source;
 } EffModelResource;
+
+u32 func_002B1F58(u16 kind, void *source, void *secondary, u32 param) {
+    u32 headerSize = 0x40;
+    u32 size = D_0037EE38[kind].resourceSize;
+    EffModelResource *effect = (EffModelResource *)func_002CFEB8(size + headerSize);
+
+    effect->source = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->updateCount = 0;
+    effect->kind = kind;
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
+    VU0_STORE_VF_UNCLOBBERED($vf0, (u8 *)effect + 0x10);
+    memcpy(effect->source, source, size);
+    if (secondary != NULL) {
+        effect->model = effLoadViewerModelWithVUState((u32)secondary, param);
+        effect->attributes = param;
+        effect->childResource = D_0037EE38[kind].createResource(effect->source, effect->model);
+        D_0037EE38[kind].fn(effect);
+    }
+    return (u32)effect;
+}
+
+u32 func_002B2088(u8 *work) {
+    void *first = fileResolvePrimaryBuffer();
+    void *second = fileResolveSecondaryBuffer(work);
+    return func_002B1F58(((EffFileRequest *)work)->kind, first, second, ((EffFileRequest *)work)->resourceParam);
+}
 
 typedef struct EffModelCreateRequest {
     u8 pad0[0x2C];
