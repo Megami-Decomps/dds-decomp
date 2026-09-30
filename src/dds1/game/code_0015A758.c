@@ -65,6 +65,24 @@ extern ParDispatch D_0034E258[];
 extern void (*D_0034E5E0[])(void *, void *, void *);
 
 extern void *memset(void *dst, s32 c, u32 n);
+extern void *memcpy(void *dst, void *src, u32 n);
+extern void *func_002CFEB8(s32);
+extern void func_0015DA10(void *);
+
+/* Emitter descriptor copied into a fresh allocation by func_0015D910. */
+typedef struct ParEmitDesc {
+    u8 pad00[0x10];
+    s32 count;          /* 0x10 */
+    u8 pad14[0x04];
+    s32 headerSize;     /* 0x18 */
+    u8 pad1C[0xAC];
+    u16 unkC8;          /* 0xC8 */
+    u8 padCA[0x0A];
+    s32 unkD4;          /* 0xD4 */
+    s32 unkD8;          /* 0xD8 */
+    s32 unkDC;          /* 0xDC */
+    void *unkE0;        /* 0xE0 */
+} ParEmitDesc;
 
 extern void parControlInit();
 
@@ -76,13 +94,26 @@ extern u8 D_003D64C0[];
 
 extern s32 parGetRestartFlag();
 
+extern void parCellInit();
+
 typedef struct ParSystem {
-    u8 pad00[4];
+    s16 kind;            /* 0x00 */
+    s16 unk2;            /* 0x02 */
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
-    u8 pad0C[8];
+    s32 unkC;            /* 0x0C */
+    s32 handle;          /* 0x10 */
     ParCell *cells;      /* 0x14 */
+    void *vertices;      /* 0x18 */
+    void *colors;        /* 0x1C */
+    s32 object;          /* 0x20 */
+    s32 unk24;           /* 0x24 */
+    s32 unk28;           /* 0x28 */
 } ParSystem;
+
+extern s32 func_002DA730();
+
+extern void func_002DA420(s32, f32);
 
 typedef struct ParScaleObj {
     u16 kind;
@@ -127,7 +158,7 @@ void parObjSetMode(ParObj *work, s32 value) {
     work->restartFlag = 1;
 }
 
-u32 parObjGetMode(ParObj *work) {
+s32 parObjGetMode(ParObj *work) {
     switch (work->dispatchIndex) {
     case 1:
     case 5:
@@ -198,7 +229,9 @@ void func_0015AD98(ParObj *work, u8 value) {
     parObjSetMode(work, value);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
+s64 func_0015ADB0(ParObj *work) {
+    return parObjGetMode(work);
+}
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
@@ -414,7 +447,64 @@ void parControlInit(void) {
     *(u16 *)(D_003D64C0 + 4) = 0x4000;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B6A0);
+ParSystem *func_0015B6A0(s32 count, s32 perCell, s32 arg2, u32 kind) {
+    s32 total;
+    s32 handle;
+    s32 base;
+    s32 cellsSize;
+    ParSystem *system;
+    s32 i;
+
+    if (kind == 4) {
+        perCell = perCell * 5 + 5;
+    } else if (kind == 3) {
+        perCell = perCell * 4 + 4;
+    } else if (kind == 2) {
+        perCell = perCell * 6 + 6;
+    } else {
+        perCell = perCell * 2;
+        if (arg2 != 0) {
+            if (perCell % arg2 != 0) {
+                perCell = perCell / arg2 + 2;
+            } else {
+                perCell = perCell / arg2;
+            }
+        }
+        perCell &= ~1;
+        perCell += 2;
+        if (kind == 1) {
+            perCell += perCell >> 1;
+        }
+    }
+    total = count * perCell;
+    cellsSize = (total + count) * 0x14;
+    handle = func_002D03F8(cellsSize + 0x2C);
+    base = sdfResourceRetainAddress(handle);
+    system = (ParSystem *)(base + cellsSize);
+    memset(system, 0, 0x2C);
+    system->vertices = (void *)base;
+    base += total * 0x10;
+    system->colors = (void *)base;
+    base += total * 4;
+    system->cells = (ParCell *)base;
+    for (i = 0; i < count; i++) {
+        ParCell *cell = (ParCell *)(i * sizeof(ParCell) + (s32)system->cells);
+        cell->history = (u128 *)((u8 *)system->vertices + i * perCell * 0x10);
+        cell->vertices = (u8 *)system->colors + i * perCell * 4;
+        parCellInit(system, i);
+    }
+    system->object = func_002DA730();
+    func_002DA420(system->object, 1.0f);
+    system->kind = kind;
+    system->cellCount = count;
+    system->unk2 = 2;
+    system->vertexWordCount = perCell;
+    system->unkC = arg2;
+    system->handle = handle;
+    system->unk24 = 0;
+    system->unk28 = 0;
+    return system;
+}
 
 void func_0015B8B8(s32 arg0) {
     sdfQueueAssetRelease(*(u32 *)(arg0 + 0x20));
@@ -524,13 +614,70 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015BFD8);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C128);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C2F0);
+void func_0015C2F0(ParSystem *system, s32 arg1, s32 arg2) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 3;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    *(s32 *)(vertex + 4) = arg1;
+                    *(s32 *)(vertex + 8) = arg2;
+                    *(s32 *)(vertex + 0) = arg2;
+                    vertex += 0xC;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C360);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C618);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C728);
+void func_0015C728(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 6;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    *(s32 *)(vertex + 0x0) = arg3;
+                    *(s32 *)(vertex + 0x4) = arg2;
+                    *(s32 *)(vertex + 0x8) = arg1;
+                    *(s32 *)(vertex + 0xC) = arg1;
+                    *(s32 *)(vertex + 0x10) = arg2;
+                    *(s32 *)(vertex + 0x14) = arg3;
+                    vertex += 0x18;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015C7A0);
 
@@ -570,7 +717,36 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CAA0);
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CB58);
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CC58);
+void func_0015CC58(ParSystem *system, s32 arg1, s32 arg2, s32 arg3) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 5;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    *(s32 *)(vertex + 0x0) = arg3;
+                    *(s32 *)(vertex + 0x4) = arg2;
+                    *(s32 *)(vertex + 0x8) = arg1;
+                    *(s32 *)(vertex + 0xC) = arg2;
+                    *(s32 *)(vertex + 0x10) = arg3;
+                    vertex += 0x14;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015CCD0);
 
@@ -598,10 +774,6 @@ typedef struct ParBlock {
     s32 object;      /* 0x10 */
     s32 handle;      /* 0x14 */
 } ParBlock;
-
-extern s32 func_002DA730();
-
-extern void func_002DA420(s32, f32);
 
 ParBlock *func_0015D710(s32 count) {
     s32 points = count * 3;
@@ -683,7 +855,22 @@ void func_0015D7E8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     emitter->finish(emitter, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015D910);
+ParEmitDesc *func_0015D910(ParEmitDesc *src) {
+    ParEmitDesc *desc = func_002CFEB8(src->count * 4 + 0xF0);
+
+    memset(desc, 0, 0xF0);
+    memcpy(desc, src, src->headerSize);
+    memcpy((u8 *)desc + 0xC0, (u8 *)src + src->headerSize, 0x30);
+    desc->headerSize = 0xC0;
+    desc->unkE0 = (u8 *)desc + 0xF0;
+    if (desc->unkC8 < 3) {
+        desc->unkC8 = 3;
+    }
+    desc->unkDC = func_0015B6A0(desc->count, desc->unkC8, 1, 0);
+    parDispatchSub(desc->unkDC, 0, desc->unkD4, desc->unkD8);
+    func_0015DA10(desc);
+    return desc;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
 
