@@ -227,27 +227,34 @@ void itfPanelSetRectSpan(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     p[1].y = y1;
 }
 
-void itfPanelInitRects30(PanelVert *v, s32 a, s32 b, s32 c, s32 d) {
+void itfPanelInitRects30(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     PanelVert *p = &v[6];
-    p->x = a;
-    p->y = b;
-    p[1].x = c;
+    p->x = x0;
+    p->y = y0;
+    p[1].x = x1;
     p[1].y = 0;
     p = &v[8];
-    p->x = a;
-    p->y = b;
-    p[1].x = c;
-    p[1].y = d;
+    p->x = x0;
+    p->y = y0;
+    p[1].x = x1;
+    p[1].y = y1;
 }
 
+/* The panel's two four-channel colors begin 0x44 and 0x54 bytes in. */
+typedef struct PanelColorPair {
+    s32 pad00[0x11];
+    s32 first[4];
+    s32 second[4];
+} PanelColorPair;
+
 /* Set both panel colors to the same blue tint with zero alpha. */
-void itfPanelSetBlueTint(s32 *rect) {
-    s32 *color = rect + 0x11;
+void itfPanelSetBlueTint(PanelColorPair *panel) {
+    s32 *color = panel->first;
     color[0] = 0x73;
     color[1] = 0x87;
     color[2] = 0xFF;
     color[3] = 0;
-    color = rect + 0x15;
+    color = panel->second;
     color[0] = 0x73;
     color[1] = 0x87;
     color[2] = 0xFF;

@@ -47,10 +47,10 @@ typedef struct TextStream {
     s32 x;           /* 0x0 */
     s32 y;           /* 0x4 */
     s32 z;           /* 0x8 */
-    s8 unkC;         /* 0xC: set by opcode 0xF206 */
-    s8 unkD;         /* 0xD: set by opcode 0xF202 */
-    s8 unkE;         /* 0xE: set by opcode 0xF209 */
-    s8 unkF;         /* 0xF: set by opcode 0xF207 */
+    s8 channel0;     /* 0xC: set by opcode 0xF206 */
+    s8 channel1;     /* 0xD: set by opcode 0xF202 */
+    s8 channel2;     /* 0xE: set by opcode 0xF209 */
+    s8 channel3;     /* 0xF: set by opcode 0xF207 */
     u8 *bytes;       /* 0x10: encoded input base */
     TextSub *sub;    /* 0x14 */
     s32 offset;      /* 0x18: current byte position */
@@ -81,6 +81,12 @@ typedef struct MemNode {
     u32 index;             /* 0x0 */
     struct MemNode *next;  /* 0x4 */
 } MemNode;
+
+/* Allocation handle precedes the first queue node by four bytes. */
+typedef struct MemRingHeader {
+    u32 allocation;
+    MemNode first;
+} MemRingHeader;
 
 void func_0019BE20(s32 id, const char *path);
 
@@ -173,10 +179,10 @@ s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 chann
     args.x = x;
     args.y = y;
     args.z = depth << 4;
-    args.unkC = channel0;
-    args.unkD = channel1;
-    args.unkE = channel2;
-    args.unkF = channel3;
+    args.channel0 = channel0;
+    args.channel1 = channel1;
+    args.channel2 = channel2;
+    args.channel3 = channel3;
     args.bytes = (u8 *)encodedText;
     args.sub = (TextSub *)sub;
     args.offset = 0;
@@ -223,10 +229,10 @@ void itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     args.x = 0;
     args.y = 0;
     args.z = 0;
-    args.unkC = 0;
-    args.unkD = 0;
-    args.unkE = 0;
-    args.unkF = 0;
+    args.channel0 = 0;
+    args.channel1 = 0;
+    args.channel2 = 0;
+    args.channel3 = 0;
     args.bytes = encodedText;
     args.sub = sub;
     args.offset = 0;
@@ -320,15 +326,15 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F280);
 
 extern s32 func_0019F280();
 
-s32 func_0019F408(arg0, arg1, arg2, arg3, arg4, arg5)
-    s32 arg0;
-    s32 arg1;
-    s32 arg2;
-    s32 arg3;
-    s32 arg4;
-    s32 arg5;
+s32 func_0019F408(x, y, depth, colors, text, parent)
+    s32 x;
+    s32 y;
+    s32 depth;
+    s32 colors;
+    s32 text;
+    s32 parent;
 {
-    s32 handle = func_0019F280(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
+    s32 handle = func_0019F280(x, y, depth, colors, text, 1, 0, parent);
     frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
 }
@@ -402,19 +408,19 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FC38);
 
-s32 func_0019FE00(s32 arg0, s32 arg1, s32 arg2, s8 arg3, u16 arg4, s32 arg5) {
+s32 func_0019FE00(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
     s32 result = 0;
 
     func_0019B8B0(0x13);
-    switch (arg3) {
+    switch (fontMode) {
     case 0:
-        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E6C, arg5);
+        result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
         break;
     case 1:
-        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E70, arg5);
+        result = func_0019FA08(x, y, depth, textId, D_00435E70, flags);
         break;
     case 2:
-        result = func_0019FA08(arg0, arg1, arg2, arg4, D_00435E6C, arg5);
+        result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
         break;
     }
     func_0019B8B0(-1);
@@ -515,7 +521,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 u32 itfReleaseMemNodeBuffer(u8 *payload) {
-    func_003297C8(*(u32 *)(payload - 4));
+    func_003297C8(((MemRingHeader *)(payload - 4))->allocation);
     return 1;
 }
 
@@ -919,11 +925,18 @@ extern void *sdfAllocPacketAligned(s32);
 extern u8 *func_0033A290(void *, s32);
 extern void sdfAppendPacket();
 
+/* The packet builder returns a 0x30-byte command with two trailing qwords. */
+typedef struct TextPacketTail {
+    u8 pad00[0x20];
+    s64 value;
+    s64 registerCode;
+} TextPacketTail;
+
 void itfSendBlendPacket(void *list, s64 value, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
-    u8 *command = func_0033A290(packet, 0x30);
-    *(s64 *)(command + 0x20) = value;
-    *(s64 *)(command + 0x28) = flag != 0 ? 0x48 : 0x47;
+    TextPacketTail *command = func_0033A290(packet, 0x30);
+    command->value = value;
+    command->registerCode = flag != 0 ? 0x48 : 0x47;
     sdfAppendPacket(list, packet);
 }
 
@@ -934,10 +947,10 @@ extern s64 D_003B4390[];
 
 void itfSendTablePacket(void *list, s32 index, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
-    u8 *command = func_0033A290(packet, 0x30);
+    TextPacketTail *command = func_0033A290(packet, 0x30);
     s64 value = D_003B4390[index];
-    *(s64 *)(command + 0x20) = value;
-    *(s64 *)(command + 0x28) = flag != 0 ? 0x43 : 0x42;
+    command->value = value;
+    command->registerCode = flag != 0 ? 0x43 : 0x42;
     sdfAppendPacket(list, packet, value);
 }
 

@@ -49,6 +49,12 @@ typedef struct MemNode {
     struct MemNode *next;  /* 0x4 */
 } MemNode;
 
+/* Allocation handle precedes the first queue node by four bytes. */
+typedef struct MemRingHeader {
+    u32 allocation;
+    MemNode first;
+} MemRingHeader;
+
 /* Field block split by itfSplitRelativeSegments. */
 typedef struct MemBlock {
     s32 firstOffset; /* 0x0 */
@@ -327,15 +333,15 @@ void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197580);
 
-s32 func_00197708(arg0, arg1, arg2, arg3, arg4, arg5)
-s32 arg0;
-s32 arg1;
-s32 arg2;
-s32 arg3;
-s32 arg4;
-s32 arg5;
+s32 func_00197708(x, y, depth, colors, text, parent)
+s32 x;
+s32 y;
+s32 depth;
+s32 colors;
+s32 text;
+s32 parent;
 {
-    s32 handle = func_00197580(arg0, arg1, arg2, arg3, arg4, 1, 0, arg5);
+    s32 handle = func_00197580(x, y, depth, colors, text, 1, 0, parent);
 
     frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
@@ -369,16 +375,16 @@ void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197C40);
 
-s32 func_00197E08(s32 arg0, s32 arg1, s32 arg2, s8 arg3, u16 arg4, s32 arg5) {
+s32 func_00197E08(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
     s32 result = 0;
 
     func_00197220(0x13);
-    switch (arg3) {
+    switch (fontMode) {
     case 0:
-        result = func_00197C40(arg0, arg1, arg2, arg4, D_003BAA98, arg5);
+        result = func_00197C40(x, y, depth, textId, D_003BAA98, flags);
         break;
     case 1:
-        result = func_00197C40(arg0, arg1, arg2, arg4, D_003BAA9C, arg5);
+        result = func_00197C40(x, y, depth, textId, D_003BAA9C, flags);
         break;
     }
     func_00197220(-1);
@@ -475,7 +481,7 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 u32 itfReleaseMemNodeBuffer(u8 *payload) {
-    func_002D0918(*(u32 *)(payload - 4));
+    func_002D0918(((MemRingHeader *)(payload - 4))->allocation);
     return 1;
 }
 
@@ -865,21 +871,28 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
     sdfAppendPacket(command, packet);
 }
 
+/* The packet builder returns a 0x30-byte command with two trailing qwords. */
+typedef struct TextPacketTail {
+    u8 pad00[0x20];
+    u64 value;
+    u64 registerCode;
+} TextPacketTail;
+
 void itfSendBlendPacket(u64 command, u64 value, s32 flag) {
     u64 packet = sdfAllocPacketAligned(0x30);
-    u64 *dst = func_002E13E0(packet, 0x30);
+    TextPacketTail *dst = (TextPacketTail *)func_002E13E0(packet, 0x30);
 
-    dst[4] = value;
-    dst[5] = flag ? 0x48 : 0x47;
+    dst->value = value;
+    dst->registerCode = flag ? 0x48 : 0x47;
     sdfAppendPacket(command, packet);
 }
 
 void itfSendTablePacket(u64 command, s32 index, s32 flag) {
     u64 packet = sdfAllocPacketAligned(0x30);
-    u64 *dst = func_002E13E0(packet, 0x30);
+    TextPacketTail *dst = (TextPacketTail *)func_002E13E0(packet, 0x30);
 
-    dst[4] = D_00357998[index];
-    dst[5] = flag ? 0x43 : 0x42;
+    dst->value = D_00357998[index];
+    dst->registerCode = flag ? 0x43 : 0x42;
     sdfAppendPacket(command, packet);
 }
 
