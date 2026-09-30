@@ -501,20 +501,37 @@ typedef struct MenuColorSet {
     MenuColorEntry *entries;
 } MenuColorSet;
 
-static inline void menuFillColors(MenuColorEntry *entries) {
+typedef struct MenuColorHost {
+    u32 resource;      /* 0x00 */
+    u32 sprite[3];     /* 0x04 */
+    MenuColorSet *set; /* 0x10 */
+    s32 ready;         /* 0x14 */
+} MenuColorHost;
+
+s32 func_0027AF28(MenuColorHost *obj) {
     s32 i;
     s32 j;
 
+    if (obj->resource == 0) {
+        return 0;
+    }
+    if (obj->set == NULL) {
+        return 0;
+    }
+    if (obj->ready == 0) {
+        return 0;
+    }
+    obj->sprite[0] = effCreateResourceSlotSet(obj->resource, 0, 1);
+    obj->sprite[1] = effCreateResourceSlotSet(obj->resource, 0, 1);
+    obj->sprite[2] = effCreateResourceSlotSet(obj->resource, 0, 1);
+    mnuBindAssetEffectPayloads(obj);
     for (i = 0; i < 5; i++) {
-        u32 *color = entries[i].color;
-
         for (j = 0; j < 4; j++) {
-            *color++ = 0x8080805A;
+            obj->set->entries[i].color[j] = 0x8080805A;
         }
     }
+    return 1;
 }
-
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AF28);
 
 void mnuReleaseAssets(MenuAssets *assets) {
     u32 i;

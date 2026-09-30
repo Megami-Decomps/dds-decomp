@@ -2,7 +2,15 @@
 
 extern s32 D_00435E5C;
 
+extern void func_00306F80();
+
+extern void mnuClearListFlagsOneAndTwo();
+
 extern s32 func_002C6CE8(void);
+
+extern s32 func_002C6480();
+
+extern char D_003E75C4[];
 
 extern void func_002B9CF8(s32, s32, s32, s32, s32);
 
@@ -883,7 +891,57 @@ s32 func_002B3150(s32 callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3260);
+s64 func_002B3260(s32 callback) {
+    s32 context = func_00101958();
+    u8 *menu = (u8 *)((MenuContext *)context)->party;
+    s32 *popup;
+    u32 buttons;
+    s64 state;
+    if (*(s32 *)(menu + 0x14) == 0) {
+        buttons = func_002C44E8(0xC2);
+    } else {
+        buttons = func_002C44E8(2);
+    }
+    popup = (s32 *)(context + 0x54);
+    state = func_002C4038(context + 8, popup, 0, callback);
+    if (state != 0) {
+        return state;
+    }
+    if (func_002C6480() != 0) {
+        return 0;
+    }
+    state = *popup;
+    *(s32 *)(menu + 0x1C) = 0;
+    if (state == 0) {
+        if (func_002B3150(callback) != 0) {
+            return 0;
+        }
+        if (buttons & 0xC0) {
+            if (*(s32 *)(menu + 0x10) == 0) {
+                *(s32 *)(menu + 0x10) = 1;
+                func_002B2C88(context + 0x284, 3, *(s32 *)(menu + 0x14), 1);
+                func_002BB498(((MenuContext *)context)->panelHandle, *(s32 *)(context + 0x6C), 0, 0);
+            } else {
+                *(s32 *)(menu + 0x10) = 0;
+                func_002B2C88(context + 0x284, 2, *(s32 *)(menu + 0x14), 0);
+                func_002BB498(((MenuContext *)context)->panelHandle, *(s32 *)(context + 0x68), 0, 0);
+            }
+            *(s32 *)(menu + 0x28) = 0;
+        }
+        if (buttons & 2) {
+            if (func_002C6CE8() != 1) {
+                evtStageTestStop();
+                *(s32 *)(menu + 0x1C) = 1;
+                *(s32 *)(menu + 0x24) = 1;
+                func_002C42C0(popup, D_003E75C4);
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        mnuPlayInputSound(0, buttons, 0);
+    }
+    return 0;
+}
 
 void mnuDrawSlotIcons(s32 x, s32 context) {
     s32 slot = D_00435DD0 + ((MenuList *)((MenuContext *)context)->selectedPartyList)->cursor->index * 0x1c4 + 0xa60;
@@ -1400,7 +1458,28 @@ u32 func_002B62A8(u32 callback) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6308);
+s32 func_002B6308(s32 callback) {
+    s32 context = func_00101958();
+    s32 changed = 0;
+    u32 buttons = func_002C44E8(0x300);
+    if (buttons & 0x100) {
+        func_002B62A8(callback);
+        func_002B8D10(((MenuContext *)context)->selectionList);
+        changed = 1;
+    }
+    if ((buttons & 0x200) && changed == 0) {
+        func_002B62A8(callback);
+        func_002B8CF0(((MenuContext *)context)->selectionList);
+        changed = 1;
+    }
+    mnuClearListFlagsOneAndTwo(((MenuContext *)context)->selectionList);
+    if (changed != 0) {
+        func_002B61F8(callback);
+        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        return 1;
+    }
+    return 0;
+}
 
 /* Shift a selected child window's list to the requested row. Keep the
  * double-dereferenced cursor load raw: the typed form does not match. */
@@ -1745,7 +1824,11 @@ void mnuDestroyEffectResources(u8 *ctx) {
 }
 
 typedef struct MenuSparkSet {
-    u8 unk0[0x60];
+    u32 flags;
+    u8 pad04[4];
+    s32 sheet;       /* 0x08 */
+    s32 handle[8];   /* 0x0C */
+    u8 pad2C[0x60 - 0x2C];
     /* 0x060 */ s32 direction[16];
     /* 0x0A0 */ s32 velocity[16][2];
     /* 0x120 */ s32 life[16];
@@ -1783,7 +1866,32 @@ void func_002B7A80(s32 effects, s32 index) {
     ((MenuSparkSet *)effects)->count = ((MenuSparkSet *)effects)->count - 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7AA0);
+void func_002B7AA0(MenuSparkSet *fx, s32 arg) {
+    s32 i;
+    for (i = 0; i < 0x10; i++) {
+        if (fx->direction[i] > 0) {
+            func_00306F80(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->sheet, fx->handle[6], arg);
+            if (fx->direction[i] == 1) {
+                fx->velocity[i][0] += fx->life[i];
+                if (fx->velocity[i][0] > 0x2000) {
+                    func_002B7A80((s32)fx, i);
+                }
+            } else {
+                fx->velocity[i][0] -= fx->life[i];
+                if (fx->velocity[i][0] < -0xFA0) {
+                    func_002B7A80((s32)fx, i);
+                }
+            }
+        }
+    }
+    if (fx->flags & 4) {
+        if ((effMiscRand(0) & 3) == 0) {
+            mnuSpawnSpark(fx);
+        }
+    } else if ((effMiscRand(0) & 0x1F) == 0) {
+        mnuSpawnSpark(fx);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7C10);
 
@@ -1794,8 +1902,7 @@ typedef struct MenuBadgePlace {
 } MenuBadgePlace;
 
 typedef struct MenuBadgeLayout {
-    MenuBadgePlace primary;
-    MenuBadgePlace secondary;
+    MenuBadgePlace place[2];
 } MenuBadgeLayout;
 
 typedef struct MenuBadgeSet {
@@ -1813,8 +1920,8 @@ void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
     MenuBadgeLayout layout = D_0042AED0;
     s32 handle;
     if (!(set->flags & 4)) {
-        handle = set->handle[layout.primary.slot];
-        func_00306CD0(layout.primary.x, layout.primary.y, 0, set->fade, 0, set->sheet, handle, arg);
+        handle = set->handle[layout.place[0].slot];
+        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->sheet, handle, arg);
         itfGridLookupValueOrDefault(set->sheet, handle);
         if (set->fade < 0x100) {
             set->fade += 0x10;
@@ -1824,11 +1931,34 @@ void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
         }
     }
     if (!(set->flags & 2)) {
-        func_00306F80(layout.secondary.x, layout.secondary.y, 0, 0, set->sheet, set->handle[layout.secondary.slot], arg);
+        func_00306F80(layout.place[1].x, layout.place[1].y, 0, 0, set->sheet, set->handle[layout.place[1].slot], arg);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7F80);
+extern MenuBadgeLayout D_0042AEE8;
+
+void func_002B7F80(MenuBadgeSet *set, s32 arg) {
+    MenuBadgePlace blank[1];
+    MenuBadgeLayout layout;
+    u32 i;
+
+    memset(blank, 0, sizeof(blank));
+    layout = D_0042AEE8;
+    func_00308380(0x30000, arg);
+    func_00308808(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
+    for (i = 0; i < 1; i++) {
+        func_00306F80(blank[i].x, blank[i].y, 0, 0, set->sheet, set->handle[blank[i].slot], arg);
+    }
+    if (!(set->flags & 2)) {
+        for (i = 0; i < 2; i++) {
+            func_00306F80(layout.place[i].x, layout.place[i].y, 0, 0, set->sheet, set->handle[layout.place[i].slot], arg);
+        }
+    }
+    if (!(set->flags & 4)) {
+        mnuDrawBadgeFade(set, arg);
+    }
+    func_002B7C10(set, arg);
+}
 
 void func_002B8140(u32 *flags) {
     *flags = *flags & 0xfffffffb;
