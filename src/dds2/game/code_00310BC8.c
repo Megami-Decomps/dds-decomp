@@ -31,8 +31,6 @@ extern u32 func_00312A48(u32 *);
 
 extern u32 func_00312188(u32, u32, u32);
 
-extern s32 func_003123D0(void *, void *);
-
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern s32 func_003139D8();
@@ -153,6 +151,8 @@ typedef struct SdfList {
     u32 count;                  /* 0x04 */
     SdfListNode *head;          /* 0x08 */
     SdfListNode *tail;          /* 0x0C */
+    u32 pad10;
+    void (*onRemove)(u32, s32); /* 0x14 */
 } SdfList;
 extern void *func_00328D68(s32);
 extern void *memset(void *, s32, u32);
@@ -170,13 +170,13 @@ extern char D_004388E0[];
 extern s64 func_00312B50();
 
 extern void func_00312D48();
-extern void func_00312DA0();
+extern s32 func_00312DA0(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
 extern void func_00312DF8(void);
 extern void func_00312D48();
-extern void func_00312DA0();
+extern s32 func_00312DA0(void);
 extern void func_00312DF8(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
@@ -494,7 +494,18 @@ SdfListNode *func_00312320(SdfList *list, SdfListNode *node) {
     return node->prev;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_003123D0);
+/* Unlink a node, hand it to the list's removal callback, free it, return its neighbour. */
+SdfListNode *func_003123D0(SdfList *list, SdfListNode *node) {
+    SdfListNode *neighbour;
+
+    if (node == NULL) {
+        return NULL;
+    }
+    neighbour = func_00312320(list, node);
+    list->onRemove(node->index, node->value);
+    func_00328E48(node);
+    return neighbour;
+}
 
 void sdfClearTaskList(TaskList *list) {
     TaskListNode *node;
@@ -672,13 +683,58 @@ s32 b;
     return sdfDestroyCallbackWork(b);
 }
 
+typedef struct SdfTaskEntry {
+    u32 flags;                   /* 0x00 */
+    s32 arg0;                    /* 0x04 */
+    u8 pad08[0xC];
+    void (*callback)(s32, s32);  /* 0x14 */
+    s32 arg1;                    /* 0x18 */
+} SdfTaskEntry;
+
+extern void *func_00101958(void);
+
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312B70);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312C78);
+/* Advance the work's cursor one node and run the node's callback when flagged. */
+s32 func_00312C78(TaskWork *work) {
+    TaskListNode *node = (TaskListNode *)work->firstItemHandle;
+    SdfTaskEntry *entry;
+    u32 flags;
+
+    if (node == NULL) {
+        work->firstItemHandle = (u32)work->list->head;
+        return 0;
+    }
+    entry = (SdfTaskEntry *)node->value;
+    flags = entry->flags;
+    work->firstItemHandle = (u32)node->next;
+    switch (flags & 0xFFFF0000) {
+    case 0x10000:
+        if (flags & 2) {
+            entry->callback(entry->arg0, entry->arg1);
+        }
+        break;
+    case 0x20000:
+        break;
+    case 0x100000:
+        entry->flags = (flags & 0xFFEFFFFF) | 0x10000;
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312D48);
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312DA0);
+s32 func_00312DA0(void) {
+    TaskWork *work = func_00101958();
+
+    if (work->firstItemHandle == 0) {
+        return -1;
+    }
+    while (func_00312C78(work) == 1) {
+    }
+    return 0;
+}
 
 void func_00312DF8(void) {
     sdfFreeTaskWork(func_00101958());
@@ -706,7 +762,15 @@ s64 func_00312FB0(void) {
     return func_003139D8();
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312FD0);
+SdfGridCell *func_00312FD0(SdfGrid *grid, s32 column, s32 row) {
+    u32 cellIndex;
+
+    cellIndex = row * grid->width + column;
+    if (cellIndex >= grid->cellCount) {
+        return NULL;
+    }
+    return &grid->cells[cellIndex];
+}
 
 void sdfGridGetCursorCoordinates(void *p, u32 *mod, u32 *div) {
     u32 *t = *(u32 **)((s32)p + 8);
@@ -714,7 +778,15 @@ void sdfGridGetCursorCoordinates(void *p, u32 *mod, u32 *div) {
     *div = *t / *(u32 *)((s32)p + 0x14);
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313040);
+u32 func_00313040(SdfGrid *grid, s32 column, s32 row) {
+    u32 cellIndex;
+
+    cellIndex = row * grid->width + column;
+    if (cellIndex >= grid->cellCount) {
+        return 0;
+    }
+    return grid->cells[cellIndex].value;
+}
 
 void sdfGridSetCellValue(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
     u32 temp_v0;

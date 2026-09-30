@@ -5,6 +5,28 @@ extern u32 D_00435E80;
 extern s32 D_00435DD0;
 
 extern s64 func_0011D588(void);
+extern void func_00118AB0();
+extern char D_00435DB0[]; /* "GBWK" */
+extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
+extern void func_00117A80(void);
+extern void func_00329910(u32 allocation);
+extern s32 func_003297C8(u32 allocation);
+extern struct ActionObj *func_00110AA8();
+
+typedef struct SdfChannel {
+    u8 pad00[0xA4];
+} SdfChannel;
+
+extern SdfChannel D_00385A90[8];
+extern void func_00118798(SdfChannel *channel);
+
+typedef struct ActionObj {
+    u8 unk0[4];   /* 0x0 */
+    s32 unk4;     /* 0x4 */
+    s32 unk8;     /* 0x8 */
+    u8 unkC[0xC]; /* 0xC */
+    s32 unk18;    /* 0x18 */
+} ActionObj;
 
 typedef struct EvtScaledValue {
     u32 value;
@@ -16,7 +38,8 @@ typedef struct EvtScaledValue {
 } EvtScaledValue;
 
 typedef struct SdfRuntime {
-    u8 pad00[0x34];
+    u8 pad00[0x30];
+    u32 allocation;
     u32 firstTick;
     u32 secondTick;
     u8 pad3C[0xA20];
@@ -30,6 +53,15 @@ typedef struct SdfPackedValue {
 
 #define SDF_PACKED_FLAG 0x8000
 #define SDF_PACKED_VALUE_MASK 0x7FFF
+
+typedef struct SdfChannelState {
+    u8 pad00[0x24];
+    u8 mode; /* 0x24 */
+    u8 pad25[0x13];
+} SdfChannelState;
+
+extern SdfChannelState *D_00435E20;
+extern u32 func_001190B0(s32 channel, s32 arg1, SdfPackedValue *item);
 
 extern void func_0011D590(void);
 
@@ -69,7 +101,14 @@ void func_00117848(EvtScaledValue *value) {
     value->flags = value->flags & 0xffffffdf;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", evtSpawnActionObj11);
+ActionObj *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
+    ActionObj *obj = func_00110AA8(0x11);
+
+    obj->unk18 = b;
+    obj->unk4 = a;
+    obj->unk8 = c;
+    return obj;
+}
 
 u32 func_001178B0(EvtScaledValue *value) {
     return value->value18;
@@ -109,7 +148,16 @@ void func_001178E0(EvtScaledValue *value) {
 
 INCLUDE_ASM(const s32, "game/code_001176A0", sdfCreateRuntimeTask);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfDestroyRuntimeTask);
+void sdfDestroyRuntimeTask(void) {
+    u32 allocation;
+
+    kwlnTaskDestroyWithHierarchyByName(D_00435DB0, 0);
+    func_00117A80();
+    allocation = ((SdfRuntime *)D_00435DD0)->allocation;
+    func_00329910(allocation);
+    func_003297C8(allocation);
+    D_00435DD0 = 0;
+}
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
@@ -166,7 +214,15 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001186F8);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118798);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfResetChannels);
+void sdfResetChannels(void) {
+    u32 i;
+
+    sdfFirePendingCallback();
+    for (i = 0; i < 8; i++) {
+        func_00118798(&D_00385A90[i]);
+    }
+    func_00118680();
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001188F0);
 
@@ -174,7 +230,9 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001189D0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118AB0);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchCmd);
+void sdfDispatchCmd(u32 context, u32 first, u32 second, u32 flags) {
+    func_00118AB0(context, first, second, (u8)flags);
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchUnitScriptDefault9);
 
@@ -196,9 +254,32 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001190B0);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00119480);
+u32 func_00119480(s32 channel, s32 arg1, SdfPackedValue *item) {
+    u32 result;
+    u32 mode = D_00435E20[channel].mode;
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfQueryChannelBits);
+    if (mode != 1 && mode != 3) {
+        return 0;
+    }
+    result = func_001190B0(channel, arg1, item);
+    if (!((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < result)) {
+        result = 0;
+    }
+    return result;
+}
+
+u32 sdfQueryChannelBits(s32 channel, s32 arg1, SdfPackedValue *item) {
+    u32 result;
+
+    if (D_00435E20[channel].mode != 2) {
+        return 0;
+    }
+    result = func_001190B0(channel, arg1, item);
+    if ((result & (item->flagsAndValue & SDF_PACKED_VALUE_MASK)) == 0) {
+        result = 0;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00119548);
 

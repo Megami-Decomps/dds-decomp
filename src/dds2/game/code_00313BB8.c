@@ -251,7 +251,7 @@ INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314A80);
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314B00);
 
-u8 func_00314B78(s32 arg0) {
+u32 func_00314B78(s32 arg0) {
     return ((ScriptFlagWork *)arg0)->scriptId;
 }
 
@@ -268,7 +268,9 @@ u32 ptyGetProfileRecordValue(u32 arg0, u16 arg1) {
     return *puVar1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", ptyGetCurrentProfileRecord);
+u32 *ptyGetCurrentProfileRecord(s32 arg0) {
+    return (u32 *)func_00314B80(arg0, func_00314B78(arg0));
+}
 
 u8 func_00314C10(s32 arg0) {
     return ((ScriptFlagWork *)arg0)->scriptId;
