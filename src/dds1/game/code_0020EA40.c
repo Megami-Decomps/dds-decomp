@@ -61,7 +61,7 @@ extern s32 D_00367940[];
 
 extern s32 D_00367960[];
 
-extern void func_003014F0();
+extern void func_003014F0(char *, const char *, const char *, s32);
 
 extern s32 func_001A17F0(void);
 
@@ -203,6 +203,11 @@ extern void func_001DC3A0(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f
 extern void func_0020DA40(u8 *);
 
 extern void func_001DC760(void);
+extern s32 kwlnTaskIsRegistered(s32);
+extern void effReleaseSharedReference(void *);
+extern void func_00105618(void);
+extern void kwlnTextureReleaseHeldReference(void);
+extern s32 func_001061E8(void);
 
 void func_0020DB90(u8 *actor);
 
@@ -342,7 +347,6 @@ void func_0020F940(s32 skill) {
 }
 
 s32 btlReleaseScriptResource(void) {
-    extern s32 kwlnTaskIsRegistered(s32);
     BtlState *battle = (BtlState *)func_001A17F0();
     if (battle->unk_1C0 == -1) {
         return 1;
@@ -611,13 +615,13 @@ typedef struct BattleTaskData {
     s32 action;
     s32 finished;
 } BattleTaskData;
+extern BattleTask *btlAllocTask(s32);
+extern BattleTaskData *func_001D47D8(BattleTask *);
+extern s32 func_00210670(void *);
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210670);
 
 void *btlCreateActionTask(void *battler, s32 action) {
-    extern BattleTask *btlAllocTask(s32);
-    extern BattleTaskData *func_001D47D8(BattleTask *);
-    extern s32 func_00210670(void *);
     BattleTask *task = btlAllocTask(12);
     BattleTaskData *data;
 
@@ -893,7 +897,6 @@ void btlReleaseAllModelEntries(void) {
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A68F8);
 
 void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
-    extern void func_003014F0(char *, const char *, const char *, s32);
     if (isDevil == 0) {
         func_003014F0(filename, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {
@@ -1044,7 +1047,6 @@ void btlInitVisibilityGrid(void) {
 }
 
 void btlReleaseOwnedData(void) {
-    extern void func_002CFF98(void *);
     void *data = D_003D7580.ownedData;
     if (data != 0) {
         func_002CFF98(data);
@@ -1132,9 +1134,6 @@ void btlClearOverlayBuffers(void) {
 }
 
 void btlReleaseRuntimeResource(void) {
-    extern void effReleaseSharedReference(void *);
-    extern void func_00105618(void);
-    extern void kwlnTextureReleaseHeldReference(void);
     void *resource = D_003D7580.resource;
     if (resource != 0) {
         effReleaseSharedReference(resource);
@@ -1224,7 +1223,6 @@ void btlClearRuntimeState(void) {
 void btlResetRuntimeState(void);
 
 void btlResetAsyncState(void) {
-    extern void func_002D0A10(void *);
     void *handle = D_003D7580.handle;
     if (handle != 0) {
         func_002D0A10(handle);
@@ -1235,7 +1233,6 @@ void btlResetAsyncState(void) {
 }
 
 void btlActivateRuntime(u8 condition) {
-    extern s32 func_001061E8(void);
     BattleRuntimeState *battle = &D_003D7580;
     battle->unk_06 = condition;
     battle->flags = 0;
@@ -1807,7 +1804,6 @@ extern void func_002D0918(s32);
 
 extern void sdfResourceListRelease(void *, s32);
 
-extern void func_002CFF98(void *);
 
 void btlDestroyGroupNode(BattleGroupNode *node) {
     BattleGroupNode *prev;

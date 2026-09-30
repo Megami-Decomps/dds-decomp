@@ -38,6 +38,15 @@ extern void *memset(void *dst, s32 c, u32 n);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 extern void func_002424B0(void);
 extern void evtReleaseEventPackResources(void);
+extern f32 D_003D80F0[];
+extern f32 D_003D80E0[];
+extern f32 D_003D80D0[];
+extern s32 D_003BC380;
+extern s32 func_00241A50(s32, s32);
+extern u8 *func_002BD258(s32 kind);
+extern s32 effDestroyPackedBatch(s32);
+extern s32 D_0036AA60[];
+extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
@@ -561,9 +570,6 @@ u32 mnuCampGetSecondaryOption(CampScene *scene) {
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243F48);
 
 void mnuShopSavePrimaryTransform(u8 *scene) {
-    extern f32 D_003D80F0[];
-    extern f32 D_003D80D0[];
-    extern s32 D_003BC380;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
@@ -574,10 +580,6 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
 }
 
 void mnuShopSaveFullTransform(u8 *scene) {
-    extern f32 D_003D80F0[];
-    extern f32 D_003D80E0[];
-    extern f32 D_003D80D0[];
-    extern s32 D_003BC380;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
@@ -589,10 +591,6 @@ void mnuShopSaveFullTransform(u8 *scene) {
 }
 
 void mnuShopRestoreTransform(u8 *scene) {
-    extern f32 D_003D80F0[];
-    extern f32 D_003D80E0[];
-    extern f32 D_003D80D0[];
-    extern s32 D_003BC380;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     s32 useMiddle = D_003BC380;
@@ -625,7 +623,6 @@ void mnuShopRegisterSceneObject(CampScene *scene, s32 identifier) {
 }
 
 void func_002441E8(CampScene *scene) {
-    extern s32 func_00241A50(s32, s32);
     s32 count = 0;
     if (scene->registeredCount > 0) {
         s32 *entry = scene->registeredIds;
@@ -639,7 +636,6 @@ void func_002441E8(CampScene *scene) {
 }
 
 void func_00244258(u8 *scene) {
-    extern u8 *func_002BD258(s32 kind);
     u8 *object;
     u8 *graphics;
     s32 *params;
@@ -663,7 +659,6 @@ void func_00244258(u8 *scene) {
 }
 
 s32 mnuShopReleaseSceneObjects(u8 *scene) {
-    extern s32 effDestroyPackedBatch(s32);
     s32 *objects = (s32 *)(scene + 0x74);
     s32 result;
     u32 i;
@@ -676,8 +671,6 @@ s32 mnuShopReleaseSceneObjects(u8 *scene) {
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(u8 *scene) {
-    extern s32 D_0036AA60[];
-    extern s32 effLoadIndexedResource(const char *, s32, s32);
     s32 *resource = (s32 *)(scene + 0x64);
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }

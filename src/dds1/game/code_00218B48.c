@@ -515,7 +515,6 @@ typedef struct {
 } MdlResourceOwner;
 
 MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 subtype) {
-    extern void *func_002CFF68(s32 size);
     MdlResourceItem *item = func_002CFF68(0x20);
     MdlResourceItem *previous = object->first;
     item->type = type;

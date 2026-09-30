@@ -134,6 +134,12 @@ extern void frFontSetChildColors(s32, u32);
 extern s32 func_0019D550(s32, s32, u32);
 
 extern void evtReleaseEventPackResources(void);
+extern f32 D_00453CB0[];
+extern f32 D_00453CA0[];
+extern f32 D_00453C90[];
+extern s32 D_004377F0;
+extern u8 *func_00304998(s32 kind);
+extern s32 effDestroyPackedBatch(s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
 
@@ -640,9 +646,6 @@ u32 mnuCampGetSecondaryOption(s32 arg0) {
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F330);
 
 void mnuShopSavePrimaryTransform(u8 *scene) {
-    extern f32 D_00453CB0[];
-    extern f32 D_00453C90[];
-    extern s32 D_004377F0;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
@@ -653,10 +656,6 @@ void mnuShopSavePrimaryTransform(u8 *scene) {
 }
 
 void mnuShopSaveFullTransform(u8 *scene) {
-    extern f32 D_00453CB0[];
-    extern f32 D_00453CA0[];
-    extern f32 D_00453C90[];
-    extern s32 D_004377F0;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     for (i = 0; i < 4; i++) {
@@ -668,10 +667,6 @@ void mnuShopSaveFullTransform(u8 *scene) {
 }
 
 void mnuShopRestoreTransform(u8 *scene) {
-    extern f32 D_00453CB0[];
-    extern f32 D_00453CA0[];
-    extern f32 D_00453C90[];
-    extern s32 D_004377F0;
     s32 i;
     f32 *coordinates = (f32 *)(scene + 0x2330);
     s32 useMiddle = D_004377F0;
@@ -726,7 +721,6 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
 void func_0025F7F0(u8 *scene) {
-    extern u8 *func_00304998(s32 kind);
     u8 *object;
     u8 *graphics;
     s32 *params;
@@ -750,7 +744,6 @@ void func_0025F7F0(u8 *scene) {
 }
 
 s32 mnuShopReleaseSceneObjects(u8 *scene) {
-    extern s32 effDestroyPackedBatch(s32);
     s32 *objects = (s32 *)(scene + 0x84);
     s32 result;
     u32 i;

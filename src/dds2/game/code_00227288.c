@@ -205,7 +205,8 @@ typedef struct BattleScriptTaskData {
 
 extern void *func_001E5DA8(void *, s32, s32);
 
-extern void func_0035C860();
+extern void func_0035C860(char *, const char *, const char *, s32);
+extern s32 kwlnTaskIsRegistered(s32);
 
 extern char D_0041B650[];
 
@@ -992,7 +993,6 @@ void func_0022A908(u32 skill) {
 }
 
 s32 btlReleaseScriptResource(void) {
-    extern s32 kwlnTaskIsRegistered(s32);
     BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
     if (battle->scriptGroup == -1) {
         return 1;
@@ -1550,7 +1550,6 @@ void btlReleaseAllModelEntries(void) {
 }
 
 void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *filename) {
-    extern void func_0035C860(char *, const char *, const char *, s32);
     if (isDevil == 0) {
         func_0035C860(filename, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {

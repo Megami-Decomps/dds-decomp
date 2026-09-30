@@ -169,6 +169,7 @@ extern s32 func_00101A70();
 extern s32 D_003BAA00;
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
+extern u8 D_0037CA58[];
 
 void func_00274B80(u32 arg0) {
     mnuSetStaffDisplayMode(4, arg0);
@@ -300,7 +301,6 @@ s32 mnuShopReleaseResources(void) {
 }
 
 void func_002758D8(s32 menu) {
-    extern u8 D_0037CA58[];
     mnuRestorePartyEntriesAndRefresh();
     func_002858F8(menu + 0x54, (s32)D_0037CA58);
     func_0027E790(((CampMenuContext *)menu)->display, ((CampMenuContext *)menu)->displayVariant, 0, 1);
