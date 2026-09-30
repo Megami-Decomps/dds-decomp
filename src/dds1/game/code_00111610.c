@@ -88,7 +88,40 @@ void func_00111740(void) {
     func_00111478();
 }
 
-INCLUDE_ASM(const s32, "game/code_00111610", func_00111758);
+/* Number of slots a given object kind occupies in the slot ring. */
+s32 func_00111758(u32 kind)
+{
+    s32 slots = 0;
+
+    switch (kind - 2) {
+    case 1:
+        slots = 1;
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        break;
+    case 8:
+        slots = 3;
+        break;
+    case 10:
+        slots = 3;
+        break;
+    case 11:
+        slots = 3;
+        break;
+    case 9:
+        slots = 4;
+        break;
+    case 0:
+        slots = 5;
+        break;
+    }
+    return slots;
+}
 
 INCLUDE_ASM(const s32, "game/code_00111610", func_001117A8);
 

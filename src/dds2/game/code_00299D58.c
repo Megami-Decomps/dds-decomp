@@ -1,4 +1,18 @@
 #include "common.h"
+extern s32 mdlFlagTest(u32 flagId);
+
+extern void mdlFlagSet(u32 flagId);
+
+extern void dspSetActive(s32 index);
+
+extern void dspStartEntry(s32 index);
+
+/* DSP request bookkeeping lives in the menu scene's own state word. */
+typedef struct MenuDspState {
+    u8 pad00[4];
+    u32 flags; /* 0x04 */
+} MenuDspState;
+
 
 extern u32 func_0029D790(u32, s32);
 
@@ -114,9 +128,42 @@ u32 func_0029A1E0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A1E8);
+s32 func_0029A1E8(MenuDspState *state)
+{
+    if (mdlFlagTest(0xB8F) == 0) {
+        if (state->flags & 1) {
+            if (mdlFlagTest(0x915) != 0) {
+                return 0;
+            }
+            dspSetActive(1);
+            dspStartEntry(1);
+            mdlFlagSet(0x915);
+            state->flags |= 2;
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A270);
+s32 func_0029A270(MenuDspState *state)
+{
+    if (mdlFlagTest(0xB8F) == 0) {
+        if (mdlFlagTest(0x290) != 0) {
+            if (state->flags & 2) {
+                return 0;
+            }
+            if (mdlFlagTest(0x817) != 0) {
+                return 0;
+            }
+            dspSetActive(1);
+            dspStartEntry(2);
+            mdlFlagSet(0x817);
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
