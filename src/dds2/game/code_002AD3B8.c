@@ -105,24 +105,33 @@ typedef struct MenuStaffContext {
     u8 tail[4];           /* 0xB10C */
 } MenuStaffContext;
 
+/* Saved choices for the two staff-menu transition variants. */
+typedef struct MenuStaffChoices {
+    u8 pad00[0x24];
+    s32 previous;          /* 0x24 */
+    s32 requested;         /* 0x28 */
+    s32 alternatePrevious; /* 0x2C */
+    s32 alternateRequested; /* 0x30 */
+} MenuStaffChoices;
+
 s64 func_002AD3B8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(5);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = *(u8 **)(menu + 8);
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 0);
     } else {
         if (*(s32 *)(menu + 0x38) == 0) {
-            func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, *(s32 *)(context + 0xc4), 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
-    func_002AA7A0(0, *(s32 *)(context + 0x60));
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -144,7 +153,7 @@ u32 func_002AD510(void) {
 
 s64 func_002AD518(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -157,7 +166,7 @@ s64 func_002AD518(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(*(s32 *)(context + 0xa914) + 0x1C);
+        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E74F8);
     }
     if (buttons & 2) {
@@ -176,8 +185,8 @@ s64 func_002AD618(s32 callback) {
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    func_002AA7A0(0, *(s32 *)(context + 0x60));
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -196,7 +205,7 @@ u32 func_002AD700(void) {
 
 s64 func_002AD708(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -209,7 +218,7 @@ s64 func_002AD708(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(*(s32 *)(context + 0xa914) + 0x1C);
+        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E7514);
     }
     if (buttons & 2) {
@@ -228,8 +237,8 @@ s64 func_002AD808(s32 callback) {
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    func_002AA7A0(0, *(s32 *)(context + 0x60));
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -248,7 +257,7 @@ u32 func_002AD8F0(void) {
 
 s64 func_002AD8F8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
     s64 state;
@@ -261,7 +270,7 @@ s64 func_002AD8F8(s32 callback) {
     window = (u8 *)(context + 0x284);
     func_002BD480(4, window);
     if (buttons & 1) {
-        *(s32 *)(menu + 0x1C) = **(s32 **)(*(s32 *)(context + 0xa914) + 0x1C);
+        *(s32 *)(menu + 0x1C) = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
         func_002C42C0(popup, D_003E7530);
     }
     if (buttons & 2) {
@@ -279,8 +288,8 @@ s64 func_002AD9F8(s32 callback) {
     func_002AAC98(0,
         *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
         (s32)D_003E7050, context, 1, 0x53);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    func_002AA7A0(0, *(s32 *)(context + 0x60));
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -307,7 +316,7 @@ u32 func_002ADB18(void) {
 
 s64 func_002ADB48(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(0xc33);
     s64 state;
@@ -343,20 +352,20 @@ s64 func_002ADB48(s32 callback) {
 
 s64 func_002ADC70(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0xD);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = *(u8 **)(menu + 0xC);
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, *(s32 *)(context + 0xc4), 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
-    func_002AA7A0(2, *(s32 *)(context + 0x60));
+    func_002AA7A0(2, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -369,12 +378,12 @@ INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
 
 s64 func_002ADF90(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     u8 *object;
 
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(6);
-    func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = *(u8 **)(menu + 8);
     if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
         func_002AD330(context, 0);
@@ -383,7 +392,7 @@ s64 func_002ADF90(s32 callback) {
             *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
             (s32)D_003E7050, context, 1, 0x53);
     }
-    func_002AA7A0(0, *(s32 *)(context + 0x60));
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
 }
 
@@ -422,21 +431,21 @@ s32 func_002AE1F0(s32 unused) {
     func_002B2C88(entryList, 0, 0, 0);
     func_002BD2E0(entryList);
     mnuClearEntries(entryList);
-    if (*(s32 *)(context + 0xaa34) != 0) {
-        mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
-        *(s32 *)(context + 0xaa34) = 0;
+    if (((MenuStaffContext *)context)->panelHandle != 0) {
+        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        ((MenuStaffContext *)context)->panelHandle = 0;
     }
-    if (*(s32 *)(context + 0xaa38) != 0) {
-        func_002C1050(*(s32 *)(context + 0xaa38));
-        *(s32 *)(context + 0xaa38) = 0;
+    if (((MenuStaffContext *)context)->spriteHandle != 0) {
+        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860(context + 0x60);
+    func_002B2860((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
 void func_002AE2D0(s32 context, u8 *entry, s32 target) {
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current = func_002C5580(entry);
 
     func_002C1B68(context + 0xaa50, 1);
@@ -449,19 +458,19 @@ void func_002AE2D0(s32 context, u8 *entry, s32 target) {
             func_0011A118(current, 1);
         }
         func_0011A118(target, -1);
-        *(s32 *)(menu + 0x24) = current;
-        *(s32 *)(menu + 0x28) = target;
+        ((MenuStaffChoices *)menu)->previous = current;
+        ((MenuStaffChoices *)menu)->requested = target;
     } else {
         func_0026C918(0, D_00435E5C + current * 0x19);
         func_0026C5B8(1);
-        *(s32 *)(menu + 0x24) = 0;
-        *(s32 *)(menu + 0x28) = 0;
+        ((MenuStaffChoices *)menu)->previous = 0;
+        ((MenuStaffChoices *)menu)->requested = 0;
     }
 }
 
 s32 func_002AE408(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
     u8 *window = *(u8 **)(*(s32 *)(menu + 0x10) + 0x18);
@@ -480,14 +489,14 @@ s32 func_002AE408(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AE1F0(callback);
-        func_002B8D10(*(s32 *)(context + 0xa914));
+        func_002B8D10(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AE1F0(callback);
-        func_002B8CF0(*(s32 *)(context + 0xa914));
+        func_002B8CF0(((MenuStaffContext *)context)->selection);
     }
-    mnuClearListFlagsOneAndTwo(*(s32 *)(context + 0xa914));
+    mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {
         return 0;
     }
@@ -565,21 +574,21 @@ s32 func_002AEC10(s32 unused) {
     func_002B2C88(entryList, 0, 0, 0);
     func_002BD2E0(entryList);
     mnuClearEntries(entryList);
-    if (*(s32 *)(context + 0xaa34) != 0) {
-        mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
-        *(s32 *)(context + 0xaa34) = 0;
+    if (((MenuStaffContext *)context)->panelHandle != 0) {
+        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        ((MenuStaffContext *)context)->panelHandle = 0;
     }
-    if (*(s32 *)(context + 0xaa38) != 0) {
-        func_002C1050(*(s32 *)(context + 0xaa38));
-        *(s32 *)(context + 0xaa38) = 0;
+    if (((MenuStaffContext *)context)->spriteHandle != 0) {
+        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860(context + 0x60);
+    func_002B2860((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
 void func_002AECF0(s32 context, u8 *entry, s32 target) {
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current = func_002C55C0(entry);
 
     func_002C1B68(context + 0xaa50, 1);
@@ -587,8 +596,8 @@ void func_002AECF0(s32 context, u8 *entry, s32 target) {
         func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
         func_0026C918(1, D_00435E5C + current * 0x19);
         func_0026C5B8(6);
-        *(s32 *)(menu + 0x2C) = current;
-        *(s32 *)(menu + 0x30) = 0;
+        ((MenuStaffChoices *)menu)->alternatePrevious = current;
+        ((MenuStaffChoices *)menu)->alternateRequested = 0;
     } else if (current != target) {
         if (current != 0) {
             func_0026C918(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
@@ -600,19 +609,19 @@ void func_002AECF0(s32 context, u8 *entry, s32 target) {
             func_0026C918(1, D_00435E5C + target * 0x19);
             func_0026C5B8(4);
         }
-        *(s32 *)(menu + 0x2C) = current;
-        *(s32 *)(menu + 0x30) = target;
+        ((MenuStaffChoices *)menu)->alternatePrevious = current;
+        ((MenuStaffChoices *)menu)->alternateRequested = target;
     } else {
         func_0026C918(0, D_00435E5C + current * 0x19);
         func_0026C5B8(5);
-        *(s32 *)(menu + 0x2C) = 0;
-        *(s32 *)(menu + 0x30) = 0;
+        ((MenuStaffChoices *)menu)->alternatePrevious = 0;
+        ((MenuStaffChoices *)menu)->alternateRequested = 0;
     }
 }
 
 s32 func_002AEEA8(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
     u8 *window = *(u8 **)(*(s32 *)(menu + 0x14) + 0x18);
@@ -631,14 +640,14 @@ s32 func_002AEEA8(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AEC10(callback);
-        func_002B8D10(*(s32 *)(context + 0xa914));
+        func_002B8D10(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AEC10(callback);
-        func_002B8CF0(*(s32 *)(context + 0xa914));
+        func_002B8CF0(((MenuStaffContext *)context)->selection);
     }
-    mnuClearListFlagsOneAndTwo(*(s32 *)(context + 0xa914));
+    mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {
         return 0;
     }
@@ -711,22 +720,22 @@ s32 func_002AFA58(s32 unused) {
     func_002B2C88(entryList, 0, 0, 0);
     func_002BD2E0(entryList);
     mnuClearEntries(entryList);
-    if (*(s32 *)(context + 0xaa34) != 0) {
-        mnuDestroyPanelGroup(*(s32 *)(context + 0xaa34));
-        *(s32 *)(context + 0xaa34) = 0;
+    if (((MenuStaffContext *)context)->panelHandle != 0) {
+        mnuDestroyPanelGroup((s32)((MenuStaffContext *)context)->panelHandle);
+        ((MenuStaffContext *)context)->panelHandle = 0;
     }
-    if (*(s32 *)(context + 0xaa38) != 0) {
-        func_002C1050(*(s32 *)(context + 0xaa38));
-        *(s32 *)(context + 0xaa38) = 0;
+    if (((MenuStaffContext *)context)->spriteHandle != 0) {
+        func_002C1050((s32)((MenuStaffContext *)context)->spriteHandle);
+        ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860(context + 0x60);
+    func_002B2860((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
 void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
     char buf[16];
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current;
     s32 base;
 
@@ -748,7 +757,7 @@ void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
 
 s32 func_002AFC58(s32 callback) {
     s32 context = func_00101958();
-    u8 *menu = *(u8 **)(context + 0xaa48);
+    u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
     u8 *window = *(u8 **)(*(s32 *)(menu + 0x18) + 0x18);
@@ -767,14 +776,14 @@ s32 func_002AFC58(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AFA58(callback);
-        func_002B8D10(*(s32 *)(context + 0xa914));
+        func_002B8D10(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AFA58(callback);
-        func_002B8CF0(*(s32 *)(context + 0xa914));
+        func_002B8CF0(((MenuStaffContext *)context)->selection);
     }
-    mnuClearListFlagsOneAndTwo(*(s32 *)(context + 0xa914));
+    mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {
         return 0;
     }

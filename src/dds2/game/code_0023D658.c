@@ -155,7 +155,7 @@ extern f32 func_0023B3A0(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_001177D0(s32, s32);
 
-extern void func_0023D708(EvtUnit *work, s32 arg1, s128 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+extern void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7);
 
 extern void *dds3GetWorldObject(void);
 
@@ -165,9 +165,9 @@ extern s32 func_0010D818(s32 arg0);
 
 extern s32 scrReadIntParameter(s32 idx);
 
-extern void dds3SetObjectFlags(void *arg0, s32 arg1);
+extern void dds3SetObjectFlags(void *object, s32 flags);
 
-extern void dds3ClearObjectFlags(void *arg0, s32 arg1);
+extern void dds3ClearObjectFlags(void *object, s32 flags);
 
 extern void func_00113660(void *arg0, s32 arg1);
 
@@ -175,7 +175,7 @@ extern void func_001136A0(void *arg0);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern void effObjSetInnerFirstVec(void *arg0, void *arg1);
+extern void effObjSetInnerFirstVec(void *object, void *vector);
 
 extern f32 bfWaitReadArgFloat(s32 idx);
 
@@ -225,7 +225,7 @@ typedef struct EvtSourceObj {
     EvtSourceVec *vec;  /* 0x18 */
 } EvtSourceObj;
 
-extern void effObjSetInnerThirdVec(void *arg0, void *arg1);
+extern void effObjSetInnerThirdVec(void *object, void *vector);
 extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
@@ -251,7 +251,7 @@ extern u8 D_00421AC0[];
 
 extern s32 scrReadStringParameter(s32 idx);
 
-extern void effObjSetFlags(void *arg0, s32 arg1);
+extern void effObjSetFlags(void *object, s32 flags);
 
 extern void *func_00115208(s32 arg0, void *arg1, void *arg2);
 
@@ -273,7 +273,7 @@ extern void func_0023CB68(EvtUnit *unit, s32 arg1);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern void evtSetUnitValueTransition(EvtUnit *unit, void *arg1, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
@@ -291,7 +291,7 @@ extern s32 func_0025D230(s32 arg0, s32 arg1);
 
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 
-extern s32 evtFindTaskById(s32 arg0);
+extern s32 evtFindTaskById(s32 taskId);
 
 extern void func_00101968(s32 arg0, s32 arg1);
 
@@ -301,7 +301,7 @@ extern void func_0023CED8(EvtUnit *, s32, s32, s32, s32, s32);
 
 extern s32 scrGetWindow(void);
 
-extern void func_001A4BB8(s32 arg0, void (*arg1)(void));
+extern void func_001A4BB8(s32 window, void (*callback)(void));
 
 extern void func_0023CE98(EvtUnit *unit, s32 arg1, s32 arg2);
 
@@ -340,7 +340,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *eventUnit, s32 objectId, s32 stepCount
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
     s128 *destination = &eventUnit->vector;
 
     eventUnit->unkB0 = arg1;
@@ -348,25 +348,25 @@ void func_0023D708(EvtUnit *eventUnit, s32 arg1, s128 *sourceVector, s32 arg3, s
     eventUnit->unkAE = 0;
     eventUnit->sourceUnit = NULL;
     PCP_COPY_VECTOR(destination, sourceVector);
-    eventUnit->unkB4 = arg4;
+    eventUnit->unkB4 = frames;
     eventUnit->unkB6 = arg5;
     eventUnit->unk94 = arg6;
     eventUnit->unkB2 = 0;
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void func_0023D740(EvtUnit *eventUnit, s32 arg1, s32 objectId, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_0023D740(EvtUnit *eventUnit, s32 arg1, s32 objectId, s32 arg3, s32 frames, s32 arg5, s32 arg6, s32 arg7) {
     EvtWorldVectorSource *sourceUnit;
 
     sourceUnit = func_00110C70(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (sourceUnit != NULL) {
-        func_0023D708(eventUnit, arg1, (s128 *)sourceUnit->vectorData, arg3, arg4, arg5, arg6, arg7);
+        func_0023D708(eventUnit, arg1, (s128 *)sourceUnit->vectorData, arg3, frames, arg5, arg6, arg7);
         eventUnit->unkAE = 1;
         eventUnit->sourceUnit = sourceUnit;
     }
 }
 
-void func_0023D800(EvtUnit *work, s32 objectId, s32 arg2, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
+void func_0023D800(EvtUnit *work, s32 objectId, s32 frames, s32 arg3, s32 mode, s32 dirFlag, s32 sideMode) {
     void *pathSource;
     s32 path;
 
@@ -425,7 +425,7 @@ void func_0023D800(EvtUnit *work, s32 objectId, s32 arg2, s32 arg3, s32 mode, s3
     work->sourceUnit = pathSource;
     func_001171A0(path);
     VU0_STORE_VF($vf10, &work->vector);
-    work->unkB4 = arg2;
+    work->unkB4 = frames;
     work->unkB6 = arg3;
     work->unk94 = 0;
     work->unkB2 = 0;
@@ -1036,11 +1036,11 @@ u32 func_0023F4B8(void) {
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = scrReadIntParameter(2);
-        s32 arg2 = scrReadIntParameter(1);
-        s32 arg3 = scrReadIntParameter(3);
+        s32 mode = scrReadIntParameter(2);
+        s32 objectId = scrReadIntParameter(1);
+        s32 frames = scrReadIntParameter(3);
         s32 arg4 = scrReadIntParameter(4);
-        func_0023D740(unit, arg1, arg2, -1, arg3, arg4, 0, 0);
+        func_0023D740(unit, mode, objectId, -1, frames, arg4, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         func_0023D360(unit);
@@ -1057,13 +1057,13 @@ u32 func_0023F580(void) {
     }
     unit->unkB2 = 0;
     {
-        s32 arg1 = scrReadIntParameter(1);
-        s32 arg2 = scrReadIntParameter(5);
+        s32 objectId = scrReadIntParameter(1);
+        s32 frames = scrReadIntParameter(5);
         s32 arg3 = scrReadIntParameter(6);
         s32 arg4 = scrReadIntParameter(2);
         s32 arg5 = scrReadIntParameter(4);
         s32 arg6 = scrReadIntParameter(3);
-        func_0023D800(unit, arg1, arg2, arg3, arg4, arg5, arg6);
+        func_0023D800(unit, objectId, frames, arg3, arg4, arg5, arg6);
     }
     return 1;
 }
