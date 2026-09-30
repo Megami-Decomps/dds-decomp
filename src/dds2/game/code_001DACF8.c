@@ -8498,7 +8498,89 @@ void btlPlaceTripleFormationAroundTarget(BattleActionLinkState *link, BtlUnit *f
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206570);
+extern void btlClearAllUnitDefeatCandidates(void);
+
+void func_00206570(BattleActionLinkState *link, BtlUnit *first, BtlUnit *second) {
+    BtlUnit *slot[3];
+    f32 center[4];
+    f32 pos[4];
+    f32 dir[4];
+    f32 rot[4];
+    BtlUnit *unit;
+    f32 radius;
+    u32 i;
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    btlClearAllUnitDefeatCandidates();
+    btlFlagMatchingUnitsDefeatCandidate(link->unit->flags & 0x600);
+    slot[0] = 0;
+    slot[1] = 0;
+    slot[2] = 0;
+    if (first != 0 && second != 0) {
+        slot[link->unit->lookupId] = link->unit;
+        slot[first->lookupId] = first;
+        slot[second->lookupId] = second;
+    } else {
+        for (unit = work->actorList; unit != NULL; unit = unit->nextActor) {
+            u32 flags = unit->flags;
+            if (flags & 1) {
+                if (flags & 0x200) {
+                    slot[unit->lookupId] = unit;
+                }
+            }
+        }
+    }
+    if (slot[1] != 0) {
+        VU0_LOAD_VF(vf10, (u8 *)slot[1] + 0x70);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_NEGATE_XYZ(vf11);
+        VU0_STORE_VF(vf11, dir);
+        radius = slot[1]->unkBC * slot[1]->scale;
+        radius += 100.0f;
+        VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_STORE_VF_UNCLOBBERED(vf10, center);
+        btlUnitGetMuzzlePosVU(slot[1]);
+        VU0_LOAD_VF(vf11, center);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, center);
+        center[1] = 0.0f;
+    } else {
+        center[0] = 0.0f;
+        center[1] = 0.0f;
+        center[2] = -230.0f;
+        dir[0] = 0.0f;
+        dir[1] = 0.0f;
+        dir[2] = -1.0f;
+    }
+    for (i = 0; i < 3; i++) {
+        if (slot[i] != 0) {
+            radius = slot[i]->unkBC * slot[i]->scale;
+            radius += 100.0f;
+            if (i != 1) {
+                if (i == 0) {
+                    func_00336538(2.0943951f);
+                } else if (i == 2) {
+                    func_00336538(-2.0943951f);
+                }
+                VU0_LOAD_VF(vf10, dir);
+                VU0_ROTATE_VEC(vf10, vf10);
+            } else {
+                VU0_LOAD_VF(vf10, dir);
+            }
+            VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, center);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+            btlSetUnitPosition(slot[i], pos);
+            if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, rot);
+                btlSetUnitRotation(slot[i], (s128 *)rot);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_00206840);
 
