@@ -140,6 +140,7 @@ segments:
       - [0x85538, c, effect/effPCPBoss]  # Nocturne __FILE__
       - [0x86E18, c, game/code_00185E18]
       - [0x87DC8, c, effect/effBlur_Filter]  # Nocturne __FILE__
+      - [0x883E0, c, game/code_001873E0]
       - [0x88DB0, c, game/code_00187DB0]
       - [0x89228, c, effect/effModelTrackPoly]  # Nocturne __FILE__
       - [0x8A0D8, c, game/code_001890D8]
@@ -430,6 +431,7 @@ segments:
       - [0x2BA308, .lit4, effect/effPCPBoss]
       - [0x2BA30C, .lit4, game/code_00185E18]
       - [0x2BA314, .lit4, effect/effBlur_Filter]
+      - [0x2BA320, .lit4, game/code_001873E0]
       - [0x2BA324, .lit4, game/code_00187DB0]
       - [0x2BA32C, .lit4, game/code_001890D8]
       - [0x2BA334, .lit4, effect/effMagatuhi]

@@ -124,23 +124,6 @@ void func_0018EF78(EffBlurWork2 *work, EffBlurSlot2 *slot) {
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018EFE0);
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F018);
-
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F098);
-
-/* Release the second variant's owned effect resource. */
-void effBlurReleaseSecondResource(EffBlurWork *work) {
-    func_003297C8(work->resource);
-}
-
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F1D0);
-
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F3C0);
-
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F5C0);
-
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018F840);
-
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414620);
 
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00414628);

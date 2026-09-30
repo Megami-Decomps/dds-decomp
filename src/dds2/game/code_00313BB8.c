@@ -850,3 +850,9 @@ void func_00316DD8(ScrVmOperand *op, float value) {
 void func_00316DE0(s32 work) {
     func_002D7458(work + 0x14, work + 0x38, 0, 0);
 }
+INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438908);
+
+INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438910);
+
+INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438918);
+
