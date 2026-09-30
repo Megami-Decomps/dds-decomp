@@ -94,9 +94,16 @@ void func_0030E880(void) {
     D_004390A4 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E8E8);
+extern s32 func_0030E010(s32, s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E910);
+s64 func_0030E8E8(void) {
+    func_0030EF18(D_004390AC);
+    return func_0030EF18(D_004390B0);
+}
+
+s64 func_0030E910(s32 arg0, s32 arg1, s32 arg2) {
+    return func_0030E010(arg0, arg1, 0, arg2, 0x20, 0, 0x54);
+}
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E940);
 

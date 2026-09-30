@@ -185,7 +185,19 @@ s32 func_0026C580(s32 arg0) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C5B8);
+extern void itfMesSetWindowHighFlags(s32, u32);
+extern void itfMesStartEntry(s32, s32, s32);
+extern void itfPanelSetPairFirst(s32, s32);
+s32 func_0026C5B8(s32 arg0) {
+    if (D_00437880 < 0) {
+        return 0;
+    }
+    itfMesSetWindowHighFlags(D_00437880, 0x200000);
+    itfMesStartEntry(D_00437880, arg0, 0);
+    itfPanelSetPairFirst(D_00437880, -1);
+    D_00437884 = 1;
+    return 1;
+}
 
 s32 func_0026C618(s32 arg0) {
     if (D_00437880 < 0) {
@@ -238,7 +250,17 @@ void func_0026C710(void) {
     func_0026C6A8(1);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C728);
+extern void func_001A39D0(s32);
+s32 func_0026C728(void) {
+    if (D_00437880 < 0) {
+        return 0;
+    }
+    func_001A39D0(D_00437880);
+    D_00437880 = -1;
+    D_00437884 = 0;
+    D_00437885 = 0;
+    return 1;
+}
 
 s32 func_0026C768(void) {
     if (D_00437880 < 0) {
@@ -279,7 +301,21 @@ s8 func_0026C940(void) {
     return D_00437885;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C948);
+extern void itfMesClearWindowHighFlags(s32, u32);
+extern void itfPanelSetStatus(s32, s32);
+void func_0026C948(s32 arg0) {
+    if (arg0 != 0) {
+        itfMesClearWindowHighFlags(D_00437880, 0x800000);
+        itfMesClearWindowHighFlags(D_00437880, 0x100000);
+        D_00437885 = 0;
+        itfPanelSetStatus(D_00437880, 1);
+        D_00437884 = 1;
+    } else {
+        itfMesSetWindowHighFlags(D_00437880, 0x800000);
+        itfMesSetWindowHighFlags(D_00437880, 0x100000);
+        D_00437885 = 1;
+    }
+}
 
 void func_0026C9B8(s32 x, s32 y) {
     itfMesBlk24MoveTo(D_00437880, x * 16, y * 8);
@@ -296,9 +332,15 @@ s32 evtIsTaskInActiveStates(s32 task) {
     return kwlnTaskGetRegisteredState(task) == 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", evtClearActiveFlag);
+extern s8 D_00438FB8[8];
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", evtIsActiveFlagSet);
+void evtClearActiveFlag(s32 index) {
+    D_00438FB8[8 + index] = 0;
+}
+
+s32 evtIsActiveFlagSet(s32 index) {
+    return D_00438FB8[8 + index] != 0;
+}
 
 s32 func_0026CA80(s32 arg0, s32 arg1) {
     if (arg0 < 0x10) {
@@ -314,7 +356,11 @@ u32 func_0026CAA8(s32 arg0) {
     return D_00453CC0[arg0];
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", evtSetCurrentActiveFlag);
+s32 evtSetCurrentActiveFlag(void) {
+    s32 index = scrReadIntParameter(0);
+    D_00438FB8[8 + index] = 1;
+    return 1;
+}
 
 s32 evtActivateCurrentFlag(void) {
     s32 index = scrReadIntParameter(0);
