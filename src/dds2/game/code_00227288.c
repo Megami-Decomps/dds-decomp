@@ -351,6 +351,12 @@ extern void *func_00328D68(s32);
 
 extern void *func_00328D68(s32);
 
+/* The owner stores the one-based process number used to launch script tasks. */
+typedef struct BattleScriptOwner {
+    u8 pad00[0x20];
+    s32 processNumber; /* +0x20; script process ID is processNumber - 1 */
+} BattleScriptOwner;
+
 /* Battle state fields used while locating and launching battle script resources. */
 typedef struct BattleScriptResources {
     u8 pad00[0x1E4];
@@ -373,7 +379,7 @@ typedef struct BattleScriptResources {
     u8 pad21C[0x60];
     u8 encounterMode;         /* 0x27C */
     u8 pad27D[0x47];
-    u8 *scriptOwner;          /* 0x2C4 */
+    BattleScriptOwner *scriptOwner; /* 0x2C4 */
     s32 taskHandle;           /* 0x2C8 */
 } BattleScriptResources;
 
@@ -490,7 +496,7 @@ s32 func_00227660(BattleCombatant *unit, s32 code) {
     if (!(unit->status & 0x400)) {
         return code;
     }
-    if ((*(BattleLinkedEffectState **)(func_001AA6F8() + 0x718))->active != 1) {
+    if (((BattleEffectContext *)func_001AA6F8())->effect->active != 1) {
         return code;
     }
     id = unit->kind;
@@ -644,7 +650,7 @@ s32 btlHasDifferentActiveTarget(u32 target) {
     return btlGetEffectActor() != target;
 }
 
-s32 btlSetLinkFlagOff(BtlUnit *arg) {
+s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
     BtlUnit *unit;
     BtlUnit *other;
     if (btlHasEffectActor() == 0) {
@@ -664,11 +670,11 @@ s32 btlSetLinkFlagOff(BtlUnit *arg) {
         if (!(other->flags & 2)) {
             return 1;
         }
-        if (unit == arg) {
+        if (unit == requestedUnit) {
             *other->model->flags &= ~1;
             return 1;
         }
-        if (other != arg) {
+        if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
@@ -681,7 +687,7 @@ s32 btlSetLinkFlagOff(BtlUnit *arg) {
     return 1;
 }
 
-s32 btlSetLinkFlagOn(BtlUnit *arg) {
+s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     BtlUnit *unit;
     BtlUnit *other;
     if (btlHasEffectActor() == 0) {
@@ -701,11 +707,11 @@ s32 btlSetLinkFlagOn(BtlUnit *arg) {
         if (!(other->flags & 2)) {
             return 1;
         }
-        if (unit == arg) {
+        if (unit == requestedUnit) {
             *other->model->flags |= 1;
             return 1;
         }
-        if (other != arg) {
+        if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
@@ -782,7 +788,7 @@ s32 func_00228D68(BtlAimUnit *unit) {
     if (unit->kind != 0x189) {
         return 0;
     }
-    for (target = *(u8 **)(battle + 0x24C); target != 0; target = *(u8 **)(target + 0x364)) {
+    for (target = (u8 *)((BtlState *)battle)->units; target != 0; target = (u8 *)((BtlUnit *)target)->next) {
         flags = ((BtlUnit *)target)->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
@@ -1082,7 +1088,7 @@ void func_0022A908(u32 skill) {
     if (battle->scriptGroup == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(battle->scriptOwner + 0x20) - 1,
+    handle = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
                             battle->resourceHandle, skill);
     scrSetCurrentActor(handle, 0);
     func_00101968((s32)battle->scriptOwner, handle);
@@ -1126,7 +1132,7 @@ void btlStartPrimaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId(*(s32 *)(battle->scriptOwner + 0x20) - 1,
+    taskId = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
                             battle->resourceHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
@@ -1164,7 +1170,7 @@ void btlStartSecondaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId(*(s32 *)(battle->scriptOwner + 0x20) - 1,
+    taskId = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
                             battle->resourceHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
@@ -1529,6 +1535,22 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7D0);
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B7E0);
 
+typedef struct BtlCommandRecord {
+    u8 flags;
+    u8 unk_01[8];
+    u8 options; /* +0x09 */
+    u8 unk_0A[2];
+    u16 restriction;
+    u8 unk_0E[8];
+    u16 primaryLimitKind; /* +0x16: governs the primary counter check */
+    u8 unk_18[2];
+    u16 secondaryLimitKind; /* +0x1A */
+    u8 unk_1C[8];
+    u32 attributeBits;
+    s32 requirementBits; /* +0x28: selects the action-entry condition */
+    u8 unk_2C[0xC];
+} BtlCommandRecord;
+
 s32 func_0022BEB0(void *list, s32 command) {
     s32 codes[5] = {0, 1, 2, 3, 4};
     s32 count = btlGetIndexListCount(list);
@@ -1539,7 +1561,7 @@ s32 func_0022BEB0(void *list, s32 command) {
 
     for (i = 0; i < count; i++) {
         entry = btlGetIndexListEntry(list, i);
-        flags = *(s32 *)(D_00435E20 + command * 0x38 + 0x28);
+        flags = ((BtlCommandRecord *)(D_00435E20 + command * 0x38))->requirementBits;
         switch (flags) {
         case 0x800:
             for (j = 0; j < 5; j++) {
@@ -1566,9 +1588,9 @@ s32 func_0022BEB0(void *list, s32 command) {
 
 u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
     s32 result = -1;
-    if (D_00435E20[command * 0x38 + 9] & 1) {
-        if (*(s32 *)(D_00435E20 + command * 0x38 + 0x28) == 0) {
-            switch (*(u16 *)(D_00435E20 + command * 0x38 + 0x16)) {
+    if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->options & 1) {
+        if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->requirementBits == 0) {
+            switch (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->primaryLimitKind) {
             case 2:
             case 5:
             case 7:
@@ -1580,8 +1602,8 @@ u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
             }
         }
         if (result != 0) {
-            if (*(s32 *)(D_00435E20 + command * 0x38 + 0x28) == 0) {
-                switch (*(u16 *)(D_00435E20 + command * 0x38 + 0x1A)) {
+            if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->requirementBits == 0) {
+                switch (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->secondaryLimitKind) {
                 case 2:
                 case 5:
                 case 7:
@@ -1593,7 +1615,7 @@ u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
                 }
             }
             if (result != 0) {
-                if (*(s32 *)(D_00435E20 + command * 0x38 + 0x28) == 0) {
+                if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->requirementBits == 0) {
                     if (D_00435E20[command * 0x38 + 0x24] == 2) {
                         result = btlListHasMatchingFlag(entries, count, *(u16 *)(D_00435E20 + command * 0x38 + 0x26)) == 0 ? 3 : 0;
                     }
@@ -1603,15 +1625,6 @@ u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
     }
     return (result < 0) ? 0 : result;
 }
-
-typedef struct BtlCommandRecord {
-    u8 flags;
-    u8 unk_01[0xB];
-    u16 restriction;
-    u8 unk_0E[0x16];
-    u32 attributeBits;
-    u8 unk_28[0x10];
-} BtlCommandRecord;
 
 s32 func_0022C1B0(BtlTask *task, s32 command) {
     BtlCommandRecord *record;
