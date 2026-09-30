@@ -559,9 +559,9 @@ void *func_00127DA8(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00126A30", D_0039FE38);
-
 extern s32 mdlFlagTest(s32);
+
+INCLUDE_RODATA(const s32, "game/code_00126A30", D_0039FE38);
 
 void func_00127E20(char *out) {
     char directory[32];
