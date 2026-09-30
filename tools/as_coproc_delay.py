@@ -94,9 +94,11 @@ def main(src, dst):
         # sequences, all swappable) where ee-as would pull the labelled insn into the slot.
         labelled = i > 0 and LABEL.match(lines[i - 1]) and line.strip() and not line.strip().startswith((".", "#")) \
             and not BRANCH.match(line)
+        # ... nor the store right after one (`sdr; sw; jr; nop` in the 0x24/0x2C copies).
+        after_unaligned = i > 0 and UNALIGNED_STORE.match(lines[i - 1]) and MEM_INDEXED.match(line)
         if (move and next_is_branch and reads_fpr(line, move.group(1))) or (
                 next_is_branch and (LA_INDEXED.match(line) or expands_indexed(line) or labelled
-                                    or UNALIGNED_STORE.match(line))) \
+                                    or UNALIGNED_STORE.match(line) or after_unaligned)) \
                 or hilo_before_branch:
             out += ["\t.set\tnoreorder", line, "\t.set\treorder"]
         else:
