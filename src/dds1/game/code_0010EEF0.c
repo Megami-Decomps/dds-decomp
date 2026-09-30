@@ -149,59 +149,59 @@ u8 effObjTestNodeFlags(EffTransformNode *node, u32 flags) {
     return (node->flags & flags) != 0;
 }
 
-void effObjInnerVecInit(EffTransformNode *arg0) {
-    u8 *p40 = (u8 *)arg0 + 0x40;
+void effObjInnerVecInit(EffTransformNode *node) {
+    u8 *p40 = (u8 *)&node->vec40;
     u8 *p50;
     u8 *p60;
 
     VU0_STORE_VF(vf0, p40);
-    p50 = (u8 *)arg0 + 0x50;
+    p50 = (u8 *)&node->vec50;
     VU0_STORE_VF(vf0, p50);
     VU0_SET_ONES_XYZ(vf10);
-    p60 = (u8 *)arg0 + 0x60;
+    p60 = (u8 *)&node->vec60;
     VU0_STORE_VF(vf10, p60);
 }
 
-void effObjInnerVecBackup(EffTransformNode *arg0) {
-    EEF0_COPY128((u128 *)((u8 *)arg0 + 0xA0), (u128 *)((u8 *)arg0 + 0x60));
-    EEF0_COPY128((u128 *)((u8 *)arg0 + 0x90), (u128 *)((u8 *)arg0 + 0x50));
-    EEF0_COPY128((u128 *)((u8 *)arg0 + 0x80), (u128 *)((u8 *)arg0 + 0x40));
+void effObjInnerVecBackup(EffTransformNode *node) {
+    EEF0_COPY128(&node->vecA0, &node->vec60);
+    EEF0_COPY128(&node->vec90, &node->vec50);
+    EEF0_COPY128(&node->vec80, &node->vec40);
 }
 
-void effObjSetInnerFloat(EffTransformNode *arg0, f32 fparg0) {
-    arg0->inner->scalar = fparg0;
+void effObjSetInnerFloat(EffTransformNode *node, f32 value) {
+    node->inner->scalar = value;
 }
 
-f32 effObjGetInnerFloat(EffTransformNode *arg0) {
-    return arg0->inner->scalar;
+f32 effObjGetInnerFloat(EffTransformNode *node) {
+    return node->inner->scalar;
 }
 
-void effObjSetInnerFirstVec(EffTransformNode *arg0, u128 *arg1) {
-    EffTransformNode *inner = arg0->inner;
-    u128 *dst = (u128 *)((u8 *)inner + 0x40);
+void effObjSetInnerFirstVec(EffTransformNode *node, u128 *vector) {
+    EffTransformNode *inner = node->inner;
+    u128 *dst = &inner->vec40;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, arg1);
+    EEF0_COPY128(dst, vector);
 }
 
-void effObjSetInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
-    EffTransformNode *inner = arg0->inner;
-    u128 *dst = (u128 *)((u8 *)inner + 0x50);
+void effObjSetInnerSecondVec(EffTransformNode *node, u128 *vector) {
+    EffTransformNode *inner = node->inner;
+    u128 *dst = &inner->vec50;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, arg1);
+    EEF0_COPY128(dst, vector);
 }
 
-void effObjSetInnerThirdVec(EffTransformNode *arg0, u128 *arg1) {
-    EffTransformNode *inner = arg0->inner;
-    u128 *dst = (u128 *)((u8 *)inner + 0x60);
+void effObjSetInnerThirdVec(EffTransformNode *node, u128 *vector) {
+    EffTransformNode *inner = node->inner;
+    u128 *dst = &inner->vec60;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, arg1);
+    EEF0_COPY128(dst, vector);
 }
 
-void effObjFetchInnerFirstVec(EffTransformNode *arg0) {
-    u8 *p = (u8 *)arg0->inner + 0x40;
+void effObjFetchInnerFirstVec(EffTransformNode *node) {
+    u8 *p = (u8 *)&node->inner->vec40;
 
     __asm__ volatile (
         ".set noreorder       \n"
@@ -214,8 +214,8 @@ void effObjFetchInnerFirstVec(EffTransformNode *arg0) {
     );
 }
 
-void effObjFetchInnerSecondVecNorm(EffTransformNode *arg0) {
-    u8 *p = (u8 *)arg0->inner + 0x50;
+void effObjFetchInnerSecondVecNorm(EffTransformNode *node) {
+    u8 *p = (u8 *)&node->inner->vec50;
 
     __asm__ volatile (
         ".set noreorder      \n"
@@ -228,8 +228,8 @@ void effObjFetchInnerSecondVecNorm(EffTransformNode *arg0) {
     effMiscNormalizeVU();
 }
 
-void effObjFetchInnerThirdVec(EffTransformNode *arg0) {
-    u8 *p = (u8 *)arg0->inner + 0x60;
+void effObjFetchInnerThirdVec(EffTransformNode *node) {
+    u8 *p = (u8 *)&node->inner->vec60;
 
     __asm__ volatile (
         ".set noreorder      \n"
@@ -241,9 +241,9 @@ void effObjFetchInnerThirdVec(EffTransformNode *arg0) {
     );
 }
 
-void effObjAddInnerFirstVec(EffTransformNode *arg0, void *arg1) {
-    EffTransformNode *inner = arg0->inner;
-    u8 *src = (u8 *)inner + 0x40;
+void effObjAddInnerFirstVec(EffTransformNode *node, void *vector) {
+    EffTransformNode *inner = node->inner;
+    u8 *src = (u8 *)&inner->vec40;
     u8 *dst;
 
     inner->flags = (inner->flags | 1) & ~2;
@@ -254,25 +254,25 @@ void effObjAddInnerFirstVec(EffTransformNode *arg0, void *arg1) {
         "vadd.xyzw vf10, vf10, vf11 \n"
         ".set reorder"
         :
-        : "r" (src), "r" (arg1)
+        : "r" (src), "r" (vector)
         : "memory"
     );
     EEF0_STORE_V10(dst, inner, 0x40);
 }
 
-void effObjQuatMulInnerSecondVec(EffTransformNode *arg0, u128 *arg1) {
-    EffTransformNode *inner = arg0->inner;
+void effObjQuatMulInnerSecondVec(EffTransformNode *node, u128 *vector) {
+    EffTransformNode *inner = node->inner;
 
     inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
     VU0_LOAD_VF($vf10, &inner->vec50);
-    VU0_LOAD_VF($vf11, arg1);
+    VU0_LOAD_VF($vf11, vector);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, &inner->vec50);
 }
 
-void effObjMulInnerThirdVec(EffTransformNode *arg0, void *arg1) {
-    EffTransformNode *inner = arg0->inner;
-    u8 *src = (u8 *)inner + 0x60;
+void effObjMulInnerThirdVec(EffTransformNode *node, void *vector) {
+    EffTransformNode *inner = node->inner;
+    u8 *src = (u8 *)&inner->vec60;
     u8 *dst;
 
     inner->flags = (inner->flags | 1) & ~2;
@@ -283,7 +283,7 @@ void effObjMulInnerThirdVec(EffTransformNode *arg0, void *arg1) {
         "vmul.xyzw vf10, vf10, vf11 \n"
         ".set reorder"
         :
-        : "r" (src), "r" (arg1)
+        : "r" (src), "r" (vector)
         : "memory"
     );
     EEF0_STORE_V10(dst, inner, 0x60);

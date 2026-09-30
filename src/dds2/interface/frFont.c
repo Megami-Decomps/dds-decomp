@@ -20,7 +20,7 @@ typedef struct FrFontEntry {
     u8 unk20[4];
 } FrFontEntry; /* 0x24 */
 
-extern u32 frFontMeasureGlyphChain(void *arg0);
+extern u32 frFontMeasureGlyphChain(void *chain);
 
 extern u32 D_00436568;
 
@@ -64,7 +64,7 @@ extern FrFontGlyph *D_004528B4[];
 
 extern s32 func_00100400(void);
 
-extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *arg0, FrFontGlyph *arg1, s32 arg2);
+extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
 /* Triple word block with one getter per word. */
 typedef struct FrFontSave {
@@ -107,9 +107,9 @@ typedef struct FrFontCtx {
     u32 mode40;              /* 0x40: set by func_00195388 */
 } FrFontCtx;
 
-extern void func_0019D010(FrFontCtx *ctx, s32 arg1);
+extern void func_0019D010(FrFontCtx *ctx, s32 value);
 
-extern void func_0019D100(FrFontCtx *ctx, u32 arg1, u32 arg2);
+extern void func_0019D100(FrFontCtx *ctx, u32 first, u32 second);
 
 void frFontCreateContext();
 
@@ -142,7 +142,7 @@ extern FrFontRec D_00452724[];
 
 extern s32 D_00436558;
 
-extern FrFontGlyph *func_0019CE78(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern FrFontGlyph *func_0019CE78(void *glyphData, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 extern void *func_00328D68(s32 size);
 
@@ -153,9 +153,9 @@ typedef struct FrFontSegments {
 } FrFontSegments;
 
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
-extern void func_001A00B8(void *dst, s32 arg1, void *block, FrFontSegments *segments);
+extern void func_001A00B8(void *dst, s32 option, void *block, FrFontSegments *segments);
 
-extern FrFontGlyph *func_0019C4D0(FrFontGlyph *arg0);
+extern FrFontGlyph *func_0019C4D0(FrFontGlyph *glyph);
 
 typedef struct TextStyleNode {
     u8 pad00[4];
@@ -170,15 +170,15 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
-extern s32 func_0019D200(FrFontGlyph *arg0);
+extern s32 func_0019D200(FrFontGlyph *glyph);
 
-extern FrFontGlyph *func_0019C850(FrFontGlyph *arg0, s32 arg1);
+extern FrFontGlyph *func_0019C850(FrFontGlyph *glyph, s32 option);
 
-FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1);
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
-void func_0019D530(FrFontGlyph *arg0, s8 arg1);
+void func_0019D530(FrFontGlyph *glyph, s8 mode);
 
-extern s32 func_0019D550(FrFontGlyph *arg0, s8 arg1, u32 arg2);
+extern s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 extern void func_0019BE20();
 
@@ -262,13 +262,13 @@ FrFontGlyph *func_0019C980(FrFontGlyph *source, FrFontGlyph *destination) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
 
-void *frFontCloneEntryResource(u8 index, s32 arg1) {
+void *frFontCloneEntryResource(u8 index, s32 option) {
     FrFontEntry *entry = &D_00452720.entries[index];
     void *dst = func_00328D68(0x120);
     FrFontSegments segments;
 
     itfSplitRelativeSegments(entry->first, &segments);
-    func_001A00B8(dst, arg1, entry->first, &segments);
+    func_001A00B8(dst, option, entry->first, &segments);
     return dst;
 }
 
@@ -315,13 +315,13 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CCC0);
 
-FrFontCtx *func_0019CE10(void *arg0, s8 arg1, s8 arg2, s8 arg3, s32 arg4) {
-    FrFontGlyph *glyph = func_0019CE78(arg0, arg1, arg2, arg3, 0);
+FrFontCtx *func_0019CE10(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph) {
+    FrFontGlyph *glyph = func_0019CE78(glyphData, arg1, arg2, arg3, 0);
 
     if (glyph == NULL) {
-        return (FrFontCtx *)arg4;
+        return (FrFontCtx *)previousGlyph;
     }
-    return (FrFontCtx *)frFontLinkGlyphAfterPrevious((FrFontGlyph *)arg4, glyph);
+    return (FrFontCtx *)frFontLinkGlyphAfterPrevious((FrFontGlyph *)previousGlyph, glyph);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CE78);
@@ -365,9 +365,9 @@ void func_0019D088(FrFontGlyph *glyph, s32 advance, s32 height) {
     head->advance = frFontMeasureGlyphChain(head);
 }
 
-void func_0019D100(FrFontCtx *ctx, u32 arg1, u32 arg2) {
-    ctx->unk4 = arg1;
-    ctx->unk8 = arg2;
+void func_0019D100(FrFontCtx *ctx, u32 first, u32 second) {
+    ctx->unk4 = first;
+    ctx->unk8 = second;
 }
 
 void func_0019D110(FrFontCtx *ctx, u32 value) {
@@ -393,9 +393,9 @@ void frFontSetChildColors(TextStyleNode *entry, u32 color) {
     }
 }
 
-void func_0019D1D0(s32 arg0) {
-    arg0 |= D_00436564;
-    D_00436564 = arg0;
+void func_0019D1D0(s32 flags) {
+    flags |= D_00436564;
+    D_00436564 = flags;
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */
@@ -406,8 +406,8 @@ u8 func_0019D1E0(u8 mask) {
     return old;
 }
 
-void func_0019D1F8(u32 arg0) {
-    D_00436568 = arg0;
+void func_0019D1F8(u32 flags) {
+    D_00436568 = flags;
 }
 
 s32 func_0019D200(FrFontGlyph *glyph) {
@@ -480,8 +480,8 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
     return next;
 }
 
-void func_0019D8A8(u32 arg0) {
-    func_0019C130(8, arg0, 0);
+void func_0019D8A8(u32 fontData) {
+    func_0019C130(8, fontData, 0);
 }
 
 void func_0019D8C8(void) {
@@ -569,8 +569,8 @@ void func_0019DB18(void) {
     D_00436554 = 0x19;
 }
 
-void func_0019DB28(u32 arg0) {
-    D_00436554 = arg0;
+void func_0019DB28(u32 value) {
+    D_00436554 = value;
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DB30);
@@ -620,7 +620,7 @@ void func_0019E0A0(FrFontCtx *ctx) {
         flag = ctx->flag1C;
     }
     else {
-        if (*(s32 *)((u8 *)ctx->u14.ptr + 0x1c) == 0) {
+        if (((FrFontGlyph *)ctx->u14.ptr)->firstChild == NULL) {
             ctx->flag1C = 0;
         }
         flag = ctx->flag1C;
