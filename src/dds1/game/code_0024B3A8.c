@@ -35,13 +35,15 @@ typedef struct EvtBContext {
     u32 visualList; /* 0x70 */
     s32 thresholdList; /* 0x74 */
     s32 selectionList; /* 0x78 */
-    u8 pad7C[0xC]; /* 0x7C: state meaning still unclear */
+    s32 state7C;       /* 0x7C: nonzero also re-requests the effect resource */
+    u8  pad80[0x8];
     s32 panelMode; /* 0x88 */
     u8 pad8C[0x40]; /* 0x98: reset flag meaning still unclear */
     s32 exitPending; /* 0xCC */
     s32 transitionPending; /* 0xD0 */
     s32 transitionStage; /* 0xD4 */
-    u8 padD8[0x84];
+    u8 padD8[0x80];
+    s32 effectHandle;   /* 0x158: effect resource handle */
     s32 dispatchMode; /* 0x15C */
     u32 resourceHandle; /* 0x160 */
 } EvtBContext;
@@ -492,7 +494,23 @@ void evtBDispatchSyncB(s32 request) {
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CDB0);
+extern void mnuFadeOrPlayCloseSfx(s32, s32);
+extern s32 mnuRequestEffectResource(char *, char *);
+extern void func_0024DEF8(s32, s32);
+extern char D_003AF590[];
+extern char D_003AF620[];
+
+u32 func_0024CDB0(void) {
+    EvtBContext *context = (EvtBContext *)func_00101A70();
+
+    mnuFadeOrPlayCloseSfx(0, (s32)context);
+    evtClearActiveFlag(0);
+    func_0024DEF8(0, 0);
+    if (context->state7C != 0) {
+        context->effectHandle = mnuRequestEffectResource(D_003AF590, D_003AF620);
+    }
+    return 1;
+}
 
 u32 func_0024CE20(void) {
     return 1;

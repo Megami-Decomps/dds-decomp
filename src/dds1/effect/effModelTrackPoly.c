@@ -15,11 +15,23 @@ typedef struct {
     void *resourceHandle; /* 0x24 */
 } EffTrackPolyData; /* 0x28 */
 
+/* Model handle the track's point queries resolve against. */
+typedef struct {
+    u8 pad_0x00[0x18]; /* 0x00 */
+    void *param;       /* 0x18: sdf text parameter */
+} EffTrackPolyModel;
+
 /* Outer work area holding track state and the data pointer. */
 typedef struct {
-    u8             pad_0x00[0x34]; /* 0x00 */
-    s32            state;          /* 0x34: cleared on reset */
-    EffTrackPolyData *data;        /* 0x38 */
+    EffTrackPolyModel *model; /* 0x00 */
+    s32 idA;                  /* 0x04 */
+    s32 idB;                  /* 0x08 */
+    f32 unk0C;                /* 0x0C */
+    f32 unk10;                /* 0x10 */
+    s32 step;                 /* 0x14 */
+    u8  pad_0x18[0x1C];       /* 0x18 */
+    s32            state;     /* 0x34: cleared on reset */
+    EffTrackPolyData *data;   /* 0x38 */
 } EffTrackPolyWork; /* 0x3C */
 
 
@@ -34,7 +46,19 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
     effTrackPolyInitData(work->data);
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188278);
+extern s32 func_002D9E98(void *param, s32 id);
+extern void func_00188A78();
+
+void func_00188278(EffTrackPolyWork *work) {
+    EffTrackPolyModel *model = work->model;
+    u128 points[2];
+
+    func_002D9E98(model->param, work->idA);
+    VU0_STORE_VF(vf10, points);
+    func_002D9E98(model->param, work->idB);
+    VU0_STORE_VF(vf10, &points[1]);
+    func_00188A78(work->data, points);
+}
 
 void func_001882D8(EffTrackPolyWork *work, void *data) {
     func_00188A78(work->data);

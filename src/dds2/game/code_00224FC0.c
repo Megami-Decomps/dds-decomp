@@ -200,7 +200,28 @@ u32 func_00226398(u32 unit, u32 actor, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002263D8);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002264E8);
+s32 func_002264E8(BattleActionUnit *unit, s32 type) {
+    s32 offset = type * 0x20;
+    u8 resourceType;
+    u32 resourceKind;
+    s32 result = 0xF;
+
+    if ((unit->flags & 0x400) == 0) {
+        return -1;
+    }
+    resourceType = ((BattleActionTableEntry *)(offset + (s32)D_00435E30))->resourceType;
+    if (resourceType == 0) {
+        return -1;
+    }
+    resourceKind = (resourceType + 0xF5) & 0xFF;
+    if (resourceKind < 0xF) {
+        return -1;
+    }
+    if (unit->kind != 0x127) {
+        result = -1;
+    }
+    return result;
+}
 
 s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
     return action == 0x109 ? 0x1194 : 0x64;
