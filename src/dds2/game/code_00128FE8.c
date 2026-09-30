@@ -588,10 +588,10 @@ void fldFreeDisplayObjects(void) {
 }
 
 u32 fldPollAreaResourceLoad(void) {
-    u32 temp_v1 = ((FldAreaResourceState *)D_00389770)->resourceFlag;
+    u32 resourceFlag = ((FldAreaResourceState *)D_00389770)->resourceFlag;
 
-    if (temp_v1 != 0) {
-        if (temp_v1 == 1) {
+    if (resourceFlag != 0) {
+        if (resourceFlag == 1) {
             if (fileRequestIsReady(D_00435FCC) != 0) {
                 ((FldAreaResourceState *)D_00389770)->resourceFlag = 0;
                 D_00435BB4 = 0;
@@ -782,15 +782,15 @@ void fldLoadAreaPackedResources(void) {
 }
 
 void fldReleaseAreaResourceCache(void) {
-    u32 temp_v0 = D_00435FD8;
+    u32 cachedResource = D_00435FD8;
 
-    if (temp_v0 != 0) {
-        func_003298C0(temp_v0);
+    if (cachedResource != 0) {
+        func_003298C0(cachedResource);
         D_00435FD8 = 0;
     }
-    temp_v0 = D_00435FC4;
-    if (temp_v0 != 0) {
-        func_002C7CE8(temp_v0);
+    cachedResource = D_00435FC4;
+    if (cachedResource != 0) {
+        func_002C7CE8(cachedResource);
         D_00435FC4 = 0;
     }
     D_00444950[0] = D_00436020[0];
@@ -1570,11 +1570,11 @@ void func_0012DD48(void) {
 }
 
 void func_0012DDC0(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+    u64 object;
 
-    temp_v0 = func_0019F460(arg0 << 4, arg1 << 4, 0, arg2, arg3, 0);
-    func_0019D518(temp_v0);
-    func_0019C5B0(temp_v0);
+    object = func_0019F460(arg0 << 4, arg1 << 4, 0, arg2, arg3, 0);
+    func_0019D518(object);
+    func_0019C5B0(object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {
@@ -1582,14 +1582,14 @@ void fldAdvanceQuadRow(FldQuadState *quad) {
 }
 
 void fldStartQuadPacketList(FldQuadState *quad) {
-    u64 temp_v0;
-    u32 temp_v1;
+    u64 packet;
+    u32 packetList;
 
-    temp_v1 = sdfCreateResetPacketList();
-    quad->packetList = temp_v1;
-    temp_v0 = sdfAllocPacketAligned(0x40);
-    func_0032E4B8(temp_v0);
-    sdfAppendPacket(quad->packetList, temp_v0);
+    packetList = sdfCreateResetPacketList();
+    quad->packetList = packetList;
+    packet = sdfAllocPacketAligned(0x40);
+    func_0032E4B8(packet);
+    sdfAppendPacket(quad->packetList, packet);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012DE70);
@@ -1836,17 +1836,17 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_001300A0);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001302A0);
 
 s64 func_001309B8(void) {
-    u64 temp_v0;
-    s64 temp_v1;
-    s64 temp_v2;
+    u64 worldObject;
+    s64 object;
+    s64 currentObject;
 
-    temp_v0 = dds3GetWorldObject();
-    temp_v1 = func_00110C18(temp_v0);
-    temp_v2 = func_00125F38();
-    if (temp_v2 == temp_v1) {
-        temp_v1 = 0;
+    worldObject = dds3GetWorldObject();
+    object = func_00110C18(worldObject);
+    currentObject = func_00125F38();
+    if (currentObject == object) {
+        object = 0;
     }
-    return temp_v1;
+    return object;
 }
 
 void fldSetCameraMoveMode(u32 value) {
@@ -1962,21 +1962,21 @@ void func_00133A28(void) {
 }
 
 void func_00133A50(void) {
-    u8 temp_v0;
+    u8 hasSecondObject;
 
-    temp_v0 = D_00435F10 != 0;
+    hasSecondObject = D_00435F10 != 0;
     *(u32 *)(*(s32 *)(D_00435F14 + 0x18) + 0x1c) = 0;
-    if (temp_v0) {
+    if (hasSecondObject) {
         *(u32 *)(*(s32 *)(D_00435F18 + 0x18) + 0x1c) = 0;
     }
 }
 
 void func_00133A78(void) {
-    u8 temp_v0;
+    u8 hasSecondObject;
 
-    temp_v0 = D_00435F10 != 0;
+    hasSecondObject = D_00435F10 != 0;
     *(u32 *)(*(s32 *)(D_00435F14 + 0x18) + 0x1c) = 0x80808080;
-    if (temp_v0) {
+    if (hasSecondObject) {
         *(u32 *)(*(s32 *)(D_00435F18 + 0x18) + 0x1c) = 0x80808080;
     }
 }
@@ -2201,12 +2201,12 @@ u32 func_00135598(void) {
 }
 
 void func_001355A8(u32 arg0) {
-    u32 temp_v0 = D_003899B4[0];
+    u32 selectedValue = D_003899B4[0];
 
     D_0043612C = arg0;
     D_00436130 = 0;
-    D_00436134 = temp_v0;
-    func_00135A68(temp_v0, 1);
+    D_00436134 = selectedValue;
+    func_00135A68(selectedValue, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001355D8);
