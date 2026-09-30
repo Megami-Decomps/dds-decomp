@@ -44,6 +44,7 @@ extern s32 D_003BD06C;
 extern s32 D_003BD05C;
 
 extern s32 func_001A17F0(void);
+extern void func_00104068(s32, u8, s32);
 
 extern u32 func_002B3390(u32, u32, s32);
 
@@ -270,9 +271,9 @@ extern void func_002DB538(void *, float);
 
 extern u32 D_003BC94C;
 
-extern u32 D_003BC9B0[2];
+extern s32 D_003BC9B0[2];
 
-extern u32 D_003BC9B8[2];
+extern s32 D_003BC9B8[2];
 
 extern u8 D_003BC9C0[2];
 
@@ -2041,6 +2042,8 @@ typedef struct EffFrameAsset {
     u8 pad_0C[0x10];    // 0x0C
     void *frameStorage; // 0x1C
     f32 *transformRows; // 0x20
+    u32 pad_24;
+    u32 *colorRows; // 0x28
 } EffFrameAsset;
 
 /* Frame-reset callbacks read the saved frame state and its configuration. */
@@ -2084,7 +2087,9 @@ typedef struct EffBillConfig {
         u32 quantizedSamples; // 0x74, clamped to at least four
         s32 signedRows;
     } samples;
-    u8 pad_78[0x10];
+    f32 fadeInEnd;     // 0x78, ramp-up length as a fraction of `resourceId`
+    f32 fadeOutStart;  // 0x7C, start of the ramp-down
+    u8 pad_80[8];
     f32 rowOffset;        // 0x88, applied across each four-vertex row
     u32 resourceId;     // 0x8C
     u8 pad_90[0x29];
@@ -5291,7 +5296,66 @@ void func_002AE200(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE208);
+typedef struct EffRibbonWork {
+    u32 count;      // 0x00
+    u32 field_04;   // 0x04
+    u32 color;      // 0x08
+    s32 rowStride;  // 0x0C
+    s32 repeat;     // 0x10
+    u8 field_14;    // 0x14
+    u8 pad_15[3];
+    u32 resource;   // 0x18
+    u32 *colors;    // 0x1C
+    u8 *positions;  // 0x20
+    u8 *uvs;        // 0x24
+    u8 *extra;      // 0x28
+    s32 *handle;    // 0x2C
+    u8 *allocation; // 0x30
+} EffRibbonWork;
+
+typedef struct EffMotionSetup {
+    u16 mode;    // 0x00
+    u16 kind;    // 0x02
+    u16 flags;   // 0x04
+    u8 pad_06[6];
+    void *table; // 0x0C
+    u8 pad_10[0x1C];
+} EffMotionSetup; // 0x2C
+
+extern EffMotionSetup D_003DCB00;
+
+u8 *func_002AE208(u32 count, u32 repeat) {
+    u32 rowStride = repeat * 4 + 4;
+    u32 size = (rowStride * 0x1C + 4) * count;
+    u32 cells = rowStride * count;
+    u8 *allocation = func_002D03F8(size + 0x34);
+    u8 *p = (u8 *)sdfResourceRetainAddress((u32)allocation);
+    EffRibbonWork *work = (EffRibbonWork *)(p + size);
+    u32 i;
+
+    work->positions = p;
+    p += cells * 16;
+    work->uvs = p;
+    p += cells * 8;
+    work->extra = p;
+    p += cells * 4;
+    work->field_04 = 2;
+    work->color = 0x80808080;
+    work->rowStride = rowStride;
+    work->repeat = repeat;
+    work->allocation = allocation;
+    work->colors = (u32 *)p;
+    work->count = count;
+    work->field_14 = 0;
+    for (i = 0; i < count; i++) {
+        ((u32 *)p)[i] = 0x80808080;
+    }
+    work->handle = func_002DA730();
+    func_002DA420(work->handle, 1.0f);
+    memset(&D_003DCB00, 0, sizeof(EffMotionSetup));
+    D_003DCB00.flags = 0x4000;
+    return (u8 *)work;
+}
 
 extern u8 *func_002AE208(u32, u32);
 
@@ -5384,9 +5448,45 @@ u32 *effAllocateAnimationBuffer(u8 *work) {
     return buffer;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002AE9A0);
+void func_002AE9A0(u8 *work, u8 *config) {
+    EffBillConfig *cfg = (EffBillConfig *)config;
+    u32 rows = cfg->frames.count;
+    u32 i;
 
-extern void func_002AE9A0(u32 *, u8 *);
+    if (rows != 0) {
+        s32 width = cfg->resourceId;
+        f32 fw = width;
+        s32 fadeInEnd = cfg->fadeInEnd * fw;
+        s32 fadeOutStart = cfg->fadeOutStart * fw;
+        u32 cols = width + 1;
+        u32 stride = cols * 4;
+        u32 *color = ((EffFrameAsset *)*(u8 **)(work + 4))->colorRows;
+        u32 *first = color;
+
+        for (i = 0; i < cols; i++) {
+            f32 t;
+            u32 alpha;
+
+            if (i < fadeInEnd) {
+                t = (f32)i / (f32)fadeInEnd;
+            } else if (fadeOutStart < i) {
+                t = (f32)(width - i) / (f32)(width - fadeOutStart);
+            } else {
+                t = 1.0f;
+            }
+            alpha = (u32)(t * 128.0f) << 24;
+            color[0] = 0x808080;
+            color[1] = alpha | 0x808080;
+            color[2] = alpha | 0x808080;
+            color[3] = 0x808080;
+            color += 4;
+        }
+        for (i = 1; i < rows; i++) {
+            memcpy(color, first, stride * 4);
+            color += stride;
+        }
+    }
+}
 
 extern u32 func_002B0AD8(u32, u32);
 
@@ -6309,7 +6409,26 @@ void func_002B3C20(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3C68);
+void func_002B3C68(u8 *work) {
+    f32 from[3];
+    f32 to[3];
+    u32 *colors;
+    u32 c;
+
+    func_001A17F0();
+    colors = *(u32 **)(work + 0x38);
+    if (*(s32 *)(work + 0x28) == 0) {
+        c = colors[0];
+        from[0] = (c & 0xFF) / 255.0f;
+        from[1] = ((c >> 8) & 0xFF) / 255.0f;
+        from[2] = ((c >> 16) & 0xFF) / 255.0f;
+        c = colors[1];
+        to[0] = (c & 0xFF) / 255.0f;
+        to[1] = ((c >> 8) & 0xFF) / 255.0f;
+        to[2] = ((c >> 16) & 0xFF) / 255.0f;
+        func_001EFD58(from, to, colors[2]);
+    }
+}
 
 void effResetSlots(void) {
     D_003BC9B0[0] = 0;
@@ -6323,7 +6442,28 @@ void effResetSlots(void) {
     func_00104130();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_002B3EC8);
+void func_002B3EC8(void) {
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (D_003BC9C0[i] != 0) {
+            if (D_003BC9B8[i] > 0 && D_003BC9B0[i] > 0) {
+                f32 ratio = (f32)D_003BC9B8[i] / (f32)D_003BC9B0[i];
+
+                if (D_003BC9C8[i] != 0) {
+                    ratio = 1.0f - ratio;
+                }
+                func_00104068(i, (u8)(D_003BC9C0[i] * ratio), 100);
+                D_003BC9B8[i] -= 1;
+            } else if (D_003BC9C8[i] == 1) {
+                func_00104068(i, D_003BC9C0[i], 100);
+            } else {
+                func_00104068(i, 0, 0);
+                D_003BC9B0[i] = 0;
+            }
+        }
+    }
+}
 
 void effSetDormantSlot(u32 index, u8 color, u32 value) {
     if (index < 2) {

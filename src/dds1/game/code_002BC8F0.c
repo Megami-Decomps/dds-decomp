@@ -83,15 +83,6 @@ typedef struct EffectObjectNode {
 
 extern EffectObjectNode *D_003BC948;
 
-typedef struct EffectRecordGroup {
-    u32 unk_00;
-    u32 unk_04;
-    u32 count;
-    u8 *records;
-} EffectRecordGroup;
-
-extern EffectRecordGroup D_0038FD88[];
-
 extern u32 D_003BD058;
 
 /* Reference-counted object header (layout inferred from field accesses). */
@@ -119,6 +110,29 @@ typedef struct BdWork {
     u8 pad_0x68[0x34];  // 0x68
     s32 alternate;      // 0x9C: alternate work entry when nonzero
 } BdWork; // 0xA0
+
+/* Per-record state (0x14 bytes) that drives a material's value over time. */
+typedef struct EffTimedState {
+    u32 flags;     // 0x00
+    s32 value;     // 0x04: clamped to [0, 0x10000]
+    s32 delay;     // 0x08
+    s32 delayMax;  // 0x0C
+    u8 *source;    // 0x10
+} EffTimedState; // 0x14
+
+typedef struct EffStateSource {
+    u8 pad_00[0x14];
+    u32 kind; // 0x14
+} EffStateSource;
+
+typedef struct EffectRecordGroup {
+    u32 unk_00;
+    s32 (*step)(BdWork *, u8 *, EffTimedState *);
+    u32 count;
+    u8 *records;
+} EffectRecordGroup;
+
+extern EffectRecordGroup D_0038FD88[];
 
 /* Resource slot header: the 0x80-byte descriptions parallel 0xA0-byte work entries. */
 typedef struct EffectSlotSet {
@@ -775,7 +789,51 @@ u32 func_002BDEC8(s32 work, s32 index, BdWork *effect) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BDF28);
+u8 *func_002BDF28(u8 *effect, u32 slot, u8 *entry) {
+    EffTimedState *states = (EffTimedState *)(entry + 0x28);
+    BdWork *record = (BdWork *)(((EffectSlotSet *)effect)->workEntries + slot * 0xA0);
+    s32 idle = 1;
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        EffTimedState *state = &states[i];
+        EffStateSource *source = (EffStateSource *)state->source;
+
+        if (source != 0 && source->kind != 0) {
+            EffectRecordGroup *group = &D_0038FD88[source->kind];
+            s32 step = group->step(record, entry, state);
+
+            if (state->delay > 0) {
+                step = 0;
+                state->delay -= 1;
+            }
+            if (step >= 0) {
+                if (state->flags & 1) {
+                    if (state->value != 0x10000) {
+                        state->value += step;
+                        idle = 0;
+                        if (func_002BDE60(effect, slot, state) == 0) {
+                            state->delay = state->delayMax;
+                            return 0;
+                        }
+                    }
+                } else if (state->value != 0) {
+                    state->value -= step;
+                    idle = 0;
+                    if (func_002BDEC8(effect, slot, state) == 0) {
+                        state->delay = state->delayMax;
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    if (idle != 0) {
+        effResetRecordRun(effect, slot, -1);
+        return 0;
+    }
+    return effect;
+}
 
 u32 func_002BE0C0(s32 work, s32 index, void *value) {
     s32 offset = index * 0xA0;
@@ -810,8 +868,6 @@ u32 func_002BE1C8(s32 work, s32 index) {
     ((BdWork *)(index * 0xa0 + ((EffectSlotSet *)work)->workEntries))->alternate = 0;
     return 1;
 }
-
-extern u32 func_002BDF28(s32, s32, BdWork *);
 
 u32 func_002BE1E8(s32 work, s32 index, u32 value, u32 flags) {
     s32 effect = ((EffectSlotSet *)work)->workEntries + index * 0xA0;

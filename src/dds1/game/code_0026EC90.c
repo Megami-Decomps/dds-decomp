@@ -12,6 +12,16 @@ extern u8 D_0037B888[];
 
 extern u8 D_003253C8[];
 
+extern u32 func_002BC630(u32 *);
+
+extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
+
+extern u32 D_0037C248[][2];
+
+extern u32 D_0037C2C8[][2];
+
+extern u32 D_0037C2F0[][2];
+
 extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
 extern char D_003B1168[]; /* "staffProc" */
@@ -920,7 +930,22 @@ void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     mnuUpdateHandleStates(arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271500);
+void func_00271500(u32 *list, u32 *state) {
+    s32 i;
+    s32 flag;
+
+    mnuResolveStaffImageHandles(state);
+    flag = func_002BC630(list) == 1;
+    for (i = 0; i < 16; i++) {
+        effAppendListEntry(list, D_003B2020, D_0037C248[i][flag], 1, state + 0x24 / 4 + i);
+    }
+    for (i = 0; i < 5; i++) {
+        effAppendListEntry(list, D_003B2020, D_0037C2C8[i][flag], 1, state + 0x64 / 4 + i);
+    }
+    for (i = 0; i < 2; i++) {
+        effAppendListEntry(list, "/camp/spr/n_sta/", D_0037C2F0[i][flag], 1, state + 0x1C / 4 + i);
+    }
+}
 
 void mnuReleaseStaffResourceGroups(u32 *resources) {
     u32 *inner = resources + 1;
