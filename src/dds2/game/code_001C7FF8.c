@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 
 extern s32 func_001AA6F8(void);
+extern void btlDispatchStateHandler();
 
 extern s32 func_00101740(const char *);
 
@@ -96,12 +97,15 @@ typedef struct SceneActor {
             u32 stateFlags;   /* 0x114 */
         } words;
     } status;
-    u8 pad_118[4];
+    u32 extraFlags;           /* 0x118 */
     u8 priority;
     u8 pad_11D[3];
     u8 entryData[4];
     u16 kind;
-    u8 pad_126[8];
+    u8 pad_126[2];
+    u16 statA;                /* 0x128 */
+    u8 pad_12A[2];
+    u16 statB;                /* 0x12C */
     u16 selectionFlags;
     u8 pad_130[0x12];
     u16 cards[8];
@@ -190,20 +194,25 @@ typedef struct BattleSceneWork {
     u16 variant;
     u8 pad272[2];
     s32 step;
-    u8 pad278[0x1C];
+    u8 pad278[4];
+    u8 unk27C;
+    u8 pad27D[0x17];
     s32 effectLayer;
     u8 pad298[8];
     s32 mode;
     u8 pad2A4[8];
     s16 tileX;
     s16 tileY;
-    u8 pad2B0[0x14];
+    s32 loadStep;             /* 0x2B0 */
+    u8 pad2B4[0x10];
     u32 taskParent;
     u8 pad2C8[8];
     u32 sceneObject;
     u32 spriteObject;
     u32 sceneStatus;
-    u8 pad2DC[0x22];
+    u8 pad2DC[0x1C];
+    s32 unk2F8;
+    u8 pad2FC[2];
     SceneSlot slots[8];
     u8 pad316[2];
     SceneTask *groupPrimary[20];    /* 0x318 */
@@ -252,7 +261,23 @@ extern u32 D_00435E64;
 extern u32 D_00435E5C;
 
 extern s32 D_00438F54;
-extern s32 D_00435DD0;
+typedef struct SceneEntry {
+    u16 flags;                /* 0x000 */
+    u8 pad02[6];
+    u16 weight;               /* 0x008 */
+    u8 pad0A[4];
+    u16 mask;                 /* 0x00E */
+    u8 pad10[0x1A8];
+    s32 link;                 /* 0x1B8 */
+    u8 pad1BC[8];
+} SceneEntry;
+
+typedef struct SceneParty {
+    u8 pad00[0xA60];
+    SceneEntry entry[5];
+} SceneParty;
+
+extern SceneParty *D_00435DD0;
 extern s32 D_00435E38;
 
 extern s32 func_00206090();
@@ -353,7 +378,54 @@ s32 btlIsSceneActorCountWithinLimit(s32 unused, u32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C82D8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C83D0);
+typedef struct SceneKindTable {
+    u8 pad00[0x14];
+    u32 value[8];
+} SceneKindTable;
+
+extern SceneKindTable *D_00438F4C;
+extern void func_001C8518();
+extern void fldCollectAvailableRosterEntries(s32, s16 *);
+extern char *func_001C8A28(s32, s16 *);
+
+/* Advance the per-kind scene counter table: refresh the slot for the current
+ * scene kind, then return its value (clamped to 4 unless noClamp is set). */
+u32 func_001C83D0(s32 ctx, s8 kind, s8 noClamp) {
+    s16 buf[8];
+    u32 type = func_001C82D8(ctx, kind);
+    if (type != 4) {
+        D_004367C0 = 0;
+    }
+    switch (type) {
+    case 0:
+        func_001C8518(ctx, buf, 0, 2, 3);
+        D_00438F4C->value[0] = buf[0] + 1;
+        break;
+    case 4:
+        func_001C8A28(ctx, buf);
+        D_00438F4C->value[4] = buf[0];
+        break;
+    case 2:
+        fldCollectAvailableRosterEntries(ctx, buf);
+        D_00438F4C->value[2] = buf[0];
+        break;
+    case 3:
+        D_00438F4C->value[3] = 3;
+        break;
+    case 6:
+        D_00438F4C->value[6] = 1;
+        break;
+    default:
+        D_00438F4C->value[type] = 0;
+        break;
+    }
+    if (noClamp == 0) {
+        if (D_00438F4C->value[type] >= 4) {
+            return 4;
+        }
+    }
+    return D_00438F4C->value[type];
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8518);
 
@@ -456,7 +528,47 @@ void func_001C9DC8(s32 unused) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9EA0);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA390);
+typedef struct SceneCheckArgs {
+    u16 mode;
+    u16 pad2;
+    s32 first;
+    s32 second;
+} SceneCheckArgs;
+
+extern s32 func_001ABDE8();
+extern s32 func_001ABA40();
+
+/* Check helper for a pair of scene objects: the caller's own result wins,
+ * then the first object's, then the second's. */
+s32 func_001CA390(s32 self, SceneCheckArgs *args) {
+    s32 base;
+    s32 resultA = 0;
+    s32 resultB = 0;
+    base = func_001ABDE8(self, self, args->first, args->second, args->mode);
+    if (args->first != 0) {
+        resultA = func_001ABDE8(args->first, args->first, self, args->second, args->mode);
+        if (resultA == 6 && base == 0) {
+            if (func_001ABA40(args->first, args->mode) == 0) {
+                resultA = 0;
+            }
+        }
+    }
+    if (args->second != 0) {
+        resultB = func_001ABDE8(args->second, args->second, self, args->first, args->mode);
+        if (resultB == 6 && base == 0) {
+            if (func_001ABA40(args->second, args->mode) == 0) {
+                resultB = 0;
+            }
+        }
+    }
+    if (base != 0) {
+        return base;
+    }
+    if (resultA != 0) {
+        return resultA;
+    }
+    return resultB;
+}
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_004169F0);
 
@@ -1233,9 +1345,99 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D18D8);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D22D8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D2798);
+extern void itfMesClearFlags();
+extern void brsTaskAllowUpdate();
+extern void func_002457E0();
+extern void func_001AA868();
+extern s32 func_0029D000();
+extern void datMoveCursorX();
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D28D8);
+/* Nudge every active party entry's cursor by weight * 0.05 once scene flag
+ * 0x40 is clear. */
+void func_001D2798(BattleSceneWork *scene) {
+    u32 i;
+    f32 scale;
+    i = 0;
+    itfMesClearFlags(1);
+    scale = 0.05f;
+    brsTaskAllowUpdate();
+    func_002457E0(8);
+    do {
+        func_001AA868(&D_00435DD0->entry[i], -0x45D1);
+        if (!(scene->subFlags & 0x40)) {
+            if (D_00435DD0->entry[i].flags & 2) {
+                if (scene->unk27C == 1) {
+                    if (D_00435DD0->entry[i].link != 0 || scene->unk2F8 != 0) {
+                        if (!(D_00435DD0->entry[i].mask & 0x40)) {
+                            if (func_0029D000(&D_00435DD0->entry[i]) == 0) {
+                                datMoveCursorX(&D_00435DD0->entry[i], (s32)((f32)D_00435DD0->entry[i].weight * scale));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        i++;
+    } while (i < 5);
+    scene->loadStep = 0;
+}
+
+extern s32 func_002998D8();
+extern s32 fldLoadAreaResource();
+extern void btlReleaseEventAssets();
+extern void btlReleaseBossData();
+extern void fldPollAreaResourceLoad();
+extern s32 fldGetResourceReadyFlag();
+extern s32 brsTaskPollDone();
+
+/* Field-load step: while loading, sends every linked scene node to state
+ * 0x1F, otherwise advances loadStep (0 start, 1 polling, 2 done). Returns
+ * 0xB while a load is still pending. */
+u32 func_001D28D8(BattleSceneWork *work) {
+    SceneLinkedNode *node;
+    s32 step;
+    if (func_002998D8() == 1) {
+        work->subFlags |= 0x20;
+        if (work->linkedNodes != 0) {
+            for (node = work->linkedNodes; node != 0; node = node->next) {
+                if (node->state != 0x1F) {
+                    btlDispatchStateHandler(node, 0x1F);
+                }
+            }
+        } else {
+            switch (work->loadStep) {
+            case 0:
+                work->flags &= ~0x10;
+                if (fldLoadAreaResource() != 0) {
+                    work->loadStep = 1;
+                } else {
+                    work->loadStep = 2;
+                }
+                btlReleaseEventAssets();
+                btlReleaseBossData();
+                break;
+            case 1:
+                fldPollAreaResourceLoad();
+                if (fldGetResourceReadyFlag() == 0) {
+                    work->loadStep = 2;
+                    btlBossDebugPrintf("btl:field loding end\n");
+                }
+                break;
+            case 2:
+                break;
+            }
+        }
+    }
+    step = work->loadStep;
+    if (step < 3) {
+        if (step > 0) {
+            if (brsTaskPollDone() == 0) {
+                return 0xB;
+            }
+        }
+    }
+    return 0;
+}
 
 void fldMarkLinkedSceneActors(u8 *scene) {
     u8 *node;
@@ -1450,7 +1652,59 @@ void fldCompactSceneSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3520);
+/* Consume `amount` scene-slot time: mode 1 drains the front slot's counter
+ * (popping it when empty), modes 2 and 3 drain full slots of 100 in steps of 50. */
+void func_001D3520(s32 amount, u8 mode) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    u8 head;
+    u32 i;
+    if (scene->flags & 0x100) {
+        head = scene->slots[0].a;
+        switch (mode) {
+        case 0:
+            break;
+        case 1:
+            if (amount < 100) {
+                if (amount < scene->slots[0].b) {
+                    scene->slots[0].b -= amount;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+            } else {
+                while (amount > 0) {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                    if (scene->slots[0].a != head) {
+                        return;
+                    }
+                    if (scene->slots[0].b == 0) {
+                        break;
+                    }
+                    amount -= 100;
+                }
+            }
+            break;
+        case 2:
+        case 3:
+            while (amount > 0) {
+                for (i = 0; i < 8; i++) {
+                    if (scene->slots[i].a == head && scene->slots[i].b == 100) {
+                        break;
+                    }
+                }
+                if (i < 8) {
+                    scene->slots[i].b -= 50;
+                } else {
+                    scene->slots[0].b = 0;
+                    fldCompactSceneSlots();
+                }
+                amount -= 50;
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", fldInsertSceneSlots);
 
@@ -1650,7 +1904,64 @@ s32 fldGetSceneGroupEntry(s32 index) {
     return ((s32 *)fldGetSceneGroupResource(scene[0x2FE]))[index];
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D3ED8);
+extern s32 func_001B2630();
+
+/* Per-frame scene advance: picks the next group task (or finishes the
+ * slot sequence) and dispatches it once flags 4 and 8 are set. */
+void func_001D3ED8(void) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    SceneTask *task;
+    void (*hook)(void);
+    if (scene->flags & 4) {
+        if (scene->flags & 8) {
+            if (scene->flags & 0x800) {
+                return;
+            }
+            if (scene->flags & 0x400) {
+                return;
+            }
+            if (func_001B2630() != 0) {
+                scene->flags |= 0x800;
+                return;
+            }
+            hook = *(void (**)(void))((u8 *)scene + 0x62C);
+            if (hook != 0) {
+                hook();
+            }
+            task = scene->groupHandles[0];
+            if (task != 0) {
+                if (task->state != 2) {
+                    return;
+                }
+                scene->currentTask = task;
+                task->flags |= 0x40;
+                btlDispatchStateHandler(task, 3);
+                scene->flags &= ~8;
+            } else {
+                if (fldAreSceneSlotsFinished() != 0) {
+                    scene->flags |= 0x400;
+                    return;
+                }
+                task = *fldGetSceneGroupResource(((u8 *)scene)[0x2FE]);
+                if (task == 0) {
+                    return;
+                }
+                if (task->actor->status.words.activeFlags & 0xE0) {
+                    return;
+                }
+                if (task->state != 2) {
+                    return;
+                }
+                if (task->actor->status.words.activeFlags & 0x30400000) {
+                    return;
+                }
+                scene->currentTask = task;
+                btlDispatchStateHandler(task, 3);
+                scene->flags &= ~8;
+            }
+        }
+    }
+}
 
 void fldClearSceneSlotsAndGroups(void) {
     BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
@@ -1860,8 +2171,6 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D46A8);
-
 extern s32 sndIsResourceNodeReferencedOrActive(s32);
 extern s32 sndHasResourceFlagsOneOrEight(s32);
 extern void sndFreeResourceNode(s32);
@@ -1869,6 +2178,52 @@ extern void sndFreeListNode(s32);
 extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(s32);
+extern u32 sndGetResourceStatus(s32);
+
+/* Returns nonzero when the scene is idle: frees every actor's unreferenced
+ * resource node, then the caller's list node, and requires no waiting actor
+ * or scene task of the listed kinds. */
+s32 func_001D46A8(s32 self) {
+    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
+    SceneActor *actor;
+    for (actor = scene->actors; actor != 0; actor = actor->next) {
+        if (actor->resourceNode != 0) {
+            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+                if ((s32)actor == self) {
+                    return 0;
+                }
+                sndGetResourceStatus(actor->resourceNode);
+                return 0;
+            }
+            sndFreeResourceNode(actor->resourceNode);
+            actor->resourceNode = 0;
+        }
+    }
+    if (((SceneActor *)self)->listNode != 0) {
+        if (sndHasResourceFlagsOneOrEight(((SceneActor *)self)->listNode) != 0) {
+            return 0;
+        }
+        sndFreeListNode(((SceneActor *)self)->listNode);
+        ((SceneActor *)self)->listNode = 0;
+    }
+    for (actor = scene->actors; actor != 0; actor = actor->next) {
+        if (actor->status.words.activeFlags & 0x200) {
+            if (actor->status.words.activeFlags & 2) {
+                if ((actor->extraFlags & 8) == 0) {
+                    return 0;
+                }
+            }
+        }
+    }
+    if (btlCountTasksByKind(0x23) != 0) return 0;
+    if (btlCountTasksByKind(0x40) != 0) return 0;
+    if (btlCountTasksByKind(0x41) != 0) return 0;
+    if (btlCountTasksByKind(0x3F) != 0) return 0;
+    if (btlCountTasksByKind(0x36) != 0) return 0;
+    if (btlCountTasksByKind(0x37) != 0) return 0;
+    if (btlCountTasksByKind(0x24) != 0) return 0;
+    return btlCountTasksByKind(0x2E) == 0;
+}
 
 s32 fldReleaseIdleSceneActorResources(SceneActor *actor) {
     if (actor->resourceNode != 0) {
@@ -1942,7 +2297,7 @@ s64 func_001D4908(u8 *task) {
         func_001E2758(unit);
         btlStartTask(func_001E44E0(unit, 0xE, 0, 1.0f));
         fldAppendTaskToGroup(task);
-        return btlDispatchStateHandler(task, 2);
+        btlDispatchStateHandler(task, 2);
     }
 }
 
@@ -2019,14 +2374,6 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4CA0);
 void func_001D4FE0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4FE8);
-
-void func_001D5330(u32 task) {
-    func_001AA6F8();
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xfffffffb;
-    func_001CAB60(task);
-}
-
 extern s32 btlCreateEffObjB();
 extern s32 btlStartTask();
 extern s32 sndHasActiveActor();
@@ -2034,6 +2381,112 @@ extern s64 func_001A9920(void);
 extern s32 btlCreateCommandSoundUpdateTask(void);
 extern s32 btlCreateSecondaryCommandSoundTask(void);
 extern s32 btlCreateCommandSoundTask();
+extern void func_00211360();
+extern s32 func_0020F200();
+
+typedef struct TaskBlock {
+    u32 word[11];
+} TaskBlock;
+
+extern u8 *func_001DFB08(SceneActor *, TaskBlock *);
+extern u8 *func_0020F9D0(SceneActor *, u32, s32);
+
+/* Starts the command sound tasks and the follow-up action for the acting
+ * unit, chosen by its selection flags. */
+void func_001D4FE8(u8 *task) {
+    SceneActor *unit;
+    s64 ownerId;
+    u8 *effectTask;
+    u8 *sceneTask;
+    u8 *object;
+    s32 effect;
+    TaskBlock block;
+    u32 hp, mp;
+    if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
+        unit = ((SceneTask *)task)->actor;
+        ownerId = func_001A9920();
+        btlStartTask(btlCreateCommandSoundUpdateTask());
+        btlStartTask(btlCreateSecondaryCommandSoundTask());
+        if (unit->status.words.activeFlags & 0x200) {
+            btlStartTask(btlCreateCommandSoundTask(task, 9));
+        } else {
+            btlStartTask(btlCreateCommandSoundTask(task, 3));
+        }
+        switch (unit->selectionFlags & 0x7FFF) {
+        case 0x200:
+            func_00211360(task, 0);
+            btlDispatchStateHandler(task, 0xC);
+            break;
+        case 0x20:
+            if (((SceneTask *)task)->actor->status.words.activeFlags & 0x200) {
+                func_00211360(task, 2);
+            } else {
+                func_00211360(task, 3);
+            }
+            btlDispatchStateHandler(task, 0xC);
+            break;
+        case 0x40:
+            func_00211360(task, 4);
+            btlDispatchStateHandler(task, 0xC);
+            break;
+        case 1:
+        case 0x2000:
+            ((SceneTask *)task)->command = 0xD;
+            btlDispatchStateHandler(task, 0xC);
+            break;
+        case 8:
+            sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
+            *sceneTask = 7;
+            *(s64 *)(sceneTask + 8) = ownerId;
+            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
+            btlStartTask(sceneTask);
+            memset(&block, 0, 0x2C);
+            hp = unit->statA;
+            block.word[0] = hp / 10;
+            mp = unit->statB;
+            block.word[1] = mp / 10;
+            effectTask = func_001DFB08(unit, &block);
+            *effectTask = 7;
+            *(s64 *)(effectTask + 8) = ownerId;
+            btlStartTask(effectTask);
+            if ((s32)block.word[0] > 0) {
+                object = func_0020F9D0(unit, block.word[0], 0);
+                *object = 4;
+                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
+                btlStartTask(object);
+            }
+            if ((s32)block.word[1] > 0) {
+                object = func_0020F9D0(unit, block.word[1], 1);
+                *object = 4;
+                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
+                btlStartTask(object);
+            }
+            btlDispatchStateHandler(task, 0x1B);
+            break;
+        case 0x800:
+            sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
+            *sceneTask = 7;
+            *(s64 *)(sceneTask + 8) = ownerId;
+            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
+            btlStartTask(sceneTask);
+            btlDispatchStateHandler(task, 0x1B);
+            break;
+        }
+        effect = func_0020F200(task);
+        if (effect > 0) {
+            object = (u8 *)btlCreateEffObjB(unit, effect);
+            *(s64 *)(object + 0x40) = ownerId;
+            btlStartTask(object);
+        }
+        ((SceneTask *)task)->flags |= 0x200;
+    }
+}
+
+void func_001D5330(u32 task) {
+    func_001AA6F8();
+    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xfffffffb;
+    func_001CAB60(task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5368);
 
@@ -2151,9 +2604,6 @@ void func_001D5CE8(s32 task) {
     btlResetIndexWork(task + 0x20);
     ((SceneTask *)task)->actor->actionResource = 0xffffffff;
 }
-
-extern void func_00211360();
-extern s32 func_0020F200();
 
 void btlCommandStartSoundTasks(u8 *task) {
     u8 *unit;
