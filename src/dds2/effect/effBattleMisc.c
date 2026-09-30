@@ -76,7 +76,78 @@ typedef struct {
     u32 flags114;         /* 0x114 */
 } EffBattleMiscUnit;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169CB8);
+typedef struct {
+    u8 unk00;
+    u8 kind;              /* 0x01 */
+    u8 sub;               /* 0x02 */
+    u8 pad03;
+    s32 length;           /* 0x04 zero selects the unit's own extent */
+} EffBattleMiscTargetParam;
+
+extern void *dds3GetWorldObject(void);
+extern void *func_00110C18(void *object);
+extern void func_001130D0(void *object);
+extern void effObjFetchInnerFirstVec(void *object);
+extern f32 D_003AF1C0[];
+extern f32 D_003AF1D8[];
+extern void func_00336538(f32 angle);
+
+/* Target offset for a unit part; the vector is returned in vf10. */
+void func_00169CB8(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
+    f32 length = 750.0f;
+    f32 height;
+    f32 out[4];
+    f32 dir[4];
+    void *object;
+    s32 lengthParam = param->length;
+    u32 sub = param->sub;
+    u32 kind = param->kind;
+
+    if (lengthParam != 0) {
+        length = (f32)lengthParam;
+    }
+    if (sub == 9 || kind == 4) {
+        object = func_00110C18(dds3GetWorldObject());
+        dir[0] = dir[1] = dir[2] = 750.0f;
+        func_001130D0(object);
+        VU0_MOVE_VF(vf11, vf10);
+        effObjFetchInnerFirstVec(object);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF(vf11, dir);
+        VU0_MUL(vf10, vf10, vf11);
+        return;
+    }
+    if (kind == 5) {
+        if (sub == 8 || sub == 10) {
+            height = -1.0f;
+            if (lengthParam != 0) {
+                height = -length;
+            }
+        } else {
+            height = -1.0f;
+        }
+    } else {
+        height = D_003AF1C0[kind] * 250.0f;
+    }
+    if (sub == 8 || sub == 10) {
+        out[0] = 0;
+        out[1] = height;
+        out[2] = 0;
+    } else {
+        dir[0] = 0;
+        dir[1] = 0;
+        dir[2] = (unit->flags110 & 0x200) ? 1.0f : -1.0f;
+        func_00336538(D_003AF1D8[sub]);
+        VU0_LOAD_VF(vf10, dir);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, dir);
+        out[0] = length * dir[0];
+        out[1] = length * dir[1] + height;
+        out[2] = length * dir[2];
+    }
+    VU0_LOAD_VF(vf10, out);
+}
 
 void effBattleMiscApplyParamByte(u32 owner, EffBattleMiscParam *param) {
     func_001E31F0(owner, param->value);
@@ -142,7 +213,6 @@ typedef struct {
 extern u8 D_0037F680[];
 extern u8 D_0037F690[];
 extern u8 D_0037F6A0[];
-extern f32 D_003AF1D8[];
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void func_003363D0(void);
 extern void func_003364B8(f32 value);

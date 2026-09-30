@@ -2823,7 +2823,38 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C2F0);
+s32 func_0027C2F0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    f32 scale;
+
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 6:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        amount = amount * scale;
+        mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
+        break;
+    case 8:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        amount = amount * scale;
+        mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
+        break;
+    case 7:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
+        break;
+    case 9:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
+        break;
+    case 0:
+        mnuDrawMantraPulseIcon(x, y, z, amount, unused, object, packet);
+        break;
+    }
+    return 0;
+}
 
 void func_0027C418(u32 unused, s32 view) {
     u32 spriteHandle;
@@ -2883,7 +2914,43 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027DE40);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425BC8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027E0E0);
+extern s32 func_0027DE40(s32, s32, s32, s32, s32, u8 *, s32);
+
+s32 func_0027E0E0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    f32 scale;
+
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 6:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        amount = amount * scale;
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    case 8:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        amount = amount * scale;
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    case 7:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    case 9:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    case 0:
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    case 1:
+        func_0027DE40(x, y, z, amount, unused, object, packet);
+        break;
+    }
+    return 0;
+}
 
 void func_0027E208(u32 unused, s32 view) {
     u32 resource;
@@ -2931,7 +2998,41 @@ s32 btlDrawPanelC(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027FC90);
+s32 func_0027FC90(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    f32 scale;
+
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 6:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        amount = amount * scale;
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    case 8:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        amount = amount * scale;
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    case 7:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    case 9:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    case 0:
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    case 1:
+        btlDrawPanelC(x, y, z, amount, unused, (u32)object, packet);
+        break;
+    }
+    return 0;
+}
 
 void func_0027FDB8(void) {
 }
@@ -2971,7 +3072,40 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002817C8);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CF8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00281B60);
+extern s32 func_002817C8(s32, s32, s32, s32, s32, u8 *, s32);
+
+s32 func_00281B60(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    f32 scale;
+
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 6:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        amount = amount * scale;
+        func_002817C8(x, y, z, amount, unused, object, packet);
+        break;
+    case 8:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        amount = amount * scale;
+        func_002817C8(x, y, z, amount, unused, object, packet);
+        break;
+    case 7:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_002817C8(x, y, z, amount, unused, object, packet);
+        break;
+    case 9:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_002817C8(x, y, z, amount, unused, object, packet);
+        break;
+    case 0:
+        func_002817C8(x, y, z, amount, unused, object, packet);
+        break;
+    }
+    return 0;
+}
 
 void func_00281C88(u32 unused, s32 view) {
     u32 spriteHandle;
@@ -3020,7 +3154,41 @@ void func_00283FA0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00283FA8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00284298);
+extern s32 func_00283FA8(s32, s32, s32, s32, s32, u8 *, s32);
+
+s32 func_00284298(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    f32 scale;
+
+    switch ((*(u32 *)object >> 19) & 0xF) {
+    case 6:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        amount = amount * scale;
+        func_00283FA8(x, y, z, amount, unused, object, packet);
+        break;
+    case 8:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        amount = amount * scale;
+        func_00283FA8(x, y, z, amount, unused, object, packet);
+        break;
+    case 7:
+        scale = *(s16 *)(object + 0x1E) * 0.25f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_00283FA8(x, y, z, amount, unused, object, packet);
+        break;
+    case 9:
+        scale = *(s16 *)(object + 0x1E) / 10.0f;
+        scale = 1.0f - scale;
+        amount = amount * scale;
+        func_00283FA8(x, y, z, amount, unused, object, packet);
+        break;
+    case 0:
+        func_00283FA8(x, y, z, amount, unused, object, packet);
+        break;
+    }
+    return 0;
+}
+
 typedef struct MantraSparkle {
     s16 age;
     s16 life;

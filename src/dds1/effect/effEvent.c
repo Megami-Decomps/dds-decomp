@@ -133,8 +133,6 @@ void effEventBindEffect(EffEventWork *work, void *value) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001908A0);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
-
 /* 0x7C-byte parameter block; the counters at 0x18/0x2C/0x30 are clamped to at least 1 on create/clone. */
 typedef struct {
     u8 pad00[0x10];
@@ -199,6 +197,8 @@ extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *billCreateFromResource(s32 kind, const char *path);
 
+INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);
+
 EffEventBillSet *func_00190AD8(EffEventBlock7C *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffEventBillParticle);
@@ -242,7 +242,56 @@ void effEventReleaseSharedResources(EffEventWork *work) {
     func_002D0918(work->resource);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00190D18);
+extern u32 effMiscRand(void *state);
+extern f32 func_002E8398(void *state);
+extern u8 D_0034DF38[];
+
+/* Randomize one billboard particle: delays, spin rates, radius and two unit direction vectors. */
+void func_00190D18(EffEventBillSet *work, s32 index) {
+    EffEventBillParticle *p = &work->particles[index];
+    f32 dir[4];
+    f32 scale;
+    f32 range;
+    s32 periodA = work->head.unk18;
+    s32 periodB = work->head.unk1C;
+
+    p->delayA = -(effMiscRand(D_0034DF38) % periodA);
+    p->delayB = -(effMiscRand(D_0034DF38) % periodB);
+    scale = func_002E8398(D_0034DF38) * work->head.blend3C + (1.0f - work->head.blend3C);
+    p->f28 = work->head.f38 * scale;
+    p->f2C = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    p->f38 = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    p->f30 = work->head.f48 * (func_002E8398(D_0034DF38) * 0.5f + 0.5f);
+    p->f3C = work->head.f48 * (func_002E8398(D_0034DF38) * 0.5f + 0.5f);
+    p->f34 = work->head.f40 * (func_002E8398(D_0034DF38) * 0.3f + 0.7f) * scale;
+    p->f40 = work->head.f44 * (func_002E8398(D_0034DF38) * 0.3f + 0.7f) * scale;
+    p->f44 = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    if (effMiscRand(D_0034DF38) & 1) {
+        p->f48 = work->head.f4C * (func_002E8398(D_0034DF38) * 0.3f + 0.7f);
+    } else {
+        p->f48 = -(work->head.f4C * (func_002E8398(D_0034DF38) * 0.3f + 0.7f));
+    }
+    range = work->head.range;
+    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[1] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, dir);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, dir);
+    p->pos[0] = range * func_002E8398(D_0034DF38) * dir[0];
+    p->pos[1] = range * func_002E8398(D_0034DF38) * dir[1];
+    p->pos[2] = range * func_002E8398(D_0034DF38) * dir[2];
+    p->dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    p->dir[1] = 0;
+    p->dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, p->dir);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, p->dir);
+    p->f4C = work->head.f68 * (func_002E8398(D_0034DF38) * work->head.blend70 + (1.0f - work->head.blend70));
+    p->f50 = 0;
+    p->f54 = work->head.f50 * (func_002E8398(D_0034DF38) * work->head.blend54 + (1.0f - work->head.blend54));
+    p->f58 = work->head.f58 * (func_002E8398(D_0034DF38) * work->head.blend5C + (1.0f - work->head.blend5C));
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
 
