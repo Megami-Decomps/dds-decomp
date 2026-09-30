@@ -894,7 +894,7 @@ void func_002E14D8(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     VU0_STORE_VF(vf10, packet->vecD);
     VU0_LOAD_MATRIX(matrix);
     func_002DD520();
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder");
+    VU0_MOVE_VF(vf10, vf31);
     VU0_STORE_VF(vf10, packet->vecE);
     VU0_STORE_VF(vf10, src + 0x90);
     packet->word0 = 0x04000002;

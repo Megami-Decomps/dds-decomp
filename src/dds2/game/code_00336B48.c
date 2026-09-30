@@ -945,7 +945,7 @@ void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecB));
     VU0_LOAD_MATRIX(matrix);
     func_003363D0();
-    __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder");
+    VU0_MOVE_VF(vf10, vf31);
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecC));
     __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
     packet->unkC4 = 0x14000000;
