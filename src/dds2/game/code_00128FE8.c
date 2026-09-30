@@ -497,9 +497,9 @@ void func_00129E78(u32 buffer, FldTransferChunk *chunk) {
     fldRelocatePackedWords((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
 }
 
-void fldSetPendingAreaAndFloor(u32 arg0, u32 arg1) {
-    D_00436014 = arg0;
-    D_00436018 = arg1;
+void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
+    D_00436014 = area;
+    D_00436018 = floor;
 }
 
 s32 fldLoadAreaResource(void) {

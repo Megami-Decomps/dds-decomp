@@ -345,17 +345,17 @@ void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 flag) {
     ctx->uC.w = measured;
 }
 
-void func_0019D088(FrFontGlyph *glyph, s32 arg1, s32 arg2) {
+void func_0019D088(FrFontGlyph *glyph, s32 advance, s32 height) {
     FrFontGlyph *head = glyph;
     FrFontGlyph *child;
 
-    head->u10.half[0] = arg1;
-    head->u10.half[1] = arg2;
+    head->u10.half[0] = advance;
+    head->u10.half[1] = height;
     for (; glyph != NULL; glyph = glyph->previous) {
         for (child = glyph->firstChild; child != NULL; child = child->next) {
-            child->advance = arg1;
-            child->unk18.b[0] = arg1;
-            child->unk18.b[1] = arg2;
+            child->advance = advance;
+            child->unk18.b[0] = advance;
+            child->unk18.b[1] = height;
         }
     }
     head->advance = frFontMeasureGlyphChain(head);
@@ -427,12 +427,12 @@ s32 func_0019D200(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D288);
 
-void func_0019D518(FrFontGlyph *arg0) {
-    func_0019D530(arg0, 0);
+void func_0019D518(FrFontGlyph *glyph) {
+    func_0019D530(glyph, 0);
 }
 
-void func_0019D530(FrFontGlyph *arg0, s8 arg1) {
-    func_0019D550(arg0, arg1, D_00436568);
+void func_0019D530(FrFontGlyph *glyph, s8 mode) {
+    func_0019D550(glyph, mode, D_00436568);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
@@ -448,8 +448,8 @@ s32 frFontAdvanceSelectedGlyphSlot(void) {
     return 0;
 }
 
-FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *arg0, FrFontGlyph *arg1) {
-    return frFontLinkGlyph(arg0, arg1, 1);
+FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next) {
+    return frFontLinkGlyph(previous, next, 1);
 }
 
 /* Splice chains; optionally place the new head after the previous glyph's advance. */
@@ -494,8 +494,8 @@ s32 frFontCountChars(s8 *str) {
 }
 
 /* Sum child advances, including one spacing value per child (even the last). */
-u32 frFontMeasureGlyphChain(void *arg0) {
-    FrFontGlyph *glyph = arg0;
+u32 frFontMeasureGlyphChain(void *chain) {
+    FrFontGlyph *glyph = chain;
     FrFontGlyph *node = glyph->firstChild;
     s32 total = 0;
 
@@ -533,8 +533,8 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D9A8);
 
-u32 func_0019DA98(u8 arg0) {
-    s32 index = arg0;
+u32 func_0019DA98(u8 fontIndex) {
+    s32 index = fontIndex;
 
     if (index < 2) {
         if (index >= 0) {
@@ -544,8 +544,8 @@ u32 func_0019DA98(u8 arg0) {
     return D_00452724[index].val->unk10;
 }
 
-u32 func_0019DAD8(u8 arg0) {
-    s32 index = arg0;
+u32 func_0019DAD8(u8 fontIndex) {
+    s32 index = fontIndex;
 
     if (index < 2) {
         if (index >= 0) {

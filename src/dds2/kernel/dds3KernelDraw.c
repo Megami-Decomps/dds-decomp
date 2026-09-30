@@ -260,12 +260,12 @@ void kwlnDrawSetupDc8(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableDc8(s32 arg0) {
+void kwlnDrawEnableDc8(s32 enabled) {
     D_00438E4E = 0;
     D_00438E4C = D_0043E548.u00.b[3];
     D_00438E48 = 0;
-    D_00438E4A = arg0;
-    if (arg0 == 0) {
+    D_00438E4A = enabled;
+    if (enabled == 0) {
         D_00435CD4 &= ~0x80000;
         D_00435CD4 &= ~0x100000;
         func_00197320();
@@ -383,12 +383,12 @@ void kwlnDrawSetupD88(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableD88(s32 arg0) {
+void kwlnDrawEnableD88(s32 enabled) {
     D_00438E42 = 0;
     D_00438E40 = D_0043E508.u00.b[3];
     D_00438E3C = 0;
-    D_00438E3E = arg0;
-    if (arg0 == 0) {
+    D_00438E3E = enabled;
+    if (enabled == 0) {
         D_00435CD4 &= ~0x20000;
         D_00435CD4 &= ~0x40000;
         func_00196FE8();

@@ -226,12 +226,12 @@ void kwlnDrawSetupDc8(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableDc8(s32 arg0) {
+void kwlnDrawEnableDc8(s32 enabled) {
     D_003BD74E = 0;
     D_003BD74C = D_003C2DC8.u00.b[3];
     D_003BD748 = 0;
-    D_003BD74A = arg0;
-    if (arg0 == 0) {
+    D_003BD74A = enabled;
+    if (enabled == 0) {
         D_003BA904 &= ~0x80000;
         D_003BA904 &= ~0x100000;
         func_0018F6E8();
@@ -275,12 +275,12 @@ void kwlnDrawSetupE08(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableE08(s32 arg0) {
+void kwlnDrawEnableE08(s32 enabled) {
     D_003BD75A = 0;
     D_003BD758 = D_003C2E08.u0C.b[3];
     D_003BD754 = 0;
-    D_003BD756 = arg0;
-    if (arg0 == 0) {
+    D_003BD756 = enabled;
+    if (enabled == 0) {
         D_003BA904 &= ~0x200000;
         D_003BA904 &= ~0x400000;
         func_0018F750();
@@ -349,12 +349,12 @@ void kwlnDrawSetupD88(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableD88(s32 arg0) {
+void kwlnDrawEnableD88(s32 enabled) {
     D_003BD742 = 0;
     D_003BD740 = D_003C2D88.u00.b[3];
     D_003BD73C = 0;
-    D_003BD73E = arg0;
-    if (arg0 == 0) {
+    D_003BD73E = enabled;
+    if (enabled == 0) {
         D_003BA904 &= ~0x20000;
         D_003BA904 &= ~0x40000;
         func_0018F3B0();
@@ -465,12 +465,12 @@ void kwlnDrawSetupCd0(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableCd0(s32 arg0) {
+void kwlnDrawEnableCd0(s32 enabled) {
     D_003BD72A = 0;
     D_003BD728 = D_003C2CD0.u0C.b[3];
     D_003BD724 = 0;
-    D_003BD726 = arg0;
-    if (arg0 == 0) {
+    D_003BD726 = enabled;
+    if (enabled == 0) {
         D_003BA904 &= ~0x2000;
         D_003BA904 &= ~0x10000;
         func_0018F4F0();
@@ -526,12 +526,12 @@ void kwlnDrawSetupD30(s32 arg0) {
     }
 }
 
-void kwlnDrawEnableD30(s32 arg0) {
+void kwlnDrawEnableD30(s32 enabled) {
     D_003BD736 = 0;
     D_003BD734 = D_003C2D30.u0C.b[3];
     D_003BD730 = 0;
-    D_003BD732 = arg0;
-    if (arg0 == 0) {
+    D_003BD732 = enabled;
+    if (enabled == 0) {
         D_003BA904 &= ~0x800000;
         D_003BA904 &= ~0x1000000;
         func_0018F5A8();

@@ -2977,9 +2977,9 @@ void effPcpChargeRespawn(EffPCPSrcD *work) {
     func_00183A58((EffPCPCompactParams *)&params);
 }
 
-void func_00183BB8(u32 arg0) {
-    effBlurReleaseFirstResource((u32)((EffPCPSrcD *)arg0)->resource);
-    func_00328E48(arg0);
+void func_00183BB8(u32 work) {
+    effBlurReleaseFirstResource((u32)((EffPCPSrcD *)work)->resource);
+    func_00328E48(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183BE8);
@@ -2988,8 +2988,8 @@ void func_00183DB0(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00183DC0(s32 arg0, u32 arg1) {
-    ((EffPCPCompactWork *)arg0)->color20 = arg1;
+void func_00183DC0(s32 work, u32 color) {
+    ((EffPCPCompactWork *)work)->color20 = color;
 }
 
 EffPCPCompactWork *func_00183DC8(EffPCPCompactParams *params) {
@@ -3029,9 +3029,9 @@ void effPcpChargeLongRespawn(EffPCPSrcD *work) {
     func_00183DC8((EffPCPCompactParams *)&params);
 }
 
-void func_00183F28(u32 arg0) {
-    effBlurReleaseSecondResource((u32)((EffPCPSrcD *)arg0)->resource);
-    func_00328E48(arg0);
+void func_00183F28(u32 work) {
+    effBlurReleaseSecondResource((u32)((EffPCPSrcD *)work)->resource);
+    func_00328E48(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183F58);
@@ -3040,8 +3040,8 @@ void func_00184148(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00184158(s32 arg0, u32 arg1) {
-    ((EffPCPCompactWork *)arg0)->color20 = arg1;
+void func_00184158(s32 work, u32 color) {
+    ((EffPCPCompactWork *)work)->color20 = color;
 }
 
 void func_00184160(EffPCPWork *work) {
@@ -3060,9 +3060,9 @@ void *func_00184198(void) {
     return work;
 }
 
-void func_001841D0(u32 arg0) {
-    effPCPThunderFree(((EffPCPWork *)arg0)->unk1C);
-    func_00328E48(arg0);
+void func_001841D0(u32 work) {
+    effPCPThunderFree(((EffPCPWork *)work)->unk1C);
+    func_00328E48(work);
 }
 
 void *func_00184200(void) {
