@@ -104,13 +104,15 @@ extern SoundNode *D_003BDA98;
 extern s32 sceIpuSync(s32, s32);
 extern u32 func_002CF530(s32);
 extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
-extern void sdfStreamOpen(SoundNode *, s32, s32, s32);
+extern void sdfStreamOpen(SoundNode *, SoundFormat *, s32, s32);
 extern void sdfSoundInitFormattedNode(SoundNode *, SoundFormat *, s32, s32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
 extern s32 func_0030B5D0(s32);
 extern u64 func_002EAF70(u64, u32 *, u64, u64);
+
+extern void func_002EB578(SoundNode *node, u8 *data, s32 size);
 
 extern s32 func_002D9FA8(s32);
 
@@ -646,7 +648,24 @@ void sdfSoundInitNodeFromFormat(SoundNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-INCLUDE_ASM(const s32, "game/code_002E9708", sdfStreamOpen);
+void sdfStreamOpen(SoundNode *node, SoundFormat *arg1, s32 arg2, s32 arg3) {
+    s32 interruptsEnabled;
+    u8 *state = (u8 *)node;
+    u8 *src = (u8 *)arg2;
+
+    sdfSoundInitNodeFromFormat(node, arg1);
+    *(u16 *)(state + 0x3C) = *(u16 *)(src + 8);
+    *(s32 *)(state + 0x40) = *(s32 *)(src + 0xC);
+    *(u16 *)(state + 0x3E) = *(u16 *)(src + 0xA);
+    sdfAllocateStreamFrameBuffers(node);
+    func_002EB578(node, src + 0x10, arg3 - 0x10);
+    interruptsEnabled = func_00312C08();
+    sdfStreamNodeAppend((SdfStreamNode *)node, 0);
+    if (interruptsEnabled != 0) {
+        EIntr();
+    }
+    func_002EC230(0);
+}
 
 void sdfSoundInitFormattedNode(SoundNode *node, SoundFormat *format, s32 callback, s32 context) {
     sdfSoundInitNodeFromFormat(node, format);

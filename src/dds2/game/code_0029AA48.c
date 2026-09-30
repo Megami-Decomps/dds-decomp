@@ -22,6 +22,12 @@ extern void func_0029AC20(s32, s32);
 
 extern void func_0026C900(void);
 
+extern s64 func_002C4038(s32, s32 *, u64, u64);
+
+static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
+    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, arg);
+}
+
 void func_0029AA48(MenuLayoutContext *context) {
     func_002B7F80((s32)context->menuList, 0x20);
 }
@@ -30,7 +36,16 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AA68);
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 
-INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AD98);
+s64 func_0029AD98(s32 request) {
+    s32 context = func_00101958();
+
+    if (func_002993D0(context) != 0) {
+        return 0;
+    }
+    func_0029AA48((MenuLayoutContext *)context);
+    func_0029AC20(context, 0);
+    return menuRunPanel(context, 1, request);
+}
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AE10);
 

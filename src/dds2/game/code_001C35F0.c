@@ -6,6 +6,12 @@ typedef struct UiSlotEntry {
     u8 pad19[0x277];
 } UiSlotEntry; /* 0x290 */
 
+typedef struct UiSlotRow {
+    u8 pad00[0x10];
+    u8 state;
+    u8 value;
+} UiSlotRow;
+
 typedef struct UiInputState {
     u8 pad00[0x3C];
     u32 flags; /* 0x3C */
@@ -31,9 +37,42 @@ typedef struct UiSceneNode {
     struct UiSceneNode *next;
 } UiSceneNode;
 
+extern s32 func_001BB970(UiSceneNode *node);
+
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C35F0);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3750);
+void func_001C3750(UiSceneNode *object, s8 mode, s8 value) {
+    s32 count = 0;
+    u8 slot = 0;
+    UiSceneNode *node = *(UiSceneNode **)(func_001AA6F8() + 0x24C);
+    u8 *entry;
+    UiSlotRow *slotEntry;
+    s64 task;
+    s32 offset;
+
+    for (; node != 0; node = node->next) {
+        if (func_001BB970(node) != 0) {
+            slot = node->slot;
+            if (object->key == node->key) {
+                break;
+            }
+            count++;
+        }
+    }
+    if (count < 3) {
+        task = func_00101740(D_004367CC);
+        if (task != 0) {
+            entry = (u8 *)func_00101958(task);
+            if (mode != 2) {
+                func_001C3A38(entry, mode);
+            }
+            offset = slot * 0x290 + 0x10;
+            slotEntry = (UiSlotRow *)(entry + offset);
+            slotEntry->state = 2;
+            slotEntry->value = value;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3850);
 

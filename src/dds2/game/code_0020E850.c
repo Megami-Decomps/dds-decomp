@@ -14,13 +14,19 @@ extern void btlCmdSimpleJ(s32, s32);
 
 extern void btlCmdSimpleC(s32, s32);
 
-extern s32 func_00210EA0(s32 context, s32 actor, u32 mask);
+typedef struct BtlJyokyoOwner {
+    u8 pad00[0x120];
+    u16 flags;       /* 0x120 */
+    u8 pad122[2];
+    u16 unk124;      /* 0x124 */
+} BtlJyokyoOwner;
+
+extern s32 func_00210EA0(s32 context, BtlJyokyoOwner *owner, s32 mask);
+
 
 extern s32 D_00436CB8;
 
 extern s32 btlDispatchPackedEffectAction(s32 arg0, u32 arg1);
-
-extern s32 func_00213818(s32, s32);
 
 extern s32 func_00328E18(s32);
 
@@ -764,7 +770,17 @@ void func_00210E48(void) {
     D_00436CAC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_00210EA0);
+s32 func_00210EA0(s32 context, BtlJyokyoOwner *owner, s32 mask) {
+    s32 *work = (s32 *)func_00328E18(0x10);
+    s32 result;
+
+    D_00436CB8 = (s32)work;
+    work[1] = owner->unk124;
+    work[0] = context;
+    result = btlDispatchPackedEffectAction((s32)owner, mask);
+    func_00328E48(D_00436CB8);
+    return result;
+}
 
 /* Top ten bits select the callback; the lower 22 bits are its argument. */
 s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {

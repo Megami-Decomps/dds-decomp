@@ -12,6 +12,10 @@ extern u32 D_00437200;
 
 extern u64 func_00101958(void);
 
+extern char D_00437208[];
+
+extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
 void func_00101968(s32 arg0, s32 arg1);
 
 s32 func_0010D8C8(void);
@@ -228,6 +232,8 @@ typedef struct {
     u8 padA42;          /* 0xA42 */
     u8 overlayFlag;     /* 0xA43: cleared separately from solar phase */
     u32 phaseTimer;    /* 0xA44: cleared on phase change */
+    u32 padA48;
+    u32 unkA4C;        /* 0xA4C: cleared when the overlay starts */
 } SolarWorldState;
 
 void evtClearSolarOverlayControl(void) {
@@ -312,7 +318,19 @@ void evtFreeSolarOverlayWork(void) {
     D_00437200 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243740);
+/* One scheduler task owns the overlay; a second start leaves its state intact. */
+void func_00243740(void) {
+    if (D_00437200 != 0) {
+        return;
+    }
+    D_00437200 = kwlnTaskCreate((s32)D_00437208, 0x2B0B, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
+    evtEnableSolarPhaseAdvance();
+    evtSetSolarOverlayFullyTransparent();
+    evtSetSolarPhase(0);
+    ((SolarWorldState *)D_00435DD0)->padA42 = 0;
+    ((SolarWorldState *)D_00435DD0)->overlayFlag = 0;
+    ((SolarWorldState *)D_00435DD0)->unkA4C = 0;
+}
 
 void evtStopSolarOverlay(void) {
     if (D_00437200 != 0) {

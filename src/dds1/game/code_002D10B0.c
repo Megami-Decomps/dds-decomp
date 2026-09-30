@@ -12,6 +12,19 @@ typedef struct SdfTexHead {
     s32 format; /* 0x18 */
 } SdfTexHead;
 
+typedef struct SdfTexPacketTail {
+    u64 tag;      /* 0x00 */
+    u64 next;     /* 0x08 */
+} SdfTexPacketTail;
+
+typedef struct SdfTexReleaseEntry {
+    struct SdfTexReleaseEntry *next; /* 0x00 */
+    s32 address;                     /* 0x04 */
+    s32 handle;                      /* 0x08 */
+    u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
+    u8 pad0D[0x93];
+} SdfTexReleaseEntry; /* 0xA0 */
+
 extern SdfTexHead *D_003BD9E4;
 extern SdfTexHead *D_003BD9E0;
 extern s8 D_003BD300[2];
@@ -32,6 +45,12 @@ void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
 void func_002D3C30(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
+void *func_002CFF68(s32 size);
+
+s32 func_002D0A80(s32 address);
+
+s32 sdfChipIsInRange(s32 address);
+
 void func_002D10B0(u32 arg0, u32 arg1) {
     D_003BD2F4 = arg0;
     D_003BD2F8 = arg1;
@@ -278,9 +297,45 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1FF0);
+void func_002D1FF0(s32 address, s32 packet) {
+    SdfSemaObj *obj = &D_003EB848;
+    SdfTexPacketTail *last;
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2070);
+    WaitSema(obj->unk0);
+    last = (SdfTexPacketTail *)obj->unk10;
+    if (last != NULL) {
+        last->next = 0;
+        last->tag = ((u64)(address & 0x0FFFFFFF) << 32) | 0x20000000;
+    } else {
+        obj->unkC = (void *)address;
+    }
+    obj->unk10 = (s32)packet;
+    SignalSema(obj->unk0);
+}
+
+void func_002D2070(s32 address) {
+    SdfSemaObj *obj = &D_003EB848;
+    SdfTexReleaseEntry *entry;
+
+    if (address != 0) {
+        entry = func_002CFF68(0xA0);
+        if (sdfChipIsInRange(address) != 0) {
+            entry->address = address;
+            entry->mode = 2;
+        } else {
+            entry->mode = 1;
+            entry->handle = func_002D0A80(address);
+        }
+        WaitSema(obj->unk0);
+        if (obj->unk8 != NULL) {
+            ((SdfTexReleaseEntry *)obj->unk8)->next = entry;
+        } else {
+            obj->unk4 = entry;
+        }
+        obj->unk8 = entry;
+        SignalSema(obj->unk0);
+    }
+}
 
 void sdfResetSemaphoreState(SdfSemaObj *arg0) {
     arg0->unk4 = NULL;

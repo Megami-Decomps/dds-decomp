@@ -151,6 +151,14 @@ extern s32 func_002F4588(s32 arg, u8 *options);
 
 extern s32 sceCdStatus(void);
 
+extern s32 func_002F4658(s32 size, s32 buffer, s32 arg2, s32 *status);
+
+extern s32 func_002F4620(void);
+
+extern s32 D_003BDA4C;
+
+extern s32 D_003BDA54;
+
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4720);
 
 void func_002E4908(s32 packet, s32 format, ...) {
@@ -304,13 +312,54 @@ void func_002E4E20(s32 request) {
     D_003BDA5C = request;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4EE0);
+void func_002E4EE0(s32 size, s32 buffer) {
+    s32 status;
+    s32 result;
+
+    for (;;) {
+        WaitSema(D_003BDA58);
+        result = func_002F4658(size, buffer, 1, &status);
+        SignalSema(D_003BDA58);
+        if (status == 0 && result == size) {
+            break;
+        }
+        if (sceCdStatus() == 1) {
+            sdfDevWaitForDisc();
+            func_002E4D48(D_003BDA5C);
+        } else {
+            WaitSema(D_003BDA58);
+            func_002F4620();
+            SignalSema(D_003BDA58);
+            func_002E4D48(D_003BDA5C);
+        }
+    }
+    D_003BDA5C += size;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4FB0);
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5158);
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5310);
+s32 func_002E5310(const char *name) {
+    s32 result;
+    s32 request[4];
+    s32 file;
+
+    file = func_002E5158((u32)name, (u8 *)request, (u32)&D_003BDA60);
+    result = -1;
+    if (file != 0) {
+        D_003BDA4C = *(s32 *)(file + 8);
+        D_003BDA48 = file;
+        D_003BDA54 = 0;
+        if (name[1] == 0x76 || name[1] == 0x56) {
+            func_002E4E20(request[0]);
+        } else {
+            func_002E4D48(request[0]);
+        }
+        result = *(s32 *)(file + 8);
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5398);
 

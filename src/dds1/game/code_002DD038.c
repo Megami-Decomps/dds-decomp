@@ -19,9 +19,56 @@ void sdfSelectMotionPointerEntry(s32 destination, s32 source, u32 unused, s32 en
     *(s32 *)(destination + 0xc) = *(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10;
 }
 
+typedef struct MotionKey {
+    s32 id;
+    f32 value;
+} MotionKey;
+
+typedef struct MotionKeySample {
+    MotionKey *first;
+    MotionKey *second;
+    f32 weight;
+} MotionKeySample;
+
+typedef struct MotionBlend {
+    u8 pad00[0xC];
+    MotionKey *out;
+} MotionBlend;
+
+extern void func_002DB7C8(void *, void *);
+
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD0C8);
 
-INCLUDE_ASM(const s32, "game/code_002DD038", sdfBlendMotionKeys);
+void sdfBlendMotionKeys(MotionBlend *motion) {
+    MotionKeySample sample;
+    MotionKey *out;
+    s32 firstId;
+    s32 secondId;
+    f32 firstValue;
+    f32 secondValue;
+    f32 weight;
+    f32 inverse;
+
+    func_002DB7C8(motion, &sample);
+    firstId = sample.first->id;
+    secondId = sample.second->id;
+    firstValue = sample.first->value;
+    secondValue = sample.second->value;
+    weight = sample.weight;
+    inverse = 1.0f - weight;
+    out = motion->out;
+    if (firstId == secondId) {
+        out[0].id = firstId;
+        out[0].value = firstValue * inverse + secondValue * weight;
+        out[1].id = secondId;
+        out[1].value = 0;
+    } else {
+        out[0].id = firstId;
+        out[0].value = firstValue * inverse;
+        out[1].id = secondId;
+        out[1].value = secondValue * weight;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD1B8);
 

@@ -29,6 +29,12 @@ typedef struct TitleMenuWork {
 
 extern s32 btlAddBaseStats(u8 *, TitleSeq *);
 
+/* Base-stat block of the title sequence unit; the five stats sit at +0x16. */
+typedef struct {
+    u8 pad00[0x16];
+    s8 baseStats[5];
+} BrsStatUnit;
+
 extern u32 func_00309138(u32, u32, s32);
 
 void itfUpdateFadeColor(u8 *work);
@@ -166,7 +172,20 @@ s32 mnuAdvanceTitleEntryAnimation(u8 *entry) {
     return step;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", btlAddBaseStats);
+s32 btlAddBaseStats(u8 *src, TitleSeq *seq) {
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        s8 *stat = &((BrsStatUnit *)seq)->baseStats[i];
+
+        *stat += src[i * 4];
+        if (*stat >= 100) {
+            *stat = 99;
+        }
+    }
+    ptyRecomputeMaxHpMp((u8 *)seq);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", ptyAccumulateStatGains);
 

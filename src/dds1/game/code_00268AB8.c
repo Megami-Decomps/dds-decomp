@@ -38,6 +38,12 @@ extern s32 func_00101A70();
 
 extern s32 D_003BC588;
 
+extern char D_003771D8[];
+
+extern void func_003014F0(char *dst, char *fmt, char *name, char *arg);
+
+extern s32 func_003003F0(const char *fmt, ...);
+
 extern void func_00134CF0(void);
 
 extern void func_002CF430(void);
@@ -172,7 +178,19 @@ void func_00269628(s32 value) {
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269658);
+void func_00269658(char *filename) {
+    char path[16];
+    TitleEffectState *state = (TitleEffectState *)func_00101A70(D_003BC588);
+
+    if (sdfSoundIsCommandBusy() != 0) {
+        func_003003F0("now playeng start...\n");
+        func_002E97E8();
+    }
+    func_003014F0(path, "%s%04d.ADB", D_003771D8 + 5 * state->soundNameIndex, filename);
+    func_003003F0("--------------- VOICE -> %s\n", path);
+    sdfSoundSendNamedCommand(path, 0x64);
+    state->frameCounter = 0;
+}
 
 void func_002696F8(void) {
     func_002E97E8();

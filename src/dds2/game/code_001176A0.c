@@ -13,6 +13,16 @@ extern void func_00329910(u32 allocation);
 extern s32 func_003297C8(u32 allocation);
 extern struct ActionObj *func_00110AA8();
 
+extern void *func_003292A8(s32 size);
+
+extern void *sdfResourceRetainAddress(void *resource);
+
+extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
+
+s32 sdfBumpTickCounters(void);
+
+void func_00117A10(void);
+
 typedef struct SdfChannel {
     u8 pad00[0xA4];
 } SdfChannel;
@@ -146,7 +156,19 @@ void func_001178E0(EvtScaledValue *value) {
     );
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfCreateRuntimeTask);
+/* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
+void sdfCreateRuntimeTask(void) {
+    void *mem = func_003292A8(0x1E840);
+    u8 *state = (u8 *)sdfResourceRetainAddress(mem);
+
+    memset(state, 0, 0x1E840);
+    ((SdfRuntime *)state)->allocation = (s32)mem;
+    ((SdfRuntime *)state)->firstTick = 0;
+    ((SdfRuntime *)state)->secondTick = 0;
+    kwlnTaskCreate(D_00435DB0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    D_00435DD0 = (s32)state;
+    func_00117A10();
+}
 
 void sdfDestroyRuntimeTask(void) {
     u32 allocation;

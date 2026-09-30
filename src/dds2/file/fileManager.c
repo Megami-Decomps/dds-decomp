@@ -35,7 +35,26 @@ void filePrependNode(FileWork *list, FileNode *node) {
     list->head = node;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C7EF8);
+/* Unlink a node from the list threaded through +0x4. */
+void func_002C7EF8(FileWork *list, FileNode *node) {
+    FileNode **link = &list->head;
+    FileNode *cur;
+
+    while ((cur = *link) != node) {
+        link = &cur->next;
+    }
+    *link = node->next;
+}
+
+/* Work area behind the fileMan task. */
+typedef struct FileManWork {
+    u8 pad00[8];
+    void *unk8;  /* 0x08 */
+    u8 pad0C[0xC];
+    u32 unk18;   /* 0x18 */
+} FileManWork;
+
+extern FileManWork D_00457F28;
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7F38);
 
@@ -110,7 +129,14 @@ void func_002C81D0(u32 id) {
     fileWaitReady(id);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C81E8);
+/* Spin until the file manager has no work left. */
+void func_002C81E8(void) {
+    FileManWork *work = &D_00457F28;
+
+    while (work->unk8 != 0 || work->unk18 != 0) {
+        fileManUpdate();
+    }
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C8238);
 

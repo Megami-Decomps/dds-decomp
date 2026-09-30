@@ -26,9 +26,28 @@ extern s8 D_00324510[];
 
 extern void func_0026C048(void);
 
+extern s32 mnuCreateListState(s32, s32, s32);
+
+extern s32 mnuListAppendNode(s32, s32);
+
+extern void func_0026D480();
+
 INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
-INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026BE38);
+void func_0026BE38(void) {
+    s32 i;
+    s32 node;
+
+    if (((MenuState *)D_003BC5D0)->linkedState != 0) {
+        func_0027B368(((MenuState *)D_003BC5D0)->linkedState);
+    }
+    node = mnuCreateListState(0, 3, 0);
+    ((MenuState *)D_003BC5D0)->linkedState = node;
+    ((MenuState *)node)->linkedState = (s32)func_0026D480;
+    for (i = 0; i < 3; i++) {
+        mnuListAppendNode(((MenuState *)D_003BC5D0)->linkedState, 0);
+    }
+}
 
 s64 func_0026BEB0(void) {
     return func_0027B368(((MenuState *)D_003BC5D0)->linkedState);
