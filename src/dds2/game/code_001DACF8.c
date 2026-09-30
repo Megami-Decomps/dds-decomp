@@ -3,6 +3,21 @@
 #include "pcp_vu0.h"
 
 extern s64 func_002A2928(void);
+extern void func_00336538(f32);
+extern void func_003364B8(f32);
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+extern f32 func_00341240(void *state);
+extern void mdlAddEntryPlain(void *, s32, s32);
+extern void mdlAddEntryFlagged(void *, s32, s32);
+extern u8 D_0037F550[];
+extern void func_001EC5F0(u32);
+extern void func_001EF030(void *, void *);
+extern void func_001E88A8(u8 *);
+extern void func_00232390(void *, void *);
+extern void func_001E38F0(void *, void *, s32, u8 *, u32);
+extern void dds3ClearObjectFlags(s32, s32);
+extern u8 D_00380788[];
+extern u8 D_003B6BD0[];
 
 extern void func_001EC868(void *, f32 *, f32);
 
@@ -41,7 +56,9 @@ typedef struct BtlExtModel {
 } BtlExtModel;
 
 typedef struct BtlUnitExt {
-    u8 pad0[0x84];
+    u8 pad0[0x68];
+    s32 unk68;
+    u8 pad6C[0x18];
     BtlExtModel *model;
     u8 pad88[4];
     BtlUnitInfo *info;
@@ -116,9 +133,14 @@ typedef struct BtlWork {
     void (*hook638)(BtlUnit *);
     u8 pad63C[0x14];
     s32 (*hook650)(BtlUnit *);
-    u8 pad654[4];
+    s32 (*hook654)(BtlUnit *);
     s32 (*hook658)(BtlUnit *);
-    u8 pad65C[0x28];
+    u8 pad65C[4];
+    s32 (*hook660)(BtlUnit *, s32, s32);
+    u8 pad664[4];
+    s32 (*hook668)(BtlUnit *);
+    s32 (*hook66C)(BtlUnit *);
+    u8 pad670[0x14];
     s32 (*hook684)(s32, s32);
     s32 (*hook688)(s32, s32);
     u8 pad68C[0x10];
@@ -130,7 +152,9 @@ typedef struct BtlWork {
     s32 (*hook6E0)(BtlUnit *);
     s32 (*hook6E4)(BtlUnit *);
     s32 (*hook6E8)(BtlUnit *);
-    u8 pad6EC[0x24];
+    u8 pad6EC[4];
+    void (*hook6F0)(BtlUnit *, s32, f32, s32, s32, s32);
+    u8 pad6F4[0x1C];
     s32 (*hook710)(BtlUnit *, s32);
     u8 pad714[8];
     u32 tint71C;
@@ -246,9 +270,12 @@ typedef struct ActionUnit {
     u8 pad118[0xC];
     u32 status;             /* 0x124 */
     s32 actionKind;         /* 0x128 */
-    u8 pad12C[8];
+    u16 stepKind;           /* 0x12C */
+    u8 pad12E[6];
     s32 category;           /* 0x134 */
     s32 actorIndices;       /* 0x138 */
+    u8 pad13C[8];
+    s32 stageCount;         /* 0x144 */
 } ActionUnit;
 
 /* Metadata records reached through the battle table pointers. */
@@ -2835,7 +2862,45 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3CB8);
+typedef struct BtlSdfModelState {
+    u8 pad00[0x80];
+    s32 unk80;
+} BtlSdfModelState;
+
+void func_001E3CB8(BtlUnit *unit) {
+    u32 flags = unit->flags;
+    u32 color;
+    BtlUnitInfo *info;
+    u32 alpha;
+    if (flags & 2) {
+        if (unit->unkCC == 0) {
+            color = unit->overlayColor;
+            info = unit->ext->info;
+            alpha = color >> 24;
+            if (!(flags & 0x20000)) {
+                if (unit->unk344 != 0) {
+                    sdfReleaseDevSlot(unit->unk344, 1, 1);
+                    unit->unk344 = 0;
+                    if (unit->flags & 2) {
+                        ((BtlSdfModelState *)info->unk18)->unk80 = unit->ext->unk68;
+                    } else {
+                        ((BtlSdfModelState *)info->unk18)->unk80 = 0;
+                    }
+                    mdlBroadcastMasked((s32)info, color);
+                    func_00232390(info, D_00380788);
+                    dds3ClearObjectFlags(unit->effectObject, 1);
+                    btlBossDebugPrintf(D_00417940, unit);
+                }
+            } else if (alpha == 0) {
+                dds3SetObjectFlags(unit->effectObject, 1);
+            } else if (unit->unk344 == 0) {
+                btlCreateUnitTransparency(unit);
+            } else {
+                func_001E38F0(unit, info, unit->unk344, D_003B6BD0, color);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E3E20);
 
@@ -2843,7 +2908,36 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", btlFormatUnitBedName);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E40F0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E4378);
+void func_001E4378(BtlUnit *unit) {
+    BtlWork *work;
+    if (!(unit->flags & 2)) {
+        return;
+    }
+    work = (BtlWork *)func_001AA6F8();
+    if (unit->unkEC != unit->effectIndex) {
+        func_001E2758(unit);
+        unit->unkF8 = 0;
+        unit->unkFA = 0;
+        func_001E22D8((u8 *)unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
+    }
+    if (unit->flags & 0x2000) {
+        return;
+    }
+    if (work->hook6F0 != 0) {
+        if (unit->effectIndex != 0xB) {
+            work->hook6F0(unit, unit->effectIndex, 1.0f, 0, 0, 1);
+        } else {
+            work->hook6F0(unit, unit->effectIndex, 1.0f, 0, 0, 2);
+        }
+    } else {
+        if (unit->effectIndex != 0xB) {
+            mdlAddEntryFlagged(unit->ext->info, 0, unit->effectIndex);
+        } else {
+            mdlAddEntryPlain(unit->ext->info, 0, unit->effectIndex);
+        }
+        func_003343E8(unit->ext->info->data, 0.0f);
+    }
+}
 
 u32 func_001E44A8(u8 *arguments) {
     s32 index = ((SoundTaskArgs *)arguments)->option;
@@ -3517,9 +3611,63 @@ SoundTask *func_001E68F8(BtlUnit *unit) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E6970);
+typedef struct BtlStiffenTaskArgs {
+    BtlUnit *unit;
+    f32 scale;
+    s32 count;
+} BtlStiffenTaskArgs;
 
-extern u32 func_001E6970(u32 *);
+u32 func_001E6970(BtlStiffenTaskArgs *args) {
+    f32 pos[4];
+    f32 scale;
+    s32 node;
+
+    if (!(args->unit->flags & 2)) {
+        return 1;
+    }
+    if (args->unit->stateFlags & 0x200000) {
+        return 1;
+    }
+    if (args->count == 0) {
+        node = mdlGetNodeField2C((s32)args->unit->ext->info, 0);
+        if (node < 0x1D) {
+            u8 *resource = (u8 *)func_001ABFD8(args->unit->resourceKind, args->unit->resourceIndex);
+            if (*(s16 *)(resource + node * 20 + 0x30) == 2) {
+                func_001E4378(args->unit);
+                btlBossDebugPrintf("btl:stiffen damage motion wait\n");
+            }
+        }
+    }
+    if (0.5f < args->scale) {
+        scale = args->scale * (func_00341240(D_0037F550) * 0.5f + 0.5f);
+        if (args->count & 1) {
+            scale = -scale;
+        }
+        if (args->unit->flags64 & 0x808000000000) {
+            effObjFetchInnerFirstVec(args->unit->effectObject);
+            VU0_STORE_VF(vf10, pos);
+            pos[0] += scale;
+        } else {
+            func_001E3108((u8 *)args->unit, (s128 *)pos);
+            pos[0] += scale;
+            pos[2] += args->unit->positionZOffset;
+        }
+        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        args->scale *= 0.85f;
+    } else {
+        if (args->unit->flags64 & 0x808000000000) {
+            effObjFetchInnerFirstVec(args->unit->effectObject);
+            VU0_STORE_VF(vf10, pos);
+        } else {
+            func_001E3108((u8 *)args->unit, (s128 *)pos);
+            pos[2] += args->unit->positionZOffset;
+        }
+        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        return 1;
+    }
+    args->count += 1;
+    return 0;
+}
 
 SoundTask *func_001E6B70(BtlUnit *unit, f32 value) {
     SoundTask *task = btlAllocTask(12);
@@ -4655,11 +4803,69 @@ s32 func_001E9CD8(ActionUnit *action) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9DD0);
+typedef struct BtlWorldTransform {
+    u8 pad00[0x40];
+    f32 pos[3];
+    u8 pad4C[4];
+    f32 rot[4];
+} BtlWorldTransform;
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E9F30);
+typedef struct BtlWorldObject {
+    u8 pad00[0x1C];
+    BtlWorldTransform *transform;
+} BtlWorldObject;
+
+void func_001E9DD0(s32 arg0, u8 *arg1) {
+    BtlWorldObject *object;
+    if (((BtlWork *)func_001AA6F8())->battleFlags & 2) {
+        object = (BtlWorldObject *)func_00110C18(dds3GetWorldObject());
+        if (object != 0) {
+            btlBossDebugPrintfN(arg0, (s32)arg1, 0, "P:%.1f %.1f %.1f", (double)object->transform->pos[0],
+                                (double)object->transform->pos[1], (double)object->transform->pos[2]);
+            btlBossDebugPrintfN(arg0, (s32)(arg1 + 0xC), 0, "R:%.3f %.3f %.3f %.3f",
+                                (double)object->transform->rot[0], (double)object->transform->rot[1],
+                                (double)object->transform->rot[2], (double)object->transform->rot[3]);
+        }
+    }
+}
 
 extern void func_00208750(s32, s32, s32);
+
+void func_001E9F30(ActionUnit *action) {
+    s128 vec[3];
+    s128 *pos;
+    BtlUnit *target;
+    BtlUnit *first;
+    u32 i;
+    u32 count = btlGetIndexListCount(action->actorIndices);
+    if (count != 0) {
+        target = action->link->unit;
+        if (count == 1) {
+            first = (BtlUnit *)btlGetIndexListEntry(action->actorIndices, 0);
+            if (target != 0 && (target->flags & 0x600) == (first->flags & 0x600)) {
+                return;
+            }
+            btlUnitGetMuzzlePosVU(first);
+        } else {
+            func_00208750(action->actorIndices, 0, 0);
+        }
+        pos = &vec[1];
+        VU0_STORE_VF(vf10, pos);
+        if (target != 0) {
+            btlUnitGetMuzzlePosVU(target);
+            VU0_STORE_VF(vf10, &vec[0]);
+            if (target->flags & 0x80000) {
+                if (btlAimHorizontalDirectionVU(&vec[0], pos) != 0) {
+                    VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
+                    btlSetUnitRotation(target, &vec[2]);
+                }
+            }
+        }
+        for (i = 0; i < count; i++) {
+            btlUnitFaceTarget((BtlUnit *)btlGetIndexListEntry(action->actorIndices, i), target);
+        }
+    }
+}
 
 void func_001EA058(ActionUnit *action) {
     s128 vec[3];
@@ -5046,7 +5252,49 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EB490);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EB5B0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EBB88);
+void func_001EBB88(ActionUnit *action) {
+    BtlWork *work;
+    s32 category;
+    u8 *out;
+    if (func_001EAA00() != 0) {
+        func_001EC5F0((u32)action);
+        return;
+    }
+    work = (BtlWork *)func_001AA6F8();
+    if (work->hook66C != 0 && work->hook66C((BtlUnit *)action) != 0) {
+        return;
+    }
+    category = btlMapActorCategory((s32)action);
+    if (category > 0 && category == action->stageCount++) {
+        btlClearRuntimeFlag2000();
+        if (work->hook658 != 0 && work->hook658((BtlUnit *)action) != 0) {
+            return;
+        }
+        if (btlIsSpecialActorCategory((s32)action) != 0) {
+            func_001EC868(action, (f32 *)action, 0.0f);
+            func_003364B8(-(10.0f * 0.017453293f));
+            VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)action + 0x10);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, (u8 *)action + 0x10);
+            ((XformData *)action)->f20 += 150.0f;
+            out = (u8 *)action + 0xC0;
+        } else {
+            u8 *pose = (u8 *)action + 0x30;
+            out = (u8 *)action + 0xC0;
+            func_001EF030(action, pose);
+            func_001E9598((XformData *)out, (XformData *)pose);
+            action->fE0 += 100.0f;
+            action->flags |= 0x41;
+            ((BattlePoseBlendState *)action)->blendMode = 0;
+            ((BattlePoseBlendState *)action)->duration = 30.0f;
+        }
+        func_001E88A8(out);
+        return;
+    }
+    if (action->stepKind == 0xD) {
+        func_001FFC70((s32)action, (s32)action);
+    }
+}
 
 void func_001EBD40(ActionUnit *action) {
     BtlUnit *target;
@@ -5080,7 +5328,35 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EC198);
 void func_001EC2A0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EC2A8);
+void func_001EC2A8(ActionUnit *action) {
+    BtlWork *work = (BtlWork *)func_001AA6F8();
+    if (action->link->unit->flags & 0x400) {
+        if (work->hook660 != 0) {
+            s32 hasFlag200 = 0;
+            s32 hasFlag400 = 0;
+            u32 i;
+            u32 count = btlGetIndexListCount(action->link->actorIndices);
+            for (i = 0; i < count; i++) {
+                BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(action->link->actorIndices, i);
+                if (entry->flags & 0x200) {
+                    hasFlag200 = 1;
+                }
+                if (entry->flags & 0x400) {
+                    hasFlag400 = 1;
+                }
+            }
+            if (work->hook660((BtlUnit *)action, hasFlag200, hasFlag400) != 0) {
+                action->flags |= 0x10000;
+                return;
+            }
+        }
+        func_001ECC18(action, (f32 *)((u8 *)action + 0x30), (u8 *)action + 0xC0);
+        ((BattlePoseBlendState *)action)->duration = 200.0f;
+        action->flags |= 0x10041;
+    } else {
+        func_001F41F0(action, action);
+    }
+}
 
 void func_001EC3E8(u32 unit) {
     if (!(((BtlUnit *)unit)->flags & 0x10000)) {
@@ -5190,13 +5466,22 @@ void func_001ECBF8(u8 *unit, f32 *vec) {
     func_001EC868(unit, vec, 27.5f);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ECC18);
+void func_001ECC18(void *unit, f32 *pose, u8 *out) {
+    func_001EC868(unit, pose, 20.0f);
+    func_001E9598((XformData *)out, (XformData *)pose);
+    if (pose[4] > 0.0f) {
+        func_00336538(-(20.0f * 0.017453293f));
+    } else {
+        func_00336538(20.0f * 0.017453293f);
+    }
+    VU0_STORE_VF(vf10, (u8 *)pose + 0x10);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, out + 0x10);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ECCB0);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001ED008);
-
-extern void func_001E88A8(u8 *);
 
 void func_001ED300(u8 *fx) {
     BtlUnit *unit = ((ActionUnit *)fx)->link->unit;
@@ -5247,7 +5532,28 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EF030);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EF668);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EF948);
+void func_001EF948(ActionUnit *action, f32 *pose, u8 *out) {
+    s128 vec[3];
+    BtlUnit *unit = action->link->unit;
+    u32 mask = 0;
+    u32 i;
+    u32 count;
+    func_001ECC18(action, pose, out);
+    count = btlGetIndexListCount(action->actorIndices);
+    for (i = 0; i < count; i++) {
+        mask |= ((BtlUnit *)btlGetIndexListEntry(action->actorIndices, i))->flags & 0x600;
+    }
+    if (unit->flags & 0x80000) {
+        func_00208000(mask, 0, 0);
+        VU0_STORE_VF(vf10, &vec[0]);
+        btlUnitGetBodyPosVU(unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
+        if (btlAimHorizontalDirectionVU(&vec[1], &vec[0]) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
+            btlSetUnitRotation(unit, &vec[2]);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001EFA30);
 
@@ -5302,8 +5608,8 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F1B00);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F1F20);
 
-void func_001F20B0(void) {
-    func_001ECC18();
+void func_001F20B0(void *unit, f32 *pose, u8 *out) {
+    func_001ECC18(unit, pose, out);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F20C8);
@@ -5354,7 +5660,7 @@ void func_001F34F8(ActionUnit *action) {
         func_001EDFB8(action, (u8 *)action + 0x30, (u8 *)action + 0xC0);
         return;
     }
-    func_001ECC18(action, (u8 *)action + 0x30, (u8 *)action + 0xC0);
+    func_001ECC18(action, (f32 *)((u8 *)action + 0x30), (u8 *)action + 0xC0);
     ((BattlePoseBlendState *)action)->duration = 200.0f;
     action->flags |= 0x41;
 }
@@ -5590,16 +5896,31 @@ void func_001FFA08(s32 action, s32 state) {
     memset(D_003BD7D0, 0, 0x130);
     switch (((ActionUnit *)action)->link->unit->mode) {
     case 1:
+        func_001F5868(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001F5320(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 2:
+        return;
     case 3:
+        func_001F5868(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001F5320(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
     case 4:
+        func_001F5868(action, state, 4, 0);
+        CURSOR->unk_0C = 0;
+        func_001F5320(action, state, 4, 1);
+        CURSOR->unk_00 = 1;
+        break;
     case 5:
         func_001F5868(action, state, 4, 0);
         CURSOR->unk_0C = 0;
         func_001F5320(action, state, 4, 1);
         CURSOR->unk_00 = 1;
-        return;
-    case 2:
-        return;
+        break;
     case 6:
         func_001F01E8(action, action);
         break;
@@ -5626,7 +5947,7 @@ void func_001FFBB0(s32 action, s32 state) {
     func_001AA6F8();
     first = btlGetIndexListEntry(((ActionUnit *)action)->actorIndices, 0);
     memset(CURSOR, 0, 0x130);
-    func_001E4378(first);
+    func_001E4378((BtlUnit *)first);
     if (btlHasFirstLinkedCategoryFlag1000(action) != 0) {
         func_001F5868(action, state, 5, 1);
     } else {
@@ -5646,8 +5967,6 @@ void func_001FFC70(s32 action, s32 state) {
     }
 }
 
-extern void func_001E4378(s32);
-
 extern void func_001E9AA0(void);
 
 void func_001FFD30(BattleActionLinkState *linkState) {
@@ -5656,7 +5975,7 @@ void func_001FFD30(BattleActionLinkState *linkState) {
     memset(D_003BD7D0, 0, 0x130);
     CURSOR->unk_0A = 0;
     CURSOR->unk_0E = 0;
-    func_001E4378((s32)linkState->unit);
+    func_001E4378(linkState->unit);
     func_001F5868((s32)scene, (s32)scene, 6, 0);
     func_001E9AA0();
     btlFlagUnitDefeatCandidate(linkState->unit);
