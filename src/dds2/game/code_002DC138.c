@@ -371,7 +371,8 @@ extern FnTbl28 D_003E9964[];
 
 typedef struct FnTbl24 {
     void (*fn)();
-    u8 pad_0x04[0x14]; // 0x04
+    u32 (*createResource)();
+    u8 pad_0x08[0x10]; // 0x08
 } FnTbl24; // 0x18
 
 typedef struct FnTbl24Create {
@@ -539,6 +540,7 @@ typedef struct EffectResourceSizeEntry24 {
 } EffectResourceSizeEntry24;
 
 extern EffectResourceSizeEntry24 D_003E9B94[];
+extern EffectResourceSizeEntry24 D_003E9D14[];
 extern EffectResourceSizeEntry D_003EA030[];
 extern EffectResourceSizeEntry D_003E9DF0[];
 
@@ -3537,7 +3539,50 @@ void effReleaseTrackEntriesA(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EBC58);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002EBE28);
+typedef struct EffScaleRange {
+    u8 *entries;
+    f32 start;
+    f32 delta;
+} EffScaleRange;
+
+typedef struct EffScaleRangeConfig {
+    u8 pad_00[0x34];
+    s32 steps;
+    u32 count;
+    u8 pad_3C[0x50];
+    f32 startBase;
+    f32 startRand;
+    f32 endBase;
+    f32 endRand;
+} EffScaleRangeConfig;
+
+void func_002EBE28(u8 *work) {
+    EffScaleRangeConfig *config = *(EffScaleRangeConfig **)(work + 0x34);
+    EffScaleRange *range = *(EffScaleRange **)(work + 0x30);
+    s32 steps = config->steps;
+    u8 *entry = range->entries;
+    f32 start = config->startBase * (func_00341240(D_0037F550) * config->startRand + (1.0f - config->startRand));
+    u32 index;
+    u32 count;
+
+    if (steps > 0) {
+        f32 end = config->endBase * (func_00341240(D_0037F550) * config->endRand + (1.0f - config->endRand));
+        range->start = start;
+        range->delta = (end - start) / (f32)steps;
+    } else {
+        range->start = start;
+        range->delta = 0.0f;
+    }
+    count = config->count;
+    index = 0;
+    if (count != 0) {
+        do {
+            index++;
+            *(s32 *)(entry + 0x14) = -1 - (effMiscRand(D_0037F550) & 7);
+            entry += 0x30;
+        } while (index < count);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EBF40);
 
@@ -3584,10 +3629,25 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_002ED3D0);
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EDB10);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002EDCF0);
+u8 *func_002EDCF0(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = D_003E9D14[kind].resourceSize;
+    u8 *effect = func_00328D68(size + headerSize);
+    ((EffClassWork *)effect)->payload = effect + headerSize;
+    ((EffClassWork *)effect)->color = 0x80808080;
+    ((EffClassWork *)effect)->scale = 1.0f;
+    ((EffClassWork *)effect)->frame = 0;
+    ((EffClassWork *)effect)->kind = kind;
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
+    memcpy(((EffClassWork *)effect)->payload, source, size);
+    ((EffClassWork *)effect)->resource = D_003E9D00[kind].createResource(source);
+    D_003E9D00[kind].fn(effect);
+    return effect;
+}
 
 void func_002EDDE0(s32 request) {
-    u64 source;
+    void *source;
 
     source = fileResolvePrimaryBuffer();
     func_002EDCF0(*(u16 *)(request + 0xc), source);
@@ -3598,8 +3658,6 @@ void func_002EDE10(s32 work) {
     D_003E9D08[obj[0x2C / 4]].run();
     func_00328E48(obj);
 }
-
-extern u32 func_002EDCF0(u32, u32);
 
 u32 func_002EDE58(s32 work) {
     return func_002EDCF0(*(u16 *)(work + 0x2c), *(u32 *)(work + 0x34));
@@ -4847,7 +4905,66 @@ u32 func_002F45A0(void) {
     return D_00437E80;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F45A8);
+typedef struct EffSpanEntry {
+    f32 first;
+    f32 second;
+    u32 pad_08;
+} EffSpanEntry;
+
+typedef struct EffSpanRecord {
+    EffSpanEntry *entries;
+    u8 pad_04[8];
+    u32 flags;
+} EffSpanRecord;
+
+typedef struct EffSpanTable {
+    EffSpanRecord *records;
+    u32 count;
+    u16 total;
+} EffSpanTable;
+
+typedef struct EffSpanConfig {
+    u8 pad_00[0xA0];
+    f32 firstRand;
+    f32 secondBase;
+    f32 rangeRand;
+    u8 pad_AC[4];
+    u32 perSpan;
+} EffSpanConfig;
+
+void func_002F45A8(u8 *work) {
+    u32 index = 0;
+    EffSpanTable *table = *(EffSpanTable **)(work + 0x38);
+    EffSpanConfig *config = *(EffSpanConfig **)(work + 0x3C);
+    u32 total = table->total;
+    u32 per = config->perSpan;
+    u32 spans = total / per;
+    EffSpanRecord *record = table->records;
+    u32 span;
+    EffSpanEntry *entry;
+
+    if (total % per != 0) {
+        spans++;
+    }
+    if (table->count != 0) {
+        do {
+            record->flags = 0;
+            entry = record->entries;
+            span = 0;
+            if (spans != 0) {
+                do {
+                    span++;
+                    entry->first = func_00341240(D_0037F550) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (func_00341240(D_0037F550) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->pad_08 = 0;
+                    entry++;
+                } while (span < spans);
+            }
+            index++;
+            record++;
+        } while (index < table->count);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F46D8);
 
@@ -4995,9 +5112,148 @@ void effGetWorldVector(u32 which) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5BC8);
+s32 func_002F5BC8(EffectVectorRequest *source, s16 index) {
+    EffectVectorRequest request;
+    u128 result;
+    u32 handle = 0;
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5D70);
+    if (index < 0) {
+        switch (source->kind) {
+        case 0:
+        case 1:
+            handle = func_00169438();
+            request.kind = 0;
+            break;
+        case 2:
+            handle = func_00169440();
+            request.kind = 0;
+            break;
+        case 3:
+            handle = func_00169438();
+            request.kind = 1;
+            break;
+        case 4:
+            handle = func_00169440();
+            request.kind = 2;
+            break;
+        case 5:
+            return 0;
+        case 6:
+            handle = func_00169448();
+            request.kind = 6;
+            break;
+        case 7:
+            handle = func_00169450();
+            request.kind = 7;
+            break;
+        }
+        request.count = source->count;
+        request.size = source->size;
+        request.unk04 = source->unk04;
+    } else {
+        switch (source->kind) {
+        case 0:
+        case 1:
+            handle = func_00169438();
+            break;
+        case 2:
+            handle = func_00169440();
+            break;
+        case 3:
+        case 4:
+        case 5:
+            return 0;
+        case 6:
+            handle = func_00169448();
+            break;
+        case 7:
+            handle = func_00169450();
+            break;
+        default:
+            return 0;
+        }
+        request.kind = 8;
+        request.count = index;
+        request.size = 0;
+    }
+    if (handle == 0) {
+        return 0;
+    }
+    {
+        u128 *vec = &result;
+
+        func_001696D0(handle, &request, vec);
+        __asm__ volatile (".set noreorder\nlqc2 vf10, 0(%0)\n.set reorder" : : "r"(vec) : "memory");
+        return 1;
+    }
+}
+
+struct EffActor;
+
+s32 func_002F5D70(struct EffActor **out, u32 kind) {
+    s32 count = 0;
+    u32 mask = 0;
+    u8 *state = (u8 *)func_001AA6F8();
+    u8 *actor = (u8 *)func_00169438();
+    u8 *other = (u8 *)func_00169440();
+
+    switch (kind) {
+    case 1:
+        if ((*(u32 *)(actor + 0x110) & 2) && *(u32 *)(actor + 0x340) != 0) {
+            out[0] = (struct EffActor *)actor;
+            count = 1;
+        }
+        break;
+    case 4:
+        mask = *(u32 *)(other + 0x110) & 0x600;
+        break;
+    case 3:
+        mask = *(u32 *)(actor + 0x110) & 0x600;
+        break;
+    case 5:
+        mask = 0x600;
+        break;
+    case 6:
+        other = (u8 *)func_00169448();
+        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+            out[0] = (struct EffActor *)other;
+            count = 1;
+        }
+        break;
+    case 7:
+        other = (u8 *)func_00169450();
+        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+            out[0] = (struct EffActor *)other;
+            count = 1;
+        }
+        break;
+    case 0:
+    case 2:
+        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+            out[0] = (struct EffActor *)other;
+            count = 1;
+        }
+        break;
+    }
+    if (mask != 0) {
+        u8 *link;
+
+        for (link = *(u8 **)(state + 0x24C); link != NULL; link = *(u8 **)(link + 0x364)) {
+            u32 flags = *(u32 *)(link + 0x110);
+
+            if (flags & 1) {
+                if (flags & 2) {
+                    if (*(u32 *)(link + 0x340) != 0) {
+                        if (flags & mask) {
+                            out[count++] = (struct EffActor *)link;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return count;
+}
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5EF0);
 
@@ -5154,7 +5410,6 @@ typedef struct EffAnimOwner {
     EffAnimInfo *info;
 } EffAnimOwner;
 
-extern u32 func_002F5D70(EffActor **, u8);
 extern s32 mdlGetNodeRefHalf();
 extern void func_001E2C00(EffActor *, u16, s32, f32);
 extern void func_00204D08();
@@ -5665,7 +5920,24 @@ s32 *effCreateMotionResource(s32 *context) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002F9048);
+s32 *func_002F9048(s32 *context, u16 kind, s32 *source) {
+    s32 *resource = effCreateMotionResource(context);
+
+    switch (kind) {
+    case 1:
+        resource[0] = billCreateIndexed(0, source);
+        break;
+    case 2:
+        resource[0] = billCreateIndexed(1, source);
+        break;
+    case 4:
+        resource[0] = effRetainResource(source[0]);
+        break;
+    }
+    func_00159FA0(resource[0]);
+    billSetBillboardMode(resource[0], *(s16 *)((u8 *)context + 0x4C));
+    return resource;
+}
 
 s32 *func_002F9118(s32 *request) {
     s32 *source = (s32 *)request[0x30 / 4];
@@ -5914,7 +6186,23 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[4] = func_00341240(D_0037F550) * 6.2831853f;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002FA4D0);
+extern void func_00336768(f32 *, f32);
+
+void func_002FA4D0(u8 *work, f32 *params, s32 frame) {
+    f32 axis[4];
+    f32 time = (f32)frame;
+    f32 angle = params[5] * time;
+
+    angle += *(f32 *)(work + 0x2C) * time * time * 0.5f;
+    if (angle < 0.0f) {
+        angle = 0.0f;
+    }
+    axis[0] = params[0];
+    axis[1] = params[1];
+    axis[2] = params[2];
+    axis[3] = 0.0f;
+    func_00336768(axis, angle + params[4]);
+}
 
 typedef struct EffectSlotNode80 {
     u32 count;
