@@ -128,8 +128,8 @@ u32 effGetHandlerArg(EffWork *work) {
     return (u32)work->unk4;
 }
 
-u32 func_0018CBC0(u32 *arg0) {
-    return *arg0;
+u32 func_0018CBC0(u32 *value) {
+    return *value;
 }
 
 void func_0018CBC8(void) {
@@ -163,76 +163,77 @@ void effTypeDispatchGuardedC(EffWork *work) {
     }
 }
 
-void effSetSubSlot(EffWork *arg0, s32 arg1) {
-    u8 v = arg1;
-    u32 t = arg0->type;
+void effSetSubSlot(EffWork *work, s32 slotValue) {
+    u8 value = slotValue;
+    u32 type = work->type;
 
-    switch (t) {
+    switch (type) {
     case 0:
-        ((EffSub *)arg0->unk4)->unk20 = v;
+        ((EffSub *)work->unk4)->unk20 = value;
         return;
     case 1:
-        ((EffSub *)arg0->unk4)->unk40 = v;
+        ((EffSub *)work->unk4)->unk40 = value;
         return;
     case 2:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = value;
         return;
     case 3:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = value;
         return;
     case 4:
-        ((EffSub *)arg0->unk4)->unk50 = v;
+        ((EffSub *)work->unk4)->unk50 = value;
         return;
     default:
         return;
     }
 }
 
-u32 effGetSubSlot(EffWork *arg0, s32 arg1) {
-    u8 v = arg1;
-    u32 t = arg0->type;
+u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
+    u8 unusedValue = unusedSlotValue;
+    u32 type = work->type;
 
-    switch (t) {
+    switch (type) {
     case 0:
-        return ((EffSub *)arg0->unk4)->unk20;
+        return ((EffSub *)work->unk4)->unk20;
     case 1:
-        return ((EffSub *)arg0->unk4)->unk40;
+        return ((EffSub *)work->unk4)->unk40;
     case 2:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     case 3:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     case 4:
-        return ((EffSub *)arg0->unk4)->unk50;
+        return ((EffSub *)work->unk4)->unk50;
     default:
         break;
     }
     return 0;
 }
 
-void effAllocSubWork(EffWork *arg0) {
-    u32 t = arg0->type;
-    u32 v = 0;
+void effAllocSubWork(EffWork *work) {
+    u32 type = work->type;
+    u32 handlerArg = 0;
 
-    switch (t) {
+    switch (type) {
     case 0:
-        v = arg0->unk4;
+        handlerArg = work->unk4;
         break;
     case 1:
-        v = arg0->unk4;
+        handlerArg = work->unk4;
         break;
     case 2:
-        v = arg0->unk4 + 0x40;
+        handlerArg = work->unk4 + 0x40;
         break;
     case 3:
-        v = arg0->unk4 + 0x40;
+        handlerArg = work->unk4 + 0x40;
         break;
     case 4:
-        v = arg0->unk4 + 0x40;
+        handlerArg = work->unk4 + 0x40;
         break;
     default:
         break;
     }
-    effAllocDispatch((EffWork *)t, v);
+    /* Required to match: the effect type is passed in the handler's pointer-shaped slot. */
+    effAllocDispatch((EffWork *)type, handlerArg);
 }
 
 void func_0018CDA0(void) {
@@ -392,17 +393,17 @@ u32 effFormatMsgNames(EffMsg *message, void *destination) {
     return *message->unk34;
 }
 
-void effSetWorkFirst(EffWork *arg0, u32 arg1) {
-    arg0->unk20 = arg1;
+void effSetWorkFirst(EffWork *work, u32 value) {
+    work->unk20 = value;
 }
 
-void effSetWorkSecond(EffWork *arg0, u32 arg1) {
-    arg0->unk24 = arg1;
+void effSetWorkSecond(EffWork *work, u32 value) {
+    work->unk24 = value;
 }
 
-void effSetMsgPair(EffMsg *arg0, u32 arg1, u32 arg2) {
-    arg0->unk28 = arg1;
-    arg0->unk2C = arg2;
+void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
+    message->unk28 = first;
+    message->unk2C = second;
 }
 
 void effSetupWorkSound(EffWork *work, u64 soundResource) {

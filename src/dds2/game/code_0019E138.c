@@ -58,7 +58,7 @@ typedef struct TextStream {
     s8 unk1D;        /* 0x1D */
 } TextStream;
 
-s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
 extern u32 D_004528C0[];
 
@@ -160,25 +160,25 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
 
-void func_0019E7C8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_0019E848(arg0, arg1, 0, 0, 0, 0, 0x80, arg2, arg3);
+void func_0019E7C8(s32 x, s32 y, s32 encodedText, s32 sub) {
+    func_0019E848(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-void func_0019E800(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    func_0019E848(arg0, arg1, 0, arg2 & 0xFF, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6, arg7);
+void func_0019E800(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+    func_0019E848(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
     TextStream args;
-    args.x = arg0;
-    args.y = arg1;
-    args.z = arg2 << 4;
-    args.unkC = arg3;
-    args.unkD = arg4;
-    args.unkE = arg5;
-    args.unkF = arg6;
-    args.bytes = (u8 *)arg7;
-    args.sub = (TextSub *)arg8;
+    args.x = x;
+    args.y = y;
+    args.z = depth << 4;
+    args.unkC = channel0;
+    args.unkD = channel1;
+    args.unkE = channel2;
+    args.unkF = channel3;
+    args.bytes = (u8 *)encodedText;
+    args.sub = (TextSub *)sub;
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
@@ -187,21 +187,21 @@ s32 func_0019E848(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 
 extern s8 D_00436550;
 
-s32 func_0019E8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+s32 func_0019E8A0(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
     s8 saved = D_00436550;
     s32 result;
     D_00436550 = 0;
-    result = func_0019E848(arg0, arg1, arg2, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6 & 0xFF, arg7, 0);
+    result = func_0019E848(x, y, depth, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, 0);
     D_00436550 = saved;
     return result;
 }
 
-u32 func_0019E8E0(u32 arg0) {
-    return D_0043654C & arg0;
+u32 func_0019E8E0(u32 mask) {
+    return D_0043654C & mask;
 }
 
-void func_0019E8F0(s32 arg0, s32 arg1) {
-    D_004528C0[arg0] = arg1;
+void func_0019E8F0(s32 index, s32 value) {
+    D_004528C0[index] = value;
 }
 
 u32 func_0019E908(void) {
@@ -218,7 +218,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EC00);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 
-void itfInitTextDrawArgs(u8 *arg0, TextSub *arg1) {
+void itfInitTextDrawArgs(u8 *encodedText, TextSub *sub) {
     TextStream args;
     args.x = 0;
     args.y = 0;
@@ -227,15 +227,15 @@ void itfInitTextDrawArgs(u8 *arg0, TextSub *arg1) {
     args.unkD = 0;
     args.unkE = 0;
     args.unkF = 0;
-    args.bytes = arg0;
-    args.sub = arg1;
+    args.bytes = encodedText;
+    args.sub = sub;
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
     func_0019EDC0(&args);
 }
 
-u64 func_0019EF38(u64 arg0, u64 arg1, s32 arg2, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
+u64 func_0019EF38(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
     u64 glyph;
     s32 kind = 4;
 
@@ -251,8 +251,8 @@ u64 func_0019EF38(u64 arg0, u64 arg1, s32 arg2, s32 alt, u64 measureFlag, u64 en
     func_0019D1D0(2);
     func_0019D1E0(1);
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
-    func_0019D100(glyph, arg0, arg1);
-    func_0019D110(glyph, arg2 << 4);
+    func_0019D100(glyph, x, y);
+    func_0019D110(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetChainFlag(glyph, 5);
     return glyph;
@@ -303,14 +303,14 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void itfAttachGlyph16x18(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
     glyph = func_0019CE10(glyphSource, 0, 0, 0, 0);
     func_0019D088(glyph, 0x10, 0x12);
-    func_0019D100(glyph, arg0, arg1);
-    func_0019D110(glyph, arg2 << 4);
+    func_0019D100(glyph, x, y);
+    func_0019D110(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
     frFontLinkGlyph(parent, glyph, 0);
@@ -346,15 +346,15 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F6C8);
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019F798);
 
 /* The sequel uses the negative flag variant on its alternate 12x16 glyph. */
-void itfAttachGlyph12x16(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
     glyph = func_0019CE78(glyphSource, 0, 0, 0, 0);
     func_0019D088(glyph, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffd);
-    func_0019D100(glyph, arg0, arg1);
-    func_0019D110(glyph, arg2 << 4);
+    func_0019D100(glyph, x, y);
+    func_0019D110(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
@@ -433,8 +433,8 @@ void func_001A0040(void) {
 void func_001A0048(void) {
 }
 
-s32 func_001A0050(s32 arg0, s32 arg1, s32 arg2) {
-    return arg2;
+s32 func_001A0050(s32 unused0, s32 unused1, s32 value) {
+    return value;
 }
 
 extern s32 D_00438F20;
@@ -442,8 +442,8 @@ s32 func_001A0058(void) {
     return D_00438F20;
 }
 
-u32 func_001A0060(u32 arg0) {
-    return arg0;
+u32 func_001A0060(u32 value) {
+    return value;
 }
 
 void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
@@ -456,8 +456,8 @@ void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
     segments->third = (u8 *)block + thirdOffset;
 }
 
-u32 func_001A0098(u32 arg0) {
-    return *(u32 *)(func_001A0060(arg0) + 0x10);
+u32 func_001A0098(u32 object) {
+    return *(u32 *)(func_001A0060(object) + 0x10);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_001A00B8);
@@ -514,8 +514,8 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     return 1;
 }
 
-u32 itfReleaseMemNodeBuffer(s32 arg0) {
-    func_003297C8(*(u32 *)(arg0 - 4));
+u32 itfReleaseMemNodeBuffer(u8 *payload) {
+    func_003297C8(*(u32 *)(payload - 4));
     return 1;
 }
 

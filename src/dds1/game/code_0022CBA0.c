@@ -5,7 +5,7 @@ extern void *func_00101A70(void);
 extern s32 D_003BAA00;
 extern char D_003ADB20[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-s32 evtViewerHasUpdateFlag(s32 arg0);
+s32 evtViewerHasUpdateFlag(s32 viewerAddr);
 void func_00232720(void);
 void func_00134C68(void);
 void func_00101A80(s32 arg0, s32 arg1);
@@ -198,7 +198,7 @@ typedef struct EvtWorldLink {
     s32 next; /* 0x20 */
 } EvtWorldLink;
 
-void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
+void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     s32 scene;
     s32 world;
     s32 object;
@@ -224,7 +224,7 @@ void evtViewerClampMovieTimes(s32 arg0, EventViewerState *viewer) {
                                 } else {
                                     time = node->time;
                                 }
-                                evtPolygonMovieClampTime(object, 0, time, arg0);
+                                evtPolygonMovieClampTime(object, 0, time, endTime);
                                 break;
                             }
                             node = node->next;
@@ -241,7 +241,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022EB10);
 
 extern void func_0022EB10();
 
-void evtViewerSyncWorldGroups(s32 arg0, EventViewerState *viewer) {
+void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
     s32 object;
     EvtViewNode *node;
     EvtViewNode *found;
@@ -260,7 +260,7 @@ void evtViewerSyncWorldGroups(s32 arg0, EventViewerState *viewer) {
                     node = node->next;
                 }
                 if (found != NULL) {
-                    func_0022EB10(arg0, object, node, viewer, 0);
+                    func_0022EB10(position, object, node, viewer, 0);
                 }
                 object = ((EvtWorldLink *)object)->next;
             } while (object != 0);
@@ -322,8 +322,8 @@ void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F2E0);
 
 /* Required to match: the signed raw load generates the original flag test. */
-s32 evtViewerHasUpdateFlag(s32 arg0) {
-    return (*(s32 *)(arg0 + 4) & 0x10) > 0;
+s32 evtViewerHasUpdateFlag(s32 viewerAddr) {
+    return (*(s32 *)(viewerAddr + 4) & 0x10) > 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F418);
@@ -399,11 +399,11 @@ void evtViewerDispatchFlagMode(u32 viewerAddr) {
     s32 viewer;
 
     viewer = (s32)viewerAddr;
-    if ((*(u32 *)(viewer + 4) & 1) != 0) {
-        func_0022FB30(0, *(u32 *)(viewer + 0x18), viewerAddr);
+    if ((((EventViewerState *)viewer)->flags & 1) != 0) {
+        func_0022FB30(0, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
         return;
     }
-    func_0022FB30(1, *(u32 *)(viewer + 0x18), viewerAddr);
+    func_0022FB30(1, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
 }
 
 s32 evtViewFindNextGlyph(EventViewerState *viewer) {
@@ -466,15 +466,15 @@ s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
     return (s32)result;
 }
 
-void func_0022FF30(s32 mode, s32 arg1, s32 arg2, s32 viewerAddr) {
+void func_0022FF30(s32 mode, s32 first, s32 second, s32 viewerAddr) {
     EventViewerState *viewer = (EventViewerState *)viewerAddr;
     s32 count = viewer->historyCount + 1;
 
     viewer->currentId = mode;
     viewer->historyCount = count;
     viewer->history[count].id = mode;
-    viewer->history[count].a = arg1;
-    viewer->history[count].b = arg2;
+    viewer->history[count].a = first;
+    viewer->history[count].b = second;
     if (mode > 0) {
         if (mode >= 3) {
             if (mode == 3) {
@@ -504,27 +504,27 @@ u16 evtViewerPopHistory(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FFC8);
 
-void func_002300B8(s32 arg0) {
-    s32 v0;
-    s32 v1;
+void func_002300B8(s32 viewerAddr) {
+    s32 windowContext;
+    s32 window;
 
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    if (v0 == 0) {
+    windowContext = ((EventViewerState *)viewerAddr)->windowContext;
+    if (windowContext == 0) {
         return;
     }
-    v1 = *(s32 *)(v0 + 0x104);
-    if (v1 == -1) {
+    window = *(s32 *)(windowContext + 0x104);
+    if (window == -1) {
         return;
     }
-    itfMesCleanupWindow(v1, 1);
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    func_0019B4A0(*(s32 *)(v0 + 0x104));
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    itfPanelSetPairFirst(*(s32 *)(v0 + 0x104), 0);
-    v0 = ((EventViewerState *)arg0)->windowContext;
-    itfMesResetWindow(*(s32 *)(v0 + 0x104));
-    ((EventViewerState *)arg0)->windowActive = 0;
-    ((EventViewerState *)arg0)->pad23C4 = 0;
+    itfMesCleanupWindow(window, 1);
+    windowContext = ((EventViewerState *)viewerAddr)->windowContext;
+    func_0019B4A0(*(s32 *)(windowContext + 0x104));
+    windowContext = ((EventViewerState *)viewerAddr)->windowContext;
+    itfPanelSetPairFirst(*(s32 *)(windowContext + 0x104), 0);
+    windowContext = ((EventViewerState *)viewerAddr)->windowContext;
+    itfMesResetWindow(*(s32 *)(windowContext + 0x104));
+    ((EventViewerState *)viewerAddr)->windowActive = 0;
+    ((EventViewerState *)viewerAddr)->pad23C4 = 0;
 }
 
 void func_00230128(EventViewerState *viewer) {
@@ -537,16 +537,16 @@ void func_00230138(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230140);
 
-s32 func_00230438(u32 arg0) {
-    u32 idx;
-    u32 lo;
+s32 func_00230438(u32 condition) {
+    u32 index;
+    u32 lowBits;
 
-    idx = (arg0 << 16) >> 28;
-    lo = arg0 & 0xfff;
-    if (idx == 0) {
+    index = (condition << 16) >> 28;
+    lowBits = condition & 0xfff;
+    if (index == 0) {
         return 1;
     }
-    return (*(s32 *)(D_003BAA00 + idx * 4 + 0x35c) ^ lo) == 0;
+    return (*(s32 *)(D_003BAA00 + index * 4 + 0x35c) ^ lowBits) == 0;
 }
 
 u32 func_00230470(void) {
@@ -565,8 +565,8 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230478);
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230660);
 
-u32 func_00230A38(u32 arg0, u32 arg1, u32 arg2) {
-    func_0022FF30(5, 0x90, 0x48, arg2);
+u32 func_00230A38(u32 unused0, u32 unused1, u32 viewerAddr) {
+    func_0022FF30(5, 0x90, 0x48, viewerAddr);
     return 0;
 }
 
@@ -603,7 +603,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231840);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231950);
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
-s32 evtViewCmdSetValue(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
     s32 value = viewer->commandValue;
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
@@ -672,7 +672,7 @@ u32 func_00231CC8(u32 unused0, u32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231D18);
 
-u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
+u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, u8 *scene) {
     u8 *record = (u8 *)evtEventViewerGetPendingNode((s32)scene);
     if (record != NULL) {
         f32 *dst = *(f32 **)(record + 0x2C);
@@ -694,7 +694,7 @@ u32 kwlnBattleCopyMatrix(u32 arg0, u32 arg1, u8 *scene) {
 }
 
 /* Transfer a selected two-component viewer position to the command entry. */
-s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     if (entry == NULL) {
@@ -710,15 +710,15 @@ s32 evtViewCmdSetPosition(s32 arg0, s32 arg1, EventViewerState *viewer) {
     return 0;
 }
 
-u32 func_00231EF8(u32 arg0, u32 arg1, u32 arg2) {
-    evtViewerPopHistory((EventViewerState *)arg2);
+u32 func_00231EF8(u32 unused0, u32 unused1, u32 viewerAddr) {
+    evtViewerPopHistory((EventViewerState *)viewerAddr);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00231F18);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
-s32 evtViewCmdSetSlot(s32 arg0, s32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
 
     entry->p0C.b[0] = viewer->slotType;
@@ -737,7 +737,7 @@ extern void func_0023E7F8(s32 slot, EventViewerState *viewer);
 extern void func_002416E0(s32 slot, EventViewerState *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
-s32 evtViewCmdSelectMode(u32 arg0, u32 arg1, EventViewerState *viewer) {
+s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
     s32 applied = 0;
     s32 mode = viewer->selectionMode;
 
@@ -760,11 +760,11 @@ s32 evtViewCmdSelectMode(u32 arg0, u32 arg1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
-u32 func_002323E8(u32 arg0, u32 arg1, u32 arg2) {
-    if (evtEventViewerGetPendingNode(arg2) != 0) {
-        ((EventViewerState *)arg2)->unk22AC = 0;
-        ((EventViewerState *)arg2)->unk22B4 = 0;
-        func_0022FF30(0xa, 0x9c, 0x54, arg2);
+u32 func_002323E8(u32 unused0, u32 unused1, u32 viewerAddr) {
+    if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
+        ((EventViewerState *)viewerAddr)->unk22AC = 0;
+        ((EventViewerState *)viewerAddr)->unk22B4 = 0;
+        func_0022FF30(0xa, 0x9c, 0x54, viewerAddr);
         return 0;
     }
 }
@@ -819,7 +819,7 @@ extern void evtEventViewerShutdown();
 extern void func_002D0918();
 extern void func_00134CF0();
 extern void kwlnFadeSetMode();
-void func_002300B8(s32 arg0);
+void func_002300B8(s32 viewerAddr);
 
 void evtViewerReleaseResources(viewer)
     EventViewerState *viewer;

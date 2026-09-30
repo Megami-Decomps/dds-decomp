@@ -239,7 +239,7 @@ void sdfDevWaitForDisc(void) {
     SignalSema(D_003BDA58);
 }
 
-void func_002E4D48(s32 arg0) {
+void func_002E4D48(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -253,7 +253,7 @@ void func_002E4D48(s32 arg0) {
     options[3] = 0;
     for (;;) {
         WaitSema(D_003BDA58);
-        ready = func_002F4588(arg0, options);
+        ready = func_002F4588(request, options);
         SignalSema(D_003BDA58);
         if (ready != 0) {
             break;
@@ -264,7 +264,7 @@ void func_002E4D48(s32 arg0) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_003BDA5C = arg0;
+    D_003BDA5C = request;
 }
 
 void sdfDevSignalPendingSemaphore(void) {
@@ -274,7 +274,7 @@ void sdfDevSignalPendingSemaphore(void) {
     }
 }
 
-void func_002E4E20(s32 arg0) {
+void func_002E4E20(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -290,7 +290,7 @@ void func_002E4E20(s32 arg0) {
         WaitSema(D_003BDA58);
         D_003BD3D8 = 1;
         WaitSema(D_003BDA64);
-        ready = func_002F4588(arg0, options);
+        ready = func_002F4588(request, options);
         SignalSema(D_003BDA58);
         if (ready != 0) {
             break;
@@ -301,7 +301,7 @@ void func_002E4E20(s32 arg0) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_003BDA5C = arg0;
+    D_003BDA5C = request;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4EE0);
@@ -498,10 +498,10 @@ s32 sdfPathExists(char *path) {
     return fd >= 0;
 }
 
-void func_002E5C38(u32 arg0) {
+void func_002E5C38(DevState *state) {
     sdfDevQueueActiveOperation();
     WaitSema(D_003BD3F4);
-    sdfDevQueueReleaseState(arg0);
+    sdfDevQueueReleaseState(state);
 }
 
 void func_002E5C68(void) {
@@ -527,13 +527,13 @@ char *func_002E5D70(void) {
     return D_00398820;
 }
 
-void func_002E5D80(s32 arg0) {
-    D_003BD3F0 = arg0;
-    func_002E5D98(arg0);
+void func_002E5D80(s32 value) {
+    D_003BD3F0 = value;
+    func_002E5D98(value);
 }
 
-void func_002E5D98(s32 arg0) {
-    D_003BD42E = arg0;
+void func_002E5D98(s32 value) {
+    D_003BD42E = value;
 }
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5DA0);
@@ -637,23 +637,23 @@ DevState *sdfDevCreateModeState(s32 path, void (*callback)(DevState *, s32, s32,
     return state;
 }
 
-s32 sdfDevQueueOperation(DevState *arg0, s32 arg1, s32 arg2) {
-    if (arg0->state != SDF_DEV_STATE_ACTIVE) {
+s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
+    if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    arg0->operationArg = arg1;
-    arg0->options = arg2;
-    arg0->operation = 3;
-    SignalSema(D_00398864[arg0->workerIndex].handle);
+    state->operationArg = operationArg;
+    state->options = options;
+    state->operation = 3;
+    SignalSema(D_00398864[state->workerIndex].handle);
     return 0;
 }
 
-s32 func_002E6CF0(DevState *arg0) {
-    if (arg0->state != SDF_DEV_STATE_ACTIVE) {
+s32 func_002E6CF0(DevState *state) {
+    if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    arg0->operation = 4;
-    SignalSema(D_00398864[arg0->workerIndex].handle);
+    state->operation = 4;
+    SignalSema(D_00398864[state->workerIndex].handle);
     return 0;
 }
 
@@ -681,23 +681,23 @@ s32 sdfDevQueueWrite(DevState *state, void *data, s32 extra) {
 }
 
 
-s32 sdfDevReactivate(DevState *arg0) {
-    if (arg0->state != SDF_DEV_STATE_INACTIVE) {
+s32 sdfDevReactivate(DevState *state) {
+    if (state->state != SDF_DEV_STATE_INACTIVE) {
         return -1;
     }
-    arg0->result = 0;
-    arg0->state = SDF_DEV_STATE_ACTIVE;
+    state->result = 0;
+    state->state = SDF_DEV_STATE_ACTIVE;
     return 0;
 }
 
-s32 sdfDevQueueActiveOperation(DevState *arg0) {
-    s8 state = arg0->state;
+s32 sdfDevQueueActiveOperation(DevState *request) {
+    s8 state = request->state;
 
     if (state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    arg0->operation = state;
-    SignalSema(D_00398864[arg0->workerIndex].handle);
+    request->operation = state;
+    SignalSema(D_00398864[request->workerIndex].handle);
     return 0;
 }
 
@@ -795,11 +795,11 @@ void sdfTickThreadPriorityOverride(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E70F0);
 
-void sdfPowerOffLoop(s32 arg0) {
+void sdfPowerOffLoop(s32 semaphore) {
     s32 status;
 
     for (;;) {
-        WaitSema(arg0);
+        WaitSema(semaphore);
         func_003110C8(D_003BD460, 0x5003, 0, 0, 0, 0);
         func_003110C8(D_003BD468, 0x4806, 0, 0, 0, 0);
         sceCdPowerOff(&status);
@@ -847,13 +847,13 @@ char *sdfStrDup(const char *text) {
     return copy;
 }
 
-s32 sdfBcdStrToInt(s32 arg0) {
+s32 sdfBcdStrToInt(s32 packedDigits) {
     s32 place = 1;
     s32 acc = 0;
 
-    while (arg0 > 0) {
-        acc += (arg0 & 0xf) * place;
-        arg0 >>= 4;
+    while (packedDigits > 0) {
+        acc += (packedDigits & 0xf) * place;
+        packedDigits >>= 4;
         place *= 10;
     }
     return acc;
@@ -962,8 +962,8 @@ f32 sdfSinPoly(f32 angle) {
 }
 
 
-void func_002E78F8(f32 arg0) {
-    sdfSinPoly(arg0 + 1.5707963f);
+void func_002E78F8(f32 angle) {
+    sdfSinPoly(angle + 1.5707963f);
 }
 
 /* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
@@ -994,32 +994,32 @@ f32 sdfTableInterpolate(f32 value, f32 *table, s32 count) {
     return mid * unit + (value - lower) * unit / (upper - lower);
 }
 
-f32 sdfAtan2Poly(f32 arg0) {
-    f32 x2 = arg0 * arg0;
-    f32 x3 = x2 * arg0;
+f32 sdfAtan2Poly(f32 ratio) {
+    f32 x2 = ratio * ratio;
+    f32 x3 = x2 * ratio;
     f32 x5 = x2 * x3;
 
-    return arg0 * 0.99999977f + x3 * -0.33325735f + x5 * 0.19388643f;
+    return ratio * 0.99999977f + x3 * -0.33325735f + x5 * 0.19388643f;
 }
 
-f32 sdfAtan2(f32 arg0, f32 arg1) {
+f32 sdfAtan2(f32 y, f32 x) {
     s32 sx = 0;
     s32 sy;
     f32 r;
 
-    if (arg1 < 0.0f) {
-        arg1 = -arg1;
+    if (x < 0.0f) {
+        x = -x;
         sx = 1;
     }
     sy = 0;
-    if (arg0 < 0.0f) {
-        arg0 = -arg0;
+    if (y < 0.0f) {
+        y = -y;
         sy = 1;
     }
-    if (arg0 < arg1) {
-        r = sdfAtan2Poly(arg0 / arg1);
+    if (y < x) {
+        r = sdfAtan2Poly(y / x);
     } else {
-        r = 1.5707963f - sdfAtan2Poly(arg1 / arg0);
+        r = 1.5707963f - sdfAtan2Poly(x / y);
     }
     if (sx != 0) {
         r = 3.1415926f - r;

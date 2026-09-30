@@ -106,9 +106,9 @@ typedef struct TextDrawArgs {
     s32 y;         /* 0x04 */
     s32 z;         /* 0x08 */
     u8 color[4];   /* 0x0C */
-    s32 unk10;     /* 0x10 */
-    s32 unk14;     /* 0x14 */
-    s32 unk18;     /* 0x18 */
+    s32 encodedText; /* 0x10: encoded input base */
+    s32 sub;         /* 0x14: text subcontext */
+    s32 offset;    /* 0x18: current byte position */
     u8 unk1C;      /* 0x1C */
     u8 unk1D;      /* 0x1D */
 } TextDrawArgs;
@@ -118,7 +118,7 @@ extern u32 D_003D6E20[];
 extern Unk6C84Rec D_003D6C84[];
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
-s32 func_00196B30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+s32 func_00196B30(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
 u32 itfReadEncodedTextLead(TextStream *stream) {
     s32 *position = &stream->offset;
@@ -147,28 +147,28 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001964F8);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001968C0);
 
-void func_00196AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_00196B30(arg0, arg1, 0, 0, 0, 0, 0x80, arg2, arg3);
+void func_00196AB0(s32 x, s32 y, s32 encodedText, s32 sub) {
+    func_00196B30(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-void func_00196AE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    func_00196B30(arg0, arg1, 0, arg2 & 0xFF, arg3 & 0xFF, arg4 & 0xFF, arg5 & 0xFF, arg6, arg7);
+void func_00196AE8(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+    func_00196B30(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00196B30);
 
-void itfDrawColor(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    func_00196B30(arg0, arg1, arg2, arg3 & 0xff, arg4 & 0xff,
-                  arg5 & 0xff, arg6 & 0xff, arg7, 0);
+void itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+                   s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
+    func_00196B30(x, y, depth, channel0 & 0xff, channel1 & 0xff,
+                  channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
 
-u32 func_00196BB0(u32 arg0) {
-    return D_003BB15C & arg0;
+u32 func_00196BB0(u32 mask) {
+    return D_003BB15C & mask;
 }
 
-void func_00196BC0(s32 arg0, s32 arg1) {
-    D_003D6E20[arg0] = arg1;
+void func_00196BC0(s32 index, s32 value) {
+    D_003D6E20[index] = value;
 }
 
 u32 func_00196BD8(void) {
@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
-void itfInitTextDrawArgs(s32 arg0, s32 arg1) {
+void itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     TextDrawArgs args;
 
     args.x = 0;
@@ -195,27 +195,27 @@ void itfInitTextDrawArgs(s32 arg0, s32 arg1) {
     args.color[1] = 0;
     args.color[2] = 0;
     args.color[3] = 0;
-    args.unk10 = arg0;
-    args.unk14 = arg1;
-    args.unk18 = 0;
+    args.encodedText = encodedText;
+    args.sub = sub;
+    args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
     func_00197068(&args);
 }
 
-u16 func_001971E0(s32 arg0) {
-    return D_003D6C84[arg0].unk0->unk10;
+u16 func_001971E0(s32 index) {
+    return D_003D6C84[index].unk0->unk10;
 }
 
-u16 func_00197200(s32 arg0) {
-    return D_003D6C84[arg0].unk0->unk12;
+u16 func_00197200(s32 index) {
+    return D_003D6C84[index].unk0->unk12;
 }
 
-void func_00197220(s32 arg0) {
-    if (arg0 < 1) {
-        arg0 = 0x14;
+void func_00197220(s32 limit) {
+    if (limit < 1) {
+        limit = 0x14;
     }
-    D_003BB168 = arg0;
+    D_003BB168 = limit;
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197238);
@@ -265,14 +265,14 @@ void itfConvertText(u8 *output, const char *input) {
 }
 
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
-void itfAttachGlyph16x18(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
     glyph = func_00195160(glyphSource, 0, 0, 0, 0);
     func_001953D8(glyph, 0x10, 0x12);
-    func_00195450(glyph, arg0, arg1);
-    func_00195460(glyph, arg2 << 4);
+    func_00195450(glyph, x, y);
+    func_00195460(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
     frFontLinkGlyph(parent, glyph, 0);
@@ -307,15 +307,15 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001979C8);
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197A98);
 
 /* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
-void itfAttachGlyph12x16(u64 arg0, u64 arg1, s32 arg2, u64 colors,
+void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
     glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
     func_001953D8(glyph, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(glyph, 3);
-    func_00195450(glyph, arg0, arg1);
-    func_00195460(glyph, arg2 << 4);
+    func_00195450(glyph, x, y);
+    func_00195460(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
@@ -350,16 +350,16 @@ void func_00198010(void) {
 void func_00198018(void) {
 }
 
-u32 func_00198020(u32 arg0, u32 arg1, u32 arg2) {
-    return arg2;
+u32 func_00198020(u32 unused0, u32 unused1, u32 value) {
+    return value;
 }
 
 u32 func_00198028(void) {
     return D_003BD818;
 }
 
-u32 func_00198030(u32 arg0) {
-    return arg0;
+u32 func_00198030(u32 value) {
+    return value;
 }
 
 void itfSplitRelativeSegments(MemBlock *block, MemOut *out) {
@@ -372,8 +372,8 @@ void itfSplitRelativeSegments(MemBlock *block, MemOut *out) {
     out->third = (u8 *)block + thirdOffset;
 }
 
-u32 func_00198068(u32 arg0) {
-    return *(u32 *)(func_00198030(arg0) + 0x10);
+u32 func_00198068(u32 object) {
+    return *(u32 *)(func_00198030(object) + 0x10);
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198088);
@@ -427,8 +427,8 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
     return 1;
 }
 
-u32 itfReleaseMemNodeBuffer(s32 arg0) {
-    func_002D0918(*(u32 *)(arg0 - 4));
+u32 itfReleaseMemNodeBuffer(u8 *payload) {
+    func_002D0918(*(u32 *)(payload - 4));
     return 1;
 }
 
