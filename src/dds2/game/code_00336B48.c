@@ -202,6 +202,20 @@ extern void sdfAppendReferencePacket(s32, void *);
 
 extern void func_0033AEA8(void *);
 
+extern void func_0033AC10(void);
+extern void func_003306C0(void);
+extern void sdfRegisterResourceQueueCallbacks(void);
+extern s32 func_0032C150(void *);
+extern u8 D_00372C00[];
+extern u8 D_00376C40[];
+extern s32 D_0037F1B8[];
+extern s32 D_0037F270[];
+extern s32 D_0037F1F4[];
+extern void *D_00438A6C;
+extern void *D_00438A70;
+extern u64 D_00438A78;
+extern void *D_00438A80;
+
 extern vu8 D_004389DA;
 
 extern void sdfAssetApplyEntryChanges(void *, s32);
@@ -1051,7 +1065,24 @@ void func_0033ABB8(s32 list, DmaPacketHeader *packet) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AD68);
+void func_0033AD68(void) {
+    u64 v;
+    func_0033AC10();
+    v = func_0032B318(D_00438A70);
+    D_0037F1B8[0] = v;
+    D_00438A78 = v;
+    D_0037F1B8[1] = v >> 32;
+    D_00438A6C = func_0032C150(D_00372C00);
+    v = func_0032B318(D_00438A6C);
+    D_0037F270[0] = v;
+    D_0037F270[1] = v >> 32;
+    D_00438A80 = func_0032C150(D_00376C40);
+    v = func_0032B318(D_00438A80);
+    D_0037F1F4[0] = v;
+    D_0037F1F4[1] = v >> 32;
+    func_003306C0();
+    sdfRegisterResourceQueueCallbacks();
+}
 
 void sdfConsAppendClearPacket(s32 list, s32 (*alloc)(s32)) {
     u64 *packet;
