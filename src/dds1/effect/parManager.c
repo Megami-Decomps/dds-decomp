@@ -46,6 +46,7 @@ extern void (*D_0034E2F0[])();
 void func_002D0918(void *arg);
 void effDestroyResources(void *arg);
 void func_002CFF98(void *arg);
+extern void func_002DDBF8(void);
 
 void parReleaseObject(ParObj *obj) {
     if (obj->child != NULL) {
@@ -139,4 +140,10 @@ void func_0015A6E8(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_0015A6F8);
+/* vu0 routine: effect+0xB0 = matrix * effect+0x100 via func_002DDBF8 */
+void func_0015A6F8(u8 *effect, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX_B(effect + 0x100);
+    func_002DDBF8();
+    VU0_STORE_MATRIX(effect + 0xB0);
+}

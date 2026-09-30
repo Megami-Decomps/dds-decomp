@@ -10,7 +10,12 @@ INCLUDE_ASM(const s32, "game/code_00253E58", func_00254288);
 
 INCLUDE_ASM(const s32, "game/code_00253E58", func_00254680);
 
-INCLUDE_ASM(const s32, "game/code_00253E58", func_002546D8);
+/* Three sprite layers drawn at the origin for one draw context. */
+void func_002546D8(s32 scale, s32 context) {
+    func_0024E260(0, 0, 0, scale, 0x4F, context);
+    func_0024E260(0, 0, 0, scale, 0xC, context);
+    func_0024E260(0, 0, 0, scale, 0xD, context);
+}
 
 void func_00254758(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
     func_0024E260(x, y, z, drawContext, 14, drawArgument);

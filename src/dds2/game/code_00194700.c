@@ -3,6 +3,8 @@
 extern s8 D_0043643D;
 
 #include "eff.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 
 extern u32 func_0032C138(u32);
 
@@ -421,7 +423,43 @@ void func_00195810(void) {
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195890);
 
-INCLUDE_ASM(const s32, "game/code_00194700", effBlendColor);
+/* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
+u32 effBlendColor(u32 colorA, u32 colorB, f32 t) {
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+
+    if (t >= 1.0f) {
+        return colorB;
+    }
+    unit = 0x3C000000;
+    color1[0] = colorB;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = colorA;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "qmtc2.ni $2, vf2\n"
+        "vmulx.xyzw vf10, vf10, vf2x\n"
+        ".set reorder"
+        : : "f"(1.0f - t) : "$2");
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $3, %0\n"
+        "qmtc2.ni $3, vf2\n"
+        "vmulx.xyzw vf11, vf11, vf2x\n"
+        "vadd.xyzw vf10, vf10, vf11\n"
+        ".set reorder"
+        : : "f"(t) : "$3");
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+
+    return packed;
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_00195A30);
 

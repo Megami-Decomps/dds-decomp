@@ -47,7 +47,15 @@ s64 func_0029AD98(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AE10);
+s64 func_0029AE10(s32 request) {
+    s32 context = func_00101958();
+
+    if (func_002993D0(context) != 0) {
+        return 0;
+    }
+    func_0026C900();
+    return menuRunPanel(context, 2, request);
+}
 
 /* The five signed config bytes reserve space before the selected entry width. */
 u32 mnuResetSelectionWidthsFromConfig(void) {

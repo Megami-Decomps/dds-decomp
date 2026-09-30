@@ -52,6 +52,7 @@ typedef struct KeyOut {
 } KeyOut;
 
 f32 sdfInterpolateMotionKeys(KeyOut *a0);
+void func_00334678(void *a0, void *out, f32 t);
 extern void effMiscQuaternionNlerpVU(f32 amount);
 extern void effMiscQuaternionToMatrixVU(void);
 
@@ -359,10 +360,10 @@ void *func_00334980(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
-void func_003349E0(u8 *motion) {
+void func_003349E0(u8 *motion, f32 t1) {
     KeyOut b;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
@@ -373,7 +374,7 @@ void func_003349E0(u8 *motion) {
 void func_00334A60(u8 *motion, f32 t1, f32 t2) {
     KeyOut b;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
@@ -403,10 +404,10 @@ void *func_00334D10(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
-void func_00334D70(u8 *motion) {
+void func_00334D70(u8 *motion, f32 t1) {
     KeyOut b;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
@@ -417,7 +418,7 @@ void func_00334D70(u8 *motion) {
 void func_00334DF0(u8 *motion, f32 t1, f32 t2) {
     KeyOut b;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
@@ -435,13 +436,13 @@ void *func_00334EA0(void *a0, s32 a1, s32 a2) {
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
-void func_00334F00(u8 *motion) {
+void func_00334F00(u8 *motion, f32 t1) {
     KeyOut b;
     u8 *sub;
     u8 *matrix;
     f32 *key;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     key = b.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
     key = b.secondKey;
@@ -463,7 +464,7 @@ void func_00334F98(u8 *motion, f32 t1, f32 t2) {
     u8 *matrix;
     f32 *key;
 
-    func_00334678(motion, &b);
+    func_00334678(motion, &b, t1);
     key = b.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, key);
     key = b.secondKey;
@@ -489,9 +490,31 @@ void *func_00335050(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003350B0);
+void func_003350B0(SdfMotionBinding *binding, f32 t) {
+    KeyOut b;
+    SdfMotionTrack *track;
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335108);
+    func_00334678(binding, &b, t);
+    track = binding->track;
+    if (*(u8 *)b.firstKey == 0) {
+        track->value14.flags = track->value14.flags | 0x10;
+    } else {
+        track->value14.flags = track->value14.flags & 0xFFEF;
+    }
+}
+
+void func_00335108(SdfMotionBinding *binding, f32 t) {
+    KeyOut b;
+    SdfMotionTrack *track;
+
+    func_00334678(binding, &b, t);
+    track = binding->track;
+    if (*(u8 *)b.firstKey == 0) {
+        track->value14.flags = track->value14.flags | 0x10;
+    } else {
+        track->value14.flags = track->value14.flags & 0xFFEF;
+    }
+}
 
 void func_00335160(SdfMotionBinding *binding) {
     binding->current.lowByte = ((u8)(binding->track->value14.flags >> 4) ^ 1) & 1;
@@ -513,7 +536,10 @@ s32 sdfDispatchMotionHandler(void *a0, s32 a1) {
     return D_0040B3F8[(u16)a1](a0, a1);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335210);
+void func_00335210(SdfMotionOutput *output, Src360 *source, void *dispatch, s32 options) {
+    sdfSetMotionPointerPair(&output->pair, source, dispatch);
+    output->target = source->unk4->unkC->arr[options];
+}
 
 void *func_00335268(void *source, s32 unused, s32 options) {
     void *motion;
@@ -525,9 +551,9 @@ void *func_00335268(void *source, s32 unused, s32 options) {
 
 extern void func_00333288();
 
-void func_003352C8(u8 *motion) {
+void func_003352C8(u8 *motion, f32 t1) {
     u8 buffer[16];
-    func_00334678(motion, buffer);
+    func_00334678(motion, buffer, t1);
     func_00333288(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
@@ -547,9 +573,9 @@ void *func_003353C8(void *source, s32 unused, s32 options) {
 
 extern void func_00333270();
 
-void func_00335428(u8 *motion) {
+void func_00335428(u8 *motion, f32 t1) {
     u8 buffer[16];
-    func_00334678(motion, buffer);
+    func_00334678(motion, buffer, t1);
     func_00333270(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
@@ -569,9 +595,9 @@ void *func_00335528(void *source, s32 unused, s32 options) {
 
 extern void func_003332A0();
 
-void func_00335588(u8 *motion) {
+void func_00335588(u8 *motion, f32 t1) {
     u8 buffer[16];
-    func_00334678(motion, buffer);
+    func_00334678(motion, buffer, t1);
     func_003332A0(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
@@ -591,9 +617,9 @@ void *func_00335688(void *source, s32 unused, s32 options) {
 
 extern void func_003332B8();
 
-void func_003356E8(u8 *motion) {
+void func_003356E8(u8 *motion, f32 t1) {
     u8 buffer[16];
-    func_00334678(motion, buffer);
+    func_00334678(motion, buffer, t1);
     func_003332B8(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
@@ -613,9 +639,9 @@ void *func_003357E8(void *source, s32 unused, s32 options) {
 
 extern void func_003332D0(s32, f32);
 
-void func_00335848(u8 *motion) {
+void func_00335848(u8 *motion, f32 t1) {
     KeyOut sample;
-    func_00334678(motion, &sample);
+    func_00334678(motion, &sample, t1);
     func_003332D0(*(s32 *)(motion + 0xC), sdfInterpolateMotionKeys(&sample));
 }
 
@@ -623,7 +649,7 @@ extern void func_003332D0(s32, f32);
 
 void func_00335888(u8 *motion, f32 unused, f32 scale) {
     KeyOut sample;
-    func_00334678(motion, &sample);
+    func_00334678(motion, &sample, unused);
     func_003332D0(*(s32 *)(motion + 0xC),
                   *(f32 *)(motion + 0x10) + sdfInterpolateMotionKeys(&sample) * scale - *(f32 *)(motion + 0x10) * scale);
 }
@@ -640,16 +666,25 @@ void *func_003358F0(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335950(SdfMotionOutput *output) {
+void func_00335950(SdfMotionOutput *output, f32 t1) {
     u8 keys[16];
     u8 interpolated[32];
 
-    func_00334678(output, keys);
+    func_00334678(output, keys, t1);
     func_003348D8(keys, interpolated);
     func_003333F8(output->target, interpolated);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003359A0);
+void func_003359A0(SdfMotionOutput *output, f32 t1, f32 t2) {
+    KeyOut b0;
+    f32 b1[5];
+    f32 b2[5];
+
+    func_00334678(output, &b0, t1);
+    func_003348D8(&b0, b2);
+    sdfMotionBlendFiveFloats(b1, (f32 *)&output->sampledValue, b2, t2);
+    func_003333F8(output->target, b1);
+}
 
 void func_00335A18(DstBlk *a0) {
     Blk *p;
@@ -666,16 +701,25 @@ void *func_00335A68(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335AC8(SdfMotionOutput *output) {
+void func_00335AC8(SdfMotionOutput *output, f32 t1) {
     u8 keys[16];
     u8 interpolated[32];
 
-    func_00334678(output, keys);
+    func_00334678(output, keys, t1);
     func_003348D8(keys, interpolated);
     func_00333560(output->target, interpolated);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335B18);
+void func_00335B18(SdfMotionOutput *output, f32 t1, f32 t2) {
+    KeyOut b0;
+    f32 b1[5];
+    f32 b2[5];
+
+    func_00334678(output, &b0, t1);
+    func_003348D8(&b0, b1);
+    sdfMotionBlendFiveFloats(b2, (f32 *)&output->sampledValue, b1, t2);
+    func_00333560(output->target, b2);
+}
 
 void func_00335B90(DstBlk *a0) {
     Blk *p;
@@ -694,9 +738,9 @@ void *func_00335BE0(void *source, s32 unused, s32 options) {
 
 extern void func_00333460();
 
-void func_00335C40(u8 *motion) {
+void func_00335C40(u8 *motion, f32 t1) {
     u8 buffer[16];
-    func_00334678(motion, buffer);
+    func_00334678(motion, buffer, t1);
     func_00333460(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
@@ -714,17 +758,17 @@ void *func_00335D40(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335DA0(SdfMotionOutput *output) {
+void func_00335DA0(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
-    func_00334678(output, sample);
+    func_00334678(output, sample, t1);
     func_003333F8(output->target, sample[0]);
 }
 
-void func_00335DD8(SdfMotionOutput *output) {
+void func_00335DD8(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
-    func_00334678(output, sample);
+    func_00334678(output, sample, t1);
     func_003333F8(output->target, sample[0]);
 }
 
@@ -739,16 +783,16 @@ void *func_00335E18(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335E78(SdfMotionOutput *output) {
+void func_00335E78(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
-    func_00334678(output, sample);
+    func_00334678(output, sample, t1);
     func_00333560(output->target, sample[0]);
 }
 
-void func_00335EB0(SdfMotionOutput *output) {
+void func_00335EB0(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
-    func_00334678(output, sample);
+    func_00334678(output, sample, t1);
     func_00333560(output->target, sample[0]);
 }
