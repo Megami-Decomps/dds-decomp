@@ -8,6 +8,30 @@ extern s32 func_00317FE0(u32);
 
 extern u32 D_00438918;
 
+extern s32 D_00435BB0;
+
+extern s16 D_00435BAC;
+
+extern u8 D_0040ABF0[];
+
+extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
+
+extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
+
+extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+
+extern void func_0031BFC0(void);
+
+extern void func_00317AD0(u32 handle);
+
+extern void *func_003292A8(s32 size);
+
+extern u32 sdfMemoryGetBlockAddress(void *block);
+
+u32 func_00316FC8(void);
+
+u8 *func_00316F40(void);
+
 /* 0xAARRGGBB color split into RGB and alpha fields. */
 typedef struct RgbAlpha {
     u8 pad_0x00[0x18]; // 0x00
@@ -64,7 +88,16 @@ void func_00316E70(void) {
     D_00438918 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316E78);
+void func_00316E78(void) {
+    u32 handle;
+
+    D_00435BB0 = 0;
+    D_00435BAC = 1;
+    handle = func_00316F40();
+    D_0043891C = handle;
+    func_00317AD0(handle);
+    kwlnTaskCreate((s32)D_0042D4D0, 0x2AF8, 0, 0, (s32)func_00316FC8, 0, 0);
+}
 
 u8 func_00316ED0(void) {
     return func_00101740(D_0042D4D0) != 0;
@@ -72,7 +105,18 @@ u8 func_00316ED0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00316F40);
+u8 *func_00316F40(void) {
+    void *block = func_003292A8(0x1E0);
+    u8 *work = (u8 *)sdfMemoryGetBlockAddress(block);
+
+    memset(work, 0, 0x1E0);
+    *(u32 *)(work + 0x0) = (u32)block;
+    *(u32 *)(work + 0x68) = 0;
+    *(u16 *)(work + 0x1D8) = 0x80;
+    *(u16 *)(work + 0x96) = 0;
+    *(u32 *)(work + 0x74) = 0;
+    return work;
+}
 
 void func_00316FA8(u32 sprite) {
     if (sprite != 0) {
@@ -102,7 +146,9 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317010);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317958);
+void func_00317958(u8 *work) {
+    mdlLoadViewerPackage(5, *(u16 *)(work + 0x12), 0x101, *(s32 *)(work + 0xC), *(s32 *)(work + 0x1C));
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317988);
 

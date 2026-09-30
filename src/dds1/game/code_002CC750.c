@@ -317,7 +317,11 @@ s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
     return op->selectedIndex;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyGetProfileRecord);
+u32 ptyGetProfileRecord(u32 work, u16 index) {
+    u32 record = D_003BAA00 + *(u16 *)(work + 4) * 0x300;
+
+    return record + index * 8 + 0x2EBB0;
+}
 
 u32 ptyGetProfileRecordValue(u32 unit, u16 profileId) {
     u32 *record;

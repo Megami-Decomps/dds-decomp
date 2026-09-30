@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEA18);
 
@@ -34,11 +35,14 @@ void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEEA8);
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF2B0);
-
 extern u8 D_00398470[];
 extern void func_002DDD60();
 extern void func_002EEEA8();
+
+void func_002EF2B0(void) {
+    VU0_LOAD_MATRIX(D_00398470);
+    func_002EEEA8();
+}
 
 void func_002EF2E0(s32 a, s32 b, s32 c, s32 d) {
     func_002DDD60(D_00398470);

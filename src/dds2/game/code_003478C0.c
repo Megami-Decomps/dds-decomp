@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct SdfRequest {
     u8 active;
@@ -90,7 +91,10 @@ void sdfStoreWordAndSetState(SdfRequest *request, u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00347D50);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348158);
+void func_00348158(void) {
+    VU0_LOAD_MATRIX(D_0040B620);
+    func_00347D50();
+}
 
 void func_00348188(s32 a, s32 b, s32 c, s32 d) {
     func_00336C10(D_0040B620);
