@@ -4972,7 +4972,78 @@ INCLUDE_ASM(const s32, "game/code_001A04C0", func_001C9098);
 void func_001C93A0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001C93A8);
+void func_001C93A8(u8 *arg0) {
+    u8 *ctx;
+    u8 *task;
+    u64 value;
+    s32 count;
+
+    if (sndHasActiveActor() != 0) {
+        return;
+    }
+    if (btlCountTasksByKind(0x45) != 0) {
+        return;
+    }
+    ctx = *(u8 **)(arg0 + 0x18);
+    value = func_001A0CB0();
+    btlStartTask(func_001D9718());
+    btlStartTask(func_001D9780());
+    if (*(u32 *)(ctx + 0x110) & 0x200) {
+        btlStartTask(btlCreateCommandSoundTask(arg0, 9));
+    } else {
+        btlStartTask(btlCreateCommandSoundTask(arg0, 3));
+    }
+    switch (*(u16 *)(ctx + 0x12E) & 0x7FFF) {
+    case 0x200:
+        func_001FF0C8(arg0, 0);
+        btlDispatchStateHandler(arg0, 0xC);
+        break;
+    case 0x2000:
+        func_001FF0C8(arg0, 1);
+        btlDispatchStateHandler(arg0, 0xC);
+        break;
+    case 0x20:
+        if (*(u32 *)(*(s32 *)(arg0 + 0x18) + 0x110) & 0x200) {
+            func_001FF0C8(arg0, 2);
+        } else {
+            func_001FF0C8(arg0, 3);
+        }
+        btlDispatchStateHandler(arg0, 0xC);
+        break;
+    case 0x40:
+        func_001FF0C8(arg0, 4);
+        btlDispatchStateHandler(arg0, 0xC);
+        break;
+    case 1:
+        *(s32 *)(arg0 + 0x20) = 0xD;
+        btlDispatchStateHandler(arg0, 0xC);
+        break;
+    case 8:
+        task = fldCreateSceneGroupAction(arg0, 0x64, 1);
+        *task = 7;
+        *(u64 *)(task + 8) = value;
+        *(u64 *)(task + 0x40) = *(u64 *)(ctx + 0x108);
+        btlStartTask(task);
+        btlDispatchStateHandler(arg0, 0x1A);
+        break;
+    case 0x800:
+        task = fldCreateSceneGroupAction(arg0, 0x64, 1);
+        *task = 7;
+        *(u64 *)(task + 8) = value;
+        *(u64 *)(task + 0x40) = *(u64 *)(ctx + 0x108);
+        btlStartTask(task);
+        btlDispatchStateHandler(arg0, 0x1A);
+        break;
+    }
+    count = func_001FD170(arg0);
+    if (count > 0) {
+        task = btlCreateEffObjB(ctx, count);
+        *(u64 *)(task + 0x40) = value;
+        btlStartTask(task);
+    }
+    *(u32 *)(arg0 + 8) |= 0x200;
+}
+
 
 void func_001C9628(u32 arg0) {
     func_001A17F0();
@@ -5640,7 +5711,82 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A37A8);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D09B8);
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D0BA0);
+void func_001D0BA0(u8 *command, u8 *argument) {
+    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(func_001A17F0() + 0x604);
+
+    if (handler != 0) {
+        s32 result = handler((s32)command, (s32)argument);
+        if (result != -1) {
+            btlDispatchStateHandler((s32)command, result);
+            return;
+        }
+    }
+    switch (*(s32 *)argument) {
+    case 1:
+        btlDispatchStateHandler((s32)command, 0xD);
+        break;
+    case 4:
+        *(s32 *)(argument + 4) = func_001A3098(*(s32 *)(argument + 8));
+        /* fallthrough */
+    case 2:
+    case 3:
+    case 7:
+    case 8:
+        if (*(s8 *)(D_003BAA4C + *(s32 *)(argument + 4) * 2 + 1) != 1) {
+            btlDispatchStateHandler((s32)command, 0xE);
+        } else {
+            if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
+                scrSetGlobalSeenBit(*(u16 *)(argument + 4));
+            }
+            btlDispatchStateHandler((s32)command, 0xF);
+        }
+        break;
+    case 5:
+        if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x1000) {
+            btlDispatchStateHandler((s32)command, 0x10);
+        } else {
+            btlDispatchStateHandler((s32)command, 0x11);
+        }
+        break;
+    case 10:
+    case 13:
+    case 14:
+        btlDispatchStateHandler((s32)command, 0x13);
+        break;
+    case 9:
+        if (*(u32 *)(*(s32 *)(command + 0x34) + 0x110) & 1) {
+            btlDispatchStateHandler((s32)command, 0x16);
+        } else {
+            btlDispatchStateHandler((s32)command, 0x15);
+        }
+        break;
+    case 12:
+        btlDispatchStateHandler((s32)command, 0x15);
+        break;
+    case 6: {
+        u32 flags = *(u32 *)(*(s32 *)(command + 0x18) + 0x110);
+        if (flags & 0x200) {
+            btlDispatchStateHandler((s32)command, 0x17);
+        } else if (flags & 0x400) {
+            btlDispatchStateHandler((s32)command, 0x14);
+        }
+        break;
+    }
+    case 11:
+        btlDispatchStateHandler((s32)command, 0x14);
+        break;
+    case 15:
+        btlDispatchStateHandler((s32)command, 0x18);
+        break;
+    case 16:
+        btlDispatchStateHandler((s32)command, 0x19);
+        break;
+    case 17:
+        btlDispatchStateHandler((s32)command, 0x1F);
+        break;
+    }
+}
+
 
 s32 func_001D0DD8(s32 *state) {
     switch (*state) {
@@ -7691,7 +7837,59 @@ void *func_001D9938(u8 *owner) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001D99B0);
+extern char D_003A3CA0[];
+extern f32 func_002E8398(void *);
+
+u32 func_001D99B0(u32 *task) {
+    f32 pos[4] __attribute__((aligned(16)));
+    f32 scale;
+    s32 node;
+
+    if (!(*(u32 *)((u8 *)*task + 0x110) & 2)) {
+        return 1;
+    }
+    if (*(s32 *)(task + 2) == 0) {
+        node = mdlGetNodeField2C(*(s32 *)(*(s32 *)((u8 *)*task + 0x320) + 0x8C), 0);
+        if (node < 0x1D) {
+            u8 *resource = (u8 *)func_001A2FD8(*(s32 *)((u8 *)*task + 0xC4),
+                                                 *(s32 *)((u8 *)*task + 0xC8));
+            if (*(s16 *)(resource + node * 20 + 0x30) == 2) {
+                func_001D74B8(*(s32 *)task);
+                btlBossDebugPrintf(D_003A3CA0);
+            }
+        }
+    }
+    if (0.5f < *(f32 *)(task + 1)) {
+        scale = *(f32 *)(task + 1) * (func_002E8398(D_00324550) * 0.5f + 0.5f);
+        if (*(s32 *)(task + 2) & 1) {
+            scale = -scale;
+        }
+        if (*(u64 *)((u8 *)*task + 0x110) & 0x808000000000) {
+            effObjFetchInnerFirstVec(*(u32 *)((u8 *)*task + 0x31C));
+            VU_STORE10(pos);
+            pos[0] += scale;
+        } else {
+            func_001D6300((u8 *)*task, pos);
+            pos[0] += scale;
+            pos[2] += *(f32 *)((u8 *)*task + 0x88);
+        }
+        effObjSetInnerFirstVec(*(s32 *)((u8 *)*task + 0x31C), pos);
+        *(f32 *)(task + 1) *= 0.85f;
+    } else {
+        if (*(u64 *)((u8 *)*task + 0x110) & 0x808000000000) {
+            effObjFetchInnerFirstVec(*(u32 *)((u8 *)*task + 0x31C));
+            VU_STORE10(pos);
+        } else {
+            func_001D6300((u8 *)*task, pos);
+            pos[2] += *(f32 *)((u8 *)*task + 0x88);
+        }
+        effObjSetInnerFirstVec(*(s32 *)((u8 *)*task + 0x31C), pos);
+        return 1;
+    }
+    *(s32 *)(task + 2) += 1;
+    return 0;
+}
+
 
 extern u32 func_001D99B0(u32 *);
 
@@ -7776,6 +7974,8 @@ void *func_001D9F88(u8 *owner) {
 extern void sdfFreeMemoryFromEitherHeap(s32);
 
 extern s32 func_00288B68(char *);
+
+INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A3CA0);
 
 void btlStartGunFinishLoad(s32 task) {
     char filename[0x70];
