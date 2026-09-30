@@ -303,7 +303,55 @@ void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB230);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB308);
+typedef struct Link {
+    struct Link *next;
+} Link;
+
+typedef struct LinkOwner {
+    u8 pad[0x14];
+    Link head;
+} LinkOwner;
+
+typedef struct MotionNode {
+    Link link;
+    LinkOwner *owner;
+    s32 u8;
+    s32 uC;
+    ArrObj *request;
+} MotionNode;
+
+/* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
+void func_002DB308(MotionNode *node)
+{
+    Link *prev;
+    Link *cur;
+    ArrObj *request;
+    void **cb;
+    s32 n;
+    s32 i;
+
+    if (node == NULL) {
+        return;
+    }
+    if (node->owner != NULL) {
+        prev = &node->owner->head;
+        while ((cur = prev->next) != NULL) {
+            if (cur == &node->link) {
+                prev->next = node->link.next;
+                break;
+            }
+            prev = cur;
+        }
+    }
+    request = node->request;
+    n = request->n4;
+    cb = request->arrC;
+    for (i = 0; i < n; i++) {
+        sdfInvokeMotionObjectCallback(cb[i]);
+    }
+    sdfDestroyDevRequest(node->request);
+    func_002CFF98(node);
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DB3D0);
 void func_002DB518(void *a0, s32 a1, s32 a2) {
