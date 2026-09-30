@@ -246,7 +246,10 @@ void func_002C0878(s32 data, s32 alternate, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_002C0950(u32 data, u32 kind) {
+void func_002C0950(data, kind)
+    u32 data;
+    u32 kind;
+{
     func_002C0878(data, 0, kind);
 }
 
@@ -338,11 +341,17 @@ void func_002C0F88(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
     func_002C0DF8(a, b, c, d, e, f, 0, g);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0FA8);
+/* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
+void func_002C0FA8(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
+    func_002C1098(x, y, z, x + width, y, z, color, context);
+    func_002C1098(x, y, z, x, y + height, z, color, context);
+    func_002C1098(x + width, y, z, x + width, y + height, z, color, context);
+    func_002C1098(x, y + height, z, x + width + 0x10, y + height, z, color, context);
+}
 
-void func_002C1098(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value) {
+void func_002C1098(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value, u32 context) {
     u32 range[2] = {value, value};
-    func_002C10C0(a, b, c, d, e, f, range);
+    func_002C10C0(a, b, c, d, e, f, range, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
@@ -381,7 +390,12 @@ void func_002C1430(s32 surfaceIndex) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C14E0);
+void func_002C14E0(s32 surface) {
+    func_002C0950(0x30000, surface);
+    func_002C0DD8(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, surface);
+    func_002C0950(0x3000DL, surface);
+    func_002C1380(surface);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1548);
 
@@ -391,9 +405,40 @@ void func_002C1588(u32 arg0) {
     func_002C0DD8(0, 0, 0, 0x2000, 0xe00, 0, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C15E0);
+/* Scale the top three bytes of a packed color by scale / 256; the low byte is kept. */
+u32 func_002C15E0(u32 color, u32 scale) {
+    u32 a = color >> 24;
+    u32 b = (color >> 16) & 0xFF;
+    u32 c = (color & 0xFF00) >> 8;
+    u32 d = color & 0xFF;
+    a = (a * scale) >> 8;
+    b = (b * scale) >> 8;
+    c = (c * scale) >> 8;
+    return (a << 24) | (b << 16) | (c << 8) | d;
+}
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1630);
+/* Blend two packed 8-bit-channel colors: weight t (mirrored above 0x100) for the first, 0x100 - t for the second. */
+u32 func_002C1630(u32 c0, u32 c1, u32 t) {
+    u32 a0 = c0 >> 24;
+    u32 r0 = (c0 & 0xFF0000) >> 16;
+    u32 g0 = (c0 & 0xFF00) >> 8;
+    u32 b0 = c0 & 0xFF;
+    u32 a1 = c1 >> 24;
+    u32 r1 = (c1 & 0xFF0000) >> 16;
+    u32 g1 = (c1 & 0xFF00) >> 8;
+    u32 b1 = c1 & 0xFF;
+    u32 inv;
+
+    if (t > 0x100) {
+        t = 0x200 - t;
+    }
+    inv = 0x100 - t;
+    a0 = (a0 * t + a1 * inv) >> 8;
+    r0 = (r0 * t + r1 * inv) >> 8;
+    g0 = (g0 * t + g1 * inv) >> 8;
+    b0 = (b0 * t + b1 * inv) >> 8;
+    return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
+}
 
 void func_002C16E0(void) {
 }
@@ -514,7 +559,39 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C19C0);
+typedef struct GridListNode {
+    u8 pad0[0x18];
+    void *head;                 /* 0x18 */
+    struct GridListNode *next;  /* 0x1C */
+} GridListNode;
+
+typedef struct GridListOwner {
+    u8 pad0[6];
+    u16 count;                  /* 0x06 */
+    u8 pad8[8];
+    GridListNode *list;         /* 0x10 */
+} GridListOwner;
+
+/* Bit 0: the first node has a head. Bit 1: the list has at least `count` links. */
+u32 func_002C19C0(GridListOwner *owner) {
+    GridListNode *node = owner->list;
+    u32 flags;
+    s32 i;
+
+    if (node == 0) {
+        return 0;
+    }
+    flags = node->head != 0;
+    for (i = 0; i < owner->count; i++) {
+        node = node->next;
+        if (node == 0) {
+            flags &= ~2;
+            return flags;
+        }
+    }
+    flags |= 2;
+    return flags;
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1A30);
 

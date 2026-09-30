@@ -194,7 +194,26 @@ void func_00314020(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_003140C8);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", ptyRebuildAllProfiles);
+/* Rebuild skill lists for the five occupied party slots. */
+void ptyRebuildAllProfiles(void) {
+    s32 i;
+    s32 offset;
+
+    for (offset = 0, i = 4; i >= 0; i--) {
+        u8 *unit = (u8 *)D_00435DD0 + 0xA60 + offset;
+
+        if ((((PtyProfileUnit *)unit)->flags & 1) != 0) {
+            s32 j;
+
+            for (j = 0; j < 0x10; j++) {
+                if (((PtyProfileUnit *)unit)->unitId == j) {
+                    func_003140C8(0, unit);
+                }
+            }
+        }
+        offset += 0x1C4;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314298);
 
@@ -274,7 +293,13 @@ void func_00314838(void) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314868);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314990);
+s32 func_00314990(s32 work, u16 id) {
+    u32 word, shift;
+    u32 *flags;
+    prfDecodeFlagPair(id, &word, &shift);
+    flags = (u32 *)D_00435DD0;
+    return (flags[0x16f10 / 4 + *(u16 *)(work + 4) * 12 + word] & (1 << shift)) != 0;
+}
 
 s32 func_00314A08(u8 *work) {
     u32 index;
@@ -289,7 +314,13 @@ s32 func_00314A08(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314A80);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314B00);
+s32 func_00314B00(s32 work, u16 id) {
+    u32 word, shift;
+    u32 *flags;
+    prfDecodeFlagPair(id, &word, &shift);
+    flags = (u32 *)D_00435DD0;
+    return (flags[0x16f10 / 4 + *(u16 *)(work + 4) * 12 + word] & (1 << (shift + 1))) != 0;
+}
 
 u32 func_00314B78(s32 arg0) {
     return ((ScriptFlagWork *)arg0)->scriptId;
@@ -380,7 +411,13 @@ void scrSetGlobalBitFlag(u32 id) {
     *word |= 1U << (bit & 31);
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314E80);
+/* Tests the global bit that scrSetGlobalBitFlag sets (ids 0x1AB..0x21F). */
+u32 func_00314E80(u16 id) {
+    if (id < 0x1ab) return 0;
+    if (id >= 0x220) return 0;
+    id += 0xfe55;
+    return *(u32 *)(D_00435DD0 + 0x16ef0 + (id >> 5) * 4) & (1U << (id & 31));
+}
 
 void scrSetSecondaryScriptFlag(u8 *work, u16 index) {
     u32 word, shift;
@@ -495,13 +532,24 @@ u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
 }
 
-u8 func_00315248(u16 id, s32 sub) {
+u32 func_00315248(u16 id, s32 sub) {
     return D_0040132C[sub + id * 36];
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", scrCallIfOperandReady);
+u32 scrCallIfOperandReady(u8 *operand, s32 value) {
+    s32 selected = func_00314C10((s32)operand);
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_003152D8);
+    if (func_00314C10((s32)operand)) {
+        return func_00315248((u16)selected, value);
+    }
+}
+
+u16 func_003152D8(u16 scriptId, u32 entry) {
+    if (entry >= 8) {
+        return 0;
+    }
+    return D_00401332[scriptId * 18 + entry];
+}
 
 u32 func_00315318(void) {
     return 0;
@@ -575,7 +623,22 @@ s32 ptyReqProfileCountAtLeast(s32 state, u8 *operand) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_003157A0);
+s32 func_003157A0(u8 *work, u8 *req) {
+    u32 index;
+    u32 count = 0;
+
+    for (index = 0; index < 0xB0; index++) {
+        if (func_00314990(work, (u16)index)) {
+            if (D_00401320[index][5] >= req[5]) {
+                count++;
+            }
+        }
+    }
+    if (count < *(u32 *)(req + 8)) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 ptyAreReqProfilesInParty(u8 *operand) {
     s32 index = 0;

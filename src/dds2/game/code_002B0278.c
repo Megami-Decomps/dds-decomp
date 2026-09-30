@@ -4,6 +4,8 @@ extern s32 D_00435E5C;
 
 extern s32 func_002C6CE8(void);
 
+extern void func_002B9CF8(s32, s32, s32, s32, s32);
+
 extern s32 func_002B86E8(u32);
 
 extern void func_002AAE80();
@@ -2199,7 +2201,27 @@ void func_002B9DD8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 par
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9EA0);
+void func_002B9EA0(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
+    s32 texture = *(s32 *)(menu + 0x94);
+    s32 count;
+
+    *(s32 *)(*(s32 *)(menu + 0x18) + 0x3C) = texture;
+    func_002B9CF8(x, y, depth, menu, param);
+    func_002B9CD8(x, y, depth, menu, param);
+    if (*(s32 *)(*(s32 *)(menu + 0x18) + 0x20) != 0) {
+        func_002B9DD8(x, y, depth, menu, param);
+    }
+    func_002B9218(x, y, depth, *(s32 *)(menu + 0x10), *(s32 *)(menu + 0x14), texture, *(s32 *)(menu + 4),
+                  *(s32 *)(menu + 0x18), param);
+    if (*(s32 *)(menu + 0x90) != 0) {
+        func_002B9BB0(x, y, depth, menu, param);
+    }
+    count = *(s32 *)(menu + 0x94);
+    if (count < 0x100) {
+        *(s32 *)(menu + 0x94) = count + 0x20;
+    }
+    *(u32 *)(menu + 4) |= 4;
+}
 
 void func_002B9FB8(s32 window) {
     s32 remaining;
