@@ -103,7 +103,7 @@ u32 func_0010CA08(ScrData *scr) {
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpWaitDispatch);
 
-u32 func_0010CAC0(ScrData *scr)
+u32 scrReturnToStackAddress(ScrData *scr)
 {
     if (scr->sp == 0) {
         return 0;
@@ -141,25 +141,25 @@ u32 scrJumpLabel(ScrData *scr) {
 
 INCLUDE_ASM(const s32, "script/scrTraceCode", bfOpBinaryEval);
 
-u32 func_0010D0B8(ScrData *scr) {
+u32 scrOpAdd(ScrData *scr) {
     bfOpBinaryEval(scr, 0);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D0F0(ScrData *scr) {
+u32 scrOpSubtract(ScrData *scr) {
     bfOpBinaryEval(scr, 1);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D128(ScrData *scr) {
+u32 scrOpMultiply(ScrData *scr) {
     bfOpBinaryEval(scr, 2);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D160(ScrData *scr) {
+u32 scrOpDivide(ScrData *scr) {
     bfOpBinaryEval(scr, 3);
     scr->pc = scr->pc + 1;
     return 1;
@@ -205,49 +205,49 @@ u32 bfOpNot(ScrData *scr) {
     return 1;
 }
 
-u32 func_0010D328(ScrData *scr) {
+u32 scrOpLogicalOr(ScrData *scr) {
     bfOpBinaryEval(scr, 4);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D360(ScrData *scr) {
+u32 scrOpLogicalAnd(ScrData *scr) {
     bfOpBinaryEval(scr, 5);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D398(ScrData *scr) {
+u32 scrOpCompareEqual(ScrData *scr) {
     bfOpBinaryEval(scr, 6);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D3D0(ScrData *scr) {
+u32 scrOpCompareNotEqual(ScrData *scr) {
     bfOpBinaryEval(scr, 7);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D408(ScrData *scr) {
+u32 scrOpCompareLess(ScrData *scr) {
     bfOpBinaryEval(scr, 8);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D440(ScrData *scr) {
+u32 scrOpCompareGreater(ScrData *scr) {
     bfOpBinaryEval(scr, 9);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D478(ScrData *scr) {
+u32 scrOpCompareLessEqual(ScrData *scr) {
     bfOpBinaryEval(scr, 10);
     scr->pc = scr->pc + 1;
     return 1;
 }
 
-u32 func_0010D4B0(ScrData *scr) {
+u32 scrOpCompareGreaterEqual(ScrData *scr) {
     bfOpBinaryEval(scr, 0xb);
     scr->pc = scr->pc + 1;
     return 1;
@@ -338,13 +338,13 @@ char *scrReadStringParameter(s32 paramIdx)
     return NULL;
 }
 
-void func_0010D818(s32 retVal)
+void scrSetIntegerReturnValue(s32 retVal)
 {
     D_00438E8C->stackTypes[SCR_STACK_RET] = 0;
     D_00438E8C->stackValues[SCR_STACK_RET].i = retVal;
 }
 
-void func_0010D830(f32 retVal)
+void scrSetFloatReturnValue(f32 retVal)
 {
     D_00438E8C->stackTypes[SCR_STACK_RET] = 1;
     D_00438E8C->stackValues[SCR_STACK_RET].f = retVal;

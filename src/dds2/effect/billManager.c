@@ -71,7 +71,7 @@ void billReleaseChild(BillObj *obj) {
     if (child != 0) {
         func_00157E50(child);
     }
-    func_00328E48(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 void billProcessChild(BillObj *obj) {
@@ -119,13 +119,13 @@ BillObj *billCloneList(BillObj *obj) {
 
 void billReleaseList(BillObj *obj) {
     func_00159848(obj->unk30);
-    func_00328E48(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158F88);
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
-u32 func_00159158(u32 colorA, u32 colorB) {
+u32 effBillModulateColors(u32 colorA, u32 colorB) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];

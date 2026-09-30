@@ -19,7 +19,7 @@ extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 void effFreePairedResources(EffectPair *pair) {
     func_00167350(pair->resource[1]);
     func_00167350(pair->resource[0]);
-    func_002CFF98(pair);
+    sdfReleaseChipBlock(pair);
 }
 
 void effUpdatePairedResources(EffectPair *work) {
@@ -100,7 +100,7 @@ INCLUDE_ASM(const s32, "game/code_00185E18", func_00186BC8);
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186C18);
 
 void func_00186CB8(void) {
-    func_002CFF98();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186CD0);

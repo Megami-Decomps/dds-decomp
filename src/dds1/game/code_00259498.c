@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
 
 extern s32 func_002D03F8(s32);
@@ -35,7 +35,7 @@ INCLUDE_ASM(const s32, "game/code_00259498", func_0025B350);
 
 void func_0025B7B0(void *unused, void *allocation) {
     if (allocation != 0) {
-        func_002CFF98(allocation);
+        sdfReleaseChipBlock(allocation);
     }
 }
 

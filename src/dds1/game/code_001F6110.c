@@ -172,15 +172,15 @@ extern u64 btlCreateCommandSoundTask(u64, u64);
 
 extern s32 D_003BB3D8;
 
-extern u32 func_0020A3F0(void);
+extern u32 btlGetEventEffectValue(void);
 
 extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetEffectActive(void);
 
-extern u32 func_002099A0(void);
+extern u32 btlGetSelectedBossEffectId(void);
 
-extern u32 func_00208C68(void);
+extern u32 btlGetSpecialModeEffectValue(void);
 
 extern u64 func_001ACAE0(void);
 
@@ -190,11 +190,11 @@ extern s32 func_0010D6A8(void);
 
 extern u32 D_003BD858;
 
-extern u32 func_0029BF88(u32, u32);
+extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 extern s32 func_001A17F0(void);
 extern s32 func_001FEC68(s32 context, s32 actor, u32 mask);
-extern void func_0010D5F0();
+extern void scrSetIntegerReturnValue();
 extern void btlCmdSimpleC(s32, u16);
 extern u8 *btlAllocTask(s32);
 extern void func_001F60E8(void);
@@ -579,7 +579,7 @@ void btlUpdateUnitActors(void) {
 }
 
 extern void evtSetUnitStatusFlags(u32);
-extern void func_00221D98(u32, s32);
+extern void evtSetUnitNormalizedDirection(u32, s32);
 
 void btlRefreshUnitEffects(void) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
@@ -590,7 +590,7 @@ void btlRefreshUnitEffects(void) {
                 handle = unit->statusEffectHandle;
                 evtSetUnitStatusFlags(handle);
                 VU0_LOAD_VF(vf10, unit);
-                func_00221D98(handle, 0);
+                evtSetUnitNormalizedDirection(handle, 0);
             }
         }
         unit = unit->next;
@@ -941,7 +941,7 @@ void btlRetainButtonTexture(void) {
     u32 resource;
 
     state = (BtlState *)func_001A17F0();
-    resource = func_0029BF88(D_003BD858, 0x10000);
+    resource = effCloneSharedReferenceWithValue(D_003BD858, 0x10000);
     state->buttonTextureHandle = resource;
 }
 
@@ -1046,7 +1046,7 @@ u32 btlCmdSetContextFlagOne(void) {
     return 1;
 }
 
-u32 func_001F8538(void) {
+u32 btlScriptSetActorUnitParameter(void) {
     u16 value;
     s32 context;
 
@@ -1179,11 +1179,11 @@ typedef struct BtlCommandContext {
 u32 btlNbScriptCheckActorFlag(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 1;
         ((BtlCommandContext *)context)->choicesA[0] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~1;
     }
     return 1;
@@ -1192,11 +1192,11 @@ u32 btlNbScriptCheckActorFlag(void) {
 u32 func_001F89B0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x6000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 2;
         ((BtlCommandContext *)context)->choicesA[1] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~2;
     }
     return 1;
@@ -1205,11 +1205,11 @@ u32 func_001F89B0(void) {
 u32 func_001F8A40(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 4;
         ((BtlCommandContext *)context)->choicesA[2] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~4;
     }
     return 1;
@@ -1217,11 +1217,11 @@ u32 func_001F8A40(void) {
 u32 func_001F8AD0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 8;
         ((BtlCommandContext *)context)->choicesA[3] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~8;
     }
     return 1;
@@ -1229,11 +1229,11 @@ u32 func_001F8AD0(void) {
 u32 func_001F8B60(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x10;
         ((BtlCommandContext *)context)->choicesA[4] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x10;
     }
     return 1;
@@ -1241,11 +1241,11 @@ u32 func_001F8B60(void) {
 u32 func_001F8BF0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x1C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x20;
         ((BtlCommandContext *)context)->choicesA[5] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x20;
     }
     return 1;
@@ -1253,11 +1253,11 @@ u32 func_001F8BF0(void) {
 u32 func_001F8C80(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x40;
         ((BtlCommandContext *)context)->choicesA[6] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x40;
     }
     return 1;
@@ -1265,11 +1265,11 @@ u32 func_001F8C80(void) {
 u32 func_001F8D10(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x80;
         ((BtlCommandContext *)context)->choicesA[7] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x80;
     }
     return 1;
@@ -1277,11 +1277,11 @@ u32 func_001F8D10(void) {
 u32 func_001F8DA0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x100;
         ((BtlCommandContext *)context)->choicesA[8] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x100;
     }
     return 1;
@@ -1289,11 +1289,11 @@ u32 func_001F8DA0(void) {
 u32 func_001F8E30(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x2C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x200;
         ((BtlCommandContext *)context)->choicesA[9] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x200;
     }
     return 1;
@@ -1301,11 +1301,11 @@ u32 func_001F8E30(void) {
 u32 func_001F8EC0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x400;
         ((BtlCommandContext *)context)->choicesA[10] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x400;
     }
     return 1;
@@ -1313,11 +1313,11 @@ u32 func_001F8EC0(void) {
 u32 func_001F8F50(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x800;
         ((BtlCommandContext *)context)->choicesA[11] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x800;
     }
     return 1;
@@ -1325,11 +1325,11 @@ u32 func_001F8F50(void) {
 u32 func_001F8FE0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x3800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x1000;
         ((BtlCommandContext *)context)->choicesA[12] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x1000;
     }
     return 1;
@@ -1338,10 +1338,10 @@ u32 func_001F8FE0(void) {
 u32 func_001F9070(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x4800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x2000;
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x2000;
     }
     return 1;
@@ -1350,10 +1350,10 @@ u32 func_001F9070(void) {
 u32 func_001F90E8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x5C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x2000000;
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x2000000;
     }
     return 1;
@@ -1362,11 +1362,11 @@ u32 func_001F90E8(void) {
 u32 func_001F9168(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x4C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x4000;
         ((BtlCommandContext *)context)->choicesA[14] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x4000;
     }
     return 1;
@@ -1374,11 +1374,11 @@ u32 func_001F9168(void) {
 u32 func_001F91F8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x5000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x4000;
         ((BtlCommandContext *)context)->choicesA[14] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x4000;
     }
     return 1;
@@ -1389,9 +1389,9 @@ u32 func_001F9288(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x6c00000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1401,9 +1401,9 @@ u32 func_001F92D8(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x9400000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1413,9 +1413,9 @@ u32 func_001F9328(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x9c00000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1423,11 +1423,11 @@ u32 func_001F9328(void) {
 u32 func_001F9378(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x8C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x40000;
         ((BtlCommandContext *)context)->choicesA[18] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x40000;
     }
     return 1;
@@ -1435,11 +1435,11 @@ u32 func_001F9378(void) {
 u32 func_001F9410(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x9000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x80000;
         ((BtlCommandContext *)context)->choicesA[19] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x80000;
     }
     return 1;
@@ -1448,9 +1448,9 @@ u32 func_001F9410(void) {
 u32 func_001F94A8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1458,9 +1458,9 @@ u32 func_001F94A8(void) {
 u32 func_001F9518(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1468,11 +1468,11 @@ u32 func_001F9518(void) {
 u32 func_001F9588(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x100000;
         ((BtlCommandContext *)context)->choicesA[20] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x100000;
     }
     return 1;
@@ -1480,11 +1480,11 @@ u32 func_001F9588(void) {
 u32 func_001F9620(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x200000;
         ((BtlCommandContext *)context)->choicesA[21] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x200000;
     }
     return 1;
@@ -1492,11 +1492,11 @@ u32 func_001F9620(void) {
 u32 func_001F96B8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xA800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x400000;
         ((BtlCommandContext *)context)->choicesA[22] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x400000;
     }
     return 1;
@@ -1504,11 +1504,11 @@ u32 func_001F96B8(void) {
 u32 func_001F9750(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xAC00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x800000;
         ((BtlCommandContext *)context)->choicesA[23] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x800000;
     }
     return 1;
@@ -1517,11 +1517,11 @@ u32 func_001F9750(void) {
 u32 func_001F97E8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xB800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 1;
         ((BtlCommandContext *)context)->choicesB[1] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~1;
     }
     return 1;
@@ -1529,11 +1529,11 @@ u32 func_001F97E8(void) {
 u32 func_001F9878(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xBC00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 2;
         ((BtlCommandContext *)context)->choicesB[2] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~2;
     }
     return 1;
@@ -1541,11 +1541,11 @@ u32 func_001F9878(void) {
 u32 func_001F9908(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 4;
         ((BtlCommandContext *)context)->choicesB[3] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~4;
     }
     return 1;
@@ -1553,11 +1553,11 @@ u32 func_001F9908(void) {
 u32 func_001F9998(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 8;
         ((BtlCommandContext *)context)->choicesB[4] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~8;
     }
     return 1;
@@ -1565,11 +1565,11 @@ u32 func_001F9998(void) {
 u32 func_001F9A28(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xC800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x10;
         ((BtlCommandContext *)context)->choicesB[5] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x10;
     }
     return 1;
@@ -1577,11 +1577,11 @@ u32 func_001F9A28(void) {
 u32 func_001F9AB8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xCC00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x20;
         ((BtlCommandContext *)context)->choicesB[6] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x20;
     }
     return 1;
@@ -1589,11 +1589,11 @@ u32 func_001F9AB8(void) {
 u32 func_001F9B48(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xD400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x400;
         ((BtlCommandContext *)context)->choicesB[11] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x400;
     }
     return 1;
@@ -1601,11 +1601,11 @@ u32 func_001F9B48(void) {
 u32 func_001F9BD8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xD800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x800;
         ((BtlCommandContext *)context)->choicesB[12] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x800;
     }
     return 1;
@@ -1614,9 +1614,9 @@ u32 func_001F9BD8(void) {
 u32 func_001F9C68(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1624,9 +1624,9 @@ u32 func_001F9C68(void) {
 u32 func_001F9CD8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x11000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1634,11 +1634,11 @@ u32 func_001F9CD8(void) {
 u32 func_001F9D48(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x9800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x40;
         ((BtlCommandContext *)context)->choicesB[7] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x40;
     }
     return 1;
@@ -1646,11 +1646,11 @@ u32 func_001F9D48(void) {
 u32 func_001F9DD8(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xDC00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x1000;
         ((BtlCommandContext *)context)->choicesB[13] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x1000;
     }
     return 1;
@@ -1659,11 +1659,11 @@ u32 func_001F9DD8(void) {
 u32 func_001F9E68(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xD000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x80;
         ((BtlCommandContext *)context)->choicesB[8] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x80;
     }
     return 1;
@@ -1674,9 +1674,9 @@ u32 func_001F9EF0(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xe800000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1686,9 +1686,9 @@ u32 func_001F9F40(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xec00000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1696,11 +1696,11 @@ u32 func_001F9F40(void) {
 u32 func_001F9F90(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0xB000000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x1000000;
         ((BtlCommandContext *)context)->choicesA[24] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x1000000;
     }
     return 1;
@@ -1709,39 +1709,39 @@ u32 func_001F9F90(void) {
 u32 func_001FA018(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x0b400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsA |= 0x04000000;
         ((BtlCommandContext *)context)->choicesB[0] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsA &= ~0x04000000;
     }
     return 1;
 }
 
 u32 func_001FA0A0(void) {
-    if (func_002099E0() != 0) {
-        func_0010D5F0(1);
+    if (btlHasBossEffectOption() != 0) {
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
 
 u32 btlCmdTestEffectActor(void) {
     if (btlHasEffectActor() != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
 
 u32 func_001FA120(void) {
     if (func_00207C18() != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1761,22 +1761,22 @@ u32 btlCmdCheckHpPercent(void) {
             s32 current = func_001A17F8(stats);
             s32 maximum = func_001A1838(stats);
             if (!((u32)(maximum * percent) < (u32)(current * 100))) {
-                func_0010D5F0(1);
+                scrSetIntegerReturnValue(1);
                 return 1;
             }
         }
         unit = unit->next;
     }
-    func_0010D5F0(0);
+    scrSetIntegerReturnValue(0);
     return 1;
 }
 
 
 u32 func_001FA270(void) {
-    if (func_0020A418() != 0) {
-        func_0010D5F0(1);
+    if (btlHasFirstSpecialEnemySpecies() != 0) {
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1784,11 +1784,11 @@ u32 func_001FA270(void) {
 u32 func_001FA2B0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0f800000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x4000;
         ((BtlCommandContext *)context)->choicesB[15] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x4000;
     }
     return 1;
@@ -1797,11 +1797,11 @@ u32 func_001FA2B0(void) {
 u32 func_001FA340(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0fc00000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x8000;
         ((BtlCommandContext *)context)->choicesB[16] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x8000;
     }
     return 1;
@@ -1810,11 +1810,11 @@ u32 func_001FA340(void) {
 u32 func_001FA3D0(void) {
     s32 context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x0f400000)) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
         ((BtlCommandContext *)context)->selectionFlagsB |= 0x2000;
         ((BtlCommandContext *)context)->choicesB[14] = scrReadIntParameter(0);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
         ((BtlCommandContext *)context)->selectionFlagsB &= ~0x2000;
     }
     return 1;
@@ -1825,9 +1825,9 @@ u32 func_001FA460(void) {
 
     context = func_0010D6A8();
     if (func_001FEC68(context, ((BtlCommandContext *)context)->actor, 0x10000000) != 0) {
-        func_0010D5F0(1);
+        scrSetIntegerReturnValue(1);
     } else {
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -1836,7 +1836,7 @@ u32 btlScriptReturnBattleValue(void) {
     u64 result;
 
     result = func_001ACAE0();
-    func_0010D5F0(result);
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
@@ -1844,7 +1844,7 @@ u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    func_0010D5F0(((BtlState *)battle)->value250);
+    scrSetIntegerReturnValue(((BtlState *)battle)->value250);
     return 1;
 }
 
@@ -1852,23 +1852,23 @@ u32 func_001FA500(void) {
     s32 context;
 
     context = func_0010D6A8();
-    func_0010D5F0(*(u16 *)(*(s32 *)(context + 0x18) + 0x134));
+    scrSetIntegerReturnValue(*(u16 *)(*(s32 *)(context + 0x18) + 0x134));
     return 1;
 }
 
 u32 func_001FA530(void) {
     u32 result;
 
-    result = func_00208C68();
-    func_0010D5F0(result);
+    result = btlGetSpecialModeEffectValue();
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
 u32 func_001FA558(void) {
     u32 result;
 
-    result = func_002099A0();
-    func_0010D5F0(result);
+    result = btlGetSelectedBossEffectId();
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
@@ -1876,7 +1876,7 @@ u32 btlScriptReturnEffectActive(void) {
     u32 active;
 
     active = btlGetEffectActive();
-    func_0010D5F0(active);
+    scrSetIntegerReturnValue(active);
     return 1;
 }
 
@@ -1884,7 +1884,7 @@ u32 func_001FA5A8(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    func_0010D5F0(((BtlState *)battle)->value25C);
+    scrSetIntegerReturnValue(((BtlState *)battle)->value25C);
     return 1;
 }
 
@@ -1892,7 +1892,7 @@ u32 btlScriptReturnEffectValue(void) {
     u32 value;
 
     value = btlGetEffectValue();
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -1900,20 +1900,20 @@ u32 btlScriptReturnContextSignedByte(void) {
     s32 context;
 
     context = func_0010D6A8();
-    func_0010D5F0(*(s8 *)(context + 0x146));
+    scrSetIntegerReturnValue(*(s8 *)(context + 0x146));
     return 1;
 }
 
 u32 btlScriptReturnGlobalDebugValue(void) {
-    func_0010D5F0(D_003BB870);
+    scrSetIntegerReturnValue(D_003BB870);
     return 1;
 }
 
 u32 func_001FA648(void) {
     u32 result;
 
-    result = func_0020A3F0();
-    func_0010D5F0(result);
+    result = btlGetEventEffectValue();
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
@@ -1942,7 +1942,7 @@ u32 func_001FA6D8(void) {
 }
 
 u32 func_001FA718(void) {
-    func_001C44D0();
+    fldClearSceneTransition();
     return 1;
 }
 
@@ -1956,13 +1956,13 @@ u32 btlScriptFlagAllUnitsDefeatCandidates(void) {
     return 1;
 }
 
-u32 func_001FA778(void) {
+u32 btlScriptFlagPlayerDefeatCandidates(void) {
     btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x200);
     return 1;
 }
 
-u32 func_001FA7A0(void) {
+u32 btlScriptFlagEnemyDefeatCandidates(void) {
     btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(0x400);
     return 1;
@@ -2055,13 +2055,13 @@ u32 btlCmdCameraMoveBlend(void) {
 
 u32 func_001FAB38(void) {
     btlBossDebugPrintf(D_003A5440);
-    func_0010D5F0(0);
+    scrSetIntegerReturnValue(0);
     return 1;
 }
 
 u32 func_001FAB68(void) {
     btlBossDebugPrintf(D_003A5460);
-    func_0010D5F0(0x14);
+    scrSetIntegerReturnValue(0x14);
     return 1;
 }
 
@@ -2072,7 +2072,7 @@ u32 func_001FAB98(void) {
 
 u32 func_001FABB8(void) {
     btlBossDebugPrintf(D_003A5488);
-    func_0010D5F0(0);
+    scrSetIntegerReturnValue(0);
     return 1;
 }
 
@@ -2118,7 +2118,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     s32 slot = scrCreateTaskForProcessId(state->list->count - 1, D_003BAAA8, taskArg);
     s32 handle;
     scrSetCurrentActor(slot, actor);
-    handle = *(s32 *)((u8 *)func_00101A70(slot) + 0xCC);
+    handle = *(s32 *)((u8 *)kwlnTaskGetUserValue(slot) + 0xCC);
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
         func_0019C590(handle, 0, unit->mode, (unit->unk_120 & 0x20) ? 1 : 2);
@@ -2155,7 +2155,7 @@ void func_001FADE8(void) {
 void func_001FADF0(void) {
 }
 
-extern void func_00221FF8(s32, s32);
+extern void evtConfigureUnitTransition(s32, s32);
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = func_001A17F0();
@@ -2165,7 +2165,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
             if ((actor->flags & 2) != 0) {
                 s32 effect = actor->statusEffectHandle;
                 if (effect != 0) {
-                    func_00221FF8(effect, 0);
+                    evtConfigureUnitTransition(effect, 0);
                 }
             }
             actor = actor->next;
@@ -2478,12 +2478,12 @@ void btlDestroyEntryList(BtlEntryList *list) {
         entry = list->head;
         do {
             BtlEntry *next = entry->next;
-            func_002CFF98(entry);
+            sdfReleaseChipBlock(entry);
             entry = next;
         } while (entry != NULL);
     }
-    func_002CFF98(list->unk_04);
-    func_002CFF98(list);
+    sdfReleaseChipBlock(list->unk_04);
+    sdfReleaseChipBlock(list);
 }
 
 void btlAppendEntry(BtlEntryList *list, char *name, s32 category, s32 flags, s32 id) {
@@ -2569,7 +2569,7 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *resource) {
     if (handle != 0 && resource->ownsHandle == 1) {
         sdfTexReleaseReferenceViaHandler(handle);
     }
-    func_002CFF98(resource);
+    sdfReleaseChipBlock(resource);
 }
 
 /* Header of the 0x38-byte resource-name record; trailing bytes hold the name. */
@@ -2671,7 +2671,7 @@ s32 btlCreateResourceNameRecord(s32 name) {
 }
 
 void func_001FC2E8(void) {
-    func_002CFF98();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);

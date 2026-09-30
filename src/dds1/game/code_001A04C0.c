@@ -170,7 +170,7 @@ extern void sndResetTransition(void);
 
 extern void func_001F4430(void);
 
-extern void func_001D48C0(void);
+extern void btlResetDeferredTaskQueue(void);
 
 extern void btlResetToInitialScene(void);
 
@@ -192,7 +192,7 @@ extern char D_003A15A8[];
 
 extern char D_003A15C8[];
 
-extern void func_0019B9A0(s32);
+extern void itfMesDestroyWindowIfPresent(s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A1598);
 
@@ -231,9 +231,9 @@ s32 func_001A1068(void) {
     brsTaskTryDestroy();
     btlClearSoundAndModelResources();
     func_001A0ED0();
-    func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x4A0));
-    func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x49C));
-    func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x498));
+    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x4A0));
+    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x49C));
+    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x498));
     btlAdvanceTitleStateWithAudioCleanup();
     func_00105888();
     evtDestroySelectionState();
@@ -314,13 +314,13 @@ typedef struct EncBgRow {
 
 extern EncBgRow *D_003BAA44;
 
-extern s32 func_00126140(s32 *, s32 *);
+extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
 
 s32 func_001A1668(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
     s16 i;
 
-    if (func_00126140(&buffer[0], &buffer[1]) == 0) {
+    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == 0) {
         return 0;
     }
     for (i = 0; i < 0x10; i++) {

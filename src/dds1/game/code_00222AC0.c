@@ -36,7 +36,7 @@ typedef struct EvtUnit {
 } EvtUnit;
 
 /* Effect slot: three vec4 at +0x08/+0x18/+0x28 (the last carries w = 1.0f),
- * then the two floats returned by func_00223A10 at +0x38/+0x3C. */
+ * then the two floats returned by evtFindUnitSlotAuxCoordinates at +0x38/+0x3C. */
 typedef struct {
     s32 state;          /* 0x00: 2 or 3 when in use */
     s32 id;             /* 0x04: bound object id (state 3) */
@@ -69,7 +69,7 @@ extern void effObjSetInnerThirdVec(void *object, void *vector);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern EvtUnit *func_00222090(s32 idx);
+extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void func_00221D00(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void func_00221E08(EvtUnit *unit, s32 arg, u32 color);
 extern void func_00221EF0(EvtUnit *unit, s32 arg, u32 color);
@@ -120,20 +120,20 @@ extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
 
 extern s32 scrReadIntParameter(s32 idx);
-extern s32 func_0021FC30(s32 arg0, s32 arg1);
+extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
 extern void *func_00110A48(void *world, s32 objectId, s32 kind);
 extern void *func_00110A38(void *world);
-extern s32 func_00222298(EvtUnit *unit);
+extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void func_00115970(void *arg0);
 extern void func_00110928(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
-extern void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
+extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
 extern void dds3FreePathObject(s32);
 extern s32 func_00116D38(void *);
 extern void func_00116F38(s32);
-extern f32 func_00220830(s32);
+extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void func_00117568(s32, s32);
 extern void func_002E7F20(f32, f32, f32);
@@ -150,14 +150,14 @@ extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
 extern s32 evtFindTaskById(s32 taskId);
 extern void func_00101A80(s32 arg0, s32 arg1);
-extern void func_002223D8(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_00222340(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_003003F0();
 extern u8 D_003AC480[];
 extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
 extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
-extern void func_00115318(void *arg0, u32 arg1);
+extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 extern void effObjSetInnerFirstVec(void *object, void *vector);
 extern f32 bfWaitReadArgFloat(s32 idx);
 
@@ -239,20 +239,20 @@ typedef struct EvtLodUnit {
 
 extern s32 sdfGetLodChunkValue();
 extern s32 scrGetWindow(void);
-extern void func_0019CB98(s32 window, void (*callback)(void));
-extern void func_00222300(EvtUnit *unit, s32 arg1, s32 arg2);
+extern void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
+extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 extern s32 scrReadStringParameter(s32 idx);
-extern void *func_00115858(s32 arg0, s32 arg1);
+extern void *effObjCreateKindFromResource(s32 arg0, s32 arg1);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00114FA0(s32 arg0, void *arg1, void *arg2);
 extern u8 D_003AC520[];
-extern void *func_001152B0(s32 arg0, void *arg1, void *arg2);
-extern s32 func_0010D5F0(s32 arg0);
-extern void func_0021FD50(s32 arg0, s32 arg1);
+extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
+extern s32 scrSetIntegerReturnValue(s32 arg0);
+extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_00221FF8(EvtUnit *unit, s32 arg1);
+extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
-extern void func_00222310(u32 arg0);
+extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
 typedef struct EvtWorldUnitRef {
     u8 pad00[0x18];
@@ -281,7 +281,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
     }
 }
 
-void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     work->unkB0 = mode;
     work->mode = 1;
     work->unkAE = 0;
@@ -293,12 +293,12 @@ void func_00222B70(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames
     work->unkB2 = 0;
 }
 
-void func_00222BA8(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     EvtWorldUnitRef *worldUnit;
 
     worldUnit = func_00110A48(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        func_00222B70(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
+        evtBeginUnitVectorTransition(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
         work->unkAE = 1;
         work->linkedUnit = worldUnit;
     }
@@ -317,7 +317,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     path = func_00116D38(pathSource);
     work->pathHandle = path;
-    work->pathSpeed = 40.0f / func_00220830(path);
+    work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
         evtScaleValueByMultiplier(path, 0.0f);
         func_00117568(path, 0);
@@ -385,7 +385,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222ED8);
 
 extern void func_00242BD0(f32 *, f32 *, f32 *, f32 *, f32 *);
 
-void func_00223540(void) {
+void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
@@ -448,7 +448,7 @@ s32 func_00223718(s32 id, f32 *out) {
     return 1;
 }
 
-void func_00223828(EvtUnit *unit) {
+void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
     EvtSlotEnds desc = { ends, 0, 0 };
@@ -494,7 +494,7 @@ void func_00223828(EvtUnit *unit) {
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
-s32 func_00223A10(s32 id, f32 *outX, f32 *outY) {
+s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
@@ -532,7 +532,7 @@ u32 evtGetWorldObjectId(void) {
     if (object != NULL) {
         id = object->objectId;
     }
-    func_0010D5F0(id);
+    scrSetIntegerReturnValue(id);
     return 1;
 }
 
@@ -543,8 +543,8 @@ u32 func_00223B20(void) {
 
     param0 = scrReadIntParameter(0);
     param1 = scrReadIntParameter(1);
-    value = func_0021FC30(param0, param1);
-    func_0010D5F0(value);
+    value = mdlSpawnLinkedCameraSlotViewerObject(param0, param1);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -570,7 +570,7 @@ u32 func_00223B68(void) {
     if (ret != 0) {
         func_00101A80(evtFindTaskById(scrReadIntParameter(0)), ret);
     }
-    return func_0010D5F0(model);
+    return scrSetIntegerReturnValue(model);
 }
 
 u32 func_00223C60(void) {
@@ -579,7 +579,7 @@ u32 func_00223C60(void) {
 
     param0 = scrReadIntParameter(0);
     param1 = scrReadIntParameter(1);
-    func_0021FD50(param0, param1);
+    mdlAttachWorldObjectToSourceVector(param0, param1);
     return 1;
 }
 
@@ -617,7 +617,7 @@ u32 func_00223D10(void) {
     return 1;
 }
 
-u32 func_00223D80(void) {
+u32 evtOpClearWorldObjectStateFlags(void) {
     void *ctx;
     s32 id;
     void *unit;
@@ -779,7 +779,7 @@ INCLUDE_ASM(const s32, "game/code_00222AC0", func_002241D0);
 u32 evtOpSetUnitParams5(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
@@ -788,17 +788,17 @@ u32 evtOpSetUnitParams5(void) {
         s32 scriptParam2 = scrReadIntParameter(2);
         s32 scriptParam3 = scrReadIntParameter(3);
         s32 scriptParam4 = scrReadIntParameter(4);
-        func_002223D8(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
+        evtPrepareUnitMotionState(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4);
     }
     return 1;
 }
 
-extern void func_00222340(EvtUnit *, s32, s32, s32, s32, s32);
+extern void evtConfigureUnitMotionSlot(EvtUnit *, s32, s32, s32, s32, s32);
 
 u32 evtOpSetUnitParams6(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
@@ -808,13 +808,13 @@ u32 evtOpSetUnitParams6(void) {
         s32 scriptParam3 = scrReadIntParameter(3);
         s32 scriptParam4 = scrReadIntParameter(4);
         s32 scriptParam5 = scrReadIntParameter(5);
-        func_00222340(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4, scriptParam5);
+        evtConfigureUnitMotionSlot(unit, scriptParam1, scriptParam2, scriptParam3, scriptParam4, scriptParam5);
     }
     return 1;
 }
 
 void func_002243C0(void) {
-    func_00222310(D_003BBDAC);
+    evtActivateStoredUnitMotionSlot(D_003BBDAC);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC2A0);
@@ -842,7 +842,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         func_003003F0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    func_00222340(unit, 2, motion, 0, 5, 1);
+    evtConfigureUnitMotionSlot(unit, 2, motion, 0, 5, 1);
     D_003BBDB0 = id;
     func_003003F0("<lips %d %d> \n", id, motion);
 }
@@ -870,7 +870,7 @@ void evtLipsStopFunction(void) {
         func_003003F0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
-    func_00222340(unit, 2, 0, 0, 3, 2);
+    evtConfigureUnitMotionSlot(unit, 2, 0, 0, 3, 2);
     func_003003F0("<lips_stop> stopunitid = %d\n", D_003BBDB0);
     D_003BBDB0 = 0;
 }
@@ -878,14 +878,14 @@ void evtLipsStopFunction(void) {
 u32 evtOpBeginWindowCallback(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
         s32 scriptParam1 = scrReadIntParameter(1);
         s32 scriptParam2 = scrReadIntParameter(2);
-        func_00222300(unit, scriptParam1, scriptParam2);
+        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
         D_003BBDAC = (u32)unit;
     }
     {
@@ -893,7 +893,7 @@ u32 evtOpBeginWindowCallback(void) {
         if (window < 0) {
             return 1;
         }
-        func_0019CB98(window, func_002243C0);
+        itfMesSetWindowCallbackAddress(window, func_002243C0);
     }
     return 1;
 }
@@ -901,15 +901,15 @@ u32 evtOpBeginWindowCallback(void) {
 u32 func_002246D0(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
     {
         s32 scriptParam1 = scrReadIntParameter(1);
         s32 scriptParam2 = scrReadIntParameter(2);
-        func_00222300(unit, scriptParam1, scriptParam2);
-        func_00222310((u32)unit);
+        evtStoreUnitMotionSlotSelection(unit, scriptParam1, scriptParam2);
+        evtActivateStoredUnitMotionSlot((u32)unit);
         D_003BBDAC = (u32)unit;
     }
     {
@@ -917,7 +917,7 @@ u32 func_002246D0(void) {
         if (window < 0) {
             return 1;
         }
-        func_0019CB98(window, func_002243C0);
+        itfMesSetWindowCallbackAddress(window, func_002243C0);
     }
     return 1;
 }
@@ -928,11 +928,11 @@ u32 func_00224770(void) {
     u32 ret = 1;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return ret;
     }
-    return func_00222298(unit) != 0;
+    return evtIsUnitMotionIdleOrTimedMode(unit) != 0;
 }
 
 u32 func_002247B0(void) {
@@ -942,7 +942,7 @@ u32 func_002247B0(void) {
     u32 result = 1;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return result;
     }
@@ -971,10 +971,10 @@ u32 func_00224828(void) {
 
 extern void func_002227C8(EvtUnit *unit);
 
-u32 func_00224880(void) {
+u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
@@ -984,7 +984,7 @@ u32 func_00224880(void) {
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(3);
         s32 valueB6 = scrReadIntParameter(4);
-        func_00222BA8(unit, mode, objectId, -1, frames, valueB6, 0, 0);
+        evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
         func_002227C8(unit);
@@ -992,10 +992,10 @@ u32 func_00224880(void) {
     return 1;
 }
 
-u32 func_00224948(void) {
+u32 evtOpStartUnitPathFollow(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
@@ -1015,7 +1015,7 @@ u32 func_00224948(void) {
 u32 evtOpSetUnitTableEntry(void) {
     EvtUnit *unit;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     if (unit == NULL) {
         return 1;
     }
@@ -1032,7 +1032,7 @@ u32 evtCommandSetUnitValue(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return 1;
     }
@@ -1045,7 +1045,7 @@ u32 func_00224AD0(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return 1;
     }
@@ -1059,23 +1059,23 @@ u32 func_00224B28(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return 1;
     }
-    func_002223D8(unit, scrReadIntParameter(1), 5, 7, 1);
+    evtPrepareUnitMotionState(unit, scrReadIntParameter(1), 5, 7, 1);
     func_003003F0(D_003AC480);
     return 1;
 }
 
-u32 func_00224B98(void) {
+u32 evtOpAttachUnitToWorldObject(void) {
     s32 id;
     EvtUnit *unit;
     s32 objectId;
     s32 frames;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit == NULL) {
         return 1;
     }
@@ -1115,7 +1115,7 @@ u32 evtUnitClearFlagBit(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
         *unit->flagWord &= ~1;
     }
@@ -1127,7 +1127,7 @@ u32 evtUnitSetFlagBit(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
         *unit->flagWord |= 1;
     }
@@ -1139,7 +1139,7 @@ u32 func_00225160(void) {
     EvtUnit *unit;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     evtSetUnitStatusFlags(unit);
     return 1;
 }
@@ -1150,9 +1150,9 @@ u32 func_00225190(void) {
     s32 param1;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     param1 = scrReadIntParameter(1);
-    func_00221FF8(unit, param1);
+    evtConfigureUnitTransition(unit, param1);
     return 1;
 }
 
@@ -1162,12 +1162,12 @@ u8 evtUnitHasNoStatusFlags(void) {
     u8 active;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     active = evtTestUnitStatusFlags(unit);
     return active == 0;
 }
 
-u32 func_00225208(void) {
+u32 evtOpSetUnitGradientColors(void) {
     EvtUnit *unit;
     s32 color1[4];
     s32 color2[4];
@@ -1175,7 +1175,7 @@ u32 func_00225208(void) {
     u32 packed2;
     u32 scale;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vaddx.x vf10, vf0, vf2x");
     VU0_SCALAR_OP(bfWaitReadArgFloat(3), "vaddx.y vf10, vf0, vf2x");
     VU0_SCALAR_OP(bfWaitReadArgFloat(4), "vaddx.z vf10, vf0, vf2x");
@@ -1197,12 +1197,12 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC480);
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00225330);
 
-u32 func_00225408(void) {
+u32 evtOpSetUnitPackedRgbColor(void) {
     EvtUnit *unit;
     s32 color[4];
     u32 packed;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vaddx.x vf10, vf0, vf2x");
     VU0_SCALAR_OP(bfWaitReadArgFloat(3), "vaddx.y vf10, vf0, vf2x");
     VU0_SET_AXIS_CLEAR_W(bfWaitReadArgFloat(4), z);
@@ -1212,12 +1212,12 @@ u32 func_00225408(void) {
     return 1;
 }
 
-u32 func_002254C8(void) {
+u32 evtOpSetUnitPackedAlpha(void) {
     EvtUnit *unit;
     s32 color[4];
     u32 packed;
 
-    unit = func_00222090(scrReadIntParameter(0));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
     VU0_MOVE_VF(vf10, vf0);
     VU0_SCALAR_OP(bfWaitReadArgFloat(2), "vmulx.w vf10, vf0, vf2x");
     EE_MMI_RGBA_PACK_F128(packed);
@@ -1226,13 +1226,13 @@ u32 func_002254C8(void) {
     return 1;
 }
 
-u32 func_00225560(void) {
+u32 evtOpSetUnitValueTransitionTarget(void) {
     s32 id;
     EvtUnit *unit;
     void *target;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     target = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(2));
     if (target == NULL) {
         return 1;
@@ -1241,13 +1241,13 @@ u32 func_00225560(void) {
     return 1;
 }
 
-u32 func_002255D8(void) {
+u32 evtOpEndUnitValueTransition(void) {
     s32 id;
     EvtUnit *unit;
     s32 param1;
 
     id = scrReadIntParameter(0);
-    unit = func_00222090(id);
+    unit = evtGetWorldUnitNestedValue(id);
     param1 = scrReadIntParameter(1);
     evtEndUnitValueTransition(unit, param1);
     return 1;
@@ -1268,10 +1268,10 @@ u32 func_00225708(void) {
     if (unit == NULL) {
         func_003003F0(D_003AC520, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->objectId);
+        scrSetIntegerReturnValue(unit->objectId);
     }
     return 1;
 }
@@ -1286,14 +1286,14 @@ u32 func_002257C0(void) {
     memset(buf2, 0, 0x10);
     buf2[3] = 1.0f;
     param0 = scrReadStringParameter(0);
-    unit = func_001152B0(param0, buf1, buf2);
+    unit = effObjCreateFromResolvedResource(param0, buf1, buf2);
     if (unit == NULL) {
         func_003003F0(D_003AC520, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->objectId);
+        scrSetIntegerReturnValue(unit->objectId);
     }
     return 1;
 }
@@ -1323,13 +1323,13 @@ u32 evtUnitCheckModelCut(void) {
             func_0010AC10(D_003AC588, param1);
             return 1;
         } else {
-            func_00115318(unit, param1);
+            effObjReplaceActiveEventNode(unit, param1);
         }
     }
     return 1;
 }
 
-f32 func_002259E0(s32 index) {
+f32 evtComputeClampedModelScale(s32 index) {
     f32 scale = (D_003BAA20[index].unk18 + D_003BAA20[index].unk1C * 0.5f) * 0.5f * D_003BAA20[index].unk10 * (1.0f / 70.0f);
 
     if (scale > 2.0f) {
@@ -1340,10 +1340,10 @@ f32 func_002259E0(s32 index) {
     return scale;
 }
 
-extern f32 func_002259E0(s32);
+extern f32 evtComputeClampedModelScale(s32);
 extern void func_00190308(void *, f32);
 
-u32 func_00225A60(void) {
+u32 evtOpSetModelCutAndScale(void) {
     void *unit;
 
     unit = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
@@ -1354,10 +1354,10 @@ u32 func_00225A60(void) {
             func_0010AC10(D_003AC588, mode);
             return 1;
         }
-        func_00115318(unit, mode);
+        effObjReplaceActiveEventNode(unit, mode);
         index = scrReadIntParameter(2);
         if (index >= 0) {
-            f32 value = func_002259E0(index);
+            f32 value = evtComputeClampedModelScale(index);
             void *target = *(void **)(*(u8 **)((u8 *)unit + 0x18) + 0x2C);
             if (target != NULL) {
                 func_00190308(target, value);
@@ -1372,14 +1372,14 @@ u32 func_00225B10(void) {
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);
-    unit = func_00115858(1, param0);
+    unit = effObjCreateKindFromResource(1, param0);
     if (unit == NULL) {
         func_003003F0(D_003AC5B0, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->objectId);
+        scrSetIntegerReturnValue(unit->objectId);
     }
     return 1;
 }
@@ -1395,14 +1395,14 @@ u32 func_00225C48(void) {
     EvtUnit *unit;
 
     param0 = scrReadStringParameter(0);
-    unit = func_00115858(2, param0);
+    unit = effObjCreateKindFromResource(2, param0);
     if (unit == NULL) {
         func_003003F0(D_003AC600, 1);
         func_003003F0(D_003AC550, scrReadStringParameter(0));
-        func_0010D5F0(0);
+        scrSetIntegerReturnValue(0);
     } else {
         effObjSetFlags(unit, 1);
-        func_0010D5F0(unit->objectId);
+        scrSetIntegerReturnValue(unit->objectId);
     }
     return 1;
 }

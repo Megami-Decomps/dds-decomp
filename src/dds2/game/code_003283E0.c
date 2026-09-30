@@ -20,7 +20,7 @@ s64 func_003283E0(s64 size) {
 }
 
 extern s32 sdfChipIsInRange(void *);
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 extern void func_00329868(void *);
 extern void func_00328F68(void *);
 extern void *func_00329930(void *);
@@ -29,7 +29,7 @@ extern void func_003298C0(void *);
 void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
-            func_00328E48(data);
+            sdfReleaseChipBlock(data);
             return;
         }
         func_00329868(data);
@@ -51,7 +51,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     if (data != NULL) {
         *slot = NULL;
         if (sdfChipIsInRange(data)) {
-            func_00328E48(data);
+            sdfReleaseChipBlock(data);
             return;
         }
         func_00329868(data);

@@ -77,7 +77,7 @@ typedef struct MdlPacket {
     u16 extra[1]; /* 0xC: start of the variable payload */
 } MdlPacket;
 
-/* Load request touched by func_00216F18. */
+/* Load request touched by mdlRecordLoadedSizeAndReleaseHandle. */
 typedef struct MdlLoadReq {
     u8 unk0[0xC]; /* 0x0 */
     u32 size;      /* 0xC: size read from the current file resource */
@@ -150,7 +150,7 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00216C00);
 
-void func_00216CC8(void *unused0, void *unused1, void *command) {
+void mdlApplyCommandToGroupedEntity(void *unused0, void *unused1, void *command) {
     void *entity;
 
     /* Only the grouped entity and command are forwarded to the worker. */
@@ -211,10 +211,10 @@ void mdlExecuteAndFreeJob(MdlPacket *packet) {
     WaitSema(D_003BD878);
     btlRemoveGroupId(packet->unk0, packet->unk2);
     SignalSema(D_003BD878);
-    func_002CFF98(packet);
+    sdfReleaseChipBlock(packet);
 }
 
-void func_00216F18(void *arg0, MdlLoadReq *req) {
+void mdlRecordLoadedSizeAndReleaseHandle(void *arg0, MdlLoadReq *req) {
     void *handle;
     u32 size;
 
@@ -325,9 +325,9 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
             cur = node;
             node = node->next;
             sdfReleaseDevSlot(cur->slot, 1, 1);
-            func_002CFF98(cur);
+            sdfReleaseChipBlock(cur);
         }
-        func_002CFF98(list);
+        sdfReleaseChipBlock(list);
         ctx->devList = NULL;
     }
 }
@@ -355,7 +355,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
     func_002172B0((MdlLink *)ctx);
-    func_002CFF98(ctx);
+    sdfReleaseChipBlock(ctx);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00217878);
@@ -686,7 +686,7 @@ INCLUDE_ASM(const s32, "model/mdlManager", func_00218768);
 
 void func_002189D8(MdlRes *res) {
     func_00288788(res->unk8);
-    func_002CFF98(res);
+    sdfReleaseChipBlock(res);
 }
 
 /* Completion job created by mdlRequestLoadWithCallback and run by func_00218A08. */
@@ -701,13 +701,13 @@ typedef struct MdlDoneJob {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218A08);
 
-extern void *func_002CFF68();
+extern void *sdfAllocAndClearQuadwords();
 extern s32 func_002889D8();
 extern void func_00288C50();
 extern void func_00218A08();
 
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
-    MdlDoneJob *job = func_002CFF68(0x14);
+    MdlDoneJob *job = sdfAllocAndClearQuadwords(0x14);
     s32 slot;
 
     job->group = group;

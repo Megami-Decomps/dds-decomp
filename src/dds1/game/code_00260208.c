@@ -169,7 +169,7 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 }
 
 void gstApplyBundleMacca(MenuIconBatch *batch) {
-    func_001198B8(batch->resource);
+    datAddCurrencyClamped(batch->resource);
 }
 
 extern s32 ptyComputeTotalExp(u8 *, s32);
@@ -274,7 +274,7 @@ void brsCloseSkillPackagePanel(s32 work) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     func_002832F8(ctx->spriteHandle);
     mnuReleaseAssets(work + 0xD1C);
-    func_00276320(work + 0x4F8);
+    mnuReleaseStaffMenuTextureHandles(work + 0x4F8);
     mnuReleaseStaffResourceGroups(work + 0x4F8);
     mnuResetWorkFloats();
 }
@@ -304,7 +304,7 @@ s32 mnuStaffInitPanel(s32 work) {
 }
 
 extern s32 mnuStaffSlotsAllFilled(s32, s32);
-extern s32 func_0027AF28(s32);
+extern s32 mnuInitializeCampAssetSprites(s32);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -326,7 +326,7 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     if (ctx->unitHandle == 0) {
         return 1;
     }
-    if (func_0027AF28(work + 0xD1C) == 0) {
+    if (mnuInitializeCampAssetSprites(work + 0xD1C) == 0) {
         return 1;
     }
     brsOpenSkillPackagePanel(ctx);
@@ -409,7 +409,7 @@ INCLUDE_RODATA(const s32, "game/code_00260208", D_003AFA98);
 
 INCLUDE_ASM(const s32, "game/code_00260208", brsCreateTaskContext);
 
-extern void func_00285600(s32, s32);
+extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void brsCloseSkillPackagePanel(s32);
 extern void func_002BC618(s32);
@@ -417,12 +417,12 @@ extern void dspCloseChannel(void);
 extern void func_002D0918(s32);
 
 void brsStaffTaskDestroy(s32 arg0) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     if (*(s32 *)(context + 0xD44) != 0) {
         effDestroyResourceSlotSet(*(s32 *)(context + 0xD44));
     }
-    func_00285600(context + 8, arg0);
+    mnuDrainPanelTransitions(context + 8, arg0);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }

@@ -123,7 +123,7 @@ struct BattleUnit {
     u16 mode;
     u16 step; /* 0x126 */
     u16 maxStep; /* 0x128 */
-    u16 actionGate; /* 0x12A: zero required by func_00214658 */
+    u16 actionGate; /* 0x12A: zero required by btlAnyGroupUnitHasZeroStat */
     u16 pendingMotion; /* 0x12C */
     u16 conditionFlags;
     u8 pad130[4];
@@ -238,7 +238,7 @@ extern void func_0023CE10(void *, s32);
 
 extern void func_0023CE18(void *, f32);
 
-extern void func_0023CE20(void *, s32, s32);
+extern void evtStoreUnitMotionShortParameters(void *, s32, s32);
 
 /* One of five per-side records (0x1C4 bytes each) at D_00435DD0 + 0xA60. */
 typedef struct BattleSlotRecord {
@@ -252,9 +252,9 @@ typedef struct BattleSlotRecord {
 
 extern s32 func_001AA840();
 
-extern void *func_00328E18(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern s32 func_00212B38();
 
@@ -367,7 +367,7 @@ extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *func_002172B8();
 
-extern void *func_001E5DA8(void *, s32, s32);
+extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern s64 btlStartTask(void *);
 
@@ -391,11 +391,11 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 row) {
     u16 species;
     s32 index;
 
-    D_00436CB8 = func_00328E18(0x10);
+    D_00436CB8 = sdfAllocAndClearQuadwords(0x10);
     species = ((BattleUnit *)task->owner)->mode;
     index = btlPickWeightedAiSlot(task->owner, species, row);
     func_00211EA8(task, D_00435DF4[species].slot[row * 5 + index].actionId, D_00435DF4[species].slot[row * 5 + index].actionArg);
-    func_00328E48(D_00436CB8);
+    sdfReleaseChipBlock(D_00436CB8);
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00211360);
@@ -943,7 +943,7 @@ u8 func_00213728(void) {
     return result != 0;
 }
 
-s32 func_00213748(u8 *unit) {
+s32 btlAnyIndexedUnitPassesQuery(u8 *unit) {
     u32 i;
     u32 count;
     s32 battle;
@@ -1136,7 +1136,7 @@ s32 func_00213E80(s32 unused, s32 action) {
     return 1;
 }
 
-s32 func_00213EF8(s32 actor) {
+s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     if (func_001B24F8(actor, 0) != 0) {
         if (D_00438B66 == 0) {
             btlBossDebugPrintf(D_00419C30);
@@ -1335,7 +1335,7 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00214658(void) {
+s32 btlAnyGroupUnitHasZeroStat(void) {
     BattleUnit *battler = ((BattleWork *)func_001AA6F8())->actorList;
     for (; battler != 0; battler = battler->nextActor) {
         if ((*(u64 *)&battler->flags & 0x221) == 0x201 &&
@@ -2818,7 +2818,7 @@ s32 func_0021A098(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x10D) {
-                                btlStartTask(func_001E5DA8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -2980,12 +2980,12 @@ void btlSetUnitResourceFloatByMode(BattleUnit *unit, s32 group, f32 value) {
 void btlSetUnitResourceHalvesByMode(BattleUnit *unit, s32 first, s32 second) {
     if (((BtlSelectCtrl *)((BattleWork *)func_001AA6F8())->sub)->unit != unit) {
         if (!(unit->flags & 0x400)) {
-            func_0023CE20(unit->namedResource, first, second);
+            evtStoreUnitMotionShortParameters(unit->namedResource, first, second);
             return;
         }
         switch (unit->mode) {
         case 0x110:
-            func_0023CE20(unit->namedResource, first, second);
+            evtStoreUnitMotionShortParameters(unit->namedResource, first, second);
             break;
         case 0x111:
             unit->namedResource->first111 = first;

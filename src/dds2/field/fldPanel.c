@@ -2,21 +2,21 @@
 
 extern u32 D_00436204;
 
-extern u64 func_00101958(void);
+extern u64 kwlnTaskGetUserValue(void);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 void fldReleasePanelState(void) {
     u64 state;
 
-    state = func_00101958();
-    func_00328E48(state);
+    state = kwlnTaskGetUserValue();
+    sdfReleaseChipBlock(state);
     D_00436204 = 0;
 }
 
 INCLUDE_ASM(const s32, "field/fldPanel", func_001441F0);
 
-void func_00144238(void) {
+void fldDestroyPanelTaskIfPresent(void) {
     if (D_00436204 != 0) {
         kwlnTaskDestroyWithHierarchy(D_00436204, 1);
     }

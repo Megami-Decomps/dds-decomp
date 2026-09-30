@@ -1,7 +1,6 @@
 # Per-unit cc1 flags: <dir>/<unit>  <flags>  # evidence (default is -O2)
 game/code_001360B8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_001C35F0  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
-game/code_001D7228  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0020E850  -fno-optimize-sibling-calls  # 18 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0021B5C0  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_002437F0  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)

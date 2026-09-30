@@ -209,9 +209,9 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
             cur = node;
             node = node->next;
             sdfReleaseDevSlot(cur->slot, 1, 1);
-            func_00328E48(cur);
+            sdfReleaseChipBlock(cur);
         }
-        func_00328E48(list);
+        sdfReleaseChipBlock(list);
         ctx->devList = NULL;
     }
 }
@@ -240,7 +240,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
     func_00231DC8((MdlLink *)ctx);
-    func_00328E48(ctx);
+    sdfReleaseChipBlock(ctx);
 }
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00232390);
@@ -564,7 +564,7 @@ INCLUDE_ASM(const s32, "game/code_00231A80", func_00233280);
 
 void func_002334F0(u32 arg0) {
     func_002C7CE8(*(u32 *)((s32)arg0 + 8));
-    func_00328E48(arg0);
+    sdfReleaseChipBlock(arg0);
 }
 
 /* Completion job created by mdlRequestLoadWithCallback and run by func_00233520. */
@@ -579,7 +579,7 @@ typedef struct MdlDoneJob {
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00233520);
 
-extern void *func_00328E18();
+extern void *sdfAllocAndClearQuadwords();
 
 extern s32 func_002C7F38();
 
@@ -588,7 +588,7 @@ extern void func_002C81D0();
 extern void func_00233520();
 
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*done)(u32), u32 doneArg) {
-    MdlDoneJob *job = func_00328E18(0x14);
+    MdlDoneJob *job = sdfAllocAndClearQuadwords(0x14);
     s32 slot;
 
     job->group = group;

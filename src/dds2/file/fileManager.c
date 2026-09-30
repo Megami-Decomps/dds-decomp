@@ -92,9 +92,9 @@ u32 func_002C8120(FileWork *work) {
     return work->unk10;
 }
 
-extern s32 func_002C8128(FileRequest *file);
+extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
 
-s32 func_002C8128(FileRequest *file) {
+s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
     s32 result;
 
     if (file->pad00 == 1) {
@@ -119,7 +119,7 @@ s32 fileRequestIsReady(FileRequest *file) {
 void fileWaitReady(u32 request) {
     s64 status;
 
-    while (status = func_002C8128(request), status == 0) {
+    while (status = fileIsRequestReadyInCurrentMode(request), status == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }

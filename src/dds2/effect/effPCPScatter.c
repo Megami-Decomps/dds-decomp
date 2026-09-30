@@ -214,7 +214,7 @@ typedef struct {
     u32 duplicateAllocation;
 } PcpScatterWork2Copy;
 
-void func_001787E0(u64 table) {
+void effScatterCreateFromParameterTriplet(u64 table) {
     u64 params;
     u64 resource;
     u64 options;
@@ -294,7 +294,7 @@ void func_00179178(PcpScatterWork8 *work, u32 *values) {
     work->unk7C = values;
 }
 
-void func_00179180(float scale, PcpScatterWork8 *work) {
+void effScatterScaleParticleValues(float scale, PcpScatterWork8 *work) {
     work->unk3C *= scale;
     work->unk4C *= scale;
     work->unk50 *= scale;
@@ -314,7 +314,7 @@ void func_00179438(u64 table) {
     func_001791A8(params, resource, options);
 }
 
-/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (func_00179180
+/* Work2 as seen by the copy constructor: byte 0x40 is a flag here (effScatterScaleParticleValues
    scales the same word as a float). */
 typedef struct {
     u8 pad00[0x20];
@@ -445,7 +445,7 @@ void func_00179D88(PcpScatterWork2 *work, u32 value) {
     work->unk6C = value;
 }
 
-void func_00179D90(float scale, PcpScatterWork2 *work) {
+void effScatterScalePair(float scale, PcpScatterWork2 *work) {
     work->unk40 *= scale;
     work->unk44 *= scale;
 }
@@ -606,13 +606,13 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 
 extern void sdfTexReleaseReferenceViaHandler(u32);
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 void effPcpScatterResRelease(PcpScatterRes *res) {
     res->refCount--;
     if (res->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(res->resourceHandle);
-        func_00328E48(res);
+        sdfReleaseChipBlock(res);
     }
 }
 
@@ -730,7 +730,7 @@ PcpScatterWork4 *effScatterBlockDuplicate(u64 table) {
     return effPcpScatterCreateParticleInstance(particleParams, resource);
 }
 
-PcpScatterWork4 *func_0017AF88(PcpScatterWork4 *work) {
+PcpScatterWork4 *effScatterCloneWithSharedObject(PcpScatterWork4 *work) {
     PcpScatterWork4 *child;
 
     child = effPcpScatterCreateParticleInstance(&work->particleParams, NULL);
@@ -738,7 +738,7 @@ PcpScatterWork4 *func_0017AF88(PcpScatterWork4 *work) {
     return child;
 }
 
-void func_0017AFD0(PcpScatterWork4 *work) {
+void effScatterReleaseObjectAndBuffer(PcpScatterWork4 *work) {
     effReleaseScatterObject(work->scatterObject);
     func_003297C8(work->ownedBuffer);
 }
@@ -822,16 +822,16 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
 
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B520);
 
-void func_0017B718(PcpScatterWork4 *work, void *src) {
+void effScatterCopyParticleParameterVector(PcpScatterWork4 *work, void *src) {
     PCP_COPY_VECTOR(&work->particleParams, src);
 }
 
-void func_0017B730(PcpScatterWork4 *work, f32 value)
+void effScatterSetParticleScale(PcpScatterWork4 *work, f32 value)
 {
     work->scale = value;
 }
 
-void func_0017B738(PcpScatterWork4 *work, u32 value) {
+void effScatterSetParticleColor(PcpScatterWork4 *work, u32 value) {
     work->color = value;
 }
 
@@ -911,7 +911,7 @@ void *effScatterInstanceCreateB(src, resource)
     return inst;
 }
 
-void func_0017B9D0(u64 table) {
+void effScatterSpawnFromParameterPair(u64 table) {
     u64 particleParams;
     u64 resource;
 
@@ -920,7 +920,7 @@ void func_0017B9D0(u64 table) {
     effScatterInstanceCreateB(particleParams, resource);
 }
 
-PcpScatterWork5 *func_0017BA18(PcpScatterWork5 *work)
+PcpScatterWork5 *effScatterCloneWithSharedResource(PcpScatterWork5 *work)
 {
     PcpScatterWork5 *child;
 
@@ -929,7 +929,7 @@ PcpScatterWork5 *func_0017BA18(PcpScatterWork5 *work)
     return child;
 }
 
-void func_0017BA60(PcpScatterWork5 *work) {
+void effScatterReleaseInstanceResources(PcpScatterWork5 *work) {
     effReleaseScatterObject(work->scatterObject);
     func_003297C8(work->ownedBuffer);
 }
@@ -1012,7 +1012,7 @@ void func_0017C270(PcpScatterWork5 *work, u32 value) {
 }
 
 /* vu0 routine: matrix = (matrix + 0x50) * src, via the vf28-vf31 by vf24-vf27 product routine */
-void func_0017C278(u8 *matrix, void *src) {
+void effScatterComposeWorkMatrix(u8 *matrix, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_LOAD_MATRIX_B(matrix + 0x50);
     func_00336AA8();

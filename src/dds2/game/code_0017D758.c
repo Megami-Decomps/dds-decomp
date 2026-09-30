@@ -61,7 +61,7 @@ void effReleaseScatterObject(ScatterObject *object) {
     }
     sdfQueueAssetRelease(object->graphics);
     func_003297C8(object->allocation);
-    func_00328E48(object);
+    sdfReleaseChipBlock(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0017D758", func_0017DA28);

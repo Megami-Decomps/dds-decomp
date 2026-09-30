@@ -37,7 +37,7 @@ extern u64 dds3GetWorldObject(void);
 
 extern s64 func_00110C18(u64);
 
-extern s64 func_00125F38(void);
+extern s64 fldGetPlayerSceneState(void);
 
 extern u32 D_004360AC;
 
@@ -485,7 +485,7 @@ extern f32 D_0038BB00[];
 
 extern f32 func_003407A0(f32);
 
-extern s32 *func_00125F28();
+extern s32 *fldGetPlayerSceneStateAddress();
 
 extern void dds3SetCameraValue(s32, f32);
 
@@ -821,7 +821,7 @@ void fldFormatAreaResourceName(char *out) {
     func_0035C860(out, "%sf%03d_000.LB", directory, area);
 }
 
-u8 func_0012A4E0(void) {
+u8 fldHasAreaResourceNameChanged(void) {
     char buf[32];
 
     fldFormatAreaResourceName(buf);
@@ -951,7 +951,7 @@ extern void fldReleaseSceneRecordChunk();
 
 extern void fldReleaseMenuSlotsAfterWait();
 
-extern void func_0014B748();
+extern void fldReleaseIndexedResourceEffect();
 
 extern void kwlnTaskDestroyWithHierarchyByName();
 
@@ -1017,7 +1017,7 @@ void fldReleaseFieldResources(void) {
             fldReleaseSceneRecordChunk();
             fldFreeSceneResources();
             fldReleaseAreaResourceCache();
-            func_00134790();
+            fldReleaseSkyResources();
         }
         fldResetRecordState();
         func_0013B818();
@@ -1025,7 +1025,7 @@ void fldReleaseFieldResources(void) {
         fldClearMenuEntries();
         mnuReleaseResourceEntries();
         fldReleaseTextureSlots();
-        func_0014B748();
+        fldReleaseIndexedResourceEffect();
     }
     sdfResourceListRelease(D_00435FA4, 1);
     D_00435FA4 = 0;
@@ -1108,7 +1108,7 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413198);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012B2B8);
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
-void func_0012B4A0(u32 relocateOnRelease) {
+void fldSetRelocateOnRelease(u32 relocateOnRelease) {
     D_00435FC0 = relocateOnRelease;
 }
 
@@ -1283,7 +1283,7 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstY = result[1];
 }
 
-void func_0012BB68(void) {
+void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
     __asm__ volatile (
         ".set noreorder\n"
@@ -1316,7 +1316,7 @@ void func_0012BB68(void) {
         : : "r"(D_0037F660) : "memory");
 }
 
-void func_0012BBD0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
     __asm__ volatile (
@@ -1345,11 +1345,11 @@ void func_0012BBD0(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
 extern void sdfAppendPacket(u64, u64);
 
-void func_0012BC38(u32 displayIndex) {
+void fldSelectDisplayBuffer(u32 displayIndex) {
     D_00436060 = displayIndex;
 }
 
-void func_0012BC40(s32 lower, s32 bits, u64 upper) {
+void fldSubmitGsCommandWord(s32 lower, s32 bits, u64 upper) {
     u64 command = sdfAllocPacketAligned(0x20);
     u64 packet;
     u64 *entry;
@@ -1692,7 +1692,7 @@ void func_0012D110(void) {
     descriptor->open(descriptor, command);
 }
 
-void func_0012D1B0(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     u64 resource;
     u64 record;
     FieldBufferDescriptor *descriptor;
@@ -1786,7 +1786,7 @@ void fldDrawMarkerQuad(f32 *pos) {
     packet.pos[1] = pos[1];
     packet.pos[2] = pos[2];
     packet.scale = 0.0f;
-    func_0012BC38(0x39);
+    fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
     func_0012BE18(0);
     fldSubmitModelPacket(D_00436080, (u8 *)&packet);
@@ -1817,7 +1817,7 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     packet.pos[1] = pos[1];
     packet.pos[2] = pos[2];
     packet.scale = 0.0f;
-    func_0012BC38(0x39);
+    fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
     func_0012BE18(0);
     fldSubmitModelPacket(D_00436080, (u8 *)&packet);
@@ -1869,7 +1869,7 @@ void func_0012DDC0(s32 x, s32 y, u64 firstPayload, u64 secondPayload) {
 
     object = func_0019F460(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     func_0019D518(object);
-    func_0019C5B0(object);
+    frFontQueueGlyphInSelectedSlot(object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {
@@ -2143,14 +2143,14 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_001300A0);
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_001302A0);
 
-s64 func_001309B8(void) {
+s64 fldGetUnselectedWorldEntry(void) {
     u64 worldObject;
     s64 object;
     s64 currentObject;
 
     worldObject = dds3GetWorldObject();
     object = func_00110C18(worldObject);
-    currentObject = func_00125F38();
+    currentObject = fldGetPlayerSceneState();
     if (currentObject == object) {
         object = 0;
     }
@@ -2171,10 +2171,10 @@ void fldClearCameraMoveMode(void) {
 
 extern u8 *dds3GetObjectOwnedHandle(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
-extern void func_00133A28(void);
+extern void fldSetCameraObjectHighlightFlag(void);
 extern void func_00133A50(void);
 extern void func_00133AA8(void);
-extern void func_00133AE8(void);
+extern void fldClearCameraObjectTransitionFlags(void);
 
 void fldUpdateCameraProximity(void) {
     f32 vec[4];
@@ -2187,7 +2187,7 @@ void fldUpdateCameraProximity(void) {
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
     if (fldGetLocationCoordinateValue(D_00389770[4], D_00389770[5] + 1) & 0x40) {
-        if (func_001283A8(0x40) == 0) {
+        if (fldTestSceneControlFlags(0x40) == 0) {
             return;
         }
     }
@@ -2205,18 +2205,18 @@ void fldUpdateCameraProximity(void) {
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, vec);
         if (fldPointDistance(vec[0], vec[1], vec[2], D_0038BAC0[0], D_0038BAC0[1], D_0038BAC0[2]) < range) {
-            func_001283A8(0x40);
+            fldTestSceneControlFlags(0x40);
             func_00133A50();
-            func_00133AE8();
-            func_00133A00();
+            fldClearCameraObjectTransitionFlags();
+            fldClearCameraObjectHighlightFlag();
         } else {
             func_00133AA8();
             if (((FldCamWork *)D_00389770)->mode == 1 || ((FldCamWork *)D_00389770)->mode == 3) {
-                func_00133A00();
+                fldClearCameraObjectHighlightFlag();
             } else if (((FldCamWork *)D_00389770)->dist < 100.0f) {
-                func_00133A28();
+                fldSetCameraObjectHighlightFlag();
             } else {
-                func_00133A00();
+                fldClearCameraObjectHighlightFlag();
             }
         }
     }
@@ -2229,13 +2229,13 @@ extern void func_001302A0(void);
 extern void func_0012F908(void);
 s32 fldUpdateCameraFollow(void) {
     FldCamWork *cam;
-    s32 *world = func_00125F28();
+    s32 *world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && D_00435F0C != 0) {
         func_00133A78();
-        if (func_001309B8() != 0) {
+        if (fldGetUnselectedWorldEntry() != 0) {
             fldToggleWorldNodeState(1);
             func_00130A40();
-            func_00133A00();
+            fldClearCameraObjectHighlightFlag();
             return 0;
         }
         func_0012EDB0();
@@ -2347,8 +2347,8 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132408);
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
 extern s32 fldGetSceneReadyFlag(void);
-extern s32 func_001283A8(s32);
-extern void func_00133A00(void);
+extern s32 fldTestSceneControlFlags(s32);
+extern void fldClearCameraObjectHighlightFlag(void);
 extern void func_001321F8(void);
 extern void func_00131B50(void);
 extern void func_00131478(s16, s16);
@@ -2371,9 +2371,9 @@ s32 fldUpdateCameraFrame(void) {
     if (fldGetSceneReadyFlag() != 0) {
         return 0;
     }
-    if (func_001283A8(0x40) == 0) {
+    if (fldTestSceneControlFlags(0x40) == 0) {
         if (D_00389770[20] == 1 || D_00389770[20] == 3) {
-            func_00133A00();
+            fldClearCameraObjectHighlightFlag();
         }
         func_001321F8();
         fldUpdateCameraTarget();
@@ -2387,7 +2387,7 @@ s32 fldUpdateCameraFrame(void) {
         return 0;
     }
     if (D_003897C0[0] == 1) {
-        func_00133A00();
+        fldClearCameraObjectHighlightFlag();
         func_00132540();
         fldSyncObjectFlagsB();
     } else {
@@ -2397,7 +2397,7 @@ s32 fldUpdateCameraFrame(void) {
     return 0;
 }
 
-u8 func_00133950(void) {
+u8 fldHasPendingSceneFlags(void) {
     if (D_00389770[0x62] == 0) {
         if (D_00389770[0x64] == 0) {
             if (D_00389770[0x63] == 0) {
@@ -2424,12 +2424,12 @@ void func_001339C0(void) {
     }
 }
 
-void func_00133A00(void) {
+void fldClearCameraObjectHighlightFlag(void) {
     func_00112B58(D_00435F0C, 0);
     dds3ClearObjectFlags(D_00435F0C, 0x800);
 }
 
-void func_00133A28(void) {
+void fldSetCameraObjectHighlightFlag(void) {
     func_00112B58(D_00435F0C, 0x80);
     dds3SetObjectFlags(D_00435F0C, 0x800);
 }
@@ -2462,7 +2462,7 @@ void func_00133AA8(void) {
     dds3SetObjectFlags(D_00435F0C, 0x200);
 }
 
-void func_00133AE8(void) {
+void fldClearCameraObjectTransitionFlags(void) {
     dds3ClearObjectFlags(D_00435F0C, 0x400);
     dds3ClearObjectFlags(D_00435F0C, 0x200);
 }
@@ -2606,7 +2606,7 @@ void fldLoadSkyResource(s32 area) {
     }
 }
 
-void func_00134790(void) {
+void fldReleaseSkyResources(void) {
     if (D_00436100 != 0) {
         sdfTexReleaseReferenceViaHandler(D_00436100);
         D_00436100 = 0;
@@ -2625,7 +2625,7 @@ void func_00134790(void) {
 void fldUploadSkyBuffer(FldSkyBuffer *src) {
     D_00436108 = 0x80;
     *D_004360EC = *src;
-    func_00134790();
+    fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && D_00438ECC == 0) {
         D_00438ECC = func_00343ED0(D_00413350, &D_00438ED0, 0);
         D_00436100 = func_0032C138((void *)D_00438ED0);
@@ -2689,11 +2689,11 @@ void fldSetSwayMode(u32 mode) {
     D_00436114 = 0;
 }
 
-void func_00135578(u32 value) {
+void fldSetSkyDrawState(u32 value) {
     D_00436108 = value;
 }
 
-u32 func_00135580(void) {
+u32 fldGetSkyDrawState(void) {
     return D_00436108;
 }
 

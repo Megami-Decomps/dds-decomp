@@ -37,15 +37,15 @@ extern s8 D_003A5A80[];
 
 extern s8 D_003A5AA8[];
 
-extern u32 func_0020A3F0(void);
+extern u32 btlGetEventEffectValue(void);
 
 extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetEffectActive(void);
 
-extern u32 func_002099A0(void);
+extern u32 btlGetSelectedBossEffectId(void);
 
-extern u32 func_00208C68(void);
+extern u32 btlGetSpecialModeEffectValue(void);
 
 extern s32 func_001A17F0(void);
 
@@ -57,7 +57,7 @@ extern s8 *D_003BAA4C;
 
 extern s32 mdlFlagTest(s32);
 
-extern u8 *func_001D9BA0(u8 *, f32);
+extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 
 extern void btlSetUnitPosition(BtlUnit *, void *);
 
@@ -223,9 +223,9 @@ extern u8 D_00360EF0[];
 
 extern void btlInitMotionTransformFromVectors(s32, u8 *, u8 *);
 
-extern void *func_002CFF68(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern s32 btlRunAiAction();
 
@@ -249,11 +249,11 @@ void btlRunWeightedAiAction(BtlTask *task, s32 row) {
     u16 species;
     s32 index;
 
-    D_003BB87C = func_002CFF68(0x10);
+    D_003BB87C = sdfAllocAndClearQuadwords(0x10);
     species = task->unit->mode;
     index = btlPickWeightedAiSlot(task->unit, species, row);
     btlRunAiAction(task, D_003BAA24[species].slot[row * 5 + index].actionId, D_003BAA24[species].slot[row * 5 + index].actionArg);
-    func_002CFF98(D_003BB87C);
+    sdfReleaseChipBlock(D_003BB87C);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF0C8);
@@ -789,7 +789,7 @@ extern s32 btlGetIndexListEntry(void *, u32);
 
 extern void btlFreeIndexList(void *);
 
-s32 func_002010F8(u8 *unit) {
+s32 btlAnyIndexedUnitPassesQuery(u8 *unit) {
     u32 i;
     u32 count;
     s32 battle;
@@ -1002,7 +1002,7 @@ extern s32 func_001A8050(s32, s32);
 
 extern u8 D_003BD476;
 
-s32 func_002018A0(s32 actor) {
+s32 btlCheckActorEligibilityWithDebug(s32 actor) {
     if (func_001A8050(actor, 0) != 0) {
         if (D_003BD476 == 0) {
             btlBossDebugPrintf(D_003A5A80);
@@ -1159,7 +1159,7 @@ s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     return 0;
 }
 
-s32 func_00201E88(void) {
+s32 btlAnyGroupUnitHasZeroStat(void) {
     u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     while (unit != 0) {
         if ((((BtlUnitStatus *)unit)->combinedFlags & 0x221) == 0x201) {
@@ -1933,7 +1933,7 @@ s32 btlDisableNonBossUnits(void) {
                             case 0x104:
                                 break;
                             default:
-                                btlStartTask(func_001D8DE8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                                 break;
                             }
@@ -2058,7 +2058,7 @@ s32 btlDisableUnitsIfSpeciesFlagged(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x105) {
-                                btlStartTask(func_001D8DE8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -2567,7 +2567,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002072F0);
 
-extern void *func_001D8DE8(void *, s32, s32);
+extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern s64 btlStartTask(void *);
 
@@ -2599,7 +2599,7 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
         }
         other = (u8 *)((BtlUnit *)other)->next;
     }
-    btlStartTask(func_001D8DE8(unit, 8, 10));
+    btlStartTask(btlCreateUnitFadeOutTask(unit, 8, 10));
     ((BtlUnit *)unit)->flags &= ~0x100;
     return 1;
 }
@@ -2881,7 +2881,7 @@ u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
 
 extern u64 func_001A0CB0(void);
 
-u64 func_00208358(u64 owner) {
+u64 btlCreateSpecialUnitAndLoadModel(u64 owner) {
     u8 **slot = *(u8 ***)(func_001A17F0() + 0x694);
     u8 *model = *slot;
     u8 *entry;
@@ -2901,7 +2901,7 @@ u64 func_00208358(u64 owner) {
     return *(u64 *)(entry + 0x38);
 }
 
-void func_00208400(void) {
+void btlDestroySpecialUnitSlot(void) {
     s32 *data;
     s32 unit;
 
@@ -2968,7 +2968,7 @@ void btlUpdateReadyUnits(void) {
     }
 }
 
-s32 func_002085E8(void) {
+s32 btlCheckEnemyUnitReadiness(void) {
     u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     s32 count = 0;
     while (unit != 0) {
@@ -2997,7 +2997,7 @@ s32 func_00208668(s32 unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00208678);
 
-s32 func_002087E0(u8 *unit, s32 index) {
+s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
     u32 flags = ((BtlUnit *)unit)->flags;
     if ((flags & 0x400) == 0) {
         return index;
@@ -3044,7 +3044,7 @@ u32 btlIsInSpecialModeRange(u32 unused0, u32 unused1, s32 action) {
     return 100;
 }
 
-u32 func_00208C68(void) {
+u32 btlGetSpecialModeEffectValue(void) {
     s32 battle;
     s32 effect;
 
@@ -3063,7 +3063,7 @@ extern void func_001D4CA8();
 
 extern void func_001F53F0(void);
 
-void func_00208CA8(void) {
+void btlTriggerSpecialUnitAction(void) {
     u8 *battle = (u8 *)func_001A17F0();
     u8 *unit = (u8 *)((BtlState *)battle)->units;
     while (unit != 0) {
@@ -3096,7 +3096,7 @@ typedef struct BtlBossEffectPayload {
     s32 selectedId;
 } BtlBossEffectPayload;
 
-void func_00208D30(void) {
+void btlInitRandomBossSelection(void) {
     u8 *data = *(u8 **)(func_001A17F0() + 0x694);
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
@@ -3104,7 +3104,7 @@ void func_00208D30(void) {
     btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
-s32 func_00208D98(u8 *unit, s32 command) {
+s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
     u32 flags = ((BtlUnit *)unit)->flags;
     if (flags & 1) {
         if (flags & 0x400) {
@@ -3181,7 +3181,7 @@ u64 func_00208F10(u64 owner) {
     return *(u64 *)(entry + 0x38);
 }
 
-void func_00208FB0(void) {
+void btlDestroyActiveMemberSlot(void) {
     s32 *data;
     s32 unit;
 
@@ -3287,7 +3287,7 @@ u32 func_00209220(u32 unused, s32 unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209238);
 
-s32 func_00209400(void) {
+s32 btlFindSubsequentTurnScript(void) {
     s32 battle;
 
     battle = func_001A17F0();
@@ -3303,7 +3303,7 @@ s32 func_00209400(void) {
     return btlFindScriptResource(D_003BB898);
 }
 
-s32 func_00209460(void) {
+s32 btlCheckSelectedBossUnitFlag(void) {
     u8 *battle = (u8 *)func_001A17F0();
     u8 *unit = (u8 *)((BtlState *)battle)->units;
     u8 *effect = (u8 *)((BtlState *)battle)->effect;
@@ -3334,7 +3334,7 @@ typedef struct BtlEventEntry {
     u32 kind;      /* 0x104 */
 } BtlEventEntry;
 
-s32 func_002096E8(u8 *entry) {
+s32 btlDispatchEligibleBossEvent(u8 *entry) {
     BtlTask *task = ((BtlEventEntry *)entry)->task;
     u8 *data;
     u32 kind;
@@ -3377,7 +3377,7 @@ s32 btlCheckAttachedMember(u8 *entry) {
     }
 }
 
-s32 func_002097D0(u8 *unit) {
+s32 btlCheckBossOptionAllowed(u8 *unit) {
     s32 *data;
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return -1;
@@ -3386,7 +3386,7 @@ s32 func_002097D0(u8 *unit) {
     return (((BtlBossEffectPayload *)data)->options & 4) ? -1 : 0;
 }
 
-s32 func_00209818(u8 *unit, s32 command, u8 mode) {
+s32 btlRemapSelectedBossCommand(u8 *unit, s32 command, u8 mode) {
     u8 *effect;
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return command;
@@ -3445,7 +3445,7 @@ void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
     }
 }
 
-u32 func_002099A0(void) {
+u32 btlGetSelectedBossEffectId(void) {
     s32 battle;
     s32 effect;
 
@@ -3460,7 +3460,7 @@ u32 func_002099A0(void) {
     return ((BtlBossEffectPayload *)effect)->selectedId;
 }
 
-s32 func_002099E0(void) {
+s32 btlHasBossEffectOption(void) {
     s32 absent = 0;
     s32 battle;
     s32 effect;
@@ -3482,7 +3482,7 @@ typedef struct BtlEventTriggers {
     s8 resourceReady; /* 0x01: consumed when the resource is requested */
 } BtlEventTriggers;
 
-void func_00209A28(void) {
+void btlArmEventResourceTrigger(void) {
     u8 *data;
     s32 battle;
 
@@ -3558,7 +3558,7 @@ s32 func_00209B70(void) {
     return absent;
 }
 
-void func_00209BC8(void) {
+void btlClearEventEffectValue(void) {
     s32 battle;
 
     battle = func_001A17F0();
@@ -3601,14 +3601,14 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_00209C90);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209EB8);
 
-u32 func_0020A3F0(void) {
+u32 btlGetEventEffectValue(void) {
     s32 battle;
 
     battle = func_001A17F0();
     return *(u16 *)((BtlState *)battle)->effect;
 }
 
-s32 func_0020A418(void) {
+s32 btlHasFirstSpecialEnemySpecies(void) {
     u8 *unit = (u8 *)((BtlState *)func_001A17F0())->units;
     u16 species = 0;
     while (unit != 0) {
@@ -3694,7 +3694,7 @@ s32 func_0020A780(BtlUnit *unit, s32 arg1) {
         case 8:
             return 4;
         case 1:
-            task = func_001D9BA0((u8 *)unit, 8.0f);
+            task = btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
             *(s32 *)(task + 0x28) = 1;
             btlStartTask(task);
             return -1;
@@ -3733,7 +3733,7 @@ s32 func_0020ABE0(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x11B) {
-                                btlStartTask(func_001D8DE8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -3768,7 +3768,7 @@ s32 btlMapSkillRange(u32 skill) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020ADA8);
 
-s32 func_0020AF00(u8 *unit, s32 action) {
+s32 btlMapSpeciesToActionVariant(u8 *unit, s32 action) {
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return -1;
     }
@@ -3795,12 +3795,12 @@ extern char D_003A5FF0[];
 
 extern char D_003A6018[];
 
+/* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
+   file: retail's func_0020C9E8 sees it as nothrow (bnez vs bnel in the branch slot). */
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6018);
 
-/* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
-   file: retail's func_0020C9E8 sees it as nothrow (bnez vs bnel in the branch slot). */
 void func_0020AFB8(unit)
     u8 *unit;
 {

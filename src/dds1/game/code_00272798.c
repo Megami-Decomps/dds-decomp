@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern s64 fileConsumeConfigTaskReady(void);
 
@@ -8,7 +8,7 @@ extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern u8 D_0037C844[];
 
-extern void func_002858F8();
+extern void mnuSetPopupEntryFlagged();
 
 extern void mnuDrawBackdrop(s32, s32);
 
@@ -24,12 +24,12 @@ INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
 /* Submit a request to the active menu dispatcher in mode 2. */
 void func_002729C8(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 s32 mnuStartStaffDisplay(void) {
-    u8 *context = (u8 *)func_00101A70();
+    u8 *context = (u8 *)kwlnTaskGetUserValue();
     mnuSetStaffDisplayMode(5, context);
     func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x114), 0, 1);
     mnuCreateConfigTasks(0);
@@ -40,19 +40,19 @@ s32 mnuStartStaffDisplay(void) {
 u32 func_00272A58(void) {
     s32 context;
 
-    context = func_00101A70();
+    context = kwlnTaskGetUserValue();
     func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x6c), 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
 s64 func_00272A90(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s64 state = func_00285670(context + 8, dispatchEntry, 0, callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
-            func_002858F8(dispatchEntry, D_0037C844);
+            mnuSetPopupEntryFlagged(dispatchEntry, D_0037C844);
         }
         return 0;
     }
@@ -62,7 +62,7 @@ s64 func_00272A90(s32 callback) {
 s64 func_00272B00(s32 arg0) {
     s32 context;
 
-    context = func_00101A70();
+    context = kwlnTaskGetUserValue();
     mnuDrawBackdrop(context + 0x13C, 0x20);
     func_0027E8D8(-0x10, -8, 0, *(u32 *)(context + 0x138), 0x54);
     mnuCreateStaffImageSprite(0x14);
@@ -71,7 +71,7 @@ s64 func_00272B00(s32 arg0) {
 }
 
 void func_00272B80(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 

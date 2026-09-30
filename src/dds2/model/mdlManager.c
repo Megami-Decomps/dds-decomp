@@ -116,7 +116,7 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231718);
 
-void func_002317E0(u64 unused0, u64 unused1, u64 command) {
+void mdlApplyCommandToGroupedEntity(u64 unused0, u64 unused1, u64 command) {
     u64 entity;
 
     entity = btlFindGroupedEntity();
@@ -178,10 +178,10 @@ void mdlExecuteAndFreeJob(u32 job) {
     WaitSema(D_00438F90);
     btlRemoveGroupId(*words, words[1]);
     SignalSema(D_00438F90);
-    func_00328E48(job);
+    sdfReleaseChipBlock(job);
 }
 
-void func_00231A30(u64 resource, s32 destination) {
+void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
     u64 handle;
     u32 resolved;
 

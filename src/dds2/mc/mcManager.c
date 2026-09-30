@@ -3,7 +3,7 @@
 extern s32 func_0034F680(s32, s32 *, s32 *);
 
 /* Poll an asynchronous memory-card request: only status zero succeeds. */
-s32 func_002C92E8(void) {
+s32 mcPollStrictSuccess(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_0034F680(1, &cmdId, &status);
@@ -40,7 +40,7 @@ void mcMakeDirectory(u32 port, u32 path) {
 }
 
 /* Treat SDK errors below -10 as a distinct memory-card failure. */
-s32 func_002C93B8(void) {
+s32 mcPollWithExtendedErrors(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_0034F680(1, &cmdId, &status);
@@ -141,7 +141,7 @@ void func_002C95F0(void) {
 }
 
 /* Like the result poll, but only report completion, not the SDK result. */
-s32 func_002C9608(void) {
+s32 mcPollCompletionStatus(void) {
     u32 cmdId;
     s32 status;
     s32 result = func_0034F680(1, &cmdId, &status);

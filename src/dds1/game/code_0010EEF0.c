@@ -5,7 +5,7 @@ extern u64 func_00119AF8(u64);
 extern u64 scrReadIntParameter(u64);
 
 extern void *func_002CFEB8(s32 size);
-extern void func_002CFF98(void *p);
+extern void sdfReleaseChipBlock(void *p);
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
 
@@ -86,7 +86,7 @@ u32 func_0010EF38(void) {
 
     context = scrReadIntParameter(0);
     context = func_00119AF8(context);
-    func_0010D5F0(context);
+    scrSetIntegerReturnValue(context);
     return 1;
 }
 
@@ -119,7 +119,7 @@ void effObjNodeDestroy(EffTransformNode *node) {
         if (prev != NULL) {
             prev->next = node->next;
         }
-        func_002CFF98(node);
+        sdfReleaseChipBlock(node);
     }
 }
 
@@ -131,7 +131,7 @@ void effObjFreeInner(EffTransformNode *node) {
     if (node != NULL) {
         inner = node->inner;
         if (inner != NULL) {
-            func_002CFF98(inner);
+            sdfReleaseChipBlock(inner);
             node->inner = NULL;
         }
     }

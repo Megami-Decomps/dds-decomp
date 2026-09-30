@@ -45,7 +45,7 @@ void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
-void *func_002CFF68(s32 size);
+void *sdfAllocAndClearQuadwords(s32 size);
 
 s32 func_002D0A80(s32 address);
 
@@ -318,7 +318,7 @@ void func_002D2070(s32 address) {
     SdfTexReleaseEntry *entry;
 
     if (address != 0) {
-        entry = func_002CFF68(0xA0);
+        entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
             entry->address = address;
             entry->mode = 2;

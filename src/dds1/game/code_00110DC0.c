@@ -14,7 +14,7 @@ extern s32 dds3InvokeAreaCallback(void *arg);
 
 void dds3DestroyWorldIndexNode(u32 node);
 
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
 const s32 func_00110DC0(WorldObjectPointer *object, s32 index, s32 value) {
     u32 *node;
@@ -110,7 +110,7 @@ void func_00111050(WorldObjectPointer *object) {
     for (i = 0; i < 2; i++) {
         dds3DestroyWorldIndexNode(p[i]);
     }
-    func_002CFF98(p);
+    sdfReleaseChipBlock(p);
 }
 
 extern void *func_002CFEB8(s32 size);

@@ -2,7 +2,7 @@
 
 extern s32 func_002D3288(u32);
 extern s32 func_00102A40(void);
-extern void func_00102A18(void);
+extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
 extern u64 func_002EB028(const char *, u32 *, u64);
 
@@ -15,11 +15,11 @@ extern u32 D_003BD81C;
 
 extern u64 func_001951C8(u64, u64, u64, u64, u64);
 
-extern u64 func_00195160(u64, u64, u64, u64, u64);
+extern u64 frFontAppendGlyphFromData(u64, u64, u64, u64, u64);
 
 extern void frFontSetEntryFlag(s32 kind, u64 flag);
 
-extern void func_00195520(u64 value);
+extern void frFontAddSharedGlyphFlags(u64 value);
 
 extern void frFontClearFlagBits(u64 value);
 
@@ -258,16 +258,16 @@ u64 func_00197238(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFl
         kind = 5;
     }
     frFontSetEntryFlag(kind, entryFlag);
-    func_00195520(1);
+    frFontAddSharedGlyphFlags(1);
     frFontClearFlagBits(2);
     frFontClearFlagBits(0x10);
-    glyph = func_00195160(source, kind, 0, 0, 0);
-    func_00195520(0x10);
-    func_00195520(2);
+    glyph = frFontAppendGlyphFromData(source, kind, 0, 0, 0);
+    frFontAddSharedGlyphFlags(0x10);
+    frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
-    func_00195450(glyph, x, y);
-    func_00195460(glyph, depth << 4);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetChainFlag(glyph, 5);
     return glyph;
@@ -322,10 +322,10 @@ void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
-    glyph = func_00195160(glyphSource, 0, 0, 0, 0);
-    func_001953D8(glyph, 0x10, 0x12);
-    func_00195450(glyph, x, y);
-    func_00195460(glyph, depth << 4);
+    glyph = frFontAppendGlyphFromData(glyphSource, 0, 0, 0, 0);
+    frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
     frFontLinkGlyph(parent, glyph, 0);
@@ -365,10 +365,10 @@ void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
     u64 glyph;
 
     glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
-    func_001953D8(glyph, 0xc, 0x10);
+    frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(glyph, 3);
-    func_00195450(glyph, x, y);
-    func_00195460(glyph, depth << 4);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
@@ -536,7 +536,7 @@ void func_001983A8(void) {
 }
 
 void func_00198408(void) {
-    func_00194800(D_003BB18C);
+    frFontAdvanceOrRetainFadingGlyph(D_003BB18C);
     func_00198308();
 }
 
@@ -912,7 +912,7 @@ extern char D_003A13F0[]; /* "Camp process halted.\n", followed by padding no C 
 
 void mnuReportCampProcessHalted(void) {
     if (func_00102A40() != 5) {
-        func_00102A18();
+        dds3AdminSetControlFlag();
     }
     func_003003F0(D_003A13F0);
 }

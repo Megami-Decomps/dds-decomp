@@ -85,7 +85,7 @@ void sdfDestroyDevRequest(void *);
 
 extern s32 D_00438A38;
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 void sdfAssetRelease(SdfAsset *);
 
@@ -583,14 +583,14 @@ void func_003335C8(SdfTextParam *param, f32 first, f32 second) {
     param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
-extern void *func_00328E18(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 SdfAsset *func_003335E0(void) {
     SdfAsset *asset;
     u32 *entry;
     s32 i;
 
     D_00438A38++;
-    asset = func_00328E18(0x48);
+    asset = sdfAllocAndClearQuadwords(0x48);
     asset->pad00[6] = 0xFF;
     for (i = 0; i != 2; i++) {
         entry = func_00328D68(0xA0);
@@ -673,11 +673,11 @@ void sdfAssetRelease(SdfAsset *asset) {
         return;
     }
     D_00438A38--;
-    func_00328E48(asset->entries[0]);
-    func_00328E48(asset->entries[1]);
-    func_00328E48(asset->third);
-    func_00328E48(asset->fourth);
-    func_00328E48(asset);
+    sdfReleaseChipBlock(asset->entries[0]);
+    sdfReleaseChipBlock(asset->entries[1]);
+    sdfReleaseChipBlock(asset->third);
+    sdfReleaseChipBlock(asset->fourth);
+    sdfReleaseChipBlock(asset);
 }
 
 void sdfQueueAssetRelease(s32 assetId) {

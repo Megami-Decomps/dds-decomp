@@ -4,7 +4,7 @@ extern void func_0024DD78(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273AB0);
 
@@ -23,7 +23,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273C50);
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273D40);
 
 s64 func_00273DE8(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     return func_00285670(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
@@ -32,7 +32,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273E20);
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273F20);
 
 s64 func_00274008(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     return func_00285670(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
@@ -49,7 +49,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274050);
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274228);
 
 s64 func_00274310(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     return func_00285670(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
@@ -57,7 +57,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274348);
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274430);
 
-extern u16 func_00286AD0(s32);
+extern u16 mnuGetPartyEntryMenuValue(s32);
 extern void func_0024DD90(s32, void *);
 extern void dspStartEntry(s32);
 extern void func_00283BF0(s32, s32);
@@ -85,7 +85,7 @@ typedef struct MnuEquipScene {
  * adjust inventory counts, and latch the old/new IDs in the menu context. */
 void mnuSwapEquippedBullet(s32 scene, u8 *unit, s32 itemId) {
     MnuEquipContext *equipContext = ((MnuEquipScene *)scene)->context;
-    s32 equipped = func_00286AD0((s32)unit);
+    s32 equipped = mnuGetPartyEntryMenuValue((s32)unit);
 
     func_00283BF0(scene + 0x914, 1);
     if (equipped != itemId) {
@@ -115,7 +115,7 @@ INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274768);
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00274978);
 
 void func_00274B30(s32 selection) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, selection);

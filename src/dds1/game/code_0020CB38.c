@@ -161,7 +161,7 @@ typedef struct BtlLinkedCommand {
     f32 value130;      /* 0x130: initialized to 30 for this motion */
 } BtlLinkedCommand;
 
-extern void *func_001D8DE8(void *, s32, s32);
+extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern s64 btlStartTask(void *);
 
@@ -348,7 +348,7 @@ s32 func_0020D690(s32 battler, s32 action) {
     return -1;
 }
 
-s32 func_0020D6D8(void) {
+s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
     BtlUnit *head = unit;
     s32 result = -1;
@@ -371,7 +371,7 @@ s32 func_0020D6D8(void) {
                     if (unit->flags & 2) {
                         if (!(unit->flags & 0xE0)) {
                             if (unit->mode != 0x13C) {
-                                btlStartTask(func_001D8DE8(unit, 6, 0xA));
+                                btlStartTask(btlCreateUnitFadeOutTask(unit, 6, 0xA));
                                 unit->flags &= ~1;
                             }
                         }
@@ -471,7 +471,7 @@ s32 func_0020D9F8(s32 battler, s32 action) {
     return -1;
 }
 
-void func_0020DA40(u8 *unit) {
+void btlSelectRandomDefeatCamera(u8 *unit) {
     btlFlagAllUnitDefeatCandidatesTask();
     switch (effMiscRandMod(0, 2)) {
     case 0:
@@ -491,7 +491,7 @@ extern void func_00204838(void *, void *, void *, s32, s32, f32, f32, f32);
 
 extern void func_001DB698(void *);
 
-void func_0020DB90(u8 *actor) {
+void btlRaiseLinkedActionPose(u8 *actor) {
     u8 *position = actor + 0x30;
     u8 *rotation = actor + 0xc0;
     func_00204838(actor, position, rotation, 0, 1, 0.25f, 0.0f, 0.5f);
@@ -515,7 +515,7 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E058);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E170);
 
-extern void func_0020DA40(u8 *);
+extern void btlSelectRandomDefeatCamera(u8 *);
 
 s32 func_0020E868(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
@@ -526,7 +526,7 @@ s32 func_0020E868(u8 *unit) {
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
-            func_0020DB90(unit);
+            btlRaiseLinkedActionPose(unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020DC38(unit, unit, 0);
@@ -542,7 +542,7 @@ s32 func_0020E910(u8 *unit) {
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            func_0020DA40(unit);
+            btlSelectRandomDefeatCamera(unit);
         } else {
             btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
                            0.124f, -0.07f, -0.021f, 0.981f,
@@ -554,10 +554,10 @@ s32 func_0020E910(u8 *unit) {
     if (flags & 0x2000) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DB90(unit);
+            btlRaiseLinkedActionPose(unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DA40(unit);
+            btlSelectRandomDefeatCamera(unit);
         }
         return 1;
     }

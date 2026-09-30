@@ -113,7 +113,7 @@ void *func_0022AB80(void) {
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022AB90);
 
 void func_0022AEB8(void) {
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
 }
 
 void evtStartTestTask(void) {

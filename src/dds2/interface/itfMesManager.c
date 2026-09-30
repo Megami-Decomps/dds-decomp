@@ -163,7 +163,7 @@ typedef struct ItfMesItem {
     u32 word10;            /* 0x10: low byte is the color */
     u8 flag14;             /* 0x14: byte set by itfMesSetRowItemFlag */
     u8 unk15;              /* 0x15 */
-    u8 flag16;             /* 0x16: tested by func_001A5B70 */
+    u8 flag16;             /* 0x16: tested by itfMesEnableUnflaggedNodeContexts */
     u8 unk17[0x11];        /* 0x17 */
     struct ItfMesItem *next; /* 0x28 */
 } ItfMesItem;
@@ -217,7 +217,7 @@ s32 scrGetWindow(void);
 
 s32 scrReadIntParameter(s32 parameterIndex);
 
-void func_001A4090(s32 window, u32 value);
+void itfMesSetWindowPanelValue(s32 window, u32 value);
 
 void itfMesCountClearBits(s32 window, s32 count);
 
@@ -235,7 +235,7 @@ void func_001A4988(s32 window, s32 first, s32 second);
 
 void func_001A4A10(s32 window, s32 first, s32 second);
 
-void func_001A34D0();
+void itfMesFinishWindowAndClearStatus();
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
@@ -243,7 +243,7 @@ void itfMesResetWindow(s32 window);
 
 void itfMesDestroyWindow(s32 window);
 
-void func_0019C5B0(FrFontGlyph *glyph);
+void frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
 
 void func_001A5E00(void *, s32);
 
@@ -253,7 +253,7 @@ void itfMesInitCharTable(s32 *table);
 
 s32 itfMesMaxGroupedExtent(ItfMesNode *node);
 
-extern void func_0019D8A8(u32);
+extern void frFontLoadTemporaryEntry(u32);
 
 extern ItfMesNode *func_0019E7C8(s32 x, s32 y, s32 encodedText, s32 sub);
 
@@ -330,7 +330,7 @@ s32 itfMesScriptSetPanelValue(void) {
     if (window < 0) {
         return 1;
     }
-    func_001A4090(window, scrReadIntParameter(0));
+    itfMesSetWindowPanelValue(window, scrReadIntParameter(0));
     return 1;
 }
 
@@ -355,7 +355,7 @@ s32 itfMesScriptActivatePanel(void) {
     return 1;
 }
 
-s32 func_001A3458(void) {
+s32 itfMesFinishScriptWindowIfActive(void) {
     s32 window = scrGetWindow();
     ItfMesState *mes;
     u32 state;
@@ -366,13 +366,13 @@ s32 func_001A3458(void) {
     mes = D_0045296C[window].mes;
     state = mes->flags & 0x300;
     if (state == 0x100 || state == 0x200) {
-        func_001A34D0(window);
+        itfMesFinishWindowAndClearStatus(window);
         func_00154F18(3);
     }
     return state < 1;
 }
 
-void func_001A34D0(s32 window, s32 unused1, s32 unused2) {
+void itfMesFinishWindowAndClearStatus(s32 window, s32 unused1, s32 unused2) {
     ItfMesState *mes = D_0045296C[window].mes;
     u32 flags = mes->flags;
 
@@ -542,7 +542,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     return window;
 }
 
-void func_001A39D0(s32 window) {
+void itfMesDestroyWindowIfPresent(s32 window) {
     if (window >= 0 && D_0045296C[window].mes != NULL) {
         itfMesDestroyWindow(window);
     }
@@ -564,7 +564,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     blk24 = &mes->blk24;
     blk14 = &mes->blk14;
     if (blk24->glyphChain != NULL) {
-        func_0019C5B0(blk24->glyphChain);
+        frFontQueueGlyphInSelectedSlot(blk24->glyphChain);
         blk24->glyphChain = NULL;
     }
     func_001A5E00(blk24, 0);
@@ -574,7 +574,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
         return;
     }
     if (blk14->glyphChain != NULL) {
-        func_0019C5B0(blk14->glyphChain);
+        frFontQueueGlyphInSelectedSlot(blk14->glyphChain);
         blk14->glyphChain = NULL;
     }
     func_001A5DD8(blk14, 0);
@@ -618,7 +618,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     s32 y;
 
     if (blk->glyphChain != NULL) {
-        func_0019C5B0(blk->glyphChain);
+        frFontQueueGlyphInSelectedSlot(blk->glyphChain);
         blk->glyphChain = NULL;
     }
     table = entry->table;
@@ -626,7 +626,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     y = blk->y - ((count - 1) * 25 << 3);
     itfMesInitCharTable((s32 *)mes->tableD0);
     if (*(s32 *)&mes->unk8[0] != 0) {
-        func_0019D8A8(*(s32 *)&mes->unk8[0]);
+        frFontLoadTemporaryEntry(*(s32 *)&mes->unk8[0]);
     }
     blk->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows((u32 *)((u8 *)table + 0x20), table->bitCount, blk->panelValue, blk->x, y, mes->renderValue);
     blk->rowCount = count;
@@ -641,7 +641,7 @@ void itfMesResetWindow(s32 window) {
     ItfMesState *mes = D_0045296C[window].mes;
     ItfMesBlk40 *blk = &mes->blk40;
     if (blk->glyphChain != NULL) {
-        func_0019C5B0(blk->glyphChain);
+        frFontQueueGlyphInSelectedSlot(blk->glyphChain);
         blk->glyphChain = NULL;
     }
     blk->panelValue = 0;
@@ -652,7 +652,7 @@ void itfMesResetWindow(s32 window) {
     mes->flags &= 0xFFFBFFFF;
 }
 
-void func_001A4090(s32 window, u32 value) {
+void itfMesSetWindowPanelValue(s32 window, u32 value) {
     D_0045296C[window].mes->blk40.panelValue = value;
 }
 
@@ -739,9 +739,9 @@ void itfMesBlk40MoveBy(s32 window, s32 dx, s32 dy) {
 void func_001A4418(s32 window, s32 value) {
     ItfMesState *mes = D_0045296C[window].mes;
     if (mes->renderValue != value) {
-        func_001A5950((ItfMesNode *)mes->blk14.glyphChain, value);
-        func_001A5950((ItfMesNode *)mes->blk24.glyphChain, value);
-        func_001A5950((ItfMesNode *)mes->blk40.glyphChain, value);
+        itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk14.glyphChain, value);
+        itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk24.glyphChain, value);
+        itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk40.glyphChain, value);
         mes->renderValue = value;
     }
 }
@@ -834,7 +834,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     itfMesInitCharTable((s32 *)mes->tableD0);
     if (*(s32 *)&mes->unk8[0] != 0) {
-        func_0019D8A8(*(s32 *)&mes->unk8[0]);
+        frFontLoadTemporaryEntry(*(s32 *)&mes->unk8[0]);
     }
     item = itfMesGetTableItem(table, itemIndex);
     if (item == 0) {
@@ -842,7 +842,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     glyph = func_0019E7C8(0, 0, item, 0);
     extent = itfMesMaxGroupedExtent(glyph);
-    func_0019C5B0((FrFontGlyph *)glyph);
+    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
     return extent;
 }
 
@@ -850,7 +850,7 @@ void func_001A4B98(s32 window, u8 value) {
     D_0045296C[window].mes->unk39 = value;
 }
 
-void func_001A4BB8(s32 window, u32 value) {
+void itfMesSetWindowCallbackAddress(s32 window, u32 value) {
     D_0045296C[window].mes->callbackAddress = value;
 }
 
@@ -963,7 +963,7 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub) {
     return &entries[sub->entryCount];
 }
 
-u32 func_001A5228(s32 window, s32 index) {
+u32 itfMesGetWindowEntryItems(s32 window, s32 index) {
     return itfMesGetEntry(D_0045296C[window].mes, index)->itemList;
 }
 
@@ -988,7 +988,7 @@ extern s32 func_0019E908();
 extern s32 func_0019E910();
 extern void evtLipsExecFunction();
 extern void itfMesCopyGlyphShade();
-extern void func_001A5B70();
+extern void itfMesEnableUnflaggedNodeContexts();
 
 /* Rebuild the selected entry's glyph chain and cache it on the window block.
  * Keep the block's byte view for the glyph builder: struct accesses change register allocation here. */
@@ -1003,7 +1003,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 
     handle = *(s32 *)(blk + 0xC);
     if (handle != 0) {
-        func_0019C5B0((FrFontGlyph *)handle);
+        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
         *(s32 *)(blk + 0xC) = 0;
     }
     glyph = func_0019E800(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
@@ -1016,7 +1016,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         }
     }
     if (!(mes->flags & 0x400000) && (D_00452940.flags & 1)) {
-        func_001A5B70(glyph);
+        itfMesEnableUnflaggedNodeContexts(glyph);
     }
     itfMesCopyGlyphShade(glyph, blk);
     flags = func_0019E8E0(3);
@@ -1036,7 +1036,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         helper = func_0019E908();
         evtLipsExecFunction(helper, func_0019E910());
     }
-    func_001A5950((ItfMesNode *)glyph, mes->renderValue);
+    itfMesSetNodeChainRenderValue((ItfMesNode *)glyph, mes->renderValue);
     *(s16 *)(blk + 0x16) = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
     *(s32 *)(blk + 0xC) = glyph;
 }
@@ -1090,7 +1090,7 @@ ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s
         }
     }
     if (node != NULL) {
-        func_001A5950(node, value);
+        itfMesSetNodeChainRenderValue(node, value);
         itfMesRecolorNodeChildren(node, 0x80);
     }
     return node;
@@ -1131,7 +1131,7 @@ void itfMesOffsetNodeChain(ItfMesNode *node, s32 dx, s32 dy) {
 }
 
 /* Persona 4 func_0027a340 @ 0027A340 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5950(ItfMesNode *node, s32 value) {
+void itfMesSetNodeChainRenderValue(ItfMesNode *node, s32 value) {
     while (node != NULL) {
         node->renderValue = value;
         node = node->next;
@@ -1167,7 +1167,7 @@ void itfMesSetRowItemFlag(ItfMesNode *node, s32 first, s32 last, s32 value) {
     } while (node != NULL && row == node->y);
 }
 
-void func_001A5A28(FrFontGlyph *glyph, u8 value) {
+void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 value) {
     FrFontGlyph *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
@@ -1222,7 +1222,7 @@ s32 itfMesNthClearBit(s32 skip, u32 mask) {
 }
 
 /* Persona 4 func_0027a580 @ 0027A580 (src/itfMesManager.c), recompiled unchanged */
-void func_001A5B70(ItfMesNode *node) {
+void itfMesEnableUnflaggedNodeContexts(ItfMesNode *node) {
     for (; node != NULL; node = node->next) {
         if (node->child->flag16 == 0) {
             frFontEnableContextMode(node);

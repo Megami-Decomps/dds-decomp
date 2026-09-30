@@ -4,7 +4,7 @@ extern u32 D_00437AE8;
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern char D_00437B78[]; /* "camp" */
 
@@ -34,9 +34,9 @@ extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
 extern void func_002C3E58(u8 *);
 
-extern s32 func_00102970(void);
+extern s32 dds3AdminReadPreviousSignedSample(void);
 
-extern s32 func_00303D00(s32);
+extern s32 mnuAllocateValueRecord(s32);
 
 extern void mnuInitPartyPanelSlots(s32);
 
@@ -44,7 +44,7 @@ extern void mnuLoadEffectResources(u8 *);
 
 extern void func_002B8140(u8 *);
 
-extern void func_0026C538(s32);
+extern void evtCreateMessageWindowIfMissing(s32);
 
 extern u8 D_003E5778[];
 
@@ -80,7 +80,7 @@ extern void ptyClearProfileRecords(void);
 
 extern void ptyRebuildAllProfiles(void);
 
-extern void func_002B7F80(u8 *, s32);
+extern void mnuDrawCampIconBackdrop(u8 *, s32);
 
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -100,7 +100,7 @@ extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
 
 extern char D_00437B80[];
 
-extern u32 func_00303D70(u32 *);
+extern u32 mnuGetValueRecordOwner(u32 *);
 
 extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
 
@@ -463,7 +463,7 @@ void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 flag;
 
     func_002A91A0(state);
-    flag = func_00303D70(list) == 1;
+    flag = mnuGetValueRecordOwner(list) == 1;
     for (i = 0; i < 16; i++) {
         effAppendListEntry(list, D_0042A950, D_003E6858[i][flag], 1, state + 0x10 / 4 + i);
     }
@@ -669,15 +669,15 @@ u8 *mnuCreateStaffMenuWork(void) {
     ((CampVisualWork *)work)->allocationHandle = handle;
     effects = work + 0x11C;
     func_002C3E58(work + 8);
-    if (func_00102970() != 0) {
-        ((CampVisualWork *)work)->menuResource = func_00303D00(1);
+    if (dds3AdminReadPreviousSignedSample() != 0) {
+        ((CampVisualWork *)work)->menuResource = mnuAllocateValueRecord(1);
     } else {
-        ((CampVisualWork *)work)->menuResource = func_00303D00(0);
+        ((CampVisualWork *)work)->menuResource = mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots((s32)work + 0xA928);
     mnuLoadEffectResources(effects);
     func_002B8140(effects);
-    func_0026C538((s32)D_003E5778);
+    evtCreateMessageWindowIfMissing((s32)D_003E5778);
     movLoadTitleEffects(work);
     func_002A9908(work);
     func_002C1B58(work + 0xAA50, 0x60);
@@ -689,13 +689,13 @@ u8 *mnuCreateStaffMenuWork(void) {
 }
 
 void mnuDestroyStaffMenuTask(u32 task) {
-    u8 *work = (u8 *)func_00101958(task);
+    u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     if (work == NULL) {
         return;
     }
-    func_002C3FC8(work + 8, task);
+    mnuDrainPanelTransitions(work + 8, task);
     func_002A9F08(work);
-    func_002BB418(((CampVisualWork *)work)->modelHandle);
+    mnuDestroyScrollPanel(((CampVisualWork *)work)->modelHandle);
     mnuShutdownContext(work + 0x284);
     dspCloseChannel();
     mnuDestroyEffectResources(work + 0x11c);
@@ -710,7 +710,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
 u32 func_002AA278(void) {
     s32 work;
 
-    work = func_00101958();
+    work = kwlnTaskGetUserValue();
     func_002C1B70(work + 0xaa50, 0x53);
     return 0;
 }
@@ -719,7 +719,7 @@ extern u32 func_002C44E8(s32);
 
 extern s32 func_002A9AB8(s32);
 
-extern s32 func_0026C768(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 func_002C6CE8(void);
 
@@ -739,7 +739,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
         return 0;
     }
     result = 0;
-    if (func_0026C768() == 0) {
+    if (evtGetMessageWindowControlState() == 0) {
         if (buttons & 8) {
             if (func_002C6CE8() != 1) {
                 if (fileConsumeConfigTaskReady() == 0) {
@@ -816,7 +816,7 @@ void func_002AA530(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
     func_0019D550(object, 1, layer);
-    func_0019C5B0(object);
+    frFontQueueGlyphInSelectedSlot(object);
     offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
@@ -851,7 +851,7 @@ void mnuCreateStaffImageSprite(s32 index) {
     u32 *object = (u32 *)func_0019F460(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[index], 0);
     func_0019D550(object, 1, 0x54);
-    func_0019C5B0(object);
+    frFontQueueGlyphInSelectedSlot(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA7A0);
@@ -871,12 +871,12 @@ void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
 /* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
  * displays the background, and all other kinds reset the highlight alpha. */
 void func_002AACB8(s32 kind, s32 task) {
-    u8 *work = (u8 *)func_00101958(task);
+    u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     CampVisualWork *visual = (CampVisualWork *)work;
     s32 ctx;
     s32 sub;
 
-    func_002B7F80(work + 0x11C, 0x20);
+    mnuDrawCampIconBackdrop(work + 0x11C, 0x20);
     switch (kind) {
     case 2:
         func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->drawContext, 0x19, 0x53);

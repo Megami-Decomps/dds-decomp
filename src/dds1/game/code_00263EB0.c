@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DD78(void);
 
@@ -44,7 +44,7 @@ extern void mnuDrawItemPanelBackdrop(s32);
 extern void func_00263B78(s32, s32);
 
 void func_002641E0(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
@@ -52,7 +52,7 @@ void func_002641E0(s32 request) {
 }
 
 void func_00264238(s32 input) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, input);
@@ -61,11 +61,11 @@ void func_00264238(s32 input) {
 u32 func_00264280(void) {
     s32 context;
 
-    context = func_00101A70();
-    func_002830F0(*(u32 *)(context + 0xd10), 0xffffffffffffffff);
+    context = kwlnTaskGetUserValue();
+    mnuSetPanelGroupSelection(*(u32 *)(context + 0xd10), 0xffffffffffffffff);
     dspStartEntry(0x16);
     func_0024DAE8(0);
-    func_0024DAB8(0x1d);
+    evtCaptureMessageWindowSoundMode(0x1d);
     return 1;
 }
 
@@ -76,7 +76,7 @@ u32 func_002642C8(void) {
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_002642D0);
 
 void func_00264498(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 1);
@@ -84,7 +84,7 @@ void func_00264498(s32 request) {
 }
 
 void func_002644F0(s32 input) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, input);
@@ -97,21 +97,21 @@ u32 func_00264608(void) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern s64 func_0024DC08(void);
-extern void func_002858F8(s32 *, char *);
+extern s64 evtGetMessageWindowControlState(void);
+extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
 s64 mnuRunPanelWithIdleFallback(u64 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     s32 *panelState = (s32 *)(context + 0x54);
     s64 result;
 
     evtStageTestUpdateCamera();
     result = func_00285670(context + 8, panelState, 0, request);
     if (result == 0) {
-        if ((*panelState == 0) && (result = func_0024DC08(), result == 0)) {
-            func_002858F8(panelState, D_0036D478);
+        if ((*panelState == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
+            mnuSetPopupEntryFlagged(panelState, D_0036D478);
         }
         result = 0;
     }
@@ -119,7 +119,7 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
 }
 
 void func_002646A0(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
     func_00263B78(context, 0);
@@ -127,7 +127,7 @@ void func_002646A0(s32 request) {
 }
 
 void func_002646F8(s32 input) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, input);

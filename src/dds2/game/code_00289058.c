@@ -54,13 +54,13 @@ u32 func_002890A8(MenuContainer *object) {
 }
 
 u32 func_002890B8(MenuContainer *object) {
-    func_002B8D10(object->list);
+    mnuRetreatListCursorDefault(object->list);
     mnuClearListFlagsOneAndTwo(object->list);
     return 1;
 }
 
 u32 func_002890F0(MenuContainer *object) {
-    func_002B8CF0(object->list);
+    mnuAdvanceListCursorDefault(object->list);
     mnuClearListFlagsOneAndTwo(object->list);
     return 1;
 }
@@ -80,11 +80,11 @@ s32 func_00289128(MenuContainer *object, s8 target) {
     diff = current - target;
     while (diff != 0) {
         if (diff > 0) {
-            func_002B8D10(object->list);
+            mnuRetreatListCursorDefault(object->list);
             diff--;
             mnuClearListFlagsOneAndTwo(object->list);
         } else {
-            func_002B8CF0(object->list);
+            mnuAdvanceListCursorDefault(object->list);
             diff++;
             mnuClearListFlagsOneAndTwo(object->list);
         }

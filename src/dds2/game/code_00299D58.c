@@ -18,7 +18,7 @@ extern u32 func_0029D790(u32, s32);
 
 extern void func_0026C900(void);
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_002C44E8(s32);
 
@@ -57,7 +57,7 @@ typedef struct MenuItemScene {
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
 void mnuStaffRunPanel1(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
@@ -66,7 +66,7 @@ void mnuStaffRunPanel1(s32 input) {
 }
 
 void mnuStaffRunPanel2(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
         brsDecaySharedAnimCounter(context);
@@ -83,19 +83,19 @@ u32 func_00299EF8(void) {
 }
 
 void mnuStaffRunPanel0(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002C44E8(0x33);
     func_002C4038(context + 8, context + 0x54, 0, input);
 }
 
 void func_00299F50(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
     func_002C4038(context + 8, context + 0x54, 1, input);
 }
 
 void func_00299FA0(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002C4038(context + 8, context + 0x54, 2, input);
 }
 
@@ -170,21 +170,21 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
 void func_0029A588(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuTitleRenderFadeAndPanels(context);
     func_002C4038(context + 8, context + 0x54, 1, request);
 }
 
 void func_0029A5D8(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
     func_002C4038(context + 8, context + 0x54, 2, request);
 }
 
 s32 mnuResetItemSelectionMarkers(void) {
-    s32 *context = (s32 *)func_00101958();
+    s32 *context = (s32 *)kwlnTaskGetUserValue();
 
     context[0x99] = 0;
     context[0xFA] = 0;

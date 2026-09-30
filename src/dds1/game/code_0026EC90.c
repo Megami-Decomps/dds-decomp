@@ -12,7 +12,7 @@ extern u8 D_0037B888[];
 
 extern u8 D_003253C8[];
 
-extern u32 func_002BC630(u32 *);
+extern u32 mnuGetValueRecordOwner(u32 *);
 
 extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
 
@@ -80,7 +80,7 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern char D_003B1AC8[];
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 typedef struct MovieListNode {
     struct MovieListNode *next;
@@ -459,7 +459,7 @@ void mnuClearMovieList(void) {
         do {
             MovieListNode *next = node->next;
 
-            func_002CFF98(node);
+            sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
         D_003DC560.head = NULL;
@@ -935,7 +935,7 @@ void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 flag;
 
     mnuResolveStaffImageHandles(state);
-    flag = func_002BC630(list) == 1;
+    flag = mnuGetValueRecordOwner(list) == 1;
     for (i = 0; i < 16; i++) {
         effAppendListEntry(list, D_003B2020, D_0037C248[i][flag], 1, state + 0x24 / 4 + i);
     }
@@ -1046,20 +1046,20 @@ void func_00271DF8(StaffSpriteHandles *handles) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_00271E58);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern s8 D_003BC6B4;
 
 extern void func_002D0918(u32);
 
 void mnuDestroyStaffMenuTask(u32 task) {
-    u8 *work = (u8 *)func_00101A70(task);
+    u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     if (work == NULL) {
         return;
     }
-    func_00285600(work + 8, task);
+    mnuDrainPanelTransitions(work + 8, task);
     func_00271DF8((StaffSpriteHandles *)work);
-    func_0027E690(*(u32 *)(work + 0x138));
+    mnuDestroyScrollPanel(*(u32 *)(work + 0x138));
     mnuShutdownContext(work + 0x15C);
     dspCloseChannel();
     mnuReleaseAssets(work + 0x13C);
@@ -1074,7 +1074,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
 u32 func_00271FC8(void) {
     s32 context;
 
-    context = func_00101A70();
+    context = kwlnTaskGetUserValue();
     func_00283BF8(context + 0x914, 0x53);
     return 0;
 }
@@ -1087,7 +1087,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
         return 0;
     }
     result = 0;
-    if (func_0024DC08() == 0) {
+    if (evtGetMessageWindowControlState() == 0) {
         if (buttons & 8) {
             if (func_002877A8() != 1) {
                 if (fileConsumeConfigTaskReady() == 0) {
@@ -1143,7 +1143,7 @@ void mnuCreateStaffImageSprite(s32 index) {
     u32 *object = (u32 *)func_00197760(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[index], 0);
     func_001958A0(object, 1, 0x54);
-    func_00194920(object);
+    frFontQueueGlyphInSelectedSlot(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_002723B0);
@@ -1155,7 +1155,7 @@ void func_00272668(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 
 void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
-    u8 *menu = (u8 *)func_00101A70(arg1);
+    u8 *menu = (u8 *)kwlnTaskGetUserValue(arg1);
 
     mnuDrawBackdrop(menu + 0x13C, 0x20);
     if (func_002719F0(arg1) == 0) {

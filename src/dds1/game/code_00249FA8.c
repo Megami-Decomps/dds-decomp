@@ -4,11 +4,11 @@ extern s32 kwlnFadeIsActive(void);
 
 extern s8 D_003BC3E0;
 
-extern s64 func_0024DC08(void);
+extern s64 evtGetMessageWindowControlState(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
@@ -58,24 +58,24 @@ s32 fldPollSceneState(void) {
 
 extern char D_0036ADF4[];
 
-extern void func_002858E8(s32 *, char *);
+extern void mnuSetPopupEntry(s32 *, char *);
 
 void func_0024A0D8(s32 value) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     s32 *state = (s32 *)(context + 0x54);
 
-    func_002858E8(state, D_0036ADF4);
+    mnuSetPopupEntry(state, D_0036ADF4);
     func_00285670(context + 8, state, 0, value);
 }
 
 void func_0024A138(s32 value) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 1, value);
 }
 
 void func_0024A170(s32 value) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 2, value);
 }
@@ -86,7 +86,7 @@ s32 func_0024A1A8(void) {
     if (fadeActive != 0) {
         return 0;
     }
-    return func_0024DC08() == 0;
+    return evtGetMessageWindowControlState() == 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A1D8);

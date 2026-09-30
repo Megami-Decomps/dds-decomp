@@ -6,7 +6,7 @@ extern s32 D_00437898;
 
 extern s32 func_0026CD50(u32);
 
-extern s32 func_0026C768(void);
+extern s32 evtGetMessageWindowControlState(void);
 
 extern u32 func_00343ED0(u32, u32 *, u32);
 
@@ -50,7 +50,7 @@ extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(u64);
 extern void func_0023AA30(s32, s32);
 /* Updates the secondary world selector only when the packed pair changes. */
-void func_0026C1D0(s32 first, s32 second) {
+void evtSwitchWorldValueIfChanged(s32 first, s32 second) {
     s32 packed = (first << 16) + second;
 
     if (dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) != packed) {
@@ -58,7 +58,7 @@ void func_0026C1D0(s32 first, s32 second) {
     }
 }
 
-void func_0026C240(void) {
+void evtResetDrawTransitions(void) {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawSetupC70B(0);
     kwlnDrawEnableCd0(0);
@@ -71,10 +71,10 @@ void func_0026C240(void) {
 
 void func_0026C298(void) {
     evtCommandShutdownStage();
-    func_0026C240();
+    evtResetDrawTransitions();
 }
 
-void func_0026C2B8(u32 a, u32 b, u32 c, s16 d, s16 e, u32 f, u32 *dst) {
+void evtFillQuadRecordFields(u32 a, u32 b, u32 c, s16 d, s16 e, u32 f, u32 *dst) {
     dst[0] = a;
     dst[1] = b;
     dst[2] = c;
@@ -83,7 +83,7 @@ void func_0026C2B8(u32 a, u32 b, u32 c, s16 d, s16 e, u32 f, u32 *dst) {
     dst[4] = f;
 }
 
-s32 func_0026C2D8(s32 task) {
+s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
         if (kwlnTaskGetRegisteredState(task) != 0) {
             kwlnTaskDestroyWithHierarchy(task, 0);
@@ -92,11 +92,11 @@ s32 func_0026C2D8(s32 task) {
 }
 
 extern s32 scrCreateTaskForProcessId();
-s32 func_0026C318(s32 first, s32 second, s32 *taskSlot) {
+s32 evtReplaceScriptProcessTask(s32 first, s32 second, s32 *taskSlot) {
     s32 task;
 
     if (taskSlot != NULL) {
-        func_0026C2D8(*taskSlot);
+        evtDestroyRegisteredTaskIfPresent(*taskSlot);
     }
     task = scrCreateTaskForProcessId(0x7D0, first, second);
     evtClearActiveFlag(0);
@@ -173,7 +173,7 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
 }
 
 extern s32 itfMesCreateWindow(void);
-s32 func_0026C538(void) {
+s32 evtCreateMessageWindowIfMissing(void) {
     if (D_00437880 < 0) {
         D_00437880 = itfMesCreateWindow();
         func_001A4988(D_00437880, 2, 0);
@@ -204,7 +204,7 @@ s32 dspStartEntry(s32 entry) {
     return 1;
 }
 
-s32 func_0026C618(s32 value) {
+s32 evtCaptureMessageWindowSoundMode(s32 value) {
     if (D_00437880 < 0) {
         return 0;
     }
@@ -234,14 +234,14 @@ s8 func_0026C6A0(void) {
     return D_0043788D;
 }
 
-u32 func_0026C6A8(s32 notify) {
+u32 evtCleanupMessageWindow(s32 notify) {
     u32 result;
 
     result = 0;
     if (-1 < D_00437880) {
         itfPanelSetStatus(D_00437880, 0);
         if (notify != 0) {
-            func_001A34D0(D_00437880);
+            itfMesFinishWindowAndClearStatus(D_00437880);
         }
         itfMesCleanupWindow(D_00437880, 0);
         dspSetActive(1);
@@ -252,22 +252,22 @@ u32 func_0026C6A8(s32 notify) {
 }
 
 void func_0026C710(void) {
-    func_0026C6A8(1);
+    evtCleanupMessageWindow(1);
 }
 
-extern void func_001A39D0(s32);
+extern void itfMesDestroyWindowIfPresent(s32);
 s32 dspCloseChannel(void) {
     if (D_00437880 < 0) {
         return 0;
     }
-    func_001A39D0(D_00437880);
+    itfMesDestroyWindowIfPresent(D_00437880);
     D_00437880 = -1;
     D_00437884 = 0;
     D_00437885 = 0;
     return 1;
 }
 
-s32 func_0026C768(void) {
+s32 evtGetMessageWindowControlState(void) {
     if (D_00437880 < 0) {
         return 0;
     }
@@ -322,7 +322,7 @@ void dspSetActive(s32 enabled) {
     }
 }
 
-void func_0026C9B8(s32 x, s32 y) {
+void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
     itfMesBlk24MoveTo(D_00437880, x * 16, y * 8);
     itfPanelEmitRecord(D_00437880, -((0x15F - y) * 8));
 }
@@ -347,7 +347,7 @@ s32 evtIsActiveFlagSet(s32 index) {
     return D_00438FB8[8 + index] != 0;
 }
 
-s32 func_0026CA80(s32 index, s32 value) {
+s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
     if (index < 0x10) {
     } else {
         return 0;
@@ -372,12 +372,12 @@ s32 evtActivateCurrentFlag(void) {
     if (index >= 16) {
         index = 15;
     }
-    func_0010D818(D_00453CC0[index]);
+    scrSetIntegerReturnValue(D_00453CC0[index]);
     return 1;
 }
 
 extern s32 func_0032C138(u32);
-s32 func_0026CB48(u32 resource) {
+s32 evtLoadTextureFromResourcePath(u32 resource) {
     u32 buffer[2];
     u32 handle;
     s32 result;
@@ -407,14 +407,14 @@ typedef struct {
     u32 unk8;   /* 0x8: exposed by func_0026D020 */
 } EvtLoadedRecord;
 
-void func_0026CC88(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
+void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
     s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
 
     func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
     func_0026CB98(x + width - 0xA0, y, y + height, 8, (s32)record);
 }
 
-void func_0026CD20(u32 x, u32 y, u32 width, u32 height) {
+void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
     func_00308808(x, y, 0, width, height, 0x30303040, 0x53);
 }
 

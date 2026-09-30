@@ -25,7 +25,7 @@ typedef struct EffResourceOwner {
     s32 buffer;        /* 0xF8 */
 } EffResourceOwner;
 
-extern void func_001618C8(s32);
+extern void effParReleaseNodeResource(s32);
 extern void func_001634A8(s32);
 extern void func_001900B8(s32);
 
@@ -67,7 +67,7 @@ typedef struct EffParticleRecord {
     u8 pad30[0x10];
 } EffParticleRecord;
 
-extern u32 func_00161EE8(u32, u32);
+extern u32 effParModulateColors(u32, u32);
 
 typedef struct EffTemplatePacketList {
     u8 pad00[0x10];
@@ -156,7 +156,7 @@ s32 func_003292A8(s32 size);
 
 EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
-void func_0015E1D0(EffTemplatePacketList *effect);
+void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
 /* Resource-table entry holds a reference-counted resource at +0x30. */
 typedef struct EffResourceRef {
@@ -177,7 +177,7 @@ u32 func_00159BB0(void) {
     return 0xf;
 }
 
-s32 func_00159BB8(s32 index) {
+s32 effGetResourceFirstWord(s32 index) {
     return *(s32 *)((EffResourceRef *)D_00451EE0[index])->resource;
 }
 
@@ -188,16 +188,16 @@ void *src;
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00159BE8(BillObj *effect, float scale) {
+void billSetLengthExtent(BillObj *effect, float scale) {
     effect->unk20 = scale;
 }
 
-void func_00159BF0(BillObj *effect, float x, float y) {
+void billSetChildScaleComponents(BillObj *effect, float x, float y) {
     effect->unk10 = x;
     effect->unk14 = y;
 }
 
-void func_00159C00(BillObj *effect, u32 value) {
+void billSetChildParameter(BillObj *effect, u32 value) {
     effect->unk24 = value;
 }
 
@@ -254,7 +254,7 @@ typedef struct EffSlotList {
     EffSlot **slots;  /* 0x18 */
 } EffSlotList;
 
-void func_00159CF0(BillObj *effect, s16 value) {
+void billSetAllChildVariants(BillObj *effect, s16 value) {
     switch (effect->unk2C) {
     case 0:
         ((EffSlot *)effect->unk30)->value = value;
@@ -277,7 +277,7 @@ void func_00159CF0(BillObj *effect, s16 value) {
     }
 }
 
-s32 func_00159D60(BillObj *effect) {
+s32 billGetChildValue(BillObj *effect) {
     if (effect->unk2C == 0) {
         return *(s32 *)effect->unk30;
     }
@@ -338,7 +338,7 @@ typedef struct BillValueLink {
     BillLinkedValue *target;
 } BillValueLink;
 
-s32 func_00159E50(s32 billboard) {
+s32 billGetLinkedChildValue(s32 billboard) {
     if (((BillObj *)billboard)->unk2C == 1) {
         return ((BillValueLink *)((BillObj *)billboard)->unk30)->target->value;
     }
@@ -395,7 +395,7 @@ s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     return 0;
 }
 
-u16 func_00159F60(BillObj *effect) {
+u16 billGetKindOneParameter(BillObj *effect) {
     if (effect->unk2C == 1) {
         return effect->unk50;
     }
@@ -417,20 +417,20 @@ typedef struct BillChildPayload {
     f32 halfHeight; /* 0x28 */
 } BillChildPayload;
 
-s32 func_00159F80(s32 billboard) {
+s32 billGetKindOneFlags(s32 billboard) {
     if (((BillKindOneView *)billboard)->kind == 1) {
         return ((BillKindOneView *)billboard)->flags;
     }
     return 0;
 }
 
-void func_00159FA0(s32 billboard) {
+void billMarkKindOneFlag(s32 billboard) {
     if (((BillKindOneView *)billboard)->kind == 1) {
         ((BillKindOneView *)billboard)->flags |= 0x1000000;
     }
 }
 
-void func_00159FC8(s32 billboard, float width, float height) {
+void billSetChildHalfExtents(s32 billboard, float width, float height) {
     if (((BillKindOneView *)billboard)->kind == 0) {
         s32 tmp = (s32)((BillObj *)billboard)->unk30;
         ((BillChildPayload *)tmp)->halfWidth = width * 0.5f;
@@ -469,15 +469,15 @@ u8 *billCloneUnitObject(EffInstance *source) {
 void effDestroy(EffInstance *instance) {
     sdfQueueAssetRelease((u32)instance->renderState);
     billDispatchByKind(instance->billboard);
-    func_00328E48(instance);
+    sdfReleaseChipBlock(instance);
 }
 
-void func_0015A348(EffInstance *instance) {
+void effSetInstanceBillboardVector(EffInstance *instance) {
     effCopyVector((u32)instance->billboard);
 }
 
 void billSetChildScale2(EffInstance *instance, f32 scale) {
-    func_00159BF0(instance->billboard, scale, scale);
+    billSetChildScaleComponents(instance->billboard, scale, scale);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -490,7 +490,7 @@ void effCopyMatrixToNext(EffInstance *instance, void *src) {
 }
 
 void billSetChildValue(EffInstance *instance, u32 value) {
-    func_00159C00(instance->billboard, value);
+    billSetChildParameter(instance->billboard, value);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -555,7 +555,7 @@ EffectBufferTail *effAllocateBuffer(s32 count) {
     return tail;
 }
 
-void func_0015B318(u32 *allocationSlot) {
+void effReleaseBufferAllocation(u32 *allocationSlot) {
     func_003297C8(*allocationSlot);
 }
 
@@ -564,7 +564,7 @@ INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
 void effDestroyResources(EffResourceOwner *owner) {
     switch (owner->kind) {
     case 1:
-        func_001618C8(owner->unk38);
+        effParReleaseNodeResource(owner->unk38);
         break;
     case 2:
         func_001634A8(owner->unk40);
@@ -577,7 +577,7 @@ void effDestroyResources(EffResourceOwner *owner) {
         break;
     }
     billDispatchByKind(owner->billboard);
-    func_0015B318(owner->buffer);
+    effReleaseBufferAllocation(owner->buffer);
 }
 
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
@@ -611,7 +611,7 @@ void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015B680(EffTemplatePacketList *source) {
+s32 effCloneRingTemplate(EffTemplatePacketList *source) {
     s32 obj = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
@@ -623,9 +623,9 @@ s32 func_0015B680(EffTemplatePacketList *source) {
     return obj;
 }
 
-void func_0015B700(u32 effect) {
+void effFreeRingTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 /* Header shared by the effect emitters that spawn a ring or spray of packets:
@@ -773,7 +773,7 @@ void effEmitterRingUpdate(EffEmitterA *effect) {
             f32 radius;
 
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -816,7 +816,7 @@ void effEmitterRingUpdate(EffEmitterA *effect) {
     }
 }
 
-void func_0015BC38(EffTemplatePacketList *effect) {
+void effResetDiscPacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -831,7 +831,7 @@ void func_0015BC38(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015BC80(float scale, EffTemplatePacketList *effect) {
+void effScaleDiscTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -848,13 +848,13 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015BC38(copy);
+    effResetDiscPacketAges(copy);
     return copy;
 }
 
-void func_0015BD50(u32 effect) {
+void effFreeDiscTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterB {
@@ -954,7 +954,7 @@ void effEmitterDiscUpdate(EffEmitterB *effect) {
             f32 k;
 
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -996,7 +996,7 @@ void effEmitterDiscUpdate(EffEmitterB *effect) {
     }
 }
 
-void func_0015C288(EffTemplatePacketList *effect) {
+void effResetBallisticPacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -1011,7 +1011,7 @@ void func_0015C288(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015C2D0(float scale, EffTemplatePacketList *effect) {
+void effScaleBallisticTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -1020,7 +1020,7 @@ void func_0015C2D0(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015C320(EffTemplatePacketList *source) {
+s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
@@ -1028,13 +1028,13 @@ s32 func_0015C320(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015C288(copy);
+    effResetBallisticPacketAges(copy);
     return copy;
 }
 
-void func_0015C3A0(u32 effect) {
+void effFreeBallisticTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterC {
@@ -1087,7 +1087,7 @@ void effEmitterBallisticUpdate(EffEmitterC *effect) {
         }
         if (age >= 0) {
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -1127,7 +1127,7 @@ typedef struct EffEmitterD EffEmitterD;
 
 extern void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index);
 
-void func_0015CDF0(EffTemplatePacketList *effect) {
+void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 i;
     u32 next;
@@ -1150,14 +1150,14 @@ void func_0015CDF0(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015CE90(float scale, EffTemplatePacketList *effect) {
+void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_0015CEC8(EffTemplatePacketList *source) {
+s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
@@ -1165,13 +1165,13 @@ s32 func_0015CEC8(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015CDF0(copy);
+    effInitLookAtRingPacketSchedule(copy);
     return copy;
 }
 
-void func_0015CF48(u32 effect) {
+void effFreeLookAtRingTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 struct EffEmitterD {
@@ -1266,7 +1266,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
 
         if (age >= 0) {
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -1303,7 +1303,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     }
 }
 
-void func_0015D420(EffTemplatePacketList *effect) {
+void effResetBurstPacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -1318,7 +1318,7 @@ void func_0015D420(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015D468(float scale, EffTemplatePacketList *effect) {
+void effScaleBurstTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -1326,7 +1326,7 @@ void func_0015D468(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_0015D4A8(EffTemplatePacketList *source) {
+s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
@@ -1334,13 +1334,13 @@ s32 func_0015D4A8(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015D420(copy);
+    effResetBurstPacketAges(copy);
     return copy;
 }
 
-void func_0015D528(u32 effect) {
+void effFreeBurstTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterE {
@@ -1416,7 +1416,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
 
 extern void func_00336768(f32 angle, f32 *axis);
 
-void func_0015D8B0(EffEmitterE *effect) {
+void effEmitterBurstUpdate(EffEmitterE *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 kind = effect->head.sub.kind;
     f32 origin[4];
@@ -1447,7 +1447,7 @@ void func_0015D8B0(EffEmitterE *effect) {
         }
         if (age >= 0) {
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -1500,7 +1500,7 @@ void func_0015D8B0(EffEmitterE *effect) {
     }
 }
 
-void func_0015DB20(EffTemplatePacketList *effect) {
+void effResetSpherePacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -1515,7 +1515,7 @@ void func_0015DB20(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015DB68(float scale, EffTemplatePacketList *effect) {
+void effScaleSphereTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -1524,7 +1524,7 @@ void func_0015DB68(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-s32 func_0015DBB8(EffTemplatePacketList *source) {
+s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
@@ -1532,13 +1532,13 @@ s32 func_0015DBB8(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015DB20(copy);
+    effResetSpherePacketAges(copy);
     return copy;
 }
 
-void func_0015DC38(u32 effect) {
+void effFreeSphereTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterF {
@@ -1640,7 +1640,7 @@ void effEmitterSphereUpdate(EffEmitterF *effect) {
             f32 k;
 
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -1682,7 +1682,7 @@ void effEmitterSphereUpdate(EffEmitterF *effect) {
     }
 }
 
-void func_0015E1D0(EffTemplatePacketList *effect) {
+void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 i;
     u32 next;
@@ -1704,7 +1704,7 @@ void func_0015E1D0(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015E240(float scale, EffTemplatePacketList *effect) {
+void effScaleExpandRingTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -1719,13 +1719,13 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     memcpy((void *)obj, source, source->templateSize);
     memcpy((void *)(obj + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(obj);
-    func_0015E1D0(obj);
+    effInitExpandRingPacketSchedule(obj);
     return obj;
 }
 
-void func_0015E2F8(u32 effect) {
+void effFreeExpandRingTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterG {
@@ -1814,7 +1814,7 @@ void effEmitterExpandRingUpdate(EffEmitterG *effect) {
             f32 s;
 
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -1855,7 +1855,7 @@ void effEmitterExpandRingUpdate(EffEmitterG *effect) {
     }
 }
 
-void func_0015E788(EffTemplatePacketList *effect) {
+void effResetConePacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -1870,7 +1870,7 @@ void func_0015E788(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015E7D0(float scale, EffTemplatePacketList *effect) {
+void effScaleConeTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -1879,7 +1879,7 @@ void func_0015E7D0(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015E820(EffTemplatePacketList *source) {
+s32 effCloneConeTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x180);
     s32 tailLen = 0x30;
 
@@ -1887,13 +1887,13 @@ s32 func_0015E820(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015E788(copy);
+    effResetConePacketAges(copy);
     return copy;
 }
 
-void func_0015E8A0(u32 effect) {
+void effFreeConeTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterH {
@@ -1989,7 +1989,7 @@ void effEmitterConeUpdate(EffEmitterH *effect) {
         }
         if (age >= 0) {
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -2036,7 +2036,7 @@ void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015ED78(float scale, EffTemplatePacketList *effect) {
+void effScalePacketRecordTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -2045,7 +2045,7 @@ void func_0015ED78(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
 
-s32 func_0015EDC8(EffTemplatePacketList *source) {
+s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x170);
     s32 tailLen = 0x20;
 
@@ -2057,9 +2057,9 @@ s32 func_0015EDC8(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015EE48(u32 effect) {
+void effFreePacketRecordScaleTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015EE70);
@@ -2070,13 +2070,13 @@ void func_0015F560(void) {
     effInitParticleRecord();
 }
 
-void func_0015F578(float scale, EffTemplatePacketList *effect) {
+void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
 }
 
-void *func_0015F5A0(EffTemplatePacketList *source) {
+void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *copy = func_00328D68(0x150);
     s32 tailLen = 0;
 
@@ -2089,9 +2089,9 @@ void *func_0015F5A0(EffTemplatePacketList *source) {
     return copy;
 }
 
-void func_0015F620(u32 effect) {
+void effFreeSingleParticleTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 extern u8 D_003AA868[];
@@ -2124,7 +2124,7 @@ void effInitParticleRecord(effect)
     }
 }
 
-void func_0015F748(EffParticle *effect) {
+void effUpdateParticleRecord(EffParticle *effect) {
     EffParticleRecord *record = (EffParticleRecord *)effect->buffer->records;
     u32 color;
 
@@ -2138,10 +2138,10 @@ void func_0015F748(EffParticle *effect) {
     effect->unk24 = record->unk20 + 1;
     record->unk24 = color;
     record->z = effect->z;
-    record->unk24 = func_00161EE8(color, effect->unkF0);
+    record->unk24 = effParModulateColors(color, effect->unkF0);
 }
 
-void func_0015F7D8(EffTemplatePacketList *effect) {
+void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -2156,7 +2156,7 @@ void func_0015F7D8(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015F820(float scale, EffTemplatePacketList *effect) {
+void effScaleOffsetGravityTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -2165,7 +2165,7 @@ void func_0015F820(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[3] = effect->tailValues[3] * scale;
 }
 
-s32 func_0015F870(EffTemplatePacketList *source) {
+s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x190);
     s32 tailLen = 0x40;
 
@@ -2173,13 +2173,13 @@ s32 func_0015F870(EffTemplatePacketList *source) {
     memcpy((void *)copy, source, source->templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
-    func_0015F7D8(copy);
+    effResetOffsetGravityPacketAges(copy);
     return copy;
 }
 
-void func_0015F8F0(u32 effect) {
+void effFreeOffsetGravityTemplate(u32 effect) {
     effDestroyResources((EffResourceOwner *)effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterJ {
@@ -2226,7 +2226,7 @@ void effEmitterOffsetGravityUpdate(EffEmitterJ *effect) {
         }
         if (age >= 0) {
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -2266,7 +2266,7 @@ void effEmitterOffsetGravityUpdate(EffEmitterJ *effect) {
     }
 }
 
-void func_00160308(EffTemplatePacketList *effect) {
+void effResetDiscAuxPacketAges(EffTemplatePacketList *effect) {
     EffectBufferRecord *record;
     u32 index;
 
@@ -2281,7 +2281,7 @@ void func_00160308(EffTemplatePacketList *effect) {
     }
 }
 
-void func_00160350(float scale, EffTemplatePacketList *effect) {
+void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
     effect->x = effect->x * scale;
     effect->y = effect->y * scale;
     effect->z = effect->z * scale;
@@ -2290,7 +2290,7 @@ void func_00160350(float scale, EffTemplatePacketList *effect) {
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
-void *func_001603A0(EffTemplatePacketList *source) {
+void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *copy = func_00328D68(0x200);
     s32 allocation;
     s32 tailLen = 0xB0;
@@ -2302,14 +2302,14 @@ void *func_001603A0(EffTemplatePacketList *source) {
     copy->auxiliaryAllocation = allocation;
     copy->auxiliaryData = sdfResourceRetainAddress(allocation);
     func_0015B330((s32)copy);
-    func_00160308(copy);
+    effResetDiscAuxPacketAges(copy);
     return copy;
 }
 
-void func_00160438(u32 effect) {
+void effFreeDiscAuxTemplate(u32 effect) {
     func_003297C8(((EffTemplatePacketList *)effect)->auxiliaryAllocation);
     effDestroyResources(effect);
-    func_00328E48(effect);
+    sdfReleaseChipBlock(effect);
 }
 
 typedef struct EffEmitterK {
@@ -2414,7 +2414,7 @@ void effEmitterDiscAuxUpdate(EffEmitterK *effect) {
             f32 k;
 
             packet->color = func_001616A8(effect->head.fade, packet->color, age);
-            packet->color = func_00161EE8(packet->color, effect->head.colorMask);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (kind != 0) {
                 VU0_LOAD_VF(vf12, packet);
             }
@@ -2480,7 +2480,7 @@ void func_001609C0(float scale, EffTemplatePacketList *effect) {
 }
 
 /* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
-s32 func_00160A00(EffTemplatePacketList *source) {
+s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
     s32 copy = (s32)func_00328D68(0x190);
     s32 tailLen = 0x40;
     s32 count;

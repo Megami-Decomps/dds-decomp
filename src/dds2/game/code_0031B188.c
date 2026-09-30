@@ -170,7 +170,7 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BA28);
 
 void mnuClearNodeBroadcastFlag(u8 *node) {
     *(u32 *)(node + 4) &= ~1U;
-    func_002D46A0(*(u32 *)node);
+    fileQueueNotifyAllJobsComplete(*(u32 *)node);
 }
 
 /* Resolves a model from a resource and releases its temporary resource data. */
@@ -180,7 +180,7 @@ u32 func_0031BBB0(u32 *owner, u32 resource) {
     u32 other;
     u32 data = func_00343ED0(resource, &handle, &other);
     *owner = func_002D4138(handle);
-    func_002D46A0(*owner);
+    fileQueueNotifyAllJobsComplete(*owner);
     func_003297C8(data);
     return *owner;
 }

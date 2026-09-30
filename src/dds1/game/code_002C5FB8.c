@@ -396,8 +396,8 @@ void func_002C7EC8(s32 gridX, s32 gridY, u64 style, u64 flags) {
     u64 glyph;
 
     glyph = func_00197760(gridX << 4, gridY << 3, 0, style, flags, 0);
-    func_00195880(glyph, 1);
-    func_00194920(glyph);
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7F18);

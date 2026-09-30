@@ -22,7 +22,7 @@ extern void func_001C35F0(s32, s32, s32);
 
 extern u32 D_004367CC;
 
-extern u32 func_00101958(s64);
+extern u32 kwlnTaskGetUserValue(s64);
 
 extern s64 func_00101740(u32);
 
@@ -62,7 +62,7 @@ void func_001C3750(UiSceneNode *object, s8 mode, s8 value) {
     if (count < 3) {
         task = func_00101740(D_004367CC);
         if (task != 0) {
-            entry = (u8 *)func_00101958(task);
+            entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
                 func_001C3A38(entry, mode);
             }
@@ -92,7 +92,7 @@ void func_001C3978(UiSceneNode *object) {
         }
     }
     if (count < 3) {
-        entry = (u8 *)func_00101958(func_00101740(D_004367CC));
+        entry = (u8 *)kwlnTaskGetUserValue(func_00101740(D_004367CC));
         offset = slot * 0x290 + 0x10;
         entry += offset;
         *(u8 *)(entry + 0x10) = 2;

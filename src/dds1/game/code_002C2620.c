@@ -21,16 +21,16 @@ extern void func_003014F0(char *, char *, s32);
 extern void func_0024DD90(s32, void *);
 extern void func_0024DAE8(s32);
 extern void dspStartEntry(s32);
-extern void func_0024DAB8(s32);
+extern void evtCaptureMessageWindowSoundMode(s32);
 extern char D_003BD250[];
-extern s32 func_0024DC08(void);
+extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
 extern void func_0024DBB0(void);
 extern void func_002E96D8(u32);
 extern s32 fldReleaseLocalMapResources(void);
 extern s64 func_002C4630(void);
 extern void fldReleaseMapRequestQueues(void);
-extern void func_00134CF0(void);
+extern void fldReleaseCameraColorEffect(void);
 extern void func_002CF430(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
@@ -241,7 +241,7 @@ void fldShutdownLmapResources(void) {
     fldReleaseLocalMapResources();
     func_002C4630();
     fldReleaseMapRequestQueues();
-    func_00134CF0();
+    fldReleaseCameraColorEffect();
     func_002CF430();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
@@ -315,13 +315,13 @@ void func_002C3690(void) {
     func_0024DD90(0, text);
     func_0024DAE8(0);
     dspStartEntry(0);
-    func_0024DAB8(1);
+    evtCaptureMessageWindowSoundMode(1);
 }
 
 s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
-    if (func_0024DC08() != 0) {
+    if (evtGetMessageWindowControlState() != 0) {
         func_0024DD78();
     } else {
         func_0024DBB0();

@@ -1,6 +1,6 @@
 #include "mnu.h"
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void mnuCampMenuHandleInput(s32);
 extern void ptySkillMenuHandleSelection(s32);
@@ -12,20 +12,20 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void func_0027CDD0(s32, s32, s32, s32, s32);
+extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern s32 D_003BAA00;
-extern s32 func_00286540(u16, s32);
+extern s32 mnuIsEntryCostUnaffordable(u16, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
-extern void func_002865B8(s32, s32);
+extern void mnuConsumeEntryCost(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 extern u32 func_00285B20(u32);
-extern s32 func_00286648(u16);
+extern s32 mnuGetAbilityByteCategory(u16);
 extern void func_00280978();
-extern void func_002858E8(s32 *, char *);
+extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
 extern void mnuClearListFlags();
 extern void mnuPlayInputSound(s32, u32, s32);
@@ -79,7 +79,7 @@ typedef struct SkillMenuContext {
 } SkillMenuContext;
 
 s64 ptySkillMenuUpdate(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s64 state = menuRunPanel(context, 0, callback);
     if (state != 0) {
@@ -98,14 +98,14 @@ s64 ptySkillMenuUpdate(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuCopyPageState);
 
 s64 ptySkillMenuEnterPage(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
     s32 label;
     if (work->panel->list->cursor->index == 0) {
-        func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
     } else {
-        func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
         ptySkillMenuCopyPageState(context);
     }
     mnuDrawStaffCampScreen(1, callback);
@@ -133,7 +133,7 @@ s64 ptySkillMenuEnterPage(s32 callback) {
 }
 
 void func_00279728(s32 selection) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
@@ -144,11 +144,11 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     s32 window = context + 0x15C;
     s32 slotA = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
     s32 slotB = D_003BAA00 + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
-    if (func_00286540(id, slotA) != 0) {
+    if (mnuIsEntryCostUnaffordable(id, slotA) != 0) {
         return 0;
     }
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
-        func_002865B8(id, slotA);
+        mnuConsumeEntryCost(id, slotA);
         mnuInitPartyPanelSlots(context + 0x7EC);
         mnuUpdateHandleStates(window);
         func_00280048(window);
@@ -172,7 +172,7 @@ void mnuFlagMatchingEntries(s32 context) {
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
         do {
-            if (func_00286540(link->id, slot)) {
+            if (mnuIsEntryCostUnaffordable(link->id, slot)) {
                 link->flags |= 1;
             }
             link = link->next;
@@ -181,7 +181,7 @@ void mnuFlagMatchingEntries(s32 context) {
 }
 
 s64 ptySkillMenuHandleFieldUse(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_00285B20(3);
@@ -195,10 +195,10 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
     }
     label = menu->selected->list->cursor->sortKey;
     code = label;
-    if (func_00286648(code) == 2) {
+    if (mnuGetAbilityByteCategory(code) == 2) {
         ((SkillMenuContext *)context)->actionFlags |= 0x10;
     }
-    if (func_00286648(code) == 3) {
+    if (mnuGetAbilityByteCategory(code) == 3) {
         ((SkillMenuContext *)context)->actionFlags |= 0x20;
     }
     window = context + 0x15C;
@@ -208,7 +208,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
         mnuFlagMatchingEntries(context);
     }
     if (buttons & 2) {
-        func_002858E8(popup, D_0037CC58);
+        mnuSetPopupEntry(popup, D_0037CC58);
         mnuClearListFlags(1, window);
     }
     mnuPlayInputSound(0, buttons, 0);
@@ -216,19 +216,19 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
 }
 
 s64 ptySkillMenuEnterConfirm(s32 callback) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     func_00272778(callback);
     mnuCreateStaffImageSprite(3);
     func_00272518(1, menu->selected->list->cursor->sortKey, D_003BAA98, context, 1, 1, 0x53);
     menu->selected->list->flags &= ~8;
-    func_0027CDD0(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
     func_002723B0(0, ((SkillMenuContext *)context)->actor);
     return menuRunPanel(context, 1, callback);
 }
 
 void func_00279AF8(s32 selection) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
 }
 
@@ -237,7 +237,7 @@ extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
 s32 func_00279B30(s32 menu) {
-    u8 *ctx = (u8 *)func_00101A70();
+    u8 *ctx = (u8 *)kwlnTaskGetUserValue();
     u32 *panel = (u32 *)(ctx + 0x15C);
 
     mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
@@ -248,7 +248,7 @@ s32 func_00279B30(s32 menu) {
 }
 
 s32 func_00279BA8(s32 selection) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_00277C80(selection);
     func_002786E8(context);
     func_002807E8(context + 0x15c);

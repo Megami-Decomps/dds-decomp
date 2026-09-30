@@ -187,7 +187,7 @@ void gstApplyCounterDeltaTable(MenuIconRef *refs) {
 }
 
 void gstApplyBundleMacca(MenuIconBatch *batch) {
-    func_0011A0D0(batch->resource);
+    datAddCurrencyClamped(batch->resource);
 }
 
 extern s32 ptyComputeTotalExp(u8 *, s32);
@@ -221,7 +221,7 @@ void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) 
 
 extern void mnuReleaseStaffMenuResources(s32);
 extern void func_002A95B0(s32, s32, s32, s32);
-extern s32 func_002C0B80(s32, s32, s32);
+extern s32 mnuCreatePanelGroup(s32, s32, s32);
 extern s32 mnuCreateSpriteState(s32, s32, s32);
 extern void evtStageTestInit(s32);
 
@@ -262,7 +262,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
     mnuReleaseStaffMenuResources((s32)group);
     func_002A95B0((s32)work + 0x690, (s32)group, 0, (s32)work + 0x584);
-    panel = func_002C0B80(work->spriteArg0, work->spriteArg1, 0);
+    panel = mnuCreatePanelGroup(work->spriteArg0, work->spriteArg1, 0);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
@@ -365,9 +365,9 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 
-extern s32 func_00101958(void);
+extern s32 kwlnTaskGetUserValue(void);
 extern void effDestroyResourceSlotSet(s32);
-extern void func_002C3FC8(s32, s32);
+extern void mnuDrainPanelTransitions(s32, s32);
 extern s32 func_002993D0(s32);
 extern void func_00299280(s32);
 extern void func_00303D58(s32);
@@ -376,12 +376,12 @@ extern void func_003297C8(s32);
 
 /* Release the panel and task resources, then mark the result task finished. */
 void brsStaffTaskDestroy(s32 taskArg) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     if (((BrsSkillPackageWork *)context)->teardownHandle != 0) {
         effDestroyResourceSlotSet(((BrsSkillPackageWork *)context)->teardownHandle);
     }
-    func_002C3FC8(context + 8, taskArg);
+    mnuDrainPanelTransitions(context + 8, taskArg);
     if (func_002993D0(context) == 0) {
         func_00299280(context);
     }

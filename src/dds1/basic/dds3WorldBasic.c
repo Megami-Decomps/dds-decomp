@@ -3,7 +3,7 @@
 
 extern World *D_003BA9BC;
 
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
 void *func_0010F418(s32 arg);
 void *func_002CFEB8(s32 arg);
@@ -161,7 +161,7 @@ void dds3DestroyWorldIndexNode(NodeB *node) {
     } else {
         node->next->previous = node->previous;
     }
-    func_002CFF98(node);
+    sdfReleaseChipBlock(node);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", func_00110018);

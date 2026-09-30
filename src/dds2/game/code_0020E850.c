@@ -40,9 +40,9 @@ extern s32 D_00436CB8;
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-extern s32 func_00328E18(s32);
+extern s32 sdfAllocAndClearQuadwords(s32);
 
-extern void func_00328E48(s32);
+extern void sdfReleaseChipBlock(s32);
 
 extern void func_002152D8(s32, s32);
 
@@ -125,7 +125,7 @@ typedef struct BtlExtendedLink {
 } BtlExtendedLink;
 
 extern BtlEffTask *btlAllocTask(s32 size);
-extern BtlEffLink *func_001E14F8();
+extern BtlEffLink *btlGetTaskArguments();
 
 typedef struct BtlHistActor {
     u8 pad00[0x2D0];
@@ -273,7 +273,7 @@ BtlEffTask *func_0020F9D0(BtlEffActor *owner, s32 arg, u8 kind) {
     obj->unk40 = owner->ownerData;
     obj->callback = func_0020F5E0;
     obj->destroy = effDecrementFirstCountdown;
-    link = (BtlEffLinkEx *)func_001E14F8(obj);
+    link = (BtlEffLinkEx *)btlGetTaskArguments(obj);
     link->kind = kind;
     link->owner = owner;
     link->arg = arg;
@@ -302,7 +302,7 @@ BtlEffTask *btlCreateEffectCounterTask(BtlEffActor *owner, s32 arg) {
     obj->unk40 = owner->ownerData;
     obj->callback = func_0020FA98;
     obj->destroy = effDecrementSecondCountdown;
-    link = (BtlExtendedLink *)func_001E14F8(obj);
+    link = (BtlExtendedLink *)btlGetTaskArguments(obj);
     link->parameter = arg;
     link->owner = owner;
     link->state = 0;
@@ -349,7 +349,7 @@ BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 arg) {
     obj->id = 0x43;
     obj->unk40 = owner->ownerData;
     obj->callback = func_0020FFB8;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -378,7 +378,7 @@ BtlEffTask *func_002101C8(BtlEffActor *owner, s32 arg) {
     obj->id = 0x44;
     obj->unk40 = owner->ownerData;
     obj->callback = func_00210148;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -448,7 +448,7 @@ BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
         obj->unk40 = owner->ownerData;
     }
     obj->callback = func_00210258;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -484,7 +484,7 @@ BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 arg) {
         obj->unk40 = owner->ownerData;
     }
     obj->callback = func_002103F8;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -523,7 +523,7 @@ BtlEffTask *btlCreateEffObjC(BtlEffActor *owner, s32 arg) {
         obj->unk40 = owner->ownerData;
     }
     obj->callback = func_00210530;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -544,7 +544,7 @@ BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
     obj->id = 0x41;
     obj->unk40 = owner->ownerData;
     obj->callback = func_00210688;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     *(u16 *)&link->arg = arg;
     link->unk08 = 0;
@@ -578,7 +578,7 @@ BtlEffTask *func_002107C0(BtlEffActor *owner, s32 arg) {
     obj->id = 0x42;
     obj->unk40 = owner->ownerData;
     obj->callback = func_00210720;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -613,7 +613,7 @@ BtlEffTask *btlCreateEffectWaitTask(BtlEffActor *owner, u16 arg) {
         obj->unk40 = owner->ownerData;
     }
     obj->callback = func_00210850;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     *(u16 *)&link->arg = arg;
     link->unk08 = 0;
@@ -650,7 +650,7 @@ BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
     obj->id = 0x47;
     obj->unk40 = owner->ownerData;
     obj->callback = btlWaitEffectTask;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = 0;
     return obj;
@@ -688,7 +688,7 @@ BtlEffTask *func_00210B78(BtlEffActor *owner, s32 arg) {
         obj->unk40 = owner->ownerData;
     }
     obj->callback = func_00210AA8;
-    link = func_001E14F8(obj);
+    link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
     link->unk08 = 0;
@@ -745,16 +745,16 @@ s32 func_00210CE0(s32 lower, s32 upper) {
 }
 
 s32 btlAllocAndCheck(s32 object) {
-    s32 allocation = func_00328E18(0x10);
+    s32 allocation = sdfAllocAndClearQuadwords(0x10);
     s32 actor = (s32)((BtlTask *)object)->unit;
 
     D_00436CB8 = allocation;
     *(s32 *)allocation = object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        func_00328E48(D_00436CB8);
+        sdfReleaseChipBlock(D_00436CB8);
         return 1;
     }
-    func_00328E48(D_00436CB8);
+    sdfReleaseChipBlock(D_00436CB8);
     return 0;
 }
 
@@ -788,14 +788,14 @@ void func_00210E48(void) {
 }
 
 s32 func_00210EA0(s32 context, BtlJyokyoOwner *owner, s32 mask) {
-    s32 *work = (s32 *)func_00328E18(0x10);
+    s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
     D_00436CB8 = (s32)work;
     work[1] = owner->unk124;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    func_00328E48(D_00436CB8);
+    sdfReleaseChipBlock(D_00436CB8);
     return result;
 }
 

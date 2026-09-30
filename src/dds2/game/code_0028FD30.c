@@ -222,7 +222,7 @@ s32 func_00292B90(s32 object) {
 extern MenuPanelSelector *func_0026D098(s32);
 extern void func_00278F60(u32);
 extern void func_002790F0(s32, s32, u32);
-extern void func_00278E50(s32, s32, u32);
+extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
 void func_00292BB0(MenuPanelObject *object) {
     s16 *record;
 
@@ -239,7 +239,7 @@ void func_00292C58(MenuPanelObject *object) {
     record = (s16 *)func_0026D098(0x71);
     *(s16 **)(base + 0x560) = record;
     /* Record coordinates are tenths; the two screen axes use different scales. */
-    func_00278E50((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
+    mnuSpawnMantraIconAtPosition((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292CF0);

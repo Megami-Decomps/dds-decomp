@@ -40,19 +40,19 @@ extern char D_004126B0[];
 
 extern ScrComGlobals *D_00435DD0;
 
-s32 func_0010D990(void)
+s32 scrCommandStoreRandomCondition(void)
 {
-    func_0010D818(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
+    scrSetIntegerReturnValue(effMiscRandMod(0, scrReadIntParameter(0)) + 1);
     return 1;
 }
 
-s32 func_0010D9C8(void)
+s32 scrCommandWaitForTimerStart(void)
 {
     return scrGetCommandTimer() != 0;
 }
 
 /* DDS2 twin of DDS1 func_0010D7C0: BF wait step-ticks-at-least callback. */
-s32 func_0010D9E8(void) {
+s32 scrCommandWaitForTimerLimit(void) {
     if (scrReadIntParameter(0) <= 0) {
         return 1;
     }
@@ -62,13 +62,13 @@ s32 func_0010D9E8(void) {
     return 1;
 }
 
-s32 func_0010DA30(void)
+s32 scrCommandPrintInteger(void)
 {
     func_0010AE38(D_00412648, scrReadIntParameter(0));
     return 1;
 }
 
-s32 func_0010DA60(void)
+s32 scrCommandPrintString(void)
 {
     func_0010AE38(D_00412658, scrReadStringParameter(0));
     return 1;
@@ -120,7 +120,7 @@ s32 bfWaitCbScreenFadeB(void)
     return 1;
 }
 
-s32 func_0010DBD0(void)
+s32 scrCommandFadeBackgroundOut(void)
 {
     if (scrGetCommandTimer() == 0)
     {
@@ -130,7 +130,7 @@ s32 func_0010DBD0(void)
     return 1;
 }
 
-s32 func_0010DC10(void)
+s32 scrCommandFadeBackgroundIn(void)
 {
     if (scrGetCommandTimer() == 0)
     {
@@ -140,7 +140,7 @@ s32 func_0010DC10(void)
     return 1;
 }
 
-s32 func_0010DC50(void)
+s32 scrCommandJumpToIndexedLabel(void)
 {
     s32 argumentIndex;
     s32 label;
@@ -158,15 +158,15 @@ s32 func_0010DC50(void)
     return 1;
 }
 
-s32 func_0010DCA8(void)
+s32 scrCommandTestIndexedCodeNegative(void)
 {
-    func_0010D818(D_0040B7D8[scrReadIntParameter(0)] < 0);
+    scrSetIntegerReturnValue(D_0040B7D8[scrReadIntParameter(0)] < 0);
     return 1;
 }
 
-s32 func_0010DCE0(void)
+s32 scrCommandTestIndexedCodeBit(void)
 {
-    func_0010D818(D_0040B7D8[scrReadIntParameter(0)] & 1);
+    scrSetIntegerReturnValue(D_0040B7D8[scrReadIntParameter(0)] & 1);
     return 1;
 }
 
@@ -183,7 +183,7 @@ s32 func_0010DD18(void)
 extern char D_00412668[];
 s32 func_001063A8(f32 arg0);
 
-s32 func_0010DD70(void)
+s32 scrCommandSetCameraFov(void)
 {
     f32 fovy;
 
@@ -214,7 +214,7 @@ typedef struct BfWaitContext {
 } BfWaitContext;
 
 s32 func_0010D8C8(void);
-s32 func_0010BEE0(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
+s32 scrCreateTaskFromContextParameters(s32 a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7, s32 a8);
 
 s32 bfWaitCbCreateTask(void)
 {
@@ -235,14 +235,14 @@ s32 bfWaitCbCreateTask(void)
     {
         return 1;
     }
-    func_0010D818(func_0010BEE0(
+    scrSetIntegerReturnValue(scrCreateTaskFromContextParameters(
         ctx->record->basePriority + scrReadIntParameter(1), ctx->base.unkAC,
         ctx->base.unkB0, ctx->base.procedures, ctx->base.labels,
         ctx->base.instructions, ctx->base.unkC0, ctx->base.strings, index));
     return 1;
 }
 
-s32 func_0010DEA8(void)
+s32 scrCommandDestroyRegisteredTask(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -254,20 +254,20 @@ s32 func_0010DEA8(void)
     return 1;
 }
 
-s32 func_0010DEF0(void)
+s32 scrCommandWaitForTaskRemoval(void)
 {
     return kwlnTaskIsRegistered(scrReadIntParameter(0)) == 0;
 }
 
-s32 func_0010DF18(void)
+s32 scrCommandStoreTaskPresence(void)
 {
     if (kwlnTaskIsRegistered(scrReadIntParameter(0)) != 0)
     {
-        func_0010D818(1);
+        scrSetIntegerReturnValue(1);
     }
     else
     {
-        func_0010D818(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }
@@ -279,16 +279,16 @@ u32 scrCommand_SCR_GET_TIMER()
     task = (KwlnTask*)scrReadIntParameter(0);
     if (!kwlnTaskIsRegistered(task))
     {
-        func_0010D818(0);
+        scrSetIntegerReturnValue(0);
     }
     else
     {
-        func_0010D818(kwlnTaskGetTimer(task));
+        scrSetIntegerReturnValue(kwlnTaskGetTimer(task));
     }
     return 1;
 }
 
-s32 func_0010DFC0(void)
+s32 scrCommandSetupFadeFrames(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -355,7 +355,7 @@ s32 func_0010E1B8(void)
     return 1;
 }
 
-s32 func_0010E210(void)
+s32 scrCommandSetDrawVectorTarget(void)
 {
     s32 p0;
     f32 x;
@@ -372,7 +372,7 @@ s32 func_0010E210(void)
     return 1;
 }
 
-s32 func_0010E348(void)
+s32 scrCommandToggleSavedDrawVectors(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
@@ -380,7 +380,7 @@ s32 func_0010E348(void)
     return 1;
 }
 
-s32 func_0010E3A0(void)
+s32 scrCommandSetDrawOffsetTransition(void)
 {
     s32 p0;
     s32 p1;
@@ -819,7 +819,7 @@ s32 func_0010EF68(void)
     return 1;
 }
 
-s32 func_0010EF90(void)
+s32 scrCommandResetDrawEffects(void)
 {
     kwlnDrawSetOffsetTransition(0, 0, 0);
     kwlnDrawEnableD88(0);
@@ -830,30 +830,30 @@ s32 func_0010EF90(void)
     return 1;
 }
 
-s32 func_0010EFE0(void)
+s32 scrCommandResetFieldEffects(void)
 {
     kwlnDrawEnableDc8(0);
     kwlnDrawEnableE08(0);
     fldSetSwayMode(0);
-    func_00135578(0x80);
+    fldSetSkyDrawState(0x80);
     func_00135588(0);
     fldSetFadeTarget(0, 1, 0);
     return 1;
 }
 
-s32 func_0010F030(void)
+s32 scrCommandClearProcessControlFlag(void)
 {
     D_00435DD0->unk388 = 0;
     return 1;
 }
 
-s32 func_0010F040(void)
+s32 scrCommandSetProcessControlFlag(void)
 {
     D_00435DD0->unk388 = 1;
     return 1;
 }
 
-s32 func_0010F058(void)
+s32 scrCommandIsProcessControlFlagClear(void)
 {
     return D_00435DD0->unk388 == 0;
 }
@@ -866,9 +866,9 @@ s32 func_0010F068(void)
     return 1;
 }
 
-s32 func_0010F0A8(void)
+s32 scrCommandAddPartyCurrency(void)
 {
-    func_0011A0D0(scrReadIntParameter(0));
+    datAddCurrencyClamped(scrReadIntParameter(0));
     return 1;
 }
 
@@ -877,13 +877,13 @@ u32 scrCommand_SCR_EXISTS()
 {
     KwlnTask* task;
     task = (KwlnTask*)scrReadIntParameter(0);
-    if (func_0011A100(task))
+    if (datHasEnoughCurrency(task))
     {
-        func_0010D818(1);
+        scrSetIntegerReturnValue(1);
     }
     else
     {
-        func_0010D818(0);
+        scrSetIntegerReturnValue(0);
     }
     return 1;
 }

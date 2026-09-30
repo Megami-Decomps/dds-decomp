@@ -102,15 +102,15 @@ u32 func_002A80F0(void) {
 }
 
 extern s8 D_0037F530[];
-extern s32 func_0010F058(void);
+extern s32 scrCommandIsProcessControlFlagClear(void);
 extern void kwlnDrawSetDc8Second(u32);
 extern void kwlnDrawSetDc8First(u32);
 extern void kwlnDrawSetupDc8(s32);
 extern s32 itfPanelReleaseHold(void);
-extern void func_0010D818(s32);
+extern void scrSetIntegerReturnValue(s32);
 
 s32 func_002A8120(void) {
-    if (D_00437AE8 == 0 && func_0010F058() == 1 && D_0037F530[0] < 0) {
+    if (D_00437AE8 == 0 && scrCommandIsProcessControlFlagClear() == 1 && D_0037F530[0] < 0) {
         D_00437AE8 = 1;
         kwlnDrawSetDc8Second(0x44);
         kwlnDrawSetDc8First(0x80000000);
@@ -120,12 +120,12 @@ s32 func_002A8120(void) {
     if (D_00437AE8 > 0) {
         if (D_00437AE8 == 0x1E) {
             func_002A7FD0();
-            func_0010D818(0);
+            scrSetIntegerReturnValue(0);
             return 1;
         }
         D_00437AE8 = D_00437AE8 + 1;
     }
-    func_0010D818(func_002A8008() == 0);
+    scrSetIntegerReturnValue(func_002A8008() == 0);
     return 1;
 }
 
@@ -146,7 +146,7 @@ void mnuClearMovieList(void) {
     if (node != NULL) {
         do {
             u32 *next = (u32 *)*node;
-            func_00328E48(node);
+            sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
         D_00457E48.head = NULL;

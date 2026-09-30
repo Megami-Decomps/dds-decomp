@@ -18,13 +18,13 @@ extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
 
 extern s32 D_00435DD0;
 
-extern s32 func_0010D818(s32 arg0);
+extern s32 scrSetIntegerReturnValue(s32 arg0);
 
 extern void *func_0019CE78(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-extern void func_0019D100(void *ctx, u32 arg1, u32 arg2);
+extern void frFontSetContextPair(void *ctx, u32 arg1, u32 arg2);
 
-extern void *func_00328E18(s32 size);
+extern void *sdfAllocAndClearQuadwords(s32 size);
 
 /* Shared glyph owner layout: handle at +0x10, released by the font routines. */
 typedef struct GlyphOwner {
@@ -52,7 +52,7 @@ extern Dds3NodeOps D_00435EA8;
 s32 func_0011EC90(void) {
     s32 unitId = scrReadIntParameter(0);
 
-    func_0010D818(func_0011C680(unitId) == 1);
+    scrSetIntegerReturnValue(func_0011C680(unitId) == 1);
     return 1;
 }
 
@@ -61,7 +61,7 @@ s32 func_0011ECC8(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
-    func_0010D818(func_0011C0B0(firstOperand, secondOperand));
+    scrSetIntegerReturnValue(func_0011C0B0(firstOperand, secondOperand));
     return 1;
 }
 
@@ -69,12 +69,12 @@ s32 func_0011ED10(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
-    func_0010D818(func_0011C340(firstOperand, secondOperand) == 1);
+    scrSetIntegerReturnValue(func_0011C340(firstOperand, secondOperand) == 1);
     return 1;
 }
 
 s32 func_0011ED60(void) {
-    func_0010D818(func_002AB598());
+    scrSetIntegerReturnValue(func_002AB598());
     return 1;
 }
 
@@ -92,7 +92,7 @@ s32 func_0011ED88(void) {
         scrSetSecondaryScriptFlag(entry, b);
         result = 1;
     }
-    func_0010D818(result);
+    scrSetIntegerReturnValue(result);
     return 1;
 }
 
@@ -176,8 +176,8 @@ void func_0011EFA0(void) {
 }
 
 void func_0011EFE0(GlyphOwner *owner) {
-    func_0019C5B0(owner->glyph);
-    func_00328E48(owner);
+    frFontQueueGlyphInSelectedSlot(owner->glyph);
+    sdfReleaseChipBlock(owner);
 }
 
 void func_0011F010(GlyphOwner *owner) {
@@ -191,8 +191,8 @@ s32 func_0011F028(s32 size, s32 a1, s32 a2) {
     if (size == 0x800000) {
         size = (0x200 - *(s32 *)(obj + 0xC)) * 8;
     }
-    func_0019D100((void *)obj, size, a1);
-    node = (Dds3Node *)func_00328E18(0x14);
+    frFontSetContextPair((void *)obj, size, a1);
+    node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
     *(s32 *)((u8 *)node + 0x10) = obj;
     func_0011EE98(node, &D_00435EA8);
     return (s32)node;
@@ -203,7 +203,7 @@ void func_0011F0C0(GlyphOwner *owner, u8 flag) {
 }
 
 void func_0011F0E0(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);

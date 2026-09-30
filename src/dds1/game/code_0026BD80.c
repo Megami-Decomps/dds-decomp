@@ -62,7 +62,7 @@ void func_0026BEE8(s32 advanceCount) {
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            func_0027BE90(((MenuState *)D_003BC5D0)->linkedState);
+            mnuAdvanceListCursorDefault(((MenuState *)D_003BC5D0)->linkedState);
         } while (advanceCount != 0);
     }
 }

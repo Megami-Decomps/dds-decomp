@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -23,7 +23,7 @@ extern void mnuClearEntries(s32);
 extern void mnuDestroyPanelGroup(s32);
 extern void func_002C1050(s32);
 extern void func_002C1B68(s32, s32);
-extern void func_002B2860(s32);
+extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(s32, s32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
@@ -35,12 +35,12 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
 extern s32 func_0019D550(s32, s32, s32);
-extern void func_0019C5B0(s32);
-extern s32 func_0011AE60(s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E20;
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
-extern s32 func_002C5580();
+extern s32 mnuGetPartyEntryMenuValue();
 extern s32 func_002C55C0();
 extern void func_0026C918(s32, s32);
 extern void dspStartEntry(s32);
@@ -53,7 +53,7 @@ extern char D_003E7530[];
 extern char D_003E7434[];
 extern u32 func_002C44E8();
 extern void func_002BD480();
-extern void func_002C42C0();
+extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
 extern void mnuPlayInputSound();
 extern void func_002B9808();
@@ -61,8 +61,8 @@ extern void func_002B97F0();
 extern void func_002B97D8();
 extern void func_002C48C8();
 extern void func_002B96D8();
-extern void func_002B8D10();
-extern void func_002B8CF0();
+extern void mnuRetreatListCursorDefault();
+extern void mnuAdvanceListCursorDefault();
 extern void mnuClearListFlagsOneAndTwo();
 extern void mnuSeekListNode();
 extern void mnuResetListNodeFadeCounters();
@@ -76,7 +76,7 @@ extern void func_002BB9C8(s32, s32);
 extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
 extern void func_002BC078(s32, u32 *, s32, s32);
-extern void *func_002C0B80(s32, s32, s32);
+extern void *mnuCreatePanelGroup(s32, s32, s32);
 extern void *mnuCreateSpriteState(s32, s32, s32);
 
 typedef struct MenuSceneConfig {
@@ -142,7 +142,7 @@ typedef struct MenuStaffChoices {
 } MenuStaffChoices;
 
 s64 func_002AD3B8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
@@ -164,7 +164,7 @@ s64 func_002AD3B8(s32 callback) {
 
 /* Ask the menu state machine to handle a new request after clearing stale state. */
 void func_002AD4C0(s32 request) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
     func_002C4038(context + 8, context + 0x54, 2, request);
@@ -179,7 +179,7 @@ u32 func_002AD510(void) {
 }
 
 s64 mnuStaffImageInputA(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
@@ -194,11 +194,11 @@ s64 mnuStaffImageInputA(s32 callback) {
     func_002BD480(4, window);
     if (buttons & 1) {
         menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
-        func_002C42C0(popup, D_003E74F8);
+        mnuSetPopupEntryFlagged(popup, D_003E74F8);
     }
     if (buttons & 2) {
         mnuClearActionFlags(0, window);
-        func_002C42C0(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -206,7 +206,7 @@ s64 mnuStaffImageInputA(s32 callback) {
 
 /* Set up a staff image and its associated menu resources before entering the state. */
 s64 func_002AD618(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(7);
     func_002AAC98(0,
@@ -218,7 +218,7 @@ s64 func_002AD618(s32 callback) {
 }
 
 void func_002AD6C0(s32 input) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002C4038(context + 8, context + 0x54, 2, input);
 }
 
@@ -231,7 +231,7 @@ u32 func_002AD700(void) {
 }
 
 s64 func_002AD708(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
@@ -246,11 +246,11 @@ s64 func_002AD708(s32 callback) {
     func_002BD480(4, window);
     if (buttons & 1) {
         menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
-        func_002C42C0(popup, D_003E7514);
+        mnuSetPopupEntryFlagged(popup, D_003E7514);
     }
     if (buttons & 2) {
         mnuClearActionFlags(0, window);
-        func_002C42C0(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
@@ -258,7 +258,7 @@ s64 func_002AD708(s32 callback) {
 
 /* The three staff image states share the same setup, but select different images. */
 s64 func_002AD808(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(9);
     func_002AAC98(0,
@@ -270,7 +270,7 @@ s64 func_002AD808(s32 callback) {
 }
 
 s64 func_002AD8B0(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
@@ -283,7 +283,7 @@ u32 func_002AD8F0(void) {
 }
 
 s64 func_002AD8F8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(3);
@@ -298,18 +298,18 @@ s64 func_002AD8F8(s32 callback) {
     func_002BD480(4, window);
     if (buttons & 1) {
         menu->currentSelection = **(s32 **)(((MenuStaffContext *)context)->selection + 0x1C);
-        func_002C42C0(popup, D_003E7530);
+        mnuSetPopupEntryFlagged(popup, D_003E7530);
     }
     if (buttons & 2) {
         mnuClearActionFlags(0, window);
-        func_002C42C0(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     mnuPlayInputSound(0, buttons, 0);
     return 0;
 }
 
 s64 func_002AD9F8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(11);
     func_002AAC98(0,
@@ -321,14 +321,14 @@ s64 func_002AD9F8(s32 callback) {
 }
 
 s64 func_002ADAA0(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
 u32 func_002ADAD8(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     func_002BAF50(*(u32 *)(*(s32 *)(context + 0xaa48) + 0xc), context + 0xb10c);
     return 1;
 }
@@ -336,13 +336,13 @@ u32 func_002ADAD8(void) {
 u32 func_002ADB18(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
     return 1;
 }
 
 s64 func_002ADB48(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = func_002C44E8(0xc33);
@@ -357,7 +357,7 @@ s64 func_002ADB48(s32 callback) {
         buttons = 0;
     }
     if (buttons & 2) {
-        func_002C42C0(popup, D_003E7434);
+        mnuSetPopupEntryFlagged(popup, D_003E7434);
     }
     window = menu->secondaryObject;
     if (window != 0) {
@@ -378,7 +378,7 @@ s64 func_002ADB48(s32 callback) {
 }
 
 s64 mnuStaffImageEnterD(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
@@ -397,14 +397,14 @@ s64 mnuStaffImageEnterD(s32 callback) {
 }
 
 s64 func_002ADD68(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
 
 s64 func_002ADF90(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     u8 *object;
 
@@ -424,12 +424,12 @@ s64 func_002ADF90(s32 callback) {
 }
 
 s64 func_002AE078(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
 }
 
 s32 func_002AE0B0(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)func_00101958();
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     u32 *window = &context->windowFlags;
     s32 index = **(s32 **)(context->selection + 0x1C);
@@ -439,7 +439,7 @@ s32 func_002AE0B0(s32 unused) {
     mnuReleaseStaffMenuResources(&context->group);
     mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, 0, 0);
     func_002BC078(index, window, 1, 0);
-    context->panelHandle = func_002C0B80(context->spriteArg0, context->spriteArg1, 0);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
@@ -451,7 +451,7 @@ s32 func_002AE0B0(s32 unused) {
 
 /* Release the current entry list, its panel group and its auxiliary resource. */
 s32 func_002AE1F0(s32 unused) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ABEB0(context);
@@ -467,13 +467,13 @@ s32 func_002AE1F0(s32 unused) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
 void func_002AE2D0(s32 context, u8 *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
-    s32 current = func_002C5580(entry);
+    s32 current = mnuGetPartyEntryMenuValue(entry);
 
     func_002C1B68(context + 0xaa50, 1);
     if (current != target) {
@@ -496,7 +496,7 @@ void func_002AE2D0(s32 context, u8 *entry, s32 target) {
 }
 
 s32 mnuStaffListInput(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
@@ -516,12 +516,12 @@ s32 mnuStaffListInput(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AE1F0(callback);
-        func_002B8D10(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AE1F0(callback);
-        func_002B8CF0(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {
@@ -549,25 +549,25 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
 
     func_00306F80(0x1C0, 0xA10, 0, 0, *(s32 *)(panel + 0xC4), 2, 0x53);
     if (id != 0) {
-        func_0035C860(buf, D_00437BD0, *(s16 *)(func_0011AE60(id) * 0x38 + D_00435E20 + 0x18));
+        func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + D_00435E20 + 0x18));
         handle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)buf, 0);
         frFontSetChainFlag(handle, 4);
         func_0019D550(handle, 1, 0x53);
-        func_0019C5B0(handle);
+        frFontQueueGlyphInSelectedSlot(handle);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE888);
 
 void func_002AEA58(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
     func_002C4038(context + 8, context + 0x54, 2, callback);
 }
 
 s32 func_002AEAA0(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)func_00101958();
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = **(s32 **)(context->selection + 0x1C);
@@ -582,7 +582,7 @@ s32 func_002AEAA0(s32 unused) {
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(*(s32 *)(slot + 0xDC), 1);
     }
-    context->panelHandle = func_002C0B80(context->spriteArg0, context->spriteArg1, 0);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
@@ -594,7 +594,7 @@ s32 func_002AEAA0(s32 unused) {
 
 /* Variant cleanup for the adjacent menu state; keep the same release ordering. */
 s32 func_002AEC10(s32 unused) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002AC660(context);
@@ -610,7 +610,7 @@ s32 func_002AEC10(s32 unused) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -647,7 +647,7 @@ void mnuStaffEntrySwapLabels(s32 context, u8 *entry, s32 target) {
 }
 
 s32 func_002AEEA8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
@@ -667,12 +667,12 @@ s32 func_002AEEA8(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AEC10(callback);
-        func_002B8D10(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AEC10(callback);
-        func_002B8CF0(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {
@@ -703,14 +703,14 @@ INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF5E0);
 
 void func_002AF898(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
     func_002C4038(context + 8, context + 0x54, 2, callback);
 }
 
 s32 func_002AF8E0(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)func_00101958();
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = **(s32 **)(context->selection + 0x1C);
@@ -725,7 +725,7 @@ s32 func_002AF8E0(s32 unused) {
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(*(s32 *)(slot + 0xDC), 1);
     }
-    context->panelHandle = func_002C0B80(context->spriteArg0, context->spriteArg1, context->spriteArg2);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
     context->windowFlags |= 0x200;
     context->windowFlags &= ~0x80;
@@ -740,7 +740,7 @@ s32 func_002AF8E0(s32 unused) {
 
 /* Third menu-state cleanup uses the matching state-specific pre-release. */
 s32 func_002AFA58(s32 unused) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
     func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
     func_002ACA98(context);
@@ -756,7 +756,7 @@ s32 func_002AFA58(s32 unused) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(context + 0xaa50, 0);
-    func_002B2860((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -783,7 +783,7 @@ void func_002AFB38(s32 context, u8 *entry, s32 unused, s32 flag) {
 }
 
 s32 func_002AFC58(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
     u32 buttons = func_002C44E8(0x300);
@@ -803,12 +803,12 @@ s32 func_002AFC58(s32 callback) {
     if (buttons & 0x100) {
         changed = 1;
         func_002AFA58(callback);
-        func_002B8D10(((MenuStaffContext *)context)->selection);
+        mnuRetreatListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     if (buttons & 0x200 && changed == 0) {
         changed = 1;
         func_002AFA58(callback);
-        func_002B8CF0(((MenuStaffContext *)context)->selection);
+        mnuAdvanceListCursorDefault(((MenuStaffContext *)context)->selection);
     }
     mnuClearListFlagsOneAndTwo(((MenuStaffContext *)context)->selection);
     if (changed == 0) {

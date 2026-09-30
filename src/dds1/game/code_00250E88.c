@@ -31,7 +31,7 @@ typedef struct {
 
 extern SceneEntry D_0036BE38[];
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250E88);
 
@@ -43,7 +43,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
 void mnuFreeTaskData(s32 unused, void *data) {
     if (data != NULL) {
-        func_002CFF98(data);
+        sdfReleaseChipBlock(data);
     }
 }
 

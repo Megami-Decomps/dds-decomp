@@ -24,7 +24,7 @@ extern char D_00453698[];
 extern char D_00421588[];
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
-void func_0023AC80(s32 eventId) {
+void evtCreateEventScriptProcess(s32 eventId) {
     func_0035C860(D_00453698, D_00421588, eventId - eventId % 10, eventId, eventId);
     scrCreateProcessTaskFromResource(0x3EB, D_00453698, 0);
 }

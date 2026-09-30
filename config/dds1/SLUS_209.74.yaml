@@ -113,6 +113,7 @@ segments:
       - [0x27A30, c, game/code_00126A30]
       - [0x420E8, c, field/fldPanel]  # Nocturne __FILE__
       - [0x421F0, c, game/code_001411F0]
+      - [0x4E110, c, game/code_0014D110]
       - [0x50098, c, game/code_0014F098]  # P4 transfer
       - [0x504C8, c, game/code_0014F4C8]
       - [0x50838, c, effect/effManager]  # Nocturne __FILE__
@@ -314,6 +315,7 @@ segments:
       - [0x2A0DB0, .rodata, game/code_00126A30]
       - [0x2A1460, .rodata, field/fldPanel]
       - [0x2A1470, .rodata, game/code_001411F0]
+      - [0x2A19C0, .rodata, game/code_0014D110]
       - [0x2A1A18, .rodata, game/code_0014F4C8]
       - [0x2A1A28, .rodata, effect/effManager]
       - [0x2A1A78, .rodata, game/code_0014FEB0]
@@ -415,6 +417,7 @@ segments:
       - [0x2B9D6C, .lit4, game/code_0011D3A0]
       - [0x2B9DF8, .lit4, game/code_00126A30]
       - [0x2B9EDC, .lit4, game/code_001411F0]
+      - [0x2B9FC4, .lit4, game/code_0014D110]
       - [0x2B9FD4, .lit4, effect/effManager]
       - [0x2B9FE0, .lit4, game/code_0014FEB0]
       - [0x2B9FE8, .lit4, game/code_00151F58]
@@ -516,6 +519,7 @@ segments:
       - [0x2BBC10, .sdata, game/code_00126A30]
       - [0x2BBE74, .sdata, field/fldPanel]
       - [0x2BBE78, .sdata, game/code_001411F0]
+      - [0x2BBFF8, .sdata, game/code_0014D110]
       - [0x2BC008, .sdata, game/code_0014F4C8]
       - [0x2BC010, .sdata, game/code_0015A758]
       - [0x2BC018, .sdata, game/code_0015F4D0]

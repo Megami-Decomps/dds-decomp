@@ -5,8 +5,8 @@ typedef struct {
     void *unk18;
 } ModelObj;
 
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 
-void func_00116860(ModelObj *model) {
-    func_002CFF98(model->unk18);
+void dds3ReleaseModelAllocation(ModelObj *model) {
+    sdfReleaseChipBlock(model->unk18);
 }

@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00159BB8(u32);
+extern u32 effGetResourceFirstWord(u32);
 
 /* Both blur variants store a setting at 0x2c and an owned resource at 0x30. */
 typedef struct EffBlurWork {
@@ -54,7 +54,7 @@ typedef struct {
 } EffBlurWork2; /* 0x38 */
 
 void func_0018E8F0(void) {
-    func_00328E48();
+    sdfReleaseChipBlock();
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
@@ -74,7 +74,7 @@ void effBlurSetHandle(EffBlurWork *work, u32 setting) {
 void effBlurAcquireHandle(EffBlurWork *work) {
     u32 setting;
 
-    setting = func_00159BB8(2);
+    setting = effGetResourceFirstWord(2);
     work->setting = setting;
 }
 
@@ -105,7 +105,7 @@ void effBlurSetSecondSetting(EffBlurWork *work, u32 setting) {
 void effBlurAcquireSecondHandle(EffBlurWork *work) {
     u32 setting;
 
-    setting = func_00159BB8(2);
+    setting = effGetResourceFirstWord(2);
     work->setting = setting;
 }
 

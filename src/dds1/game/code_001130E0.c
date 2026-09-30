@@ -90,12 +90,12 @@ void func_00113538(EffectObject *obj) {
         data->handle = -1;
     }
     if (data->word08 != 0) {
-        func_00222200(data->word08);
+        evtReleaseUnitTransitionWork(data->word08);
         data->word08 = 0;
     }
     func_00111B40(obj);
     func_00111840(data->word0C);
-    func_002CFF98(obj->data);
+    sdfReleaseChipBlock(obj->data);
 }
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_001135B0);
@@ -197,7 +197,7 @@ void func_00113EE8(EffectObject *obj) {
     effObjFreeInner();
     data = obj->data;
     func_00111840(data->handle);
-    func_002CFF98(data);
+    sdfReleaseChipBlock(data);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F720);

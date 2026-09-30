@@ -35,7 +35,7 @@ extern void func_001C7DB8(s32, s32);
 
 extern void func_001C35F0(s32, s32, s32);
 
-extern u32 func_00101958();
+extern u32 kwlnTaskGetUserValue();
 
 extern void func_00230960(s32);
 
@@ -347,7 +347,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u64 first, u64 second) {
     func_0019B8B0(0x13);
     handle = func_0019F5E8(x << 4, y << 3, 0, first, second, 0);
     func_0019D550(handle, 1, 0x53);
-    func_0019C5B0(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
     func_0019B8B0(0xffffffffffffffff);
 }
 
@@ -355,8 +355,8 @@ void func_001C8158(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     func_0019B8B0(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
-    func_0019D530(handle, 1);
-    func_0019C5B0(handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphInSelectedSlot(handle);
     func_0019B8B0(-1);
 }
 
@@ -364,8 +364,8 @@ void func_001C81F8(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     func_0019B8B0(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
-    func_0019D530(handle, 1);
-    func_0019C5B0(handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphInSelectedSlot(handle);
     func_0019B8B0(-1);
 }
 
@@ -522,8 +522,8 @@ void func_001C9DC8(s32 unused) {
     }
     func_0019B8B0(0x13);
     handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
-    func_0019D530(handle, 1);
-    func_0019C5B0(handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphInSelectedSlot(handle);
     func_0019B8B0(-1);
 }
 
@@ -582,7 +582,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA490);
 extern void func_001BD978(void);
 
 void fldClearBattleSceneObject(void) {
-    func_00328E48(func_00101958());
+    sdfReleaseChipBlock(kwlnTaskGetUserValue());
     ((BattleSceneWork *)func_001AA6F8())->sceneObject = 0;
     func_001BD978();
 }
@@ -599,10 +599,10 @@ SceneObject *func_001CA7E0(void) {
     if (handle == 0) {
         return (SceneObject *)handle;
     }
-    return (SceneObject *)func_00101958(handle);
+    return (SceneObject *)kwlnTaskGetUserValue(handle);
 }
 
-s32 func_001CA820(void) {
+s32 fldGetSceneObjectState(void) {
     s32 handle = func_00101740(D_004367BC);
     if (handle == 0) {
         return handle;
@@ -712,7 +712,7 @@ void func_001CB158(void) {
 
 extern s32 D_00416BB8[];
 
-void func_001CB190(s32 *outX, s32 *outY, s32 dir, s32 step) {
+void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     s32 offsets[3][8][2];
 
     memcpy(offsets, D_00416BB8, sizeof(offsets));
@@ -784,7 +784,7 @@ s32 fldStepSceneStateMachine(s32 handle) {
     if (work->flags & 0x04000000) {
         return 0;
     }
-    state = (s32 *)func_00101958(handle);
+    state = (s32 *)kwlnTaskGetUserValue(handle);
     switch (*state) {
     case 1:
         *state = 2;
@@ -823,7 +823,7 @@ typedef struct SceneAiOther {
 } SceneAiOther;
 
 extern char *D_004367CC;
-extern void *func_00328E18(s32);
+extern void *sdfAllocAndClearQuadwords(s32);
 extern void *btlAllocateIndexList();
 extern u32 btlGetIndexListCount();
 extern u32 btlGetIndexListEntry();
@@ -842,12 +842,12 @@ s32 func_001CC9C0(s32 source) {
     s32 id;
     s32 count;
     func_001AA6F8();
-    work = (SceneAiWork *)func_00328E18(0xA4);
-    object = (SceneObject *)func_00101958(func_00101740(D_004367BC));
+    work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
+    object = (SceneObject *)kwlnTaskGetUserValue(func_00101740(D_004367BC));
     work->listA = btlAllocateIndexList(0xD);
     work->listB = btlAllocateIndexList(0xD);
     if (object->state == 8) {
-        other = (SceneAiOther *)func_00101958(func_00101740(D_004367CC));
+        other = (SceneAiOther *)kwlnTaskGetUserValue(func_00101740(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (D_00435DD0->entry[other->index].mask & 0x4800)) {
             func_001AC0F8(source, work->listA, 1, 4, -0x4801);
@@ -879,11 +879,11 @@ s32 func_001CC9C0(s32 source) {
 void fldReleaseSceneSpriteWork(SceneSpriteWork *work) {
     btlFreeIndexList(work->secondResource);
     btlFreeIndexList(work->firstResource);
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
 }
 
 void fldReleaseSceneSprite(s64 arg) {
-    fldReleaseSceneSpriteWork((SceneSpriteWork *)func_00101958(arg));
+    fldReleaseSceneSpriteWork((SceneSpriteWork *)kwlnTaskGetUserValue(arg));
     ((BattleSceneWork *)func_001AA6F8())->spriteObject = 0;
 }
 
@@ -892,7 +892,7 @@ u32 func_001CCBB8(void) {
     if (handle == 0) {
         return handle;
     }
-    return func_00101958(handle);
+    return kwlnTaskGetUserValue(handle);
 }
 
 u32 fldGetSceneScriptState(void) {
@@ -1122,7 +1122,7 @@ s32 fldUpdateConditionalSceneCleanup(void) {
     return 0;
 }
 
-void func_001CFAC0(void) {
+void fldResetSceneStatus(void) {
     BattleSceneWork *scene;
 
     scene = (BattleSceneWork *)func_001AA6F8();
@@ -1135,7 +1135,7 @@ void fldBeginSceneTransition(void) {
     scene->flags |= 0x200;
 }
 
-void func_001CFB20(void) {
+void fldClearSceneTransition(void) {
     func_001AA6F8();
     func_001C7DB8(0, 8);
 }
@@ -1167,7 +1167,7 @@ void fldCreateSceneCleanupTask(void) {
         func_001AA6F8();
     }
     scene = (BattleSceneWork *)func_001AA6F8();
-    task = kwlnTaskCreate(D_004368B0, 0x2B0E, 1, 1, (void (*)(void))fldUpdateConditionalSceneCleanup, func_001CFAC0, 0);
+    task = kwlnTaskCreate(D_004368B0, 0x2B0E, 1, 1, (void (*)(void))fldUpdateConditionalSceneCleanup, fldResetSceneStatus, 0);
     func_00101968(scene->taskParent, task);
     scene->sceneStatus = task;
     btlLoadResourceBlock();
@@ -1550,21 +1550,7 @@ void btlQueueScene(u32 scene) {
     work->queuedScene = scene;
 }
 
-void btlUpdateScene(void) {
-    BattleSceneWork *work = (BattleSceneWork *)func_001AA6F8();
-    s32 next;
-    s32 event;
-    next = work->queuedScene;
-    if (next != 0) {
-        btlSetScene(next);
-        work->queuedScene = 0;
-    }
-    event = D_003B6938[work->currentScene].update((s32)work);
-    if (event != 0) {
-        btlQueueScene(event);
-    }
-    work->frame = work->frame + 1;
-}
+INCLUDE_ASM(const s32, "game/code_001C7FF8", btlUpdateScene);
 
 void btlResetToInitialScene(void) {
     BattleSceneWork *work;
@@ -2083,7 +2069,7 @@ u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     }
     ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4120;
     ((SceneTask *)object)->onUpdate = 0;
-    fields = (u8 *)func_001E14F8(object);
+    fields = (u8 *)btlGetTaskArguments(object);
     *(u32 *)(fields + 0) = (u32)actor;
     *(u32 *)(fields + 4) = owner;
     fields[8] = group;
@@ -2119,7 +2105,7 @@ u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     }
     ((SceneTask *)object)->onUpdate = (void (*)(void))func_001D4200;
     ((SceneTask *)object)->onComplete = (void (*)(void))fldActivateRequestedSceneActor;
-    fields = (u32 *)func_001E14F8(object);
+    fields = (u32 *)btlGetTaskArguments(object);
     fields[0] = (u32)actor;
     fields[1] = owner;
     return object;
@@ -2137,7 +2123,7 @@ u8 *fldCreateActorAction(s32 owner) {
     ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4328;
     object[0x10] = 0;
     ((SceneTask *)object)->onUpdate = 0;
-    *(u32 *)func_001E14F8(object) = owner;
+    *(u32 *)btlGetTaskArguments(object) = owner;
     return object;
 }
 
@@ -2171,653 +2157,6 @@ LAB_001c8880:
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417278);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417288);
-
-void btlActionSeqStateSelect(u8 *task) {
-    u8 *work = (u8 *)func_001AA6F8();
-    u8 *unit = (u8 *)((SceneTask *)task)->actor;
-    s32 (*hook)(u8 *);
-    s32 next;
-    u32 flags;
-    ((SceneTask *)task)->flags &= ~0x20;
-    if (((SceneTask *)task)->actionNumber == 0) {
-        btlDispatchStateHandler(task, 0x1B);
-        btlBossDebugPrintf("btl:actnum 0 [%p]\n", task);
-        return;
-    }
-    hook = *(s32 (**)(u8 *))(work + 0x630);
-    if (hook != 0) {
-        next = hook(task);
-        if (next != -1) {
-            btlDispatchStateHandler(task, next);
-            return;
-        }
-    }
-    if (((SceneTask *)task)->flags & 0x40) {
-        btlDispatchStateHandler(task, 0xA);
-    } else {
-        flags = ((SceneActor *)unit)->status.words.activeFlags;
-        if (flags & 0x200) {
-            if (((BattleSceneWork *)work)->flags & 0x8000) {
-                btlDispatchStateHandler(task, 9);
-            } else {
-                btlDispatchStateHandler(task, 6);
-            }
-        } else if (flags & 0x400) {
-            if (!(((BattleSceneWork *)work)->refreshFlags & 1)) {
-                btlDispatchStateHandler(task, 8);
-            } else {
-                btlDispatchStateHandler(task, 6);
-            }
-        }
-    }
-}
-
-extern s32 effOffsetIfOwnerFlagClear();
-
-void btlUnitTurnEndStateSelect(u8 *task) {
-    u8 *unit = (u8 *)((SceneTask *)task)->actor;
-    u32 flags = ((SceneActor *)unit)->status.words.activeFlags;
-    if (flags & 0x200) {
-        if (flags & 0x1000) {
-            if ((((SceneActor *)unit)->status.words.stateFlags & 0x40) && !(((SceneActor *)unit)->selectionFlags & 0x5800) &&
-                !(((SceneTask *)task)->flags & 0x100)) {
-                ((SceneTask *)task)->actionStage = 4;
-                ((SceneTask *)task)->effect = effOffsetIfOwnerFlagClear(unit, 0xA4);
-                ((SceneActor *)unit)->status.words.activeFlags = (((SceneActor *)unit)->status.words.activeFlags & ~0x20) | 0x400000;
-                *(u16 *)((SceneActor *)unit)->entryData |= 0x4000;
-                ((SceneActor *)unit)->status.words.stateFlags |= 0x2000;
-                btlDispatchStateHandler(task, 0x10);
-            } else {
-                btlDispatchStateHandler(task, 0x1E);
-            }
-            ((SceneActor *)unit)->status.words.stateFlags &= ~0x40;
-        } else {
-            btlDispatchStateHandler(task, 0x1E);
-        }
-    } else {
-        btlDispatchStateHandler(task, 0x1E);
-    }
-}
-
-extern s32 sndIsResourceNodeReferencedOrActive(s32);
-extern s32 sndHasResourceFlagsOneOrEight(s32);
-extern void sndFreeResourceNode(s32);
-extern void sndFreeListNode(s32);
-extern s32 btlIsUnitInActiveList(u8 *);
-extern void btlResetActiveUnitList(void);
-extern s32 btlCountTasksByKind(s32);
-extern u32 sndGetResourceStatus(s32);
-
-/* Returns nonzero when the scene is idle: frees every actor's unreferenced
- * resource node, then the caller's list node, and requires no waiting actor
- * or scene task of the listed kinds. */
-s32 func_001D46A8(s32 self) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
-    SceneActor *actor;
-    for (actor = scene->actors; actor != 0; actor = actor->next) {
-        if (actor->resourceNode != 0) {
-            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
-                if ((s32)actor == self) {
-                    return 0;
-                }
-                sndGetResourceStatus(actor->resourceNode);
-                return 0;
-            }
-            sndFreeResourceNode(actor->resourceNode);
-            actor->resourceNode = 0;
-        }
-    }
-    if (((SceneActor *)self)->listNode != 0) {
-        if (sndHasResourceFlagsOneOrEight(((SceneActor *)self)->listNode) != 0) {
-            return 0;
-        }
-        sndFreeListNode(((SceneActor *)self)->listNode);
-        ((SceneActor *)self)->listNode = 0;
-    }
-    for (actor = scene->actors; actor != 0; actor = actor->next) {
-        if (actor->status.words.activeFlags & 0x200) {
-            if (actor->status.words.activeFlags & 2) {
-                if ((actor->extraFlags & 8) == 0) {
-                    return 0;
-                }
-            }
-        }
-    }
-    if (btlCountTasksByKind(0x23) != 0) return 0;
-    if (btlCountTasksByKind(0x40) != 0) return 0;
-    if (btlCountTasksByKind(0x41) != 0) return 0;
-    if (btlCountTasksByKind(0x3F) != 0) return 0;
-    if (btlCountTasksByKind(0x36) != 0) return 0;
-    if (btlCountTasksByKind(0x37) != 0) return 0;
-    if (btlCountTasksByKind(0x24) != 0) return 0;
-    return btlCountTasksByKind(0x2E) == 0;
-}
-
-s32 fldReleaseIdleSceneActorResources(SceneActor *actor) {
-    if (actor->resourceNode != 0) {
-        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
-            return 0;
-        }
-        sndFreeResourceNode(actor->resourceNode);
-        actor->resourceNode = 0;
-    }
-    if (actor->listNode != 0) {
-        if (sndHasResourceFlagsOneOrEight(actor->listNode) != 0) {
-            return 0;
-        }
-        sndFreeListNode(actor->listNode);
-        actor->listNode = 0;
-    }
-    if (actor->pendingResource != 0) {
-        return 0;
-    }
-    if (btlIsUnitInActiveList((u8 *)actor) != 0) {
-        btlResetActiveUnitList();
-        return 0;
-    }
-    if (btlCountTasksForOwner(actor->ownerId) != 0) {
-        return 0;
-    }
-    return btlCountTasksByKind(0x2E) == 0;
-}
-
-void func_001D48E0(void) {
-}
-
-void func_001D48E8(void) {
-}
-
-void func_001D48F0(s32 task) {
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xfffffdff;
-}
-
-extern void func_001AA850();
-extern void btlFlagUnitDefeatCandidate();
-extern void func_001E2758();
-extern s32 func_001E44E0(u8 *, s32, s32, f32);
-
-/* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change
- * instruction scheduling in this otherwise matching callback. */
-s64 func_001D4908(u8 *task) {
-    u8 *unit;
-    u8 *work;
-    s32 handle;
-    void (*hook)(u8 *);
-    work = (u8 *)func_001AA6F8();
-    unit = *(u8 **)(task + 0x18);
-    handle = *(s32 *)(unit + 0x318);
-    *(u32 *)(task + 8) &= ~0x100;
-    if (handle != 0 && sndIsResourceNodeReferencedOrActive(handle) == 0) {
-        sndFreeResourceNode(*(s32 *)(unit + 0x318));
-        *(s32 *)(unit + 0x318) = 0;
-    }
-    if (*(u32 *)(unit + 0x110) & 0x400) {
-        hook = *(void (**)(u8 *))(work + 0x700);
-        if (hook != 0) {
-            hook(task);
-        }
-    } else if (!(*(u16 *)(unit + 0x12E) & 0x4000)) {
-        if (*(s32 *)(unit + 0xC8) == 0x1F) {
-            func_001AA850(unit + 0x120, 0x1000);
-        }
-        *(s32 *)(unit + 0x110) = *(s32 *)(unit + 0x110) & ~0x20 & 0xF7FFFFFF;
-        btlFlagUnitDefeatCandidate(unit);
-        func_001E2758(unit);
-        btlStartTask(func_001E44E0(unit, 0xE, 0, 1.0f));
-        fldAppendTaskToGroup(task);
-        btlDispatchStateHandler(task, 2);
-    }
-}
-
-void func_001D4A30(s32 task) {
-    ((SceneTask *)task)->flags = (((SceneTask *)task)->flags | 0x10) & ~0x200;
-}
-
-void btlUnitStateSelectAfterAction(u8 *task) {
-    u8 *unit = (u8 *)((SceneTask *)task)->actor;
-    u32 flags;
-    if (!(((SceneActor *)unit)->status.words.activeFlags & 0x20)) {
-        ((SceneTask *)task)->flags &= ~0x100;
-    }
-    if (((SceneActor *)unit)->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(((SceneActor *)unit)->resourceNode) == 0) {
-        sndFreeResourceNode(((SceneActor *)unit)->resourceNode);
-        ((SceneActor *)unit)->resourceNode = 0;
-    }
-    flags = ((SceneActor *)unit)->status.words.activeFlags;
-    if (flags & 0x20000000) {
-        btlDispatchStateHandler(task, 0x11);
-    } else if (flags & 0x400000) {
-        btlDispatchStateHandler(task, 0x10);
-    } else if (flags & 0x10000000) {
-        btlDispatchStateHandler(task, 0x12);
-    } else if (flags & 0x20) {
-        btlUnitTurnEndStateSelect(task);
-    } else if (((SceneActor *)unit)->status.words.stateFlags & 0x40000) {
-        btlDispatchStateHandler(task, 0x15);
-    }
-}
-
-void func_001D4B90(s32 task) {
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xffffffef;
-}
-
-extern s32 func_001D46A8(s32);
-extern s32 btlBothSidesActive(s32);
-extern s32 func_0020EB40(u8 *);
-
-void btlActionSeqCheckDispatch(u8 *task) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
-    u32 flags = scene->flags;
-    s32 unit = (s32)((SceneTask *)task)->actor;
-    SceneActor *actor;
-    if (!(flags & 0x20)) {
-        for (actor = scene->actors; actor != 0; actor = actor->next) {
-            u32 actorFlags = actor->status.words.activeFlags;
-            if (actorFlags & 0x4000) {
-                return;
-            }
-            if (actorFlags & 0x30400000) {
-                return;
-            }
-        }
-        if (!(flags & 0x8000) || func_001D46A8(unit) != 0) {
-            if (btlBothSidesActive(unit) == 0) {
-                btlDispatchStateHandler(task, 0x1D);
-                return;
-            }
-            if (func_0020EB40(task) != 0) {
-                btlDispatchStateHandler(task, 5);
-            } else {
-                btlActionSeqStateSelect(task);
-            }
-        }
-    }
-}
-
-void func_001D4C98(void) {
-}
-
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D4CA0);
-
-void func_001D4FE0(void) {
-}
-
-extern s32 btlCreateEffObjB();
-extern s32 btlStartTask();
-extern s32 sndHasActiveActor();
-extern s64 func_001A9920(void);
-extern s32 btlCreateCommandSoundUpdateTask(void);
-extern s32 btlCreateSecondaryCommandSoundTask(void);
-extern s32 btlCreateCommandSoundTask();
-extern void func_00211360();
-extern s32 func_0020F200();
-
-typedef struct TaskBlock {
-    u32 word[11];
-} TaskBlock;
-
-extern u8 *func_001DFB08(SceneActor *, TaskBlock *);
-extern u8 *func_0020F9D0(SceneActor *, u32, s32);
-
-/* Starts the command sound tasks and the follow-up action for the acting
- * unit, chosen by its selection flags. */
-void func_001D4FE8(u8 *task) {
-    SceneActor *unit;
-    s64 ownerId;
-    u8 *effectTask;
-    u8 *sceneTask;
-    u8 *object;
-    s32 effect;
-    TaskBlock block;
-    u32 hp, mp;
-    if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
-        unit = ((SceneTask *)task)->actor;
-        ownerId = func_001A9920();
-        btlStartTask(btlCreateCommandSoundUpdateTask());
-        btlStartTask(btlCreateSecondaryCommandSoundTask());
-        if (unit->status.words.activeFlags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask(task, 9));
-        } else {
-            btlStartTask(btlCreateCommandSoundTask(task, 3));
-        }
-        switch (unit->selectionFlags & 0x7FFF) {
-        case 0x200:
-            func_00211360(task, 0);
-            btlDispatchStateHandler(task, 0xC);
-            break;
-        case 0x20:
-            if (((SceneTask *)task)->actor->status.words.activeFlags & 0x200) {
-                func_00211360(task, 2);
-            } else {
-                func_00211360(task, 3);
-            }
-            btlDispatchStateHandler(task, 0xC);
-            break;
-        case 0x40:
-            func_00211360(task, 4);
-            btlDispatchStateHandler(task, 0xC);
-            break;
-        case 1:
-        case 0x2000:
-            ((SceneTask *)task)->command = 0xD;
-            btlDispatchStateHandler(task, 0xC);
-            break;
-        case 8:
-            sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
-            *sceneTask = 7;
-            *(s64 *)(sceneTask + 8) = ownerId;
-            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
-            btlStartTask(sceneTask);
-            memset(&block, 0, 0x2C);
-            hp = unit->statA;
-            block.word[0] = hp / 10;
-            mp = unit->statB;
-            block.word[1] = mp / 10;
-            effectTask = func_001DFB08(unit, &block);
-            *effectTask = 7;
-            *(s64 *)(effectTask + 8) = ownerId;
-            btlStartTask(effectTask);
-            if ((s32)block.word[0] > 0) {
-                object = func_0020F9D0(unit, block.word[0], 0);
-                *object = 4;
-                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
-                btlStartTask(object);
-            }
-            if ((s32)block.word[1] > 0) {
-                object = func_0020F9D0(unit, block.word[1], 1);
-                *object = 4;
-                *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
-                btlStartTask(object);
-            }
-            btlDispatchStateHandler(task, 0x1B);
-            break;
-        case 0x800:
-            sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
-            *sceneTask = 7;
-            *(s64 *)(sceneTask + 8) = ownerId;
-            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
-            btlStartTask(sceneTask);
-            btlDispatchStateHandler(task, 0x1B);
-            break;
-        }
-        effect = func_0020F200(task);
-        if (effect > 0) {
-            object = (u8 *)btlCreateEffObjB(unit, effect);
-            *(s64 *)(object + 0x40) = ownerId;
-            btlStartTask(object);
-        }
-        ((SceneTask *)task)->flags |= 0x200;
-    }
-}
-
-void func_001D5330(u32 task) {
-    func_001AA6F8();
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xfffffffb;
-    func_001CAB60(task);
-}
-
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5368);
-
-void btlCommandResultEffectSelect(u8 *task) {
-    s32 selection;
-
-    ((SceneTask *)task)->flags &= ~4;
-    switch (((SceneTask *)task)->command) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 7:
-    case 8:
-        if (((SceneTask *)task)->command == 4) {
-            selection = func_001AC098(((SceneTask *)task)->commandReference);
-        } else {
-            selection = ((SceneTask *)task)->commandValue;
-        }
-        switch (func_0022C1B0(task, selection)) {
-        case 2:
-            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0x82));
-            sndSetStationedSeVolume(0xD);
-            btlDispatchStateHandler(task, 6);
-            return;
-        case 6:
-            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xB0));
-            sndSetStationedSeVolume(0xD);
-            btlDispatchStateHandler(task, 6);
-            return;
-        case 8:
-            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xB2));
-            sndSetStationedSeVolume(0xD);
-            btlDispatchStateHandler(task, 6);
-            return;
-        case 10:
-            btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0xD0));
-            sndSetStationedSeVolume(0xD);
-            btlDispatchStateHandler(task, 6);
-            return;
-        }
-        break;
-    }
-    fldCreateSceneSpriteTask((s32)task);
-}
-
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5668);
-
-void func_001D5938(s32 task) {
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags & 0xffffff7f;
-}
-
-typedef struct SceneAiEntry {
-    u8 kind;                  /* 0x000 */
-    u8 pad01;
-    u16 slot;                 /* 0x002 */
-    u8 pad04[0x158];
-} SceneAiEntry;
-
-extern SceneAiEntry *D_00435DF4;
-extern s32 btlAllocAndCheck();
-extern void func_00210DB0();
-extern void btlBindActorSlot();
-extern void func_00210F58();
-extern s32 func_0020EBD0();
-extern s32 kwlnTaskIsRegistered();
-
-/* AI task: binds the acting unit's slot on first run, then waits for the
- * pending AI task and dispatches state 0xB or 0xC. */
-s32 func_001D5950(SceneTask *task) {
-    BattleSceneWork *scene = (BattleSceneWork *)func_001AA6F8();
-    u16 index;
-    if (!(scene->flags & 0x20)) {
-        if (sndHasActiveActor() == 0) {
-            if (func_001D46A8((s32)task->actor) != 0) {
-                if (!(task->flags & 0x80)) {
-                    index = task->actor->kind;
-                    scene->pendingTask = 0;
-                    if (D_00435DF4[index].kind != 1 && btlAllocAndCheck(task) != 0) {
-                        func_00210DB0(task);
-                    } else if (D_00435DF4[index].slot != 0) {
-                        btlBindActorSlot(task, D_00435DF4[index].slot);
-                    } else {
-                        func_00210F58(task);
-                    }
-                    task->flags |= 0x80;
-                    scene->flags &= ~0x100000;
-                }
-                if (scene->pendingTask == 0) {
-                    scene->flags |= 0x100000;
-                    if (func_0020EBD0(task) != 0) {
-                        btlDispatchStateHandler(task, 0xB);
-                    } else {
-                        btlDispatchStateHandler(task, 0xC);
-                    }
-                } else if (kwlnTaskIsRegistered(scene->pendingTask) == 0) {
-                    if (task->command == -1) {
-                        btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
-                        btlDebugPrintf("AI script return NULL\n");
-                        func_00210F58(task);
-                    }
-                    scene->flags |= 0x100000;
-                    if (func_0020EBD0(task) != 0) {
-                        btlDispatchStateHandler(task, 0xB);
-                    } else {
-                        btlDispatchStateHandler(task, 0xC);
-                    }
-                    scene->pendingTask = 0;
-                }
-            }
-        }
-    }
-}
-
-void func_001D5B38(s32 task) {
-    func_001C35F0(task, 0, 0);
-    ((SceneTask *)task)->flags = ((SceneTask *)task)->flags | 0x20;
-}
-
-extern void func_001E0CE0(s32, s32);
-extern s32 func_0020EBD0();
-
-s32 btlCommandStateSelectB(s32 task) {
-    if (sndHasActiveActor() == 0) {
-        func_001E0CE0(task, task + 0x20);
-        if (func_0020EBD0(task) != 0) {
-            btlDispatchStateHandler(task, 0xB);
-        } else {
-            btlDispatchStateHandler(task, 0xC);
-        }
-    }
-}
-
-void func_001D5BD8(void) {
-}
-
-extern u32 btlGetIndexListCount(s32);
-extern u32 btlGetIndexListEntry(s32, s32);
-extern s32 func_001DD390();
-extern s32 btlIsActiveActor();
-
-s32 btlCommandStateSelectC(u8 *task) {
-    s32 command;
-    s32 ready;
-    s32 value;
-    SceneActor *actor;
-    if ((((SceneTask *)task)->options & 8) || sndHasActiveActor() == 0) {
-        actor = (SceneActor *)btlGetIndexListEntry(((SceneTask *)task)->actorHandle, 0);
-        command = ((SceneTask *)task)->command;
-        ready = 0;
-        if (command == 1) {
-            ready = 1;
-        } else if (command == 2) {
-            value = ((SceneTask *)task)->commandValue;
-            if (value < 0xFA) {
-                if (value < 0xF8) {
-                    ready = 0;
-                } else {
-                    ready = 1;
-                }
-            }
-        }
-        if (ready == 1 && (btlIsActiveActor(actor) == 0 || (actor->status.flags & 0xE1) != 1)) {
-            btlDispatchStateHandler(task, 0x1B);
-        } else if (!(((SceneTask *)task)->options & 8)) {
-            btlDispatchStateHandler(task, 0xC);
-        } else {
-            func_001DD390(task, task + 0x20);
-        }
-    }
-}
-
-void func_001D5CE8(s32 task) {
-    func_001B7830();
-    btlResetIndexWork(task + 0x20);
-    ((SceneTask *)task)->actor->actionResource = 0xffffffff;
-}
-
-void btlCommandStartSoundTasks(u8 *task) {
-    u8 *unit;
-    s64 ownerId;
-    s32 effect;
-    u8 *object;
-    if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
-        unit = (u8 *)((SceneTask *)task)->actor;
-        ownerId = func_001A9920();
-        btlStartTask(btlCreateCommandSoundUpdateTask());
-        btlStartTask(btlCreateSecondaryCommandSoundTask());
-        if (((SceneActor *)unit)->status.words.activeFlags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask(task, 9));
-        } else {
-            btlStartTask(btlCreateCommandSoundTask(task, 3));
-        }
-        if ((((SceneActor *)unit)->selectionFlags & 0x7FFF) == 0x20) {
-            if (((SceneTask *)task)->actor->status.words.activeFlags & 0x200) {
-                func_00211360(task, 2);
-            } else {
-                func_00211360(task, 3);
-            }
-            btlDispatchStateHandler(task, 0xC);
-        }
-        effect = func_0020F200(task);
-        if (effect > 0) {
-            object = (u8 *)btlCreateEffObjB(unit, effect);
-            *(s64 *)(object + 0x40) = ownerId;
-            btlStartTask(object);
-        }
-        ((SceneTask *)task)->flags |= 0x200;
-    }
-}
-
-extern void func_001DDB60(SceneTask *, s32);
-
-void btlCommandPrintAndFetchOwner(SceneTask *task) {
-    s32 command;
-    btlBossDebugPrintf("btl:command=%d\n", task->command);
-    func_001DDB60(task, (s32)task + 0x20);
-    command = task->command;
-    if (command > 0) {
-        if (command >= 4) {
-            if (command < 9) {
-                if (command >= 7) {
-                    if (btlGetIndexListCount(task->actorHandle) == 1) {
-                        task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->actorHandle, 0))->ownerId;
-                    }
-                }
-            }
-        } else {
-            if (btlGetIndexListCount(task->actorHandle) == 1) {
-                task->ownerId = ((SceneActor *)btlGetIndexListEntry(task->actorHandle, 0))->ownerId;
-            }
-        }
-    }
-}
-
-extern void func_00201828();
-
-void func_001D5EE8(u8 *task) {
-    u8 *commandData = task + 0x20;
-    u8 *work = (u8 *)func_001AA6F8();
-    s32 owner = (s32)((SceneTask *)task)->actor;
-    void (*hook)(u8 *);
-    if (func_001D46A8(owner) != 0) {
-        if (((SceneTask *)task)->actionStage == 2) {
-            btlStartTask(btlCreateEffObjB(owner, ((SceneTask *)task)->effect));
-        }
-        func_00201828(task, commandData);
-        hook = *(void (**)(u8 *))(work + 0x634);
-        if (hook != 0) {
-            hook(task);
-        }
-        func_001DD390(task, commandData);
-    }
-}
-
-void func_001D5FA8(void) {
-}
-
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001D5FB0);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417348);
-
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00417360);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436878);
 
@@ -2862,64 +2201,4 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436908);
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436910);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436918);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436920);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436928);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436930);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436938);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436940);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436948);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436950);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436958);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436960);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436968);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436970);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436978);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436980);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436988);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436990);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436998);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369A0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369A8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369B0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369B8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369C0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369C8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369D0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369D8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369E0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369E8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369F0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004369F8);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436A00);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436A08);
 

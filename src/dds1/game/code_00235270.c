@@ -2,7 +2,7 @@
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
-extern void *func_00101A70();
+extern void *kwlnTaskGetUserValue();
 extern s32 func_0018FDA8(void);
 extern s32 func_002E92C0(s32 sequence);
 extern void func_002E9340(s32 sequence);
@@ -22,12 +22,12 @@ extern void func_00190308(void *target, f32 scale);
 extern s32 kwlnTaskGetTaskByName(void *name);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern void fldSetSwayMode(s32 mode);
-extern void func_00132B70(s32 value);
+extern void fldSetSkyDrawState(s32 value);
 extern void func_00132B80(s32 value);
 extern s16 func_00132B90(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void func_00132010(void);
-extern void func_00129720(s32 id);
+extern void fldSelectDisplayBuffer(s32 id);
 extern void func_0012AEB0(void);
 extern void sdfAppendPacket(s32 list, s32 packet);
 extern void sndStartTrackDefault(s32 track);
@@ -235,7 +235,7 @@ s32 evtUpdateSkyTask(void) {
     evtAdvanceSkyTransition();
     func_00132010();
     if (D_003BBF8C != 0) {
-        func_00129720(0x53);
+        fldSelectDisplayBuffer(0x53);
         func_0012AEB0();
     }
     return 0;
@@ -257,7 +257,7 @@ void evtDestroySkyTask(void) {
 
 void evtCreateSkyTask(void) {
     fldSetSwayMode(0);
-    func_00132B70(0x80);
+    fldSetSkyDrawState(0x80);
     func_00132B80(0);
     fldSetFadeTarget(0, 1, 0);
     kwlnTaskCreate(D_003BBF90, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
@@ -344,7 +344,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", jtbl_003ADE60);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 
-void func_00235B30(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+void evtDrawValueChangeInstructionRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfAppendPacket(list, func_002E4960(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
@@ -364,12 +364,12 @@ void func_00235B30(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_00235C68(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 step;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, func_00235AE0, func_00235B30);
+    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, func_00235AE0, evtDrawValueChangeInstructionRow);
     D_00325748.invoke(&D_00325748, (void *)list);
     if (ctx->actionMode != 7) {
         return 0;
@@ -535,7 +535,7 @@ s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtDrawWork *work) {
     return 2;
 }
 
-void func_00236510(s32 list, s32 x, s32 y, s32 index, EvtDrawWork *work) {
+void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtDrawWork *work) {
     s32 color;
 
     if (index < work->itemCount) {
@@ -548,7 +548,7 @@ void func_00236510(s32 list, s32 x, s32 y, s32 index, EvtDrawWork *work) {
     }
 }
 
-s32 func_002365A0(s32 x, s32 y, EvtDrawWork *work) {
+s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtDrawWork *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 width = 10;
 
@@ -558,7 +558,7 @@ s32 func_002365A0(s32 x, s32 y, EvtDrawWork *work) {
             width = 6;
         }
     }
-    func_00235598(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, (u8 *)work, evtDrawStringEntry, func_00236510);
+    func_00235598(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, (u8 *)work, evtDrawStringEntry, evtDrawSelectableTextRow);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (work->mode != 2) {
         return 0;
@@ -624,7 +624,7 @@ void func_00237048(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
-s32 func_00237348(s32 x, s32 y, u8 *work) {
+s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
     s32 shown;
@@ -932,7 +932,7 @@ void func_0023B1F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023B200);
 
-void func_0023B848(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
+void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtDrawWork *work) {
     switch (kind) {
     case 0:
         if (work->text0 != 0) {
@@ -952,7 +952,7 @@ extern s8 D_00324510[];
 s32 mnuDrawTimedPrompt(s32 x, s32 y, u8 *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
-    func_00235598(packets, x, y, 0x19, 2, 0, 1, work, 0, func_0023B848);
+    func_00235598(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
     D_00325748.invoke(&D_00325748, (void *)packets);
     if (((EvtRuntime *)work)->actionMode != 0x14) {
         return 0;
@@ -1027,7 +1027,7 @@ extern EvtSelectionCache *D_003BB128;
 extern s32 D_003BD8A0;
 
 s32 evtSynchronizeSelectedEntry(s32 task) {
-    EvtRuntime *runtime = func_00101A70();
+    EvtRuntime *runtime = kwlnTaskGetUserValue();
     if (func_0018FEB0() == 0) {
         runtime->controlState = 0;
         return -1;
@@ -1048,10 +1048,10 @@ s32 evtSynchronizeSelectedEntry(s32 task) {
     return 0;
 }
 
-s32 func_0023C208(void) {
+s32 evtPollRuntimeControlReady(void) {
     EvtRuntime *runtime;
 
-    runtime = func_00101A70();
+    runtime = kwlnTaskGetUserValue();
     if (func_0018FDA8() == 0) {
         runtime->controlState = 0;
         return -1;
@@ -1444,35 +1444,35 @@ typedef struct EvtExtendedRow {
     u8 pad08[0x24];
 } EvtExtendedRow;
 
-u16 func_0023ED08(s32 table, s32 row) {
+u16 evtGetRowValue(s32 table, s32 row) {
     if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
         return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->value;
     }
     return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->value;
 }
 
-s16 func_0023ED58(s32 table, s32 row) {
+s16 evtGetRowVariant(s32 table, s32 row) {
     if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
         return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->variant;
     }
     return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->variant;
 }
 
-u16 func_0023EDA8(s32 table, s32 row) {
+u16 evtGetRowParameter(s32 table, s32 row) {
     if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
         return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->parameter;
     }
     return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->parameter;
 }
 
-u16 func_0023EDF8(s32 table, s32 row) {
+u16 evtGetRowFlags(s32 table, s32 row) {
     if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
         return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->flags;
     }
     return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->flags;
 }
 
-s32 func_0023EE48(s32 table, s32 row) {
+s32 evtGetRowPayloadAddress(s32 table, s32 row) {
     if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
         return ((EvtRowTable *)table)->compactRows + row * 0x10 + 8;
     }
@@ -1693,7 +1693,7 @@ s32 evtGetTaskValueWord(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return ((EvtTaskData *)func_00101A70(task))->value;
+        return ((EvtTaskData *)kwlnTaskGetUserValue(task))->value;
     } else {
         return -1;
     }
@@ -1704,7 +1704,7 @@ EvtTaskData *evtGetTaskData(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return func_00101A70(task);
+        return kwlnTaskGetUserValue(task);
     }
     return (EvtTaskData *)task;
 }
@@ -1731,14 +1731,14 @@ typedef struct EvtResourceTask {
     EvtResourceEntry *entries;
 } EvtResourceTask;
 
-s32 func_00241BF0(u32 taskId, s32 key) {
+s32 evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     s32 i;
     EvtResourceTask *data;
     s32 task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        data = func_00101A70(task);
+        data = kwlnTaskGetUserValue(task);
         if (data->kind != 2) {
             return 0;
         }
@@ -1758,7 +1758,7 @@ extern void effSetCh72Id(s32 id);
 
 void evtRefreshTaskData(s32 taskId, s32 key) {
     EvtTaskData *data = evtGetTaskData(taskId);
-    s32 resource = func_00241BF0(taskId, key);
+    s32 resource = evtFindTaskResourceEntryByKey(taskId, key);
     if (resource != 0) {
         s32 old = data->effectHandle;
         if (old != 0) {
@@ -1800,7 +1800,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
-    found = (void *)func_00241BF0(taskId, key);
+    found = (void *)evtFindTaskResourceEntryByKey(taskId, key);
     if (found != 0) {
         obj = func_00115298(found, vecA, vecB);
         if (obj != 0) {

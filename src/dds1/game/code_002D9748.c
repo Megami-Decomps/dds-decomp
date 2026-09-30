@@ -73,7 +73,7 @@ extern f32 D_003BD35C;
 extern u8 D_003BDA10;
 extern u8 D_003BDA18;
 extern s32 D_003BD348;
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 void *sdfDevCreateBufferedRequest(s32, s32, s32);
 extern u64 func_002D2468(SdfTex *);
 extern u64 func_002D2478(SdfTex *);
@@ -93,7 +93,7 @@ extern void func_002D5938(void *);
 
 void *sdfChunkFindById(SdfChunk *chunk, s32 id);
 void *func_002CFEB8(s32 size);
-void *func_002CFF68(s32 size);
+void *sdfAllocAndClearQuadwords(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
 void func_002D9D80(SdfTextParam *param, void *resource);
@@ -574,7 +574,7 @@ SdfAsset *func_002DA730(void) {
     s32 i;
 
     D_003BD348++;
-    asset = func_002CFF68(0x48);
+    asset = sdfAllocAndClearQuadwords(0x48);
     asset->pad00[6] = 0xFF;
     for (i = 0; i != 2; i++) {
         entry = func_002CFEB8(0xA0);
@@ -658,11 +658,11 @@ void sdfAssetRelease(SdfAsset *asset) {
         return;
     }
     D_003BD348--;
-    func_002CFF98(asset->entries[0]);
-    func_002CFF98(asset->entries[1]);
-    func_002CFF98(asset->third);
-    func_002CFF98(asset->fourth);
-    func_002CFF98(asset);
+    sdfReleaseChipBlock(asset->entries[0]);
+    sdfReleaseChipBlock(asset->entries[1]);
+    sdfReleaseChipBlock(asset->third);
+    sdfReleaseChipBlock(asset->fourth);
+    sdfReleaseChipBlock(asset);
 }
 
 void sdfQueueAssetRelease(SdfAsset *asset) {

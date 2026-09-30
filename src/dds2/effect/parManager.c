@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
     u8 pad[0xC];
-    void *resource; /* 0xC released by func_001618C8 */
+    void *resource; /* 0xC released by effParReleaseNodeResource */
 } ParNode;
 
 typedef struct {
@@ -56,7 +56,7 @@ void parReleaseObject(ParObj *obj) {
         func_003297C8(child);
     }
     effDestroyResources(obj);
-    func_00328E48(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00160B98);
@@ -69,7 +69,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001616A8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001617F8);
 
-void func_001618C8(ParNode *node) {
+void effParReleaseNodeResource(ParNode *node) {
     func_003297C8(node->resource);
 }
 
@@ -88,7 +88,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161B38);
 INCLUDE_ASM(const s32, "effect/parManager", func_00161D08);
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
-u32 func_00161EE8(u32 colorA, u32 colorB) {
+u32 effParModulateColors(u32 colorA, u32 colorB) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];

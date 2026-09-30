@@ -86,14 +86,14 @@ typedef struct {
 
 extern void *dds3GetWorldObject(void);
 extern void *func_00110C18(void *object);
-extern void func_001130D0(void *object);
+extern void dds3LoadCameraVectorVU(void *object);
 extern void effObjFetchInnerFirstVec(void *object);
 extern f32 D_003AF1C0[];
 extern f32 D_003AF1D8[];
 extern void func_00336538(f32 angle);
 
 /* Target offset for a unit part; the vector is returned in vf10. */
-void func_00169CB8(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
+void effBattleMiscBuildUnitPartOffsetVU(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
     f32 length = 750.0f;
     f32 height;
     f32 out[4];
@@ -109,7 +109,7 @@ void func_00169CB8(EffBattleMiscUnit *unit, EffBattleMiscTargetParam *param) {
     if (sub == 9 || kind == 4) {
         object = func_00110C18(dds3GetWorldObject());
         dir[0] = dir[1] = dir[2] = 750.0f;
-        func_001130D0(object);
+        dds3LoadCameraVectorVU(object);
         VU0_MOVE_VF(vf11, vf10);
         effObjFetchInnerFirstVec(object);
         VU0_SUB(vf10, vf10, vf11);

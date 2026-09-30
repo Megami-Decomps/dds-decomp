@@ -6,8 +6,8 @@
    +0xDC is a float, so the two layouts are distinct node types.) */
 typedef struct {
     u8 pad[0xCC]; /* 0x0 */
-    f32 unkCC;    /* 0xCC scaled by func_0015DA80/func_0015F2B0/func_0015EBF8 */
-    f32 unkD0;    /* 0xD0 scaled by func_0015DA80/func_0015F2B0 */
+    f32 unkCC;    /* 0xCC scaled by polyScaleTransformPair/func_0015F2B0/polyScaleTransformFirstComponent */
+    f32 unkD0;    /* 0xD0 scaled by polyScaleTransformPair/func_0015F2B0 */
     u8 padD4[8];  /* 0xD4 */
     u32 unkDC;    /* 0xDC handle released by effPolyDestroyWork/func_0015B918 */
 } PolyNode;
@@ -34,7 +34,7 @@ typedef struct {
     u8 pad[0xF0]; /* 0x0 */
     u32 unkF0;    /* 0xF0 */
     u8 padF4[4];  /* 0xF4 */
-    void *unkF8;  /* 0xF8 released by func_0015E0D0 */
+    void *unkF8;  /* 0xF8 released by polyReleaseBandNodeResources */
 } PolyNodeF0;
 
 typedef struct {
@@ -89,7 +89,7 @@ typedef struct {
 void func_0015B8B8(u32 arg);
 void func_0015B918(u32 arg);
 void func_0015DAA0(void);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 void func_002D0918(void *arg);
 extern f32 func_002E78F8(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -99,19 +99,19 @@ extern void func_002DDC50(void);
 
 void effPolyDestroyWork(PolyNode *obj) {
     func_0015B8B8(obj->unkDC);
-    func_002CFF98(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DA10);
 
-void func_0015DA80(f32 scale, PolyNode *obj) {
+void polyScaleTransformPair(f32 scale, PolyNode *obj) {
     obj->unkCC = obj->unkCC * scale;
     obj->unkD0 = obj->unkD0 * scale;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DAA0);
 
-void func_0015DC48(PolyNode *obj) {
+void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     func_0015DAA0();
     func_0015B918(obj->unkDC);
 }
@@ -153,7 +153,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015DE88);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DFA8);
 
-void func_0015E0D0(PolyNodeF0 *obj) {
+void polyReleaseBandNodeResources(PolyNodeF0 *obj) {
     func_0015B8B8(obj->unkF0);
     func_002D0918(obj->unkF8);
 }
@@ -316,7 +316,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E900);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E9A0);
 
-void func_0015EBF8(f32 scale, PolyNode *obj) {
+void polyScaleTransformFirstComponent(f32 scale, PolyNode *obj) {
     obj->unkCC = obj->unkCC * scale;
 }
 

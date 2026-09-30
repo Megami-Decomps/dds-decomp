@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern u32 func_00151FC8(u32);
+extern u32 effGetResourceFirstWord(u32);
 
 /* Work area shared by both blur-filter variants in this TU. */
 typedef struct {
@@ -64,7 +64,7 @@ void effBlurSetHandle(EffBlurWork *work, u32 setting) {
 
 /* Acquire the first variant's source handle from the effect manager. */
 void effBlurAcquireHandle(EffBlurWork *work) {
-    work->setting = func_00151FC8(2);
+    work->setting = effGetResourceFirstWord(2);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186E60);
@@ -92,7 +92,7 @@ void effBlurSetSecondSetting(EffBlurWork *work, u32 setting) {
 }
 
 void effBlurAcquireSecondHandle(EffBlurWork *work) {
-    work->setting = func_00151FC8(2);
+    work->setting = effGetResourceFirstWord(2);
 }
 
 void effBlurSecondUpdateSlotRect(EffBlurWork2 *work, EffBlurSlot2 *slot) {

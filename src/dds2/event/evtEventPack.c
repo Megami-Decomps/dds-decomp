@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00101958(void);
+extern s32 kwlnTaskGetUserValue(void);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D230);
 
@@ -12,8 +12,8 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_0025D4D0);
 void evtFreeEventPackState(void) {
     s32 state;
 
-    state = func_00101958();
-    func_00328E48(state);
+    state = kwlnTaskGetUserValue();
+    sdfReleaseChipBlock(state);
 }
 
 void func_0025D4D0(void);
@@ -53,7 +53,7 @@ extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void func_002C7D00(s32);
 extern void func_003298C0(s32);
 extern void func_003297C8(s32);
-extern void func_00328E48(s32);
+extern void sdfReleaseChipBlock(s32);
 
 /* Keep this task resource layout identical to DDS1's EvtPackResources. */
 typedef struct EvtPackResources {
@@ -73,7 +73,7 @@ typedef struct EvtPackResources {
 
 /* Release the event task's owned handles, then free its state. */
 void evtReleaseEventPackResources(void) {
-    s32 state = func_00101958();
+    s32 state = kwlnTaskGetUserValue();
     EvtPackResources *resources = (EvtPackResources *)state;
 
     fileWaitIdle();
@@ -107,7 +107,7 @@ void evtReleaseEventPackResources(void) {
             func_003297C8(resources->sceneAllocation2);
         }
     }
-    func_00328E48(state);
+    sdfReleaseChipBlock(state);
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377D8);

@@ -4,7 +4,7 @@ extern u32 D_00435E80;
 
 extern s32 D_00435DD0;
 
-extern s64 func_0011D588(void);
+extern s64 scrGetWorkTaskHandle(void);
 extern void func_00118AB0();
 extern char D_00435DB0[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
@@ -81,7 +81,7 @@ extern SdfUnitMode *D_00435E1C;
 extern SdfChannelState *D_00435E20;
 extern u32 func_001190B0(s32 channel, s32 arg1, SdfPackedValue *item);
 
-extern void func_0011D590(void);
+extern void scrDestroyWorkTask(void);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
 
@@ -200,7 +200,7 @@ s32 sdfBumpTickCounters(void) {
 
 void func_00117A10(void) {
     scrClearProcessGlobals();
-    func_0023A028();
+    mdlResetViewerFlagsAndSolarOverlay();
     ((SdfRuntime *)D_00435DD0)->updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
@@ -230,13 +230,13 @@ void sdfFirePendingCallback(void) {
     if (D_00435E80 == 0) {
         return;
     }
-    func_0011D590();
+    scrDestroyWorkTask();
 }
 
 u8 func_001186C8(s64 expected) {
     s64 current;
 
-    current = func_0011D588();
+    current = scrGetWorkTaskHandle();
     return current == expected;
 }
 

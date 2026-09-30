@@ -47,7 +47,7 @@ void effBattleSetInputValue(BattleEffect *effect, s32 value) {
     }
 }
 
-u32 func_001687D0(BattleEffect *effect) {
+u32 effBattleGetInputValue(BattleEffect *effect) {
     return effect->inputValue;
 }
 
@@ -62,7 +62,7 @@ void effBattleUpdateSelectedValue(BattleEffect *effect, u32 value) {
     effect->selectedValue = value;
 }
 
-u32 func_00168808(BattleEffect *effect) {
+u32 effBattleGetSelectedValue(BattleEffect *effect) {
     return effect->selectedValue;
 }
 

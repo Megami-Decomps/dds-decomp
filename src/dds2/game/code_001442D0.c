@@ -1,12 +1,7 @@
 #include "common.h"
-
 #include "pcp_vu0.h"
-
 #include "fpu.h"
 
-extern s32 fldGetSceneStatusCode(void);
-extern void func_001442A0(s32);
-extern void func_00144270(s32);
 extern f32 fldAngleDifference(f32, f32);
 
 /* Field work area (D_00389770) fields reached through a pointer. */
@@ -47,31 +42,51 @@ typedef struct FldSlot0C {
 } FldSlot0C; /* 0xC bytes */
 
 extern s32 D_003A5470[];
+
 extern FldSlot0C D_0044F818[];
-extern void func_00123038(s32, s32, s32, s32);
-extern void func_00112230(void *, s32);
 
 extern s32 D_004362D4;
+
 extern u32 D_004362D8;
+
 extern s32 D_004362E0;
+
 extern s32 D_004362E4;
+
 extern s32 D_004362EC;
+
 extern s32 D_004362F0;
+
 extern s32 D_004362F8;
+
 extern s32 D_004362FC;
+
 extern s32 D_00436304;
+
 extern s32 D_00436308;
+
 extern s32 D_00436310;
+
 extern s32 D_00436314;
+
 extern s32 D_00436318;
+
 extern s32 D_0043631C;
+
 extern s32 D_00436338;
+
 extern s32 D_0043633C;
+
 extern s32 D_00438EDC;
+
 extern s32 D_00438EE0;
+
 extern s32 D_00438EE4;
+
 extern s32 D_00438EE8;
+
 extern s32 D_00438EEC;
+
 extern s32 D_00438EF0;
 
 /* DDS2 saves store the area flag table earlier than the DDS1 save layout. */
@@ -81,8 +96,6 @@ typedef struct FldAreaFlagsView {
 } FldAreaFlagsView;
 
 extern s32 D_004363C4;
-
-extern u32 D_00435F0C;
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 
@@ -168,7 +181,7 @@ extern u32 D_0043623C;
 
 extern u32 D_00436200;
 
-extern void *func_00101958();
+extern void *kwlnTaskGetUserValue();
 
 extern u32 D_00436210;
 
@@ -187,27 +200,18 @@ extern u32 D_00436364;
 extern u32 D_00436354;
 
 extern u32 D_0043635C;
+
 extern s32 D_00436350;
+
 extern s32 D_00436358;
+
 extern s32 D_00436360;
+
 extern void func_003297C8(s32);
+
 extern void func_0014E6A8();
 
 extern s32 D_0043637C;
-
-extern s32 fldFindRoomByTask(u32);
-
-extern s32 func_00120858(void);
-
-extern void func_0010D818(s32 value);
-
-extern s32 func_00140780(s32 value);
-
-extern s32 func_0013FA98(s32 param0, s32 param1);
-
-extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
-
-extern void func_00140238(void);
 
 extern void fldStopCurrentBgm(void);
 
@@ -227,41 +231,15 @@ extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern s32 fldGetTaskRecordValue(u32 key);
-
-extern void func_00140A58(void *entry);
-
-/* Work object queried by func_0014F408; +0xE4 holds the key for func_0013BEE8. */
-typedef struct {
-    u8 unk00[0xE4]; /* 0x00 */
-    u32 key;        /* 0xE4 */
-} EffCmdWork;
-
-typedef struct FldSceneParamRow {
-    s32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s32 unk8;
-    s32 unkC;
-} FldSceneParamRow; /* 0x10 bytes */
-
-extern FldSceneParamRow D_003A8EB0[];
-
 extern void func_0014BF98(s32 handle);
-
-extern s32 func_0023CC00(s32 param);
-
-extern char *scrReadStringParameter(s32 idx);
 
 extern s32 fldFindEffectByName(char *str);
 
 extern s32 func_0014E620(void);
 
-extern s32 sdfSoundIsCommandBusy(void);
-
 extern void *func_00328D68(s32 size);
 
-extern void func_00101950(s32 arg0, void *arg1);
+extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
 extern s32 fldFieldTaskUpdate(void);
 
@@ -334,37 +312,15 @@ extern s32 D_00389884[];
 
 extern u8 D_003A9EB0[];
 
-extern void func_0026C538(void *arg0);
+extern void evtCreateMessageWindowIfMissing(void *arg0);
 
 extern void dspStartEntry(s32 arg0);
 
-extern void func_00126000(void);
+extern void fldResetPlayerSceneObjectState(void);
 
 extern void *D_00451B94[];
 
-extern s32 D_003897C0[];
-
-extern u64 dds3GetWorldSecondaryObject(void);
-
-extern u32 *func_001111A8(u64 world, const char *name);
-
 extern void func_0035B6E0(const char *fmt, ...);
-
-extern s32 D_003897C8[];
-
-extern s32 D_00389988[];
-
-extern s32 func_0010D8C8(void);
-
-extern s32 fldGetActorStat0(s32);
-
-extern s32 func_001421C0(s32);
-
-extern s32 fldGetActorMotionEntry(s32);
-
-extern s32 fldGetRowValue(s32);
-
-extern u32 func_00140750(void);
 
 extern void func_00125F58(void);
 
@@ -376,30 +332,9 @@ extern s32 D_0043633C;
 
 extern s32 D_00451B9C[];
 
-extern s32 D_00389784[];
-
-extern s32 func_00123238(s32, s32, s32, s32);
-
-extern s32 func_00123338(s32, s32, s32, s32);
-
 extern void fldClearFloorFlag(s32, s32, s32);
 
 extern void fldSetFloorFlag(s32, s32, s32);
-
-/* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 scrReadIntParameter(s32);
-
-extern s32 D_0038984C[];
-
-extern s32 fldIsSceneStateEight(void);
-
-extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
-
-extern s32 effMiscRandMod(s32, s32);
-
-extern s32 evtGetMirroredSolarPhase(void);
-
-extern s32 D_003AA720[];
 
 extern void sdfWaitSlotReady(void);
 
@@ -419,14 +354,6 @@ extern FieldResourceSlot D_0044FFB0[];
 extern void fldCacheMapLabelLengths(s32);
 
 extern void func_00145698(void);
-
-extern char D_004363E8[];
-
-extern s32 func_0035D600(char *, const char *);
-
-extern void fldSetFadeTarget(s32, s32, s32);
-
-extern void fldSetSwayMode(s32);
 
 extern s32 D_00399FF0[];
 
@@ -534,6 +461,7 @@ typedef struct FieldPair48 {
     s16 objectSlot;
     s16 unk2E;
 } FieldPair48; /* 0x30 bytes */
+
 extern FieldPair48 D_00450F90[];
 
 extern u32 effMiscRand();
@@ -566,33 +494,7 @@ extern s32 D_00451B90[];
 
 extern s32 dds3GetWorldObject(void);
 
-extern void *func_00110C70(u64, s32, s32);
-
-extern s32 func_00125F38(void);
-
-extern s32 func_00110BE0(s32, s32);
-
-extern void func_00113110(s32, f32 *, f32 *);
-
-extern void fldUpdateCameraProjectionEndpoints(void);
-
-extern f32 D_0038BAD0[];
-
-extern f32 D_0038BAE0[];
-
-extern s32 D_004360B4;
-
-extern s32 D_004360B8;
-
-extern void func_00123138(s32, s32, s32, s32);
-
 extern int strcmp(const char *, const char *);
-
-extern char D_004363F0[]; /* "BARIA" */
-
-extern char *D_004361D8;
-
-extern void func_001235E8(s32, s32, s32, s32);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -614,8 +516,6 @@ extern void sdfDrawNodeBuildMatrix();
 extern void sdfModelUpdateCurrentFrameTransforms();
 
 extern void func_003320E8();
-
-extern s32 func_0013F790(s32 index);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
@@ -659,15 +559,15 @@ void *fldFieldTaskCreate(s32 task) {
     work[1] = 0;
     work[2] = 0;
     work[3] = 0;
-    func_00101950(task, work);
+    kwlnTaskSetUserValue(task, work);
     return fldFieldTaskUpdate;
 }
 
 void fldFieldTaskDestroy(void) {
     u64 work;
 
-    work = func_00101958();
-    func_00328E48(work);
+    work = kwlnTaskGetUserValue();
+    sdfReleaseChipBlock(work);
     D_00436200 = 0;
 }
 
@@ -732,9 +632,13 @@ void fldPlayPendingSounds(void) {
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001447A0);
 
 extern s32 D_0039A0BC[];
+
 extern s32 D_0039A0C0[];
+
 extern s32 D_0039A0C4[];
+
 extern s32 D_0039A0C8[];
+
 extern s32 D_0039A0D0[];
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_004136C0);
@@ -1075,21 +979,35 @@ u32 fldGetCurrentBgmHandle(void) {
 }
 
 typedef struct FldName30 { char s[0x1E]; } FldName30;
+
 typedef struct FldName34 { char s[0x22]; } FldName34;
+
 typedef struct FldName28 { char s[0x1C]; } FldName28;
+
 typedef struct FldName24 { char s[0x18]; } FldName24;
 
 extern s16 D_0044FC98[];
+
 extern s16 D_0044FD48[];
+
 extern s16 D_0044FCF0[];
+
 extern s16 D_00438ED8;
+
 extern FldName30 D_0039A5AC[];
+
 extern FldName34 D_0039E1AC[];
+
 extern FldName28 D_003A25AC[];
+
 extern FldName24 D_0039A1D0[];
+
 extern s32 strlen(const char *);
+
 extern s32 func_001237B0(s32, s32);
+
 extern s32 func_00123808(s32, s32);
+
 extern s32 fldFindMapCoordinateIndex(s32, s32);
 
 void fldCacheMapLabelLengths(s32 world) {
@@ -1249,11 +1167,10 @@ void fldReleaseResourceSlots(void) {
         sdfWaitSlotReady();
     }
     D_0043626C = 0;
-    func_0019D1F8(0x54);
+    frFontSetSharedRenderFlags(0x54);
 }
 
 extern void sdfReleaseDevSlot(s32, s32, s32);
-
 
 void func_00149CE0(void) {
     s32 i;
@@ -1300,22 +1217,39 @@ typedef struct FldFogParams {
     f32 unkC;
     s32 unk10;
 } FldFogParams;
+
 extern FldFogParams D_0037FB30;
+
 extern u128 D_0037FA20;
+
 extern u128 D_0037FA30;
+
 extern u128 D_0037FA40;
+
 extern s32 D_0043624C;
+
 extern s32 D_00436250;
+
 extern s32 D_00436254;
+
 extern s32 D_00436258;
+
 extern s32 D_0043625C;
+
 extern s32 D_00436264;
-extern void func_00128358(s32);
+
+extern void fldClearSceneLifecycleFlags(s32);
+
 extern f32 D_0037F980[];
+
 extern FldVec4 D_00413788[]; /* default camera up vectors (3 copies), the first still read by asm func_00149A00 */
+
 extern void func_001363D8(void);
+
 extern void func_00110A88(s32, s32);
+
 extern s32 D_00436260;
+
 extern s32 D_00436268;
 
 /* Enters the field camera state for a fresh scene: releases the resource slots and
@@ -1333,12 +1267,12 @@ void fldEnterSceneCamera(void) {
     sdfWaitSlotReady();
     fldReleaseResourceSlots();
     D_0043626C = 0;
-    func_00128358(1);
+    fldClearSceneLifecycleFlags(1);
     func_00125F58();
     evtSetSolarOverlayFullyVisible();
     func_001363D8();
     cam->unk70 = 4;
-    func_0019D1F8(0x54);
+    frFontSetSharedRenderFlags(0x54);
     func_00110A88(dds3GetWorldObject(), 1);
     D_00436268 = 0;
     D_00436248 = cam->stage;
@@ -1372,6 +1306,7 @@ void fldEnterSceneCamera(void) {
 }
 
 extern s32 sdfModelCreateWithAlternateItems(s32, s32);
+
 extern s32 func_0032C138();
 
 /* Loads the scene's models into the resource slots, then centers the camera on the
@@ -1441,7 +1376,6 @@ u32 fldGetSceneReadyFlag(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014A258);
-
 
 /* Re-centers the scene camera on the current scene's entry point. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
@@ -1738,8 +1672,11 @@ void fldClearAllAreaFloorFlags(void) {
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
 
 extern s32 D_003A8E60[];
+
 extern s32 func_001579C8();
+
 extern char *D_00413860[4];
+
 void fldLoadFieldEffectTextureSlots(void) {
     char *names[4];
     s32 i;
@@ -1778,7 +1715,7 @@ void fldLoadResourceByIndex(s32 index) {
     D_0043632C = func_001578C0(D_00436328);
 }
 
-void func_0014B748(void) {
+void fldReleaseIndexedResourceEffect(void) {
     if (D_0043632C != 0) {
         effDestroyNode(D_0043632C);
         D_0043632C = 0;
@@ -1793,7 +1730,7 @@ typedef struct {
     f32 position[3];
 } FieldPlacementState;
 
-void func_0014B788(void) {
+void fldUpdateIndexedResourceEffectPosition(void) {
     f32 position[4];
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
@@ -1859,7 +1796,7 @@ void mnuReleaseResourceEntries(void) {
     }
 }
 
-void func_0014B9E0(void) {
+void fldUpdateMenuResourceEffects(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         if (D_003A8E70[i] != 0 && D_003A8E80[i] != 0) {
@@ -1869,8 +1806,11 @@ void func_0014B9E0(void) {
 }
 
 extern void *func_002C7FF0(const char *);
+
 extern void func_002C81D0(void *);
+
 extern void func_002C7CE8(void *);
+
 extern s32 sdfMemoryGetBlockAddress(s32);
 
 typedef struct FldLbNode {
@@ -1894,7 +1834,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413848);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413860);
 
-void func_0014BA60(void) {
+void fldParseMixLb(void) {
     FldLbFile *lb;
     FldLbNode *node;
     u32 index;
@@ -1952,14 +1892,20 @@ void func_0014BA60(void) {
 }
 
 extern s32 D_00438EE0;
+
 extern s32 D_00438EE8;
+
 extern s32 D_00438EF0;
+
 extern u32 D_004362D8;
+
 extern u32 D_004362DC;
+
 extern u32 D_004362CC;
+
 extern s32 D_004362D0;
 
-void func_0014BD20(void) {
+void fldInitializeMenuResources(void) {
     if (D_00389770[4] < 200) {
         D_004362DC = func_001578C0(D_004362D8);
         if (D_00389770[4] == 26) {
@@ -2110,9 +2056,10 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413B78);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D380);
 
 extern void *memset(void *, s32, u32);
+
 extern s32 D_004362D0;
 
-s32 func_0014D7B8(f32 x, f32 y, f32 z) {
+s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     f32 pos[4];
 
     memset(pos, 0, sizeof(pos));
@@ -2130,11 +2077,11 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D838);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
 
-extern s32 func_00128370(u32);
+extern s32 fldTestSceneLifecycleFlags(u32);
 
 void fldFlushQueuedEffectPositions(void) {
     if (D_00389770[4] < 0xC8) {
-        if (func_00128370(1) != 0) {
+        if (fldTestSceneLifecycleFlags(1) != 0) {
             return;
         }
         if (func_00127398() != 0) {
@@ -2174,8 +2121,11 @@ void fldFireRoomEffects(void) {
 }
 
 extern u32 sdfDevCreateCommandState(const char *);
+
 extern u32 func_0033EB10(u32, void *, u32);
+
 extern void func_0033EAE0(u32);
+
 typedef struct FldNpcPalette {
     u32 word[0x80];
 } FldNpcPalette; /* 0x200 bytes */
@@ -2309,9 +2259,13 @@ void fldReleaseTitleMiniTexture(void) {
 }
 
 extern s32 D_003898B4[];
+
 extern s32 D_00436378;
+
 extern void func_0014EDB8(void);
+
 extern void fldReleaseTitleMiniTexture(void);
+
 extern void func_003297C8(s32);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
@@ -2449,7 +2403,7 @@ void fldRequestMiniTitleDismiss(void) {
     }
 }
 
-void func_0014F318(void) {
+void fldLoadWeatherEffects(void) {
     s32 data;
     s32 handle;
 
@@ -2470,7 +2424,7 @@ void func_0014F318(void) {
     D_0043639C = 0;
 }
 
-void func_0014F408(void) {
+void fldReleaseWeatherEffects(void) {
     if (D_004363AC != 0) {
         sdfTexReleaseReferenceViaHandler(D_004363AC);
         D_004363AC = 0;
@@ -2668,6 +2622,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00150138);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
 
 extern s32 D_003899E0[];
+
 extern void func_00125B10(void);
 
 void fldFinishEventFieldState(void) {
@@ -2677,7 +2632,7 @@ void fldFinishEventFieldState(void) {
         D_003899E0[0] = 0;
         func_00125B10();
         fldClearObjectEntryHandles();
-        func_0014F408();
+        fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
         func_00125F58();
         work->eventActive = 0;
@@ -2720,7 +2675,7 @@ void fldResetEventSceneState(void) {
     D_003899E0[0] = 0;
     D_00389770[0x118 / 4] = 0;
     fldClearObjectEntryHandles();
-    func_0014F408();
+    fldReleaseWeatherEffects();
     func_00125F58();
     D_00389770[0x114 / 4] = 1;
     ((FldWorkView *)D_00389770)->eventActive = 0;
@@ -2734,7 +2689,7 @@ void fldResetAfterEvent(void) {
     D_003899E0[0] = 0;
     D_00389770[0x118 / 4] = 0;
     fldClearObjectEntryHandles();
-    func_0014F408();
+    fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();
     D_00389770[0x114 / 4] = 0;
     ((FldWorkView *)D_00389770)->eventActive = 0;
@@ -2744,16 +2699,16 @@ void fldResetAfterEvent(void) {
 }
 
 void fldStartDeferredFieldExit(void) {
-    func_0026C538(D_003A9EB0);
+    evtCreateMessageWindowIfMissing(D_003A9EB0);
     dspStartEntry(4);
-    func_00126000();
+    fldResetPlayerSceneObjectState();
     D_00389884[0] = 2;
 }
 
 void fldFinishDeferredExit(void) {
     if (D_00389770[0x45] == 2) {
         func_0026C900();
-        if (!func_0026C768()) {
+        if (!evtGetMessageWindowControlState()) {
             func_0026C710();
             dspCloseChannel();
             func_00125F58();
@@ -3020,7 +2975,7 @@ s32 func_001533D0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153410);
 
-s32 func_00153520(void) {
+s32 fldIsTargetWithinInteractionRange(void) {
     f32 distance;
     f32 angle;
     s32 inRange = 1;
@@ -3062,6 +3017,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001540E8);
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001542D8);
 
 extern s32 D_003898AC[];
+
 extern s32 D_004363DC;
 
 s32 func_00154528(void) {
@@ -3079,1333 +3035,6 @@ void fldGetFieldFloatPair(f32 *x, f32 *y) {
     *x = D_004363E0;
     *y = D_004363E4;
 }
-
-extern s32 func_0013D308(s32, void *);
-extern s32 func_0013D598(s32, void *);
-
-s32 func_00154558(void) {
-    s32 world = dds3GetWorldObject();
-    s32 unit = D_00435F0C;
-    void *entry;
-    s32 result;
-
-    if (unit == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
-    if (entry == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    if (func_0013D308(unit, entry) == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
-    result = func_001442D0();
-    switch (result) {
-    case 1:
-        func_0010D818(1);
-        return 1;
-    case -1:
-        func_0010D818(-1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-s32 func_00154628(void) {
-    s32 world = dds3GetWorldObject();
-    s32 unit = D_00435F0C;
-    void *entry;
-    s32 result;
-
-    if (unit == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
-    if (entry == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    if (func_0013D598(unit, entry) == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
-    result = func_001442D0();
-    switch (result) {
-    case 1:
-        func_0010D818(1);
-        return 1;
-    case -1:
-        func_0010D818(-1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-extern void func_001442A0(s32);
-extern void func_00144270(s32);
-
-s32 fldCmdReadSceneStatus(void) {
-    s32 result;
-
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
-    result = func_001442D0();
-    if (result == -1) {
-        func_0010D818(-1);
-        return 1;
-    }
-    if (result == 1) {
-        func_0010D818(1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-s32 func_00154758(void) {
-    s32 world = dds3GetWorldObject();
-    s32 unit = D_00435F0C;
-    void *entry;
-
-    if (unit == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    entry = func_00110C70(world, fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key), 0x11);
-    if (entry == 0) {
-        func_0010D818(0);
-        return 1;
-    }
-    if (func_0013D308(unit, entry) == 0) {
-        func_0010D818(0);
-    } else {
-        func_0010D818(1);
-    }
-    return 1;
-}
-
-extern void fldSetCameraNodeModeWithTen(void);
-
-s32 func_001547F0(void) {
-    func_00126000();
-    if (D_00435F0C == 0) {
-        return 1;
-    }
-    fldSetCameraNodeModeWithTen();
-    return 1;
-}
-
-extern s32 D_003898B0[];
-
-extern void dds3InvokeSlot1Handler(s32, s32);
-
-s32 fldCmdReleaseCurrentObject(void) {
-    if (D_00435F0C == 0) {
-        return 1;
-    }
-    dds3InvokeSlot1Handler(D_00435F0C, 0);
-    fldSetCameraNodeModeWithTen();
-    func_00125F58();
-    D_003898B0[0] = 0;
-    return 1;
-}
-
-s32 func_00154870(void) {
-    D_003898B0[0] = 1;
-    return 1;
-}
-
-u32 func_00154880(void) {
-    func_00128380(0x10);
-    return 1;
-}
-
-u32 func_001548A0(void) {
-    func_00128390(0x10);
-    return 1;
-}
-
-typedef struct FldObjModel {
-    u8 unk00[0x40];
-    f32 pos[3]; /* 0x40 */
-} FldObjModel;
-
-typedef struct FldObj {
-    u8 unk00[0x1C];
-    FldObjModel *model; /* 0x1C */
-} FldObj;
-
-extern void func_001300A0(void);
-
-s32 fldCmdFocusCameraOnObject(void) {
-    FldWorkView *work;
-    FldObj *obj;
-    u64 world = dds3GetWorldSecondaryObject();
-
-    obj = func_00110C70(world, scrReadIntParameter(0), 4);
-    if (obj == NULL) {
-        return 1;
-    }
-    work = (FldWorkView *)D_00389770;
-    work->focusActive = 1;
-    work->focusPos[0] = obj->model->pos[0];
-    work->focusPos[1] = obj->model->pos[1];
-    work->focusPos[2] = obj->model->pos[2];
-    func_001300A0();
-    return 1;
-}
-
-typedef struct FldVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-} FldVec3;
-extern f32 D_0038BAB0[];
-extern f32 sdfSinPoly(f32);
-extern f32 func_003407A0(f32);
-extern s32 func_00133B10();
-extern void func_00133A00();
-extern void func_0012F078();
-s32 fldUpdateLookAtSegment(void) {
-    FldWorkView *cam = (FldWorkView *)D_00389770;
-    FldVec3 near;
-    FldVec3 far;
-
-    cam->focusActive = 0;
-    cam->negatedAngle = -cam->angle;
-    near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
-    near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + func_003407A0((cam->angle + 180.0f) * 3.14f / 180.0f);
-    far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
-    far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + func_003407A0(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
-    D_0038BAB0[0] = near.x;
-    D_0038BAB0[1] = near.y;
-    D_0038BAB0[2] = near.z;
-    D_0038BAC0[0] = far.x;
-    D_0038BAC0[1] = far.y;
-    D_0038BAC0[2] = far.z;
-    func_00133B10();
-    func_00133A00();
-    func_0012F078();
-    return 1;
-}
-
-s32 fldCmdSetScenePhaseThree(void) {
-    D_003897C0[0] = 3;
-    return 1;
-}
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00154B00);
-
-s32 fldCmdCaptureObjectPose(void) {
-    f32 pos[4];
-    f32 rot[4];
-    s32 handle;
-    s32 object;
-    s32 world;
-
-    if (scrReadIntParameter(0) == -1) {
-        handle = func_00125F38();
-        if (handle == 0) {
-            return 1;
-        }
-        object = func_00110BE0(dds3GetWorldObject(), handle);
-        if (object == 0) {
-            return 1;
-        }
-        func_00113110(object, pos, rot);
-        fldUpdateCameraProjectionEndpoints();
-        D_0038BAD0[0] = pos[0];
-        D_0038BAD0[1] = pos[1];
-        D_0038BAD0[2] = pos[2];
-        D_0038BAE0[0] = rot[0];
-        D_0038BAE0[1] = rot[1];
-        D_0038BAE0[2] = rot[2];
-        D_004360B4 = 0;
-        D_004360B8 = scrReadIntParameter(1);
-        D_003897C0[0] = 4;
-    } else {
-        world = dds3GetWorldObject();
-        handle = (s32)func_00110C70(world, scrReadIntParameter(0), 4);
-        if (handle == 0) {
-            return 1;
-        }
-        func_00110BE0(dds3GetWorldObject(), handle);
-    }
-    return 1;
-}
-
-s32 fldCmdSetRequestedSceneName(void) {
-    char *name;
-
-    name = scrReadStringParameter(0);
-    D_00389770[0x14] = 5;
-    strcpy((char *)D_00389770 + 0x40, name);
-    return 1;
-}
-
-extern void evtSetSolarOverlayFullyTransparent(void);
-extern void evtDisableSolarOverlayAlpha(void);
-extern void evtEnableSolarOverlayAlpha(void);
-
-s32 fldCmdSetSolarOverlayMode(void) {
-    s32 mode = scrReadIntParameter(0);
-
-    D_00389770[0xCC / 4] = mode;
-    D_00389770[0xD0 / 4] = 0;
-    if (mode < 4) {
-        D_00389770[0xD4 / 4] = mode;
-    }
-    switch (D_00389770[0xCC / 4]) {
-    case 0:
-        evtSetSolarOverlayFullyTransparent();
-        break;
-    case 1:
-        evtSetSolarOverlayFullyVisible();
-        D_00389770[0x138 / 4] = 1;
-        break;
-    case 2:
-        evtDisableSolarOverlayAlpha();
-        D_00389770[0xD0 / 4] = 15;
-        break;
-    case 3:
-        evtEnableSolarOverlayAlpha();
-        D_00389770[0xD0 / 4] = 0;
-        D_00389770[0x138 / 4] = 1;
-        break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        break;
-    }
-    return 1;
-}
-
-void func_00154F18(void) {
-}
-
-u32 func_00154F20(void) {
-    return 1;
-}
-
-u32 fldCmdFreeDisplayObjects(void) {
-    fldFreeDisplayObjects();
-    return 1;
-}
-
-s32 fldFindSearchId(const char *name) {
-    u32 *entry = func_001111A8(dds3GetWorldSecondaryObject(), name);
-    if (entry != 0) {
-        return entry[1];
-    }
-    func_0035B6E0("field SEARCH_ID NotFound:[%s]\n", name);
-    return -1;
-}
-
-s32 fldParseRoomNumberFromName(char *name) {
-    s32 index;
-    if (func_0035D600(name, D_004363E8) == 0) return 0;
-    for (index = 0; index < 32; index++) {
-        if (name[index] == '\0') {
-            if (index < 4) return 0;
-            return (name[index - 2] - '0') * 10 + (name[index - 1] - '0');
-        }
-    }
-    return 0;
-}
-
-s32 fldCmdSetSceneControlValue(void) {
-    s32 value;
-
-    value = scrReadIntParameter(0);
-    D_003897C8[0] = value;
-    return 1;
-}
-
-s32 fldCmdSetFieldParameterPair(void) {
-    s32 value;
-
-    D_00389988[11] = scrReadIntParameter(0);
-    value = scrReadIntParameter(1);
-    func_00135A68(D_00389988[11], value);
-    return 1;
-}
-
-s32 fldCmdSetFadeAndSway(void) {
-    s32 second;
-    s32 third;
-    D_00389988[13] = scrReadIntParameter(0) & 0xFF;
-    second = scrReadIntParameter(1);
-    third = scrReadIntParameter(2);
-    fldSetFadeTarget(D_00389988[13], second, third);
-    fldSetSwayMode(scrReadIntParameter(3));
-    return 1;
-}
-
-extern void func_00122F38(s32, s32, s32, s32);
-extern s64 func_00110628(u64);
-extern s64 func_001106D8(u64);
-extern u64 func_00110CD8(u64, u64);
-extern void dds3DestroyWorldIndexNode(u64);
-extern s32 func_001106B8(u64);
-typedef struct FldWorldItem {
-    u8 pad0[0x18];
-    s32 *data;
-} FldWorldItem;
-extern FldWorldItem *func_00110680(u64);
-extern void func_00114048(FldWorldItem *, s32);
-
-s32 fldCmdApplyRoomModeGroupZero(void) {
-    s32 world;
-    s32 stage;
-    s32 mode;
-    char *name;
-    s32 room;
-    u64 list;
-    FldWorldItem *item;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    mode = scrReadIntParameter(3);
-    name = scrReadStringParameter(2);
-    if (name == NULL) {
-        for (room = 0; room < 16; room++) {
-            func_00122F38(world, stage, room, 0);
-        }
-    } else {
-        room = fldParseRoomNumberFromName(name);
-        func_00122F38(world, stage, room, 0);
-    }
-    if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
-        list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
-        if (func_00110628(list) != 0) {
-            func_001106B8(list);
-            do {
-                item = func_00110680(list);
-                if (item->data[1] == room) {
-                    switch (mode) {
-                    case 0:
-                        func_00114048(item, 1);
-                        break;
-                    case 1:
-                        func_00114048(item, 5);
-                        break;
-                    case 2:
-                        func_00114048(item, 7);
-                        break;
-                    }
-                }
-            } while (func_001106D8(list) != 0);
-            dds3DestroyWorldIndexNode(list);
-        }
-    }
-    return 1;
-}
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001552E0);
-
-extern char *D_004361D4;
-
-s32 fldCmdApplyRoomModeGroupOne(void) {
-    s32 world;
-    s32 stage;
-    s32 mode;
-    char *name;
-    s32 room;
-    u64 list;
-    FldWorldItem *item;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    mode = scrReadIntParameter(3);
-    name = scrReadStringParameter(2);
-    if (strcmp(name, D_004363F0) == 0) {
-        name = D_004361D4;
-    }
-    if (name == NULL) {
-        for (room = 0; room < 16; room++) {
-            func_00122F38(world, stage, room, 1);
-        }
-    } else {
-        room = fldParseRoomNumberFromName(name);
-        func_00122F38(world, stage, room, 1);
-    }
-    if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
-        list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
-        if (func_00110628(list) != 0) {
-            func_001106B8(list);
-            do {
-                item = func_00110680(list);
-                if (item->data[1] == room) {
-                    switch (mode) {
-                    case 0:
-                        func_00114048(item, 2);
-                        break;
-                    case 1:
-                        func_00114048(item, 6);
-                        break;
-                    case 2:
-                        func_00114048(item, 8);
-                        break;
-                    }
-                }
-            } while (func_001106D8(list) != 0);
-            dds3DestroyWorldIndexNode(list);
-        }
-    }
-    return 1;
-}
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00155690);
-
-s32 fldCmdApplyRoomObjectModeZero(void) {
-    s32 world;
-    s32 stage;
-    char *name;
-    s32 i;
-    s32 searchId;
-    void *obj;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    name = scrReadStringParameter(2);
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123038(world, stage, i, 0);
-        }
-    } else {
-        func_00123038(world, stage, fldParseRoomNumberFromName(name), 0);
-    }
-    if (world == D_00389770[4]) {
-        if (stage == D_00389770[5] + 1) {
-            searchId = fldFindSearchId(name);
-            if (searchId != -1) {
-                obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (scrReadIntParameter(3)) {
-                case 0:
-                    func_00112230(obj, 0);
-                    break;
-                case 1:
-                    func_00112230(obj, 1);
-                    break;
-                case 2:
-                    func_00112230(obj, 2);
-                    break;
-                case 3:
-                    func_00112230(obj, 6);
-                    break;
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
-    s32 i;
-    s32 searchId;
-    void *obj;
-
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123038(world, stage, i, 0);
-        }
-    } else {
-        func_00123038(world, stage, fldParseRoomNumberFromName(name), 0);
-    }
-    if (world == D_00389770[4]) {
-        if (stage == D_00389770[5] + 1) {
-            searchId = fldFindSearchId(name);
-            if (searchId != -1) {
-                obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (mode) {
-                case 0:
-                    func_00112230(obj, 0);
-                    break;
-                case 1:
-                    func_00112230(obj, 1);
-                    break;
-                case 2:
-                    func_00112230(obj, 2);
-                    break;
-                case 3:
-                    func_00112230(obj, 6);
-                    break;
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-s32 fldCmdApplyRoomObjectModeOne(void) {
-    s32 world;
-    s32 stage;
-    char *name;
-    s32 i;
-    s32 searchId;
-    void *obj;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    name = scrReadStringParameter(2);
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123038(world, stage, i, 1);
-        }
-    } else {
-        func_00123038(world, stage, fldParseRoomNumberFromName(name), 1);
-    }
-    if (world == D_00389770[4]) {
-        if (stage == D_00389770[5] + 1) {
-            searchId = fldFindSearchId(name);
-            if (searchId != -1) {
-                obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (scrReadIntParameter(3)) {
-                case 0:
-                    func_00112230(obj, 3);
-                    break;
-                case 1:
-                    func_00112230(obj, 4);
-                    break;
-                case 2:
-                    func_00112230(obj, 5);
-                    break;
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-
-s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
-    s32 i;
-    s32 searchId;
-    void *obj;
-
-    if (world == 0) {
-        world = D_00389770[4];
-    }
-    if (stage == 0) {
-        stage = D_00389770[5] + 1;
-    }
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123038(world, stage, i, 1);
-        }
-    } else {
-        func_00123038(world, stage, fldParseRoomNumberFromName(name), 1);
-    }
-    if (world == D_00389770[4]) {
-        if (stage == D_00389770[5] + 1) {
-            searchId = fldFindSearchId(name);
-            if (searchId != -1) {
-                obj = func_00110C70(dds3GetWorldSecondaryObject(), searchId, 6);
-                switch (mode) {
-                case 0:
-                    func_00112230(obj, 3);
-                    break;
-                case 1:
-                    func_00112230(obj, 4);
-                    break;
-                case 2:
-                    func_00112230(obj, 5);
-                    break;
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-s32 fldCmdSetSceneBits(void) {
-    s32 world;
-    s32 stage;
-    char *name;
-    s32 i;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389780[0];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389784[0] + 1;
-    }
-    name = scrReadStringParameter(2);
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123138(world, stage, i, 0);
-        }
-    } else {
-        func_00123138(world, stage, fldParseRoomNumberFromName(name), 0);
-    }
-    return 1;
-}
-
-s32 fldCmdSetSceneBitsBarrierRoom(void) {
-    s32 world;
-    s32 stage;
-    char *name;
-    s32 i;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389780[0];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389784[0] + 1;
-    }
-    name = scrReadStringParameter(2);
-    if (strcmp(name, D_004363F0) == 0) {
-        name = D_004361D8;
-    }
-    if (name == NULL) {
-        for (i = 0; i < 16; i++) {
-            func_00123138(world, stage, i, 1);
-        }
-    } else {
-        func_00123138(world, stage, fldParseRoomNumberFromName(name), 1);
-    }
-    return 1;
-}
-
-s32 func_00156070(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    func_00123238(area, floor, target, 0);
-    return 1;
-}
-
-s32 func_001560F8(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    func_00123238(area, floor, target, 1);
-    return 1;
-}
-
-s32 func_00156180(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    func_00123338(area, floor, target, 0);
-    return 1;
-}
-
-s32 func_00156208(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    func_00123338(area, floor, target, 1);
-    return 1;
-}
-
-extern void fldSetMapSlotByte(s32, s32, s32, s32);
-
-s32 fldCmdSetMapSlotByte(void) {
-    s32 world;
-    s32 stage;
-    s32 slot;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389780[0];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389784[0] + 1;
-    }
-    slot = scrReadIntParameter(2);
-    if (slot == 0) {
-        return 1;
-    }
-    fldSetMapSlotByte(world, stage, slot, scrReadIntParameter(3));
-    return 1;
-}
-
-s32 fldCmdClearFloorFlag(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldSetFloorFlag(area, floor, target);
-    return 1;
-}
-
-s32 fldCmdSetFloorFlag(void) {
-    s32 area = scrReadIntParameter(0);
-    s32 floor, target;
-    if (area == 0) area = D_00389780[0];
-    floor = scrReadIntParameter(1);
-    if (floor == 0) floor = D_00389784[0] + 1;
-    target = scrReadIntParameter(2);
-    if (target == 0) return 1;
-    fldClearFloorFlag(area, floor, target);
-    return 1;
-}
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00156440);
-
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00156538);
-
-s32 fldCmdSetSceneBitsValue(void) {
-    s32 world;
-    s32 stage;
-    s32 room;
-
-    world = scrReadIntParameter(0);
-    if (world == 0) {
-        world = D_00389780[0];
-    }
-    stage = scrReadIntParameter(1);
-    if (stage == 0) {
-        stage = D_00389784[0] + 1;
-    }
-    room = scrReadIntParameter(2);
-    if (room == 0) {
-        for (; room < 16; room++) {
-            func_001235E8(world, stage, room, scrReadIntParameter(3));
-        }
-    } else {
-        func_001235E8(world, stage, room, scrReadIntParameter(3));
-    }
-    return 1;
-}
-
-s32 fldSetFlagFromWorld1(void) {
-    if (fldGetSceneStatusCode() == 1) {
-        func_0010D818(1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-s32 fldSetFlagFromWorld3(void) {
-    if (fldGetSceneStatusCode() == 3) {
-        func_0010D818(1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-s32 fldSetFlagFromWorld4(void) {
-    if (fldGetSceneStatusCode() == 4) {
-        func_0010D818(1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-s32 fldSetFlagFromWorld2(void) {
-    if (fldGetSceneStatusCode() == 2) {
-        func_0010D818(1);
-        return 1;
-    }
-    func_0010D818(0);
-    return 1;
-}
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00414090);
-
-s32 fldCmdPushSceneParam(void) {
-    s32 room;
-
-    room = fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key);
-    switch (scrReadIntParameter(0)) {
-    case 0:
-        func_0010D818(D_003A8EB0[room].unk0);
-        break;
-    case 1:
-        func_0010D818(D_003A8EB0[room].unk4);
-        break;
-    case 2:
-        func_0010D818(D_003A8EB0[room].unk6);
-        break;
-    case 3:
-        func_0010D818(D_003A8EB0[room].unk8);
-        break;
-    case 4:
-        func_0010D818(D_003A8EB0[room].unkC);
-        break;
-    }
-    return 1;
-}
-
-u32 fldCmdActivateTaskRoomObject(void) {
-    s32 task;
-    u64 room;
-
-    task = func_0010D8C8();
-    room = fldFindRoomByTask(((EffCmdWork *)task)->key);
-    fldActivateFlaggedObject(room);
-    return 1;
-}
-
-u32 fldCmdTestTaskRoomObjectActive(void) {
-    if (fldTestObjectActivationFlag(fldFindRoomByTask(((EffCmdWork *)func_0010D8C8())->key)) != 0) {
-        func_0010D818(1);
-    } else {
-        func_0010D818(0);
-    }
-    return 1;
-}
-
-u32 fldCmdSetCurrentTaskScene(void) {
-    s32 scene;
-
-    if (fldIsSceneStateEight()) {
-        func_00140BC8(0);
-        return 1;
-    }
-    scene = fldGetTaskRecordValue(((EffCmdWork *)func_0010D8C8())->key);
-    if (scene) {
-        func_00140BC8(scene);
-    }
-    return 1;
-}
-
-u32 func_001569B8(void) {
-    u64 value;
-
-    value = scrReadIntParameter(0);
-    func_001411F8(value);
-    return 1;
-}
-
-u32 func_001569E0(void) {
-    return 1;
-}
-
-u32 fldCmdGetActorStat0(void) {
-    s32 actorStat;
-
-    actorStat = scrReadIntParameter(0);
-    actorStat = fldGetActorStat0(actorStat);
-    func_0010D818(actorStat);
-    return 1;
-}
-
-u32 fldCmdGetActorStat1(void) {
-    s32 actorStat;
-
-    actorStat = scrReadIntParameter(0);
-    actorStat = func_001421C0(actorStat);
-    func_0010D818(actorStat);
-    return 1;
-}
-
-u32 fldCmdGetActorMotionEntry(void) {
-    s32 motionEntry;
-
-    motionEntry = scrReadIntParameter(0);
-    motionEntry = fldGetActorMotionEntry(motionEntry);
-    func_0010D818(motionEntry);
-    return 1;
-}
-
-u32 fldCmdGetRowValue(void) {
-    s32 rowValue;
-
-    rowValue = scrReadIntParameter(0);
-    rowValue = fldGetRowValue(rowValue);
-    func_0010D818(rowValue);
-    return 1;
-}
-
-u32 func_00156AA8(void) {
-    u64 value;
-
-    value = scrReadIntParameter(0);
-    func_00142670(value);
-    return 1;
-}
-
-u32 func_00156AD0(void) {
-    u64 first;
-    u64 second;
-
-    first = scrReadIntParameter(0);
-    second = scrReadIntParameter(1);
-    func_001206D0(first, second);
-    return 1;
-}
-
-u32 func_00156B10(void) {
-    func_00120820();
-    return 1;
-}
-
-s32 func_00156B30(void) {
-    func_0010D818(func_00120858());
-    return 1;
-}
-
-/* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-s32 fldCmdQuerySceneValue(void) {
-    func_0010D818(func_00140780(scrReadIntParameter(0)));
-    return 1;
-}
-
-u32 fldCmdUpdateTaskRecordScene(void) {
-    s32 scene;
-    if (fldIsSceneStateEight()) {
-        scene = 0;
-    } else {
-        scene = fldFindTaskRecordId(((EffCmdWork *)func_0010D8C8())->key);
-    }
-    fldApplyActorEntryTrigger(scene);
-    return 1;
-}
-
-void fldCmdResetAfterEvent(void) {
-    fldResetAfterEvent();
-}
-
-s32 func_00156BE8(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
-
-    func_0010D818(func_0013FA98(param0, param1));
-    return 1;
-}
-
-s32 func_00156C30(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
-
-    func_0010D818(fldGetActorSlotAttribute(param0, param1));
-    return 1;
-}
-
-void func_00156C78(void) {
-    func_0010D818(func_0013F790(1));
-}
-
-s32 func_00156C98(void) {
-    func_00140238();
-    return 1;
-}
-
-s32 fldCmdStartSceneBgm(void) {
-    D_00389798[0] = scrReadIntParameter(0);
-    fldStartSceneBgm();
-    return 1;
-}
-
-s32 fldCmdStartSceneBgmAlternate(void) {
-    D_00389798[0] = scrReadIntParameter(0);
-    fldStartSceneBgmAlternate();
-    return 1;
-}
-
-s32 fldCmdStopCurrentBgm(void) {
-    fldStopCurrentBgm();
-    return 1;
-}
-
-s32 fldCmdPlayCurrentBgmSound(void) {
-    fldPlayCurrentBgmSound();
-    return 1;
-}
-
-s32 fldCmdReleaseCurrentBgm(void) {
-    fldReleaseCurrentBgm();
-    return 1;
-}
-
-s32 fldCommandPlaySeVolumePan(void) {
-    fldPlayMenuSound(scrReadIntParameter(0));
-    return 1;
-}
-
-s32 fldCommandPlaySe(void) {
-    fldPlayFieldSe(scrReadIntParameter(0));
-    return 1;
-}
-
-u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(scrReadIntParameter(0)) != 0;
-}
-
-s32 fldCmdSetArchiveSoundVolumePan(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
-
-    fldSetArchiveSoundVolumePan(param0, param1);
-    return 1;
-}
-
-s32 fldCmdPlayArchiveSound(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
-
-    fldPlayArchiveSound(param0, param1);
-    return 1;
-}
-
-s32 fldCommandStartTitle(void) {
-    s32 param0 = scrReadIntParameter(0);
-    s32 param1 = scrReadIntParameter(1);
-
-    fldStartTitle(param0, param1, 0x3c);
-    return 1;
-}
-
-s32 func_00156EB8(void) {
-    s32 value;
-
-    value = scrReadIntParameter(0);
-    D_0038984C[0] = value;
-    return 1;
-}
-
-s32 fldCmdApplyTaskRecordEntry(void) {
-    EffCmdWork *work = func_0010D8C8();
-    void *entry = fldGetTaskRecordValue(work->key);
-
-    if (entry != NULL) {
-        func_00140A58(entry);
-    }
-    return 1;
-}
-
-s32 func_00156F18(void) {
-    func_0010D818(func_00140750());
-    return 1;
-}
-
-s32 func_00156F40(void) {
-    func_0014BF98(func_0023CC00(scrReadIntParameter(0)));
-    return 1;
-}
-
-/* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
-s32 fldCommandFindEffectByName(void) {
-    char *param = scrReadStringParameter(0);
-
-    func_0010D818(fldFindEffectByName(param));
-    return 1;
-}
-
-s32 func_00156FA0(void) {
-    func_0010D818(func_0014E620());
-    return 1;
-}
-
-/* Clear the selected flag only if it was set, and report whether it changed. */
-s32 fldCommandClearSelectedFlag(void) {
-    s32 changed = 0;
-    switch (scrReadIntParameter(0)) {
-    case 0:
-        if (D_00389770[3] & 1) {
-            D_00389770[3] &= ~1;
-            changed = 1;
-        }
-        break;
-    case 1:
-        if (D_00389770[3] & 2) {
-            D_00389770[3] &= ~2;
-            changed = 1;
-        }
-        break;
-    case 2:
-        if (D_00389770[3] & 4) {
-            D_00389770[3] &= ~4;
-            changed = 1;
-        }
-        break;
-    case 3:
-        if (D_00389770[3] & 8) {
-            D_00389770[3] &= ~8;
-            changed = 1;
-        }
-        break;
-    }
-    func_0010D818(changed);
-    return 1;
-}
-
-/* Roll against the threshold associated with the mirrored solar phase. */
-s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = D_003AA720[evtGetMirroredSolarPhase()];
-    if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
-        func_0010D818(1);
-    } else {
-        func_0010D818(0);
-    }
-    return 1;
-}
-
-/* Handle an occupied sound-command channel before dispatching a named sound. */
-s32 fldCommandSendNamedSound(void) {
-    s32 commandName;
-    commandName = scrReadStringParameter(0);
-    if (sdfSoundIsCommandBusy() != 0) {
-        func_00342690();
-    }
-    sdfSoundSendNamedCommand(commandName, 0x7f);
-    return 1;
-}
-
-u32 fldCommandSendSoundControl(void) {
-    func_00342690();
-    return 1;
-}
-
-/* Return sound-command busy state to the field script interpreter. */
-s32 fldCommandIsSoundBusy(void) {
-    func_0010D818(sdfSoundIsCommandBusy());
-    return 1;
-}
-
-/* Pass five field-script arguments to the underlying handler. */
-s32 func_001571C8(void) {
-    s32 first = scrReadIntParameter(0);
-    s32 second = scrReadIntParameter(1);
-    s32 third = scrReadIntParameter(2);
-    s32 fourth = scrReadIntParameter(3);
-    func_00123DE8(D_00389780[0], first, second, third, fourth, scrReadIntParameter(4));
-    return 1;
-}
-
-extern s32 D_003898A4[];
-
-s32 func_00157258(void) {
-    D_003898A4[0] = 1;
-    return 1;
-}
-
-
-typedef struct FldSceneParam {
-    s32 unk0;
-    s32 value;
-} FldSceneParam;
-
-extern FldSceneParam *D_00435F1C;
-
-s32 fldCmdGetPendingSceneParam(void) {
-    if (D_00435F1C == NULL) {
-        func_0010D818(-1);
-        return 1;
-    }
-    func_0010D818(D_00435F1C->value);
-    return 1;
-}
-
-s32 fldCmdSetTargetGuideMode(void) {
-    if (scrReadIntParameter(0) == 2) {
-        fldSetTargetGuideEnabled(0);
-        D_003898B0[0] = 0;
-    } else if (scrReadIntParameter(0) == 0) {
-        fldSetTargetGuideEnabled(0);
-    } else {
-        fldSetTargetGuideEnabled(1);
-    }
-    return 1;
-}
-
-extern void func_001536B8(s32);
-
-s32 func_00157308(void) {
-    func_001536B8(scrReadIntParameter(0));
-    return 1;
-}
-
-extern void func_00341348(void *);
-extern void func_002D2C50(void);
-extern void func_00157BE0(void);
-extern void parSysReset(void);
-extern void func_0015B270(void);
-extern void func_00194A70(void);
-extern void effInitWorks(void);
-extern void effBTLFieldColorResetFlags(void);
-extern void func_00157400(void);
-extern void effManagerUpdateAndDispatch(void);
-extern void effManagerInitializeSubsystems(void);
-extern u8 D_003AA868[];
-extern char D_004363F8[];
-
-void fldCreateFieldEffectTask(void) {
-    func_00341348(D_003AA868);
-    func_002D2C50();
-    func_00157BE0();
-    parSysReset();
-    func_0015B270();
-    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_00157400, NULL, 0);
-    kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
-    func_00194A70();
-    effInitWorks();
-    effBTLFieldColorResetFlags();
-}
-
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436208);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436210);
@@ -4643,10 +3272,4 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363DC);
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E4);
-
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363E8);
-
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F0);
-
-INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363F8);
 

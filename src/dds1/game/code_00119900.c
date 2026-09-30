@@ -103,8 +103,8 @@ extern s32 D_003C2E80[];
 
 extern s32 scrCreateTaskWithDefaultOption(void);
 extern s32 scrReadIntParameter(s32 idx);
-extern s32 func_0010D5F0();
-extern void func_0010D608(f32 value);
+extern s32 scrSetIntegerReturnValue();
+extern void scrSetFloatReturnValue(f32 value);
 extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
 extern void func_00119900(s32 arg0, s32 arg1);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
@@ -202,7 +202,7 @@ s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     return 0;
 }
 
-void func_00119EF8(s32 counterAddress, s32 increment) {
+void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
     *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
@@ -248,7 +248,7 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011A158);
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyInitRuntime);
 
-u16 func_0011A568(s32 tableIndex) {
+u16 evtGetIndexedEventRecordId(s32 tableIndex) {
     return ((EventIndexRecord *)D_003BAA68)[tableIndex].index;
 }
 
@@ -449,42 +449,42 @@ void dds3WorkInit(void) {
     memset(D_003C2E70, 0, 0x18);
 }
 
-u32 func_0011B938(void) {
+u32 scrGetWorkTaskHandle(void) {
     return D_003BAAB4;
 }
 
-void func_0011B940(void) {
+void scrDestroyWorkTask(void) {
     scrProcDestroyTask(D_003BAAB4);
     D_003BAAB4 = 0;
 }
 
 s32 func_0011B968(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->level);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->level);
     return 1;
 }
 
 s32 func_0011B990(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->level);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->level);
     return 1;
 }
 
 s32 func_0011B9B8(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->unk6);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->unk6);
     return 1;
 }
 
 s32 func_0011B9E0(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->unk6);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->unk6);
     return 1;
 }
 
 s32 func_0011BA08(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E78[0])->unk8);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->unk8);
     return 1;
 }
 
 s32 func_0011BA30(void) {
-    func_0010D5F0(((Entry1A4 *)D_003C2E7C[0])->unk8);
+    scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->unk8);
     return 1;
 }
 
@@ -499,14 +499,14 @@ INCLUDE_ASM(const s32, "game/code_00119900", func_0011BC60);
 s32 func_0011BD08(void) {
     s32 val = scrReadIntParameter(0);
 
-    func_0010D5F0(func_00119368(D_003C2E78[0], val));
+    scrSetIntegerReturnValue(func_00119368(D_003C2E78[0], val));
     return 1;
 }
 
 s32 func_0011BD40(void) {
     s32 val = scrReadIntParameter(0);
 
-    func_0010D5F0(func_00119368(D_003C2E7C[0], val));
+    scrSetIntegerReturnValue(func_00119368(D_003C2E7C[0], val));
     return 1;
 }
 
@@ -519,11 +519,11 @@ s32 func_0011BD78(void) {
     } else {
         value = ((EventStatRow *)D_003BAA50)[index].stat;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011BE00(void) {
+s32 evtPushSelectedScaledStat(void) {
     EvtScriptContext *work = (EvtScriptContext *)D_003C2E70;
     s32 index = work->third;
     s32 value = ((EventStatRow *)D_003BAA50)[index].scaledStat;
@@ -531,12 +531,12 @@ s32 func_0011BE00(void) {
         f32 scale = ((RosterDetail *)D_003BAA18)[((Entry1A4 *)work->first)->rosterIndex].scale;
         value = (s32)((f32)value * scale);
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011BE90(void) {
-    func_0010D5F0(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].grade);
+s32 evtPushSelectedStatGrade(void) {
+    scrSetIntegerReturnValue(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].grade);
     return 1;
 }
 
@@ -554,11 +554,11 @@ s32 evtSelectScriptStatValue(void) {
         value = 0;
         break;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011BF50(void) {
+s32 evtPushEntryIndexedStatOption(void) {
     s32 *work = D_003C2E70;
     s32 value;
     u16 mode = ((EvtScriptContext *)work)->options;
@@ -575,7 +575,7 @@ s32 func_0011BF50(void) {
         value = 0;
         break;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -588,16 +588,16 @@ s32 func_0011BFE8(void) {
     } else {
         value = ((EventStatRow *)D_003BAA50)[index].total;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011C070(void) {
-    func_0010D5F0(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].max);
+s32 evtPushSelectedStatMaximum(void) {
+    scrSetIntegerReturnValue(((EventStatRow *)D_003BAA50)[D_003C2E74[0]].max);
     return 1;
 }
 
-s32 func_0011C0B0(void) {
+s32 evtStoreScriptParameterResult(void) {
     u16 bits = ((EvtScriptContext *)D_003C2E70)->stateFlags | 1;
 
     ((EvtScriptContext *)D_003C2E70)->stateFlags = bits;
@@ -606,12 +606,12 @@ s32 func_0011C0B0(void) {
 }
 
 s32 func_0011C0F0(void) {
-    func_0010D5F0(D_003C2E80[0]);
+    scrSetIntegerReturnValue(D_003C2E80[0]);
     return 1;
 }
 
-s32 func_0011C118(void) {
-    func_0010D5F0((((((Entry1A4 *)D_003C2E78[0])->flags) >> 5) ^ 1) & 1);
+s32 evtPushEntryFlagBitInverted(void) {
+    scrSetIntegerReturnValue((((((Entry1A4 *)D_003C2E78[0])->flags) >> 5) ^ 1) & 1);
     return 1;
 }
 
@@ -620,7 +620,7 @@ s32 evtRollRandomScale(void) {
     s32 range = scrReadIntParameter(0);
     s32 roll = effMiscRandMod(0, range * 2);
 
-    func_0010D608((f32)(roll - range + 100) / 100.0f);
+    scrSetFloatReturnValue((f32)(roll - range + 100) / 100.0f);
     return 1;
 }
 
@@ -634,7 +634,7 @@ s32 func_0011C1B8(void) {
     else {
         value = 0;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -648,7 +648,7 @@ s32 func_0011C208(void) {
     else {
         value = 0;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
@@ -662,11 +662,11 @@ s32 func_0011C258(void) {
     else {
         value = 0;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011C2A8(void) {
+s32 evtPushAvailableChoiceRatio(void) {
     s32 available = func_001A1438();
     u64 value;
     if (available) {
@@ -678,38 +678,38 @@ s32 func_0011C2A8(void) {
     else {
         value = 0;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
     return 1;
 }
 
-s32 func_0011C310(void) {
+s32 evtPushAvailableFloatValue(void) {
     s32 v0 = func_001A1438();
     f32 val = 0.0f;
 
     if (v0 != 0) {
         val = func_001A4598();
     }
-    func_0010D608(val);
+    scrSetFloatReturnValue(val);
     return 1;
 }
 
-s32 func_0011C350(void) {
+s32 evtPushAvailableIntegerValue(void) {
     s32 v0 = func_001A1438();
     s32 val = 0;
 
     if (v0 != 0) {
         val = func_001A4630();
     }
-    func_0010D5F0(val);
+    scrSetIntegerReturnValue(val);
     return 1;
 }
 
 void func_0011C390(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 - 4));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 - 4));
 }
 
 void func_0011C3C0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x188));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x188));
 }
 
 extern s32 func_001190B0(s32);
@@ -738,23 +738,23 @@ void evtSelectStatGrade(void) {
             }
         }
     }
-    func_0010D608(*(f32 *)(D_003BAA6C + grade * 4 + 0x318));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + grade * 4 + 0x318));
 }
 
 void func_0011C4C0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x360));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x360));
 }
 
 void func_0011C4F0(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x4ec));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x4ec));
 }
 
 void func_0011C520(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
 }
 
 void func_0011C550(void) {
-    func_0010D608(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + ((Entry1A4 *)D_003C2E78[0])->level * 4 + 0x678));
 }
 
 void evtScriptSelectRandomValue(void) {
@@ -768,11 +768,11 @@ void evtScriptSelectRandomValue(void) {
         roll = effMiscRandMod(0, 0x30);
         value = roll != 0 ? 0 : 0x80;
     }
-    func_0010D5F0(value);
+    scrSetIntegerReturnValue(value);
 }
 
-void func_0011C5D8(void) {
-    func_0010D5F0(((RosterDetail *)D_003BAA18)[((Entry1A4 *)D_003C2E78[0])->rosterIndex].baseValue);
+void evtPushRosterBaseValue(void) {
+    scrSetIntegerReturnValue(((RosterDetail *)D_003BAA18)[((Entry1A4 *)D_003C2E78[0])->rosterIndex].baseValue);
 }
 
 void evtSelectFineStatGrade(void) {
@@ -808,12 +808,12 @@ void evtSelectFineStatGrade(void) {
             }
         }
     }
-    func_0010D608(*(f32 *)(D_003BAA6C + grade * 4 + 0x338));
+    scrSetFloatReturnValue(*(f32 *)(D_003BAA6C + grade * 4 + 0x338));
 }
 
 extern s32 evtGetMirroredSolarPhase(void);
 
-s32 func_0011C700(u32 flags) {
+s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
     u32 type = flags >> 16;
     switch (type) {
     case 0:
@@ -863,7 +863,7 @@ void func_0011CE48(void) {
 s32 func_0011CE50(void) {
     s32 val = scrReadIntParameter(0);
 
-    func_0010D5F0(func_0011A968(val) == 1);
+    scrSetIntegerReturnValue(func_0011A968(val) == 1);
     return 1;
 }
 

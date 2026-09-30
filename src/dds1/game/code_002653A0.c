@@ -229,7 +229,7 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
 }
 
 void func_00266130(u32 fontContext) {
-    func_001953D8(fontContext, 0xc, 0x10);
+    frFontSetGlyphChainDimensions(fontContext, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
 }
 

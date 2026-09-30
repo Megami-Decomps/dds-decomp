@@ -66,5 +66,5 @@ void dds3ReleaseWorldSlotResource(WorldSlotObject *object) {
     resource = object->slots;
     dds3ReleaseObjectResource();
     dds3ExchangeSlot(*resource, 0, 1);
-    func_00328E48(resource);
+    sdfReleaseChipBlock(resource);
 }

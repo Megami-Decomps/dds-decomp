@@ -83,7 +83,7 @@ extern void sdfBuildFillPacket101(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfDestroyObjectList();
 
-extern void func_00328E48(void *allocation);
+extern void sdfReleaseChipBlock(void *allocation);
 
 typedef struct SdfFreeNode {
     struct SdfFreeNode *next;
@@ -292,13 +292,13 @@ void sdfPendingQueueFlush(SdfPendingNode *node) {
                         i++;
                     } while (i < count);
                     nextBuffer = buffer->next;
-                    func_00328E48(buffer);
+                    sdfReleaseChipBlock(buffer);
                     buffer = nextBuffer;
                     count = 0x3F;
                 } while (buffer != NULL);
             }
             nextNode = node->next;
-            func_00328E48(node);
+            sdfReleaseChipBlock(node);
             node = nextNode;
         } while (node != NULL);
     }
@@ -1417,7 +1417,7 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
             if (node->allocation != 0) {
                 func_003297C8(node->allocation);
             } else {
-                func_00328E48(node);
+                sdfReleaseChipBlock(node);
             }
             node = next;
         }
@@ -1429,9 +1429,9 @@ void sdfFreeNodeLists(SdfFreeRoot *root) {
 
 void sdfReleaseFreeRoot(SdfFreeRoot *root) {
     sdfFreeNodeLists(root);
-    func_00328E48(root->workspace);
+    sdfReleaseChipBlock(root->workspace);
     root->workspace = NULL;
-    func_00328E48(root);
+    sdfReleaseChipBlock(root);
 }
 
 /* Dev slot: buffered request, unit matrix at +0x20, two vectors at +0x60/+0x70. */
@@ -1452,7 +1452,7 @@ typedef struct SdfDevSlot {
 SdfDevSlot *func_00330870(void) {
     SdfDevSlot *slot;
 
-    slot = func_00328E18(0x9C);
+    slot = sdfAllocAndClearQuadwords(0x9C);
     slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX((u8 *)&slot->pad20[0]);
     VU0_STORE_VF(vf0, (u8 *)&slot->unk60);
@@ -1469,11 +1469,11 @@ void sdfDestroyObjectList(SdfObjectList **owner) {
         sdfReleaseFreeRoot((*owner)->elements[i]);
     }
     sdfDestroyDevRequest(*owner);
-    func_00328E48(owner);
+    sdfReleaseChipBlock(owner);
 }
 
 extern void sdfReleaseQueuedResource(s32, s32);
-extern void func_00328E48();
+extern void sdfReleaseChipBlock();
 
 void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
     if (slot == NULL) {
@@ -1489,7 +1489,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
         sdfPendingQueuePush((SdfPendingOwner *)&D_00439168, (u32)slot);
     } else {
         sdfDestroyDevRequest((void *)slot->request);
-        func_00328E48(slot);
+        sdfReleaseChipBlock(slot);
     }
 }
 

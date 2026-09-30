@@ -10,13 +10,13 @@ extern void func_0024A2D8(s32);
 
 extern void func_0024DD78(void);
 
-extern void func_002858E8(s32, s32);
+extern void mnuSetPopupEntry(s32, s32);
 
-extern s64 func_0024DC08(void);
+extern s64 evtGetMessageWindowControlState(void);
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024A340(s32, s32);
 
@@ -70,7 +70,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B478);
 extern s32 fldClassifyRemainingFrames(s32);
 
 s64 func_0024B6C0(u64 request) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
     func_0024A340(0, state);
@@ -84,14 +84,14 @@ s64 func_0024B6C0(u64 request) {
 }
 
 void evtBSetupDispatchSync(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 s32 evtBClearAndReset(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     evtRememberDispatchCallback(0, context);
     *(s32 *)(((EvtBContext *)context)->visualList + 0x3C) = 0;
@@ -107,7 +107,7 @@ extern void mnuReleaseVisualResources(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 u32 func_0024B7E8(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
@@ -121,13 +121,13 @@ u32 func_0024B7E8(void) {
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B868);
 
 void evtBDispatchStart(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 1, request);
 }
 
 void evtBSetupDispatchSyncB(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -142,10 +142,10 @@ extern void func_0024AB70(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 extern void evtClearActiveFlag(s32);
 
-extern void func_0024DEF8(s32, s32);
+extern void evtSetBoundedDisplayValue(s32, s32);
 
 u32 func_0024B9D8(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     if (((EvtBContext *)context)->transitionPending == 0) {
         mnuSelectFirstListNode(((EvtBContext *)context)->selectionList);
@@ -157,7 +157,7 @@ u32 func_0024B9D8(void) {
     }
     ((EvtBContext *)context)->transitionPending = 0;
     evtClearActiveFlag(0);
-    func_0024DEF8(0, 3);
+    evtSetBoundedDisplayValue(0, 3);
     return 1;
 }
 
@@ -168,7 +168,7 @@ extern void func_0024AB70(s32, s32);
 extern void func_0024A570(s32, s32, s32);
 
 u32 func_0024BA78(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     if (((EvtBContext *)context)->transitionPending != 0) {
         func_0024A728(3, context);
@@ -185,7 +185,7 @@ u32 func_0024BA78(void) {
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BB00);
 
 void func_0024BC18(s32 item) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
@@ -195,7 +195,7 @@ void func_0024BC18(s32 item) {
 }
 
 void evtBSetupDispatchSyncC(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -209,7 +209,7 @@ extern void func_0024AB70(s32, s32);
 extern void func_0024B168(void);
 
 u32 func_0024BCD0(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuRefreshThresholdNodeFlags(((EvtBContext *)context)->thresholdList);
     mnuSelectFirstListNode(((EvtBContext *)context)->thresholdList);
@@ -227,7 +227,7 @@ extern void func_0024ACD8(void);
 extern void func_00249420(s32);
 
 u32 evtBEnterStateA(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024A570(3, 0, context);
     func_0024B090(4, context);
@@ -244,7 +244,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BF48);
 extern void func_0024BF48(s32, s32);
 
 void func_0024C028(s32 item) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
@@ -257,7 +257,7 @@ void func_0024C028(s32 item) {
 }
 
 void evtBSetupDispatchSyncD(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -266,7 +266,7 @@ void evtBSetupDispatchSyncD(s32 request) {
 u32 evtSelectFinalVisualNode(void) {
     s32 context;
 
-    context = func_00101A70();
+    context = kwlnTaskGetUserValue();
     mnuSelectLastListNode(((EvtBContext *)context)->visualList);
     return 1;
 }
@@ -276,7 +276,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C120);
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C1B8);
 
 void evtBSetupDispatchSyncE(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -291,7 +291,7 @@ extern void dspCloseChannel(void);
 extern void func_002E96D8(u32);
 
 u32 func_0024C2E0(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuReleaseStaffImageHandles(context + 0xE0);
     func_0024A728(2, context);
@@ -313,7 +313,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C3F8);
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C578);
 
 void evtBDispatchSync(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 2, request);
 }
@@ -328,10 +328,10 @@ extern void func_0024DD90(s32, void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void func_0024DAE8(s32);
-extern void func_0024DAB8(s32);
+extern void evtCaptureMessageWindowSoundMode(s32);
 
 u32 evtPrepareSelectedMenuEntry(void) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     s32 owner = ((EvtBContext *)state)->selectionList;
     s32 *selectionIndex = &((EvtBSelectionList *)owner)->selected->entryIndex;
 
@@ -342,7 +342,7 @@ u32 evtPrepareSelectedMenuEntry(void) {
     dspSetActive(1);
     dspStartEntry(0);
     func_0024DAE8(1);
-    func_0024DAB8(6);
+    evtCaptureMessageWindowSoundMode(6);
     return 1;
 }
 
@@ -353,7 +353,7 @@ u32 func_0024C6F8(void) {
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C700);
 
 void func_0024C7E8(s32 item) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
@@ -363,7 +363,7 @@ void func_0024C7E8(s32 item) {
 }
 
 void evtBSetupDispatchSyncF(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -373,7 +373,7 @@ extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 
 u32 evtBCheckPanelMode(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     dspSetActive(1);
     switch (((EvtBContext *)context)->panelMode) {
@@ -392,12 +392,12 @@ s64 evtBContinueDispatchOrRestoreTable(u64 input) {
     s64 dispatchResult;
     s32 *dispatchState;
 
-    context = func_00101A70();
+    context = kwlnTaskGetUserValue();
     dispatchState = &((EvtBContext *)context)->dispatchState;
     dispatchResult = func_00285670(context + 8, dispatchState, 0, input);
     if (dispatchResult == 0) {
-        if ((*dispatchState == 0) && (dispatchResult = func_0024DC08(), dispatchResult == 0)) {
-            func_002858E8(dispatchState, ((EvtBContext *)context)->dispatchTable);
+        if ((*dispatchState == 0) && (dispatchResult = evtGetMessageWindowControlState(), dispatchResult == 0)) {
+            mnuSetPopupEntry(dispatchState, ((EvtBContext *)context)->dispatchTable);
         }
         dispatchResult = 0;
     }
@@ -405,7 +405,7 @@ s64 evtBContinueDispatchOrRestoreTable(u64 input) {
 }
 
 void func_0024C9A0(s32 item) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
@@ -415,7 +415,7 @@ void func_0024C9A0(s32 item) {
 }
 
 void evtBSetupDispatchSyncG(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
     func_00285670(context + 8, context + 0x54, 2, request);
@@ -429,7 +429,7 @@ extern void func_002E96D8(u32);
 extern void evtClearActiveFlag(s32);
 
 u32 func_0024CA58(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024A728(2, context);
     if (((EvtBContext *)context)->transitionStage >= 2) {
@@ -454,7 +454,7 @@ extern void func_0024AB70(s32, s32);
 extern void func_0024ACD8(void);
 
 u32 func_0024CB00(void) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     mnuReleaseWorkResources(context);
     mnuTerminalBuildMenus(context);
@@ -472,7 +472,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CB80);
 extern s32 func_0024A6E8(s32);
 
 void evtBDispatchSyncD2(s32 item) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
     if (func_0024A6E8(state) == 0) {
@@ -489,23 +489,23 @@ void evtBDispatchSyncD2(s32 item) {
 }
 
 void evtBDispatchSyncB(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 2, request);
 }
 
 extern void mnuFadeOrPlayCloseSfx(s32, s32);
 extern s32 mnuRequestEffectResource(char *, char *);
-extern void func_0024DEF8(s32, s32);
+extern void evtSetBoundedDisplayValue(s32, s32);
 extern char D_003AF590[];
 extern char D_003AF620[];
 
 u32 func_0024CDB0(void) {
-    EvtBContext *context = (EvtBContext *)func_00101A70();
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
 
     mnuFadeOrPlayCloseSfx(0, (s32)context);
     evtClearActiveFlag(0);
-    func_0024DEF8(0, 0);
+    evtSetBoundedDisplayValue(0, 0);
     if (context->state7C != 0) {
         context->effectHandle = mnuRequestEffectResource(D_003AF590, D_003AF620);
     }
@@ -519,14 +519,14 @@ u32 func_0024CE20(void) {
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CE28);
 
 void evtBLateDispatchStart(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_0024A2D8(context);
     func_00285670(context + 8, context + 0x54, 1, request);
 }
 
 void evtBDispatchSyncC(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     func_00285670(context + 8, context + 0x54, 2, request);
 }

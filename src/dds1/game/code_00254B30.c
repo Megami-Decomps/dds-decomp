@@ -87,7 +87,7 @@ extern s32 mnuGetMantraSourceValue(s32);
 extern void func_003014F0(void *, void *, s32);
 extern void func_0024DAE8(s32);
 extern void dspStartEntry(s32);
-extern void func_0024DAB8(s32);
+extern void evtCaptureMessageWindowSoundMode(s32);
 
 /* Populate four menu labels from the current selection and scene metadata. */
 void itfDspPopulatePrimaryLabels(void) {
@@ -102,7 +102,7 @@ void itfDspPopulatePrimaryLabels(void) {
     func_0024DD90(3, text);
     func_0024DAE8(0);
     dspStartEntry(0);
-    func_0024DAB8(8);
+    evtCaptureMessageWindowSoundMode(8);
 }
 
 /* Populate the same menu labels, selecting the alternate display signal. */
@@ -118,7 +118,7 @@ void itfDspPopulateAlternateLabels(void) {
     func_0024DD90(3, text);
     func_0024DAE8(0);
     dspStartEntry(1);
-    func_0024DAB8(8);
+    evtCaptureMessageWindowSoundMode(8);
 }
 
 /* Populate menu labels for the third display signal. */
@@ -305,7 +305,7 @@ DspListNode *mnuReleaseDisplayListNodeAndGetNext(DspListNode *node) {
     DspListNode *next;
 
     next = node->next;
-    func_002CFF98();
+    sdfReleaseChipBlock();
     return next;
 }
 

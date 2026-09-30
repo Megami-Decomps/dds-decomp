@@ -23,5 +23,5 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
         handle = func_00329930(resource);
         func_003298C0(handle);
     }
-    func_00328E48(data);
+    sdfReleaseChipBlock(data);
 }

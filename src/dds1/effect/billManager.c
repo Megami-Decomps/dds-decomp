@@ -32,7 +32,7 @@ extern BillDispatch D_0034E068[];
 void *func_002CFEB8(s32 size);
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 void func_002D0918(void *arg);
-void func_002CFF98(void *arg);
+void sdfReleaseChipBlock(void *arg);
 void func_00150260(void *arg);
 void func_001502B0(void *arg0, void *arg1);
 void func_00151C58(void *arg);
@@ -67,7 +67,7 @@ void billReleaseChild(BillObj *obj) {
     if (obj->unk30 != NULL) {
         func_00150260(obj->unk30);
     }
-    func_002CFF98(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 void billProcessChild(BillObj *obj) {
@@ -115,13 +115,13 @@ BillObj *billCloneList(BillObj *obj) {
 
 void billReleaseList(BillObj *obj) {
     func_00151C58(obj->unk30);
-    func_002CFF98(obj);
+    sdfReleaseChipBlock(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151398);
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
-u32 func_00151568(u32 colorA, u32 colorB) {
+u32 effBillModulateColors(u32 colorA, u32 colorB) {
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];

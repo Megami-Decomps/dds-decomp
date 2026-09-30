@@ -4,7 +4,7 @@ extern void *func_00328D68(s32 size);
 extern s32 func_00110AA8(s32 kind);
 extern void *sdfModelCreateWithItems(void *data, void *listRef);
 extern s32 func_003340E0(s32 arg0, void *arg1, s32 arg2);
-extern s32 func_003343C8(void *arg0, s32 arg1, s32 arg2);
+extern s32 sdfMotionInitializeAtZeroTime(void *arg0, s32 arg1, s32 arg2);
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];

@@ -46,7 +46,7 @@ extern void fldClearCameraMoveMode(void);
 extern void fldSetCameraMoveMode(s32);
 extern void func_0013E5A8(u32 arg0);
 extern u32 fldGetSceneReadyFlag(void);
-extern s32 func_0010BED8(const char *arg0);
+extern s32 scrFindNamedProcessNode(const char *arg0);
 extern void func_002D8C88(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
@@ -66,7 +66,7 @@ extern s32 fldGetResourceReadyFlag(void);
 extern void fldFreeDisplayObjects(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 func_00102A60(void);
-extern s32 func_00102AB0(void);
+extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
 extern void func_002D0A10(u32 arg0);
@@ -92,11 +92,11 @@ extern u8 D_0032C9A0[];
 extern s16 D_0032C9B0[];
 extern u8 D_00346068[];
 extern u32 mnuAcknowledgeCampState(void);
-void func_001244D0(void);
-void func_001246C8(void);
+void fldClearSceneCommandFlag(void);
+void fldClearFieldTransitionFlag(void);
 void func_00124788(void);
 void func_00124850(void);
-void func_00125DE0(u32 arg0);
+void fldClearSceneControlFlags(u32 arg0);
 extern u32 D_003BAB64;
 extern u32 D_003BAB60;
 extern u32 D_003BAB5C;
@@ -104,15 +104,15 @@ extern u32 func_002D03F8(u32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 void fldLoadPlayerModel(void);
-u8 func_00125DF8(u32 arg0);
+u8 fldTestSceneControlFlags(u32 arg0);
 
-u32 *func_00123DD0(void);
+u32 *fldGetPlayerSceneStateAddress(void);
 
 extern u32 D_003BAC08[2];
 extern void fldResetEventSceneState(void);
 extern u32 func_0014D100(void);
 extern void fldResetTaskSlots(void);
-extern void func_00125D90(u32);
+extern void fldSetSceneLifecycleFlags(u32);
 extern void func_00220178(void);
 
 void func_0011D3A0(u32 *packet, u32 first, u32 second) {
@@ -337,7 +337,7 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
     return value != old;
 }
 
-void func_0011DE00(u32 *arg0, s32 arg1) {
+void fldStepColorChannelByCurrentPad(u32 *arg0, s32 arg1) {
     fldStepColorChannelByPad(arg0, arg1, D_00324530);
 }
 
@@ -385,7 +385,7 @@ extern void func_00134348(void);
 extern void func_00132010(void);
 extern void func_0012AEB0(void);
 extern u32 D_0032E570[];
-extern void func_00129720(s32);
+extern void fldSelectDisplayBuffer(s32);
 s32 fldTestDrawUpdate(void) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
@@ -393,23 +393,23 @@ s32 fldTestDrawUpdate(void) {
     if (func_00124F08() == 1) {
         return 0;
     }
-    func_00129720(0x53);
+    fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     func_00129900(0);
     func_00134348();
     func_00132010();
     if (D_0032E570[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
-            func_00129720(0x53);
+            fldSelectDisplayBuffer(0x53);
         } else {
-            func_00129720(0x5E);
+            fldSelectDisplayBuffer(0x5E);
         }
         func_0012AEB0();
     }
-    func_00129720(0x27);
+    fldSelectDisplayBuffer(0x27);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     func_00129900(0);
-    func_00129720(0x39);
+    fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
     func_00129900(0);
     return 0;
@@ -427,7 +427,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E6C0);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E810);
 
-void func_0011E960(void) {
+void fldResetCameraMoveTracking(void) {
     D_003BAB20 = 0;
     D_003BAB08 = -999;
     D_003BAB0C = -999;
@@ -439,7 +439,7 @@ void func_0011E960(void) {
 }
 
 
-s32 func_0011E998(void) {
+s32 fldEvaluateCameraMoveTracking(void) {
     if (D_003BAB20 == 1) {
         return 2;
     }
@@ -461,11 +461,11 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 extern u32 func_00110490(u64);
 extern s32 dds3TestObjectFlags(u64, s32);
 extern void dds3DestroyWorldIndexNode(u64);
-extern void func_00129720(s32);
+extern void fldSelectDisplayBuffer(s32);
 extern void fldSubmitBackgroundResourcePacket(void);
 extern void fldSubmitBackgroundDescriptorPacket(void);
 extern s32 D_0032E3C0[];
-void func_0011EBC8(void) {
+void fldSubmitVisibleWorldBackground(void) {
     s32 found = 0;
     u64 list;
     u64 item;
@@ -488,9 +488,9 @@ void func_0011EBC8(void) {
         found = 0;
     }
     if (found != 0) {
-        func_00129720(0x24);
+        fldSelectDisplayBuffer(0x24);
         fldSubmitBackgroundResourcePacket();
-        func_00129720(0x26);
+        fldSelectDisplayBuffer(0x26);
         fldSubmitBackgroundDescriptorPacket();
     }
 }
@@ -625,7 +625,7 @@ u8 func_00121248(s32 map, u32 slot, u32 bit) {
     return 0;
 }
 
-void func_001212A0(s32 map, s32 slot, s32 bit, s32 enabled) {
+void fldSetMapTargetFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
@@ -638,7 +638,7 @@ void func_001212A0(s32 map, s32 slot, s32 bit, s32 enabled) {
     }
 }
 
-u8 func_00121348(s32 map, u32 slot, u32 bit) {
+u8 fldTestMapTargetFlag(s32 map, u32 slot, u32 bit) {
     s32 mapIndex;
     u8 *slotBase;
     u32 flags;
@@ -1122,7 +1122,7 @@ void func_00122ED0(void) {
         ".set reorder"
         : : "r"(buffer) : "memory");
     D_003BAB34 = 0;
-    *func_00123DD0() = 0;
+    *fldGetPlayerSceneStateAddress() = 0;
 }
 
 typedef struct FieldSequenceRecord {
@@ -1379,7 +1379,7 @@ void fldReleasePlayerSceneResources(void) {
         }
         D_003BAB34 = 0;
         D_003BAB38 = 0;
-        *func_00123DD0() = 0;
+        *fldGetPlayerSceneStateAddress() = 0;
         fldReleaseResources();
     }
 }
@@ -1389,22 +1389,22 @@ void fldCleanupFieldScene(void) {
     fldTestDrawDestroy();
     fldReleasePlayerSceneResources();
     evtDestroySecondaryWorldNode();
-    func_00125F18();
+    fldReleaseCampSceneTasks();
 }
 
-u32 * func_00123DD0(void) {
+u32 * fldGetPlayerSceneStateAddress(void) {
     return &D_003BABD0;
 }
 
-u32 func_00123DE0(void) {
-    return *func_00123DD0();
+u32 fldGetPlayerSceneState(void) {
+    return *fldGetPlayerSceneStateAddress();
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00123E00);
 
-void func_00123EA8(void) {
+void fldResetPlayerSceneObjectState(void) {
     if (D_003BAB34 != 0) {
-        func_00125DE0(0x40);
+        fldClearSceneControlFlags(0x40);
         dds3InvokeSlot1Handler(D_003BAB34, 0);
     }
     D_0032E498[0] = 4;
@@ -1474,14 +1474,14 @@ s32 fldSelectSceneCommand(void) {
     return result;
 }
 
-void func_00124488(void) {
+void fldConsumeSceneCommandFlag(void) {
     if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 8) != 0) {
-        func_001244D0();
+        fldClearSceneCommandFlag();
         D_0032E3B0[3] |= 1;
     }
 }
 
-void func_001244D0(void) {
+void fldClearSceneCommandFlag(void) {
     ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~8;
     D_0032E3B0[3] &= ~1;
 }
@@ -1544,24 +1544,24 @@ void fldUpdateSceneCommand(void) {
     }
 }
 
-void func_00124680(void) {
+void fldConsumeFieldTransitionFlag(void) {
     if ((((FldWorkFlags *)D_003BAA00)->fieldFlags & 4) != 0) {
-        func_001246C8();
+        fldClearFieldTransitionFlag();
         D_0032E3B0[3] |= 2;
     }
 }
 
-void func_001246C8(void) {
+void fldClearFieldTransitionFlag(void) {
     ((FldWorkFlags *)D_003BAA00)->fieldFlags &= ~4;
     D_0032E3B0[3] &= ~2;
 }
 
-void func_001246F8(void) {
+void fldSetFieldTransitionFlag(void) {
     ((FldWorkFlags *)D_003BAA00)->fieldFlags |= 4;
     D_0032E3B0[3] &= ~2;
 }
 
-u8 func_00124728(void) {
+u8 fldTestFieldTransitionFlag(void) {
     s32 temp_v0 = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
     temp_v0 &= 4;
     return temp_v0 != 0;
@@ -1662,23 +1662,23 @@ s32 fldAdvanceToNextScene(void) {
     D_0032E3B0[0x3C] = area;
     D_0032E3B0[0x3D] = scene + 1;
     fldResetTaskSlots();
-    func_00125D90(1);
-    func_00125D90(2);
-    func_00123EA8();
+    fldSetSceneLifecycleFlags(1);
+    fldSetSceneLifecycleFlags(2);
+    fldResetPlayerSceneObjectState();
     func_00220178();
     return -1;
 }
 
 u8 func_00124E90(void) {
-    return func_0010BED8(D_0039FCA0) != 0;
+    return scrFindNamedProcessNode(D_0039FCA0) != 0;
 }
 
 u8 func_00124EB8(void) {
-    return func_0010BED8(D_0039FCC8) != 0;
+    return scrFindNamedProcessNode(D_0039FCC8) != 0;
 }
 
 u8 func_00124EE0(void) {
-    return func_0010BED8(D_0039FCB0) != 0;
+    return scrFindNamedProcessNode(D_0039FCB0) != 0;
 }
 
 u8 func_00124F08(void) {
@@ -1688,7 +1688,7 @@ u8 func_00124F08(void) {
     if (mnuAcknowledgeCampState() != 0) {
         return 1;
     }
-    return func_00125DF8(0x20) != 0 ? 0 : 3;
+    return fldTestSceneControlFlags(0x20) != 0 ? 0 : 3;
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124F58);
@@ -1706,7 +1706,7 @@ extern void evtStartSceneResourceTask(u64, void *);
 extern void func_0014C468(void);
 /* Dispatch one pending field command, preferring the temporary override
  * over the scene-work buffer and its saved fallback. */
-s32 func_00125348(void) {
+s32 fldDispatchPendingSceneResource(void) {
     u32 *sceneWork = D_0032F1A0;
     u32 flags;
 
@@ -1758,29 +1758,29 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcDraw);
 
 /* Independent flag words: D_003BABF8 and D_003BAC00 each have
  * their own set, clear and test operations. */
-void func_00125D90(u32 mask) {
+void fldSetSceneLifecycleFlags(u32 mask) {
     u32 *flags = &D_003BABF8;
     *flags |= mask;
 }
 
-void func_00125DA8(u32 mask) {
+void fldClearSceneLifecycleFlags(u32 mask) {
     u32 *flags = &D_003BABF8;
     *flags &= ~mask;
 }
 
-u8 func_00125DC0(u32 mask) {
+u8 fldTestSceneLifecycleFlags(u32 mask) {
     return (D_003BABF8 & mask) != 0;
 }
 
-void func_00125DD0(u32 mask) {
+void fldSetSceneControlFlags(u32 mask) {
     D_003BAC00 = D_003BAC00 | mask;
 }
 
-void func_00125DE0(u32 mask) {
+void fldClearSceneControlFlags(u32 mask) {
     D_003BAC00 = D_003BAC00 & ~mask;
 }
 
-u8 func_00125DF8(u32 mask) {
+u8 fldTestSceneControlFlags(u32 mask) {
     return (D_003BAC00 & mask) != 0;
 }
 
@@ -1789,21 +1789,21 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125E08);
 extern s32 D_003BABF4, D_003BABE4;
 extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
-extern void func_00141158(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
-extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), func_0010BDB8(void);
+extern void fldDestroyPanelTaskIfPresent(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
+extern void effBlurReleaseFirstResource(s32), mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
 extern void fldReleaseMenuSlotsAfterWait(void);
 
-void func_00125F18(void) {
+void fldReleaseCampSceneTasks(void) {
     if (D_003BABF4 == 0) return;
     D_003BABF4 = 0;
     kwlnFadeResetBackground();
-    func_00125DE0(0x10);
-    func_00125DE0(0x20);
-    func_00125D90(1);
-    func_00125D90(2);
+    fldClearSceneControlFlags(0x10);
+    fldClearSceneControlFlags(0x20);
+    fldSetSceneLifecycleFlags(1);
+    fldSetSceneLifecycleFlags(2);
     kwlnTaskDestroyWithHierarchyByName(D_0039FD30, 1);
     kwlnTaskDestroyWithHierarchyByName(D_0039FD40, 1);
-    func_00141158();
+    fldDestroyPanelTaskIfPresent();
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_003BABE4 != 0) {
@@ -1811,11 +1811,11 @@ void func_00125F18(void) {
         D_003BABE4 = 0;
     }
     mnuDestroyCampTasks();
-    func_0010BDB8();
+    scrDestroyAllNamedProcesses();
     fldReleaseMenuSlotsAfterWait();
 }
 
-u8 func_00125FD0(void) {
+u8 fldIsFieldResourceWaitFinished(void) {
     if (D_0032E3D0[0] == 0 && fldIsAreaResourceReady() != 0) {
         fldPollAreaResourceLoad();
         if (fldGetResourceReadyFlag() == 1) return 0;
@@ -1833,7 +1833,7 @@ void func_00126050(void) {
     fldStopCurrentBgm();
 }
 
-void func_00126068(void) {
+void fldProcessDeferredSceneCommand(void) {
     if (D_003BABD8 != 0) {
         fldDispatchDeferredFieldCommand();
         return;
@@ -1849,16 +1849,16 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
 void fldDispatchDeferredFieldCommand(void) {
     if (D_003BABD8 == 0) return;
     if (func_00102A60() > 0) return;
-    if (func_00102A60() < 0 && (func_00102AB0() & 1) != 0) return;
+    if (func_00102A60() < 0 && (dds3AdminReadPreviousUnsignedSample() & 1) != 0) return;
     func_0013F100(D_003BABD8, D_003BABDC);
     D_003BABD8 = 0;
 }
 
-void func_00126108(u32 argument) {
+void fldSetPendingSceneAction(u32 argument) {
     D_003BABE0 = argument;
 }
 
-void func_00126110(void) {
+void fldRunPendingSceneAction(void) {
     u32 argument;
 
     argument = D_003BABE0;
@@ -1870,7 +1870,7 @@ void func_00126110(void) {
 
 /* Consume the pending pair of field-script values. -1 in both slots means
  * no request; the first value is returned with its 200-entry base offset. */
-s32 func_00126140(s32 *outCode, s32 *outParameter) {
+s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
     if (D_0032E3B0[0x3C] == -1 && D_0032E3B0[0x3D] == -1) {
         return 0;
     }

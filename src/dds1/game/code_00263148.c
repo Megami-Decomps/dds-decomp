@@ -4,7 +4,7 @@ extern u32 ptyBuildProfileCapSkillList(u32, s32);
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 func_00101A70();
+extern s32 kwlnTaskGetUserValue();
 
 extern void dspSetActive(s32);
 
@@ -105,19 +105,19 @@ u32 func_002633D8(void) {
 INCLUDE_ASM(const s32, "game/code_00263148", prfCapTaskStep);
 
 s64 func_00263570(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, request);
 }
 
 s64 func_002635C0(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
     func_0024DD78();
     return menuRunPanel(context, 2, request);
 }
 
 s32 mnuResetItemSelectionMarkers(void) {
-    MenuItemScene *scene = (MenuItemScene *)func_00101A70();
+    MenuItemScene *scene = (MenuItemScene *)kwlnTaskGetUserValue();
     scene->resetStateA = 0;
     scene->resetStateB = 0;
     return 1;
@@ -145,7 +145,7 @@ extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void func_00263B78(s32, s32);
 
 s64 func_00263C98(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -156,7 +156,7 @@ s64 func_00263C98(s32 request) {
 }
 
 s64 func_00263D10(s32 request) {
-    s32 context = func_00101A70();
+    s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -175,7 +175,7 @@ u32 mnuInitializeItemSelectionExtent(void) {
     s32 extent;
     s32 sum;
 
-    scene = (MenuItemScene *)func_00101A70();
+    scene = (MenuItemScene *)kwlnTaskGetUserValue();
     sum = 0;
     remaining = 4;
     extent = (*(s32 **)((s32)scene + 0x98))[1] * 3;
@@ -199,7 +199,7 @@ u32 mnuInitializeItemSelectionExtent(void) {
         slot = slot + -1;
     } while (-1 < remaining);
     if (*(s32 *)((s32)scene + 0x1578) != 0) {
-        func_002830F0(*(u32 *)((s32)scene + 0xd10), 0);
+        mnuSetPanelGroupSelection(*(u32 *)((s32)scene + 0xd10), 0);
     }
     return 1;
 }

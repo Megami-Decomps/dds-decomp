@@ -5,7 +5,7 @@ extern u64 scrReadIntParameter(u64);
 
 extern u64 func_0011A318(u64);
 
-extern void func_00328E48(void *p);
+extern void sdfReleaseChipBlock(void *p);
 
 typedef struct EffTransformNode EffTransformNode;
 
@@ -60,7 +60,7 @@ u32 func_0010F160(void) {
 
     id = scrReadIntParameter(0);
     id = func_0011A318(id);
-    func_0010D818(id);
+    scrSetIntegerReturnValue(id);
     return 1;
 }
 
@@ -93,7 +93,7 @@ void effObjNodeDestroy(EffTransformNode *node) {
         if (prev != NULL) {
             prev->next = node->next;
         }
-        func_00328E48(node);
+        sdfReleaseChipBlock(node);
     }
 }
 
@@ -105,7 +105,7 @@ void effObjFreeInner(EffTransformNode *node) {
     if (node != 0) {
         inner = node->inner;
         if (inner != 0) {
-            func_00328E48(inner);
+            sdfReleaseChipBlock(inner);
             node->inner = 0;
         }
     }

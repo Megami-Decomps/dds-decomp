@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern void func_0026FFF8(s32);
 
@@ -14,7 +14,7 @@ INCLUDE_ASM(const s32, "game/code_0026DC50", func_0026DD30);
 
 void func_0026DEA8(s32 unused, void *data) {
     if (data != NULL) {
-        func_002CFF98(data);
+        sdfReleaseChipBlock(data);
     }
 }
 

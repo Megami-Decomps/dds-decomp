@@ -1,7 +1,7 @@
 #include "common.h"
 
-s32 func_00101A70(void);
-void func_002CFF98(s32 arg0);
+s32 kwlnTaskGetUserValue(void);
+void sdfReleaseChipBlock(s32 arg0);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", func_00241E18);
 
@@ -12,7 +12,7 @@ INCLUDE_ASM(const s32, "event/evtEventPack", func_002420B8);
 /* Free the event state shared with the motion-sound task. */
 void evtFreeEventPackState(void)
 {
-    func_002CFF98(func_00101A70());
+    sdfReleaseChipBlock(kwlnTaskGetUserValue());
 }
 
 void func_002420B8(void);
@@ -72,7 +72,7 @@ typedef struct EvtPackResources {
 
 /* Release the event task's owned handles, then free its state. */
 void evtReleaseEventPackResources(void) {
-    s32 state = func_00101A70();
+    s32 state = kwlnTaskGetUserValue();
     EvtPackResources *resources = (EvtPackResources *)state;
 
     fileWaitIdle();
@@ -106,7 +106,7 @@ void evtReleaseEventPackResources(void) {
             func_002D0918(resources->sceneAllocation2);
         }
     }
-    func_002CFF98(state);
+    sdfReleaseChipBlock(state);
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_003BC368);

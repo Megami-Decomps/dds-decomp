@@ -20,7 +20,7 @@ typedef struct {
 extern void *effGetHandlerArg(void *arg);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-/* Four matrix rows (three floats each) plus four floats, copied by func_0018AD58. */
+/* Four matrix rows (three floats each) plus four floats, copied by effMagatuhiCopyHandlerRows. */
 typedef struct {
     f32 row[4][4];
     f32 extra[4];
@@ -206,7 +206,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     return work;
 }
 
-void func_00189E60(EffMagatuhiWideFirst *work) {
+void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
     func_002D0918(work->buffer);
@@ -252,7 +252,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     return work;
 }
 
-void func_0018A800(EffMagatuhiWideSecond *work) {
+void effMagatuhiReleaseWideWorkResources(EffMagatuhiWideSecond *work) {
     effMathReleaseWorkResource(work->mathResource);
     effReleaseMagatuhiOwner(work->managedResource);
     func_002D0918(work->buffer);
@@ -266,7 +266,7 @@ extern void func_001891A8(void *owner);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018AB40);
 
-void func_0018AD58(EffMagatuhiWork *work, EffMagatuhiRowsSrc *src) {
+void effMagatuhiCopyHandlerRows(EffMagatuhiWork *work, EffMagatuhiRowsSrc *src) {
     EffMagatuhiRowsDst *dst = effGetHandlerArg(work->ptr08);
     u32 i;
 
@@ -324,7 +324,7 @@ EffMagatuhiWideFourth *effMagatuhiCreateFourth(EffMagatuhiHeadThird *src) {
     return work;
 }
 
-void func_0018B1D0(EffMagatuhiMidWork *work) {
+void effMagatuhiReleaseOwnerAndBuffer(EffMagatuhiMidWork *work) {
     effReleaseMagatuhiOwner(work->firstResource);
     func_002D0918(work->buffer);
 }
@@ -350,7 +350,7 @@ void effMagatuhiInitParticleA(EffMagatuhiFamilyA *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018B348);
 
-void func_0018B600(void *work, void *src) {
+void effMagatuhiCopyWorkVector(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
@@ -413,7 +413,7 @@ EffMagatuhiWideFifth *effMagatuhiCreateFifth(EffMagatuhiHeadFifth *src) {
     return work;
 }
 
-void func_0018BA00(EffMagatuhiMidWork *work) {
+void effMagatuhiReleaseOwnerAndExtraBuffer(EffMagatuhiMidWork *work) {
     effReleaseMagatuhiOwner(work->secondResource);
     func_002D0918(work->extraBuffer);
 }
@@ -426,7 +426,7 @@ void func_0018BE50(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_0018BE68(EffMagatuhiMidWork *work, void *value) {
+void effMagatuhiSetWorkBuffer(EffMagatuhiMidWork *work, void *value) {
     work->buffer = value;
 }
 
@@ -472,7 +472,7 @@ EffMagatuhiWideThird *effMagatuhiCreateThird(EffMagatuhiHeadThird *src) {
     return work;
 }
 
-void func_0018C2A8(EffMagatuhiMidWork *work) {
+void effMagatuhiReleaseSecondaryOwnerAndBuffer(EffMagatuhiMidWork *work) {
     effReleaseMagatuhiOwner(work->secondResource);
     func_002D0918(work->buffer);
 }

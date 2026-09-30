@@ -4,7 +4,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -12,9 +12,9 @@ extern void func_0025FD78(s32);
 
 extern void func_00297970(s32);
 
-extern s32 func_0026C768(void);
+extern s32 evtGetMessageWindowControlState(void);
 
-extern void func_002C42C0(s32 *, char *);
+extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003CE63C[];
 extern u8 D_003CE1A8[];
@@ -25,13 +25,13 @@ extern s32 func_0026C6A0();
 extern void func_00260380();
 extern void func_00260020();
 extern s32 func_0025FE70();
-extern void func_002B8CF0();
+extern void mnuAdvanceListCursorDefault();
 extern void func_0025FC08();
 extern s32 func_0026BC80();
-extern void func_0023AC80();
+extern void evtCreateEventScriptProcess();
 extern void kwlnFadeOutStart();
 extern void evtClearActiveFlag();
-extern void func_0026CA80();
+extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
 extern s32 D_00435DD0;
 extern char D_00437840[];
@@ -42,7 +42,7 @@ extern s32 func_002604A0();
 extern void dspSetActive();
 extern void func_0026C918();
 extern void dspStartEntry();
-extern void func_0011A0D0();
+extern void datAddCurrencyClamped();
 extern void func_0011A118();
 extern s32 func_0035C860(char *, const char *, ...);
 
@@ -87,13 +87,13 @@ u32 func_002652D8(void) {
 
 /* Poll the event window; when it closes, install the default window if needed. */
 s64 evtMenuPollWindow(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 *window = &((EvtMenuContext *)context)->window;
     s64 state = func_002C4038(context + 0xc, window, 0, callback);
     if (state == 0) {
         if (*window == 0) {
-            if (func_0026C768() == 0) {
-                func_002C42C0(window, D_003CE63C);
+            if (evtGetMessageWindowControlState() == 0) {
+                mnuSetPopupEntryFlagged(window, D_003CE63C);
             }
         }
         return 0;
@@ -102,14 +102,14 @@ s64 evtMenuPollWindow(s32 callback) {
 }
 
 s64 func_00265360(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 1, callback);
 }
 
 s64 func_002653B8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_0026C7F8(1, 0);
     return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 2, callback);
 }
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
 
 /* Walk the list until its selected id is found, then persist the slot choice. */
 s32 evtMenuPersistSelectedSlot(void) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     s32 selectedId = ((EvtMenuContext *)context)->selection->list->selected->id;
     EvtSelectionNode *node;
     u8 *record;
@@ -127,7 +127,7 @@ s32 evtMenuPersistSelectedSlot(void) {
     func_00260020(context);
     for (node = ((EvtMenuContext *)context)->selection->list->first;
          node != 0 && node->id != selectedId; node = node->next) {
-        func_002B8CF0((s32)((EvtMenuContext *)context)->selection->list);
+        mnuAdvanceListCursorDefault((s32)((EvtMenuContext *)context)->selection->list);
     }
     record = ((EvtMenuContext *)context)->selection->list->record;
     slot = func_0025FE70(context);
@@ -139,26 +139,26 @@ s32 evtMenuPersistSelectedSlot(void) {
 INCLUDE_ASM(const s32, "game/code_002651C0", func_002655C0);
 
 s64 func_002657F8(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
     return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 1, callback);
 }
 
 s64 func_00265850(s32 callback) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 2, callback);
 }
 
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */
 s32 evtStartFadeByState(void) {
-    s32 context = func_00101958();
+    s32 context = kwlnTaskGetUserValue();
     func_0025FC08(context);
     switch (((EvtMenuContext *)context)->mode) {
     case 2:
         if (mdlFlagTest(0x42a) == 0 && func_0026BC80() == 0) {
-            func_0023AC80(0x323);
+            evtCreateEventScriptProcess(0x323);
         } else {
             kwlnFadeOutStart(0, 0, 0, 0xf);
         }
@@ -170,8 +170,8 @@ s32 evtStartFadeByState(void) {
         break;
     }
     evtClearActiveFlag(0);
-    func_0026CA80(0, 0);
-    func_0026CA80(1, 1);
+    evtSetBoundedDisplayValue(0, 0);
+    evtSetBoundedDisplayValue(1, 1);
     return 1;
 }
 
@@ -201,7 +201,7 @@ void func_002659E0(void) {
     func_0035C860(text, D_00437840, index);
     func_0026C918(0, text);
     dspStartEntry(0x19);
-    func_0011A0D0(index);
+    datAddCurrencyClamped(index);
     func_0011A118(0x81, -*(u8 *)(D_00435DD0 + 0x13c1));
     mdlFlagClear(0xa01);
 }

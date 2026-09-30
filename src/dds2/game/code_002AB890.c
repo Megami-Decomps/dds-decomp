@@ -4,7 +4,7 @@ extern s64 func_002ACF38(void);
 
 extern s32 D_00435DD0;
 
-extern s32 func_00101958();
+extern s32 kwlnTaskGetUserValue();
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -102,7 +102,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
 
 s64 func_002ACF00(s32 callback) {
-    return menuSetHandler(func_00101958(), 2, callback);
+    return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
@@ -125,7 +125,7 @@ void mnuApplyResourceSelection(s32 index, s32 context) {
 u32 func_002AD0A8(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     func_002BAF50(((MenuResourceOwner *)context)->resources->first, context + 0xb10c);
     return 1;
 }
@@ -133,7 +133,7 @@ u32 func_002AD0A8(void) {
 u32 func_002AD0E8(void) {
     s32 context;
 
-    context = func_00101958();
+    context = kwlnTaskGetUserValue();
     func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
     return 1;
 }

@@ -22,7 +22,7 @@ extern u32 D_00438F24;
 
 extern u64 func_0019CE78(u64, u64, u64, u64, u64);
 
-extern u64 func_0019CE10(u64, u64, u64, u64, u64);
+extern u64 frFontAppendGlyphFromData(u64, u64, u64, u64, u64);
 
 extern u32 D_0043654C;
 
@@ -131,7 +131,7 @@ typedef struct TextStyleNode {
 
 extern s32 func_00102930(void);
 
-extern void func_00102908(void);
+extern void dds3AdminSetControlFlag(void);
 
 extern void func_0035B6E0(const char *);
 
@@ -249,16 +249,16 @@ u64 func_0019EF38(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFl
         kind = 5;
     }
     frFontSetEntryFlag(kind, entryFlag);
-    func_0019D1D0(1);
+    frFontAddSharedGlyphFlags(1);
     frFontClearFlagBits(2);
     frFontClearFlagBits(0x10);
-    glyph = func_0019CE10(source, kind, 0, 0, 0);
-    func_0019D1D0(0x10);
-    func_0019D1D0(2);
+    glyph = frFontAppendGlyphFromData(source, kind, 0, 0, 0);
+    frFontAddSharedGlyphFlags(0x10);
+    frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
-    func_0019D100(glyph, x, y);
-    func_0019D110(glyph, depth << 4);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetChainFlag(glyph, 5);
     return glyph;
@@ -313,10 +313,10 @@ void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
                                     u64 glyphSource, u64 parent) {
     u64 glyph;
 
-    glyph = func_0019CE10(glyphSource, 0, 0, 0, 0);
-    func_0019D088(glyph, 0x10, 0x12);
-    func_0019D100(glyph, x, y);
-    func_0019D110(glyph, depth << 4);
+    glyph = frFontAppendGlyphFromData(glyphSource, 0, 0, 0, 0);
+    frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffc);
     frFontLinkGlyph(parent, glyph, 0);
@@ -357,10 +357,10 @@ void itfAttachGlyph12x16(u64 x, u64 y, s32 depth, u64 colors,
     u64 glyph;
 
     glyph = func_0019CE78(glyphSource, 0, 0, 0, 0);
-    func_0019D088(glyph, 0xc, 0x10);
+    frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(glyph, 0xfffffffffffffffd);
-    func_0019D100(glyph, x, y);
-    func_0019D110(glyph, depth << 4);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
@@ -573,7 +573,7 @@ void func_001A03D8(void) {
 }
 
 void func_001A0438(void) {
-    func_0019C490(D_0043658C);
+    frFontAdvanceOrRetainFadingGlyph(D_0043658C);
     func_001A0338();
 }
 
@@ -968,7 +968,7 @@ u32 func_001A1818(void) {
 
 void mnuReportCampProcessHalted(void) {
     if (func_00102930() != 5) {
-        func_00102908();
+        dds3AdminSetControlFlag();
     }
     func_0035B6E0(D_00414C50);
 }

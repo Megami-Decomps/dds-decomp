@@ -143,7 +143,7 @@ extern void frFontSetChildColors(u32, u32);
 
 extern void func_0019D550(u32, s32, s32);
 
-extern void func_0019C5B0(u32);
+extern void frFontQueueGlyphInSelectedSlot(u32);
 
 void func_00313BB8(s32 left, s32 right) {
     s32 file = func_00359A98("debug.log", D_00438908);
@@ -790,7 +790,7 @@ void func_00316450(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_0019FC38(x, y, first, width, (u32)D_00405CA8, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
-    func_0019C5B0(handle);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 u8 *func_003164C0(void) {

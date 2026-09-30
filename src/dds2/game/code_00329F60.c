@@ -15,7 +15,7 @@ typedef struct SdfTexBlock {
     s32 size;                 /* 0x10 */
 } SdfTexBlock;
 
-extern void func_00328E48();
+extern void sdfReleaseChipBlock();
 s32 func_0032A968(SdfTexBlock *block);
 
 typedef struct SdfTexReleaseEntry {
@@ -227,7 +227,7 @@ s32 func_0032A968(SdfTexBlock *block) {
             } else {
                 D_00439144 = (SdfTexHead *)block;
             }
-            func_00328E48(prev, block, prev);
+            sdfReleaseChipBlock(prev, block, prev);
             return 1;
         }
     }
@@ -361,7 +361,7 @@ void func_0032AF20(s32 address) {
     SdfTexReleaseEntry *entry;
 
     if (address != 0) {
-        entry = func_00328E18(0xA0);
+        entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
             entry->address = address;
             entry->mode = 2;
@@ -539,11 +539,11 @@ void sdfTexListInsert(SdfTex *texture) {
     D_004389F8 = texture;
 }
 
-extern void *func_00328E18(s32 size);
+extern void *sdfAllocAndClearQuadwords(s32 size);
 
 SdfTex *func_0032B5D8(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
-    SdfTex *tex = func_00328E18(0x40);
-    SdfTexRef *ref = func_00328E18(8);
+    SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
+    SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
     ref->refCount = 1;
     tex->unk18 = arg6;

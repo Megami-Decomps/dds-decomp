@@ -59,7 +59,7 @@ extern void func_00342580(u32);
 extern s32 func_0030DAE8(void);
 extern void func_0030C640(void);
 extern void fldReleaseMapRequestQueues(void);
-extern void func_001378A0(void);
+extern void fldReleaseCameraColorEffect(void);
 extern void func_00316E70(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
@@ -71,9 +71,9 @@ extern void func_0035C860(char *, char *, ...);
 extern void func_0026C918(s32, void *);
 extern void func_0026C648(s32);
 extern void dspStartEntry(s32);
-extern void func_0026C618(s32);
+extern void evtCaptureMessageWindowSoundMode(s32);
 extern char D_004388A0[];
-extern s64 func_0026C768(void);
+extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 extern void func_0026C710(void);
 extern void fldInitializeLmapTaskVariant(LmapTaskState *task);
@@ -233,7 +233,7 @@ void fldShutdownLmapResources(void) {
     func_0030DAE8();
     func_0030C640();
     fldReleaseMapRequestQueues();
-    func_001378A0();
+    fldReleaseCameraColorEffect();
     func_00316E70();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
@@ -293,13 +293,13 @@ void func_0030B680(void) {
     func_0026C918(0, text);
     func_0026C648(0);
     dspStartEntry(0);
-    func_0026C618(1);
+    evtCaptureMessageWindowSoundMode(1);
 }
 
 s32 fldLmapToggleOverlay(void) {
     s32 result = 0;
 
-    if (func_0026C768() != 0) {
+    if (evtGetMessageWindowControlState() != 0) {
         func_0026C900();
     } else {
         func_0026C710();

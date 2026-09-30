@@ -12,7 +12,7 @@ extern s32 func_002CE920(void);
 
 extern s32 fileMenuTaskExists(void);
 
-extern s32 func_00128580(void);
+extern s32 fldIsFieldResourceWaitFinished(void);
 
 extern u32 D_00435BB0;
 
@@ -182,7 +182,7 @@ extern u32 func_00104150(void);
 
 extern s32 D_004371E8;
 
-extern void func_0023AC80(s32 arg0);
+extern void evtCreateEventScriptProcess(s32 arg0);
 
 extern void evtCreateSkyTask(void);
 
@@ -194,11 +194,11 @@ extern void kwlnFadeBackgroundStartOut();
 
 extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-extern s32 func_0033D060(s32 arg0, s32 arg1);
+extern s32 sdfDevConsSetControlByte(s32 arg0, s32 arg1);
 
 extern void sdfDevConsSetTextAttribute(s32 arg0, s32 arg1);
 
-extern void func_00102908(void);
+extern void dds3AdminSetControlFlag(void);
 
 extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
 
@@ -391,7 +391,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 extern void sdfPktInit();
 extern void *func_0033D7B8();
 
-void func_00109C30(s32 x, s32 y, s32 packetArg, s32 drawArg) {
+void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     u8 pkt[16];
     void *list;
     void *packet;
@@ -406,12 +406,12 @@ void func_00109C30(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     surface->submit(surface, list);
 }
 
-void func_00109D00(s32 width, s32 height, u64 first, u64 second) {
+void evtPrepareSizedDrawResource(s32 width, s32 height, u64 first, u64 second) {
     u64 resource;
 
     resource = func_0019F448(width << 4, height << 3, 0, first, second, 0);
     func_0019D518(resource);
-    func_0019C5B0(resource);
+    frFontQueueGlyphInSelectedSlot(resource);
 }
 
 s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
@@ -422,7 +422,7 @@ s32 evtSelStateCreate(s32 limit, s16 frames, s32 value08, s32 value0C) {
     if (D_00435D18 != 0) {
         evtSelStateDestroy();
     }
-    node = func_00328E18(0x28);
+    node = sdfAllocAndClearQuadwords(0x28);
     D_00438E60 = node;
     if (limit == 0) {
         node->limit = -1;
@@ -461,7 +461,7 @@ void evtDestroySelectionState(void) {
 
 void evtSelStateDestroy(void) {
     if (D_00435D18 != 0) {
-        func_00328E48(D_00438E60);
+        sdfReleaseChipBlock(D_00438E60);
         D_00435D18 = 0;
         __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
         __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F590) : "memory");
@@ -537,7 +537,7 @@ s32 evtCheckSelectionInput(void) {
     return -1;
 }
 
-u8 func_0010A478(void) {
+u8 evtIsFileMenuTaskAbsent(void) {
     s64 operationResult;
 
     operationResult = fileMenuTaskExists();
@@ -592,7 +592,7 @@ u32 evtPollSelectedAreaReady(void) {
     u32 status;
 
     func_00125EE8();
-    operationResult = func_00128580();
+    operationResult = fldIsFieldResourceWaitFinished();
     status = 0xffffffff;
     if (operationResult != 0) {
         status = 0;
@@ -633,7 +633,7 @@ void evtDispatchSelectionValue(s32 source, s32 *params) {
         return;
     }
     evtCreateSkyTask();
-    func_0023AC80(selection);
+    evtCreateEventScriptProcess(selection);
 }
 
 u32 evtCloseSkyEventTask(void) {
@@ -711,7 +711,7 @@ u32 evtDestroyConfigTasks(void) {
     return 0;
 }
 
-u8 func_0010A7A8(void) {
+u8 evtWaitConfigTaskDone(void) {
     s64 result;
 
     result = fileConsumeConfigTaskReady();
@@ -728,7 +728,7 @@ void evtDispatchSelectionCommand(s32 source, s32 *params) {
         }
     }
     else {
-        func_00102908();
+        dds3AdminSetControlFlag();
         func_00128658();
     }
 }
@@ -753,7 +753,7 @@ void evtCreateBattleStageTestTask(void) {
 }
 
 u32 func_0010A8A0(void) {
-    func_002C7C18();
+    evtBattleStageTestStopTask();
     return 0;
 }
 
@@ -783,7 +783,7 @@ u32 func_0010A920(void) {
 void evtClearSecondaryWorldAndViewer(void) {
     D_00435BB0 = 0;
     evtDestroySecondaryWorldNode();
-    func_0024DAF8();
+    evtViewerCreateTaskWithSky();
 }
 
 u32 evtInitializeSelectionScreen(void) {
@@ -832,7 +832,7 @@ void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {
 u32 evtDestroySkyAndCampTasks(void) {
     evtDestroySkyTask();
     mnuCampDestroyPanelTasks();
-    func_00128618();
+    fldProcessDeferredSceneCommand();
     return 0;
 }
 
@@ -953,7 +953,7 @@ void evtSelectFontResource(s32 unused, s32 *lmapArgs) {
 
 u32 evtDestroyLmapTask(void) {
     fldStopLmapTask();
-    func_001286C8();
+    fldRunPendingSceneAction();
     return 0;
 }
 
@@ -1013,13 +1013,13 @@ u8 evtWaitFileMenuTaskFour(void) {
 u32 evtEnsureFontResourceChain(void) {
     if (D_00435D30 == 0) {
         D_00435D30 = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        func_0033D060(D_00435D30, 2);
+        sdfDevConsSetControlByte(D_00435D30, 2);
         sdfDevConsSetTextAttribute(D_00435D30, 7);
     }
     return 0;
 }
 
-void func_0010AE08(void) {
+void evtDestroyFontResourceChain(void) {
     if (D_00435D30 != 0) {
         sdfDevConsNodeDestroy(D_00435D30);
         D_00435D30 = 0;
@@ -1037,7 +1037,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411370);
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411380);
 
-void func_0010B118(s8 mode) {
+void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
         D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_0010AEC0, func_0010B110, NULL);
     } else if (mode == 0) {

@@ -68,7 +68,7 @@ s32 scrCreateTaskWithDefaultOption(s32 processId)
     return bfParseFLW0(processId, 0);
 }
 
-s32 func_0010BCB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
+s32 scrCreateTaskFromContextParameters(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
 {
     return scrProcCreateTask(a0, bfContextCreate(a1, a2, a3, a4, a5, a6, a7, a8));
 }
@@ -79,8 +79,8 @@ s32 func_0010BD08(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 }
 
 extern void func_0010AC10(char *, u32);
-extern void func_002CFF98(void *);
-extern void func_0019B9A0(s32);
+extern void sdfReleaseChipBlock(void *);
+extern void itfMesDestroyWindowIfPresent(s32);
 extern void func_002D0918(void *);
 extern void evtUnlinkWorkNode(void *);
 
@@ -88,22 +88,22 @@ extern void evtUnlinkWorkNode(void *);
 void scrProcDestroyTask(ScrProcTask *process) {
     func_0010AC10("end <%s>\n", process->nameTableBase + (process->nameIndex << 5));
     if (process->workBuffer != 0) {
-        func_002CFF98((void *)process->workBuffer);
+        sdfReleaseChipBlock((void *)process->workBuffer);
     }
     if (process->auxBuffer != 0) {
-        func_002CFF98((void *)process->auxBuffer);
+        sdfReleaseChipBlock((void *)process->auxBuffer);
     }
     if (process->resourceIndex >= 0) {
-        func_0019B9A0(process->resourceIndex);
+        itfMesDestroyWindowIfPresent(process->resourceIndex);
     }
     if (process->scriptHandle != 0) {
         func_002D0918(process->scriptHandle);
     }
     evtUnlinkWorkNode(process);
-    func_002CFF98(process);
+    sdfReleaseChipBlock(process);
 }
 
-/* Node of the script-name table walked by func_0010BDB8. */
+/* Node of the script-name table walked by scrDestroyAllNamedProcesses. */
 typedef struct ScriptNameNode {
     char name[1];                 /* 0x0: the name text is stored in place */
     u8 pad01[0xE3];
@@ -119,7 +119,7 @@ extern s32 func_00118140(void *);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 /* Walk the script-name table, releasing each node's task or process. */
-void func_0010BDB8(void)
+void scrDestroyAllNamedProcesses(void)
 {
     ScriptNameNode *node;
     ScriptNameNode *next;
@@ -147,7 +147,7 @@ void func_0010BDB8(void)
 INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010BE30);
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
-ScriptNameNode *func_0010BED8(char *name) {
+ScriptNameNode *scrFindNamedProcessNode(char *name) {
     ScriptNameNode *node = D_003BA994;
 
     while (node != NULL) {

@@ -35,10 +35,10 @@ u32 func_00102878(void) {
 
 extern char D_003BA848[];
 extern void *kwlnTaskGetTaskByName(char *);
-extern AdminWork *func_00101A70(void *);
+extern AdminWork *kwlnTaskGetUserValue(void *);
 
 AdminWork *func_001028A0(void) {
-    return func_00101A70(kwlnTaskGetTaskByName(D_003BA848));
+    return kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BA848));
 }
 
 u32 func_001028C8(void) {

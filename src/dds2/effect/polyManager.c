@@ -53,19 +53,19 @@ extern void func_00336B00(void);
 
 void effPolyDestroyWork(u32 work) {
     func_001634A8(*(u32 *)((s32)work + 0xdc));
-    func_00328E48(work);
+    sdfReleaseChipBlock(work);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165600);
 
-void func_00165670(float factor, PolyTransform *transform) {
+void polyScaleTransformPair(float factor, PolyTransform *transform) {
     transform->scaleCC = transform->scaleCC * factor;
     transform->scaleD0 = transform->scaleD0 * factor;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
 
-void func_00165838(s32 work) {
+void polyFinishAndReleaseNodeHandle(s32 work) {
     func_00165690();
     func_00163508(*(u32 *)(work + 0xdc));
 }
@@ -107,7 +107,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165A78);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165B98);
 
-void func_00165CC0(s32 work) {
+void polyReleaseBandNodeResources(s32 work) {
     func_001634A8(*(u32 *)(work + 0xf0));
     func_003297C8(*(u32 *)(work + 0xf8));
 }
@@ -270,7 +270,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001664F0);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166590);
 
-void func_001667E8(float factor, PolyTransform *transform) {
+void polyScaleTransformFirstComponent(float factor, PolyTransform *transform) {
     transform->scaleCC = transform->scaleCC * factor;
 }
 

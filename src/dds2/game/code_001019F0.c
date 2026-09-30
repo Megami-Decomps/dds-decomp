@@ -6,7 +6,7 @@ extern u32 D_00435D8C;
 extern AdminWork *func_00102790(void);
 extern char D_00435C18[];
 extern void *func_00101740(char *);
-extern u32 func_00101958(void *);
+extern u32 kwlnTaskGetUserValue(void *);
 
 INCLUDE_ASM(const s32, "game/code_001019F0", func_001019F0);
 
@@ -37,7 +37,7 @@ u32 func_00102768(void) {
 }
 
 AdminWork *func_00102790(void) {
-    return (AdminWork *)func_00101958(func_00101740(D_00435C18));
+    return (AdminWork *)kwlnTaskGetUserValue(func_00101740(D_00435C18));
 }
 
 u32 func_001027B8(void) {

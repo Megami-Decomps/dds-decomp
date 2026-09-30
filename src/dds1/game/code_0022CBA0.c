@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void *func_00101A70(void);
+extern void *kwlnTaskGetUserValue(void);
 
 extern s32 D_003BAA00;
 extern char D_003ADB20[]; /* "EventViewer" */
@@ -11,16 +11,16 @@ void func_00134C68(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void evtEventViewerReset(u64 arg0);
-void *func_002329A0(s32 arg0);
+void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(s32 arg0);
-extern s32 func_0026A720(void);
+extern s32 mnuPollTitleStreamStateLocked(void);
 extern void func_0026A808(void);
 extern void func_0023EF90(s32 arg0, void *arg1);
 
 extern u32 D_003BA904;
 s32 evtEventViewerGetPendingNode(s32 arg0);
 void func_0022E5A0(s32 arg0, void *arg1);
-void func_0022FF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
 f32 dds3GetCameraValue(s32 arg0);
@@ -277,7 +277,7 @@ void evtViewerSyncWorldGroups(s32 position, EventViewerState *viewer) {
 
 extern s32 sdfGetLodChunkValue();
 
-void func_0022EF38(s32 position, EventViewerState *viewer) {
+void evtViewerApplyGlyphLodChannel(s32 position, EventViewerState *viewer) {
     EvtViewNode *node = viewer->nodes;
     EvtViewGlyph *glyph;
     EvtViewGlyph *best;
@@ -338,7 +338,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F418);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F550);
 
 /* Advance or stop the timed viewer action according to the current position. */
-s32 func_0022F778(EventViewerState *viewer) {
+s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
     if (viewer->timedActive == 1) {
         if (viewer->glyphAdvancePosition < viewer->timedStart) {
             func_00270030();
@@ -379,9 +379,9 @@ void evtViewerAdvanceGlyphTick(EventViewerState *viewer) {
 void func_0022FA60(void) {
 }
 
-s32 func_00230438(u32 condition);
+s32 evtViewerTestIndexedCondition(u32 condition);
 
-EvtViewGlyph *func_0022FA68(EvtViewNode *group, s32 position, s32 channel) {
+EvtViewGlyph *evtViewerFindLatestMatchingGlyph(EvtViewNode *group, s32 position, s32 channel) {
     s32 bestId = -1;
     EvtViewGlyph *best = NULL;
     EvtViewGlyph *glyph = group->glyphs;
@@ -389,7 +389,7 @@ EvtViewGlyph *func_0022FA68(EvtViewNode *group, s32 position, s32 channel) {
     if (glyph != NULL) {
         do {
             if (position >= glyph->id && bestId < glyph->id && glyph->kind == 5 &&
-                glyph->channel == channel && func_00230438(glyph->condition) == 1) {
+                glyph->channel == channel && evtViewerTestIndexedCondition(glyph->condition) == 1) {
                 bestId = glyph->id;
                 best = glyph;
             }
@@ -473,7 +473,7 @@ s32 evtViewFindPrevGlyph(EventViewerState *viewer) {
     return (s32)result;
 }
 
-void func_0022FF30(s32 mode, s32 first, s32 second, s32 viewerAddr) {
+void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, s32 viewerAddr) {
     EventViewerState *viewer = (EventViewerState *)viewerAddr;
     s32 count = viewer->historyCount + 1;
 
@@ -511,7 +511,7 @@ u16 evtViewerPopHistory(EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022FFC8);
 
-void func_002300B8(s32 viewerAddr) {
+void evtViewerCleanupMessageWindow(s32 viewerAddr) {
     s32 windowContext;
     s32 window;
 
@@ -525,7 +525,7 @@ void func_002300B8(s32 viewerAddr) {
     }
     itfMesCleanupWindow(window, 1);
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
-    func_0019B4A0(*(s32 *)(windowContext + 0x104));
+    itfMesFinishWindowAndClearStatus(*(s32 *)(windowContext + 0x104));
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
     itfPanelSetPairFirst(*(s32 *)(windowContext + 0x104), 0);
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
@@ -534,17 +534,17 @@ void func_002300B8(s32 viewerAddr) {
     ((EventViewerState *)viewerAddr)->pad23C4 = 0;
 }
 
-void func_00230128(EventViewerState *viewer) {
+void evtViewerMarkWindowActive(EventViewerState *viewer) {
     viewer->windowActive = 1;
 }
 
-void func_00230138(EventViewerState *viewer) {
+void evtViewerMarkWindowInactive(EventViewerState *viewer) {
     viewer->windowActive = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230140);
 
-s32 func_00230438(u32 condition) {
+s32 evtViewerTestIndexedCondition(u32 condition) {
     u32 index;
     u32 lowBits;
 
@@ -573,7 +573,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230478);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230660);
 
 u32 func_00230A38(u32 unused0, u32 unused1, u32 viewerAddr) {
-    func_0022FF30(5, 0x90, 0x48, viewerAddr);
+    evtViewerPushCommandHistory(5, 0x90, 0x48, viewerAddr);
     return 0;
 }
 
@@ -627,7 +627,7 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EventViewerState *viewer) {
 }
 
 /* Store the command value in the selected halfword of a viewer entry. */
-u32 func_00231C18(u32 unused0, u32 unused1, EventViewerState *viewer) {
+u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry;
     u32 value;
     s32 slot;
@@ -665,7 +665,7 @@ u32 func_00231CC0(void) {
 }
 
 /* Copy the current command word into the selected script entry. */
-u32 func_00231CC8(u32 unused0, u32 unused1, EventViewerState *viewer) {
+u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EventViewerState *viewer) {
     EvtViewEntry *entry;
 
     entry = (EvtViewEntry *)evtEventViewerGetPendingNode((s32)viewer);
@@ -771,7 +771,7 @@ u32 func_002323E8(u32 unused0, u32 unused1, u32 viewerAddr) {
     if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
         ((EventViewerState *)viewerAddr)->unk22AC = 0;
         ((EventViewerState *)viewerAddr)->unk22B4 = 0;
-        func_0022FF30(0xa, 0x9c, 0x54, viewerAddr);
+        evtViewerPushCommandHistory(0xa, 0x9c, 0x54, viewerAddr);
         return 0;
     }
 }
@@ -785,10 +785,10 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerPickNextHandler);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232720);
 
 /* Update the active viewer, then switch to its frame-variable task. */
-void *func_002329A0(s32 task) {
+void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
-    viewer = func_00101A70();
+    viewer = kwlnTaskGetUserValue();
     func_0022E5A0(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     D_003BA904 |= 0x2000000;
@@ -796,19 +796,19 @@ void *func_002329A0(s32 task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-void *func_00232A00(void) {
+void *evtViewerInitializeUpdateSequence(void) {
     u64 viewer;
 
-    viewer = func_00101A70();
+    viewer = kwlnTaskGetUserValue();
     func_00134C68();
     evtEventViewerReset(viewer);
     D_003BA904 |= 0x2000000;
-    return (void *)func_002329A0;
+    return (void *)evtViewerScheduleFrameVariableTask;
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
 void *evtViewerAdvanceUpdate(void) {
-    EventViewerState *viewer = (EventViewerState *)func_00101A70();
+    EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
     s32 flags;
 
     func_00232E20(viewer->windowContext);
@@ -821,7 +821,7 @@ void *evtViewerAdvanceUpdate(void) {
             D_003BA904 |= 0x2000000;
             return 0;
         }
-        if ((u32)(func_0026A720() - 3) < 2) {
+        if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
             if (viewer->unk2440 == 0x78) {
                 func_0026A808();
             }
@@ -831,7 +831,7 @@ void *evtViewerAdvanceUpdate(void) {
         }
         func_0023EF90(viewer->windowContext, viewer);
         D_003BA904 |= 0x2000000;
-        return (void *)func_002329A0;
+        return (void *)evtViewerScheduleFrameVariableTask;
     }
 }
 
@@ -839,7 +839,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerStartUpdate);
 
 extern f32 D_00324590[];
 extern void func_002441E8();
-extern void func_00223540();
+extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void func_0014A298();
 extern void func_00105888();
@@ -851,16 +851,16 @@ extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
 extern void func_002D0918();
-extern void func_00134CF0();
+extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
-void func_002300B8(s32 viewerAddr);
+void evtViewerCleanupMessageWindow(s32 viewerAddr);
 
 void evtViewerReleaseResources(viewer)
     EventViewerState *viewer;
 {
     func_002441E8();
-    func_00223540();
-    func_002300B8((s32)viewer);
+    evtResetUnitVectorSlots();
+    evtViewerCleanupMessageWindow((s32)viewer);
     mnuCampLinkFontGlyph(viewer);
     func_0014A298(0);
     func_00105888();
@@ -889,7 +889,7 @@ void evtViewerReleaseResources(viewer)
     func_002D0918(viewer->resourceHandle);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_00134CF0();
+    fldReleaseCameraColorEffect();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     kwlnFadeSetMode(0);
@@ -900,7 +900,7 @@ void evtViewerReleaseResources(viewer)
 void func_00232D08(void) {
     u64 viewer;
 
-    viewer = func_00101A70();
+    viewer = kwlnTaskGetUserValue();
     evtViewerReleaseResources(viewer);
 }
 
@@ -908,7 +908,7 @@ void func_00232D08(void) {
 void func_00232D28(void) {
     u64 viewer;
 
-    viewer = func_00101A70();
+    viewer = kwlnTaskGetUserValue();
     evtViewerReleaseResources(viewer);
 }
 
@@ -923,7 +923,7 @@ extern void *memset(void *dst, s32 value, u32 size);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern s32 evtCreateSkyTask(void);
 
-void func_00232D60(void) {
+void evtViewerCreateTaskWithSky(void) {
     s32 handle;
     u32 *state;
     void *task;
@@ -933,7 +933,7 @@ void func_00232D60(void) {
     state = sdfResourceRetainAddress(handle);
     memset(state, 0, 0x2490);
     *state = handle;
-    task = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, func_00232A00, func_00232D08, state);
+    task = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, state);
     func_00101A80((s32)task, evtCreateSkyTask());
     func_00232D48(state);
 }

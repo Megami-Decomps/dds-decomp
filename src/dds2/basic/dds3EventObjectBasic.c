@@ -23,7 +23,7 @@ void dds3ReleaseEventData(EventObj *event) {
     effObjFreeInner();
     data = event->eventData;
     func_00111A68(data->handle);
-    func_00328E48(data);
+    sdfReleaseChipBlock(data);
 }
 
 /* Snapshot the node's vectors once its pending flag is observed. */

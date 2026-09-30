@@ -1,7 +1,7 @@
 #include "common.h"
 
-extern s64 func_0011B938(void);
-extern void func_0011B940(void);
+extern s64 scrGetWorkTaskHandle(void);
+extern void scrDestroyWorkTask(void);
 
 extern u32 D_003BAAAC;
 
@@ -205,7 +205,7 @@ s32 sdfBumpTickCounters(void) {
 
 void func_001177A8(void) {
     scrClearProcessGlobals();
-    func_0021F4B8();
+    mdlResetViewerFlagsAndSolarOverlay();
     ((SdfRuntime *)D_003BAA00)->updateMode = 8;
     ptyInitRuntime();
     func_00120C08(0);
@@ -233,13 +233,13 @@ void sdfFirePendingCallback(void) {
     if (D_003BAAAC == 0) {
         return;
     }
-    func_0011B940();
+    scrDestroyWorkTask();
 }
 
 u8 func_00118140(s64 expectedValue) {
     s64 currentValue;
 
-    currentValue = func_0011B938();
+    currentValue = scrGetWorkTaskHandle();
     return currentValue == expectedValue;
 }
 

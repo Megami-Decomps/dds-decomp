@@ -55,7 +55,7 @@ typedef struct {
     SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
 
-extern void func_002CFF98(void *);
+extern void sdfReleaseChipBlock(void *);
 
 extern void mnuDestroyListState(SdfCounterRuntime *);
 
@@ -168,10 +168,10 @@ void func_002C45C8(SdfCounterRuntime *rt) {
 
     if (rt != NULL) {
         for (channel = rt->first; channel != NULL; channel = channel->next) {
-            func_002CFF98(channel->display);
+            sdfReleaseChipBlock(channel->display);
             channel->display = NULL;
         }
-        func_002CFF98(rt->timer);
+        sdfReleaseChipBlock(rt->timer);
         rt->timer = NULL;
         mnuDestroyListState(rt);
     }

@@ -78,21 +78,21 @@ typedef struct PacState {
 void sdfPacStartPacketPayload(PacState *state, PacHead *packet);
 void func_002EDD98(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
-void func_002CFF98(void *allocation);
+void sdfReleaseChipBlock(void *allocation);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void func_002EDCC0(PacState *state);
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
-void *func_002CFF68(s32 size);
+void *sdfAllocAndClearQuadwords(s32 size);
 void *func_002CFEB8(s32 size);
 void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
-void func_002EE418(PacState *state);
-void func_002EE4A8(PacState *state);
+void sdfPacRelocateQueuedPayload(PacState *state);
+void sdfPacFinalizeRelocatedPayload(PacState *state);
 void func_002EE828(PacState *state);
 void sdfPacResetOutputToAllocationEntry(PacState *state);
 void sdfPacAdvanceAllocationEntry(PacState *state);
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
-void func_002EE478(PacState *state, PacHead *packet);
-void func_002EE508(PacState *state, PacHead *packet);
+void sdfPacStartRelocatingPacket(PacState *state, PacHead *packet);
+void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 void func_002EEAA0(PacState *state, void *packet);
 void func_002DA058(s32 handle, s32 resource);
@@ -112,7 +112,7 @@ INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EDE48);
 /* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
     s32 extensionBytes = packet->flags & 0xF0;
-    PacWork *node = func_002CFF68(extensionBytes + 0x20);
+    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + 0x20);
     node->owner = state;
     memcpy(node->packet, packet, extensionBytes + 0x10);
     if (state->queueTail == NULL) {
@@ -144,7 +144,7 @@ PacWork *sdfPacRemovePacket(PacWork *work) {
     if (state->queueTail == work) {
         state->queueTail = prev;
     }
-    func_002CFF98(work);
+    sdfReleaseChipBlock(work);
     return next;
 }
 
@@ -159,10 +159,10 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
             sdfPacStartAllocationList(state, packet);
             return 0;
         case 6:
-            func_002EE478(state, packet);
+            sdfPacStartRelocatingPacket(state, packet);
             return 0;
         case 8:
-            func_002EE508(state, packet);
+            sdfPacBeginRelocatedPayload(state, packet);
             return 0;
         case 9:
             func_002EEAA0(state, packet);
@@ -214,7 +214,7 @@ void sdfPacDecodePendingBytes(PacState *state) {
     if (finished == 0) {
         return;
     }
-    func_002CFF98(state->decoder);
+    sdfReleaseChipBlock(state->decoder);
     state->onComplete(state);
 }
 
@@ -281,7 +281,7 @@ void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
 }
 
 /* Apply the relocation record at the front of the queued payload. */
-void func_002EE418(PacState *state) {
+void sdfPacRelocateQueuedPayload(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
@@ -295,13 +295,13 @@ void func_002EE418(PacState *state) {
 }
 
 /* Begin a payload that must be relocated before normal finalization. */
-void func_002EE478(PacState *state, PacHead *packet) {
+void sdfPacStartRelocatingPacket(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
-    state->onComplete = func_002EE418;
+    state->onComplete = sdfPacRelocateQueuedPayload;
 }
 
 /* Complete the second relocation-command variant with the same word fixups. */
-void func_002EE4A8(PacState *state) {
+void sdfPacFinalizeRelocatedPayload(PacState *state) {
     PacWork *work = state->queueTail;
     PacReloc *record = (PacReloc *)work->dataCursor;
     u8 *payload = record->payload;
@@ -315,9 +315,9 @@ void func_002EE4A8(PacState *state) {
 }
 
 /* Begin the second relocation-command variant. */
-void func_002EE508(PacState *state, PacHead *packet) {
+void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
-    state->onComplete = func_002EE4A8;
+    state->onComplete = sdfPacFinalizeRelocatedPayload;
 }
 
 /* Incrementally copy a resource chunk before processing its resource slot. */
@@ -357,7 +357,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
         buffer->result = func_002D3288(sdfResourceRetainAddress(buffer->resourceSlot));
         sdfReleaseMemorySlot(&buffer->resourceSlot);
     }
-    func_002CFF98(state->decoder);
+    sdfReleaseChipBlock(state->decoder);
     state->onComplete(state);
 }
 
@@ -422,7 +422,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;
         if (nextIndex == allocation->entryCount) {
-            func_002CFF98(allocation);
+            sdfReleaseChipBlock(allocation);
             func_002EDD98(state);
         } else {
             sdfPacResetOutputToAllocationEntry(state);

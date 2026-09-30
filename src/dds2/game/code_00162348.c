@@ -123,7 +123,7 @@ extern void effBillSetEntryValue(s32, s32, u32);
 
 extern void func_00190120(s32, s32, void *);
 
-extern void func_00190170(s32, s32, u32);
+extern void effTrackPolySetIndexedColor(s32, s32, u32);
 
 extern void parFadeAlphaCell(s32, s32);
 
@@ -168,7 +168,7 @@ typedef struct ParEmitDesc {
 
 extern void parClearSlotFlag(s32);
 
-extern void func_00190148(s32);
+extern void effTrackPolyResetIndexedWork(s32);
 
 typedef struct ParBlock {
     s32 count;       /* 0x00 */
@@ -234,11 +234,11 @@ extern BillDispatch D_003AAB80[];
 
 extern s32 func_00159A50(s32 id);
 
-extern void func_00159BF0(s32 id, f32 a, f32 b);
+extern void billSetChildScaleComponents(s32 id, f32 a, f32 b);
 
 extern void billSetBillboardMode(s32 id, s16 mode);
 
-extern void func_00159FA0(s32 id);
+extern void billMarkKindOneFlag(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
@@ -250,9 +250,9 @@ ParObj *parInstantiateKind(ParObj *src) {
     obj->dispatchIndex = src->dispatchIndex;
     if (src->unk28 == -1) {
         bill = func_00159A50(src->billId);
-        func_00159BF0(bill, obj->unk10, obj->unk14);
+        billSetChildScaleComponents(bill, obj->unk10, obj->unk14);
         billSetBillboardMode(bill, obj->unk2C);
-        func_00159FA0(bill);
+        billMarkKindOneFlag(bill);
         obj->billId = bill;
     }
     return obj;
@@ -356,7 +356,7 @@ void parDispatchKindInit(ParSystem *work, s32 index) {
         parCellInit((void *)work->cells, index);
         return;
     case 4:
-        func_00190148((s32)work->cells);
+        effTrackPolyResetIndexedWork((s32)work->cells);
         break;
     }
 }
@@ -447,7 +447,7 @@ void func_00162D38(s32 particle, s32 index, u32 color) {
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
     __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
     func_00190120(particle, index, axis);
-    func_00190170(particle, index, (color & 0xFF000000) | 0x808080);
+    effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
 u32 func_00162E10(void) {

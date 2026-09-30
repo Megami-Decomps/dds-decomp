@@ -549,7 +549,7 @@ extern s32 func_00369B70();
 
 extern void func_00369DF8(s32);
 
-extern void func_00328E48(void *);
+extern void sdfReleaseChipBlock(void *);
 
 s32 sdfPathExists(char *path) {
     char *resolved = func_0033E818(path);
@@ -561,7 +561,7 @@ s32 sdfPathExists(char *path) {
 
     fd = func_00369B70(resolved, 1);
     func_00369DF8(fd);
-    func_00328E48(resolved);
+    sdfReleaseChipBlock(resolved);
     return fd >= 0;
 }
 
@@ -611,7 +611,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC48);
 
 extern s64 func_0036DE70(void);
 extern void EIntr(void);
-extern void func_00328E48(void *ptr);
+extern void sdfReleaseChipBlock(void *ptr);
 extern DevState *D_00438B14;
 extern DevState *D_00438B18;
 extern s16 D_00438B10;
@@ -638,8 +638,8 @@ void func_0033ED38(DevState *state) {
     if (interrupts != 0) {
         EIntr();
     }
-    func_00328E48(state->resource);
-    func_00328E48(state);
+    sdfReleaseChipBlock(state->resource);
+    sdfReleaseChipBlock(state);
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EDB0);
@@ -674,7 +674,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 context) {
-    DevState *state = (DevState *)func_00328E18(0x40);
+    DevState *state = (DevState *)sdfAllocAndClearQuadwords(0x40);
     state->resource = resource;
     state->workerIndex = workerIndex;
     state->operation = operation;
@@ -965,7 +965,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 mode) {
 
 void sdfDestroyDevRequest(DevRequest *request) {
     func_003297C8(request->handle);
-    func_00328E48(request);
+    sdfReleaseChipBlock(request);
 }
 
 extern void func_00329910(s32 handle);
