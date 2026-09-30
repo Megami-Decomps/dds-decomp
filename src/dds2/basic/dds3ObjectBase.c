@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "dds3obj.h"
+#include "dds3Admin.h"
 
 extern void *dds3GetSlot(void *arg0, s32 index);
 
@@ -19,12 +20,6 @@ extern void *dds3SpawnSlotRingObj3(void *arg);
 void dds3SetSlotKey(void *arg0, void *arg1);
 
 void dds3ReplaceObjectResource(void *arg0);
-
-/* Prefix of the administration record returned by func_00102790. */
-typedef struct AdminWork {
-    u32 flags;
-    u32 value;
-} AdminWork;
 
 extern AdminWork *func_00112AB0(void);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 
 extern u64 func_00219318(void);
 
@@ -189,11 +190,6 @@ extern char D_00419B88[];
 
 extern s32 func_001ABF50();
 
-typedef struct BtlUnitModel {
-    u8 unk_00[0x8C];
-    u32 *flags;
-} BtlUnitModel;
-
 typedef struct BtlUnit {
     u8 unk_00[0xC8];
     u32 species;
@@ -220,28 +216,6 @@ typedef struct BtlUnit {
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern BtlUnit *func_002172B8();
-
-typedef struct BattleEffectState {
-    u32 actor, flags, value;
-    u16 timer;
-    u8 active, phase;
-    u32 effect;
-    f32 speed;
-} BattleEffectState;
-
-typedef struct BtlTask {
-    u8 unk_00[8];
-    u32 flags;
-    u8 unk_0C[0xC];
-    BtlUnit *unit;
-    u8 unk_1C[4];
-    s32 result;
-    s32 arg;
-    u8 unk_28[0x38];
-    s32 unk_60;
-    u8 unk_64[0x108];
-    struct BtlTask *next;
-} BtlTask;
 
 typedef struct BtlState {
     u8 unk_000[0x1C0];

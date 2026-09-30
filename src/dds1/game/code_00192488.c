@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 /* Primary work object (created by func_00192CC8): owned buffers plus the
  * channel-B cursor (count at +0x8, index at +0x20). Extends past 0x2C with
@@ -42,12 +43,6 @@ typedef struct EffChan {
     f32 cursorPosition; /* 0x10: channel-A interpolation position */
     f32 cursorStep; /* 0x14: channel-A position increment */
 } EffChan;
-
-/* 8-byte counter record at EffPrim.counterRecords. */
-typedef struct EffCntRec {
-    s32 randomIndex; /* 0x0: advanced by effFillRandRecords */
-    u32 unk4; /* 0x4: id released by func_00192638 */
-} EffCntRec;
 
 /* 0x38-byte keyframe record addressed by effMathGetSlotAt. */
 typedef struct EffRec38 {

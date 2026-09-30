@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/* Random slot index and associated release id (0x8); DDS1/2 effect and panel views. */
+typedef struct EffCntRec {
+    s32 randomIndex; /* +0x00: advanced while filling random records */
+    u32 unk4;        /* +0x04: id released with its owner */
+} EffCntRec;
+
 /* Type-indexed effect work and sound handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffWork {
     u32 type;

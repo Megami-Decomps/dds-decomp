@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 
 /* 5/10 words match. With this TU's default -O2 the call in the final
  * conditional is sibling-call-optimized to j, while retail has jal+epilogue.
@@ -21,14 +22,6 @@ extern void func_00224EE8(u32);
 extern void func_001E9660(u32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_001E2758(void *);
-
-typedef struct BattleEffectState {
-    u32 actor, flags, value;
-    u16 timer;
-    u8 active, phase;
-    u32 effect;
-    f32 speed;
-} BattleEffectState;
 
 typedef struct BattleActionUnit BattleActionUnit;
 

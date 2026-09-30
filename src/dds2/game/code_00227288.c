@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 
 extern s32 *btlFindGroupedEntity();
 
@@ -142,7 +143,7 @@ extern s32 btlReleaseScriptResource(void);
 
 extern s32 btlFindModelEntry();
 
-typedef struct BattleEffectState {
+typedef struct BattleLinkedEffectState {
     u32 actor;
     struct BtlUnit *linkedUnit;
     u32 value;
@@ -150,7 +151,7 @@ typedef struct BattleEffectState {
     u8 active, phase;
     u32 effect;
     f32 speed;
-} BattleEffectState;
+} BattleLinkedEffectState;
 
 typedef struct BattleEffectContext {
     u8 pad00[0x2A0];
@@ -158,7 +159,7 @@ typedef struct BattleEffectContext {
     u8 pad2A4[0x24];
     u32 targetObject;
     u8 pad2CC[0x44C];
-    BattleEffectState *effect;
+    BattleLinkedEffectState *effect;
 } BattleEffectContext;
 
 typedef struct BattleEffectUnitNode {
@@ -235,11 +236,6 @@ extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-typedef struct BtlUnitModel {
-    u8 unk_00[0x8C];
-    u32 *flags;
-} BtlUnitModel;
-
 typedef struct BtlUnit {
     u8 unk_00[0xC8];
     u32 species;
@@ -262,20 +258,6 @@ typedef struct BtlUnit {
     struct BtlUnit *next;
 } BtlUnit;
 
-typedef struct BtlTask {
-    u8 unk_00[8];
-    u32 flags;
-    u8 unk_0C[0xC];
-    BtlUnit *unit;
-    u8 unk_1C[4];
-    s32 result;
-    s32 arg;
-    u8 unk_28[0x38];
-    s32 unk_60;
-    u8 unk_64[0x108];
-    struct BtlTask *next;
-} BtlTask;
-
 typedef struct BtlState {
     u8 unk_000[0x1E4];
     s16 unk_1C0;
@@ -289,7 +271,7 @@ typedef struct BtlState {
     u8 unk_22C[0x20];
     u16 unk_24C;
     u8 unk_24E[0x4A6];
-    struct BattleEffectState *effect;
+    struct BattleLinkedEffectState *effect;
     u8 unk_698[0xC];
     s32 unk_6A4;
     s32 unk_6A8;
@@ -452,7 +434,7 @@ void func_00227288(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleEffectState *effect = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *effect = ((BattleEffectContext *)func_001AA6F8())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -474,7 +456,7 @@ s32 func_00227660(BattleCombatant *unit, s32 arg1) {
     if (!(unit->status & 0x400)) {
         return arg1;
     }
-    if ((*(BattleEffectState **)(func_001AA6F8() + 0x718))->active != 1) {
+    if ((*(BattleLinkedEffectState **)(func_001AA6F8() + 0x718))->active != 1) {
         return arg1;
     }
     id = unit->kind;
@@ -550,7 +532,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);
 INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
 
 s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
-    BattleEffectState *effect;
+    BattleLinkedEffectState *effect;
     if ((task->flags & 8) == 0) {
         return -1;
     }
@@ -563,7 +545,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00227CC8);
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
 s32 btlIsEffectActor(u32 actor) {
-    BattleEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
     u32 active = state->actor;
     if (active != 0) {
         return active == actor;
@@ -686,7 +668,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_002286D8);
 
 s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     BtlState *battle = (BtlState *)func_001AA6F8();
-    BattleEffectState *effect;
+    BattleLinkedEffectState *effect;
     BtlUnit *other;
     if ((unit->flags & 0x400) == 0) {
         return 1;
@@ -736,7 +718,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 u32 btlGetEffectActive(void) {
     BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
     u32 battleId = battle->battleId;
-    BattleEffectState *state;
+    BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
@@ -750,7 +732,7 @@ u32 btlGetEffectActive(void) {
 s32 btlHasEffectActor(void) {
     BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
     u32 battleId = battle->battleId;
-    BattleEffectState *state;
+    BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
@@ -764,7 +746,7 @@ s32 btlHasEffectActor(void) {
 u32 btlGetEffectValue(void) {
     BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
     u32 battleId = battle->battleId;
-    BattleEffectState *state;
+    BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
     }
@@ -776,14 +758,14 @@ u32 btlGetEffectValue(void) {
 }
 
 u32 btlGetEffectActor(void) {
-    BattleEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
     return state->actor;
 }
 
 s32 func_002291C0(void) {
     BtlState *battle = (BtlState *)func_001AA6F8();
     BtlUnit *unit = battle->units;
-    BattleEffectState *effect = battle->effect;
+    BattleLinkedEffectState *effect = battle->effect;
     while (unit != 0) {
         if ((unit->flags & 0x400) &&
             unit->mode == 0x12F) {

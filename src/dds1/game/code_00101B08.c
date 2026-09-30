@@ -1,10 +1,5 @@
 #include "common.h"
-
-/* Prefix of the administration record returned by func_001028A0. */
-typedef struct AdminWork {
-    u32 flags;
-    u32 value;
-} AdminWork;
+#include "dds3Admin.h"
 
 extern AdminWork *func_001028A0(void);
 

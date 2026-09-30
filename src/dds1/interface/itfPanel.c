@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 
 /* Primary work object (created by func_00192CC8): owned buffers plus the
  * channel-B cursor (count at +0x8, index at +0x20). Extends past 0x2C with
@@ -23,12 +24,6 @@ typedef struct EffPrim {
     struct EffCntRec *unk168; /* 0x168: counter records */
     s32 *unk16C;      /* 0x16C: base for effMathGetSlotAt */
 } EffPrim;
-
-/* 8-byte counter record at EffPrim.unk168. */
-typedef struct EffCntRec {
-    s32 unk0; /* 0x0: rand slot advanced by effFillRandRecords */
-    u32 unk4; /* 0x4: id released by func_00192638 */
-} EffCntRec;
 
 extern void func_002D0918(void *arg0);
 
