@@ -34,8 +34,22 @@ typedef struct MenuProgressNode {
 
 typedef struct {
     u8 pad00[0x10];
-    MenuProgressNode *firstProgressNode;
+    MenuProgressNode *firstProgressNode; /* 0x10 */
+    u8 pad14[8];
+    MenuProgressNode *selectedNode;      /* 0x1C */
+    s32 selectionState;                   /* 0x20 */
 } MenuProgressOwner;
+
+typedef struct MenuProgressWork {
+    u8 pad00[4];
+    s32 groupResource;       /* 0x04 */
+    u8 pad08[0x68];
+    s32 listResource;        /* 0x70 */
+    MenuProgressOwner *list; /* 0x74 */
+    MenuProgressOwner *owner;/* 0x78 */
+    s32 mode;                /* 0x7C */
+    s32 initState;           /* 0x80 */
+} MenuProgressWork;
 
 extern s32 func_00248BA0(s32, s32);
 
@@ -133,20 +147,20 @@ void mnuUpdateGroupResources(u8 *scene) {
 void mnuDestroyThresholdNodePanels(s32 owner) {
     s32 entry;
 
-    for (entry = *(s32 *)(*(s32 *)(owner + 0x74) + 0x10); entry != 0; entry = *(s32 *)(entry + 0x58)) {
-        func_00248C38(*(u32 *)(entry + 0x70));
+    for (entry = (s32)((MenuProgressWork *)owner)->list->firstProgressNode; entry != 0; entry = (s32)((MenuProgressNode *)entry)->next) {
+        func_00248C38(((MenuProgressNode *)entry)->panel);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248D40);
 
 void func_00248E18(s32 arg0) {
-    func_0027B368(*(u32 *)(arg0 + 0x74));
+    func_0027B368((u32)((MenuProgressWork *)arg0)->list);
 }
 
 void func_00248E30(s32 arg0) {
-    func_00248C38(*(u32 *)(*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x1c) + 0x70));
-    func_0027B888(*(u32 *)(arg0 + 0x74));
+    func_00248C38(((MenuProgressWork *)arg0)->list->selectedNode->panel);
+    func_0027B888((u32)((MenuProgressWork *)arg0)->list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248E68);
@@ -191,15 +205,15 @@ s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback)
 extern s32 mnuWalkNodeList(s32, s32);
 
 void func_002493B0(s32 object) {
-    s32 state = *(s32 *)(object + 0x7C);
+    s32 state = ((MenuProgressWork *)object)->mode;
     if (state < 2) {
         if (state < 0) {
             return;
         }
-        if (*(s32 *)(*(s32 *)(object + 0x78) + 0x20) == 0) {
+        if (((MenuProgressWork *)object)->owner->selectionState == 0) {
             s32 selected = mnuWalkNodeList(2 - func_00249198(),
-                                              *(s32 *)(object + 0x70));
-            *(u32 *)(selected + 0x48) |= 1;
+                                              ((MenuProgressWork *)object)->listResource);
+            ((MenuProgressNode *)selected)->flags |= 1;
         }
     }
 }
@@ -207,7 +221,7 @@ void func_002493B0(s32 object) {
 extern s32 mnuWalkNodeList(s32, s32);
 
 void func_00249420(s32 object) {
-    s32 state = *(s32 *)(object + 0x7C);
+    s32 state = ((MenuProgressWork *)object)->mode;
     s32 selectedIndex;
     if (state != 0) {
         if (state != 2) {
@@ -217,9 +231,9 @@ void func_00249420(s32 object) {
     } else {
         selectedIndex = 3 - func_00249198();
     }
-    if (*(s32 *)(*(s32 *)(object + 0x74) + 0x20) == 0) {
-        s32 node = mnuWalkNodeList(selectedIndex, *(s32 *)(object + 0x70));
-        *(u32 *)(node + 0x48) |= 1;
+    if (((MenuProgressWork *)object)->list->selectionState == 0) {
+        s32 node = mnuWalkNodeList(selectedIndex, ((MenuProgressWork *)object)->listResource);
+        ((MenuProgressNode *)node)->flags |= 1;
     }
 }
 
@@ -237,7 +251,7 @@ void mnuReleaseWorkResources(u8 *work) {
     mnuDestroyThresholdNodePanels((s32)work);
     mnuReleaseStaffImageHandles(work + 0xE0);
     func_00248E18((s32)work);
-    func_0027B368(*(u32 *)(work + 0x78));
+    func_0027B368((u32)((MenuProgressWork *)work)->owner);
 }
 
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -247,7 +261,7 @@ extern void func_0024DEF8(s32, s32);
 
 void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
     if (skip == 0) {
-        s32 mode = *(s32 *)(work + 0x7C);
+        s32 mode = ((MenuProgressWork *)work)->mode;
 
         if (mode < 3) {
             if (mode > 0) {
@@ -266,9 +280,9 @@ void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
 }
 
 void func_002496D8(u8 *work) {
-    u8 *owner = *(u8 **)(work + 0x78);
-    *(s32 *)(work + 0x7C) = 0;
-    *(s32 *)(work + 0x80) = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
+    u8 *owner = (u8 *)((MenuProgressWork *)work)->owner;
+    ((MenuProgressWork *)work)->mode = 0;
+    ((MenuProgressWork *)work)->initState = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
 extern s32 func_002D03F8(s32);
@@ -284,10 +298,10 @@ u8 *mnuCreateWorkBlock(void) {
 
     memset(work, 0, 0x82C);
     *(s32 *)work = handle;
-    *(s32 *)(work + 4) = func_002BC5C0(1);
+    ((MenuProgressWork *)work)->groupResource = func_002BC5C0(1);
     initPartyPanelSlots((s32)(work + 0x84));
-    func_00271500(*(s32 *)(work + 4), (s32)(work + 8));
-    *(s32 *)(work + 0x80) = 1;
+    func_00271500(((MenuProgressWork *)work)->groupResource, (s32)(work + 8));
+    ((MenuProgressWork *)work)->initState = 1;
     return work;
 }
 
@@ -304,7 +318,7 @@ extern void func_002762D8(s32 *);
 extern void func_00271480(s32, s32 *, s32, s32);
 
 s32 mnuTickInitState(u8 *work) {
-    s32 state = *(s32 *)(work + 0x80);
+    s32 state = ((MenuProgressWork *)work)->initState;
     s32 *group;
 
     if (state == 0) {
@@ -314,12 +328,12 @@ s32 mnuTickInitState(u8 *work) {
         return 0;
     }
     group = (s32 *)(work + 8);
-    if (mnuStaffSlotsAllFilled(*(s32 *)(work + 4), group) == 0) {
+    if (mnuStaffSlotsAllFilled(((MenuProgressWork *)work)->groupResource, group) == 0) {
         return 1;
     }
     func_002762D8(group);
     func_00271480((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
-    *(s32 *)(work + 0x80) = 2;
+    ((MenuProgressWork *)work)->initState = 2;
     return 0;
 }
 

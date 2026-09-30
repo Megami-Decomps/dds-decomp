@@ -397,8 +397,25 @@ typedef struct FileTypeCallbacks {
 
 extern FileTypeCallbacks D_003E9168[];
 
+/* Only fields needed by the save copy are exposed; the remaining state is opaque. */
+typedef struct FileSaveState {
+    u8 pad00[0x20];
+    u32 money;          /* 0x20 */
+    u32 header24;       /* 0x24 */
+    u32 header28;       /* 0x28 */
+    u32 header2C;       /* 0x2C */
+    u8 pad30[0xA24];
+    u32 slotFlags;      /* 0xA54 */
+    u8 padA58[0x1DBF8];
+    u32 savedMoney;     /* 0x1E650 */
+} FileSaveState;
+
 typedef struct FileQueue {
-    u8 unk0[0x80];
+    u8 unk0[0x68];
+    u32 transformWord; /* 0x68 */
+    u8 pad6C[8];
+    f32 transformValue; /* 0x74 */
+    u8 pad78[8];
     s32 count;
     u32 unk84;
     FileJob *last;   /* 0x88: append end */
@@ -2236,9 +2253,9 @@ void func_002D0AB8(void) {
 extern char D_0042B938[];
 
 void func_002D0AD8(void) {
-    u8 *state = (u8 *)D_00435DD0;
-    u32 money = *(u32 *)(state + 0x20);
-    *(u32 *)(state + 0x1E650) = money;
+    FileSaveState *state = (FileSaveState *)D_00435DD0;
+    u32 money = state->money;
+    state->savedMoney = money;
     func_0035B6E0(D_0042B938, money);
 }
 
@@ -2252,10 +2269,10 @@ void func_002D0D00(s32 arg0) {
     s32 state;
 
     state = D_00435DD0;
-    *(u32 *)(D_00435DD0 + 0x20) = *(u32 *)(arg0 + 0x20);
-    *(u32 *)(state + 0x24) = *(u32 *)(arg0 + 0x24);
-    *(u32 *)(state + 0x28) = *(u32 *)(arg0 + 0x28);
-    *(u32 *)(state + 0x2c) = *(u32 *)(arg0 + 0x2c);
+    ((FileSaveState *)D_00435DD0)->money = ((FileSaveState *)arg0)->money;
+    ((FileSaveState *)state)->header24 = ((FileSaveState *)arg0)->header24;
+    ((FileSaveState *)state)->header28 = ((FileSaveState *)arg0)->header28;
+    ((FileSaveState *)state)->header2C = ((FileSaveState *)arg0)->header2C;
 }
 
 typedef struct {
@@ -2274,11 +2291,11 @@ s32 fileLoadStateChanged(void) {
 
 void fileCacheSlotFlagsFromState(void) {
     D_00437DE8.current = D_00437DE8.previous =
-        *(u32 *)(D_00435DD0 + 0xA54);
+        ((FileSaveState *)D_00435DD0)->slotFlags;
 }
 
 void fileRestoreSlotFlagsToState(void) {
-    *(u32 *)(D_00435DD0 + 0xa54) = D_00437DEC;
+    ((FileSaveState *)D_00435DD0)->slotFlags = D_00437DEC;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", fileToggleSlotFlagsBit);
@@ -2876,8 +2893,8 @@ FileQueue *fileQueueClone(FileQueue *source) {
 
     PCP_COPY_VECTOR(queue, source);
     PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
-    *(f32 *)((u8 *)queue + 0x74) = *(f32 *)((u8 *)source + 0x74);
-    *(u32 *)((u8 *)queue + 0x68) = *(u32 *)((u8 *)source + 0x68);
+    queue->transformValue = source->transformValue;
+    queue->transformWord = source->transformWord;
     for (src = source->first; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
         job->id = (u32)fileJobCreateChild((FileJob *)src->id);
@@ -2897,12 +2914,12 @@ FileQueue *fileQueueClone(FileQueue *source) {
 }
 
 void func_002D46A0(u8 *owner) {
-    u8 *job = *(u8 **)(owner + 0x8C);
+    u8 *job = (u8 *)((FileQueue *)owner)->first;
     while (job != 0) {
-        fileJobNotifyComplete(*(u32 *)(job + 0x90));
-        job = *(u8 **)(job + 0xAC);
+        fileJobNotifyComplete(((FileJob *)job)->id);
+        job = (u8 *)((FileJob *)job)->next;
     }
-    *(u32 *)(owner + 0x84) = 0;
+    ((FileQueue *)owner)->unk84 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C9660", func_002D46F0);

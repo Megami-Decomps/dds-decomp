@@ -65,13 +65,17 @@ typedef struct EvtRuntimeGroup {
 } EvtRuntimeGroup;
 
 typedef struct EvtRuntime {
-    u8 pad00[0x2034];
+    u8 pad00[0x2030];
+    s32 entryCount; /* 0x2030 */
     EvtRuntimeGroup *groups; /* 0x2034 */
     u8 pad2038[0x248];
     s32 actionMode; /* 0x2280 */
     u8 pad2284[8];
     s32 controlState; /* 0x228C */
-    u8 pad2290[0x78];
+    u8 pad2290[0x64];
+    s32 entryCursor; /* 0x22F4 */
+    s32 entryFirst;  /* 0x22F8 */
+    u8 pad22FC[0xC];
     s32 *tableRowIndex; /* 0x2308 */
     u8 pad230C[0xBC];
     s32 tableColumn; /* 0x23C8 */
@@ -253,7 +257,7 @@ s32 mnuDrawInfoWindowA(s32 arg0, s32 arg1, u8 *work) {
     u32 packets = sdfCreateInitializedPacketList();
     func_00235598(packets, arg0, arg1, 0xF, 0xB, 0, 0xB, work, 0, func_00236180);
     D_00325748.invoke(&D_00325748, (void *)packets);
-    if (*(s32 *)(work + 0x2280) != 1) {
+    if (((EvtRuntime *)work)->actionMode != 1) {
         return 0;
     }
     return func_001037C0(0, 1, 0xB, 1, 0xB, 0, 0, 0, work + 0x22A8);
@@ -371,12 +375,12 @@ s32 func_00237348(s32 arg0, s32 arg1, u8 *work) {
     s32 count;
     s32 shown;
 
-    func_00235598(packets, arg0, arg1, 8, 0x1D, *(s32 *)(work + 0x22F8), *(s32 *)(work + 0x2030), work, 0, func_00237130);
+    func_00235598(packets, arg0, arg1, 8, 0x1D, ((EvtRuntime *)work)->entryFirst, ((EvtRuntime *)work)->entryCount, work, 0, func_00237130);
     D_00325748.invoke(&D_00325748, (void *)packets);
-    if (*(s32 *)(work + 0x2280) != 4) {
+    if (((EvtRuntime *)work)->actionMode != 4) {
         return 0;
     }
-    count = *(s32 *)(work + 0x2030);
+    count = ((EvtRuntime *)work)->entryCount;
     if (count == 0) {
         return 0;
     }
@@ -418,7 +422,7 @@ extern void func_00238BE8();
 s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     u32 packets = sdfCreateInitializedPacketList();
     s32 rows;
-    switch (**(s32 **)(work + 0x2308)) {
+    switch (*((EvtRuntime *)work)->tableRowIndex) {
     case 20:
         rows = 2;
         break;
@@ -430,7 +434,7 @@ s32 mnuDrawInfoWindowB(s32 arg0, s32 arg1, u8 *work) {
     }
     func_00235598(packets, arg0, arg1, 0x1C, rows, 0, rows, work, 0, func_00238BE8);
     D_00325748.invoke(&D_00325748, (void *)packets);
-    if (*(s32 *)(work + 0x2280) != 0xC) {
+    if (((EvtRuntime *)work)->actionMode != 0xC) {
         return 0;
     }
     return func_001037C0(0, 1, rows, 1, rows, 0, 0, 0, work + 0x22B8);
@@ -546,12 +550,12 @@ s32 mnuDrawTimedPrompt(s32 arg0, s32 arg1, u8 *work) {
     s32 count;
     func_00235598(packets, arg0, arg1, 0x19, 2, 0, 1, work, 0, func_0023B848);
     D_00325748.invoke(&D_00325748, (void *)packets);
-    if (*(s32 *)(work + 0x2280) != 0x14) {
+    if (((EvtRuntime *)work)->actionMode != 0x14) {
         return 0;
     }
-    count = *(s32 *)(work + 0x23E4);
+    count = ((EvtRuntime *)work)->commandFirst;
     if (count > 0) {
-        *(s32 *)(work + 0x23E4) = count - 1;
+        ((EvtRuntime *)work)->commandFirst = count - 1;
     } else if (count == 0) {
         return -1;
     }
@@ -977,39 +981,69 @@ void func_0023E770(s32 output, EvtRuntime *runtime) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023E7F8);
 
+/* A row table switches between 0x10-byte and 0x2C-byte entry formats. */
+typedef struct EvtRowTable {
+    u8 pad00[0x74];
+    s32 descriptor;   /* 0x74: format at descriptor + 0x14 */
+    u8 pad78[0x10];
+    s32 compactRows;  /* 0x88 */
+    s32 extendedRows; /* 0x8C */
+} EvtRowTable;
+
+typedef struct EvtRowDescriptor {
+    u8 pad00[0x14];
+    s32 format;
+} EvtRowDescriptor;
+
+typedef struct EvtCompactRow {
+    u16 value;
+    u16 parameter;
+    u16 flags;
+    s16 variant;
+    u8 pad08[8];
+} EvtCompactRow;
+
+typedef struct EvtExtendedRow {
+    u16 value;
+    u16 parameter;
+    u16 flags;
+    s16 variant;
+    u8 pad08[0x24];
+} EvtExtendedRow;
+
 u16 func_0023ED08(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x14) == 4) {
-        return *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 0x88));
+    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->value;
     }
-    return *(u16 *)(arg1 * 0x2c + *(s32 *)(arg0 + 0x8c));
+    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->value;
 }
 
 s16 func_0023ED58(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x14) == 4) {
-        return *(s16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 0x88) + 6);
+    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->variant;
     }
-    return *(s16 *)(arg1 * 0x2c + *(s32 *)(arg0 + 0x8c) + 6);
+    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->variant;
 }
 
 u16 func_0023EDA8(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x14) == 4) {
-        return *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 0x88) + 2);
+    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->parameter;
     }
-    return *(u16 *)(arg1 * 0x2c + *(s32 *)(arg0 + 0x8c) + 2);
+    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->parameter;
 }
 
 u16 func_0023EDF8(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x14) == 4) {
-        return *(u16 *)(arg1 * 0x10 + *(s32 *)(arg0 + 0x88) + 4);
+    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
+        return ((EvtCompactRow *)(((EvtRowTable *)arg0)->compactRows + arg1 * 0x10))->flags;
     }
-    return *(u16 *)(arg1 * 0x2c + *(s32 *)(arg0 + 0x8c) + 4);
+    return ((EvtExtendedRow *)(((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c))->flags;
 }
 
 s32 func_0023EE48(s32 arg0, s32 arg1) {
-    if (*(s32 *)(*(s32 *)(arg0 + 0x74) + 0x14) == 4) {
-        return *(s32 *)(arg0 + 0x88) + arg1 * 0x10 + 8;
+    if (((EvtRowDescriptor *)((EvtRowTable *)arg0)->descriptor)->format == 4) {
+        return ((EvtRowTable *)arg0)->compactRows + arg1 * 0x10 + 8;
     }
-    return *(s32 *)(arg0 + 0x8c) + arg1 * 0x2c + 0xc;
+    return ((EvtRowTable *)arg0)->extendedRows + arg1 * 0x2c + 0xc;
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023EE98);
