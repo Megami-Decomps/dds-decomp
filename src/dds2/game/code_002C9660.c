@@ -421,16 +421,6 @@ extern FileJob *fileCreateJob(u16 type);
 extern void fileJobFreePrimaryBuffer(FileJob *job);
 extern void fileJobFreeSecondaryBuffer(FileJob *job);
 
-typedef struct FileTypeCallbacks {
-    void *(*create)(void *);
-    void (*unk4)(void *);
-    void (*destroy)(void *);
-    void *(*createChild)(void *, u16);
-    u8 unk10[0x18];
-} FileTypeCallbacks;
-
-extern FileTypeCallbacks D_003E9168[];
-
 /* Only fields needed by the save copy are exposed; the remaining state is opaque. */
 typedef struct FileSaveState {
     u8 pad00[0x20];
@@ -2850,6 +2840,16 @@ void *fileResolveSecondaryBuffer(FileJob *job) {
     return NULL;
 }
 
+typedef struct FileTypeCallbacks {
+    void *(*create)(void *);
+    void (*unk4)(void *);
+    void (*destroy)(void *);
+    void *(*createChild)(void *, u16);
+    u8 unk10[0x18];
+} FileTypeCallbacks;
+
+extern FileTypeCallbacks D_003E9168[];
+
 FileJob *fileJobCreateFromJob(FileJob *request) {
     FileJob *job = fileCreateJob(request->type);
     job->option = request->option;
@@ -2858,7 +2858,15 @@ FileJob *fileJobCreateFromJob(FileJob *request) {
     return job;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileJobDestroy);
+void fileJobDestroy(FileJob *job) {
+    void *data = job->data;
+    if (data != NULL) {
+        D_003E9168[job->type].destroy(data);
+    }
+    fileJobFreePrimaryBuffer(job);
+    fileJobFreeSecondaryBuffer(job);
+    func_00328E48(job);
+}
 
 void fileJobFreePrimaryBuffer(FileJob *job) {
     void *buffer = job->slots[0].allocation;
@@ -2880,7 +2888,15 @@ void fileJobFreeSecondaryBuffer(FileJob *job) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileJobCreateChild);
+FileJob *fileJobCreateChild(FileJob *request) {
+    FileJob *job = fileCreateJob(request->type);
+    FileTypeCallbacks *cb = &D_003E9168[job->type];
+
+    job->option = request->option;
+    job->slots[0].selector = request->slots[0].selector;
+    job->data = cb->createChild(request->data, job->type);
+    return job;
+}
 
 void fileJobNotifyPair(FileJob *left, FileJob *right) {
     void (*cb)(void *, void *) = D_003E916C[right->type].cbC;
@@ -3726,7 +3742,35 @@ EffectSurfaceNode *func_002D6058(FileJob *job) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", func_002D6160);
+void func_002D6160(EffectSurfaceNode *node) {
+    u32 count;
+    u32 i;
+
+    if (node->resource != NULL) {
+        billDispatchByKind(node->resource);
+    }
+    if (node->jobHandle != 0) {
+        count = ((FileSlotTable *)node->active)->count;
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        func_003297C8(node->jobHandle);
+    }
+    if (node->queueHandle != 0) {
+        count = ((FileSlotTable *)node->active)->count;
+        for (i = 0; i < count; i++) {
+            fileQueueDestroy(node->queues[i]);
+        }
+        func_003297C8(node->queueHandle);
+    }
+    if (node->referenceHolder != NULL) {
+        effReleaseReferenceHolder((s32)node->referenceHolder);
+    }
+    if (node->active != 0) {
+        func_002DC028((FileSlotTable *)node->active);
+    }
+    func_00328E48(node);
+}
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     LoadObj *source = (LoadObj *)((FileSlotTable *)owner->recordWork)->data1;
@@ -3737,7 +3781,79 @@ LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileCloneEffectSurfaceResources);
+void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *src) {
+    u32 count;
+    s32 size;
+    u32 i;
+
+    switch (src->kind) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->resource != NULL) {
+            billDispatchByKind(dst->resource);
+        }
+        dst->resource = (void *)func_00159A50((u32)src->resource);
+        func_00159FA0((u32)dst->resource);
+        if (dst->active != 0) {
+            billSetBillboardMode((u32)dst->resource, ((FileBillboardRecord *)((FileSlotTable *)dst->active)->data0)->mode);
+        }
+        break;
+    case 5:
+        count = ((FileSlotTable *)src->active)->count;
+        if (count == 0) {
+            return;
+        }
+        if (dst->jobHandle != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(dst->jobs[i]);
+            }
+            func_003297C8(dst->jobHandle);
+            dst->jobs = 0;
+            dst->jobHandle = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->jobHandle = func_003292A8(size);
+        dst->jobs = sdfResourceRetainAddress(dst->jobHandle);
+        for (i = 0; i < count; i++) {
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+        }
+        break;
+    case 6:
+        count = ((FileSlotTable *)src->active)->count;
+        if (count == 0) {
+            return;
+        }
+        if (dst->queueHandle != 0) {
+            for (i = 0; i < count; i++) {
+                fileQueueDestroy(dst->queues[i]);
+            }
+            func_003297C8(dst->queueHandle);
+            dst->queues = 0;
+            dst->queueHandle = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->queueHandle = func_003292A8(size);
+        dst->queues = sdfResourceRetainAddress(dst->queueHandle);
+        for (i = 0; i < count; i++) {
+            dst->queues[i] = fileQueueClone(src->queues[0]);
+        }
+        break;
+    case 7:
+        if (dst->referenceHolder != NULL) {
+            effReleaseReferenceHolder((s32)dst->referenceHolder);
+        }
+        dst->referenceHolder = (void *)effReferenceObjectRetain((u32)src->referenceHolder);
+        break;
+    }
+    dst->kind = src->kind;
+}
 
 void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
@@ -3783,7 +3899,29 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileReplaceEffectSurfaceJobs);
+void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJob *job) {
+    u32 count = ((FileSlotTable *)node->active)->count;
+    u32 i;
+    s32 size;
+
+    if (node->jobHandle != 0) {
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        func_003297C8(node->jobHandle);
+        node->jobs = 0;
+        node->jobHandle = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        node->jobHandle = func_003292A8(size);
+        node->jobs = sdfResourceRetainAddress(node->jobHandle);
+        node->jobs[0] = fileJobCreateFromJob(job);
+        for (i = 1; i < count; i++) {
+            node->jobs[i] = fileJobCreateChild(node->jobs[0]);
+        }
+    }
+}
 
 void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     u32 count = ((FileSlotTable *)node->active)->count;
@@ -4212,7 +4350,13 @@ void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C9660", fileAcquireRecord);
+void fileAcquireRecord(FileSlotTable *record) {
+    if (record->references == 0) {
+        fileResetSlotStates(record);
+    }
+    D_003E95C0[record->type].acquire(record);
+    record->references++;
+}
 
 void fileReadVectorPtr20(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));
