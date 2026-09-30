@@ -23,7 +23,7 @@ typedef struct DevRequest {
     s16 flags;
     u16 count;
     s16 stride;
-    u16 mode;
+    s16 mode;
     s32 buffer;
 } DevRequest;
 
@@ -87,6 +87,8 @@ extern char D_00398820[];
 extern DevWorkerEntry D_00398860[];
 extern DevWorkerEntry D_00398864[];
 extern u8 D_003BD408[];
+extern f32 D_0039DAF4[];
+extern char *func_002E5970(char *path);
 
 extern s32 SignalSema(s32 sema);
 extern s32 WaitSema(s32 sema);
@@ -108,7 +110,7 @@ extern void *func_002CFF68(s32 size);
 extern s32 func_002D03F8(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
 extern s32 sdfResourceRetainAddress(s32 arg0);
-extern s32 func_002D0A60(s32 arg0);
+extern void func_002D0A60(s32 arg0);
 extern u32 strlen(const char *s);
 extern void func_002F4190(u32 arg0);
 extern u32 D_003BD3E8;
@@ -321,7 +323,7 @@ void func_002E55E0(void) {
     }
 }
 
-u8 sdfPacketExists(u32 request) {
+s32 sdfPacketExists(u32 request) {
     u8 buffer[16];
 
     return func_002E5158(request, buffer, 0) != 0;
@@ -483,7 +485,18 @@ DevState *sdfDevCreateCommandState(s32 command) {
     return state;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5BB8);
+s32 func_002E5BB8(char *path) {
+    char *resolved = func_002E5970(path);
+    s32 fd;
+
+    if (*resolved == '/') {
+        return sdfPacketExists((u32)resolved);
+    }
+    fd = func_0030E8F0(resolved, 1);
+    func_0030EB78(fd);
+    func_002CFF98(resolved);
+    return fd >= 0;
+}
 
 void func_002E5C38(u32 arg0) {
     sdfDevQueueActiveOperation();
@@ -881,7 +894,18 @@ void sdfDestroyDevRequest(DevRequest *request) {
     func_002CFF98(request);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E76B0);
+void func_002E7730(DevRequest *request, s32 count);
+
+void func_002E76B0(DevRequest *request) {
+    if (request->handle == 0) {
+        func_002E7730(request, request->mode);
+        return;
+    }
+    func_002D0A60(request->handle);
+    request->count = request->count + request->mode;
+    func_002D0750(request->handle, (s16)request->count * request->stride);
+    request->buffer = sdfResourceRetainAddress(request->handle);
+}
 
 void func_002E7730(DevRequest *request, s32 count) {
     if (request->handle == 0) {
@@ -942,7 +966,33 @@ void func_002E78F8(f32 arg0) {
     sdfSinPoly(arg0 + 1.5707963f);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7918);
+/* Binary search for value in a sorted table; returns the interpolated position in 0..1. */
+f32 func_002E7918(f32 value, f32 *table, s32 count) {
+    f32 unit = 1 / count;
+    s32 lo = 0;
+    s32 hi = count;
+    s32 mid;
+    f32 lower;
+    f32 upper;
+
+    do {
+        mid = lo + hi;
+        mid >>= 1;
+        upper = table[mid];
+        if (value < upper) {
+            hi = mid;
+        } else {
+            mid++;
+            lo = mid;
+        }
+    } while (lo < hi);
+    upper = table[mid];
+    lower = 0.0f;
+    if (mid != 0) {
+        lower = table[mid - 1];
+    }
+    return mid * unit + (value - lower) * unit / (upper - lower);
+}
 
 f32 sdfAtan2Poly(f32 arg0) {
     f32 x2 = arg0 * arg0;
@@ -980,9 +1030,36 @@ f32 sdfAtan2(f32 arg0, f32 arg1) {
     return r;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7AA8);
+f32 func_002E7AA8(f32 x) {
+    f32 sign;
+    f32 result;
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E7B20);
+    if (x < 0.0f) {
+        x = -x;
+        sign = -1.0f;
+    } else {
+        sign = 1.0f;
+    }
+    result = x >= 1.0f ? 1.5707963f : func_002E7918(x, D_0039DAF4, 128) * 1.5707963f;
+    return result * sign;
+}
+
+f32 func_002E7B20(f32 x) {
+    f32 sign;
+    f32 result;
+
+    if (x < 0.0f) {
+        x = -x;
+        sign = -1.0f;
+    } else {
+        sign = 1.0f;
+    }
+    result = 0.0f;
+    if (!(x >= 1.0f)) {
+        result = (1.0f - func_002E7918(x, D_0039DAF4, 128)) * 1.5707963f;
+    }
+    return result * sign;
+}
 
 f32 sdfWrapAngle(f32 angle) {
     s32 turns;
