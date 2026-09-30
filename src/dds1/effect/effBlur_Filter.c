@@ -9,7 +9,14 @@ typedef struct {
     void *resource;      /* 0x30: object released by the free helpers */
 } EffBlurWork; /* 0x34 */
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186DC8);
+/* Parameter block at the start of a blur work (0x2C bytes). */
+typedef struct {
+    u32 word[11];
+} EffBlurParams;
+
+void func_00186DC8(EffBlurParams *dst, EffBlurParams *src) {
+    *dst = *src;
+}
 
 /* Supply a source handle for the first blur variant. */
 void effBlurSetHandle(EffBlurWork *work, u32 setting) {
