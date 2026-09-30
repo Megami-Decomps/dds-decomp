@@ -119,6 +119,7 @@ typedef struct EffModelCreateRequest {
     void *source;
 } EffModelCreateRequest;
 
+
 extern float func_00341240(void *);
 extern s32 func_002FF0B8(EffectStateSnapshot *, s32);
 
@@ -2063,9 +2064,16 @@ void effClearBillFrames(u8 *owner) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0840);
 
+/* Shared billboard work prefix: retained references and the backing allocation. */
+typedef struct EffBillOwnedWork {
+    u32 reserved;
+    u32 references; /* 0x04 */
+    u32 allocation; /* 0x08 */
+} EffBillOwnedWork;
+
 void func_002E08D0(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E0900);
@@ -2179,8 +2187,8 @@ void billResetCellIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1110);
 
 void func_002E11A0(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E11D0);
@@ -2268,8 +2276,8 @@ void billResetParticleIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1AE8);
 
 void func_002E1B80(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E1BB0);
@@ -2401,7 +2409,7 @@ extern u8 *func_002E24A8();
 u8 *billCreateAnimatedTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E24A8(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
+    ((EffBillOwnedWork *)work)->references = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2411,14 +2419,14 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
     u8 *source = *(u8 **)(owner + 0x30);
     u8 *work = func_002E24A8(descriptor);
 
-    *(s32 *)(work + 4) = effDuplicateResourceRefs(*(u32 *)(source + 4));
+    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
 
 void func_002E2670(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E26A0);
@@ -2538,7 +2546,7 @@ extern u8 *func_002E2E28();
 u8 *billCreateEmitterTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E2E28(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
+    ((EffBillOwnedWork *)work)->references = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2548,14 +2556,14 @@ u8 *billCloneEmitterTransform(u8 *owner) {
     u8 *source = *(u8 **)(owner + 0x30);
     u8 *work = func_002E2E28(descriptor);
 
-    *(s32 *)(work + 4) = effDuplicateResourceRefs(*(u32 *)(source + 4));
+    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
 
 void func_002E2FD8(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E3008);
@@ -2675,7 +2683,7 @@ extern u8 *func_002E37D0();
 u8 *billCreateStripTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E37D0(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
+    ((EffBillOwnedWork *)work)->references = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 3, handle);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2685,14 +2693,14 @@ u8 *billCloneStripTransform(u8 *owner) {
     u8 *source = *(u8 **)(owner + 0x30);
     u8 *work = func_002E37D0(descriptor);
 
-    *(s32 *)(work + 4) = effDuplicateResourceRefs(*(u32 *)(source + 4));
+    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
     billInitializeStripRows(work, descriptor);
     return work;
 }
 
 void func_002E3980(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E39B0);
@@ -2800,8 +2808,8 @@ void billResetTrailIndices(u8 *owner) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4250);
 
 void func_002E42F0(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4320);
@@ -2941,7 +2949,7 @@ extern u8 *func_002E4CA8();
 u8 *billCreateQuadTransform(u8 *descriptor, s32 handle) {
     u8 *work = func_002E4CA8(descriptor);
 
-    *(s32 *)(work + 4) = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
+    ((EffBillOwnedWork *)work)->references = func_002E5C50(((EffBillConfig *)descriptor)->frames.count, 4, handle);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2951,14 +2959,14 @@ u8 *billCloneQuadTransform(u8 *owner) {
     u8 *source = *(u8 **)(owner + 0x30);
     u8 *work = func_002E4CA8(descriptor);
 
-    *(s32 *)(work + 4) = effDuplicateResourceRefs(*(u32 *)(source + 4));
+    ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
 
 void func_002E4E50(s32 work) {
-    effReleaseResourceRefs(*(u32 *)(work + 4));
-    func_003297C8(*(u32 *)(work + 8));
+    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
+    func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E4E80);
@@ -3156,8 +3164,6 @@ void func_002E5AB0(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042BC10);
-
 typedef struct EffTrackSet {
     u32 type;      // 0x00
     u32 color;     // 0x04
@@ -3180,6 +3186,8 @@ extern void func_003332D0(void *, f32);
 extern u16 D_004582B0[];
 extern s32 D_00437E58[2];
 extern void *D_00437E60[2];
+
+INCLUDE_RODATA(const s32, "game/code_002DC138", D_0042BC10);
 
 EffTrackSet *func_002E5AB8(s32 count, u16 kind) {
     s32 rows;
@@ -3697,9 +3705,16 @@ u8 *func_002E75C8(u32 count) {
     return (u8 *)set;
 }
 
+/* Shared asset and allocation handles released by the effect cleanup callbacks. */
+typedef struct EffAssetOwner {
+    u8 pad_00[0x18];
+    u32 asset;      /* 0x18 */
+    u32 allocation; /* 0x1C */
+} EffAssetOwner;
+
 void func_002E7698(s32 work) {
-    sdfQueueAssetRelease(*(u32 *)(work + 0x18));
-    func_003297C8(*(u32 *)(work + 0x1c));
+    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
+    func_003297C8(((EffAssetOwner *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002E76C8);
@@ -4445,8 +4460,8 @@ EffPointSet *func_002EDFB8(s32 count) {
 }
 
 void func_002EE0A8(s32 work) {
-    sdfQueueAssetRelease(*(u32 *)(work + 0x18));
-    func_003297C8(*(u32 *)(work + 0x1c));
+    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
+    func_003297C8(((EffAssetOwner *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002EE0D8);
@@ -5180,8 +5195,8 @@ void func_002F13E0(u32 *obj) {
 
 u8 *effDuplicateActiveResourceB(u8 *obj) {
     u8 *work = effAllocateBlock(*(u16 *)(obj + 0x2C), ((EffClassWork *)obj)->payload);
-    *(void **)(work + 0x30) = D_003E9DD8[*(s32 *)(obj + 0x2C)].duplicate(obj);
-    D_003E9DD8[*(s32 *)(obj + 0x2C)].fn(work);
+    *(void **)(work + 0x30) = D_003E9DD8[((EffClassWork *)obj)->kind].duplicate(obj);
+    D_003E9DD8[((EffClassWork *)obj)->kind].fn(work);
     return work;
 }
 
@@ -5552,8 +5567,8 @@ void effDispatchCleanupOp(u8 *work) {
 
 u8 *effRecreateActiveByClass(u8 *obj) {
     u8 *work = effAllocateBlockWithModel(*(u16 *)(obj + 0x2C), ((EffClassWork *)obj)->payload);
-    *(void **)(work + 0x30) = D_003E9E60[*(s32 *)(obj + 0x2C)].duplicate(obj);
-    D_003E9E60[*(s32 *)(obj + 0x2C)].fn(work);
+    *(void **)(work + 0x30) = D_003E9E60[((EffClassWork *)obj)->kind].duplicate(obj);
+    D_003E9E60[((EffClassWork *)obj)->kind].fn(work);
     return work;
 }
 
@@ -5820,8 +5835,8 @@ EffPointSet *func_002F5730(s32 count) {
 }
 
 void func_002F5820(s32 work) {
-    sdfQueueAssetRelease(*(u32 *)(work + 0x18));
-    func_003297C8(*(u32 *)(work + 0x1c));
+    sdfQueueAssetRelease(((EffAssetOwner *)work)->asset);
+    func_003297C8(((EffAssetOwner *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F5850);
@@ -5950,7 +5965,18 @@ s32 func_002F5BC8(EffectVectorRequest *source, s16 index) {
     }
 }
 
-struct EffActor;
+typedef struct EffActor {
+    u8 pad000[0x54];
+    u32 effectValue; /* 0x54: forwarded to the linked effect */
+    u8 pad058[0xB8];
+    u32 flags;
+    u8 unk114[0x21C];
+    u16 animFlags;
+    u8 unk332[0xE];
+    struct EffModelRef *model; /* 0x340 */
+    u8 pad344[0x20];
+    struct EffActor *next; /* 0x364 */
+} EffActor;
 
 s32 func_002F5D70(struct EffActor **out, u32 kind) {
     s32 count = 0;
@@ -5961,37 +5987,37 @@ s32 func_002F5D70(struct EffActor **out, u32 kind) {
 
     switch (kind) {
     case 1:
-        if ((*(u32 *)(actor + 0x110) & 2) && *(u32 *)(actor + 0x340) != 0) {
+        if ((((EffActor *)actor)->flags & 2) && ((EffActor *)actor)->model != 0) {
             out[0] = (struct EffActor *)actor;
             count = 1;
         }
         break;
     case 4:
-        mask = *(u32 *)(other + 0x110) & 0x600;
+        mask = ((EffActor *)other)->flags & 0x600;
         break;
     case 3:
-        mask = *(u32 *)(actor + 0x110) & 0x600;
+        mask = ((EffActor *)actor)->flags & 0x600;
         break;
     case 5:
         mask = 0x600;
         break;
     case 6:
         other = (u8 *)func_00169448();
-        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+        if ((((EffActor *)other)->flags & 2) && ((EffActor *)other)->model != 0) {
             out[0] = (struct EffActor *)other;
             count = 1;
         }
         break;
     case 7:
         other = (u8 *)func_00169450();
-        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+        if ((((EffActor *)other)->flags & 2) && ((EffActor *)other)->model != 0) {
             out[0] = (struct EffActor *)other;
             count = 1;
         }
         break;
     case 0:
     case 2:
-        if ((*(u32 *)(other + 0x110) & 2) && *(u32 *)(other + 0x340) != 0) {
+        if ((((EffActor *)other)->flags & 2) && ((EffActor *)other)->model != 0) {
             out[0] = (struct EffActor *)other;
             count = 1;
         }
@@ -6000,12 +6026,12 @@ s32 func_002F5D70(struct EffActor **out, u32 kind) {
     if (mask != 0) {
         u8 *link;
 
-        for (link = *(u8 **)(state + 0x24C); link != NULL; link = *(u8 **)(link + 0x364)) {
-            u32 flags = *(u32 *)(link + 0x110);
+        for (link = *(u8 **)(state + 0x24C); link != NULL; link = (u8 *)((EffActor *)link)->next) {
+            u32 flags = ((EffActor *)link)->flags;
 
             if (flags & 1) {
                 if (flags & 2) {
-                    if (*(u32 *)(link + 0x340) != 0) {
+                    if (((EffActor *)link)->model != 0) {
                         if (flags & mask) {
                             out[count++] = (struct EffActor *)link;
                         }
@@ -6143,14 +6169,6 @@ void effReleaseTargetSlots(u32 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F6D00);
 
-typedef struct EffActor {
-    u8 unk0[0x110];
-    u32 flags;
-    u8 unk114[0x21C];
-    u16 animFlags;
-    u8 unk332[0xE];
-    struct EffModelRef *model;
-} EffActor;
 
 typedef struct EffModelRef {
     u8 unk0[0x8C];
@@ -9688,8 +9706,19 @@ s32 effDestroyPackedBatch(s32 *batch) {
     return 1;
 }
 
+/* Resource slot set: source records and 0xA0-byte live entries. */
+typedef struct EffSlotSet {
+    u8 pad00[8];
+    u32 count;        /* 0x08 */
+    u8 pad0C[4];
+    u32 sourceRecords; /* 0x10 */
+    u32 allocation;    /* 0x14 */
+    u32 entries;       /* 0x18 */
+    u32 entryCount;    /* 0x1C */
+} EffSlotSet;
+
 u32 func_00304AB8(s32 owner) {
-    func_003297C8(*(u32 *)(owner + 0x14));
+    func_003297C8(((EffSlotSet *)owner)->allocation);
     return 1;
 }
 
@@ -9697,7 +9726,7 @@ s32 func_00304AD8(s32 owner, s32 index) {
     s32 override;
     s32 entry;
 
-    entry = index * 0xa0 + *(s32 *)(owner + 0x18);
+    entry = index * 0xa0 + ((EffSlotSet *)owner)->entries;
     override = *(s32 *)(entry + 0x9c);
     if (override != 0) {
         entry = override;
@@ -9719,17 +9748,17 @@ u32 func_00304AF8(u32 *state) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_00304B18);
 
 void func_00304CE0(s32 owner, s32 index) {
-    func_00304B18(owner, index, *(s32 *)(owner + 0x18) + index * 0xa0);
+    func_00304B18(owner, index, ((EffSlotSet *)owner)->entries + index * 0xa0);
 }
 
 extern void func_00304D80(u32, u32);
 
 void func_00304D08(u8 *owner) {
     u32 index = 0;
-    if (*(u32 *)(owner + 8) != 0) {
+    if (((EffSlotSet *)owner)->count != 0) {
         do {
             func_00304D80((u32)owner, index++);
-        } while (index < *(u32 *)(owner + 8));
+        } while (index < ((EffSlotSet *)owner)->count);
     }
 }
 
@@ -9746,7 +9775,7 @@ void func_00304D60(a, b, obj)
 void func_00304D80(u32 owner, u32 index) {
     s32 entry;
 
-    entry = *(s32 *)((s32)owner + 0x18) + (s32)index * 0xa0;
+    entry = ((EffSlotSet *)owner)->entries + (s32)index * 0xa0;
     memset(entry, 0, 0xa0);
     func_00304D60(owner, index, entry);
 }
@@ -9775,7 +9804,7 @@ extern void sdfTexReleaseReference(s32, u32, u32);
 
 void func_00304FB0(u8 *owner, s32 preserve) {
     u32 i = 0;
-    u32 count = *(u32 *)(owner + 0x1C);
+    u32 count = ((EffSlotSet *)owner)->entryCount;
     u32 *resources;
 
     if (count != 0) {
@@ -9925,10 +9954,10 @@ INCLUDE_ASM(const s32, "game/code_002DC138", func_003056B0);
 
 s32 func_00305848(u8 *effect, u32 slot, u32 material) {
     u32 offset = slot * 0xA0;
-    if (*(u32 *)(offset + *(u32 *)(effect + 0x18) + 0x9C) == 0) {
+    if (*(u32 *)(offset + ((EffSlotSet *)effect)->entries + 0x9C) == 0) {
         func_00304D60(effect, slot);
     }
-    *(u32 *)(offset + *(u32 *)(effect + 0x18) + 0x9C) = material;
+    *(u32 *)(offset + ((EffSlotSet *)effect)->entries + 0x9C) = material;
     return 1;
 }
 
@@ -9936,10 +9965,10 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     s32 offset = index * 0xA0;
     u32 i;
     EffectMaterialSlot *slots;
-    if (*(void **)(offset + *(s32 *)(work + 0x18) + 0x9C) == NULL) {
+    if (*(void **)(offset + ((EffSlotSet *)work)->entries + 0x9C) == NULL) {
         func_00304D60((void *)work, index, asset);
     }
-    *(BdWork **)(offset + *(s32 *)(work + 0x18) + 0x9C) = asset;
+    *(BdWork **)(offset + ((EffSlotSet *)work)->entries + 0x9C) = asset;
     slots = (EffectMaterialSlot *)((u8 *)asset + 0x30);
     for (i = 0; i < 2; i++) {
         slots[i].value = value;
@@ -9948,19 +9977,19 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
 }
 
 u32 func_00305950(s32 effect, s32 slot) {
-    *(u32 *)(slot * 0xa0 + *(s32 *)(effect + 0x18) + 0x9c) = 0;
+    *(u32 *)(slot * 0xa0 + ((EffSlotSet *)effect)->entries + 0x9c) = 0;
     return 1;
 }
 
 s32 func_00305970(u8 *effect, u32 slot, u32 resource, u32 flags) {
-    u8 *entry = *(u8 **)(effect + 0x18) + slot * 0xA0;
+    u8 *entry = (u8 *)((EffSlotSet *)effect)->entries + slot * 0xA0;
     func_00305558((u32 *)(entry + 0x28), resource, flags);
     func_003056B0(effect, slot, entry);
     return 1;
 }
 
 s32 func_003059E0(u8 *effect, u32 slot, u8 *resources, u32 index, u32 flags) {
-    u8 *entry = *(u8 **)(effect + 0x18) + slot * 0xA0;
+    u8 *entry = (u8 *)((EffSlotSet *)effect)->entries + slot * 0xA0;
     u32 resource = *(u32 *)(resources + 8) + index * 0x24;
     func_00305558((u32 *)(entry + 0x28), resource, flags);
     func_003056B0(effect, slot, entry);
@@ -9969,7 +9998,7 @@ s32 func_003059E0(u8 *effect, u32 slot, u8 *resources, u32 index, u32 flags) {
 
 s32 func_00305A60(u8 *effect, u32 slot, u8 *resources, u32 index,
                   u32 flags, u32 option, u32 color) {
-    u8 *entry = *(u8 **)(effect + 0x18) + slot * 0xA0;
+    u8 *entry = (u8 *)((EffSlotSet *)effect)->entries + slot * 0xA0;
     u32 resource = *(u32 *)(resources + 8) + index * 0x24;
     func_00305558((u32 *)(entry + 0x28), resource, color);
     func_003056B0(effect, slot, entry);
@@ -9988,10 +10017,10 @@ u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
     u32 index;
 
     do {
-        func_003055D8((first + i) * 0xA0 + *(u32 *)(table + 0x18) + 0x28, arg);
+        func_003055D8((first + i) * 0xA0 + ((EffSlotSet *)table)->entries + 0x28, arg);
         i++;
         index = first + i;
-    } while (index < *(u32 *)(table + 8) && (*(u32 *)(index * 0x80 + *(u32 *)(table + 0x10) + 0x18) & 0x20));
+    } while (index < ((EffSlotSet *)table)->count && (*(u32 *)(index * 0x80 + ((EffSlotSet *)table)->sourceRecords + 0x18) & 0x20));
     return 1;
 }
 

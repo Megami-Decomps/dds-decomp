@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 
 extern void *D_003BDA34;
@@ -188,14 +189,14 @@ void sdfVuMultiplyScratchByPrimary(void) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDD38(void *arg0) {
-    VU0_LOAD_MATRIX_B(arg0);
+void func_002DDD38(void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
     func_002DDBF8();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDD60(void *arg0) {
-    VU0_LOAD_MATRIX_B(arg0);
+void func_002DDD60(void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
     func_002DDC50();
 }
 
@@ -214,8 +215,8 @@ void sdfVuTransformVector(void *dst, void *src) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-f32 sdfVuDot3(void *arg0, void *arg1) {
-    f32 ret;
+f32 sdfVuDot3(void *left, void *right) {
+    f32 dot;
     __asm__ volatile (
         ".set noreorder           \n"
         "lqc2 vf10, 0x0(%1)       \n"
@@ -226,8 +227,8 @@ f32 sdfVuDot3(void *arg0, void *arg1) {
         "qmfc2.ni $2, vf2        \n"
         "mtc1 $2, %0 \n"
         ".set reorder"
-        : "=f"(ret) : "r"(arg0), "r"(arg1) : "memory");
-    return ret;
+        : "=f"(dot) : "r"(left), "r"(right) : "memory");
+    return dot;
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -245,7 +246,7 @@ void sdfVuCross3(void *dst, void *src1, void *src2) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
-void sdfVuBuildLookAtBasis(void *arg0, void *arg1, void *arg2) {
+void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
     __asm__ volatile (
         ".set noreorder             \n"
         "lqc2 vf10, 0x0(%1)         \n"
@@ -279,7 +280,7 @@ void sdfVuBuildLookAtBasis(void *arg0, void *arg1, void *arg2) {
         "vopmsub.xyz vf10, vf11, vf10 \n"
         "vmove.xyzw vf29, vf10 \n"
         ".set reorder"
-        : : "r"(arg0), "r"(arg1), "r"(arg2) : "memory");
+        : : "r"(target), "r"(origin), "r"(up) : "memory");
     func_002DD520();
 }
 
@@ -334,8 +335,8 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-/* vu0 routine: rotate the three vectors at arg0 + 0x40 by the 3x3 of D_003BDA28 into vf24-vf26, store them at D_003F98A0 */
-void func_002DDFB0(void *arg0) {
+/* vu0 routine: rotate the three vectors at vectors + 0x40 by the 3x3 of D_003BDA28 into vf24-vf26, store them at D_003F98A0 */
+void func_002DDFB0(void *vectors) {
     void *m = (void *)D_003BDA28;
     __asm__ volatile (
         ".set noreorder                \n"
@@ -358,7 +359,7 @@ void func_002DDFB0(void *arg0) {
         "sqc2 vf3, 0x10(%2)           \n"
         "sqc2 vf4, 0x20(%2) \n"
         ".set reorder"
-        : : "r"(arg0), "r"(m), "r"(D_003F98A0) : "memory");
+        : : "r"(vectors), "r"(m), "r"(D_003F98A0) : "memory");
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
@@ -652,19 +653,19 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E02D8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
 
-void func_002E04E0(u32 arg0) {
+void func_002E04E0(u32 workAddress) {
     u32 flags;
-    s32 workAddress;
+    s32 address;
 
-    workAddress = (s32)arg0;
-    func_002E02B0((VuWork *)workAddress);
-    flags = ((VuWork *)workAddress)->selectedFlags;
+    address = (s32)workAddress;
+    func_002E02B0((VuWork *)address);
+    flags = ((VuWork *)address)->selectedFlags;
     if ((flags & 0x1000) != 0) {
-        func_002E02D8(arg0);
-        flags = ((VuWork *)workAddress)->selectedFlags;
+        func_002E02D8(workAddress);
+        flags = ((VuWork *)address)->selectedFlags;
     }
     if ((flags & 1) != 0) {
-        func_002E03C0(arg0);
+        func_002E03C0(workAddress);
         return;
     }
 }
@@ -742,8 +743,8 @@ void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *
     }
 }
 
-void func_002E11E0(u32 arg0) {
-    D_003BDA28 = arg0;
+void func_002E11E0(u32 matrixAddress) {
+    D_003BDA28 = matrixAddress;
 }
 
 void func_002E11E8(u8 *object) {
@@ -754,8 +755,8 @@ void func_002E11E8(u8 *object) {
 }
 
 
-void func_002E1210(f32 arg0) {
-    D_003BDA30 = arg0;
+void func_002E1210(f32 scale) {
+    D_003BDA30 = scale;
 }
 
 void func_002E1218(void) {
@@ -830,17 +831,17 @@ s32 sdfConsCreateDrawPacket(s32 owner, s32 width, s32 height) {
     return result;
 }
 
-u32 func_002E13E0(u32 arg0, s32 arg1) {
-    func_002D45B0(arg0, (arg1 >> 4) - 2);
-    return arg0;
+u32 func_002E13E0(u32 packet, s32 size) {
+    func_002D45B0(packet, (size >> 4) - 2);
+    return packet;
 }
 
 s32 sdfConsCalculateDrawPacketSize(s32 width, s32 height) {
     return (width * height + 2) << 4;
 }
 
-s32 func_002E1420(s32 arg0) {
-    return arg0 + 0x20;
+s32 func_002E1420(s32 size) {
+    return size + 0x20;
 }
 
 void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 flags, s32 width, s64 command, s32 height) {
@@ -935,7 +936,86 @@ void func_002E1710(u32 arg0) {
     D_003BD378 = arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1718);
+/* Camera/viewport record; builds the perspective matrix (vf28-vf31 -> matrix) and the screen offsets. */
+typedef struct SdfCamera {
+    u32 flags;       // 0x00: 1 half-height, 2 field-of-view projection
+    f32 aspect;      // 0x04
+    f32 scale;       // 0x08
+    f32 fov;         // 0x0C
+    f32 offsetX;     // 0x10
+    f32 offsetY;     // 0x14
+    f32 width;       // 0x18
+    f32 height;      // 0x1C
+    f32 top;         // 0x20
+    f32 bottom;      // 0x24
+    f32 nearZ;       // 0x28
+    f32 farZ;        // 0x2C
+    u8 matrix[0x40]; // 0x30
+    f32 halfWidth;   // 0x70
+    f32 halfHeight;  // 0x74
+    f32 centerY;     // 0x78
+    f32 one;         // 0x7C
+    f32 originX;     // 0x80
+    f32 originY;     // 0x84
+    f32 bottomY;     // 0x88
+    u32 zero;        // 0x8C
+} SdfCamera;
+
+extern s8 D_003BD360;
+extern f32 D_003BD364;
+extern f32 D_003BD368;
+extern f32 D_003BD36C;
+extern f32 D_003BD370;
+extern f32 func_002FA148(f32);
+
+void func_002E1718(SdfCamera *cam) {
+    f32 m[16];
+    f32 farZ = cam->farZ;
+    f32 nearZ = cam->nearZ;
+    f32 range = farZ - nearZ;
+    f32 halfWidth = cam->width * 0.5f;
+    f32 halfHeight = cam->height * 0.5f;
+    f32 v;
+    f32 centerY;
+
+    EE_MMI_UNIT_MATRIX(m);
+    m[0] = 1.0f / (halfWidth * cam->aspect);
+    m[5] = 1.0f / halfHeight;
+    m[10] = farZ * nearZ * 2.0f / range;
+    m[14] = -(nearZ + farZ) / range;
+    VU0_LOAD_MATRIX(m);
+    EE_MMI_UNIT_MATRIX(m);
+    if (cam->flags & 2) {
+        v = cam->height / (func_002FA148(cam->fov * 0.5f) * 2.0f);
+    } else {
+        v = cam->scale;
+    }
+    m[5] = m[0] = v;
+    m[10] = 0;
+    m[15] = 0;
+    m[14] = m[11] = 1.0f;
+    func_002DDD38(m);
+    VU0_STORE_MATRIX(cam->matrix);
+    cam->halfWidth = halfWidth;
+    centerY = (cam->bottom - cam->top) * 0.5f;
+    if (cam->flags & 1) {
+        cam->halfHeight = halfHeight * 0.5f;
+    } else {
+        cam->halfHeight = halfHeight;
+    }
+    cam->centerY = centerY;
+    cam->one = 1.0f;
+    cam->originX = cam->offsetX;
+    cam->originY = cam->offsetY;
+    cam->bottomY = centerY + cam->top;
+    cam->zero = 0;
+    if (D_003BD360 != 0) {
+        cam->halfWidth *= D_003BD364;
+        cam->halfHeight *= D_003BD368;
+        cam->originX += D_003BD36C;
+        cam->originY += D_003BD370;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1938);
 
@@ -1137,16 +1217,16 @@ void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2680);
 
-s32 func_002E27C8(s32 arg0) {
-    return arg0 * 0x40 + 0x40;
+s32 func_002E27C8(s32 count) {
+    return count * 0x40 + 0x40;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E27D8);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2A00);
 
-u32 func_002E2B90(s32 arg0) {
-    return (arg0 * 0x54 + 0x4bU) & 0xfffffff0;
+u32 func_002E2B90(s32 count) {
+    return (count * 0x54 + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2BB8);
@@ -1161,8 +1241,8 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E2F68);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E31A0);
 
-u32 func_002E3368(s32 arg0) {
-    return (arg0 * 0x6c + 0x4bU) & 0xfffffff0;
+u32 func_002E3368(s32 count) {
+    return (count * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3390);
@@ -1399,13 +1479,44 @@ void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
     D_003F9B00[padIndex].largeMotor = strength;
 }
 
-void sdfDevConsSetEntryPair(s32 index, s32 arg1, s32 arg2) {
+void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
     F9B00Entry *entry = &D_003F9B00[index];
-    entry->smallMotor = arg1 & 0xFF;
-    D_003F9B00[index].largeMotor = arg2 & 0xFF;
+    entry->smallMotor = small & 0xFF;
+    D_003F9B00[index].largeMotor = large & 0xFF;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E3BD8);
+extern u8 D_003BD398[4];
+extern u8 D_003F9900[];
+extern u8 D_003BD39C;
+extern s32 func_002F1C50(s32);
+extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
+
+void func_002E3BD8(void) {
+    s32 i;
+
+    func_002F1C50(0);
+    for (i = 0; i != 2; i++) {
+        s32 port = D_003BD398[i * 2];
+        s32 slot = D_003BD398[i * 2 + 1];
+        F9B00Entry *entry;
+
+        scePadPortOpen(port, slot, &D_003F9900[i * 0x100]);
+        entry = &D_003F9B00[i];
+        entry->port = port;
+        entry->slot = slot;
+        entry->state = 0;
+        entry->mode = 0;
+        entry->requestedMode = 0;
+        entry->buttons = 0;
+        entry->prevButtons = 0;
+        entry->smallMotor = 0;
+        entry->largeMotor = 0;
+    }
+    memset(D_00398628, 0, 0x20);
+    memset(D_003BD3A8, 0x80, 8);
+    memset(D_00398648, 0, 0x18);
+    D_003BD39C = 0;
+}
 
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
@@ -1464,14 +1575,14 @@ void sdfDevConsResetNode(ConsNode *node) {
     sdfDevConsNodeClear(node);
 }
 
-ConsNode *sdfDevConsNodeCreate(u32 arg0, u32 arg1, s32 columns, s32 rows) {
+ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     ConsNode *node;
     u32 bufferHandle;
 
     sdfDevConsInit();
     node = func_002CFEB8(0x20);
-    node->unk8 = arg0;
-    node->unkA = arg1;
+    node->unk8 = first;
+    node->unkA = second;
     node->columns = columns;
     node->rows = rows;
     node->unk17 = 8;
@@ -1514,6 +1625,8 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD380);
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD388);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD390);
+
+INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD398);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD39C);
 
