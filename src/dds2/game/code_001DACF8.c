@@ -465,6 +465,20 @@ extern u32 D_00435CD4;
 
 extern s32 func_002A2330(void);
 
+extern void func_002A2550(void);
+
+extern void func_002A2200(s32);
+
+extern s32 D_00435E0C;
+
+extern s32 D_00435E04;
+
+typedef struct SoundSceneEntry {
+    u8 pad00[0x24];
+    u16 unk24;
+    u8 pad26[2];
+} SoundSceneEntry;
+
 extern s32 func_00342168(u32);
 
 typedef struct SoundTask {
@@ -645,18 +659,32 @@ extern s32 D_003BBF70[];
 
 extern s32 D_003BBF88[];
 
+extern s32 D_003BBFA8[];
+
+extern s32 D_003BC090[];
+
+extern s32 D_003BC0A0[];
+
+extern s32 D_003BC0C0[];
+
+extern s32 D_003BC0C8[];
+
+extern void func_001F02E0(s32, s32);
+
 extern void func_001FA480(s32, s32, s32);
 
 extern void func_001FBAC0(s32, s32);
 
+extern s32 func_001FB908(s32, s32, s32, s32);
+
 typedef struct SoundCursor {
     u16 unk_00;
-    u16 frame;
+    s16 frame;
     s16 mode;
     s16 index;
     u16 unk_08;
-    u16 unk_0A;
-    u16 unk_0C;
+    s16 unk_0A;
+    s16 unk_0C;
     u16 unk_0E;
 } SoundCursor;
 
@@ -2024,7 +2052,18 @@ void func_001E20B8(u32 arg0, u32 arg1, u32 arg2) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001E2110);
+s32 func_001E2110(u8 *object, u32 effect, u32 model) {
+    if (mdlFlagTest(0xC0F) != 0) {
+        if (func_0022CD60(effect, model, 0) != 0) {
+            return 1;
+        }
+    } else {
+        if (mdlRequestAsset(effect, model, 0) != 0 && mdlRequestAsset(effect, model, 0) != -1) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
     s32 (*hook)(BtlUnit *) = ((BtlWork *)func_001AA6F8())->hook69C;
@@ -4809,7 +4848,15 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F3E48);
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F41F0);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001F4D70);
+void func_001F4D70(s32 arg0, s32 arg1) {
+    if (!(((ActionUnit *)arg0)->link->unit->flags & 0x400)) {
+        func_001FA480(arg0, arg1, D_003BBFA8[CURSOR->unk_0A]);
+        func_001FBAC0(arg0, arg1);
+        func_001FB908(arg0, arg1, 0, 0);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001DACF8", D_00417D70);
 
@@ -4969,18 +5016,54 @@ s32 btlCountUnitsByFlags(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF5D8);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF820);
+void func_001FF820(s32 arg0, s32 arg1) {
+    if (CURSOR->unk_00 == 1) {
+        if (!(((ActionUnit *)arg0)->link->unit->flags & 0x400)) {
+            func_001FA480(arg0, arg1, D_003BC0A0[CURSOR->unk_0C]);
+            func_001FBAC0(arg0, arg1);
+            func_001FB908(arg0, arg1, 0, 1);
+            CURSOR->frame++;
+            CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+        }
+    }
+}
 
 void func_001FF8F0(u32 arg0) {
     memset(D_003BD7D0, 0, 0x130);
     func_001F01E8(arg0, arg0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FF930);
+void func_001FF930(s32 arg0, s32 arg1) {
+    if (CURSOR->unk_00 == 1) {
+        if (((ActionUnit *)arg0)->link->unit->flags & 0x400) {
+            return;
+        }
+        func_001FA480(arg0, arg1, D_003BC0C0[CURSOR->unk_0C]);
+        func_001FBAC0(arg0, arg1);
+        func_001FB908(arg0, arg1, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        func_001F02E0(arg0, arg0);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFA08);
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFAD8);
+void func_001FFAD8(s32 arg0, s32 arg1) {
+    if (CURSOR->unk_00 == 1) {
+        if (((ActionUnit *)arg0)->link->unit->flags & 0x400) {
+            return;
+        }
+        func_001FA480(arg0, arg1, D_003BC0C8[CURSOR->unk_0C]);
+        func_001FBAC0(arg0, arg1);
+        func_001FB908(arg0, arg1, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    } else {
+        func_001F02E0(arg0, arg0);
+    }
+}
 
 void func_001FFBB0(s32 arg0, s32 arg1) {
     s32 first;
@@ -4997,7 +5080,15 @@ void func_001FFBB0(s32 arg0, s32 arg1) {
     func_001F5320(arg0, arg1, 0, 0x11);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFC70);
+void func_001FFC70(s32 arg0, s32 arg1) {
+    if (!(((ActionUnit *)arg0)->link->unit->flags & 0x400)) {
+        func_001FA480(arg0, arg1, D_003BC090[CURSOR->unk_0C]);
+        func_001FBAC0(arg0, arg1);
+        func_001FB908(arg0, arg1, 0, 1);
+        CURSOR->frame++;
+        CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
+    }
+}
 
 extern void func_001E4378(s32);
 
@@ -5022,8 +5113,6 @@ INCLUDE_ASM(const s32, "game/code_001DACF8", func_001FFDD0);
 extern void func_001F5868(s32, s32, s32, s32);
 
 extern void func_001F5320(s32, s32, s32, s32);
-
-extern s32 func_001FB908(s32, s32, s32, s32);
 
 s32 func_001FFF68(s32 arg0, s32 arg1) {
     s32 result;
@@ -6333,7 +6422,31 @@ void func_00203EE8(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x319c, 0x3f);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DACF8", func_00203F08);
+void func_00203F08(s32 arg0, s32 arg1) {
+    s32 work = func_001AA6F8();
+    u32 v = 0;
+    SoundSceneEntry *entry;
+    if (arg0 != 0) {
+        v = *(u16 *)(D_00435E0C + arg0 * 0x190 + 4);
+    }
+    entry = (SoundSceneEntry *)(arg1 * 0x28 + D_00435E04);
+    if (entry->unk24 != 0) {
+        v = entry->unk24;
+    } else if (*(u8 *)(work + 0x26E) == 3) {
+        v = 1;
+    }
+    if (v == 0) {
+        v = 5;
+    }
+    if (func_002A2330() != 0) {
+        func_002A2550();
+    }
+    if (v == 5) {
+        func_002A2200(4);
+    } else {
+        func_002A2200(v - 1);
+    }
+}
 
 u8 func_00203FD8(void) {
     s32 status;

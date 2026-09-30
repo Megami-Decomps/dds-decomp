@@ -137,6 +137,35 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - `bltzl` with the fallback constant in the delay slot is
   `if (a + b < 0) x = K; else x += b;`: the sum sits in the condition and
   both arms store. A temporary or a ternary gives `movn`.
+- A clamp that retail keeps as a branch (`beql; li MAX-1` or `bnez; daddu`
+  with the value in the slot) is a ternary whose every arm reads the field
+  itself, after a separate increment, the way a `CLAMP(x, lo, hi)` macro
+  expands: `c->frame++; c->frame = c->frame <= 0 ? 0 : c->frame >= 0x7FFF ?
+  0x7FFE : c->frame;`. jump_optimize won't turn an arm with a memory read into
+  `movn`/`movz` (`may_trap_p`); CSE later folds the reads into the register
+  holding the sum. The field must be signed (`s16`/`s8`) so the compare is
+  `sll; sra`. Any local temporary if-converts to `li; movn`
+  (`func_001F4D70`, `func_001FFC70`, `func_00210DC8`; DDS1 `func_001E60C0`,
+  `func_001EEC20`, `func_001FEB90` have the same shape). `abs` written as
+  `l->arg < 0 ? -l->arg : l->arg` gives `bltzl; negu` for the same reason.
+- `xori t,x,K; movz` with K != 0 is plain `v = d; if (x == K) v = c;`.
+  With K = 0 it is an `xor reg,reg` compare that only became 0 after CSE;
+  the source shape is still unknown (`func_001E99C0`, DDS1
+  `btlLowestSetPairIndex`).
+- `li K; mult` for a small K that shifts could do: the multiplier is a named
+  local, e.g. `s32 cw = 0xC0, ch = 0x60;`, used as `cols * cw + ch`. Literals
+  and `const` locals fold to `sll/addu` (`func_00103790`; DDS1 twin
+  `func_001038A0`).
+- `beqz; sltiu; bnel` (store in the slot), `b; li 1`, `daddu $2,$0,$0` is an
+  `||` guard ahead of an unsigned counter increment:
+  `if (f() == 0 || l->count >= 0x1E) return 1; l->count++; return 0;`
+  (`func_00210148`, `func_00210850`).
+- A load in the first `bnez` delay slot after a leading call is a local read
+  right after the call (`actor = link->actor;`); without it reorg leaves a
+  `nop` (`func_00210258`, `func_002103F8`).
+- A hoisted `daddu $2,$0,$0` with a load in the branch slot is
+  `s32 result = 0;` at the top, returned on the zero paths; `return 0;` puts
+  `move $2,$0` in the slot (`func_0020EBD0`).
 - Loops over parallel per-slot arrays (`set->handle[i]`, `set->active[i]`)
   keep retail's count-up loop. A pointer walk becomes a count-down loop.
 - To keep two `slti` where C would fold a range test into `sltiu`, nest the
