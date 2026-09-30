@@ -26,6 +26,18 @@ case 4: o->sub->c = v; return;
 The table goes into the unit's `.rodata`, and check_unit verifies every entry.
 Retail example: `func_0018CC98`.
 
+- A `switch` on `u32` with cases 0, 1 and 2 makes a linear `beq` chain;
+  changing the selector to `s32` introduces an `slt` split (`func_0027DCE8`).
+- In a switch with calls, `case 1: f(); return; case 2: g(); break;`
+  keeps the first call a sibling `j`, but gives the last a `jal` and shared
+  epilogue (`func_00282850`; also `func_002BE448`).
+- Write the same call separately in switch cases ending in `break` when
+  retail has one cross-jumped `jal`; computing one argument and calling
+  once instead changes the whole dispatch (`func_00285F00`).
+- In a sparse switch, an explicit `default: return;` after separately
+  written cases can turn duplicate tail calls into one `jal` plus a
+  shared epilogue (`func_0025FCD8`).
+
 ## `slt; sltiu 1` vs `slt; xori 1`
 
 A negated comparison written as an expression (`return !(x < 2);`,
@@ -90,6 +102,9 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Chained `*p &= ~2; *p &= ~4;` are not folded into one mask.
 - A ternary of two constants can pick the wrong `movn`/`movz` operands;
   `x = default; if (c) x = other;` gives retail's split.
+- For two constant arms, their order controls `movz` versus `movn`:
+  `x = r != 0 ? 0xA : 0x80` gives `li 0x80; li 0xA; movz`, unlike the
+  equivalent `r == 0` ternary (`func_0011E208`).
 - `(w + 8) * 16` folds to `w * 16 + 128` unless `w + 8` is its own local.
 - A field that retail tests with `srl; andi` and rewrites with `and`/`ori`
   on the whole word is a bitfield. Declare the struct with bitfields; raw
@@ -173,6 +188,93 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   delay slots: `if (a != 0) { if (g() != 0) return 0; ...; return 2; } return 1;`
   matched where `if (g() == 0) {...; return 2;} return 0;` produced `bnel`
   instead of `bne` (`func_002C5EA8`).
+- Use early `return 0` rather than a shared `result` variable when retail
+  puts `daddu $2,$0,$0` in the branch delay slot; the variable adds a move
+  or changes the branch to `beql` (`func_0030D3C0`, `func_00312320`).
+- Separate `return 1` exits can keep a `li $2,1` at each branch site;
+  one merged return changes the delay slots (`func_002198D8`).
+- A small `if/else` whose else is `dir = 1` gives `bgezl; li` when written
+  `if (x < 0) { dir = -1; x = -x; } else { dir = 1; }`; testing `x >= 0`
+  first gives plain `bgez` (`func_00279CC0`).
+- Keeping `s64 t = f(); if (t) { ...; return g(t); } return t;` preserves
+  the post-call `move $3,$2`; overwriting `t` with `g(t)` does not
+  (`func_001B7AE0`).
+- Copy a `u8` state into an `s32` local before testing
+  `state == 1 || state == 2` to get `addiu -1; sltiu 2` without
+  `andi 0xFF` (`func_001C2A50`).
+- `head = head->prev; list->head = head;` reuses the argument's
+  home register; a separate accumulator takes another register
+  (`func_0027BB80`).
+- Chained stores `timer = timerMax = value` reverse the two store
+  instructions compared with `timer = value; timerMax = timer`
+  (`func_002858A0`).
+- Read a field into a local before an unrelated store to let the store
+  occupy the following `jal` delay slot (`func_001E64B0`).
+- `s32 bank = kind >= 2; return m->banks[bank].x;` retains the indexed
+  shift/add, whereas `banks[kind >= 2]` becomes `li/movn`
+  (`func_00168448`).
+- A word set by `header = h | (w << 60); header |= f << 47; header |= K;`
+  loads `K` late with `dli`; one combined OR chain hoists it
+  (`func_0033A2D8`).
+- A union view `union { u32 word; u16 half; }` preserves an `lhu`
+  reload after writing `word`; a plain halfword or bitfield lets gcc
+  fold the read away (`func_0025E7B8`).
+- `value += 0.005f; value -= whole;` on an `f32` parameter reuses
+  `$f12`, where separate temporaries do not (`func_0011DE20`).
+- `s64 result = f(); if (result != 0) { ...; return 1; } return result;`
+  passes `$2` straight through on the zero path (`func_002B3090`).
+- Initialize a scalar counter after the early-return checks, not at
+  its declaration, when retail keeps it in a caller-saved register
+  (`func_001B2540`).
+- `if (f() == 0) { ...; return N; } return 0;` gives an annulled
+  `bnel` with zero in its slot; flipping the test to an early
+  `return 0` gives plain `bne` (`func_001D0710`).
+- `limit = value = word & 0xFF` keeps the low-byte result in the
+  register retail uses for both the clamp and its store; splitting
+  the assignments changes the pseudo (`func_001B0938`).
+- Re-read a just-stored call result through `*(T *)(work + off)` when
+  retail passes the call's `$2` straight through: gcc eliminates the
+  load via CSE (`func_002A94D0`).
+- `fade->state = kind;` followed by a test of `fade->state` against
+  6 and 1 retains the copied value used in retail's comparison
+  (`func_002710D8`).
+- Declaring non-GP data as `extern s32 D_X[]` rather than a scalar
+  emits retail's `lui/lw` instead of a `%gp_rel` load
+  (`func_002A87F0`).
+- `((void (*)(void))p)()` leaves `$4` untouched before an indirect
+  call, preserving retail's `jalr; nop` and the earlier `li $4`
+  (`func_0028BE78`).
+- Declare switch cases' shared `count` and `i` at function scope
+  when retail retains the same register assignment across arms
+  (`func_002D62D8`).
+- `size = a + b; size += c; size += d;` preserves each add in retail
+  order, where one sum expression gets reassociated (`func_0029A5E0`).
+
+## Pointer and loop addressing
+
+- `R *r = &w->records[i]; r->field` computes base plus index before
+  the field offset (`addu base,idx`); direct `w->records[i].field`
+  reverses the operands (`func_002806E8`).
+- For byte indexing, `*(arr + i)` and `arr[i]` likewise give opposite
+  `addu` operand orders (`func_00287E60`).
+- `D + i * 0x1C4 + 0xA60` puts the scaled offset before the
+  constant; indexing a pre-biased `(T *)(D + 0xA60)` reverses the
+  arithmetic order (`func_002B6C70`).
+- Repeated `unit->entrySlots[index].f` accesses retain separate address
+  pseudos and `daddu` copies; caching a slot pointer merges them
+  (`func_001ADDD0`).
+- A struct containing `u32 slot[25]` keeps `slot[i]`'s `sll 2` outside
+  the loop; a bare pointer indexed by `i + 3` strength-reduces
+  (`func_0030DAA0`).
+- A local `s32 *work = D_0043E5C0` reused for field offsets keeps
+  one `lui/addiu` base; direct `D_0043E5C0 + 0x14` biases the base
+  instead (`func_0011DB20`).
+- An array-element store `D_003BA928[3] = 0x80` produces retail's
+  `sb; jr; nop`; using a separate symbol for that byte lets the
+  assembler fill the return slot (`func_00106240`).
+- Separate `s32 cx = cam->x, cz = cam->z` and compute z before x
+  to retain z-first loads (`func_00146900`); direct x-then-z
+  expressions match its DDS2 twin (`func_00149E08`).
 
 ## Rodata order
 
@@ -184,6 +286,10 @@ around it. Keep the string's `INCLUDE_RODATA` and use an `extern` while any asm
 still references it, and don't write a literal whose bytes an `INCLUDE_RODATA`
 item still supplies. `check_unit` reports `RODATA` when the full unit's
 `.rodata` differs from retail.
+
+- A local `f32 up[4] = {0, 0, -1, 1}` produces an `ldl/ldr/sdl/sdr`
+  stack copy of its rodata initializer at declaration
+  (`func_00146900`).
 
 ## 128-bit vector copies (`lq; sq; jr; nop`)
 
@@ -199,9 +305,13 @@ allowed, and only for this exact instruction pair.
 
 `*dst = *src` on a struct of `u32 word[N]` reproduces retail's `ldl/ldr`
 copies exactly, including the trailing `lw`/`sw` word and, from 0x40 bytes,
-the aligned/unaligned dual loop. `memcpy` with a literal size gives
-`lwl/lwr` on the tail word, so it only matches when the size is a multiple
-of 8. Try the struct assignment first when the tail differs.
+the aligned/unaligned dual loop (`func_001E3810`). `memcpy` with a literal
+size gives `lwl/lwr` on the tail word when the operands lack alignment
+information. Try the struct assignment first when the tail differs.
+
+- With both operands declared `aligned(4)`, a literal-size `memcpy`
+  ending in four bytes uses `lw/sw` rather than `lwl/lwr`, without
+  changing the rest of the copy (`func_002BBC70`).
 
 ## Unaligned block copies (`ldl/ldr/sdl/sdr`)
 
@@ -380,6 +490,12 @@ line above the definition):
   (`6.283185005f` gives 0x40C90FD9, retail has 0x40C90FDA). The retail bits
   come from the expression the programmer likely wrote:
   `3.14159265f * 2.0f`, `-3.14159265f / 2.0f`.
+- For the retail 0x3C8EFA35 radians-per-degree literal, write
+  `0.017453293f`; `3.14159265f / 180.0f` rounds one bit lower
+  (`func_00285500`).
+- Reuse one `f32 wave` across `(f32)frame / 60` and `f(wave * pi)`
+  to keep both live ranges in `$f20` across the call; separate locals
+  change the FPR assignment (`func_0026EEE8`).
 - Float arguments to an unprototyped callee are promoted to double and go
   through soft-float helper calls (extra `jal`s). Give the callee a
   prototype with `f32` parameters.
