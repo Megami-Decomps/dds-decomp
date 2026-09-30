@@ -614,15 +614,15 @@ extern void func_0019B9A0(s32);
 
 s32 func_001A1068(void) {
     if (D_003BB2E4 == 0) {
-        func_001FB0A8(D_003A15A8);
+        btlBossDebugPrintf(D_003A15A8);
         return 0;
     }
     if (sndHasOccupiedNodeSlots() != 0) {
-        func_001FB0A8(D_003A15C8);
+        btlBossDebugPrintf(D_003A15C8);
         return -1;
     }
     if (func_001D4508() != 0) {
-        func_001FB0A8("btl:wait Packet\n");
+        btlBossDebugPrintf("btl:wait Packet\n");
         btlFlagTasksForUpdate();
         return -1;
     }
@@ -635,7 +635,7 @@ s32 func_001A1068(void) {
     func_001C7360();
     btlFreeFieldBlocks();
     func_001EFF58();
-    func_001EFC30();
+    btlClearTintAndEnableCamera();
     func_001C4658();
     btlReleaseButtonTexture();
     sndFreeBattleSoundEntries();
@@ -646,16 +646,16 @@ s32 func_001A1068(void) {
     func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x4A0));
     func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x49C));
     func_0019B9A0(*(s32 *)(D_003BB2E4 + 0x498));
-    func_001F3408();
+    btlAdvanceTitleStateWithAudioCleanup();
     func_00105888();
-    func_0010A158();
+    evtDestroySelectionState();
     effResetSlots();
     evtSetSolarOverlayFullyTransparent();
     itfMesClearFlags(1);
     func_002D0918(D_003BB2E0);
     D_003BB2E0 = 0;
     D_003BB2E4 = 0;
-    func_001FB0A8("** btlExit ***************\n");
+    btlBossDebugPrintf("** btlExit ***************\n");
     return 0;
 }
 
@@ -4123,7 +4123,7 @@ extern s64 func_001F53F0(void);
 extern void func_001F53C0(void);
 extern s32 func_001A3638(void);
 extern void func_001A57A0(void);
-extern void func_001060C8(s32);
+extern void kwlnFadeBackgroundStartOut(s32);
 extern void kwlnDrawSetOffsetTransition(s32, s32, s32);
 extern void kwlnDrawEnableD88(s32);
 extern void kwlnDrawEnableDc8(s32);
@@ -4316,13 +4316,7 @@ typedef struct {
 
 extern SceneInitializer D_00359A88[];
 
-void btlSetScene(s32 scene) {
-    s32 context = func_001A17F0();
-    *(s32 *)(context + 0x208) = scene;
-    *(s32 *)(context + 0x210) = 0;
-    *(s32 *)(context + 0x214) = 0;
-    D_00359A88[scene].initialize(context);
-}
+INCLUDE_ASM(const s32, "game/code_001A04C0", btlSetScene);
 
 void btlQueueScene(u32 arg0) {
     s32 temp_v0;
@@ -4331,20 +4325,7 @@ void btlQueueScene(u32 arg0) {
     *(u32 *)(temp_v0 + 0x20c) = arg0;
 }
 
-void btlUpdateScene(void) {
-    s32 context = func_001A17F0();
-    s32 next = *(s32 *)(context + 0x20C);
-    s32 result;
-    if (next != 0) {
-        btlSetScene(next);
-        *(s32 *)(context + 0x20C) = 0;
-    }
-    result = D_00359A88[*(s32 *)(context + 0x208)].update(context);
-    if (result != 0) {
-        btlQueueScene(result);
-    }
-    *(s32 *)(context + 0x210) += 1;
-}
+INCLUDE_ASM(const s32, "game/code_001A04C0", btlUpdateScene);
 
 void btlResetToInitialScene(void) {
     s32 temp_v0;
@@ -5013,22 +4994,22 @@ void func_001C97B0(u8 *task) {
     switch (reason) {
     case 2:
         btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0x82));
-        func_001F3238(0xD);
+        sndSetStationedSeVolume(0xD);
         btlDispatchStateHandler(task, 6);
         return;
     case 6:
         btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB0));
-        func_001F3238(0xD);
+        sndSetStationedSeVolume(0xD);
         btlDispatchStateHandler(task, 6);
         return;
     case 7:
         btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB2));
-        func_001F3238(0xD);
+        sndSetStationedSeVolume(0xD);
         btlDispatchStateHandler(task, 6);
         return;
     case 9:
         btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xD0));
-        func_001F3238(0xD);
+        sndSetStationedSeVolume(0xD);
         btlDispatchStateHandler(task, 6);
         return;
     }
@@ -5263,9 +5244,9 @@ u64 func_001CED58(u8 *task) {
         actor = *(u8 **)(task + 0x18);
     }
     if (*(u32 *)(actor + 0x110) & 0x200) {
-        func_001FB0A8("return:player=%X[%X]\n", actor[0x2C4], *(u16 *)(actor + 0x124));
+        btlBossDebugPrintf("return:player=%X[%X]\n", actor[0x2C4], *(u16 *)(actor + 0x124));
     } else {
-        func_001FB0A8("return:enemy=%X\n", *(u16 *)(actor + 0x124));
+        btlBossDebugPrintf("return:enemy=%X\n", *(u16 *)(actor + 0x124));
     }
     if (*(u32 *)(actor + 0x110) & 0x400) {
         btlStartTask(func_001D9718());
