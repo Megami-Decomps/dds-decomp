@@ -100,6 +100,12 @@
 #define VU0_SCALAR_OP(f, insn) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
     : : "f" (f))
+/* vf10.<axis> = f and vf10.w = 0 in one block: a direction on one axis for the
+ * unit's path/aim vector (retail keeps the w clear right after the vaddx). */
+#define VU0_SET_AXIS_CLEAR_W(f, axis) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx." #axis " vf10, vf0, vf2x\n\t" \
+    "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
+    : : "f" (f))
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
@@ -108,5 +114,46 @@
 #define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
     "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
+/* dst = a - b, dst = a + b, dst = a * b on all four components
+ * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
+#define VU0_SUB(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+#define VU0_ADD(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+#define VU0_MUL(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+/* vf.w = 0 (vmulx.w vf,vf,vf0x) and vf.w = 1 (vmove.w vf,vf0): the w fix-up
+ * retail does before packing a colour or storing a point/direction. */
+#define VU0_CLEAR_W(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.w " #vf ", " #vf ", vf0x\n\t.set reorder")
+#define VU0_SET_W_ONE(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.w " #vf ", vf0\n\t.set reorder")
+/* out = |vf10.xyz| as a C float:
+ *   vmul.xyz vf2,vf10,vf10; vaddy.x vf2,vf2,vf2y; vaddz.x vf2,vf2,vf2z;
+ *   vsqrt Q,vf2x; vwaitq; cfc2.ni $2,vi22; mtc1 $2,out
+ * $2 is declared clobbered, as in the matched blocks this replaces. */
+#define VU0_LENGTH_VF10(out) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvaddy.x vf2, vf2, vf2y\n\t" \
+    "vaddz.x vf2, vf2, vf2z\n\tvsqrt Q, vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
+    "mtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+/* vf10 = vf10 / |vf10.xyz| (w untouched):
+ *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
+ *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
+#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
+/* dst = a x b (xyz cross product): vopmula.xyz ACC,a,b; vopmsub.xyz dst,b,a */
+#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
+/* out = a . b (xyz dot product) as a C float:
+ *   vmul.xyz vf2,a,b; vaddy.x vf2,vf2,vf2y; vaddz.x vf2,vf2,vf2z;
+ *   qmfc2.ni $2,vf2; mtc1 $2,out
+ * $2 is declared clobbered, like VU0_LENGTH_VF10. */
+#define VU0_DOT_XYZ(out, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, " #a ", " #b "\n\tvaddy.x vf2, vf2, vf2y\n\t" \
+    "vaddz.x vf2, vf2, vf2z\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
 
 #endif

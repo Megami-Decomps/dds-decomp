@@ -136,22 +136,49 @@ s32 func_0023B0D0(s32 index, s32 base) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023AF20", func_0023B148);
-
-INCLUDE_ASM(const s32, "game/code_0023AF20", func_0023B170);
-
-INCLUDE_ASM(const s32, "game/code_0023AF20", func_0023B1E8);
+typedef struct EvtMoveTarget {
+    u8 pad00[0x1C];
+    u8 *data;           /* 0x1C */
+} EvtMoveTarget;
 
 typedef struct EvtMoveUnit {
     u8 pad00[0x70];
     s128 vector;        /* 0x70 */
-    u8 pad80[0x20];     /* 0x80 */
+    EvtMoveTarget *target; /* 0x80 */
+    u8 pad84[0x1C];     /* 0x84 */
     void *scaled;       /* 0xA0 */
     f32 delta;          /* 0xA4 */
     u32 flags;          /* 0xA8 */
     s16 mode;           /* 0xAC */
     s16 state;          /* 0xAE */
+    s16 range;          /* 0xB0 */
 } EvtMoveUnit;
+
+extern void effMiscQuaternionToMatrixVU(void);
+
+/* vf10 = (a - b) with y replaced by 0 */
+void func_0023B148(f32 *a, f32 *b) {
+    VU0_LOAD_VF(vf10, a);
+    VU0_LOAD_VF(vf11, b);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+}
+
+/* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
+void func_0023B170(EvtMoveUnit *unit) {
+    f32 v[4];
+
+    VU0_LOAD_VF(vf10, unit->target->data + 0x50);
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_VF(vf30, v);
+    v[1] = 0.0f;
+    v[3] = 1.0f;
+    VU0_LOAD_VF(vf10, v);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+}
+
+INCLUDE_ASM(const s32, "game/code_0023AF20", func_0023B1E8);
 
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
 extern void func_001171A0(void *value);
