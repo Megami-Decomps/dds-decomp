@@ -952,9 +952,117 @@ void func_00235198(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
     sdfAppendPacket(packet, func_00235178(x, y, depth, width, height));
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002351D0);
+extern s8 D_0040B7D8[];
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235288);
+s32 func_002351D0(s16 *cursor, s32 count) {
+    s32 max = count - 1;
+    s32 v = *cursor;
+    s32 changed = 0;
+    if (D_0040B7D8[5] < 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        } else {
+            v = 0;
+            changed = 1;
+        }
+    } else if (((u8)D_0040B7D8[5] & 2) != 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        }
+    } else if (D_0040B7D8[4] < 0) {
+        if (v > 0) {
+            v -= 1;
+            changed = 1;
+        } else {
+            v = max;
+            changed = 1;
+        }
+    } else if ((((u8)D_0040B7D8[4] & 2) != 0) && (v > 0)) {
+        v -= 1;
+        changed = 1;
+    }
+    if (changed != 0) {
+        *cursor = v;
+        D_00453550.unk09 = 0;
+        return 1;
+    }
+    return 0;
+}
+
+s32 func_00235288(s16 *cursor, s32 count, s32 step) {
+    s32 max = count - 1;
+    s32 v = *cursor;
+    s32 changed = 0;
+    if (D_0040B7D8[7] < 0) {
+        if (v < max) {
+            v += 1;
+        } else {
+            v = 0;
+        }
+        changed = 1;
+    } else if (((u8)D_0040B7D8[7] & 2) != 0) {
+        if (v < max) {
+            v += 1;
+            changed = 1;
+        }
+    } else if (D_0040B7D8[6] < 0) {
+        if (v > 0) {
+            v -= 1;
+        } else {
+            v = max;
+        }
+        changed = 1;
+    } else if (((u8)D_0040B7D8[6] & 2) != 0) {
+        if (v > 0) {
+            v -= 1;
+            changed = 1;
+        }
+    } else if (step != 0) {
+        if (D_0040B7D8[11] < 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+            } else {
+                v = 0;
+            }
+            changed = 1;
+        } else if (((u8)D_0040B7D8[11] & 2) != 0) {
+            if (v < max) {
+                v += step;
+                if (v > max) {
+                    v = max;
+                }
+                changed = 1;
+            }
+        } else if (D_0040B7D8[10] < 0) {
+            if (v > 0) {
+                v -= step;
+                if (v < 0) {
+                    v = 0;
+                }
+            } else {
+                v = max;
+            }
+            changed = 1;
+        } else if ((((u8)D_0040B7D8[10] & 2) != 0) && (v > 0)) {
+            v -= step;
+            if (v < 0) {
+                v = 0;
+            }
+            changed = 1;
+        }
+    }
+    if (changed != 0) {
+        *cursor = v;
+        D_00453550.unk09 = 0;
+        return 1;
+    }
+    return 0;
+}
 
 extern MdlLoaded *func_00232198(s16 a, s16 b);
 
@@ -1124,6 +1232,8 @@ s32 func_002369C0(void) {
     return 0;
 }
 
+extern s8 D_0037F510[];
+
 INCLUDE_ASM(const s32, "game/code_00233660", mdlAdjustViewerScale);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236B20);
@@ -1286,7 +1396,32 @@ void func_00238140(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002381D8);
+extern s32 D_004370F8;
+
+extern u8 D_003C89B0[];
+
+extern u8 D_003C89F0[];
+
+extern s32 func_00343188(s32, s32);
+
+void func_002381D8(void) {
+    s32 list;
+    s32 packet;
+    MdlResourceOwner *resource;
+
+    if (D_00453550.taskPhase == 3) {
+        list = sdfCreateResetPacketList();
+        resource = (MdlResourceOwner *)D_00453550.resources[0];
+        VU0_LOAD_MATRIX(resource->chunk + 0x20);
+        packet = func_00348188(D_003C89B0, D_003C89F0, 4, 0x80);
+        if ((D_0040B7D8[13] < 0) & (D_004370F8 == 0)) {
+            D_004370F8 = 1;
+            func_00343188(packet, 0x100);
+        }
+        sdfAppendPacket(list, packet);
+        D_00380048.submit(&D_00380048, list);
+    }
+}
 
 void mdlViewerTaskDestroy(void) {
     if (D_00453550.viewerTask != 0) {

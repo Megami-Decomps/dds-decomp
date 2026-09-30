@@ -70,6 +70,14 @@ typedef struct SdfChannelState {
     u8 pad25[0x13];
 } SdfChannelState;
 
+/* Two-byte runtime-mode entries read by the unit script dispatcher. */
+typedef struct SdfUnitMode {
+    u8 pad00;
+    s8 mode; /* 0x01 */
+} SdfUnitMode;
+
+extern SdfUnitMode *D_00435E1C;
+
 extern SdfChannelState *D_00435E20;
 extern u32 func_001190B0(s32 channel, s32 arg1, SdfPackedValue *item);
 
@@ -256,7 +264,24 @@ void sdfDispatchCmd(u32 context, u32 first, u32 second, u32 flags) {
     func_00118AB0(context, first, second, (u8)flags);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", sdfDispatchUnitScriptDefault9);
+s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    s32 result;
+    u8 flags;
+
+    if (((SdfUnitMode *)D_00435E1C)[unitIndex].mode == 5) {
+        result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
+    } else {
+        flags = ((u8 *)D_00435E20)[unitIndex * 0x38];
+        if (flags & 0x40) {
+            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
+        } else if (flags & 0x80) {
+            result = evtRunContext(0x1D, scriptArg, contextArg, unitIndex, mode);
+        } else {
+            result = evtRunContext(9, scriptArg, contextArg, unitIndex, mode);
+        }
+    }
+    return result;
+}
 
 void func_00118C58(u32 context, u32 first, u32 second, u8 flags) {
     evtRunContext(10, first, second, context, flags);

@@ -85,7 +85,62 @@ void func_00188560(EffTrackPolyWork ***list) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001885C0);
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
+void func_001885C0(f32 (*p)[4], f32 t)
+{
+    f32 tan[2][4];
+    f32 half[4];
+    f32 h[4][4];
+    f32 t2 = t * t;
+    f32 t3 = t2 * t;
+
+    VEC3_SPLAT(half, 0.5f);
+    VU0_LOAD_VF(vf10, p[1]);
+    VU0_LOAD_VF(vf11, p[0]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, p[2]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_LOAD_VF(vf11, half);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, tan[0]);
+    VU0_LOAD_VF(vf10, p[2]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, p[3]);
+    VU0_LOAD_VF(vf11, p[2]);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_LOAD_VF(vf11, half);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, tan[1]);
+    VEC3_SPLAT(h[0], 2.0f * t3 - 3.0f * t2 + 1.0f);
+    VEC3_SPLAT(h[1], t3 - 2.0f * t2 + t);
+    VEC3_SPLAT(h[2], t3 - t2);
+    VEC3_SPLAT(h[3], -2.0f * t3 + 3.0f * t2);
+    VU0_LOAD_VF(vf10, h[0]);
+    VU0_LOAD_VF(vf11, p[1]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, h[1]);
+    VU0_LOAD_VF(vf11, tan[0]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf12, vf12, vf10);
+    VU0_LOAD_VF(vf10, h[2]);
+    VU0_LOAD_VF(vf11, tan[1]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf12, vf12, vf10);
+    VU0_LOAD_VF(vf10, h[3]);
+    VU0_LOAD_VF(vf11, p[2]);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+}
+#undef VEC3_SPLAT
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188738);
 
