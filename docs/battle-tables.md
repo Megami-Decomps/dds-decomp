@@ -194,6 +194,20 @@ and the status masks they consume. For example, `ailment_type=INFLICT` with
 `base_status=FREEZE` and `hp_type=MAX_HP_PERCENT_HEAL` expose the behavior that
 the native dispatchers select.
 
+The remaining action controls use the same exact-source rule. `flags` names
+the recovered `DRAIN`, `FORFEIT_HP`, `HUNT`, `PHYSICAL_AMMO`, and
+`ELEMENTAL_AMMO` paths and permits mixed numeric terms such as `HUNT|0x1`.
+`hunt_rate` is the byte authored by hunt and devour actions.
+`affinity_effect` selects the temporary Void, Drain, Repel, or Tetraja effect
+installed by the action, while `program` selects special behavior such as
+`ANALYZE`, `CALL_REINFORCEMENTS`, `CANNIBALIZE`, or `GATE_TO_ABYSS`. These last
+two domains are profile-specific because the games do not define identical
+selectors. Across both canonical sources, 48 of 55 authored program values and
+65 of 67 authored affinity-effect values have recovered names. DDS2 program
+values 8 and 18, the reserved affinity-effect entry in each game, action-flag
+bit `0x1`, and DDS2 action-flag bit `0x10` remain numeric until their contracts
+are established.
+
 Across the paired canonical sources, 5,282 of 5,347 populated values in these
 domains now use semantic names. The 65 values whose special target, status, or
 effect behavior is not yet established remain numeric. Numeric values and
