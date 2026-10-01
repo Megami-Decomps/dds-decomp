@@ -40,6 +40,9 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x000, "MESSAGE_REQUEST_AND_POLL", 1, writes_result=False),
     NativeCommand(0x001, "ACTIVATE_MESSAGE_PANEL", 0, writes_result=False),
     NativeCommand(0x002, "FINISH_SCRIPT_MESSAGE_WINDOW", 0, writes_result=False),
+    NativeCommand(
+        0x003, "MESSAGE_SELECTION_REQUEST_AND_POLL", 1, writes_result=True
+    ),
     NativeCommand(0x007, "TEST_MODEL_FLAG", 1, writes_result=True),
     NativeCommand(0x008, "SET_MODEL_FLAG", 1, writes_result=False),
     NativeCommand(0x009, "CLEAR_MODEL_FLAG", 1, writes_result=False),
@@ -64,6 +67,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x068, "READ_CURRENT_WORLD_OBJECT_ID", 0, writes_result=True),
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
+    NativeCommand(0x071, "SET_MESSAGE_WINDOW_GEOMETRY", 3, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
     NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0, writes_result=False),
