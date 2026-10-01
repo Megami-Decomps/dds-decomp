@@ -85,7 +85,23 @@ INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E0D0);
 
 INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E350);
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E628);
+extern void *effCreateSizedDrawPacket();
+extern void *func_00167400();
+extern void func_0018DFD0();
+extern void func_0018DC80();
+extern void sdfAppendPacket();
+
+/* Build the two draw packets for `source` and append them to `list`. */
+void func_0018E628(void *list, void *source, u8 flag) {
+    void *packet;
+
+    packet = effCreateSizedDrawPacket(1, 0x200);
+    func_0018DFD0(source, func_00167400(packet), flag);
+    sdfAppendPacket(list, packet);
+    packet = effCreateSizedDrawPacket(1, 0);
+    func_0018DC80(source, func_00167400(packet), flag);
+    sdfAppendPacket(list, packet);
+}
 
 typedef struct BlurFilterOps {
     u8 pad00[0x10];
@@ -108,8 +124,41 @@ void func_0018E6D0(void *list) {
     D_003803E8.draw(&D_003803E8, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E758);
+extern s32 func_001200E0();
+extern void sdfInitPacketList();
+extern void func_0018E350();
+
+void func_0018E758(void *source, s32 arg1, u8 flag) {
+    void *list;
+
+    if (func_001200E0(source) == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        func_0018E350(list, *(s32 *)((u8 *)source + 4), arg1);
+        func_0018E628(list, source, flag);
+        func_0018E6D0(list);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E800);
 
-INCLUDE_ASM(const s32, "game/code_0018DA70", func_0018E850);
+typedef struct EffBlurTemplateBody {
+    u32 words[11];
+} EffBlurTemplateBody;
+
+typedef struct EffBlurTemplate {
+    EffBlurTemplateBody body;  /* 0x00: copied from the source template */
+    u32 resourceWord;          /* 0x2C */
+} EffBlurTemplate;
+
+extern void *func_00328D68(s32 size);
+extern u32 effGetResourceFirstWord(s32 index);
+
+/* Clone a blur template into a fresh allocation. */
+EffBlurTemplate *func_0018E850(EffBlurTemplate *src) {
+    EffBlurTemplate *dst = func_00328D68(sizeof(EffBlurTemplate));
+
+    dst->resourceWord = effGetResourceFirstWord(2);
+    dst->body = src->body;
+    return dst;
+}
