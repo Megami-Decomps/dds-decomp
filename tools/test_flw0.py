@@ -242,6 +242,16 @@ class Flw0Tests(unittest.TestCase):
         self.assertGreater(len(edited_binary), len(binary))
         self.assertEqual(msg1.encode(msg1.decode(edited_binary)), edited_binary)
 
+        quoted = msg1.Bank((msg1.Message('A "quoted" name', 0xFFFF, (b"Text",)),), ())
+        quoted_binary = msg1.encode(quoted)
+        quoted_source = msg1.render(quoted_binary)
+        quoted_content = [
+            (index, line.strip()) for index, line in enumerate(quoted_source[1:], 1)
+        ]
+        self.assertEqual(msg1.parse_source(quoted_content), quoted_binary)
+        with self.assertRaisesRegex(msg1.Msg1Error, "not printable ASCII"):
+            msg1.encode(msg1.Bank((msg1.Message("BAD\nNAME", 0xFFFF, ()),), ()))
+
     def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
         source = """\
 flw0 2
