@@ -698,16 +698,25 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00122B58);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00122E50);
 
+/* A 30-byte map slot: bank 3 contains the map-target flags. */
+typedef struct FieldMapSlot {
+    u16 flagBanks[5];
+    u8 values[0x10];
+    u16 trailingFlagBanks[2];
+} FieldMapSlot;
+
+#define FIELD_MAP_SLOT_OFFSET 0x1450
+
 void func_00122F38(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            s32 byteOffset = slot * 30 + index * 1920 + 0x1450;
-            u16 *flags = (u16 *)(D_00435DD0 + byteOffset);
+            s32 byteOffset = slot * 30 + index * 1920 + FIELD_MAP_SLOT_OFFSET;
+            u16 *flags = &((FieldMapSlot *)(D_00435DD0 + byteOffset))->flagBanks[0];
             *flags |= 1 << bit;
         } else {
-            s32 byteOffset = slot * 30 + index * 1920 + 0x1450;
-            u16 *flags = (u16 *)(D_00435DD0 + byteOffset);
+            s32 byteOffset = slot * 30 + index * 1920 + FIELD_MAP_SLOT_OFFSET;
+            u16 *flags = &((FieldMapSlot *)(D_00435DD0 + byteOffset))->flagBanks[0];
             *flags &= ~(1 << bit);
         }
     }
@@ -722,7 +731,7 @@ u8 func_00122FE0(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x1450);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -732,10 +741,10 @@ void func_00123038(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1452);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1452);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
             *flags &= ~(1 << bit);
         }
     }
@@ -750,7 +759,7 @@ u8 func_001230E0(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x1452);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -760,10 +769,10 @@ void func_00123138(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1454);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1454);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
             *flags &= ~(1 << bit);
         }
     }
@@ -778,7 +787,7 @@ u8 func_001231E0(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x1454);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[2];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -788,10 +797,10 @@ void fldSetMapTargetFlag(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1456);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1456);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
             *flags &= ~(1 << bit);
         }
     }
@@ -806,7 +815,7 @@ u8 fldTestMapTargetFlag(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x1456);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[3];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -816,10 +825,10 @@ void func_00123338(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1458);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x1458);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
             *flags &= ~(1 << bit);
         }
     }
@@ -834,7 +843,7 @@ u8 func_001233E0(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x1458);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->flagBanks[4];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -846,7 +855,7 @@ void fldSetMapSlotByte(s32 map, u32 slot, s32 offset, s32 value) {
         s32 displacement = offset + index * 1920;
         u8 *entry = (u8 *)(slot * 30 + displacement);
         entry += D_00435DD0;
-        entry[0x145A] = value;
+        ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->values[0] = value;
     }
 }
 
@@ -857,7 +866,7 @@ s32 fldGetMapSlotByte(s32 map, u32 slot, s32 offset) {
         s32 displacement = offset + index * 1920;
         u8 *entry = (u8 *)(slot * 30 + displacement);
         entry += D_00435DD0;
-        value = entry[0x145A];
+        value = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->values[0];
     }
     return value == 0xff ? -1 : value;
 }
@@ -866,10 +875,10 @@ void func_001234E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x146A);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x146A);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
             *flags &= ~(1 << bit);
         }
     }
@@ -884,7 +893,7 @@ u8 func_00123590(s32 map, u32 slot, u32 bit) {
         index = map % 100;
         entry = (u8 *)(slot * 30 + index * 1920);
         entry += D_00435DD0;
-        flags = *(u16 *)(entry + 0x146A);
+        flags = ((FieldMapSlot *)(entry + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[0];
         return (flags >> bit) & 1;
     }
     return 0;
@@ -894,10 +903,10 @@ void func_001235E8(s32 map, s32 slot, s32 bit, s32 enabled) {
     if (map < 40) {
         s32 index = map % 100;
         if (enabled != 0) {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x146C);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
             *flags |= 1 << bit;
         } else {
-            u16 *flags = (u16 *)(slot * 30 + index * 1920 + D_00435DD0 + 0x146C);
+            u16 *flags = &((FieldMapSlot *)(slot * 30 + index * 1920 + D_00435DD0 + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
             *flags &= ~(1 << bit);
         }
     }
@@ -912,7 +921,7 @@ u8 func_00123690(s32 map, u32 slot, u32 bit) {
         mapIndex = map % 100;
         flagsAddress = (u8 *)(slot * 30 + mapIndex * 1920);
         flagsAddress += D_00435DD0;
-        flags = *(u16 *)(flagsAddress + 0x146C);
+        flags = ((FieldMapSlot *)(flagsAddress + FIELD_MAP_SLOT_OFFSET))->trailingFlagBanks[1];
         return (flags >> bit) & 1;
     }
     return 0;

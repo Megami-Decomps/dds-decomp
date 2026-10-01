@@ -14,6 +14,13 @@ extern void func_0025FD78(s32);
 extern void func_00297320(s32);
 extern void func_00297970(s32);
 extern s32 D_00435DD0;
+
+/* Shared save-state item quantities, also used by the camp menu. */
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
 extern s32 D_003CE148[];
 extern u8 D_003CE4EC[];
 extern void func_00297220(s32, u32);
@@ -55,9 +62,24 @@ typedef struct EvtSceneObject {
 } EvtSceneObject;
 
 typedef struct EvtSceneNode {
-    u8 pad00[0x2C];
+    u8 pad00[0x1C];
+    s32 entryRecord; /* 0x1C: per-node entry and stage information */
+    s32 completionState;
+    u8 pad24[8];
     s32 callback; /* 0x2C: scene action callback */
+    s32 selectionRecord;
 } EvtSceneNode;
+
+typedef struct EvtEntryRecord {
+    u8 pad00[0x60];
+    s32 stage;
+    s32 itemId;
+} EvtEntryRecord;
+
+typedef struct EvtSelectionRecord {
+    u8 pad00[0x12];
+    u16 slot;
+} EvtSelectionRecord;
 
 
 typedef struct EvtStateTableContext {
@@ -156,10 +178,10 @@ s32 evtInitializeSelectedSlot(void) {
     if (((EvtStateTableContext *)context)->primaryObject == 0) {
         func_00260020(context);
     }
-    selectionRecord = *(s32 *)(((EvtStateTableContext *)context)->primaryObject->node + 0x30);
+    selectionRecord = ((EvtSceneNode *)((EvtStateTableContext *)context)->primaryObject->node)->selectionRecord;
     slot = func_0025FE70(context);
     ((EvtStateTableContext *)context)->cachedSelection = *(s32 *)(D_00435DD0 + 0x3c);
-    *(u16 *)(selectionRecord + 0x12) = slot;
+    ((EvtSelectionRecord *)selectionRecord)->slot = slot;
     ((EvtStateTableContext *)context)->selectedSlot = slot;
     return 1;
 }
@@ -545,14 +567,14 @@ INCLUDE_ASM(const s32, "game/code_00261E10", func_00263C38);
 
 s32 func_00263D40(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 stage = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x7c) + 0x18) + 0x1c) + 0x60) + 1;
-    s32 id = *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x80) + 0x18) + 0x1c) + 0x64);
+    s32 stage = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)context)->primaryObject->node)->entryRecord)->stage + 1;
+    s32 id = ((EvtEntryRecord *)((EvtSceneNode *)((EvtStateTableContext *)context)->secondaryObject->node)->entryRecord)->itemId;
     if (stage == 4) {
-        if (*(u8 *)(id + D_00435DD0 + 0x1340) == 0) {
-            func_002B86E8(*(s32 *)(*(s32 *)(context + 0x80) + 0x18));
+        if (((SaveItemCounts *)D_00435DD0)->counts[id] == 0) {
+            func_002B86E8(((EvtStateTableContext *)context)->secondaryObject->node);
         }
-        if (*(s32 *)(*(s32 *)(*(s32 *)(context + 0x80) + 0x18) + 0x20) == 0) {
-            *(s32 *)(context + 0x94) = 2;
+        if (((EvtSceneNode *)((EvtStateTableContext *)context)->secondaryObject->node)->completionState == 0) {
+            ((EvtStateTableContext *)context)->dispatchMode = 2;
         }
     }
     return 1;
@@ -591,7 +613,7 @@ void func_00263E60(void) {
 }
 
 void func_00263EB0(EvtStateTableContext *context) {
-    s32 *entry = (s32 *)(*(s32 *)(context->secondaryObject->node + 0x1c) + 0x60);
+    s32 *entry = &((EvtEntryRecord *)((EvtSceneNode *)context->secondaryObject->node)->entryRecord)->stage;
     if (func_002C5498(entry[1])) {
         *(s32 *)(D_00435DD0 + 0xa50) += entry[0] * context->entryMultiplier;
     }

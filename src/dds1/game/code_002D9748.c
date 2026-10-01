@@ -117,6 +117,16 @@ extern u16 D_00398198[];
 extern u32 func_002D2800(u32);
 extern void func_002D33C8(u32, s32, f32);
 
+typedef struct SdfPacketCommand {
+    u8 pad00[0x28];
+    u32 opcode; /* 0x28: packet header command */
+} SdfPacketCommand;
+
+typedef struct SdfPacketFooter {
+    u64 data;
+    u64 opcode;
+} SdfPacketFooter;
+
 typedef struct SdfPacketOwner {
     u8 pad00[0x10];
     void (*sync)(struct SdfPacketOwner *, void *);
@@ -133,14 +143,14 @@ void sdfInitializeDrawPacketGroups(u8 *ctx) {
     func_002D5828(ctx + 0xE0);
     func_002D5938(ctx + 0x140);
     for (i = 0; i != 4; i++) {
-        *(u32 *)(packet + 0x28) = 0x11000000;
+        ((SdfPacketCommand *)packet)->opcode = 0x11000000;
         sdfInitPacketList(packet);
         sdfAppendPacket(packet, packet + 0x20);
         packet += 0x60;
     }
     sdfInitPacketList(ctx + 0x180);
-    *(u64 *)(ctx + 0x1A0) = 0;
-    *(u64 *)(ctx + 0x1A8) = 0x13000000;
+    ((SdfPacketFooter *)(ctx + 0x1A0))->data = 0;
+    ((SdfPacketFooter *)(ctx + 0x1A0))->opcode = 0x13000000;
     sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
 }
 
@@ -683,19 +693,29 @@ void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, u8 *entry) {
     func_002DAB80(entry + 0x68, asset->third);
 }
 
+typedef struct SdfDrawPacket {
+    u8 pad00[0xC];
+    u32 color; /* 0x0C */
+    u8 pad10[0x10];
+    u32 paletteValue; /* 0x20 */
+    u32 mode;         /* 0x24 */
+    u8 pad28[0x28];
+    u64 textureWords[3]; /* 0x50, 0x58, 0x60 */
+} SdfDrawPacket;
+
 void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *entryArg) {
     u8 *entry = entryArg;
     SdfTex *tex = *(SdfTex **)((u8 *)asset + 0x30);
     u32 mode;
 
-    *(u32 *)(entry + 0xC) = asset->unk18;
+    ((SdfDrawPacket *)entry)->color = asset->unk18;
     mode = *(u32 *)((u8 *)asset + 0x34);
-    *(u32 *)(entry + 0x24) = mode;
-    *(u32 *)(entry + 0x20) = D_00398198[mode];
+    ((SdfDrawPacket *)entry)->mode = mode;
+    ((SdfDrawPacket *)entry)->paletteValue = D_00398198[mode];
     if (tex != NULL) {
-        *(u64 *)(entry + 0x50) = func_002D2478(tex);
-        *(u64 *)(entry + 0x58) = func_002D2468(tex);
-        *(u64 *)(entry + 0x60) = func_002D2488(tex);
+        ((SdfDrawPacket *)entry)->textureWords[0] = func_002D2478(tex);
+        ((SdfDrawPacket *)entry)->textureWords[1] = func_002D2468(tex);
+        ((SdfDrawPacket *)entry)->textureWords[2] = func_002D2488(tex);
     }
     func_002DAB80(entry + 0x80, asset->fourth);
 }
