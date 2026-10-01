@@ -1319,7 +1319,103 @@ void effReleaseScatterObjectAndOwnedBuffer(PcpScatterWork6 *work)
     func_002D0918(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174940);
+typedef struct PcpScatterRingSource {
+    u8 pad00[0x9C];
+    u32 lifetime;           /* 0x9C */
+    u8 padA0[0x10];
+    f32 angleStepBase;      /* 0xB0 */
+    f32 angleStepJitter;    /* 0xB4 */
+    f32 tiltScale;          /* 0xB8 */
+    f32 riseRange;          /* 0xBC */
+    f32 radiusRamp;         /* 0xC0 */
+    f32 heightOffsetBase;   /* 0xC4 */
+    f32 heightOffsetJitter; /* 0xC8 */
+    f32 initialRise;        /* 0xCC */
+    u8 padD0[8];
+    f32 initialTiltSpeed;   /* 0xD8 */
+    u8 padDC[4];
+    f32 radiusBase;         /* 0xE0 */
+    f32 radiusJitter;       /* 0xE4 */
+    f32 radiusStepBase;     /* 0xE8 */
+    f32 radiusStepJitter;   /* 0xEC */
+    u8 padF0[0xC];
+    u32 vTail;              /* 0xFC */
+    u32 vCount;             /* 0x100 */
+    u8 pad104[0x80];
+    PcpScatterRing *rings;  /* 0x184 */
+    u8 pad188[0xC];
+    u32 scatterObject;      /* 0x194 */
+} PcpScatterRingSource;
+
+/* Initialise ring `index`, staggering its rise and radius by index over the lifetime, then its first vertex pairs. */
+void func_00174940(PcpScatterRingSource *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 height;
+    f32 rise;
+    f32 u;
+    f32 du;
+    f32 v;
+    f32 jitter;
+    f32 s;
+    u32 count;
+    u32 i;
+
+    ring = &work->rings[index];
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    angle = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    jitter = work->angleStepJitter;
+    angleStep = work->angleStepBase * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) / (f32)count;
+    jitter = work->radiusJitter;
+    radius = work->radiusBase * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    jitter = work->heightOffsetJitter;
+    height = work->heightOffsetBase * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    jitter = work->radiusStepJitter;
+    ring->radiusStep = work->radiusStepBase * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    ring->unk00 = work->tiltScale * effMiscRandUnitFloat(D_0034DF38);
+    ring->tiltAngle = 0;
+    rise = work->riseRange / (f32)work->lifetime * (f32)index;
+    radius = radius + work->radiusRamp * (f32)(work->lifetime - index);
+    ring->angle = angle;
+    ring->heightOffset = height;
+    ring->angleStep = angleStep;
+    ring->radius = radius;
+    ring->tiltSpeed = work->initialTiltSpeed;
+    ring->rise = work->initialRise;
+    func_002DD608(ring->unk00);
+    func_002DD968(ring->tiltAngle);
+    sdfMultiplyVuMatrixInPlace();
+    v = (f32)work->vCount;
+    u = 0.0f;
+    du = (f32)work->vTail / (f32)count;
+    for (i = 0; i < count; i++) {
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[1] = rise;
+        s = sdfSinPoly(angle) * radius;
+        vertex[4] = vertex[0];
+        vertex[6] = vertex[2] = s;
+        vertex[5] = vertex[1] - height;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        uv[0] = u;
+        uv[2] = u;
+        uv[1] = 0;
+        uv[3] = v;
+        uv += 4;
+        angle += angleStep;
+        u += du;
+        vertex += 8;
+    }
+}
 
 typedef struct PcpScatterWork13 {
     u8 pad00[0xD0];
@@ -1404,8 +1500,6 @@ typedef struct PcpScatterUpdateC {
     s32 age;             /* 0x190 */
     PcpScatterDraw *draw; /* 0x194 */
 } PcpScatterUpdateC;
-
-extern void func_00174940(void *work, u32 index);
 
 /* Per-frame update of a fading, optionally looping scatter instance whose colour blends between two keys over its lifetime. */
 void func_00174ED0(PcpScatterUpdateC *work) {
