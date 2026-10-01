@@ -15,6 +15,7 @@ Pipeline per version (see README.md):
   check              sha1sum -c config/<v>/checksum.sha1 (the output IS the retail ELF file)
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
+  WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
 edit that changes code or data shows up as a checksum failure.
@@ -217,6 +218,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"mkdir -p $outdir && {sys.executable} tools/inf.py assemble --messages $messages $in $out",
         description="inf $in",
     )
+    n.rule(
+        "wap",
+        f"mkdir -p $outdir && {sys.executable} tools/wap.py assemble "
+        "--scripts $scripts --interactions $interactions $in $out",
+        description="wap $in",
+    )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
     n.newline()
 
@@ -314,6 +321,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(f"{version}-scripts", "phony", str(script_stamp))
             version_outputs.append(str(script_stamp))
 
+        field_data_stamps = []
         inf_manifest = Path("config") / version / "field_inf.sha1"
         if (ROOT / inf_manifest).exists():
             inf_source_dir = Path("src") / version / "data" / "field"
@@ -348,8 +356,49 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 inf_outputs.append(str(output))
             inf_stamp = inf_output_dir / "field_inf.ok"
             n.build(str(inf_stamp), "check", str(inf_manifest), implicit=inf_outputs)
-            n.build(f"{version}-field-data", "phony", str(inf_stamp))
             version_outputs.append(str(inf_stamp))
+            field_data_stamps.append(str(inf_stamp))
+
+        wap_manifest = Path("config") / version / "field_wap.sha1"
+        if (ROOT / wap_manifest).exists():
+            wap_source_dir = Path("src") / version / "data" / "field"
+            wap_output_dir = Path("build") / version / "data" / "field"
+            wap_sources = sorted((ROOT / wap_source_dir).glob("*.wapasm"))
+            wap_outputs = []
+            for source in wap_sources:
+                source = source.relative_to(ROOT)
+                output = wap_output_dir / source.with_suffix(".wap").name
+                stem = source.stem
+                scripts = Path("src") / version / "scripts" / "field" / f"{stem}.bfasm"
+                interactions = wap_source_dir / f"{stem}.infasm"
+                n.build(
+                    str(output),
+                    "wap",
+                    str(source),
+                    implicit=[
+                        "tools/wap.py",
+                        "tools/flw0.py",
+                        "tools/flw0_symbolic.py",
+                        "tools/flw0_profiles.py",
+                        "tools/msg1.py",
+                        "tools/dds1_msg1_chars.tsv",
+                        str(scripts),
+                        str(interactions),
+                    ],
+                    variables={
+                        "outdir": str(output.parent),
+                        "scripts": str(scripts),
+                        "interactions": str(interactions),
+                    },
+                )
+                wap_outputs.append(str(output))
+            wap_stamp = wap_output_dir / "field_wap.ok"
+            n.build(str(wap_stamp), "check", str(wap_manifest), implicit=wap_outputs)
+            version_outputs.append(str(wap_stamp))
+            field_data_stamps.append(str(wap_stamp))
+
+        if field_data_stamps:
+            n.build(f"{version}-field-data", "phony", field_data_stamps)
 
         n.build(version, "phony", version_outputs)
         defaults.append(version)
@@ -384,6 +433,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         inf_manifest = ROOT / "config" / version / "field_inf.sha1"
         if inf_manifest.exists():
             configure_inputs.append(str(inf_manifest.relative_to(ROOT)))
+        wap_manifest = ROOT / "config" / version / "field_wap.sha1"
+        if wap_manifest.exists():
+            configure_inputs.append(str(wap_manifest.relative_to(ROOT)))
     n.build("build.ninja", "configure", implicit=configure_inputs,
             variables={"args": " ".join(sys.argv[1:])})
     n.default(defaults)
