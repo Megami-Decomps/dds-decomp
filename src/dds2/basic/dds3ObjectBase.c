@@ -36,9 +36,9 @@ void func_00111D68(World *world);
 /* ObjBase plus the runtime fields past 0x38. */
 typedef struct ObjBaseFull {
     u32 flags;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
+    u32 worldIndexNode;
+    u32 resourceState;
+    u32 resourceHandle;
     void *slots[8];
     void *extData;
     s32 devSlot; /* 0x34: released by sdfReleaseDevSlot */
@@ -72,7 +72,7 @@ void func_00111A68(ObjBaseFull *base) {
     if (base->devSlot != 0) {
         sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
-    dds3DestroyWorldIndexNode(base->unk4);
+    dds3DestroyWorldIndexNode(base->worldIndexNode);
     sdfReleaseChipBlock(base);
 }
 
@@ -139,10 +139,10 @@ void func_00111D68(World *world) {
     WorldInfo *info;
 
     base = (ObjBaseFull *)dds3GetObjectOwnedHandle(world);
-    if (base->unkC != 0) {
-        if (base->unk8 != 1) {
-            if (base->unk8 == 0) {
-                mdlDestroyContext(base->unkC);
+    if (base->resourceHandle != 0) {
+        if (base->resourceState != 1) {
+            if (base->resourceState == 0) {
+                mdlDestroyContext(base->resourceHandle);
                 info = world->info;
                 if (info->primaryObject != NULL) {
                     evtReleaseUnitTransitionWork(info->primaryObject);
@@ -150,11 +150,11 @@ void func_00111D68(World *world) {
                 }
             }
         } else {
-            sdfReleaseDevSlot(base->unkC, 1, 1);
+            sdfReleaseDevSlot(base->resourceHandle, 1, 1);
             sdfDestroyMotion(base->motion);
         }
-        base->unkC = 0;
-        base->unk8 = 3;
+        base->resourceHandle = 0;
+        base->resourceState = 3;
     }
 }
 

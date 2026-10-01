@@ -91,7 +91,7 @@ typedef struct {
     s32 subCount;    /* 0x68 */
     u8 pad6C[0x38]; /* 0x6C */
     EffThunderSub *subs; /* 0xA4 sub-element array */
-    u32 parameterValue; /* 0xA8: set by the parameter setter */
+    u32 unkA8;      /* 0xA8 settable param */
     u32 workHandle; /* 0xAC: released after the sub-systems */
 } EffPCPThunderWorkB;
 
@@ -400,7 +400,7 @@ void func_00164A98(void *dst, void *src) {
 }
 
 void effPCPThunderSetParamA8(EffPCPThunderWorkB *work, u32 value) {
-    work->parameterValue = value;
+    work->unkA8 = value;
 }
 
 void effThunderSparkInit(EffThunderWorkA4 *work, s32 index) {
