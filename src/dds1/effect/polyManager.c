@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 enum {
     POLY_INACTIVE_ENTRY_AGE = -0xFFFFFF,
@@ -158,7 +159,31 @@ void polyStripPushPairsApart(PolyNode *node, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015DE88);
+extern f32 D_0034E630[4];
+extern f32 D_0034E640[4];
+
+/* Blend two constant colour vectors by elapsed/duration (1 once elapsed reaches duration) and tint the result with the packed colour. */
+u32 func_0015DE88(u32 elapsed, u32 duration, u32 color) {
+    f32 ratio = 1.0f;
+    s32 tint[4];
+    s32 blended[4]; /* never read; gcc drops the stores but keeps the frame slot */
+    u32 packed;
+
+    if (elapsed < duration) {
+        ratio = (f32)elapsed / (f32)duration;
+    }
+    VU0_LOAD_VF(vf10, D_0034E640);
+    VU0_LOAD_VF(vf11, D_0034E630);
+    VU0_SCALE_VF(vf10, 1.0f - ratio);
+    VU0_SCALE_VF(vf11, ratio);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    tint[0] = color;
+    EE_MMI_RGBA_UNPACK(tint, 1.0f / 128.0f);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+    return packed;
+}
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DFA8);
 
