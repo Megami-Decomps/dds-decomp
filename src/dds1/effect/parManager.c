@@ -6,37 +6,105 @@ enum {
     PAR_BURST_RANDOM_AXIS = 1
 };
 
-typedef struct {
-    u8 pad[0x30];    /* 0x0 */
-    u16 kind;        /* 0x30 */
-    u8 pad32[6];     /* 0x32 */
-    f32 scale;       /* 0x38 */
-    u8 pad3C[0x68];  /* 0x3C */
-    u32 restartStepCount; /* 0xA4 copied to pendingRestartSteps on restart */
-    u8 padA8[0x54];  /* 0xA8 */
-    void *pendingRestartSteps; /* 0xFC native updater treats this word as a count, not a pointer */
-    u8 pad100[0x40]; /* 0x100 */
-    u16 dispatchIndex; /* 0x140 selects parKindConstructorEntries/D_0034E258/D_0034E2F0 */
-    u16 restartFlag; /* 0x142 read by parGetRestartFlag, set to 1 by parRestartKind */
-    u8 pad144[0x30]; /* 0x144 */
-    void *child;      /* 0x174 released by parReleaseObject */
-} ParObj;
+/* Colour-ramp setup for a particle emitter: masks the three colours to 24 bits, derives the fade-in/out
+   steps from the alpha byte, then the per-channel (colour0 -> colour1 -> colour2) steps per frame. */
+typedef struct ParColorRamp {
+    s32 mode;          /* 0x00: 1 = no ramp, 2 = ramp color0->color1 only */
+    u32 color0;        /* 0x04 */
+    u32 color1;        /* 0x08 */
+    u32 color2;        /* 0x0C */
+    u32 alpha;         /* 0x10 */
+    s32 fadeInFrames;  /* 0x14 */
+    s32 fadeOutFrames; /* 0x18 */
+    s32 frames;        /* 0x1C */
+    s32 rampFrames;    /* 0x20 */
+    f32 r01;           /* 0x24 per-channel step color0 -> color1 */
+    f32 r12;           /* 0x28 per-channel step color1 -> color2 */
+    f32 g01;           /* 0x2C */
+    f32 g12;           /* 0x30 */
+    f32 b01;           /* 0x34 */
+    f32 b12;           /* 0x38 */
+    u32 fadeIn;        /* 0x3C */
+    u32 fadeOut;       /* 0x40 */
+} ParColorRamp;
 
 typedef struct {
-    u8 pad[0xC]; /* 0x0 */
-    void *resource;  /* 0xC released by effParReleaseNodeResource */
-} ParNode;
+    u128 *points;
+    u16 pointCount;
+    u8 pad06[2];
+    u32 color;
+    f32 billboardScale;
+} ParSlot; /* 0x10 */
+
+/* The slot table and its allocation owner are one record, not two views.
+ * The native allocator returns this header after the point/slot arrays. */
+typedef struct {
+    u16 slotCount;
+    u16 pointCapacity;
+    ParSlot *slots;
+    void *billboardRef;
+    u32 resource;
+} ParTable; /* 0x10 */
+
+/* Kind 1 uses a point-history table; kinds 2..4 use the same word as a
+ * floating-point scale. Only those scaled kinds reach the scale accessor. */
+typedef struct {
+    u16 kind;
+    u8 pad02[6];
+    union {
+        ParTable *table;
+        f32 scale;
+    } value;
+    u8 pad0C[0xC];
+} ParKindState; /* 0x18 */
+
+/* Record contents depend on the emitter; radial records are ParBurstPacket. */
+typedef struct {
+    u32 allocation;
+    void *records;
+} ParBuffer; /* 0x08 */
+
+/* Common emitter header. Radial-only fields belong to ParBurstEmitter's tail. */
+typedef struct {
+    f32 origin[4];                /* 0x00 */
+    f32 billboardScale;           /* 0x10: radial packet's base scale */
+    u8 pad14[0xC];
+    s32 particleCount;            /* 0x20 */
+    s32 lifetimeFrames;           /* 0x24 */
+    u8 pad28[8];
+    ParKindState kindState;       /* 0x30 */
+    ParColorRamp colorRamp;       /* 0x48 */
+    u8 pad8C[8];
+    f32 billboardScaleJitter;     /* 0x94 */
+    f32 initialPhaseJitter;       /* 0x98 */
+    u8 pad9C[8];
+    u32 restartStepCount;         /* 0xA4 */
+    u8 padA8[8];
+    f32 matrix[16];               /* 0xB0 */
+    u8 padF0[8];
+    ParBuffer *buffer;            /* 0xF8 */
+    u32 pendingRestartSteps;      /* 0xFC: count, not a pointer */
+    f32 sourceMatrix[16];         /* 0x100 */
+    u16 dispatchIndex;            /* 0x140: object dispatch, distinct from kind */
+    u16 restartFlag;              /* 0x142 */
+    u8 pad144[0xC];
+} ParObj; /* 0x150 */
 
 typedef struct {
-    u8 pad[4];   /* 0x0 native renderer reads a point-buffer address */
-    u16 pointCount; /* 0x4 number of billboard points emitted from this slot */
-    u8 pad6[10]; /* 0x6 includes packed color at +0x8 and billboard scale at +0xC */
-} ParSlot; /* 0x10 bytes */
-
-typedef struct {
-    u8 pad[4];     /* 0x0 */
-    ParSlot *slots; /* 0x4 */
-} ParTable;
+    ParObj head;
+    u8 axisMode;                 /* 0x150 */
+    u8 loop;                     /* 0x151: rearm expired particles */
+    u8 pad152[2];
+    u32 spawnDelayFrames;        /* 0x154 */
+    f32 initialRadius;           /* 0x158 */
+    f32 rotationStepDegrees;     /* 0x15C: native updater converts to radians */
+    f32 targetRadius;
+    f32 initialRadiusJitter;
+    f32 targetRadiusJitter;
+    u8 pad16C[8];
+    u32 childHandle;             /* 0x174: additional owned allocation */
+    f32 previousOrigin[3];       /* 0x178: native updater caches origin here */
+} ParBurstEmitter; /* 0x184 */
 
 
 /* Particle dispatch entry (0xC bytes): command func selected by the
@@ -51,48 +119,20 @@ extern ParDispatch parKindConstructorEntries[];
 extern ParDispatch D_0034E258[];
 extern void (*D_0034E2F0[])();
 
-void func_002D0918(void *arg);
+void func_002D0918(u32 handle);
 void effDestroyResources(void *arg);
 void sdfReleaseChipBlock(void *arg);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-/* Release a non-null child, then the object's resources and chip block. */
-void parReleaseObject(ParObj *obj) {
-    if (obj->child != NULL) {
-        func_002D0918(obj->child);
+/* Release the radial emitter's extra allocation, shared resources, and block. */
+void parReleaseObject(ParBurstEmitter *obj) {
+    if (obj->childHandle != 0) {
+        func_002D0918(obj->childHandle);
     }
     effDestroyResources(obj);
     sdfReleaseChipBlock(obj);
 }
 
-typedef struct {
-    u8 pad00[4];
-    void *records;
-} ParBurstBuffer;
-
-typedef struct {
-    f32 origin[4];
-    f32 billboardScale;
-    u8 pad14[0x10];
-    s32 lifetimeFrames;
-    u8 pad28[8];
-    u8 kindState[0x64];
-    f32 billboardScaleJitter;
-    f32 initialPhaseJitter;
-    u8 pad9C[0x14];
-    f32 matrix[16];
-    u8 padF0[8];
-    ParBurstBuffer *buffer;
-    u8 padFC[0x54];
-    u8 axisMode;
-    u8 pad151[3];
-    u32 spawnDelayFrames;
-    f32 initialRadius;
-    f32 rotationStepDegrees; /* native updater converts this angle to radians */
-    f32 targetRadius;
-    f32 initialRadiusJitter;
-    f32 targetRadiusJitter;
-} ParBurstEmitter;
 
 /* The native updater rotates radialOffset and rebuilds position = origin +
    radialOffset; it does not integrate this vector as a velocity. */
@@ -118,7 +158,7 @@ extern u8 effEmitterDelayRandomState[];
    lifetimeFrames. RNG calls and the pre-transform length measurement stay in
    their original order. */
 void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
-    ParBurstPacket *packet = (ParBurstPacket *)effect->buffer->records;
+    ParBurstPacket *packet = effect->head.buffer->records;
     f32 direction[4];
     f32 initialRadius;
     f32 jitterFactor;
@@ -141,13 +181,13 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     packet->radialOffset[2] = initialRadius * (effMiscRandUnitFloat(D_0034DF38) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
     VU0_LOAD_VF(vf10, packet->radialOffset);
     VU0_LENGTH_VF10(initialRadiusLength);
-    VU0_LOAD_MATRIX(effect->matrix);
+    VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->radialOffset);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF_UNCLOBBERED(vf10, packet->radialOffset);
-    packet->position[0] = packet->radialOffset[0] + effect->origin[0];
-    packet->position[1] = packet->radialOffset[1] + effect->origin[1];
-    packet->position[2] = packet->radialOffset[2] + effect->origin[2];
+    packet->position[0] = packet->radialOffset[0] + effect->head.origin[0];
+    packet->position[1] = packet->radialOffset[1] + effect->head.origin[1];
+    packet->position[2] = packet->radialOffset[2] + effect->head.origin[2];
     if (effect->axisMode == PAR_BURST_RANDOM_AXIS) {
         direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
         direction[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
@@ -166,43 +206,22 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     jitterFactor = effect->targetRadiusJitter;
     packet->radiusStep = (effect->targetRadius * (effMiscRandUnitFloat(D_0034DF38) * jitterFactor +
                                     (1.0f - jitterFactor)) - initialRadiusLength) /
-                   effect->lifetimeFrames;
-    jitterFactor = effect->billboardScaleJitter;
-    packet->billboardScale = effect->billboardScale * (effMiscRandUnitFloat(D_0034DF38) * jitterFactor +
+                   effect->head.lifetimeFrames;
+    jitterFactor = effect->head.billboardScaleJitter;
+    packet->billboardScale = effect->head.billboardScale * (effMiscRandUnitFloat(D_0034DF38) * jitterFactor +
                                          (1.0f - jitterFactor));
-    jitterFactor = effect->initialPhaseJitter;
+    jitterFactor = effect->head.initialPhaseJitter;
     if (jitterFactor != 0) {
         packet->initialPhaseRadians = (effMiscRandUnitFloat(D_0034DF38) * jitterFactor + (1.0f - jitterFactor)) *
                        (3.14159265f * 2.0f);
     } else {
         packet->initialPhaseRadians = 0;
     }
-    parDispatchKindInit(effect->kindState, particleIndex);
+    parDispatchKindInit(&effect->head.kindState, particleIndex);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159308);
 
-/* Colour-ramp setup for a particle emitter: masks the three colours to 24 bits, derives the fade-in/out
-   steps from the alpha byte, then the per-channel (colour0 -> colour1 -> colour2) steps per frame. */
-typedef struct ParColorRamp {
-    s32 mode;          /* 0x00: 1 = no ramp, 2 = ramp color0->color1 only */
-    u32 color0;        /* 0x04 */
-    u32 color1;        /* 0x08 */
-    u32 color2;        /* 0x0C */
-    u32 alpha;         /* 0x10 */
-    s32 fadeInFrames;  /* 0x14 */
-    s32 fadeOutFrames; /* 0x18 */
-    s32 frames;        /* 0x1C */
-    s32 rampFrames;    /* 0x20 */
-    f32 r01;           /* 0x24 per-channel step color0 -> color1 */
-    f32 r12;           /* 0x28 per-channel step color1 -> color2 */
-    f32 g01;           /* 0x2C */
-    f32 g12;           /* 0x30 */
-    f32 b01;           /* 0x34 */
-    f32 b12;           /* 0x38 */
-    u32 fadeIn;        /* 0x3C */
-    u32 fadeOut;       /* 0x40 */
-} ParColorRamp;
 
 void parInitColorRamp(ParColorRamp *p, s32 frames) {
     u32 alpha;
@@ -253,9 +272,9 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00159AB8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159C08);
 
-/* Release the allocation handle stored in this node, not the node itself. */
-void effParReleaseNodeResource(ParNode *node) {
-    func_002D0918(node->resource);
+/* Release the slot table's allocation handle, not a separate node object. */
+void effParReleaseNodeResource(ParTable *table) {
+    func_002D0918(table->resource);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159CF0);
@@ -319,7 +338,7 @@ void parCloneKind(ParObj *obj) {
 
 void parRestartKind(ParObj *obj) {
     D_0034E2F0[obj->dispatchIndex]();
-    obj->pendingRestartSteps = (void *)obj->restartStepCount;
+    obj->pendingRestartSteps = obj->restartStepCount;
     obj->restartFlag = 1;
 }
 
@@ -328,15 +347,15 @@ extern void (*D_0034E328[])(ParObj *, f32);
 /* Call the selected entry with factor, additionally scale kinds 2..4, then restart. */
 void parScaleAndRestartKind(ParObj *obj, f32 factor) {
     D_0034E328[obj->dispatchIndex](obj, factor);
-    switch (obj->kind) {
+    switch (obj->kindState.kind) {
     case 2:
-        obj->scale *= factor;
+        obj->kindState.value.scale *= factor;
         break;
     case 3:
-        obj->scale *= factor;
+        obj->kindState.value.scale *= factor;
         break;
     case 4:
-        obj->scale *= factor;
+        obj->kindState.value.scale *= factor;
         break;
     }
     parRestartKind(obj);
@@ -352,10 +371,10 @@ void parCopyVectorB(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
-/* vu0 routine: effect+0xB0 = matrix * effect+0x100 via sdfComposeVuMatrixFromRegisters */
-void parComposeEffectTransformMatrices(u8 *effect, void *matrix) {
+/* vu0 routine: compose the supplied matrix with the emitter's source matrix. */
+void parComposeEffectTransformMatrices(ParObj *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_MATRIX_B(effect + 0x100);
+    VU0_LOAD_MATRIX_B(effect->sourceMatrix);
     sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX(effect + 0xB0);
+    VU0_STORE_MATRIX(effect->matrix);
 }
