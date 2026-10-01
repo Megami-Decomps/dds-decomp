@@ -71,7 +71,41 @@ s32 func_00119368(u8 *unit, s32 statIndex) {
     return func_00119300(unit, statIndex);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_001193A0);
+typedef struct DatSkillOwner {
+    u16 flags;        /* 0x00: 0x20 = skills live in the party table */
+    u16 unk2;
+    u16 partyIndex;   /* 0x04 */
+    u8 unk6[0x1C];
+    u16 skills[0x18]; /* 0x22 */
+} DatSkillOwner;
+
+typedef struct DatPartyMember {
+    u8 unk0[0x18];
+    u16 skills[8]; /* 0x18 */
+    u8 unk28[0x24];
+} DatPartyMember; /* 0x4C */
+
+extern DatPartyMember *D_003BAA1C;
+
+/* Nonzero if `skill` is in the unit's skill list (party members use the party table). */
+s32 func_001193A0(DatSkillOwner *unit, s32 skill) {
+    s32 i;
+
+    if (!(unit->flags & 0x20)) {
+        for (i = 0; i < 0x18; i++) {
+            if (unit->skills[i] == skill) {
+                return 1;
+            }
+        }
+    } else {
+        for (i = 0; i < 8; i++) {
+            if (D_003BAA1C[unit->partyIndex].skills[i] == skill) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", func_00119448);
 
