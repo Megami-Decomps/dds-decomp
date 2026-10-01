@@ -1,3 +1,5 @@
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 #include "common.h"
 #include "fpu.h"
 #include "fld.h"
@@ -1110,17 +1112,9 @@ void fldInitializeDisplayAndTables(void) {
 
 void func_00122ED0(void) {
     u32 *buffer = D_0032F1A0;
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(buffer) : "memory");
-    buffer += 4;
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(buffer) : "memory");
+
+    VU0_STORE_VF(vf0, buffer);
+    VU0_STORE_VF(vf0, buffer + 4);
     D_003BAB34 = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }
@@ -1359,23 +1353,14 @@ void fldReleaseResources(void) {
 
 void fldReleasePlayerSceneResources(void) {
     u32 *buffer;
-    u64 active;
+
     if (D_003BAB34 != 0) {
-        active = dds3GetWorldSecondaryObject();
-        buffer = D_0032F1A0;
-        if (active != 0) {
+        if (dds3GetWorldSecondaryObject() != 0) {
+            buffer = D_0032F1A0;
             effObjFetchInnerFirstVec(D_003BAB34);
-            __asm__ volatile(
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(buffer) : "memory");
+            VU0_STORE_VF(vf10, buffer);
             effObjFetchInnerSecondVecNorm(D_003BAB34);
-            __asm__ volatile(
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(buffer + 4) : "memory");
+            VU0_STORE_VF(vf10, buffer + 4);
         }
         D_003BAB34 = 0;
         D_003BAB38 = 0;

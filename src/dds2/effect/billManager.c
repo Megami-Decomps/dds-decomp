@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "pcp_vu0.h"
 
 /* The entry offset is relative to the table's record base. */
 typedef struct {

@@ -367,7 +367,7 @@ void sdfMotionBlendDrawVector(u8 *motion, f32 t1) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(*(u8 **)(motion + 0xC) + 0x60));
+    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x60);
 }
 
 /* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with the vec3 at +0x10 by t2 into sub+0x60 */
@@ -378,9 +378,9 @@ void sdfMotionBlendDrawVectorWithCurrent(u8 *motion, f32 t1, f32 t2) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(motion + 0x10));
+    VU0_LOAD_VF(vf10, motion + 0x10);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(t2));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(*(u8 **)(motion + 0xC) + 0x60));
+    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x60);
 }
 
 void *func_00334B10(void *a0, s32 a1, s32 a2) {
@@ -411,7 +411,7 @@ void sdfMotionBlendScaleVector(u8 *motion, f32 t1) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(b.weight));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(*(u8 **)(motion + 0xC) + 0x70));
+    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x70);
 }
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
@@ -422,9 +422,9 @@ void sdfMotionBlendScaleVectorWithCurrent(u8 *motion, f32 t1, f32 t2) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : : "f"(b.weight));
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(motion + 0x10));
+    VU0_LOAD_VF(vf10, motion + 0x10);
     __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\tvmove.w vf10, vf0\n\t.set reorder" : : "f"(t2));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(*(u8 **)(motion + 0xC) + 0x70));
+    VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x70);
 }
 
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
@@ -449,12 +449,12 @@ void sdfMotionBlendQuaternionToMatrix(u8 *motion, f32 t1) {
     EE_MMI_LOAD_S16X4_FIXED12(vf11, key);
     effMiscQuaternionNlerpVU(b.weight);
     sub = *(u8 **)(motion + 0xC);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(sub + 0x50));
+    VU0_STORE_VF_UNCLOBBERED(vf10, sub + 0x50);
     matrix = sub + 0x80;
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r"(matrix));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x10));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x20));
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix + 0x20);
 }
 
 /* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
@@ -472,14 +472,14 @@ void sdfMotionBlendKeyQuaternionWithBase(u8 *motion, f32 t1, f32 t2) {
     effMiscQuaternionNlerpVU(b.weight);
     sub = *(u8 **)(motion + 0xC);
     VU0_MOVE_VF(vf11, vf10);
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(motion + 0x10));
+    VU0_LOAD_VF(vf10, motion + 0x10);
     effMiscQuaternionNlerpVU(t2);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(sub + 0x50));
+    VU0_STORE_VF_UNCLOBBERED(vf10, sub + 0x50);
     matrix = sub + 0x80;
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r"(matrix));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x10));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r"(matrix + 0x20));
+    VU0_STORE_VF_UNCLOBBERED(vf28, matrix);
+    VU0_STORE_VF_UNCLOBBERED(vf29, matrix + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf30, matrix + 0x20);
 }
 
 void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {

@@ -599,17 +599,8 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
 
     VU0_LOAD_VF($vf10, D_00324690);
     VU0_LOAD_VF($vf11, D_00324680);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        ".set reorder");
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
     VU0_STORE_VF($vf10, dir);
     handle = work->handle;
     size[0] = work->scale;
@@ -617,9 +608,9 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     size[2] = work->scale;
     VU0_LOAD_VF($vf10, size);
     VU0_LOAD_VF($vf11, dir);
-    __asm__ volatile(".set noreorder\n\tvmul.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    VU0_MUL(vf10, vf10, vf11);
     VU0_LOAD_VF($vf11, work);
-    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, pos);
     effCopyVector(handle, pos);
     scale = work->scale;
@@ -1178,20 +1169,12 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
         } else {
             obj[0] = effParamWorkGetData(work->handle[i * 2]);
             obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
-            __asm__ volatile (
-                ".set noreorder\n"
-                "lqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(work) : "memory");
+            VU0_LOAD_VF_MEMORY(vf10, work);
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
             func_00217878(obj[0], D_00325828);
             func_002D9E98(((EffPCPWork *)obj[0])->unk18, 1);
-            __asm__ volatile (
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(&vec));
+            VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
             func_00217878(obj[1], D_00325828);
         }
@@ -1308,11 +1291,7 @@ void effPcpSpawnOnce(EffPCPWork1C *work) {
     u128 vec;
 
     obj = effParamWorkGetData(work->primaryHandle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(work) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color10);
     func_00217878(obj, D_00325828);
@@ -3610,23 +3589,9 @@ void effSpinEffectUpdate(EffPCPSpinWork *work) {
     effParamWorkCallback1(handle, work->scale);
     effParamWorkCallback3(handle, work->color);
     func_002DD688(work->angle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf24, 0(%0)\n"
-        "lqc2 vf25, 0x10(%0)\n"
-        "lqc2 vf26, 0x20(%0)\n"
-        "lqc2 vf27, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(work->matrix) : "memory");
+    VU0_LOAD_MATRIX_B(work->matrix);
     func_002DDBF8();
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(mtx) : "memory");
+    VU0_STORE_MATRIX(mtx);
     effParamWorkCallback2(handle, mtx);
     effParamWorkInvokeCallback(handle);
     work->frame++;
@@ -3698,9 +3663,9 @@ void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
     func_002DD688(work->angle);
-    __asm__ volatile (".set noreorder\nlqc2 vf24, 0(%0)\nlqc2 vf25, 0x10(%0)\nlqc2 vf26, 0x20(%0)\nlqc2 vf27, 0x30(%0)\n.set reorder" : : "r"(work->matrix));
+    VU0_LOAD_MATRIX_B(work->matrix);
     func_002DDBF8();
-    __asm__ volatile (".set noreorder\nsqc2 vf28, 0(%0)\nsqc2 vf29, 0x10(%0)\nsqc2 vf30, 0x20(%0)\nsqc2 vf31, 0x30(%0)\n.set reorder" : : "r"(mtx));
+    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     effParamWorkCallback2(handle[0], mtx);
     effParamWorkCallback2(handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
@@ -3774,9 +3739,9 @@ void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
     effParamWorkCallback3(handle[0], work->color);
     effParamWorkCallback3(handle[1], work->color);
     func_002DD688(work->angle);
-    __asm__ volatile (".set noreorder\nlqc2 vf24, 0(%0)\nlqc2 vf25, 0x10(%0)\nlqc2 vf26, 0x20(%0)\nlqc2 vf27, 0x30(%0)\n.set reorder" : : "r"(work->matrix));
+    VU0_LOAD_MATRIX_B(work->matrix);
     func_002DDBF8();
-    __asm__ volatile (".set noreorder\nsqc2 vf28, 0(%0)\nsqc2 vf29, 0x10(%0)\nsqc2 vf30, 0x20(%0)\nsqc2 vf31, 0x30(%0)\n.set reorder" : : "r"(mtx));
+    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     effParamWorkCallback2(handle[0], mtx);
     effParamWorkCallback2(handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
@@ -4235,24 +4200,10 @@ void effPcpCopyNestedMatrix(EffPCPWork *work, void *src) {
 }
 
 void effRotateNested(EffPCPWork *work, void *src) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
+    VU0_LOAD_MATRIX(src);
     func_002DD8E8(1.5707963f);
     func_002DDBF8();
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 0x10(%0)\n"
-        "sqc2 vf30, 0x20(%0)\n"
-        "sqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"((void *)work->unk5C) : "memory");
+    VU0_STORE_MATRIX((void *)work->unk5C);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180BD0);
@@ -4732,7 +4683,7 @@ typedef struct EffPCPNode {
 void effPcpCaptureNodeVectors(EffPCPNode *node) {
     EffPCPNode *child;
 
-    __asm__ volatile ("sqc2 vf10, 0(%0)" :: "r" (node->vector70) : "memory");
+    VU0_STORE_VF(vf10, node->vector70);
     child = node->child;
     if (child != NULL) {
         do {
