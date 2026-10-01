@@ -267,17 +267,27 @@ tables and both implementations:
 | `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
 | `SCREEN_FADE_B` | `0x010` | 2 | Starts the selected screen fade-in when its timer reaches zero |
+| `ADD_EFFECT_UNIT_TO_WORLD` | `0x012` | 1 | Adds the selected player object or effect-unit ID to the active world |
+| `ADD_FLAGGED_EFFECT_UNIT_TO_WORLD` | `0x019` | 1 | Adds the selected player object, or marks and adds an effect-unit ID |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
+| `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
+| `ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR` | `0x04A` | 2 | Attaches a world object to a source vector |
+| `SET_UNIT_VALUE` | `0x04B` | 2 | Writes the selected unit's 16-bit value at offset `0xBC` |
 | `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
 | `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
 | `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
+| `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
+| `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
+| `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
+| `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
+| `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
@@ -287,8 +297,8 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 32,695 of 53,400 native calls in the complete DDS1
-corpus and 23,630 of 38,850 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 37,026 of 53,400 native calls in the complete DDS1
+corpus and 26,973 of 38,850 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
