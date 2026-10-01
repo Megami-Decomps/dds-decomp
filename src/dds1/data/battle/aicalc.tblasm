@@ -1,0 +1,3435 @@
+battle-table 1 kind=aicalc profile=dds1
+
+script ai file=aicalc-ai.bfasm
+script formula file=aicalc-formulas.bfasm
+
+calculation-word 0x0 value=4
+calculation-word 0x4 value=4
+calculation-word 0x8 value=4
+calculation-word 0xc value=4
+calculation-word 0x10 value=4
+calculation-word 0x14 value=4
+calculation-word 0x18 value=4
+calculation-word 0x1c value=4
+calculation-word 0x20 value=4
+calculation-word 0x24 value=4
+calculation-word 0x28 value=4
+calculation-word 0x2c value=4
+calculation-word 0x30 value=4
+calculation-word 0x34 value=4
+calculation-word 0x38 value=4
+calculation-word 0x3c value=4
+calculation-word 0x40 value=4
+calculation-word 0x44 value=4
+calculation-word 0x48 value=4
+calculation-word 0x4c value=4
+calculation-word 0x50 value=4
+calculation-word 0x54 value=4
+calculation-word 0x58 value=4
+calculation-word 0x5c value=4
+calculation-word 0x60 value=4
+calculation-word 0x64 value=4
+calculation-word 0x68 value=4
+calculation-word 0x6c value=4
+calculation-word 0x70 value=4
+calculation-word 0x74 value=4
+calculation-word 0x78 value=4
+calculation-word 0x7c value=4
+calculation-word 0x80 value=4
+calculation-word 0x84 value=4
+calculation-word 0x88 value=4
+calculation-word 0x8c value=4
+calculation-word 0x90 value=4
+calculation-word 0x94 value=4
+calculation-word 0x98 value=4
+calculation-word 0x9c value=4
+calculation-word 0xa0 value=4
+calculation-word 0xa4 value=4
+calculation-word 0xa8 value=4
+calculation-word 0xac value=4
+calculation-word 0xb0 value=4
+calculation-word 0xb4 value=4
+calculation-word 0xb8 value=4
+calculation-word 0xbc value=4
+calculation-word 0xc0 value=4
+calculation-word 0xc4 value=4
+calculation-word 0xc8 value=4
+calculation-word 0xcc value=4
+calculation-word 0xd0 value=4
+calculation-word 0xd4 value=4
+calculation-word 0xd8 value=4
+calculation-word 0xdc value=4
+calculation-word 0xe0 value=4
+calculation-word 0xe4 value=4
+calculation-word 0xe8 value=4
+calculation-word 0xec value=4
+calculation-word 0xf0 value=4
+calculation-word 0xf4 value=4
+calculation-word 0xf8 value=4
+calculation-word 0xfc value=4
+calculation-word 0x100 value=4
+calculation-word 0x104 value=4
+calculation-word 0x108 value=4
+calculation-word 0x10c value=4
+calculation-word 0x110 value=4
+calculation-word 0x114 value=4
+calculation-word 0x118 value=4
+calculation-word 0x11c value=4
+calculation-word 0x120 value=4
+calculation-word 0x124 value=4
+calculation-word 0x128 value=4
+calculation-word 0x12c value=4
+calculation-word 0x130 value=4
+calculation-word 0x134 value=4
+calculation-word 0x138 value=4
+calculation-word 0x13c value=4
+calculation-word 0x140 value=4
+calculation-word 0x144 value=4
+calculation-word 0x148 value=4
+calculation-word 0x14c value=4
+calculation-word 0x150 value=4
+calculation-word 0x154 value=4
+calculation-word 0x158 value=4
+calculation-word 0x15c value=4
+calculation-word 0x160 value=4
+calculation-word 0x164 value=4
+calculation-word 0x168 value=4
+calculation-word 0x16c value=4
+calculation-word 0x170 value=4
+calculation-word 0x174 value=4
+calculation-word 0x178 value=4
+calculation-word 0x17c value=4
+calculation-word 0x180 value=4
+calculation-word 0x184 value=4
+calculation-word 0x188 value=4
+calculation-word 0x18c value=4
+calculation-word 0x190 value=4
+calculation-word 0x194 value=4
+calculation-word 0x198 value=4
+calculation-word 0x19c value=4
+calculation-word 0x1a0 value=4
+calculation-word 0x1a4 value=4
+calculation-word 0x1a8 value=4
+calculation-word 0x1ac value=4
+calculation-word 0x1b0 value=4
+calculation-word 0x1b4 value=4
+calculation-word 0x1b8 value=4
+calculation-word 0x1bc value=4
+calculation-word 0x1c0 value=4
+calculation-word 0x1c4 value=4
+calculation-word 0x1c8 value=4
+calculation-word 0x1cc value=4
+calculation-word 0x1d0 value=4
+calculation-word 0x1d4 value=4
+calculation-word 0x1d8 value=4
+calculation-word 0x1dc value=4
+calculation-word 0x1e0 value=4
+calculation-word 0x1e4 value=4
+calculation-word 0x1e8 value=4
+calculation-word 0x1ec value=4
+calculation-word 0x1f0 value=4
+calculation-word 0x1f4 value=4
+calculation-word 0x1f8 value=4
+calculation-word 0x1fc value=4
+calculation-word 0x200 value=4
+calculation-word 0x204 value=4
+calculation-word 0x208 value=4
+calculation-word 0x20c value=4
+calculation-word 0x210 value=4
+calculation-word 0x214 value=4
+calculation-word 0x218 value=4
+calculation-word 0x21c value=4
+calculation-word 0x220 value=4
+calculation-word 0x224 value=4
+calculation-word 0x228 value=4
+calculation-word 0x22c value=4
+calculation-word 0x230 value=4
+calculation-word 0x234 value=4
+calculation-word 0x238 value=4
+calculation-word 0x23c value=4
+calculation-word 0x240 value=4
+calculation-word 0x244 value=4
+calculation-word 0x248 value=4
+calculation-word 0x24c value=4
+calculation-word 0x250 value=4
+calculation-word 0x254 value=4
+calculation-word 0x258 value=4
+calculation-word 0x25c value=4
+calculation-word 0x260 value=4
+calculation-word 0x264 value=4
+calculation-word 0x268 value=4
+calculation-word 0x26c value=4
+calculation-word 0x270 value=4
+calculation-word 0x274 value=4
+calculation-word 0x278 value=4
+calculation-word 0x27c value=4
+calculation-word 0x280 value=4
+calculation-word 0x284 value=4
+calculation-word 0x288 value=4
+calculation-word 0x28c value=4
+calculation-word 0x290 value=4
+calculation-word 0x294 value=4
+calculation-word 0x298 value=4
+calculation-word 0x29c value=4
+calculation-word 0x2a0 value=4
+calculation-word 0x2a4 value=4
+calculation-word 0x2a8 value=4
+calculation-word 0x2ac value=4
+calculation-word 0x2b0 value=4
+calculation-word 0x2b4 value=4
+calculation-word 0x2b8 value=4
+calculation-word 0x2bc value=4
+calculation-word 0x2c0 value=4
+calculation-word 0x2c4 value=4
+calculation-word 0x2c8 value=4
+calculation-word 0x2cc value=4
+calculation-word 0x2d0 value=4
+calculation-word 0x2d4 value=4
+calculation-word 0x2d8 value=4
+calculation-word 0x2dc value=4
+calculation-word 0x2e0 value=4
+calculation-word 0x2e4 value=4
+calculation-word 0x2e8 value=4
+calculation-word 0x2ec value=4
+calculation-word 0x2f0 value=4
+calculation-word 0x2f4 value=4
+calculation-word 0x2f8 value=4
+calculation-word 0x2fc value=4
+calculation-word 0x300 value=4
+calculation-word 0x304 value=4
+calculation-word 0x308 value=4
+calculation-word 0x30c value=4
+calculation-word 0x310 value=4
+calculation-word 0x314 value=4
+calculation-word 0x31c value=0.43
+calculation-word 0x320 value=0.86
+calculation-word 0x324 value=1.29
+calculation-word 0x328 value=1.72
+calculation-word 0x32c value=2.15
+calculation-word 0x330 value=2.58
+calculation-word 0x334 value=3
+calculation-word 0x33c value=0.27
+calculation-word 0x340 value=0.69
+calculation-word 0x344 value=1.29
+calculation-word 0x348 value=1.98
+calculation-word 0x34c value=2.72
+calculation-word 0x350 value=3.65
+calculation-word 0x354 value=4.75
+calculation-word 0x358 value=5.99
+calculation-word 0x35c value=7.69
+calculation-word 0x360 value=1e+01
+calculation-word 0x364 value=3.6
+calculation-word 0x368 value=4.2
+calculation-word 0x36c value=4.8
+calculation-word 0x370 value=5.4
+calculation-word 0x374 value=6
+calculation-word 0x378 value=6.6
+calculation-word 0x37c value=7.2
+calculation-word 0x380 value=7.8
+calculation-word 0x384 value=8.4
+calculation-word 0x388 value=9
+calculation-word 0x38c value=9.6
+calculation-word 0x390 value=10.2
+calculation-word 0x394 value=10.8
+calculation-word 0x398 value=11.4
+calculation-word 0x39c value=12
+calculation-word 0x3a0 value=12.6
+calculation-word 0x3a4 value=13.2
+calculation-word 0x3a8 value=13.8
+calculation-word 0x3ac value=14.4
+calculation-word 0x3b0 value=15
+calculation-word 0x3b4 value=15.6
+calculation-word 0x3b8 value=16.2
+calculation-word 0x3bc value=16.8
+calculation-word 0x3c0 value=17.4
+calculation-word 0x3c4 value=18
+calculation-word 0x3c8 value=18.6
+calculation-word 0x3cc value=19.2
+calculation-word 0x3d0 value=19.8
+calculation-word 0x3d4 value=20.4
+calculation-word 0x3d8 value=21
+calculation-word 0x3dc value=21.6
+calculation-word 0x3e0 value=22.2
+calculation-word 0x3e4 value=22.8
+calculation-word 0x3e8 value=23.4
+calculation-word 0x3ec value=24
+calculation-word 0x3f0 value=24.6
+calculation-word 0x3f4 value=25.2
+calculation-word 0x3f8 value=25.8
+calculation-word 0x3fc value=26.4
+calculation-word 0x400 value=27
+calculation-word 0x404 value=27.6
+calculation-word 0x408 value=28.2
+calculation-word 0x40c value=28.8
+calculation-word 0x410 value=29.4
+calculation-word 0x414 value=3e+01
+calculation-word 0x418 value=30.6
+calculation-word 0x41c value=31.2
+calculation-word 0x420 value=31.8
+calculation-word 0x424 value=32.4
+calculation-word 0x428 value=33
+calculation-word 0x42c value=33.6
+calculation-word 0x430 value=34.2
+calculation-word 0x434 value=34.8
+calculation-word 0x438 value=35.4
+calculation-word 0x43c value=36
+calculation-word 0x440 value=36.6
+calculation-word 0x444 value=37.2
+calculation-word 0x448 value=37.8
+calculation-word 0x44c value=38.4
+calculation-word 0x450 value=39
+calculation-word 0x454 value=39.6
+calculation-word 0x458 value=40.2
+calculation-word 0x45c value=40.8
+calculation-word 0x460 value=41.4
+calculation-word 0x464 value=42
+calculation-word 0x468 value=42.6
+calculation-word 0x46c value=43.2
+calculation-word 0x470 value=43.8
+calculation-word 0x474 value=44.4
+calculation-word 0x478 value=45
+calculation-word 0x47c value=45.6
+calculation-word 0x480 value=46.2
+calculation-word 0x484 value=46.8
+calculation-word 0x488 value=47.4
+calculation-word 0x48c value=48
+calculation-word 0x490 value=48.6
+calculation-word 0x494 value=49.2
+calculation-word 0x498 value=49.8
+calculation-word 0x49c value=50.4
+calculation-word 0x4a0 value=51
+calculation-word 0x4a4 value=51.6
+calculation-word 0x4a8 value=52.2
+calculation-word 0x4ac value=52.8
+calculation-word 0x4b0 value=53.4
+calculation-word 0x4b4 value=54
+calculation-word 0x4b8 value=54.6
+calculation-word 0x4bc value=55.2
+calculation-word 0x4c0 value=55.8
+calculation-word 0x4c4 value=56.4
+calculation-word 0x4c8 value=57
+calculation-word 0x4cc value=57.6
+calculation-word 0x4d0 value=58.2
+calculation-word 0x4d4 value=58.8
+calculation-word 0x4d8 value=59.4
+calculation-word 0x4dc value=6e+01
+calculation-word 0x4e0 value=60.6
+calculation-word 0x4e4 value=61.2
+calculation-word 0x4e8 value=61.8
+calculation-word 0x4ec value=62.4
+calculation-word 0x4f0 value=3.6
+calculation-word 0x4f4 value=4.2
+calculation-word 0x4f8 value=4.8
+calculation-word 0x4fc value=5.4
+calculation-word 0x500 value=6
+calculation-word 0x504 value=6.6
+calculation-word 0x508 value=7.2
+calculation-word 0x50c value=7.8
+calculation-word 0x510 value=8.4
+calculation-word 0x514 value=9
+calculation-word 0x518 value=9.6
+calculation-word 0x51c value=10.2
+calculation-word 0x520 value=10.8
+calculation-word 0x524 value=11.4
+calculation-word 0x528 value=12
+calculation-word 0x52c value=12.6
+calculation-word 0x530 value=13.2
+calculation-word 0x534 value=13.8
+calculation-word 0x538 value=14.4
+calculation-word 0x53c value=15
+calculation-word 0x540 value=15.6
+calculation-word 0x544 value=16.2
+calculation-word 0x548 value=16.8
+calculation-word 0x54c value=17.4
+calculation-word 0x550 value=18
+calculation-word 0x554 value=18.6
+calculation-word 0x558 value=19.2
+calculation-word 0x55c value=19.8
+calculation-word 0x560 value=20.4
+calculation-word 0x564 value=21
+calculation-word 0x568 value=21.6
+calculation-word 0x56c value=22.2
+calculation-word 0x570 value=22.8
+calculation-word 0x574 value=23.4
+calculation-word 0x578 value=24
+calculation-word 0x57c value=24.6
+calculation-word 0x580 value=25.2
+calculation-word 0x584 value=25.8
+calculation-word 0x588 value=26.4
+calculation-word 0x58c value=27
+calculation-word 0x590 value=27.6
+calculation-word 0x594 value=28.2
+calculation-word 0x598 value=28.8
+calculation-word 0x59c value=29.4
+calculation-word 0x5a0 value=3e+01
+calculation-word 0x5a4 value=30.6
+calculation-word 0x5a8 value=31.2
+calculation-word 0x5ac value=31.8
+calculation-word 0x5b0 value=32.4
+calculation-word 0x5b4 value=33
+calculation-word 0x5b8 value=33.6
+calculation-word 0x5bc value=34.2
+calculation-word 0x5c0 value=34.8
+calculation-word 0x5c4 value=35.4
+calculation-word 0x5c8 value=36
+calculation-word 0x5cc value=36.6
+calculation-word 0x5d0 value=37.2
+calculation-word 0x5d4 value=37.8
+calculation-word 0x5d8 value=38.4
+calculation-word 0x5dc value=39
+calculation-word 0x5e0 value=39.6
+calculation-word 0x5e4 value=40.2
+calculation-word 0x5e8 value=40.8
+calculation-word 0x5ec value=41.4
+calculation-word 0x5f0 value=42
+calculation-word 0x5f4 value=42.6
+calculation-word 0x5f8 value=43.2
+calculation-word 0x5fc value=43.8
+calculation-word 0x600 value=44.4
+calculation-word 0x604 value=45
+calculation-word 0x608 value=45.6
+calculation-word 0x60c value=46.2
+calculation-word 0x610 value=46.8
+calculation-word 0x614 value=47.4
+calculation-word 0x618 value=48
+calculation-word 0x61c value=48.6
+calculation-word 0x620 value=49.2
+calculation-word 0x624 value=49.8
+calculation-word 0x628 value=50.4
+calculation-word 0x62c value=51
+calculation-word 0x630 value=51.6
+calculation-word 0x634 value=52.2
+calculation-word 0x638 value=52.8
+calculation-word 0x63c value=53.4
+calculation-word 0x640 value=54
+calculation-word 0x644 value=54.6
+calculation-word 0x648 value=55.2
+calculation-word 0x64c value=55.8
+calculation-word 0x650 value=56.4
+calculation-word 0x654 value=57
+calculation-word 0x658 value=57.6
+calculation-word 0x65c value=58.2
+calculation-word 0x660 value=58.8
+calculation-word 0x664 value=59.4
+calculation-word 0x668 value=6e+01
+calculation-word 0x66c value=60.6
+calculation-word 0x670 value=61.2
+calculation-word 0x674 value=61.8
+calculation-word 0x678 value=62.4
+calculation-word 0x67c value=3.6
+calculation-word 0x680 value=4.2
+calculation-word 0x684 value=4.8
+calculation-word 0x688 value=5.4
+calculation-word 0x68c value=6
+calculation-word 0x690 value=6.6
+calculation-word 0x694 value=7.2
+calculation-word 0x698 value=7.8
+calculation-word 0x69c value=8.4
+calculation-word 0x6a0 value=9
+calculation-word 0x6a4 value=9.6
+calculation-word 0x6a8 value=10.2
+calculation-word 0x6ac value=10.8
+calculation-word 0x6b0 value=11.4
+calculation-word 0x6b4 value=12
+calculation-word 0x6b8 value=12.6
+calculation-word 0x6bc value=13.2
+calculation-word 0x6c0 value=13.8
+calculation-word 0x6c4 value=14.4
+calculation-word 0x6c8 value=15
+calculation-word 0x6cc value=15.6
+calculation-word 0x6d0 value=16.2
+calculation-word 0x6d4 value=16.8
+calculation-word 0x6d8 value=17.4
+calculation-word 0x6dc value=18
+calculation-word 0x6e0 value=18.6
+calculation-word 0x6e4 value=19.2
+calculation-word 0x6e8 value=19.8
+calculation-word 0x6ec value=20.4
+calculation-word 0x6f0 value=21
+calculation-word 0x6f4 value=21.6
+calculation-word 0x6f8 value=22.2
+calculation-word 0x6fc value=22.8
+calculation-word 0x700 value=23.4
+calculation-word 0x704 value=24
+calculation-word 0x708 value=24.6
+calculation-word 0x70c value=25.2
+calculation-word 0x710 value=25.8
+calculation-word 0x714 value=26.4
+calculation-word 0x718 value=27
+calculation-word 0x71c value=27.6
+calculation-word 0x720 value=28.2
+calculation-word 0x724 value=28.8
+calculation-word 0x728 value=29.4
+calculation-word 0x72c value=3e+01
+calculation-word 0x730 value=30.6
+calculation-word 0x734 value=31.2
+calculation-word 0x738 value=31.8
+calculation-word 0x73c value=32.4
+calculation-word 0x740 value=33
+calculation-word 0x744 value=33.6
+calculation-word 0x748 value=34.2
+calculation-word 0x74c value=34.8
+calculation-word 0x750 value=35.4
+calculation-word 0x754 value=36
+calculation-word 0x758 value=36.6
+calculation-word 0x75c value=37.2
+calculation-word 0x760 value=37.8
+calculation-word 0x764 value=38.4
+calculation-word 0x768 value=39
+calculation-word 0x76c value=39.6
+calculation-word 0x770 value=40.2
+calculation-word 0x774 value=40.8
+calculation-word 0x778 value=41.4
+calculation-word 0x77c value=42
+calculation-word 0x780 value=42.6
+calculation-word 0x784 value=43.2
+calculation-word 0x788 value=43.8
+calculation-word 0x78c value=44.4
+calculation-word 0x790 value=45
+calculation-word 0x794 value=45.6
+calculation-word 0x798 value=46.2
+calculation-word 0x79c value=46.8
+calculation-word 0x7a0 value=47.4
+calculation-word 0x7a4 value=48
+calculation-word 0x7a8 value=48.6
+calculation-word 0x7ac value=49.2
+calculation-word 0x7b0 value=49.8
+calculation-word 0x7b4 value=50.4
+calculation-word 0x7b8 value=51
+calculation-word 0x7bc value=51.6
+calculation-word 0x7c0 value=52.2
+calculation-word 0x7c4 value=52.8
+calculation-word 0x7c8 value=53.4
+calculation-word 0x7cc value=54
+calculation-word 0x7d0 value=54.6
+calculation-word 0x7d4 value=55.2
+calculation-word 0x7d8 value=55.8
+calculation-word 0x7dc value=56.4
+calculation-word 0x7e0 value=57
+calculation-word 0x7e4 value=57.6
+calculation-word 0x7e8 value=58.2
+calculation-word 0x7ec value=58.8
+calculation-word 0x7f0 value=59.4
+calculation-word 0x7f4 value=6e+01
+calculation-word 0x7f8 value=60.6
+calculation-word 0x7fc value=61.2
+calculation-word 0x800 value=61.8
+calculation-word 0x804 value=62.4
+calculation-word 0x808 bits=0x5
+calculation-word 0x80c bits=0xfffffffb
+calculation-word 0x810 bits=0x7
+calculation-word 0x818 bits=0xfffffffb
+calculation-word 0x81c bits=0x3
+calculation-word 0x820 bits=0xfffffffb
+calculation-word 0x888 bits=0x1
+calculation-word 0x88c bits=0x2
+calculation-word 0x890 bits=0x3
+calculation-word 0x894 bits=0x4
+calculation-word 0x898 bits=0x5
+calculation-word 0x89c bits=0x6
+calculation-word 0x8a0 bits=0x7
+calculation-word 0x8a4 bits=0x8
+calculation-word 0x8a8 bits=0x7
+calculation-word 0x8ac bits=0x6
+calculation-word 0x8b0 bits=0x5
+calculation-word 0x8b4 bits=0x4
+calculation-word 0x8b8 bits=0x3
+calculation-word 0x8bc bits=0x2
+calculation-word 0x8c0 value=0.2
+calculation-word 0x8c4 value=0.5
+calculation-word 0x8c8 value=0.8
+calculation-word 0x8cc value=1
+calculation-word 0x8d0 value=1.2
+calculation-word 0x8d4 value=1.5
+calculation-word 0x8d8 value=1.8
+calculation-word 0x8dc bits=0x5
+calculation-word 0x8e0 value=1.3
+calculation-word 0x8e4 value=1.5
+calculation-word 0x8e8 value=1.5
+calculation-word 0x8ec value=1.2
+calculation-word 0x8f0 value=1.2
+calculation-word 0x8f4 value=1
+calculation-word 0x8f8 value=1
+calculation-word 0x8fc value=1
+calculation-word 0x900 value=1
+calculation-word 0x904 value=1
+calculation-word 0x908 value=1
+calculation-word 0x90c value=1
+calculation-word 0x910 value=1
+calculation-word 0x914 value=1
+calculation-word 0x918 value=1
+calculation-word 0x91c value=1
+calculation-word 0x920 value=1
+calculation-word 0x924 bits=0x5
+calculation-word 0x928 value=1
+calculation-word 0x92c bits=0x5
+calculation-word 0x930 value=0.75
+calculation-word 0x934 bits=0x5
+calculation-word 0x938 value=0.75
+calculation-word 0x93c bits=0x5
+calculation-word 0x940 value=0.75
+calculation-word 0x944 bits=0x5
+calculation-word 0x948 value=0.75
+calculation-word 0x94c bits=0x5
+calculation-word 0x950 value=0.75
+calculation-word 0x954 bits=0x5
+calculation-word 0x958 value=0.75
+calculation-word 0x95c bits=0x5
+calculation-word 0x960 value=0.75
+calculation-word 0x964 bits=0x5
+calculation-word 0x968 value=0.75
+calculation-word 0x96c bits=0x5
+calculation-word 0x970 value=0.75
+calculation-word 0x974 value=0.5
+calculation-word 0x978 value=0.5
+calculation-word 0x97c value=0.5
+calculation-word 0x980 value=0.5
+calculation-word 0x984 value=0.5
+calculation-word 0x988 value=0.5
+calculation-word 0x98c value=0.5
+calculation-word 0x990 value=0.5
+calculation-word 0x994 value=0.5
+calculation-word 0x998 value=0.5
+calculation-word 0x99c value=0.75
+calculation-word 0x9a0 value=0.75
+calculation-word 0x9a4 value=0.75
+calculation-word 0x9a8 value=0.75
+calculation-word 0x9ac value=0.75
+calculation-word 0x9b0 value=0.75
+calculation-word 0x9b4 value=0.75
+calculation-word 0x9b8 value=0.75
+calculation-word 0x9bc value=1
+calculation-word 0x9c0 value=1
+calculation-word 0x9c4 value=1
+calculation-word 0x9c8 value=1
+calculation-word 0x9cc value=1
+calculation-word 0x9d0 value=1
+calculation-word 0x9d4 value=1
+calculation-word 0x9d8 value=1
+calculation-word 0x9dc value=1
+calculation-word 0x9e0 value=1
+calculation-word 0x9e4 value=1
+calculation-word 0x9e8 value=1
+calculation-word 0x9ec value=1
+calculation-word 0x9f0 value=1
+calculation-word 0x9f4 value=1
+calculation-word 0x9f8 value=1
+calculation-word 0x9fc value=1
+calculation-word 0xa00 value=1
+calculation-word 0xa04 value=1
+calculation-word 0xa08 value=1
+calculation-word 0xa0c value=1.2
+calculation-word 0xa10 value=1.2
+calculation-word 0xa14 value=1.2
+calculation-word 0xa18 value=1.2
+calculation-word 0xa1c value=1.2
+calculation-word 0xa20 value=1.2
+calculation-word 0xa24 value=1.2
+calculation-word 0xa28 value=1.2
+calculation-word 0xa2c value=1.2
+calculation-word 0xa30 value=1.2
+calculation-word 0xa34 value=1.2
+calculation-word 0xa38 value=1.2
+calculation-word 0xa3c value=1.5
+calculation-word 0xa40 value=1.5
+calculation-word 0xa44 value=1.5
+calculation-word 0xa48 value=1.5
+calculation-word 0xa4c value=1.5
+calculation-word 0xa50 value=1.5
+calculation-word 0xa54 value=1.5
+calculation-word 0xa58 value=1.5
+calculation-word 0xa5c value=1.5
+calculation-word 0xa60 value=1.5
+calculation-word 0xa64 value=1.5
+calculation-word 0xa68 value=1.5
+
+enemy-ai 1
+  decision 0 predicates=1:25,48:12,9:8 routes=4,1,4,4,2,3,4,8
+  decision 1 predicates=62:55,62:56,62:47 routes=6,5,6,6,5,5,6,8
+  choice 0 0 weight=20 action=skill:47
+  choice 0 1 weight=10 action=skill:190
+  choice 0 2 weight=20 action=skill:76
+  choice 0 3 weight=20 action=skill:55
+  choice 0 4 weight=30 action=special:0
+  choice 1 0 weight=10 action=skill:47
+  choice 1 1 weight=1 action=skill:48
+  choice 1 2 weight=79 action=skill:76
+  choice 1 3 weight=10 action=skill:165
+  choice 2 0 weight=15 action=skill:47
+  choice 2 1 weight=1 action=skill:48
+  choice 2 2 weight=40 action=skill:190
+  choice 2 3 weight=40 action=skill:76
+  choice 2 4 weight=4 action=skill:165
+  choice 3 0 weight=5 action=skill:47
+  choice 3 1 weight=50 action=skill:76
+  choice 3 2 weight=30 action=skill:61
+  choice 3 3 weight=15 action=special:0
+  choice 4 0 weight=75 action=skill:77
+  choice 4 1 weight=25 action=special:0
+  choice 5 0 weight=5 action=skill:47
+  choice 5 1 weight=65 action=skill:76
+  choice 5 2 weight=30 action=special:0
+  choice 6 0 weight=70 action=skill:76
+  choice 6 1 weight=30 action=special:0
+end
+
+enemy-ai 2 script=ai_ishisu_zako
+  decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
+  decision 1 predicates=none,none,none routes=8,8,8,1,3,2,8,8
+  decision 2 predicates=none,none,none routes=8,8,8,8,5,8,8,8
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=50 action=skill:86
+  choice 1 1 weight=30 action=skill:24
+  choice 1 2 weight=15 action=skill:87
+  choice 1 3 weight=5 action=special:0
+  choice 2 0 weight=50 action=skill:184
+  choice 2 1 weight=50 action=special:0
+  choice 3 0 weight=100 action=skill:24
+  choice 4 0 weight=100 action=skill:87
+  choice 5 0 weight=100 action=preset:1:4
+  choice 6 0 weight=100 action=skill:77
+end
+
+enemy-ai 3
+  decision 0 predicates=42:500,10:536,none routes=8,8,6,8,6,8,8,8
+  decision 1 predicates=1:50,36:0x1ffffe,9:536 routes=4,4,3,5,3,1,2,8
+  choice 0 0 weight=20 action=skill:33
+  choice 0 1 weight=20 action=skill:63
+  choice 0 2 weight=20 action=skill:349
+  choice 0 3 weight=20 action=skill:75
+  choice 0 4 weight=20 action=skill:73 effect=14:16
+  choice 1 0 weight=25 action=skill:33
+  choice 1 1 weight=25 action=skill:63
+  choice 1 2 action=skill:349
+  choice 1 3 weight=25 action=skill:75
+  choice 1 4 weight=25 action=skill:73 effect=14:16
+  choice 2 0 weight=33 action=skill:33
+  choice 2 1 weight=33 action=skill:63
+  choice 2 2 weight=34 action=skill:349
+  choice 2 3 action=skill:75
+  choice 2 4 action=skill:73 effect=14:16
+  choice 3 0 weight=25 action=skill:47
+  choice 3 1 weight=45 action=skill:87
+  choice 3 2 weight=15 action=skill:349
+  choice 3 3 weight=15 action=skill:164
+  choice 4 0 weight=30 action=skill:47
+  choice 4 1 weight=45 action=skill:87
+  choice 4 2 action=skill:349
+  choice 4 3 weight=25 action=skill:164
+  choice 5 0 weight=50 action=skill:33
+  choice 5 1 weight=50 action=skill:63
+  choice 5 2 action=skill:349
+  choice 5 3 action=skill:75
+  choice 5 4 action=skill:73 effect=14:16
+  choice 6 0 weight=30 action=skill:500
+  choice 6 1 weight=65 action=special:0
+  choice 6 2 weight=5 action=skill:0
+end
+
+enemy-ai 4
+  decision 0 predicates=1:50,36:0x1ffffe,none routes=8,2,8,8,1,8,8,8
+  choice 0 0 weight=25 action=skill:3
+  choice 0 1 weight=25 action=skill:6
+  choice 0 2 weight=25 action=skill:63
+  choice 0 3 weight=25 action=skill:75
+  choice 1 0 weight=15 action=skill:6
+  choice 1 1 weight=15 action=skill:63
+  choice 1 2 weight=50 action=skill:336
+  choice 1 3 weight=20 action=skill:164
+  choice 2 0 weight=30 action=skill:6
+  choice 2 1 weight=30 action=skill:63
+  choice 2 2 weight=40 action=skill:164
+end
+
+enemy-ai 5
+  decision 0 predicates=1:99,50:11,none routes=8,8,8,8,2,1,8,8
+  choice 0 0 weight=25 action=skill:5
+  choice 0 1 weight=50 action=skill:184
+  choice 0 2 weight=25 action=skill:21
+  choice 1 0 weight=48 action=skill:5
+  choice 1 1 weight=47 action=skill:21
+  choice 1 2 weight=5 action=special:0
+  choice 2 0 weight=23 action=skill:5
+  choice 2 1 weight=22 action=skill:21
+  choice 2 2 weight=50 action=skill:164
+  choice 2 3 weight=5 action=special:0
+end
+
+enemy-ai 6
+  decision 0 predicates=1:99,10:32,none routes=8,2,8,8,3,1,8,8
+  choice 0 0 weight=35 action=skill:84
+  choice 0 1 weight=35 action=skill:85
+  choice 0 2 weight=15 action=special:0
+  choice 0 3 weight=15 action=skill:22
+  choice 1 0 weight=70 action=skill:164
+  choice 1 1 weight=10 action=skill:50
+  choice 1 2 weight=20 action=special:0
+  choice 2 0 weight=33 action=skill:84
+  choice 2 1 weight=33 action=skill:50
+  choice 2 2 weight=34 action=special:0
+  choice 3 0 weight=20 action=skill:84
+  choice 3 1 weight=25 action=skill:85
+  choice 3 2 weight=20 action=special:0
+  choice 3 3 weight=25 action=skill:164
+  choice 3 4 weight=10 action=skill:22
+end
+
+enemy-ai 7
+  decision 0 predicates=1:15,2:15,36:0x1ffffe routes=8,1,2,8,1,1,2,8
+  choice 0 0 action=skill:161 effect=1:0
+  choice 0 1 weight=30 action=skill:87
+  choice 0 2 weight=30 action=skill:34
+  choice 0 3 weight=20 action=skill:340
+  choice 0 4 weight=20 action=special:0
+  choice 1 0 weight=45 action=skill:161 effect=1:0
+  choice 1 1 weight=5 action=skill:87
+  choice 1 2 weight=20 action=skill:34
+  choice 1 3 action=skill:340
+  choice 1 4 weight=30 action=special:0
+  choice 2 0 action=skill:161 effect=1:0
+  choice 2 1 action=skill:87
+  choice 2 2 weight=50 action=skill:34
+  choice 2 3 action=skill:340
+  choice 2 4 weight=50 action=special:0
+end
+
+enemy-ai 8
+  decision 0 predicates=1:99,43:13,none routes=8,1,8,8,1,2,8,8
+  choice 0 0 weight=25 action=skill:3
+  choice 0 1 weight=25 action=skill:6
+  choice 0 2 weight=25 action=skill:79
+  choice 0 3 weight=25 action=skill:193
+  choice 1 0 weight=20 action=skill:6
+  choice 1 1 weight=20 action=skill:70
+  choice 1 2 weight=20 action=skill:79
+  choice 1 3 weight=20 action=skill:71 effect=14:2048
+  choice 1 4 weight=20 action=special:0
+  choice 2 0 weight=33 action=skill:3
+  choice 2 1 weight=33 action=skill:6
+  choice 2 2 weight=34 action=skill:79
+end
+
+enemy-ai 9 script=ganesha_zako
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 10
+  decision 0 predicates=1:99,50:11,18:0 routes=2,2,2,3,2,1,4,8
+  choice 0 0 weight=25 action=skill:181
+  choice 0 1 weight=75 action=skill:192
+  choice 1 0 weight=50 action=skill:192
+  choice 1 1 weight=50 action=special:0
+  choice 2 0 weight=20 action=skill:128
+  choice 2 1 weight=5 action=skill:136
+  choice 2 2 weight=75 action=special:0
+  choice 3 0 weight=100 action=special:0
+  choice 4 0 weight=50 action=skill:181
+  choice 4 1 weight=50 action=special:0
+end
+
+enemy-ai 11
+  decision 0 predicates=9:2048,35:0,1:99 routes=2,3,1,2,1,3,8,8
+  choice 0 0 weight=33 action=skill:137
+  choice 0 1 weight=33 action=skill:121
+  choice 0 2 weight=34 action=special:0
+  choice 1 0 weight=100 action=special:0 effect=2:2048
+  choice 2 0 weight=30 action=skill:52
+  choice 2 1 weight=50 action=skill:162
+  choice 2 2 weight=20 action=skill:190
+  choice 3 0 weight=70 action=skill:52
+  choice 3 1 weight=30 action=skill:190
+end
+
+enemy-ai 12
+  decision 0 predicates=13:7,31:8,36:0x1ffffe routes=1,1,2,2,1,3,2,8
+  choice 0 0 weight=10 action=skill:361
+  choice 0 1 action=skill:129
+  choice 0 2 weight=20 action=skill:125
+  choice 0 3 weight=35 action=special:0
+  choice 0 4 weight=35 action=skill:189
+  choice 1 0 action=skill:361
+  choice 1 1 action=skill:129
+  choice 1 2 weight=35 action=skill:125
+  choice 1 3 weight=60 action=special:0
+  choice 1 4 weight=5 action=skill:189
+  choice 2 0 action=skill:361
+  choice 2 1 action=skill:129
+  choice 2 2 weight=25 action=skill:125
+  choice 2 3 weight=45 action=special:0
+  choice 2 4 weight=30 action=skill:189
+  choice 3 0 weight=60 action=skill:361
+  choice 3 1 action=skill:129
+  choice 3 2 weight=5 action=skill:125
+  choice 3 3 weight=20 action=special:0
+  choice 3 4 weight=15 action=skill:189
+end
+
+enemy-ai 13 script=AI_Hanuman
+  decision 0 predicates=50:0,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=50 action=skill:181
+  choice 0 1 weight=25 action=skill:136
+  choice 0 2 weight=25 action=special:0
+  choice 1 0 action=skill:181
+  choice 1 1 weight=50 action=skill:136
+  choice 1 2 weight=50 action=special:0
+end
+
+enemy-ai 14 script=AllEscape_MeriBeru
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 1 weight=25 action=skill:126
+  choice 0 2 weight=25 action=skill:116
+  choice 0 3 weight=25 action=skill:130
+  choice 0 4 weight=25 action=skill:364
+  choice 1 1 weight=40 action=skill:126
+  choice 1 2 weight=30 action=skill:116
+  choice 1 3 weight=30 action=skill:130
+  choice 1 4 action=skill:364
+end
+
+enemy-ai 15
+  choice 0 0 weight=30 action=skill:138
+  choice 0 1 weight=20 action=skill:46
+  choice 0 2 weight=20 action=skill:84
+  choice 0 3 weight=30 action=special:0
+end
+
+enemy-ai 16 script=rakusha_zako
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 17
+  decision 0 predicates=1:99,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=40 action=skill:34
+  choice 0 1 weight=30 action=skill:60
+  choice 0 2 weight=30 action=skill:62
+  choice 1 0 weight=30 action=skill:34
+  choice 1 1 weight=20 action=skill:60
+  choice 1 2 weight=20 action=skill:62
+  choice 1 3 weight=10 action=skill:57
+  choice 1 4 weight=20 action=skill:138
+end
+
+enemy-ai 18
+  decision 0 predicates=23:0,48:12,43:10 routes=8,8,2,2,3,1,2,8
+  choice 0 0 weight=20 action=skill:32
+  choice 0 1 weight=20 action=skill:57
+  choice 0 2 weight=20 action=special:0
+  choice 0 3 weight=20 action=skill:192
+  choice 0 4 weight=20 action=skill:177
+  choice 1 0 weight=25 action=skill:32
+  choice 1 1 weight=25 action=skill:57
+  choice 1 2 weight=25 action=special:0
+  choice 1 3 weight=25 action=skill:192
+  choice 1 4 action=skill:177
+  choice 2 0 action=skill:32
+  choice 2 1 action=skill:57
+  choice 2 2 weight=30 action=special:0
+  choice 2 3 weight=70 action=skill:126
+  choice 2 4 action=skill:177
+  choice 3 0 weight=25 action=skill:32
+  choice 3 1 action=skill:57
+  choice 3 2 weight=25 action=special:0
+  choice 3 3 weight=25 action=skill:192
+  choice 3 4 weight=25 action=skill:177
+end
+
+enemy-ai 19
+  decision 0 predicates=1:99,48:12,42:505 routes=2,1,2,1,1,1,8,8
+  choice 0 0 weight=20 action=skill:33
+  choice 0 1 weight=20 action=skill:42
+  choice 0 2 weight=20 action=skill:177
+  choice 0 3 weight=20 action=skill:176
+  choice 0 4 weight=20 action=skill:178
+  choice 1 0 weight=20 action=skill:30
+  choice 1 1 weight=20 action=skill:33
+  choice 1 2 weight=20 action=skill:39
+  choice 1 3 weight=20 action=skill:42
+  choice 1 4 weight=20 action=special:0
+  choice 2 0 weight=24 action=skill:30
+  choice 2 1 weight=24 action=skill:33
+  choice 2 2 weight=24 action=skill:39
+  choice 2 3 weight=23 action=skill:42
+  choice 2 4 weight=5 action=skill:505
+end
+
+enemy-ai 20
+  decision 0 predicates=1:80,48:12,57:0 routes=1,1,1,4,1,2,3,8
+  choice 0 0 weight=25 action=skill:64
+  choice 0 1 weight=25 action=skill:190
+  choice 0 2 weight=25 action=skill:365
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=30 action=skill:64
+  choice 1 1 weight=30 action=skill:15
+  choice 1 2 weight=30 action=skill:24
+  choice 1 3 weight=10 action=skill:162 effect=1:0
+  choice 2 0 weight=35 action=skill:64
+  choice 2 1 weight=30 action=skill:15
+  choice 2 2 action=skill:190
+  choice 2 3 weight=35 action=skill:365
+  choice 3 0 weight=35 action=skill:64
+  choice 3 1 weight=30 action=skill:24
+  choice 3 2 weight=35 action=skill:190
+  choice 3 3 action=skill:365
+  choice 4 0 weight=90 action=skill:64
+  choice 4 1 action=skill:190
+  choice 4 2 action=skill:365
+  choice 4 3 weight=10 action=special:0
+end
+
+enemy-ai 21
+  decision 0 predicates=48:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=20 action=skill:46
+  choice 0 1 weight=20 action=skill:112
+  choice 0 2 weight=30 action=skill:127
+  choice 0 3 weight=20 action=skill:189
+  choice 0 4 weight=10 action=special:1
+  choice 1 0 weight=20 action=skill:46
+  choice 1 1 weight=40 action=skill:112
+  choice 1 2 weight=40 action=skill:127
+  choice 1 3 action=skill:189
+  choice 1 4 action=special:1
+  choice 6 0 weight=20 action=skill:46
+  choice 6 1 weight=30 action=skill:112
+  choice 6 2 weight=30 action=skill:127
+  choice 6 3 weight=20 action=skill:189
+  choice 6 4 action=special:1
+end
+
+enemy-ai 22
+  decision 0 predicates=1:99,50:11,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 weight=25 action=skill:128
+  choice 0 1 weight=25 action=skill:182
+  choice 0 2 weight=25 action=skill:183
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=50 action=skill:128
+  choice 1 1 action=skill:182
+  choice 1 2 action=skill:183
+  choice 1 3 weight=50 action=special:0
+  choice 2 0 weight=25 action=skill:128
+  choice 2 1 weight=25 action=skill:113
+  choice 2 2 weight=25 action=skill:114
+  choice 2 3 weight=25 action=skill:117
+end
+
+enemy-ai 23
+  decision 0 predicates=36:0x1ffffe,5:2,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=25 action=skill:62
+  choice 0 1 weight=25 action=skill:61
+  choice 0 2 weight=25 action=skill:49
+  choice 0 3 weight=25 action=skill:362
+  choice 0 4 action=preset:1:23
+  choice 1 0 weight=20 action=skill:62
+  choice 1 1 weight=30 action=skill:61
+  choice 1 2 weight=30 action=skill:49
+  choice 1 3 action=skill:362
+  choice 1 4 weight=20 action=special:0
+  choice 2 0 weight=20 action=skill:62
+  choice 2 1 weight=20 action=skill:61
+  choice 2 2 weight=20 action=skill:49
+  choice 2 3 weight=20 action=skill:362
+  choice 2 4 weight=20 action=preset:1:23
+  choice 3 0 weight=30 action=skill:62
+  choice 3 1 weight=30 action=skill:61
+  choice 3 2 weight=20 action=skill:49
+  choice 3 3 action=skill:362
+  choice 3 4 weight=20 action=special:0
+end
+
+enemy-ai 24
+  decision 0 predicates=50:2,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=30 action=skill:29
+  choice 0 1 weight=20 action=skill:50
+  choice 0 2 weight=15 action=skill:116
+  choice 0 3 weight=5 action=skill:184
+  choice 0 4 weight=30 action=special:0
+  choice 1 0 weight=100 action=skill:29
+  choice 1 1 action=skill:50
+  choice 1 2 action=skill:116
+  choice 1 3 action=skill:184
+  choice 2 0 action=skill:29
+  choice 2 1 weight=30 action=skill:50
+  choice 2 2 weight=40 action=skill:116
+  choice 2 3 weight=30 action=skill:184
+end
+
+enemy-ai 25
+  decision 0 predicates=36:0x1ffffe,48:12,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=20 action=skill:62
+  choice 0 1 weight=20 action=skill:73
+  choice 0 2 weight=20 action=skill:178
+  choice 0 3 weight=20 action=skill:362
+  choice 0 4 weight=20 action=special:0
+  choice 1 0 weight=30 action=skill:62
+  choice 1 1 weight=30 action=skill:73
+  choice 1 2 weight=20 action=skill:178
+  choice 1 3 action=skill:362
+  choice 1 4 weight=20 action=special:0
+  choice 2 0 weight=30 action=skill:62
+  choice 2 1 weight=20 action=skill:73
+  choice 2 2 action=skill:178
+  choice 2 3 weight=30 action=skill:362
+  choice 2 4 weight=20 action=special:0
+  choice 3 0 weight=25 action=skill:62
+  choice 3 1 weight=25 action=skill:73
+  choice 3 2 action=skill:178
+  choice 3 3 action=skill:362
+  choice 3 4 weight=50 action=special:0
+end
+
+enemy-ai 26 script=garuuda_zako
+  decision 0 predicates=14:13,1:60,none routes=8,8,8,8,2,1,8,8
+  choice 0 0 weight=70 action=special:0
+  choice 0 1 weight=15 action=skill:63
+  choice 0 2 weight=15 action=skill:30
+  choice 1 0 weight=60 action=special:0
+  choice 1 1 weight=20 action=skill:63
+  choice 1 2 weight=20 action=skill:30
+  choice 2 0 weight=40 action=special:0
+  choice 2 1 action=skill:63
+  choice 2 2 weight=60 action=skill:30
+end
+
+enemy-ai 27
+  decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=30 action=skill:60
+  choice 0 1 weight=30 action=skill:130
+  choice 0 2 weight=10 action=skill:343
+  choice 0 3 weight=30 action=special:0
+  choice 1 0 weight=50 action=skill:60
+  choice 1 1 weight=30 action=skill:130
+  choice 1 2 weight=20 action=special:0
+  choice 2 0 weight=30 action=skill:130
+  choice 2 1 weight=40 action=skill:134
+  choice 2 2 weight=10 action=skill:343
+  choice 2 3 weight=20 action=special:0
+  choice 3 0 weight=20 action=skill:130
+  choice 3 1 weight=20 action=skill:134
+  choice 3 2 weight=60 action=special:0
+end
+
+enemy-ai 28
+  decision 0 predicates=5:2,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=20 action=skill:25
+  choice 0 2 weight=40 action=skill:114
+  choice 0 3 action=preset:1:28
+  choice 0 4 weight=40 action=special:0
+  choice 1 0 weight=20 action=skill:25
+  choice 1 2 weight=20 action=skill:114
+  choice 1 3 weight=20 action=preset:1:28
+  choice 1 4 weight=40 action=special:0
+end
+
+enemy-ai 29
+  decision 0 predicates=1:50,36:0x1ffffe,24:10 routes=5,3,4,1,2,1,8,8
+  choice 0 0 weight=30 action=skill:139
+  choice 0 1 weight=30 action=skill:71 effect=14:2048
+  choice 0 2 weight=20 action=skill:59
+  choice 0 3 weight=20 action=skill:364
+  choice 1 0 weight=35 action=skill:139
+  choice 1 1 weight=35 action=skill:71 effect=14:2048
+  choice 1 2 weight=30 action=skill:59
+  choice 1 3 action=skill:364
+  choice 2 0 weight=30 action=skill:140
+  choice 2 1 weight=30 action=skill:57
+  choice 2 2 weight=20 action=skill:365
+  choice 2 3 weight=20 action=skill:50
+  choice 3 0 weight=35 action=skill:140
+  choice 3 1 weight=35 action=skill:57
+  choice 3 2 action=skill:365
+  choice 3 3 weight=30 action=skill:50
+  choice 4 0 weight=35 action=skill:140
+  choice 4 1 weight=35 action=skill:57
+  choice 4 2 weight=30 action=skill:365
+  choice 4 3 action=skill:50
+  choice 5 0 weight=50 action=skill:140
+  choice 5 1 weight=50 action=skill:57
+  choice 5 2 action=skill:365
+  choice 5 3 action=skill:50
+end
+
+enemy-ai 30
+  decision 0 predicates=1:50,36:0x1ffffe,9:2048 routes=3,2,3,3,1,8,3,8
+  choice 0 0 weight=25 action=skill:71 effect=14:2048
+  choice 0 1 weight=25 action=skill:126
+  choice 0 2 weight=25 action=skill:70
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=25 action=skill:71 effect=14:2048
+  choice 1 1 weight=25 action=skill:126
+  choice 1 2 weight=25 action=skill:356
+  choice 1 3 weight=25 action=skill:350
+  choice 2 0 weight=50 action=skill:71 effect=14:2048
+  choice 2 1 weight=50 action=skill:126
+  choice 3 0 weight=75 action=special:0 effect=2:2048
+  choice 3 1 weight=25 action=skill:126
+end
+
+enemy-ai 31 script=jyatayu_zako
+  decision 0 predicates=1:60,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=90 action=special:0
+  choice 0 1 action=skill:66
+  choice 0 2 weight=10 action=skill:66
+  choice 1 0 weight=75 action=special:0
+  choice 1 1 action=skill:66
+  choice 1 2 weight=25 action=skill:66
+  choice 1 3 action=skill:137
+end
+
+enemy-ai 32
+  decision 0 predicates=1:50,36:0x1ffffe,5:3 routes=2,3,1,0,1,0,0,8
+  choice 0 0 weight=25 action=skill:126
+  choice 0 1 weight=25 action=skill:84
+  choice 0 2 weight=25 action=skill:79
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=20 action=skill:126
+  choice 1 1 weight=20 action=skill:84
+  choice 1 2 weight=20 action=skill:79
+  choice 1 3 weight=20 action=skill:359
+  choice 1 4 weight=20 action=preset:1:4
+  choice 2 0 weight=25 action=skill:126
+  choice 2 1 weight=25 action=skill:84
+  choice 2 2 weight=25 action=skill:79
+  choice 2 3 weight=25 action=preset:1:4
+  choice 3 0 weight=34 action=skill:126
+  choice 3 1 weight=33 action=skill:84
+  choice 3 2 weight=33 action=skill:79
+  choice 4 0 weight=25 action=skill:126
+  choice 4 1 weight=25 action=skill:84
+  choice 4 2 weight=25 action=skill:79
+  choice 4 3 weight=25 action=skill:359
+end
+
+enemy-ai 33 script=girime_deka
+  decision 0 predicates=20:50,48:12,none routes=8,1,8,8,2,8,8,8
+  choice 0 0 weight=100 action=skill:132
+  choice 1 0 action=skill:190
+  choice 1 1 action=skill:66
+  choice 1 2 weight=50 action=skill:52
+  choice 1 3 weight=30 action=skill:132
+  choice 1 4 weight=20 action=skill:48
+  choice 2 0 weight=20 action=skill:190
+  choice 2 1 weight=10 action=skill:66
+  choice 2 2 weight=20 action=skill:52
+  choice 2 3 weight=20 action=skill:132
+  choice 2 4 weight=30 action=skill:48
+end
+
+enemy-ai 34 script=neazu_zako
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 35
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 36 script=AllEscape_MeriBeru
+  decision 0 predicates=9:2,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=70 action=skill:20
+  choice 0 1 weight=30 action=skill:22
+  choice 0 2 action=skill:119
+  choice 1 0 action=skill:20
+  choice 1 1 action=skill:22
+  choice 1 2 weight=100 action=skill:119
+end
+
+enemy-ai 37
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=25 action=skill:12
+  choice 0 1 weight=25 action=skill:15
+  choice 0 2 weight=25 action=skill:84
+  choice 0 3 weight=25 action=skill:350
+  choice 1 0 weight=30 action=skill:12
+  choice 1 1 weight=30 action=skill:15
+  choice 1 2 weight=40 action=skill:84
+  choice 1 3 action=skill:350
+end
+
+enemy-ai 38
+  decision 0 predicates=6:2,9:6,none routes=8,0,8,8,8,2,8,8
+  decision 1 predicates=1:60,5:1,20:10 routes=1,1,8,1,3,8,8,8
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 action=skill:119
+  choice 0 2 weight=40 action=skill:37
+  choice 0 3 weight=10 action=skill:40
+  choice 1 0 weight=30 action=special:0
+  choice 1 1 weight=10 action=skill:37
+  choice 1 2 weight=20 action=skill:40
+  choice 1 3 weight=40 action=skill:119
+  choice 2 0 weight=35 action=special:0
+  choice 2 1 weight=20 action=skill:119
+  choice 2 2 weight=25 action=special:0 effect=2:6
+  choice 2 3 weight=20 action=skill:37
+  choice 3 0 weight=50 action=special:0
+  choice 3 1 weight=10 action=skill:119
+  choice 3 2 weight=30 action=skill:37
+  choice 3 3 weight=10 action=skill:40
+end
+
+enemy-ai 39
+  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=40 action=skill:85
+  choice 0 1 weight=30 action=skill:121
+  choice 0 2 weight=30 action=skill:127
+  choice 1 0 weight=50 action=skill:42
+  choice 1 1 weight=50 action=skill:127
+end
+
+enemy-ai 40
+  decision 0 predicates=20:8,1:90,none routes=8,2,8,8,1,8,8,8
+  choice 0 0 weight=90 action=skill:112
+  choice 0 1 action=skill:126
+  choice 0 2 action=skill:119
+  choice 0 3 action=skill:83
+  choice 0 4 weight=10 action=special:0
+  choice 1 0 weight=50 action=skill:112
+  choice 1 1 weight=20 action=skill:126
+  choice 1 2 action=skill:119
+  choice 1 3 weight=30 action=skill:83
+  choice 1 4 action=special:0
+  choice 2 0 weight=40 action=skill:112
+  choice 2 1 weight=30 action=skill:126
+  choice 2 2 weight=30 action=skill:119
+  choice 2 3 action=skill:83
+  choice 2 4 action=special:0
+end
+
+enemy-ai 41
+  decision 0 predicates=1:50,43:13,52:0 routes=2,2,1,2,1,2,4,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,4,8,8,8
+  choice 0 0 weight=25 action=special:0
+  choice 0 1 weight=25 action=skill:65
+  choice 0 2 weight=25 action=skill:70
+  choice 0 3 weight=25 action=skill:58
+  choice 1 0 weight=25 action=skill:3
+  choice 1 1 weight=25 action=skill:70
+  choice 1 2 weight=25 action=skill:193
+  choice 1 3 weight=25 action=skill:6
+  choice 2 0 weight=40 action=skill:3
+  choice 2 1 weight=60 action=skill:6
+  choice 3 0 weight=40 action=special:0
+  choice 3 1 weight=30 action=skill:65
+  choice 3 2 weight=30 action=skill:70
+  choice 3 3 action=skill:58
+  choice 4 0 weight=40 action=special:0
+  choice 4 1 action=skill:65
+  choice 4 2 weight=30 action=skill:70
+  choice 4 3 weight=30 action=skill:58
+end
+
+enemy-ai 42
+  decision 0 predicates=23:0,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=20 action=skill:12
+  choice 0 1 weight=20 action=skill:39
+  choice 0 2 weight=20 action=skill:66
+  choice 0 3 weight=20 action=skill:69
+  choice 0 4 weight=20 action=skill:71
+  choice 1 0 weight=20 action=skill:12
+  choice 1 1 weight=20 action=skill:39
+  choice 1 2 action=skill:66
+  choice 1 3 weight=30 action=skill:69
+  choice 1 4 weight=30 action=skill:71
+end
+
+enemy-ai 43
+  decision 0 predicates=48:12,42:506,1:99 routes=3,4,3,1,4,1,8,2
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=30 action=skill:6
+  choice 0 1 weight=30 action=skill:12
+  choice 0 2 weight=10 action=skill:177
+  choice 0 3 weight=10 action=skill:178
+  choice 0 4 weight=20 action=skill:165
+  choice 1 0 weight=40 action=skill:506
+  choice 1 1 weight=30 action=skill:3
+  choice 1 2 weight=30 action=skill:15
+  choice 2 0 weight=50 action=skill:6
+  choice 2 1 weight=30 action=skill:12
+  choice 2 2 weight=10 action=skill:177
+  choice 2 3 weight=10 action=skill:178
+  choice 2 4 action=skill:165
+  choice 3 0 weight=33 action=skill:6
+  choice 3 1 weight=33 action=skill:12
+  choice 3 2 action=skill:177
+  choice 3 3 action=skill:178
+  choice 3 4 weight=34 action=skill:165
+  choice 4 0 weight=50 action=skill:6
+  choice 4 1 weight=50 action=skill:12
+  choice 4 2 action=skill:177
+  choice 4 3 action=skill:178
+  choice 4 4 action=skill:165
+  choice 6 0 weight=25 action=skill:12
+  choice 6 1 weight=25 action=skill:3
+  choice 6 2 weight=50 action=special:0
+end
+
+enemy-ai 44
+  decision 0 predicates=1:99,50:11,57:0 routes=8,8,8,4,8,2,3,0
+  decision 1 predicates=69:0,none,none routes=5,5,5,1,5,1,1,1
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=25 action=skill:184
+  choice 0 1 weight=25 action=skill:57
+  choice 0 2 weight=25 action=skill:365
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=20 action=skill:3
+  choice 1 1 weight=20 action=skill:12
+  choice 1 2 weight=20 action=skill:21
+  choice 1 3 weight=20 action=skill:39
+  choice 1 4 weight=20 action=skill:30
+  choice 2 0 weight=33 action=skill:57
+  choice 2 1 weight=33 action=skill:365
+  choice 2 2 weight=34 action=special:0
+  choice 3 0 weight=33 action=skill:184
+  choice 3 1 weight=33 action=skill:57
+  choice 3 2 weight=34 action=special:0
+  choice 4 0 weight=50 action=skill:57
+  choice 4 1 weight=50 action=special:0
+  choice 5 0 weight=25 action=skill:3
+  choice 5 1 weight=25 action=skill:15
+  choice 5 2 weight=17 action=skill:450
+  choice 5 3 weight=17 action=skill:442
+  choice 5 4 weight=16 action=skill:446
+  choice 6 0 weight=30 action=skill:184
+  choice 6 1 action=skill:57
+  choice 6 2 weight=20 action=skill:365
+  choice 6 3 weight=50 action=special:0
+end
+
+enemy-ai 45
+  decision 0 predicates=1:90,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=30 action=skill:131
+  choice 0 1 action=skill:132
+  choice 0 2 weight=30 action=skill:138
+  choice 0 3 weight=40 action=special:0
+  choice 1 0 weight=20 action=skill:131
+  choice 1 1 weight=50 action=skill:132
+  choice 1 2 weight=30 action=skill:138
+  choice 1 3 action=special:0
+end
+
+enemy-ai 46
+  decision 0 predicates=36:0x1ffffe,23:0,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 weight=35 action=skill:2
+  choice 0 1 weight=25 action=skill:65
+  choice 0 2 weight=10 action=skill:66
+  choice 0 3 weight=10 action=skill:69
+  choice 0 4 weight=20 action=skill:342
+  choice 1 0 weight=40 action=skill:2
+  choice 1 1 weight=30 action=skill:65
+  choice 1 2 weight=20 action=skill:66
+  choice 1 3 weight=10 action=skill:69
+  choice 1 4 action=skill:342
+  choice 2 0 weight=40 action=skill:2
+  choice 2 1 action=skill:65
+  choice 2 2 action=skill:66
+  choice 2 3 weight=30 action=skill:69
+  choice 2 4 weight=30 action=skill:342
+end
+
+enemy-ai 47 script=AllEscape_MeriBeru
+  decision 0 predicates=36:0x1ffffe,50:2,1:50 routes=5,3,5,4,1,2,4,8
+  choice 0 0 weight=20 action=skill:361
+  choice 0 1 weight=20 action=skill:358
+  choice 0 2 weight=40 action=skill:184
+  choice 0 3 weight=20 action=special:0
+  choice 1 0 action=skill:361
+  choice 1 1 action=skill:358
+  choice 1 2 weight=50 action=skill:184
+  choice 1 3 weight=50 action=special:0
+  choice 2 0 weight=30 action=skill:361
+  choice 2 1 weight=30 action=skill:358
+  choice 2 2 action=skill:184
+  choice 2 3 weight=40 action=special:0
+  choice 3 0 action=skill:361
+  choice 3 1 action=skill:358
+  choice 3 2 action=skill:184
+  choice 3 3 weight=100 action=special:0
+  choice 4 0 weight=10 action=skill:49
+  choice 4 1 weight=10 action=skill:50
+  choice 4 2 weight=50 action=skill:87
+  choice 4 3 weight=15 action=skill:350
+  choice 4 4 weight=15 action=skill:353
+  choice 5 0 weight=20 action=skill:49
+  choice 5 1 weight=20 action=skill:50
+  choice 5 2 weight=60 action=skill:87
+  choice 5 3 action=skill:350
+  choice 5 4 action=skill:353
+end
+
+enemy-ai 48 script=AI_Zin
+  choice 0 0 weight=100 action=skill:30
+end
+
+enemy-ai 49 script=AllEscape_MeriBeru
+  decision 0 predicates=50:11,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=35 action=skill:182
+  choice 0 1 weight=35 action=skill:183
+  choice 0 2 action=skill:130
+  choice 0 3 weight=30 action=special:0
+  choice 1 0 action=skill:182
+  choice 1 1 action=skill:183
+  choice 1 2 weight=50 action=skill:130
+  choice 1 3 weight=50 action=special:0
+end
+
+enemy-ai 50
+  choice 0 0 weight=45 action=skill:2
+  choice 0 1 weight=45 action=skill:4
+  choice 0 2 weight=10 action=special:0
+end
+
+enemy-ai 51
+  decision 0 predicates=9:8,23:0,24:9 routes=8,8,1,8,1,2,0,3
+  choice 0 0 action=skill:39
+  choice 0 1 weight=70 action=skill:76
+  choice 0 2 action=skill:50 effect=2:8
+  choice 0 3 weight=30 action=special:0
+  choice 1 0 action=skill:39
+  choice 1 1 action=skill:76
+  choice 1 2 weight=80 action=skill:50 effect=2:8
+  choice 1 3 weight=20 action=special:0
+  choice 2 0 weight=100 action=skill:39
+  choice 2 1 action=skill:76
+  choice 2 2 action=skill:50 effect=2:8
+  choice 2 3 action=special:0
+  choice 3 0 weight=100 action=skill:39
+  choice 3 1 action=skill:76
+  choice 3 2 action=skill:50 effect=2:8
+  choice 3 3 action=special:0
+end
+
+enemy-ai 52
+  decision 0 predicates=2:30,1:30,9:8 routes=8,1,8,8,1,1,8,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,3,8,8,8
+  choice 0 1 weight=30 action=skill:76
+  choice 0 2 weight=30 action=skill:73
+  choice 0 3 weight=40 action=special:0
+  choice 1 0 weight=30 action=skill:161 effect=1:0
+  choice 1 1 weight=30 action=special:0
+  choice 1 2 weight=20 action=skill:76
+  choice 1 4 weight=20 action=skill:73
+  choice 2 0 action=skill:75
+  choice 2 2 weight=50 action=skill:73
+  choice 2 3 weight=50 action=special:0
+  choice 3 1 weight=10 action=skill:76
+  choice 3 2 weight=30 action=skill:73
+  choice 3 3 weight=60 action=special:0
+end
+
+enemy-ai 53
+  decision 0 predicates=12:44,12:77,2:99 routes=8,8,8,3,1,2,8,8
+  choice 0 0 weight=20 action=skill:20
+  choice 0 1 weight=20 action=skill:23
+  choice 0 2 weight=10 action=skill:161 effect=1:0
+  choice 0 3 weight=50 action=preset:1:44
+  choice 1 0 weight=30 action=skill:20
+  choice 1 1 weight=40 action=skill:23
+  choice 1 2 weight=30 action=skill:161 effect=1:0
+  choice 2 0 weight=50 action=skill:20
+  choice 2 1 weight=50 action=skill:23
+  choice 2 2 action=skill:161 effect=3:77
+  choice 3 0 weight=20 action=skill:20
+  choice 3 1 weight=30 action=skill:23
+  choice 3 2 weight=50 action=skill:161 effect=3:77
+end
+
+enemy-ai 54
+  decision 0 predicates=36:0x1ffffe,5:4,9:4 routes=4,3,4,4,1,2,4,8
+  choice 0 0 weight=40 action=skill:11
+  choice 0 1 weight=10 action=skill:164
+  choice 0 2 weight=30 action=skill:350
+  choice 0 3 action=preset:1:54
+  choice 0 4 weight=20 action=special:0
+  choice 1 0 weight=50 action=skill:11
+  choice 1 1 weight=20 action=skill:164
+  choice 1 2 action=skill:350
+  choice 1 3 action=preset:1:54
+  choice 1 4 weight=30 action=special:0
+  choice 2 0 weight=40 action=skill:11
+  choice 2 1 weight=10 action=skill:164
+  choice 2 2 weight=30 action=skill:350
+  choice 2 3 weight=20 action=preset:1:54
+  choice 2 4 action=special:0
+  choice 3 0 weight=40 action=skill:11
+  choice 3 1 weight=10 action=skill:164
+  choice 3 2 action=skill:350
+  choice 3 3 weight=30 action=preset:1:54
+  choice 3 4 weight=20 action=special:0
+  choice 4 0 weight=100 action=special:0 effect=2:4
+end
+
+enemy-ai 55
+  decision 0 predicates=1:50,48:12,23:0 routes=8,1,8,8,1,2,3,8
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=25 action=skill:87
+  choice 0 2 weight=25 action=skill:176
+  choice 1 0 weight=30 action=special:0
+  choice 1 1 weight=70 action=skill:87
+  choice 1 2 action=skill:176
+  choice 2 0 weight=50 action=special:0
+  choice 2 1 weight=50 action=skill:87
+  choice 2 2 action=skill:176
+  choice 3 0 weight=50 action=special:0
+  choice 3 1 action=skill:87
+  choice 3 2 weight=50 action=skill:176
+end
+
+enemy-ai 56
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=50 action=skill:113
+end
+
+enemy-ai 57
+  decision 0 predicates=23:0,12:53,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 weight=5 action=skill:19
+  choice 0 1 weight=20 action=skill:48
+  choice 0 2 weight=5 action=skill:160 effect=1:0
+  choice 0 3 weight=70 action=preset:1:53
+  choice 1 0 action=skill:19
+  choice 1 1 weight=100 action=skill:48
+  choice 1 2 action=skill:160 effect=1:0
+  choice 1 3 action=special:1
+  choice 2 0 weight=100 action=special:1 effect=12:0
+end
+
+enemy-ai 58
+  decision 0 predicates=1:99,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=30 action=skill:30
+  choice 0 1 weight=20 action=skill:121
+  choice 0 2 weight=50 action=special:0
+  choice 1 0 weight=25 action=skill:30
+  choice 1 1 weight=25 action=skill:121
+  choice 1 2 weight=25 action=skill:85
+  choice 1 3 weight=25 action=special:0
+end
+
+enemy-ai 59
+  decision 0 predicates=1:25,36:0x1ffffe,9:2048 routes=2,1,2,2,1,3,2,8
+  choice 0 0 weight=25 action=skill:42
+  choice 0 1 weight=25 action=skill:137
+  choice 0 2 weight=25 action=skill:360
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=25 action=skill:137
+  choice 1 1 weight=25 action=skill:53
+  choice 1 2 weight=25 action=skill:49
+  choice 1 3 weight=25 action=special:0
+  choice 2 0 weight=80 action=skill:112 effect=2:2048
+  choice 2 1 weight=20 action=special:0 effect=2:2048
+  choice 3 0 weight=33 action=skill:42
+  choice 3 1 weight=33 action=skill:137
+  choice 3 2 action=skill:360
+  choice 3 3 weight=34 action=special:0
+end
+
+enemy-ai 60
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 61
+  decision 0 predicates=24:20,24:5,none routes=8,2,8,8,1,2,8,8
+  choice 0 0 weight=30 action=skill:32
+  choice 0 1 weight=30 action=skill:30
+  choice 0 2 weight=30 action=skill:87
+  choice 0 3 weight=10 action=special:0
+  choice 1 0 weight=80 action=skill:50
+  choice 1 1 weight=20 action=special:0
+  choice 2 0 weight=60 action=skill:87
+  choice 2 1 weight=40 action=special:0
+end
+
+enemy-ai 62
+  decision 0 predicates=1:50,36:0x1ffffe,5:2 routes=2,3,1,0,4,0,0,8
+  choice 0 0 weight=25 action=skill:21
+  choice 0 1 weight=25 action=skill:24
+  choice 0 2 weight=25 action=skill:25
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=22 action=skill:21
+  choice 1 1 weight=22 action=skill:24
+  choice 1 2 weight=22 action=skill:66
+  choice 1 3 weight=22 action=skill:359
+  choice 1 4 weight=12 action=preset:1:62
+  choice 2 0 weight=29 action=skill:21
+  choice 2 1 weight=28 action=skill:24
+  choice 2 2 weight=28 action=skill:68
+  choice 2 3 weight=15 action=preset:1:62
+  choice 3 0 weight=33 action=skill:21
+  choice 3 1 weight=33 action=skill:24
+  choice 3 2 weight=34 action=skill:66
+  choice 4 0 weight=25 action=skill:21
+  choice 4 1 weight=25 action=skill:24
+  choice 4 2 weight=25 action=skill:68
+  choice 4 3 weight=25 action=skill:359
+end
+
+enemy-ai 63 script=AI_Tooto
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=50 action=skill:20
+  choice 0 1 weight=20 action=skill:24
+  choice 0 2 weight=10 action=skill:57
+  choice 0 3 weight=20 action=skill:362
+  choice 1 0 weight=60 action=skill:20
+  choice 1 1 weight=30 action=skill:24
+  choice 1 2 weight=10 action=skill:57
+  choice 1 3 action=skill:362
+  choice 5 0 action=special:0
+  choice 5 1 action=skill:2
+  choice 5 2 action=skill:4
+  choice 5 3 weight=100 action=skill:58
+  choice 5 4 action=skill:73
+end
+
+enemy-ai 64 script=AllEscape_MeriBeru
+  decision 0 predicates=36:0x1ffffe,1:50,23:0 routes=8,2,8,8,1,2,3,8
+  choice 0 0 weight=25 action=skill:65
+  choice 0 1 weight=25 action=skill:115
+  choice 0 2 weight=25 action=skill:128
+  choice 0 3 weight=25 action=skill:353
+  choice 1 0 weight=30 action=skill:65
+  choice 1 1 weight=30 action=skill:115
+  choice 1 2 weight=40 action=skill:128
+  choice 1 3 action=skill:353
+  choice 2 0 weight=25 action=skill:65
+  choice 2 1 weight=25 action=skill:115
+  choice 2 2 action=skill:128
+  choice 2 3 action=skill:353
+  choice 2 4 weight=50 action=skill:49
+  choice 3 0 action=skill:65
+  choice 3 1 weight=40 action=skill:115
+  choice 3 2 weight=30 action=skill:128
+  choice 3 3 weight=30 action=skill:353
+end
+
+enemy-ai 65
+  decision 0 predicates=42:449,5:2,48:12 routes=1,2,2,2,1,2,3,8
+  choice 0 0 weight=20 action=skill:38
+  choice 0 1 weight=20 action=skill:2
+  choice 0 2 weight=20 action=skill:176
+  choice 0 3 weight=20 action=skill:121
+  choice 0 4 weight=20 action=skill:43
+  choice 1 0 weight=30 action=skill:449
+  choice 1 1 weight=20 action=skill:121
+  choice 1 2 weight=30 action=skill:43
+  choice 1 3 weight=20 action=skill:2
+  choice 2 0 weight=25 action=skill:38
+  choice 2 1 weight=25 action=skill:2
+  choice 2 2 action=skill:176
+  choice 2 3 weight=40 action=skill:121
+  choice 2 4 weight=10 action=preset:1:65
+  choice 3 0 weight=40 action=skill:2
+  choice 3 1 action=skill:176
+  choice 3 2 weight=40 action=skill:121
+  choice 3 3 weight=20 action=preset:1:65
+end
+
+enemy-ai 66
+  decision 0 predicates=1:20,2:20,none routes=8,1,8,8,1,1,8,8
+  decision 1 predicates=none,none,none routes=8,1,8,8,1,1,8,8
+  choice 0 0 weight=30 action=special:0
+  choice 0 1 weight=30 action=skill:112
+  choice 0 2 weight=40 action=skill:60
+  choice 0 3 action=skill:161 effect=1:0
+  choice 1 0 weight=20 action=special:0
+  choice 1 1 weight=20 action=skill:112
+  choice 1 2 weight=40 action=skill:60
+  choice 1 3 weight=20 action=skill:161 effect=1:0
+end
+
+enemy-ai 67
+  decision 0 predicates=1:50,36:0x1ffffe,none routes=8,2,8,8,1,2,8,8
+  choice 0 0 weight=30 action=skill:21
+  choice 0 1 weight=30 action=skill:23
+  choice 0 2 weight=20 action=skill:83
+  choice 0 3 weight=20 action=special:0
+  choice 1 0 weight=30 action=skill:21
+  choice 1 1 weight=30 action=skill:23
+  choice 1 2 weight=40 action=skill:354
+  choice 2 0 weight=30 action=skill:21
+  choice 2 1 weight=30 action=skill:23
+  choice 2 2 weight=40 action=special:0
+end
+
+enemy-ai 68 script=AllEscape_MeriBeru
+  decision 0 predicates=36:0x1ffffe,50:11,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=20 action=skill:124
+  choice 0 1 weight=20 action=skill:37
+  choice 0 2 weight=30 action=skill:86
+  choice 0 3 weight=10 action=skill:182
+  choice 0 4 weight=20 action=skill:339
+  choice 1 0 weight=30 action=skill:124
+  choice 1 1 weight=20 action=skill:37
+  choice 1 2 weight=40 action=skill:38
+  choice 1 3 weight=10 action=skill:182
+  choice 1 4 action=skill:339
+  choice 2 0 weight=40 action=skill:124
+  choice 2 1 weight=20 action=skill:37
+  choice 2 2 weight=20 action=skill:38
+  choice 2 3 action=skill:182
+  choice 2 4 weight=20 action=skill:339
+  choice 3 0 weight=40 action=skill:124
+  choice 3 1 weight=30 action=skill:37
+  choice 3 2 weight=30 action=skill:38
+  choice 3 3 action=skill:182
+  choice 3 4 action=skill:339
+end
+
+enemy-ai 69 flags=0x8 script=AllEscape_MeriBeru
+  decision 0 predicates=1:10,36:0x1ffffe,48:12 routes=4,2,3,4,1,2,3,8
+  choice 0 0 weight=25 action=skill:177
+  choice 0 1 weight=10 action=skill:23
+  choice 0 2 weight=25 action=skill:123
+  choice 0 3 weight=10 action=skill:337
+  choice 0 4 weight=30 action=special:0
+  choice 1 0 weight=10 action=skill:177
+  choice 1 1 weight=35 action=skill:23
+  choice 1 2 weight=15 action=skill:123
+  choice 1 3 weight=5 action=skill:337
+  choice 1 4 weight=35 action=special:0
+  choice 2 0 weight=20 action=skill:177
+  choice 2 1 weight=20 action=skill:23
+  choice 2 2 weight=30 action=skill:123
+  choice 2 3 action=skill:337
+  choice 2 4 weight=30 action=special:0
+  choice 3 0 action=skill:177
+  choice 3 1 weight=30 action=skill:23
+  choice 3 2 weight=20 action=skill:123
+  choice 3 3 weight=20 action=skill:337
+  choice 3 4 weight=30 action=special:0
+  choice 4 0 action=skill:177
+  choice 4 1 weight=30 action=skill:23
+  choice 4 2 weight=30 action=skill:123
+  choice 4 3 action=skill:337
+  choice 4 4 weight=40 action=special:0
+end
+
+enemy-ai 70
+  decision 0 predicates=18:0,5:2,23:0 routes=8,8,8,3,4,8,5,8
+  decision 1 predicates=2:40,34:70,12:70 routes=8,1,8,8,6,0,0,1
+  decision 2 predicates=36:6,31:6,none routes=8,8,8,8,0,2,8,2
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=15 action=skill:22
+  choice 0 2 weight=5 action=skill:164
+  choice 0 3 weight=30 action=skill:192
+  choice 1 0 weight=20 action=special:0
+  choice 1 1 weight=10 action=skill:22
+  choice 1 2 weight=60 action=skill:164
+  choice 1 3 weight=10 action=skill:192
+  choice 2 0 weight=40 action=skill:354
+  choice 2 1 weight=30 action=special:0
+  choice 2 2 weight=30 action=skill:22
+  choice 3 0 weight=15 action=special:0
+  choice 3 1 weight=85 action=skill:192
+  choice 4 0 weight=100 action=special:0
+  choice 5 0 weight=40 action=special:0
+  choice 5 1 weight=30 action=skill:22
+  choice 5 2 action=skill:163
+  choice 5 3 weight=30 action=skill:192
+  choice 6 0 weight=60 action=special:0
+  choice 6 1 weight=10 action=skill:22
+  choice 6 2 weight=20 action=skill:164
+  choice 6 3 weight=10 action=skill:192
+end
+
+enemy-ai 71
+  decision 0 predicates=1:50,5:2,none routes=3,2,8,8,1,8,8,8
+  choice 0 0 weight=20 action=skill:19
+  choice 0 1 weight=40 action=skill:20
+  choice 0 2 weight=40 action=skill:118
+  choice 1 0 weight=40 action=skill:118
+  choice 1 1 action=preset:1:28
+  choice 1 2 weight=20 action=special:0
+  choice 1 3 weight=40 action=skill:20
+  choice 2 0 weight=30 action=skill:118
+  choice 2 1 weight=10 action=preset:1:28
+  choice 2 2 weight=20 action=special:0
+  choice 2 3 weight=40 action=skill:20
+end
+
+enemy-ai 72
+  decision 1 predicates=5:1,29:13,23:0 routes=5,8,3,8,1,3,3,8
+  decision 2 predicates=none,1:30,1:50 routes=8,8,8,8,8,2,4,8
+  choice 0 0 weight=80 action=special:0
+  choice 0 1 action=skill:179
+  choice 0 2 weight=20 action=skill:10
+  choice 1 0 weight=10 action=special:0
+  choice 1 1 action=skill:179
+  choice 1 2 weight=80 action=skill:13
+  choice 1 3 weight=10 action=skill:10
+  choice 2 0 weight=10 action=special:0
+  choice 2 1 action=skill:179
+  choice 2 2 weight=30 action=skill:13
+  choice 2 3 weight=60 action=skill:10
+  choice 3 0 weight=60 action=special:0
+  choice 3 1 weight=40 action=skill:10
+  choice 4 0 weight=30 action=special:0
+  choice 4 1 action=skill:179
+  choice 4 2 weight=20 action=skill:13
+  choice 4 3 weight=50 action=skill:10
+  choice 5 0 weight=10 action=special:0
+  choice 5 1 action=skill:179
+  choice 5 2 weight=60 action=skill:13
+  choice 5 3 weight=30 action=skill:10
+  choice 6 0 weight=100 action=special:0
+end
+
+enemy-ai 73
+  decision 0 predicates=36:0x1ffffe,50:11,5:2 routes=2,3,2,4,1,3,2,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,8,8,8,8
+  choice 0 0 weight=25 action=skill:16
+  choice 0 1 weight=25 action=skill:184
+  choice 0 2 weight=25 action=skill:352
+  choice 0 3 weight=25 action=skill:353
+  choice 0 4 action=preset:1:73
+  choice 1 0 weight=50 action=skill:16
+  choice 1 1 weight=50 action=skill:184
+  choice 1 2 action=skill:352
+  choice 1 3 action=skill:353
+  choice 1 4 action=preset:1:73
+  choice 2 0 weight=40 action=skill:16
+  choice 2 1 weight=40 action=skill:184
+  choice 2 2 action=skill:352
+  choice 2 3 action=skill:353
+  choice 2 4 weight=20 action=preset:1:73
+  choice 3 0 weight=40 action=skill:11
+  choice 3 1 weight=30 action=skill:16
+  choice 3 2 weight=30 action=special:0
+  choice 3 3 action=preset:1:73
+  choice 4 0 weight=30 action=skill:11
+  choice 4 1 weight=30 action=skill:16
+  choice 4 2 weight=30 action=special:0
+  choice 4 3 weight=10 action=preset:1:73
+  choice 5 0 weight=100 action=special:1
+end
+
+enemy-ai 74
+  decision 0 predicates=2:40,12:40,2:80 routes=8,5,8,8,8,8,8,8
+  decision 1 predicates=5:1,23:0,1:20 routes=8,8,0,8,1,3,8,8
+  decision 2 predicates=2:40,34:74,12:74 routes=8,6,8,8,0,1,1,6
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=20 action=skill:160 effect=1:0
+  choice 0 2 weight=20 action=skill:75
+  choice 0 3 weight=10 action=skill:37
+  choice 1 0 weight=60 action=special:0
+  choice 1 1 weight=20 action=skill:75
+  choice 1 2 weight=5 action=skill:160 effect=1:0
+  choice 1 3 weight=15 action=skill:37
+  choice 2 0 weight=60 action=skill:160 effect=1:0
+  choice 2 1 weight=10 action=skill:75
+  choice 2 2 weight=15 action=special:0
+  choice 2 3 weight=15 action=skill:37
+  choice 3 0 weight=60 action=special:0
+  choice 3 1 weight=10 action=skill:37
+  choice 3 2 weight=30 action=skill:75
+  choice 3 3 action=skill:160 effect=1:0
+  choice 4 0 weight=80 action=special:0
+  choice 4 1 weight=10 action=skill:37
+  choice 4 2 weight=10 action=skill:75
+  choice 4 3 weight=5 action=skill:160 effect=1:0
+  choice 5 0 weight=90 action=skill:160 effect=3:40
+  choice 5 1 weight=10 action=special:0
+  choice 6 0 weight=70 action=skill:160 effect=1:0
+  choice 6 1 weight=15 action=skill:75
+  choice 6 2 weight=10 action=special:0
+  choice 6 3 weight=5 action=skill:37
+end
+
+enemy-ai 75
+  decision 0 predicates=42:511,35:0x100618,56:0 routes=1,1,1,2,1,2,2,8
+  decision 1 predicates=5:2,none,none routes=8,8,8,8,3,8,8,8
+  choice 0 0 weight=48 action=skill:1
+  choice 0 1 weight=2 action=skill:68
+  choice 0 2 weight=47 action=skill:10
+  choice 0 3 weight=2 action=skill:63
+  choice 0 4 weight=1 action=skill:52
+  choice 1 0 weight=13 action=skill:1
+  choice 1 1 weight=12 action=skill:68
+  choice 1 2 weight=13 action=skill:10
+  choice 1 3 weight=12 action=skill:63
+  choice 1 4 weight=50 action=skill:511
+  choice 2 0 weight=55 action=special:0
+  choice 2 1 weight=45 action=skill:52
+  choice 3 0 weight=43 action=skill:1
+  choice 3 1 weight=2 action=skill:68
+  choice 3 2 weight=43 action=skill:10
+  choice 3 3 weight=2 action=skill:63
+  choice 3 4 weight=10 action=preset:1:75
+end
+
+enemy-ai 76
+  decision 0 predicates=36:0x1ffffe,1:10,none routes=8,1,8,8,1,2,8,8
+  choice 0 0 weight=100 action=skill:356
+  choice 1 0 weight=33 action=skill:62
+  choice 1 1 weight=33 action=skill:61
+  choice 1 2 weight=34 action=special:0
+  choice 2 0 weight=33 action=skill:63
+  choice 2 1 weight=33 action=skill:61
+  choice 2 2 weight=34 action=special:0
+end
+
+enemy-ai 77 script=girime_zako
+  decision 0 predicates=none,none,23:0 routes=8,8,8,8,8,8,1,8
+  choice 0 0 weight=25 action=skill:132
+  choice 0 1 weight=25 action=skill:66
+  choice 0 2 weight=25 action=skill:3
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=25 action=skill:132
+  choice 1 1 weight=25 action=skill:190
+  choice 1 2 weight=25 action=skill:3
+  choice 1 3 weight=25 action=special:0
+end
+
+enemy-ai 78
+  decision 0 predicates=1:99,50:11,42:433 routes=3,1,3,2,1,2,8,8
+  decision 1 predicates=14:10,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=50 action=skill:192
+  choice 0 1 weight=25 action=skill:30
+  choice 0 2 weight=25 action=skill:3
+  choice 1 0 weight=25 action=skill:120
+  choice 1 1 weight=25 action=skill:131
+  choice 1 2 weight=25 action=skill:161
+  choice 1 3 weight=25 action=special:0
+  choice 2 0 weight=50 action=skill:30
+  choice 2 1 weight=50 action=skill:3
+  choice 3 0 weight=50 action=skill:438
+  choice 3 1 weight=25 action=skill:131
+  choice 3 2 weight=25 action=skill:161
+end
+
+enemy-ai 79
+  decision 0 predicates=36:0x1ffffe,42:446,none routes=8,1,8,8,1,2,1,8
+  choice 0 0 weight=60 action=skill:30
+  choice 0 1 weight=10 action=skill:344
+  choice 0 2 weight=10 action=skill:356
+  choice 0 3 weight=10 action=skill:360
+  choice 0 4 weight=10 action=skill:358
+  choice 1 0 weight=60 action=skill:30
+  choice 1 1 action=skill:344
+  choice 1 2 action=skill:356
+  choice 1 3 action=skill:360
+  choice 1 4 weight=40 action=special:0
+  choice 2 0 weight=30 action=skill:30
+  choice 2 1 weight=50 action=skill:446
+  choice 2 2 action=skill:356
+  choice 2 3 action=skill:360
+  choice 2 4 weight=20 action=special:0
+end
+
+enemy-ai 80
+  decision 0 predicates=36:0x1ffffe,1:99,23:0 routes=8,3,8,8,1,2,4,8
+  choice 0 0 weight=25 action=skill:46
+  choice 0 1 weight=25 action=skill:65
+  choice 0 2 weight=25 action=skill:353
+  choice 0 3 weight=25 action=special:0
+  choice 1 0 weight=30 action=skill:46
+  choice 1 1 weight=40 action=skill:65
+  choice 1 2 action=skill:353
+  choice 1 3 weight=30 action=special:0
+  choice 2 0 weight=25 action=skill:70
+  choice 2 1 weight=25 action=skill:65
+  choice 2 2 weight=25 action=skill:67
+  choice 2 3 weight=25 action=skill:353
+  choice 3 0 weight=40 action=skill:70
+  choice 3 1 weight=30 action=skill:65
+  choice 3 2 weight=30 action=skill:67
+  choice 3 3 action=skill:353
+  choice 4 0 weight=30 action=skill:46
+  choice 4 1 action=skill:65
+  choice 4 2 weight=30 action=skill:353
+  choice 4 3 weight=40 action=special:0
+end
+
+enemy-ai 81
+  decision 0 predicates=42:438,none,none routes=8,8,8,8,1,8,8,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,8,8,8,8
+  choice 0 0 weight=34 action=special:0
+  choice 0 1 weight=33 action=skill:12
+  choice 0 2 weight=33 action=skill:126
+  choice 1 0 weight=50 action=skill:438
+  choice 1 1 weight=20 action=special:0
+  choice 1 2 weight=20 action=skill:12
+  choice 1 3 weight=10 action=skill:126
+  choice 6 0 weight=100 action=skill:12
+end
+
+enemy-ai 82 script=AllEscape_MeriBeru
+  decision 0 predicates=43:10,36:0x1ffffe,none routes=8,1,8,8,1,2,8,8
+  choice 0 0 weight=15 action=skill:135
+  choice 0 1 weight=20 action=skill:117
+  choice 0 2 weight=30 action=skill:192
+  choice 0 3 weight=5 action=skill:345
+  choice 0 4 weight=30 action=special:0
+  choice 1 0 action=skill:135
+  choice 1 1 weight=50 action=skill:117
+  choice 1 2 action=skill:192
+  choice 1 3 action=skill:345
+  choice 1 4 weight=50 action=special:0
+  choice 2 0 weight=20 action=skill:135
+  choice 2 1 weight=20 action=skill:117
+  choice 2 2 weight=30 action=skill:192
+  choice 2 3 action=skill:345
+  choice 2 4 weight=30 action=special:0
+end
+
+enemy-ai 83
+  decision 0 predicates=8:512,2:30,42:442 routes=8,1,1,2,1,2,3,8
+  choice 0 0 weight=70 action=skill:21
+  choice 0 1 action=skill:164
+  choice 0 2 weight=30 action=special:0
+  choice 0 3 action=skill:167
+  choice 1 0 action=skill:21
+  choice 1 1 action=skill:164
+  choice 1 2 action=special:0
+  choice 1 3 weight=100 action=skill:167
+  choice 2 0 weight=50 action=skill:21
+  choice 2 1 weight=25 action=skill:164
+  choice 2 2 weight=25 action=special:0
+  choice 2 3 action=skill:167
+  choice 3 0 weight=50 action=skill:442
+  choice 3 1 weight=30 action=skill:21
+  choice 3 2 weight=10 action=special:0
+  choice 3 3 weight=10 action=skill:164
+end
+
+enemy-ai 84
+  decision 0 predicates=9:4,36:0x1ffffe,none routes=8,1,8,8,1,2,8,8
+  choice 0 0 weight=40 action=skill:11
+  choice 0 1 weight=20 action=skill:12
+  choice 0 2 weight=20 action=skill:16
+  choice 0 3 weight=20 action=skill:339
+  choice 1 0 weight=70 action=special:0 effect=2:4
+  choice 1 1 weight=30 action=skill:121 effect=2:4
+  choice 2 0 weight=40 action=skill:11
+  choice 2 1 weight=20 action=skill:12
+  choice 2 2 weight=40 action=skill:16
+  choice 2 3 action=skill:339
+end
+
+enemy-ai 85
+  decision 0 predicates=1:40,5:2,none routes=8,1,8,8,2,8,8,8
+  choice 0 0 weight=20 action=skill:116
+  choice 0 1 weight=50 action=skill:40
+  choice 0 2 weight=30 action=skill:121
+  choice 0 3 action=preset:1:85
+  choice 1 0 action=skill:116
+  choice 1 1 weight=40 action=skill:40
+  choice 1 2 weight=40 action=skill:121
+  choice 1 3 weight=20 action=preset:1:85
+  choice 2 0 action=skill:116
+  choice 2 1 weight=50 action=skill:40
+  choice 2 2 weight=50 action=skill:121
+  choice 2 3 action=preset:1:85
+end
+
+enemy-ai 86
+  decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,2,1,8,8
+  decision 1 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=25 action=skill:66
+  choice 0 1 weight=25 action=skill:131
+  choice 0 2 weight=25 action=skill:342
+  choice 0 3 weight=25 action=skill:340
+  choice 1 0 weight=25 action=skill:53
+  choice 1 1 weight=25 action=skill:131
+  choice 1 2 weight=25 action=skill:342
+  choice 1 3 weight=25 action=skill:340
+  choice 2 0 weight=25 action=skill:66
+  choice 2 1 weight=75 action=skill:131
+  choice 2 2 action=skill:342
+  choice 2 3 action=skill:340
+  choice 2 4 action=special:0
+  choice 3 0 weight=20 action=skill:53
+  choice 3 1 weight=30 action=skill:131
+  choice 3 2 weight=40 action=skill:66
+  choice 3 3 weight=10 action=special:0
+  choice 6 0 action=skill:66
+  choice 6 1 weight=100 action=skill:131
+  choice 6 2 action=skill:342
+  choice 6 3 action=skill:340
+end
+
+enemy-ai 87
+  decision 0 predicates=18:0,23:0,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 action=special:0
+  choice 0 1 weight=50 action=skill:192
+  choice 0 2 weight=50 action=skill:112
+  choice 1 0 action=special:0
+  choice 1 1 action=skill:192
+  choice 1 2 weight=50 action=skill:112
+  choice 1 3 weight=50 action=skill:119
+  choice 2 0 action=special:0
+  choice 2 1 weight=100 action=skill:192
+  choice 2 2 action=skill:112
+end
+
+enemy-ai 88
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=20 action=skill:4
+  choice 0 2 weight=40 action=skill:338
+  choice 0 3 weight=40 action=special:0
+  choice 1 0 weight=10 action=skill:4
+  choice 1 2 action=skill:338
+  choice 1 3 weight=90 action=special:0
+end
+
+enemy-ai 89
+  decision 0 predicates=36:2,50:11,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=10 action=skill:182
+  choice 0 1 weight=20 action=skill:183
+  choice 0 2 weight=20 action=skill:184
+  choice 0 3 weight=25 action=skill:337
+  choice 0 4 weight=25 action=special:0
+  choice 1 0 weight=5 action=skill:182
+  choice 1 1 weight=20 action=skill:183
+  choice 1 2 weight=40 action=skill:184
+  choice 1 3 action=skill:337
+  choice 1 4 weight=35 action=special:0
+  choice 2 0 action=skill:182
+  choice 2 1 action=skill:183
+  choice 2 2 action=skill:184
+  choice 2 3 weight=30 action=skill:337
+  choice 2 4 weight=70 action=special:0
+  choice 3 0 action=skill:182
+  choice 3 1 action=skill:183
+  choice 3 2 action=skill:184
+  choice 3 3 action=skill:337
+  choice 3 4 weight=100 action=special:0
+end
+
+enemy-ai 90 script=AI_GOOL2
+  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=30 action=special:0
+  choice 0 1 weight=70 action=skill:112
+  choice 1 0 weight=50 action=special:0
+  choice 1 1 weight=50 action=skill:115
+  choice 6 0 weight=80 action=skill:49
+  choice 6 1 weight=20 action=special:0
+end
+
+enemy-ai 91
+  decision 0 predicates=1:99,5:1,none routes=8,2,8,8,1,8,8,8
+  choice 0 0 weight=30 action=skill:398
+  choice 0 1 weight=35 action=skill:58
+  choice 0 2 weight=35 action=skill:382
+  choice 1 0 weight=35 action=skill:398
+  choice 1 1 weight=30 action=skill:58
+  choice 1 2 weight=25 action=skill:59
+  choice 1 3 weight=10 action=skill:382
+  choice 2 0 weight=30 action=skill:398
+  choice 2 1 weight=25 action=skill:58
+  choice 2 2 weight=15 action=skill:59
+  choice 2 3 weight=10 action=skill:382
+  choice 2 4 weight=20 action=preset:1:91
+end
+
+enemy-ai 92
+  decision 0 predicates=9:4,35:0x100018,36:0x1ffffe routes=1,1,1,4,1,3,3,8
+  choice 0 0 weight=40 action=skill:6
+  choice 0 1 weight=50 action=skill:365
+  choice 0 2 weight=10 action=special:0
+  choice 1 0 weight=100 action=special:0 effect=2:4
+  choice 2 0 weight=40 action=skill:15
+  choice 2 1 weight=50 action=skill:365
+  choice 2 2 weight=10 action=special:0
+  choice 3 0 weight=80 action=skill:6
+  choice 3 1 weight=20 action=special:0
+  choice 4 0 weight=80 action=skill:15
+  choice 4 1 weight=20 action=special:0
+end
+
+enemy-ai 93
+  decision 0 predicates=50:11,1:99,36:0x1ffffe routes=3,2,3,3,1,2,3,8
+  choice 0 0 weight=60 action=skill:20
+  choice 0 1 weight=20 action=skill:181
+  choice 0 2 weight=20 action=special:0
+  choice 1 0 weight=70 action=skill:20
+  choice 1 1 action=skill:181
+  choice 1 2 weight=30 action=special:0
+  choice 2 0 weight=50 action=skill:20
+  choice 2 1 weight=20 action=skill:121
+  choice 2 2 weight=10 action=special:0
+  choice 2 3 weight=20 action=skill:337
+  choice 3 0 weight=60 action=skill:20
+  choice 3 1 weight=20 action=skill:121
+  choice 3 2 weight=20 action=special:0
+  choice 3 3 action=skill:337
+end
+
+enemy-ai 94
+  decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
+  choice 0 0 weight=30 action=skill:181
+  choice 0 1 weight=20 action=skill:182
+  choice 0 2 weight=20 action=skill:183
+  choice 0 3 weight=20 action=skill:184
+  choice 0 4 weight=10 action=special:1 effect=12:0
+  choice 1 0 action=skill:181
+  choice 1 1 action=skill:182
+  choice 1 2 action=skill:183
+  choice 1 3 action=skill:184
+  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=50 action=special:1 effect=12:0
+  choice 2 1 weight=50 action=special:0
+end
+
+enemy-ai 95
+  decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
+  choice 0 0 weight=20 action=skill:181
+  choice 0 1 weight=30 action=skill:182
+  choice 0 2 weight=20 action=skill:183
+  choice 0 3 weight=20 action=skill:184
+  choice 0 4 weight=10 action=special:1 effect=12:0
+  choice 1 0 action=skill:181
+  choice 1 1 action=skill:182
+  choice 1 2 action=skill:183
+  choice 1 3 action=skill:184
+  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=50 action=special:1 effect=12:0
+  choice 2 1 weight=50 action=special:0
+end
+
+enemy-ai 96
+  decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
+  choice 0 0 weight=20 action=skill:181
+  choice 0 1 weight=20 action=skill:182
+  choice 0 2 weight=30 action=skill:183
+  choice 0 3 weight=20 action=skill:184
+  choice 0 4 weight=10 action=special:1 effect=12:0
+  choice 1 0 action=skill:181
+  choice 1 1 action=skill:182
+  choice 1 2 action=skill:183
+  choice 1 3 action=skill:184
+  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=50 action=special:1 effect=12:0
+  choice 2 1 weight=50 action=special:0
+end
+
+enemy-ai 97
+  decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
+  choice 0 0 weight=20 action=skill:181
+  choice 0 1 weight=20 action=skill:182
+  choice 0 2 weight=20 action=skill:183
+  choice 0 3 weight=30 action=skill:184
+  choice 0 4 weight=10 action=special:1 effect=12:0
+  choice 1 0 action=skill:181
+  choice 1 1 action=skill:182
+  choice 1 2 action=skill:183
+  choice 1 3 action=skill:184
+  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=50 action=special:1 effect=12:0
+  choice 2 1 weight=50 action=special:0
+end
+
+enemy-ai 98 script=ai_omoikane
+  decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,1,1,1,3,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=50 action=skill:190
+  choice 0 1 weight=50 action=special:1 effect=12:0
+  choice 1 0 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=20 action=skill:190
+  choice 2 1 weight=80 action=special:1 effect=12:0
+  choice 3 0 weight=10 action=skill:190
+  choice 3 1 weight=90 action=special:1 effect=12:0
+  choice 6 0 weight=100 action=skill:190
+end
+
+enemy-ai 99
+  decision 0 predicates=none,5:2,none routes=8,8,8,8,8,1,8,8
+  decision 2 predicates=9:8,none,none routes=8,8,8,8,4,8,8,8
+  choice 0 0 weight=60 action=special:0
+  choice 0 1 weight=40 action=skill:1
+  choice 1 0 weight=30 action=special:0
+  choice 1 1 weight=70 action=skill:1
+  choice 2 0 weight=70 action=skill:1
+  choice 2 2 weight=30 action=special:0
+  choice 3 0 action=skill:1
+  choice 3 2 weight=100 action=special:0
+  choice 4 0 weight=95 action=special:0
+  choice 4 1 weight=5 action=skill:1
+  choice 6 0 weight=85 action=special:0
+  choice 6 1 weight=15 action=skill:1
+end
+
+enemy-ai 100
+  decision 0 predicates=1:99,36:0x1ffffe,50:11 routes=3,3,1,3,1,2,1,8
+  choice 0 0 weight=20 action=skill:181
+  choice 0 1 weight=5 action=skill:182
+  choice 0 2 weight=20 action=skill:183
+  choice 0 3 weight=25 action=skill:184
+  choice 0 4 weight=30 action=skill:354
+  choice 1 0 weight=30 action=skill:1
+  choice 1 1 weight=30 action=skill:2
+  choice 1 2 weight=20 action=skill:127
+  choice 1 3 weight=20 action=skill:354
+  choice 2 0 weight=30 action=skill:181
+  choice 2 1 weight=5 action=skill:182
+  choice 2 2 weight=30 action=skill:183
+  choice 2 3 weight=35 action=skill:184
+  choice 2 4 action=skill:354
+  choice 3 0 weight=30 action=skill:1
+  choice 3 1 weight=40 action=skill:2
+  choice 3 2 weight=30 action=skill:127
+  choice 3 3 action=skill:354
+end
+
+enemy-ai 102
+  decision 0 predicates=1:50,5:3,none routes=8,1,8,8,2,8,8,8
+  choice 0 0 weight=25 action=skill:19
+  choice 0 1 weight=25 action=skill:28
+  choice 0 2 action=skill:112
+  choice 0 3 weight=50 action=special:0
+  choice 1 0 weight=50 action=skill:112
+  choice 1 1 weight=25 action=special:1
+  choice 1 2 weight=25 action=preset:1:102
+  choice 2 0 weight=50 action=skill:112
+  choice 2 1 weight=50 action=special:1
+end
+
+enemy-ai 257 script=ai_2
+  decision 0 predicates=1:40,20:7,none routes=8,6,8,8,8,8,8,8
+  decision 1 predicates=6:2,35:2,1:50 routes=8,0,0,6,8,8,2,8
+  decision 2 predicates=1:80,none,23:0 routes=8,8,8,8,1,8,1,8
+  choice 0 0 weight=100 action=special:0
+  choice 0 1 action=skill:113
+  choice 0 2 action=skill:4
+  choice 1 0 weight=100 action=special:0
+  choice 1 1 action=skill:4
+  choice 1 2 action=skill:113
+  choice 2 0 weight=100 action=special:0
+  choice 2 1 action=skill:4
+  choice 2 2 action=skill:113
+  choice 6 0 weight=100 action=special:0
+  choice 6 1 action=skill:4
+  choice 6 2 action=skill:113
+end
+
+enemy-ai 258 script=AI_Kamasosso_No1
+  choice 0 0 weight=30 action=special:0
+  choice 0 1 weight=35 action=skill:49
+  choice 0 2 action=skill:34
+  choice 0 3 weight=35 action=skill:116
+  choice 0 4 action=skill:391
+  choice 1 0 action=special:0
+  choice 1 1 action=skill:49
+  choice 1 2 action=skill:34
+  choice 1 3 action=skill:116
+  choice 1 4 action=skill:391
+  choice 2 0 action=special:0
+  choice 2 1 action=skill:49
+  choice 2 2 action=skill:34
+  choice 2 3 action=skill:116
+  choice 2 4 action=skill:391
+  choice 3 0 action=special:0
+  choice 3 1 action=skill:49
+  choice 3 2 action=skill:34
+  choice 3 3 action=skill:116
+  choice 3 4 action=skill:391
+  choice 4 0 action=special:0
+  choice 4 1 action=skill:49
+  choice 4 2 action=skill:34
+  choice 4 3 action=skill:116
+  choice 4 4 action=skill:391
+  choice 5 0 action=special:0
+  choice 5 1 action=skill:49
+  choice 5 2 action=skill:34
+  choice 5 3 action=skill:116
+  choice 5 4 action=skill:391
+  choice 6 0 action=special:0
+  choice 6 1 action=skill:49
+  choice 6 2 action=skill:34
+  choice 6 3 action=skill:116
+  choice 6 4 action=skill:391
+end
+
+enemy-ai 259 script=AI_Kamasosso_No2
+  decision 0 predicates=5:1,1:35,none routes=8,2,8,8,1,8,8,8
+  decision 1 predicates=5:1,none,none routes=8,8,8,8,8,8,8,8
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=50 action=skill:29
+  choice 0 2 action=skill:31
+  choice 0 3 action=skill:116
+  choice 0 4 action=preset:1:63
+  choice 1 0 action=skill:349
+  choice 1 1 weight=50 action=skill:389
+  choice 1 2 weight=50 action=skill:391
+  choice 1 3 action=skill:353
+  choice 1 4 action=skill:354
+  choice 2 0 weight=25 action=skill:349
+  choice 2 1 weight=30 action=skill:389
+  choice 2 2 weight=45 action=skill:391
+  choice 2 3 action=skill:353
+  choice 2 4 action=skill:354
+end
+
+enemy-ai 260 script=AI_Kamasosso_No3
+  decision 0 predicates=none,18:0,none routes=8,8,8,8,8,1,8,8
+  decision 1 predicates=10:0x1000,9:0x1000,none routes=8,8,8,8,2,3,8,8
+  decision 2 predicates=none,none,22:2 routes=8,8,8,8,8,8,4,8
+  choice 0 0 weight=40 action=special:0
+  choice 0 1 action=skill:390 effect=14:0x1000
+  choice 0 2 weight=30 action=skill:29
+  choice 0 3 action=skill:192
+  choice 0 4 weight=30 action=skill:69
+  choice 1 0 weight=60 action=special:0
+  choice 1 1 action=skill:390 effect=14:0x1000
+  choice 1 2 weight=20 action=skill:29
+  choice 1 3 action=skill:192
+  choice 1 4 weight=20 action=skill:69
+  choice 2 0 weight=50 action=special:0
+  choice 2 1 action=skill:390 effect=14:0x1000
+  choice 2 2 weight=30 action=skill:29
+  choice 2 3 weight=10 action=skill:192
+  choice 2 4 weight=10 action=skill:69
+  choice 3 0 weight=10 action=special:0
+  choice 3 1 weight=60 action=skill:390 effect=14:0x1000
+  choice 3 2 weight=10 action=skill:29
+  choice 3 3 weight=20 action=skill:192
+  choice 3 4 action=skill:69
+  choice 4 0 weight=15 action=special:0
+  choice 4 1 weight=50 action=skill:390 effect=14:0x1000
+  choice 4 2 weight=10 action=skill:29
+  choice 4 3 weight=15 action=skill:192
+  choice 4 4 weight=10 action=skill:69
+  choice 5 0 weight=60 action=special:0
+  choice 5 1 action=skill:390 effect=14:0x1000
+  choice 5 2 weight=20 action=skill:29
+  choice 5 3 action=skill:192
+  choice 5 4 weight=20 action=skill:69
+end
+
+enemy-ai 261 script=AI_Ushasu
+  decision 0 predicates=8:16,none,23:0 routes=8,8,8,8,1,8,3,8
+  decision 1 predicates=8:32,8:8,none routes=8,8,8,8,2,3,8,8
+  choice 0 0 weight=5 action=special:0
+  choice 0 1 weight=30 action=skill:386
+  choice 0 2 weight=20 action=skill:60
+  choice 0 3 weight=20 action=skill:86
+  choice 0 4 weight=25 action=skill:121
+  choice 1 0 weight=5 action=special:0
+  choice 1 1 weight=15 action=skill:386
+  choice 1 2 weight=50 action=skill:168 effect=2:16
+  choice 1 3 weight=20 action=skill:86
+  choice 1 4 weight=10 action=skill:121
+  choice 2 0 weight=5 action=special:0
+  choice 2 1 weight=15 action=skill:386
+  choice 2 2 weight=50 action=skill:166 effect=2:32
+  choice 2 3 weight=20 action=skill:86
+  choice 2 4 weight=10 action=skill:121
+  choice 3 0 weight=5 action=special:0
+  choice 3 1 weight=15 action=skill:386
+  choice 3 2 weight=50 action=skill:166 effect=2:8
+  choice 3 3 weight=20 action=skill:86
+  choice 3 4 weight=10 action=skill:121
+  choice 4 0 action=special:0
+  choice 4 1 action=skill:386
+  choice 4 2 action=skill:60
+  choice 4 3 action=skill:86
+  choice 4 4 action=skill:121
+  choice 5 0 action=special:0
+  choice 5 1 action=skill:386
+  choice 5 2 action=skill:60
+  choice 5 3 action=skill:86
+  choice 5 4 action=skill:121
+  choice 6 0 action=special:0
+  choice 6 1 action=skill:386
+  choice 6 2 action=skill:60
+  choice 6 3 action=skill:86
+  choice 6 4 action=skill:121
+end
+
+enemy-ai 262 script=HEAT_1
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=65 action=special:0
+  choice 1 1 weight=35 action=skill:1
+end
+
+enemy-ai 263 script=AI_RAFU1
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 264 script=AI_RAFU2
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 weight=50 action=skill:392
+end
+
+enemy-ai 265 script=ai_metatoron
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 266 script=AI_Keruberosu_Right
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 267 script=ai_katobu
+  decision 0 predicates=none,none,none routes=8,8,8,8,8,8,6,8
+  decision 1 predicates=none,none,none routes=8,8,8,8,4,2,1,8
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=100 action=skill:39
+  choice 2 0 weight=100 action=skill:42
+  choice 3 0 weight=100 action=skill:71 effect=14:2048
+  choice 4 0 weight=100 action=skill:71 effect=14:2048
+  choice 5 0 weight=100 action=skill:137
+  choice 6 0 weight=100 action=skill:137
+end
+
+enemy-ai 268 script=ai_ishisu
+  decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
+  decision 1 predicates=none,none,none routes=8,8,8,1,3,2,8,8
+  decision 2 predicates=none,none,none routes=8,8,8,8,5,8,8,8
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=50 action=skill:86
+  choice 1 1 weight=30 action=skill:24
+  choice 1 2 weight=15 action=skill:87
+  choice 1 3 weight=5 action=special:0
+  choice 2 0 weight=50 action=skill:184
+  choice 2 1 weight=50 action=special:0
+  choice 3 0 weight=100 action=skill:24
+  choice 4 0 weight=100 action=skill:87
+  choice 5 0 weight=100 action=preset:1:4
+  choice 6 0 weight=100 action=skill:77
+end
+
+enemy-ai 269 script=neazu_b
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 270
+  decision 0 predicates=4:5,21:4,none routes=8,8,8,8,2,1,8,8
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=20 action=skill:39
+  choice 1 1 weight=20 action=skill:30
+  choice 1 2 weight=20 action=skill:21
+  choice 1 3 weight=20 action=skill:3
+  choice 1 4 weight=20 action=skill:12
+  choice 2 0 weight=100 action=skill:47
+end
+
+enemy-ai 271 script=AI_RAVAN
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 272 script=AI_BeruzeHum
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=100 action=special:0
+end
+
+enemy-ai 273 script=AI_BeruzeFly
+  choice 0 0 weight=100 action=skill:418
+  choice 1 0 weight=100 action=special:0
+  choice 2 0 weight=100 action=special:0
+  choice 3 0 weight=100 action=special:0
+  choice 4 0 weight=100 action=special:0
+end
+
+enemy-ai 274 script=AI_Yamata
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 275 script=AI_Kouryuu
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 276 script=karu_gard
+  choice 0 0 weight=100 action=skill:382
+end
+
+enemy-ai 277 script=ai_vasuki
+  decision 0 predicates=9:4,9:2,none routes=8,8,8,8,3,2,8,8
+  decision 1 predicates=60:0,35:3,35:4 routes=4,5,1,4,1,5,8,8
+  decision 2 predicates=none,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=40 action=special:0
+  choice 0 1 weight=10 action=skill:399
+  choice 0 2 action=skill:24
+  choice 0 3 action=skill:47
+  choice 0 4 weight=50 action=skill:85
+  choice 1 0 weight=5 action=special:0
+  choice 1 1 weight=75 action=skill:399
+  choice 1 2 action=skill:24
+  choice 1 3 weight=10 action=skill:47
+  choice 1 4 weight=10 action=skill:85
+  choice 2 0 weight=100 action=special:0 effect=2:2
+  choice 2 1 action=skill:399
+  choice 2 2 action=skill:24
+  choice 2 3 action=skill:47
+  choice 2 4 action=skill:85
+  choice 3 0 weight=100 action=special:0 effect=2:4
+  choice 3 1 action=skill:399
+  choice 3 2 action=skill:24
+  choice 3 3 action=skill:47
+  choice 3 4 action=skill:85
+  choice 4 0 weight=5 action=special:0
+  choice 4 1 action=skill:399
+  choice 4 2 action=skill:24
+  choice 4 3 weight=70 action=skill:47
+  choice 4 4 weight=25 action=skill:85
+  choice 5 0 weight=5 action=special:0
+  choice 5 1 action=skill:399
+  choice 5 2 weight=50 action=skill:24
+  choice 5 3 weight=20 action=skill:47
+  choice 5 4 weight=25 action=skill:85
+  choice 6 0 weight=90 action=special:0
+  choice 6 1 weight=10 action=skill:399
+  choice 6 2 action=skill:24
+  choice 6 3 action=skill:47
+  choice 6 4 action=skill:85
+end
+
+enemy-ai 278 script=garuuda
+  decision 0 predicates=14:13,1:60,none routes=8,8,8,8,2,1,8,8
+  choice 0 0 weight=70 action=special:0
+  choice 0 1 weight=15 action=skill:63
+  choice 0 2 weight=15 action=skill:30
+  choice 1 0 weight=60 action=special:0
+  choice 1 1 weight=20 action=skill:63
+  choice 1 2 weight=20 action=skill:30
+  choice 2 0 weight=40 action=special:0
+  choice 2 1 action=skill:63
+  choice 2 2 weight=60 action=skill:30
+end
+
+enemy-ai 279 script=jyatayu
+  decision 0 predicates=1:60,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=90 action=special:0
+  choice 0 1 action=skill:66
+  choice 0 2 weight=10 action=skill:68
+  choice 1 0 weight=75 action=special:0
+  choice 1 1 action=skill:66
+  choice 1 2 weight=25 action=skill:68
+  choice 1 3 action=skill:137
+end
+
+enemy-ai 280 script=ai_ananta
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=100 action=skill:178
+  choice 2 0 weight=50 action=skill:180
+  choice 2 1 weight=50 action=skill:185
+  choice 3 0 weight=100 action=skill:127
+  choice 4 0 weight=100 action=skill:140
+  choice 5 0 weight=100 action=skill:74
+  choice 6 0 weight=100 action=skill:192
+end
+
+enemy-ai 281 script=ai_hari_vis
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 282 script=ai_hari_siv
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 283 script=ai_hari_las
+  decision 0 predicates=1:20,20:70,5:1 routes=8,6,6,6,8,8,2,8
+  decision 1 predicates=20:70,1:50,5:2 routes=8,8,8,8,8,2,4,8
+  decision 2 predicates=20:60,1:80,5:5 routes=8,2,8,8,3,3,0,5
+  choice 0 0 weight=40 action=skill:421
+  choice 0 1 weight=10 action=skill:378
+  choice 0 2 weight=10 action=skill:57
+  choice 0 3 weight=40 action=skill:70
+  choice 2 0 weight=40 action=skill:421
+  choice 2 1 weight=10 action=skill:378
+  choice 2 2 weight=30 action=skill:57
+  choice 2 3 weight=20 action=skill:70
+  choice 3 0 weight=30 action=skill:421
+  choice 3 1 weight=30 action=skill:378
+  choice 3 2 weight=20 action=skill:57
+  choice 3 3 weight=20 action=skill:70
+  choice 4 0 weight=35 action=skill:421
+  choice 4 1 weight=35 action=skill:378
+  choice 4 2 weight=10 action=skill:57
+  choice 4 3 weight=20 action=skill:70
+  choice 5 0 weight=40 action=skill:421
+  choice 5 1 weight=20 action=skill:378
+  choice 5 2 weight=10 action=skill:57
+  choice 5 3 weight=30 action=skill:70
+  choice 6 0 weight=15 action=skill:421
+  choice 6 1 weight=35 action=skill:378
+  choice 6 2 weight=20 action=skill:57
+  choice 6 3 weight=30 action=skill:70
+end
+
+enemy-ai 284
+  decision 0 predicates=1:20,20:30,none routes=8,6,8,8,2,8,8,8
+  decision 2 predicates=1:80,none,23:0 routes=8,8,8,8,1,8,2,8
+  choice 0 0 weight=90 action=special:0
+  choice 0 1 weight=10 action=skill:112
+  choice 1 0 weight=70 action=special:0
+  choice 1 1 weight=30 action=skill:112
+  choice 2 0 weight=90 action=special:0
+  choice 2 1 weight=10 action=skill:112
+  choice 6 0 weight=90 action=special:0
+  choice 6 1 weight=10 action=skill:112
+end
+
+enemy-ai 285 script=neazu_s
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 286 script=AI_Kokato
+  decision 0 predicates=1:20,none,none routes=8,8,8,8,1,8,8,8
+  decision 2 predicates=none,none,23:0 routes=8,8,8,8,8,8,3,8
+  choice 0 0 weight=80 action=special:0
+  choice 0 1 weight=20 action=skill:112
+  choice 1 0 weight=50 action=special:0
+  choice 1 1 weight=50 action=skill:112
+  choice 3 0 weight=100 action=special:0
+  choice 3 1 action=skill:112
+  choice 5 0 weight=90 action=skill:112
+  choice 5 1 action=skill:126
+  choice 5 2 action=skill:119
+  choice 5 3 action=skill:83
+  choice 5 4 weight=10 action=special:0
+  choice 6 0 weight=40 action=skill:112
+  choice 6 1 weight=30 action=skill:126
+  choice 6 2 weight=30 action=skill:119
+  choice 6 3 action=skill:83
+  choice 6 4 action=special:0
+end
+
+enemy-ai 287 script=AI_Enpusa
+  decision 1 predicates=none,none,none routes=8,8,8,8,0,8,8,8
+  choice 0 0 action=special:0
+  choice 0 1 weight=20 action=skill:13
+  choice 0 2 weight=80 action=skill:10
+end
+
+enemy-ai 288
+  decision 0 predicates=9:2,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=70 action=skill:20
+  choice 0 1 weight=30 action=skill:22
+  choice 0 2 action=skill:119
+  choice 1 0 action=skill:20
+  choice 1 1 action=skill:22
+  choice 1 2 weight=100 action=skill:119
+end
+
+enemy-ai 289
+  decision 0 predicates=none,none,1:50 routes=8,8,8,8,8,8,4,8
+  decision 1 predicates=34:55,none,1:80 routes=8,8,8,8,2,8,1,8
+  decision 2 predicates=5:1,23:0,13:1 routes=8,5,8,8,8,3,4,8
+  choice 0 0 weight=35 action=special:0
+  choice 0 1 weight=25 action=skill:86
+  choice 0 2 weight=40 action=skill:176
+  choice 1 0 weight=70 action=special:0
+  choice 1 1 weight=20 action=skill:86
+  choice 1 2 weight=10 action=skill:176
+  choice 2 0 weight=30 action=special:0
+  choice 2 1 weight=30 action=skill:86
+  choice 2 2 weight=40 action=skill:176
+  choice 3 0 weight=40 action=special:0
+  choice 3 1 weight=30 action=skill:86
+  choice 3 2 weight=30 action=skill:176
+  choice 4 0 weight=80 action=special:0
+  choice 4 1 weight=20 action=skill:86
+  choice 5 0 weight=1 action=special:0
+  choice 5 1 weight=99 action=skill:86
+end
+
+enemy-ai 290
+  decision 0 predicates=18:0,23:0,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 action=special:0
+  choice 0 1 weight=50 action=skill:192
+  choice 0 2 weight=50 action=skill:112
+  choice 1 0 action=special:0
+  choice 1 1 action=skill:192
+  choice 1 2 weight=100 action=skill:112
+  choice 2 0 action=special:0
+  choice 2 1 weight=100 action=skill:192
+  choice 2 2 action=skill:112
+end
+
+enemy-ai 291
+  decision 0 predicates=50:2,35:5,none routes=8,2,8,8,1,2,8,8
+  choice 0 0 weight=30 action=skill:29
+  choice 0 1 weight=30 action=skill:50
+  choice 0 2 action=skill:116
+  choice 0 3 weight=10 action=skill:184
+  choice 0 4 weight=30 action=special:0
+  choice 1 0 weight=100 action=skill:29
+  choice 1 1 action=skill:50
+  choice 1 2 action=skill:116
+  choice 1 3 action=skill:184
+  choice 2 0 action=skill:29
+  choice 2 1 weight=30 action=skill:50
+  choice 2 2 action=skill:116
+  choice 2 3 weight=30 action=skill:184
+  choice 2 4 weight=40 action=special:0
+end
+
+enemy-ai 292 script=AI_RAFU1
+  choice 0 0 weight=100 action=special:0
+  choice 0 1 action=skill:393
+end
+
+enemy-ai 294
+  decision 0 predicates=2:20,20:10,5:1 routes=8,6,6,8,8,8,6,8
+  decision 1 predicates=13:5,none,none routes=8,8,8,8,8,8,8,8
+  decision 2 predicates=1:50,none,23:0 routes=8,8,8,8,1,8,3,8
+  choice 0 0 weight=40 action=special:0
+  choice 0 1 weight=20 action=skill:31
+  choice 0 2 weight=10 action=skill:177
+  choice 0 3 weight=30 action=skill:83
+  choice 1 0 weight=35 action=special:0
+  choice 1 1 weight=25 action=skill:31
+  choice 1 2 weight=5 action=skill:177
+  choice 1 3 weight=35 action=skill:83
+  choice 2 0 weight=65 action=special:0
+  choice 2 1 weight=15 action=skill:31
+  choice 2 2 action=skill:177
+  choice 2 3 weight=20 action=skill:83
+  choice 3 0 weight=30 action=special:0
+  choice 3 1 weight=25 action=skill:31
+  choice 3 2 weight=35 action=skill:177
+  choice 3 3 weight=10 action=skill:83
+  choice 6 0 weight=40 action=special:0
+  choice 6 1 weight=30 action=skill:31
+  choice 6 2 action=skill:177
+  choice 6 3 weight=30 action=skill:83
+end
+
+enemy-ai 295 script=AI_Apisu
+  decision 1 predicates=14:2,2:40,1:20 routes=8,2,2,8,1,8,8,0
+  choice 0 0 weight=50 action=special:0
+  choice 0 1 action=skill:163 effect=1:0
+  choice 0 2 weight=50 action=skill:184
+  choice 0 3 action=preset:1:71
+  choice 0 4 action=preset:1:70
+  choice 1 0 weight=100 action=special:0
+  choice 1 1 action=skill:163 effect=1:0
+  choice 1 2 action=skill:184
+  choice 1 3 action=preset:1:71
+  choice 1 4 action=preset:1:70
+  choice 2 0 weight=40 action=special:0
+  choice 2 1 weight=60 action=skill:163 effect=1:0
+  choice 2 2 action=skill:184
+  choice 2 3 action=preset:1:71
+  choice 2 4 action=preset:1:70
+  choice 3 0 action=special:0
+  choice 3 1 action=skill:163
+  choice 3 2 action=skill:184
+  choice 3 3 weight=100 action=preset:1:71
+  choice 3 4 action=preset:1:70
+  choice 4 0 action=special:0
+  choice 4 1 action=skill:163
+  choice 4 2 action=skill:184
+  choice 4 3 action=preset:1:71
+  choice 4 4 weight=100 action=preset:1:70
+  choice 5 0 action=special:0
+  choice 5 1 action=skill:163
+  choice 5 2 action=skill:184
+  choice 5 3 action=preset:1:71
+  choice 5 4 action=preset:1:70
+  choice 6 0 weight=30 action=special:0
+  choice 6 1 weight=60 action=skill:163
+  choice 6 2 weight=10 action=skill:184
+  choice 6 3 action=preset:1:71
+  choice 6 4 action=preset:1:70
+end
+
+enemy-ai 296
+  decision 0 predicates=12:298,23:0,31:12 routes=4,8,8,3,8,1,3,8
+  choice 0 0 weight=90 action=special:0
+  choice 0 1 weight=5 action=skill:80
+  choice 0 2 weight=5 action=skill:85
+  choice 0 3 action=skill:346 effect=7:0
+  choice 1 0 weight=70 action=special:0
+  choice 1 1 weight=15 action=skill:80
+  choice 1 2 weight=15 action=skill:85
+  choice 1 3 action=skill:346 effect=7:0
+  choice 3 0 weight=10 action=special:0
+  choice 3 1 weight=5 action=skill:80
+  choice 3 2 weight=5 action=skill:85
+  choice 3 3 weight=80 action=skill:346 effect=7:0
+  choice 4 0 action=special:0
+  choice 4 1 action=skill:80
+  choice 4 2 action=skill:85
+  choice 4 3 weight=100 action=skill:346 effect=7:0
+end
+
+enemy-ai 297 script=AI_Onkotto
+  decision 0 predicates=43:6,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=70 action=special:0
+  choice 0 1 action=skill:130
+  choice 0 2 weight=30 action=skill:183
+  choice 0 3 action=skill:55
+  choice 1 0 weight=100 action=special:0
+  choice 1 1 action=skill:130
+  choice 1 2 action=skill:183
+  choice 1 3 action=skill:55
+  choice 2 0 action=special:0
+  choice 2 1 action=skill:130
+  choice 2 2 action=skill:183
+  choice 2 3 action=skill:55
+  choice 3 0 action=special:0
+  choice 3 1 action=skill:130
+  choice 3 2 action=skill:183
+  choice 3 3 action=skill:55
+  choice 4 0 action=special:0
+  choice 4 1 action=skill:130
+  choice 4 2 action=skill:183
+  choice 4 3 action=skill:55
+  choice 5 0 action=special:0
+  choice 5 1 action=skill:130
+  choice 5 2 action=skill:183
+  choice 5 3 action=skill:55
+  choice 6 0 action=special:0
+  choice 6 1 action=skill:130
+  choice 6 2 action=skill:183
+  choice 6 3 action=skill:55
+end
+
+enemy-ai 298
+  decision 1 predicates=11:296,2:40,1:20 routes=8,3,8,8,8,2,2,8
+  choice 0 0 weight=20 action=special:0
+  choice 0 1 action=skill:161 effect=1:0
+  choice 0 2 weight=30 action=skill:87
+  choice 0 3 weight=50 action=skill:34
+  choice 2 0 weight=10 action=special:0
+  choice 2 1 weight=30 action=skill:161 effect=1:0
+  choice 2 2 weight=30 action=skill:87
+  choice 2 3 weight=30 action=skill:34
+  choice 3 0 weight=10 action=special:0
+  choice 3 1 weight=60 action=skill:161 effect=1:0
+  choice 3 2 action=skill:87
+  choice 3 3 weight=30 action=skill:34
+end
+
+enemy-ai 299
+  decision 0 predicates=1:40,5:2,none routes=8,1,8,8,2,8,8,8
+  choice 0 0 weight=20 action=skill:116
+  choice 0 1 weight=50 action=skill:40
+  choice 0 2 weight=30 action=skill:121
+  choice 0 3 action=preset:1:85
+  choice 1 0 action=skill:116
+  choice 1 1 weight=30 action=skill:40
+  choice 1 2 weight=50 action=skill:121
+  choice 1 3 weight=20 action=preset:1:85
+  choice 2 0 weight=20 action=skill:116
+  choice 2 1 weight=40 action=skill:40
+  choice 2 2 weight=40 action=skill:121
+  choice 2 3 action=preset:1:85
+end
+
+enemy-ai 300
+  decision 0 predicates=43:10,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=50 action=skill:117
+  choice 0 1 weight=30 action=skill:135
+  choice 0 2 weight=20 action=skill:192
+  choice 1 0 weight=70 action=skill:117
+  choice 1 1 weight=30 action=skill:135
+  choice 1 2 action=skill:192
+end
+
+enemy-ai 301
+  decision 1 predicates=7:16,14:12,none routes=8,8,8,8,2,1,8,8
+  choice 0 0 weight=30 action=special:0
+  choice 0 1 weight=40 action=skill:112
+  choice 0 2 weight=30 action=skill:60
+  choice 0 3 action=skill:180
+  choice 1 0 weight=20 action=special:0
+  choice 1 1 weight=30 action=skill:112
+  choice 1 2 weight=10 action=skill:60
+  choice 1 3 weight=40 action=skill:180
+  choice 2 0 weight=20 action=special:0
+  choice 2 1 weight=80 action=skill:112
+end
+
+enemy-ai 302 script=AI_Keruberosu_Center
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 303 script=AI_Keruberosu_Left
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 304 script=HEAT_2
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=65 action=special:0
+  choice 1 1 weight=35 action=skill:1
+end
+
+enemy-ai 305
+  decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,1,2,8,8
+  choice 0 0 weight=40 action=skill:60
+  choice 0 1 weight=30 action=skill:130
+  choice 0 2 weight=10 action=skill:343
+  choice 0 3 weight=20 action=special:0
+  choice 1 0 weight=50 action=skill:60
+  choice 1 1 weight=30 action=skill:130
+  choice 1 2 weight=20 action=special:0
+  choice 2 0 weight=40 action=skill:130
+  choice 2 1 weight=30 action=skill:134
+  choice 2 2 weight=10 action=skill:343
+  choice 2 3 weight=20 action=special:0
+  choice 3 0 weight=40 action=skill:130
+  choice 3 1 weight=40 action=skill:134
+  choice 3 2 weight=20 action=special:0
+  choice 6 0 action=special:0
+  choice 6 1 action=skill:60
+  choice 6 2 weight=50 action=skill:134
+  choice 6 3 weight=50 action=skill:130
+end
+
+enemy-ai 307 script=m2_kerupi
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 308 script=m2_nue
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 309 script=m2_onkot
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 310 script=m2_atabaku
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 311 script=AI_KingFrost
+  choice 0 0 weight=100 action=skill:381
+end
+
+enemy-ai 312 script=ai_suzaku
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 313 script=ai_seiryuu
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 314 script=ai_genbu
+  choice 0 0 weight=100 action=special:2
+end
+
+enemy-ai 315 script=ai_byattko
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 316 script=hitosyura
+  choice 0 0 weight=100 action=special:0
+end
+
+enemy-ai 317
+  choice 0 0 weight=80 action=skill:3
+  choice 0 1 weight=20 action=skill:5
+end
+
+enemy-ai 318
+  choice 0 0 weight=80 action=skill:12
+  choice 0 1 weight=20 action=skill:14
+end
+
+enemy-ai 319
+  choice 0 0 weight=80 action=skill:21
+  choice 0 1 weight=20 action=skill:23
+end
+
+enemy-ai 320
+  choice 0 0 weight=80 action=skill:30
+  choice 0 1 weight=20 action=skill:32
+end
+
+enemy-ai 321
+  choice 0 0 weight=80 action=skill:39
+  choice 0 1 weight=20 action=skill:41
+end
+
+enemy-ai 322
+  choice 0 0 weight=80 action=skill:131
+  choice 0 1 weight=20 action=skill:126
+end
+
+enemy-ai 323
+  decision 0 predicates=9:4,7:12,none routes=8,8,8,8,1,5,8,8
+  decision 1 predicates=50:0,50:2,35:3 routes=5,2,8,8,4,3,8,8
+  decision 2 predicates=35:3,61:3,1:35 routes=6,5,8,8,5,8,8,8
+  choice 0 0 weight=10 action=special:0
+  choice 0 1 weight=25 action=skill:11
+  choice 0 2 weight=15 action=skill:14
+  choice 0 3 weight=25 action=skill:184
+  choice 0 4 weight=25 action=skill:181
+  choice 1 0 weight=100 action=special:0 effect=2:4
+  choice 2 0 weight=25 action=special:0
+  choice 2 1 weight=75 action=skill:11
+  choice 3 0 weight=5 action=special:0
+  choice 3 1 weight=20 action=skill:11
+  choice 3 2 weight=10 action=skill:14
+  choice 3 4 weight=65 action=skill:181
+  choice 4 0 weight=5 action=special:0
+  choice 4 1 weight=20 action=skill:11
+  choice 4 2 weight=10 action=skill:14
+  choice 4 3 weight=65 action=skill:184
+  choice 5 0 weight=85 action=special:0
+  choice 5 1 weight=15 action=skill:11
+  choice 6 0 action=special:0
+  choice 6 1 action=skill:11
+  choice 6 2 weight=100 action=skill:14
+  choice 6 3 action=skill:184
+  choice 6 4 action=skill:181
+end
+
+enemy-ai 324 script=AI_bafo
+  decision 0 predicates=14:12,13:11,none routes=8,8,8,8,1,2,8,8
+  choice 0 0 weight=40 action=skill:65
+  choice 0 1 weight=10 action=skill:66
+  choice 0 2 weight=10 action=skill:69
+  choice 0 3 weight=30 action=special:0
+  choice 0 4 weight=10 action=skill:118
+  choice 1 0 weight=40 action=skill:65
+  choice 1 1 weight=10 action=skill:66
+  choice 1 2 weight=10 action=skill:69
+  choice 1 3 weight=20 action=skill:180
+  choice 1 4 weight=20 action=skill:2
+  choice 2 0 weight=40 action=skill:65
+  choice 2 1 weight=10 action=skill:66
+  choice 2 2 weight=10 action=skill:118
+  choice 2 3 weight=20 action=skill:185
+  choice 2 4 weight=20 action=skill:2
+end
+
+enemy-ai 325
+  decision 0 predicates=1:99,1:50,none routes=8,2,8,8,1,8,8,8
+  choice 0 0 weight=50 action=skill:19
+  choice 0 1 weight=50 action=special:0
+  choice 1 0 weight=33 action=skill:19
+  choice 1 1 weight=33 action=special:0
+  choice 1 2 weight=34 action=skill:160
+  choice 2 0 weight=33 action=skill:48
+  choice 2 1 weight=33 action=special:0
+  choice 2 2 weight=34 action=special:1
+end
+
+enemy-ai 327 script=AI_JFrost
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=20 action=special:0
+  choice 0 1 weight=20 action=skill:14
+  choice 0 2 weight=20 action=skill:12
+  choice 0 3 weight=20 action=skill:350
+  choice 0 4 weight=20 action=special:0
+  choice 1 0 weight=25 action=special:0
+  choice 1 1 weight=25 action=skill:14
+  choice 1 2 weight=25 action=skill:12
+  choice 1 3 action=skill:350
+  choice 1 4 weight=25 action=special:0
+end
+
+enemy-ai 328 script=AI_JLantern
+  decision 0 predicates=43:13,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=10 action=special:0
+  choice 0 1 weight=20 action=skill:5
+  choice 0 2 weight=40 action=skill:2
+  choice 0 3 weight=30 action=skill:193
+  choice 1 0 action=special:0
+  choice 1 1 weight=30 action=skill:5
+  choice 1 2 weight=70 action=skill:2
+  choice 1 3 action=skill:176
+end
+
+enemy-ai 329
+  decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 1 weight=25 action=skill:126
+  choice 0 2 weight=25 action=skill:116
+  choice 0 3 weight=25 action=skill:130
+  choice 0 4 weight=25 action=skill:364
+  choice 1 1 weight=40 action=skill:126
+  choice 1 2 weight=30 action=skill:116
+  choice 1 3 weight=30 action=skill:130
+  choice 1 4 action=skill:364
+end
+
+enemy-ai 330 script=hito_goei2
+  decision 0 predicates=21:3,4:60,48:7 routes=2,2,3,3,1,2,3,8
+  choice 0 0 weight=25 action=skill:131
+  choice 0 1 weight=25 action=skill:138
+  choice 0 2 weight=25 action=skill:132
+  choice 0 3 weight=25 action=skill:125
+  choice 1 0 weight=100 action=skill:189
+  choice 2 0 weight=100 action=skill:173
+  choice 3 0 weight=50 action=skill:139
+  choice 3 1 weight=50 action=skill:140
+end
+
+enemy-ai 331 script=hito_goei2
+  decision 0 predicates=4:60,21:3,48:12 routes=3,3,3,8,3,1,2,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,1,8,8,8
+  choice 0 0 weight=5 action=skill:68
+  choice 0 1 weight=40 action=skill:190
+  choice 0 2 weight=30 action=skill:132
+  choice 0 3 weight=25 action=skill:3
+  choice 1 0 weight=100 action=skill:68
+  choice 1 1 action=skill:190
+  choice 1 2 action=skill:132
+  choice 1 3 action=skill:3
+  choice 2 0 weight=15 action=skill:68
+  choice 2 1 action=skill:190
+  choice 2 2 weight=55 action=skill:132
+  choice 2 3 weight=30 action=skill:3
+  choice 3 0 weight=100 action=skill:173
+end
+
+enemy-ai 332 script=hito_goei2
+  decision 0 predicates=4:30,none,48:12 routes=8,2,8,8,2,8,1,8
+  decision 1 predicates=none,none,none routes=8,8,8,8,2,8,8,8
+  choice 0 0 weight=30 action=skill:70
+  choice 0 1 weight=20 action=skill:137
+  choice 0 2 weight=20 action=skill:141
+  choice 0 3 weight=30 action=skill:190
+  choice 1 0 weight=40 action=skill:70
+  choice 1 1 weight=30 action=skill:137
+  choice 1 2 weight=30 action=skill:141
+  choice 1 3 action=skill:190
+  choice 2 0 weight=100 action=skill:173
+end
+
+enemy-ai 333 script=hito_goei
+  decision 1 predicates=2:50,21:3,4:60 routes=3,8,3,3,2,1,3,8
+  choice 0 0 weight=20 action=skill:24
+  choice 0 1 weight=20 action=skill:48
+  choice 0 2 weight=20 action=skill:76
+  choice 0 3 weight=40 action=skill:57
+  choice 1 0 action=skill:160 effect=1:0
+  choice 1 1 action=skill:19
+  choice 1 2 weight=100 action=skill:48
+  choice 1 3 action=special:0
+  choice 2 0 weight=20 action=skill:161 effect=1:0
+  choice 2 1 weight=40 action=skill:24
+  choice 2 2 weight=40 action=skill:57
+  choice 3 0 weight=100 action=skill:173
+end
+
+enemy-ai 334 script=hito_goei2
+  decision 1 predicates=48:12,4:30,none routes=8,2,8,8,1,2,8,8
+  choice 0 0 weight=20 action=skill:6
+  choice 0 1 weight=20 action=skill:24
+  choice 0 2 weight=20 action=skill:15
+  choice 0 3 weight=20 action=skill:178
+  choice 0 4 weight=20 action=skill:177
+  choice 1 0 weight=20 action=skill:6
+  choice 1 1 weight=40 action=skill:24
+  choice 1 2 weight=40 action=skill:15
+  choice 2 0 weight=100 action=skill:173
+end
+
+enemy-ai 335 script=hito_goei
+  decision 0 predicates=4:30,2:40,50:11 routes=3,3,3,1,3,2,1,8
+  choice 0 0 weight=20 action=skill:63
+  choice 0 1 weight=20 action=skill:181
+  choice 0 2 weight=20 action=skill:183
+  choice 0 3 weight=20 action=skill:182
+  choice 0 4 weight=20 action=skill:184
+  choice 1 0 weight=40 action=skill:63
+  choice 1 1 weight=50 action=skill:164 effect=1:0
+  choice 1 2 weight=10 action=skill:76
+  choice 2 0 weight=20 action=skill:164 effect=1:0
+  choice 2 1 weight=20 action=skill:181
+  choice 2 2 weight=20 action=skill:183
+  choice 2 3 weight=20 action=skill:182
+  choice 2 4 weight=20 action=skill:184
+  choice 3 0 weight=100 action=skill:173
+end
+
+enemy-ai 336
+  decision 0 predicates=48:12,42:506,1:99 routes=3,4,3,1,4,1,8,2
+  choice 0 0 weight=20 action=skill:6
+  choice 0 1 weight=20 action=skill:12
+  choice 0 2 weight=20 action=skill:177
+  choice 0 3 weight=20 action=skill:178
+  choice 0 4 weight=20 action=skill:165
+  choice 1 0 weight=70 action=skill:506
+  choice 1 1 weight=15 action=skill:3
+  choice 1 2 weight=15 action=skill:15
+  choice 2 0 weight=25 action=skill:6
+  choice 2 1 weight=25 action=skill:12
+  choice 2 2 weight=25 action=skill:177
+  choice 2 3 weight=25 action=skill:178
+  choice 2 4 action=skill:165
+  choice 3 0 weight=33 action=skill:6
+  choice 3 1 weight=33 action=skill:12
+  choice 3 2 action=skill:177
+  choice 3 3 action=skill:178
+  choice 3 4 weight=34 action=skill:165
+  choice 4 0 weight=50 action=skill:6
+  choice 4 1 weight=50 action=skill:12
+  choice 4 2 action=skill:177
+  choice 4 3 action=skill:178
+  choice 4 4 action=skill:165
+end
+
+enemy-ai 337
+  choice 0 0 weight=25 action=skill:131
+  choice 0 1 weight=25 action=skill:132
+  choice 0 2 weight=25 action=skill:138
+  choice 0 3 weight=25 action=special:0
+end
+
+enemy-ai 338 script=AI_Zin
+  choice 0 0 weight=100 action=skill:30
+end
+
+enemy-ai 339
+  decision 0 predicates=9:4,none,none routes=8,8,8,8,8,8,8,8
+  choice 0 0 weight=40 action=skill:11
+  choice 0 1 weight=20 action=skill:12
+  choice 0 2 weight=20 action=skill:16
+  choice 0 3 weight=20 action=skill:339
+  choice 1 0 weight=70 action=special:0 effect=2:4
+  choice 1 1 weight=30 action=skill:121 effect=2:4
+end
+
+enemy-ai 340
+  decision 0 predicates=36:0x1ffffe,5:2,9:4 routes=4,3,4,3,1,2,4,8
+  choice 0 0 weight=30 action=skill:11
+  choice 0 1 weight=10 action=skill:164
+  choice 0 2 weight=25 action=skill:337
+  choice 0 3 weight=35 action=preset:1:54
+  choice 0 4 action=special:0
+  choice 1 0 weight=40 action=skill:11
+  choice 1 1 weight=10 action=skill:164
+  choice 1 2 action=skill:337
+  choice 1 3 weight=40 action=preset:1:54
+  choice 1 4 weight=10 action=special:0
+  choice 2 0 weight=40 action=skill:11
+  choice 2 1 weight=10 action=skill:164
+  choice 2 2 weight=30 action=skill:337
+  choice 2 3 action=preset:1:54
+  choice 2 4 weight=20 action=special:0
+  choice 3 0 weight=50 action=skill:11
+  choice 3 1 weight=20 action=skill:164
+  choice 3 2 action=skill:337
+  choice 3 3 action=preset:1:54
+  choice 3 4 weight=30 action=special:0
+  choice 4 0 weight=100 action=special:0 effect=2:4
+end
+
+enemy-ai 341 script=ai_omoikane
+  decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,1,1,1,3,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=50 action=skill:190
+  choice 0 1 weight=50 action=special:1 effect=12:0
+  choice 1 0 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=20 action=skill:190
+  choice 2 1 weight=80 action=special:1 effect=12:0
+  choice 3 0 weight=10 action=skill:190
+  choice 3 1 weight=90 action=special:1 effect=12:0
+  choice 6 0 weight=100 action=skill:190
+end
+
+enemy-ai 342 script=ai_omoikane
+  decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,3,1,1,3,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=50 action=skill:190
+  choice 0 1 weight=50 action=special:1 effect=12:0
+  choice 1 0 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=20 action=skill:190
+  choice 2 1 weight=80 action=special:1 effect=12:0
+  choice 3 0 weight=10 action=skill:190
+  choice 3 1 weight=90 action=special:1 effect=12:0
+  choice 6 0 weight=100 action=skill:190
+end
+
+enemy-ai 343 script=ai_omoikane
+  decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,3,1,1,3,8
+  decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
+  choice 0 0 weight=50 action=skill:190
+  choice 0 1 weight=50 action=special:1 effect=12:0
+  choice 1 0 weight=100 action=special:1 effect=12:0
+  choice 2 0 weight=20 action=skill:190
+  choice 2 1 weight=80 action=special:1 effect=12:0
+  choice 3 0 weight=10 action=skill:190
+  choice 3 1 weight=90 action=special:1 effect=12:0
+  choice 6 0 weight=100 action=skill:190
+end

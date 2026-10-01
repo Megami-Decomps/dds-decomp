@@ -11,6 +11,9 @@ import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+import flw0
+import flw0_symbolic
+
 
 class BattleTableError(ValueError):
     """The binary or source is not a supported canonical battle table."""
@@ -336,6 +339,66 @@ class SkillTable:
 
 
 SKILL_ACTION_FORMAT = "<BBBBHHBBBBHHBBHBBHhHhhhHBBHIbBHIhh"
+
+
+@dataclass(frozen=True)
+class AiCalcProfile:
+    name: str
+    calculation_word_count: int
+    weighted_table_count: int
+
+
+AICALC_PROFILES = {
+    profile.name: profile
+    for profile in (
+        AiCalcProfile("dds1", 0xA6C // 4, 0),
+        AiCalcProfile("dds2", 0xC14 // 4, 32),
+    )
+}
+
+
+@dataclass(frozen=True)
+class AiOperation:
+    selector: int = 0
+    argument: int = 0
+
+
+@dataclass(frozen=True)
+class AiDecision:
+    predicates: tuple[AiOperation, ...] = (AiOperation(),) * 3
+    routes: tuple[int, ...] = (8,) * 8
+
+
+@dataclass(frozen=True)
+class AiChoice:
+    weight: int = 0
+    action: int = 0
+    effect: AiOperation = AiOperation()
+
+
+@dataclass(frozen=True)
+class EnemyAi:
+    flags: int = 0
+    script_procedure: int = 0
+    decisions: tuple[AiDecision, ...] = (AiDecision(),) * 3
+    groups: tuple[tuple[AiChoice, ...], ...] = ((AiChoice(),) * 5,) * 7
+    reserved: int = 0
+
+
+@dataclass(frozen=True)
+class WeightedValue:
+    value: int = 0
+    weight: int = 0
+
+
+@dataclass(frozen=True)
+class AiCalcTable:
+    profile: AiCalcProfile
+    enemies: tuple[EnemyAi, ...]
+    calculation_words: tuple[int, ...]
+    weighted_tables: tuple[tuple[WeightedValue, ...], ...]
+    ai_script: bytes
+    formula_script: bytes
 
 
 def default_zone(profile: EncountProfile) -> Zone:
@@ -1223,6 +1286,240 @@ def encode_skill(table: SkillTable) -> bytes:
     return _join_segments(tuple(segments))
 
 
+def _aicalc_profile_from_segments(segments: tuple[bytes, ...]) -> AiCalcProfile:
+    for profile in AICALC_PROFILES.values():
+        prefix = [0x20A00, profile.calculation_word_count * 4]
+        if profile.weighted_table_count:
+            prefix.append(profile.weighted_table_count * 0x20)
+        if (
+            len(segments) == len(prefix) + 2
+            and list(map(len, segments[: len(prefix)])) == prefix
+            and all(segment[8:12] == b"FLW0" for segment in segments[-2:])
+        ):
+            return profile
+    sizes = ", ".join(f"{len(segment):#x}" for segment in segments)
+    raise BattleTableError(f"unsupported AICALC segment sizes: {sizes}")
+
+
+def _decode_ai_operation(value: int) -> AiOperation:
+    return AiOperation(value >> 22, value & 0x3FFFFF)
+
+
+def _encode_ai_operation(operation: AiOperation, context: str) -> int:
+    selector = _range(operation.selector, 0, 0x3FF, f"{context} selector")
+    argument = _range(operation.argument, 0, 0x3FFFFF, f"{context} argument")
+    return selector << 22 | argument
+
+
+def decode_aicalc(data: bytes) -> AiCalcTable:
+    """Decode and validate a retail DDS1 or DDS2 ``AICALC.TBL``."""
+
+    segments = _split_segments(data)
+    profile = _aicalc_profile_from_segments(segments)
+    enemies = []
+    for enemy_id in range(384):
+        row = segments[0][enemy_id * 0x15C : (enemy_id + 1) * 0x15C]
+        decisions = []
+        for decision_index in range(3):
+            offset = 4 + decision_index * 0x14
+            decisions.append(
+                AiDecision(
+                    tuple(
+                        _decode_ai_operation(value)
+                        for value in struct.unpack_from("<3I", row, offset)
+                    ),
+                    tuple(row[offset + 0xC : offset + 0x14]),
+                )
+            )
+        groups = []
+        for group_index in range(7):
+            choices = []
+            for choice_index in range(5):
+                offset = 0x40 + (group_index * 5 + choice_index) * 8
+                weight, action, effect = struct.unpack_from("<HHI", row, offset)
+                choices.append(AiChoice(weight, action, _decode_ai_operation(effect)))
+            groups.append(tuple(choices))
+        enemies.append(
+            EnemyAi(
+                *struct.unpack_from("<HH", row),
+                tuple(decisions),
+                tuple(groups),
+                struct.unpack_from("<I", row, 0x158)[0],
+            )
+        )
+
+    calculation_words = struct.unpack(
+        f"<{profile.calculation_word_count}I", segments[1]
+    )
+    segment_index = 2
+    weighted_tables = []
+    if profile.weighted_table_count:
+        for table_index in range(profile.weighted_table_count):
+            offset = table_index * 0x20
+            weighted_tables.append(
+                tuple(
+                    WeightedValue(*struct.unpack_from("<HH", segments[2], offset + i * 4))
+                    for i in range(8)
+                )
+            )
+        segment_index += 1
+
+    ai_script = segments[segment_index]
+    formula_script = segments[segment_index + 1]
+    try:
+        flw0.parse(ai_script)
+        flw0.parse(formula_script)
+    except flw0.Flw0Error as exc:
+        raise BattleTableError(f"invalid embedded AICALC script: {exc}") from exc
+    return AiCalcTable(
+        profile,
+        tuple(enemies),
+        calculation_words,
+        tuple(weighted_tables),
+        ai_script,
+        formula_script,
+    )
+
+
+def encode_aicalc(table: AiCalcTable) -> bytes:
+    """Encode one AICALC model to its exact physical profile."""
+
+    profile = AICALC_PROFILES.get(table.profile.name)
+    if profile != table.profile:
+        raise BattleTableError(f"unknown or modified AICALC profile {table.profile.name!r}")
+    if len(table.enemies) != 384:
+        raise BattleTableError(f"AICALC needs 384 enemy rows, found {len(table.enemies)}")
+    if len(table.calculation_words) != profile.calculation_word_count:
+        raise BattleTableError(
+            f"AICALC needs {profile.calculation_word_count} calculation words, "
+            f"found {len(table.calculation_words)}"
+        )
+    if len(table.weighted_tables) != profile.weighted_table_count:
+        raise BattleTableError(
+            f"AICALC needs {profile.weighted_table_count} weighted tables, "
+            f"found {len(table.weighted_tables)}"
+        )
+    validate_aicalc_references(table)
+
+    enemy_data = bytearray(384 * 0x15C)
+    for enemy_id, enemy in enumerate(table.enemies):
+        context = f"enemy AI {enemy_id}"
+        if len(enemy.decisions) != 3:
+            raise BattleTableError(f"{context} needs three decisions")
+        if len(enemy.groups) != 7 or any(len(group) != 5 for group in enemy.groups):
+            raise BattleTableError(f"{context} needs seven groups of five choices")
+        row_offset = enemy_id * 0x15C
+        struct.pack_into(
+            "<HH",
+            enemy_data,
+            row_offset,
+            _u16(enemy.flags, f"{context} flags"),
+            _u16(enemy.script_procedure, f"{context} script procedure"),
+        )
+        for decision_index, decision in enumerate(enemy.decisions):
+            if len(decision.predicates) != 3 or len(decision.routes) != 8:
+                raise BattleTableError(f"{context} decision {decision_index} has invalid shape")
+            offset = row_offset + 4 + decision_index * 0x14
+            struct.pack_into(
+                "<3I",
+                enemy_data,
+                offset,
+                *(
+                    _encode_ai_operation(
+                        operation, f"{context} decision {decision_index} predicate"
+                    )
+                    for operation in decision.predicates
+                ),
+            )
+            enemy_data[offset + 0xC : offset + 0x14] = bytes(
+                _u8(route, f"{context} decision {decision_index} route")
+                for route in decision.routes
+            )
+        for group_index, group in enumerate(enemy.groups):
+            for choice_index, choice in enumerate(group):
+                offset = row_offset + 0x40 + (group_index * 5 + choice_index) * 8
+                choice_context = f"{context} group {group_index} choice {choice_index}"
+                struct.pack_into(
+                    "<HHI",
+                    enemy_data,
+                    offset,
+                    _u16(choice.weight, f"{choice_context} weight"),
+                    _u16(choice.action, f"{choice_context} action"),
+                    _encode_ai_operation(choice.effect, f"{choice_context} effect"),
+                )
+        struct.pack_into(
+            "<I",
+            enemy_data,
+            row_offset + 0x158,
+            _u32(enemy.reserved, f"{context} reserved"),
+        )
+
+    calculation_data = struct.pack(
+        f"<{profile.calculation_word_count}I",
+        *(_u32(value, "AICALC calculation word") for value in table.calculation_words),
+    )
+    segments: list[bytes] = [bytes(enemy_data), calculation_data]
+    if profile.weighted_table_count:
+        weighted_data = bytearray(profile.weighted_table_count * 0x20)
+        for table_index, weighted_table in enumerate(table.weighted_tables):
+            if len(weighted_table) != 8:
+                raise BattleTableError(f"weighted table {table_index} needs eight entries")
+            for entry_index, entry in enumerate(weighted_table):
+                struct.pack_into(
+                    "<HH",
+                    weighted_data,
+                    table_index * 0x20 + entry_index * 4,
+                    _u16(entry.value, f"weighted table {table_index} value"),
+                    _u16(entry.weight, f"weighted table {table_index} weight"),
+                )
+        segments.append(bytes(weighted_data))
+
+    scripts = []
+    for name, script in (("AI", table.ai_script), ("formula", table.formula_script)):
+        try:
+            scripts.append(flw0.parse(script).to_bytes())
+        except flw0.Flw0Error as exc:
+            raise BattleTableError(f"invalid {name} script: {exc}") from exc
+    segments.extend(scripts)
+    return _join_segments(tuple(segments))
+
+
+def validate_aicalc_references(table: AiCalcTable, skill: SkillTable | None = None) -> None:
+    """Validate AI procedure, skill, and weighted-table references."""
+
+    if skill is not None and table.profile.name != skill.profile.name:
+        raise BattleTableError(
+            f"cannot join {table.profile.name} AICALC with {skill.profile.name} SKILL"
+        )
+    try:
+        procedure_count = len(flw0.parse(table.ai_script).named_rows(0))
+    except flw0.Flw0Error as exc:
+        raise BattleTableError(f"invalid AI script: {exc}") from exc
+    for enemy_id, enemy in enumerate(table.enemies):
+        if enemy.script_procedure >= procedure_count:
+            raise BattleTableError(
+                f"enemy AI {enemy_id} references procedure {enemy.script_procedure} "
+                f"outside the AI script"
+            )
+        for group_index, group in enumerate(enemy.groups):
+            for choice_index, choice in enumerate(group):
+                if choice.weight == 0:
+                    continue
+                if choice.action < 0x1000 and skill is not None:
+                    if choice.action >= len(skill.action_attributes):
+                        raise BattleTableError(
+                            f"enemy AI {enemy_id} group {group_index} choice {choice_index} "
+                            f"references skill {choice.action} outside SKILL"
+                        )
+                elif choice.action & 0xF000 == 0x7000:
+                    weighted = choice.action & 0xFFF
+                    if weighted >= len(table.weighted_tables):
+                        raise BattleTableError(
+                            f"enemy AI {enemy_id} group {group_index} choice {choice_index} "
+                            f"references weighted table {weighted} outside AICALC"
+                        )
+
+
 def validate_encount_unit(encount: EncountTable, unit: UnitTable) -> None:
     """Validate encounter enemy IDs against the paired UNIT profile."""
 
@@ -1414,6 +1711,270 @@ def _parse_bits_or_float(
     if "value" in fields:
         return _float_bits(fields["value"], line_number, context)
     return _integer(fields["bits"], line_number, context)
+
+
+def _ai_operation(text: str, line_number: int, context: str) -> AiOperation:
+    if text == "none":
+        return AiOperation()
+    if ":" not in text:
+        raise BattleTableError(
+            f"line {line_number}: {context} needs SELECTOR:ARGUMENT or none"
+        )
+    selector_text, argument_text = text.split(":", 1)
+    return AiOperation(
+        _integer(selector_text, line_number, f"{context} selector"),
+        _integer(argument_text, line_number, f"{context} argument"),
+    )
+
+
+def _ai_operations(text: str, line_number: int) -> tuple[AiOperation, ...]:
+    values = tuple(
+        _ai_operation(value, line_number, "predicate") for value in text.split(",")
+    )
+    if len(values) != 3:
+        raise BattleTableError(f"line {line_number}: predicates needs three values")
+    return values
+
+
+def _ai_action(text: str, line_number: int) -> int:
+    if ":" not in text:
+        return _integer(text, line_number, "AI action")
+    parts = text.split(":")
+    kind = parts[0]
+    if kind == "skill" and len(parts) == 2:
+        return _integer(parts[1], line_number, "skill action")
+    if kind == "preset" and len(parts) == 3:
+        preset = _integer(parts[1], line_number, "action preset")
+        argument = _integer(parts[2], line_number, "action preset argument")
+        if not 1 <= preset <= 6 or not 0 <= argument <= 0xFFF:
+            raise BattleTableError(f"line {line_number}: invalid action preset")
+        return preset << 12 | argument
+    if kind == "weighted" and len(parts) == 2:
+        argument = _integer(parts[1], line_number, "weighted table")
+        if not 0 <= argument <= 0xFFF:
+            raise BattleTableError(f"line {line_number}: invalid weighted table")
+        return 0x7000 | argument
+    if kind == "special" and len(parts) == 2:
+        argument = _integer(parts[1], line_number, "special action")
+        if not 0 <= argument <= 0xFFF:
+            raise BattleTableError(f"line {line_number}: invalid special action")
+        return 0x8000 | argument
+    raise BattleTableError(f"line {line_number}: invalid AI action {text!r}")
+
+
+def _read_flw0_source(path: Path, kind: str) -> bytes:
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BattleTableError(f"cannot read {kind} script {path}: {exc}") from exc
+    try:
+        return flw0.parse_source(source).to_bytes()
+    except flw0.Flw0Error as exc:
+        raise BattleTableError(f"invalid {kind} script {path}: {exc}") from exc
+
+
+def parse_aicalc_source(text: str, source_dir: Path = Path(".")) -> AiCalcTable:
+    """Assemble AICALC source and its sibling FLW0 source files."""
+
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(text.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        raise BattleTableError("empty battle table source")
+    first_number, first_line = meaningful[0]
+    first = _tokens(first_line, first_number)
+    if len(first) != 4 or first[:2] != ["battle-table", "1"]:
+        raise BattleTableError(
+            "source must begin with 'battle-table 1 kind=aicalc profile=PROFILE'"
+        )
+    header = _fields(first[2:], first_number, {"kind", "profile"}, "header")
+    if header.get("kind") != "aicalc":
+        raise BattleTableError("AICALC source needs kind=aicalc")
+    try:
+        profile = AICALC_PROFILES[header["profile"]]
+    except KeyError as exc:
+        raise BattleTableError(f"unknown AICALC profile {header.get('profile')!r}") from exc
+
+    script_files: dict[str, tuple[int, str]] = {}
+    for line_number, line in meaningful[1:]:
+        tokens = _tokens(line, line_number)
+        if tokens[0] != "script":
+            continue
+        if len(tokens) < 3 or tokens[1] not in {"ai", "formula"}:
+            raise BattleTableError(f"line {line_number}: expected script ai|formula file=PATH")
+        fields = _fields(tokens[2:], line_number, {"file"}, "script")
+        if "file" not in fields:
+            raise BattleTableError(f"line {line_number}: script needs file=PATH")
+        if tokens[1] in script_files:
+            raise BattleTableError(f"line {line_number}: duplicate {tokens[1]} script")
+        script_files[tokens[1]] = (line_number, fields["file"])
+    if set(script_files) != {"ai", "formula"}:
+        raise BattleTableError("AICALC source needs one AI and one formula script")
+
+    ai_script = _read_flw0_source(source_dir / script_files["ai"][1], "AI")
+    formula_script = _read_flw0_source(
+        source_dir / script_files["formula"][1], "formula"
+    )
+    procedures = flw0.parse(ai_script).named_rows(0)
+    procedures_by_name = {row.name: row.row_index for row in procedures}
+    if len(procedures_by_name) != len(procedures):
+        raise BattleTableError("AI script has duplicate procedure names")
+
+    enemies = [EnemyAi() for _ in range(384)]
+    calculation_words = [0] * profile.calculation_word_count
+    weighted_tables = [
+        [WeightedValue() for _ in range(8)]
+        for _ in range(profile.weighted_table_count)
+    ]
+    seen_calculation_words: set[int] = set()
+    seen_enemies: set[int] = set()
+    seen_weighted_tables: set[int] = set()
+    source_index = 1
+    while source_index < len(meaningful):
+        line_number, line = meaningful[source_index]
+        tokens = _tokens(line, line_number)
+        directive = tokens[0]
+        if directive == "script":
+            source_index += 1
+            continue
+        if directive == "calculation-word":
+            if len(tokens) < 3:
+                raise BattleTableError(f"line {line_number}: calculation-word needs an offset")
+            offset = _integer(tokens[1], line_number, "calculation-word offset")
+            if offset & 3 or not 0 <= offset < profile.calculation_word_count * 4:
+                raise BattleTableError(f"line {line_number}: invalid calculation-word offset")
+            index = offset // 4
+            if index in seen_calculation_words:
+                raise BattleTableError(f"line {line_number}: duplicate calculation-word {offset:#x}")
+            seen_calculation_words.add(index)
+            fields = _fields(tokens[2:], line_number, {"value", "bits"}, directive)
+            calculation_words[index] = _parse_bits_or_float(fields, line_number, directive)
+            source_index += 1
+            continue
+        if directive == "weighted-table":
+            if len(tokens) != 2:
+                raise BattleTableError(f"line {line_number}: weighted-table needs an index")
+            table_index = _index(
+                tokens[1], line_number, profile.weighted_table_count, "weighted table index"
+            )
+            if table_index in seen_weighted_tables:
+                raise BattleTableError(f"line {line_number}: duplicate weighted-table {table_index}")
+            seen_weighted_tables.add(table_index)
+            seen_entries: set[int] = set()
+            source_index += 1
+            while source_index < len(meaningful):
+                child_number, child_line = meaningful[source_index]
+                child = _tokens(child_line, child_number)
+                if child == ["end"]:
+                    break
+                if len(child) < 2 or child[0] != "entry":
+                    raise BattleTableError(f"line {child_number}: expected weighted entry or end")
+                entry_index = _index(child[1], child_number, 8, "weighted entry index")
+                if entry_index in seen_entries:
+                    raise BattleTableError(f"line {child_number}: duplicate weighted entry")
+                seen_entries.add(entry_index)
+                fields = _fields(child[2:], child_number, {"value", "weight"}, "entry")
+                weighted_tables[table_index][entry_index] = WeightedValue(
+                    _value(fields, "value", 0, child_number),
+                    _value(fields, "weight", 0, child_number),
+                )
+                source_index += 1
+            else:
+                raise BattleTableError(f"line {line_number}: unterminated weighted-table")
+            source_index += 1
+            continue
+        if directive != "enemy-ai":
+            raise BattleTableError(f"line {line_number}: unknown directive {directive!r}")
+        if len(tokens) < 2:
+            raise BattleTableError(f"line {line_number}: enemy-ai needs an index")
+        enemy_id = _index(tokens[1], line_number, 384, "enemy AI index")
+        if enemy_id in seen_enemies:
+            raise BattleTableError(f"line {line_number}: duplicate enemy-ai {enemy_id}")
+        seen_enemies.add(enemy_id)
+        fields = _fields(tokens[2:], line_number, {"flags", "script", "reserved"}, directive)
+        procedure = 0
+        if "script" in fields:
+            try:
+                procedure = procedures_by_name[fields["script"]]
+            except KeyError as exc:
+                raise BattleTableError(
+                    f"line {line_number}: unknown AI procedure {fields['script']!r}"
+                ) from exc
+        decisions = [AiDecision() for _ in range(3)]
+        groups = [[AiChoice() for _ in range(5)] for _ in range(7)]
+        seen_decisions: set[int] = set()
+        seen_choices: set[tuple[int, int]] = set()
+        source_index += 1
+        while source_index < len(meaningful):
+            child_number, child_line = meaningful[source_index]
+            child = _tokens(child_line, child_number)
+            if child == ["end"]:
+                break
+            if child[0] == "decision":
+                if len(child) < 2:
+                    raise BattleTableError(f"line {child_number}: decision needs an index")
+                decision_index = _index(child[1], child_number, 3, "decision index")
+                if decision_index in seen_decisions:
+                    raise BattleTableError(f"line {child_number}: duplicate decision")
+                seen_decisions.add(decision_index)
+                child_fields = _fields(
+                    child[2:], child_number, {"predicates", "routes"}, "decision"
+                )
+                predicates = _ai_operations(
+                    child_fields.get("predicates", "none,none,none"), child_number
+                )
+                routes = _int_list(child_fields.get("routes", ""), child_number, "routes")
+                if len(routes) != 8:
+                    raise BattleTableError(f"line {child_number}: routes needs eight values")
+                decisions[decision_index] = AiDecision(predicates, routes)
+            elif child[0] == "choice":
+                if len(child) < 3:
+                    raise BattleTableError(
+                        f"line {child_number}: choice needs group and slot indices"
+                    )
+                group_index = _index(child[1], child_number, 7, "choice group")
+                choice_index = _index(child[2], child_number, 5, "choice slot")
+                key = (group_index, choice_index)
+                if key in seen_choices:
+                    raise BattleTableError(f"line {child_number}: duplicate choice")
+                seen_choices.add(key)
+                child_fields = _fields(
+                    child[3:], child_number, {"weight", "action", "effect"}, "choice"
+                )
+                if "action" not in child_fields:
+                    raise BattleTableError(f"line {child_number}: choice needs action=")
+                groups[group_index][choice_index] = AiChoice(
+                    _value(child_fields, "weight", 0, child_number),
+                    _ai_action(child_fields["action"], child_number),
+                    _ai_operation(child_fields.get("effect", "none"), child_number, "effect"),
+                )
+            else:
+                raise BattleTableError(f"line {child_number}: expected decision, choice, or end")
+            source_index += 1
+        else:
+            raise BattleTableError(f"line {line_number}: unterminated enemy-ai")
+        enemies[enemy_id] = EnemyAi(
+            _value(fields, "flags", 0, line_number),
+            procedure,
+            tuple(decisions),
+            tuple(tuple(group) for group in groups),
+            _value(fields, "reserved", 0, line_number),
+        )
+        source_index += 1
+
+    result = AiCalcTable(
+        profile,
+        tuple(enemies),
+        tuple(calculation_words),
+        tuple(tuple(table) for table in weighted_tables),
+        ai_script,
+        formula_script,
+    )
+    validate_aicalc_references(result)
+    encode_aicalc(result)
+    return result
 
 
 def parse_skill_source(text: str) -> SkillTable:
@@ -2439,6 +3000,113 @@ def render_skill_source(table: SkillTable) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _ai_operation_text(operation: AiOperation) -> str:
+    if operation == AiOperation():
+        return "none"
+    argument = (
+        f"{operation.argument:#x}" if operation.argument >= 0x1000 else str(operation.argument)
+    )
+    return f"{operation.selector}:{argument}"
+
+
+def _ai_action_text(action: int) -> str:
+    family = action & 0xF000
+    argument = action & 0xFFF
+    if family == 0:
+        return f"skill:{action}"
+    if 0x1000 <= family <= 0x6000:
+        return f"preset:{family >> 12}:{argument}"
+    if family == 0x7000:
+        return f"weighted:{argument}"
+    if family == 0x8000:
+        return f"special:{argument}"
+    return f"{action:#x}"
+
+
+def render_aicalc_source(
+    table: AiCalcTable,
+    ai_script_file: str = "aicalc-ai.bfasm",
+    formula_script_file: str = "aicalc-formulas.bfasm",
+) -> str:
+    """Render canonical AICALC table source with sibling script references."""
+
+    encode_aicalc(table)
+    validate_aicalc_references(table)
+    procedures = flw0.parse(table.ai_script).named_rows(0)
+    procedure_names = {row.row_index: row.name for row in procedures}
+    lines = [
+        f"battle-table 1 kind=aicalc profile={table.profile.name}",
+        "",
+        f"script ai file={ai_script_file}",
+        f"script formula file={formula_script_file}",
+        "",
+    ]
+
+    for index, bits in enumerate(table.calculation_words):
+        if bits == 0:
+            continue
+        text = _f32_text(bits)
+        if text is not None and 0.0001 <= abs(float(text)) <= 1000:
+            field = f"value={text}"
+        else:
+            field = f"bits={bits:#x}"
+        lines.append(f"calculation-word {index * 4:#x} {field}")
+
+    for table_index, weighted_table in enumerate(table.weighted_tables):
+        if not any(entry != WeightedValue() for entry in weighted_table):
+            continue
+        lines.extend(("", f"weighted-table {table_index}"))
+        for entry_index, entry in enumerate(weighted_table):
+            if entry == WeightedValue():
+                continue
+            fields = []
+            _append(fields, "value", entry.value)
+            _append(fields, "weight", entry.weight)
+            lines.append(f"  entry {entry_index} {' '.join(fields)}")
+        lines.append("end")
+
+    for enemy_id, enemy in enumerate(table.enemies):
+        if enemy == EnemyAi():
+            continue
+        fields = []
+        _append_hex(fields, "flags", enemy.flags)
+        if enemy.script_procedure:
+            try:
+                fields.append(f"script={procedure_names[enemy.script_procedure]}")
+            except KeyError as exc:
+                raise BattleTableError(
+                    f"enemy AI {enemy_id} references missing procedure "
+                    f"{enemy.script_procedure}"
+                ) from exc
+        _append_hex(fields, "reserved", enemy.reserved)
+        suffix = f" {' '.join(fields)}" if fields else ""
+        lines.extend(("", f"enemy-ai {enemy_id}{suffix}"))
+        for decision_index, decision in enumerate(enemy.decisions):
+            if decision == AiDecision():
+                continue
+            predicates = ",".join(
+                _ai_operation_text(operation) for operation in decision.predicates
+            )
+            routes = _list(decision.routes)
+            lines.append(
+                f"  decision {decision_index} predicates={predicates} routes={routes}"
+            )
+        for group_index, group in enumerate(enemy.groups):
+            for choice_index, choice in enumerate(group):
+                if choice == AiChoice():
+                    continue
+                choice_fields = []
+                _append(choice_fields, "weight", choice.weight)
+                choice_fields.append(f"action={_ai_action_text(choice.action)}")
+                if choice.effect != AiOperation():
+                    choice_fields.append(f"effect={_ai_operation_text(choice.effect)}")
+                lines.append(
+                    f"  choice {group_index} {choice_index} {' '.join(choice_fields)}"
+                )
+        lines.append("end")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _read(path: Path) -> bytes:
     try:
         return path.read_bytes()
@@ -2458,8 +3126,35 @@ def _write_text(path: Path, text: str) -> None:
 
 def _command_disassemble(args: argparse.Namespace) -> None:
     data = _read(args.input)
-    segment_count = len(_split_segments(data))
-    if segment_count == 6:
+    segments = _split_segments(data)
+    segment_count = len(segments)
+    if (
+        segment_count in {4, 5}
+        and len(segments[0]) == 0x20A00
+        and all(segment[8:12] == b"FLW0" for segment in segments[-2:])
+    ):
+        table = decode_aicalc(data)
+        ai_name = f"{args.output.stem}-ai.bfasm"
+        formula_name = f"{args.output.stem}-formulas.bfasm"
+        try:
+            ai_source = flw0_symbolic.render(
+                flw0.parse(table.ai_script),
+                f"{table.profile.name}-aicalc",
+                semantic=True,
+                structured=True,
+            )
+            formula_source = flw0_symbolic.render(
+                flw0.parse(table.formula_script),
+                f"{table.profile.name}-aicalc",
+                semantic=True,
+                structured=True,
+            )
+        except flw0.Flw0Error as exc:
+            raise BattleTableError(f"cannot render AICALC script source: {exc}") from exc
+        _write_text(args.output.parent / ai_name, ai_source)
+        _write_text(args.output.parent / formula_name, formula_source)
+        source = render_aicalc_source(table, ai_name, formula_name)
+    elif segment_count == 6:
         source = render_encount_source(decode_encount(data))
     elif segment_count == 5:
         source = render_unit_source(decode_unit(data))
@@ -2495,6 +3190,8 @@ def _command_assemble(args: argparse.Namespace) -> None:
         data = encode_unit(parse_unit_source(source))
     elif header.get("kind") == "skill":
         data = encode_skill(parse_skill_source(source))
+    elif header.get("kind") == "aicalc":
+        data = encode_aicalc(parse_aicalc_source(source, args.input.parent))
     else:
         raise BattleTableError(f"unsupported battle table kind {header.get('kind')!r}")
     _write_bytes(args.output, data)

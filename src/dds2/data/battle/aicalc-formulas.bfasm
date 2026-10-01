@@ -1,0 +1,597 @@
+flw0 2
+profile dds2-aicalc
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=35 float=4
+
+procedure calc_0 reserved=0x00000000
+procedure calc_MAXMG reserved=0x00000000
+procedure calc_MAXSP reserved=0x00000000
+procedure calc_BUTURI_HIT reserved=0x00000000
+procedure calc_BUTURI_CRITICAL reserved=0x00000000
+procedure calc_BUTURI_DAMAGE reserved=0x00000000
+procedure calc_CRITICAL_RATIO reserved=0x00000000
+procedure calc_BUTURI_DAMAGE_MG reserved=0x00000000
+procedure calc_MAGIC_HIT reserved=0x00000000
+procedure calc_MAGIC_DAMAGE reserved=0x00000000
+procedure calc_MAGIC_RECOVERY reserved=0x00000000
+procedure calc_HUNT_HIT reserved=0x00000000
+procedure calc_BAD_HIT reserved=0x00000000
+procedure calc_CURSE_STICK reserved=0x00000000
+procedure calc_BAT_RECOVERY reserved=0x00000000
+procedure calc_CHARM_RECOVERY reserved=0x00000000
+procedure calc_PANIC_RECOVERY reserved=0x00000000
+procedure calc_SLEEP_RECOVERY reserved=0x00000000
+procedure calc_BIND_RECOVERY reserved=0x00000000
+procedure calc_STONE_DEAD reserved=0x00000000
+procedure calc_ITEM_GET reserved=0x00000000
+procedure calc_ESCAPE reserved=0x00000000
+procedure calc_ENCOUNT_BASE reserved=0x00000000
+procedure calc_ENCOUNT reserved=0x00000000
+procedure calc_SURPRISE reserved=0x00000000
+procedure calc_GUN_DAMAGE reserved=0x00000000
+procedure calc_HUNT_RECOVERY reserved=0x00000000
+procedure calc_FEAR_HIT reserved=0x00000000
+procedure calc_ILTUSE_DAMAGE reserved=0x00000000
+procedure calc_GUNLKG_DAMAGE reserved=0x00000000
+procedure calc_MONEY_DROP reserved=0x00000000
+procedure calc_SHUCHU_DAMAGE reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _4 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _6 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _8 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _10 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _27 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _38 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _40 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _42 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _44 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _50 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _52 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _54 reserved=0x00000000
+jump_label _56 reserved=0x00000000
+jump_label _58 reserved=0x00000000
+jump_label _60 reserved=0x00000000
+jump_label _62 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _64 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _70 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _73 reserved=0x00000000
+jump_label _72 reserved=0x00000000
+jump_label _76 reserved=0x00000000
+jump_label _75 reserved=0x00000000
+jump_label _78 reserved=0x00000000
+jump_label _77 reserved=0x00000000
+jump_label _80 reserved=0x00000000
+jump_label _83 reserved=0x00000000
+jump_label _82 reserved=0x00000000
+jump_label _85 reserved=0x00000000
+jump_label _84 reserved=0x00000000
+jump_label _88 reserved=0x00000000
+jump_label _87 reserved=0x00000000
+jump_label _90 reserved=0x00000000
+jump_label _89 reserved=0x00000000
+jump_label _93 reserved=0x00000000
+jump_label _92 reserved=0x00000000
+jump_label _95 reserved=0x00000000
+jump_label _94 reserved=0x00000000
+
+code
+calc_0:
+  PROC calc_0
+  MESSAGE_REQUEST_AND_POLL(0)
+  return
+calc_MAXMG:
+  PROC calc_MAXMG
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[0] = CALC_SOURCE_LEVEL() * float32(4.0, bits=0x40800000) + CALC_SOURCE_STAT(1) * CALC_LEVEL_MAX_HP_FACTOR() + float32(10.0, bits=0x41200000)
+  } else {
+  _2:
+    local_int[0] = CALC_SOURCE_LEVEL() * float32(4.0, bits=0x40800000) + CALC_SOURCE_STAT(1) * CALC_LEVEL_MAX_HP_FACTOR()
+    goto _1
+  }
+_1:
+  CALC_SET_RESULT(local_int[0])
+  return
+calc_MAXSP:
+  PROC calc_MAXSP
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[1] = CALC_SOURCE_LEVEL() * float32(4.0, bits=0x40800000) + CALC_SOURCE_STAT(2) * CALC_LEVEL_MAX_MP_FACTOR() + float32(8.0, bits=0x41000000)
+  } else {
+  _4:
+    local_int[1] = CALC_SOURCE_LEVEL() * float32(4.0, bits=0x40800000) + CALC_SOURCE_STAT(2) * CALC_LEVEL_MAX_MP_FACTOR()
+    goto _3
+  }
+_3:
+  CALC_SET_RESULT(local_int[1])
+  return
+calc_BUTURI_HIT:
+  PROC calc_BUTURI_HIT
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[2] = CALC_ACTION_HIT_LEVEL() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(3) + float32(70.0, bits=0x428c0000)) / (CALC_TARGET_LEVEL() + CALC_TARGET_STAT(3) + float32(70.0, bits=0x428c0000))
+  } else {
+  _6:
+    local_int[2] = CALC_ACTION_HIT_LEVEL() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(3) + float32(70.0, bits=0x428c0000)) / (CALC_TARGET_LEVEL() + CALC_TARGET_STAT(3) + float32(70.0, bits=0x428c0000))
+    goto _5
+  }
+_5:
+  if (CALC_ACTION_HIT_LEVEL() + 20 < local_int[2]) {
+    local_int[2] = CALC_ACTION_HIT_LEVEL() + 20
+  } else {
+  _8:
+    if (CALC_ACTION_HIT_LEVEL() - 20 > local_int[2]) {
+      local_int[2] = CALC_ACTION_HIT_LEVEL() - 20
+    }
+  }
+_7:
+  if (local_int[2] < 1) {
+    local_int[2] = 1
+  } else {
+  _11:
+    if (local_int[2] > 100) {
+      local_int[2] = 99
+    }
+  }
+_10:
+  CALC_SET_RESULT(local_int[2])
+  return
+calc_BUTURI_CRITICAL:
+  PROC calc_BUTURI_CRITICAL
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[3] = CALC_ACTION_MAGIC_BASE() * CALC_SOURCE_STAT(4) / CALC_LEVEL_CRITICAL_FACTOR() * float32(1.0, bits=0x3f800000)
+  } else {
+  _14:
+    local_int[3] = CALC_ACTION_MAGIC_BASE() * CALC_SOURCE_STAT(4) / CALC_LEVEL_CRITICAL_FACTOR() * float32(0.800000011920929, bits=0x3f4ccccd)
+    goto _13
+  }
+_13:
+  if (local_int[3] > 35) {
+    local_int[3] = 35
+  }
+_15:
+  CALC_SET_RESULT(local_int[3])
+  return
+calc_BUTURI_DAMAGE:
+  PROC calc_BUTURI_DAMAGE
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[4] = (CALC_SOURCE_LEVEL() * float32(2.0, bits=0x40000000) + CALC_SOURCE_STAT(0) * float32(2.0, bits=0x40000000)) * CALC_ACTION_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+  } else {
+  _18:
+    local_int[4] = (CALC_SOURCE_LEVEL() * float32(2.0, bits=0x40000000) + CALC_SOURCE_STAT(0) * float32(2.0, bits=0x40000000)) * CALC_ACTION_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000)) * float32(0.5, bits=0x3f000000)
+    goto _17
+  }
+_17:
+  local_int[4] = local_int[4] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[4] = local_int[4] * CALC_RANDOM_SCALE(5)
+  if (local_int[4] < 0) {
+    local_int[4] = 0
+  } else {
+  _20:
+    if (local_int[4] > 9999) {
+      local_int[4] = 9999
+    }
+  }
+_19:
+  CALC_SET_RESULT(local_int[4])
+  return
+calc_CRITICAL_RATIO:
+  PROC calc_CRITICAL_RATIO
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[5] = 200
+  } else {
+  _23:
+    local_int[5] = 150
+    goto _22
+  }
+_22:
+  CALC_SET_RESULT(local_int[5])
+  return
+calc_BUTURI_DAMAGE_MG:
+  PROC calc_BUTURI_DAMAGE_MG
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[7] = (CALC_SOURCE_LEVEL() * float32(2.0, bits=0x40000000) + CALC_SOURCE_STAT(0) * float32(2.0, bits=0x40000000)) * CALC_ACTION_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+    local_int[6] = local_int[7] + local_int[7] / float32(4.0, bits=0x40800000) * CALC_SOURCE_HP() / CALC_SOURCE_MAX_HP()
+  } else {
+  _25:
+    local_int[7] = (CALC_SOURCE_LEVEL() * float32(2.0, bits=0x40000000) + CALC_SOURCE_STAT(0) * float32(2.0, bits=0x40000000)) * CALC_ACTION_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+    local_int[6] = (local_int[7] + local_int[7] / float32(4.0, bits=0x40800000) * CALC_SOURCE_HP() / CALC_SOURCE_MAX_HP()) * float32(0.5, bits=0x3f000000)
+    goto _24
+  }
+_24:
+  local_int[6] = local_int[6] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[6] = local_int[6] * CALC_RANDOM_SCALE(5)
+  if (local_int[6] < 0) {
+    local_int[6] = 0
+  } else {
+  _27:
+    if (local_int[6] > 9999) {
+      local_int[6] = 9999
+    }
+  }
+_26:
+  CALC_SET_RESULT(local_int[6])
+  return
+calc_MAGIC_HIT:
+  PROC calc_MAGIC_HIT
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[8] = CALC_ACTION_HIT_LEVEL() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2) + float32(100.0, bits=0x42c80000)) / (CALC_TARGET_LEVEL() + CALC_TARGET_STAT(3) + float32(100.0, bits=0x42c80000))
+  } else {
+  _30:
+    local_int[8] = CALC_ACTION_HIT_LEVEL() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2) + float32(100.0, bits=0x42c80000)) / (CALC_TARGET_LEVEL() + CALC_TARGET_STAT(3) + float32(100.0, bits=0x42c80000))
+    goto _29
+  }
+_29:
+  if (CALC_ACTION_HIT_LEVEL() + 20 < local_int[8]) {
+    local_int[8] = CALC_ACTION_HIT_LEVEL() + 20
+  } else {
+  _32:
+    if (CALC_ACTION_HIT_LEVEL() - 20 > local_int[8]) {
+      local_int[8] = CALC_ACTION_HIT_LEVEL() - 20
+    }
+  }
+_31:
+  if (local_int[8] < 1) {
+    local_int[8] = 1
+  } else {
+  _35:
+    if (local_int[8] > 100) {
+      local_int[8] = 99
+    }
+  }
+_34:
+  CALC_SET_RESULT(local_int[8])
+  return
+calc_MAGIC_DAMAGE:
+  PROC calc_MAGIC_DAMAGE
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[9] = CALC_ACTION_POWER() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2) + float32(20.0, bits=0x41a00000)) / (CALC_TARGET_STAT(2) + float32(5.0, bits=0x40a00000) + float32(20.0, bits=0x41a00000))
+  } else {
+  _38:
+    local_int[9] = CALC_ACTION_POWER() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2) + float32(20.0, bits=0x41a00000)) / (CALC_TARGET_STAT(2) + float32(5.0, bits=0x40a00000) + float32(20.0, bits=0x41a00000)) * float32(0.5, bits=0x3f000000) - 3
+    goto _37
+  }
+_37:
+  local_int[9] = local_int[9] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[9] = local_int[9] * CALC_RANDOM_SCALE(5)
+  if (local_int[9] < 0) {
+    local_int[9] = 0
+  } else {
+  _40:
+    if (local_int[9] > 9999) {
+      local_int[9] = 9999
+    }
+  }
+_39:
+  CALC_SET_RESULT(local_int[9])
+  return
+calc_MAGIC_RECOVERY:
+  PROC calc_MAGIC_RECOVERY
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[10] = CALC_ACTION_POWER() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2)) / (CALC_SOURCE_LEVEL() + CALC_ACTION_POWER() / float32(10.0, bits=0x41200000))
+  } else {
+  _43:
+    local_int[10] = CALC_ACTION_POWER() * (CALC_SOURCE_LEVEL() + CALC_SOURCE_STAT(2)) / (CALC_SOURCE_LEVEL() + CALC_ACTION_POWER() / float32(10.0, bits=0x41200000)) * float32(0.699999988079071, bits=0x3f333333)
+    goto _42
+  }
+_42:
+  local_int[10] = local_int[10] * CALC_RANDOM_SCALE(5)
+  if (local_int[10] < 0) {
+    local_int[10] = 0
+  } else {
+  _45:
+    if (local_int[10] > 9999) {
+      local_int[10] = 9999
+    }
+  }
+_44:
+  CALC_SET_RESULT(local_int[10])
+  return
+calc_HUNT_HIT:
+  PROC calc_HUNT_HIT
+  local_int[11] = CALC_ACTION_DEATH_TYPE() * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  if (local_int[11] > 95) {
+    local_int[11] = 95
+  }
+_47:
+  CALC_SET_RESULT(local_int[11])
+  return
+calc_BAD_HIT:
+  PROC calc_BAD_HIT
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[12] = CALC_ACTION_AILMENT_LEVEL() / float32(100.0, bits=0x42c80000) * (CALC_TARGET_ATTACK_AFFINITY() / float32(100.0, bits=0x42c80000) * float32(100.0, bits=0x42c80000)) * float32(1.0, bits=0x3f800000)
+  } else {
+  _50:
+    local_int[12] = CALC_ACTION_AILMENT_LEVEL() / float32(100.0, bits=0x42c80000) * (CALC_TARGET_ATTACK_AFFINITY() / float32(100.0, bits=0x42c80000) * float32(100.0, bits=0x42c80000)) * float32(0.699999988079071, bits=0x3f333333)
+    goto _49
+  }
+_49:
+  if (local_int[12] < 0) {
+    local_int[12] = 1
+  } else {
+  _52:
+    if (local_int[12] > 95) {
+      local_int[12] = 95
+    }
+  }
+_51:
+  CALC_SET_RESULT(local_int[12])
+  return
+calc_CURSE_STICK:
+  PROC calc_CURSE_STICK
+  local_int[13] = float32(70.0, bits=0x428c0000) - (CALC_SOURCE_STAT(4) / float32(2.0, bits=0x40000000) + float32(4.0, bits=0x40800000))
+  CALC_SET_RESULT(local_int[13])
+  return
+calc_BAT_RECOVERY:
+  PROC calc_BAT_RECOVERY
+  local_int[14] = float32(25.0, bits=0x41c80000)
+  if (local_int[14] > 70) {
+    local_int[14] = 70
+  }
+_54:
+  CALC_SET_RESULT(local_int[14])
+  return
+calc_CHARM_RECOVERY:
+  PROC calc_CHARM_RECOVERY
+  local_int[15] = float32(30.0, bits=0x41f00000) * CALC_SOURCE_STAT(4) / CALC_LEVEL_RECOVERY_FACTOR()
+  if (local_int[15] > 70) {
+    local_int[15] = 70
+  }
+_56:
+  CALC_SET_RESULT(local_int[15])
+  return
+calc_PANIC_RECOVERY:
+  PROC calc_PANIC_RECOVERY
+  local_int[16] = float32(30.0, bits=0x41f00000) * CALC_SOURCE_STAT(4) / CALC_LEVEL_RECOVERY_FACTOR()
+  if (local_int[16] > 70) {
+    local_int[16] = 70
+  }
+_58:
+  CALC_SET_RESULT(local_int[16])
+  return
+calc_SLEEP_RECOVERY:
+  PROC calc_SLEEP_RECOVERY
+  local_int[17] = float32(30.0, bits=0x41f00000) * CALC_SOURCE_STAT(4) / CALC_LEVEL_RECOVERY_FACTOR()
+  if (local_int[17] > 70) {
+    local_int[17] = 70
+  }
+_60:
+  CALC_SET_RESULT(local_int[17])
+  return
+calc_BIND_RECOVERY:
+  PROC calc_BIND_RECOVERY
+  local_int[18] = float32(60.0, bits=0x42700000) * CALC_SOURCE_STAT(4) / CALC_LEVEL_RECOVERY_FACTOR()
+  if (local_int[18] > 70) {
+    local_int[18] = 70
+  }
+_62:
+  CALC_SET_RESULT(local_int[18])
+  return
+calc_STONE_DEAD:
+  PROC calc_STONE_DEAD
+  local_int[19] = float32(80.0, bits=0x42a00000) * (CALC_LEVEL_RECOVERY_FACTOR() / CALC_SOURCE_STAT(4))
+  CALC_SET_RESULT(local_int[19])
+  return
+calc_ITEM_GET:
+  PROC calc_ITEM_GET
+  CALC_SET_RESULT(100)
+  return
+calc_ESCAPE:
+  PROC calc_ESCAPE
+  local_float[0] = CALC_GROUP_AVERAGE_HP(0)
+  local_float[1] = CALC_GROUP_AVERAGE_MAX_HP(0)
+  local_int[22] = (float32(60.0, bits=0x42700000) + float32(10.0, bits=0x41200000) * CALC_ESCAPE_BONUS_COUNTER()) * (CALC_SOURCE_STAT(3) + CALC_SOURCE_STAT(4) + 200) / (CALC_GROUP_AVERAGE_STAT(1, 3) * float32(2.0, bits=0x40000000) + 200) + (float32(50.0, bits=0x42480000) - float32(50.0, bits=0x42480000) * (local_float[0] / local_float[1]))
+  if (local_int[22] < 60) {
+    local_int[22] = 60
+  } else {
+  _65:
+    if (local_int[22] > 95) {
+      local_int[22] = 95
+    }
+  }
+_64:
+  CALC_SET_RESULT(local_int[22])
+  return
+calc_ENCOUNT_BASE:
+  PROC calc_ENCOUNT_BASE
+  CALC_SET_RESULT(370)
+  return
+calc_ENCOUNT:
+  PROC calc_ENCOUNT
+  local_int[23] = float32(65.0, bits=0x42820000) * (CALC_GROUP_AVERAGE_LEVEL(0) + CALC_GROUP_AVERAGE_STAT(0, 3)) / (CALC_GROUP_AVERAGE_LEVEL(1) + CALC_GROUP_AVERAGE_STAT(1, 3))
+  if (CALC_GROUP_AVERAGE_LEVEL(0) < CALC_GROUP_AVERAGE_LEVEL(1) + 3) {
+    local_int[23] = local_int[23] * CALC_ENCOUNTER_ZONE_FACTOR()
+  }
+_67:
+  if (local_int[23] < 60) {
+    local_int[23] = 60
+  } else {
+  _70:
+    if (local_int[23] > 85) {
+      local_int[23] = 85
+    }
+  }
+_69:
+  CALC_SET_RESULT(local_int[23])
+  return
+calc_SURPRISE:
+  PROC calc_SURPRISE
+  local_int[25] = float32(10.0, bits=0x41200000) * (float32(60.0, bits=0x42700000) * CALC_GROUP_AVERAGE_LEVEL(0) / float32(99.0, bits=0x42c60000) / CALC_GROUP_AVERAGE_STAT(0, 4))
+  if (local_int[25] < 3) {
+    local_int[25] = 3
+  } else {
+  _73:
+    if (local_int[25] > 20) {
+      local_int[25] = 20
+    }
+  }
+_72:
+  CALC_SET_RESULT(local_int[25])
+  return
+calc_GUN_DAMAGE:
+  PROC calc_GUN_DAMAGE
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[26] = CALC_SOURCE_ROSTER_BASE() * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+  } else {
+  _76:
+    local_int[26] = CALC_SOURCE_ROSTER_BASE() * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000)) * float32(0.4000000059604645, bits=0x3ecccccd)
+    goto _75
+  }
+_75:
+  local_int[26] = local_int[26] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[26] = local_int[26] * CALC_RANDOM_SCALE(5)
+  if (local_int[26] < 0) {
+    local_int[26] = 0
+  } else {
+  _78:
+    if (local_int[26] > 9999) {
+      local_int[26] = 9999
+    }
+  }
+_77:
+  CALC_SET_RESULT(local_int[26])
+  return
+calc_HUNT_RECOVERY:
+  PROC calc_HUNT_RECOVERY
+  local_float[2] = CALC_TARGET_LEVEL()
+  local_float[3] = CALC_SOURCE_LEVEL()
+  local_int[27] = float32(10.0, bits=0x41200000) * (local_float[2] / local_float[3])
+  if (local_int[27] > 20) {
+    local_int[27] = 20
+  }
+_80:
+  local_int[27] = local_int[27] * CALC_RANDOM_SCALE(5)
+  local_int[27] = CALC_SOURCE_MAX_HP() * local_int[27] / float32(100.0, bits=0x42c80000)
+  push 10
+  COMM 0x000a
+  PUSHREG
+  push 10
+  ADD
+  push local_int[27]
+  ADD
+  POPLIX 0x001b
+  CALC_SET_RESULT(local_int[27])
+  return
+calc_FEAR_HIT:
+  PROC calc_FEAR_HIT
+  local_int[28] = float32(100.0, bits=0x42c80000) * CALC_TARGET_HP_FINE_FACTOR() / float32(100.0, bits=0x42c80000)
+  CALC_SET_RESULT(local_int[28])
+  return
+calc_ILTUSE_DAMAGE:
+  PROC calc_ILTUSE_DAMAGE
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[29] = float32(15.0, bits=0x41700000) * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+  } else {
+  _83:
+    local_int[29] = float32(15.0, bits=0x41700000) * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000)) * float32(0.4000000059604645, bits=0x3ecccccd)
+    goto _82
+  }
+_82:
+  local_int[29] = local_int[29] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[29] = local_int[29] * float32(3.0, bits=0x40400000)
+  local_int[29] = local_int[29] * CALC_RANDOM_SCALE(5)
+  if (local_int[29] < 0) {
+    local_int[29] = 0
+  } else {
+  _85:
+    if (local_int[29] > 9999) {
+      local_int[29] = 9999
+    }
+  }
+_84:
+  CALC_SET_RESULT(local_int[29])
+  return
+calc_GUNLKG_DAMAGE:
+  PROC calc_GUNLKG_DAMAGE
+  call calc_GUN_DAMAGE
+  local_int[31] = CALC_CURRENT_RESULT()
+  call calc_MAGIC_DAMAGE
+  local_int[32] = CALC_CURRENT_RESULT()
+  local_int[30] = (local_int[31] + local_int[32]) * float32(1.100000023841858, bits=0x3f8ccccd)
+  CALC_SET_RESULT(local_int[30])
+  return
+calc_MONEY_DROP:
+  PROC calc_MONEY_DROP
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[33] = float32(0.10000000149011612, bits=0x3dcccccd) * CALC_MONEY_BASE() * CALC_MONEY_LEVEL_FACTOR()
+  } else {
+  _88:
+    local_int[33] = CALC_MONEY_BASE() * (CALC_GROUP_AVERAGE_STAT(0, 4) / (float32(4.0, bits=0x40800000) + CALC_GROUP_AVERAGE_LEVEL(0) / float32(5.0, bits=0x40a00000)))
+    goto _87
+  }
+_87:
+  local_int[33] = local_int[33] * CALC_RANDOM_SCALE(10)
+  if (local_int[33] > CALC_MONEY_BASE()) {
+    local_int[33] = CALC_MONEY_BASE()
+  } else {
+  _90:
+    if (local_int[33] <= 0) {
+      local_int[33] = 1
+    }
+  }
+_89:
+  CALC_SET_RESULT(local_int[33])
+  return
+calc_SHUCHU_DAMAGE:
+  PROC calc_SHUCHU_DAMAGE
+  if (CALC_SOURCE_FLAG_20_CLEAR()) {
+    local_int[34] = float32(15.0, bits=0x41700000) * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000))
+  } else {
+  _93:
+    local_int[34] = float32(15.0, bits=0x41700000) * CALC_SOURCE_ATTACK_POWER() / (float32(16.5, bits=0x41840000) + CALC_TARGET_LEVEL() / float32(10.0, bits=0x41200000) + CALC_TARGET_STAT(1) / float32(10.0, bits=0x41200000)) * float32(0.4000000059604645, bits=0x3ecccccd)
+    goto _92
+  }
+_92:
+  local_int[34] = local_int[34] * (CALC_TARGET_ACTION_AFFINITY() / float32(100.0, bits=0x42c80000))
+  local_int[34] = local_int[34] * float32(2.0, bits=0x40000000)
+  local_int[34] = local_int[34] * CALC_RANDOM_SCALE(5)
+  if (local_int[34] < 0) {
+    local_int[34] = 0
+  } else {
+  _95:
+    if (local_int[34] > 9999) {
+      local_int[34] = 9999
+    }
+  }
+_94:
+  CALC_SET_RESULT(local_int[34])
+  return
+end
+
+messages
+end
+
+strings
+  zero 240
+end
