@@ -198,21 +198,21 @@ void mnuCampDestroyAllTasks(void) {
 
 typedef struct ScrollNode {
     u16 pos;                  /* 0x0 */
-    u8 unk2[0x2E];            /* 0x2 */
+    u8 pad02[0x2E];           /* 0x2 */
     struct ScrollNode *next;  /* 0x30 */
 } ScrollNode;
 
 typedef struct ScrollList {
-    u8 unk0[0x1C];
+    u8 pad00[0x1C];
     s16 base;                 /* 0x1C */
-    u8 unk1E[0x36];
+    u8 pad1E[0x36];
     ScrollNode *nodes;        /* 0x54 */
 } ScrollList;
 
 typedef struct ScrollOwner {
-    u8 unk0[0xC];
+    u8 pad00[0xC];
     s32 limit;                /* 0xC */
-    u8 unk10[0x22F8];
+    u8 pad10[0x22F8];
     ScrollList *list;         /* 0x2308 */
 } ScrollOwner;
 
@@ -707,7 +707,7 @@ void func_0025EF10(CampScene *scene) {
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EFD8);
 
 typedef struct BufferDescriptor {
-    u8 unk0[0x10];
+    u8 pad00[0x10];
     void (*open)(struct BufferDescriptor *, s32);
 } BufferDescriptor;
 
@@ -1046,19 +1046,19 @@ typedef struct ShopWindowState {
 } ShopWindowState;
 
 typedef struct ShopBuf {
-    u8 unk0[0x1C];
+    u8 pad00[0x1C];
     ShopWindowState *state; /* 0x1C */
     u8 pad20[0x10];
     void *buffer;           /* 0x30 */
 } ShopBuf;
 
 typedef struct ShopSprite {
-    u8 unk0[0x18];
+    u8 pad00[0x18];
     ShopBuf *data;   /* 0x18 */
 } ShopSprite;
 
 typedef struct ShopScene {
-    u8 unk0[0x7C];
+    u8 pad00[0x7C];
     ShopSprite *sprites[1]; /* 0x7C */
     ShopSprite *extra;      /* 0x80 */
     u8 pad84[0xC];
