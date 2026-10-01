@@ -131,7 +131,102 @@ void effEventBindEffect(EffEventWork *work, void *value) {
     effEventCopyFileRecordHeader(work->owner, work->initBlock);
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_001908A0);
+typedef struct EffAimSource {
+    f32 pos[4];           /* 0x00 */
+    f32 rot[4];           /* 0x10 */
+    f32 range;            /* 0x20 */
+    f32 height;           /* 0x24 */
+} EffAimSource;
+
+typedef struct EffAimParams {
+    u8 pad0;
+    u8 mode;              /* 0x01 */
+    u8 sub;               /* 0x02 */
+    u8 pad3;
+    s32 range;            /* 0x04 */
+} EffAimParams;
+
+extern f32 D_003563A0[];
+extern f32 D_003563B8[];
+extern u8 D_00324690[];
+extern u8 D_003246A0[];
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern void sdfInvertRigidVuTransform(void);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void func_002DD968(f32 angle);
+extern void sdfComposeVuMatrixFromRegisters(void);
+
+/* vu0 routine: vf10 = the aimed offset point computed from the source and parameters */
+void func_001908A0(EffAimSource *src, EffAimParams *param) {
+    f32 out[4];
+    f32 dir[4];
+    f32 pos[4];
+    f32 radius;
+    f32 half;
+    f32 y;
+    s32 range = param->range;
+    u8 sub = param->sub;
+    u8 mode = param->mode;
+
+    if (range == 0) {
+        radius = src->range;
+    } else {
+        radius = (f32)range;
+    }
+    half = src->height * 0.5f;
+    PCP_COPY_VECTOR(pos, src->pos);
+    if (mode == 5) {
+        if (sub == 8 || sub == 10) {
+            y = -1.0f;
+            if (range != 0) {
+                y = -radius;
+            }
+        } else {
+            y = -1.0f;
+        }
+    } else {
+        y = pos[1] - D_003563A0[mode] * half;
+        if (sub == 8 || sub == 10) {
+            if (range != 0) {
+                y -= radius;
+            }
+        }
+    }
+    if (sub == 9 || mode == 4) {
+        dir[2] = half < radius ? -radius : -half;
+        dir[0] = dir[1] = 0.0f;
+        pos[1] = y;
+        sdfVuBuildLookAtBasis(pos, D_00324690, D_003246A0);
+        sdfInvertRigidVuTransform();
+        VU0_LOAD_VF(vf10, dir);
+        VU0_CLEAR_W(vf10);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, pos);
+        VU0_ADD(vf10, vf10, vf11);
+        return;
+    }
+    if (sub == 8 || sub == 10) {
+        out[0] = pos[0];
+        out[1] = y;
+        out[2] = pos[2];
+    } else {
+        dir[0] = 0.0f;
+        dir[2] = 1.0f;
+        dir[1] = 0.0f;
+        VU0_LOAD_VF(vf10, src->rot);
+        effMiscQuaternionToMatrixVU();
+        func_002DD968(D_003563B8[sub]);
+        sdfComposeVuMatrixFromRegisters();
+        VU0_LOAD_VF(vf10, dir);
+        VU0_CLEAR_W(vf10);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, dir);
+        out[0] = pos[0] + radius * dir[0];
+        out[1] = y + radius * dir[1];
+        out[2] = pos[2] + radius * dir[2];
+    }
+    VU0_LOAD_VF(vf10, out);
+}
 
 /* 0x7C-byte parameter block; the counters at 0x18/0x2C/0x30 are clamped to at least 1 on create/clone. */
 typedef struct {

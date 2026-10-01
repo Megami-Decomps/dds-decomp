@@ -368,7 +368,81 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109780);
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109950);
+typedef struct EvtQuadDesc {
+    s16 kind;
+    s16 count;
+    u8 pad4[4];
+    s32 color;
+    u64 *strip;
+    f32 *verts;
+    u8 pad14[4];
+    f32 *uvs;
+    u8 pad1C[4];
+    s32 *indices;
+    u8 pad24[8];
+} EvtQuadDesc; /* 0x2C bytes */
+
+extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
+extern void sdfConsAppendClearPacket(void *, s32);
+extern void sdfConsAppendAssetPacket(void *, void *, s32);
+extern void *func_0033B050(EvtQuadDesc *);
+extern void func_003332E8(void *, u32);
+extern void sdfQueueAssetRelease(void *);
+
+void func_00109950(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
+    EvtQuadDesc desc;
+    f32 verts[16];
+    s32 indices[4];
+    u64 strip[2];
+    f32 uvs[8];
+    void *asset;
+    void *list;
+    EvtDrawSurface *surface;
+
+    asset = sdfCreateAssetWithDrawEntries();
+    func_003332E8(asset, bits);
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, asset, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.kind = 2;
+    desc.count = 4;
+    desc.verts = verts;
+    desc.indices = indices;
+    desc.strip = strip;
+    desc.uvs = uvs;
+    verts[0] = x0;
+    verts[1] = y0;
+    verts[2] = z0;
+    verts[4] = x2;
+    verts[5] = y2;
+    verts[6] = z2;
+    verts[8] = x3;
+    verts[9] = y3;
+    verts[10] = z3;
+    verts[12] = x1;
+    verts[13] = y1;
+    verts[14] = z1;
+    indices[0] = i0;
+    indices[1] = i2;
+    indices[2] = i3;
+    indices[3] = i1;
+    strip[0] = D_0037F5A0[0];
+    uvs[0] = u0;
+    uvs[1] = v0;
+    uvs[2] = u0;
+    uvs[3] = v1;
+    uvs[4] = u1;
+    uvs[5] = v1;
+    uvs[6] = u1;
+    uvs[7] = v0;
+    sdfAppendPacket(list, func_0033B050(&desc));
+    surface = &D_0037FB48[D_00435CB8];
+    surface->submit(surface, list);
+    sdfQueueAssetRelease(asset);
+}
 
 void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     void *list;

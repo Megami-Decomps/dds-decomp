@@ -116,6 +116,9 @@ typedef struct EvtUnit {
     u8 pad1B4[8];     /* 0x1b4 */
     s16 transitionElapsed; /* 0x1bc */
     s16 transitionDuration; /* 0x1be */
+    f32 speedY;        /* 0x1c0 */
+    s16 stepCount;     /* 0x1c4 */
+    u8 pad1C6[10];    /* 0x1c6 */
 } EvtUnit;
 
 extern void sdfStepWrappingFloatCounter(s32 path);
@@ -493,7 +496,51 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D360);
+typedef struct EvtEffVecs {
+    u8 pad00[0x40];
+    f32 pos[4];
+    f32 dir[4];
+} EvtEffVecs;
+
+extern s32 func_0023B1E8(EvtUnit *unit);
+extern void func_0035B6E0(const char *fmt, ...);
+
+/* Run a copy of the unit until func_0023B1E8 reports done, and derive its per-step Y speed. */
+s32 func_0023D360(EvtUnit *unit) {
+    EvtUnit copy;
+    f32 delta[4];
+    f32 savedA[4];
+    f32 savedB[4];
+    s32 count = 0;
+    s32 i;
+    for (i = 0; i < 4; i++) {
+        savedA[i] = ((EvtEffVecs *)unit->effObj->data)->pos[i];
+        savedB[i] = ((EvtEffVecs *)unit->effObj->data)->dir[i];
+    }
+    copy = *unit;
+    while (func_0023B1E8(&copy) == 0) {
+        count++;
+        evtApplyUnitDirectionOffset(&copy);
+    }
+    for (i = 0; i < 4; i++) {
+        ((EvtEffVecs *)unit->effObj->data)->pos[i] = savedA[i];
+        ((EvtEffVecs *)unit->effObj->data)->dir[i] = savedB[i];
+    }
+    if (count == 0) {
+        func_0035B6E0("ymove frameno = 0\n");
+        unit->stepCount = 0;
+        unit->speedY = 0;
+        return 0;
+    }
+    VU0_LOAD_VF(vf10, unit->vec70);
+    VU0_LOAD_VF(vf11, unit->effObj->data + 0x40);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, delta);
+    unit->stepCount = count;
+    unit->speedY = delta[1] / (f32)count;
+    func_0035B6E0("ymove frameno = %d addvalue = %f total yzahyo=%f\n", count, unit->speedY, delta[1]);
+    return count;
+}
 
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];

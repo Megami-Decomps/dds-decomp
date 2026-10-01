@@ -407,7 +407,100 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C6B0);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C7F0);
+typedef struct EvtViewCmd {
+    s32 kind;           /* 0x0 */
+    u8 pad04[0x10];
+    s32 arg;            /* 0x14 */
+    u8 pad18[6];
+    s8 plain;           /* 0x1E */
+} EvtViewCmd;
+
+typedef struct EvtViewParams {
+    u16 word;           /* 0x0 */
+    u8 pad02[7];
+    s8 unk9;            /* 0x9 */
+    u8 pad0A[2];
+    union {
+        s8 names[4];    /* 0xC */
+        struct {
+            s8 flag;    /* 0xC */
+            s8 type;    /* 0xD */
+            s16 value;  /* 0xE */
+        } a;
+    } u;
+} EvtViewParams;
+
+extern void effObjSetFlags(s32 obj, s32 flags);
+extern s32 func_00114F60(s32 arg, f32 *vec0, f32 *vec1);
+extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
+extern s32 func_00115840(s32 mode, s32 arg);
+extern void func_00115970(s32 obj);
+extern s32 func_001159E8(s32 obj, s32 a, s32 b, s32 c, s32 d);
+extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
+
+/* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
+s32 func_0022C7F0(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
+    f32 vec0[4];
+    f32 vec1[4];
+    s32 handle = 0;
+    s32 slot;
+    s32 n0;
+    s32 n1;
+    s32 n2;
+
+    memset(vec0, 0, 0x10);
+    memset(vec1, 0, 0x10);
+    vec1[3] = 1.0f;
+    for (slot = 0; slot < 0x7F; slot++) {
+        if (viewer->slots[slot] == NULL) {
+            break;
+        }
+    }
+    if (slot == 0x7F) {
+        return -1;
+    }
+    switch (cmd->kind) {
+    case 3:
+    case 0x1A:
+        if (cmd->kind == 3) {
+            handle = func_00114F60(cmd->arg, vec0, vec1);
+        } else {
+            handle = func_001150B0(cmd->arg, vec0, vec1);
+        }
+        if (params->u.a.flag != 0) {
+            func_00115970(handle);
+        }
+        if (cmd->plain == 0) {
+            func_0022C6B0(handle, params->u.a.value, params->u.a.type, params->word, viewer);
+        } else {
+            func_0022C6B0(handle, params->u.a.value, params->u.a.type, 0, viewer);
+        }
+        break;
+    case 0x14:
+    case 0x15:
+        switch (cmd->kind) {
+        case 0x14:
+            handle = func_00115840(1, cmd->arg);
+            break;
+        case 0x15:
+            handle = func_00115840(2, cmd->arg);
+            break;
+        }
+        n0 = evtEventViewerGetNameObject(params->u.names[0], viewer);
+        n1 = evtEventViewerGetNameObject(params->u.names[1], viewer);
+        n2 = evtEventViewerGetNameObject(params->u.names[2], viewer);
+        func_001159E8(handle, n0, n1, n2, evtEventViewerGetNameObject(params->u.names[3], viewer));
+        if (params->unk9 != 0) {
+            func_00115970(handle);
+        }
+        break;
+    }
+    viewer->slots[slot] = (void *)handle;
+    if (handle != 0) {
+        effObjSetFlags(handle, 1);
+    }
+    return slot;
+}
 
 void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
 {
