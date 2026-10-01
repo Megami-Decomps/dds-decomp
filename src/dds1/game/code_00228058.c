@@ -40,6 +40,8 @@ extern void func_00129900(s32 arg);
 extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 extern u32 D_003BA904;
 extern s32 scrGetCommandTimer(void);
+s32 evtPreloadBgm(s32 id);
+s32 evtIsBgmLoaded(s32 id);
 
 void func_0022AB00(s32 arg0);
 
@@ -162,7 +164,19 @@ u32 evtHideSky(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00228058", func_00228408);
+u32 func_00228408(void) {
+    s32 id;
+
+    if (scrGetCommandTimer() == 0) {
+        evtPreloadBgm(scrReadIntParameter(0));
+    } else {
+        id = scrReadIntParameter(0);
+        if (evtIsBgmLoaded(id) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 u32 evtOpcodePlayBgm(void) {
     u64 id;
