@@ -67,7 +67,34 @@ INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0B50);
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0BF8);
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0C68);
+extern s32 func_002D03F8(s32 size);
+extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
+extern u8 D_003E2770[];
+
+s32 func_002D0C68(char *name, s32 dataSize, void *data, s32 *outSize) {
+    u8 buffer[0x50];
+    s32 nameLength = strlen(name);
+    s32 total = nameLength + dataSize + 0xC;
+    u32 *block = (u32 *)sdfResourceRetainAddress((SdfResource *)func_002D03F8(total));
+    u32 *reply;
+    s32 result;
+
+    block[0] = nameLength;
+    block[1] = dataSize;
+    memcpy(block + 2, name, nameLength + 1);
+    if (dataSize != 0) {
+        memcpy((u8 *)block + nameLength + 9, data, dataSize);
+    }
+    reply = (u32 *)(((u32)buffer + 0x3F) & ~0x3F);
+    result = func_002F4FD8(D_003E2770, 1, 0, block, total, reply, 8, 0, 0);
+    if (result >= 0) {
+        if (outSize != NULL) {
+            *outSize = reply[1];
+        }
+        result = reply[0];
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0D70);
 
