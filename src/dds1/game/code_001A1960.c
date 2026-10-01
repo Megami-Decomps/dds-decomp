@@ -6309,7 +6309,84 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A40);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A50);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlEvalTaskCondition);
+/* A battle task start condition: `kind` selects what is looked up and how its presence or state is tested. */
+typedef struct TaskCondition {
+    u8 kind;           /* 0x00 */
+    u8 pad01[7];
+    union {
+        s32 count;     /* kind 2: threshold the value must reach */
+        s64 handle;    /* kinds 3-5: task handle */
+        s64 owner;     /* kinds 6-8: task owner */
+        u16 taskKind;  /* kinds 9-10: task kind */
+    } value;           /* 0x08 */
+} TaskCondition;
+
+s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
+    s32 result = 0;
+    s32 task;
+
+    switch (condition->kind) {
+    case 0:
+        break;
+    case 1:
+        result = 1;
+        break;
+    case 2:
+        if (!(value < condition->value.count)) {
+            result = 1;
+        }
+        break;
+    case 3:
+        if (btlFindTaskByHandle(condition->value.handle) != 0) {
+            result = 1;
+        }
+        break;
+    case 4:
+        if (btlFindTaskByHandle(condition->value.handle) == 0) {
+            result = 1;
+        }
+        break;
+    case 5:
+        task = btlFindTaskByHandle(condition->value.handle);
+        if (task != 0) {
+            if (*(u16 *)(task + 0x22) == 2) {
+                result = 1;
+            }
+        } else {
+            result = 1;
+        }
+        break;
+    case 6:
+        if (btlFindTaskByOwner(condition->value.owner) != 0) {
+            result = 1;
+        }
+        break;
+    case 7:
+        if (btlFindTaskByOwner(condition->value.owner) == 0) {
+            result = 1;
+        }
+        break;
+    case 8:
+        task = btlFindTaskByOwner(condition->value.owner);
+        if (task != 0) {
+            if (*(u16 *)(task + 0x22) == 2) {
+                result = 1;
+            }
+        } else {
+            result = 1;
+        }
+        break;
+    case 9:
+        if (btlFindTaskByKind(condition->value.taskKind) != 0) {
+            result = 1;
+        }
+        break;
+    case 10:
+        result = btlFindTaskByKind(condition->value.taskKind) == 0;
+        break;
+    }
+    return result;
+}
 
 void *btlAllocTask(s32 size) {
     u8 *task = sdfAllocAndClearQuadwords(size + 0x70);
@@ -8369,12 +8446,12 @@ u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f3
 
 extern void func_001DB048(s32, s32, s32, s32, s32);
 
-extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 s32 btlApplyEffectCameraKeyframes(f32 *args) {
     s32 context = btlGetRuntime();
     func_001DB048(1, *(s32 *)args, 0, 0, 0);
-    btlSetEffectCameraKeys(context + 0x70, args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
+    btlSetEffectCameraKeys((u8 *)(context + 0x70), args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
                   args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
     return 1;
 }
@@ -8503,11 +8580,11 @@ void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 v
     *(f32 *)(object + 0x24) = scale * 0.017453293f;
 }
 
-void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f32 vz0, f32 vw0,
+void btlSetEffectCameraKeys(u8 *fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f32 vz0, f32 vw0,
                             f32 x1, f32 y1, f32 z1, f32 vx1, f32 vy1, f32 vz1, f32 vw1,
                             f32 scale, f32 f154) {
-    btlInitMotionTransformFromComponents((u8 *)fx + 0x30, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
-    btlInitMotionTransformFromComponents((u8 *)fx + 0xC0, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
+    btlInitMotionTransformFromComponents(fx + 0x30, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
+    btlInitMotionTransformFromComponents(fx + 0xC0, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
     *(f32 *)(fx + 0x130) = f154;
     *(u32 *)(fx + 0xF0) |= 0x41;
 }

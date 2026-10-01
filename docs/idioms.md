@@ -313,6 +313,16 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   (`func_002D62D8`).
 - `size = a + b; size += c; size += d;` preserves each add in retail
   order, where one sum expression gets reassociated (`func_0029A5E0`).
+- Order of independent stores after a call: when two stores have the same
+  priority (e.g. `li $3,1; sw $3,4(p)` and `sw $2,8(p)` where `$2` is the
+  call result), sched1 breaks the tie towards the LATER source statement.
+  To get `sw 4; sw 8` in the asm, write `state->fileHandle = h;` first and
+  `state->loaded = 1;` second (`func_00242340` / DDS2 `func_0025D758`; the
+  natural order gave `sw 8; sw 4`). The rule only applies to equal
+  priority: a store fed by a constant that needs `lui/ori` or `lui/mtc1`
+  has a longer chain and is emitted first regardless of order, and moving a
+  statement also changes the live ranges seen by global alloc (sched1 runs
+  before it), so callee-saved assignments can shift (DDS1 `func_00183EE0`).
 
 ## Pointer and loop addressing
 
