@@ -322,7 +322,24 @@ void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
     item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00119728);
+extern void evtRandomizeEntryValue();
+
+/* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
+void func_00119728(SdfPackedValue *item, u32 value) {
+    s32 channel;
+
+    if ((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < value) {
+        item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
+        channel = item->flagsAndValue & SDF_PACKED_VALUE_MASK;
+        switch (channel) {
+        case 0x40:
+        case 0x80:
+        case 0x400:
+            evtRandomizeEntryValue(item);
+            break;
+        }
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DB0);
 

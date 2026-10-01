@@ -45,8 +45,8 @@ struct MenuActionOwner {
     u8 pad00[0x30];
     MenuAction *action;
     u8 pad34[0x88];
-    u32 counter;
-    u32 valueC0;
+    s32 frames;           /* 0xBC */
+    s32 mode;             /* 0xC0: command phase */
 };
 
 typedef struct MenuIconRef {
@@ -126,15 +126,42 @@ void func_00297220(MenuActionOwner *owner, u32 value) {
 }
 
 void mnuSetCommandPhase(MenuActionOwner *owner, u32 value) {
-    owner->valueC0 = value;
-    owner->counter = 0;
+    owner->mode = value;
+    owner->frames = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297250);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297898);
+/* Phase machine of the menu command: phases 4, 5 and 8 wait ten frames before reporting themselves, 6 and 7 report at once. */
+s32 func_00297898(MenuActionOwner *work) {
+    switch (work->mode) {
+    case 4:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames > 10.0f) {
+            return 4;
+        }
+        break;
+    case 5:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames > 10.0f) {
+            return 5;
+        }
+        break;
+    case 7:
+        return 7;
+    case 8:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames >= 10.0f) {
+            return 8;
+        }
+        break;
+    case 6:
+        return 6;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297970);
 
