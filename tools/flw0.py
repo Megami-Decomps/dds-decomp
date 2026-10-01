@@ -1506,6 +1506,11 @@ def main() -> int:
         action="store_true",
         help="fold consumed stack operations into semantic statements",
     )
+    view_parser.add_argument(
+        "--structured",
+        action="store_true",
+        help="recover canonical branches and loops in the semantic view",
+    )
 
     args = parser.parse_args()
     try:
@@ -1541,7 +1546,10 @@ def main() -> int:
             source = args.input.read_text(encoding="utf-8")
             profile_name = args.profile or flw0_view.source_profile_name(source)
             rendered = flw0_view.render(
-                parse_source(source), profile_name, semantic=args.semantic
+                parse_source(source),
+                profile_name,
+                semantic=args.semantic,
+                structured=args.structured,
             )
             if args.output is None:
                 print(rendered, end="")

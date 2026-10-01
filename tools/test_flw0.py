@@ -925,6 +925,20 @@ end
         self.assertNotIn("push 670", semantic.stdout)
         self.assertNotIn("push result", semantic.stdout)
 
+        structured = subprocess.run(
+            [
+                sys.executable,
+                str(TOOLS / "flw0.py"),
+                "view",
+                "--structured",
+                str(path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(structured.returncode, 0, structured.stderr)
+        self.assertIn("FLW0 structured reading view", structured.stdout)
+
     def test_semantic_view_keeps_values_before_unknown_consumers(self) -> None:
         code = [
             flw0.OPCODE_IDS["PROC"],
@@ -1042,6 +1056,49 @@ end
         self.assertNotIn("0003: push 3", view)
         self.assertNotIn("0005: push 3", view)
 
+    def test_structured_view_recovers_canonical_if_and_loop(self) -> None:
+        if_code = [
+            flw0.OPCODE_IDS["PROC"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["IF"],
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["GOTO"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        if_view = flw0_view.render(
+            flw0.parse(_fixture(if_code, jump_rows=(("done", 6),))),
+            "dds1",
+            structured=True,
+        )
+        self.assertIn("0002: if (1) {", if_view)
+        self.assertIn("0004: WAIT_FOR_TIMER_LIMIT(9)", if_view)
+        self.assertIn("0005: }", if_view)
+        self.assertNotIn("goto done", if_view)
+
+        loop_code = [
+            flw0.OPCODE_IDS["PROC"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHLIX"],
+            (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["LT"],
+            (1 << 16) | flw0.OPCODE_IDS["IF"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["GOTO"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        loop_view = flw0_view.render(
+            flw0.parse(
+                _fixture(loop_code, jump_rows=(("again", 1), ("done", 8)))
+            ),
+            "dds1",
+            structured=True,
+        )
+        self.assertIn("0004: while ((3 < local_int[1])) {", loop_view)
+        self.assertIn("0006: WAIT_FOR_TIMER_LIMIT(1)", loop_view)
+        self.assertIn("0007: }", loop_view)
+        self.assertNotIn("goto again", loop_view)
+
     def test_verified_nonwriter_preserves_result_state(self) -> None:
         code = [
             7,
@@ -1150,6 +1207,25 @@ end
             self.assertEqual(
                 (files, statements, explicit_pushes), expected_counts
             )
+
+    def test_structured_view_handles_both_tracked_corpora(self) -> None:
+        root = TOOLS.parent
+        expected = {
+            "dds1": (143, 3522, 813, 1221),
+            "dds2": (140, 3497, 1263, 1068),
+        }
+        for game, expected_counts in expected.items():
+            totals = [0, 0, 0, 0]
+            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+                source = path.read_text(encoding="utf-8")
+                view = flw0_view.render(
+                    flw0.parse_source(source), game, structured=True
+                )
+                totals[0] += 1
+                totals[1] += len(re.findall(r": if \(", view))
+                totals[2] += len(re.findall(r": while \(", view))
+                totals[3] += view.count("} else {")
+            self.assertEqual(tuple(totals), expected_counts)
 
     def test_reading_view_uses_world_unit_stack_contracts(self) -> None:
         code = [
