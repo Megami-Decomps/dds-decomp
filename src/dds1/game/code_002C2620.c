@@ -181,9 +181,45 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C28E0);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2A20);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2BF8);
+typedef struct LmapDrawSurface {
+    u8 pad00[0x10];
+    void (*submit)(struct LmapDrawSurface *, void *); /* 0x10 */
+    u8 pad14[0xC];
+} LmapDrawSurface; /* 0x20 */
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2CC0);
+extern LmapDrawSurface D_00324B48[];
+extern void *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void sdfPktInit(void *, s32, s32, s32, s32);
+extern void *sdfFormatSifPacket();
+extern void *func_0011D3E8();
+
+/* Build a one-packet SIF command at (x, y) in GS coordinates and submit it on draw surface `surface`. */
+void func_002C2BF8(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface) {
+    void *list = sdfAllocPacketAligned(0x20);
+    u8 header[0x10];
+
+    sdfInitPacketList(list);
+    sdfPktInit(header, x + 0x7000, y + 0x7900, width, height);
+    sdfAppendPacket(list, sdfFormatSifPacket(header, command));
+    {
+        LmapDrawSurface *target = &D_00324B48[surface];
+        target->submit(target, list);
+    }
+}
+
+/* Variant that formats a textured sprite packet (func_0011D3E8) instead of a SIF command. */
+void func_002C2CC0(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s32 e, s32 surface) {
+    void *list = sdfAllocPacketAligned(0x20);
+
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, func_0011D3E8(x + 0x7000, y + 0x7900, a, b * 16, c * 8, d, e));
+    {
+        LmapDrawSurface *target = &D_00324B48[surface];
+        target->submit(target, list);
+    }
+}
 
 s32 fldLmapTaskUpdate(void) {
     s32 state = D_003BD96C;

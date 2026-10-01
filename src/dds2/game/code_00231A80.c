@@ -573,7 +573,24 @@ typedef struct MdlDoneJob {
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_00233520);
+extern u32 D_00438F90;
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern void btlRemoveGroupId(s32, s32);
+extern s32 func_00233280();
+
+/* Run a completed load job: apply it, drop its group id, then call its done callback and free it. */
+void func_00233520(void *owner, MdlDoneJob *job) {
+    job->owner = owner;
+    func_00233280(*(u32 *)((u8 *)owner + 0x60), job->group, job->id, job->arg);
+    WaitSema(D_00438F90);
+    btlRemoveGroupId(job->group, job->id);
+    SignalSema(D_00438F90);
+    if (job->done != NULL) {
+        job->done(job->doneArg);
+        func_002334F0((u32)job);
+    }
+}
 
 extern void *sdfAllocAndClearQuadwords();
 

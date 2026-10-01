@@ -681,7 +681,20 @@ typedef struct MdlDoneJob {
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00218A08);
+extern s32 func_00218768();
+
+/* Run a completed load job: apply it, drop its group id, then call its done callback and free it. */
+void func_00218A08(void *owner, MdlDoneJob *job) {
+    job->owner = owner;
+    func_00218768(*(u32 *)((u8 *)owner + 0x60), job->group, job->id, job->arg);
+    WaitSema(D_003BD878);
+    btlRemoveGroupId(job->group, job->id);
+    SignalSema(D_003BD878);
+    if (job->done != NULL) {
+        job->done(job->doneArg);
+        func_002189D8((MdlRes *)job);
+    }
+}
 
 extern void *sdfAllocAndClearQuadwords();
 extern s32 func_002889D8();
