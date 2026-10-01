@@ -114,6 +114,36 @@ class BattleTableTests(unittest.TestCase):
         self.assertIn("enemy 12 flags=0x1000 race=2 level=17", source)
         self.assertEqual(battle_tbl.encode_unit(battle_tbl.parse_unit_source(source)), data)
 
+    def test_encounter_enemy_reference_validation(self) -> None:
+        encount = battle_tbl.default_encount(battle_tbl.ENCOUNT_PROFILES["dds2"])
+        encounters = list(encount.encounters)
+        encounters[4] = battle_tbl.Encounter(enemies=(7,) + (0,) * 10)
+        encount = battle_tbl.EncountTable(
+            encount.profile,
+            tuple(encounters),
+            encount.default_maps,
+            encount.zones,
+            encount.overrides,
+            encount.background_maps,
+            encount.visuals,
+        )
+        unit = battle_tbl.default_unit(battle_tbl.UNIT_PROFILES["dds2"])
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "empty enemy 7"):
+            battle_tbl.validate_encount_unit(encount, unit)
+        enemies = list(unit.enemies)
+        enemies[7] = battle_tbl.EnemyTemplate(level=1)
+        battle_tbl.validate_encount_unit(
+            encount,
+            battle_tbl.UnitTable(
+                unit.profile,
+                unit.party,
+                unit.party_affinities,
+                unit.alternate_affinities,
+                tuple(enemies),
+                unit.enemy_affinities,
+            ),
+        )
+
     def test_every_encount_record_family_round_trips(self) -> None:
         profile = battle_tbl.ENCOUNT_PROFILES["dds2"]
         model = battle_tbl.default_encount(profile)
@@ -228,6 +258,14 @@ end
                     self.fail(f"unhandled tracked battle table {name}")
                 self.assertEqual(hashlib.sha1(data).hexdigest(), digest)
                 self.assertEqual(rendered, source_text)
+
+            encount = battle_tbl.parse_encount_source(
+                (ROOT / f"src/{game}/data/battle/encount.tblasm").read_text()
+            )
+            unit = battle_tbl.parse_unit_source(
+                (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
+            )
+            battle_tbl.validate_encount_unit(encount, unit)
 
 
 if __name__ == "__main__":
