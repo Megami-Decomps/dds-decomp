@@ -34,8 +34,9 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
     return (s32)object;
 }
 
-/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10; the store
-   order gives retail's saved-register order (see the DDS2 twin). */
+/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10. The store
+   order is what fixes retail's saved-register order: sched1 sorts these independent
+   stores by luid, and the saved regs go by live length (store position - copy position). */
 s32 func_001168F0(s32 a, s32 b, s32 c, s32 d, s32 e) {
     ScriptObj *object = (ScriptObj *)func_00110880(10);
     ObjWork *work = (ObjWork *)object->work;
