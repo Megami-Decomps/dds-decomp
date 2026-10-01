@@ -56,10 +56,17 @@ typedef struct MdlInner {
 typedef struct MdlCtx {
     u8 unk0[0xC];      /* 0x0 */
     MdlSub *sub;       /* 0xC */
-    u32 unk10;         /* 0x10 */
+    union {
+        u32 word;      /* 0x10: low byte read by mdlIsInnerSentinel */
+        struct {
+            s16 id;    /* 0x10 */
+            s16 arg;   /* 0x12 */
+        } h;
+    } current;
     u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
     MdlInner *inner;   /* 0x18 */
-    u8 unk1C[0x14];    /* 0x1C */
+    struct MdlNode *first;    /* 0x1C */
+    struct MdlNode *slots[4]; /* 0x20 */
     struct MdlDevList *devList; /* 0x30: device slots released with the model */
 } MdlCtx;
 
@@ -258,7 +265,36 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_002327C0);
+extern struct MdlNode *func_00231618(MdlCtx *, s32);
+extern void func_00334280(struct MdlNode *, s32, s32, f32, f32);
+extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
+extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
+
+/* Select (or create) the node for `id`, make it the current node of its slot
+ * and apply its resource entries. */
+void func_002327C0(MdlCtx *ctx, s32 id, s32 arg2, s32 arg3, f32 arg4, f32 arg5) {
+    MdlNode *node;
+    s16 slot;
+
+    for (node = ctx->inner->list; node != NULL; node = node->next) {
+        if (node->searchId == id) {
+            break;
+        }
+    }
+    if (node == NULL) {
+        node = func_00231618(ctx, id);
+    }
+    slot = node->slotIndex;
+    ctx->slots[slot] = node;
+    if (slot == 0) {
+        ctx->first = node;
+    }
+    func_00334280(node, arg2, arg3, arg4, arg5);
+    ctx->current.h.id = id;
+    ctx->current.h.arg = arg2;
+    mdlRemoveResourceSubtype(ctx, slot);
+    mdlApplyResourceEntries(ctx, arg2, slot);
+}
 
 void mdlAddEntryFlagged(MdlCtx *ctx, s32 arg1, s32 arg2) {
     func_002327C0(ctx, arg1, arg2, 1, 0.0f, 0.0f);
@@ -512,7 +548,7 @@ INCLUDE_ASM(const s32, "game/code_00231A80", func_00232F78);
 s32 mdlIsInnerSentinel(MdlCtx *ctx) {
     s32 r = 0;
 
-    if ((u8)ctx->unk10 == 1) {
+    if ((u8)ctx->current.word == 1) {
         r = ctx->inner == (MdlInner *)0x30424950;
     }
     return r;
