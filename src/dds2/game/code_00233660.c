@@ -92,7 +92,11 @@ typedef struct MdlLoadedInfo {
 } MdlLoadedInfo;
 
 typedef struct MdlMotionState {
-    u8 pad00[0x32];
+    u8 pad00[0x1C];
+    f32 time;   /* 0x1C */
+    u8 pad20[0xE];
+    u16 length; /* 0x2E */
+    u8 pad30[2];
     u8 reverse; /* 0x32 */
 } MdlMotionState;
 
@@ -1421,7 +1425,37 @@ void mdlAdjustViewerScale(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00236B20);
+extern void sdfAppendFillRectanglePacket();
+
+/* Draw the motion progress bar: timeline frame, playhead marker and "[time/length]" label, then the zoom value. */
+void func_00236B20(void) {
+    s32 list;
+    MdlLoaded *resource;
+    MdlMotionState *motion;
+    s32 x;
+    s32 step;
+
+    mdlAppendViewerRectToDrawList(0x81D0, 0x7948, 0xFF007F, 0xD20, 0xF0, 0);
+    list = D_00453550.packetList;
+    sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
+    sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
+    sdfAppendFillRectanglePacket(list, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
+    resource = (MdlLoaded *)D_00453550.resources[0];
+    motion = resource->motion;
+    if (motion != NULL) {
+        x = (s32)(motion->time * 3264.0f / motion->length);
+        if (x < 0) {
+            x = 0;
+        }
+        x += 0x8200;
+        sdfAppendFillRectanglePacket(list, 0x800000E0, 0, x, 0x7960, x, 0x79C0, 0xFF0090, 0);
+        sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->time, motion->length));
+    } else {
+        sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
+    }
+    step = D_00453550.unk0C != 0 ? 2 : 0;
+    sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, "%5.2f", D_00453550.unk54));
+}
 
 u32 func_00236D50(void) {
     mdlAdjustViewerScale();
@@ -2202,8 +2236,6 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004370A8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370B0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370B8);
-
-INCLUDE_SDATA(const s32, "game/code_00233660", D_004370C0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370C8);
 
