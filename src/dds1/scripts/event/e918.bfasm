@@ -9,7 +9,7 @@ procedure e918_main reserved=0x00000000
 code
 e918_main:
   PROC e918_main
-  PUSHIS 0
+  PUSHMSG MSG_START_00
   COMM MESSAGE_REQUEST_AND_POLL
   END
 end

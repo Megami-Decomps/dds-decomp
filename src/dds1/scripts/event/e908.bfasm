@@ -10,7 +10,7 @@ procedure e908_dead reserved=0x00000000
 code
 e908_main:
   PROC e908_main
-  PUSHIS 0
+  PUSHMSG MSG_000
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e908_dead:

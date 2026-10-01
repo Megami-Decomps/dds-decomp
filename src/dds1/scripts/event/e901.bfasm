@@ -10,7 +10,7 @@ procedure e901_dead reserved=0x00000000
 code
 e901_main:
   PROC e901_main
-  PUSHIS 0
+  PUSHMSG MSG_000
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e901_dead:

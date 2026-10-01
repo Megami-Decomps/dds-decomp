@@ -10,7 +10,7 @@ procedure e903_dead reserved=0x00000000
 code
 e903_main:
   PROC e903_main
-  PUSHIS 0
+  PUSHMSG MSG_000
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e903_dead:

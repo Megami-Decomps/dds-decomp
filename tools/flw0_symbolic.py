@@ -122,6 +122,7 @@ def _render_instruction(
     jump_symbols: list[str],
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[int, str],
+    message_symbols: tuple[str | None, ...],
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -129,6 +130,14 @@ def _render_instruction(
     if opcode >= len(flw0.OPCODE_NAMES):
         return f"  WORD 0x{raw:08x}", pc + 1
     name = flw0.OPCODE_NAMES[opcode]
+    message_symbol = flw0._message_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+        message_symbols,
+    )
+    if message_symbol is not None:
+        return f"  PUSHMSG {message_symbol}", pc + 1
     if opcode in flw0._EXTENDED_OPCODES:
         if pc + 1 >= len(words) or operand:
             return f"  WORD 0x{raw:08x}", pc + 1
@@ -177,6 +186,15 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     string_lines, string_symbols = flw0._render_string_payload(
         script.section_bytes(script.sections[4]), flw0._type5_offsets(script), used
     )
+    message_data = script.section_bytes(script.sections[3])
+    message_symbols = flw0._message_symbols(message_data)[0]
+    if message_data:
+        try:
+            message_lines = msg1.render(message_data)
+        except msg1.Msg1Error:
+            message_lines = ["messages", *_raw_block(message_data)]
+    else:
+        message_lines = ["messages"]
     symbols_at_pc: dict[int, list[str]] = {}
     for row, symbol in zip(procedures, procedure_symbols):
         symbols_at_pc.setdefault(row.start_pc, []).append(symbol)
@@ -227,6 +245,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
             jump_symbols,
             command_profile,
             string_symbols,
+            message_symbols,
         )
         lines.append(instruction)
         pc = next_pc
@@ -241,15 +260,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
         lines.append(f"{symbol}:")
     lines.append("end")
     lines.append("")
-    message_data = script.section_bytes(script.sections[3])
-    if message_data:
-        try:
-            lines.extend(msg1.render(message_data))
-        except msg1.Msg1Error:
-            lines.append("messages")
-            lines.extend(_raw_block(message_data))
-    else:
-        lines.append("messages")
+    lines.extend(message_lines)
     lines.extend(("end", "", "strings"))
     lines.extend(string_lines)
     lines.append("end")
@@ -300,6 +311,7 @@ def _parse_code(
     jump_labels: list[Declaration],
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[str, int],
+    message_symbols: dict[str, int],
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
@@ -317,6 +329,20 @@ def _parse_code(
         if not tokens:
             continue
         mnemonic = tokens[0].upper()
+        if mnemonic == "PUSHMSG":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHMSG takes one symbol"
+                )
+            symbol = tokens[1]
+            if symbol not in message_symbols:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown message {symbol!r}"
+                )
+            words.append(
+                (message_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
+            )
+            continue
         if mnemonic == "WORD":
             if len(tokens) != 2:
                 raise flw0.Flw0Error(f"line {line_number}: WORD takes one value")
@@ -510,11 +536,6 @@ def parse(text: str) -> flw0.Flw0File:
 
     command_profile = _get_profile(*profile_record) if profile_record else None
     string_data, string_symbols = flw0._parse_string_payload(blocks["strings"])
-    code, labels = _parse_code(
-        blocks["code"], procedures, jump_labels, command_profile, string_symbols
-    )
-    procedure_data = _named_payload(procedures, labels)
-    jump_label_data = _named_payload(jump_labels, labels)
     if messages_are_msg1:
         try:
             message_data = msg1.parse_source(blocks["messages"])
@@ -522,6 +543,17 @@ def parse(text: str) -> flw0.Flw0File:
             raise flw0.Flw0Error(str(exc)) from exc
     else:
         message_data = _parse_raw_block(blocks["messages"])
+    message_symbols = flw0._message_symbols(message_data)[1]
+    code, labels = _parse_code(
+        blocks["code"],
+        procedures,
+        jump_labels,
+        command_profile,
+        string_symbols,
+        message_symbols,
+    )
+    procedure_data = _named_payload(procedures, labels)
+    jump_label_data = _named_payload(jump_labels, labels)
     payloads = (
         procedure_data,
         jump_label_data,
