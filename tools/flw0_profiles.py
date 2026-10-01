@@ -273,6 +273,60 @@ SHARED_DDS_COMMANDS = (
     ),
 )
 
+
+# AICALC formula procedures run through the ordinary FLW0 VM but use this
+# compact group of native accessors for their calculation context.  The names
+# describe the values read by the native handlers; they deliberately leave the
+# still-unclassified lookup curves as factors rather than assigning gameplay
+# meaning that the executable does not establish.
+BATTLE_CALC_COMMANDS = (
+    NativeCommand(0x16C, "CALC_SET_RESULT", 1, writes_result=False),
+    NativeCommand(0x16D, "CALC_SOURCE_LEVEL", 0, writes_result=True),
+    NativeCommand(0x16E, "CALC_TARGET_LEVEL", 0, writes_result=True),
+    NativeCommand(0x16F, "CALC_SOURCE_STAT", 1, writes_result=True),
+    NativeCommand(0x170, "CALC_TARGET_STAT", 1, writes_result=True),
+    NativeCommand(0x171, "CALC_ACTION_HIT_LEVEL", 0, writes_result=True),
+    NativeCommand(0x172, "CALC_ACTION_AILMENT_LEVEL", 0, writes_result=True),
+    NativeCommand(0x173, "CALC_ACTION_POWER", 0, writes_result=True),
+    NativeCommand(0x174, "CALC_ACTION_MAGIC_BASE", 0, writes_result=True),
+    NativeCommand(0x175, "CALC_SOURCE_FLAG_20_CLEAR", 0, writes_result=True),
+    NativeCommand(0x176, "CALC_SOURCE_ACTION_AFFINITY", 0, writes_result=True),
+    NativeCommand(0x177, "CALC_TARGET_ACTION_AFFINITY", 0, writes_result=True),
+    NativeCommand(0x178, "CALC_SOURCE_ATTACK_AFFINITY", 0, writes_result=True),
+    NativeCommand(0x179, "CALC_TARGET_ATTACK_AFFINITY", 0, writes_result=True),
+    NativeCommand(0x17A, "CALC_RANDOM_SCALE", 1, writes_result=True),
+    NativeCommand(0x17B, "CALC_CURRENT_RESULT", 0, writes_result=True),
+    NativeCommand(0x17C, "CALC_ACTION_MAGIC_LIMIT", 0, writes_result=True),
+    NativeCommand(0x17D, "CALC_GROUP_AVERAGE_LEVEL", 1, writes_result=True),
+    NativeCommand(0x17E, "CALC_GROUP_AVERAGE_STAT", 2, writes_result=True),
+    NativeCommand(0x17F, "CALC_ENCOUNTER_ZONE_FACTOR", 0, writes_result=True),
+    NativeCommand(0x180, "CALC_ESCAPE_BONUS_COUNTER", 0, writes_result=True),
+    NativeCommand(0x181, "CALC_SOURCE_HP", 0, writes_result=True),
+    NativeCommand(0x182, "CALC_TARGET_HP", 0, writes_result=True),
+    NativeCommand(0x183, "CALC_SOURCE_MAX_HP", 0, writes_result=True),
+    NativeCommand(0x184, "CALC_TARGET_MAX_HP", 0, writes_result=True),
+    NativeCommand(0x186, "CALC_LEVEL_MAX_HP_FACTOR", 0, writes_result=True),
+    NativeCommand(0x187, "CALC_LEVEL_MAX_MP_FACTOR", 0, writes_result=True),
+    NativeCommand(0x188, "CALC_TARGET_HP_BAND_FACTOR", 0, writes_result=True),
+    NativeCommand(0x189, "CALC_LEVEL_FACTOR_360", 0, writes_result=True),
+    NativeCommand(0x18A, "CALC_LEVEL_FACTOR_4EC", 0, writes_result=True),
+    NativeCommand(0x18B, "CALC_ROLL_TARGET_FLAG_RESULT", 0, writes_result=True),
+    NativeCommand(0x18C, "CALC_ACTION_DEATH_TYPE", 0, writes_result=True),
+    NativeCommand(0x18D, "CALC_LEVEL_CRITICAL_FACTOR", 0, writes_result=True),
+    NativeCommand(0x18E, "CALC_LEVEL_RECOVERY_FACTOR", 0, writes_result=True),
+    NativeCommand(0x195, "CALC_SOURCE_ROSTER_BASE", 0, writes_result=True),
+    NativeCommand(0x1A5, "CALC_TARGET_HP_FINE_FACTOR", 0, writes_result=True),
+    NativeCommand(0x1D0, "CALC_SOURCE_ATTACK_POWER", 0, writes_result=True),
+    NativeCommand(0x1D2, "CALC_GROUP_AVERAGE_MAX_HP", 1, writes_result=True),
+    NativeCommand(0x1D3, "CALC_GROUP_AVERAGE_HP", 1, writes_result=True),
+)
+
+
+DDS2_BATTLE_CALC_COMMANDS = (
+    NativeCommand(0x05A, "CALC_MONEY_BASE", 0, writes_result=True),
+    NativeCommand(0x162, "CALC_MONEY_LEVEL_FACTOR", 0, writes_result=True),
+)
+
 DDS1_EVENT_IDS = frozenset(
     (
         500, 501, 502, 503, 506, 510, 550, 601, 602, 603, 604, 605,
@@ -303,8 +357,18 @@ DDS2_EVENT_IDS = frozenset(
 
 DDS1 = CommandProfile("dds1", SHARED_DDS_COMMANDS, DDS1_EVENT_IDS)
 DDS2 = CommandProfile("dds2", SHARED_DDS_COMMANDS, DDS2_EVENT_IDS)
+DDS1_AICALC = CommandProfile(
+    "dds1-aicalc", SHARED_DDS_COMMANDS + BATTLE_CALC_COMMANDS, DDS1_EVENT_IDS
+)
+DDS2_AICALC = CommandProfile(
+    "dds2-aicalc",
+    SHARED_DDS_COMMANDS + BATTLE_CALC_COMMANDS + DDS2_BATTLE_CALC_COMMANDS,
+    DDS2_EVENT_IDS,
+)
 
-PROFILES = {profile.name: profile for profile in (DDS1, DDS2)}
+PROFILES = {
+    profile.name: profile for profile in (DDS1, DDS2, DDS1_AICALC, DDS2_AICALC)
+}
 
 
 def get(name: str) -> CommandProfile:
