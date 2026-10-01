@@ -1,7 +1,41 @@
 #include "common.h"
 
+/* Picture task data: an owner link and the attached texture handle. */
+typedef struct {
+    u32 unk0;
+    void *unk4;
+} Picture;
+
+extern void *kwlnTaskGetUserValue(void);
+extern void sdfTexReleaseReferenceViaHandler(void *);
+extern void sdfReleaseChipBlock(void *);
+
+extern void func_00235150(void *);
+
 INCLUDE_ASM(const s32, "event/evtPicture", func_00235150);
 
-INCLUDE_ASM(const s32, "event/evtPicture", func_002351E0);
+/* Run the picture's own update step while its active flag is set. */
+s32 func_002351E0(void) {
+    Picture *picture;
 
-INCLUDE_ASM(const s32, "event/evtPicture", func_00235228);
+    picture = kwlnTaskGetUserValue();
+    if (picture->unk0 & 1) {
+        if (picture->unk4 != 0) {
+            func_00235150(picture->unk4);
+        }
+        return 0;
+    }
+    return 0;
+}
+
+/* Drop the picture's texture, then free the task data. */
+void func_00235228(void) {
+    Picture *picture;
+
+    picture = kwlnTaskGetUserValue();
+    if (picture->unk4 != 0) {
+        sdfTexReleaseReferenceViaHandler(picture->unk4);
+        picture->unk4 = 0;
+    }
+    sdfReleaseChipBlock(picture);
+}
