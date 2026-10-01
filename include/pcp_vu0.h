@@ -314,4 +314,34 @@
     "vmadday.w ACC, vf0, vf2\n\tvmaddz.w vf3, vf0, vf2\n\tvrsqrt Q, vf0w, vf3w\n\t" \
     "vwaitq\n\tvmulq.xyzw vf10, vf10, Q\n\t.set reorder")
 
+/* One component of vf10 read back into a C float through the SDK scratch $2
+ * (declared clobbered, like VU0_DOT_XYZ). Retail stores a result vector to
+ * four separate floats this way (evtPolygonMovie vector blend):
+ *   x: qmfc2.ni $2,vf10; mtc1 $2,out
+ *   y: qmfc2.ni $2,vf10; prot3w $2,$2; mtc1 $2,out   (prot3w rotates y into word 0)
+ *   z: qmfc2.ni $2,vf10; pexew $2,$2; mtc1 $2,out    (pexew swaps words 0 and 2)
+ *   w: vaddw.x vf2,vf0,vf10w; qmfc2.ni $2,vf2; mtc1 $2,out */
+#define VU0_GET_VF10_X(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_GET_VF10_W(out) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+/* One component of vf10 set from a C float: the broadcast through vf2x of
+ * VU0_SCALAR_OP_CLOBBER followed by vaddx.<axis> vf10,vf0,vf2x (x, y, z) or,
+ * for w, vmulx.w vf10,vf0,vf2x (vf0.w is 1, so w = f):
+ *   mfc1 $2,f; qmtc2.ni $2,vf2; vaddx.y vf10,vf0,vf2x
+ * $2 is declared clobbered so a table address kept across the four sets lives
+ * in $3 (retail's default-vector arm). */
+#define VU0_SET_VF10_COMPONENT(axis, f) \
+    VU0_SCALAR_OP_CLOBBER(f, "vaddx." #axis " vf10, vf0, vf2x")
+#define VU0_SET_VF10_W(f) \
+    VU0_SCALAR_OP_CLOBBER(f, "vmulx.w vf10, vf0, vf2x")
+
 #endif
