@@ -86,8 +86,18 @@ def _raw_block(payload: bytes) -> list[str]:
 
 
 def _get_profile(
-    name: str | None, line_number: int | None = None
+    name: str | None,
+    line_number: int | None = None,
+    override: flw0_profiles.CommandProfile | None = None,
 ) -> flw0_profiles.CommandProfile | None:
+    if override is not None:
+        if name is not None and name != override.name:
+            prefix = f"line {line_number}: " if line_number is not None else ""
+            raise flw0.Flw0Error(
+                f"{prefix}source profile {name!r} does not match "
+                f"provided profile {override.name!r}"
+            )
+        return override
     if name is None:
         return None
     try:
@@ -203,11 +213,12 @@ def render(
     profile_name: str | None = None,
     semantic: bool = False,
     structured: bool = False,
+    profile: flw0_profiles.CommandProfile | None = None,
 ) -> str:
     """Render standard-layout FLW0 as symbolic version-2 source."""
 
     string_data = _require_standard_layout(script)
-    command_profile = _get_profile(profile_name)
+    command_profile = _get_profile(profile_name, override=profile)
     procedures = script.named_rows(0)
     jump_labels = script.named_rows(1)
     for row in (*procedures, *jump_labels):
@@ -582,7 +593,9 @@ def _named_payload(
     return b"".join(rows)
 
 
-def parse(text: str) -> flw0.Flw0File:
+def parse(
+    text: str, profile: flw0_profiles.CommandProfile | None = None
+) -> flw0.Flw0File:
     """Assemble version-2 symbolic source and derive a canonical layout."""
 
     meaningful = [
@@ -675,7 +688,9 @@ def parse(text: str) -> flw0.Flw0File:
     if len(symbols) != len(set(symbols)):
         raise flw0.Flw0Error("procedure and jump-label symbols must be unique")
 
-    command_profile = _get_profile(*profile_record) if profile_record else None
+    command_profile = _get_profile(
+        *(profile_record or (None, None)), override=profile
+    )
     string_data, string_symbols = flw0._parse_string_payload(blocks["strings"])
     string_count = len(string_data)
     if string_count_record is not None:

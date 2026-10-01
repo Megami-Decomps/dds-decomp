@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class IntegerSymbols:
     values: tuple[tuple[int, str], ...]
+    complete: bool = False
 
     @property
     def by_value(self) -> dict[int, str]:
@@ -331,32 +332,104 @@ DDS2_BATTLE_CALC_COMMANDS = (
 # The AICALC AI programs use the same VM with a battle-command vocabulary.
 # Argument counts come from the native command table.  Query names follow the
 # packed-action handlers reached by each command; operational names follow the
-# command handler and its immediate callee.  Commands whose gameplay role is
-# still ambiguous deliberately remain numeric in source.
+# command handler and its immediate callee.  Group queries use the same native
+# 0x200/0x400 player/enemy filters as the established count and mask commands.
+# Commands whose gameplay role is still ambiguous deliberately remain numeric
+# in source.
 BATTLE_AI_COMMANDS = (
     NativeCommand(0x00A, "RANDOM_ONE_TO", 1, writes_result=True),
     NativeCommand(0x030, "AI_SELECT_BASIC_ATTACK", 0, writes_result=False),
+    NativeCommand(0x031, "AI_SELECT_ESCAPE", 0, writes_result=False),
+    NativeCommand(0x032, "AI_SELECT_WAIT", 0, writes_result=False),
     NativeCommand(0x033, "AI_SELECT_SKILL", 1, writes_result=False),
     NativeCommand(0x034, "AI_SELECT_ACTION_TARGETS", 0, writes_result=False),
     NativeCommand(0x035, "AI_SELECT_LOWEST_HP_TARGET", 0, writes_result=False),
     NativeCommand(0x036, "AI_SELECT_TARGETS_WITH_ACTION_MASK", 1, writes_result=False),
+    NativeCommand(0x037, "AI_SELECT_TARGET_BY_ID", 1, writes_result=False),
+    NativeCommand(0x039, "AI_ANY_PLAYER_HAS_ACTION", 1, writes_result=True),
+    NativeCommand(0x03A, "AI_ANY_ENEMY_HAS_ACTION", 1, writes_result=True),
+    NativeCommand(0x03B, "AI_SET_BATTLE_REQUEST_ARGUMENT", 1, writes_result=False),
     NativeCommand(0x03D, "AI_SELECT_TABLE_ACTION", 0, writes_result=False),
     NativeCommand(0x03E, "AI_CLEAR_SCENE_TRANSITION", 0, writes_result=False),
     NativeCommand(0x03F, "AI_BEGIN_SCENE_TRANSITION", 0, writes_result=False),
     NativeCommand(0x07B, "AI_UNIT_HP_AT_OR_BELOW_RATE", 1, writes_result=True),
+    NativeCommand(0x07C, "AI_BOSS_HP_AT_OR_BELOW_RATE", 1, writes_result=True),
+    NativeCommand(0x07D, "AI_SELECT_LOWEST_HP_RATE_TARGET", 0, writes_result=False),
+    NativeCommand(0x07F, "AI_PLAYER_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x085, "AI_HAS_OTHER_ENEMY_UNIT_MODE", 1, writes_result=True),
+    NativeCommand(
+        0x086, "AI_ANY_PLAYER_PASSES_ACTION_CHECK", 1, writes_result=True
+    ),
+    NativeCommand(
+        0x087, "AI_ANY_ENEMY_PASSES_ACTION_CHECK", 1, writes_result=True
+    ),
+    NativeCommand(0x089, "AI_NO_PLAYER_BLOCKS_QUERY", 1, writes_result=True),
     NativeCommand(0x08C, "AI_UNIT_PASSES_ACTION_TEN_CHECK", 0, writes_result=True),
+    NativeCommand(0x0AB, "START_SCREEN_QUAKE", 2, writes_result=False),
+    NativeCommand(0x0DF, "AI_COUNTER_REACHED_LIMIT", 1, writes_result=True),
+    NativeCommand(0x0E2, "AI_SELECT_ACTION_BY_KIND", 2, writes_result=False),
     NativeCommand(0x0E6, "AI_RESET_COMMAND_CONTEXT", 0, writes_result=False),
+    NativeCommand(
+        0x0E7,
+        "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT",
+        1,
+        writes_result=False,
+    ),
+    NativeCommand(0x0F5, "AI_RESTORE_BATTLE_CAMERA", 0, writes_result=False),
     NativeCommand(0x0FA, "AI_QUEUE_ACTOR_COMMAND_SOUND", 0, writes_result=False),
     NativeCommand(0x14C, "AI_ACTOR_HISTORY_COUNTER", 0, writes_result=True),
+    NativeCommand(0x15B, "AI_SELECT_LOWEST_LEVEL_TARGET", 0, writes_result=False),
     NativeCommand(0x19A, "AI_ANY_PLAYER_PASSES_QUERY", 1, writes_result=True),
+    NativeCommand(0x19B, "AI_ANY_ENEMY_PASSES_QUERY", 1, writes_result=True),
+    NativeCommand(0x19C, "AI_ALL_PLAYERS_PASS_QUERY", 1, writes_result=True),
+    NativeCommand(0x19D, "AI_ALL_ENEMIES_PASS_QUERY", 1, writes_result=True),
+    NativeCommand(
+        0x1A0,
+        "AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000",
+        0,
+        writes_result=True,
+    ),
+    NativeCommand(0x1A2, "AI_BATTLE_READY_WITH_ZERO_TURNS", 0, writes_result=True),
+    NativeCommand(0x1A3, "AI_CONTEXT_FLAG_TWO_SET", 0, writes_result=True),
+    NativeCommand(0x1A6, "AI_SPECIAL_MODE_EFFECT_VALUE", 0, writes_result=True),
     NativeCommand(0x1A7, "AI_UNIT_ACTION_MODE_ZERO", 1, writes_result=True),
+    NativeCommand(0x1A9, "AI_ANY_PLAYER_ACTION_MODE_ZERO", 1, writes_result=True),
+    NativeCommand(0x1AB, "AI_ANY_ENEMY_ACTION_MODE_ZERO", 1, writes_result=True),
+    NativeCommand(
+        0x1AF,
+        "AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000",
+        0,
+        writes_result=False,
+    ),
     NativeCommand(0x1B0, "AI_APPEND_SELF_TO_TARGETS", 0, writes_result=False),
+    NativeCommand(0x1B1, "AI_SELECT_OTHER_TARGET_OR_SELF", 0, writes_result=False),
     NativeCommand(0x1B6, "AI_EFFECT_ACTIVE", 0, writes_result=True),
+    NativeCommand(0x1B7, "AI_BATTLE_PHASE", 0, writes_result=True),
+    NativeCommand(
+        0x1B8, "AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO", 1, writes_result=True
+    ),
+    NativeCommand(
+        0x1BA, "AI_SELECT_TARGETS_WITHOUT_ACTION_MASK", 1, writes_result=False
+    ),
     NativeCommand(0x1BD, "AI_EFFECT_VALUE", 0, writes_result=True),
     NativeCommand(0x1BE, "AI_SCENE_FADE_COUNT", 0, writes_result=True),
+    NativeCommand(0x1BF, "AI_ALL_PLAYERS_LACK_FLAG_1000", 0, writes_result=True),
+    NativeCommand(0x1C0, "AI_ALL_PLAYERS_HAVE_FLAG_1000", 0, writes_result=True),
+    NativeCommand(
+        0x1C1, "AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000", 0, writes_result=False
+    ),
+    NativeCommand(0x1C4, "AI_APPEND_EFFECT_ACTOR_TO_TARGETS", 0, writes_result=False),
     NativeCommand(0x1C5, "AI_GLOBAL_HISTORY_COUNTER", 0, writes_result=True),
+    NativeCommand(0x1C6, "AI_ANY_PLAYER_BLOCKS_ELEMENT", 1, writes_result=True),
     NativeCommand(0x1C7, "AI_SELECT_TARGETS_BLOCKING_ELEMENT", 1, writes_result=False),
+    NativeCommand(0x1C8, "AI_ANY_ENEMY_HAS_QUEUED_ACTION", 1, writes_result=True),
+    NativeCommand(0x1C9, "AI_ANY_PLAYER_HAS_QUEUED_ACTION", 1, writes_result=True),
     NativeCommand(0x1CA, "AI_SET_ACTOR_UNIT_PARAMETER", 1, writes_result=False),
+    NativeCommand(0x1CB, "AI_SELECT_HIGHEST_MP_TARGET", 0, writes_result=False),
+    NativeCommand(
+        0x1CC, "AI_SELECT_TARGET_PASSING_QUERY", 1, writes_result=False
+    ),
+    NativeCommand(0x1D1, "AI_CLEAR_SPECIAL_ENEMY_ENTRY_FLAGS", 0, writes_result=False),
     NativeCommand(0x1D4, "AI_QUEUE_UNBOUND_COMMAND_SOUND", 0, writes_result=False),
     NativeCommand(0x1D5, "AI_SET_CAMERA_BLEND_START", 7, writes_result=False),
     NativeCommand(0x1D6, "AI_SET_CAMERA_BLEND_END", 7, writes_result=False),
@@ -366,30 +439,51 @@ BATTLE_AI_COMMANDS = (
 
 DDS1_BATTLE_AI_COMMANDS = (
     NativeCommand(0x07E, "AI_ENEMY_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x081, "AI_ANY_ENEMY_HAS_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x082, "AI_ANY_PLAYER_HAS_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x083, "AI_ALL_PLAYERS_HAVE_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x0F4, "AI_MOVE_CAMERA", 7, writes_result=False),
+    NativeCommand(0x14B, "AI_UNIT_MP_AT_OR_BELOW_RATE", 1, writes_result=True),
     NativeCommand(0x19E, "AI_ENEMY_HAS_ACTION", 1, writes_result=True),
+    NativeCommand(
+        0x1AD, "AI_ANY_ENEMY_CURRENT_ACTION_MATCHES", 1, writes_result=True
+    ),
+    NativeCommand(
+        0x1BB, "AI_ANY_PLAYER_CURRENT_ACTION_MATCHES", 1, writes_result=True
+    ),
 )
 
 
 DDS2_BATTLE_AI_COMMANDS = (
     NativeCommand(0x01D, "AI_SELECT_WEIGHTED_TABLE_ENTRY", 1, writes_result=False),
+    NativeCommand(0x020, "AI_HAS_UNIT_OR_SLOT_ACTION_MASK", 2, writes_result=True),
     NativeCommand(0x05B, "AI_SET_CONTEXT_FLAG_ONE", 0, writes_result=False),
+    NativeCommand(0x05C, "AI_ACTOR_CAN_USE_ACTION", 1, writes_result=True),
     NativeCommand(0x07E, "AI_ENEMY_COUNT_AT_MOST", 1, writes_result=True),
-    NativeCommand(0x07F, "AI_PLAYER_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x080, "AI_UNIT_HAS_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x082, "AI_ANY_PLAYER_HAS_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x083, "AI_ALL_PLAYERS_HAVE_ACTION_MASK", 1, writes_result=True),
     NativeCommand(0x084, "AI_HAS_PLAYER_UNIT_MODE", 1, writes_result=True),
-    NativeCommand(0x085, "AI_HAS_OTHER_ENEMY_UNIT_MODE", 1, writes_result=True),
     NativeCommand(0x0E0, "AI_TURN_COUNT", 0, writes_result=True),
     NativeCommand(0x0E1, "AI_SELECT_DIRECT_ACTION", 1, writes_result=False),
-    NativeCommand(0x0E2, "AI_SELECT_ACTION_BY_KIND", 2, writes_result=False),
     NativeCommand(0x0F6, "AI_ENABLE_COMMAND_STATE_FLAG", 0, writes_result=False),
+    NativeCommand(0x122, "AI_LINKED_ACTION_SCENE_ACTIVE", 0, writes_result=True),
+    NativeCommand(
+        0x141, "AI_HAS_ELIGIBLE_QUEUED_SPECIAL_ACTION", 0, writes_result=True
+    ),
+    NativeCommand(0x151, "AI_HAS_FLAG_800000", 1, writes_result=True),
+    NativeCommand(0x15A, "AI_ROLL_ONE_BASED_BUCKET", 0, writes_result=True),
+    NativeCommand(0x1AE, "AI_ANY_PLAYER_LACKS_FLAG_1000", 0, writes_result=True),
+    NativeCommand(
+        0x1B9, "AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO", 1, writes_result=True
+    ),
     NativeCommand(0x1D8, "AI_ACTIVE_SUBTASK", 0, writes_result=True),
     NativeCommand(0x1D9, "AI_SUBTASK_TARGET_MODE", 0, writes_result=True),
+    NativeCommand(0x1DA, "AI_SELECT_TARGETS_BY_UNIT_MODE", 1, writes_result=False),
     NativeCommand(0x1DB, "AI_SPECIAL_BATTLE_OBJECT_VALUE", 0, writes_result=True),
+    NativeCommand(0x1DC, "AI_APPEND_CURRENT_UNIT_TO_TARGETS", 0, writes_result=False),
     NativeCommand(0x1DE, "AI_MARKED_ACTION_SCENE_ACTIVE", 0, writes_result=True),
+    NativeCommand(0x1E9, "AI_SET_SPECIAL_EFFECT_ACTOR_BYTE", 1, writes_result=False),
 )
 
 DDS1_EVENT_IDS = frozenset(
