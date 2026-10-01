@@ -16,7 +16,7 @@ jump_label _1 reserved=0x00000000
 code
 e506_main:
   PROC e506_main
-  PUSHIS 2
+  PUSHMSG MODE
   COMM MESSAGE_REQUEST_AND_POLL
   PUSHIS 3
   COMM 0x0003

@@ -10,7 +10,7 @@ procedure e904_dead reserved=0x00000000
 code
 e904_main:
   PROC e904_main
-  PUSHIS 0
+  PUSHMSG MSG_000
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e904_dead:

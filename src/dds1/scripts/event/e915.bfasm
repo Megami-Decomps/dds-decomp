@@ -10,7 +10,7 @@ procedure e915_dead reserved=0x00000000
 code
 e915_main:
   PROC e915_main
-  PUSHIS 0
+  PUSHMSG MSG_START_00
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e915_dead:

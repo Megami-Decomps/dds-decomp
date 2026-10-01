@@ -11,7 +11,7 @@ procedure e912_dead reserved=0x00000000
 code
 e912_main:
   PROC e912_main
-  PUSHIS 0
+  PUSHMSG MSG_000
   COMM MESSAGE_REQUEST_AND_POLL
   END
 e912_first:
