@@ -890,11 +890,7 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             pos[0] = work->x;
             pos[2] = work->z;
             pos[1] = (work->y - work->offset[i] + 100.0f) * work->scale;
-            __asm__ volatile (
-                ".set noreorder\n"
-                "lqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(pos));
+            VU0_LOAD_VF(vf10, pos);
             mdlStorePrimaryVectorVU(obj[0]);
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
