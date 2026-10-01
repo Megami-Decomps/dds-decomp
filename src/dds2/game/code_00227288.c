@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_state.h"
+#include "btl_command.h"
 #include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -239,29 +240,6 @@ typedef struct BtlUnitInfo {
     struct BtlUnitData *data;
 } BtlUnitInfo;
 
-/* btlCopyMotionTransform copies two vectors and the two trailing scalars. */
-typedef struct BtlCamState {
-    f32 position[4];
-    f32 direction[4];
-    f32 distance;
-    f32 fov;
-} BtlCamState;
-
-/* Motion-command cameras and aim state, not a BtlUnit stat layout. */
-typedef struct BtlLinkedCommand {
-    BtlCamState camera; /* 0x00 */
-    u8 pad28[8];
-    BtlCamState frontCamera; /* 0x30 */
-    u8 pad58[0x68];
-    BtlCamState backCamera; /* 0xC0 */
-    u8 padE8[0x48];
-    s32 state; /* 0x130 */
-    s32 actionCode; /* 0x134 */
-    u8 pad138[4];
-    s32 armed; /* 0x13C */
-    u8 pad140[0x14];
-    f32 motionParameter; /* 0x154 */
-} BtlLinkedCommand;
 
 
 
@@ -707,12 +685,12 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     if (target == 0) {
         return 1;
     }
-    if (command->state != 0x1E || command->armed != 0) {
+    if (command->state != 0x1E || command->motionProgress != 0) {
         return 1;
     }
     btlCopyMotionTransform(&command->frontCamera, command);
     command->motionParameter = 10.0f;
-    command->armed = 1;
+    command->motionProgress = 1;
     command->state = 0;
     btlSetActorEffectParameterOrMuzzlePosition(target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);

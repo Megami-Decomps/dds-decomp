@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_state.h"
+#include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -1600,34 +1601,6 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
 
 extern s32 btlCanUseLinkedActor();
 
-/* btlCopyMotionTransform copies exactly these two vectors and two scalars. */
-typedef struct BtlCamState {
-    f32 position[4];
-    f32 direction[4];
-    f32 distance;
-    f32 fov;
-} BtlCamState;
-
-/* Motion commands own their camera states and refer separately to battle units. */
-typedef struct BtlLinkedCommand {
-    BtlCamState camera;       /* 0x00 */
-    u8 pad28[8];
-    BtlCamState frontCamera;  /* 0x30 */
-    u8 pad58[0x68];
-    BtlCamState backCamera;   /* 0xC0 */
-    u8 padE8[8];
-    u32 flags;               /* 0xF0: direction flags */
-    BtlTask *task;            /* 0xF4: owns the ordinary actor fallback */
-    BtlUnit *linkedA;         /* 0xF8 */
-    BtlUnit *linkedB;         /* 0xFC */
-    u8 pad100[0x10];
-    s32 state;               /* 0x110: aim waits for state 0x1E */
-    s32 actionCode;          /* 0x114 */
-    u32 targetList;          /* 0x118 */
-    s32 armed;               /* 0x11C: one-shot aim latch */
-    u8 pad120[0x10];
-    f32 motionParameter;     /* 0x130: assigned 10 during aim setup */
-} BtlLinkedCommand;
 
 /* Resolve a command's linked actor, retaining each independent task fallback. */
 BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
@@ -2597,12 +2570,12 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     if (target == 0) {
         return 1;
     }
-    if (command->state != 0x1E || command->armed != 0) {
+    if (command->state != 0x1E || command->motionProgress != 0) {
         return 1;
     }
     btlCopyMotionTransform(&command->frontCamera, &command->camera);
     command->motionParameter = 10.0f;
-    command->armed = 1;
+    command->motionProgress = 1;
     command->state = 0;
     btlSetActorEffectParameterOrMuzzlePosition(target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
