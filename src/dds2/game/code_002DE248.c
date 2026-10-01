@@ -715,11 +715,11 @@ extern u8 *effCreateRibbonWork(u32, u32);
 
 /* Battle/display work object (layout inferred from field accesses). */
 typedef struct BdWork {
-    s32 x0;            // 0x00
-    s32 x4;            // 0x04
-    u8 pad_0x08[0x58]; // 0x08
-    void *x60;         // 0x60
-    s32 x64;           // 0x64
+    s32 flags;           // 0x00
+    s32 phase16_16;      // 0x04: clamped to [0, 0x10000]
+    u8 pad_0x08[0x58];   // 0x08
+    void *owner;         // 0x60: passed to the work initializer
+    s32 slotIndex;       // 0x64: slot index passed to the work initializer
 } BdWork; // 0x68
 
 typedef struct EffectMaterialSlot {
@@ -7694,7 +7694,7 @@ typedef struct EffFileJobRequest {
     u8 pad14[4];
     u16 resourceMode;
     u8 pad1A[2];
-    s32 relatedResource;
+    u32 relatedResource;
 } EffFileJobRequest;
 
 s32 effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
