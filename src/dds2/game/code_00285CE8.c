@@ -1,4 +1,7 @@
 #include "common.h"
+extern s32 func_003292A8(s32 size);
+extern s8 *sdfMemoryGetBlockAddress();
+
 
 extern void evtPrintDeveloperConsoleMessage();
 
@@ -46,7 +49,29 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_002862B0);
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPush);
+s32 mtrMantraEventBitPush(void) {
+    s8 *data;
+    s32 handle;
+    s32 i;
+
+    handle = func_003292A8(0x76);
+    data = sdfMemoryGetBlockAddress(handle);
+    memset(data, 0, 0x76);
+    for (i = 0; i < 0x70; i++) {
+        if (mdlFlagTest(i + 0x920)) {
+            *data = 1;
+        }
+        data++;
+    }
+    for (i = 0; i < 6; i++) {
+        if (mdlFlagTest(i + 0x9A0)) {
+            *data = 1;
+        }
+        data++;
+    }
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPush()]*****************\n");
+    return handle;
+}
 
 extern s8 *sdfMemoryGetBlockAddress(void);
 extern void func_003297C8(s32 arg);
