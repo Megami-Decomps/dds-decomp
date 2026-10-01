@@ -466,7 +466,27 @@ s32 sdfDevGetFileSize(void) {
     return *(s32 *)(D_004391A8 + 8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E550);
+extern s32 func_00369B70();
+extern s32 func_00369F78(s32, s32, s32);
+extern s32 func_0035A828(s32);
+extern s32 func_0036A1B0(s32, s32, s32);
+extern void func_00369DF8(s32);
+
+void func_0033E550(s32 name) {
+    s32 fd = func_00369B70(name, 1);
+    s32 size;
+    s32 buffer;
+
+    if (fd < 0) {
+        func_00328520(D_0042E288, name);
+    }
+    size = func_00369F78(fd, 0, 2);
+    func_00369F78(fd, 0, 0);
+    buffer = func_0035A828(size);
+    D_004391A4 = buffer;
+    func_0036A1B0(fd, buffer, size);
+    func_00369DF8(fd);
+}
 
 void sdfDevStartLoad(s32 name, s32 mode) {
     u32 file[12];

@@ -268,7 +268,9 @@ typedef struct BrsSkillPackageWork {
     s32 panelGroup;          /* 0x51C: start of the group passed to setup */
     s32 spriteArg0;          /* 0x520 */
     s32 spriteArg1;          /* 0x524 */
-    u8 pad528[0xA80C];
+    u8 pad528[0x58];
+    s32 setupState;          /* 0x580 */
+    u8 pad584[0xA7B0];
     s32 panelHandle;         /* 0xAD34 */
     s32 spriteHandle;        /* 0xAD38 */
     u8 padAD3C[0x174];
@@ -303,7 +305,32 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
         (((BrsSelectedRow *)((u8 *)work + 0x2F0))[work->selectedRow].unit))->unitId);
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299280);
+extern void effDestroyResourceSlotSet(s32);
+extern void mnuClearEntries();
+extern void mnuReleasePartyIconBundles();
+extern void mnuShutdownContext();
+extern void mnuDestroyPanelGroup(s32);
+extern void func_002C1050(s32);
+extern void mnuDestroyEffectResources(s32);
+extern void mnuReleaseStaffMenuTextureHandles();
+extern void mnuReleaseTitleEffectSprites();
+extern void mnuResetWorkFloats(void);
+
+void func_00299280(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
+    s32 panelContext = work + 0x690;
+
+    effDestroyResourceSlotSet(ctx->unitHandle);
+    mnuClearEntries(panelContext);
+    mnuReleasePartyIconBundles(panelContext);
+    mnuShutdownContext(panelContext);
+    mnuDestroyPanelGroup(ctx->panelHandle);
+    func_002C1050(ctx->spriteHandle);
+    mnuDestroyEffectResources(work + 0xAD40);
+    mnuReleaseStaffMenuTextureHandles(work + 0x51C);
+    mnuReleaseTitleEffectSprites(work + 0x51C);
+    mnuResetWorkFloats();
+}
 
 s32 brsStartPartyPanelResourcesOnce(s32 work) {
     if (*(s32 *)(work + 0x580) != 0) {
@@ -320,7 +347,36 @@ s32 brsStartPartyPanelResourcesOnce(s32 work) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_002993D0);
+extern s32 movAreTitleEffectsReady(s32, s32);
+extern s32 mnuBindCampEffectWhenLoaded(s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+
+s32 func_002993D0(s32 work) {
+    BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
+
+    if (ctx->setupState == 0) {
+        return 1;
+    }
+    if (ctx->setupState == 2) {
+        return 0;
+    }
+    if (movAreTitleEffectsReady(ctx->fadeTarget, work + 0x51C) == 0) {
+        return 1;
+    }
+    if (func_002C6CE8() == 1) {
+        return 1;
+    }
+    if (ctx->unitHandle == 0) {
+        return 1;
+    }
+    if (mnuBindCampEffectWhenLoaded(work + 0xAD40) == 0) {
+        return 1;
+    }
+    brsOpenSkillPackagePanel(ctx);
+    ctx->setupState = 2;
+    kwlnFadeOutStart(0, 0, 0, 15);
+    return 0;
+}
 
 extern s32 D_00435DD0;
 

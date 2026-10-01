@@ -132,8 +132,8 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-s64 mnuStartMovieMenuSfx16(s32 work) {
-    return mnuDrawSprite(0, 0, 0, work, 0, 0x1F, 0x53);
+void mnuStartMovieMenuSfx16(s32 work) {
+    mnuDrawSprite(0, 0, 0, work, 0, 0x1F, 0x53);
 }
 
 void mnuStartMovieMenuSfx17(u32 work) {
@@ -170,7 +170,25 @@ void mnuSlideBarSetStateB(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4110);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+
+void func_002A4110(SlideBar *bar, s32 value) {
+    if (bar->active == 0 && bar->pos == 0) {
+        return;
+    }
+    mnuDrawSprite(0, 0, 0, bar->pos / 4, 0, 2, value);
+    if (bar->active != 0) {
+        bar->pos += 0x20;
+    } else {
+        bar->pos -= 0x20;
+    }
+    if (bar->pos < 0) {
+        bar->pos = 0;
+    }
+    if (bar->pos > 0x200) {
+        bar->pos = 0x200;
+    }
+}
 
 void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
     switch (mode) {

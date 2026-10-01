@@ -20,8 +20,6 @@ extern s32 kwlnTaskFindByPriority(u32);
 
 extern s64 evtFindTaskById(void);
 
-s32 effDestroyResourceSlotSet(u32 sprite);
-
 extern s32 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
@@ -816,9 +814,7 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
-s64 func_00244360(ShopScene *scene) {
-    return effDestroyResourceSlotSet(scene->spriteResource);
-}
+INCLUDE_ASM(const s32, "game/code_00242608", func_00244360);
 
 extern s32 D_003BAA00;
 extern u8 *D_003BAA68;

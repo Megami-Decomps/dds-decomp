@@ -1,15 +1,5 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257200);
-
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
-
-INCLUDE_ASM(const s32, "game/code_00257200", func_002573E8);
-
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257670);
-
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
-
 typedef struct MantraPulseEntry {
     s32 unk_0;
     s32 active;
@@ -21,6 +11,42 @@ typedef struct MantraPulseGrid {
     u8 pad08[0xC];
     s32 stride;
 } MantraPulseGrid;
+
+extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
+extern void func_00257150();
+extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
+
+void func_00257200(s32 arg0, s32 arg1, s32 arg2) {
+    itfDspDrawStrip(0, 0, 0, arg1, arg2);
+    func_00257150(arg0, arg1, arg2);
+    mnuChooseDisplaySpriteKindFromEntryFlags(arg0, arg1, arg2);
+}
+
+INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
+
+INCLUDE_ASM(const s32, "game/code_00257200", func_002573E8);
+
+extern void *func_002CB3B8(s32, s32);
+extern void func_002593E0(s32, MantraPulseGrid *, MantraPulseEntry *);
+extern s32 D_003BC4CC;
+
+void func_00257670(s32 argument, MantraPulseGrid *grid) {
+    MantraPulseEntry *entry;
+    s32 row;
+    s32 col;
+
+    func_002CB3B8(D_003BC4CC, 1);
+    for (row = 0; row < 0x11; row++) {
+        entry = grid->entries + row * grid->stride;
+        for (col = 0; col < 15; col++) {
+            if (entry[col].active != 0) {
+                func_002593E0(argument, grid, &entry[col]);
+            }
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
 
 typedef struct MantraPulseDisplayWork {
     u8 pad00[0x5AC];
@@ -78,14 +104,13 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
 
 typedef struct {
     u8 pad00[0x484];
-    s32 field_0x484;
+    MantraPulseGrid *grid; /* 0x484 */
     u8 pad488[8];
     s32 field_0x490;
 } DisplayGridWork;
 
-extern void func_00257670(s32 argument, s32 work);
 void func_00257BD8(DisplayGridWork *work, s32 argument) {
-    func_00257670(argument, work->field_0x484);
+    func_00257670(argument, work->grid);
     mnuAdvanceWrappingFrame(&work->field_0x490);
 }
 

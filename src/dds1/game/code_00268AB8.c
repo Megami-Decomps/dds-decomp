@@ -502,7 +502,22 @@ s32 mnuPollTitleStreamStateLocked(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A778);
+extern void fileWaitIdle(void);
+
+void func_0026A778(void) {
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuUpdateTitleTransition() == 1) {
+        fileWaitIdle();
+        mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
+    }
+    if (mnuTitleStreamStatus[4] != 1) {
+        mnuTitleStreamStatus[4] = 0;
+        mnuTitleStreamStatus[9] = 3;
+        *(u32 *)D_003D9178 = 0;
+    }
+    func_003003F0("----------- AT3 BGM Play ------------\n");
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 void mnuMarkTitleStreamResetPending(void) {
     WaitSema(mnuTitleStreamSemaphore);

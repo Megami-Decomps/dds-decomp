@@ -278,11 +278,7 @@ void *effCreateChannel(void *rows, u32 count) {
     return channel;
 }
 
-s64 effReleaseInterpolationChannel(u32 *p) {
-    if (p != NULL) {
-        func_003297C8((void *)*p);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0019A0C0", effReleaseInterpolationChannel);
 
 /* Interpolate the channel; advance three records when its position wraps. */
 s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {

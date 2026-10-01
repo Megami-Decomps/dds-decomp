@@ -210,7 +210,7 @@ typedef struct BattleSlotRecord {
     u16 pad02;
     u16 group;
     u8 pad06[8];
-    u16 mask;
+    u16 actionMask;
     u8 pad10[0x1C4 - 0x10];
 } BattleSlotRecord;
 
@@ -572,7 +572,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
                     if ((query & 0xFFFF) == 0x7FFF) {
                         return ((func_001AA840() & query) & 0xFFFF) != 0;
                     }
-                    if ((record->mask & 0x7FFF & query) != 0) {
+                    if ((record->actionMask & 0x7FFF & query) != 0) {
                         return 1;
                     }
                 }
@@ -1721,16 +1721,16 @@ s32 btlSelectTargetsByMode(s32 task, s32 mode) {
 extern u32 btlGetEffectActor(void);
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
-    u32 value = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, value);
+    u32 actor = btlGetEffectActor();
+    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, actor);
     return 1;
 }
 
 u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
-    u64 value;
+    u64 unitId;
 
-    value = func_00219318();
-    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, value);
+    unitId = func_00219318();
+    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, unitId);
     return 1;
 }
 
@@ -2105,21 +2105,7 @@ void func_00218250(void) {
     *(u32 *)((BattleWork *)battle)->sub = 0;
 }
 
-s64 btlClaimCommandSlot(s32 battler, s32 task) {
-    s32 *slot;
-    if (((BtlUnit *)battler)->flags & 0x400) {
-        slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
-        ((BattleTaskControl *)task)->control &= ~1;
-        ((BattleTaskControl *)task)->control &= ~2;
-        if (btlIsUnitDefeatTriggeredByValueDelta(battler, 0) != 0) {
-            if (*slot != 0 && *slot != battler) {
-                btlRestoreUnitMinimumValueAndClearStatus(battler, task);
-            } else {
-                *slot = battler;
-            }
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlClaimCommandSlot);
 
 void btlStartReadyUnitAction(void) {
     BattleWork *work = (BattleWork *)func_001AA6F8();
@@ -2544,22 +2530,7 @@ void btlClearSubtaskHandle(void) {
     work->sub->task = 0;
 }
 
-s64 btlClaimCommandSlotAndTarget(s32 battler, s32 task) {
-    s32 *slot;
-    if (((BtlUnit *)battler)->flags & 0x400) {
-        slot = (s32 *)((BattleWork *)func_001AA6F8())->sub;
-        ((BattleTaskControl *)task)->control &= ~1;
-        ((BattleTaskControl *)task)->control &= ~2;
-        if (btlIsUnitDefeatTriggeredByValueDelta(battler, 0) != 0) {
-            if (*slot != 0 && *slot != battler) {
-                btlRestoreUnitMinimumValueAndClearStatus(battler, task);
-            } else {
-                slot[0] = battler;
-                slot[2] = battler;
-            }
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlClaimCommandSlotAndTarget);
 
 s32 btlSetSubtaskControlEnabled(s32 unused, s32 ignored, s32 action) {
     BattleSub *sub = ((BattleWork *)func_001AA6F8())->sub;
@@ -2994,19 +2965,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A490);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A778);
 
-s64 btlReturnUnitToGroup(BtlTask *task) {
-    if (task->flags & 8) {
-        BtlUnit *unit = task->unit;
-        if (!(unit->conditionFlags & 0x4000)) {
-            unit->flags &= ~0x20;
-            unit->flags &= ~0x08000000;
-            unit->flags |= 1;
-            func_001E2758(unit);
-            fldAppendTaskToGroup(task);
-            btlDispatchStateHandler(task, 2);
-        }
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlReturnUnitToGroup);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021A978);
 

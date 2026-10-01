@@ -53,6 +53,7 @@ void func_002D35B8();
 void func_002D4DD0();
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
+void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node);
 
 typedef struct SdfSynchronizedRequest {
     u32 value;
@@ -117,7 +118,20 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(D_003980E8[entryIndex]->unk0C >> 6);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D38B8);
+void func_002D38B8(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
+                   s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+                   s32 (*alloc)(s32)) {
+    s32 packet;
+
+    if (alloc == NULL) {
+        alloc = sdfAllocPacketAligned;
+    }
+    packet = alloc(0x100);
+    ((SdfNode *)packet)->unk4 = (u32)sdfPatchPacketResourceField;
+    func_002D35B8(packet + 0x10, D_003980E8[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendPacketRange(list, packet + 0x10, packet + 0xD0);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D39B0);
 

@@ -173,7 +173,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(s32 object) {
 }
 
 extern void mnuDestroyMantraDrawPool(u32 address);
-extern s64 evtReleaseMantraSelectionWork(u32 *p);
+extern void evtReleaseMantraSelectionWork(u32 *p);
 extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
 
 void mnuReleaseMantraMenuDrawResources(s32 object) {

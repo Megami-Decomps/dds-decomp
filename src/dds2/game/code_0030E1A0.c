@@ -114,14 +114,9 @@ void func_0030E880(void) {
 
 extern s32 sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32);
 
-s64 fldReleaseMapRequestQueues(void) {
-    func_0030EF18(D_004390AC);
-    return func_0030EF18(D_004390B0);
-}
+INCLUDE_ASM(const s32, "game/code_0030E1A0", fldReleaseMapRequestQueues);
 
-s64 func_0030E910(s32 map, s32 request, s32 value) {
-    return sdfDrawUniformlyScaledSlotImage(map, request, 0, value, 0x20, 0, 0x54);
-}
+INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E910);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E940);
 
@@ -170,11 +165,7 @@ SdfRing *func_0030EE40(s16 count, s16 limit) {
     return ring;
 }
 
-s64 func_0030EF18(u32 *sprite) {
-    if (sprite != NULL) {
-        return sdfQueueNonzeroResourceId(*sprite);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EF18);
 
 void fldAdvanceMapRequest(s32 queue, u32 first, u32 second, u32 third) {
     u32 *entry;

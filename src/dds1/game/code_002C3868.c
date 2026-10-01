@@ -13,8 +13,10 @@ extern s32 sdfCounterGetDisplayValue(void);
 
 typedef struct {
     u32 *word;         /* 0x00 */
-    u8 pad04[4];
+    u8 *info;          /* 0x04 */
     s16 value;         /* 0x08 */
+    u8 pad0A[4];
+    s16 flag;          /* 0x0E */
 } SdfCounterDisplay;
 
 typedef struct {
@@ -42,7 +44,10 @@ typedef struct {
     SdfCounterDisplay *display;        /* 0x70 */
 } SdfCounterChannel;
 
-typedef struct {
+struct SdfCounterRuntime;
+typedef void (*SdfCounterDrawFn)();
+
+typedef struct SdfCounterRuntime {
     u8 pad00[0xC];
     s32 base;                          /* 0x0C */
     SdfCounterChannel *first;          /* 0x10 */
@@ -52,7 +57,7 @@ typedef struct {
     s32 active;                        /* 0x20 */
     u8 pad24[4];
     s32 posX;                          /* 0x28 */
-    u8 pad2C[4];
+    SdfCounterDrawFn draw;             /* 0x2C */
     SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
 
@@ -176,7 +181,63 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3F78);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4160);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C42F0);
+extern s32 mnuCreateListState(s32, s32, s32);
+extern void *func_002CFEB8(s32);
+extern void *memset(void *, s32, u32);
+extern s32 mdlCollectFlagBitsIntoMask(void);
+extern SdfCounterChannel *mnuListAppendNode(s32, s32);
+extern u8 *func_002C44D0(s32);
+extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
+extern void func_002C4C88();
+extern u8 D_00390220[];
+
+s32 func_002C42F0(s32 mask, s32 index) {
+    SdfCounterDisplay *display;
+    SdfCounterChannel *channel;
+    s32 completedMask;
+    s32 count;
+    s32 i;
+
+    count = 0;
+    sdfActiveCounterRuntime = mnuCreateListState(0, 6, 0x16);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = func_002CFEB8(0x24);
+    memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = func_002C4C88;
+    completedMask = mdlCollectFlagBitsIntoMask();
+    for (i = 0; i != 10; i++) {
+        if ((mask >> i) & 1) {
+            channel = mnuListAppendNode(sdfActiveCounterRuntime, 0);
+            display = func_002CFEB8(0x10);
+            memset(display, 0, 0x10);
+            display->value = i + 1;
+            display->word = (u32 *)(D_00390220 + i * 0x18);
+            display->info = func_002C44D0(i + 1);
+            if ((completedMask >> i) & 1) {
+                display->flag = 1;
+            }
+            channel->display = display;
+            count++;
+        }
+    }
+    if (count < 6) {
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->base = count;
+    }
+    if (count == 3) {
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0x148;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x8F;
+    } else if (count == 4) {
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0x100;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x84;
+    } else if (count == 5) {
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0xD8;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7F;
+    } else {
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0xB0;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7E;
+    }
+    sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime, index);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C44D0);
 

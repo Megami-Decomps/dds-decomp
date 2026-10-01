@@ -116,7 +116,26 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     func_002BF4E0(x + (D_0036C728[26].x << 4), y + (D_0036C728[26].y << 3), z, b, 0, D_003BC520, D_0036C728[26].id, c);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FEB8);
+extern s32 func_003014F0(char *, const char *, ...);
+extern s32 func_00197A98(s32, s32, s32, s32, char *, s32);
+extern void frFontSetChainFlag(s32, u8);
+extern void func_001958A0(s32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+extern char D_003BC508[];
+
+void func_0025FEB8(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
+    char text[16];
+    s32 value;
+    s32 glyph;
+
+    func_002BF4E0(x + (D_0036C728[25].x << 4), y + (D_0036C728[25].y << 3), z, scale, 0, D_003BC520, D_0036C728[25].id, option);
+    value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
+    func_003014F0(text, D_003BC508, 0);
+    glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
+    frFontSetChainFlag(glyph, 4);
+    func_001958A0(glyph, 1, option);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025FFC8);
 

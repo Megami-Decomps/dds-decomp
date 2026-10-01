@@ -357,7 +357,27 @@ void kwlnDrawSetD88Pair(u32 first, u32 second) {
     D_003C2D88.unk14 = second;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_001069A8);
+typedef struct {
+    u32 w[10];
+} DrawWord40;
+
+extern DrawWord40 D_003C2D60;
+extern u16 D_003BD744;
+extern u16 D_003BD746;
+extern u32 effGetCh70Params(void);
+
+void func_001069A8(s32 mode) {
+    D_003C2D60 = *(DrawWord40 *)effGetCh70Params();
+    D_003BD744 = 0;
+    D_003BD746 = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= 0xFFFBFFFF;
+        kwlnDrawInitRect(&D_003C2D88.r18);
+        func_0018F3B8(&D_003C2D88);
+    } else {
+        kwlnDrawControlFlags |= 0x40000;
+    }
+}
 
 void kwlnDrawSetupD88(s32 mode) {
     DrawBlkD88 *blk = &D_003C2D88;
