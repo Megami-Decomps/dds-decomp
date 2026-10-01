@@ -180,7 +180,16 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7760);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7BA8);
 
-extern u8 *btlTrackedTaskHandles;
+/* Tracked-task state: the word at +0x3C holds status flags, and its low byte is read as the signed status code. */
+typedef struct BtlTrackedState {
+    u8 pad00[0x3C];
+    union {
+        u32 flags;
+        s8 status;
+    } word; /* 0x3C */
+} BtlTrackedState;
+
+extern BtlTrackedState *btlTrackedTaskHandles;
 extern u32 D_004367BC;
 
 s32 func_001C7D48(void) {
@@ -193,10 +202,10 @@ s32 func_001C7D48(void) {
         if (first == 0 && second == 0) {
             return -128;
         }
-        if (*(u32 *)(btlTrackedTaskHandles + 0x3C) & 0x100) {
+        if (btlTrackedTaskHandles->word.flags & 0x100) {
             return 0;
         }
-        return *(s8 *)(btlTrackedTaskHandles + 0x3C);
+        return btlTrackedTaskHandles->word.status;
     }
     return -128;
 }

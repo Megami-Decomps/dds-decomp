@@ -816,8 +816,7 @@ u32 mnuDestroySelectedPartyWindow() {
 
 void mnuSeekFirstAvailableStaffListNode(void) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue())->menu;
-    MenuSelectionState *state = (MenuSelectionState *)menu->selectedList;
-    MenuSelectionNode *node = state->list->first;
+    MenuSelectionNode *node = ((MenuSelectionState *)menu->selectedList)->list->first;
 
     while (node != NULL) {
         u32 key = node->sortKey;
@@ -827,7 +826,7 @@ void mnuSeekFirstAvailableStaffListNode(void) {
         node = node->next;
     }
     if (node != NULL) {
-        mnuSeekListNode(node->index, (s32)((MenuInputNode *)state)->flags);
+        mnuSeekListNode(node->index, (s32)((MenuSelectionState *)menu->selectedList)->list);
     }
 }
 
