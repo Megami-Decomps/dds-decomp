@@ -596,9 +596,7 @@ s32 btlHasContextFlagTwo(void) {
     return ((*(s32 *)(*(s32 *)btlActionScratchWork + 0xc) & 2) > 0);
 }
 
-s64 btlCheckCounterLimit(s32 unused, u32 limit) {
-    return btlCounterReachedLimit(unused, limit);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlCheckCounterLimit);
 
 s32 btlCounterReachedLimit(s32 unused, u32 limit) {
     if (func_001A9488(4) < limit) {
@@ -936,13 +934,9 @@ s32 action;
     return 0;
 }
 
-s64 btlAnyGroup200HasAction(s32 unused, s32 action) {
-    return btlAnyUnitHasActionInSlots(0x200, action);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup200HasAction);
 
-s64 btlAnyGroup400HasAction(s32 unused, s32 action) {
-    return btlAnyUnitHasActionInSlots(0x400, action);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup400HasAction);
 
 s32 func_00201B50(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)func_001A17F0())->units;
@@ -1052,13 +1046,9 @@ s32 btlAnyGroupUnitHasZeroStat(void) {
     return 0;
 }
 
-s64 btlAnyGroup400HasQuery(s32 unused, s32 query, u32 unused2) {
-    return btlAnyUnitHasQueuedQuery(unused, query, 0x400);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup400HasQuery);
 
-s64 btlAnyGroup200HasQuery(s32 unused, s32 query, u32 unused2) {
-    return btlAnyUnitHasQueuedQuery(unused, query, 0x200);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlAnyGroup200HasQuery);
 
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
     u8 *node = (u8 *)((BtlState *)func_001A17F0())->tasks;
@@ -1118,9 +1108,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
     return 0;
 }
 
-s64 func_00202158(void) {
-    return func_001A8CE0(0);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", func_00202158);
 
 extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
@@ -2141,9 +2129,7 @@ s32 btlInitializeResources(s32 unused, s32 resource) {
     return 1;
 }
 
-s64 btlInitResourcesWrap(s32 unused, s32 resource) {
-    return btlInitializeResources(unused, resource);
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", btlInitResourcesWrap);
 
 void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
     BtlState *battle = (BtlState *)func_001A17F0();
@@ -3746,9 +3732,7 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B190);
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B348);
 
-s64 func_0020B560(void) {
-    return func_0020B348();
-}
+INCLUDE_ASM(const s32, "game/code_001FF030", func_0020B560);
 
 s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
