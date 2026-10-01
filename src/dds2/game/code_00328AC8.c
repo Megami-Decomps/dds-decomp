@@ -57,7 +57,23 @@ void func_00328B20(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328BA0);
+extern void func_00366A78(void);
+extern s32 sdfCreateSemaphore(s32, s32, s32);
+extern s32 sdfCreateThread(void (*)(void), void *, s32, s32);
+extern char D_0045E8A0[];
+extern s32 _StartThread(s32, s32);
+
+s32 func_00328BA0(void) {
+    s32 thread;
+
+    func_00366A78();
+    D_004389C8 = 0;
+    D_004390FC = NULL;
+    D_004390F8 = sdfCreateSemaphore(1, 1, 0);
+    thread = sdfCreateThread(func_00328B20, D_0045E8A0, 0x800, 0x3E);
+    D_00439100 = thread;
+    return _StartThread(thread, 0);
+}
 
 extern s32 D_00439104;
 
