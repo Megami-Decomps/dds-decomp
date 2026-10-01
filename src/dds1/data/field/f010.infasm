@@ -1,0 +1,9 @@
+inf 1
+
+set 1 kind=255 area=255 action=1 event_hit=1 event="01eve_01"
+  flag 0 id=0 off=row0 on=row1
+end
+
+set 2 kind=255 area=255 action=1 event_hit=1 event="01eve_01"
+  flag 0 id=0 off=row0 on=0
+end
