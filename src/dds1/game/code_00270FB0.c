@@ -313,8 +313,14 @@ u8 *work;
     }
 }
 
+/* The active resource category is stored in the staff task's display mode. */
+typedef struct StaffDisplayModeState {
+    u8 pad00[0x910];
+    s32 displayMode;
+} StaffDisplayModeState;
+
 void mnuSetStaffDisplayMode(s32 next, u8 *context) {
-    s32 previous = *(s32 *)(context + 0x910);
+    s32 previous = ((StaffDisplayModeState *)context)->displayMode;
     if (next != previous) {
         if (previous != 0) {
             func_002712A0(previous);
@@ -322,7 +328,7 @@ void mnuSetStaffDisplayMode(s32 next, u8 *context) {
         if (next != 0) {
             movReleaseCategoryModels(next, context);
         }
-        *(s32 *)(context + 0x910) = next;
+        ((StaffDisplayModeState *)context)->displayMode = next;
     }
 }
 
@@ -335,6 +341,7 @@ typedef struct StaffSpriteHandles {
     u32 secondaryImage;
     u32 images[3];
     u32 extraImages[2];
+    u32 scrollPanel; /* 0x138: created panel drawn and destroyed with this task */
 } StaffSpriteHandles;
 
 void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
@@ -486,7 +493,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     }
     mnuDrainPanelTransitions(work + 8, task);
     func_00271DF8((StaffSpriteHandles *)work);
-    mnuDestroyScrollPanel(*(u32 *)(work + 0x138));
+    mnuDestroyScrollPanel(((StaffSpriteHandles *)work)->scrollPanel);
     mnuShutdownContext(work + 0x15C);
     dspCloseChannel();
     mnuReleaseAssets(work + 0x13C);
@@ -588,7 +595,7 @@ void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
     if (func_002719F0(arg1) == 0) {
         return;
     }
-    func_0027E8D8(-0x10, -8, 0, *(s32 *)(menu + 0x138), 0x53);
+    func_0027E8D8(-0x10, -8, 0, (s32)((StaffSpriteHandles *)menu)->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
     if (arg0 == 0) {
         itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);

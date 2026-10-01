@@ -1273,14 +1273,14 @@ void func_00223ED0(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
         task = btlCreateEffObjB(unit->parentUnit, kind);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
-        *(s64 *)(task + 0x40) = func_001A9920();
+        ((BattleActionTask *)task)->resourceOwner = func_001A9920();
         btlStartTask(task);
         task = btlCreateEffObjD(unit->parentUnit, 0x19F);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
         value = func_001A9920();
         ((BattleActionTask *)task)->delay = 0x26;
-        *(s64 *)(task + 0x40) = value;
+        ((BattleActionTask *)task)->resourceOwner = value;
         btlStartTask(task);
         state[3] += 1;
     }
