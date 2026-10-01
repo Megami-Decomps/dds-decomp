@@ -396,12 +396,14 @@ tables and both implementations:
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
 | `ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR` | `0x04A` | 2 | Attaches a world object to a source vector |
 | `SET_UNIT_VALUE` | `0x04B` | 2 | Writes the selected unit's 16-bit value at offset `0xBC` |
+| `ACTION_WINDOW_REQUEST_AND_POLL` | `0x05E` | 1 | Requests or polls the current action-window message and returns `-1`, `0`, or `1` |
 | `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
 | `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
 | `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
 | `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
+| `MOVE_OBJECT_ALONG_PATH` | `0x06B` | 3 | Binds the selected object to a path and applies its movement mode |
 | `SET_MESSAGE_WINDOW_GEOMETRY` | `0x071` | 3 | Applies three geometry values to the current message window |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
@@ -422,8 +424,8 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 38,882 of 53,389 native calls in the complete DDS1
-corpus and 28,401 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 41,752 of 53,389 native calls in the complete DDS1
+corpus and 29,786 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
