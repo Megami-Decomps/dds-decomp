@@ -72,9 +72,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
 
-s64 func_00225778(u32 unit) {
-    return func_002254C8(unit);
-}
+INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225778);
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */
@@ -103,8 +101,8 @@ s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     if (actor->owner->flags & 0x200) {
         if (btlGetIndexListCount(actor->targetIndexList) == 1) {
-            s32 owner = btlGetIndexListEntry(actor->targetIndexList, 0);
-            if (((BattleActionUnit *)owner)->flags & 0x400) {
+            s32 target = btlGetIndexListEntry(actor->targetIndexList, 0);
+            if (((BattleActionUnit *)target)->flags & 0x400) {
                 if ((actor->owner->flags & 0x1000) == 0) {
                     return 0;
                 }
