@@ -22,9 +22,9 @@ typedef struct ConsNode {
     /* 0x0E */ s16 rows;
     /* 0x10 */ u16 cursorColumn;
     /* 0x12 */ u16 cursorRow;
-    /* 0x14 */ u8 unk14;
+    /* 0x14 */ u8 controlByte;
     /* 0x15 */ u8 pad15;
-    /* 0x16 */ u8 unk16;
+    /* 0x16 */ u8 textAttribute;
     /* 0x17 */ u8 unk17;
     /* 0x18 */ u32 bufferHandle;
     /* 0x1C */ u8 *cells;
@@ -1491,8 +1491,8 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->columns = columns;
     node->rows = rows;
     node->unk17 = 8;
-    node->unk14 = 0;
-    node->unk16 = 0;
+    node->controlByte = 0;
+    node->textAttribute = 0;
     bufferHandle = func_002D03F8((columns * rows) * 2);
     node->bufferHandle = bufferHandle;
     node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);

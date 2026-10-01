@@ -28,8 +28,8 @@ typedef struct DevRequest {
 } DevRequest;
 
 typedef struct DevState {
-    struct DevState *unk0; /* 0x0 */
-    struct DevState *unk4; /* 0x4 */
+    struct DevState *next; /* 0x0 */
+    struct DevState *previous; /* 0x4 */
     struct DevState *workerNext; /* 0x8 */
     struct DevState *workerPrev; /* 0xC */
     void *resource; /* 0x10 */
@@ -632,9 +632,9 @@ void func_002E5DA0(DevState *state) {
     if (worker->handle < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
     }
-    state->unk4 = D_003BD41C;
+    state->previous = D_003BD41C;
     if (D_003BD41C != NULL) {
-        D_003BD41C->unk0 = state;
+        D_003BD41C->next = state;
     } else {
         D_003BD418 = state;
     }
@@ -663,17 +663,17 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     s64 interrupts;
 
     interrupts = func_00312C08(state);
-    prev = state->unk4;
-    next = state->unk0;
+    prev = state->previous;
+    next = state->next;
     if (prev == NULL) {
         D_003BD424 = next;
     } else {
-        prev->unk0 = next;
+        prev->next = next;
     }
     if (next == NULL) {
         D_003BD428 = prev;
     } else {
-        next->unk4 = prev;
+        next->previous = prev;
     }
     D_003BD420 -= 1;
     if (interrupts != 0) {
