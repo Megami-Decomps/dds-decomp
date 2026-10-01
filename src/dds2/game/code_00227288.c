@@ -1217,8 +1217,8 @@ s32 func_0022B760(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 value = 100;
 
-    if (state->unk_6EC != NULL) {
-        value = state->unk_6EC();
+    if (state->scriptReturnHook != NULL) {
+        value = state->scriptReturnHook();
     }
     scrSetIntegerReturnValue(value);
     return 1;

@@ -88,8 +88,8 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         btlFlagAllUnitDefeatCandidatesTask();
         func_0020B348((void *)command, (void *)command, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(command->task->unk_60) == 1) {
-            void *target = (void *)btlGetIndexListEntry((void *)command->task->unk_60, 0);
+        if (btlGetIndexListCount(command->task->targetList) == 1) {
+            void *target = (void *)btlGetIndexListEntry((void *)command->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B190((u8 *)command, target);
             command->state = 0;
@@ -382,8 +382,8 @@ s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command) {
     BtlTask *entry = command->task;
     BtlUnit *other;
     if (entry->unit->flags & 0x200) {
-        if (btlGetIndexListCount((void *)entry->unk_60) == 1) {
-            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->unk_60, 0);
+        if (btlGetIndexListCount((void *)entry->targetList) == 1) {
+            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->targetList, 0);
             if ((other->flags & 0x400) == 0) {
                 return 0;
             }
@@ -413,7 +413,7 @@ s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount((void *)command->task->unk_60) == 1) {
+        if (btlGetIndexListCount((void *)command->task->targetList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseLinkedActionPose(command);
         } else {

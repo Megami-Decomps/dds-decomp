@@ -60,16 +60,16 @@ EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
 }
 
 void effTypeDispatch(EffWork *work) {
-    D_00355734[work->type].handler(work->unk4);
+    D_00355734[work->type].handler(work->payload);
 }
 
 void effTypeDispatchFree(EffWork *work) {
-    D_00355738[work->type].handler(work->unk4);
+    D_00355738[work->type].handler(work->payload);
     sdfReleaseChipBlock(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
-    return (u32)work->unk4;
+    return (u32)work->payload;
 }
 
 u32 func_0018CBC0(u32 *value) {
@@ -87,7 +87,7 @@ void effTypeDispatchGuardedA(EffWork *work) {
     void (*handler)(void *) = D_0035573C[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -95,7 +95,7 @@ void effTypeDispatchGuardedB(EffWork *work) {
     void (*handler)(void *) = D_00355744[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -103,7 +103,7 @@ void effTypeDispatchGuardedC(EffWork *work) {
     void (*handler)(void *) = D_00355740[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -115,19 +115,19 @@ void effSetSubSlot(EffWork *work, s32 slotValue) {
 
     switch (type) {
     case 0:
-        ((EffSub *)work->unk4)->unk20 = value;
+        ((EffSub *)work->payload)->unk20 = value;
         return;
     case 1:
-        ((EffSub *)work->unk4)->unk40 = value;
+        ((EffSub *)work->payload)->unk40 = value;
         return;
     case 2:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     case 3:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     case 4:
-        ((EffSub *)work->unk4)->unk50 = value;
+        ((EffSub *)work->payload)->unk50 = value;
         return;
     default:
         return;
@@ -140,15 +140,15 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
 
     switch (type) {
     case 0:
-        return ((EffSub *)work->unk4)->unk20;
+        return ((EffSub *)work->payload)->unk20;
     case 1:
-        return ((EffSub *)work->unk4)->unk40;
+        return ((EffSub *)work->payload)->unk40;
     case 2:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 3:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 4:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     default:
         break;
     }
@@ -161,19 +161,19 @@ void effAllocSubWork(EffWork *work) {
 
     switch (type) {
     case 0:
-        handlerArg = work->unk4;
+        handlerArg = work->payload;
         break;
     case 1:
-        handlerArg = work->unk4;
+        handlerArg = work->payload;
         break;
     case 2:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     case 3:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     case 4:
-        handlerArg = work->unk4 + 0x40;
+        handlerArg = work->payload + 0x40;
         break;
     default:
         break;
@@ -297,16 +297,16 @@ INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018CF98);
 /* The root's +8 points to the first node; each node's +0x38 points to the
  * next. The root also owns the separate allocation stored at +4. */
 void effFreeWorkList(EffWork *root) {
-    EffWork *node = (EffWork *)root->unk8;
+    EffWork *node = (EffWork *)root->listHead;
 
     if (node != NULL) {
         do {
-            EffWork *next = node->unk38;
+            EffWork *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    sdfReleaseChipBlock(root->unk4);
+    sdfReleaseChipBlock(root->payload);
     sdfReleaseChipBlock(root);
 }
 
@@ -359,9 +359,9 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018D4B8);
 
 void effFreeWork(EffWork *work) {
-    if (work->unk3C != 0) {
-        sdfTexReleaseReferenceViaHandler(work->unk3C);
-        work->unk3C = 0;
+    if (work->textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        work->textureHandle = 0;
     }
     sdfReleaseChipBlock(work);
 }
@@ -377,12 +377,12 @@ u32 effGetWorkParam(EffWork *work) {
 }
 
 u32 effGetWorkLink(EffWork *work) {
-    return work->unk8;
+    return work->listHead;
 }
 
 u32 effFormatMsgNames(EffMsg *message, void *destination) {
-    func_003014F0(destination, D_003BB060, message->unk40[1], message->unk34 + 1);
-    return *message->unk34;
+    func_003014F0(destination, D_003BB060, message->prefixRecord[1], message->nameRecord + 1);
+    return *message->nameRecord;
 }
 
 void effSetWorkFirst(EffWork *work, u32 value) {
@@ -398,20 +398,20 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
     message->unk2C = second;
 }
 
-/* Replace the work's sound handle, keeping the newly acquired voice handle
- * but releasing the temporary resource returned by the loader. */
-void effSetupWorkSound(EffWork *work, u64 soundResource) {
-    u32 voiceHandle;
+/* Replace the retained texture reference, then release the temporary resource
+ * returned by the loader. */
+void effSetupWorkSound(EffWork *work, u64 textureResource) {
+    u32 textureHandle;
     u64 loadedResource;
     u32 resourceWords[4];
 
-    if (work->unk3C != 0) {
-        sdfTexReleaseReferenceViaHandler(work->unk3C);
-        work->unk3C = 0;
+    if (work->textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        work->textureHandle = 0;
     }
-    loadedResource = func_002EB028(soundResource, resourceWords, 0);
-    voiceHandle = func_002D3288(resourceWords[0]);
-    work->unk3C = voiceHandle;
+    loadedResource = func_002EB028(textureResource, resourceWords, 0);
+    textureHandle = func_002D3288(resourceWords[0]);
+    work->textureHandle = textureHandle;
     func_002D0918(loadedResource);
 }
 
@@ -493,8 +493,8 @@ void *effAllocSlotArray(s32 count) {
     EffSlot38 *slot = retainedAddress;
     u8 *headerAddress = (u8 *)slot + count * 0x38;
 
-    ((EffArrHdr *)headerAddress)->unk8 = allocation;
-    ((EffArrHdr *)headerAddress)->unk0 = retainedAddress;
+    ((EffArrHdr *)headerAddress)->allocation = allocation;
+    ((EffArrHdr *)headerAddress)->slots = retainedAddress;
     ((EffArrHdr *)headerAddress)->unk4 = count;
     if (count != 0) {
         do {

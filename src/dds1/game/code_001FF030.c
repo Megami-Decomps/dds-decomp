@@ -1269,18 +1269,18 @@ s32 func_00203098(s32 actor, s32 action) {
             }
         }
         if (found != 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, btlGetIndexListEntry((void *)list, bestIndex));
+            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, btlGetIndexListEntry((void *)list, bestIndex));
         } else {
             u32 n = count;
             for (i = 0; i < n; i++) {
                 flags[i] = 1;
             }
-            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         }
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1317,11 +1317,11 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         } else {
             result = func_002024A8(list, flags, count);
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, result);
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, result);
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1343,11 +1343,11 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1369,11 +1369,11 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1395,11 +1395,11 @@ s32 func_002035E0(s32 actor, s32 mode) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1446,16 +1446,16 @@ s32 func_00203CA8(s32 actor) {
             }
         }
         if (found == 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, (s32)((BtlTask *)actor)->unit);
+            btlAppendIndexListEntry(((BtlTask *)actor)->targetList, (s32)((BtlTask *)actor)->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8((s32)list, picked, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8((s32)list, picked, count));
         btlFreeIndexList(list);
         return 1;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, (s32)list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, (s32)list);
         break;
     }
     return 1;
@@ -1467,7 +1467,7 @@ s32 btlAppendSelfAfterTargetScan(s32 actor) {
     void *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, (s32)((BtlTask *)actor)->unit);
+    btlAppendIndexListEntry(((BtlTask *)actor)->targetList, (s32)((BtlTask *)actor)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1486,7 +1486,7 @@ u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, actor);
     return 1;
 }
 
@@ -1505,11 +1505,11 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1543,11 +1543,11 @@ s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1577,11 +1577,11 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->unk_60, func_002024A8(list, flags, count));
+        btlAppendIndexListEntry(((BtlTask *)actor)->targetList, func_002024A8(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->unk_60, list);
+        btlCopyIndexList(((BtlTask *)actor)->targetList, list);
         break;
     }
     btlFreeIndexList((void *)list);
@@ -1662,8 +1662,8 @@ extern void func_002DD688(f32);
 extern void func_001DB698();
 
 /* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
-   swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). The result is unused. */
-s32 func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift) {
+   swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). */
+void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -3500,7 +3500,7 @@ s32 btlPickRandomMarkedTask(void) {
     } else {
         task->arg = 0xD2;
     }
-    btlAppendIndexListEntry(task->unk_60, (s32)unit);
+    btlAppendIndexListEntry(task->targetList, (s32)unit);
     mark->marked = 1;
     return -1;
 }
@@ -3805,8 +3805,8 @@ s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
         if ((flags & 0x1000) == 0) {
             return 0;
         }
-        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
+        if (btlGetIndexListCount(((BtlTask *)entry)->targetList) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->targetList, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -3827,8 +3827,8 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u8 *other;
     if (((BtlTask *)entry)->unit->flags & 0x200) {
-        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
+        if (btlGetIndexListCount(((BtlTask *)entry)->targetList) == 1) {
+            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->targetList, 0);
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
@@ -3876,8 +3876,8 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
         }
         return 1;
     } else if (flags & 0x2000) {
-        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->unk_60, 0);
+        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->targetList) == 1) {
+            void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->targetList, 0);
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B190(unit, other);
         } else {

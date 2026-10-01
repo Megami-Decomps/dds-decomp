@@ -115,6 +115,7 @@ s64 mnuStaffImageEnterA(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_00273AB0", func_00273B98);
 
+
 u32 func_00273C40(void) {
     return 1;
 }

@@ -107,7 +107,7 @@ BillObj *billCloneList(BillObj *obj) {
 
     data = obj->entryList;
     n = data->entryCount;
-    data->unk14 = data->unk14 + 1;
+    data->listRefCount = data->listRefCount + 1;
     newobj = func_00328D68(n * 20 + 0x6C);
     newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
@@ -206,7 +206,7 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     newobj = D_003AA990[index].func(data);
     func_00158D68(newobj);
     newobj->kind = index;
-    newobj->callback = D_003AA990[index].unk4;
+    newobj->callback = D_003AA990[index].callback;
     return newobj;
 }
 
@@ -237,7 +237,7 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
         copy->kind = source->kind;
         copy->callback = source->callback;
         data = source->entryList;
-        data->unk8 = data->unk8 + 1;
+        data->childRefCount = data->childRefCount + 1;
         copy->entryList = data;
     }
     return copy;

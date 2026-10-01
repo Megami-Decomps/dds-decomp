@@ -115,7 +115,7 @@ void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s3
 }
 
 void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->unk0C >> 6);
+    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
 }
 
 void func_002D38B8(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
@@ -359,8 +359,8 @@ void sdfInitPacketList(SdfListHead *list) {
     list->unk0 = 0;
     list->first = 0;
     list->last = 0;
-    list->unk10 = 0;
-    list->unk14 = 0;
+    list->firstReferenceSource = 0;
+    list->secondReferenceSource = 0;
     list->unk18 = 0;
     list->unk1C = 0;
 }
@@ -484,7 +484,7 @@ INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
 u32 sdfCreateReferenceDmaNode(u32 source) {
     SdfDmaNode *node = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     SdfDmaSrc *src = (SdfDmaSrc *)source;
-    u64 tag = src->unk0;
+    u64 tag = src->quadwordCount;
     u32 address = ((u32)src + 0x10) & 0x0FFFFFFF;
     s64 shifted = (s64)address << 32;
 
@@ -492,7 +492,7 @@ u32 sdfCreateReferenceDmaNode(u32 source) {
     tag |= shifted;
     node->unk0 = tag;
     node->unk10 = 0;
-    node->unk8 = src->unk8;
+    node->unk8 = src->vifCommands;
     return (u32)node;
 }
 
@@ -519,14 +519,14 @@ void sdfChainReferenceNodes(SdfListHead *list) {
     u32 address;
     u32 source;
 
-    source = list->unk14;
+    source = list->secondReferenceSource;
     if (source != 0) {
         node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
         address = list->first & 0xFFFFFFF;
         list->first = (u32)node;
         node->chain = ((s64)address << 32) | 0x20000000;
     }
-    source = list->unk10;
+    source = list->firstReferenceSource;
     if (source != 0) {
         node = (SdfRefNode *)sdfCreateReferenceDmaNode(source);
         address = list->first & 0xFFFFFFF;
@@ -1022,7 +1022,7 @@ void sdfCreateExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s
 }
 
 void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->unk08]->unk0C >> 6);
+    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5CD0);

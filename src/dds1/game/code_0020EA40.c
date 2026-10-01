@@ -143,7 +143,7 @@ s32 btlDispatchActionAnimation(BtlLinkedCommand *command) {
         btlFlagAllUnitDefeatCandidatesTask();
         func_0020DC38(command, command, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(command->task->unk_60) == 1) {
+        if (btlGetIndexListCount(command->task->targetList) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseLinkedActionPose(command);
             command->state = 0;

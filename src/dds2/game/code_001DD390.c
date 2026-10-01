@@ -2180,7 +2180,7 @@ void btlApplyUnitModelScaledValue(u8 *object) {
         return;
     }
     context = btlGetRuntime();
-    ((BtlUnit *)object)->unkE8 &= ~1;
+    ((BtlUnit *)object)->updateFlags &= ~1;
     volume = ((BtlUnit *)object)->fF4;
     resource = *(u8 **)(object + 0x340);
     *(f32 *)(*(u8 **)(*(u8 **)(resource + 0x8C) + 0x1C) + 0x20) =
@@ -2189,7 +2189,7 @@ void btlApplyUnitModelScaledValue(u8 *object) {
 
 void btlResetUnitModelProgress(BtlUnit *unit) {
     if (unit->flags & 2) {
-        unit->unkE8 |= 1;
+        unit->updateFlags |= 1;
         unit->ext->info->data->unk20 = 0;
     }
 }
@@ -2244,7 +2244,7 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     if (!(unit->flags & 2)) {
         return 1;
     }
-    if (unit->unkF0 != 2) {
+    if (unit->effectState != 2) {
         return 1;
     }
     return unit->ext->info->data->b30 == 5;
@@ -2334,7 +2334,7 @@ s32 btlIsUnitAtStoredPosition(u8 *object) {
     func_001E3108(object, position);
     if (((BtlUnit *)object)->positionX == position[0] &&
         ((BtlUnit *)object)->positionY == position[1] &&
-        ((BtlUnit *)object)->unk38 == position[2]) {
+        ((BtlUnit *)object)->positionZ == position[2]) {
         return 1;
     }
     return 0;
@@ -2635,7 +2635,7 @@ SoundTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
 
 u32 btlPollThresholdTask(s32 *arguments) {
     if ((s32)btlGetUnitModelValue1C((BtlUnit *)arguments[0]) >= arguments[1]) {
-        if ((((BtlUnit *)arguments[0])->unkE8 & 1) == 0) {
+        if ((((BtlUnit *)arguments[0])->updateFlags & 1) == 0) {
             btlResetUnitModelProgress((BtlUnit *)arguments[0]);
         }
         return 1;
@@ -4565,7 +4565,7 @@ s32 btlPositionActorIndexUnits(ActionUnit *action) {
     for (unit = work->actorList; unit != 0; unit = unit->nextActor) {
         if ((unit->flags & 0x100) && unit->lookupId != 1) {
             func_001E3108((u8 *)unit, (s128 *)pos);
-            pos[2] = unit->unk38 - 90.0f;
+            pos[2] = unit->positionZ - 90.0f;
             btlSetUnitPosition(unit, pos);
         }
     }

@@ -69,16 +69,16 @@ EffResult *effAllocDispatch(s32 kind, s32 input) {
 }
 
 void effTypeDispatch(EffWork *work) {
-    D_003B2064[work->type].handler(work->unk4);
+    D_003B2064[work->type].handler(work->payload);
 }
 
 void effTypeDispatchFree(EffWork *work) {
-    D_003B2068[work->type].handler(work->unk4);
+    D_003B2068[work->type].handler(work->payload);
     sdfReleaseChipBlock(work);
 }
 
 u32 effGetHandlerArg(EffWork *work) {
-    return (u32)work->unk4;
+    return (u32)work->payload;
 }
 
 u32 func_001947F8(u32 *value) {
@@ -96,7 +96,7 @@ void effTypeDispatchGuardedA(EffWork *work) {
     void (*handler)(void *) = D_003B206C[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -104,7 +104,7 @@ void effTypeDispatchGuardedB(EffWork *work) {
     void (*handler)(void *) = D_003B2074[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -112,7 +112,7 @@ void effTypeDispatchGuardedC(EffWork *work) {
     void (*handler)(void *) = D_003B2070[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->unk4);
+        handler(work->payload);
     }
 }
 
@@ -122,19 +122,19 @@ void effSetSubSlot(EffWork *work, s32 slot) {
 
     switch (kind) {
     case 0:
-        ((EffSub *)work->unk4)->unk20 = slotByte;
+        ((EffSub *)work->payload)->unk20 = slotByte;
         return;
     case 1:
-        ((EffSub *)work->unk4)->unk40 = slotByte;
+        ((EffSub *)work->payload)->unk40 = slotByte;
         return;
     case 2:
-        ((EffSub *)work->unk4)->unk50 = slotByte;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     case 3:
-        ((EffSub *)work->unk4)->unk50 = slotByte;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     case 4:
-        ((EffSub *)work->unk4)->unk50 = slotByte;
+        ((EffSub *)work->payload)->unk50 = slotByte;
         return;
     default:
         return;
@@ -146,15 +146,15 @@ u32 effGetSubSlot(EffWork *work, s32 unused) {
 
     switch (kind) {
     case 0:
-        return ((EffSub *)work->unk4)->unk20;
+        return ((EffSub *)work->payload)->unk20;
     case 1:
-        return ((EffSub *)work->unk4)->unk40;
+        return ((EffSub *)work->payload)->unk40;
     case 2:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 3:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     case 4:
-        return ((EffSub *)work->unk4)->unk50;
+        return ((EffSub *)work->payload)->unk50;
     default:
         break;
     }
@@ -167,19 +167,19 @@ void effAllocSubWork(EffWork *work) {
 
     switch (kind) {
     case 0:
-        handlerInput = work->unk4;
+        handlerInput = work->payload;
         break;
     case 1:
-        handlerInput = work->unk4;
+        handlerInput = work->payload;
         break;
     case 2:
-        handlerInput = work->unk4 + 0x40;
+        handlerInput = work->payload + 0x40;
         break;
     case 3:
-        handlerInput = work->unk4 + 0x40;
+        handlerInput = work->payload + 0x40;
         break;
     case 4:
-        handlerInput = work->unk4 + 0x40;
+        handlerInput = work->payload + 0x40;
         break;
     default:
         break;
@@ -298,16 +298,16 @@ s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
 INCLUDE_ASM(const s32, "game/code_00194700", func_00194BD0);
 
 void effFreeWorkList(EffWork *root) {
-    EffWork *node = (EffWork *)root->unk8;
+    EffWork *node = (EffWork *)root->listHead;
 
     if (node != NULL) {
         do {
-            EffWork *next = node->unk38;
+            EffWork *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
     }
-    sdfReleaseChipBlock(root->unk4);
+    sdfReleaseChipBlock(root->payload);
     sdfReleaseChipBlock(root);
 }
 
@@ -360,12 +360,12 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
 
 void effFreeWork(EffWork *work) {
-    s32 soundHandle;
+    s32 textureHandle;
 
-    soundHandle = work->unk3C;
-    if (soundHandle != 0) {
-        sdfTexReleaseReferenceViaHandler(soundHandle);
-        work->unk3C = 0;
+    textureHandle = work->textureHandle;
+    if (textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(textureHandle);
+        work->textureHandle = 0;
     }
     sdfReleaseChipBlock(work);
 }
@@ -380,12 +380,12 @@ u32 effGetWorkParam(EffWork *work) {
 }
 
 u32 effGetWorkLink(EffWork *work) {
-    return work->unk8;
+    return work->listHead;
 }
 
 u32 effFormatMsgNames(EffMsg *message, void *destination) {
-    func_0035C860(destination, D_00436450, message->unk40[1], message->unk34 + 1);
-    return *message->unk34;
+    func_0035C860(destination, D_00436450, message->prefixRecord[1], message->nameRecord + 1);
+    return *message->nameRecord;
 }
 
 void effSetWorkFirst(EffWork *work, u32 value) {
@@ -402,17 +402,17 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
 }
 
 void effSetupWorkSound(EffWork *work, u64 resource) {
-    u32 soundHandle;
+    u32 textureHandle;
     u64 allocation;
     u32 resourceData[4];
 
-    if (work->unk3C != 0) {
-        sdfTexReleaseReferenceViaHandler(work->unk3C);
-        work->unk3C = 0;
+    if (work->textureHandle != 0) {
+        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        work->textureHandle = 0;
     }
     allocation = func_00343ED0(resource, resourceData, 0);
-    soundHandle = func_0032C138(resourceData[0]);
-    work->unk3C = soundHandle;
+    textureHandle = func_0032C138(resourceData[0]);
+    work->textureHandle = textureHandle;
     func_003297C8(allocation);
 }
 
@@ -495,8 +495,8 @@ void *effAllocSlotArray(s32 count) {
     EffSlot38 *slot = slotBase;
     u8 *end = (u8 *)(slot + count);
 
-    ((EffArrHdr *)end)->unk8 = allocation;
-    ((EffArrHdr *)end)->unk0 = slotBase;
+    ((EffArrHdr *)end)->allocation = allocation;
+    ((EffArrHdr *)end)->slots = slotBase;
     ((EffArrHdr *)end)->unk4 = count;
     if (count != 0) {
         do {

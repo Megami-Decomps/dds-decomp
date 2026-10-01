@@ -408,7 +408,7 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     mnuSelectPage(window, index);
     func_002ABD60(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, 0, 0);
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 1, 0);
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -554,7 +554,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     mnuSelectPage(window, index);
     func_002AC408(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
@@ -697,7 +697,7 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     mnuSelectPage(window, index);
     func_002AC8F0(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->unk6C, context->spriteArg0,
+    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {

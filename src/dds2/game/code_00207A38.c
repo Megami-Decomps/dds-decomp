@@ -594,8 +594,8 @@ void func_00208F78(void) {
         btlFlagUnitDefeatCandidate((s32)actor);
         btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
         btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
-        if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->unkF0 != 0) ||
-            (actor->unkE8 & 2) != 0) {
+        if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->effectState != 0) ||
+            (actor->updateFlags & 2) != 0) {
             func_001E2758((s32)actor);
             actor->unkF8 = 0;
             actor->unkFA = 0;
@@ -2002,7 +2002,7 @@ u32 func_0020C530(void) {
     s32 context;
 
     context = func_0010D8D0();
-    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk134);
+    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->actionTime);
     return 1;
 }
 

@@ -201,7 +201,6 @@ LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A3E8);
-
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A528);
 
 typedef struct LmapDrawSurface {

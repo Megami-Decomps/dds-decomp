@@ -114,7 +114,7 @@ typedef struct EffResourceSet {
 
 /* Attach the indexed effect resource to a new billboard and increment its reference count. */
 void effRetainResource(s32 index) {
-    s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].unk00, 0);
+    s32 *effect = (s32 *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
     s32 *resource = ((EffResourceOwner *)D_003D6438[index])->resource;
     s32 references = resource[2];
 

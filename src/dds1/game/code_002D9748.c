@@ -675,7 +675,7 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
         entry->unk10 = asset->unk20;
     }
     entry->unk14 = asset->unk28;
-    resource = asset->unk2C;
+    resource = asset->texture;
     if (resource != NULL) {
         entry->unk38 = func_002D2478(resource);
         entry->unk40 = func_002D2468(resource);
@@ -806,7 +806,7 @@ void sdfCopyAssetParameterState(SdfAsset *dst, SdfAsset *src) {
     dst->unk1C = src->unk1C;
     dst->unk18 = src->unk18;
     *(u16 *)&dst->pad00[4] = *(u16 *)&src->pad00[4];
-    dst->unk2C = src->unk2C;
+    dst->texture = src->texture;
     dst->unk20 = src->unk20;
     dst->unk28 = src->unk28;
     sub = src->third;
