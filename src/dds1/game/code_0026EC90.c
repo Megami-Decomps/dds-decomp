@@ -70,7 +70,7 @@ extern u8 D_0037B168[];
 
 extern u32 D_003BC62C;
 
-extern u32 D_003BC630;
+extern s32 D_003BC630;
 
 extern u16 D_003BA72C;
 
@@ -255,7 +255,7 @@ void func_00270030(void) {
     D_003BC62C = 0;
 }
 
-void func_00270068(void) {
+s32 func_00270068(void) {
     func_002EDBB8(D_0037B888);
 }
 
@@ -512,7 +512,22 @@ void mnuDrawMovieList(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_00270738);
+typedef struct MovieStatus {
+    u8 pad00[0x64];
+    s32 total;
+    s32 pad68;
+    s32 current;
+} MovieStatus;
+extern s32 D_003DC570[];
+
+void func_00270738(void) {
+    s32 list;
+    if (func_00270068() == 0) {
+        list = D_003DC570[0];
+        sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
+        sdfAppendPacket(list, func_002E4960(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_0037B888)->current, ((MovieStatus *)D_0037B888)->total));
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", mnuMovieViewer);
 

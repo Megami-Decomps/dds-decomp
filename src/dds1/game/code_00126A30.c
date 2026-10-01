@@ -4,9 +4,9 @@
 
 extern u8 D_00337D00[];
 typedef struct FldNpcMotion {
-    s32 unk0;
-    u8 unk4[0x10];
-    u8 unk14[0x10];
+    s32 defaultMotionId;
+    u8 primaryName[0x10];
+    u8 secondaryName[0x10];
     u8 unk24[0x10];
     u8 unk34[0x10];
     s32 unk44;
@@ -3080,7 +3080,71 @@ void fldResetRecordState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00135360);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00136850);
+/* Axis-aligned trigger zone: up to four bounding planes plus a 2D extent. */
+typedef struct FldZone {
+    s16 mode;
+    s16 count;
+    u8 pad4[0x14];
+    f32 plane[4][4]; /* 0x18 */
+    f32 limit[4];    /* 0x58 */
+    f32 bound[4];    /* 0x68: min0, min1, max0, max1 */
+} FldZone;
+
+s32 func_00136850(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+    f32 probe[3];
+    f32 planar[2];
+    f32 best = margin;
+    f32 dist;
+    f32 slack;
+    s32 inside = 0;
+    s32 i;
+
+    if (mode == 0) {
+        probe[0] = 0.0f;
+        probe[1] = pos[1];
+        probe[2] = pos[2];
+        planar[0] = pos[1];
+        planar[1] = pos[2];
+    } else if (mode == 1) {
+        probe[0] = pos[0];
+        probe[1] = 0.0f;
+        probe[2] = pos[2];
+        planar[0] = pos[0];
+        planar[1] = pos[2];
+    } else {
+        probe[0] = pos[0];
+        probe[1] = pos[1];
+        probe[2] = 0.0f;
+        planar[0] = pos[0];
+        planar[1] = pos[1];
+    }
+    for (i = 0; i < count; i++) {
+        dist = fldDotVector(probe, zone->plane[i]) - zone->limit[i];
+        slack = dist + margin;
+        if (slack < 0.0f) {
+            *out = -1.0f;
+            return -1;
+        }
+        if (planar[0] < zone->bound[0] - margin || planar[1] < zone->bound[1] - margin ||
+            zone->bound[2] + margin < planar[0] || zone->bound[3] + margin < planar[1]) {
+            *out = -1.0f;
+            return -1;
+        }
+        if (dist < 0.0f) {
+            if (mode == 1) {
+                best = dist + 45.0f;
+            } else {
+                best = slack;
+            }
+            inside = 1;
+        }
+    }
+    if (best < 0.001f) {
+        best = -1.0f;
+    }
+    *out = best;
+    return inside;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00136A78);
 
@@ -3099,7 +3163,49 @@ void func_00137E98(void) {
 void func_00137EA0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00137EA8);
+f32 func_00137EA8(f32 margin, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+    f32 probe[3];
+    f32 planar[2];
+    f32 best = margin;
+    f32 dist;
+    f32 slack;
+    s32 i;
+
+    if (mode == 0) {
+        probe[0] = 0.0f;
+        probe[1] = pos[1];
+        probe[2] = pos[2];
+        planar[0] = pos[1];
+        planar[1] = pos[2];
+    } else if (mode == 1) {
+        probe[0] = pos[0];
+        probe[1] = 0.0f;
+        probe[2] = pos[2];
+        planar[0] = pos[0];
+        planar[1] = pos[2];
+    } else {
+        probe[0] = pos[0];
+        probe[1] = pos[1];
+        probe[2] = 0.0f;
+        planar[0] = pos[0];
+        planar[1] = pos[1];
+    }
+    for (i = 0; i < count; i++) {
+        dist = fldDotVector(probe, zone->plane[i]) - zone->limit[i];
+        slack = dist + margin;
+        if (slack < 0.0f || planar[0] < zone->bound[0] - margin || planar[1] < zone->bound[1] - margin ||
+            zone->bound[2] + margin < planar[0] || zone->bound[3] + margin < planar[1]) {
+            return -1.0f;
+        }
+        if (dist < 0.0f) {
+            best = slack;
+        }
+    }
+    if (best < 0.001f) {
+        best = -1.0f;
+    }
+    return best;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00138058);
 
@@ -3110,7 +3216,98 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00138910);
 void func_00138C28(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00138C30);
+typedef struct FldRoomState {
+    f32 corner[8][4]; /* 0x00 */
+    f32 center[4];    /* 0x80 */
+    f32 plane[6][4];  /* 0x90 */
+    f32 limit[6];     /* 0xF0 */
+    s32 unk108;
+    f32 unk10C;
+    f32 unk110;
+    f32 unk114;
+    f32 unk118;
+    f32 unk11C;
+    s32 unk120;
+    u8 pad124[0xC];
+    s16 unk130;
+    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
+    s16 unk134;
+    s16 mode;
+    s16 unk138;
+    s16 axisMode;
+    s32 unk13C;
+} FldRoomState; /* 0x140 bytes */
+
+typedef struct FldRoomPlanes {
+    f32 plane[6][4];
+    f32 limit[6];
+    u8 pad78[0x140 - 0x78];
+} FldRoomPlanes;
+extern FldRoomPlanes D_003C9470[];
+extern f32 fldDotVector(f32 *, f32 *);
+extern FldRoomState D_003C93E0[];
+extern void fldResetActorSlots(void);
+extern s32 D_003BAE04;
+extern s32 D_003BAE08;
+extern s32 D_003BAE0C;
+extern s32 D_003BAE10;
+extern s32 D_003BAE18;
+extern s32 D_003BAE1C;
+extern s32 D_003BAE20;
+extern s32 D_003BAE2C;
+extern s32 D_003BAE34;
+
+void func_00138C30(void) {
+    s32 i;
+    s32 j;
+
+    D_003BAE14 = 0;
+    D_003BAE28 = 0;
+    D_003BAE2C = 0;
+    for (i = 0; i < 0x40; i++) {
+        for (j = 0; j < 8; j++) {
+            D_003C93E0[i].corner[j][0] = 0.0f;
+            D_003C93E0[i].corner[j][1] = 0.0f;
+            D_003C93E0[i].corner[j][2] = 0.0f;
+            D_003C93E0[i].corner[j][3] = 1.0f;
+        }
+        D_003C93E0[i].center[0] = 0.0f;
+        D_003C93E0[i].center[1] = 0.0f;
+        D_003C93E0[i].center[2] = 0.0f;
+        D_003C93E0[i].center[3] = 1.0f;
+        for (j = 0; j < 6; j++) {
+            D_003C93E0[i].plane[j][0] = 0.0f;
+            D_003C93E0[i].plane[j][1] = 0.0f;
+            D_003C93E0[i].plane[j][2] = 0.0f;
+            D_003C93E0[i].plane[j][3] = 1.0f;
+            D_003C93E0[i].limit[j] = 0.0f;
+        }
+        D_003308B0[i] = 0;
+        D_003C93E0[i].unk108 = 0;
+        D_003C93E0[i].unk10C = 0.0f;
+        D_003C93E0[i].unk110 = 0.0f;
+        D_003C93E0[i].unk114 = 0.0f;
+        D_003C93E0[i].unk118 = 0.0f;
+        D_003C93E0[i].unk11C = 0.0f;
+        D_003C93E0[i].unk130 = 0;
+        D_003C93E0[i].roomId = -1;
+        D_003C93E0[i].unk134 = -1;
+        D_003C93E0[i].mode = 0;
+        D_003C93E0[i].unk138 = -1;
+        D_003C93E0[i].unk120 = -1;
+        D_003C93E0[i].axisMode = 0;
+        D_003C93E0[i].unk13C = 0;
+    }
+    D_003BAE04 = -1;
+    D_003BAE08 = -1;
+    D_003BAE0C = -1;
+    D_003BAE10 = -1;
+    D_003BAE18 = -1;
+    D_003BAE1C = -1;
+    D_003BAE20 = -1;
+    D_003BAE34 = 0;
+    fldResetActorSlots();
+}
 
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 D_003BAE18;
@@ -3164,27 +3361,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013A720);
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013A9B0);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AC10);
-
-typedef struct FldRoomPlanes {
-    f32 plane[6][4];
-    f32 limit[6];
-    u8 pad78[0x140 - 0x78];
-} FldRoomPlanes;
-extern FldRoomPlanes D_003C9470[];
-extern f32 fldDotVector(f32 *, f32 *);
-
-typedef struct FldRoomState {
-    u8 pad0[0x120];
-    s32 unk120;
-    u8 pad124[0xE];
-    s16 roomId; /* 0x132: returned by fldFindRoomByTask */
-    u8 pad134[2];
-    s16 mode;
-    s16 unk138;
-    s16 axisMode;
-    s32 unk13C;
-} FldRoomState; /* 0x140 bytes */
-extern FldRoomState D_003C93E0[];
 
 s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
     f32 probe[3];
@@ -3634,7 +3810,60 @@ extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
 extern u32 D_003CE3E0[][23];
 extern s32 D_0032E530[];
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DC08);
+
+void func_0013DC08(s32 checkTaskRecord) {
+    s32 index;
+    s32 kind;
+    s32 record;
+    FldActorEntry *entry;
+
+    if (checkTaskRecord != 0) {
+        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D6A0())->key);
+        if (record == 0) {
+            return;
+        }
+        if (fldFindActorEntryByName((const char *)record) == 0) {
+            return;
+        }
+    }
+    index = D_003BAE64;
+    entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    kind = entry->kind;
+    if (kind == 1) {
+        if (entry->floor == D_0032E3C4[0] + 1) {
+            fldPlayFieldSeVolumePan(entry->sound);
+            fldReleaseActorTasksById(D_003CE3E0[index][1]);
+            return;
+        }
+    } else if (kind == 2) {
+        if (entry->floor == D_0032E3B0[5] + 1) {
+            s32 motion = entry->motion;
+
+            D_0032E3B0[94] = 1;
+            *(f32 *)&D_0032E3B0[93] = *(f32 *)&D_003CE3E0[index][11];
+            if (motion == 1) {
+                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                return;
+            }
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            return;
+        }
+    } else if (kind == 3) {
+        kwlnFadeSetRGB(0, 0, 0);
+        return;
+    } else if (kind == 5) {
+        if (entry->motion == 0) {
+            D_0032E530[0] = 0x64;
+        } else {
+            D_0032E530[0] = -0x64;
+        }
+    } else if (kind == 10) {
+    } else if (kind == 11) {
+    } else if (kind == 12) {
+    } else if (kind == 4) {
+        fldApplyPendingCameraHeading();
+    }
+}
 
 extern s32 func_00110ED0(u64, s32, void *);
 extern void func_001109B8(u64, s32);

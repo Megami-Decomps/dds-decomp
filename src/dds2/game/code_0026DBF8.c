@@ -1895,7 +1895,50 @@ void func_00274E88(u32 obj) {
     sdfReleaseChipBlock(((MantraDrawItem *)obj)->data);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274EA8);
+s32 func_00274EA8(s32 unused, MantraDrawItem *item) {
+    MantraPanelFade *fade = (MantraPanelFade *)item->data;
+
+    fade->cycle += 1;
+    if ((s16)fade->cycle >= 0x3D) {
+        fade->cycle = 0;
+    }
+    if (fade->delay > 0) {
+        fade->delay -= 1;
+    }
+    switch (fade->state) {
+    case 1:
+    case 6:
+        fade->scale = (f32)fade->elapsed / 20.0f;
+        fade->elapsed += 1;
+        if (fade->elapsed >= 20) {
+            fade->state = 2;
+            fade->scale = 1.0f;
+            fade->elapsed = 0;
+        }
+        break;
+    case 2:
+        fade->scale = 1.0f;
+        break;
+    case 3:
+    case 5:
+        fade->scale = 1.0f - (f32)fade->elapsed / 10.0f;
+        fade->elapsed += 1;
+        if (fade->elapsed >= 10) {
+            fade->elapsed = 0;
+            fade->scale = 0.0f;
+            if (fade->state == 5) {
+                fade->state = 4;
+            } else {
+                return 1;
+            }
+        }
+        break;
+    case 4:
+        fade->scale = 0.0f;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274FF8);
 
