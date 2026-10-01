@@ -58,9 +58,13 @@ python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
-ninja dds1-field-data dds2-field-data  # assemble and verify field interaction data
+ninja dds1-field-data dds2-field-data  # assemble and verify INF/WAP field data
 python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
 ```
+
+See [`docs/flw0.md`](docs/flw0.md) for script source,
+[`docs/inf.md`](docs/inf.md) for interaction tables, and
+[`docs/wap.md`](docs/wap.md) for actor, elevator, door, and transition tables.
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
 (`build/<v>/SLUS_*`). It is silent when the ELF matches. A mismatch prints

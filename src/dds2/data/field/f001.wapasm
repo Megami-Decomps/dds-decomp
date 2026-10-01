@@ -1,0 +1,114 @@
+wap 1 profile=dds2
+
+entry 0 kind=9
+  scene args=1,0,0
+  warp args=4,1,0 position="01pos_03"
+  camera mode=1 table=20
+end
+
+entry 2 kind=9 flag=28
+  scene args=2,0,0
+  warp args=8,3,0
+  camera mode=1 table=40
+end
+
+entry 3 kind=9 flag=19
+  scene args=2,0,0
+  warp args=8,2,0
+  camera mode=1 table=40
+end
+
+entry 4 kind=9
+  scene args=2,0,0
+  warp args=8,1,0
+  camera mode=1 table=40
+end
+
+entry 6 kind=9 flag=28
+  scene args=3,0,0
+  warp args=7,3,0 position="01pos_03"
+  camera mode=1 table=35
+end
+
+entry 7 kind=9 flag=19
+  scene args=3,0,0
+  warp args=7,2,0 position="01pos_03"
+  camera mode=1 table=35
+end
+
+entry 8 kind=9
+  scene args=3,0,0
+  warp args=7,1,0 position="01pos_03"
+  camera mode=1 table=35
+end
+
+entry 10 kind=9 flag=28
+  scene args=4,0,0
+  warp args=11,3,0
+  camera mode=1 table=55
+end
+
+entry 11 kind=9 flag=19
+  scene args=4,0,0
+  warp args=11,2,0
+  camera mode=1 table=55
+end
+
+entry 12 kind=9
+  scene args=4,0,0
+  warp args=11,1,0
+  camera mode=1 table=55
+end
+
+entry 14 kind=9 flag=42
+  scene args=5,0,0
+  warp args=13,1,0
+  camera mode=1 table=10
+end
+
+entry 15 kind=9
+  scene args=5,0,0
+  warp type=event args=644,0,13
+end
+
+entry 17 kind=9
+  scene args=6,0,0
+  warp args=12,1,0 position="01pos_02"
+  camera mode=1 table=60
+end
+
+entry 19 kind=9 flag=28
+  scene args=7,0,0
+  warp args=9,3,0
+  camera mode=1 table=45
+end
+
+entry 20 kind=9 flag=19
+  scene args=7,0,0
+  warp args=9,2,0
+  camera mode=1 table=45
+end
+
+entry 21 kind=9
+  scene args=7,0,0
+  warp args=9,1,0
+  camera mode=1 table=45
+end
+
+entry 23 kind=9 flag=28
+  scene args=8,0,0
+  warp args=10,3,0
+  camera mode=1 table=50
+end
+
+entry 24 kind=9 flag=19
+  scene args=8,0,0
+  warp args=10,2,0
+  camera mode=1 table=50
+end
+
+entry 25 kind=9
+  scene args=8,0,0
+  warp args=10,1,0
+  camera mode=1 table=50
+end

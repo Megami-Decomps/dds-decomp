@@ -1,0 +1,7 @@
+wap 1 profile=dds1
+
+entry 0 kind=1 area=1 name="01d_01"
+  scene primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8
+end
