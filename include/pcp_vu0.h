@@ -218,6 +218,16 @@
     "vmaddaz.xyzw ACC, vf26, vf31z\n\tvmaddw.xyzw vf31, vf27, vf31w\n\t" \
     ".set reorder" \
     : : : "memory")
+/* vf28-vf31 = transpose of vf28-vf31, via the GPR quadword halves and the
+ * pext/pcpy lane shuffles. DDS1 sdfTransposeVuTransform / DDS2
+ * code_00335EE8; the rigid-inverse routine builds on this. */
+#define VU0_MATRIX4_TRANSPOSE() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\tpcpyud $11, $13, $15\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\tqmtc2.ni $11, vf31\n\t" \
+    ".set reorder\n")
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")

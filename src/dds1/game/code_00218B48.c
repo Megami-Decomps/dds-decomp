@@ -2222,7 +2222,7 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
                         VU0_STORE_VF(vf10, quaternion);
             effObjSetInnerSecondVec(target, quaternion);
             effObjFetchInnerFirstVec(target);
-            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(target->inner + 0x70));
+            VU0_STORE_VF(vf10, target->inner + 0x70);
         }
     }
 }

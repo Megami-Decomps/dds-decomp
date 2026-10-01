@@ -486,7 +486,7 @@ void sdfMotionBlendScaleVector(HasSub *a0, f32 t) {
     EE_MMI_LOAD_VEC3(vf10, b.firstKey);
     EE_MMI_LOAD_VEC3(vf11, b.secondKey);
         VU0_LERP_VF10_W(b.weight);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
+    VU0_STORE_VF(vf10, (u8 *)a0->sub + 0x70);
 }
 
 /* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
@@ -499,7 +499,7 @@ void sdfMotionBlendScaleVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
         VU0_LERP_VF10_COPY(b.weight);
         VU0_LOAD_VF(vf10, (u8 *)a0 + 0x10);
         VU0_LERP_VF10_W(t2);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)a0->sub + 0x70));
+    VU0_STORE_VF(vf10, (u8 *)a0->sub + 0x70);
 }
 
 void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {

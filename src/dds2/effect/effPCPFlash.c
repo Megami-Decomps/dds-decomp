@@ -664,12 +664,10 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     direction[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     direction[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    __asm__ volatile(".set noreorder
-	lqc2 $vf10, 0(%0)
-	.set reorder" : : "r"(direction));
-    __asm__ volatile(".set noreorder
-	lqc2 $vf11, 0(%0)
-	.set reorder" : : "r"(orientation));
+    /* Two plain quadword loads, no memory clobber: retail keeps `direction`
+     * and `orientation` CSE'd across them. */
+    VU0_LOAD_VF(vf10, direction);
+    VU0_LOAD_VF(vf11, orientation);
     __asm__ volatile(".set noreorder
 	vopmula.xyz ACC, $vf10, $vf11
 	vopmsub.xyz $vf10, $vf11, $vf10
@@ -1100,7 +1098,86 @@ void effFlashAccumulatingParticleAdvance(PcpFlashWork4 *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173AA0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173D40);
+#define EFFECT_RING_START_ANGLE (-1.5707963f)
+#define EFFECT_RING_FULL_TURN (6.2831853f)
+
+typedef struct EffectRingVertex {
+    s32 pad0;
+    s32 offset;
+    f32 angle;
+    s32 padC;
+} EffectRingVertex;
+
+typedef struct EffectRing {
+    u8 pad00[0x10];
+    u32 count;
+    u8 pad14[8];
+    s32 spread;
+    u8 pad20[0x10];
+    f32 param30;
+    f32 param34;
+    f32 param38;
+    u8 pad3C[0x14];
+    u32 unk50;
+    u32 unk54;
+    EffectRingVertex *vertices;
+    s32 unk5C;
+    u32 color;
+    f32 scale;
+    f32 unk68;
+    u8 pad6C[4];
+    f32 unk70;
+    f32 unk74;
+    u32 handle;
+    u8 *matrix;
+} EffectRing;
+
+typedef struct EffectRingBlock {
+    EffectRing header;
+    EffectRingVertex vertices[1];
+} EffectRingBlock;
+
+extern s32 func_00177760();
+
+EffectRing *func_00173D40(source)
+EffectRing *source;
+{
+    u32 handle;
+    EffectRingBlock *block;
+    EffectRing *ring;
+    f32 angle;
+    f32 step;
+    u32 spread;
+    u32 i;
+
+    handle = func_003292A8(source->count * 16 + 0x80);
+    block = (EffectRingBlock *)sdfResourceRetainAddress(handle);
+    ring = &block->header;
+    memcpy(ring, source, 0x58);
+    ring->vertices = block->vertices;
+    ring->handle = handle;
+    ring->color = 0x80808080;
+    ring->unk68 = ring->param38;
+    ring->unk70 = ring->param30;
+    ring->unk74 = ring->param34;
+    ring->unk5C = 0;
+    ring->scale = 1.0f;
+    if (ring->spread == 0) {
+        ring->spread = 1;
+    }
+    angle = EFFECT_RING_START_ANGLE;
+    ring->matrix = (u8 *)func_00177760(ring->count);
+    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
+    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
+    step = EFFECT_RING_FULL_TURN / ring->count;
+    spread = ring->spread;
+    for (i = 0; i < ring->count; i++) {
+        ring->vertices[i].offset = -(effMiscRand(D_003AA868) % spread);
+        ring->vertices[i].angle = angle;
+        angle += step;
+    }
+    return ring;
+}
 
 void effFlashOrbitArcSpawnFromTable(u64 table) {
     u64 effectParams;
@@ -1222,8 +1299,6 @@ void effFlashOrbitArcAdvanceAngle(PcpFlashWork5 *work, s32 index) {
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
-
-extern s32 func_00177760();
 
 PcpFlashWork6 *func_00174648(src)
     PcpFlashWork6 *src;

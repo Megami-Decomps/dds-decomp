@@ -245,11 +245,7 @@ void *effParamAssembleWork(void *source) {
 }
 
 void effParamForwardVector(void *work, void *vec) {
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
     mdlStorePrimaryVectorVU(work);
 }
 
@@ -258,11 +254,7 @@ void effParamBuildVector(void *work, f32 scalar) {
     f32 v[3];
 
     v[0] = v[1] = v[2] = scalar;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (v) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, v);
     mdlStoreTertiaryVectorVU(work);
 }
 
@@ -273,23 +265,11 @@ void effParamScatterVectors(EffScatterWork *work, void *src) {
 
     VU0_LOAD_MATRIX(src);
     d0 = work->destination + 0x20;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf28, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (d0) : "memory");
+    VU0_STORE_VF(vf28, d0);
     d1 = work->destination + 0x30;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf29, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (d1) : "memory");
+    VU0_STORE_VF(vf29, d1);
     d2 = work->destination + 0x40;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf30, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (d2) : "memory");
+    VU0_STORE_VF(vf30, d2);
 }
 
 void func_0016AB30(void) {

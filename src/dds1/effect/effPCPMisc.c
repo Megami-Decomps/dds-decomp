@@ -1376,9 +1376,9 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
         scale[1] = -reach;
         VU0_LOAD_VF($vf10, dir);
         VU0_LOAD_VF($vf11, scale);
-        __asm__ volatile(".set noreorder\n\tvmul.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_MUL(vf10, vf10, vf11);
         VU0_LOAD_VF($vf11, D_00354D50);
-        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, D_00354D40);
         if (scale[0] < 250.0f) {
             speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
@@ -1441,11 +1441,11 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderShift *work, s32 count
         VU0_LOAD_VF($vf10, obj + 0x10);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
-        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, obj + 0x10);
         VU0_LOAD_VF($vf10, obj);
         VU0_STORE_VF($vf10, &saved[0]);
-        __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, obj);
         func_00165D80(work->handle[i]);
         PCP_COPY_VECTOR(obj, &saved[0]);
