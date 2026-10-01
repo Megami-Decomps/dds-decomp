@@ -39,6 +39,11 @@ typedef struct FileCleanup {
 extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
 extern void sdfReleaseChipBlock(void *);
+extern void func_0035B6E0(const char *, ...);
+extern void *sdfAllocAndClearQuadwords(s32);
+extern void func_00346A80(void *, void *);
+extern void func_00346AE8(void *);
+extern void func_002C7D78(void *, s32, u32, s32, s32);
 
 s32 func_002C7D00(FileCleanup *entry) {
     if (entry->kind == 1) {
@@ -97,7 +102,20 @@ typedef struct FileManWork {
 
 extern FileManWork D_00457F28;
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C7F38);
+void *func_002C7F38(u32 request, s32 flags, void *dispatch, s32 arg4, s32 arg5) {
+    u8 *work;
+    u8 *packet;
+
+    func_0035B6E0("pac load %s\n", request);
+    work = sdfAllocAndClearQuadwords(0x70);
+    packet = work + 0x30;
+    func_00346A80(packet, dispatch);
+    if (flags != 0) {
+        func_00346AE8(packet);
+    }
+    func_002C7D78(work, 1, request, arg4, arg5);
+    return work;
+}
 
 void func_002C7FF0(u32 request) {
     func_002C7F38(request, 0, 0, 0, 0);
