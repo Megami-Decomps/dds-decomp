@@ -1,5 +1,13 @@
 #include "common.h"
 
+/* Transition host: two optional callbacks at +0xC4 and the flag at +0xCC that
+   picks which value they are called with. */
+typedef struct TransitionHost {
+    u8 pad00[0xC4];
+    void (*callbacks[2])(s32, struct TransitionHost *); /* 0xC4 */
+    u32 unkCC; /* 0xCC */
+} TransitionHost;
+
 typedef struct MenuFadeHost {
     u8 pad00[0x7C];
     s32 reduced;      /* 0x7C */
@@ -48,7 +56,17 @@ void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
     transition->previousCallback = previous;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B2E0);
+/* Call each registered transition callback once; the flag at +0xCC picks the
+   index they receive. */
+void func_0024B2E0(TransitionHost *host) {
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (host->callbacks[i] != NULL) {
+            host->callbacks[i](host->unkCC ? 1 : (s32)i, host);
+        }
+    }
+}
 
 void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
     if (mode == 0) {

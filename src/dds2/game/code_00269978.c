@@ -1,5 +1,13 @@
 #include "common.h"
 
+/* Transition host: two optional callbacks at +0xCC and the flag at +0xD4 that
+   picks which value they are called with. */
+typedef struct TransitionHost {
+    u8 pad00[0xCC];
+    void (*callbacks[2])(s32, struct TransitionHost *); /* 0xCC */
+    u32 unkD4; /* 0xD4 */
+} TransitionHost;
+
 extern s64 evtGetMessageWindowControlState(void);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
@@ -131,7 +139,18 @@ void evtRememberDispatchCallback(u32 callback, s32 address) {
     state->previousCallback = previous;
 }
 
-INCLUDE_ASM(const s32, "game/code_00269978", func_00269B08);
+/* Call each registered transition callback once; the flag at +0xD4 picks the
+   index they receive. */
+void func_00269B08(s32 state) {
+    TransitionHost *host = (TransitionHost *)state;
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (host->callbacks[i] != NULL) {
+            host->callbacks[i](host->unkD4 ? 1 : (s32)i, host);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_00269B80);
 
