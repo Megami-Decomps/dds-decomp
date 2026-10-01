@@ -231,7 +231,35 @@ void sdfDevStartRpcServer(void) {
     sceSifRpcLoop(queue);
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D990);
+typedef struct SifClient {
+    u8 pad00[0x24];
+    void *server; /* 0x24: non-NULL once the bind succeeded */
+    u8 pad28[8];
+} SifClient;
+
+extern SifClient D_004764D0;
+extern u8 D_00438AB8;
+extern s32 func_00328390();
+extern s32 func_003287E0(void);
+extern s32 sdfGetElapsedTimerTicks(s32);
+extern s32 sceSifMBindRpc(void *, s32, s32);
+extern void _StartThread(s32, s32);
+
+/* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
+void func_0033D990(void) {
+    s32 start;
+
+    _StartThread(func_00328390(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
+    while (sceSifMBindRpc(&D_004764D0, 0x646E7270, 0) >= 0) {
+        if (D_004764D0.server != NULL) {
+            D_00438AB8 = 1;
+            break;
+        }
+        start = func_003287E0();
+        while (sdfGetElapsedTimerTicks(start) < 4) {
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DA30);
 
@@ -867,7 +895,28 @@ void sdfTickThreadPriorityOverride(void) {
     sdfRestoreDeviceThreadPriority();
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033FF98);
+extern void D_0033F3E0();
+extern void sdfDevWorkerThread();
+
+/* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
+void func_0033FF98(s32 index) {
+    ThreadEntry *worker = &D_0040BA10[index];
+    void (*entry)();
+    s32 thread;
+
+    thread = worker->threadId;
+    if (thread < 0) {
+        worker->sema = sdfCreateSemaphore(0, 0xFF, 0);
+        entry = D_0033F3E0;
+        if (index != 3) {
+            entry = sdfDevWorkerThread;
+        }
+        D_00438B20 = 0x48;
+        thread = func_00328390(entry, 0x4000, 0x48);
+        worker->threadId = thread;
+        _StartThread(thread, (s32)worker);
+    }
+}
 
 void sdfPowerOffLoop(s32 semaphore) {
     s32 status;
