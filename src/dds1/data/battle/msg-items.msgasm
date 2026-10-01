@@ -1,2865 +1,2865 @@
 messages msg1
   message item_000 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_001 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 50 HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_002 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 150 HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_003 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 300 HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_004 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP (S)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_005 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP (M)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_006 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 150 HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_007 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 50 MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_008 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 50 MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_009 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore 150 MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP or MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~???"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Revive target"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Some HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_00F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Revive target"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_010 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Revive 1 ally"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All HP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_011 speaker=none
     page
-      control f2 08 ff ff
+      segment-start
       text "0x011"
       newline
-      control f2 06 02 ff
+      font-slot 1
     endpage
   endmessage
   message item_012 speaker=none
     page
-      control f2 08 ff ff
+      segment-start
       text "0x012"
       newline
-      control f2 06 02 ff
+      font-slot 1
     endpage
   endmessage
   message item_013 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure poison"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_014 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure ache"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_015 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure mute"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_016 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure stun"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_017 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure stone"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_018 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Uncurse"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_019 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cure panic/charm/"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "sleep"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_01A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP (M)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~???"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_01B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP (M)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~???"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_01C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP (M)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~???"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_01D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_01E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_01F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_020 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Repel magic"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Next turn only"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_021 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Repel phys attack"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Next turn only"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_022 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Cancel -kaja"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All enemies"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_023 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_024 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Light damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Fire"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_025 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Fire"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_026 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Light damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Ice"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_027 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Ice"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_028 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Light damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Electricity"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_029 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Electricity"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Light damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Force"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Force"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Light damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Earth"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Earth"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Reduce HP by half"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Expel"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_02F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Death"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_030 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Death (low odds)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_031 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Death (high odds)"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_032 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_033 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_034 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Moderate damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Almighty"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_035 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Almighty damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_036 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Heavy damage"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Almighty"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~All"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_037 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_038 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "See enemy info"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 enemy"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Reusable"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_039 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Fewer encounters"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Temporary"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_03A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "More encounters"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Temporary"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_03B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null damage zone"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Temporary"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_03C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_03D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_03E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_03F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_040 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null fire attacks"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_041 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null ice attacks"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_042 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null elec attacks"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_043 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null force attacks"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_044 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Null earth attacks"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Party"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_045 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_046 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_047 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_048 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_049 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_04F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
+      segment-start
+      font-slot 1
     endpage
   endmessage
   message item_050 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Strength +2"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_051 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Vitality +2"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_052 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Magic +2"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_053 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Agility +2"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_054 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore all HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Luck +2"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_055 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Max HP +10"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_056 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Restore HP/MP"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Max MP +10"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~1 ally"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_057 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_058 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_059 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_05F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_060 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_061 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_062 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_063 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_064 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_065 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_066 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_067 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_068 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_069 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Trade for Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "at Vendor"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_06F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_070 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_071 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_072 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_073 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_074 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_075 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_076 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_077 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_078 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_079 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_07F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_080 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Destroys "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "blue walls"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_081 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Destroys "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "yellow walls"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_082 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Destroys "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "red walls"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_083 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Records Macca "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "earned in battle"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_084 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Crimson sphere "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of Feng Huang"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_085 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Earth sphere "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of Gui Xian"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_086 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Azure sphere "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of Long"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_087 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "White sphere "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of Baihu"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_088 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Mysterious "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "gold sphere"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_089 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Tag Ring with "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "blood on it"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Steel feather "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of Metatron"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Mysterious "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "black skull"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Fine-grained "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "wooden key"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Key made of steel"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Key made of glass"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_08F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Lightweight "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "white key"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_090 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Shiny silver key"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_091 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Shiny gold key"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_092 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Useful and "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "delicious!"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_093 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Ice crystal "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "of King Frost"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_094 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Key acquired in "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "the Citadel"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_095 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Key acquired in "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "the Citadel"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_096 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Useful when "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "scuba diving"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_097 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_098 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_099 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09A speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09B speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09C speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09D speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09E speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_09F speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A0 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A1 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 8"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A2 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Shock"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 24"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A3 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Sleep"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 48"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A4 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 16"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A5 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Stun"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 64"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A6 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Freeze"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 32"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A7 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 40"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A8 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 56"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0A9 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Charm"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 104"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AA speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 80"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AB speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Poison"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 88"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AC speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AD speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 96"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AE speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 120"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0AF speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Stone"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 112"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B0 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B1 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Bullet"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "~Attack power 200"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B2 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B3 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B4 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B5 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B6 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B7 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B8 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0B9 speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BA speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BB speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BC speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BD speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BE speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
   message item_0BF speaker=none
     page
-      control f2 08 ff ff
-      control f2 06 02 ff
-      control f2 06 01 ff
+      segment-start
+      font-slot 1
+      font-slot 0
       text "Dummy Message "
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "1234567890"
-      control f2 06 02 ff
-      control f1 0f
-      control f2 06 01 ff
+      font-slot 1
+      conditional-newline
+      font-slot 0
       text "123456"
-      control f2 06 02 ff
+      font-slot 1
       newline
     endpage
   endmessage
