@@ -977,14 +977,8 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003296F0) : "memory");
+        VU0_LOAD_MATRIX(D_003296F0);
+;
     func_002DDD60(D_00324610);
     __asm__ volatile (
         ".set noreorder\n"
@@ -1003,23 +997,16 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
         "vmulq.xyzw vf10, vf10, Q\n"
         ".set reorder"
         : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_00324650) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_00324660) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, D_00324650);
+;
+    VU0_MUL(vf10, vf10, vf11);
+;
+    VU0_LOAD_VF_MEMORY(vf11, D_00324660);
+;
+    VU0_ADD(vf10, vf10, vf11);
+;
+    VU0_STORE_VF(vf10, result);
+;
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1033,14 +1020,8 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_00329790) : "memory");
+        VU0_LOAD_MATRIX(D_00329790);
+;
     func_002DDD60(D_003249B0);
     __asm__ volatile (
         ".set noreorder\n"
@@ -1059,37 +1040,24 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
         "vmulq.xyzw vf10, vf10, Q\n"
         ".set reorder"
         : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_003249F0) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_00324A00) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, D_003249F0);
+;
+    VU0_MUL(vf10, vf10, vf11);
+;
+    VU0_LOAD_VF_MEMORY(vf11, D_00324A00);
+;
+    VU0_ADD(vf10, vf10, vf11);
+;
+    VU0_STORE_VF(vf10, result);
+;
     *dstX = result[0];
     *dstY = result[1];
 }
 
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003296F0) : "memory");
+        VU0_LOAD_MATRIX(D_003296F0);
+;
     matrix = D_00324610;
     func_002DDD60(matrix);
     __asm__ volatile (
@@ -1101,16 +1069,10 @@ void fldPrepareProjectionMatrix(void) {
         ".set reorder"
         : : : "memory");
     matrix += 0x40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(matrix) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf12, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_00324660) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, matrix);
+;
+    VU0_LOAD_VF_MEMORY(vf12, D_00324660);
+;
 }
 
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
@@ -1131,11 +1093,8 @@ void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z
         "vadd.xyzw vf10, vf10, vf12\n"
         ".set reorder"
         : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_STORE_VF(vf10, result);
+;
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1456,14 +1415,8 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
     sdfAppendReferencePacket(command, header);
     func_002DD708(((FldModelPacketInput *)modelData)->angle);
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 16(%0)\n"
-        "sqc2 vf30, 32(%0)\n"
-        "sqc2 vf31, 48(%0)\n"
-        ".set reorder"
-        : : "r"(mat) : "memory");
+        VU0_STORE_MATRIX(mat);
+;
     packet = sdfAllocPacketAligned(0x38);
     sdfInitGeometryDmaPacket(packet, mat);
     sdfAppendPacket(command, packet);
@@ -2066,14 +2019,8 @@ void fldUpdateCameraProximity(void) {
     if (slot >= 0) {
         model = *modelRef;
         matrices = ((FldModelMatrices *)model)->rows;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf28, 0(%0)\n"
-            "lqc2 vf29, 0x10(%0)\n"
-            "lqc2 vf30, 0x20(%0)\n"
-            "lqc2 vf31, 0x30(%0)\n"
-            ".set reorder"
-            : : "r"(matrices[slot] + 0xC0));
+            VU0_LOAD_MATRIX(matrices[slot] + 0xC0);
+;
         __asm__ volatile (
             ".set noreorder\n"
             "lqc2 vf10, 0(%0)\n"
@@ -2208,11 +2155,8 @@ void fldUpdateCameraTarget(void) {
             effObjSetInnerFirstVec(D_003BAB34, vec.f);
             st->positionPending = 0;
             effObjFetchInnerFirstVec(D_003BAB34);
-            __asm__ volatile (
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(&vec) : "memory");
+            VU0_STORE_VF(vf10, &vec);
+;
             dst = (u128 *)(*(u32 *)(D_003BAB34 + 0x1C) + 0x70);
             PCP_COPY_VECTOR(dst, &vec);
         }
