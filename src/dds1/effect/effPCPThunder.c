@@ -28,8 +28,8 @@ typedef struct {
     u32 unk50;      /* 0x50 settable param */
     f32 baseFirst;   /* 0x54 */
     f32 baseSecond;  /* 0x58 */
-    u32 unk5C;      /* 0x5C handle released by parReleaseCellSystem */
-    u32 unk60;      /* 0x60 handle released by func_002D0918 */
+    u32 system; /* 0x5C: released by parReleaseCellSystem */
+    u32 handle; /* 0x60: released by func_002D0918 */
 } EffPCPThunderWork;
 
 #define EFF_THUNDER_FRAGMENT_GREY 0x80808080
@@ -85,9 +85,9 @@ typedef struct {
         EffThunderFrag *fragments;
     } fragmentData; /* 0x54: fragment array / released handle */
     u32 unk58;      /* 0x58 settable param */
-    u32 unk5C;      /* 0x5C handle released by parReleaseCellSystem */
-    u32 unk60;      /* 0x60 handle released by parReleaseCellSystem/func_002D0918 */
-    u32 unk64;      /* 0x64 handle released by func_002D0918 */
+    u32 secondarySystem; /* 0x5C: released by parReleaseCellSystem */
+    u32 system;          /* 0x60: released by parReleaseCellSystem */
+    u32 handle;          /* 0x64: released by func_002D0918 */
     s32 subCount;    /* 0x68 */
     u8 pad6C[0x38]; /* 0x6C */
     EffThunderSub *subs; /* 0xA4 sub-element array */
@@ -106,8 +106,8 @@ void func_001634C0(void *work) {
 }
 
 void effPCPThunderFree(EffPCPThunderWork *work) {
-    parReleaseCellSystem(work->unk5C);
-    func_002D0918(work->unk60);
+    parReleaseCellSystem(work->system);
+    func_002D0918(work->handle);
 }
 
 void func_00163508(void *dst, void *src) {
@@ -248,8 +248,8 @@ EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
 }
 
 void effPCPThunderFree2(EffPCPThunderWork *work) {
-    parReleaseCellSystem(work->unk5C);
-    func_002D0918(work->unk60);
+    parReleaseCellSystem(work->system);
+    func_002D0918(work->handle);
 }
 
 void effThunderCreateWorkFromPackedParams(void *data) {
@@ -473,8 +473,8 @@ EffThunderWork54 *effThunderFragCreate(EffThunderHead54 *src) {
 }
 
 void effPCPThunderFree3(EffPCPThunderWorkB *work) {
-    parReleaseCellSystem(work->unk60);
-    func_002D0918(work->unk64);
+    parReleaseCellSystem(work->system);
+    func_002D0918(work->handle);
 }
 
 void effThunderShiftOriginByVectorDelta(u8 *p, void *src) {
@@ -496,16 +496,17 @@ u32 func_00165638(u32 arg0) {
 }
 
 void func_00165640(EffPCPThunderWorkB *work) {
-    func_0015CCD0(work->unk60, work->unk40, work->cells, work->unk50);
+    func_0015CCD0(work->system, work->unk40, work->cells, work->unk50);
 }
 
 void func_00165668(EffPCPThunderWorkB *work) {
-    func_0015CDF0(work->unk60, work->unk40, work->cells, work->unk50);
+    func_0015CDF0(work->system, work->unk40, work->cells, work->unk50);
 }
 
 void func_00165690(EffPCPThunderWorkB *work) {
-    parFillSymmetricCellColors(work->unk60, work->unk40, work->cells, work->unk50);
+    parFillSymmetricCellColors(work->system, work->unk40, work->cells, work->unk50);
 }
+
 
 /* Sample per-fragment timing values; the color is a fixed neutral grey. */
 void effThunderRandomizeFrag(EffThunderWork54 *work, s32 index) {
@@ -554,9 +555,9 @@ EffThunderWork54B *func_00165ED0(EffThunderHead54 *src) {
 }
 
 void effPCPThunderFree4(EffPCPThunderWorkB *work) {
-    parReleaseCellSystem(work->unk5C);
-    parReleaseCellSystem(work->unk60);
-    func_002D0918(work->unk64);
+    parReleaseCellSystem(work->secondarySystem);
+    parReleaseCellSystem(work->system);
+    func_002D0918(work->handle);
 }
 
 void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
