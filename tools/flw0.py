@@ -12,6 +12,7 @@ import argparse
 import json
 import shlex
 import struct
+import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Iterable
@@ -906,6 +907,11 @@ def main() -> int:
         action="store_true",
         help="derive symbolic, relayout-capable version-2 source",
     )
+    disassemble_parser.add_argument(
+        "--profile",
+        metavar="NAME",
+        help="name native commands using a version-2 command profile",
+    )
 
     assemble_parser = commands.add_parser(
         "assemble", help="assemble physical or symbolic FLW0 source"
@@ -926,10 +932,12 @@ def main() -> int:
             return 0
         if args.command == "disassemble":
             script = parse(args.input.read_bytes())
+            if args.profile is not None and not args.symbolic:
+                raise Flw0Error("--profile requires --symbolic")
             if args.symbolic:
                 import flw0_symbolic
 
-                source = flw0_symbolic.render(script)
+                source = flw0_symbolic.render(script, args.profile)
             else:
                 source = render_source(script)
             if args.output is None:
@@ -947,4 +955,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Keep the error and data types shared when the companion symbolic module
+    # imports this file by its module name.
+    sys.modules["flw0"] = sys.modules[__name__]
     raise SystemExit(main())
