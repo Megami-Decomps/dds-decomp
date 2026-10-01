@@ -14,6 +14,9 @@ import msg1
 
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 _PROCEDURE_OPCODES = {7, 10, 11}
+_PROCEDURE_REFERENCE_OPCODES = _PROCEDURE_OPCODES | {
+    flw0.OPCODE_IDS["PUSHIS"]
+}
 _JUMP_LABEL_OPCODES = {13, 28}
 _COMMAND_OPCODE = flw0.OPCODE_IDS["COMM"]
 _STANDARD_SECTIONS = ((0, 0x20), (1, 0x20), (2, 4), (3, 1), (4, 1))
@@ -162,6 +165,14 @@ def _render_instruction(
     )
     if event_symbol is not None:
         return f"  PUSHEVENT {event_symbol}", pc + 1
+    procedure_symbol = flw0._procedure_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+        procedure_symbols,
+    )
+    if procedure_symbol is not None:
+        return f"  PUSHPROC {procedure_symbol}", pc + 1
     if opcode in flw0._EXTENDED_OPCODES:
         if pc + 1 >= len(words) or operand:
             return f"  WORD 0x{raw:08x}", pc + 1
@@ -405,6 +416,19 @@ def _parse_code(
                 )
             words.append((event_id << 16) | flw0.OPCODE_IDS["PUSHIS"])
             continue
+        if mnemonic == "PUSHPROC":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHPROC takes one symbol"
+                )
+            words.append(
+                SymbolReference(
+                    flw0.OPCODE_IDS["PUSHIS"],
+                    _symbol(tokens[1], line_number),
+                    line_number,
+                )
+            )
+            continue
         if mnemonic == "WORD":
             if len(tokens) != 2:
                 raise flw0.Flw0Error(f"line {line_number}: WORD takes one value")
@@ -478,10 +502,16 @@ def _parse_code(
             resolved.append(word)
             continue
         indices = (
-            procedure_indices if word.opcode in _PROCEDURE_OPCODES else jump_indices
+            procedure_indices
+            if word.opcode in _PROCEDURE_REFERENCE_OPCODES
+            else jump_indices
         )
         if word.symbol not in indices:
-            kind = "procedure" if word.opcode in _PROCEDURE_OPCODES else "jump label"
+            kind = (
+                "procedure"
+                if word.opcode in _PROCEDURE_REFERENCE_OPCODES
+                else "jump label"
+            )
             raise flw0.Flw0Error(
                 f"line {word.line_number}: unknown {kind} {word.symbol!r}"
             )

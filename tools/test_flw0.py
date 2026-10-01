@@ -35,20 +35,21 @@ def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
 def _fixture(
     code_words: list[int] | None = None,
     message_data: bytes = b"",
+    procedure_rows: tuple[tuple[str, int], ...] = (("synthetic_001", 0),),
 ) -> bytes:
     """Build the significant shape of a small DDS event script."""
 
     if code_words is None:
         code_words = [7, (42 << 16) | 29, 9]
     sections = [
-        (0, 0x20, 1),
+        (0, 0x20, len(procedure_rows)),
         (1, 0x20, 0),
         (2, 4, len(code_words)),
         (3, 1, len(message_data)),
         (4, 1, 0xF0),
     ]
     table_end = 0x20 + len(sections) * 0x10
-    proc = _named_row("synthetic_001", 0)
+    proc = b"".join(_named_row(name, pc) for name, pc in procedure_rows)
     code = b"".join(struct.pack("<I", word) for word in code_words)
     string_padding = bytes(0xF0)
     offsets = [
@@ -308,6 +309,46 @@ class Flw0Tests(unittest.TestCase):
             flw0.Flw0Error, "named event target requires a profile"
         ):
             flw0.parse_source(symbolic.replace("profile dds1\n", ""))
+
+    def test_script_task_targets_use_local_procedure_symbols(self) -> None:
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                flw0.OPCODE_IDS["PUSHIS"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x0A5 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["PUSHREG"],
+                (0x0A7 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+                (1 << 16) | flw0.OPCODE_IDS["PROC"],
+                flw0.OPCODE_IDS["END"],
+            ],
+            procedure_rows=(("main", 0), ("worker", 7)),
+        )
+        script = flw0.parse(original)
+        symbolic = flw0_symbolic.render(script, "dds1")
+
+        self.assertIn("  PUSHPROC worker", symbolic)
+        self.assertIn("  COMM CREATE_SCRIPT_TASK", symbolic)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
+        reordered = flw0.parse_source(
+            symbolic.replace(
+                "procedure main reserved=0x00000000\n"
+                "procedure worker reserved=0x00000000",
+                "procedure worker reserved=0x00000000\n"
+                "procedure main reserved=0x00000000",
+            )
+        )
+        self.assertEqual(reordered.code_words()[2].operand_u16, 0)
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown procedure 'missing'"):
+            flw0.parse_source(symbolic.replace("PUSHPROC worker", "PUSHPROC missing"))
+
+        view = flw0_view.render(script, "dds1")
+        self.assertIn(
+            "result = CREATE_SCRIPT_TASK(procedure(worker), 0)", view
+        )
+        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", view)
 
     def test_duplicate_message_names_keep_numeric_operands(self) -> None:
         message_data = msg1.encode(
@@ -802,6 +843,8 @@ end
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
+            "CREATE_SCRIPT_TASK": (0x0A5, 2, True),
+            "DESTROY_REGISTERED_TASK": (0x0A6, 1, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
@@ -941,7 +984,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 38060)
+        self.assertEqual(profiled_command_uses, 38882)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1035,6 +1078,7 @@ end
         message_references = 0
         selection_references = 0
         event_references = 0
+        procedure_references = 0
         short_string_counts = 0
         for expected, source in records:
             with self.subTest(source=source.relative_to(source_dir)):
@@ -1048,6 +1092,7 @@ end
                 message_references += len(re.findall(r"\bPUSHMSG\b", text))
                 selection_references += len(re.findall(r"\bPUSHSELECT\b", text))
                 event_references += len(re.findall(r"\bPUSHEVENT\b", text))
+                procedure_references += len(re.findall(r"\bPUSHPROC\b", text))
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
@@ -1094,12 +1139,13 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 38060)
+            (code_words, commands, profiled_commands), (168829, 53389, 38882)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
         self.assertEqual(selection_references, 329)
         self.assertEqual(event_references, 31)
+        self.assertEqual(procedure_references, 807)
         self.assertEqual(short_string_counts, 30)
 
     def test_tracked_dds2_script_corpus_assembles_exact_hashes(self) -> None:
@@ -1131,6 +1177,7 @@ end
             "message_references": 0,
             "selection_references": 0,
             "event_references": 0,
+            "procedure_references": 0,
             "font": 0,
             "glyphs": 0,
             "short_string_counts": 0,
@@ -1166,6 +1213,9 @@ end
                 )
                 totals["event_references"] += len(
                     re.findall(r"\bPUSHEVENT\b", text)
+                )
+                totals["procedure_references"] += len(
+                    re.findall(r"\bPUSHPROC\b", text)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -1216,9 +1266,10 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (27934, 1910, 287),
+                (28401, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
+        self.assertEqual(totals["procedure_references"], 463)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)
 
