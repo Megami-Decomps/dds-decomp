@@ -825,9 +825,7 @@ s32 btlHasContextFlagTwo(void) {
     return (((*btlActionScratchWork)->flags & 2) > 0);
 }
 
-s64 btlCheckCounterLimit(s32 unused, u32 limit) {
-    return btlCounterReachedLimit(unused, limit);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlCheckCounterLimit);
 
 s32 btlCounterReachedLimit(s32 unused, u32 limit) {
     if (func_001B39E8(4) < limit) {
@@ -1159,13 +1157,9 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
     return 0;
 }
 
-s64 btlAnyGroup200HasAction(void) {
-    return btlAnyUnitHasActionInSlots(0x200);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup200HasAction);
 
-s64 btlAnyGroup400HasAction(void) {
-    return btlAnyUnitHasActionInSlots(0x400);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup400HasAction);
 
 /* The signed action-slot halfword at +0x2D0 is absent from the canonical header. */
 s32 func_002141A8(s32 unused, s32 action) {
@@ -1327,13 +1321,9 @@ s32 btlAnyGroupUnitHasZeroStat(void) {
 
 extern s32 btlAnyUnitHasQueuedQuery(s32, s32, s32);
 
-s64 btlAnyGroup400HasQuery(s32 unit, s32 action) {
-    return btlAnyUnitHasQueuedQuery(unit, action, 0x400);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup400HasQuery);
 
-s64 btlAnyGroup200HasQuery(s32 unit, s32 action) {
-    return btlAnyUnitHasQueuedQuery(unit, action, 0x200);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", btlAnyGroup200HasQuery);
 
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
     u8 *actor;
@@ -1398,9 +1388,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
     return 0;
 }
 
-s64 func_00214928(void) {
-    return func_001B3200(0);
-}
+INCLUDE_ASM(const s32, "game/code_002112C8", func_00214928);
 
 s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
     u32 flags = ((BtlUnit *)unit)->flags;

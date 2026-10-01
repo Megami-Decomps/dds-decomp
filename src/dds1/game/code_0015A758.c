@@ -262,9 +262,7 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C *= scale;
 }
 
-s64 func_0015AD48(void) {
-    return parGetRestartFlag();
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", func_0015AD48);
 
 void parCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -282,9 +280,7 @@ void func_0015AD98(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-s64 func_0015ADB0(ParObj *work) {
-    return parObjGetMode(work);
-}
+INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */

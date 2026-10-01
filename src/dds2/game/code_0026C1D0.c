@@ -483,11 +483,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     return work;
 }
 
-s64 evtReleaseMantraSelectionWork(u32 *p) {
-    if (p != NULL) {
-        func_003297C8((void *)*p);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0026C1D0", evtReleaseMantraSelectionWork);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D168);
 
