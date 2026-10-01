@@ -74,7 +74,50 @@ extern void func_00348900();
 
 extern void func_00348B10();
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_003478C0);
+typedef struct SdfPacCounter {
+    u32 count;     /* 0x0 */
+    u32 progress;  /* 0x4 */
+} SdfPacCounter;
+
+typedef struct SdfPacList {
+    u8 pad00[8];
+    void *list;    /* 0x8 */
+} SdfPacList;
+
+typedef struct SdfPacRead {
+    u8 pad00[8];
+    void (*handler)();      /* 0x08 */
+    u8 pad0C[4];
+    u32 *input;             /* 0x10 */
+    s32 active;             /* 0x14 */
+    u8 pad18[8];
+    u32 skipBytes;          /* 0x20 */
+    u8 pad24[8];
+    SdfPacCounter *counter; /* 0x2C */
+    u8 pad30[4];
+    SdfPacList *dest;       /* 0x34 */
+} SdfPacRead;
+
+extern void sdfPacAdvanceInput();
+extern void *sdfCreateConfiguredBufferedResourceList();
+extern void sdfPacSkipAllocationEntryBytes();
+
+/* Read the entry count word, size the list for it and arm the skip handler. */
+void func_003478C0(SdfPacRead *state) {
+    u32 count;
+    SdfPacList *dest;
+
+    if (state->active != 0) {
+        count = *state->input;
+        sdfPacAdvanceInput(state, 4);
+        dest = state->dest;
+        state->counter->count = count;
+        state->counter->progress = 0;
+        dest->list = sdfCreateConfiguredBufferedResourceList(count);
+        state->skipBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
+        state->handler = sdfPacSkipAllocationEntryBytes;
+    }
+}
 
 void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     sdfPacEnqueuePacket(work);
@@ -101,7 +144,29 @@ void func_00348188(s32 a, s32 b, s32 c, s32 d) {
     func_00347D50(a, b, c, d);
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_003481E8);
+typedef struct SdfTmxHeader {
+    u8 type;          /* 0x00 */
+    u8 pad01[7];
+    u32 magic;        /* 0x08: 'TMX0' */
+    u8 pad0C[4];
+    u8 flagA;         /* 0x10 */
+    u8 flagB;         /* 0x11 */
+    u16 width;        /* 0x12 */
+    u16 height;       /* 0x14 */
+    u8 depth;         /* 0x16 */
+    u8 pad17[0x29];
+} SdfTmxHeader;
+
+void func_003481E8(SdfTmxHeader *hdr, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
+    memset(hdr, 0, sizeof(SdfTmxHeader));
+    hdr->flagB = flagB;
+    hdr->width = width;
+    hdr->height = height;
+    hdr->depth = depth;
+    hdr->flagA = flagA;
+    hdr->magic = 0x30584D54;
+    hdr->type = 2;
+}
 
 void sdfStreamSendChunk(void) {
     s32 length = D_0047BCC0.length;
@@ -126,11 +191,63 @@ void sdfStartAndSuspendWorkerThread(void) {
     SleepThread();
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348670);
+extern char *D_0040BE00[];
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern char *strcpy(char *, const char *);
+extern char *strcat(char *, const char *);
+extern void func_0034EC40(void);
+
+/* Load the pair of IOP modules of `group` from the directory `prefix`. */
+void func_00348670(const char *prefix, s32 group) {
+    char path[0x100];
+    char **names = &D_0040BE00[group * 2];
+    s32 i;
+
+    for (i = 0; i != 2; i++) {
+        strcpy(path, prefix);
+        strcat(path, names[i]);
+        sceSifLoadModule(path, 0, 0);
+    }
+    func_0034EC40();
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348700);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348780);
+typedef struct SdfTreeNode {
+    struct SdfTreeNode *first;   /* 0x0 */
+    struct SdfTreeNode *second;  /* 0x4 */
+    u8 pad8[4];
+    s32 balance;                 /* 0xC */
+} SdfTreeNode;
+
+/* Balance-flag rotation: `node` takes the place under `a`'s first link; returns the new subtree root. */
+SdfTreeNode *func_00348780(SdfTreeNode *a, SdfTreeNode *node) {
+    SdfTreeNode *root = a;
+    SdfTreeNode *pivot;
+
+    if (root->balance > 0) {
+        pivot = root->first;
+        node->second = pivot->first;
+        root->first = pivot->second;
+        pivot->first = node;
+        pivot->second = root;
+        if (pivot->balance > 0) {
+            node->balance = -1;
+            root->balance = 0;
+        } else {
+            node->balance = 0;
+            root->balance = 1;
+        }
+        pivot->balance = 0;
+    } else {
+        node->balance = 0;
+        node->second = root->first;
+        root->balance = 0;
+        root->first = node;
+        pivot = root;
+    }
+    return pivot;
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348800);
 

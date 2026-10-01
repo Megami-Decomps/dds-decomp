@@ -52,11 +52,18 @@ typedef struct PanelEntry {
     u8 unk4[0x10];  /* 0x4 */
 } PanelEntry;
 
+typedef struct PanelHoldItem {
+    s32 first;  /* 0x0 */
+    s16 second; /* 0x4 */
+    s16 third;  /* 0x6 */
+} PanelHoldItem;
+
 typedef struct PanelHold {
     s32 window;
     s16 unk4;
     s16 unk6;
     s32 unk8;
+    PanelHoldItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
 } PanelHold;
 
 extern PanelHold D_003B4780;
@@ -261,7 +268,20 @@ void itfPanelSetBlueTint(PanelColorPair *panel) {
     color[3] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2180);
+extern u8 D_003B45C8[];
+extern u8 D_003B45D8[];
+
+/* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
+void func_001A2180(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 4;
+    s32 i;
+
+    colors[1].unkC = panel->unk38;
+    for (i = 0; i < 3; i++) {
+        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->unkC, command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2230);
 
@@ -382,7 +402,30 @@ s32 itfPanelReleaseHold(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2F60);
+/* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
+s32 func_001A2F60(void) {
+    PanelHold *cursor = &D_003B4780;
+    s32 first;
+    s32 second;
+    s32 third;
+    s32 i;
+
+    if (cursor->window < 0) {
+        return 1;
+    }
+    if (cursor->unk6 >= 0x40) {
+        return 1;
+    }
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
+    third = scrReadIntParameter(2);
+    cursor->items[cursor->unk6].second = first;
+    i = cursor->unk6;
+    cursor->items[i].third = third;
+    cursor->items[i].first = second;
+    cursor->unk6++;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3008);
 

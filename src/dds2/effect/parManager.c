@@ -7,7 +7,11 @@
 #include "eff.h"
 
 typedef struct {
-    u8 pad[0xA4];    /* 0x0 */
+    u8 pad[0x30];    /* 0x0 */
+    u16 kind;        /* 0x30 */
+    u8 pad32[6];     /* 0x32 */
+    f32 scale;       /* 0x38 */
+    u8 pad3C[0x68];  /* 0x3C */
     u32 unkA4;       /* 0xA4 copied to unkFC by parRestartKind */
     u8 padA8[0x54];  /* 0xA8 */
     void *unkFC;     /* 0xFC */
@@ -132,7 +136,24 @@ void parRestartKind(ParObj *obj) {
     obj->restartFlag = 1;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00162248);
+extern void (*D_003AAC58[])(ParObj *, f32);
+
+/* Reissue the dispatch callback, scale the kind-specific value for kinds 2..4, then restart. */
+void func_00162248(ParObj *obj, f32 factor) {
+    D_003AAC58[obj->dispatchIndex](obj, factor);
+    switch (obj->kind) {
+    case 2:
+        obj->scale *= factor;
+        break;
+    case 3:
+        obj->scale *= factor;
+        break;
+    case 4:
+        obj->scale *= factor;
+        break;
+    }
+    parRestartKind(obj);
+}
 
 u16 parGetRestartFlag(ParObj *obj) {
     return obj->restartFlag;

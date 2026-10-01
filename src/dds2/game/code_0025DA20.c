@@ -540,7 +540,7 @@ typedef struct {
     s32 descriptorHandle; /* 0x2428: submitted to the drawing packet */
     u8 pad242C[4];
     u32 menuState; /* 0x2430 */
-    u8 pad2434[4];
+    s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
     u32 linkedHandle; /* 0x2438: passed to func_0025F130 */
     u32 optionFlags; /* 0x243C */
     u8 pad2440[4];
@@ -673,7 +673,36 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EF10);
+extern void func_001053F0(s32, s32, f32);
+extern void func_0025EFD8(CampScene *scene);
+extern void mnuShopSubmitDescriptor(u8 *work);
+extern void func_0025F2B0(CampScene *scene);
+
+/* Camp scene opening steps 1..5, each falling into the next; stages 0 and 2 do nothing, other values advance by one. */
+void func_0025EF10(CampScene *scene) {
+    switch (scene->menuState) {
+    case 1:
+        if (D_00435CC8 == 0) {
+            func_001053F0(0x200, 0xE0, 100.75f);
+        }
+        scene->menuState = scene->menuState + 1;
+    case 3:
+        func_0025EFD8(scene);
+        scene->menuState = scene->menuState + 1;
+    case 4:
+        mnuShopSubmitDescriptor((u8 *)scene);
+        scene->menuState = scene->menuState + 1;
+    case 5:
+        if (scene->shopFlag == 1) {
+            func_0025F2B0(scene);
+        }
+    case 0:
+        break;
+    default:
+        scene->menuState = scene->menuState + 1;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025EFD8);
 

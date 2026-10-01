@@ -76,7 +76,37 @@ extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117438);
+typedef struct SdfCurveTable {
+    u8 pad00[4];
+    f32 *values;          /* 0x04 */
+} SdfCurveTable;
+
+typedef struct SdfCurveUser {
+    u8 pad00[4];
+    u32 flags;            /* 0x04: bit 2 = curve active */
+    u8 pad08[4];
+    f32 time;             /* 0x0C */
+    u8 pad10[0xC];
+    SdfCurveTable *curve; /* 0x1C */
+} SdfCurveUser;
+
+extern void func_00116B80(s32 *index, f32 *fraction, void *table, f32 time);
+
+/* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
+f32 func_00117438(SdfCurveUser *user) {
+    s32 index;
+    f32 fraction;
+    SdfCurveTable *curve;
+    f32 *values;
+
+    if (user->flags & 4) {
+        curve = user->curve;
+        func_00116B80(&index, &fraction, curve, user->time);
+        values = curve->values;
+        return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
+    }
+    return 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_001174C0);
 

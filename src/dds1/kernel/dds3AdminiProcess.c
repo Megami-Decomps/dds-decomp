@@ -12,7 +12,7 @@ extern void* memcpy(void* dst, void* src, s32 n);
  * columns are consecutive symbols, D_003297D0 / D_003297D4 / D_003297D8. */
 typedef struct AdminDispatch {
     void (*entry)(void);
-    void (*destroy)(void);
+    s32 (*destroy)(void);
     void (*cleanup)(void);
 } AdminDispatch;
 
@@ -68,7 +68,31 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102AE0);
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102C58);
+typedef void (*AdminStep)(void);
+
+extern void func_00102AE0(void);
+
+/* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
+   cleared. Returns the next step function, or NULL if the callback failed. */
+AdminStep func_00102C58(void *task) {
+    AdminWork *work = kwlnTaskGetUserValue(task);
+    s32 mode = work->unk08;
+    s32 (*destroy)(void);
+    s32 result;
+
+    if (mode >= 0) {
+        destroy = D_003297D0[mode].destroy;
+        if (destroy != NULL) {
+            result = destroy();
+            if (result < 0) {
+                return NULL;
+            }
+            work->unk21 = result + 1;
+            work->unk08 = -1;
+        }
+    }
+    return func_00102AE0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102CD8);
 

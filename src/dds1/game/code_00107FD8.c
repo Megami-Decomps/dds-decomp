@@ -998,7 +998,20 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AC10);
+extern s32 func_00305B08();
+extern void sdfDevConsPrintf();
+
+/* printf into the dev console node when one exists. */
+void func_0010AC10(const char *fmt, ...) {
+    char buffer[0x200];
+    __builtin_va_list args;
+
+    __builtin_stdarg_start(args, fmt);
+    if (D_003BA960 != 0) {
+        func_00305B08(buffer, fmt, args);
+        sdfDevConsPrintf(D_003BA960, "%s", buffer);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AC98);
 
@@ -1095,8 +1108,6 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA950);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA958);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA960);
-
-INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA968);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA970);
 

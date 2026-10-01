@@ -113,7 +113,23 @@ void func_00194038(s16 buffer, s32 image) {
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_001940B8);
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_00194190);
+extern void *func_002EB028();
+extern void func_001944A0(s32, s32, void *);
+
+/* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
+void func_00194190(s32 index, s32 path) {
+    s32 slot = index & 0xFF;
+    FrFontSysLocal *sys = &D_003D6C80;
+
+    if (D_003565F8[slot] != 1) {
+        if (slot == 1) {
+            func_001944A0(1, 0, sys->entries[0].buffer);
+        } else {
+            func_001944A0(slot, 0, func_002EB028(path, 0, 0));
+        }
+        D_003565F8[slot] = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00194228);
 

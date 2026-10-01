@@ -8,6 +8,7 @@ typedef struct {
     s32 unk1C;
 } FmGslWork;
 
+
 extern FmGslWork D_003D68C0;
 extern void func_002D0918(void *);
 

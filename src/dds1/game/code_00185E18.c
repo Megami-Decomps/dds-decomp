@@ -124,4 +124,33 @@ void func_00186CB8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186CD0);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186D48);
+typedef struct BlurRect {
+    s32 extent;     /* 0x00 half-size source */
+    u8 pad04[0x10];
+    s32 centerX;    /* 0x14 */
+    s32 centerY;    /* 0x18 */
+    s32 left;       /* 0x1C */
+    s32 top;        /* 0x20 */
+    s32 right;      /* 0x24 */
+    s32 bottom;     /* 0x28 */
+    u32 resource;   /* 0x2C */
+} BlurRect;
+
+extern s32 func_0011E278();
+extern void func_00186B20();
+
+void func_00186D48(BlurRect *rect) {
+    s32 x, y, w;
+
+    if (func_0011E278(rect) == 0) {
+        x = rect->centerX + 0x1000;
+        y = (rect->centerY + 0xE00) >> 1;
+        w = rect->extent;
+        rect->left = x - w;
+        rect->right = x + w;
+        w >>= 1;
+        rect->top = y - w;
+        rect->bottom = y + w;
+        func_00186B20((u8 *)rect + 4, rect->resource, 1);
+    }
+}

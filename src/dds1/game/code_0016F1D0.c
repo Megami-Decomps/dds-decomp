@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 typedef struct {
     u8 pad0[8];
@@ -244,7 +245,12 @@ s32 func_00170548(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170558);
+u8 *func_00170558(u32 count) {
+    u8 *matrix = func_0016FB08(count);
+
+    EE_MMI_UNIT_MATRIX(matrix);
+    return matrix;
+}
 
 void func_001705A0(u32 id) {
     effReleaseRecordGroupAssetAndHandle(id);

@@ -76,15 +76,19 @@ extern s32 D_00357BA0[];
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
 
+typedef struct PanelCursorItem {
+    s32 first;  /* 0x0 */
+    s16 second; /* 0x4 */
+    s16 third;  /* 0x6 */
+} PanelCursorItem;
+
 /* Selection state shared by the id helpers below. */
 typedef struct PanelCursor {
     s32 unk0;  /* 0x0: id (>= 0 valid) */
     s16 unk4;  /* 0x4 */
     s16 unk6;  /* 0x6: counter */
     s32 unk8;  /* 0x8 */
-    s32 unkC;  /* 0xC */
-    s16 unk10; /* 0x10 */
-    s16 unk12; /* 0x12 */
+    PanelCursorItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
 } PanelCursor;
 
 extern PanelCursor D_00357D90;
@@ -244,7 +248,20 @@ void itfPanelSetBlueTint(u8 *base) {
     panelSetVec4(vec, 0x73, 0x87, 0xFF, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A150);
+extern u8 D_00357BD0[];
+extern u8 D_00357BE0[];
+
+/* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
+void func_0019A150(PanelObj *panel, u64 command) {
+    PktRec *buf = panel->buf;
+    PktRec *colors = buf + 4;
+    s32 i;
+
+    colors[1].unkC = panel->unk38;
+    for (i = 0; i < 3; i++) {
+        itfDrawQuadFlat4(buf, colors, &D_00357BD0[i * 4], &D_00357BE0[i * 4], panel->unkC, command);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A200);
 
@@ -365,7 +382,30 @@ s32 itfPanelReleaseHold(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AF30);
+/* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
+s32 func_0019AF30(void) {
+    PanelCursor *cursor = &D_00357D90;
+    s32 first;
+    s32 second;
+    s32 third;
+    s32 i;
+
+    if (cursor->unk0 < 0) {
+        return 1;
+    }
+    if (cursor->unk6 >= 0x40) {
+        return 1;
+    }
+    first = scrReadIntParameter(0);
+    second = scrReadIntParameter(1);
+    third = scrReadIntParameter(2);
+    cursor->items[cursor->unk6].second = first;
+    i = cursor->unk6;
+    cursor->items[i].third = third;
+    cursor->items[i].first = second;
+    cursor->unk6++;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019AFD8);
 

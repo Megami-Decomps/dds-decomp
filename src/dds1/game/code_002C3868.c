@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 
 extern void sdfCounterTickCountdown(void);
 
@@ -71,9 +72,11 @@ extern void func_002C3C48(void);
 
 extern s32 D_003BD264;
 
-extern u8 D_003900A0[];
+extern SdfQuad D_003900A0;
 
-extern u8 D_003900B0[];
+extern SdfQuad D_003900B0;
+extern SdfQuad D_003900C0;
+extern SdfQuad D_003900D0;
 
 extern void effObjSetInnerFirstVec(s32, void *);
 
@@ -107,8 +110,8 @@ typedef struct MapResource {
 extern MapResource D_00390700;
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(D_003BD264, D_003900A0);
-    effObjSetInnerSecondVec(D_003BD264, D_003900B0);
+    effObjSetInnerFirstVec(D_003BD264, &D_003900A0);
+    effObjSetInnerSecondVec(D_003BD264, &D_003900B0);
     ((EffObjHeader *)D_003BD264)->vtbl->refresh(D_003BD264);
 }
 
@@ -116,7 +119,15 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3AC8);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3C48);
+extern void sdfCommitPendingVectorAndMarkChanged();
+
+/* Latch the base vectors into the pending pair and flag the change. */
+void func_002C3C48(void) {
+    D_003BD270 = 1;
+    D_003900C0 = D_003900A0;
+    D_003900D0 = D_003900B0;
+    sdfCommitPendingVectorAndMarkChanged();
+}
 
 /* Reset the current selection before installing the requested index. */
 void sdfSetSelectedIndex(u32 index) {

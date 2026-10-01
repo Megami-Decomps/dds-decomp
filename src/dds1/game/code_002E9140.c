@@ -55,7 +55,33 @@ void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9198);
 
-INCLUDE_ASM(const s32, "game/code_002E9140", func_002E92C0);
+typedef struct SndTrackSlot {
+    s32 id;      /* 0x00 */
+    u8 flagA;    /* 0x04 */
+    u8 flagB;    /* 0x05 */
+    u8 pad06[2];
+} SndTrackSlot;
+
+extern void func_0030B458(void *dst, void *src);
+
+/* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
+   current track, else 0. */
+s32 func_002E92C0(s32 packed) {
+    s32 id = packed >> 16;
+    u8 *base = (u8 *)&D_003FE0C0;
+    SndTrackSlot *slot;
+    s32 i;
+
+    func_0030B458(base, base + 0x8D0);
+    slot = (SndTrackSlot *)(base + 0x190);
+    for (i = 0; i < 13; i++) {
+        if (slot->id == id) {
+            return 1;
+        }
+        slot++;
+    }
+    return D_003BD490 == id ? 2 : 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9340);
 
