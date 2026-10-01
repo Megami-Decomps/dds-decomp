@@ -52,9 +52,7 @@ class _Stack:
         return "<?>"
 
     def arguments(self, count: int) -> list[str]:
-        arguments = [self.pop() for _ in range(count)]
-        arguments.reverse()
-        return arguments
+        return [self.pop() for _ in range(count)]
 
 
 def _signed(value: int, bits: int) -> int:
@@ -153,6 +151,11 @@ def render(
     ]
     message_symbols = (
         flw0._message_symbols(script.section_bytes(message_sections[0]))[0]
+        if len(message_sections) == 1
+        else ()
+    )
+    selection_symbols = (
+        flw0._selection_symbols(script.section_bytes(message_sections[0]))[0]
         if len(message_sections) == 1
         else ()
     )
@@ -281,15 +284,33 @@ def render(
                 profile,
                 message_symbols,
             )
+            selection_symbol = flw0._selection_push_symbol(
+                raw,
+                words[pc + 1].raw if pc + 1 < len(words) else None,
+                profile,
+                selection_symbols,
+            )
             event_symbol = flw0._event_push_symbol(
                 raw,
                 words[pc + 1].raw if pc + 1 < len(words) else None,
                 profile,
             )
+            procedure_symbol = flw0._procedure_push_symbol(
+                raw,
+                words[pc + 1].raw if pc + 1 < len(words) else None,
+                profile,
+                tuple(
+                    procedures.get(index, "") for index in range(len(procedures))
+                ),
+            )
             if message_symbol is not None:
                 expression = f"message({message_symbol})"
+            elif selection_symbol is not None:
+                expression = f"selection({selection_symbol})"
             elif event_symbol is not None:
                 expression = f"event({event_symbol})"
+            elif procedure_symbol:
+                expression = f"procedure({procedure_symbol})"
             else:
                 expression = str(_signed(operand, 16))
             stack.push(expression)

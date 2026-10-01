@@ -35,20 +35,21 @@ def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
 def _fixture(
     code_words: list[int] | None = None,
     message_data: bytes = b"",
+    procedure_rows: tuple[tuple[str, int], ...] = (("synthetic_001", 0),),
 ) -> bytes:
     """Build the significant shape of a small DDS event script."""
 
     if code_words is None:
         code_words = [7, (42 << 16) | 29, 9]
     sections = [
-        (0, 0x20, 1),
+        (0, 0x20, len(procedure_rows)),
         (1, 0x20, 0),
         (2, 4, len(code_words)),
         (3, 1, len(message_data)),
         (4, 1, 0xF0),
     ]
     table_end = 0x20 + len(sections) * 0x10
-    proc = _named_row("synthetic_001", 0)
+    proc = b"".join(_named_row(name, pc) for name, pc in procedure_rows)
     code = b"".join(struct.pack("<I", word) for word in code_words)
     string_padding = bytes(0xF0)
     offsets = [
@@ -79,6 +80,26 @@ def _fixture(
         for (type_id, size, count), offset in zip(sections, offsets)
     )
     return header + table + proc + code + message_data + string_padding
+
+
+def _instruction_words(script: flw0.Flw0File) -> tuple[flw0.InstructionWord, ...]:
+    """Return instruction heads without treating extended operands as opcodes."""
+
+    words = script.code_words()
+    instructions: list[flw0.InstructionWord] = []
+    pc = 0
+    while pc < len(words):
+        word = words[pc]
+        instructions.append(word)
+        if (
+            word.opcode in flw0._EXTENDED_OPCODES
+            and word.operand_u16 == 0
+            and pc + 1 < len(words)
+        ):
+            pc += 2
+        else:
+            pc += 1
+    return tuple(instructions)
 
 
 class Flw0Tests(unittest.TestCase):
@@ -205,6 +226,57 @@ class Flw0Tests(unittest.TestCase):
         view = flw0_view.render(script, "dds1")
         self.assertIn("MESSAGE_REQUEST_AND_POLL(message(MSG_B))", view)
 
+    def test_selection_references_are_typed_and_return_the_choice(self) -> None:
+        message_data = msg1.encode(
+            msg1.Bank(
+                (
+                    msg1.Message("PROMPT", 0xFFFF, (b"Choose",)),
+                    msg1.Selection("CHOICE", 0, 0, 0, (b"Yes", b"No")),
+                ),
+                (),
+            )
+        )
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x003 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["PUSHREG"],
+                (10 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (20 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (30 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x071 << 16) | flw0.OPCODE_IDS["COMM"],
+                (0 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x003 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ],
+            message_data,
+        )
+        script = flw0.parse(original)
+
+        physical = flw0.render_source(script, "dds1")
+        symbolic = flw0_symbolic.render(script, "dds1")
+        self.assertIn("0001: PUSHSELECT CHOICE", physical)
+        self.assertIn("  PUSHSELECT CHOICE", symbolic)
+        self.assertIn("0008: PUSHIS 0x0000", physical)
+        self.assertNotIn("PUSHSELECT PROMPT", symbolic)
+        self.assertEqual(flw0.parse_source(physical).to_bytes(), original)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "unknown selection 'PROMPT'"
+        ):
+            flw0.parse_source(
+                symbolic.replace("PUSHSELECT CHOICE", "PUSHSELECT PROMPT")
+            )
+
+        view = flw0_view.render(script, "dds1")
+        self.assertIn(
+            "result = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(CHOICE))", view
+        )
+        self.assertIn("push result", view)
+        self.assertIn("SET_MESSAGE_WINDOW_GEOMETRY(30, 20, 10)", view)
+
     def test_event_references_use_names_in_both_source_formats(self) -> None:
         original = _fixture(
             [
@@ -237,6 +309,46 @@ class Flw0Tests(unittest.TestCase):
             flw0.Flw0Error, "named event target requires a profile"
         ):
             flw0.parse_source(symbolic.replace("profile dds1\n", ""))
+
+    def test_script_task_targets_use_local_procedure_symbols(self) -> None:
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                flw0.OPCODE_IDS["PUSHIS"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x0A5 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["PUSHREG"],
+                (0x0A7 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+                (1 << 16) | flw0.OPCODE_IDS["PROC"],
+                flw0.OPCODE_IDS["END"],
+            ],
+            procedure_rows=(("main", 0), ("worker", 7)),
+        )
+        script = flw0.parse(original)
+        symbolic = flw0_symbolic.render(script, "dds1")
+
+        self.assertIn("  PUSHPROC worker", symbolic)
+        self.assertIn("  COMM CREATE_SCRIPT_TASK", symbolic)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
+        reordered = flw0.parse_source(
+            symbolic.replace(
+                "procedure main reserved=0x00000000\n"
+                "procedure worker reserved=0x00000000",
+                "procedure worker reserved=0x00000000\n"
+                "procedure main reserved=0x00000000",
+            )
+        )
+        self.assertEqual(reordered.code_words()[2].operand_u16, 0)
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown procedure 'missing'"):
+            flw0.parse_source(symbolic.replace("PUSHPROC worker", "PUSHPROC missing"))
+
+        view = flw0_view.render(script, "dds1")
+        self.assertIn(
+            "result = CREATE_SCRIPT_TASK(procedure(worker), 0)", view
+        )
+        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", view)
 
     def test_duplicate_message_names_keep_numeric_operands(self) -> None:
         message_data = msg1.encode(
@@ -706,6 +818,7 @@ end
             "MESSAGE_REQUEST_AND_POLL": (0x000, 1, False),
             "ACTIVATE_MESSAGE_PANEL": (0x001, 0, False),
             "FINISH_SCRIPT_MESSAGE_WINDOW": (0x002, 0, False),
+            "MESSAGE_SELECTION_REQUEST_AND_POLL": (0x003, 1, True),
             "TEST_MODEL_FLAG": (0x007, 1, True),
             "SET_MODEL_FLAG": (0x008, 1, False),
             "CLEAR_MODEL_FLAG": (0x009, 1, False),
@@ -726,9 +839,12 @@ end
             "READ_CURRENT_WORLD_OBJECT_ID": (0x068, 0, True),
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
+            "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
+            "CREATE_SCRIPT_TASK": (0x0A5, 2, True),
+            "DESTROY_REGISTERED_TASK": (0x0A6, 1, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
@@ -768,7 +884,7 @@ end
         self.assertIn("procedure e670_001 @ 0x0000", view)
         self.assertIn("0004: push 1", view)
         self.assertIn("0005: push 670", view)
-        self.assertIn("0006: result = CREATE_POLYGON_MOVIE(1, 670)", view)
+        self.assertIn("0006: result = CREATE_POLYGON_MOVIE(670, 1)", view)
         self.assertIn("0007: push result", view)
         self.assertIn("0008: WAIT_FOR_TASK_REMOVAL(result)", view)
         self.assertIn("000c: return_or_end", view)
@@ -782,7 +898,7 @@ end
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("profile dds1", result.stdout)
-        self.assertIn("CREATE_POLYGON_MOVIE(1, 670)", result.stdout)
+        self.assertIn("CREATE_POLYGON_MOVIE(670, 1)", result.stdout)
 
     def test_reading_view_is_conservative_after_unknown_command(self) -> None:
         code = [
@@ -809,7 +925,7 @@ end
             flw0.OPCODE_IDS["END"],
         ]
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
-        self.assertIn("0003: result = CREATE_POLYGON_MOVIE(1, 670)", view)
+        self.assertIn("0003: result = CREATE_POLYGON_MOVIE(670, 1)", view)
         self.assertIn("0005: push result<?>", view)
 
     def test_verified_nonwriter_preserves_result_state(self) -> None:
@@ -854,7 +970,7 @@ end
                 self.assertIn("FLW0 reading view", view)
                 self.assertIn("messages ", view)
                 strings = flw0_view.type5_strings(script)
-                for word in script.code_words():
+                for word in _instruction_words(script):
                     if word.opcode == flw0.OPCODE_IDS["COMM"]:
                         command_uses += 1
                         if word.operand_u16 in flw0_profiles.DDS1.by_id:
@@ -867,8 +983,8 @@ end
                             view,
                         )
         self.assertEqual(type5_uses, 7863)
-        self.assertEqual(command_uses, 53400)
-        self.assertEqual(profiled_command_uses, 37026)
+        self.assertEqual(command_uses, 53389)
+        self.assertEqual(profiled_command_uses, 38882)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -888,12 +1004,12 @@ end
             flw0.OPCODE_IDS["END"],
         ]
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds2")
-        self.assertIn("PREPARE_UNIT_MOTION_STATE(1, 2, 3, 4, 5)", view)
+        self.assertIn("PREPARE_UNIT_MOTION_STATE(5, 4, 3, 2, 1)", view)
         self.assertIn("result = READ_SECONDARY_WORLD_ID_VALUE(12)", view)
         self.assertIn("push result", view)
         self.assertIn("result = TEST_MODEL_FLAG(7)", view)
         self.assertIn("WAIT_FOR_TIMER_START()", view)
-        self.assertIn("SCREEN_FADE_B(0, 30)", view)
+        self.assertIn("SCREEN_FADE_B(30, 0)", view)
 
     def test_reading_view_uses_world_unit_stack_contracts(self) -> None:
         code = [
@@ -915,10 +1031,10 @@ end
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
         self.assertIn("ADD_EFFECT_UNIT_TO_WORLD(4)", view)
         self.assertIn("WAIT_FOR_UNIT_MOTION(4)", view)
-        self.assertIn("ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(8, 9)", view)
+        self.assertIn("ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(9, 8)", view)
         self.assertIn("result = READ_CURRENT_WORLD_OBJECT_ID()", view)
         self.assertIn("push result", view)
-        self.assertIn("QUEUE_WORLD_OBJECT_PENDING_VALUE(10, 20)", view)
+        self.assertIn("QUEUE_WORLD_OBJECT_PENDING_VALUE(20, 10)", view)
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -960,7 +1076,9 @@ end
         font_directives = 0
         glyph_directives = 0
         message_references = 0
+        selection_references = 0
         event_references = 0
+        procedure_references = 0
         short_string_counts = 0
         for expected, source in records:
             with self.subTest(source=source.relative_to(source_dir)):
@@ -972,19 +1090,21 @@ end
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
                 message_references += len(re.findall(r"\bPUSHMSG\b", text))
+                selection_references += len(re.findall(r"\bPUSHSELECT\b", text))
                 event_references += len(re.findall(r"\bPUSHEVENT\b", text))
+                procedure_references += len(re.findall(r"\bPUSHPROC\b", text))
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
                 code_words += len(script.code_words())
                 commands += sum(
                     word.opcode == flw0.OPCODE_IDS["COMM"]
-                    for word in script.code_words()
+                    for word in _instruction_words(script)
                 )
                 profiled_commands += sum(
                     word.opcode == flw0.OPCODE_IDS["COMM"]
                     and word.operand_u16 in flw0_profiles.DDS1.by_id
-                    for word in script.code_words()
+                    for word in _instruction_words(script)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -1019,11 +1139,13 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53400, 37026)
+            (code_words, commands, profiled_commands), (168829, 53389, 38882)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
+        self.assertEqual(selection_references, 329)
         self.assertEqual(event_references, 31)
+        self.assertEqual(procedure_references, 807)
         self.assertEqual(short_string_counts, 30)
 
     def test_tracked_dds2_script_corpus_assembles_exact_hashes(self) -> None:
@@ -1053,7 +1175,9 @@ end
             "commands": 0,
             "profiled_commands": 0,
             "message_references": 0,
+            "selection_references": 0,
             "event_references": 0,
+            "procedure_references": 0,
             "font": 0,
             "glyphs": 0,
             "short_string_counts": 0,
@@ -1074,18 +1198,24 @@ end
                 totals["code_words"] += len(script.code_words())
                 totals["commands"] += sum(
                     word.opcode == flw0.OPCODE_IDS["COMM"]
-                    for word in script.code_words()
+                    for word in _instruction_words(script)
                 )
                 totals["profiled_commands"] += sum(
                     word.opcode == flw0.OPCODE_IDS["COMM"]
                     and word.operand_u16 in flw0_profiles.DDS2.by_id
-                    for word in script.code_words()
+                    for word in _instruction_words(script)
                 )
                 totals["message_references"] += len(
                     re.findall(r"\bPUSHMSG\b", text)
                 )
+                totals["selection_references"] += len(
+                    re.findall(r"\bPUSHSELECT\b", text)
+                )
                 totals["event_references"] += len(
                     re.findall(r"\bPUSHEVENT\b", text)
+                )
+                totals["procedure_references"] += len(
+                    re.findall(r"\bPUSHPROC\b", text)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -1128,13 +1258,18 @@ end
             (66, 59, 2437, 2673, 1149, 177),
         )
         self.assertEqual(
-            (totals["code_words"], totals["commands"]), (123441, 38850)
+            (totals["code_words"], totals["commands"]), (123441, 38839)
         )
         self.assertEqual(
-            (totals["profiled_commands"], totals["message_references"]),
-            (26973, 1910),
+            (
+                totals["profiled_commands"],
+                totals["message_references"],
+                totals["selection_references"],
+            ),
+                (28401, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
+        self.assertEqual(totals["procedure_references"], 463)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)
 
