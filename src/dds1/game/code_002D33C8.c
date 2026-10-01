@@ -657,8 +657,8 @@ typedef struct SdfTexView {
     s16 x;          /* 0x0 */
     u8 pad2[2];
     s16 y;          /* 0x4 */
-    u8 unk6;        /* 0x6 */
-    u8 unk7;        /* 0x7 */
+    u8 width;       /* 0x6 */
+    u8 height;      /* 0x7 */
     SdfResRef *res[3]; /* 0x8 */
 } SdfTexView;
 
@@ -686,12 +686,12 @@ void func_002D48A8(SdfTexScenePacket *packet, SdfTexView *view, s32 index) {
     tex = view->res[index]->handle;
     shade = view->res[2]->handle;
     x = view->x;
-    w = view->unk6;
+    w = view->width;
     y = view->y;
-    h = view->unk7;
+    h = view->height;
     func_002D4678(packet->tex0, tex, x, y, w, shade, h, D_003BD332, 0);
     func_002D4678(packet->tex1, tex, x, y, w, shade, h, D_003BD332, 1);
-    sdfBuildCenteredViewBoundsPacket(packet->limits, view->x, view->y, view->unk6, view->unk7);
+    sdfBuildCenteredViewBoundsPacket(packet->limits, view->x, view->y, view->width, view->height);
     packet->regs[0] = 0x517FB;
     packet->regs[1] = 0x47;
     packet->regs[2] = 0x44;
@@ -709,8 +709,8 @@ typedef struct SdfViewBox {
     s16 x;       /* 0x0 */
     u8 pad2[2];
     s16 y;       /* 0x4 */
-    u8 unk6;     /* 0x6 */
-    u8 unk7;     /* 0x7 */
+    u8 width;     /* 0x6 */
+    u8 height;    /* 0x7 */
 } SdfViewBox;
 
 typedef struct SdfSceneNode {
@@ -730,7 +730,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfViewBox *view) {
     sdfInitializeDmaReferenceTag(&node->header, 0x15);
     node->view = view;
     node->handler = func_002D49E8;
-    sdfBuildCenteredViewBoundsPacket(node->limits, view->x, view->y, view->unk6, view->unk7);
+    sdfBuildCenteredViewBoundsPacket(node->limits, view->x, view->y, view->width, view->height);
     node->regs[0] = 0x517FB;
     node->regs[1] = 0x47;
     node->regs[2] = 0x44;
