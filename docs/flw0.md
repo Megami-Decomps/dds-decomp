@@ -416,19 +416,56 @@ the task creation and wait in `e670` become:
   0008: WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+Use the semantic form to fold stack setup and expression instructions into
+their proven consumers:
+
+```sh
+python3 tools/flw0.py view --semantic src/dds1/scripts/event/e670.bfasm
+```
+
+The same sequence then reads:
+
+```text
+  0006: result = CREATE_POLYGON_MOVIE(670, 1)
+  0008: WAIT_FOR_TASK_REMOVAL(result)
+```
+
+An unused value, or a value that reaches a command with an unknown stack
+contract, remains as an explicit `push`. The semantic view therefore removes
+VM mechanics only when a known instruction accounts for the value.
+
+The structured form additionally recognizes the compiler's canonical forward
+branches and natural loops:
+
+```sh
+python3 tools/flw0.py view --structured src/dds1/scripts/battle/nego.bfasm
+```
+
+It emits nested `if`, `else`, and `while` blocks and removes only the branch and
+back-edge instructions owned by those regions. A region is structured only
+when its intervals are properly nested, no procedure or external edge enters
+its interior, `if` arms do not cross into each other, and a loop condition has
+no visible side effect before its test. Other control flow remains as labels
+and gotos inside or beside the recovered blocks.
+
+Across the maintained scripts this recovers 813 DDS1 and 1,263 DDS2 natural
+loops, plus 3,522 and 3,497 conditional regions. Of those conditionals, 1,221
+DDS1 and 1,068 DDS2 regions include a recovered `else` arm.
+
 This is a derived reading aid, not another source format. An unprofiled native
 command is printed numerically and invalidates the inferred stack; later
-self-contained pushes can still form known arguments. Procedure and jump-label
-entries also start with unknown stack state. Unsupported instructions stay
-visible at their original PC instead of being guessed away. Float literals
-retain their exact bit pattern. Every one of the 315 `PUSHTYPE5` operands in the
-tracked corpus lands on a NUL-delimited ASCII run in section 4, so the view
-shows both the byte offset and that observed text while retaining the
-conservative `type5_ref` name. The current profile resolves 1,334 of the
-corpus's 3,881 native-command instructions and reaches every tracked event
-file. Native call arguments follow the handler's parameter order: argument 0
-is popped from the top of the VM stack. Binary expressions use the same VM
-order, with the top stack value on the left and the next value on the right.
+self-contained pushes can still form known arguments. Analysis starts at each
+procedure and follows direct branch edges to a fixed point. At a join it keeps
+only the top-of-stack suffix and VM result value on which every incoming path
+agrees; different native-result sites remain distinct even though both display
+as `result`. Calls, unknown commands, and unsupported instructions are explicit
+analysis barriers. Unsupported instructions stay visible at their original PC
+instead of being guessed away. Float literals retain their exact bit pattern.
+`PUSHTYPE5` references show both the byte offset and observed NUL-delimited
+ASCII text where available. Native call arguments follow the handler's
+parameter order: argument 0 is popped from the top of the VM stack. Binary
+expressions use the same VM order, with the top stack value on the left and the
+next value on the right.
 
 ## Physical source
 
