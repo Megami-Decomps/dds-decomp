@@ -52,7 +52,19 @@ u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
     return (u32 *)0x0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D998);
+u32 *func_0031D998(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
+    u32 *slot = itfClaimFreeWideSlot(pool);
+    u32 bits = (tag & 0xFF) << 1;
+
+    if (slot != NULL) {
+        slot[1] = a;
+        slot[2] = b;
+        slot[3] = c;
+        slot[4] = 0;
+        slot[0] = (slot[0] & ~0x1FE) | bits;
+    }
+    return slot;
+}
 
 /* Return a wide slot to the pool without disturbing its other flags. */
 void itfReleaseWideSlot(u32 *flags) {
