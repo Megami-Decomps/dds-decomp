@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_state.h"
+#include "btl_command.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -31,33 +32,6 @@ extern void (*D_00360E38[])(BtlTask *, u32, s32);
 
 extern s32 btlGetIndexListEntry(void *, u32);
 
-/* Paired cameras are transforms: two vectors, distance and field of view. */
-typedef struct BtlCamState {
-    f32 position[4];
-    f32 direction[4];
-    f32 distance;
-    f32 fov;
-} BtlCamState;
-
-/* Linked motion command; actionCode/state belong here, not in BtlUnit flags. */
-typedef struct BtlLinkedCommand {
-    BtlCamState camera; /* 0x00 */
-    u8 pad28[8];
-    BtlCamState frontCamera; /* 0x30 */
-    u8 pad58[0x68];
-    BtlCamState backCamera; /* 0xC0 */
-    u8 padE8[8];
-    u32 flags; /* 0xF0 */
-    BtlTask *task; /* 0xF4 */
-    BtlUnit *linkedA; /* 0xF8 */
-    BtlUnit *linkedB; /* 0xFC */
-    u8 pad100[0x10];
-    s32 state; /* 0x110 */
-    s32 actionCode; /* 0x114 */
-    u32 targetList; /* 0x118 */
-    u8 pad11C[0x14];
-    f32 motionParameter; /* 0x130 */
-} BtlLinkedCommand;
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_command.h"
 #include "pcp_vu0.h"
 
 extern u64 func_00219318(void);
@@ -119,7 +119,9 @@ typedef struct BattleNamedResource BattleNamedResource;
 typedef struct ActionStateLink {
     u8 pad00[0x18];
     BtlUnit *unit; /* 0x18 */
-    u8 pad1C[0x44];
+    u8 pad1C[0x28];
+    s32 slot; /* 0x44: action-kind table index, also reached through command->link */
+    u8 pad48[0x18];
     u32 targetHandle; /* 0x60 */
     u8 pad64[0x10C];
     s32 lastMode; /* 0x170: mode of the unit picked last time */
@@ -132,15 +134,6 @@ typedef struct BtlSelectCtrl {
     s8 pending;
 } BtlSelectCtrl;
 
-typedef struct BtlCommandRecord {
-    u8 pad00[0x44];
-    s32 slot; /* 0x44 */
-} BtlCommandRecord;
-
-typedef struct BtlCommandView {
-    u8 pad00[0x114];
-    BtlCommandRecord *record; /* 0x114 */
-} BtlCommandView;
 
 /* Queued action slot: some queries inspect the full word, others its ID. */
 typedef union BattleActionSlot {
@@ -1858,25 +1851,6 @@ void btlSelectLinkedTargets(s32 task, s32 unused, s8 linked) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002172B8);
 
-typedef struct BtlCamState {
-    f32 position[4];  /* 0x00 */
-    f32 direction[4]; /* 0x10 */
-    f32 distance;     /* 0x20 */
-    f32 fov;          /* 0x24 */
-} BtlCamState;
-/* Linked motion command, distinct from the unit selected by its action link. */
-typedef struct BtlLinkedCommand {
-    BtlCamState camera; /* 0x00: same two-vector/two-scalar motion state */
-    u8 pad28[0xE8];
-    u32 flags;       /* 0x110: direction flags */
-    ActionStateLink *link; /* 0x114 */
-    u8 pad118[0x14];
-    u16 pendingMotion; /* 0x12C */
-    u8 pad12E[6];
-    u32 actionCode;   /* 0x134 */
-    u32 targetList;   /* 0x138 */
-    s32 elapsed;     /* 0x13C */
-} BtlLinkedCommand;
 
 void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     BtlUnit *user;
@@ -2052,7 +2026,7 @@ s32 btlShiftUnitUpForScriptAction(u8 *command) {
     if (user->mode == 0x5F || user->mode == 0x101) {
         table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
-            kind = ((BtlActionKindTable *)table)->rows[((BtlCommandView *)command)->record->slot].kind;
+            kind = ((BtlActionKindTable *)table)->rows[((BtlLinkedCommand *)command)->link->slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 350.0f;
@@ -2437,7 +2411,7 @@ s32 btlRaiseUnitForCommandSlot(u8 *command) {
     if (user->mode == 0x108) {
         table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
-            kind = ((BtlActionKindTable *)table)->rows[((BtlCommandView *)command)->record->slot].kind;
+            kind = ((BtlActionKindTable *)table)->rows[((BtlLinkedCommand *)command)->link->slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 1250.0f;
@@ -2729,11 +2703,11 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
     }
     switch (command->actionCode) {
     case 0x10C:
-        command->elapsed = 0;
+        command->motionProgress = 0;
         return 0;
     case 0x17E:
         btlPrepareRandomizedActionCameraPose((s32)command, (s32)command + 0x30, (s32)command + 0xC0);
-        command->pendingMotion = 4;
+        command->unk12C = 4;
         return 1;
     }
     return 0;
@@ -2752,11 +2726,11 @@ s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
         return 0;
     }
     if (btlHasMarkedEntry14((s32)command, 0x10c) != 0) {
-        if (command->elapsed >= 0x12) {
+        if (command->motionProgress >= 0x12) {
             btlClearRuntimeFlag2000();
             func_001EC868((s32)command, (s32)command, 0.0f);
         }
-        command->elapsed++;
+        command->motionProgress++;
     }
     return 1;
 }
@@ -2903,6 +2877,8 @@ typedef struct NamedChunkNode {
     u8 pad16[6];
     u32 color;
 } NamedChunkNode;
+
+
 
 typedef struct NamedChunkData {
     u8 pad0[0xC];

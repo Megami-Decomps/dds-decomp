@@ -1,6 +1,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_state.h"
+#include "btl_command.h"
 #include "ee_mmi.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -102,32 +103,6 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-/* Linked-command camera transforms, shared with code_0020CB38.c. */
-typedef struct BtlCamState {
-    f32 position[4];
-    f32 direction[4];
-    f32 distance;
-    f32 fov;
-} BtlCamState;
-
-typedef struct BtlLinkedCommand {
-    BtlCamState camera;
-    u8 pad28[8];
-    BtlCamState frontCamera; /* 0x30 */
-    u8 pad58[0x68];
-    BtlCamState backCamera; /* 0xC0 */
-    u8 padE8[8];
-    u32 flags; /* 0xF0 */
-    BtlTask *task; /* 0xF4 */
-    BtlUnit *linkedA;
-    BtlUnit *linkedB;
-    u8 pad100[0x10];
-    s32 state; /* 0x110 */
-    s32 actionCode; /* 0x114 */
-    u32 targetList;
-    u8 pad11C[0x14];
-    f32 motionParameter;
-} BtlLinkedCommand;
 
 /* Action-animation records are distinct from the 0x38-byte command metadata. */
 typedef struct BtlActionTableRow {
