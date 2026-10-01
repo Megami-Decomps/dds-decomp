@@ -186,7 +186,7 @@ extern u32 func_00313BB0(void);
 
 extern s32 func_003292A8(s32);
 extern u32 strlen(const char *);
-extern void func_0035C860(char *, char *, ...);
+extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 extern void func_00312B50();
@@ -848,7 +848,21 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312910);
+TaskWork *func_00312910(char *name, s32 destroyCallback, u32 userData) {
+    s32 allocation = func_003292A8(0x14);
+    TaskWork *work = sdfMemoryGetBlockAddress(allocation);
+
+    memset(work, 0, 0x14);
+    work->handle = allocation;
+    work->list = sdfCreateTaskHeader(userData);
+    sdfSetTaskDestroyCallback((s32)work->list, destroyCallback);
+    sdfSetTaskSecondaryCallback((s32)work->list, (s32)func_00312B50);
+    work->primaryTaskName = func_00328D68(strlen(name));
+    work->secondaryTaskName = func_00328D68(strlen(name) + 5);
+    func_0035C860(work->primaryTaskName, D_004388D8, name);
+    func_0035C860(work->secondaryTaskName, D_004388E0, name);
+    return work;
+}
 
 s64 sdfDestroyTaskResourceWork(TaskWork *work) {
     if (work != NULL) {
