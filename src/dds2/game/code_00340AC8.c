@@ -17,6 +17,11 @@ extern void sdfAtan2(f32 x, f32 y);
 
 extern f32 D_0040B530[4];
 
+extern f32 D_00435B38;
+
+extern f32 sdfAcosTable(f32 dot);
+
+
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
 void effMiscQuatMultiplyVU(void)
 {
@@ -199,7 +204,58 @@ INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340DC8);
 
 INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340EE0);
 
-INCLUDE_ASM(const s32, "game/code_00340AC8", func_00341028);
+/* Spherical interpolation of quaternions vf10 and vf11 by amount, taking the
+ * shorter arc and leaving the normalized result in vf10. */
+void func_00341028(f32 amount)
+{
+    f32 dot;
+    f32 w0;
+    f32 w1;
+    f32 sinTheta;
+    f32 theta;
+
+    __asm__ volatile (
+        ".set noreorder\n"
+        "vaddw.xyz vf1, vf0, vf0w\n"
+        "vmul.xyzw vf2, vf10, vf11\n"
+        "vadday.x ACC, vf2, vf2y\n"
+        "vmaddaz.x ACC, vf1, vf2z\n"
+        "vmaddw.x vf2, vf1, vf2w\n"
+        "qmfc2.ni $2, vf2\n"
+        "mtc1 $2, %0\n"
+        ".set reorder\n"
+        : "=f"(dot));
+    if (dot < 0.0f) {
+        dot = -dot;
+        __asm__ volatile (
+            ".set noreorder\n"
+            "vmulax.xyzw ACC, vf0, vf0x\n"
+            "vmsubw.xyzw vf12, vf11, vf0w\n"
+            ".set reorder\n");
+    } else {
+        VU0_MOVE_VF(vf12, vf11);
+    }
+    w0 = 1.0f - amount;
+    w1 = amount;
+    /* Close enough to identical: a straight blend is already on the sphere. */
+    if (dot < 0.99899996f) {
+        theta = sdfAcosTable(dot);
+        sinTheta = sdfSinPoly(theta);
+        w0 = sdfSinPoly(w0 * theta) / sinTheta;
+        w1 = sdfSinPoly(w1 * theta) / sinTheta;
+    }
+    __asm__ volatile (
+        ".set noreorder\n"
+        "mfc1 $2, %0\n"
+        "mfc1 $3, %1\n"
+        "qmtc2.ni $2, vf2\n"
+        "qmtc2.ni $3, vf3\n"
+        "vmulax.xyzw ACC, vf10, vf2x\n"
+        "vmaddx.xyzw vf10, vf12, vf3x\n"
+        ".set reorder\n"
+        : : "f"(w0), "f"(w1));
+    effMiscNormalizeVU();
+}
 
 /* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
 void effMiscQuaternionNlerpVU(f32 amount)
