@@ -178,7 +178,7 @@ section 3 type=3 stride=0x1 count=122 offset=0x3e4
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 81d7 81ca 81d9 83ff 808e 808e 808e
+      font "テスト中..."
       newline
       control f1 04
     endpage

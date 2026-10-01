@@ -7,6 +7,7 @@ import re
 import shlex
 import struct
 from dataclasses import dataclass
+from pathlib import Path
 
 
 HEADER_SIZE = 0x20
@@ -14,6 +15,57 @@ NAME_SIZE = 0x18
 MESSAGE_KIND = 0
 SELECTION_KIND = 1
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+
+
+def _load_character_map() -> tuple[dict[int, str], dict[str, int]]:
+    path = Path(__file__).with_name("dds1_msg1_chars.tsv")
+    code_to_character: dict[int, str] = {}
+    character_codes: dict[str, list[int]] = {}
+    preferred: dict[str, int] = {}
+
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for line_number, line in enumerate(lines, 1):
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) not in (2, 3) or (
+            len(fields) == 3 and fields[2] != "preferred"
+        ):
+            raise RuntimeError(f"{path.name}:{line_number}: invalid character-map row")
+        try:
+            code = int(fields[0], 16)
+            character = json.loads(fields[1])
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise RuntimeError(
+                f"{path.name}:{line_number}: invalid character-map value"
+            ) from exc
+        if not 0x8000 <= code < 0xF000 or len(fields[0]) != 4:
+            raise RuntimeError(f"{path.name}:{line_number}: invalid glyph code")
+        if not isinstance(character, str) or len(character) != 1:
+            raise RuntimeError(f"{path.name}:{line_number}: expected one character")
+        if code in code_to_character:
+            raise RuntimeError(f"{path.name}:{line_number}: duplicate glyph code")
+        code_to_character[code] = character
+        character_codes.setdefault(character, []).append(code)
+        if len(fields) == 3:
+            if character in preferred:
+                raise RuntimeError(
+                    f"{path.name}:{line_number}: duplicate preferred character"
+                )
+            preferred[character] = code
+
+    character_to_code: dict[str, int] = {}
+    for character, codes in character_codes.items():
+        if len(codes) == 1:
+            character_to_code[character] = codes[0]
+        elif character in preferred:
+            character_to_code[character] = preferred[character]
+        else:
+            raise RuntimeError(f"{path.name}: {character!r} has no preferred glyph code")
+    return code_to_character, character_to_code
+
+
+_GLYPH_TO_CHARACTER, _CHARACTER_TO_GLYPH = _load_character_map()
 
 
 class Msg1Error(ValueError):
@@ -438,15 +490,38 @@ def _render_stream(data: bytes, indent: str) -> list[str]:
                 index += size
                 continue
         if byte >= 0x80 and byte < 0xF0 and index + 1 < len(data):
+            first_code = int.from_bytes(data[index : index + 2], "big")
+            first_character = _GLYPH_TO_CHARACTER.get(first_code)
+            render_as_font = (
+                first_character is not None
+                and _CHARACTER_TO_GLYPH[first_character] == first_code
+            )
             glyphs: list[str] = []
+            characters: list[str] = []
             while (
                 index + 1 < len(data)
                 and 0x80 <= data[index] < 0xF0
                 and len(glyphs) < 12
             ):
-                glyphs.append(data[index : index + 2].hex())
+                code_bytes = data[index : index + 2]
+                code = int.from_bytes(code_bytes, "big")
+                character = _GLYPH_TO_CHARACTER.get(code)
+                current_is_font = (
+                    character is not None
+                    and _CHARACTER_TO_GLYPH[character] == code
+                )
+                if current_is_font != render_as_font:
+                    break
+                glyphs.append(code_bytes.hex())
+                if character is not None:
+                    characters.append(character)
                 index += 2
-            lines.append(f"{indent}glyphs {' '.join(glyphs)}")
+            if render_as_font:
+                lines.append(
+                    f"{indent}font {json.dumps(''.join(characters), ensure_ascii=False)}"
+                )
+            else:
+                lines.append(f"{indent}glyphs {' '.join(glyphs)}")
             continue
         end = index + 1
         while end < len(data) and end - index < 24:
@@ -538,6 +613,17 @@ def _parse_stream(content: list[tuple[int, str]]) -> bytes:
                 output.extend(tokens[1].encode("ascii"))
             except UnicodeEncodeError as exc:
                 raise Msg1Error(f"line {line_number}: text is not ASCII") from exc
+        elif tokens[0] == "font":
+            if len(tokens) != 2:
+                raise Msg1Error(f"line {line_number}: font takes one quoted string")
+            for character in tokens[1]:
+                code = _CHARACTER_TO_GLYPH.get(character)
+                if code is None:
+                    raise Msg1Error(
+                        f"line {line_number}: character {character!r} is not in "
+                        "the DDS1 MSG1 map"
+                    )
+                output.extend(code.to_bytes(2, "big"))
         elif tokens[0] == "newline":
             if len(tokens) != 1:
                 raise Msg1Error(f"line {line_number}: newline takes no operands")

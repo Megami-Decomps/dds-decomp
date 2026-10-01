@@ -128,9 +128,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 81e3 8299 81d9
+      font "ヒート"
       newline
-      glyphs 81c3 81b5 81fc 80ea 8783 8189
+      font "ゲイルが急に"
       newline
     endpage
   endmessage
@@ -138,9 +138,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 89e8 80e6 8184 81b1 818c 80e9 8080 81c3 81b5 81fc
+      font "飢えてんのか ゲイル"
       newline
-      glyphs 8483 81b0 87d5 80e2 8184 80e5 80e9 809f
+      font "俺を喰いてぇか?"
       newline
     endpage
   endmessage
@@ -150,7 +150,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 84e9 818c 86a0 86da 818d 8080 8480 80fe
+      font "今の言葉は 何だ"
       newline
     endpage
   endmessage
@@ -158,7 +158,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 8586 81a6
+      font "歌よ"
       newline
     endpage
   endmessage
@@ -166,7 +166,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 84e9 818c 80ea 8080 8586
+      font "今のが 歌"
       newline
     endpage
   endmessage
@@ -174,7 +174,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 80fb 80e4 8080 8586
+      font "そう 歌"
       newline
     endpage
   endmessage
@@ -182,7 +182,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 80e8 83e7 818d 8080 8480 85a3 80fe
+      font "お前は 何者だ"
       newline
     endpage
   endmessage
@@ -190,9 +190,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 8489 818d 81cc 81fa
+      font "私はセラ"
       newline
-      glyphs 85db 81b0 86fa 80ef 8189 848d 80fd 818c
+      font "皆を助けに来たの"
       newline
     endpage
   endmessage
@@ -200,9 +200,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 86fa 80ef 8189 848d 80fd 8181 8184
+      font "助けに来たって"
       newline
-      glyphs 8187 80f1 80e9 81a7 809f
+      font "どこから?"
       newline
     endpage
   endmessage
@@ -210,9 +210,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 81ad 80e9 81a7 8188 80e2
+      font "わからない"
       newline
-      glyphs 8480 81a0 84d9 80e6 8184 8188 80e2 818c
+      font "何も覚えてないの"
       newline
     endpage
   endmessage
@@ -220,9 +220,9 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 84d9 80e6 8184 81a9 818c 818d
+      font "覚えてるのは"
       newline
-      glyphs 85db 81b0 86fa 80ef 80fd 80e2 8181 8184 80f1 8186 80fe 80ef
+      font "皆を助けたいってことだけ"
       newline
     endpage
   endmessage

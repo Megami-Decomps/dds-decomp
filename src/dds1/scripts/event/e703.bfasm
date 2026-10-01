@@ -600,10 +600,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 80e8 81a2 819c 80e0 8288 83eb 83c7 8188 81b1 80fc 80ea
+      font "おやまあ、悪魔なんぞが"
       newline
-      glyphs 81bc 81c1 81d5 81d2 8196 818c 8888 81b0 8182 80ed 81a8 819c
-      glyphs 80f5 80fd 80e9 8289
+      font "カグツチへの道をつくりま"
+      font "したか。"
       newline
       control f1 04
     endpage
@@ -612,10 +612,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 80f1 81aa 8189 818d 8288 8fc1 81a0 84f1 8296 85f1 80e2 8184
-      glyphs 80e8 81a8 819c 80f7 81a6 8288
+      font "これには、婆も少々驚いて"
+      font "おりますよ、"
       newline
-      glyphs 9186 80ff 81a1 819c 829d 829d
+      font "坊ちゃま……"
       newline
       control f1 04
     endpage
@@ -624,10 +624,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 81bc 81c1 81d5 81d2 80ea 88d8 818e 80f9 80f5 8d86 818d
+      font "カグツチが伸ばせし塔は"
       newline
-      glyphs 81bb 81ea 81fb 81ca 81c0 81b0 89ac 80ff 8288 80f1 81aa 81b0
-      glyphs 8895 80e6 80fd 8289
+      font "オベリスクを打ち、これを"
+      font "従えた。"
       newline
       control f1 04
     endpage
@@ -636,11 +636,11 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 8dd5 8784 81b0 86ed 819e 85a3 80fd 80ff 80ea 81cf 81fe 81cf
-      glyphs 81fe 8186 8288
+      font "創世を望む者たちがゾロゾ"
+      font "ロと、"
       newline
-      glyphs 81cf 81fe 81cf 81fe 8186 829d 829d 81a2 8181 8184 80eb 819c
-      glyphs 80f7 8185 80f5 81a5 80e4 818b 80e5 8289
+      font "ゾロゾロと……やってきま"
+      font "すでしょうねぇ。"
       newline
       control f1 04
     endpage
@@ -649,38 +649,38 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 80f1 81aa 819c 8185 83fa 83fb 818d 8288 81a6 80ed 83ee 80eb
-      glyphs 8ae9 8191 8184
+      font "これまで貴方は、よく生き"
+      font "延びて"
       newline
-      glyphs 9186 80ff 81a1 819c 81b0 86b0 80f5 819c 80f9 8184 80ed 81aa
-      glyphs 819c 80f5 80fd 8289
+      font "坊ちゃまを楽しませてくれ"
+      font "ました。"
       newline
-      glyphs 829d 80fb 81aa 818d 88f9 819f 8184 8ae6 81ad 80f5 819c 80f7
-      glyphs 8289
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      glyphs 8185 80f7 80ea 8288 85be 87da 818c 87ea 84f5 8188 8486 9098
-      glyphs 818d 80f1 81aa 80e9 81a7 8289
-      newline
-      glyphs 84eb 81b0 87fa 80e9 80f8 8189 8288 80f5 8181 80e9 81a8 81a2
-      glyphs 81a9 80f1 8186 829d 829d
-      newline
-      glyphs 80fb 81aa 80ea 84aa 85bd 8185 80f7 81a6 8289
+      font "…それは誉めて遣わします"
+      font "。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 829d 80f3 8184 8288 83eb 83c7 80ea 8dd5 81a8 85b2 8189
-      glyphs 8188 81a9 8188 81b1 8184
+      font "ですが、最後の肝心な一幕"
+      font "はこれから。"
       newline
-      glyphs 87b4 8bf6 80ea 80e0 81a9 81b1 8185 80f2 80f4 80e2 819c 80f5
-      glyphs 81a5 80e4 80e9 818b 80e5 8288
+      font "気を抜かずに、しっかりや"
+      font "ること……"
       newline
-      glyphs 9186 80ff 81a1 819c 829d 829d
+      font "それが大事ですよ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "……さて、悪魔が創り主に"
+      font "なるなんて"
+      newline
+      font "結末があるんでございまし"
+      font "ょうかねぇ、"
+      newline
+      font "坊ちゃま……"
       newline
       control f1 04
     endpage
@@ -689,14 +689,14 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 809e 87dc 8187 81a0 8186 88cd 8fc1 818d 80e2 8188 80ed 8188
-      glyphs 8181 80fd 829d 829d
+      font ">子どもと老婆はいなくな"
+      font "った……"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 88cd 8fc1
+    font "老婆"
   endspeaker
 end
 

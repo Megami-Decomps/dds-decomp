@@ -160,28 +160,28 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 81fb 8299 81d1 8299 818c 88a8 89ef 818d
+      font "リーダーの判断は"
       newline
     endpage
   endmessage
   select TEST_SEL ext=0 pattern=0 reserved=0 trailing=00
     option
       control f2 08 ff ff
-      glyphs 86dc 83c6 818d 80f7 81a9 80ea 92c3 80f5 8a83 80ff 818d 80f5
-      glyphs 8188 80e2
+      font "協力はするが騙し討ちはし"
+      font "ない"
     endoption
     option
       control f2 08 ff ff
-      glyphs 80e2 80e2 84dd 84c2 80fe
+      font "いい作戦だ"
     endoption
   endselect
   message HET_TEST001 speaker=none
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 8c81 80e5 8188
+      font "甘ぇな"
       newline
-      glyphs 85da 81a7 8188 80eb 81a1 85da 81a7 81aa 81a9 80fa
+      font "殺らなきゃ殺られるぜ"
       newline
     endpage
   endmessage
@@ -189,11 +189,11 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 81d7 81ca 81d9 818d 84b3 84b4 80fe
+      font "テストは終了だ"
       newline
-      glyphs 80e8 83e7 818d 868d 92ca
+      font "お前は分岐"
       text "001"
-      glyphs 8189 8a9a 88b2 80f5 80fd
+      font "に成功した"
       newline
     endpage
   endmessage
@@ -201,7 +201,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 80e0 819a 8299 8299 8299 8299 8299 8299 81b1 8081 8081
+      font "あぼーーーーーーん!!"
       newline
     endpage
   endmessage
@@ -209,11 +209,11 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 81 ff
-      glyphs 868d 92ca
+      font "分岐"
       text "002"
-      glyphs 8189 8a9a 88b2 80f5 819c 80f5 80fd
+      font "に成功しました"
       newline
-      glyphs 81d7 81ca 81d9 84b3 84b4
+      font "テスト終了"
       newline
     endpage
   endmessage

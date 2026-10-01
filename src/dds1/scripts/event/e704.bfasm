@@ -708,16 +708,16 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 829d 83f0 80ea 8d86 81b0 8ddd 81a7 81b1 8186 80f7 81a9
-      glyphs 85a3 81a6 8289
+      font "……我が塔を登らんとする"
+      font "者よ。"
       newline
-      glyphs 89be 818c 83ff 8196 84bc 81a8 80fd 81a9 85a3 81a6 8289
+      font "光の中へ入りたる者よ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 80e8 819c 80e6 818c 84f5 81b0 85ae 80f9 81a6 829d 829d
+      font "おまえの心を見せよ……"
       newline
       control f1 04
     endpage
@@ -726,10 +726,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 80e8 829d 829d 80e8 819c 80e6 818c 87a3 8189 818d
+      font "おお……おまえの内には"
       newline
-      glyphs 8a88 81aa 8188 80ed 85b7 8183 80ed 81c4 81d9 8280 81fb 80ea
-      glyphs 80e0 81a9 829d 829d
+      font "乱れなく息づくコトワリが"
+      font "ある……"
       newline
       control f1 04
     endpage
@@ -738,10 +738,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 80e8 829d 829d 80e8 819c 80e6 818c 87a3 8189 818d
+      font "おお……おまえの内には"
       newline
-      glyphs 8b92 818c 88ce 80eb 81c4 81d9 8280 81fb 80ea 80e0 81a9 829d
-      glyphs 829d
+      font "炎の如きコトワリがある…"
+      font "…"
       newline
       control f1 04
     endpage
@@ -750,10 +750,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 80e8 829d 829d 80e8 819c 80e6 818c 87a3 8189 818d
+      font "おお……おまえの内には"
       newline
-      glyphs 87b8 818c 91d2 80f3 818c 81c4 81d9 8280 81fb 80ea 80e0 81a9
-      glyphs 829d 829d
+      font "珠の硬さのコトワリがある"
+      font "……"
       newline
       control f1 04
     endpage
@@ -762,20 +762,20 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80fb 818c 81c4 81d9 8280 81fb 8189 8184 8dd5 8784 818c 80e9
-      glyphs 8188 80e4 81a2 829d 829d
+      font "そのコトワリにて創世のか"
+      font "なうや……"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 8683 819f 81a9 8188 81a7 8288
+      font "求めるなら、"
       control f2 02 02 ff
-      glyphs 8093 8182 818c 81d0 81bc 81fa 818c 87b8
+      font "3つのタカラの珠"
       control f2 02 01 ff
-      glyphs 81b0 84a8 8189
+      font "を手に"
       newline
-      glyphs 83f0 80ea 84ea 819c 8185 848d 81a9 80ea 81a6 80e2 8081
+      font "我が元まで来るがよい!"
       newline
       control f1 04
     endpage
@@ -784,16 +784,16 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 829d 83f0 80ea 8d86 81b0 8ddd 81a7 81b1 8186 80f7 81a9
-      glyphs 85a3 81a6 8289
+      font "……我が塔を登らんとする"
+      font "者よ。"
       newline
-      glyphs 89be 818c 83ff 8196 84bc 81a8 80fd 81a9 85a3 81a6 8289
+      font "光の中へ入りたる者よ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 80e8 819c 80e6 818c 84f5 81b0 85ae 80f9 81a6 829d 829d
+      font "おまえの心を見せよ……"
       newline
       control f1 04
     endpage
@@ -802,10 +802,10 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 80e8 829d 829d
+      font "おお……"
       newline
-      glyphs 80e8 819c 80e6 818c 84f5 818c 87a3 81a2 85ae 80e6 80f8 829d
-      glyphs 829d
+      font "おまえの心の内や見えず…"
+      font "…"
       newline
       control f1 04
     endpage
@@ -814,28 +814,28 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8eb7 8288 8480 85a3 8188 81a9 80e9 829d
+      font "汝、何者なるか…"
       newline
-      glyphs 83f0 80ea 85cc 8189 80e9 8188 80e4 85a3 8188 81a9 80e9 829d
-      glyphs 829d
+      font "我が意にかなう者なるか…"
+      font "…"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 86cb 81aa 84f0 80ed 818e 8288
+      font "…恐れ無くば、"
       control f2 02 02 ff
-      glyphs 8093 8182 818c 81d0 81bc 81fa 818c 87b8
+      font "3つのタカラの珠"
       control f2 02 01 ff
-      glyphs 81b0 84a8 8189
+      font "を手に"
       newline
-      glyphs 83f0 80ea 84ea 819c 8185 848d 81a9 80ea 81a6 80e2 829d 829d
+      font "我が元まで来るがよい……"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 8682
+    font "声"
   endspeaker
 end
 
