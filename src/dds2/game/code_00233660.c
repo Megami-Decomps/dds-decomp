@@ -181,9 +181,13 @@ extern u128 D_00453630;
 
 extern u128 D_00453640;
 
-extern u128 D_003C87C0;
+typedef struct {
+    f32 x, y, z, w;
+} __attribute__((aligned(16))) MdlEyeVec;
 
-extern u128 D_003C87D0;
+extern MdlEyeVec D_003C87C0;
+
+extern MdlEyeVec D_003C87D0;
 
 extern u128 D_003C87E0;
 
@@ -1894,15 +1898,15 @@ void func_002388F8(void) {
             }
         } else if (memcmp(line, "eye-position=", 13) == 0) {
             if (func_0035C8F8(line + 13, "%f,%f,%f", &x, &y, &z) == 3) {
-                ((f32 *)&D_003C87C0)[0] = x;
-                ((f32 *)&D_003C87C0)[1] = y;
-                ((f32 *)&D_003C87C0)[2] = z;
+                D_003C87C0.x = x;
+                D_003C87C0.y = y;
+                D_003C87C0.z = z;
             }
         } else if (memcmp(line, "target-position=", 16) == 0) {
             if (func_0035C8F8(line + 16, "%f,%f,%f", &x, &y, &z) == 3) {
-                ((f32 *)&D_003C87D0)[0] = x;
-                ((f32 *)&D_003C87D0)[1] = y;
-                ((f32 *)&D_003C87D0)[2] = z;
+                D_003C87D0.x = x;
+                D_003C87D0.y = y;
+                D_003C87D0.z = z;
             }
         } else if (memcmp(line, D_00437108, 5) == 0) {
             if (func_0035C8F8(line + 5, D_00437110, &fovy) == 1) {
