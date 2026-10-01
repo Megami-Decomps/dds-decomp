@@ -3,7 +3,7 @@
 #include "ee_mmi.h"
 
 extern f32 *D_0037F770[];
-extern u8 D_0037F780[];
+extern u8 kwlnDefaultColorVector[];
 
 typedef struct WorldUnitState {
     u8 pad00[8];
@@ -11,7 +11,7 @@ typedef struct WorldUnitState {
     u8 pad0C[0x58];
     u32 flags;
     u32 colorA;          /* 0x68 packed from D_0037F770 */
-    u32 colorB;          /* 0x6C packed from D_0037F780 */
+    u32 colorB;          /* 0x6C packed from kwlnDefaultColorVector */
     s16 unk70;           /* 0x70 */
     u8 pad72[2];
     u32 value74; /* Meaning unknown; exposed by func_00116800. */
@@ -55,7 +55,7 @@ void func_00116858(void) {
     dds3RemoveWorldObjectNode();
 }
 
-void func_00116870(WorldUnitOwner *object, s32 value) {
+void evtBeginUnitValueColorTransition(WorldUnitOwner *object, s32 value) {
     WorldUnitState *state = object->state;
     s32 color1[4];
     s32 color2[4];
@@ -72,7 +72,7 @@ void func_00116870(WorldUnitOwner *object, s32 value) {
         EE_MMI_RGBA_PACK_F128(packed1);
         color1[0] = packed1;
         state->colorA = color1[0];
-        VU0_LOAD_VF(vf10, D_0037F780);
+        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
         EE_MMI_RGBA_PACK(packed2);
         color2[0] = packed2;
         state->colorB = color2[0];

@@ -12,7 +12,7 @@ extern void func_001958A0(s32, s32, s32);
 
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 typedef struct MenuListNode MenuListNode;
 
@@ -46,7 +46,7 @@ typedef struct MenuSlot {
     u16 flags;
 } MenuSlot;
 
-extern MenuSlot *D_003BAA54;
+extern MenuSlot *datAffinityRecords;
 
 typedef struct MenuGauge {
     s32 id;
@@ -185,7 +185,7 @@ void mnuCollectFrontlinePartySlots(s32 **out, s32 max) {
     s32 i = 0;
 
     while (count < max) {
-        s32 entry = D_003BAA00 + i * 0x1A4 + 0xA60;
+        s32 entry = datGameState + i * 0x1A4 + 0xA60;
 
         *out = 0;
         if ((((PtyFrontlineSlot *)entry)->flags & 1) != 0 &&
@@ -205,7 +205,7 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     MenuSlot *entry;
     s32 i;
     id -= 0x1ab;
-    entry = (MenuSlot *)((id << 4) + (s32)D_003BAA54);
+    entry = (MenuSlot *)((id << 4) + (s32)datAffinityRecords);
     if ((entry->flags & 2) != 0) {
         return 0;
     }
@@ -253,7 +253,7 @@ s64 mnuUpdateSkillListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *popup = (s32 *)(context + 0x54);
     s32 *menu = *(s32 **)(context + 0x90C);
-    u32 buttons = func_00285B20(0x32);
+    u32 buttons = mnuMapPadMaskToFlags(0x32);
     s64 state;
     s32 *list;
 
@@ -868,18 +868,4 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC718);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC720);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC728);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC730);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC738);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC740);
-
-INCLUDE_SDATA(const s32, "game/code_00279CC0", D_003BC748);
 

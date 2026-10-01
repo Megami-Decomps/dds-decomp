@@ -77,7 +77,7 @@ typedef struct {
     f32 vec[14];        /* 0x08 */
 } EvtSlot;
 
-extern EvtSlot D_004536D8[10];
+extern EvtSlot evtUnitVectorSlots[10];
 
 typedef struct EvtSlotEnds {
     f32 (*points)[4];
@@ -241,7 +241,7 @@ extern char D_00421AF8[];
 
 extern void func_00115BD8(void *arg0);
 
-extern s32 func_0010D8C8(void);
+extern s32 scrGetCurrentContext(void);
 
 extern s32 func_0025D230(s32 arg0, s32 arg1);
 
@@ -263,7 +263,7 @@ extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
-extern void func_0023D360(EvtUnit *unit);
+extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 extern f32 evtComputeClampedModelScale(s32);
 
@@ -405,31 +405,31 @@ void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        mnuInitializeCampPanelVisualDefaults(&D_004536D8[i].vec[0], &D_004536D8[i].vec[4], &D_004536D8[i].vec[8], &D_004536D8[i].vec[12], &D_004536D8[i].vec[13]);
-        D_004536D8[i].state = 0;
-        D_004536D8[i].id = 0;
+        mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].vec[12], &evtUnitVectorSlots[i].vec[13]);
+        evtUnitVectorSlots[i].state = 0;
+        evtUnitVectorSlots[i].id = 0;
     }
 }
 
 void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpoint, f32 *secondEndpoint, f32 *color) {
     if (slotIndex < 10) {
-        D_004536D8[slotIndex].vec[0] = firstEndpoint[0];
-        D_004536D8[slotIndex].state = slotState;
-        D_004536D8[slotIndex].vec[1] = firstEndpoint[1];
-        D_004536D8[slotIndex].vec[2] = firstEndpoint[2];
-        D_004536D8[slotIndex].vec[3] = 0;
-        D_004536D8[slotIndex].vec[4] = secondEndpoint[0];
-        D_004536D8[slotIndex].vec[5] = secondEndpoint[1];
-        D_004536D8[slotIndex].vec[6] = secondEndpoint[2];
-        D_004536D8[slotIndex].vec[7] = secondEndpoint[3];
-        D_004536D8[slotIndex].vec[8] = color[0];
-        D_004536D8[slotIndex].vec[9] = color[1];
-        D_004536D8[slotIndex].vec[10] = color[2];
-        D_004536D8[slotIndex].vec[11] = 1.0f;
+        evtUnitVectorSlots[slotIndex].vec[0] = firstEndpoint[0];
+        evtUnitVectorSlots[slotIndex].state = slotState;
+        evtUnitVectorSlots[slotIndex].vec[1] = firstEndpoint[1];
+        evtUnitVectorSlots[slotIndex].vec[2] = firstEndpoint[2];
+        evtUnitVectorSlots[slotIndex].vec[3] = 0;
+        evtUnitVectorSlots[slotIndex].vec[4] = secondEndpoint[0];
+        evtUnitVectorSlots[slotIndex].vec[5] = secondEndpoint[1];
+        evtUnitVectorSlots[slotIndex].vec[6] = secondEndpoint[2];
+        evtUnitVectorSlots[slotIndex].vec[7] = secondEndpoint[3];
+        evtUnitVectorSlots[slotIndex].vec[8] = color[0];
+        evtUnitVectorSlots[slotIndex].vec[9] = color[1];
+        evtUnitVectorSlots[slotIndex].vec[10] = color[2];
+        evtUnitVectorSlots[slotIndex].vec[11] = 1.0f;
         if (slotState == 3) {
-            D_004536D8[slotIndex].id = unitId;
+            evtUnitVectorSlots[slotIndex].id = unitId;
         } else {
-            D_004536D8[slotIndex].id = 0;
+            evtUnitVectorSlots[slotIndex].id = 0;
         }
     }
 }
@@ -442,14 +442,14 @@ s32 func_0023E350(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == id) {
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (D_004536D8[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == 2) {
                 found = i;
                 break;
             }
@@ -458,9 +458,9 @@ s32 func_0023E350(s32 id, f32 *out) {
             return 0;
         }
     }
-    out[0] = D_004536D8[found].vec[4];
-    out[1] = D_004536D8[found].vec[5];
-    out[2] = D_004536D8[found].vec[6];
+    out[0] = evtUnitVectorSlots[found].vec[4];
+    out[1] = evtUnitVectorSlots[found].vec[5];
+    out[2] = evtUnitVectorSlots[found].vec[6];
     return 1;
 }
 
@@ -473,14 +473,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (D_004536D8[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == 2) {
                 found = i;
                 break;
             }
@@ -489,17 +489,17 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             return;
         }
     }
-    ends[0][0] = D_004536D8[found].vec[0];
-    ends[0][1] = D_004536D8[found].vec[1];
-    ends[0][2] = D_004536D8[found].vec[2];
+    ends[0][0] = evtUnitVectorSlots[found].vec[0];
+    ends[0][1] = evtUnitVectorSlots[found].vec[1];
+    ends[0][2] = evtUnitVectorSlots[found].vec[2];
     ends[0][3] = 0;
-    ends[1][0] = D_004536D8[found].vec[4];
-    ends[1][1] = D_004536D8[found].vec[5];
-    ends[1][2] = D_004536D8[found].vec[6];
+    ends[1][0] = evtUnitVectorSlots[found].vec[4];
+    ends[1][1] = evtUnitVectorSlots[found].vec[5];
+    ends[1][2] = evtUnitVectorSlots[found].vec[6];
     ends[1][3] = 0;
-    color[0] = D_004536D8[found].vec[8];
-    color[1] = D_004536D8[found].vec[9];
-    color[2] = D_004536D8[found].vec[10];
+    color[0] = evtUnitVectorSlots[found].vec[8];
+    color[1] = evtUnitVectorSlots[found].vec[9];
+    color[2] = evtUnitVectorSlots[found].vec[10];
     color[3] = 1.0f;
     for (i = 0; i < 3; i++) {
         if (color[i] > 1.0f) {
@@ -515,16 +515,16 @@ s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 3 && D_004536D8[i].id == id) {
-            *outX = D_004536D8[i].vec[12];
-            *outY = D_004536D8[i].vec[13];
+        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+            *outX = evtUnitVectorSlots[i].vec[12];
+            *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 10; i++) {
-        if (D_004536D8[i].state == 2) {
-            *outX = D_004536D8[i].vec[12];
-            *outY = D_004536D8[i].vec[13];
+        if (evtUnitVectorSlots[i].state == 2) {
+            *outX = evtUnitVectorSlots[i].vec[12];
+            *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
@@ -571,7 +571,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     s32 model;
     s32 ret;
 
-    if (func_0010D8C8() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     param0 = scrReadIntParameter(0);
@@ -1000,7 +1000,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
         evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
-        func_0023D360(unit);
+        evtUnitPrepareVerticalMoveSteps(unit);
     }
     return 1;
 }

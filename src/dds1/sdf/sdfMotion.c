@@ -471,7 +471,7 @@ void sdfMotionBlendDrawVectorWithCurrent(HasSub *a0, f32 t1, f32 t2) {
         VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)a0->sub + 0x60);
 }
 
-void *func_002DBC60(void *a0, s32 a1, s32 a2) {
+void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_002CFEB8(0x20);

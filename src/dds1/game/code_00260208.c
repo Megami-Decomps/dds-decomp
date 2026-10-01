@@ -366,7 +366,7 @@ s32 brsAdvanceSkillPackagePanel(s32 work) {
     return 0;
 }
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 /* Five party slots, followed by the number of reward rows in this batch. */
 typedef struct BrsRewardRow {
@@ -401,7 +401,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
 
     for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
         u8 *d = dst;
-        u8 *unit = *(u8 **)&D_003BAA00 + 0xA60;
+        u8 *unit = *(u8 **)&datGameState + 0xA60;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -555,7 +555,7 @@ void mnuStaffCopyPanelBlock(MenuPanelBlock *src, u8 *base) {
     *(MenuPanelBlock *)(base + 0x9C) = *src;
 }
 
-extern s32 D_0036D3C0[];
+extern s32 mnuStaffRollThresholds[];
 extern s32 effMiscRand(s32);
 
 s32 mnuStaffPickRoll(void) {
@@ -563,7 +563,7 @@ s32 mnuStaffPickRoll(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        if ((s32)roll < D_0036D3C0[i]) {
+        if ((s32)roll < mnuStaffRollThresholds[i]) {
             return i + 1;
         }
     }

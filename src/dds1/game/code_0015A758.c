@@ -8,7 +8,7 @@ typedef struct ParCellNode ParCellNode;
 
 extern ParCellNode *D_003BB014;
 
-extern ParListNode *D_003BB010;
+extern ParListNode *parRecordListHead;
 
 /* Particle object (layout mirrors effect/parManager.c ParObj, which owns
  * the type; only the fields this TU touches are named here). */
@@ -95,7 +95,7 @@ struct ParCellNode {
     ParCellNode *next;
 };
 
-extern ParDispatch D_0034E250[];
+extern ParDispatch parKindConstructorEntries[];
 
 extern s32 billCloneObjectRetainingSharedData(s32);
 
@@ -135,7 +135,7 @@ extern void func_002E84A0(void *arg);
 
 extern u8 D_003D64B0[];
 
-extern u8 D_003D64C0[];
+extern u8 parDrawControl[];
 
 extern s32 parGetRestartFlag();
 
@@ -178,9 +178,9 @@ extern f32 D_0034E5C0[];
 
 extern f32 D_0034E5D0[];
 
-extern u8 D_00324680[];
+extern u8 sdfViewEyeVector[];
 
-extern u8 D_00324690[];
+extern u8 sdfViewTargetVector[];
 
 void func_0015A758(ParObj *work, u32 value) {
     work->valueF0 = value;
@@ -235,7 +235,7 @@ s32 parObjGetMode(ParObj *object) {
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
 ParObj *parInstantiateKind(ParObj *source) {
-    ParObj *particle = D_0034E250[source->dispatchIndex].func();
+    ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func();
     particle->dispatchIndex = source->dispatchIndex;
     if (source->unk28 == -1) {
         s32 billboard = billCloneObjectRetainingSharedData(source->billId);
@@ -306,8 +306,8 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     default:
         return;
     }
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, D_003D6490);
 }
@@ -444,7 +444,7 @@ u32 func_0015B220(void) {
 }
 
 void parSysReset(void) {
-    D_003BB010 = 0;
+    parRecordListHead = 0;
     parControlInit();
     func_002E84A0(&D_003D64B0);
 }
@@ -461,8 +461,8 @@ void parReleaseAssetRecord(ParReleaseRecord *record) {
 }
 
 void parPrependRecordListNode(ParListNode *node) {
-    node->next = D_003BB010;
-    D_003BB010 = node;
+    node->next = parRecordListHead;
+    parRecordListHead = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
@@ -472,8 +472,8 @@ void func_0015B648(ParReleaseRecord *record) {
 }
 
 void parControlInit(void) {
-    memset(D_003D64C0, 0, 0x2C);
-    *(u16 *)(D_003D64C0 + 4) = 0x4000;
+    memset(parDrawControl, 0, 0x2C);
+    *(u16 *)(parDrawControl + 4) = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -1064,7 +1064,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
         sdfAppendPacket(list, func_0015FE20(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)D_003D64C0;
+        u16 *counts = (u16 *)parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
         sdfAppendPacket(list, func_0015FE20(&state));
@@ -1089,7 +1089,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     return desc;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB010);
+INCLUDE_SDATA(const s32, "game/code_0015A758", parRecordListHead);
 
 INCLUDE_SDATA(const s32, "game/code_0015A758", D_003BB014);
 

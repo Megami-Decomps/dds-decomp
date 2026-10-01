@@ -9,7 +9,7 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
     func_002CFB18(thread);
 }
 
-extern s32 D_003BD9A4;
+extern s32 sdfSleepThreadId;
 extern s32 D_003BD9A0;
 extern u8 D_003BD480;
 extern s32 GetThreadId(void);
@@ -32,7 +32,7 @@ typedef struct ThreadWaiter {
     s32 thread;                /* 0x4 */
 } ThreadWaiter;
 
-extern s32 D_003BD2D8;
+extern s32 sdfThreadWakeTick;
 extern s32 sdfTrackedThreadSemaphore;
 extern ThreadWaiter *sdfTrackedThreadHead;
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
@@ -49,7 +49,7 @@ void sdfWakeQueuedThreadWaiters(void) {
     func_0030B568(2);
     for (;;) {
         SleepThread();
-        D_003BD2D8++;
+        sdfThreadWakeTick++;
         WaitSema(sdfTrackedThreadSemaphore);
         for (waiter = sdfTrackedThreadHead; waiter != NULL; waiter = waiter->next) {
             WakeupThread(waiter->thread);
@@ -64,11 +64,11 @@ extern s32 sdfCreateThread(void (*)(void), void *, s32, s32);
 extern char D_003E1EF0[];
 extern s32 _StartThread(s32, s32);
 
-s32 func_002CFCF0(void) {
+s32 sdfStartQueuedThreadWakeWorker(void) {
     s32 thread;
 
     func_0030B7F8();
-    D_003BD2D8 = 0;
+    sdfThreadWakeTick = 0;
     sdfTrackedThreadHead = NULL;
     sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
     thread = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_003E1EF0, 0x800, 0x3E);
@@ -79,7 +79,7 @@ s32 func_002CFCF0(void) {
 s32 sdfThreadSleepSelf(void) {
     s32 thread = GetThreadId();
 
-    D_003BD9A4 = thread;
+    sdfSleepThreadId = thread;
     ChangeThreadPriority(thread, 0x7C);
     return SleepThread();
 }
@@ -149,13 +149,13 @@ typedef struct SdfCursorOwner {
     u16 limit;
 } SdfCursorOwner;
 
-extern SdfCursorSlot *D_003BD9AC;
+extern SdfCursorSlot *sdfFreeCursorSlotHead;
 extern SdfCursorNode *func_002CFDF0();
 
 SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
-    SdfCursorSlot *slot = D_003BD9AC;
+    SdfCursorSlot *slot = sdfFreeCursorSlotHead;
 
-    D_003BD9AC = slot->next;
+    sdfFreeCursorSlotHead = slot->next;
     slot->count = 0;
     slot->handler = func_002CFDF0;
     owner->slot = slot;
@@ -166,5 +166,5 @@ SdfCursorNode *sdfCursorSlotAlloc(SdfCursorOwner *owner) {
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFEB8);
 
-INCLUDE_SDATA(const s32, "game/code_002CFC18", D_003BD2D8);
+INCLUDE_SDATA(const s32, "game/code_002CFC18", sdfThreadWakeTick);
 

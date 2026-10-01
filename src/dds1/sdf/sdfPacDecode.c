@@ -80,7 +80,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfReleaseChipBlock(void *allocation);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
-void func_002EDCC0(PacState *state);
+void sdfPacAdvanceCallbackBoundary(PacState *state);
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
 void *sdfAllocAndClearQuadwords(s32 size);
 void *func_002CFEB8(s32 size);

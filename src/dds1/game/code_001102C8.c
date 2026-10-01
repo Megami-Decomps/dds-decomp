@@ -70,7 +70,7 @@ typedef struct {
     WorldIndexState *state; /* 0x18 */
 } WorldHandle;
 
-extern WorldHandle *D_003BA9BC;
+extern WorldHandle *dds3ActiveWorld;
 
 
 INCLUDE_ASM(const s32, "game/code_001102C8", dds3GrowWorldValueChain);
@@ -92,7 +92,7 @@ u32 dds3WriteIndexedWorldObjectWord(WorldObject *object, u32 value) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    D_003BA9BC->state->entries[object->cursorIndex].value = value;
+    dds3ActiveWorld->state->entries[object->cursorIndex].value = value;
     return 1;
 }
 
@@ -103,7 +103,7 @@ u32 dds3ReadIndexedWorldObjectWord(WorldObject *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return D_003BA9BC->state->entries[object->cursorIndex].value;
+    return dds3ActiveWorld->state->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -116,7 +116,7 @@ u32 dds3AdvanceObjectValueCursor(WorldObject *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    object->cursorIndex = D_003BA9BC->state->entries[object->cursorIndex].next;
+    object->cursorIndex = dds3ActiveWorld->state->entries[object->cursorIndex].next;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 

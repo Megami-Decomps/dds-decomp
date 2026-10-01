@@ -142,7 +142,7 @@ typedef struct SdfGrid {
     u32 userData;          /* 0x30 */
 } SdfGrid;
 
-extern void func_00310888(f32 *, f32 *);
+extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
 extern void func_0030FA28(f32 *, f32 *, f32 *);
@@ -194,14 +194,14 @@ extern void func_00312B50();
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
-extern TaskWork *func_00312910();
+extern TaskWork *sdfCreateNamedTaskWork();
 
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
-extern TaskWork *func_00312910();
+extern TaskWork *sdfCreateNamedTaskWork();
 
 extern void func_00312E20(void);
 
@@ -389,7 +389,7 @@ void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     f32 vector[4];
     memset(vector, 0, sizeof(vector));
     vector[2] = 1.0f;
-    func_00310888(matrix, rotation);
+    sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(vector, matrix);
     func_0030F8D0(vector);
     memcpy(out, vector, sizeof(vector));
@@ -425,7 +425,7 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     f32 dot;
     f32 dist;
 
-    func_00310888(matrix, rotation);
+    sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(forward, matrix);
     dot = fldNormalizedVectorDot(up, forward);
     func_0030F8D0(forward);
@@ -768,7 +768,7 @@ u32 func_00312578(void) {
 TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
     TaskWork *work;
 
-    work = func_00312910(name, destroyCallback, userData);
+    work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
     kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
@@ -848,7 +848,7 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
     }
 }
 
-TaskWork *func_00312910(char *name, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) {
     s32 allocation = func_003292A8(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 

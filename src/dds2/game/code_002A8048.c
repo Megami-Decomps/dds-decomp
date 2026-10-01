@@ -66,7 +66,7 @@ typedef struct MnuViewerPad {
     u8 right;       /* 0x17 */
 } MnuViewerPad;
 
-extern MnuViewerPad D_0040B7D8;
+extern MnuViewerPad sdfPadButtonStates;
 extern MnuPacketDev D_00380708;
 extern char D_0042A428[];
 extern s32 sdfCreateResetPacketList(void);
@@ -278,16 +278,16 @@ s32 mnuUpdateIpuRegisterViewer(void) {
         mnuMovieDrawSources.started = 1;
         mnuBindMovieDrawValueSources();
     }
-    if (D_0040B7D8.reset != 0) {
+    if (sdfPadButtonStates.reset != 0) {
         mnuMarkMovieDrawValuesPending();
-    } else if (D_0040B7D8.init != 0) {
+    } else if (sdfPadButtonStates.init != 0) {
         mnuBindMovieDrawValueSources();
-    } else if (D_0040B7D8.next & 2) {
+    } else if (sdfPadButtonStates.next & 2) {
         mnuMovieDrawSources.cursor++;
         if (mnuMovieDrawSources.cursor == 0x10) {
             mnuMovieDrawSources.cursor = 0;
         }
-    } else if (D_0040B7D8.prev & 2) {
+    } else if (sdfPadButtonStates.prev & 2) {
         if (mnuMovieDrawSources.cursor != 0) {
             mnuMovieDrawSources.cursor--;
         } else {
@@ -296,7 +296,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     } else {
         n = 1 << ((~mnuMovieDrawSources.cursor & 7) * 4);
         i = mnuMovieDrawSources.cursor >> 3;
-        if (D_0040B7D8.right & 2) {
+        if (sdfPadButtonStates.right & 2) {
             if (i == 0) {
                 mnuMovieDrawSources.wordPending = 0;
                 mnuMovieDrawSources.wordSource += n;
@@ -305,7 +305,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
                 mnuMovieDrawSources.blockSource += n;
             }
         }
-        if (D_0040B7D8.left & 2) {
+        if (sdfPadButtonStates.left & 2) {
             if (i == 0) {
                 mnuMovieDrawSources.wordPending = 0;
                 mnuMovieDrawSources.wordSource -= n;

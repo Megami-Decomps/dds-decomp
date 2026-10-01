@@ -6,7 +6,7 @@ extern void func_0031EEE8(void *, u32);
 extern void mnuDrawFadeSequenceOffset(void *);
 extern void itfDrawFadeGlyphTriplet(void *);
 extern void mnuDrawFadeSequenceTwo(void *);
-void func_0031AD00(u8 *object) {
+void itfDispatchObjectFadeSequenceMode(u8 *object) {
     s16 mode = *(s16 *)(object + 0x98);
 
     switch (mode) {

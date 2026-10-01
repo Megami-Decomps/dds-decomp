@@ -71,7 +71,7 @@ extern UiSprite *func_00199828();
 
 extern void itfSetPanelLayoutAndNotify();
 
-extern void func_00199A20();
+extern void itfPanelUpdateValuesAndNotify();
 
 typedef struct SoundSeq {
     s32 unk00;
@@ -102,7 +102,7 @@ typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
 
 extern SndPad D_00324510;
 
-extern UiSurface D_00324B48[];
+extern UiSurface kwlnDrawSurfaces[];
 
 extern UiOwnerRef *D_00357D88[];
 
@@ -126,9 +126,9 @@ extern u32 kwlnTaskGetUserValue(s64);
 
 extern u32 D_00358308[];
 
-extern u32 D_003BB240;
+extern u32 sndTestMessageResourceIndex;
 
-extern s32 D_003BB244;
+extern s32 sndTestMessageTexture;
 
 extern s32 itfLoadTextureFromAsset(u32);
 
@@ -160,7 +160,7 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     spriteTop = pos->y + place->offsetY;
     itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->offsetX, spriteTop, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
     place->sprite->screenY = spriteTop;
-    func_00199A20(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
+    itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
@@ -172,7 +172,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
             s32 width = origin->tex->unkC * 16;
             place->frame = func_00199828(7, itfMesWork.allocation);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->unkC);
-            func_00199A20(place->frame, 0x7F, 0x7F, 0x7F, 0);
+            itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
         panel->flags = (panel->flags & ~0x3000) | 0x1000;
     } else if (place->frame != 0) {
@@ -504,11 +504,11 @@ void itfMesRenderActivePanelSprites(UiPanel *panel) {
     place = &panel->place;
     if ((panel->flags & 0x300) >= 0x100) {
         if (panel->state != 3) {
-            itfBuildAndSubmitPanelPacket(place->sprite, &D_00324B48[panel->index]);
+            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->index]);
         }
         itfMesWork.drawFlags |= 2;
         if (place->overlay != 0) {
-            itfBuildAndSubmitPanelPacket(place->overlay, &D_00324B48[panel->index]);
+            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->index]);
         }
     }
     if (D_00357D88[0] != 0 && D_00357D88[0]->owner == panel && place != 0) {
@@ -601,13 +601,13 @@ void sndCreateTestMsgTasks(void) {
 }
 
 void sndCycleTestMessageResource(void) {
-    if (D_003BB244 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BB244);
-        D_003BB244 = 0;
+    if (sndTestMessageTexture != 0) {
+        sdfTexReleaseReferenceViaHandler(sndTestMessageTexture);
+        sndTestMessageTexture = 0;
     }
-    D_003BB240 = (D_003BB240 + 1) & 3;
-    if (D_003BB240 != 3) {
-        D_003BB244 = itfLoadTextureFromAsset(D_00358308[D_003BB240]);
+    sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;
+    if (sndTestMessageResourceIndex != 3) {
+        sndTestMessageTexture = itfLoadTextureFromAsset(D_00358308[sndTestMessageResourceIndex]);
     }
 }
 
@@ -641,11 +641,11 @@ extern void func_00198C70(void *, void *, void *, s32, s32, s32, s32);
 
 s32 sndUpdateTestMsgTask(void) {
     s32 mem;
-    if ((D_003BB244 != 0) && (D_003BB240 != 3)) {
+    if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
         mem = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(mem);
         itfSendTablePacket(mem, 0, 0);
-        func_00198C70(D_00358318, D_00358328, D_00358338, 0xFFF, D_003BB244, 0, mem);
+        func_00198C70(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
         D_003255A8.unk10(&D_003255A8, mem);
         return 0;
     }
@@ -676,9 +676,9 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB230);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB238);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB240);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", sndTestMessageResourceIndex);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB244);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", sndTestMessageTexture);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB248);
 
@@ -772,7 +772,7 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB398);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3A0);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3A4);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlCommandPanelTaskNameRef);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3A8);
 
@@ -790,9 +790,9 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3C0);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3C4);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3C8);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlMahenPanelTaskNameRef);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3CC);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlAnalyzPanelTaskNameRef);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3D0);
 
@@ -806,9 +806,9 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", btlCommandPanelWork);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3E4);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3E5);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlResourceBlockLoaded);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3E8);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlResourceBlock);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3F0);
 
@@ -986,7 +986,7 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB690);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB694);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB698);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlTintTransitionHoldCount);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB6A0);
 

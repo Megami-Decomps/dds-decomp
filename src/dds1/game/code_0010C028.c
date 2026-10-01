@@ -77,7 +77,7 @@ typedef struct ScriptGlobals {
     f32 floats[256];
 } ScriptGlobals;
 
-extern ScriptGlobals *D_003BAA00;
+extern ScriptGlobals *datGameState;
 
 s32 bfStackPopInt(ScriptContext *script) {
     s32 stackIndex = script->stackDepth;
@@ -90,9 +90,9 @@ s32 bfStackPopInt(ScriptContext *script) {
     case 1:
         return script->stack.stackFloats[script->stackDepth];
     case 2:
-        return D_003BAA00->ints[script->stack.stackValues[script->stackDepth]];
+        return datGameState->ints[script->stack.stackValues[script->stackDepth]];
     case 3:
-        return D_003BAA00->floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
     }
     return 0;
 }
@@ -109,9 +109,9 @@ f32 bfStackPopFloat(ScriptContext *script) {
     case 1:
         return script->stack.stackFloats[script->stackDepth];
     case 2:
-        return (f32)D_003BAA00->ints[script->stack.stackValues[script->stackDepth]];
+        return (f32)datGameState->ints[script->stack.stackValues[script->stackDepth]];
     case 3:
-        return D_003BAA00->floats[script->stack.stackValues[script->stackDepth]];
+        return datGameState->floats[script->stack.stackValues[script->stackDepth]];
     }
     return 0.0f;
 }

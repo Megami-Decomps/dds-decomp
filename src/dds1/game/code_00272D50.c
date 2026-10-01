@@ -4,7 +4,7 @@ extern s32 mnuUseStaffItem(s32, s32);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
 extern s32 func_002D03F8(s32);
@@ -66,7 +66,7 @@ typedef struct StaffWindowHeader {
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context) {
     StaffWindowResources *resources = ((StaffDisplayContext *)context)->resources;
 
-    if (*(u8 *)((itemId & 0xFFFF) + D_003BAA00 + 0x12A0) == 0) {
+    if (*(u8 *)((itemId & 0xFFFF) + datGameState + 0x12A0) == 0) {
         func_0027C6A0(resources->firstWindow);
     }
     return ((StaffWindowHeader *)resources->firstWindow)->data->remaining > 0;
@@ -87,7 +87,7 @@ void func_00273390(u32 context) {
 void func_002733B0() {
 }
 
-s32 func_002733B8(void) {
+s32 mnuInitializeStaffDisplayResources(void) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     s32 handle;
@@ -145,7 +145,7 @@ typedef struct StaffImageContext {
     StaffImageList *activeWindow; /* 0x128 */
 } StaffImageContext;
 
-s64 func_00273670(s32 callback) {
+s64 mnuPrepareStaffImageAndSelectionLabelB(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_00272778(callback);
     mnuCreateStaffImageSprite(4);
@@ -184,7 +184,7 @@ typedef struct StaffItemContext {
  * party panels. Returns 1 when the item was consumed. */
 s32 mnuUseStaffItem(s32 itemId, s32 context) {
     s32 partyPanel = context + 0x15C;
-    s32 targetUnit = D_003BAA00 + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
+    s32 targetUnit = datGameState + *(((StaffItemContext *)context)->list->selectedIndex) * 0x1A4 + 0xA60;
     s32 result = btlItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
@@ -210,7 +210,7 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
     consumed = mnuUseStaffItem(selection, context);
     if (consumed != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->firstWindow + 0x14) + 0x1c) + 0x60) =
-                  (u32)*(u8 *)(selection + D_003BAA00 + 0x12a0);
+                  (u32)*(u8 *)(selection + datGameState + 0x12a0);
         resources->selection = selection;
     }
     func_00283BF0(context + 0x914, 1);

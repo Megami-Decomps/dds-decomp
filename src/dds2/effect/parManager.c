@@ -52,7 +52,7 @@ typedef struct {
     u32 unk8;        /* 0x8 */
 } ParDispatch; /* 0xC bytes */
 
-extern ParDispatch D_003AAB80[];
+extern ParDispatch parKindConstructorEntries[];
 
 extern ParDispatch D_003AAB88[];
 
@@ -114,14 +114,14 @@ typedef struct {
 extern s32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
-extern u8 D_00451F20[];
+extern u8 effEmitterDelayRandomState[];
 extern void parDispatchKindInit(void *, u32);
 
 /* Initialize one 64-byte particle record and its kind-specific state. Negative
    ages delay activation; radial distance changes toward a jittered target over
    lifetimeFrames. RNG calls and the pre-transform length measurement stay in
    their original order. */
-void func_00160B98(ParBurstEmitter *effect, u32 particleIndex) {
+void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     ParBurstPacket *packet = (ParBurstPacket *)effect->buffer->records;
     f32 direction[4];
     f32 initialRadius;
@@ -130,7 +130,7 @@ void func_00160B98(ParBurstEmitter *effect, u32 particleIndex) {
 
     packet += particleIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spawnDelayFrames + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
     initialRadius = effect->initialRadius;
     jitterFactor = effect->initialRadiusJitter;
     direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
@@ -208,7 +208,7 @@ typedef struct ParColorRamp {
     u32 fadeOut;       /* 0x40 */
 } ParColorRamp;
 
-void func_001612D8(ParColorRamp *p, s32 frames) {
+void parInitColorRamp(ParColorRamp *p, s32 frames) {
     u32 alpha;
     f32 span;
     u32 a, b;
@@ -299,7 +299,7 @@ u32 effParModulateColors(u32 colorA, u32 colorB) {
 void parCreateIndexed(s32 dispatchIndex, void *creationData) {
     ParObj *createdObject;
 
-    createdObject = D_003AAB80[dispatchIndex].func(creationData);
+    createdObject = parKindConstructorEntries[dispatchIndex].func(creationData);
     createdObject->dispatchIndex = dispatchIndex;
 }
 
@@ -315,7 +315,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
 void parCloneKind(ParObj *obj) {
     ParObj *createdObject;
 
-    createdObject = D_003AAB80[obj->dispatchIndex].func();
+    createdObject = parKindConstructorEntries[obj->dispatchIndex].func();
     createdObject->dispatchIndex = obj->dispatchIndex;
 }
 
@@ -351,7 +351,7 @@ u16 parGetRestartFlag(ParObj *obj) {
 }
 
 /* Copy one 16-byte vector with the existing EE/VU copy primitive. */
-void func_001622D8(void *destination, void *source) {
+void parCopyVectorB(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 

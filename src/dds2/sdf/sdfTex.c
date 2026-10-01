@@ -23,7 +23,7 @@ void *sdfTexGetSecondaryResourceWord(void *arg0);
 
 void func_0032BBF8(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 arg4, void *arg5, s32 arg6, s64 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11);
 
-extern u8 D_00439150;
+extern u8 sdfTextureReleaseQueue;
 
 void sdfPendingQueuePush(void *arg0, void *arg1);
 
@@ -103,7 +103,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->unk20 = 0;
-            sdfPendingQueuePush(&D_00439150, texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
     }
 }

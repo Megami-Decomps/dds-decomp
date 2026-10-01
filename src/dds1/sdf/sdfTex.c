@@ -5,7 +5,7 @@
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfTex *sdfResourceListHead;
-extern u8 D_003BD9F0;
+extern u8 sdfTextureReleaseQueue;
 
 void *sdfAllocateBlockBySizeThreshold(s32 arg0);
 void *memcpy(void *arg0, void *arg1, u32 arg2);
@@ -95,7 +95,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->unk20 = 0;
-            sdfPendingQueuePush(&D_003BD9F0, texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
         }
     }
 }

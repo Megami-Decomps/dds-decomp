@@ -48,7 +48,7 @@ typedef struct LmapList {
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
-extern LmapNode *func_0030A160(LmapList *);
+extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern void *func_003292A8(s32 size);
 extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 extern s32 func_0030AAB0(s32);
@@ -94,7 +94,7 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_0030A160(LmapList *list) {
+LmapNode *fldLmapExpandWindowBackward(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *head = list->first;
     LmapNode *node;
@@ -165,7 +165,7 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
     list->cur = cur;
     list->count--;
     if (list->count <= 0) {
-        cur = func_0030A160(list);
+        cur = fldLmapExpandWindowBackward(list);
     }
     return cur;
 }
@@ -210,7 +210,7 @@ typedef struct LmapDrawSurface {
     u8 pad14[0xC];
 } LmapDrawSurface; /* 0x20 */
 
-extern LmapDrawSurface D_0037FB48[];
+extern LmapDrawSurface kwlnDrawSurfaces[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
@@ -227,7 +227,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s
     sdfInitPacketList(list);
     sdfPktInit(header, x + 0x7000, y + 0x7900, width, height);
     sdfAppendPacket(list, sdfFormatSifPacket(header, command));
-    target = &D_0037FB48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -238,7 +238,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s
 
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011F250(x + 0x7000, y + 0x7900, a, b * 16, c * 8, d, e));
-    target = &D_0037FB48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 

@@ -58,7 +58,7 @@ extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, void *arg1);
 extern void func_001935B8(EffPrim *arg0, void *arg1);
 extern void effMathReleaseWorkResource(void *work);
-extern void func_001629F0(void *handle);
+extern void effDispatchParameterDataAndFreeWork(void *handle);
 
 /* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
 typedef struct EffChanHead {
@@ -95,7 +95,7 @@ extern void *effAllocSlotArray(u32 count);
 extern void *effParamWorkDuplicate(void *param);
 
 /* Create a channel work: clone the header, allocate the slot array, then give every record a duplicated parameter and a random negative start delay. */
-EffChanWork *func_00192488(EffChanSource *src) {
+EffChanWork *effChanWorkCreate(EffChanSource *src) {
     u32 count = src->head.count;
     void *handle = func_002D03F8(count * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = sdfResourceRetainAddress(handle);
@@ -133,7 +133,7 @@ void func_00192638(EffChanWork *work) {
     record = work->records;
     if (count != 0) {
         do {
-            func_001629F0(record->param);
+            effDispatchParameterDataAndFreeWork(record->param);
             record++;
             i++;
         } while (i < count);

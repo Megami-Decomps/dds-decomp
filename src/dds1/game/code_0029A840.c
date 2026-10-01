@@ -6,7 +6,7 @@ extern u32 sdfResourceRetainAddress(u32);
 
 extern void *func_002D03F8(u32);
 
-extern s32 func_001A17F0(void);
+extern s32 btlGetRuntime(void);
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
@@ -84,7 +84,7 @@ typedef struct EffectObjectNode {
     struct EffectObjectNode *next;
 } EffectObjectNode;
 
-extern EffectObjectNode *D_003BC948;
+extern EffectObjectNode *effFloorModelListHead;
 
 extern s64 btlIsRuntimeAllocated(void);
 
@@ -102,7 +102,7 @@ typedef struct RefObj {
 
 extern void func_002DB538(void *, float);
 
-extern u32 D_003BC94C;
+extern u32 effSharedTextureReferenceCount;
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
@@ -210,7 +210,7 @@ extern u8 D_00325828[];
 
 extern s64 effComputeLightDirectionVU(void *, void *);
 
-extern void func_00217878(void *, void *);
+extern void mdlProcessContextNodesAndTransforms(void *, void *);
 
 void effRefreshModelLighting(u8 *work) {
     void *model;
@@ -220,7 +220,7 @@ void effRefreshModelLighting(u8 *work) {
     } else {
         model = (void *)((EffModelOwner *)work)->model;
     }
-    func_00217878(model, D_00325828);
+    mdlProcessContextNodesAndTransforms(model, D_00325828);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
@@ -250,7 +250,7 @@ void effApplyScaledModelTertiaryVector(s32 model, float scale) {
 
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;
-    EffBattleTexHeaders *battle = (EffBattleTexHeaders *)func_001A17F0();
+    EffBattleTexHeaders *battle = (EffBattleTexHeaders *)btlGetRuntime();
     EffTexTable *table = *(EffTexTable **)(*(s32 *)(owner->model + 0x18) + 8);
 
     do {
@@ -321,17 +321,17 @@ u32 *effDuplicateFloorModelOwner(u8 *source) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AE88);
 
-extern u32 D_003BC8F8;
+extern u32 effModelUpdateControlFlags;
 
 void effMarkFloorModelForUpdate(u8 *work) {
     u32 previous = ((EffectObjectFlag *)work)->flags;
     u32 flags = previous | 1;
     ((EffectObjectFlag *)work)->flags = flags;
     if ((flags & 4) == 0) {
-        if ((D_003BC8F8 & 1) == 0) {
+        if ((effModelUpdateControlFlags & 1) == 0) {
             func_0029AE88(work);
         }
-    } else if ((D_003BC8F8 & 1) != 0) {
+    } else if ((effModelUpdateControlFlags & 1) != 0) {
         ((EffectObjectFlag *)work)->flags = previous | 0x31;
     }
 }
@@ -348,13 +348,13 @@ void effFloorModelListPush(EffectObjectFlag *obj) {
 
     entry->object = obj;
     entry->prev = NULL;
-    if (D_003BC948 != NULL) {
-        D_003BC948->prev = entry;
-        entry->next = D_003BC948;
+    if (effFloorModelListHead != NULL) {
+        effFloorModelListHead->prev = entry;
+        entry->next = effFloorModelListHead;
     } else {
         entry->next = NULL;
     }
-    D_003BC948 = entry;
+    effFloorModelListHead = entry;
     entry->object->flags |= 4;
 }
 
@@ -374,13 +374,13 @@ void effFloorModelListRemove(EffectObjectNode *node) {
     if (node->prev != NULL) {
         node->prev->next = node->next;
     } else {
-        D_003BC948 = node->next;
+        effFloorModelListHead = node->next;
     }
     sdfReleaseChipBlock(node);
 }
 
 void effSweepFloorModelList(void) {
-    EffectObjectNode *node = D_003BC948;
+    EffectObjectNode *node = effFloorModelListHead;
     EffectObjectNode *next;
 
     if (node != NULL) {
@@ -400,7 +400,7 @@ void effSweepFloorModelList(void) {
 }
 
 void mdlPropagateObjectFlag(void) {
-    EffectObjectNode *node = D_003BC948;
+    EffectObjectNode *node = effFloorModelListHead;
     EffectObjectFlag *object;
     s32 flags;
 
@@ -420,7 +420,7 @@ void mdlClearListedObjectFlag(void) {
     EffectObjectFlag *object;
     EffectObjectNode *node;
 
-    node = D_003BC948;
+    node = effFloorModelListHead;
     while (node != NULL) {
         object = node->object;
         node = node->next;
@@ -432,7 +432,7 @@ void mdlSetListedObjectFlag(void) {
     EffectObjectFlag *object;
     EffectObjectNode *node;
 
-    node = D_003BC948;
+    node = effFloorModelListHead;
     while (node != NULL) {
         object = node->object;
         node = node->next;
@@ -441,7 +441,7 @@ void mdlSetListedObjectFlag(void) {
 }
 
 void mdlMarkAndProcessObjectNodes(void) {
-    EffectObjectNode *node = D_003BC948;
+    EffectObjectNode *node = effFloorModelListHead;
     EffectObjectFlag *object;
     EffectObjectNode *next;
     s32 flags;
@@ -587,8 +587,8 @@ extern u8 *D_003BC958;
 extern void sdfTexReleaseReference(void *);
 
 void effReleaseSharedReference(RefObj *obj) {
-    D_003BC94C--;
-    if (D_003BC94C == 0) {
+    effSharedTextureReferenceCount--;
+    if (effSharedTextureReferenceCount == 0) {
         u8 *graphics = D_003BC958;
         *(u16 *)(graphics + 0xC) = 0x100;
         *(u16 *)(graphics + 0xE) = 0x100;
@@ -603,7 +603,7 @@ void effReleaseSharedReference(RefObj *obj) {
 
 RefObj *effRetainSharedReference(RefObj *obj) {
     obj->refCount++;
-    D_003BC94C++;
+    effSharedTextureReferenceCount++;
     return obj;
 }
 
@@ -736,9 +736,9 @@ INCLUDE_RODATA(const s32, "game/code_0029A840", D_003B2AC0);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC944);
 
-INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC948);
+INCLUDE_SDATA(const s32, "game/code_0029A840", effFloorModelListHead);
 
-INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC94C);
+INCLUDE_SDATA(const s32, "game/code_0029A840", effSharedTextureReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC950);
 

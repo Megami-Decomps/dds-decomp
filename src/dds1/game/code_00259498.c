@@ -127,5 +127,5 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4CC);
+INCLUDE_SDATA(const s32, "game/code_00259498", mnuSceneResourceContext);
 

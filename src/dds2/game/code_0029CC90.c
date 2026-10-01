@@ -2,7 +2,7 @@
 
 extern u32 func_0029D790();
 
-extern u8 *D_00435DD0;
+extern u8 *datGameState;
 
 typedef struct {
     u8 pad0[6];
@@ -154,7 +154,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = ptyCalcLevelUps(D_00435DD0 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(datGameState + 0xa60 + offset);
         count += step > 0;
         offset += 0x1c4;
     } while (--remaining >= 0);
@@ -238,7 +238,7 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
         ptyGetProfileRecordCap(func_00314C10((s32)entry) & 0xFFFF));
 }
 
-u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     func_00314C10(*(u32 *)(resource + 8));
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }

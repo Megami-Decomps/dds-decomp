@@ -5,7 +5,7 @@ extern void *sdfAllocateBlockBySizeThreshold(s32);
 
 extern u32 D_004389BC;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *func_00328D68();
 extern void *func_003292A8(void);
@@ -57,7 +57,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     }
 }
 
-void func_00328520(const char *format, ...) {
+void sdfPanicHaltPrintf(const char *format, ...) {
     for (;;) {
     }
 }

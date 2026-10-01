@@ -1,7 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u32 D_00435D88;
+extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(u8 *, u8 *, u8 *);
 
@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FC68);
 
 /* The stored sequence wraps at 16 bits even though its backing word is 32 bits. */
 void dds3AdvanceWorldCounter(void) {
-    D_00435D88 = (D_00435D88 + 1) & 0xffff;
+    dds3WorldCounter = (dds3WorldCounter + 1) & 0xffff;
 }
 
 void dds3SetWorldEntryCallbackTarget(WorldEntry *entry, void *callbackTarget) {
@@ -84,7 +84,7 @@ extern void *func_00328D68(s32 size);
    The assignment order is load-bearing: ee-gcc hoists the last statement's
    store out of the independent group, so counter1C stays last and the entry
    store follows it. */
-s32 func_0010FCE8(WorldObject *object) {
+s32 dds3AllocateWorldObjectEntry(WorldObject *object) {
     WorldNode *node;
 
     node = (WorldNode *)func_00328D68(0x28);
@@ -119,7 +119,7 @@ u32 func_0010FDF0(WorldObject *obj) {
     return 1;
 }
 
-u32 func_0010FE20(WorldObject *obj) {
+u32 dds3DispatchWorldEntryCallbackTarget(WorldObject *obj) {
     void *callbackTarget;
 
     callbackTarget = obj->entry->callbackTarget;
@@ -131,7 +131,7 @@ u32 func_0010FE20(WorldObject *obj) {
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FE50);
 
-INCLUDE_SDATA(const s32, "game/code_0010FB00", D_00435D88);
+INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3WorldCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0010FB00", D_00435D8C);
+INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3ActiveWorld);
 

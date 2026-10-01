@@ -2,7 +2,7 @@
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 extern s32 func_002CB3B8(u32, u32);
-extern u32 D_003BC4CC;
+extern u32 mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 func_00255E08();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
@@ -30,7 +30,7 @@ void mnuDrawPanelWithPackedColorPattern(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) 
 }
 
 /* Fill-level dispatch: direct, inverted, or sin-pulsed, then the shared layers. */
-s32 func_00254288(void) {
+s32 mnuDrawMantraCostTransition(void) {
     s32 nodePrev;
     s32 nodeNext;
     s32 level;
@@ -41,8 +41,8 @@ s32 func_00254288(void) {
 
     frac = 0.0f;
     mnuGetSelectedNodeValue();
-    nodePrev = func_002CB3B8(D_003BC4CC, -1);
-    nodeNext = func_002CB3B8(D_003BC4CC, 1);
+    nodePrev = func_002CB3B8(mnuSceneResourceContext, -1);
+    nodeNext = func_002CB3B8(mnuSceneResourceContext, 1);
     func_00255E08(nodePrev, 0x80, 0x52);
     level = *(s32 *)(nodePrev + 0x1C);
     switch (level) {

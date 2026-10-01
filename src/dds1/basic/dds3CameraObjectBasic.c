@@ -72,7 +72,7 @@ void dds3DestroyCameraData(CameraObject *camera) {
 
     effObjFreeInner();
     data = camera->data;
-    func_00111840(data->handle);
+    dds3DestroyObjectBase(data->handle);
     sdfReleaseChipBlock(data);
 }
 
@@ -112,7 +112,7 @@ ActionObj *func_00112D00(s32 value, void *innerVec, u128 *vec60, u128 *vec50) {
     return obj;
 }
 
-ActionObj *func_00112D98(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 flag84) {
+ActionObj *dds3CreateCameraObjectWithVectors(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 flag84) {
     ActionObj *obj = dds3CreateCameraObjectWithSlotData(slotValue);
     CameraData *data = obj->data;
 
@@ -133,7 +133,7 @@ void func_00112E58(void) {
     dds3RemoveWorldObjectNode();
 }
 
-void func_00112E70(void *obj) {
+void dds3LoadObjectMatrixPointerIntoVu(void *obj) {
     VU0_LOAD_MATRIX(*(void **)((u8 *)obj + 0x18));
 }
 

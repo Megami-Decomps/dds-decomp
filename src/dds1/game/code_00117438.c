@@ -6,10 +6,10 @@ extern void scrDestroyWorkTask(void);
 
 extern u32 D_003BAAAC;
 
-extern s32 D_003BAA00;
-extern s32 D_003BAA1C;
-extern s32 D_003BAA4C;
-extern u8 *D_003BAA50;
+extern s32 datGameState;
+extern s32 datEnemyRecords;
+extern s32 datCommandSelectors;
+extern u8 *datCommandRecords;
 typedef struct EvtScaledValue {
     u32 unk0;
     u32 flags;
@@ -66,7 +66,7 @@ typedef struct SdfUnitMode {
     s8 kind; /* 0x01: 5 selects the alternate unit script */
 } SdfUnitMode;
 
-extern u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed);
+extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char D_003BA9E0[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
 extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
@@ -231,7 +231,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->firstTick = 0;
     ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
-    D_003BAA00 = (s32)state;
+    datGameState = (s32)state;
     evtResetWorldAndProfileRuntime();
 }
 
@@ -242,16 +242,16 @@ void sdfDestroyRuntimeTask(void) {
 
     kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
     func_00117808();
-    handle = ((SdfRuntime *)D_003BAA00)->backingAllocation;
+    handle = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(handle);
     func_002D0918(handle);
-    D_003BAA00 = 0;
+    datGameState = 0;
 }
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
 
-    runtime = (SdfRuntime *)D_003BAA00;
+    runtime = (SdfRuntime *)datGameState;
     runtime->firstTick += 1;
     runtime->secondTick += 1;
     return 0;
@@ -260,7 +260,7 @@ s32 sdfBumpTickCounters(void) {
 void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
-    ((SdfRuntime *)D_003BAA00)->updateMode = 8;
+    ((SdfRuntime *)datGameState)->updateMode = 8;
     ptyInitRuntime();
     func_00120C08(0);
     ptyClearProfileRecords();
@@ -323,7 +323,7 @@ s32 ptyComputeMaxHp(s32 unit) {
     s32 result;
 
     if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+        return ((SdfEnemyVitals *)(datEnemyRecords + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
     }
     result = evtRunContext(1, unit, 0, 0, 0);
     if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
@@ -340,7 +340,7 @@ s32 ptyComputeMaxMp(s32 unit) {
     s32 result;
 
     if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(D_003BAA1C + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+        return ((SdfEnemyVitals *)(datEnemyRecords + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
     }
     result = evtRunContext(2, unit, 0, 0, 0);
     if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
@@ -358,10 +358,10 @@ s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].kind == 5) {
+    if (((SdfUnitMode *)datCommandSelectors)[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = D_003BAA50[unitIndex * 0x38];
+        flags = datCommandRecords[unitIndex * 0x38];
         if (flags & 0x40) {
             result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
@@ -381,10 +381,10 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].kind == 5) {
+    if (((SdfUnitMode *)datCommandSelectors)[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = D_003BAA50[unitIndex * 0x38];
+        flags = datCommandRecords[unitIndex * 0x38];
         if (flags & 0x40) {
             result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
@@ -410,7 +410,7 @@ void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
-extern s32 D_003BAA5C;
+extern s32 datAbilityParameters;
 extern s32 func_00119750(u32);
 extern u32 func_00119520(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
@@ -418,7 +418,7 @@ extern s32 effMiscRandMod(s32, s32);
 extern void func_003003F0(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
-/* Per-slot battle record (0x38 bytes) in D_003BAA50. */
+/* Per-slot battle record (0x38 bytes) in datCommandRecords. */
 typedef struct SdfBattleSlot {
     u8 pad00[0x24];
     u8 type;        /* 0x24: 1/3 = skill-scaled hit roll, 2 = bit query */
@@ -429,10 +429,10 @@ typedef struct SdfBattleSlot {
     u8 pad34[4];
 } SdfBattleSlot;
 
-#define SDF_BATTLE_SLOT(i) ((SdfBattleSlot *)(D_003BAA50 + (i) * 0x38))
+#define SDF_BATTLE_SLOT(i) ((SdfBattleSlot *)(datCommandRecords + (i) * 0x38))
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed) {
+u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -464,17 +464,17 @@ u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         switch (kind) {
         case 3:
             if (datUnitHasSkill(packed, 0x23E)) {
-                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x1F0) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F0) * (f32)ratio);
             }
             break;
         case 4:
             if (datUnitHasSkill(packed, 0x23F)) {
-                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x1F8) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F8) * (f32)ratio);
             }
             break;
         case 9:
             if (datUnitHasSkill(packed, 0x243)) {
-                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x218) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x218) * (f32)ratio);
             }
             break;
         }
@@ -488,7 +488,7 @@ u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         } else if (!(*(u16 *)queryArg & 4)) {
             mask &= 0xFFFE;
         } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
-                   (((SdfEnemyVitals *)(D_003BAA1C + actor->unitId * 76))->flags & 0x440) != 0) {
+                   (((SdfEnemyVitals *)(datEnemyRecords + actor->unitId * 76))->flags & 0x440) != 0) {
             mask &= 0xFFFE;
         }
     }
@@ -511,12 +511,12 @@ u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed) {
 
 u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
-    u32 mode = D_003BAA50[channel * 0x38 + 0x24];
+    u32 mode = datCommandRecords[channel * 0x38 + 0x24];
 
     if (mode != 1 && mode != 3) {
         return 0;
     }
-    result = func_001189A0(channel, queryArg, item);
+    result = sdfRollActionHit(channel, queryArg, item);
     if (!((item->flagsAndValue & SDF_PACKED_CHANNEL_MASK) < result)) {
         result = 0;
     }
@@ -526,10 +526,10 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
 u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
 
-    if (D_003BAA50[channel * 0x38 + 0x24] != 2) {
+    if (datCommandRecords[channel * 0x38 + 0x24] != 2) {
         return 0;
     }
-    result = func_001189A0(channel, queryArg, item);
+    result = sdfRollActionHit(channel, queryArg, item);
     if ((result & (item->flagsAndValue & SDF_PACKED_CHANNEL_MASK)) == 0) {
         result = 0;
     }
@@ -581,7 +581,7 @@ INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F8);
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F9);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA00);
+INCLUDE_SDATA(const s32, "game/code_00117438", datGameState);
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA04);
 

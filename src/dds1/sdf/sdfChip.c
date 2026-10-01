@@ -22,9 +22,9 @@ typedef struct SdfChipBlock {
     void *next;
 } SdfChipBlock;
 
-extern SdfCursorSlot *D_003BD9AC;
+extern SdfCursorSlot *sdfFreeCursorSlotHead;
 extern s32 D_003BD9A8;
-extern s32 D_003BD9B0;
+extern s32 sdfChipHeapStart;
 extern s32 D_003BD9B4;
 extern u8 D_003BD9C0;
 
@@ -51,7 +51,7 @@ void sdfReleaseChipBlock(void *memory) {
     if (memory == NULL) {
         return;
     }
-    index = (s32)memory - D_003BD9B0;
+    index = (s32)memory - sdfChipHeapStart;
     if (index < 0) {
         index += 0xFFF;
     }
@@ -71,8 +71,8 @@ void sdfReleaseChipBlock(void *memory) {
             *link = slot->next;
         }
         slot->owner = NULL;
-        slot->next = D_003BD9AC;
-        D_003BD9AC = slot;
+        slot->next = sdfFreeCursorSlotHead;
+        sdfFreeCursorSlotHead = slot;
     } else {
         if (count == owner->limit) {
             slot->next = owner->next;
@@ -94,7 +94,7 @@ s32 sdfChipIsInRange(s32 address) {
     s32 inRange;
 
     inRange = 0;
-    if (address >= D_003BD9B0) {
+    if (address >= sdfChipHeapStart) {
         inRange = address < D_003BD9B4;
     }
     return inRange;

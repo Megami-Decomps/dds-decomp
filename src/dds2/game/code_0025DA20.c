@@ -13,7 +13,7 @@ extern s32 func_00261198();
 extern s32 func_002613C8();
 extern s32 ptyCountBulletItem(s32);
 
-extern s8 D_003CD8D8[34];
+extern s8 mnuCampListedItems[34];
 
 extern void func_00246950();
 
@@ -62,7 +62,7 @@ extern s64 evtFindTaskById(void);
 
 extern s32 func_00101820(u32);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s32 func_00261B98(s32);
 
@@ -74,7 +74,7 @@ extern char D_00424BC0[]; /* "camp_draw" */
 
 extern char D_00424BD0[]; /* "camp_update" */
 
-extern s8 D_00437837;
+extern s8 mnuPanelTaskCompletionState;
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -114,7 +114,7 @@ extern s32 effMiscRand(s32);
 
 extern u8 D_003CDA8C[];
 
-extern u8 D_003CD8F8[];
+extern u8 mnuCampCompactEntries[];
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -133,7 +133,7 @@ extern void func_0025D8C8(void);
 extern s32 func_002C54B0(s32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C5498(s32);
-extern u8 *D_00435E38;
+extern u8 *datItemSkillRecords;
 
 extern u8 D_003CDA88[];
 
@@ -676,7 +676,7 @@ extern void mnuShopSubmitDescriptor(u8 *work);
 extern void func_0025F2B0(CampScene *scene);
 
 /* Camp scene opening steps 1..5, each falling into the next; stages 0 and 2 do nothing, other values advance by one. */
-void func_0025EF10(CampScene *scene) {
+void mnuAdvanceShopMenuState(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
@@ -956,10 +956,10 @@ s32 mnuCampHasEligibleOwnedItems(void) {
         if (func_002C54B0(i) != 0) {
             continue;
         }
-        if (((SaveItemCounts *)D_00435DD0)->counts[i] == 0) {
+        if (((SaveItemCounts *)datGameState)->counts[i] == 0) {
             continue;
         }
-        if ((D_00435E38[i * 8] & 3) != 0) {
+        if ((datItemSkillRecords[i * 8] & 3) != 0) {
             result = 1;
             break;
         }
@@ -981,7 +981,7 @@ typedef struct CampWindowListData {
 
 extern void func_00295400(void);
 
-s32 func_0025FF18(s32 count, s32 *enabled, u8 *settings) {
+s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, u8 *settings) {
     CampWindowContainer *window;
     s32 *storage;
     s32 i;
@@ -1108,7 +1108,7 @@ s32 mnuCountActivePartyEntries(void) {
 
     enabledCount = 0;
     remaining = 4;
-    entry = (u16 *)(D_00435DD0 + 0xa60);
+    entry = (u16 *)(datGameState + 0xa60);
     do {
         entryFlags = *entry;
         entry = entry + 0xe2;
@@ -1130,10 +1130,10 @@ s32 mnuCampResolveProgressTierValue(void) {
 
     for (i = 0; i < 3; i++) {
         if (i + 1 < 3) {
-            if (D_003CE408[i].threshold > *(u32 *)(D_00435DD0 + 0x1E650)) {
+            if (D_003CE408[i].threshold > *(u32 *)(datGameState + 0x1E650)) {
                 break;
             }
-        } else if (D_003CE408[i].threshold <= *(u32 *)(D_00435DD0 + 0x1E650)) {
+        } else if (D_003CE408[i].threshold <= *(u32 *)(datGameState + 0x1E650)) {
             break;
         }
     }
@@ -1146,12 +1146,12 @@ void mnuCampClearListedItemCounts(void) {
     u32 index;
 
     index = 0;
-    entry = D_003CD8D8;
+    entry = mnuCampListedItems;
     do {
         entryId = *(u16 *)entry;
         entry = (s8 *)((s32)entry + 8);
         index = index + 1;
-        *(u8 *)((u32)entryId + D_00435DD0 + 0x1340) = 0;
+        *(u8 *)((u32)entryId + datGameState + 0x1340) = 0;
     } while (index < 3);
 }
 
@@ -1187,7 +1187,7 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene + 0x60);
         func_003297C8(*(s32 *)scene);
-        D_00437837 = 2;
+        mnuPanelTaskCompletionState = 2;
     }
 }
 
@@ -1217,7 +1217,7 @@ void mnuCampDestroyPanelTasks(void) {
 }
 
 s32 mnuCampConsumePanelTaskCompletion(void) {
-    s32 state = D_00437837;
+    s32 state = mnuPanelTaskCompletionState;
     if (state == 1) {
         return 1;
     }
@@ -1225,7 +1225,7 @@ s32 mnuCampConsumePanelTaskCompletion(void) {
         return 0;
     }
     if (state == 2) {
-        D_00437837 = 0;
+        mnuPanelTaskCompletionState = 0;
     }
     return 0;
 }
@@ -1253,7 +1253,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260950);
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260A58);
 
 s32 mnuCampFindListedItemIndex(s32 id) {
-    u16 *entry = (u16 *)D_003CD8D8;
+    u16 *entry = (u16 *)mnuCampListedItems;
     u32 index = 0;
     do {
         if (id == *entry) {
@@ -1350,7 +1350,7 @@ s32 mnuCampFindFreeWideEntryIndex(s32 row) {
 }
 
 s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
-    s32 *entry = (s32 *)(D_003CD8F8 + row * 0x44);
+    s32 *entry = (s32 *)(mnuCampCompactEntries + row * 0x44);
     s32 index = 0;
     do {
         s32 value = *entry;
@@ -1381,14 +1381,14 @@ s32 mnuCampResolveOwnedItemVariant(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
-    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((SaveItemCounts *)D_00435DD0)->counts[id] != 0) {
+    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((SaveItemCounts *)datGameState)->counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
 }
 
 s32 mnuCampGetCompactEntryId(s32 row, s32 column) {
-    return *(s32 *)(D_003CD8F8 + row * 0x44 + column * 8);
+    return *(s32 *)(mnuCampCompactEntries + row * 0x44 + column * 8);
 }
 
 s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
@@ -1397,15 +1397,15 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     if (mode == 1) {
         value -= ptyCountBulletItem(id);
     } else if (mode == 3) {
-        value = 1 - ((SaveItemCounts *)D_00435DD0)->counts[id];
+        value = 1 - ((SaveItemCounts *)datGameState)->counts[id];
     } else if (mode == 2) {
-        value = 1 - ((SaveItemCounts *)D_00435DD0)->counts[id];
+        value = 1 - ((SaveItemCounts *)datGameState)->counts[id];
     } else {
-        value = 99 - ((SaveItemCounts *)D_00435DD0)->counts[id];
+        value = 99 - ((SaveItemCounts *)datGameState)->counts[id];
     }
     if (mnuCampFindListedItemIndex(id) >= 0) {
         if (value >= 2) {
-            value = ((SaveItemCounts *)D_00435DD0)->counts[id] == 0;
+            value = ((SaveItemCounts *)datGameState)->counts[id] == 0;
         }
     }
     return value < 0 ? 0 : value;

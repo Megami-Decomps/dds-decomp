@@ -22,9 +22,9 @@ extern EffHandler D_003B2074[];
 
 extern EffHandler D_003B2070[];
 
-extern u8 D_00438B66;
+extern u8 sdfPfsDebugMode;
 
-extern u32 D_00438F08;
+extern u32 effDataDirectoryIndex;
 
 extern char D_00436448[];
 
@@ -51,7 +51,7 @@ extern char *D_003B20D8[];
 
 extern s32 func_0036B588(void);
 
-extern u8 D_003846F0[];
+extern u8 sdfViewMatrix[];
 
 extern u8 D_0037F610[];
 
@@ -265,17 +265,17 @@ s8 func_00194AA0(void) {
 s32 effOpenDataDir(void *name) {
     u8 path[0x70];
 
-    if (D_00438B66 != 0) {
+    if (sdfPfsDebugMode != 0) {
         func_0035C860(path, D_00436448, name);
         return sceDopen(path);
     } else {
-        D_00438F08 = 0;
+        effDataDirectoryIndex = 0;
         return 0;
     }
 }
 
 void effRunIfEnabled(void) {
-    if (D_00438B66 != 0) {
+    if (sdfPfsDebugMode != 0) {
         func_0036B420();
     }
 }
@@ -283,15 +283,15 @@ void effRunIfEnabled(void) {
 /* In built-in mode the name table supplies entries instead of the
  * directory iterator; clearing 0x1000 marks a synthesized entry. */
 s32 effNextDataDirEntry(s32 unused, EffDirEnt *entry) {
-    if (D_00438B66 != 0) {
+    if (sdfPfsDebugMode != 0) {
         return func_0036B588();
     }
-    if ((u32)D_00438F08 >= 0x2F) {
+    if ((u32)effDataDirectoryIndex >= 0x2F) {
         return 0;
     }
-    strcpy(entry->name, D_003B20D8[D_00438F08]);
+    strcpy(entry->name, D_003B20D8[effDataDirectoryIndex]);
     entry->flags &= ~0x1000;
-    D_00438F08++;
+    effDataDirectoryIndex++;
     return strlen(entry->name);
 }
 
@@ -334,7 +334,7 @@ typedef struct EffResourceDescriptor {
 } EffResourceDescriptor;
 
 /* Build a resource descriptor with the list's count and head. */
-EffResourceDescriptor *func_00195060(EffResourceList *list) {
+EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
     EffResourceDescriptor *resource = func_00328D68(0x44);
 
     resource->word00 = 0;
@@ -428,7 +428,7 @@ void func_001957E8(void) {
 
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
-    VU0_LOAD_MATRIX(D_003846F0);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
     matrix = D_0037F610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     VU0_TRANSFORM_POINT(vf10, vf10);

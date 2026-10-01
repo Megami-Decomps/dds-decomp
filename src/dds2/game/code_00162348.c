@@ -61,9 +61,9 @@ extern f32 D_00451F30[];
 
 extern f32 D_00451F40[];
 
-extern u8 D_0037F680[];
+extern u8 sdfViewEyeVector[];
 
-extern u8 D_0037F690[];
+extern u8 sdfViewTargetVector[];
 
 extern f32 D_003AAEC0[];
 
@@ -73,7 +73,7 @@ extern f32 D_003AAEF0[];
 
 extern f32 D_003AAF00[];
 
-extern ParListNode *D_00436400;
+extern ParListNode *parRecordListHead;
 
 extern ParCellNode *D_00436404;
 
@@ -230,7 +230,7 @@ s32 parObjGetMode(ParObj *object) {
     }
 }
 
-extern BillDispatch D_003AAB80[];
+extern BillDispatch parKindConstructorEntries[];
 
 extern s32 billCloneObjectRetainingSharedData(s32 id);
 
@@ -246,7 +246,7 @@ ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle;
     s32 billboard;
 
-    particle = D_003AAB80[source->dispatchIndex].func();
+    particle = parKindConstructorEntries[source->dispatchIndex].func();
     particle->dispatchIndex = source->dispatchIndex;
     if (source->unk28 == -1) {
         billboard = billCloneObjectRetainingSharedData(source->billId);
@@ -317,8 +317,8 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     default:
         return;
     }
-    VU0_LOAD_VF($vf10, D_0037F680);
-    VU0_LOAD_VF($vf11, D_0037F690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, D_00451F30);
 }
@@ -448,7 +448,7 @@ extern u8 D_00451F50[];
 extern void func_00341348();
 
 void parSysReset(void) {
-    D_00436400 = 0;
+    parRecordListHead = 0;
     parControlInit();
     func_00341348(D_00451F50);
 }
@@ -465,8 +465,8 @@ void parReleaseAssetRecord(ParReleaseRecord *record) {
 }
 
 void parPrependRecordListNode(ParListNode *node) {
-    node->next = D_00436400;
-    D_00436400 = node;
+    node->next = parRecordListHead;
+    parRecordListHead = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
@@ -489,11 +489,11 @@ typedef struct ParDrawState {
     u8 pad24[8];
 } ParDrawState;
 
-extern ParDrawState D_00451F60;
+extern ParDrawState parDrawControl;
 
 void parControlInit(void) {
-    memset(&D_00451F60, 0, 0x2C);
-    D_00451F60.flags = 0x4000;
+    memset(&parDrawControl, 0, 0x2C);
+    parDrawControl.flags = 0x4000;
 }
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -1081,7 +1081,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
         sdfAppendPacket(list, func_00167A10(&state));
     }
     if (remaining > 0) {
-        u16 *counts = (u16 *)&D_00451F60;
+        u16 *counts = (u16 *)&parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
         sdfAppendPacket(list, func_00167A10(&state));
@@ -1106,7 +1106,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     return desc;
 }
 
-INCLUDE_SDATA(const s32, "game/code_00162348", D_00436400);
+INCLUDE_SDATA(const s32, "game/code_00162348", parRecordListHead);
 
 INCLUDE_SDATA(const s32, "game/code_00162348", D_00436404);
 

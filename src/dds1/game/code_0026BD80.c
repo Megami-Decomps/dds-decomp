@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 D_003BC5D0;
+extern s32 mnuMovieMenuState;
 
 extern void func_0026C7E0();
 
@@ -38,31 +38,31 @@ void mnuRecreateMenuSelectionList(void) {
     s32 i;
     s32 node;
 
-    if (((MenuState *)D_003BC5D0)->linkedState != 0) {
-        mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
+    if (((MenuState *)mnuMovieMenuState)->linkedState != 0) {
+        mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
     }
     node = mnuCreateListState(0, 3, 0);
-    ((MenuState *)D_003BC5D0)->linkedState = node;
+    ((MenuState *)mnuMovieMenuState)->linkedState = node;
     ((MenuState *)node)->linkedState = (s32)func_0026D480;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(((MenuState *)D_003BC5D0)->linkedState, 0);
+        mnuListAppendNode(((MenuState *)mnuMovieMenuState)->linkedState, 0);
     }
 }
 
 u32 mnuDestroyMovieMenuSelectionList(void) {
-    return mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
+    return mnuDestroyListState(((MenuState *)mnuMovieMenuState)->linkedState);
 }
 
 u32 func_0026BED0(void) {
-    return **(u32 **)(((MenuState *)D_003BC5D0)->linkedState + 0x1c);
+    return **(u32 **)(((MenuState *)mnuMovieMenuState)->linkedState + 0x1c);
 }
 
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
-    mnuSelectFirstListNode(((MenuState *)D_003BC5D0)->linkedState);
+    mnuSelectFirstListNode(((MenuState *)mnuMovieMenuState)->linkedState);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault(((MenuState *)D_003BC5D0)->linkedState);
+            mnuAdvanceListCursorDefault(((MenuState *)mnuMovieMenuState)->linkedState);
         } while (advanceCount != 0);
     }
 }
@@ -85,15 +85,15 @@ u32 func_0026C040(void) {
 }
 
 void mnuReleaseMenuResourceSlots(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
     if (state->firstResource != 0) {
         effDestroyResourceSlotSet(state->firstResource);
-        state = (MenuState *)D_003BC5D0;
+        state = (MenuState *)mnuMovieMenuState;
         state->firstResource = 0;
     }
     if (state->secondResource != 0) {
         effDestroyResourceSlotSet(state->secondResource);
-        state = (MenuState *)D_003BC5D0;
+        state = (MenuState *)mnuMovieMenuState;
         state->secondResource = 0;
     }
 }
@@ -101,13 +101,13 @@ void mnuReleaseMenuResourceSlots(void) {
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C098);
 
 u8 mnuHasSpriteHandle(void) {
-    return ((MenuState *)D_003BC5D0)->spriteHandle != 0;
+    return ((MenuState *)mnuMovieMenuState)->spriteHandle != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (((MenuState *)D_003BC5D0)->spriteHandle != 0) {
-        effDestroyResourceSlotSet(((MenuState *)D_003BC5D0)->spriteHandle);
-        ((MenuState *)D_003BC5D0)->spriteHandle = 0;
+    if (((MenuState *)mnuMovieMenuState)->spriteHandle != 0) {
+        effDestroyResourceSlotSet(((MenuState *)mnuMovieMenuState)->spriteHandle);
+        ((MenuState *)mnuMovieMenuState)->spriteHandle = 0;
     }
 }
 
@@ -145,7 +145,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C350);
 
 void func_0026C4A8(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word14 = 0;
     state->word38 = 0;
@@ -167,7 +167,7 @@ void func_0026CAB0(void) {
 }
 
 void mnuSwapStateWords(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     switch (state->mode) {
     case 0:
@@ -188,7 +188,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
 
 void mnuClearGlobalMenuStateFields(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
     state->word14 = 0;
@@ -196,7 +196,7 @@ void mnuClearGlobalMenuStateFields(void) {
 }
 
 void mnuResetTitlePageAndPhase(void) {
-    MenuState *state = (MenuState *)D_003BC5D0;
+    MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
     state->word14 = 0;

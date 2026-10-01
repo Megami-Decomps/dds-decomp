@@ -15,7 +15,7 @@ typedef struct Unk6C84Rec {
     u8 unk4[0x20];    /* 0x4 */
 } Unk6C84Rec;
 
-extern Unk6C84Rec D_00452724[];
+extern Unk6C84Rec frFontResourceRecords[];
 
 /* Circular doubly-linked list node; prev/next at +0x18/+0x1C. */
 typedef struct FntNode {
@@ -94,11 +94,11 @@ void frFontListInsert(FntNode *node) {
 }
 
 u16 func_0019B870(s32 index) {
-    return D_00452724[index].unk0->unk10;
+    return frFontResourceRecords[index].unk0->unk10;
 }
 
 u16 func_0019B890(s32 index) {
-    return D_00452724[index].unk0->unk12;
+    return frFontResourceRecords[index].unk0->unk12;
 }
 
 void itfSetTextDrawLimit(s32 value) {
@@ -137,7 +137,7 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BC60);
 
-extern volatile s32 D_004389DC; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
+extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 extern s32 func_003292A8(s32);
 extern s32 sdfResourceRetainAddress(s32);
@@ -152,15 +152,15 @@ void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
-    WaitSema(D_004389DC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_004389DC);
+    SignalSema(sdfGsImageUploadSemaphore);
 }
 
 /* Upload the font's bitmap: clear a (width * height / 2)-byte block and load it to GS memory under the GS semaphore. */
-void func_0019BD48(void) {
+void frFontUploadClearedTexture(void) {
     u8 loadImage[0x60];
     s32 size;
     s32 block;
@@ -173,11 +173,11 @@ void func_0019BD48(void) {
     memset(image, 0, size);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.gsBuffer, (s16)frFontWork.gsFormat, 0x14, 0, 0,
                          (s16)frFontWork.width, (s16)frFontWork.height);
-    WaitSema(D_004389DC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, (s32)image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_004389DC);
+    SignalSema(sdfGsImageUploadSemaphore);
     func_003297C8((void *)block);
 }
 

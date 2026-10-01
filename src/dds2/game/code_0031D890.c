@@ -37,7 +37,7 @@ typedef struct SpriteWorkPool {
 } SpriteWorkPool;
 
 /* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
-u32 func_0031D890(u32 count) {
+u32 itfCreateSpriteWorkPool(u32 count) {
     u32 size = count * 0x14 + 0xC;
     u32 handle = func_003292A8(size);
     SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
@@ -141,7 +141,7 @@ INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);
 
 extern void itfFadeSetTint(u32 tint);
 
-void func_0031E198(u8 *work) {
+void itfApplyWorkTintAndClearBuffers(u8 *work) {
     itfFadeSetTint(*(u32 *)(work + 0x34));
     memset(work + 0xB4, 0, 0x18);
     memset(work + 0xCC, 0, 0x1C);
@@ -155,7 +155,7 @@ void func_0031E198(u8 *work) {
 
 extern void itfFadeClearTint(void);
 
-void func_0031E240(u8 *work) {
+void itfClearTintAndWorkBuffers(u8 *work) {
     itfFadeClearTint();
     memset(work + 0xB4, 0, 0x18);
     memset(work + 0xCC, 0, 0x1C);

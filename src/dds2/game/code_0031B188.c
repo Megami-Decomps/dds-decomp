@@ -37,7 +37,7 @@ extern void mdlBroadcastMasked();
 extern void mdlStorePrimaryVectorVU(void *model);
 extern void mdlStoreTertiaryVectorVU(void *model);
 
-extern u32 *D_00438940;
+extern u32 *dds3SoundSlotPool;
 
 extern u32 mdlGetBroadcastValue(u32 model);
 
@@ -60,27 +60,27 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B188);
 void dds3InitSoundSlotPool(void) {
     u32 handle;
     SoundSlotPool *pool;
-    if (D_00438940 != 0) {
+    if (dds3SoundSlotPool != 0) {
         dds3ReleaseSoundSlotPool();
     }
     handle = func_003292A8(0x32c);
-    D_00438940 = sdfMemoryGetBlockAddress(handle);
-    memset(D_00438940, 0, 0x32c);
-    pool = (SoundSlotPool *)D_00438940;
+    dds3SoundSlotPool = sdfMemoryGetBlockAddress(handle);
+    memset(dds3SoundSlotPool, 0, 0x32c);
+    pool = (SoundSlotPool *)dds3SoundSlotPool;
     pool->handle = handle;
     pool->slots = (SoundSlot *)(pool + 1);
     pool->count = 100;
 }
 
 void dds3ReleaseSoundSlotPool(void) {
-    if (D_00438940 != (u32 *)0x0) {
-        func_003297C8(*D_00438940);
-        D_00438940 = (u32 *)0x0;
+    if (dds3SoundSlotPool != (u32 *)0x0) {
+        func_003297C8(*dds3SoundSlotPool);
+        dds3SoundSlotPool = (u32 *)0x0;
     }
 }
 
-SoundSlot *func_0031B290(void) {
-    SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
+SoundSlot *sndFindFreeSoundSlot(void) {
+    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
     SoundSlot *slot = pool->slots;
     s32 i;
 
@@ -92,8 +92,8 @@ SoundSlot *func_0031B290(void) {
     return 0;
 }
 
-SoundSlot *func_0031B2E0(u32 sequence, u32 frames) {
-    SoundSlot *slot = func_0031B290();
+SoundSlot *sndClaimFreeSoundSlot(u32 sequence, u32 frames) {
+    SoundSlot *slot = sndFindFreeSoundSlot();
 
     if (slot != NULL) {
         slot->sequence = sequence;
@@ -104,7 +104,7 @@ SoundSlot *func_0031B2E0(u32 sequence, u32 frames) {
 
 /* Returns occupied sound slots to their default volume and pan when they expire. */
 void dds3UpdateSoundSlots(void) {
-    SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
+    SoundSlotPool *pool = (SoundSlotPool *)dds3SoundSlotPool;
     if (pool != 0) {
         s32 index = 0;
         SoundSlot *slot = pool->slots;
@@ -118,7 +118,7 @@ void dds3UpdateSoundSlots(void) {
                 }
                 index++;
                 slot++;
-            } while (index < (s32)D_00438940[2]);
+            } while (index < (s32)dds3SoundSlotPool[2]);
         }
     }
 }

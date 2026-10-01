@@ -63,7 +63,7 @@ extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
 extern void sdfReleaseChipBlock(void *);
 
-extern FileManWork D_003DC658;
+extern FileManWork fileManagerWork;
 
 
 extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
@@ -102,15 +102,15 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *link = node->next;
 }
 
-extern void func_002EDBD8(void *, u32);
+extern void sdfPacInitializeDispatchPacket(void *, u32);
 extern void func_002EDC40(void *);
 extern void func_00288818(void *, s32, u32, u32, u32);
 
-void *func_002889D8(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 userData) {
+void *fileAllocateDispatchRequest(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 userData) {
     void *work = sdfAllocAndClearQuadwords(0x70);
     void *packet = (u8 *)work + 0x30;
 
-    func_002EDBD8(packet, dispatch);
+    sdfPacInitializeDispatchPacket(packet, dispatch);
     if (flags != 0) {
         func_002EDC40(packet);
     }
@@ -119,11 +119,11 @@ void *func_002889D8(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 us
 }
 
 void func_00288A80(u32 request) {
-    func_002889D8(request, 0, 0, 0, 0);
+    fileAllocateDispatchRequest(request, 0, 0, 0, 0);
 }
 
 void func_00288AA8(u32 request) {
-    func_002889D8(request, 1, 0, 0, 0);
+    fileAllocateDispatchRequest(request, 1, 0, 0, 0);
 }
 
 typedef struct FileRequestCallbackWork {
@@ -152,7 +152,7 @@ u32 fileGetResourceHandle(FileWork *work) {
     return work->resourceHandle;
 }
 
-u32 func_00288B90(FileWork *work) {
+u32 fileGetLoadedDataAddress(FileWork *work) {
     return work->unk24;
 }
 
@@ -201,7 +201,7 @@ void func_00288C50(u32 id) {
 
 /* Spin until the file manager has no work left. */
 void fileWaitIdle(void) {
-    FileManWork *work = &D_003DC658;
+    FileManWork *work = &fileManagerWork;
     while (work->unk8 != 0 || work->unk18 != 0) {
         fileManUpdate();
     }
@@ -217,7 +217,7 @@ typedef struct FileWindowSlot {
     u8 pad2C[4];
 } FileWindowSlot; /* 0x30 */
 
-FileWindowSlot *func_00288CB8(s32 id, s32 firstValue, s32 secondValue, s32 left, s32 right) {
+FileWindowSlot *fileWindowSlotCreate(s32 id, s32 firstValue, s32 secondValue, s32 left, s32 right) {
     FileWindowSlot *slot = sdfAllocAndClearQuadwords(0x30);
 
     slot->firstValue = firstValue;
@@ -233,7 +233,7 @@ s32 a;
 s32 b;
 s32 c;
 {
-    func_00288CB8(a, b, c, 0, 0);
+    fileWindowSlotCreate(a, b, c, 0, 0);
 }
 
 extern s32 WaitSema(s32);
@@ -242,7 +242,7 @@ extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
 
 /* Claim the next of four read slots for a pending request and start its device read. */
 void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
-    FileManWork *work = &D_003DC658;
+    FileManWork *work = &fileManagerWork;
     u8 slot;
     s32 size;
 

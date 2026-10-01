@@ -214,7 +214,7 @@ extern ItfMesGlobals itfMesWork;
 
 extern ItfMesZero D_00357D80;
 
-extern u32 D_003BB1E8;
+extern u32 itfMessageFlags;
 
 s32 scrGetWindow(void);
 
@@ -328,7 +328,7 @@ extern s32 func_00199828();
 
 extern void itfSetPanelLayoutAndNotify();
 
-extern void func_00199A20();
+extern void itfPanelUpdateValuesAndNotify();
 
 s32 itfMesScriptSetPanelValue(void) {
     s32 window = scrGetWindow();
@@ -514,11 +514,11 @@ u32 itfMesGetGlobalWindowValue(void) {
 }
 
 void itfMesSetFlags(u32 flags) {
-    D_003BB1E8 |= flags;
+    itfMessageFlags |= flags;
 }
 
 void itfMesClearFlags(u32 flags) {
-    D_003BB1E8 &= ~flags;
+    itfMessageFlags &= ~flags;
 }
 
 s32 itfMesCreateWindow(ItfMesSub *sub) {
@@ -611,7 +611,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[3] = 0x530 + height;
     blkA4->panelHandle = func_00199828(9, itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(blkA4->panelHandle, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
-    func_00199A20(blkA4->panelHandle, 0, 0, 0, 0);
+    itfPanelUpdateValuesAndNotify(blkA4->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
@@ -1236,7 +1236,7 @@ void itfMesEnableUnflaggedNodeContexts(ItfMesNode *node) {
     }
 }
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1E8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMessageFlags);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_003BB1F0);
 

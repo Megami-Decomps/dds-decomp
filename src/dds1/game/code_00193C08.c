@@ -17,7 +17,7 @@ typedef struct FntList {
 /* 0x24-byte table entry in the frFontWork font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
     void *buffer;  /* 0x0: released by frFontFreeEntry */
-    void *unk4;  /* 0x4: value record (u16 pair read via D_003D6C84 view) */
+    void *unk4;  /* 0x4: value record (u16 pair read via frFontResourceRecords view) */
     u32 unk8;    /* 0x8 */
     u32 unkC;    /* 0xC */
     u8 *flagBytes; /* 0x10: first byte enables entry, second byte stores value + 1 */
@@ -97,7 +97,7 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193FD0);
 
-extern volatile s32 D_003BD2EC; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
+extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 extern s32 func_002D03F8(s32);
 extern s32 sdfResourceRetainAddress(s32);
@@ -112,15 +112,15 @@ void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
-    WaitSema(D_003BD2EC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_003BD2EC);
+    SignalSema(sdfGsImageUploadSemaphore);
 }
 
 /* Upload the font's bitmap: clear a (width * height / 2)-byte block and load it to GS memory under the GS semaphore. */
-void func_001940B8(void) {
+void frFontUploadClearedTexture(void) {
     u8 loadImage[0x60];
     s32 size;
     s32 block;
@@ -133,11 +133,11 @@ void func_001940B8(void) {
     memset(image, 0, size);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.gsBuffer, (s16)frFontWork.gsFormat, 0x14, 0, 0,
                          (s16)frFontWork.width, (s16)frFontWork.height);
-    WaitSema(D_003BD2EC);
+    WaitSema(sdfGsImageUploadSemaphore);
     FlushCache(0);
     sceGsExecLoadImage(loadImage, (s32)image);
     sceGsSyncPath(0, 0);
-    SignalSema(D_003BD2EC);
+    SignalSema(sdfGsImageUploadSemaphore);
     func_002D0918((void *)block);
 }
 

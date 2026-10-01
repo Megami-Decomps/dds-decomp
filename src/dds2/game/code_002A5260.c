@@ -18,7 +18,7 @@ typedef struct MenuTitleState {
     u32 movieFrame;      /* 0x114 */
 } MenuTitleState;
 
-extern s32 D_00437A40;
+extern s32 mnuMovieMenuState;
 
 extern u16 D_00435BAC;
 
@@ -34,7 +34,7 @@ extern u8 D_003E5608[];
 
 extern u8 D_003803C8[];
 
-extern u32 D_00437ACC;
+extern u32 mnuMovieDrawTask;
 
 extern u8 D_00437AC0[];
 
@@ -65,7 +65,7 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A55B8);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5890);
 
 void mnuClearGlobalMenuStateFields(void) {
-    MenuTitleState *state = (MenuTitleState *)D_00437A40;
+    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
 
     state->phase = 0;
     state->selectedPage = 0;
@@ -73,7 +73,7 @@ void mnuClearGlobalMenuStateFields(void) {
 }
 
 void mnuResetTitlePageAndPhase(void) {
-    MenuTitleState *state = (MenuTitleState *)D_00437A40;
+    MenuTitleState *state = (MenuTitleState *)mnuMovieMenuState;
 
     state->phase = 0;
     state->selectedPage = 0;
@@ -82,7 +82,7 @@ void mnuResetTitlePageAndPhase(void) {
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A58E8);
 
 void mnuUpdateTitlePageByMode(void) {
-    s32 *title = (s32 *)D_00437A40;
+    s32 *title = (s32 *)mnuMovieMenuState;
 
     switch (title[0x28 / 4]) {
     case 0:
@@ -101,7 +101,7 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5B08);
 
 void mnuTitleResetSequenceTimers(void) {
-    MenuTitleState *title = (MenuTitleState *)D_00437A40;
+    MenuTitleState *title = (MenuTitleState *)mnuMovieMenuState;
     title->phase = 1;
     title->sequenceTimer = title->selectedPage = 0;
 }
@@ -109,23 +109,23 @@ void mnuTitleResetSequenceTimers(void) {
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
 
 void mnuDrawTitleSceneForPhase(void) {
-    switch (((MenuTitleState *)D_00437A40)->phase) {
+    switch (((MenuTitleState *)mnuMovieMenuState)->phase) {
     case 1:
-        func_002A5260(2, ((MenuTitleState *)D_00437A40)->selectedPage);
-        func_002A55B8(0, ((MenuTitleState *)D_00437A40)->selectedPage);
-        func_002A50E8(D_00437A40 + 0x100, 1, 1);
+        func_002A5260(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        func_002A55B8(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        func_002A50E8(mnuMovieMenuState + 0x100, 1, 1);
         return;
     case 0:
-        func_002A55B8(1, ((MenuTitleState *)D_00437A40)->selectedPage);
-        func_002A50E8(D_00437A40 + 0x100, 1, 1);
+        func_002A55B8(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        func_002A50E8(mnuMovieMenuState + 0x100, 1, 1);
         return;
     case 2:
-        mnuCallInitWide(0, 0, 0, ((MenuTitleState *)D_00437A40)->overlayHandle, 0x53);
+        mnuCallInitWide(0, 0, 0, ((MenuTitleState *)mnuMovieMenuState)->overlayHandle, 0x53);
         return;
     case 3:
     case 4:
-        func_002A55B8(2, ((MenuTitleState *)D_00437A40)->selectedPage);
-        func_002A50E8(D_00437A40 + 0x100, 1, 0);
+        func_002A55B8(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        func_002A50E8(mnuMovieMenuState + 0x100, 1, 0);
         break;
     }
 }
@@ -134,23 +134,23 @@ void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
     u32 work;
 
     func_002A7AF0();
-    work = D_00437A40;
-    if (D_00437A40 != 0) {
-        ((MenuTitleState *)D_00437A40)->movieDrawActive = 1;
+    work = mnuMovieMenuState;
+    if (mnuMovieMenuState != 0) {
+        ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
         if (arg1 == 0) {
             ((MenuTitleState *)work)->drawAlpha = 0x80;
         }
         else {
             ((MenuTitleState *)work)->drawAlpha = 0;
         }
-        ((MenuTitleState *)D_00437A40)->movieFrame = 0;
+        ((MenuTitleState *)mnuMovieMenuState)->movieFrame = 0;
     }
 }
 
 void mnuStopTitleMovieDraw(void) {
     mnuStopMovieDrawTask();
-    if (D_00437A40 != 0) {
-        ((MenuTitleState *)D_00437A40)->movieDrawActive = 0;
+    if (mnuMovieMenuState != 0) {
+        ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 0;
     }
 }
 
@@ -158,8 +158,8 @@ u32 mnuIsTitleMovieDrawActive(void) {
     u32 state;
 
     state = 0;
-    if (D_00437A40 != 0) {
-        state = ((MenuTitleState *)D_00437A40)->movieDrawActive;
+    if (mnuMovieMenuState != 0) {
+        state = ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive;
     }
     return state;
 }
@@ -729,7 +729,7 @@ extern u32 D_00437AB4;
 
 extern u32 D_00437AB8;
 
-void func_002A7938(void) {
+void mnuInitializeMovieRollViewport(void) {
     D_00437AB8 = 4;
     D_00437AB4 = 0;
     mnuLoadMovieRollSprite();
@@ -759,7 +759,7 @@ void mnuCreateStaffTask(void) {
     ((StaffTaskState *)mnuMovieWork)->unk8 = 0;
     ((StaffTaskState *)mnuMovieWork)->unkC = 0;
     D_00435BAC = 1;
-    func_0019BD48();
+    frFontUploadClearedTexture();
     kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);
 }
 
@@ -782,9 +782,9 @@ s32 mnuMovieDraw(void) {
 extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
-    if (D_00437ACC == 0) {
+    if (mnuMovieDrawTask == 0) {
         func_00346778(D_003E5608, data, resource);
-        D_00437ACC = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -809,7 +809,7 @@ extern char D_0042A380[];
 extern u32 D_00437AD0;
 
 s32 mnuMovieDrawNextProc(s32 procedure) {
-    if (D_00437ACC == 0) {
+    if (mnuMovieDrawTask == 0) {
         func_0035B6E0(D_0042A348);
         return -1;
     }
@@ -996,12 +996,12 @@ void func_002A7F98(s32 index) {
 }
 
 void mnuStopMovieDrawTask(void) {
-    if (D_00437ACC == 0) {
+    if (mnuMovieDrawTask == 0) {
         return;
     }
     func_00346988(D_003E5608);
-    kwlnTaskDestroyWithHierarchy(D_00437ACC, 0);
-    D_00437ACC = 0;
+    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    mnuMovieDrawTask = 0;
 }
 
 s32 func_002A8008(void) {

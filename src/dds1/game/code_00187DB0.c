@@ -46,7 +46,7 @@ extern void func_00188878();
 extern void func_00188870();
 
 /* Clone an effect with its own sub-resource attached. */
-EffCloned *func_00188150(EffCloned *src) {
+EffCloned *effTrackPolyCreateWork(EffCloned *src) {
     EffCloned *dst = func_002CFEB8(sizeof(EffCloned));
 
     dst->body = src->body;

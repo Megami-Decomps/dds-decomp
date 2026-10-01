@@ -287,7 +287,7 @@ void effMagatuhiCopyHandlerRows(EffMagatuhiWork *work, EffMagatuhiRowsSrc *src) 
     }
 }
 
-void func_00192A10(EffMagatuhiWork *arg) {
+void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiWork *arg) {
     EffMagatuhiWideSecond *work = effGetHandlerArg(arg->ptr08);
     EffMagatuhiWork *valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
     u32 duration = work->head.duration;
@@ -445,7 +445,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 /* Advance the ring family: each slot is replayed from a random delay, one orbit step at a time, into the value table. */
-void func_00193280(EffMagatuhiWork *arg) {
+void effMagatuhiInitRingParticles(EffMagatuhiWork *arg) {
     u32 k;
     EffMagatuhiRingWork *work;
     EffMagatuhiWork *valueWork;
@@ -612,7 +612,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
-void func_00193AD0(EffMagatuhiWork *arg) {
+void effMagatuhiReplayOrbitStartDelays(EffMagatuhiWork *arg) {
     u32 k;
     EffMagatuhiOrbitWork *work;
     EffMagatuhiWork *valueWork;
@@ -771,7 +771,7 @@ typedef struct {
 } EffMagatuhiDriftWork;
 
 /* Advance the drift family: each slot is replayed from a random delay, one step at a time, into the value table. */
-void func_00194428(EffMagatuhiWork *arg) {
+void effMagatuhiInitDriftParticles(EffMagatuhiWork *arg) {
     u32 k;
     EffMagatuhiDriftWork *work;
     EffMagatuhiWork *valueWork;
@@ -850,16 +850,16 @@ s32 effMagatuhiDispatchByKind(EffMagatuhiWork *work) {
         case 0:
             break;
         case 1:
-            func_00192A10(work);
+            effMagatuhiInitializeInterpolatedHistory(work);
             break;
         case 2:
-            func_00193280(work);
+            effMagatuhiInitRingParticles(work);
             break;
         case 3:
-            func_00193AD0(work);
+            effMagatuhiReplayOrbitStartDelays(work);
             break;
         case 4:
-            func_00194428(work);
+            effMagatuhiInitDriftParticles(work);
             break;
         }
     }

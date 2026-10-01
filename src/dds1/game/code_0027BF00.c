@@ -8,7 +8,7 @@ typedef struct MenuPanelHandles MenuPanelHandles;
 
 extern void func_0027CA90();
 
-extern void func_002807E8();
+extern void mnuReleasePageHandlesAndClearSelection();
 
 extern s32 mnuGetSelectionFromFlags(s32);
 
@@ -42,7 +42,7 @@ extern void func_001958A0(s32, s32, s32);
 
 extern void frFontQueueGlyphInSelectedSlot(s32);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 typedef struct MenuListNode MenuListNode;
 
@@ -1054,7 +1054,7 @@ typedef struct MenuPageResources {
 } MenuPageResources;
 
 /* Create a ten-sprite page bundle; the caller chooses its last two slots. */
-MenuPageResources *func_0027EAF0(s32 mainResource, s32 secondaryResource, s32 extraResource, s32 extraIndex,
+MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondaryResource, s32 extraResource, s32 extraIndex,
                      s32 finalResource, s32 finalIndex) {
     MenuPageResources *item = (MenuPageResources *)func_002CFEB8(0x3C);
 
@@ -1096,7 +1096,7 @@ void mnuCreatePartyPageResources(MenuWindow *menu, s32 x, s32 y, s32 style, s32 
         s32 entry = ((MenuRecord *)((u8 *)menu->records + offset))->gauge.id;
         offset += 0x34;
         if (entry >= 0) {
-            *output = func_0027EAF0(x, y, style, 0, color, entry);
+            *output = mnuCreatePartyPageSpriteBundle(x, y, style, 0, color, entry);
         }
         output = (MenuPageResources **)((u8 *)output + 0x134);
     }
@@ -1264,7 +1264,7 @@ void mnuSetWindowResource(s32 index, s32 window, s32 resource, s32 option) {
 void mnuClearEntries(s32 *menu) {
     u32 i;
     s32 *entry = menu + 0x56;
-    func_002807E8();
+    mnuReleasePageHandlesAndClearSelection();
     for (i = 0; i < 5; i++, entry += 0x4D) {
         if (*entry != 0) {
             mnuFreeIconSprites(*entry);
@@ -1386,7 +1386,7 @@ void mnuReleasePartyPanelSpriteTextures(s32 window) {
 }
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void func_0027FBE0(MenuWindow *window, u32 *source) {
+void mnuCopyPrimaryWindowHandles(MenuWindow *window, u32 *source) {
     u32 value;
     s32 *destination;
     u32 index;
@@ -1403,7 +1403,7 @@ void func_0027FBE0(MenuWindow *window, u32 *source) {
 }
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void func_0027FC10(MenuWindow *window, u32 *source) {
+void mnuCopySecondaryWindowHandles(MenuWindow *window, u32 *source) {
     u32 value;
     s32 *destination;
     u32 index;
@@ -1603,7 +1603,7 @@ void mnuSelectPage(MenuWindow *window, s32 selected) {
         effReleaseTextureHandlesAndResetSlots(*resource++);
     }
     record = &window->records[selected];
-    active = mnuGetSelectionFromFlags(D_003BAA00 + record->partyIndex * 0x1A4 + 0xA60);
+    active = mnuGetSelectionFromFlags(datGameState + record->partyIndex * 0x1A4 + 0xA60);
     for (i = 0; i < 5; i++) {
         if (i == active) {
             effResolveAndReleaseResource(*(s32 *)(handles + 0x60 + i * 4));
@@ -1616,7 +1616,7 @@ void mnuSelectPage(MenuWindow *window, s32 selected) {
     mnuReleasePageTexturesAndSelectedResources(window);
 }
 
-void func_002807E8(window)
+void mnuReleasePageHandlesAndClearSelection(window)
     MenuWindow *window;
 {
     s32 *resource = window->handlesC;
@@ -1675,14 +1675,14 @@ void mnuClearListFlags(s32 which, MenuWindow *menu) {
     }
 }
 
-extern u32 func_00285B20(u32);
+extern u32 mnuMapPadMaskToFlags(u32);
 
 extern void mnuRetreatListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32, u32, s32);
 
 /* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
-void func_00280978(s32 mode, MenuWindow *window) {
-    u32 input = func_00285B20(0x30);
+void mnuUpdateWindowListFromInput(s32 mode, MenuWindow *window) {
+    u32 input = mnuMapPadMaskToFlags(0x30);
     u32 flags = window->flags;
     u32 state;
     s32 which = mode == 8;
@@ -1766,7 +1766,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                      s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = ptyGetCurrentProfileId(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);
+    s32 cost = ptyGetCurrentProfileId(datGameState + partyIndex * 0x1A4 + 0xA60);
     s32 code;
     s32 texture;
     s32 item;
@@ -1786,6 +1786,18 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
 }
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_002812E8);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC718);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC720);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC728);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC730);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC738);
+
+INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC740);
 
 void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 param) {
     s32 pos[2] = {0x180, 0xE0};

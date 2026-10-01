@@ -57,14 +57,14 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_001029D0);
 extern void* kwlnTaskGetUserValue(void* task);
 extern void sdfReleaseChipBlock(void* ptr);
 /* One dispatch row per mode: three function pointers, 12 bytes each. The three
- * columns are consecutive symbols, D_003847D0 / D_003847D4 / D_003847D8. */
+ * columns are consecutive symbols, ddsAdminModeCallbacks / D_003847D4 / D_003847D8. */
 typedef struct AdminDispatch {
     void (*entry)(void);
     s32 (*destroy)(void);
     void (*cleanup)(void);
 } AdminDispatch;
 
-extern AdminDispatch D_003847D0[];
+extern AdminDispatch ddsAdminModeCallbacks[];
 
 typedef void (*AdminStep)(void);
 
@@ -79,7 +79,7 @@ AdminStep dds3AdminPollModeDestruction(void *task) {
     s32 result;
 
     if (mode >= 0) {
-        destroy = D_003847D0[mode].destroy;
+        destroy = ddsAdminModeCallbacks[mode].destroy;
         if (destroy != NULL) {
             result = destroy();
             if (result < 0) {
@@ -101,7 +101,7 @@ void dds3AdminReleaseTaskWork(void* task) {
     s32 mode = work->unk08;
 
     if (mode >= 0) {
-        void (*destroy)(void) = D_003847D0[mode].destroy;
+        void (*destroy)(void) = ddsAdminModeCallbacks[mode].destroy;
 
         if (destroy != NULL) {
             destroy();

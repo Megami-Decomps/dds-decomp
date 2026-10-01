@@ -20,9 +20,9 @@ extern u32 func_002B9FF8(u32);
 
 extern u32 effCreateStatusBatch(u32);
 
-extern s32 D_00435E20;
+extern s32 datCommandRecords;
 
-extern s32 D_00435E1C;
+extern s32 datCommandSelectors;
 
 extern void mnuSetPopupEntry(s32, s32);
 
@@ -35,7 +35,7 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void func_00232390(s32, s32);
+extern void mdlProcessContextNodesAndTransforms(s32, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern u32 ptyGetSkillNibbleState(s32, u16);
 
@@ -90,7 +90,7 @@ typedef struct AffinityRow {
     s32 affinity[4];
 } AffinityRow;
 
-extern u32 D_00435E24;
+extern u32 datAffinityRecords;
 
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 
@@ -115,7 +115,7 @@ extern void sdfReleaseChipBlock();
 
 extern u32 effMiscRand(s32);
 
-extern u8 *D_00435DD0;
+extern u8 *datGameState;
 
 extern u16 D_003E78D8[];
 
@@ -145,7 +145,7 @@ typedef struct StageTestSlot {
 } StageTestSlot;
 
 /* Battle stage test viewer state. Retail addresses it partly through
- * D_00457EC8 (= &D_00457EB0.slot[0], hence the negative offsets), so the
+ * D_00457EC8 (= &evtStageTestState.slot[0], hence the negative offsets), so the
  * D_00457EB4..D_00457F1C symbols are all interior fields of this one object. */
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
@@ -160,7 +160,7 @@ typedef struct StageTestState {
     s32 modelUpdateStarted;  /* 0x70: DDS2 only, defers effect/motion work on the first update */
 } StageTestState;
 
-extern StageTestState D_00457EB0;
+extern StageTestState evtStageTestState;
 
 extern void func_00340DC8(f32, f32, f32);
 
@@ -249,7 +249,7 @@ s32 mnuQueueListEntry(u8 *menu, s32 window, u32 kind, s32 argument) {
             bestIndex = i;
         }
     }
-    flags = *(u16 *)(D_00435DD0 + window * 0x1C4 + 0xA60);
+    flags = *(u16 *)(datGameState + window * 0x1C4 + 0xA60);
     entry = block + bestIndex * 0x1024 + 0xF0;
     ((MenuQueuedCommand *)entry)->initialValue = 0x200;
     ((MenuQueuedCommand *)entry)->argument = argument;
@@ -1065,7 +1065,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     panel->unk0 = 0;
     panel->unk4 = 0;
     for (i = 0; i < 5; i++) {
-        entry = D_00435DD0 + offset + 0xA60;
+        entry = datGameState + offset + 0xA60;
         offset += 0x1C4;
         if (*(u16 *)entry & 1) {
             func_002C4328(entry, 0, i, panel);
@@ -1080,7 +1080,7 @@ extern u8 D_0037F530[];
 
 /* Translate a mask of pad buttons into held/pressed flags: low bits test each digital button (sign bit or pressure bit), the high bits
  * report the same inputs as plain non-zero tests. Select (bit 0) overrides everything else. */
-s32 func_002C44E8(s32 buttons) {
+s32 mnuMapPadMaskToFlags(s32 buttons) {
     s32 out = 0;
 
     if (buttons & 0x1) {
@@ -1339,7 +1339,7 @@ typedef struct MenuPanelEntry {
 
 s32 mnuFindMatchingPartyEntryIndex(s32 object) {
     s32 i;
-    u8 *entry = D_00435DD0 + 0xA60;
+    u8 *entry = datGameState + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
         if ((((MenuPanelEntry *)entry)->flags & 1) &&
             ((MenuPanelEntry *)object)->tableIndex == ((MenuPanelEntry *)entry)->tableIndex) {
@@ -1406,7 +1406,7 @@ u16 mnuLookupPartyTableValue(u32 count, s32 base, s32 which) {
 
 /* Only secondary-kind-2 entries expose the paired value. */
 u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
-    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + D_00435E20);
+    RangeEntry *entry = (RangeEntry *)((entryId & 0xffff) * 56 + datCommandRecords);
 
     if (entry->secondaryKind != 2) {
         return 0;
@@ -1415,11 +1415,11 @@ u16 mnuGetSecondaryValueIfKind2(s32 entryId) {
 }
 
 u8 mnuGetRangeEntryKind(u32 id) {
-    return ((RangeEntry *)((id & 0xffff) * 0x38 + D_00435E20))->kind;
+    return ((RangeEntry *)((id & 0xffff) * 0x38 + datCommandRecords))->kind;
 }
 
 u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
-    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
+    RangeEntry *entry = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
     u16 base = entry->value;
     u16 addition = entry->addition;
     if (mnuGetRangeEntryKind(id & 0xFFFF) == 1) {
@@ -1430,7 +1430,7 @@ u16 mnuGetAdjustedEntryValue(s32 id, s32 object) {
 
 s32 mnuGetRangeEntryFlatValue(s32 id) {
     s32 index = id & 0xFFFF;
-    RangeEntry *record = (RangeEntry *)(index * 0x38 + D_00435E20);
+    RangeEntry *record = (RangeEntry *)(index * 0x38 + datCommandRecords);
     s32 scale = record->value;
     s32 addition = record->addition;
 
@@ -1441,7 +1441,7 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 }
 
 s32 mnuCanAffordEntryCost(u16 id, s32 item) {
-    u16 minimum = ((RangeEntry *)D_00435E20)[id].value;
+    u16 minimum = ((RangeEntry *)datCommandRecords)[id].value;
     s32 kind = mnuGetRangeEntryKind(id);
 
     switch (kind) {
@@ -1463,14 +1463,14 @@ extern s32 mnuCanAffordEntryCost(u16, s32);
 
 s32 mnuGetEntryUseStatus(s32 context, u16 id) {
     if (mnuCanAffordEntryCost(id, context) == 0) return -1;
-    if ((((RangeEntry *)(D_00435E20 + id * 56))->flags & 1) == 0) return 1;
+    if ((((RangeEntry *)(datCommandRecords + id * 56))->flags & 1) == 0) return 1;
     if (id < 0x220) return 0;
     return 1;
 }
 
 s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
-    s32 kind = ((RangeEntry *)D_00435E20)[id].kind;
-    u16 value = ((RangeEntry *)D_00435E20)[id].value;
+    s32 kind = ((RangeEntry *)datCommandRecords)[id].kind;
+    u16 value = ((RangeEntry *)datCommandRecords)[id].value;
 
     switch (kind) {
     case 1:
@@ -1488,7 +1488,7 @@ s32 mnuIsEntryCostUnaffordable(u16 id, s32 object) {
 }
 
 s32 mnuConsumeEntryCost(s32 id, u8 *cursor) {
-    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + D_00435E20);
+    RangeEntry *record = (RangeEntry *)((id & 0xFFFF) * 0x38 + datCommandRecords);
     u16 amount = record->value;
 
     switch (record->kind) {
@@ -1514,7 +1514,7 @@ s32 mnuGetAbilityByteCategory(u16 ability) {
     if (ability == 0) {
         return 1;
     }
-    value = *(u8 *)(D_00435E20 + ability * 56 + 8);
+    value = *(u8 *)(datCommandRecords + ability * 56 + 8);
     switch (value) {
     case 0:
         return 1;
@@ -1537,11 +1537,11 @@ u32 func_002C5140(void) {
 INCLUDE_ASM(const s32, "game/code_002BE628", ptySkillApplyFieldUseEffect);
 
 u8 mnuIsAbilityValueMarked(u32 id) {
-    return *(s8 *)((id & 0xffff) * 2 + D_00435E1C) == '\x01';
+    return *(s8 *)((id & 0xffff) * 2 + datCommandSelectors) == '\x01';
 }
 
 s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
-    s32 flags = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 flags = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (flags == -1) {
         return -1;
@@ -1580,7 +1580,7 @@ s32 ptyGetAffinityKind(s32 affinityId, s32 index) {
 }
 
 s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
-    s32 value = ((AffinityRow *)D_00435E24)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
+    s32 value = ((AffinityRow *)datAffinityRecords)[(affinityId - 0x1AB) & 0xFFFF].affinity[index];
 
     if (value == -1) {
         return 0;
@@ -1620,9 +1620,9 @@ u32 ptyCountBulletItem(s32 id) {
     s32 index;
     if (id < 0xA0) return 0;
     if (id >= 0xBF) return 0;
-    value = *(u8 *)(id + (s32)D_00435DD0 + 0x1340);
+    value = *(u8 *)(id + (s32)datGameState + 0x1340);
     for (index = 0; index < 5; index++) {
-        MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60) + index;
+        MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0xA60) + index;
         if (id == mnuGetPartyEntryMenuValue((s32)entry)) {
             value++;
         }
@@ -1652,7 +1652,7 @@ u16 mnuGetPartyEntryCurrentId(s32 entry) {
 
 MenuPanelEntry *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
-    MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60);
+    MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0xA60);
     for (index = 0; index < 5; index++, entry++) {
         if ((entry->flags & 1) && id == entry->currentId) {
             return entry;
@@ -1663,7 +1663,7 @@ MenuPanelEntry *mnuFindPartySlotByCurrentId(u32 id) {
 
 MenuPanelEntry *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
-    MenuPanelEntry *entry = (MenuPanelEntry *)(D_00435DD0 + 0x1CA10);
+    MenuPanelEntry *entry = (MenuPanelEntry *)(datGameState + 0x1CA10);
     for (index = 0; index < 16; index++, entry++) {
         if (entry->marker != 0 && (entry->flags & 1) && id == entry->currentId) {
             return entry;
@@ -1675,14 +1675,14 @@ MenuPanelEntry *mnuFindReserveSlotByCurrentId(u32 id) {
 void mnuMarkEntryBlocked(s32 index) {
     s32 offset = 0x1E730 + index;
     if (index != 0) {
-        D_00435DD0[offset] |= 1;
+        datGameState[offset] |= 1;
     }
 }
 
 void mnuClearEntryBlocked(s32 index) {
     s32 offset = 0x1E730 + index;
     if (index != 0) {
-        D_00435DD0[offset] &= ~1;
+        datGameState[offset] &= ~1;
     }
 }
 
@@ -1690,13 +1690,13 @@ s32 mnuIsEntryBlocked(s32 index) {
     if (index == 0) {
         return 1;
     }
-    return *(u8 *)(index + (s32)D_00435DD0 + 0x1E730) & 1;
+    return *(u8 *)(index + (s32)datGameState + 0x1E730) & 1;
 }
 
 s32 mnuHasOwnedUnblockedItem(void) {
     s32 index;
     for (index = 0xC0; index < 0x100; index++) {
-        if (!mnuIsEntryBlocked(index) && *(u8 *)(index + (s32)D_00435DD0 + 0x1340) != 0) {
+        if (!mnuIsEntryBlocked(index) && *(u8 *)(index + (s32)datGameState + 0x1340) != 0) {
             return 1;
         }
     }
@@ -1857,7 +1857,7 @@ s32 mnuGetSelectionFromFlags(MenuSelectionEntry *entry) {
 
 s32 mnuGetMatchingPartyEntryMask(s32 object) {
     s32 i;
-    u8 *entry = D_00435DD0 + 0xA60;
+    u8 *entry = datGameState + 0xA60;
     for (i = 0; i < 5; i++, entry += 0x1C4) {
         if ((((MenuPanelEntry *)entry)->flags & 1) &&
             ((MenuPanelEntry *)entry)->tableIndex == ((MenuPanelEntry *)object)->tableIndex) {
@@ -1891,7 +1891,7 @@ MenuPanelEntry *mnuPickBestPartyEntry(u32 *table) {
 
     for (pass = 0; pass < 2; pass++) {
         bestWeight = 0;
-        entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60);
+        entry = (MenuPanelEntry *)(datGameState + 0xA60);
         for (i = 0; i < 5; i++, entry++) {
             if ((entry->flags & 1) && table[entry->tableIndex] == 0) {
                 s32 usable = 0;
@@ -1927,7 +1927,7 @@ MenuPanelEntry *mnuFindPartyEntryBySelection(s32 *out) {
         MenuPanelEntry *entry;
         s32 j;
 
-        for (j = 0, entry = (MenuPanelEntry *)(D_00435DD0 + 0xA60); j < 5; j++, entry++) {
+        for (j = 0, entry = (MenuPanelEntry *)(datGameState + 0xA60); j < 5; j++, entry++) {
             if ((entry->flags & 1) && entry->state == table[i][0]) {
                 *out = table[i][1];
                 return entry;
@@ -2025,18 +2025,18 @@ u8 func_002C6480(void) {
 
 void evtStageTestSetModelScalingEnabled(s32 enabled) {
     if (enabled == 0) {
-        D_00457EB0.flag = 0;
+        evtStageTestState.flag = 0;
     } else {
-        D_00457EB0.flag = 1;
+        evtStageTestState.flag = 1;
     }
 }
 
 u32 evtStageTestGetActiveModel(void) {
-    return D_00457EB0.model;
+    return evtStageTestState.model;
 }
 
 u32 evtStageTestGetSlotModelId(void) {
-    return D_00457EB0.slot[0].modelId;
+    return evtStageTestState.slot[0].modelId;
 }
 
 /* Clamp the motion selector to the loaded model's available motions. */
@@ -2046,10 +2046,10 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 value) {
     if (value < 0) {
         value = 0;
     }
-    if (D_00457EB0.model != 0 && value >= mdlGetNodeRefHalf(D_00457EB0.model, 0)) {
-        value = mdlGetNodeRefHalf(D_00457EB0.model, 0) - 1;
+    if (evtStageTestState.model != 0 && value >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
+        value = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
-    D_00457EB0.entries[index].motionIndex = value;
+    evtStageTestState.entries[index].motionIndex = value;
     func_002C6E20(-1);
 }
 
@@ -2058,17 +2058,17 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     s32 index = encodedIndex & 0xFFFF;
     StageTestEntry *entry;
 
-    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)D_00457EB0.entries))->frame - delta < 0.0f) {
+    if (delta < 0.0f && ((StageTestEntry *)(index * 60 + (s32)evtStageTestState.entries))->frame - delta < 0.0f) {
         return;
     }
-    entry = (StageTestEntry *)(index * 60 + (s32)D_00457EB0.entries);
+    entry = (StageTestEntry *)(index * 60 + (s32)evtStageTestState.entries);
     entry->frame += delta;
     func_002C6E20(-1);
 }
 
 void mnuOffsetPanelPosition(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
-    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)evtStageTestState.entries);
     f32 x = entry->position[0] + (f32)dx;
     f32 y = entry->position[1] + (f32)dy;
     f32 z = entry->position[2] + (f32)dz;
@@ -2080,7 +2080,7 @@ void mnuOffsetPanelPosition(s32 index, s32 dx, s32 dy, s32 dz) {
 
 void mnuOffsetPanelTarget(s32 index, s32 dx, s32 dy, s32 dz) {
     s32 offset = (index & 0xFFFF) * sizeof(StageTestEntry);
-    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)D_00457EB0.entries);
+    StageTestEntry *entry = (StageTestEntry *)(offset + (s32)evtStageTestState.entries);
     f32 x = entry->rotation[0] + (f32)dx;
     f32 y = entry->rotation[1] + (f32)dy;
     f32 z = entry->rotation[2] + (f32)dz;
@@ -2091,23 +2091,23 @@ void mnuOffsetPanelTarget(s32 index, s32 dx, s32 dy, s32 dz) {
 }
 
 u8 func_002C66D0(u16 index) {
-    return D_00457EB0.entries[index].motionIndex;
+    return evtStageTestState.entries[index].motionIndex;
 }
 
 f32 func_002C66F8(u16 index) {
-    return D_00457EB0.entries[index].frame;
+    return evtStageTestState.entries[index].frame;
 }
 
 void func_002C6720(s32 index, f32 *out) {
-    out[0] = D_00457EB0.entries[index & 0xFFFF].position[0];
-    out[1] = D_00457EB0.entries[index & 0xFFFF].position[1];
-    out[2] = D_00457EB0.entries[index & 0xFFFF].position[2];
+    out[0] = evtStageTestState.entries[index & 0xFFFF].position[0];
+    out[1] = evtStageTestState.entries[index & 0xFFFF].position[1];
+    out[2] = evtStageTestState.entries[index & 0xFFFF].position[2];
 }
 
 void func_002C6758(s32 index, f32 *out) {
-    out[0] = D_00457EB0.entries[index & 0xFFFF].rotation[0];
-    out[1] = D_00457EB0.entries[index & 0xFFFF].rotation[1];
-    out[2] = D_00457EB0.entries[index & 0xFFFF].rotation[2];
+    out[0] = evtStageTestState.entries[index & 0xFFFF].rotation[0];
+    out[1] = evtStageTestState.entries[index & 0xFFFF].rotation[1];
+    out[2] = evtStageTestState.entries[index & 0xFFFF].rotation[2];
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6790);
@@ -2123,31 +2123,31 @@ void evtStageTestInit(s32 mode) {
     s32 i;
     s32 value;
 
-    D_00457EB0.mode = mode;
-    D_00457EB0.assetRequest = 0;
-    D_00457EB0.model = 0;
-    D_00457EB0.flag = 0;
-    D_00457EB0.modelUpdateStarted = 0;
+    evtStageTestState.mode = mode;
+    evtStageTestState.assetRequest = 0;
+    evtStageTestState.model = 0;
+    evtStageTestState.flag = 0;
+    evtStageTestState.modelUpdateStarted = 0;
     if (mode == 0) {
-        D_00457EB0.entries = (StageTestEntry *)D_003E7978;
+        evtStageTestState.entries = (StageTestEntry *)D_003E7978;
         offset = -140.0f;
     } else {
-        D_00457EB0.entries = NULL;
+        evtStageTestState.entries = NULL;
         offset = 140.0f;
     }
     value = D_003E7970[mode];
-    D_00457EB0.flags = 0;
+    evtStageTestState.flags = 0;
     for (i = 0; i < 2; i++) {
-        D_00457EB0.slot[i].assetResource = value;
-        D_00457EB0.slot[i].modelId = -1;
-        D_00457EB0.slot[i].unk0C = 0;
-        D_00457EB0.slot[i].flags = 0;
+        evtStageTestState.slot[i].assetResource = value;
+        evtStageTestState.slot[i].modelId = -1;
+        evtStageTestState.slot[i].unk0C = 0;
+        evtStageTestState.slot[i].flags = 0;
     }
     func_002C6958(offset);
 }
 
 void evtStageTestStop(void) {
-    StageTestState *state = &D_00457EB0;
+    StageTestState *state = &evtStageTestState;
 
     if (state->mode == 1) {
         return;
@@ -2171,13 +2171,13 @@ void mnuResetWorkFloats(void) {
 
 /* Remember the model asset request result for the stage viewer. */
 void evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
-    D_00457EB0.assetRequest = mdlRequestAsset();
+    evtStageTestState.assetRequest = mdlRequestAsset();
 }
 
 void mnuForwardTableByte(s32 encodedIndex) {
-    StageTestSlot *slot = D_00457EB0.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
 
-    evtStageTestRequestModelAsset(slot->assetResource, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
+    evtStageTestRequestModelAsset(slot->assetResource, evtStageTestState.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
 u32 func_002C6B28(u32 *flags) {
@@ -2204,7 +2204,7 @@ s32 mnuCommitPendingBlock(MenuBlockState *object) {
 }
 
 void evtStageTestClearPendingFlag(void) {
-    D_00457EB0.flags &= ~1;
+    evtStageTestState.flags &= ~1;
 }
 
 s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
@@ -2212,22 +2212,22 @@ s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialValue, s32 option) {
     s32 bank;
     StageTestSlot *slot;
 
-    if (D_00457EB0.model != 0 && D_00457EB0.slot[0].modelId == D_00457EB0.entries[index].modelId) {
+    if (evtStageTestState.model != 0 && evtStageTestState.slot[0].modelId == evtStageTestState.entries[index].modelId) {
         return 0;
     }
     evtStageTestStop();
     bank = 0;
-    if (D_00457EB0.flags & 2) {
+    if (evtStageTestState.flags & 2) {
         bank = 1;
     }
-    D_00457EB0.flags |= 2;
-    D_00457EB0.flags &= ~4;
+    evtStageTestState.flags |= 2;
+    evtStageTestState.flags &= ~4;
     if (bank) {
-        D_00457EB0.flags |= 1;
+        evtStageTestState.flags |= 1;
     }
-    slot = &D_00457EB0.slot[bank];
+    slot = &evtStageTestState.slot[bank];
     slot->entryIndex = index;
-    slot->modelId = D_00457EB0.entries[index].modelId;
+    slot->modelId = evtStageTestState.entries[index].modelId;
     slot->unk0C = option;
     slot->unk10 = initialValue;
     slot->state = 0;
@@ -2252,7 +2252,7 @@ f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
     f32 vec[4];
 
     if (useTable != 0) {
-        scale = *(f32 *)(D_00435DF0 + D_00457EB0.slot[0].modelId * 0x270 + 0x10);
+        scale = *(f32 *)(D_00435DF0 + evtStageTestState.slot[0].modelId * 0x270 + 0x10);
     }
     vec[0] = scale;
     vec[1] = scale;
@@ -2293,16 +2293,16 @@ void mnuApplyModelCamera(s32 model) {
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
+    entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
     vec[0] = entry->position[0];
     vec[1] = entry->position[1];
-    if (D_00457EB0.flag != 1) {
+    if (evtStageTestState.flag != 1) {
         mnuSetModelScaleVector(model, 0);
-        vec[2] = ((StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries))->position[2];
+        vec[2] = ((StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries))->position[2];
         mnuResetWorkPair();
     } else {
         scale = mnuSetModelScaleVector(model, 1);
-        entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
+        entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
         vec[0] -= entry->position[0] - entry->position[0] * scale;
         vec[1] -= entry->position[1] - entry->position[1] * scale;
         vec[2] = 0.0f;
@@ -2313,7 +2313,7 @@ void mnuApplyModelCamera(s32 model) {
 }
 
 void evtStageTestApplyEntryRotation(s32 model) {
-    StageTestEntry *entry = (StageTestEntry *)(D_00457EB0.slot[0].entryIndex * 60 + (s32)D_00457EB0.entries);
+    StageTestEntry *entry = (StageTestEntry *)(evtStageTestState.slot[0].entryIndex * 60 + (s32)evtStageTestState.entries);
 
     func_00340DC8(entry->rotation[0] * 3.14159265f / 180.0f, entry->rotation[1] * 3.14159265f / 180.0f,
                   entry->rotation[2] * 3.14159265f / 180.0f);
@@ -2326,11 +2326,11 @@ extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
 extern void sdfConsCacheTransformedNode(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 D_003E7960[];
-extern u8 D_0037F690[];
-extern u8 D_0037F680[];
-extern u8 D_0037F6A0[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewUpVector[];
 extern u8 D_0037F590[];
-extern u8 D_003846F0[];
+extern u8 sdfViewMatrix[];
 extern u8 D_003820F0[];
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
@@ -2342,12 +2342,12 @@ void evtStageTestUpdateCamera(void)
 
     slot = func_00100400();
     func_002C6790();
-    PCP_COPY_VECTOR(D_0037F690, D_003E7950);
-    PCP_COPY_VECTOR(D_0037F680, D_003E7940);
-    PCP_COPY_VECTOR(D_0037F6A0, D_003E7960);
+    PCP_COPY_VECTOR(sdfViewTargetVector, D_003E7950);
+    PCP_COPY_VECTOR(sdfViewEyeVector, D_003E7940);
+    PCP_COPY_VECTOR(sdfViewUpVector, D_003E7960);
     sdfCameraBuildProjection(D_0037F5E0);
-    VU0_LOAD_VF(vf10, D_0037F680);
-    VU0_LOAD_VF(vf11, D_0037F690);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -2355,13 +2355,13 @@ void evtStageTestUpdateCamera(void)
     VU0_LOAD_VF(vf11, D_0037F590);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, &eye);
-    VU0_LOAD_VF(vf10, D_0037F690);
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, &at);
-    sdfVuBuildLookAtBasis(&eye, &at, D_0037F6A0);
-    VU0_STORE_MATRIX_UNCLOBBERED(D_003846F0);
-    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, D_0037F5E0, D_003846F0);
-    sdfConsCacheTransformedNode(D_0037F5E0, D_003846F0);
+    sdfVuBuildLookAtBasis(&eye, &at, sdfViewUpVector);
+    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, D_0037F5E0, sdfViewMatrix);
+    sdfConsCacheTransformedNode(D_0037F5E0, sdfViewMatrix);
 }
 
 s8 evtStageTestUpdate(s32 frame) {
@@ -2370,22 +2370,22 @@ s8 evtStageTestUpdate(s32 frame) {
     if (result == 1) {
         return 1;
     }
-    if (D_00457EB0.mode != 1) {
-        if (D_00457EB0.model != 0) {
-            mnuApplyModelCamera(D_00457EB0.model);
-            evtStageTestApplyEntryRotation(D_00457EB0.model);
+    if (evtStageTestState.mode != 1) {
+        if (evtStageTestState.model != 0) {
+            mnuApplyModelCamera(evtStageTestState.model);
+            evtStageTestApplyEntryRotation(evtStageTestState.model);
             evtStageTestUpdateCamera();
-            if (D_00457EB0.modelUpdateStarted == 0) {
-                D_00457EB0.modelUpdateStarted = 1;
+            if (evtStageTestState.modelUpdateStarted == 0) {
+                evtStageTestState.modelUpdateStarted = 1;
             } else {
-                if (D_00457EB0.pendingEffect >= 0) {
-                    evtStageTestCreateModelEffect(D_00457EB0.pendingEffect);
-                    D_00457EB0.pendingEffect = -1;
+                if (evtStageTestState.pendingEffect >= 0) {
+                    evtStageTestCreateModelEffect(evtStageTestState.pendingEffect);
+                    evtStageTestState.pendingEffect = -1;
                 }
-                if (D_00457EB0.effect != 0) {
-                    btlUpdateJobPositionFromModel(D_00457EB0.effect);
+                if (evtStageTestState.effect != 0) {
+                    btlUpdateJobPositionFromModel(evtStageTestState.effect);
                 }
-                func_00232390(D_00457EB0.model, frame);
+                mdlProcessContextNodesAndTransforms(evtStageTestState.model, frame);
                 evtStageTestAdvanceMotionQueue();
             }
         }
@@ -2394,7 +2394,7 @@ s8 evtStageTestUpdate(s32 frame) {
 }
 
 s32 evtStageTestCountFlags(s32 mode) {
-    StageTestSlot *slot = D_00457EB0.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     s32 index = slot->entryIndex;
     s32 count = 0;
     u32 i;
@@ -2403,9 +2403,9 @@ s32 evtStageTestCountFlags(s32 mode) {
         u8 flag;
 
         if (mode == 0) {
-            flag = *(D_00457EB0.entries[index].column[0] + i);
+            flag = *(evtStageTestState.entries[index].column[0] + i);
         } else {
-            flag = *(D_00457EB0.entries[index].column[1] + i);
+            flag = *(evtStageTestState.entries[index].column[1] + i);
         }
         if (flag) {
             count++;
@@ -2416,7 +2416,7 @@ s32 evtStageTestCountFlags(s32 mode) {
 
 /* Queue a motion from the selected entry's column, with a 15-frame blend. */
 void evtStageTestQueueMotion(s32 kind, u32 index) {
-    StageTestSlot *slot = D_00457EB0.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     f32 blendLeadFrames = 0.0f;
     s32 motionIndex;
 
@@ -2424,14 +2424,14 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
         switch (kind) {
         default:
             blendLeadFrames = 15.0f;
-            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[0] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[0] + index);
             break;
         case 1:
-            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[1] + index);
             slot->flags &= ~1;
             break;
         case 2:
-            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(evtStageTestState.entries[slot->entryIndex].column[1] + index);
             slot->flags |= 1;
             break;
         }
@@ -2442,7 +2442,7 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
 /* Queue a motion and its blend timing; inputs are truncated to whole frames.
  * The lead shifts initial motion time backwards, not to a start-frame endpoint. */
 void evtStageTestQueueMotionSegment(u32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames) {
-    StageTestSlot *slot = D_00457EB0.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
 
     slot->state = 1;
     slot->motionIndex = motionIndex;
@@ -2451,11 +2451,11 @@ void evtStageTestQueueMotionSegment(u32 motionIndex, f32 blendLeadFrames, f32 bl
 }
 
 void func_002C7530(void) {
-    D_00457EB0.slot[0].state = 4;
+    evtStageTestState.slot[0].state = 4;
 }
 
 s32 evtStageTestHasPendingMotion(void) {
-    s32 state = D_00457EB0.slot[0].state;
+    s32 state = evtStageTestState.slot[0].state;
 
     if ((state == 0) || (state == 3)) {
         return 0;
@@ -2466,7 +2466,7 @@ s32 evtStageTestHasPendingMotion(void) {
 /* Play the queued motion once, then start the entry's fallback unless suppressed.
  * State 4 also permits the fallback before the active motion finishes. */
 void evtStageTestAdvanceMotionQueue(void) {
-    StageTestSlot *slot = D_00457EB0.slot;
+    StageTestSlot *slot = evtStageTestState.slot;
     s32 index;
     s32 node;
 
@@ -2479,7 +2479,7 @@ void evtStageTestAdvanceMotionQueue(void) {
                 slot->state = 2;
             }
         } else if (!(slot->flags & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || slot->state == 4)) {
-            index = D_00457EB0.entries[slot->entryIndex].motionIndex;
+            index = evtStageTestState.entries[slot->entryIndex].motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
                 mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->blendLeadFrames, (s32)slot->blendDurationFrames);
@@ -2490,14 +2490,14 @@ void evtStageTestAdvanceMotionQueue(void) {
 }
 
 void evtStageTestCreateModelEffect(s32 unused) {
-    if (D_00457EB0.effect != 0) {
+    if (evtStageTestState.effect != 0) {
         evtStageTestDestroyModelEffect();
     }
-    D_00457EB0.effect = sndCreateSystemEffectHandle(D_00457EB0.model, 0x30);
+    evtStageTestState.effect = sndCreateSystemEffectHandle(evtStageTestState.model, 0x30);
 }
 
 void evtStageTestDestroyModelEffect(void) {
-    StageTestState *stage = &D_00457EB0;
+    StageTestState *stage = &evtStageTestState;
     u32 effectHandle = stage->effect;
 
     if (effectHandle == 0) {
@@ -2508,11 +2508,11 @@ void evtStageTestDestroyModelEffect(void) {
 }
 
 void evtStageTestSetPendingEffect(u32 effect) {
-    D_00457EB0.pendingEffect = effect;
+    evtStageTestState.pendingEffect = effect;
 }
 
 s32 evtStageTestHasModelEffect(void) {
-    return D_00457EB0.effect != 0;
+    return evtStageTestState.effect != 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);

@@ -296,7 +296,7 @@ typedef struct {
 } PolyArc;
 
 /* Lay a ring of point pairs for strip entry `index` on an arc of the node: the inner row sits at the arc's sine radius, the outer row `width` further out. */
-void func_00166590(PolyArc *obj, s32 index) {
+void polyUpdateArcRingStripPoints(PolyArc *obj, s32 index) {
     PolyStrip *strip = obj->strip;
     PolyArcRec *rec = &obj->recs[index];
     PolyStripEntry *entry = &strip->entries[index];

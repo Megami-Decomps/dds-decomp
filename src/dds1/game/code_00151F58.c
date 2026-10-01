@@ -61,7 +61,7 @@ s32 billCreateIndexed(s32 kind, s32 index);
 
 extern s32 D_003D6438[];
 
-extern s32 D_003D6480[];
+extern s32 effEmitterDelayRandomState[];
 
 s32 sdfAllocPacketAligned(s32 size);
 
@@ -407,7 +407,7 @@ void billSetChildHalfExtents(s32 billboard, float width, float height) {
     }
 }
 
-extern u8 D_003296F0[];
+extern u8 sdfViewMatrix[];
 extern u8 D_00324610[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
@@ -416,12 +416,12 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: computes the projected angle between two vectors */
-f32 func_00152408(const void *position, const void *offset) {
+f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     f32 delta[4];
     f32 projectedPosition[4];
     f32 projectedOffset[4];
 
-    VU0_LOAD_MATRIX(D_003296F0);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
     sdfPostmultiplyVuMatrixFromMemory(D_00324610);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
@@ -561,7 +561,7 @@ void func_00153618(s32 sink, s32 source) {
 }
 
 void func_00153680(void) {
-    func_002E84A0(&D_003D6480);
+    func_002E84A0(&effEmitterDelayRandomState);
 }
 
 void func_001536A0(void) {
@@ -947,7 +947,7 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -1223,9 +1223,9 @@ struct EffEmitterD {
     f32 f164;
 };
 
-extern u8 D_00324680[];
-extern u8 D_00324690[];
-extern u8 D_003246A0[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
@@ -1237,7 +1237,7 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
     f32 jitter;
 
     packet += index;
-    sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     if (effect->mode == 0) {
         PCP_COPY_VECTOR(packet, effect->head.origin);
@@ -1292,7 +1292,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     s32 i;
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
-    sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
     frames = effect->head.frameCount;
     spin = effect->f160 * (3.14159265f / 180.0f);
@@ -1405,7 +1405,7 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
 
     packet += index;
     packet->color = 0;
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
     tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
@@ -1633,7 +1633,7 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -1992,7 +1992,7 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
         packet->vel[2] = sinv * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
@@ -2445,7 +2445,7 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;

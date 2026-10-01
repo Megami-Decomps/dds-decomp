@@ -2,7 +2,7 @@
 
 extern u32 D_00438FC8;
 
-extern u32 *D_00437960;
+extern u32 *mnuPanelSoundEntryPool;
 
 extern u64 mnuSpawnPanelSlotB(u32, u64, u64, u64, u64, u64);
 
@@ -295,11 +295,11 @@ void mnuInitPanelSoundEntries(void) {
     s32 handle;
     MenuPanelEntryPool *pool;
 
-    if (D_00437960 == 0) {
+    if (mnuPanelSoundEntryPool == 0) {
         handle = func_003292A8(0xAC);
-        D_00437960 = sdfMemoryGetBlockAddress(handle);
-        memset(D_00437960, 0, 0xAC);
-        pool = (MenuPanelEntryPool *)D_00437960;
+        mnuPanelSoundEntryPool = sdfMemoryGetBlockAddress(handle);
+        memset(mnuPanelSoundEntryPool, 0, 0xAC);
+        pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
         pool->entries = (MenuPanelEntry *)((u8 *)pool + 0xC);
         pool->count = 0x14;
         pool->allocation = handle;
@@ -307,18 +307,18 @@ void mnuInitPanelSoundEntries(void) {
 }
 
 void mnuReleasePanelEntryPool(void) {
-    if (D_00437960 != (u32 *)0x0) {
-        func_003297C8(((MenuPanelEntryPool *)D_00437960)->allocation);
+    if (mnuPanelSoundEntryPool != (u32 *)0x0) {
+        func_003297C8(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation);
     }
-    D_00437960 = (u32 *)0x0;
+    mnuPanelSoundEntryPool = (u32 *)0x0;
 }
 
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 void mnuTickPanelSoundEntries(void) {
     s32 i;
-    MenuPanelEntry *entry = ((MenuPanelEntryPool *)D_00437960)->entries;
+    MenuPanelEntry *entry = ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->entries;
 
-    for (i = 0; i < ((MenuPanelEntryPool *)D_00437960)->count; i++, entry++) {
+    for (i = 0; i < ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->count; i++, entry++) {
         if (entry->soundHandle != 0) {
             if (entry->framesRemaining == 0) {
                 sndSetSequenceVolumePan(entry->soundHandle, 0x7F, 0x3F);
@@ -332,7 +332,7 @@ void mnuTickPanelSoundEntries(void) {
 }
 
 MenuPanelEntry *mnuFindFreePanelEntry(void) {
-    MenuPanelEntryPool *pool = (MenuPanelEntryPool *)D_00437960;
+    MenuPanelEntryPool *pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
     s32 count = pool->count;
     MenuPanelEntry *entry = pool->entries;
     s32 index;
@@ -361,5 +361,5 @@ INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437950);
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437958);
 
-INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437960);
+INCLUDE_SDATA(const s32, "game/code_0028FD30", mnuPanelSoundEntryPool);
 

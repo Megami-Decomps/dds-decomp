@@ -51,13 +51,13 @@ typedef struct PanelEntry {
 } PanelEntry;
 
 extern PanelEntry itfWindowSlots[];
-extern void (*D_00357A50[])(PanelObj *);
+extern void (*itfPanelHandlers[])(PanelObj *);
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern s32 scrGetWindow(void);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern void func_0019C968(s32 window, s32 arg1, s32 arg2);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
-extern s32 D_00357AF0[];
+extern s32 itfPanelColorTemplates[];
 extern s32 D_00357B50[];
 extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command);
 extern u8 D_003BB1C8[8];
@@ -71,8 +71,8 @@ extern void itfSendTablePacket(u64 command, s32 index, s32 flag);
 extern void itfEmitQuadListWide(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, u64 command);
 extern u8 D_003BB1D8[8];
 extern u8 D_003BB1E0[8];
-extern s32 D_00357B90[];
-extern s32 D_00357BA0[];
+extern s32 itfPanelGradientColorTemplate[];
+extern s32 itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
 
@@ -91,7 +91,7 @@ typedef struct PanelCursor {
     PanelCursorItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
 } PanelCursor;
 
-extern PanelCursor D_00357D90;
+extern PanelCursor itfHeldPanelCursor;
 
 /* Screen-space vertex (x, y) written by the panel rect builders. */
 typedef struct PanelPt {
@@ -100,7 +100,7 @@ typedef struct PanelPt {
 } PanelPt;
 
 void itfPanelDispatchHandler(PanelObj *panel) {
-    D_00357A50[panel->handlerIndex](panel);
+    itfPanelHandlers[panel->handlerIndex](panel);
 }
 
 void itfPanelSetFourColumnVertices(PanelPt *v, s32 x0, s32 y0, s32 x1, s32 y1) {
@@ -202,7 +202,7 @@ void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32
     panelSetVec4(vec, red, green, blue, 1);
     vec = (u32 *)(base + 0x150);
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, D_00357AF0, 6);
+    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
 void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
@@ -218,8 +218,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
     u32 *vec = (u32 *)(base + 0x20);
 
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, D_00357B90, 1);
-    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, D_00357BA0, 2);
+    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
+    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, itfPanelGradientColorPair, 2);
 }
 
 void itfPanelSetRectSpan(u8 *base, s32 red, s32 green, s32 blue, s32 alpha) {
@@ -359,7 +359,7 @@ s32 itfPanelAcquireHold(void) {
     if (window < 0) {
         return 1;
     }
-    cursor = &D_00357D90;
+    cursor = &itfHeldPanelCursor;
     cursor->unk0 = window;
     cursor->unk4 = -1;
     cursor->unk8 = -1;
@@ -369,7 +369,7 @@ s32 itfPanelAcquireHold(void) {
 }
 
 s32 itfPanelReleaseHold(void) {
-    PanelCursor *cursor = &D_00357D90;
+    PanelCursor *cursor = &itfHeldPanelCursor;
 
     if (cursor->unk0 < 0) {
         return 1;
@@ -384,7 +384,7 @@ s32 itfPanelReleaseHold(void) {
 
 /* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
 s32 itfCommandQueueHeldPanelEntry(void) {
-    PanelCursor *cursor = &D_00357D90;
+    PanelCursor *cursor = &itfHeldPanelCursor;
     s32 first;
     s32 second;
     s32 third;

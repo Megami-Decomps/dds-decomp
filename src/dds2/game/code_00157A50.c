@@ -14,7 +14,7 @@ typedef struct EffectHandler {
 extern EffectHandler D_003AA770[];
 extern void *func_00328D68(s32);
 
-void *func_00157A50(EffectSource *source) {
+void *effCloneSourceWithTypeHandler(EffectSource *source) {
     EffectSource *copy = (EffectSource *)func_00328D68(0x10);
     u32 argument = source->argument;
 
@@ -62,7 +62,7 @@ extern s32 D_00438EFC;
 extern u32 D_00451EE0[];
 extern void billDispatchByKind(u32);
 
-void func_00157CE0(void) {
+void effBillDispatchAll(void) {
     u32 i;
 
     D_00438EFC = 0;

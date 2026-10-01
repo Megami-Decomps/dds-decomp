@@ -12,7 +12,7 @@ extern s8 D_003BC414;
 
 extern s8 dspCapturedSoundMode;
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 typedef struct EvtActiveFlagTable {
     s32 unk0;
@@ -79,8 +79,8 @@ typedef struct PartySlotHeader {
     u16 id;
 } PartySlotHeader;
 
-extern SceneFlagEntry D_0036ABB8[4];
-extern PartyFlagPair D_0036ABF8[];
+extern SceneFlagEntry mnuSceneFlagEventEntries[4];
+extern PartyFlagPair mnuPartyFlagEventEntries[];
 
 void evtCloseDisplayChannelAndEnsureMessageWindow(s32 arg0) {
     dspCloseChannel();
@@ -100,27 +100,27 @@ s32 dspStartFlagEvent(s32 context) {
                 mdlFlagSet(0x907);
                 return 1;
             }
-            for (i = 0; i < sizeof(D_0036ABB8) / sizeof(D_0036ABB8[0]); i++) {
-                if (mdlFlagTest(D_0036ABB8[i].needFlag) != 0 && mdlFlagTest(D_0036ABB8[i].doneFlag) == 0) {
+            for (i = 0; i < sizeof(mnuSceneFlagEventEntries) / sizeof(mnuSceneFlagEventEntries[0]); i++) {
+                if (mdlFlagTest(mnuSceneFlagEventEntries[i].needFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[i].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    func_0024DD90(0, D_003BAA84 + D_0036ABB8[i].areaIndex * 0x19);
-                    func_0024DD90(1, D_003BAA78 + D_0036ABB8[i].nameIndex * 0x13);
-                    func_0024DD90(2, D_003BAA74 + D_0036ABB8[i].dialogIndex * 0x11);
+                    func_0024DD90(0, D_003BAA84 + mnuSceneFlagEventEntries[i].areaIndex * 0x19);
+                    func_0024DD90(1, D_003BAA78 + mnuSceneFlagEventEntries[i].nameIndex * 0x13);
+                    func_0024DD90(2, D_003BAA74 + mnuSceneFlagEventEntries[i].dialogIndex * 0x11);
                     dspStartEntry(3);
-                    mdlFlagSet(D_0036ABB8[i].doneFlag);
+                    mdlFlagSet(mnuSceneFlagEventEntries[i].doneFlag);
                     return 1;
                 }
             }
             for (i = 0; i < 5; i++) {
-                slot = (PartySlotHeader *)(D_003BAA00 + i * 0x1A4 + 0xA60);
-                if ((slot->flags & 1) != 0 && mdlFlagTest(D_0036ABF8[slot->id].needFlag) != 0
-                    && mdlFlagTest(D_0036ABF8[slot->id].doneFlag) == 0) {
+                slot = (PartySlotHeader *)(datGameState + i * 0x1A4 + 0xA60);
+                if ((slot->flags & 1) != 0 && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].needFlag) != 0
+                    && mdlFlagTest(mnuPartyFlagEventEntries[slot->id].doneFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0024DD90(0, D_003BAA70 + slot->id * 0x11);
                     dspStartEntry(4);
-                    mdlFlagSet(D_0036ABF8[slot->id].doneFlag);
+                    mdlFlagSet(mnuPartyFlagEventEntries[slot->id].doneFlag);
                     return 1;
                 }
             }
@@ -132,7 +132,7 @@ s32 dspStartFlagEvent(s32 context) {
 s32 mnuPrepareTerminalPanelState(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
-    func_00249DD0(state);
+    mnuSelectTerminalResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
     return 1;
 }
@@ -240,7 +240,7 @@ u32 func_0024D608(void) {
 }
 
 s32 evtCopyWorldObjectEntryValue(s32 id, s32 dst) {
-    s32 src = func_00110ED0(dds3GetWorldSecondaryObject(), 9, id);
+    s32 src = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 9, id);
     if (src != 0) {
         *(s32 *)(*(s32 *)(dst + 0x18) + 0x80) = *(s32 *)(*(s32 *)(src + 0x18) + 0x78);
         return 1;
@@ -315,7 +315,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 i;
     list->count = 0;
     for (i = 1; i < 0xC0; i++) {
-        if (*(u8 *)(i + D_003BAA00 + 0x12A0) != 0) {
+        if (*(u8 *)(i + datGameState + 0x12A0) != 0) {
             s32 count = list->count++;
             list->indices[count] = i;
         }
@@ -410,7 +410,7 @@ void evtSetMessageWindowOptionWhenOpen(s32 arg0) {
     }
 }
 
-s8 func_0024DB00(void) {
+s8 evtGetMessageWindowOption(void) {
     return D_003BC414;
 }
 
@@ -491,7 +491,7 @@ void func_0024DD90(s32 arg0, s32 arg1) {
     func_0019C838(dspWindowHandle, arg0, arg1);
 }
 
-s8 func_0024DDB8(void) {
+s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
 

@@ -4,11 +4,11 @@
 
 #define KWLN_TASK_STATE_MASK 0xF
 
-extern KwlnTask* D_00435BE8;
+extern KwlnTask* kwlnActiveTaskHead;
 
 extern void func_001005C8(KwlnTask* task);
 
-extern void func_00100740(KwlnTask* task);
+extern void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask* task);
 
 extern void kwlnTaskActivate(KwlnTask* task);
 
@@ -24,11 +24,11 @@ extern void kwlnTaskAdvanceDestroyDelays(void);
 
 extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
-extern void* D_00435BD8;
+extern void* kwlnDelayedStartTaskCount;
 
-extern void* D_00435BE4;
+extern void* kwlnDelayedDestroyTaskCount;
 
-extern void* D_00435BF0;
+extern void* kwlnActiveTaskCount;
 
 extern void func_0035B6E0();
 
@@ -58,7 +58,7 @@ void kwlnTaskActivate(KwlnTask* task)
 {
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
     task->unk24 = 0;
     task->timer = 0;
 }
@@ -118,7 +118,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     }
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
     if (task->unk2E == 0) {
         kwlnTaskFinalizeDestroy(task);
     }
@@ -150,11 +150,11 @@ void* kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case 1:
-        return D_00435BD8;
+        return kwlnDelayedStartTaskCount;
     case 2:
-        return D_00435BF0;
+        return kwlnActiveTaskCount;
     case 3:
-        return D_00435BE4;
+        return kwlnDelayedDestroyTaskCount;
     default:
         return 0;
     }
@@ -172,17 +172,17 @@ void func_00101198(KwlnTask* task, void* unused)
     } while (task != 0);
 }
 
-void func_001011D0(void)
+void kwlnPrintTaskQueueDiagnostics(void)
 {
     u8* tmp;
 
     func_00101198(kwlnDelayedStartTaskHead, D_00411008);
     tmp = D_00411038;
-    func_0035B6E0(tmp, D_00435BD8);
-    func_00101198(D_00435BE8, D_00411048);
-    func_0035B6E0(tmp, D_00435BF0);
+    func_0035B6E0(tmp, kwlnDelayedStartTaskCount);
+    func_00101198(kwlnActiveTaskHead, D_00411048);
+    func_0035B6E0(tmp, kwlnActiveTaskCount);
     func_00101198(kwlnDelayedDestroyTaskHead, D_00411078);
-    func_0035B6E0(tmp, D_00435BE4);
+    func_0035B6E0(tmp, kwlnDelayedDestroyTaskCount);
     func_0035B6E0(D_00435BF8);
 }
 
@@ -206,7 +206,7 @@ void func_00101328(void)
             func_00101250(task, 0);
         }
     }
-    for (task = D_00435BE8; task != NULL; task = task->listNext) {
+    for (task = kwlnActiveTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
             func_00101250(task, 0);
@@ -250,7 +250,7 @@ void kwlnTaskMarkDestroyPending(KwlnTask* task)
     }
     func_001005C8(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
-    func_00100740(task);
+    kwlnTaskInsertIntoOrderedStateQueue(task);
 }
 
 void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
@@ -296,7 +296,7 @@ s32 kwlnTaskIsRegistered(KwlnTask* target)
             node = kwlnDelayedStartTaskHead;
             break;
         case 1:
-            node = D_00435BE8;
+            node = kwlnActiveTaskHead;
             break;
         case 2:
             node = kwlnDelayedDestroyTaskHead;

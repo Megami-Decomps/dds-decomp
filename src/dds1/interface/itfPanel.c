@@ -66,7 +66,7 @@ void itfAdvancePanelLayoutAndNotify(PanelDefinition *panel, s32 a10, s32 a14, s3
     }
 }
 
-void func_00199A20(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
+void itfPanelUpdateValuesAndNotify(PanelDefinition2 *panel, s32 a2C, s32 a30, s32 a34, s32 a38) {
     panel->a2C = a2C;
     panel->a30 = a30;
     panel->a34 = a34;

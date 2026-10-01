@@ -39,9 +39,9 @@ typedef struct FlagSource {
     s32 pad[2];
 } FlagSource;
 
-extern FlagSource D_003CE6E8[];
+extern FlagSource mnuSceneFlagEventEntries[];
 
-extern FlagPair D_003CE728[];
+extern FlagPair mnuPartyFlagEventEntries[];
 
 extern s64 kwlnFadeIsActive(void);
 
@@ -218,15 +218,15 @@ s32 mnuCreateFlagEntries(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        entries[i].firstFlag = D_003CE6E8[i].first;
+        entries[i].firstFlag = mnuSceneFlagEventEntries[i].first;
         entries[i].firstOn = mdlFlagTest(entries[i].firstFlag);
-        entries[i].secondFlag = D_003CE6E8[i].second;
+        entries[i].secondFlag = mnuSceneFlagEventEntries[i].second;
         entries[i].secondOn = mdlFlagTest(entries[i].secondFlag);
     }
     for (i = 0; i < 16; i++) {
-        entries[4 + i].firstFlag = D_003CE728[i].first;
+        entries[4 + i].firstFlag = mnuPartyFlagEventEntries[i].first;
         entries[4 + i].firstOn = mdlFlagTest(entries[4 + i].firstFlag);
-        entries[4 + i].secondFlag = D_003CE728[i].second;
+        entries[4 + i].secondFlag = mnuPartyFlagEventEntries[i].second;
         entries[4 + i].secondOn = mdlFlagTest(entries[4 + i].secondFlag);
     }
     return handle;
@@ -258,12 +258,12 @@ void mnuClearCampResourceFlagEntries(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        mdlFlagClear(D_003CE6E8[i].first);
-        mdlFlagClear(D_003CE6E8[i].second);
+        mdlFlagClear(mnuSceneFlagEventEntries[i].first);
+        mdlFlagClear(mnuSceneFlagEventEntries[i].second);
     }
     for (i = 0; i < 16; i++) {
-        mdlFlagClear(D_003CE728[i].first);
-        mdlFlagClear(D_003CE728[i].second);
+        mdlFlagClear(mnuPartyFlagEventEntries[i].first);
+        mdlFlagClear(mnuPartyFlagEventEntries[i].second);
     }
 }
 

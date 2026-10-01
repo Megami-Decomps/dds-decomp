@@ -69,7 +69,7 @@ extern u32 D_003BAFA8;
 
 extern u32 D_003BAFB0;
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern u32 fldSceneReady;
 
@@ -163,7 +163,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 fldSceneSoundBase;
 
-extern void func_001130C8(s32 arg0);
+extern void ddsReleaseUnitObject(s32 arg0);
 
 typedef struct {
     s32 unk0;
@@ -521,7 +521,7 @@ void fldSetSequenceVolume(s32 category, s32 volume) {
     }
 }
 
-extern s32 D_003BAE98;
+extern s32 fldCurrentBgmMode;
 
 extern s32 D_0033EAE8[];
 
@@ -530,27 +530,27 @@ extern void func_002E96D8();
 void fldSetBgmMode(s32 mode) {
     switch (mode) {
     case -1:
-        if (D_003BAE98 != mode) {
-            func_002E8DD0(D_003BAE98);
-            D_003BAE98 = mode;
+        if (fldCurrentBgmMode != mode) {
+            func_002E8DD0(fldCurrentBgmMode);
+            fldCurrentBgmMode = mode;
         }
         break;
     case 0:
         mode = -1;
-        if (D_003BAE98 != mode) {
-            func_002E96D8(D_003BAE98);
-            D_003BAE98 = mode;
+        if (fldCurrentBgmMode != mode) {
+            func_002E96D8(fldCurrentBgmMode);
+            fldCurrentBgmMode = mode;
         }
         break;
     case 1:
         mode = D_0033EB78[0] + 1;
         sndStartTrackDefault(mode);
-        D_003BAE98 = mode;
+        fldCurrentBgmMode = mode;
         break;
     case 2:
         mode = D_0033EAE8[0] + 1;
         sndStartTrackDefault(mode);
-        D_003BAE98 = mode;
+        fldCurrentBgmMode = mode;
         break;
     }
 }
@@ -583,14 +583,14 @@ void fldPrepareSceneBgmArchive(void) {
     D_003BAEA0 = 0;
 }
 
-extern s32 func_002E92C0(s32);
+extern s32 sndFindPackedTrackLoadStatus(s32);
 
 extern void sndEnsureMidiBankResident(s32);
 
 s32 fldStepSceneBgmArchive(void) {
     switch (D_003BAEA0) {
     case 0:
-        if (func_002E92C0(D_003BAE9C) == 0) {
+        if (sndFindPackedTrackLoadStatus(D_003BAE9C) == 0) {
             sndEnsureMidiBankResident(D_003BAE9C);
             D_003BAEA0 = D_003BAEA0 + 1;
         } else {
@@ -598,7 +598,7 @@ s32 fldStepSceneBgmArchive(void) {
         }
         break;
     case 1:
-        if (func_002E92C0(D_003BAE9C) == 1) {
+        if (sndFindPackedTrackLoadStatus(D_003BAE9C) == 1) {
             D_003BAEA0 = D_003BAEA0 + 1;
         }
         break;
@@ -615,7 +615,7 @@ u32 fldGetArchiveLoadPending(void) {
 
 s32 fldPollArchiveLoad(s32 id) {
     s32 name = 0x30000000 + (id << 16);
-    s32 result = func_002E92C0(name);
+    s32 result = sndFindPackedTrackLoadStatus(name);
     if (result == 0) {
         sndEnsureMidiBankResident(name);
         D_003BAEA4 = 1;
@@ -643,7 +643,7 @@ void fldResetArchiveLoadPhase(void) {
 s32 fldStepArchiveLoad(void) {
     switch (D_003BAEA8) {
     case 0:
-        if (func_002E92C0(0x670000) == 0) {
+        if (sndFindPackedTrackLoadStatus(0x670000) == 0) {
             sndEnsureMidiBankResident(0x670000);
             D_003BAEA8 = D_003BAEA8 + 1;
         } else {
@@ -651,7 +651,7 @@ s32 fldStepArchiveLoad(void) {
         }
         break;
     case 1:
-        if (func_002E92C0(0x670000) == 1) {
+        if (sndFindPackedTrackLoadStatus(0x670000) == 1) {
             D_003BAEA8 = D_003BAEA8 + 1;
         }
         break;
@@ -1154,7 +1154,7 @@ extern s32 D_0032C900[];
 s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 areaIndex = D_0032C900[area % 100];
     if (areaIndex == -1) return 0;
-    return (((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] >> bit) & 1;
+    return (((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
 /* Set a one-based flag on the current floor, and retain the associated record. */
@@ -1168,7 +1168,7 @@ void fldSetFlagAndFindRecord(s32 flagNumber) {
             bit = flagNumber - 1;
             fldAreaState[6] = bit;
             fldAreaState[0x2F] = flagNumber;
-            ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][fldAreaState[5]] |= 1ULL << bit;
+            ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][fldAreaState[5]] |= 1ULL << bit;
             fldAreaState[0x30] = fldFindRecordItem(fldAreaState[5], bit);
         }
     }
@@ -1182,7 +1182,7 @@ void fldSetFlagBit(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] |= 1ULL << bit;
+        ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] |= 1ULL << bit;
     }
 }
 
@@ -1193,7 +1193,7 @@ void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
     bit--;
     areaIndex = D_0032C900[area % 100];
     if (areaIndex != -1) {
-        ((FldAreaFlagsView *)D_003BAA00)->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
+        ((FldAreaFlagsView *)datGameState)->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
     }
 }
 
@@ -1364,7 +1364,7 @@ void fldClearAllAreaFloorFlags(void) {
     s32 index;
 
     index = 0;
-    block = D_003BAA00;
+    block = datGameState;
     do {
         words = (u64 *)(block + 0x13f70);
         remaining = 0x3f;
@@ -1444,23 +1444,23 @@ void mnuInitializeResourceEntries(void) {
 
 extern void func_0014FB38(s32 handle);
 
-extern void func_0014FBF0(s32 handle, f32 *pos);
+extern void effCopyVectorToNodeInstance(s32 handle, f32 *pos);
 
-extern s32 D_003BAF94;
+extern s32 mnuPositionedResourceCursor;
 
 void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
     f32 pos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 handle;
 
-    handle = D_0034C8B0[D_003BAF94];
+    handle = D_0034C8B0[mnuPositionedResourceCursor];
     if (handle != 0) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
         func_0014FB38(handle);
-        func_0014FBF0(D_0034C8B0[D_003BAF94], pos);
-        D_0034C8C0[D_003BAF94] = 1;
-        D_003BAF94 = (D_003BAF94 + 1) % 4;
+        effCopyVectorToNodeInstance(D_0034C8B0[mnuPositionedResourceCursor], pos);
+        D_0034C8C0[mnuPositionedResourceCursor] = 1;
+        mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
     }
 }
 
@@ -1737,7 +1737,7 @@ typedef struct {
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
 
-extern FldObj30 D_003D50A0[32];
+extern FldObj30 fldObjectSlots[32];
 
 extern s32 D_003BAF70;
 
@@ -1750,14 +1750,14 @@ void fldResetObjectSlots(void) {
 
     D_003BAF80 = 0;
     for (i = 0; i < 32; i++) {
-        D_003D50A0[i].id = -1;
-        D_003D50A0[i].unk0 = 0;
-        D_003D50A0[i].unk8 = 0;
-        D_003D50A0[i].activationRequested = 0;
-        if (D_003D50A0[i].effectNode != 0) {
-            effDestroyNode(D_003D50A0[i].effectNode);
+        fldObjectSlots[i].id = -1;
+        fldObjectSlots[i].unk0 = 0;
+        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationRequested = 0;
+        if (fldObjectSlots[i].effectNode != 0) {
+            effDestroyNode(fldObjectSlots[i].effectNode);
         }
-        D_003D50A0[i].effectNode = 0;
+        fldObjectSlots[i].effectNode = 0;
     }
     D_003BAF70 = 0;
     D_003BAF7C = 0;
@@ -1781,8 +1781,8 @@ void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < D_003BAF80; i++) {
-        if (D_003D50A0[i].id == id && D_003D50A0[i].unk8 == 0) {
-            D_003D50A0[i].activationRequested = 1;
+        if (fldObjectSlots[i].id == id && fldObjectSlots[i].unk8 == 0) {
+            fldObjectSlots[i].activationRequested = 1;
         }
     }
 }
@@ -1791,17 +1791,17 @@ void fldReleaseObjectSlots(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (D_003D50A0[i].effectNode != 0) {
-            effDestroyNode(D_003D50A0[i].effectNode);
-            D_003D50A0[i].effectNode = 0;
+        if (fldObjectSlots[i].effectNode != 0) {
+            effDestroyNode(fldObjectSlots[i].effectNode);
+            fldObjectSlots[i].effectNode = 0;
         }
     }
     D_003BAF80 = 0;
     for (i = 0; i < 32; i++) {
-        D_003D50A0[i].id = -1;
-        D_003D50A0[i].unk0 = 0;
-        D_003D50A0[i].unk8 = 0;
-        D_003D50A0[i].activationRequested = 0;
+        fldObjectSlots[i].id = -1;
+        fldObjectSlots[i].unk0 = 0;
+        fldObjectSlots[i].unk8 = 0;
+        fldObjectSlots[i].activationRequested = 0;
     }
 }
 
@@ -1815,7 +1815,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00148FF0);
 
 extern s32 D_0032E4C8[];
 
-extern f32 D_003BAF98;
+extern f32 fldBannerColorPhase;
 
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 
@@ -1835,15 +1835,15 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
         if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
             color = 0x808080;
             fldSubmitSpriteRect(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
-            if (D_003BAF98 < 45.0f) {
-                color = (s32)(sdfSinPoly(D_003BAF98 * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
+            if (fldBannerColorPhase < 45.0f) {
+                color = (s32)(sdfSinPoly(fldBannerColorPhase * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
                 color |= (color << 8) | (color << 16);
             }
             func_00129900(1);
             func_00129178(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
-            D_003BAF98 += 1.0f;
-            if (D_003BAF98 > 90.0f) {
-                D_003BAF98 = 0.0f;
+            fldBannerColorPhase += 1.0f;
+            if (fldBannerColorPhase > 90.0f) {
+                fldBannerColorPhase = 0.0f;
             }
         }
         func_00129900(0);
@@ -2128,7 +2128,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         func_0014FB38(fldDamEffectNode);
-        func_0014FBF0(fldDamEffectNode, pos);
+        effCopyVectorToNodeInstance(fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
     if (fldYukEffectNode != 0) {
@@ -2136,7 +2136,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[1] = y;
         pos[2] = z;
         func_0014FB38(fldYukEffectNode);
-        func_0014FBF0(fldYukEffectNode, pos);
+        effCopyVectorToNodeInstance(fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }
@@ -2181,7 +2181,7 @@ void fldClearObjectEntryHandles(void) {
 
         i--;
         if (temp != 0) {
-            func_001130C8(temp);
+            ddsReleaseUnitObject(temp);
             entry->unk0 = 0;
         }
         entry++;
@@ -2439,7 +2439,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE90);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE94);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE98);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldCurrentBgmMode);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE9C);
 
@@ -2565,9 +2565,9 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF8C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF90);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF94);
+INCLUDE_SDATA(const s32, "game/code_001411F0", mnuPositionedResourceCursor);
 
-INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF98);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldBannerColorPhase);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF9C);
 

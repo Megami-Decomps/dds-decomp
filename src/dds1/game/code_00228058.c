@@ -23,7 +23,7 @@ void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
 void func_00101A80(s32 arg0, s32 arg1);
 
-EvtCommandWork *func_0010D6A0(void);
+EvtCommandWork *scrGetCurrentContext(void);
 
 char *scrReadStringParameter(s32 idx);
 
@@ -56,7 +56,7 @@ u32 kwlnTaskGetUserValue(s32 task);
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 typedef struct SolarWorldState SolarWorldState;
-extern SolarWorldState *D_003BAA00;
+extern SolarWorldState *datGameState;
 
 extern s64 kwlnTaskIsRegistered(u64);
 
@@ -77,7 +77,7 @@ u32 func_002280B0(void) {
     s32 entry;
     s32 task;
 
-    work = func_0010D6A0();
+    work = scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
@@ -101,7 +101,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
     EvtCommandWork *work;
     s32 task;
 
-    work = func_0010D6A0();
+    work = scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
@@ -228,7 +228,7 @@ u32 evtOpcodeTransitionBgm(void) {
     return 1;
 }
 
-u32 func_002284E0(void) {
+u32 evtCommandQueueBgmWithFade(void) {
     u64 id;
     u64 fade;
 
@@ -260,7 +260,7 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     return 1;
 }
 
-u32 func_002285B0(void) {
+u32 evtCommandStartBgmWithFade(void) {
     u64 id;
     u64 fade;
 
@@ -285,7 +285,7 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
     return 1;
 }
 
-u32 func_00228650(void) {
+u32 evtCommandSetDrawFlagWhileWaiting(void) {
     if (scrReadIntParameter(0) <= 0) {
         kwlnDrawControlFlags |= 0x2000000;
         return 1;
@@ -313,7 +313,7 @@ struct SolarWorldState {
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = D_003BAA00->phase;
+    phase = datGameState->phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -321,39 +321,39 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return D_003BAA00->phase;
+    return datGameState->phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    D_003BAA00->phase = phase & 0xf;
-    D_003BAA00->phaseTimer = 0.0f;
+    datGameState->phase = phase & 0xf;
+    datGameState->phaseTimer = 0.0f;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
-    D_003BAA00->flags = D_003BAA00->flags | SOLAR_PHASE_ADVANCE_FLAG;
+    datGameState->flags = datGameState->flags | SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtDisableSolarPhaseAdvance(void) {
-    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_PHASE_ADVANCE_FLAG;
+    datGameState->flags = datGameState->flags & ~SOLAR_PHASE_ADVANCE_FLAG;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->flags = datGameState->flags | SOLAR_ALPHA_ENABLED_FLAG;
     evtSolarOverlayAlpha = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
-    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->flags = datGameState->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
     evtSolarOverlayAlpha = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
-    D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->flags = datGameState->flags | SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 void evtDisableSolarOverlayAlpha(void) {
-    D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
+    datGameState->flags = datGameState->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
 u32 evtUpdateSolarOverlayFade(s32 task) {
@@ -367,7 +367,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         return 0;
     }
     overlay = kwlnTaskGetUserValue(task);
-    state = D_003BAA00;
+    state = datGameState;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
@@ -386,7 +386,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
             evtSolarOverlayAlpha = alpha;
         }
     }
-    if ((D_003BAA00->flags & 2) != 0) {
+    if ((datGameState->flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
         fldSelectDisplayBuffer(0x53);
         func_00129900(0);
@@ -427,7 +427,7 @@ void evtStartSolarOverlay(void) {
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
-    D_003BAA00->secondaryPhase = 0;
+    datGameState->secondaryPhase = 0;
 }
 
 void evtStopSolarOverlay(void) {

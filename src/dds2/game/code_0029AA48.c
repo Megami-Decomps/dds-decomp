@@ -17,7 +17,7 @@ typedef struct MenuLayoutContext {
     s32 visible;
 } MenuLayoutContext;
 
-extern s32 func_002993D0(s32);
+extern s32 brsAdvanceSkillPackagePanel(s32);
 
 extern void func_0029AC20(s32, s32);
 
@@ -34,7 +34,7 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    if (func_002993D0(context) != 0) {
+    if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
     func_0029AA48((MenuLayoutContext *)context);
@@ -45,7 +45,7 @@ s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
 s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    if (func_002993D0(context) != 0) {
+    if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
     func_0026C900();

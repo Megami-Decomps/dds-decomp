@@ -221,7 +221,7 @@ typedef struct SdfTreeNode {
 
 /* Balance-flag rotation on the second link: `node` takes the place under
  * `a`'s second link; returns the new subtree root. */
-SdfTreeNode *func_00348700(SdfTreeNode *a, SdfTreeNode *node) {
+SdfTreeNode *sdfRotateBalancedTreeSecondLink(SdfTreeNode *a, SdfTreeNode *node) {
     SdfTreeNode *root = a;
     SdfTreeNode *pivot;
 
@@ -347,12 +347,12 @@ typedef struct SdfKeyTreeNode {
 extern void func_00348A30(void *item, s32 first, s32 second);
 
 /* Walk a key tree depth first, applying func_00348A30 to every node's item. */
-void func_00348AA0(SdfKeyTreeNode *node, s32 first, s32 second) {
+void sdfKeyTreeApply(SdfKeyTreeNode *node, s32 first, s32 second) {
     SdfKeyTreeNode *next;
 
     do {
         if (node->child != NULL) {
-            func_00348AA0(node->child, first, second);
+            sdfKeyTreeApply(node->child, first, second);
         }
         func_00348A30(node->item, first, second);
         next = node->next;

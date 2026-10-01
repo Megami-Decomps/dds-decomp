@@ -38,7 +38,7 @@ extern u32 D_004389E8;
 
 extern SdfTex *sdfResourceListHead;
 
-extern u8 D_00439148;
+extern u8 sdfTextureUpdateQueue;
 
 void sdfPendingQueuePush(void *request, s32 value);
 
@@ -53,7 +53,7 @@ typedef struct SdfTexHead {
     s32 format; /* 0x18 */
 } SdfTexHead;
 
-extern SdfTexHead *D_00439144;
+extern SdfTexHead *sdfTextureBlockListHead;
 
 extern SdfTexHead *sdfTextureListHead;
 
@@ -225,7 +225,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexBlock *block) {
             if (before != NULL) {
                 prev->prev->next = block;
             } else {
-                D_00439144 = (SdfTexHead *)block;
+                sdfTextureBlockListHead = (SdfTexHead *)block;
             }
             sdfReleaseChipBlock(prev, block, prev);
             return 1;
@@ -258,7 +258,7 @@ s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexBlock *block) {
 }
 
 void sdfTexQueuePendingWork(s32 value) {
-    sdfPendingQueuePush(&D_00439148, value);
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, value);
 }
 
 void sdfTexInitializeLists(void) {
@@ -271,8 +271,8 @@ void sdfTexInitializeLists(void) {
     head->unk8 = NULL;
     head->unkC = NULL;
     sdfTextureListHead = head;
-    D_00439144 = head;
-    sdfInitializeSynchronizedRequest(&D_00439148, sdfUpdateTextureHeadsWithInterruptsMasked);
+    sdfTextureBlockListHead = head;
+    sdfInitializeSynchronizedRequest(&sdfTextureUpdateQueue, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
@@ -305,7 +305,7 @@ u32 sdfGetTextureListHead(void) {
 }
 
 u32 sdfGetTextureBlockListHead(void) {
-    return D_00439144;
+    return sdfTextureBlockListHead;
 }
 
 s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {

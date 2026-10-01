@@ -4,7 +4,7 @@
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void func_001632E0(void *work);
+extern void effCreateThunderCellSystemWork(void *work);
 
 extern void parReleaseCellSystem(u32 handle);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
@@ -89,10 +89,10 @@ void effPCPThunderCreate(void *data) {
     void *work;
 
     work = effParamTableGetBlock(data, 0);
-    func_001632E0(work);
+    effCreateThunderCellSystemWork(work);
 }
 void func_001634C0(void *work) {
-    func_001632E0(work);
+    effCreateThunderCellSystemWork(work);
 }
 
 void effPCPThunderFree(EffThunderVectorWork *work) {

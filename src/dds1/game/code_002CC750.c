@@ -1,9 +1,9 @@
 #include "common.h"
-extern u16 D_00393AE0[][96];
-extern u16 D_00393AF0[][96];
+extern u16 ptyPresetSkillSlots[][96];
+extern u16 ptyPresetPoolSkills[][96];
 extern void ptyMergeStockSkills(u8 *);
 
-extern void (*D_003BD2D4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
@@ -15,7 +15,7 @@ extern u32 prfIsRequirementExcluded(u16);
 
 extern u32 ptyGetProfileRecord(u32, u16);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 /* Operand block used by the script VM helpers near ptyGetProfileRecord (layout inferred from field accesses). */
 typedef struct ScrVmOperand {
@@ -122,8 +122,8 @@ extern Entry28W D_003907B0[];
 extern s32 func_002FE950(const char *, const char *);
 extern void func_002FE978(s32, const char *, s32, s32);
 extern void func_002FE360(s32);
-extern char D_003BD2B8[];
-extern char D_003BD2C0[];
+extern char sdfDebugLogAppendMode[];
+extern char sdfDebugLogPairFormat[];
 extern u32 func_00197C40(s32, s32, u32, u16, u32, u32);
 extern void frFontSetChildColors(u32, u32);
 extern void func_001958A0(u32, s32, s32);
@@ -145,15 +145,15 @@ typedef struct PtyProfileUnit {
 } PtyProfileUnit;
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
-    s32 file = func_002FE950("debug.log", D_003BD2B8);
+    s32 file = func_002FE950("debug.log", sdfDebugLogAppendMode);
     if (file != 0) {
-        func_002FE978(file, D_003BD2C0, left, right);
+        func_002FE978(file, sdfDebugLogPairFormat, left, right);
         func_002FE360(file);
     }
 }
 
 void ptyClearProfileRecords(void) {
-    memset(D_003BAA00 + 0x2ebb0, 0, 0x3000);
+    memset(datGameState + 0x2ebb0, 0, 0x3000);
 }
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
@@ -161,7 +161,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
 
 void ptyLoadPresetSkillSlots(u8 *work) {
-    u16 *source = D_00393AE0[((PtyProfileUnit *)work)->unitId];
+    u16 *source = ptyPresetSkillSlots[((PtyProfileUnit *)work)->unitId];
     u16 *slots = ((PtyProfileUnit *)work)->skills;
     u32 index;
     index = 0;
@@ -177,7 +177,7 @@ void ptyLoadPresetSkillSlots(u8 *work) {
 }
 
 void ptyMarkPresetSkillPool(u8 *work) {
-    u16 *source = D_00393AF0[((PtyProfileUnit *)work)->unitId];
+    u16 *source = ptyPresetPoolSkills[((PtyProfileUnit *)work)->unitId];
     u32 index = 0;
     do {
         u16 id = *source++;
@@ -201,7 +201,7 @@ void ptyRebuildAllProfiles(void) {
     s32 offset;
 
     for (offset = 0, i = 4; i >= 0; i--) {
-        u8 *unit = (u8 *)D_003BAA00 + 0xA60 + offset;
+        u8 *unit = (u8 *)datGameState + 0xA60 + offset;
 
         if ((((PtyProfileUnit *)unit)->flags & 1) != 0) {
             s32 j;
@@ -317,7 +317,7 @@ s32 ptyTestProfileFlag1(ScrVmOperand *work, u16 id) {
     u32 *flags;
 
     prfDecodeFlagPair(id, &word, &shift);
-    flags = (u32 *)D_003BAA00;
+    flags = (u32 *)datGameState;
     shift++;
     return (flags[0x2e9f0 / 4 + word + work->h04 * 7] & (1 << shift)) != 0;
 }
@@ -327,7 +327,7 @@ s8 scrGetSelectedOperandIndex(ScrVmOperand *op) {
 }
 
 u32 ptyGetProfileRecord(u32 work, u16 index) {
-    u32 record = D_003BAA00 + *(u16 *)(work + 4) * 0x300;
+    u32 record = datGameState + *(u16 *)(work + 4) * 0x300;
 
     return record + index * 8 + 0x2EBB0;
 }
@@ -391,7 +391,7 @@ void scrSetGlobalSeenBit(u32 id) {
     if (id >= 0x200) return;
     bit = id + 0xfe55;
     offset = 0x2e9d0 + (bit >> 5) * 4;
-    word = (u32 *)(D_003BAA00 + offset);
+    word = (u32 *)(datGameState + offset);
     *word |= 1U << (bit & 31);
 }
 
@@ -403,7 +403,7 @@ u32 scrTestGlobalSeenBit(u32 arg) {
     if (id >= 0x200) return 0;
     id = id + 0xfe55;
     offset = 0x2e9d0 + (id >> 5) * 4;
-    word = (u32 *)(D_003BAA00 + offset);
+    word = (u32 *)(datGameState + offset);
     return *word & (1U << (id & 31));
 }
 
@@ -643,7 +643,7 @@ s32 ptyAreReqProfilesInParty(u8 *operand) {
             s32 offset = 0;
             s32 remaining = 4;
             do {
-                u8 *entry = (u8 *)D_003BAA00 + 0xa60 + offset;
+                u8 *entry = (u8 *)datGameState + 0xa60 + offset;
                 offset += 0x1a4;
                 if ((((PtyProfileUnit *)entry)->flags & 1) != 0) {
                     if (ptyTestProfileFlag0((s32)entry, (u16)selected) != 0) {
@@ -670,7 +670,7 @@ u32 prfReqCheckUnitLevel(ScrVmOperand *operand, u8 *value) {
 
 /* Test the global currency counter against a prerequisite threshold. */
 u32 prfReqCheckGlobalCounter(u8 *operand) {
-    if (((PtyGameCounter *)D_003BAA00)->currency < ((PrfRequirementOperand *)operand)->requiredValue) {
+    if (((PtyGameCounter *)datGameState)->currency < ((PrfRequirementOperand *)operand)->requiredValue) {
         return 0;
     }
     return 1;
@@ -842,9 +842,9 @@ void sdfCreateThreadWithAllocatedWorkspace(u64 destination, u64 encoded, u64 opt
     sdfCreateThread(destination, decoded, encoded, option);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2B8);
+INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);
 
-INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C0);
+INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C8);
 

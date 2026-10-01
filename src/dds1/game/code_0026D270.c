@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 D_003BC5D0;
+extern s32 mnuMovieMenuState;
 
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D270);
 
@@ -9,7 +9,7 @@ INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D480);
 INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D510);
 
 void mnuTitleResetSequenceTimers(void) {
-    s32 *timers = (s32 *)D_003BC5D0;
+    s32 *timers = (s32 *)mnuMovieMenuState;
 
     timers[13] = 1;
     timers[5] = 0;

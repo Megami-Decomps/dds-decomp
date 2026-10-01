@@ -4,11 +4,11 @@ extern u32 D_00436418;
 
 extern u32 D_0043641C;
 
-extern u32 D_00436420;
+extern u32 effFieldColorOverrideSelector;
 
 extern u32 D_00436424;
 
-extern u32 D_00436414;
+extern u32 effFieldColorFlags;
 
 extern s32 effBTLFieldColorGetBaseColor(s32, s16, s16, s32);
 
@@ -21,10 +21,10 @@ typedef struct Entry20B {
 extern Entry20B D_003AB070[];
 
 void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
-    D_00436420 = (u32)baseId;
-    D_00436418 = D_00436420;
+    effFieldColorOverrideSelector = (u32)baseId;
+    D_00436418 = effFieldColorOverrideSelector;
     if (overrideId != 0) {
-        D_00436420 = (u32)overrideId;
+        effFieldColorOverrideSelector = (u32)overrideId;
     }
     if (finalId != 0) {
         baseId = finalId;
@@ -42,7 +42,7 @@ u32 effBTLFieldColorGetVariantSelector(void) {
 }
 
 u32 effBTLFieldColorGetOverrideSelector(void) {
-    return D_00436420;
+    return effFieldColorOverrideSelector;
 }
 
 u32 effBTLFieldColorGetFinalSelector(void) {
@@ -72,19 +72,19 @@ u32 func_001695C8(void) {
 }
 
 void effBTLFieldColorSetFlags(u32 bits) {
-    D_00436414 = D_00436414 | bits;
+    effFieldColorFlags = effFieldColorFlags | bits;
 }
 
 void effBTLFieldColorClearFlags(u32 bits) {
-    D_00436414 = D_00436414 & ~bits;
+    effFieldColorFlags = effFieldColorFlags & ~bits;
 }
 
 u8 effBTLFieldColorTestFlags(u32 bits) {
-    return (D_00436414 & bits) != 0;
+    return (effFieldColorFlags & bits) != 0;
 }
 
 void effBTLFieldColorResetFlags(void) {
-    D_00436414 = 0;
+    effFieldColorFlags = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00169418", func_00169610);
@@ -93,13 +93,13 @@ void func_001696B8(void) {
     func_00169610();
 }
 
-INCLUDE_SDATA(const s32, "game/code_00169418", D_00436414);
+INCLUDE_SDATA(const s32, "game/code_00169418", effFieldColorFlags);
 
 INCLUDE_SDATA(const s32, "game/code_00169418", D_00436418);
 
 INCLUDE_SDATA(const s32, "game/code_00169418", D_0043641C);
 
-INCLUDE_SDATA(const s32, "game/code_00169418", D_00436420);
+INCLUDE_SDATA(const s32, "game/code_00169418", effFieldColorOverrideSelector);
 
 INCLUDE_SDATA(const s32, "game/code_00169418", D_00436424);
 

@@ -316,7 +316,7 @@ extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuReleaseTitleEffectSprites();
 extern void mnuResetWorkFloats(void);
 
-void func_00299280(s32 work) {
+void brsCloseSkillPackagePanel(s32 work) {
     BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
     s32 panelContext = work + 0x690;
 
@@ -351,7 +351,7 @@ extern s32 movAreTitleEffectsReady(s32, s32);
 extern s32 mnuBindCampEffectWhenLoaded(s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-s32 func_002993D0(s32 work) {
+s32 brsAdvanceSkillPackagePanel(s32 work) {
     BrsSkillPackageWork *ctx = (BrsSkillPackageWork *)work;
 
     if (ctx->setupState == 0) {
@@ -378,7 +378,7 @@ s32 func_002993D0(s32 work) {
     return 0;
 }
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 /* Five party slots followed by the number of rewards in this batch. */
 typedef struct BrsRewardRow {
@@ -413,7 +413,7 @@ void brsMarkPartyRows(u8 *dst, u8 *state, s32 flags) {
 
     for (i = 0; i < ((BrsRewardBatch *)state)->count; i++) {
         u8 *d = dst;
-        u8 *unit = *(u8 **)&D_00435DD0 + 0xA60;
+        u8 *unit = *(u8 **)&datGameState + 0xA60;
         s32 j;
 
         for (j = 4; j >= 0; j--) {
@@ -455,8 +455,8 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00299578);
 extern s32 kwlnTaskGetUserValue(void);
 extern void effDestroyResourceSlotSet(s32);
 extern void mnuDrainPanelTransitions(s32, s32);
-extern s32 func_002993D0(s32);
-extern void func_00299280(s32);
+extern s32 brsAdvanceSkillPackagePanel(s32);
+extern void brsCloseSkillPackagePanel(s32);
 extern void func_00303D58(s32);
 extern void dspCloseChannel(void);
 extern void func_003297C8(s32);
@@ -469,8 +469,8 @@ void brsStaffTaskDestroy(s32 taskArg) {
         effDestroyResourceSlotSet(((BrsSkillPackageWork *)context)->teardownHandle);
     }
     mnuDrainPanelTransitions(context + 8, taskArg);
-    if (func_002993D0(context) == 0) {
-        func_00299280(context);
+    if (brsAdvanceSkillPackagePanel(context) == 0) {
+        brsCloseSkillPackagePanel(context);
     }
     func_00303D58(((BrsSkillPackageWork *)context)->fadeTarget);
     dspCloseChannel();

@@ -2,6 +2,6 @@
 
 void dds3RemoveWorldObjectNode(void);
 
-void func_001130C8(void) {
+void ddsReleaseUnitObject(void) {
     dds3RemoveWorldObjectNode();
 }

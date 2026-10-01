@@ -3,7 +3,7 @@
 
 extern AdminWork *dds3GetAdminTaskWork(void);
 
-extern u32 D_003BA9BC;
+extern u32 dds3ActiveWorld;
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_00101B08);
 
@@ -56,13 +56,13 @@ extern void func_002EA5C0(s32);
 extern void func_002D4EE8(s32 *, void *);
 extern u8 D_00325788[];
 extern u8 D_003258B0[];
-extern u8 D_00326ED0[];
-extern u8 D_00324B48[];
+extern u8 kwlnFrameDrawPacketRecords[];
+extern u8 kwlnDrawSurfaces[];
 extern u8 D_00325860[];
 extern u8 D_00325708[];
-extern u8 D_003BA908;
-extern s16 D_003BA90A;
-extern s16 D_003BA90C;
+extern u8 kwlnDrawOverlayEnabled;
+extern s16 kwlnDrawOverlayAlpha;
+extern s16 kwlnDrawOverlayScale;
 extern s32 D_003BA910[2];
 extern u8 D_003BA7FC;
 extern s32 *D_003BA844;
@@ -76,7 +76,7 @@ typedef struct KwlnDrawSink {
 
 /* Per-frame render task: update the HUD pieces, submit the thirteen draw-packet groups of the current buffer, optionally draw the
  * screen-edge vignette, then flush the packet pools. */
-s32 func_001024D8(void) {
+s32 kwlnRenderFrame(void) {
     s32 buf = func_00100518();
     u8 *target;
     u8 *block;
@@ -102,10 +102,10 @@ s32 func_001024D8(void) {
         target += 0x10;
         block += 0x1B0;
     }
-    if (D_003BA908 != 0 && func_0011E278() == 0) {
+    if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {
         list = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        sdfAppendDmaPrimary(list, D_00326ED0 + buf * 0x1F40, sdfAllocPacketAligned(0x20));
+        sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + buf * 0x1F40, sdfAllocPacketAligned(0x20));
         packet = sdfAllocPacketAligned(0x40);
         packet[0] = 3;
         packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -131,14 +131,14 @@ s32 func_001024D8(void) {
         rect[2] = 0x100 - D_003BA910[0];
         rect[3] = 0xE0 - D_003BA910[1];
         for (i = 0; i != 4; i++) {
-            rect[i] = rect[i] * D_003BA90C >> 12;
+            rect[i] = rect[i] * kwlnDrawOverlayScale >> 12;
         }
         column = sdfConsAllocateColumnPacket(1);
         vtx = sdfConsMeasurePacketWithHeader(column);
         vtx->r = 0x80;
         vtx->g = 0x80;
         vtx->b = 0x80;
-        vtx->a = D_003BA90A;
+        vtx->a = kwlnDrawOverlayAlpha;
         vtx->corner[0].u = 0;
         vtx->corner[0].v = 0;
         vtx->corner[0].x = 0x7000 - rect[0] * 16;
@@ -154,7 +154,7 @@ s32 func_001024D8(void) {
         sdfAppendPacket(list, column);
         ((KwlnDrawSink *)D_00325708)->invoke(D_00325708, list);
     }
-    pool = sdfFlushPoolNodes(D_00324B48);
+    pool = sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_003BA844 = pool;
     if (D_003BA7FC != 0) {
         func_002EA5C0(pool[1]);
@@ -170,12 +170,12 @@ s32 func_001024D8(void) {
 }
 
 u32 func_00102850(void) {
-    func_0010FA00(D_003BA9BC);
+    func_0010FA00(dds3ActiveWorld);
     return 0;
 }
 
 u32 func_00102878(void) {
-    func_0010FA40(D_003BA9BC);
+    func_0010FA40(dds3ActiveWorld);
     return 0;
 }
 

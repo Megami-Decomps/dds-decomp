@@ -74,7 +74,7 @@ typedef struct RenderCallbackEntry {
     u8 tail[0xC];
 } RenderCallbackEntry;
 
-extern RenderCallbackEntry D_00324B48[];
+extern RenderCallbackEntry kwlnDrawSurfaces[];
 
 extern s32 sdfAllocPacketAligned(s32);
 
@@ -237,7 +237,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_00324B48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -262,7 +262,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_00324B48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -290,7 +290,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_00324B48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -311,7 +311,7 @@ void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_00324B48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -328,7 +328,7 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     context = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(context);
     sdfAppendPacket(context, packet);
-    entry = &D_00324B48[kind];
+    entry = &kwlnDrawSurfaces[kind];
     entry->draw(entry, context);
 }
 
@@ -379,7 +379,7 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1228);
 
 extern s32 func_00100518(void);
-extern u8 D_00326ED0[];
+extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
@@ -389,10 +389,10 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D4C80(kwlnFrameDrawPacketRecords + func_00100518() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        u8 *surface = (u8 *)D_00324B48 + (surfaceIndex << 5);
+        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
     }
 }
@@ -402,10 +402,10 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
-    func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
+    func_002D4CC8(kwlnFrameDrawPacketRecords + func_00100518() * 0x1F40, texture, 0);
     sdfAppendDmaTagToList(list, texture);
     {
-        u8 *surface = (u8 *)D_00324B48 + (surfaceIndex << 5);
+        u8 *surface = (u8 *)kwlnDrawSurfaces + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
     }
 }
@@ -765,7 +765,7 @@ extern char *strcpy(char *, const char *);
 extern s32 func_003014F0(char *, const char *, ...);
 extern double fptodp(f32);
 
-void func_002C20F8(GridTextWidget *widget, GridValueEntry *entry, char *out) {
+void itfFormatGridValueEntryText(GridTextWidget *widget, GridValueEntry *entry, char *out) {
     char text[0x100];
     char prefix[0x100];
     char format[0x100];

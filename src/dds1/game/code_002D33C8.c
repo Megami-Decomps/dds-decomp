@@ -36,12 +36,12 @@ extern s64 func_00312C08(void);
 
 extern s32 sdfPendingQueueSemaphore;
 extern s32 sdfCreateSemaphore(u32, u32, u32);
-extern u8 D_003BD9F0;
-extern u8 D_003BDA08;
+extern u8 sdfTextureReleaseQueue;
+extern u8 sdfObjectListReleaseQueue;
 extern volatile s8 D_003BD333;
 extern s32 D_003BD338;
 extern u32 D_00398158[];
-extern SdfResEntry *D_003980E8[];
+extern SdfResEntry *sdfPacketResourceEntries[];
 
 void sdfTexRelease(void);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
@@ -97,7 +97,7 @@ SdfResource *sdfFindResourceById(s32 id) {
 }
 
 void sdfRegisterTextureReleaseRequestHandler(void) {
-    sdfInitializeSynchronizedRequest(&D_003BD9F0, sdfTexRelease);
+    sdfInitializeSynchronizedRequest(&sdfTextureReleaseQueue, sdfTexRelease);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D35B8);
@@ -115,7 +115,7 @@ void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s3
 }
 
 void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(D_003980E8[entryIndex]->unk0C >> 6);
+    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->unk0C >> 6);
 }
 
 void func_002D38B8(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg3,
@@ -128,7 +128,7 @@ void func_002D38B8(SdfListHead *list, SdfListHead *linkedList, s32 arg2, s32 arg
     }
     packet = alloc(0x100);
     ((SdfNode *)packet)->unk4 = (u32)sdfPatchPacketResourceField;
-    func_002D35B8(packet + 0x10, D_003980E8[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    func_002D35B8(packet + 0x10, sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
     sdfAppendPacketRange(list, packet + 0x10, packet + 0xD0);
 }
@@ -309,7 +309,7 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
     return pendingWork;
 }
 
-extern s32 D_003BD310;
+extern s32 sdfDoubleBufferAllocation;
 extern void func_002D0918(s32);
 extern s32 func_002D03F8(s32);
 extern s32 sdfResourceRetainAddress(s32);
@@ -317,14 +317,14 @@ extern s32 sdfResourceRetainAddress(s32);
 /* Reallocate two adjacent, 128-byte-aligned packet workspaces. */
 void sdfResizeDoubleBuffer(s32 size) {
     s32 memory;
-    if (D_003BD310 != 0) {
-        func_002D0918(D_003BD310);
-        D_003BD310 = 0;
+    if (sdfDoubleBufferAllocation != 0) {
+        func_002D0918(sdfDoubleBufferAllocation);
+        sdfDoubleBufferAllocation = 0;
     }
     size = (size + 0x7F) & ~0x7F;
     sdfPacketBufferSize = size;
-    D_003BD310 = func_002D03F8(size * 2);
-    memory = sdfResourceRetainAddress(D_003BD310);
+    sdfDoubleBufferAllocation = func_002D03F8(size * 2);
+    memory = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
     sdfPacketBuffers[0] = memory;
     sdfPacketBuffers[1] = memory + size;
 }
@@ -688,7 +688,7 @@ typedef struct SdfTexScenePacket {
 extern u8 D_003BD332;
 
 /* Build a textured scene packet: two texture setups, view bounds, GS registers and draw tail. */
-void func_002D48A8(SdfTexScenePacket *packet, SdfTexView *view, s32 index) {
+void sdfBuildTextureScenePacket(SdfTexScenePacket *packet, SdfTexView *view, s32 index) {
     s32 tex;
     s32 shade;
     s32 x;
@@ -893,30 +893,30 @@ void sdfBuildSecondaryAlphaBlendDmaPacket(SdfPacket *packet) {
     packet->unk18 = 0xE;
 }
 
-void func_002D56C8(SdfPacket *packet) {
+void sdfSetPrimaryTestBlendRegisters(SdfPacket *packet) {
     packet->unk0 = 0x717FB;
     packet->unk8 = 0x47;
     packet->unk10 = 0x44;
     packet->unk18 = 0x42;
 }
 
-void func_002D56F0(SdfPacket *packet) {
+void sdfSetSecondaryTestBlendRegisters(SdfPacket *packet) {
     packet->unk0 = 0x717FB;
     packet->unk8 = 0x48;
     packet->unk10 = 0x44;
     packet->unk18 = 0x43;
 }
 
-void func_002D5718(SdfPacket *packet) {
-    func_002D56C8(packet + 1);
+void sdfBuildPrimaryTestBlendPacket(SdfPacket *packet) {
+    sdfSetPrimaryTestBlendRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
     packet->unk18 = 0xE;
 }
 
-void func_002D5778(SdfPacket *packet) {
-    func_002D56F0(packet + 1);
+void sdfBuildSecondaryTestBlendPacket(SdfPacket *packet) {
+    sdfSetSecondaryTestBlendRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1022,7 +1022,7 @@ void sdfCreateExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s
 }
 
 void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(D_003980E8[entryIndex ^ packet->unk08]->unk0C >> 6);
+    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->unk08]->unk0C >> 6);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5CD0);
@@ -1416,7 +1416,7 @@ void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive,
 }
 
 void sdfInitializeObjectListRequest(void) {
-    sdfInitializeSynchronizedRequest(&D_003BDA08, sdfDestroyObjectList);
+    sdfInitializeSynchronizedRequest(&sdfObjectListReleaseQueue, sdfDestroyObjectList);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D7830);
@@ -1515,7 +1515,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
         sdfDestroyDevRequest(slot->device);
     }
     if (recycle != 0) {
-        sdfPendingQueuePush((SdfPendingOwner *)&D_003BDA08, (u32)slot);
+        sdfPendingQueuePush((SdfPendingOwner *)&sdfObjectListReleaseQueue, (u32)slot);
     } else {
         sdfDestroyDevRequest((void *)slot->request);
         sdfReleaseChipBlock(slot);
@@ -1661,7 +1661,7 @@ void sdfLinkRouteNode(SdfRouteNode *node, SdfRouteOwner *owner) {
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPendingQueueSemaphore);
 
-INCLUDE_SDATA(const s32, "game/code_002D33C8", D_003BD310);
+INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfDoubleBufferAllocation);
 
 INCLUDE_SDATA(const s32, "game/code_002D33C8", sdfPacketBufferSize);
 

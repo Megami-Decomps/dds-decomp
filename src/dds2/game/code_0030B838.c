@@ -3,7 +3,7 @@
 #include "gs_packet.h"
 #include "sdf.h"
 
-extern s32 D_004388B4;
+extern s32 fldLocalMapCameraObject;
 
 extern SdfQuad D_00400970;
 extern SdfQuad D_00400980;
@@ -82,7 +82,7 @@ extern u32 D_004390A0;
 
 extern s32 sdfCounterGetDisplayValue(void);
 
-extern s32 D_004388BC;
+extern s32 sdfCounterSelectionCount;
 
 extern void sdfLatchBaseVectorsForSelection(void);
 
@@ -103,11 +103,11 @@ typedef struct MapResource {
     u32 unkC;
 } MapResource;
 
-extern MapResource D_00401280[10];
+extern MapResource fldLocalMapNameTextures[10];
 
 extern MapResource D_00401260;
 
-extern MapResource D_00401270;
+extern MapResource fldLocalMapTextureResource;
 
 extern u32 fldReleaseMapResource(s32 *);
 
@@ -130,7 +130,7 @@ typedef struct {
     s32 maxCount;      /* 0x20 */
 } MapSelection;
 
-extern u32 D_0045C7C0[];
+extern u32 sdfInstalledSpriteSlots[];
 
 typedef struct SdfSlotSet {
     u8 pad00[0xC];
@@ -206,7 +206,7 @@ extern SdfSpritePlace D_00400DF0[];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, u32, s32, s32, s32);
 
-#define SDF_SPRITE(index) (((SdfSpriteSet *)D_0045C7C0[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
+#define SDF_SPRITE(index) (((SdfSpriteSet *)sdfInstalledSpriteSlots[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
 
 static inline s32 sprPlaceBank(SdfSpritePlace *p) { return p->bank; }
 static inline s32 sprPlaceSlot(SdfSpritePlace *p) { return p->slot; }
@@ -218,9 +218,9 @@ extern s32 fldLoadMapResource(const char *, MapResource *);
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(D_004388B4, &D_00400970);
-    effObjSetInnerSecondVec(D_004388B4, &D_00400980);
-    ((EffObjHeader *)D_004388B4)->vtbl->refresh(D_004388B4);
+    effObjSetInnerFirstVec(fldLocalMapCameraObject, &D_00400970);
+    effObjSetInnerSecondVec(fldLocalMapCameraObject, &D_00400980);
+    ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
@@ -244,7 +244,7 @@ void sdfSetSelectedIndex(u32 index) {
 }
 
 void sdfCycleForward(void) {
-    if ((s32)sdfSelectedCounterIndex < D_004388BC - 1) {
+    if ((s32)sdfSelectedCounterIndex < sdfCounterSelectionCount - 1) {
         sdfLatchBaseVectorsForSelection();
         sdfSelectedCounterIndex = sdfSelectedCounterIndex + 1;
     } else {
@@ -260,7 +260,7 @@ void sdfCycleBackward(void) {
         sdfSelectedCounterIndex = sdfSelectedCounterIndex - 1;
     } else {
         sdfLatchBaseVectorsForSelection();
-        sdfSelectedCounterIndex = D_004388BC - 1;
+        sdfSelectedCounterIndex = sdfCounterSelectionCount - 1;
     }
 }
 
@@ -399,7 +399,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CA38);
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CC68);
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
-void func_0030CEF0(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
     f32 fade = (f32)rt->timer->value / 10.0f;
     s32 base = 0;
     s32 width;
@@ -553,7 +553,7 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  D_00401270.image);
+                  fldLocalMapTextureResource.image);
     func_00108BD8(0);
 }
 
@@ -671,14 +671,14 @@ void sdfInstallNonzeroSpriteSlots(SdfSlotSet *set) {
     s32 i;
     for (i = 0; i < 25; i++) {
         if (set->slot[i] != 0) {
-            D_0045C7C0[i] = set->slot[i];
+            sdfInstalledSpriteSlots[i] = set->slot[i];
         }
     }
 }
 
 void sdfReleaseAllSpriteSlots(void) {
     s32 remaining = 24;
-    u32 *slot = D_0045C7C0;
+    u32 *slot = sdfInstalledSpriteSlots;
     do {
         if (*slot != 0) {
             effDestroyResourceSlotSet(*slot);
@@ -699,7 +699,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", sdfDrawUniformlyScaledSlotImage);
 s32 fldLoadLocalMapResources(void) {
     char name[32];
     s32 i;
-    MapResource *item = D_00401280;
+    MapResource *item = fldLocalMapNameTextures;
 
     for (i = 0; i < 10; i++) {
         func_0035C860(name, "/lmap/sname_%02d.tmx", i + 1);
@@ -707,20 +707,20 @@ s32 fldLoadLocalMapResources(void) {
         item++;
     }
     fldLoadMapResource("/lmap/1006.tmx", &D_00401260);
-    fldLoadMapResource("/lmap/l_map00.tmx", &D_00401270);
+    fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
-    MapResource *item = D_00401280;
+    MapResource *item = fldLocalMapNameTextures;
     do {
         fldReleaseMapResource((s32 *)item);
         item++;
         --i;
     } while (i >= 0);
     fldReleaseMapResource((s32 *)&D_00401260);
-    fldReleaseMapResource((s32 *)&D_00401270);
+    fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
     return 1;
 }
 

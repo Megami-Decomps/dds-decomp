@@ -2,7 +2,7 @@
 #include "fpu.h"
 #include "sdf.h"
 
-extern s32 D_004388B4;
+extern s32 fldLocalMapCameraObject;
 
 extern SdfQuad D_00400970;
 
@@ -21,17 +21,17 @@ extern void dds3SetWorldCameraObject(s32, s32);
 extern s32 func_00112E30(s32, SdfQuad *, SdfQuad *);
 
 void fldCreateLocalMapCamera(void) {
-    D_004388B4 = func_00112E30(dds3AdvanceWorldCounter(), &D_00400970, &D_00400980);
-    dds3SetWorldEntryCallbackTarget(D_004388B4, "Lmap_Cam");
-    effObjSetInnerFloat(D_004388B4, 2.0f);
-    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), D_004388B4);
+    fldLocalMapCameraObject = func_00112E30(dds3AdvanceWorldCounter(), &D_00400970, &D_00400980);
+    dds3SetWorldEntryCallbackTarget(fldLocalMapCameraObject, "Lmap_Cam");
+    effObjSetInnerFloat(fldLocalMapCameraObject, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), fldLocalMapCameraObject);
 }
 
-INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388B4);
+INCLUDE_SDATA(const s32, "game/code_0030B7D0", fldLocalMapCameraObject);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", sdfSelectedCounterIndex);
 
-INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388BC);
+INCLUDE_SDATA(const s32, "game/code_0030B7D0", sdfCounterSelectionCount);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388C0);
 

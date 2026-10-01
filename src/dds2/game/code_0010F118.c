@@ -58,7 +58,7 @@ u32 func_0010F118(void) {
     return 1;
 }
 
-u32 func_0010F140(void) {
+u32 ptyScriptRestoreEntireParty(void) {
     ptyRecoverAllUnits();
     return 1;
 }
@@ -94,7 +94,7 @@ extern s8 D_0037F543[];
 extern void func_002458B8();
 
 /* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
-s32 func_0010F518(void *task) {
+s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     s32 width;
     u8 *node;
     void *list;
@@ -131,7 +131,7 @@ extern EffTransformOwner *D_003849D8[];
 void effObjNodeDestroy(EffTransformNode *node);
 
 /* Allocate a node of `kind`, link its owner and run the owner's create hook. */
-EffTransformNode *func_0010F640(u32 kind) {
+EffTransformNode *dds3CreateWorldNodeForKind(u32 kind) {
     EffTransformNode *node;
     EffTransformOwner *owner;
 

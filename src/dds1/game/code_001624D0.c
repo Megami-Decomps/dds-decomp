@@ -3,8 +3,8 @@
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
- * arrays (D_00353710/14/18/1C/20/24/28/2C/30/34 and D_00353880/84/88/90/94/
- * 98/9C/A0/A4). The family2 create table (D_00353880) additionally carries a
+ * arrays (effParamWorkFactories/14/18/1C/20/24/28/2C/30/34 and effParameterWorkOperations/84/88/90/94/
+ * 98/9C/A0/A4). The family2 create table (effParameterWorkOperations) additionally carries a
  * fallback selector at +0x0C: nonzero calls the entry handler directly,
  * zero falls back through D_003536A0.
  */
@@ -38,11 +38,11 @@ typedef struct EffInitWork {
     void *param;    /* 0x1C optional block */
 } EffInitWork; /* 0x20 */
 
-extern EffDispatchEntry D_00353710[];
+extern EffDispatchEntry effParamWorkFactories[];
 
 extern EffDispatchEntry D_00353718[];
 
-extern EffDispatchEntry D_0035371C[];
+extern EffDispatchEntry effParamWorkDuplicators[];
 
 extern EffDispatchEntry D_00353720[];
 
@@ -56,11 +56,11 @@ extern EffDispatchEntry D_00353730[];
 
 extern EffDispatchEntry D_00353734[];
 
-extern EffDispatchEntry D_00353880[];
+extern EffDispatchEntry effParameterWorkOperations[];
 
 extern EffDispatchEntry D_00353884[];
 
-extern EffDispatchEntry D_00353888[];
+extern EffDispatchEntry effParamWorkReleaseCallbacks[];
 
 extern EffDispatchEntry D_00353890[];
 
@@ -92,7 +92,7 @@ extern void mdlBroadcastMasked();
 
 extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
-extern void func_00217878(void *arg0, void *arg1);
+extern void mdlProcessContextNodesAndTransforms(void *arg0, void *arg1);
 
 extern void mdlStorePrimaryVectorVU(void *work);
 
@@ -139,11 +139,11 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
 
     work = func_002CFEB8(8);
     work->id = id;
-    work->data = D_00353710[id].func(data);
+    work->data = effParamWorkFactories[id].func(data);
     return work;
 }
 
-void func_001629F0(EffParamWork *work) {
+void effDispatchParameterDataAndFreeWork(EffParamWork *work) {
     ((void (*)(void *))D_00353718[work->id].func)(work->data);
     sdfReleaseChipBlock(work);
 }
@@ -160,7 +160,7 @@ EffParamWork *effParamWorkDuplicate(EffParamWork *src) {
 
     work = func_002CFEB8(8);
     work->id = src->id;
-    work->data = D_0035371C[src->id].func(src->data);
+    work->data = effParamWorkDuplicators[src->id].func(src->data);
     return work;
 }
 
@@ -238,7 +238,7 @@ void *effParamCreateInitWork(void *arg0) {
 }
 
 void effParamInitFromGlobal(void *work) {
-    func_00217878(work, &D_00325828);
+    mdlProcessContextNodesAndTransforms(work, &D_00325828);
 }
 
 void func_00162DE0(void) {
@@ -306,16 +306,16 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     work = func_002CFEB8(0xC);
     work->id = func_00163248(source);
     work->unk04 = func_00163250((s32)source);
-    if (D_00353880[work->id].altFunc == NULL) {
-        work->data = D_00353880[work->id].func(D_003536A0[work->id][work->unk04]);
+    if (effParameterWorkOperations[work->id].altFunc == NULL) {
+        work->data = effParameterWorkOperations[work->id].func(D_003536A0[work->id][work->unk04]);
     } else {
-        work->data = D_00353880[work->id].func(source);
+        work->data = effParameterWorkOperations[work->id].func(source);
     }
     return work;
 }
 
 void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
-    ((void (*)(void *))D_00353888[work->id].func)(work->data);
+    ((void (*)(void *))effParamWorkReleaseCallbacks[work->id].func)(work->data);
     sdfReleaseChipBlock(work);
 }
 
@@ -329,10 +329,10 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *src) {
     work = func_002CFEB8(0xC);
     work->id = src->id;
     work->unk04 = src->unk04;
-    if (D_00353880[work->id].altFunc == NULL) {
-        work->data = D_00353880[work->id].func(D_003536A0[work->id][work->unk04]);
+    if (effParameterWorkOperations[work->id].altFunc == NULL) {
+        work->data = effParameterWorkOperations[work->id].func(D_003536A0[work->id][work->unk04]);
     } else {
-        work->data = D_00353880[work->id].altFunc(src->data);
+        work->data = effParameterWorkOperations[work->id].altFunc(src->data);
     }
     return work;
 }
@@ -460,7 +460,7 @@ extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32
 extern void func_0015CEF8(void *system, u32 arg1, u32 arg2, u32 arg3);
 extern void func_0015D078(void *system, u32 value);
 
-ParamThunderWork *func_001632E0(ParamThunderHead *src) {
+ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *src) {
     u32 handle = func_002D03F8(src->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
     ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(handle);
     u32 i;

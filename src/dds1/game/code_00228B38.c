@@ -83,7 +83,7 @@ void func_00229230(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t
 }
 
 /* Indexed solar-table pass, then the shared layer setup with the 0x10 rate. */
-void func_00229320(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
     s32 n;
     s32 tmp;
     s32 *p;

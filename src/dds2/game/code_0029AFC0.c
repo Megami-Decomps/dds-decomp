@@ -62,7 +62,7 @@ s64 func_0029B378(s32 request) {
     return menuSetHandler(context, 2, request);
 }
 
-u32 func_0029B3C0(void) {
+u32 mnuResetGroupSelectionAndStartMessage(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();

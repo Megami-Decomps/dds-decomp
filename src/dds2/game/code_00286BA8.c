@@ -2,7 +2,7 @@
 
 extern u64 func_00312810(u32, u64);
 
-extern u32 D_00437924;
+extern u32 mnuMantraSelectionResource;
 
 extern u8 D_00426060[];
 
@@ -30,20 +30,20 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286F18);
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
     s32 menuData = func_00286E98();
-    D_00437924 = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
+    mnuMantraSelectionResource = sdfCreateTaskWorker(D_00426060, 0x402, 0x2B12, D_003CFCC0, func_00286F18, menuData);
 }
 
 s32 mnuCheckResourceTask(void) {
     if (kwlnTaskExists(D_00426060) != 0) {
         return 1;
     }
-    D_00437924 = 0;
+    mnuMantraSelectionResource = 0;
     return 0;
 }
 
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks(D_00437924);
-    D_00437924 = 0;
+    sdfDestroyTaskWorkerTasks(mnuMantraSelectionResource);
+    mnuMantraSelectionResource = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287030);
@@ -53,7 +53,7 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426060);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
 s32 mtrUnitSelectInit(void) {
-    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
 
     func_002885E8(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
@@ -61,7 +61,7 @@ s32 mtrUnitSelectInit(void) {
 }
 
 void mtrUnitSelectRelease(void) {
-    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
 
     mnuReleaseSelectionWorkResources(selected);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
@@ -74,13 +74,13 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287670);
 u64 func_00287768(void) {
     u64 selected;
 
-    selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
     func_00288920(selected);
     return 0;
 }
 
 s32 mtrMantraSelectInit(void) {
-    u64 selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    u64 selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
 
     func_00267F68(0);
     mnuOpenMantraSelectionAndLoadTitleStream(selected);
@@ -95,7 +95,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287848);
 u64 func_00287900(void) {
     u64 selected;
 
-    selected = func_00312810(D_00437924, 0xffffffffffffffff);
+    selected = func_00312810(mnuMantraSelectionResource, 0xffffffffffffffff);
     func_0028B1B0(selected);
     return 0;
 }
@@ -138,7 +138,7 @@ INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437920);
 
-INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437924);
+INCLUDE_SDATA(const s32, "game/code_00286BA8", mnuMantraSelectionResource);
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437928);
 

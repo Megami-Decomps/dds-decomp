@@ -130,7 +130,7 @@ u32 mdlAdvanceViewerPackageTask(void) {
 
     status = func_00317FE0(D_0043891C);
     if (status == -1) {
-        func_00128658();
+        fldDispatchDeferredFieldCommand();
         result = 0xffffffff;
     }
     else {
@@ -145,7 +145,7 @@ extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
 extern void scrDestroyAllNamedProcesses(void);
 
-s32 func_00317010(void) {
+s32 evtCallShooting(void) {
     evtPrintDeveloperConsoleMessage(D_0042D4E0, 0);
     dds3AdminSubmitModeRequest(0x1D, 0, 0, 0);
     scrDestroyAllNamedProcesses();
@@ -224,7 +224,7 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438934);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438938);
 
-INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438940);
+INCLUDE_SDATA(const s32, "game/code_00316E08", dds3SoundSlotPool);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
 

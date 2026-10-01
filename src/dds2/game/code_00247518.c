@@ -13,7 +13,7 @@ extern void func_001063A8(f32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 s32 evtEventViewerGetPendingNode(s32 arg0);
 
@@ -608,7 +608,7 @@ s32 evtViewerTestIndexedCondition(u32 encodedId) {
     if (idx == 0) {
         return 1;
     }
-    return (*(s32 *)(D_00435DD0 + idx * 4 + 0x35c) ^ lo) == 0;
+    return (*(s32 *)(datGameState + idx * 4 + 0x35c) ^ lo) == 0;
 }
 
 u32 func_0024B078(void) {

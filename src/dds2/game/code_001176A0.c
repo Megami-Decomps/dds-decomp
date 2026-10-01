@@ -3,7 +3,7 @@
 
 extern u32 D_00435E80;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s64 scrGetWorkTaskHandle(void);
 extern void func_00118AB0();
@@ -82,10 +82,10 @@ typedef struct SdfUnitMode {
     s8 kind; /* 0x01: 5 selects the alternate unit script */
 } SdfUnitMode;
 
-extern SdfUnitMode *D_00435E1C;
+extern SdfUnitMode *datCommandSelectors;
 
-extern SdfChannelState *D_00435E20;
-extern u32 func_001190B0(s32 channel, s32 arg1, SdfPackedValue *item);
+extern SdfChannelState *datCommandRecords;
+extern u32 sdfRollActionHit(s32 channel, s32 arg1, SdfPackedValue *item);
 
 extern void scrDestroyWorkTask(void);
 
@@ -228,7 +228,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->firstTick = 0;
     ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_00435DB0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
-    D_00435DD0 = (s32)state;
+    datGameState = (s32)state;
     evtResetWorldAndProfileRuntime();
 }
 
@@ -237,16 +237,16 @@ void sdfDestroyRuntimeTask(void) {
 
     kwlnTaskDestroyWithHierarchyByName(D_00435DB0, 0);
     func_00117A80();
-    allocation = ((SdfRuntime *)D_00435DD0)->backingAllocation;
+    allocation = ((SdfRuntime *)datGameState)->backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
     func_003297C8(allocation);
-    D_00435DD0 = 0;
+    datGameState = 0;
 }
 
 s32 sdfBumpTickCounters(void) {
     SdfRuntime *runtime;
 
-    runtime = (SdfRuntime *)D_00435DD0;
+    runtime = (SdfRuntime *)datGameState;
     runtime->firstTick += 1;
     runtime->secondTick += 1;
     return 0;
@@ -255,7 +255,7 @@ s32 sdfBumpTickCounters(void) {
 void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
-    ((SdfRuntime *)D_00435DD0)->updateMode = 8;
+    ((SdfRuntime *)datGameState)->updateMode = 8;
     func_0011AB38();
     func_00122B58(0);
     ptyClearProfileRecords();
@@ -322,10 +322,10 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (D_00435E1C[unitIndex].kind == 5) {
+    if (datCommandSelectors[unitIndex].kind == 5) {
         result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = D_00435E20[unitIndex].scriptFlags;
+        flags = datCommandRecords[unitIndex].scriptFlags;
         if (flags & 0x40) {
             result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
@@ -353,7 +353,7 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
-extern s32 D_00435E2C;
+extern s32 datAbilityParameters;
 
 /* The 0x20 flag selects base enemy vitals instead of the party script path. */
 #define SDF_UNIT_ENEMY 0x20
@@ -371,7 +371,7 @@ typedef struct SdfEnemyVitals {
     u32 flags;          /* 0x00 */
 } SdfEnemyVitals;
 
-extern s32 D_00435DEC;
+extern s32 datEnemyRecords;
 extern s32 func_00119F68(u32);
 extern u32 func_00119C78(SdfPackedValue *, s32);
 extern s32 datUnitHasSkill(SdfPackedValue *, s32);
@@ -380,7 +380,7 @@ extern void func_0035B6E0(const char *, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
+u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -391,8 +391,8 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
     s32 hit;
     u16 flag;
 
-    mask = D_00435E20[index].mask;
-    if (D_00435E20[index].mode == 3) {
+    mask = datCommandRecords[index].mask;
+    if (datCommandRecords[index].mode == 3) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {
             if ((mask >> bit) & 1) {
@@ -402,9 +402,9 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         }
         mask = 1 << list[effMiscRandMod(0, count)];
     }
-    if (mask != 0 && (D_00435E20[index].mode == 1 || D_00435E20[index].mode == 3)) {
+    if (mask != 0 && (datCommandRecords[index].mode == 1 || datCommandRecords[index].mode == 3)) {
         kind = func_00119F68(mask);
-        if (!(D_00435E20[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
+        if (!(datCommandRecords[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (func_00119C78(packed, kind) & 0x170000) {
                 return 0;
             }
@@ -412,17 +412,17 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         switch (kind) {
         case 3:
             if (datUnitHasSkill(packed, 0x25E)) {
-                ratio = (u32)(*(f32 *)(D_00435E2C + 0x1F0) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F0) * (f32)ratio);
             }
             break;
         case 4:
             if (datUnitHasSkill(packed, 0x25F)) {
-                ratio = (u32)(*(f32 *)(D_00435E2C + 0x1F8) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x1F8) * (f32)ratio);
             }
             break;
         case 9:
             if (datUnitHasSkill(packed, 0x263)) {
-                ratio = (u32)(*(f32 *)(D_00435E2C + 0x218) * (f32)ratio);
+                ratio = (u32)(*(f32 *)(datAbilityParameters + 0x218) * (f32)ratio);
             }
             break;
         }
@@ -436,7 +436,7 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         } else if (!(*(u16 *)queryArg & 4)) {
             mask &= 0xFFFE;
         } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
-                   (((SdfEnemyVitals *)(D_00435DEC + actor->unitId * 76))->flags & 0x440) != 0) {
+                   (((SdfEnemyVitals *)(datEnemyRecords + actor->unitId * 76))->flags & 0x440) != 0) {
             mask &= 0xFFFE;
         }
     }
@@ -449,7 +449,7 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
         return 0;
     }
     hit = 1;
-    if (D_00435E20[index].chance < 100) {
+    if (datCommandRecords[index].chance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
         func_0035B6E0(D_00412B08, scaled, ratio, mask);
         hit = effMiscRandMod(0, 100) < scaled;
@@ -459,12 +459,12 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
 
 u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
-    u32 mode = D_00435E20[channel].mode;
+    u32 mode = datCommandRecords[channel].mode;
 
     if (mode != 1 && mode != 3) {
         return 0;
     }
-    result = func_001190B0(channel, queryArg, item);
+    result = sdfRollActionHit(channel, queryArg, item);
     if (!((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < result)) {
         result = 0;
     }
@@ -474,10 +474,10 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
 u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
 
-    if (D_00435E20[channel].mode != 2) {
+    if (datCommandRecords[channel].mode != 2) {
         return 0;
     }
-    result = func_001190B0(channel, queryArg, item);
+    result = sdfRollActionHit(channel, queryArg, item);
     if ((result & (item->flagsAndValue & SDF_PACKED_VALUE_MASK)) == 0) {
         result = 0;
     }
@@ -523,7 +523,7 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC4);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 
-INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD0);
+INCLUDE_SDATA(const s32, "game/code_001176A0", datGameState);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
 

@@ -1,6 +1,6 @@
 #include "mnu.h"
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -57,7 +57,7 @@ extern void func_002B9720(s32);
 s32 func_002ABD08(s32 itemId, MenuResourceOwner *owner) {
     MenuResourceSet *resources = owner->resources;
 
-    if (*(u8 *)((itemId & 0xFFFF) + D_00435DD0 + 0x1340) == 0) {
+    if (*(u8 *)((itemId & 0xFFFF) + datGameState + 0x1340) == 0) {
         func_002B9720(resources->first);
     }
     return ((MenuStaffList *)resources->first)->window->panelActive != 0;
@@ -98,7 +98,7 @@ void func_002ACB18(u32 arg0) {
 void func_002ACB38(s32 object) {
 }
 
-u32 func_002ACB40(void) {
+u32 mnuInitializeWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 handle = func_003292A8(0x54);
     u8 *resource = sdfResourceRetainAddress(handle);
@@ -116,7 +116,7 @@ u32 func_002ACB40(void) {
 
 /* Close the staff selection state: drop the owner's window containers, run
  * the owner's teardown hook, then close the party's resource menu. */
-s32 func_002ACBF8(void) {
+s32 mnuDestroyWindowOwnerResourceSet(void) {
     s32 context = kwlnTaskGetUserValue();
     MenuResourceOwner *owner = (MenuResourceOwner *)context;
     MenuResourceSet *party = owner->resources;
@@ -173,7 +173,7 @@ s32 itemId;
 s32 context;
 {
     s32 partyPanel = context + 0x284;
-    s32 targetUnit = D_00435DD0 + *(((StaffUseContext *)context)->list->selectedIndex) * 0x1C4 + 0xA60;
+    s32 targetUnit = datGameState + *(((StaffUseContext *)context)->list->selectedIndex) * 0x1C4 + 0xA60;
     s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
@@ -200,7 +200,7 @@ void mnuApplyResourceSelection(s32 index, s32 context) {
     resourceActive = func_002ACF38();
     if (resourceActive != 0) {
         *(u32 *)(*(s32 *)(*(s32 *)(resources->first + 0x18) + 0x1c) + 0x60) =
-                  (u32)*(u8 *)(index + D_00435DD0 + 0x1340);
+                  (u32)*(u8 *)(index + datGameState + 0x1340);
         resources->selection = index;
     }
     func_002C1B68(context + 0xaa50, 1);

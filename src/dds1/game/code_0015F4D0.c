@@ -2,17 +2,17 @@
 #include "pcp_vu0.h"
 #include "eff.h"
 
-extern BillDispatch D_0034E658[];
+extern BillDispatch billObjectCallbacks[];
 
 extern BillDispatch D_0034E654[];
-extern BillDispatch D_0034E650[];
+extern BillDispatch effBillConstructorEntries[];
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
 extern void (*D_0034E690[])();
-extern void func_00160B00(void *);
+extern void effReleaseBattleVoiceOwner(void *);
 extern void func_00161790(void *);
 extern void func_002D0918(void *);
 extern void func_00160690();
@@ -83,7 +83,7 @@ typedef struct BillEntryOwner {
 } BillEntryOwner;
 
 void *effBillCreateDispatch(s32 index, void *arg) {
-    EffectDispatchState *effect = D_0034E650[index].func(arg);
+    EffectDispatchState *effect = effBillConstructorEntries[index].func(arg);
 
     effect->handler = index;
     effect->valueB2 = 1;
@@ -91,7 +91,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
 }
 
 void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
-    EffectDispatchState *result = D_0034E650[effect->handler].func();
+    EffectDispatchState *result = effBillConstructorEntries[effect->handler].func();
 
     result->handler = effect->handler;
     result->valueB2 = 1;
@@ -99,7 +99,7 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
 }
 
 void billDispatchIndexedObjectCallback(EffectDispatchState *effect) {
-    D_0034E658[effect->handler].func();
+    billObjectCallbacks[effect->handler].func();
 }
 
 void func_0015F5B0(EffectDispatchState *effect) {
@@ -257,7 +257,7 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern void func_00161650(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
-SoundMixer *func_001606C0(SoundMixer *src) {
+SoundMixer *sndMixerClone(SoundMixer *src) {
     u32 handle = func_002D03F8(sizeof(SoundMixer));
     SoundMixer *mixer = sdfResourceRetainAddress(handle);
 
@@ -275,7 +275,7 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
 
     while (voice != NULL) {
         next = voice->next;
-        func_00160B00(voice);
+        effReleaseBattleVoiceOwner(voice);
         voice = next;
     }
     func_00161790(mixer);
