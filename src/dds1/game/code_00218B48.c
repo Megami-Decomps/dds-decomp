@@ -97,6 +97,8 @@ extern char D_003ABF78[]; /* "modelViewer" */
 
 extern char D_003ABF88[]; /* "modelViewerEnd" */
 
+extern char D_003BBC80[]; /* "%5.2f" */
+
 extern void mdlViewer();
 
 extern void mdlViewerEnd();
@@ -1426,7 +1428,7 @@ void func_0021BFB0(void) {
         sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
     step = D_003D7A50.unk0C != 0 ? 2 : 0;
-    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, "%5.2f", D_003D7A50.unk54));
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, D_003D7A50.unk54));
 }
 
 u32 func_0021C1E0(void) {
@@ -2294,6 +2296,8 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC68);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC70);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC78);
+
+INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC80);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC88);
 
