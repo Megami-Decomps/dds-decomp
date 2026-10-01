@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import struct
+import subprocess
 import sys
+import tempfile
 import unittest
 from hashlib import sha1
 from pathlib import Path
@@ -15,6 +17,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import flw0
+import flw0_profiles
 import flw0_symbolic
 
 
@@ -258,14 +261,134 @@ end
         with self.assertRaisesRegex(flw0.Flw0Error, "has no code label"):
             flw0.parse_source(without_label.replace("  CALL missing\n", "  END\n"))
 
+    def test_dds1_command_profile_resolves_names_and_keeps_numeric_fallback(self) -> None:
+        source = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  PROC main
+  COMM RESET_DRAW_EFFECTS
+  COMM 0x0123
+  END
+end
+messages
+end
+strings
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            [word.raw for word in script.code_words()],
+            [7, (0x043 << 16) | 8, (0x123 << 16) | 8, 9],
+        )
+        rendered = flw0_symbolic.render(script, "dds1")
+        self.assertIn("profile dds1", rendered)
+        self.assertIn("COMM RESET_DRAW_EFFECTS", rendered)
+        self.assertIn("COMM 0x0123", rendered)
+        self.assertEqual(flw0.parse_source(rendered).to_bytes(), script.to_bytes())
+
+        unprofiled = flw0_symbolic.render(script)
+        self.assertNotIn("profile ", unprofiled)
+        self.assertIn("COMM 0x0043", unprofiled)
+        self.assertIn("COMM 0x0123", unprofiled)
+        self.assertEqual(flw0.parse_source(unprofiled).to_bytes(), script.to_bytes())
+
+    def test_dds1_command_profile_is_explicit(self) -> None:
+        source = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  PROC main
+  COMM NOT_A_DDS1_COMMAND
+  END
+end
+messages
+end
+strings
+end
+"""
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown dds1 command"):
+            flw0.parse_source(source)
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "named COMM operand requires a profile"
+        ):
+            flw0.parse_source(source.replace("profile dds1\n", ""))
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown command profile"):
+            flw0.parse_source(source.replace("profile dds1", "profile nocturne"))
+
+    def test_command_profile_cli_error_has_no_traceback(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "invalid.bfasm"
+            source.write_text(
+                """\
+flw0 2
+profile unknown
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  END
+end
+messages
+end
+strings
+end
+""",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(TOOLS / "flw0.py"),
+                    "assemble",
+                    str(source),
+                    str(root / "invalid.bf"),
+                ],
+                capture_output=True,
+                text=True,
+            )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown command profile 'unknown'", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_dds1_command_profile_records_verified_stack_pops(self) -> None:
+        commands = {
+            command.name: (command.command_id, command.stack_pop)
+            for command in flw0_profiles.DDS1.commands
+        }
+        self.assertEqual(
+            commands,
+            {
+                "RESET_DRAW_EFFECTS": (0x043, 0),
+                "RETURN_TO_TITLE": (0x046, 0),
+                "RESET_FIELD_EFFECTS": (0x099, 0),
+                "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1),
+                "CREATE_POLYGON_MOVIE": (0x0AA, 2),
+                "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0),
+            },
+        )
+
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
-        rebuilt = flw0.parse_source(path.read_text(encoding="utf-8")).to_bytes()
+        source = path.read_text(encoding="utf-8")
+        script = flw0.parse_source(source)
+        rebuilt = script.to_bytes()
         self.assertEqual(len(rebuilt), 436)
         self.assertEqual(
             sha1(rebuilt).hexdigest(),
             "f662f1c11775216fd98f34fb034fec5f8e0e3177",
         )
+        self.assertEqual(flw0_symbolic.render(script, "dds1"), source)
 
 
 if __name__ == "__main__":

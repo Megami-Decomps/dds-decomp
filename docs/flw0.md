@@ -16,6 +16,12 @@ Use `--symbolic` to derive source whose layout can change:
 python3 tools/flw0.py disassemble --symbolic event.bf event.bfasm
 ```
 
+Select a command profile when native command names are known for the game:
+
+```sh
+python3 tools/flw0.py disassemble --symbolic --profile dds1 event.bf event.bfasm
+```
+
 Assemble it again:
 
 ```sh
@@ -76,6 +82,45 @@ bytes; use version 1 for those files. Message and string payloads remain raw
 until their internal formats are understood. In the current DDS1 event corpus,
 97 of 104 files use the canonical layout and round-trip exactly through this
 form; the other seven remain exact through version 1.
+
+### Native command profiles
+
+Native `COMM` IDs belong to a specific game and executable version. A `profile`
+directive makes that choice part of the source instead of inferring it from a
+path:
+
+```text
+flw0 2
+profile dds1
+
+# ...
+  COMM RESET_DRAW_EFFECTS
+  PUSHIS 1
+  PUSHIS 670
+  COMM CREATE_POLYGON_MOVIE
+  PUSHREG
+  COMM WAIT_FOR_TASK_REMOVAL
+```
+
+The DDS1 profile currently contains the six commands used by `e670`. Their IDs,
+handlers, and stack consumption were checked against the DDS1 PS2 command table
+and runtime code:
+
+| Source name | ID | Stack values consumed | DDS1 handler behavior |
+|---|---:|---:|---|
+| `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
+| `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
+| `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
+| `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
+| `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
+| `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
+
+The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
+valid for commands outside the reviewed profile. A name is rejected when the
+source has no profile or the selected profile does not define it. Profiles are
+kept separate because the same command ID can differ between engine versions;
+for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
+HD's two-argument behavior.
 
 The first tracked script is `src/dds1/scripts/event/e670.bfasm`. Assemble it
 with the same command as any other source:

@@ -8,11 +8,13 @@ import struct
 from dataclasses import dataclass
 
 import flw0
+import flw0_profiles
 
 
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 _PROCEDURE_OPCODES = {7, 10, 11}
 _JUMP_LABEL_OPCODES = {13, 28}
+_COMMAND_OPCODE = flw0.OPCODE_IDS["COMM"]
 _STANDARD_SECTIONS = ((0, 0x20), (1, 0x20), (2, 4), (3, 1), (4, 1))
 
 
@@ -78,6 +80,18 @@ def _raw_block(payload: bytes) -> list[str]:
     ]
 
 
+def _get_profile(
+    name: str | None, line_number: int | None = None
+) -> flw0_profiles.CommandProfile | None:
+    if name is None:
+        return None
+    try:
+        return flw0_profiles.get(name)
+    except KeyError as exc:
+        prefix = f"line {line_number}: " if line_number is not None else ""
+        raise flw0.Flw0Error(f"{prefix}unknown command profile {name!r}") from exc
+
+
 def _require_standard_layout(script: flw0.Flw0File) -> None:
     shape = tuple((section.type_id, section.element_size) for section in script.sections)
     if shape != _STANDARD_SECTIONS:
@@ -105,6 +119,7 @@ def _render_instruction(
     pc: int,
     procedure_symbols: list[str],
     jump_symbols: list[str],
+    command_profile: flw0_profiles.CommandProfile | None,
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -124,16 +139,21 @@ def _render_instruction(
         return f"  {name} {procedure_symbols[operand]}", pc + 1
     if opcode in _JUMP_LABEL_OPCODES and operand < len(jump_symbols):
         return f"  {name} {jump_symbols[operand]}", pc + 1
+    if opcode == _COMMAND_OPCODE and command_profile is not None:
+        command = command_profile.by_id.get(operand)
+        if command is not None:
+            return f"  {name} {command.name}", pc + 1
     if opcode == 29:
         signed_operand = operand - 0x10000 if operand & 0x8000 else operand
         return f"  {name} {signed_operand}", pc + 1
     return f"  {name} 0x{operand:04x}", pc + 1
 
 
-def render(script: flw0.Flw0File) -> str:
+def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     """Render standard-layout FLW0 as symbolic version-2 source."""
 
     _require_standard_layout(script)
+    command_profile = _get_profile(profile_name)
     procedures = script.named_rows(0)
     jump_labels = script.named_rows(1)
     for row in (*procedures, *jump_labels):
@@ -157,19 +177,23 @@ def render(script: flw0.Flw0File) -> str:
         symbols_at_pc.setdefault(row.start_pc, []).append(symbol)
 
     header = script.header
-    lines = [
-        "flw0 2",
-        "",
-        (
-            "header "
-            f"word00=0x{header.word_00:08x} "
-            f"word0c=0x{header.word_0c:08x} "
-            f"word18=0x{header.word_18:08x} "
-            f"word1c=0x{header.word_1c:08x}"
-        ),
-        f"locals int={header.int_local_count} float={header.float_local_count}",
-        "",
-    ]
+    lines = ["flw0 2"]
+    if command_profile is not None:
+        lines.append(f"profile {command_profile.name}")
+    lines.extend(
+        [
+            "",
+            (
+                "header "
+                f"word00=0x{header.word_00:08x} "
+                f"word0c=0x{header.word_0c:08x} "
+                f"word18=0x{header.word_18:08x} "
+                f"word1c=0x{header.word_1c:08x}"
+            ),
+            f"locals int={header.int_local_count} float={header.float_local_count}",
+            "",
+        ]
+    )
     for row, symbol in zip(procedures, procedure_symbols):
         name = f" name={json.dumps(row.name)}" if row.name != symbol else ""
         lines.append(
@@ -190,7 +214,7 @@ def render(script: flw0.Flw0File) -> str:
         for symbol in symbols_at_pc.get(pc, ()):
             lines.append(f"{symbol}:")
         instruction, next_pc = _render_instruction(
-            words, pc, procedure_symbols, jump_symbols
+            words, pc, procedure_symbols, jump_symbols, command_profile
         )
         lines.append(instruction)
         pc = next_pc
@@ -253,6 +277,7 @@ def _parse_code(
     content: list[tuple[int, str]],
     procedures: list[Declaration],
     jump_labels: list[Declaration],
+    command_profile: flw0_profiles.CommandProfile | None,
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
@@ -299,6 +324,19 @@ def _parse_code(
                 f"line {line_number}: {mnemonic} takes one value"
             )
         operand_text = tokens[1]
+        if opcode == _COMMAND_OPCODE and _SYMBOL.fullmatch(operand_text):
+            if command_profile is None:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: named COMM operand requires a profile"
+                )
+            command = command_profile.by_name.get(operand_text.upper())
+            if command is None:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown {command_profile.name} "
+                    f"command {operand_text!r}"
+                )
+            words.append((command.command_id << 16) | opcode)
+            continue
         if opcode in _PROCEDURE_OPCODES | _JUMP_LABEL_OPCODES and _SYMBOL.fullmatch(
             operand_text
         ):
@@ -363,6 +401,7 @@ def parse(text: str) -> flw0.Flw0File:
 
     header_values: dict[str, str] | None = None
     locals_values: dict[str, str] | None = None
+    profile_record: tuple[str, int] | None = None
     procedures: list[Declaration] = []
     jump_labels: list[Declaration] = []
     blocks: dict[str, list[tuple[int, str]]] = {}
@@ -371,6 +410,12 @@ def parse(text: str) -> flw0.Flw0File:
         line_number, line = meaningful[index]
         tokens = flw0._tokens(line, line_number)
         directive = tokens[0]
+        if directive == "profile":
+            if len(tokens) != 2 or profile_record is not None:
+                raise flw0.Flw0Error(f"line {line_number}: invalid profile")
+            profile_record = (tokens[1], line_number)
+            index += 1
+            continue
         if directive == "header":
             if header_values is not None:
                 raise flw0.Flw0Error(f"line {line_number}: duplicate header")
@@ -423,7 +468,10 @@ def parse(text: str) -> flw0.Flw0File:
     if len(symbols) != len(set(symbols)):
         raise flw0.Flw0Error("procedure and jump-label symbols must be unique")
 
-    code, labels = _parse_code(blocks["code"], procedures, jump_labels)
+    command_profile = _get_profile(*profile_record) if profile_record else None
+    code, labels = _parse_code(
+        blocks["code"], procedures, jump_labels, command_profile
+    )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
     message_data = _parse_raw_block(blocks["messages"])
