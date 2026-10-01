@@ -329,7 +329,13 @@ f32 sdfInterpolateMotionKeys(KeyOut *output) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003347B0);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334808);
+/* vu0 routine: blend the two bracketing RGBA colour keys by the key weight. */
+s32 func_00334808(KeyOut *a0) {
+    s32 color;
+
+    EE_MMI_RGBA_LERP(color, *(u32 *)a0->firstKey, *(u32 *)a0->secondKey, a0->weight, 0.5f);
+    return color;
+}
 
 /* Interpolate exactly five scalar channels, retaining the retail arithmetic order. */
 void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
@@ -563,7 +569,17 @@ void func_003352C8(u8 *motion, f32 t1) {
     func_00333288(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335308);
+/* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
+void func_00335308(SdfMotionBinding *binding, f32 t, f32 weight) {
+    KeyOut b;
+    s32 key;
+    s32 color;
+
+    func_00334678(binding, &b, t);
+    key = func_00334808(&b);
+    EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
+    func_00333288(binding->track, color);
+}
 
 void sdfCopyTrackStateToBinding(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value14.word;
@@ -585,7 +601,17 @@ void func_00335428(u8 *motion, f32 t1) {
     func_00333270(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335468);
+/* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
+void func_00335468(SdfMotionBinding *binding, f32 t, f32 weight) {
+    KeyOut b;
+    s32 key;
+    s32 color;
+
+    func_00334678(binding, &b, t);
+    key = func_00334808(&b);
+    EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
+    func_00333270(binding->track, color);
+}
 
 void sdfMotionReadBoundTrackInteger(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value10;
@@ -607,7 +633,17 @@ void func_00335588(u8 *motion, f32 t1) {
     func_003332A0(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003355C8);
+/* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
+void func_003355C8(SdfMotionBinding *binding, f32 t, f32 weight) {
+    KeyOut b;
+    s32 key;
+    s32 color;
+
+    func_00334678(binding, &b, t);
+    key = func_00334808(&b);
+    EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
+    func_003332A0(binding->track, color);
+}
 
 void func_00335678(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value20;
@@ -629,7 +665,17 @@ void func_003356E8(u8 *motion, f32 t1) {
     func_003332B8(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335728);
+/* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
+void func_00335728(SdfMotionBinding *binding, f32 t, f32 weight) {
+    KeyOut b;
+    s32 key;
+    s32 color;
+
+    func_00334678(binding, &b, t);
+    key = func_00334808(&b);
+    EE_MMI_RGBA_LERP(color, binding->current.word, key, weight, 0.5f);
+    func_003332B8(binding->track, color);
+}
 
 void sdfMotionCopyTrackValueToBinding(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value28;
@@ -753,7 +799,17 @@ void sdfMotionApplyInterpolatedKey(u8 *motion, f32 t1) {
     func_00333460(*(s32 *)(motion + 0xC), func_00334808(buffer));
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
+/* vu0 routine: blend the captured output colour toward the keyed colour by weight. */
+void func_00335C80(SdfMotionOutput *output, f32 t, f32 weight) {
+    KeyOut b;
+    s32 key;
+    s32 color;
+
+    func_00334678(output, &b, t);
+    key = func_00334808(&b);
+    EE_MMI_RGBA_LERP(color, output->capturedValue, key, weight, 0.5f);
+    func_00333460(output->target, color);
+}
 
 void sdfCopyMotionTargetValue(SdfMotionOutput *output) {
     output->capturedValue = output->target->value;

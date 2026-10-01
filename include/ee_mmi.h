@@ -163,4 +163,41 @@
     ".set reorder" \
     : : "r"(p) : "$2")
 
+/*
+ * Blend two RGBA8888 words: out = a + (b - a) * t per channel, rounded
+ * (bias 0.5 through vf3x into ACC):
+ *     qmtc2.ni half,vf3; mfc1 $8,t; pextlb/pextlh a->$4, b->$5 (bytes -> words)
+ *     vf5w = 1 - t; ACC = 0.5 + a*vf5w; vf5 = ACC + b*t; vftoi0
+ *     qmfc2.ni $4,vf4; ppach $5,$0,$4; ppacb out,$0,$5
+ * `half` is 0.5f; scratch $4/$5/$8 are hard-coded, and the block declares
+ * $4-$8 clobbered (retail never places an operand in $6/$7). The
+ * `vsubx.w vf5` is issued twice in retail. Users: sdfMotion colour-key lerp
+ * and its five weighted-binding callers, both games.
+ */
+#define EE_MMI_RGBA_LERP(out, a, b, t, half) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %4, vf3\n\t" \
+    "mfc1 $8, %3\n\t" \
+    "pextlb $4, $0, %1\n\t" \
+    "pextlb $5, $0, %2\n\t" \
+    "vsub.xyzw vf2, vf0, vf0\n\t" \
+    "qmtc2.ni $8, vf4\n\t" \
+    "pextlh $4, $0, $4\n\t" \
+    "pextlh $5, $0, $5\n\t" \
+    "vaddax.xyzw ACC, vf2, vf3x\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "qmtc2.ni $4, vf2\n\t" \
+    "qmtc2.ni $5, vf3\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "vmaddaw.xyzw ACC, vf2, vf5w\n\t" \
+    "vmaddx.xyzw vf5, vf3, vf4x\n\t" \
+    "vftoi0.xyzw vf4, vf5\n\t" \
+    "qmfc2.ni $4, vf4\n\t" \
+    "ppach $5, $0, $4\n\t" \
+    "ppacb %0, $0, $5\n\t" \
+    ".set reorder" \
+    : "=r"(out) : "r"(a), "r"(b), "f"(t), "r"(half) : "$4", "$5", "$6", "$7", "$8")
+
 #endif
