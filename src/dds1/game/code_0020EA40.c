@@ -11,9 +11,9 @@ extern s32 btlFindModelEntry();
 
 extern s32 btlCountTasksByKind(u32);
 
-extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
-extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 extern u32 func_001A3360(u64, u64, u64);
 
@@ -74,13 +74,13 @@ extern s32 func_001A17F0(void);
 
 typedef struct BtlUnit {
     u8 unk_00[0x90];
-    s32 position90; /* 0x90 */
-    f32 position94;
-    f32 position98;
-    s32 position9C;
+    s32 bodyOffsetXBits; /* 0x90: preserve integer stores to the vector components */
+    f32 bodyOffsetY;
+    f32 bodyOffsetZ;
+    s32 bodyOffsetWBits;
     u8 unk_A0[0x10];
-    f32 positionB0;
-    f32 positionB4;
+    f32 height;
+    f32 reach;
     f32 positionB8;
     f32 positionBC;
     u8 unk_C0[8];
@@ -92,11 +92,11 @@ typedef struct BtlUnit {
     u8 unk_F0[0x18];
     u64 identity; /* 0x108: compared to exclude the current actor */
     u32 flags;
-    u32 actionRecordIndex; /* indexes the 0x20-byte action animation records */
+    u32 stateFlags; /* 0x114: second unit status word, not a command index */
     u8 unk_118[4];
     u8 lookupId;      /* 0x11C */
     u8 unk_11D[3];
-    u16 unk_120;
+    u16 statBits; /* 0x120: base of the stat accessors */
     u8 unk_122[2];
     u16 mode;
     u8 unk_126[4];
@@ -214,7 +214,43 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void btlSelectRandomDefeatCamera(u8 *);
+/* Linked-command camera transforms, shared with code_0020CB38.c. */
+typedef struct BtlCamState {
+    f32 position[4];
+    f32 direction[4];
+    f32 distance;
+    f32 fov;
+} BtlCamState;
+
+typedef struct BtlLinkedCommand {
+    BtlCamState camera;
+    u8 pad28[8];
+    BtlCamState frontCamera; /* 0x30 */
+    u8 pad58[0x68];
+    BtlCamState backCamera; /* 0xC0 */
+    u8 padE8[8];
+    u32 flags; /* 0xF0 */
+    BtlTask *task; /* 0xF4 */
+    BtlUnit *linkedA;
+    BtlUnit *linkedB;
+    u8 pad100[0x10];
+    s32 state; /* 0x110 */
+    s32 actionCode; /* 0x114 */
+    u32 targetList;
+    u8 pad11C[0x14];
+    f32 motionParameter;
+} BtlLinkedCommand;
+
+/* Action-animation records are distinct from the 0x38-byte command metadata. */
+typedef struct BtlActionTableRow {
+    u8 pad00[3];
+    u8 enabled;
+    u8 pad04[0x18];
+    u16 flags;
+    u8 pad1E[2];
+} BtlActionTableRow;
+
+extern void btlSelectRandomDefeatCamera(BtlLinkedCommand *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 extern s32 kwlnTaskIsRegistered(s32);
@@ -223,32 +259,34 @@ extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
-void btlRaiseLinkedActionPose(u8 *actor);
+void btlRaiseLinkedActionPose(BtlLinkedCommand *command);
 
-s32 btlDispatchActionAnimation(u8 *unit) {
-    u16 flags = *(u16 *)((u8 *)D_003BAA60 + (s32)((BtlUnit *)unit)->actionRecordIndex * 32 + 0x1c);
+/* Dispatch the command's animation-camera flags. Clearing +0x110 resets command
+ * state; it does not clear a BtlUnit's active flags. Returns 1 when handled. */
+s32 btlDispatchActionAnimation(BtlLinkedCommand *command) {
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[command->actionCode].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            btlSelectRandomDefeatCamera(unit);
+            btlSelectRandomDefeatCamera(command);
         } else {
-            btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
+            btlSetEffectCameraKeys(command, -203.0f, -531.1f, -1259.0f,
                            0.124f, -0.07f, -0.021f, 0.981f,
                            -203.0f, -46.1f, -1259.0f, -0.144f,
                            -0.066f, -0.003f, 0.978f, 45.0f, 30.0f);
         }
-        ((BtlUnit *)unit)->flags = 0;
+        command->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_0020DC38(unit, unit, 0);
+        func_0020DC38(command, command, 0);
     } else if (flags & 8) {
-        if (btlGetIndexListCount(*(u32 *)(*(u8 **)(unit + 0xf4) + 0x60)) == 1) {
+        if (btlGetIndexListCount(command->task->unk_60) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            btlRaiseLinkedActionPose(unit);
-            ((BtlUnit *)unit)->flags = 0;
+            btlRaiseLinkedActionPose(command);
+            command->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            btlSelectRandomDefeatCamera(unit);
+            btlSelectRandomDefeatCamera(command);
         }
     } else {
         return 0;
@@ -279,19 +317,19 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020EC20);
 
 extern s32 D_003BAA34;
 
-s32 btlIsActionIdListed(u8 *unit) {
+s32 btlIsActionIdListed(BtlUnit *unit) {
     BtlState *battle;
     u16 *entry;
     u32 id;
     u32 i;
 
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
+    if ((unit->flags & 0x400) == 0) {
         return 0;
     }
     battle = (BtlState *)func_001A17F0();
     i = 0;
     entry = (u16 *)(battle->battleMode * 0x28 + D_003BAA34 + 6);
-    id = ((BtlUnit *)unit)->mode;
+    id = unit->mode;
     for (; i < 0xB; i++) {
         if (*entry++ == id) {
             return 1;
@@ -604,17 +642,17 @@ s32 btlCommandStartSlotMotion(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
     s32 index = scrReadIntParameter(2);
-    u8 *unit;
+    BtlUnit *unit;
 
     if (choice == 0) {
-        unit = btlFindUnitByModeClear(unitIndex);
+        unit = (BtlUnit *)btlFindUnitByModeClear(unitIndex);
     } else {
-        unit = btlFindUnitByModeFlagged(unitIndex);
+        unit = (BtlUnit *)btlFindUnitByModeFlagged(unitIndex);
     }
     if (unit == NULL) {
         return 1;
     }
-    if ((((BtlUnit *)unit)->flags & 2) == 0) {
+    if ((unit->flags & 2) == 0) {
         return 1;
     }
     if (index >= 0) {

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl_task.h"
+#include "btl.h"
 #include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -185,13 +185,6 @@ typedef struct BattleEffectContext {
     BattleLinkedEffectState *effect;
 } BattleEffectContext;
 
-typedef struct BattleEffectUnitNode {
-    u8 pad00[0x110];
-    u32 status;
-    u32 statusExtra;
-    u8 pad118[0x24C];
-    struct BattleEffectUnitNode *next;
-} BattleEffectUnitNode;
 
 typedef struct BattleScriptTask {
     u8 active;
@@ -226,24 +219,6 @@ extern s32 evtFindTaskResourceEntryByKey(s16, s32);
 
 extern char D_0041B7E0[];
 
-typedef struct BattleCombatant {
-    u8 unk_00[0xE0];
-    s32 unk_E0;
-    u8 unk_E4[0x2C];
-    u32 status;
-    u32 statusExtra;
-    u8 unk_118[8];
-    u16 entryFlags;
-    u8 unk_122[2];
-    u16 kind;
-    u16 alternateKind;
-    u8 unk_128[6];
-    u16 ailment;
-    u8 unk_130[4];
-    s32 unk_134;
-    u8 unk_138[0x22C];
-    struct BattleCombatant *next;
-} BattleCombatant;
 
 typedef struct BattleListEntry {
     u8 pad0[6];
@@ -260,27 +235,42 @@ extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-typedef struct BtlUnit {
-    u8 unk_00[0xC8];
-    u32 species;
-    u8 unk_CC[0x20];
-    s32 unk_EC;
-    u8 unk_F0[0x20];
-    u32 flags;
-    u32 unk_114;
-    u8 unk_118[8];
-    u16 unk_120;
-    u8 unk_122[2];
-    u16 mode;
-    u8 unk_126[8];
-    u16 unk_12E;
-    u8 unk_130[0x1EC];
-    u32 unk_31C;
-    u8 unk_320[0x20];
-    struct BtlUnitModel *model;
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
-} BtlUnit;
+/* The model flag word is the first member of the extension's +0x8C info object.
+ * Retail accesses unit+0x340 -> extension+0x8C -> flags+0; no second unit view. */
+typedef struct BtlUnitInfo {
+    union {
+        u8 b0;
+        u32 flags;
+    };
+    u8 pad1[0x14];
+    s32 unk18;
+    struct BtlUnitData *data;
+} BtlUnitInfo;
+
+/* btlCopyMotionTransform copies two vectors and the two trailing scalars. */
+typedef struct BtlCamState {
+    f32 position[4];
+    f32 direction[4];
+    f32 distance;
+    f32 fov;
+} BtlCamState;
+
+/* Motion-command cameras and aim state, not a BtlUnit stat layout. */
+typedef struct BtlLinkedCommand {
+    BtlCamState camera; /* 0x00 */
+    u8 pad28[8];
+    BtlCamState frontCamera; /* 0x30 */
+    u8 pad58[0x68];
+    BtlCamState backCamera; /* 0xC0 */
+    u8 padE8[0x48];
+    s32 state; /* 0x130 */
+    s32 actionCode; /* 0x134 */
+    u8 pad138[4];
+    s32 armed; /* 0x13C */
+    u8 pad140[0x14];
+    f32 motionParameter; /* 0x154 */
+} BtlLinkedCommand;
+
 
 typedef struct BtlState {
     u8 unk_000[0x1E4];
@@ -488,18 +478,18 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227528);
 
-s32 btlRemapEffectActiveCombatantAction(BattleCombatant *unit, s32 code) {
+s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     u32 id;
-    if (!(unit->status & 1)) {
+    if (!(unit->flags & 1)) {
         return code;
     }
-    if (!(unit->status & 0x400)) {
+    if (!(unit->flags & 0x400)) {
         return code;
     }
     if (((BattleEffectContext *)func_001AA6F8())->effect->active != 1) {
         return code;
     }
-    id = unit->kind;
+    id = unit->mode;
     if (id == 0x119) {
         return code;
     }
@@ -546,25 +536,27 @@ BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
         if (flags & 1) {
             if (flags & 0x400) {
                 if (flags & 2) {
-                    if (unit->species == 0x119) {
+                    if (unit->resourceIndex == 0x119) {
                         return unit;
                     }
                 }
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return 0;
 }
 
-s32 func_002277D8(BattleCombatant *unit) {
-    switch (unit->kind) {
+/* Collapse three special unit modes to one display code. +0xE0 remains unnamed
+ * in the canonical header, so retain this bounded read rather than a unit view. */
+s32 func_002277D8(BtlUnit *unit) {
+    switch (unit->mode) {
     case 0x119:
     case 0x12E:
     case 0x12F:
         return 0x119;
     }
-    return unit->unk_E0;
+    return *(s32 *)((u8 *)unit + 0xE0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227820);
@@ -599,7 +591,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     *(s32 *)(group + 0x28) = 0x16;
     btlStartTask(group);
     effect->phase = 1;
-    return (task->unit->unk_12E & 0x480) ? 0x19 : 0x1B;
+    return (task->unit->conditionFlags & 0x480) ? 0x19 : 0x1B;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
@@ -625,11 +617,11 @@ s32 btlGetSoleTargetKind(void) {
     target = (BtlUnit *)btlGetEffectActor();
     last = NULL;
     count = 0;
-    for (unit = state->units; unit != NULL; unit = unit->next) {
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x200) {
                 if (!(unit->flags & 0xE0)) {
-                    if (!(unit->unk_12E & 0x800)) {
+                    if (!(unit->conditionFlags & 0x800)) {
                         count++;
                         last = unit;
                     }
@@ -656,7 +648,7 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
-    for (unit = ((BtlState *)func_001AA6F8())->units; unit != NULL; unit = unit->next) {
+    for (unit = ((BtlState *)func_001AA6F8())->units; unit != NULL; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
                 if (unit->mode == 0x12F) {
@@ -671,16 +663,16 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->model->flags &= ~1;
+            other->ext->info->flags &= ~1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->model->flags &= ~1;
+            other->ext->info->flags &= ~1;
         } else {
-            *other->model->flags |= 1;
+            other->ext->info->flags |= 1;
         }
         return 0;
     }
@@ -693,7 +685,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
-    for (unit = ((BtlState *)func_001AA6F8())->units; unit != NULL; unit = unit->next) {
+    for (unit = ((BtlState *)func_001AA6F8())->units; unit != NULL; unit = unit->nextActor) {
         if (unit->flags & 1) {
             if (unit->flags & 0x400) {
                 if (unit->mode == 0x12F) {
@@ -708,16 +700,16 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->model->flags |= 1;
+            other->ext->info->flags |= 1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->model->flags &= ~1;
+            other->ext->info->flags &= ~1;
         } else {
-            *other->model->flags |= 1;
+            other->ext->info->flags |= 1;
         }
         return 0;
     }
@@ -737,7 +729,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     if (effect->active != 0) {
         return 1;
     }
-    if (unit->species == 0x119) {
+    if (unit->resourceIndex == 0x119) {
         return 1;
     }
     other = battle->units;
@@ -752,7 +744,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
                 }
             }
         }
-        other = other->next;
+        other = other->nextActor;
     }
     btlStartTask(btlCreateUnitFadeOutTask(unit, 8, 10));
     unit->flags &= ~0x100;
@@ -761,39 +753,27 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228B08);
 
-typedef struct BtlAimUnit {
-    u8 pad00[0x30];
-    u8 anim[0x90];     /* 0x30 */
-    f32 origin[4];     /* 0xC0 */
-    f32 direction[4];  /* 0xD0 */
-    f32 distance;      /* 0xE0 */
-    u8 padE4[0x4C];
-    s32 state;         /* 0x130 */
-    s32 kind;          /* 0x134 */
-    u8 pad138[4];
-    s32 armed;         /* 0x13C */
-    u8 pad140[0x14];
-    f32 scale;         /* 0x154 */
-} BtlAimUnit;
 
-s32 btlUnitStartAimAtTarget(BtlAimUnit *unit) {
-    u8 *battle = (u8 *)func_001AA6F8();
-    u8 *target;
+/* Initialize the linked command's target aim once in state 0x1E. Action 0x171
+ * succeeds without setup; unsupported actions return 0, deferred setup returns 1. */
+s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    BtlUnit *target;
     u32 flags;
     f32 distance;
 
-    if (unit->kind == 0x171) {
+    if (command->actionCode == 0x171) {
         return 1;
     }
-    if (unit->kind != 0x189) {
+    if (command->actionCode != 0x189) {
         return 0;
     }
-    for (target = (u8 *)((BtlState *)battle)->units; target != 0; target = (u8 *)((BtlUnit *)target)->next) {
-        flags = ((BtlUnit *)target)->flags;
+    for (target = battle->units; target != 0; target = target->nextActor) {
+        flags = target->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 2) != 0) {
-                    if (((BtlUnit *)target)->mode == 0x12F) {
+                    if (target->mode == 0x12F) {
                         break;
                     }
                 }
@@ -803,31 +783,32 @@ s32 btlUnitStartAimAtTarget(BtlAimUnit *unit) {
     if (target == 0) {
         return 1;
     }
-    if (unit->state != 0x1E || unit->armed != 0) {
+    if (command->state != 0x1E || command->armed != 0) {
         return 1;
     }
-    btlCopyMotionTransform(unit->anim, unit);
-    unit->scale = 10.0f;
-    unit->armed = 1;
-    unit->state = 0;
+    btlCopyMotionTransform(&command->frontCamera, command);
+    command->motionParameter = 10.0f;
+    command->armed = 1;
+    command->state = 0;
     btlSetActorEffectParameterOrMuzzlePosition(target, 0);
-    VU0_STORE_VF_UNCLOBBERED(vf10, unit->origin);
-    unit->origin[1] += 150.0f;
-    btlInterpolateVectorStep(unit->anim);
+    VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
+    command->backCamera.position[1] += 150.0f;
+    btlInterpolateVectorStep(&command->frontCamera);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, unit->origin);
+    VU0_LOAD_VF(vf10, command->backCamera.position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(distance);
-    unit->distance = distance;
+    command->backCamera.distance = distance;
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, unit->direction);
-    unit->distance += 45.0f;
-    func_001E88A8(unit->origin);
+    VU0_STORE_VF(vf10, command->backCamera.direction);
+    command->backCamera.distance += 45.0f;
+    func_001E88A8(command->backCamera.position);
     return 1;
 }
 
-s32 func_00228F20(BattleCombatant *unit) {
-    switch (unit->unk_134) {
+/* Recognize the two action codes accepted by the linked-command aim handler. */
+s32 func_00228F20(BtlLinkedCommand *command) {
+    switch (command->actionCode) {
     case 0x171:
         return 1;
     case 0x189:
@@ -894,7 +875,7 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
             unit->mode == 0x12F) {
             break;
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     if (unit == 0) {
         return 1;
@@ -972,30 +953,31 @@ void func_002292D8(void) {
 }
 
 s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
-    BattleEffectUnitNode *node = *(BattleEffectUnitNode **)(func_001AA6F8() + 0x24c);
-    while (node != 0) {
-        if (node->status & 1) {
-            node->statusExtra &= ~0x100000;
+    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+    while (unit != 0) {
+        if (unit->flags & 1) {
+            unit->stateFlags &= ~0x100000;
         }
-        node = node->next;
+        unit = unit->nextActor;
     }
     return -1;
 }
 
-void btlMarkBattleUnitEntryForActiveKind(BattleCombatant *unit) {
-    u32 flags = unit->status;
-    if ((flags & 0x200) && unit->kind == 2) {
-        unit->status = flags | 0x1000;
-        unit->statusExtra |= 0x100000;
-        unit->entryFlags |= 0x1000;
+void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
+    u32 flags = unit->flags;
+    if ((flags & 0x200) && unit->mode == 2) {
+        unit->flags = flags | 0x1000;
+        unit->stateFlags |= 0x100000;
+        unit->statBits |= 0x1000;
     }
 }
 
-void btlSetAlternateKindForEnabledSpecialUnit(BattleCombatant *unit) {
-    if ((unit->status & 0x400) &&
-        unit->kind == 0x144 &&
+/* The +0x126 stat halfword is still padding in the protected canonical header. */
+void btlSetAlternateKindForEnabledSpecialUnit(BtlUnit *unit) {
+    if ((unit->flags & 0x400) &&
+        unit->mode == 0x144 &&
         mdlFlagTest(0x841)) {
-        unit->alternateKind = 1;
+        *(u16 *)unit->pad126 = 1;
     }
 }
 
@@ -1316,7 +1298,7 @@ s32 btlCommandPlayUnitMotion(void) {
         if (index < 0x1D) {
             btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
         } else {
-            mdlAddEntryPlainEx((s32)unit->model->flags, 0, index, 0.0f, 0.0f);
+            mdlAddEntryPlainEx((s32)unit->ext->info, 0, index, 0.0f, 0.0f);
         }
     }
     return 1;
@@ -1507,18 +1489,18 @@ void *btlCreateActionTask(void *battler, s32 action) {
 }
 
 s32 btlHasRestrictedUnit(void) {
-    BattleCombatant *unit = *(BattleCombatant **)(func_001AA6F8() + 0x24C);
+    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
     while (unit != 0) {
-        u32 status = unit->status;
+        u32 status = unit->flags;
         if (status & 0x200) {
             if (status & 0xe0) {
                 return 1;
             }
-            if (unit->ailment & 0x4000) {
+            if (unit->conditionFlags & 0x4000) {
                 return 1;
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return 0;
 }
@@ -1710,7 +1692,7 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
     count = btlGetIndexListCount(list);
     if (D_00435E20[command * 0x38] & 8) {
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry(list, i))->unk_12E & 0x800) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->conditionFlags & 0x800) {
                 flaggedCount++;
             }
         }
