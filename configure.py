@@ -415,11 +415,25 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             for source in battle_sources:
                 source = source.relative_to(ROOT)
                 output = battle_output_dir / f"{source.stem.upper()}.TBL"
+                dependencies = ["tools/battle_tbl.py"]
+                if source.stem == "aicalc":
+                    dependencies.extend(
+                        (
+                            "tools/flw0.py",
+                            "tools/flw0_symbolic.py",
+                            "tools/flw0_semantic.py",
+                            "tools/flw0_profiles.py",
+                            "tools/msg1.py",
+                            "tools/dds1_msg1_chars.tsv",
+                            str(source.with_name("aicalc-ai.bfasm")),
+                            str(source.with_name("aicalc-formulas.bfasm")),
+                        )
+                    )
                 n.build(
                     str(output),
                     "battle_tbl",
                     str(source),
-                    implicit=["tools/battle_tbl.py"],
+                    implicit=dependencies,
                     variables={"outdir": str(output.parent)},
                 )
                 battle_outputs.append(str(output))
