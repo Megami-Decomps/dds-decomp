@@ -439,10 +439,10 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     memcpy(out, forward, 16);
 }
 
-s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
+s64 sdfFontRegisterShort(s32 x, s32 y, u64 first, u64 second) {
     u64 handle;
 
-    handle = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
+    handle = func_0019F460(x << 4, y << 3, 0, first, second, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     return frFontQueueGlyphInSelectedSlot(handle);
 }
@@ -535,13 +535,13 @@ s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00311F20);
 
-void *sdfCreateTaskHeader(u32 arg0) {
+void *sdfCreateTaskHeader(u32 userData) {
     s32 allocation = func_003292A8(0x1C);
     u32 *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, 0x1C);
     obj[0] = allocation;
-    obj[4] = arg0;
+    obj[4] = userData;
     obj[5] = (u32)func_00313BA8;
     obj[6] = (u32)func_00313BA8;
     return obj;
@@ -555,9 +555,9 @@ s64 sdfDestroyTaskWork(SdfTaskOwner *owner) {
     }
 }
 
-void sdfSetTaskDestroyCallback(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x18) = (s32)arg1;
+void sdfSetTaskDestroyCallback(s32 work, s32 callback) {
+    if (callback != 0) {
+        *(s32 *)(work + 0x18) = (s32)callback;
     }
 }
 
@@ -605,9 +605,9 @@ SdfListNode *sdfListInsertAfter(SdfList *list, SdfListNode *after, s32 key, void
     return node;
 }
 
-void sdfSetTaskSecondaryCallback(s32 arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *(s32 *)(arg0 + 0x14) = (s32)arg1;
+void sdfSetTaskSecondaryCallback(s32 work, s32 callback) {
+    if (callback != 0) {
+        *(s32 *)(work + 0x14) = (s32)callback;
     }
 }
 
@@ -1027,12 +1027,12 @@ u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
     return grid->cells[cellIndex].value;
 }
 
-void sdfGridSetCellValue(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
-    u32 cell;
+void sdfGridSetCellValue(s32 grid, s32 column, s32 row, u32 value) {
+    u32 cellIndex;
 
-    cell = arg2 * *(s32 *)(arg0 + 0x14) + arg1;
-    if (cell < *(u32 *)(arg0 + 0x10)) {
-        *(u32 *)(cell * 8 + *(s32 *)(arg0 + 4) + 4) = arg3;
+    cellIndex = row * *(s32 *)(grid + 0x14) + column;
+    if (cellIndex < *(u32 *)(grid + 0x10)) {
+        *(u32 *)(cellIndex * 8 + *(s32 *)(grid + 4) + 4) = value;
     }
 }
 
@@ -1155,8 +1155,8 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313A58);
 
-float sdfMultiplyAddFloat(float arg0, float arg1, float arg2) {
-    return arg0 + arg1 * arg2;
+float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
+    return addend + multiplicand * multiplier;
 }
 
 u32 func_00313BA0(void) {

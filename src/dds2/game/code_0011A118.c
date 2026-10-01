@@ -846,7 +846,35 @@ s32 func_0011E018(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E050);
+extern s32 func_001197C0(s32);
+
+s32 func_0011E050(void) {
+    s32 total = func_001197C0(D_0043E5C0[3]);
+    s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 percent = (s32)((f32)current / (f32)total * 100.0f);
+    s32 grade = 0;
+
+    if (percent != 100) {
+        grade = 1;
+        if (percent < 80) {
+            grade = 2;
+            if (percent < 60) {
+                grade = 3;
+                if (percent < 40) {
+                    grade = 4;
+                    if (percent < 30) {
+                        grade = 5;
+                        if (percent < 20) {
+                            grade = percent >= 10 ? 6 : 7;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + grade * 4 + 0x318));
+    return 1;
+}
 
 s32 func_0011E128(void) {
     s32 entry = D_0043E5C8[0];
@@ -893,7 +921,42 @@ s32 evtPushRosterBaseValue(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E2A8);
+s32 func_0011E2A8(void) {
+    s32 total = func_001197C0(D_0043E5C0[3]);
+    s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
+    s32 percent = (s32)((f32)current / (f32)total * 100.0f);
+    s32 grade = 0;
+
+    if (percent != 100) {
+        grade = 1;
+        if (percent < 90) {
+            grade = 2;
+            if (percent < 80) {
+                grade = 3;
+                if (percent < 70) {
+                    grade = 4;
+                    if (percent < 60) {
+                        grade = 5;
+                        if (percent < 50) {
+                            grade = 6;
+                            if (percent < 40) {
+                                grade = 7;
+                                if (percent < 30) {
+                                    grade = 8;
+                                    if (percent < 20) {
+                                        grade = percent >= 10 ? 9 : 10;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + grade * 4 + 0x338));
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E3A0);
 

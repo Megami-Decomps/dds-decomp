@@ -89,9 +89,9 @@ typedef struct SdfList {
 
 extern void *func_002CFEB8(s32);
 
-float sdfQuatLengthSquared(float *arg0) {
-    return *arg0 * *arg0 + arg0[1] * arg0[1] + arg0[2] * arg0[2] +
-                  arg0[3] * arg0[3];
+float sdfQuatLengthSquared(float *quaternion) {
+    return *quaternion * *quaternion + quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] +
+                  quaternion[3] * quaternion[3];
 }
 
 float sdfQuaternionMagnitude(float *values) {
@@ -1127,8 +1127,8 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC5F0);
 
-float sdfMultiplyAddFloat(float arg0, float arg1, float arg2) {
-    return arg0 + arg1 * arg2;
+float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
+    return addend + multiplicand * multiplier;
 }
 
 u32 func_002CC738(void) {
