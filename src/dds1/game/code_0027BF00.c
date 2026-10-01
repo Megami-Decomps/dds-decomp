@@ -1677,7 +1677,48 @@ void mnuClearListFlags(s32 which, MenuWindow *menu) {
 
 extern u32 func_00285B20(u32);
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280978);
+extern void mnuRetreatListCursorDefault(u32 list);
+extern void mnuPlayInputSound(s32, u32, s32);
+
+/* Step the selected party-panel list from the pad: left/right move its cursor, any input restarts the fade. */
+void func_00280978(s32 mode, MenuWindow *window) {
+    u32 input = func_00285B20(0x30);
+    u32 flags = window->flags;
+    u32 state;
+    s32 which = mode == 8;
+    MenuList *list = window->lists[which];
+
+    if (flags & 2) {
+        window->fade = 0x100;
+    }
+    state = flags | 2;
+    state |= mode;
+    window->flags = state;
+    if (!(state & 0x30)) {
+        if (!(input & 0x300000)) {
+            mnuClearListFlagsOneAndTwo((u32 *)list);
+        }
+        if (input & 0x10) {
+            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+                window->fade = 0x100;
+            }
+            mnuRetreatListCursorDefault((u32)list);
+        }
+        if (input & 0x20) {
+            if (mnuTestListFlagTwo((u32 *)list) == 0) {
+                window->fade = 0x100;
+            }
+            mnuAdvanceListCursorDefault((u32)list);
+        }
+        mnuPlayInputSound(0, input, (s32)list);
+    }
+    if (window->fade > 0) {
+        s32 fade = window->fade - 0x10;
+
+        window->fade = fade < 0 ? 0 : fade;
+    }
+    mnuClearPageSelection(window);
+}
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280A90);
 
