@@ -4,6 +4,9 @@
 typedef struct FileNode {
     u32 unk0;              /* 0x0 */
     struct FileNode *next; /* 0x4 */
+    void *unk8;            /* 0x08: duplicated string */
+    u32 unk10;             /* 0x10 */
+    u32 unk14;             /* 0x14 */
 } FileNode;
 
 /* Work record behind the fileManager getters below. */
@@ -27,6 +30,29 @@ typedef struct FileRequest {
     u16 unk68;
     u16 slot; /* 0x6A */
 } FileRequest;
+
+/* Work area behind the fileMan task (see game/code_00288E70). */
+typedef struct FileManSlot {
+    FileRequest *request; /* 0x24 + 8 * slot */
+    u32 unk4;
+} FileManSlot;
+
+typedef struct FileManWork {
+    s32 sema;    /* 0x00 */
+    u8 pad04;
+    u8 nextSlot; /* 0x05 */
+    u8 pad06;
+    u8 freeSlots; /* 0x07 */
+    void *unk8;  /* 0x08 */
+    u8 pad0C[0xC];
+    u32 unk18;   /* 0x18 */
+    u32 buffer;  /* 0x1C */
+    u8 pad20[4];
+    FileManSlot slots[4]; /* 0x24 */
+} FileManWork;
+
+extern FileManWork D_003DC658;
+
 
 extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
 
@@ -121,27 +147,6 @@ void func_00288C50(u32 id) {
     fileWaitReady(id);
 }
 
-/* Work area behind the fileMan task (see game/code_00288E70). */
-typedef struct FileManSlot {
-    FileRequest *request; /* 0x24 + 8 * slot */
-    u32 unk4;
-} FileManSlot;
-
-typedef struct FileManWork {
-    s32 sema;    /* 0x00 */
-    u8 pad04;
-    u8 nextSlot; /* 0x05 */
-    u8 pad06;
-    u8 freeSlots; /* 0x07 */
-    void *unk8;  /* 0x08 */
-    u8 pad0C[0xC];
-    u32 unk18;   /* 0x18 */
-    u32 buffer;  /* 0x1C */
-    u8 pad20[4];
-    FileManSlot slots[4]; /* 0x24 */
-} FileManWork;
-
-extern FileManWork D_003DC658;
 
 /* Spin until the file manager has no work left. */
 void fileWaitIdle(void) {
