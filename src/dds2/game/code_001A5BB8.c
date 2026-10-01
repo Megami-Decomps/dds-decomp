@@ -67,6 +67,23 @@ extern u8 D_003B4DC0[];
 extern s32 D_00435E00;
 
 extern void *D_003B4E88[];
+typedef struct EncBgEntry {
+    s32 unk00;
+    s16 unk04;
+    s16 unk06;
+    s16 unk08;
+    s16 unk0A;
+} EncBgEntry;
+
+typedef struct EncBgRow {
+    s32 unk00;
+    EncBgEntry entries[64];
+} EncBgRow;
+
+extern EncBgRow *D_00435E14;
+
+extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
+
 
 typedef struct ActorEntrySlot {
     s16 code;
@@ -129,6 +146,7 @@ typedef struct BattleEffect {
 extern s32 D_003B4F70[];
 
 extern s32 D_00435E20;
+extern u32 func_0011AA58(s32, s32);
 
 extern s32 btlTrackedTaskHandles;
 
@@ -832,7 +850,17 @@ void func_001A9910(void) {
     D_004366E8 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlAdvanceRuntimeSequenceCounter);
+u64 btlAdvanceRuntimeSequenceCounter(void) {
+    s64 value = D_004366E8 + 1;
+
+    if (value < 0) {
+        value = 1;
+        D_004366E8 = value;
+    } else {
+        D_004366E8 = value;
+    }
+    return value;
+}
 
 void btlClearModelFlagRange(void) {
     s32 temp_v0;
@@ -1014,7 +1042,33 @@ void btlResetActorEntryState(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA400);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlResolveQueuedSceneRequestParameters);
+s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
+    s32 buffer[2];
+    s16 i;
+
+    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == 0) {
+        return 0;
+    }
+    for (i = 0; i < 0x10; i++) {
+        if (D_00435E14[i].unk00 + 0xC8 != buffer[0]) {
+            continue;
+        }
+        *outCode = D_00435E14[i].unk00 + 0xC8;
+        if (D_00435E14[i].entries[buffer[1]].unk08 != -1 &&
+            mdlFlagTest(D_00435E14[i].entries[buffer[1]].unk08) != 0) {
+            *outParameter = D_00435E14[i].entries[buffer[1]].unk0A;
+            return 1;
+        }
+        if (D_00435E14[i].entries[buffer[1]].unk04 != -1 &&
+            mdlFlagTest(D_00435E14[i].entries[buffer[1]].unk04) != 0) {
+            *outParameter = D_00435E14[i].entries[buffer[1]].unk06;
+            return 1;
+        }
+        *outParameter = D_00435E14[i].entries[buffer[1]].unk00;
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_001AA6F8(void) {
     return btlRuntime;
@@ -1188,7 +1242,29 @@ void func_001AB8D8(void) {
     func_00119A78();
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlApplyCommandAbilityMultiplier);
+s32 btlApplyCommandAbilityMultiplier(s32 battler, s32 command) {
+    u32 value = func_0011AA58(battler, command);
+    f32 scale;
+
+    if (value == 0) {
+        return 0;
+    }
+    scale = 1.0f;
+    switch (*(u8 *)(D_00435E20 + command * 56 + 3)) {
+    case 1:
+        if (btlCheckSpecialAbility(battler, 0x254)) {
+            scale = *(f32 *)((u8 *)D_00435E2C + 0x1A0);
+        }
+        break;
+    case 2:
+        if (btlCheckSpecialAbility(battler, 0x255)) {
+            scale = *(f32 *)((u8 *)D_00435E2C + 0x1A8);
+        }
+        break;
+    }
+    value = (s32)((f32)value * scale);
+    return value == 0 ? 1 : value;
+}
 
 s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
     s32 value = D_00435E24[slot * 16 - 0x1aa4];
@@ -1276,7 +1352,33 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC750);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ACD10);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlEncodeActorIndexAsSelectionMask);
+u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
+    u32 mask;
+    switch (id) {
+    case 0xFFFFFFFF: mask = 0x1; break;
+    case 0: mask = 0x2; break;
+    case 1: mask = 0x4; break;
+    case 2: mask = 0x8; break;
+    case 3: mask = 0x10; break;
+    case 4: mask = 0x20; break;
+    case 5: mask = 0x40; break;
+    case 6: mask = 0x80; break;
+    case 7: mask = 0x100; break;
+    case 8: mask = 0x200; break;
+    case 9: mask = 0x400; break;
+    case 10: mask = 0x800; break;
+    case 11: mask = 0x1000; break;
+    case 12: mask = 0x2000; break;
+    case 13: mask = 0x4000; break;
+    case 14: mask = 0x8000; break;
+    case 15: mask = 0x10000; break;
+    case 16: mask = 0x20000; break;
+    case 17: mask = 0x40000; break;
+    case 18: mask = 0x80000; break;
+    default: mask = 0; break;
+    }
+    return mask;
+}
 
 void func_001AD090(void) {
     func_00119F68();
@@ -2432,7 +2534,26 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B18);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5A20);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlPopulateCommandPanelGrid);
+typedef struct BattleCmdPanelGridTable {
+    u8 values[30];
+} BattleCmdPanelGridTable;
+
+extern const BattleCmdPanelGridTable D_00415B80;
+extern const BattleCmdPanelGridTable D_00415BA0;
+
+void btlPopulateCommandPanelGrid(void) {
+    BattleCmdPanelGridTable table1 = D_00415B80;
+    BattleCmdPanelGridTable table2 = D_00415BA0;
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        *(u8 *)(btlCommandPanelWork + 0x14 + i * 0x10) =
+            table1.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
+        *(u8 *)(btlCommandPanelWork + 0x64 + i * 0x10) =
+            table2.values[*(s8 *)(btlCommandPanelWork + 1) * 5 + i];
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5E98);
 
@@ -2837,7 +2958,48 @@ u32 func_001B8740(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlReplaceDialogTasksAndQueueMessage);
+typedef struct MsgQueueTaskData {
+    s32 task;
+    s32 id;
+    s32 unk08;
+    u8 pad0C[4];
+    s32 value;
+} MsgQueueTaskData;
+
+extern void *sdfAllocAndClearQuadwords(s32);
+extern void func_001BF690(s32);
+extern void btlReleaseDialogTaskData(s32);
+extern s32 btlGetTrackedTaskHandle(s32);
+extern void btlSetTrackedTaskHandle(s32, s32);
+
+s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
+    s32 context = func_001AA6F8();
+    s32 task = btlGetTrackedTaskHandle(0);
+    MsgQueueTaskData *data;
+
+    if (func_001B8740() != 0) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
+    if (func_001B8538() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+    }
+    if (func_001B81E8() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+    }
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(10), 0);
+    }
+    data->id = arg0;
+    data->unk08 = arg1;
+    data->value = 0x2D;
+    task = kwlnTaskCreate((s32)D_004367C4, 0x2B0E, 1, 1, func_001BF690,
+                          btlReleaseDialogTaskData, data);
+    func_00101968(*(s32 *)(context + 0x2C4), task);
+    data->task = task;
+    btlSetTrackedTaskHandle(0, task);
+    return 1;
+}
 
 s32 btlGetTrackedTaskHandle(s32 arg0) {
     s32 temp_v0;
