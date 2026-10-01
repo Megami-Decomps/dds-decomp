@@ -32,26 +32,34 @@ typedef struct {
     MtrMid *mid;   /* 0x18 */
 } MtrRoot;
 
-/* Mantra context fields reset when the menu task is (re)created. */
-typedef struct {
-    u8 pad0[0xB1D0]; /* 0x0 */
-    u32 unkB1D0;     /* 0xB1D0 */
-    u32 unkB1D4;     /* 0xB1D4 */
-    u32 unkB1D8;     /* 0xB1D8 */
-} MtrCtx;
+/* A focused view of the staff menu's CampVisualWork (code_002A9068). */
+typedef struct CampVisualWork {
+    u8 pad00[0x60];
+    u32 drawContext;        /* 0x60 */
+    u8 pad64[0x8C];
+    u32 panelResource;      /* 0xF0 */
+    u8 padF4[0x10];
+    MtrRoot *skillFlagRoot; /* 0x104 */
+    u8 pad108[0x10];
+    u32 modelHandle;        /* 0x118 */
+    u8 pad11C[0xB0B4];
+    u32 titleFadingOut;    /* 0xB1D0 */
+    u32 titleOpacity;      /* 0xB1D4 */
+    u32 titleSlide;        /* 0xB1D8 */
+} CampVisualWork;
 
 u32 func_002AAEA0(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
     if (mnuUseFieldSkillOnParty(0xA928 + context, context + 0x284, 0) == 0) {
-        ((MtrRoot *)*(u32 *)(context + 0x104))->mid->sub->flags |= 1;
+        ((CampVisualWork *)context)->skillFlagRoot->mid->sub->flags |= 1;
     } else {
-        ((MtrRoot *)*(u32 *)(context + 0x104))->mid->sub->flags &= ~1;
+        ((CampVisualWork *)context)->skillFlagRoot->mid->sub->flags &= ~1;
     }
-    ((MtrCtx *)context)->unkB1D4 = 0;
-    ((MtrCtx *)context)->unkB1D0 = 0;
-    ((MtrCtx *)context)->unkB1D8 = -0x32;
+    ((CampVisualWork *)context)->titleOpacity = 0;
+    ((CampVisualWork *)context)->titleFadingOut = 0;
+    ((CampVisualWork *)context)->titleSlide = -0x32;
     return 1;
 }
 
@@ -59,7 +67,7 @@ u32 func_002AAF40(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    *(u32 *)(context + 0xb1d0) = 1;
+    ((CampVisualWork *)context)->titleFadingOut = 1;
     return 1;
 }
 
@@ -79,7 +87,7 @@ u32 func_002AB1E8(void) {
 
     context = kwlnTaskGetUserValue();
     func_002A9460(5, context);
-    mnuConfigurePanelResource(*(u32 *)(context + 0x118), *(u32 *)(context + 0xF0), 0, 0);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->panelResource, 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -89,7 +97,7 @@ u32 func_002AB240(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    mnuConfigurePanelResource(*(u32 *)(context + 0x118), *(u32 *)(context + 0x60), 0, 1);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->drawContext, 0, 1);
     return 1;
 }
 
@@ -112,9 +120,9 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
 
     context = kwlnTaskGetUserValue();
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
-    func_002BB510(-0x10, -8, 0, *(u32 *)(context + 0x118), 0x54);
+    func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
-    func_002AA7A0(2, *(u32 *)(context + 0x60));
+    func_002AA7A0(2, ((CampVisualWork *)context)->drawContext);
     return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, arg0);
 }
 

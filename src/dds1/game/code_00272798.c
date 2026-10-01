@@ -18,6 +18,18 @@ extern void mnuCreateStaffImageSprite(s32);
 
 extern void func_002723B0(s32, u32);
 
+/* Staff-display fields of CampMenuContext (code_00274B80). */
+typedef struct StaffScreenContext {
+    u8 pad00[0x6C];
+    u32 displayVariant; /* 0x6C */
+    u8 pad70[8];
+    u32 actor;          /* 0x78 */
+    u8 pad7C[0x98];
+    u32 staffResource;  /* 0x114 */
+    u8 pad118[0x20];
+    u32 display;        /* 0x138 */
+} StaffScreenContext;
+
 INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
@@ -31,7 +43,7 @@ void func_002729C8(s32 request) {
 s32 mnuStartStaffDisplay(void) {
     u8 *context = (u8 *)kwlnTaskGetUserValue();
     mnuSetStaffDisplayMode(5, context);
-    func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x114), 0, 1);
+    func_0027E790(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->staffResource, 0, 1);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -41,7 +53,7 @@ u32 func_00272A58(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_0027E790(*(u32 *)(context + 0x138), *(u32 *)(context + 0x6c), 0, 1);
+    func_0027E790(((StaffScreenContext *)context)->display, ((StaffScreenContext *)context)->displayVariant, 0, 1);
     return 1;
 }
 
@@ -64,9 +76,9 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
 
     context = kwlnTaskGetUserValue();
     mnuDrawBackdrop(context + 0x13C, 0x20);
-    func_0027E8D8(-0x10, -8, 0, *(u32 *)(context + 0x138), 0x54);
+    func_0027E8D8(-0x10, -8, 0, ((StaffScreenContext *)context)->display, 0x54);
     mnuCreateStaffImageSprite(0x14);
-    func_002723B0(2, *(u32 *)(context + 0x78));
+    func_002723B0(2, ((StaffScreenContext *)context)->actor);
     return func_00285670(context + 8, (s32 *)(context + 0x54), 1, arg0);
 }
 
