@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_state.h"
 #include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -298,8 +298,6 @@ typedef struct BattleScriptOwner {
     u8 pad00[0x20];
     s32 processNumber; /* +0x20; script process ID is processNumber - 1 */
 } BattleScriptOwner;
-
-/* Battle state fields used while locating and launching battle script resources. */
 
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
@@ -1245,8 +1243,8 @@ s32 func_0022B760(void) {
     BtlState *state = (BtlState *)func_001AA6F8();
     s32 value = 100;
 
-    if (state->queryCallback != NULL) {
-        value = state->queryCallback();
+    if (state->unk_6EC != NULL) {
+        value = state->unk_6EC();
     }
     scrSetIntegerReturnValue(value);
     return 1;
