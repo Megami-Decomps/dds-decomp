@@ -1,11 +1,19 @@
 #include "common.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
+
+extern f32 *D_0037F770[];
+extern u8 D_0037F780[];
 
 typedef struct WorldUnitState {
     u8 pad00[8];
     u32 unit; /* 0x08: passed to the unit value transition helpers */
     u8 pad0C[0x58];
     u32 flags;
-    u8 pad68[0xC];
+    u32 colorA;          /* 0x68 packed from D_0037F770 */
+    u32 colorB;          /* 0x6C packed from D_0037F780 */
+    s16 unk70;           /* 0x70 */
+    u8 pad72[2];
     u32 value74; /* Meaning unknown; exposed by func_00116800. */
 } WorldUnitState;
 
@@ -47,7 +55,29 @@ void func_00116858(void) {
     func_00110B50();
 }
 
-INCLUDE_ASM(const s32, "game/code_001167F8", func_00116870);
+void func_00116870(WorldUnitOwner *object, s32 value) {
+    WorldUnitState *state = object->state;
+    s32 color1[4];
+    s32 color2[4];
+    u32 packed1;
+    u32 packed2;
+
+    state->flags |= 1;
+    if (value == 0) {
+        state->flags &= ~2;
+    } else {
+        state->flags |= 2;
+        state->unk70 = value;
+        VU0_LOAD_VF(vf10, D_0037F770[0]);
+        EE_MMI_RGBA_PACK_F128(packed1);
+        color1[0] = packed1;
+        state->colorA = color1[0];
+        VU0_LOAD_VF(vf10, D_0037F780);
+        EE_MMI_RGBA_PACK(packed2);
+        color2[0] = packed2;
+        state->colorB = color2[0];
+    }
+}
 
 void dds3ClearUnitObjectLowFlags(WorldUnitOwner *object) {
     object->state->flags = object->state->flags & 0xfffffffc;

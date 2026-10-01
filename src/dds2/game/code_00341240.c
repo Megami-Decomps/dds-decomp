@@ -2,6 +2,21 @@
 
 extern u32 effMiscRand(void *state);
 
+extern u16 D_0040BAC0[];
+
+typedef struct ClockTime {
+    u8 pad0;
+    u8 sec;   /* 0x1 */
+    u8 min;   /* 0x2 */
+    u8 hour;  /* 0x3 */
+    u8 day;   /* 0x4 */
+    u8 month; /* 0x5 */
+    u16 year; /* 0x6 */
+} ClockTime;
+
+void func_003412D8(void *state, s32 seed);
+void func_003413F0(ClockTime *now);
+
 extern s8 D_004391E0;
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
@@ -17,7 +32,17 @@ u32 effMiscRandMod(void *state, u32 modulus) {
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003412D8);
 
-INCLUDE_ASM(const s32, "game/code_00341240", func_00341348);
+/* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
+void func_00341348(void *state) {
+    ClockTime now;
+    s32 t;
+
+    func_003413F0(&now);
+    t = now.year * 0x16E + now.day + D_0040BAC0[now.month + 7] + 0xFFF4FF83;
+    t = t * 0x18 + now.hour;
+    t = t * 0x3C + now.min;
+    func_003412D8(state, t * 0x3C + now.sec);
+}
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003413F0);
 

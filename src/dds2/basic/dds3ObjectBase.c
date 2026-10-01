@@ -23,7 +23,58 @@ void dds3ReplaceObjectResource(void *arg0);
 
 extern AdminWork *dds3GetObjectOwnedHandle();
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111A68);
+void mdlDestroyContext(s32 arg0);
+void evtReleaseUnitTransitionWork(void *arg0);
+void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
+void sdfDestroyMotion(void *arg);
+void func_00111480(void *slot, void *owner);
+void func_00110B50(void *node);
+void dds3DestroyWorldIndexNode(u32 node);
+void sdfReleaseChipBlock(void *block);
+void func_00111D68(World *world);
+
+/* ObjBase plus the runtime fields past 0x38. */
+typedef struct ObjBaseFull {
+    u32 flags;
+    u32 unk4;
+    u32 unk8;
+    u32 unkC;
+    void *slots[8];
+    void *extData;
+    s32 unk34;
+    void *unk38;
+    s32 mode;    /* 0x3C */
+    f32 weight;  /* 0x40 */
+    u32 unk44;
+} ObjBaseFull;
+
+/* Free an object base: owner, the slot nodes, its devices and finally the block itself. */
+void func_00111A68(ObjBaseFull *base) {
+    void *owner;
+    void *slot;
+    s32 i;
+
+    owner = base->slots[0];
+    slot = dds3GetSlot(owner, 5);
+    if (slot != NULL) {
+        func_00111480(slot, owner);
+    }
+    for (i = 0; i < 8; i++) {
+        if (i < 3) {
+            if (i > 0) {
+                if (base->slots[i] != NULL) {
+                    func_00110B50(base->slots[i]);
+                }
+            }
+        }
+    }
+    func_00111D68(owner);
+    if (base->unk34 != 0) {
+        sdfReleaseDevSlot(base->unk34, 1, 1);
+    }
+    dds3DestroyWorldIndexNode(base->unk4);
+    sdfReleaseChipBlock(base);
+}
 
 void dds3SetObjectFlags(u32 unused, u32 flags) {
     ObjBase *base;
@@ -82,7 +133,30 @@ u32 dds3GetUnk0C(void) {
     return ((ObjBase *)dds3GetObjectOwnedHandle())->unkC;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111D68);
+/* Tear down the model/context behind an object's primary handle and mark it released (state 3). */
+void func_00111D68(World *world) {
+    ObjBaseFull *base;
+    WorldInfo *info;
+
+    base = (ObjBaseFull *)dds3GetObjectOwnedHandle(world);
+    if (base->unkC != 0) {
+        if (base->unk8 != 1) {
+            if (base->unk8 == 0) {
+                mdlDestroyContext(base->unkC);
+                info = world->info;
+                if (info->primaryObject != NULL) {
+                    evtReleaseUnitTransitionWork(info->primaryObject);
+                    info->primaryObject = NULL;
+                }
+            }
+        } else {
+            sdfReleaseDevSlot(base->unkC, 1, 1);
+            sdfDestroyMotion(base->unk38);
+        }
+        base->unkC = 0;
+        base->unk8 = 3;
+    }
+}
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111E00);
 
