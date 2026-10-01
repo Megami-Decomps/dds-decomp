@@ -51,12 +51,37 @@ typedef struct FileManWork {
     FileManSlot slots[4]; /* 0x24 */
 } FileManWork;
 
+typedef struct FileCleanup {
+    u8 kind;
+    u8 state;
+    u8 pad02[6];
+    void *resource;
+    u32 handle;
+} FileCleanup;
+
+extern s32 btlDestroyStageTask(void *);
+extern void sdfDevQueueReleaseState(u32);
+extern void sdfReleaseChipBlock(void *);
+
 extern FileManWork D_003DC658;
 
 
 extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002887A0);
+s32 func_002887A0(FileCleanup *entry) {
+    if (entry->kind == 1) {
+        return btlDestroyStageTask(entry);
+    }
+    if (entry->state == 6) {
+        if (entry->handle != 0) {
+            sdfDevQueueReleaseState(entry->handle);
+        }
+        sdfReleaseChipBlock(entry->resource);
+        sdfReleaseChipBlock(entry);
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "file/fileManager", func_00288818);
 
