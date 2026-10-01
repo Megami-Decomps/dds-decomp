@@ -129,7 +129,9 @@ extern s32 func_00197760(s32, s32, s32, s32, s32, s32);
 extern u8 D_00347C68[];
 extern u8 D_003482A8[];
 
-void mnuQueueFontGlyphFromAtlasSlot(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
+/* gridX/gridY are the glyph helper's grid cell coordinates (see
+   sdfCounterDrawGlyphAtGridCell); depth is its z argument. */
+void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
     u8 *entry;
     s32 handle;
 
@@ -138,7 +140,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 
     } else {
         entry = D_003482A8 + slot * 32;
     }
-    handle = func_00197760(a0, a1, a2, a3, (s32)entry, 0);
+    handle = func_00197760(gridX, gridY, depth, value, (s32)entry, 0);
     func_001958A0(handle, 1, 0x53);
     frFontQueueGlyphInSelectedSlot(handle);
 }

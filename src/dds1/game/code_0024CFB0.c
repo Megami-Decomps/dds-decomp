@@ -82,9 +82,9 @@ typedef struct PartySlotHeader {
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
 extern PartyFlagPair mnuPartyFlagEventEntries[];
 
-void evtCloseDisplayChannelAndEnsureMessageWindow(s32 arg0) {
+void evtCloseDisplayChannelAndEnsureMessageWindow(void *context) {
     dspCloseChannel();
-    evtCreateMessageWindowIfMissing(*(u32 *)(arg0 + 0x60));
+    evtCreateMessageWindowIfMissing(*(u32 *)((u8 *)context + 0x60));
 }
 
 s32 dspStartFlagEvent(s32 context) {
@@ -297,13 +297,13 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     }
 }
 
-s32 evtReplaceScriptProcessTask(s32 arg0, s32 arg1, s32 *slot) {
+s32 evtReplaceScriptProcessTask(s32 processId, s32 value, s32 *slot) {
     s32 task;
 
     if (slot != 0) {
         evtDestroyRegisteredTaskIfPresent(*slot);
     }
-    task = scrCreateTaskForProcessId(0x7D0, arg0, arg1);
+    task = scrCreateTaskForProcessId(0x7D0, processId, value);
     evtClearActiveFlag(0);
     if (slot != 0) {
         *slot = task;
@@ -376,11 +376,11 @@ s32 evtCreateMessageWindowIfMissing(s32 unused) {
     return 0;
 }
 
-s32 func_0024DA20(s32 arg0) {
+s32 func_0024DA20(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    func_0019C968(dspWindowHandle, 0, arg0);
+    func_0019C968(dspWindowHandle, 0, soundMode);
     return 1;
 }
 
@@ -395,18 +395,18 @@ s32 dspStartEntry(s32 entry) {
     return 1;
 }
 
-s32 evtCaptureMessageWindowSoundMode(s32 arg0) {
+s32 evtCaptureMessageWindowSoundMode(s32 soundMode) {
     if (dspWindowHandle < 0) {
         return 0;
     }
-    D_003BC410 = arg0;
+    D_003BC410 = soundMode;
     dspCapturedSoundMode = sndGetActiveMode();
     return 1;
 }
 
-void evtSetMessageWindowOptionWhenOpen(s32 arg0) {
+void evtSetMessageWindowOptionWhenOpen(s32 option) {
     if (dspWindowHandle >= 0) {
-        D_003BC414 = arg0;
+        D_003BC414 = option;
     }
 }
 
@@ -487,8 +487,8 @@ void func_0024DD78(void) {
     func_0024DC98(1);
 }
 
-void func_0024DD90(s32 arg0, s32 arg1) {
-    func_0019C838(dspWindowHandle, arg0, arg1);
+void func_0024DD90(s32 entryIndex, s32 itemIndex) {
+    func_0019C838(dspWindowHandle, entryIndex, itemIndex);
 }
 
 s8 dspGetWindowStateGate(void) {
@@ -578,8 +578,8 @@ void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
     func_0024E010(x + width - 0xA0, y, y + height, 8, record);
 }
 
-void evtDrawPlainPanel(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
-    func_002C0DD8(arg0, arg1, 0, arg2, arg3, 0x30303040, 0x53);
+void evtDrawPlainPanel(u32 x, u32 y, u32 width, u32 height) {
+    func_002C0DD8(x, y, 0, width, height, 0x30303040, 0x53);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);
