@@ -104,13 +104,13 @@ typedef struct {
 } EffMagatuhiWideSecond;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
-typedef struct EffMagatuhiSrc {
-    f32 f00, f04, f08;
+typedef struct {
+    f32 unk00, unk04, unk08;
     u8 pad0C[4];
-    f32 f10, f14, f18;
+    f32 unk10, unk14, unk18;
     u8 pad1C[4];
-    f32 f20, f24;
-} EffMagatuhiSrc; /* 0x28 */
+    f32 unk20, unk24;
+} EffMagatuhiFloatParams; /* 0x28 */
 
 
 void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
@@ -170,6 +170,8 @@ extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
+/* Clone the first-family parameters; return the work after its state array.
+ * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
@@ -205,19 +207,21 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191AD0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191CD0);
 
-void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiSrc *src) {
+/* Update the first family's scattered float parameters without touching gaps. */
+void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams *src) {
     EffMagatuhiWideFirst *dst = effGetHandlerArg(work->effect);
 
-    dst->head.unk00 = src->f00;
-    dst->head.unk04 = src->f04;
-    dst->head.unk08 = src->f08;
-    dst->head.unk34 = src->f20;
-    dst->head.unk10 = src->f10;
-    dst->head.unk14 = src->f14;
-    dst->head.unk18 = src->f18;
-    dst->head.unk50 = src->f24;
+    dst->head.unk00 = src->unk00;
+    dst->head.unk04 = src->unk04;
+    dst->head.unk08 = src->unk08;
+    dst->head.unk34 = src->unk20;
+    dst->head.unk10 = src->unk10;
+    dst->head.unk14 = src->unk14;
+    dst->head.unk18 = src->unk18;
+    dst->head.unk50 = src->unk24;
 }
 
+/* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * 4 + sizeof(EffMagatuhiWideSecond));
@@ -366,6 +370,7 @@ typedef struct {
     void *buffer;
 } EffMagatuhiRingWork;
 
+/* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagatuhiCreateFourth(EffMagatuhiRingParams *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
@@ -444,7 +449,7 @@ void effMagatuhiInitRingParticles(EffMagatuhiCallback *arg) {
     EffMagatuhiValueWork *valueWork;
     EffMagatuhiRingParticle *particle;
     u32 count;
-    s32 spread;
+    s32 frames;
     u32 maxSteps;
     u32 i;
     u32 steps;
@@ -463,14 +468,16 @@ void effMagatuhiInitRingParticles(EffMagatuhiCallback *arg) {
             count = work->head.count;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
-            spread = work->head.frames;
+            frames = work->head.frames;
             particle = work->particles;
             PCP_COPY_VECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += 3, particle += 3) {
                 effMagatuhiInitParticleA(work, i);
-                delay = effMiscRand(D_003AA868) % spread;
+                delay = effMiscRand(D_003AA868) % frames;
                 particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < delay) {
                     steps = maxSteps;
                     delay -= steps;
@@ -545,6 +552,7 @@ typedef struct {
     void *buffer;
 } EffMagatuhiOrbitWork;
 
+/* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateFifth(EffMagatuhiOrbitParams *src) {
     u32 count = src->count;
     u32 handle = func_003292A8(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
@@ -606,7 +614,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
     EffMagatuhiValueWork *valueWork;
     EffMagatuhiOrbitParticle *particle;
     u32 count;
-    s32 spread;
+    s32 frames;
     u32 maxSteps;
     u32 i;
     u32 steps;
@@ -626,14 +634,16 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
             count = work->head.count;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
-            spread = work->head.frames;
+            frames = work->head.frames;
             particle = work->particles;
             PCP_COPY_VECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += 3, particle += 3) {
                 func_00193668(work, i);
-                delay = effMiscRand(D_003AA868) % spread;
+                delay = effMiscRand(D_003AA868) % frames;
                 particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < delay) {
                     steps = maxSteps;
                     delay -= steps;
@@ -680,6 +690,7 @@ typedef struct {
     void *buffer;
 } EffMagatuhiDriftWork;
 
+/* Clone drift parameters; return the work after its 0x30-byte state array. */
 EffMagatuhiDriftWork *effMagatuhiCreateThird(EffMagatuhiDriftParams *src) {
     u32 count = src->count;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
@@ -737,7 +748,7 @@ void effMagatuhiInitDriftParticles(EffMagatuhiCallback *arg) {
     EffMagatuhiValueWork *valueWork;
     EffMagatuhiDriftParticle *particle;
     u32 count;
-    s32 spread;
+    s32 frames;
     u32 maxSteps;
     u32 i;
     u32 steps;
@@ -757,14 +768,16 @@ void effMagatuhiInitDriftParticles(EffMagatuhiCallback *arg) {
             count = work->head.count;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
-            spread = work->head.frames;
+            frames = work->head.frames;
             particle = work->particles;
             PCP_COPY_VECTOR(origin, work->head.origin);
             VU0_LOAD_MATRIX(work->matrix);
             for (i = 0; i < count; i += 3, particle += 3) {
                 func_00193F10(work, i);
-                delay = effMiscRand(D_003AA868) % spread;
+                delay = effMiscRand(D_003AA868) % frames;
                 particle->delay = delay;
+                /* Keep at most maxSteps samples: skip older state only when
+                 * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < delay) {
                     steps = maxSteps;
                     delay -= steps;
