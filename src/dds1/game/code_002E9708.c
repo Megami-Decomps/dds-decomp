@@ -943,16 +943,16 @@ typedef struct IpuWorker {
     u8 pad08[5];
     u8 queued;
     u8 unk0E;
-    u8 unk0F;
-    u8 unk10;
+    u8 drained;      /* 0x0F: set when the cycle wraps without the drain flag */
+    u8 firstStop;    /* 0x10: set on the first DMA stop, cleared by the worker */
     u8 unk11;
     u8 pad12[3];
     u8 unk15;
     u8 pad16[4];
     u8 unk1A;
     u8 pad1B[0x25];
-    u32 unk40;
-    u32 unk44;
+    u32 cycleLength; /* 0x40: cycle the tick counter counts up to */
+    u32 tickCount;   /* 0x44: incremented per completed DMA, reset at cycleLength */
     u8 pad48[0x1D];
     u8 unk65;
     u8 pad66[2];
@@ -974,22 +974,22 @@ void sdfIpuDmaCompletionWorker(void) {
         if (work->unk70 == 0) {
             work->unk11 = 0;
         }
-        if (work->unk10 == 0) {
-            work->unk10 = 1;
+        if (work->firstStop == 0) {
+            work->firstStop = 1;
         }
         work->unk1A++;
         D_003BDAA4 = 0;
-        work->unk44++;
-        if (work->unk44 == work->unk40) {
+        work->tickCount++;
+        if (work->tickCount == work->cycleLength) {
             if (work->unk15 != 0) {
                 work->unk0E = 0;
-                work->unk44 = 0;
+                work->tickCount = 0;
                 work->unk65 = 0;
             } else {
-                work->unk0F = 1;
+                work->drained = 1;
             }
         }
-        if (work->unk0F == 0) {
+        if (work->drained == 0) {
             interruptsEnabled = func_00312C08();
             sdfStreamNodeAppend((SdfStreamNode *)work, 0);
             if (interruptsEnabled != 0) {
