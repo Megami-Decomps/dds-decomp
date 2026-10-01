@@ -11,8 +11,8 @@ jump_label _1 reserved=0x00000000
 code
 e927_main:
   PROC e927_main
-  PUSHIS 0
-  COMM 0x0000
+  PUSHMSG MSG_000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 e927_dead:
   PROC e927_dead

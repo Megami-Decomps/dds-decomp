@@ -1,0 +1,649 @@
+flw0 1
+profile dds1
+
+header word00=0x00000000 declared_size=0x00000fd2 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0xfd2
+
+section 0 type=0 stride=0x20 count=5 offset=0x60
+  proc "sc02" pc=0 reserved=0x00000000
+  proc "yes" pc=162 reserved=0x00000000
+  proc "no" pc=216 reserved=0x00000000
+  proc "sc11" pc=312 reserved=0x00000000
+  proc "finish" pc=351 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=5 offset=0x100
+  label "_2" pc=158 reserved=0x00000000
+  label "_1" pc=160 reserved=0x00000000
+  label "_4" pc=302 reserved=0x00000000
+  label "_5" pc=309 reserved=0x00000000
+  label "_3" pc=311 reserved=0x00000000
+end
+
+section 2 type=2 stride=0x4 count=360 offset=0x1a0
+  0000: PROC 0x0000  # "sc02"
+  0001: PUSHIS 0x000b
+  0002: COMM 0x004d
+  0003: PUSHI 0x00020001
+  0005: COMM 0x0012
+  0006: PUSHIS 0x0009
+  0007: PUSHIS 0x0003
+  0008: COMM 0x0015
+  0009: PUSHREG
+  000a: POPIX 0x0004
+  000b: PUSHIS 0x0008
+  000c: PUSHIS 0x0003
+  000d: COMM 0x0015
+  000e: PUSHREG
+  000f: POPIX 0x0005
+  0010: PUSHI 0x00030014
+  0012: PUSHIX 0x0005
+  0013: COMM 0x004a
+  0014: PUSHIX 0x0005
+  0015: COMM 0x006a
+  0016: PUSHIS 0x0000
+  0017: PUSHIS 0x0003
+  0018: COMM 0x0015
+  0019: PUSHREG
+  001a: POPIX 0x0002
+  001b: PUSHI 0x00030013
+  001d: PUSHIX 0x0002
+  001e: COMM 0x004a
+  001f: PUSHIS 0x0006
+  0020: PUSHIS 0x0003
+  0021: COMM 0x0015
+  0022: PUSHREG
+  0023: POPIX 0x0003
+  0024: PUSHI 0x00030011
+  0026: PUSHIX 0x0003
+  0027: COMM 0x004a
+  0028: PUSHIX 0x0003
+  0029: COMM 0x006a
+  002a: PUSHIS 0x0002
+  002b: PUSHIX 0x0002
+  002c: COMM 0x004c
+  002d: PUSHIS 0x0008
+  002e: PUSHIS 0x0014
+  002f: PUSHIS 0x0000
+  0030: PUSHI 0x0003000e
+  0032: PUSHIX 0x0002
+  0033: COMM 0x0017
+  0034: PUSHIS 0x003c
+  0035: PUSHIS 0x0000
+  0036: COMM SCREEN_FADE_A
+  0037: PUSHIX 0x0002
+  0038: COMM 0x0049
+  0039: PUSHI 0x00020002
+  003b: COMM 0x0012
+  003c: PUSHI 0x0003000f
+  003e: PUSHIX 0x0002
+  003f: COMM 0x004a
+  0040: PUSHIS 0x0002
+  0041: PUSHIX 0x0002
+  0042: COMM 0x004c
+  0043: PUSHIS 0x0008
+  0044: PUSHIS 0x0013
+  0045: PUSHIS 0x0000
+  0046: PUSHI 0x00030010
+  0048: PUSHIX 0x0002
+  0049: COMM 0x0017
+  004a: PUSHIX 0x0002
+  004b: COMM 0x0049
+  004c: PUSHIS 0x000a
+  004d: PUSHIS 0x000a
+  004e: PUSHIS 0x0004
+  004f: PUSHIX 0x0002
+  0050: COMM 0x0018
+  0051: PUSHIX 0x0002
+  0052: COMM 0x0049
+  0053: PUSHIX 0x0003
+  0054: COMM 0x0069
+  0055: PUSHI 0x00020003
+  0057: COMM 0x0012
+  0058: COMM ACTIVATE_MESSAGE_PANEL
+  0059: PUSHMSG TAKE_02_01
+  005a: COMM MESSAGE_REQUEST_AND_POLL
+  005b: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  005c: PUSHIS 0x0000
+  005d: PUSHIS 0x0000
+  005e: PUSHIS 0x000b
+  005f: PUSHIX 0x0003
+  0060: COMM 0x0018
+  0061: PUSHI 0x0003000c
+  0063: PUSHI 0x00020003
+  0065: COMM 0x0013
+  0066: PUSHI 0x00020003
+  0068: COMM 0x0055
+  0069: PUSHIS 0x000a
+  006a: PUSHIS 0x000a
+  006b: PUSHIS 0x0001
+  006c: PUSHIX 0x0003
+  006d: COMM 0x0018
+  006e: PUSHIS 0x0002
+  006f: PUSHIX 0x0003
+  0070: COMM 0x004b
+  0071: COMM ACTIVATE_MESSAGE_PANEL
+  0072: PUSHMSG TAKE_02_02
+  0073: COMM MESSAGE_REQUEST_AND_POLL
+  0074: PUSHIS 0x0014
+  0075: PUSHIS 0x0014
+  0076: PUSHIS 0x0003
+  0077: PUSHIX 0x0003
+  0078: COMM 0x0018
+  0079: PUSHIS 0x0000
+  007a: PUSHIX 0x0003
+  007b: COMM 0x004b
+  007c: PUSHMSG TAKE_02_03
+  007d: COMM MESSAGE_REQUEST_AND_POLL
+  007e: PUSHMSG TAKE_02_04
+  007f: COMM MESSAGE_REQUEST_AND_POLL
+  0080: PUSHIS 0x001e
+  0081: COMM WAIT_FOR_TIMER_LIMIT
+  0082: PUSHMSG TAKE_02_05
+  0083: COMM MESSAGE_REQUEST_AND_POLL
+  0084: PUSHIS 0x000a
+  0085: PUSHIS 0x000a
+  0086: PUSHIS 0x0004
+  0087: PUSHIX 0x0003
+  0088: COMM 0x0018
+  0089: PUSHIS 0x0005
+  008a: PUSHIX 0x0003
+  008b: COMM 0x004b
+  008c: PUSHMSG TAKE_02_06
+  008d: COMM MESSAGE_REQUEST_AND_POLL
+  008e: PUSHI 0x00020004
+  0090: COMM 0x0012
+  0091: PUSHMSG TAKE_02_07
+  0092: COMM MESSAGE_REQUEST_AND_POLL
+  0093: COMM 0x0004
+  0094: PUSHIS 0x0007
+  0095: COMM 0x0003
+  0096: PUSHREG
+  0097: POPIX 0x0001
+  0098: PUSHIS 0x0000
+  0099: PUSHIX 0x0001
+  009a: EQ
+  009b: IF 0x0000  # "_2"
+  009c: CALL 0x0001  # "yes"
+  009d: GOTO 0x0001  # "_1"
+  009e: CALL 0x0002  # "no"
+  009f: GOTO 0x0001  # "_1"
+  00a0: JUMP 0x0004  # "finish"
+  00a1: END
+  00a2: PROC 0x0001  # "yes"
+  00a3: COMM 0x0005
+  00a4: PUSHI 0x00020002
+  00a6: COMM 0x0012
+  00a7: PUSHIS 0x000f
+  00a8: PUSHIS 0x000f
+  00a9: PUSHIS 0x0004
+  00aa: PUSHIX 0x0003
+  00ab: COMM 0x0018
+  00ac: PUSHIS 0x0005
+  00ad: PUSHIX 0x0003
+  00ae: COMM 0x004b
+  00af: PUSHMSG TAKE_02_Y_01
+  00b0: COMM MESSAGE_REQUEST_AND_POLL
+  00b1: PUSHI 0x00020005
+  00b3: COMM 0x0012
+  00b4: PUSHIS 0x000f
+  00b5: PUSHIS 0x000f
+  00b6: PUSHIS 0x0001
+  00b7: PUSHIX 0x0003
+  00b8: COMM 0x0018
+  00b9: PUSHIS 0x0002
+  00ba: PUSHIX 0x0003
+  00bb: COMM 0x004b
+  00bc: PUSHMSG TAKE_02_Y_02
+  00bd: COMM MESSAGE_REQUEST_AND_POLL
+  00be: PUSHI 0x00020006
+  00c0: COMM 0x0012
+  00c1: PUSHIS 0x003c
+  00c2: COMM WAIT_FOR_TIMER_LIMIT
+  00c3: PUSHIS 0x000f
+  00c4: PUSHIS 0x000f
+  00c5: PUSHIS 0x0004
+  00c6: PUSHIX 0x0003
+  00c7: COMM 0x0018
+  00c8: PUSHIS 0x0005
+  00c9: PUSHIX 0x0003
+  00ca: COMM 0x004b
+  00cb: PUSHMSG TAKE_02_Y_03
+  00cc: COMM MESSAGE_REQUEST_AND_POLL
+  00cd: PUSHMSG TAKE_02_Y_04
+  00ce: COMM MESSAGE_REQUEST_AND_POLL
+  00cf: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  00d0: PUSHIS 0x003c
+  00d1: PUSHIS 0x0000
+  00d2: COMM SCREEN_FADE_B
+  00d3: PUSHIS 0x003c
+  00d4: COMM WAIT_FOR_TIMER_LIMIT
+  00d5: PUSHIS 0x0003
+  00d6: COMM SET_MODEL_FLAG
+  00d7: END
+  00d8: PROC 0x0002  # "no"
+  00d9: COMM 0x0005
+  00da: PUSHI 0x00020002
+  00dc: COMM 0x0012
+  00dd: PUSHIS 0x000a
+  00de: PUSHIS 0x000a
+  00df: PUSHIS 0x0006
+  00e0: PUSHIX 0x0003
+  00e1: COMM 0x0018
+  00e2: PUSHIS 0x0007
+  00e3: PUSHIX 0x0003
+  00e4: COMM 0x004b
+  00e5: PUSHI 0x00020006
+  00e7: COMM 0x0012
+  00e8: PUSHMSG TAKE_02_N_01
+  00e9: COMM MESSAGE_REQUEST_AND_POLL
+  00ea: PUSHIS 0x0009
+  00eb: PUSHIX 0x0003
+  00ec: COMM 0x004b
+  00ed: PUSHMSG TAKE_02_N_02
+  00ee: COMM MESSAGE_REQUEST_AND_POLL
+  00ef: PUSHI 0x00020007
+  00f1: COMM 0x0012
+  00f2: PUSHIX 0x0004
+  00f3: COMM 0x0016
+  00f4: PUSHIX 0x0005
+  00f5: COMM 0x0069
+  00f6: PUSHIS 0x0000
+  00f7: PUSHIS 0x0000
+  00f8: PUSHIS 0x0000
+  00f9: PUSHIX 0x0005
+  00fa: COMM 0x0018
+  00fb: PUSHI 0x0003000d
+  00fd: PUSHI 0x00020007
+  00ff: COMM 0x0013
+  0100: PUSHI 0x00020007
+  0102: COMM 0x0055
+  0103: PUSHIS 0x0014
+  0104: COMM WAIT_FOR_TIMER_LIMIT
+  0105: PUSHIS 0x001e
+  0106: PUSHIS 0x0001
+  0107: COMM SCREEN_FADE_B
+  0108: PUSHIS 0x003c
+  0109: COMM WAIT_FOR_TIMER_LIMIT
+  010a: PUSHIS 0x001e
+  010b: PUSHIS 0x0001
+  010c: COMM SCREEN_FADE_A
+  010d: PUSHI 0x00020008
+  010f: COMM 0x0012
+  0110: PUSHIS 0x000a
+  0111: PUSHIS 0x000a
+  0112: PUSHIS 0x000a
+  0113: PUSHIX 0x0003
+  0114: COMM 0x0018
+  0115: PUSHIS 0x0007
+  0116: PUSHIX 0x0003
+  0117: COMM 0x004b
+  0118: PUSHIS 0x0001
+  0119: PUSHIX 0x0002
+  011a: COMM 0x004b
+  011b: PUSHMSG TAKE_02_N_03
+  011c: COMM MESSAGE_REQUEST_AND_POLL
+  011d: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  011e: PUSHIS 0x003c
+  011f: PUSHIS 0x0000
+  0120: COMM SCREEN_FADE_B
+  0121: PUSHIS 0x003c
+  0122: COMM WAIT_FOR_TIMER_LIMIT
+  0123: COMM 0x004e
+  0124: PUSHIS 0x01c2
+  0125: COMM 0x0067
+  0126: PUSHREG
+  0127: POPIX 0x0006
+  0128: PUSHIS 0x0001
+  0129: PUSHIX 0x0006
+  012a: EQ
+  012b: IF 0x0002  # "_4"
+  012c: CALL 0x0003  # "sc11"
+  012d: GOTO 0x0004  # "_3"
+  012e: PUSHIS 0x0002
+  012f: PUSHIX 0x0006
+  0130: EQ
+  0131: IF 0x0003  # "_5"
+  0132: PUSHIS 0x000a
+  0133: COMM CALL_EVENT
+  0134: GOTO 0x0004  # "_3"
+  0135: CALL 0x0003  # "sc11"
+  0136: GOTO 0x0004  # "_3"
+  0137: END
+  0138: PROC 0x0003  # "sc11"
+  0139: PUSHIS 0x000b
+  013a: COMM 0x004d
+  013b: PUSHIS 0x0000
+  013c: PUSHIS 0x0003
+  013d: COMM 0x0015
+  013e: PUSHREG
+  013f: POPIX 0x0002
+  0140: PUSHI 0x00030010
+  0142: PUSHIX 0x0002
+  0143: COMM 0x004a
+  0144: PUSHI 0x00020008
+  0146: COMM 0x0012
+  0147: PUSHIS 0x003c
+  0148: PUSHIS 0x0000
+  0149: COMM SCREEN_FADE_A
+  014a: PUSHIS 0x003c
+  014b: COMM WAIT_FOR_TIMER_LIMIT
+  014c: COMM ACTIVATE_MESSAGE_PANEL
+  014d: PUSHMSG TAKE_LOSE
+  014e: COMM MESSAGE_REQUEST_AND_POLL
+  014f: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0150: PUSHIS 0x0064
+  0151: COMM WAIT_FOR_TIMER_LIMIT
+  0152: PUSHIS 0x003c
+  0153: PUSHIS 0x0000
+  0154: COMM SCREEN_FADE_B
+  0155: PUSHIS 0x003c
+  0156: COMM WAIT_FOR_TIMER_LIMIT
+  0157: COMM 0x004e
+  0158: PUSHIS 0x000c
+  0159: COMM SET_MODEL_FLAG
+  015a: PUSHI 0x00030037
+  015c: PUSHIS 0x0001
+  015d: COMM 0x005d
+  015e: END
+  015f: PROC 0x0004  # "finish"
+  0160: PUSHIS 0x0001
+  0161: POPIX 0x0001
+  0162: COMM 0x004e
+  0163: PUSHI 0x00030036
+  0165: PUSHIS 0x0001
+  0166: COMM 0x005d
+  0167: END
+end
+
+section 3 type=3 stride=0x1 count=2194 offset=0x740
+  msg1
+  message TAKE_02_01 speaker=0
+    page
+      control f2 08 ff ff
+      font "おうおうおうおう!"
+      newline
+      font "ゲセンの者が物欲しそうに"
+      font "見上げよるわ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "んんっ?"
+      newline
+      font "ひょっとして貴様ら、小生"
+      font "意気にも"
+      newline
+      font "アマテラスさまにお目通り"
+      font "願いたいとか!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_03 speaker=0
+    page
+      control f2 08 ff ff
+      font "んー!"
+      newline
+      font "アマテラスさまにお会いし"
+      font "たいのは解るが"
+      newline
+      font "あいにく…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_04 speaker=0
+    page
+      control f2 08 ff ff
+      font "あいにく、"
+      newline
+      font "あの中にお"
+      glyphs 85cf
+      font "れ中なのだ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_05 speaker=0
+    page
+      control f2 08 ff ff
+      font "こうなったのもアナト!"
+      newline
+      font "あの女のせいなのだ!"
+      newline
+      glyphs 85d0
+      font "の呪いで"
+      glyphs 85d1
+      font "を"
+      glyphs 85d2
+      font "され、心を"
+      glyphs 85d3
+      font "められた!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_06 speaker=0
+    page
+      control f2 08 ff ff
+      font "おお、そうだ!"
+      newline
+      font "ヒマそうな貴様らに"
+      newline
+      glyphs 85d4
+      font "り入ってお"
+      glyphs 85b0
+      font "み"
+      glyphs 83f9
+      font "す!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_07 speaker=0
+    page
+      control f2 08 ff ff
+      font "アマテラスさまのお"
+      glyphs 85d1
+      font "を"
+      newline
+      font "元に戻すという"
+      glyphs 82a8 85d5
+      font "説の神"
+      glyphs 85c3 82a9
+      font "が"
+      newline
+      font "この動物園のどこかにある"
+      font "らしい!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "それを"
+      glyphs 85d7
+      font "し出し"
+      newline
+      font "ここへ"
+      glyphs 85d8
+      font "けてもらいたい!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select TAKE_02_SEL_01
+    option
+      control f2 08 ff ff
+      font "もちろんだ、"
+      glyphs 85d9
+      font "せてくれ"
+    endoption
+    option
+      control f2 08 ff ff
+      font "俺はアマテラスを殺しに来"
+      font "た"
+    endoption
+  endselect
+  message TAKE_02_Y_01 speaker=0
+    page
+      control f2 08 ff ff
+      font "おお、そう来ると思ってま"
+      font "したぞ!"
+      newline
+      font "いやいや、"
+      glyphs 85ab
+      font "くまでもなかったですなあ"
+      font "!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_Y_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "ところで"
+      glyphs 82a8 85d5
+      font "説の神"
+      glyphs 85c3 82a9
+      font "だが…"
+      newline
+      font "いったいどこにあるんでし"
+      font "ょうなあ!"
+      newline
+      font "私にも皆目見"
+      glyphs 8591
+      font "が付かん!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_Y_03 speaker=0
+    page
+      control f2 08 ff ff
+      font "おおっ、そうだ!"
+      newline
+      font "こもれびの小"
+      glyphs 85dc
+      font "には"
+      glyphs 82a8
+      font "物知りな悪魔"
+      glyphs 82a9
+      font "が"
+      newline
+      font "多いと"
+      glyphs 85ab
+      font "く!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 85df
+      font "らなら"
+      newline
+      font "何か知っているかもしれま"
+      font "せんぞ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_Y_04 speaker=0
+    page
+      control f2 08 ff ff
+      font "こもれびの小"
+      glyphs 85dc
+      font "はこの"
+      glyphs 8ac7
+      font "手になります!"
+      newline
+      font "さっそく行ってみてはいか"
+      font "がでしょう!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_N_01 speaker=0
+    page
+      control f2 08 ff ff
+      font "なっ、なんと!"
+      newline
+      font "貴様、アナトの刺客であっ"
+      font "たか!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_N_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "アマテラスさま! お逃げ"
+      font "くだされーっ!"
+      newline
+      font "ここは私におまかせを～～"
+      font "～～～～～っ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_02_N_03 speaker=0
+    page
+      control f2 08 ff ff
+      font "追わせるものか!"
+      newline
+      font "貴様の"
+      glyphs 85e4
+      font "手は、この私だ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_LOSE speaker=0
+    page
+      control f2 08 ff ff
+      control f2 09 02 ff
+      font "ア…マテラス様は"
+      newline
+      glyphs 84df
+      font "…所にお戻りだ…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 84df
+      font "所で…とうに結界など"
+      newline
+      glyphs 86e9
+      font "っておられよう…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "貴…様ごとき"
+      glyphs 85f3 8aa5
+      font "にゃ…"
+      newline
+      font "あれは破…れんよ…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "グ…"
+      glyphs 81d4
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    font "タ"
+    glyphs 81c2
+    font "ミカ"
+    glyphs 81d6
+    font "チ"
+  endspeaker
+end

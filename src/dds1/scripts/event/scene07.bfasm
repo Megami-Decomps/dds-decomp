@@ -1,0 +1,302 @@
+flw0 1
+profile dds1
+
+header word00=0x00000000 declared_size=0x000005f8 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0x5f8
+
+section 0 type=0 stride=0x20 count=1 offset=0x60
+  proc "sc07" pc=0 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=0 offset=0x80
+end
+
+section 2 type=2 stride=0x4 count=161 offset=0x80
+  0000: PROC 0x0000  # "sc07"
+  0001: PUSHIS 0x0010
+  0002: COMM 0x004d
+  0003: PUSHI 0x00020001
+  0005: COMM 0x0012
+  0006: PUSHIS 0x0005
+  0007: PUSHIS 0x0003
+  0008: COMM 0x0015
+  0009: PUSHREG
+  000a: POPIX 0x0001
+  000b: PUSHI 0x0003000b
+  000d: PUSHIX 0x0001
+  000e: COMM 0x004a
+  000f: PUSHIX 0x0001
+  0010: COMM 0x006a
+  0011: PUSHIS 0x0000
+  0012: PUSHIS 0x0003
+  0013: COMM 0x0015
+  0014: PUSHREG
+  0015: POPIX 0x0000
+  0016: PUSHI 0x0003000a
+  0018: PUSHIX 0x0000
+  0019: COMM 0x004a
+  001a: PUSHIX 0x0000
+  001b: COMM 0x006a
+  001c: PUSHIS 0x003c
+  001d: PUSHIS 0x0000
+  001e: COMM SCREEN_FADE_A
+  001f: PUSHIS 0x001e
+  0020: COMM WAIT_FOR_TIMER_LIMIT
+  0021: PUSHIS 0x000b
+  0022: PUSHIS 0x0003
+  0023: COMM 0x0015
+  0024: PUSHREG
+  0025: POPIX 0x0002
+  0026: PUSHI 0x0003000e
+  0028: PUSHIX 0x0002
+  0029: COMM 0x004a
+  002a: PUSHI 0x00030007
+  002c: PUSHI 0x00020001
+  002e: COMM 0x0013
+  002f: PUSHI 0x00020001
+  0031: COMM 0x0055
+  0032: PUSHIX 0x0001
+  0033: COMM 0x0069
+  0034: COMM ACTIVATE_MESSAGE_PANEL
+  0035: PUSHMSG KIKU_01_01
+  0036: COMM MESSAGE_REQUEST_AND_POLL
+  0037: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0038: PUSHI 0x00020002
+  003a: COMM 0x0012
+  003b: PUSHI 0x00030008
+  003d: PUSHI 0x00020002
+  003f: COMM 0x0013
+  0040: PUSHI 0x00020002
+  0042: COMM 0x0055
+  0043: PUSHIS 0x002b
+  0044: COMM 0x000b
+  0045: COMM ACTIVATE_MESSAGE_PANEL
+  0046: PUSHMSG KIKU_01_02
+  0047: COMM MESSAGE_REQUEST_AND_POLL
+  0048: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0049: PUSHIS 0x0002
+  004a: PUSHIX 0x0001
+  004b: COMM 0x004c
+  004c: PUSHIS 0x0008
+  004d: PUSHIS 0x001e
+  004e: PUSHIS 0x0000
+  004f: PUSHI 0x0003000c
+  0051: PUSHIX 0x0001
+  0052: COMM 0x0017
+  0053: PUSHIX 0x0001
+  0054: COMM 0x0049
+  0055: PUSHIS 0x003c
+  0056: COMM WAIT_FOR_TIMER_LIMIT
+  0057: COMM ACTIVATE_MESSAGE_PANEL
+  0058: PUSHMSG KIKU_01_03
+  0059: COMM MESSAGE_REQUEST_AND_POLL
+  005a: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  005b: PUSHIS 0x002c
+  005c: COMM 0x000b
+  005d: PUSHIS 0x000a
+  005e: PUSHIS 0x000a
+  005f: PUSHIS 0x0004
+  0060: PUSHIX 0x0001
+  0061: COMM 0x0018
+  0062: COMM ACTIVATE_MESSAGE_PANEL
+  0063: PUSHMSG KIKU_01_04
+  0064: COMM MESSAGE_REQUEST_AND_POLL
+  0065: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0066: PUSHIX 0x0001
+  0067: COMM 0x0049
+  0068: PUSHIS 0x002d
+  0069: COMM 0x000b
+  006a: PUSHIS 0x000a
+  006b: PUSHIS 0x000a
+  006c: PUSHIS 0x0005
+  006d: PUSHIX 0x0001
+  006e: COMM 0x0018
+  006f: PUSHIX 0x0001
+  0070: COMM 0x0049
+  0071: PUSHIS 0x003c
+  0072: COMM WAIT_FOR_TIMER_LIMIT
+  0073: PUSHIS 0x0003
+  0074: PUSHIX 0x0001
+  0075: COMM 0x004c
+  0076: PUSHIS 0x002e
+  0077: COMM 0x000b
+  0078: PUSHIS 0x0000
+  0079: PUSHIS 0x0022
+  007a: PUSHIS 0x0000
+  007b: PUSHI 0x0003000d
+  007d: PUSHIX 0x0001
+  007e: COMM 0x0017
+  007f: PUSHIX 0x0001
+  0080: COMM 0x0049
+  0081: PUSHI 0x00020003
+  0083: COMM 0x0012
+  0084: PUSHIX 0x0000
+  0085: COMM 0x0069
+  0086: PUSHI 0x00030009
+  0088: PUSHI 0x00020003
+  008a: COMM 0x0013
+  008b: PUSHI 0x00020003
+  008d: COMM 0x0055
+  008e: COMM ACTIVATE_MESSAGE_PANEL
+  008f: PUSHMSG KIKU_01_05
+  0090: COMM MESSAGE_REQUEST_AND_POLL
+  0091: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0092: PUSHIS 0x003c
+  0093: PUSHIS 0x0000
+  0094: COMM SCREEN_FADE_B
+  0095: PUSHIS 0x003c
+  0096: COMM WAIT_FOR_TIMER_LIMIT
+  0097: PUSHIS 0x0011
+  0098: COMM SET_MODEL_FLAG
+  0099: COMM 0x004e
+  009a: PUSHIS 0x01c6
+  009b: COMM 0x0067
+  009c: PUSHI 0x0003002d
+  009e: PUSHIS 0x0009
+  009f: COMM 0x005d
+  00a0: END
+end
+
+section 3 type=3 stride=0x1 count=756 offset=0x304
+  msg1
+  message KIKU_01_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      font "そこにおるんは"
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f2 06 01 ff
+      font "人間"
+      control f2 06 02 ff
+      font "かいの"
+      control f2 06 01 ff
+      font "?"
+      control f2 06 01 ff
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KIKU_01_02 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      glyphs 81ec 81d4 81ec 81d4 81ec 81d4 81ec 81d4 81ec 81d4 81ec
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f2 06 01 ff
+      font "驚"
+      control f2 06 02 ff
+      font "かせてしもうたかの"
+      glyphs 80e7
+      control f2 06 01 ff
+      font "?"
+      control f2 06 01 ff
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KIKU_01_03 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      font "人間"
+      control f2 06 02 ff
+      font "に"
+      control f2 06 01 ff
+      font "会"
+      control f2 06 02 ff
+      font "うのは"
+      control f2 06 01 ff
+      font "久方"
+      control f2 06 02 ff
+      font "ぶりじゃ"
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KIKU_01_04 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      font "それも"
+      control f2 06 01 ff
+      glyphs 85f3
+      control f2 06 02 ff
+      font "い"
+      control f2 06 01 ff
+      font "男"
+      control f2 06 02 ff
+      font "となると"
+      control f2 06 01 ff
+      newline
+      control f2 06 01 ff
+      glyphs 8485
+      font "年"
+      control f2 06 02 ff
+      font "は"
+      control f2 06 01 ff
+      font "会"
+      control f2 06 02 ff
+      font "うとらん"
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KIKU_01_05 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      font "互"
+      control f2 06 02 ff
+      font "いを"
+      control f2 06 01 ff
+      font "許"
+      control f2 06 02 ff
+      font "し"
+      control f2 06 01 ff
+      glyphs 83e8
+      control f2 06 02 ff
+      font "うには"
+      control f2 06 01 ff
+      glyphs 85f7 85f8
+      control f2 06 02 ff
+      font "が"
+      control f2 06 01 ff
+      font "必要"
+      control f2 06 02 ff
+      font "じゃ"
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f2 06 02 ff
+      font "では"
+      control f2 06 01 ff
+      font "、"
+      control f2 06 01 ff
+      font "始"
+      control f2 06 02 ff
+      font "めるぞ"
+      control f2 06 01 ff
+      font "…"
+      control f2 06 01 ff
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    font "キクリヒメ"
+  endspeaker
+end

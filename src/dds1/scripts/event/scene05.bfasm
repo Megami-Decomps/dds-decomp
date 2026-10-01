@@ -1,0 +1,456 @@
+flw0 1
+profile dds1
+
+header word00=0x00000000 declared_size=0x00000a78 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0xa78
+
+section 0 type=0 stride=0x20 count=1 offset=0x60
+  proc "sc05" pc=0 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=3 offset=0x80
+  label "_2" pc=282 reserved=0x00000000
+  label "_3" pc=289 reserved=0x00000000
+  label "_1" pc=292 reserved=0x00000000
+end
+
+section 2 type=2 stride=0x4 count=293 offset=0xe0
+  0000: PROC 0x0000  # "sc05"
+  0001: PUSHIS 0x000e
+  0002: COMM 0x004d
+  0003: PUSHIS 0x0007
+  0004: PUSHIS 0x0003
+  0005: COMM 0x0015
+  0006: PUSHREG
+  0007: POPIX 0x0001
+  0008: PUSHIS 0x0000
+  0009: PUSHIS 0x0003
+  000a: COMM 0x0015
+  000b: PUSHREG
+  000c: POPIX 0x0000
+  000d: PUSHI 0x00030013
+  000f: PUSHIX 0x0000
+  0010: COMM 0x004a
+  0011: PUSHIS 0x0004
+  0012: PUSHIS 0x0003
+  0013: COMM 0x0015
+  0014: PUSHREG
+  0015: POPIX 0x0002
+  0016: PUSHI 0x00030015
+  0018: PUSHIX 0x0002
+  0019: COMM 0x004a
+  001a: PUSHIX 0x0002
+  001b: COMM 0x006a
+  001c: PUSHIS 0x0003
+  001d: PUSHIS 0x0003
+  001e: COMM 0x0015
+  001f: PUSHREG
+  0020: POPIX 0x0003
+  0021: PUSHI 0x00030019
+  0023: PUSHIX 0x0003
+  0024: COMM 0x004a
+  0025: PUSHIS 0x0000
+  0026: PUSHIS 0x0000
+  0027: PUSHIS 0x0001
+  0028: PUSHIX 0x0003
+  0029: COMM 0x0018
+  002a: PUSHIS 0x0001
+  002b: PUSHIX 0x0003
+  002c: COMM 0x004b
+  002d: PUSHIX 0x0003
+  002e: COMM 0x006a
+  002f: PUSHIS 0x003c
+  0030: PUSHIS 0x0000
+  0031: COMM SCREEN_FADE_A
+  0032: PUSHIS 0x001e
+  0033: COMM WAIT_FOR_TIMER_LIMIT
+  0034: PUSHI 0x00020001
+  0036: COMM 0x0012
+  0037: PUSHI 0x0003000e
+  0039: PUSHI 0x00020001
+  003b: COMM 0x0013
+  003c: PUSHI 0x00020001
+  003e: COMM 0x0055
+  003f: PUSHIS 0x001e
+  0040: COMM WAIT_FOR_TIMER_LIMIT
+  0041: COMM ACTIVATE_MESSAGE_PANEL
+  0042: PUSHMSG ANATO_01
+  0043: COMM MESSAGE_REQUEST_AND_POLL
+  0044: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0045: PUSHIS 0x000a
+  0046: PUSHIS 0x000a
+  0047: PUSHIS 0x0003
+  0048: PUSHIX 0x0000
+  0049: COMM 0x0018
+  004a: PUSHIS 0x0078
+  004b: COMM WAIT_FOR_TIMER_LIMIT
+  004c: PUSHI 0x00020002
+  004e: COMM 0x0012
+  004f: PUSHIX 0x0002
+  0050: COMM 0x0069
+  0051: PUSHIS 0x001e
+  0052: COMM WAIT_FOR_TIMER_LIMIT
+  0053: PUSHIS 0x000a
+  0054: PUSHIS 0x000a
+  0055: PUSHIS 0x0006
+  0056: PUSHIX 0x0002
+  0057: COMM 0x0018
+  0058: PUSHIX 0x0002
+  0059: COMM 0x0049
+  005a: PUSHI 0x00020003
+  005c: COMM 0x0012
+  005d: PUSHIS 0x0001
+  005e: PUSHIX 0x0002
+  005f: COMM 0x004c
+  0060: PUSHIS 0x0008
+  0061: PUSHIS 0x0011
+  0062: PUSHIS 0x0000
+  0063: PUSHI 0x00030016
+  0065: PUSHIX 0x0002
+  0066: COMM 0x0017
+  0067: COMM ACTIVATE_MESSAGE_PANEL
+  0068: PUSHMSG ANATO_02
+  0069: COMM MESSAGE_REQUEST_AND_POLL
+  006a: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  006b: PUSHIX 0x0002
+  006c: COMM 0x0049
+  006d: PUSHI 0x00020004
+  006f: COMM 0x0012
+  0070: COMM ACTIVATE_MESSAGE_PANEL
+  0071: PUSHMSG ANATO_03
+  0072: COMM MESSAGE_REQUEST_AND_POLL
+  0073: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  0074: PUSHIS 0x000a
+  0075: PUSHIS 0x000a
+  0076: PUSHIS 0x0004
+  0077: PUSHIX 0x0002
+  0078: COMM 0x0018
+  0079: PUSHI 0x0003000f
+  007b: PUSHI 0x00020004
+  007d: COMM 0x0013
+  007e: PUSHI 0x00020004
+  0080: COMM 0x0055
+  0081: PUSHIS 0x003c
+  0082: PUSHIS 0x0001
+  0083: COMM SCREEN_FADE_B
+  0084: PUSHIS 0x0078
+  0085: COMM WAIT_FOR_TIMER_LIMIT
+  0086: PUSHIX 0x0001
+  0087: COMM 0x0016
+  0088: PUSHI 0x00020005
+  008a: COMM 0x0012
+  008b: PUSHIX 0x0000
+  008c: COMM 0x006a
+  008d: PUSHI 0x00030017
+  008f: PUSHIX 0x0002
+  0090: COMM 0x004a
+  0091: PUSHIS 0x003c
+  0092: PUSHIS 0x0001
+  0093: COMM SCREEN_FADE_A
+  0094: PUSHIS 0x001e
+  0095: COMM WAIT_FOR_TIMER_LIMIT
+  0096: COMM ACTIVATE_MESSAGE_PANEL
+  0097: PUSHMSG ANATO_04
+  0098: COMM MESSAGE_REQUEST_AND_POLL
+  0099: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  009a: PUSHI 0x00020006
+  009c: COMM 0x0012
+  009d: PUSHIX 0x0003
+  009e: COMM 0x0069
+  009f: PUSHIS 0x003c
+  00a0: COMM WAIT_FOR_TIMER_LIMIT
+  00a1: PUSHIS 0x000a
+  00a2: PUSHIS 0x000a
+  00a3: PUSHIS 0x0002
+  00a4: PUSHIX 0x0003
+  00a5: COMM 0x0018
+  00a6: PUSHIS 0x0000
+  00a7: PUSHIX 0x0003
+  00a8: COMM 0x004b
+  00a9: PUSHI 0x00030010
+  00ab: PUSHI 0x00020006
+  00ad: COMM 0x0013
+  00ae: PUSHI 0x00020006
+  00b0: COMM 0x0055
+  00b1: PUSHIS 0x003c
+  00b2: COMM WAIT_FOR_TIMER_LIMIT
+  00b3: PUSHI 0x00020007
+  00b5: COMM 0x0012
+  00b6: COMM ACTIVATE_MESSAGE_PANEL
+  00b7: PUSHMSG AMA_01
+  00b8: COMM MESSAGE_REQUEST_AND_POLL
+  00b9: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  00ba: PUSHI 0x00020008
+  00bc: COMM 0x0012
+  00bd: PUSHIX 0x0000
+  00be: COMM 0x0069
+  00bf: PUSHI 0x0003001a
+  00c1: PUSHIX 0x0003
+  00c2: COMM 0x004a
+  00c3: PUSHI 0x00030018
+  00c5: PUSHIX 0x0002
+  00c6: COMM 0x004a
+  00c7: PUSHI 0x00030014
+  00c9: PUSHIX 0x0000
+  00ca: COMM 0x004a
+  00cb: PUSHIS 0x0008
+  00cc: PUSHIS 0x00c8
+  00cd: PUSHIS 0x0000
+  00ce: PUSHI 0x0003001a
+  00d0: PUSHIX 0x0003
+  00d1: COMM 0x0017
+  00d2: COMM ACTIVATE_MESSAGE_PANEL
+  00d3: PUSHMSG AMA_02
+  00d4: COMM MESSAGE_REQUEST_AND_POLL
+  00d5: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  00d6: PUSHIX 0x0003
+  00d7: COMM 0x0049
+  00d8: PUSHIS 0x000a
+  00d9: PUSHIS 0x000a
+  00da: PUSHIS 0x0006
+  00db: PUSHIX 0x0002
+  00dc: COMM 0x0018
+  00dd: PUSHIS 0x000a
+  00de: PUSHIS 0x000a
+  00df: PUSHIS 0x0004
+  00e0: PUSHIX 0x0000
+  00e1: COMM 0x0018
+  00e2: PUSHI 0x00020009
+  00e4: COMM 0x0012
+  00e5: PUSHI 0x00030011
+  00e7: PUSHI 0x00020009
+  00e9: COMM 0x0013
+  00ea: COMM ACTIVATE_MESSAGE_PANEL
+  00eb: PUSHMSG AMA_03
+  00ec: COMM MESSAGE_REQUEST_AND_POLL
+  00ed: PUSHMSG AMA_04
+  00ee: COMM MESSAGE_REQUEST_AND_POLL
+  00ef: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  00f0: PUSHI 0x00020009
+  00f2: COMM 0x0055
+  00f3: COMM ACTIVATE_MESSAGE_PANEL
+  00f4: PUSHMSG AMA_05
+  00f5: COMM MESSAGE_REQUEST_AND_POLL
+  00f6: COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  00f7: PUSHI 0x0002000a
+  00f9: COMM 0x0012
+  00fa: PUSHI 0x00030012
+  00fc: PUSHI 0x0002000a
+  00fe: COMM 0x0013
+  00ff: PUSHIS 0x000a
+  0100: PUSHIS 0x000a
+  0101: PUSHIS 0x0003
+  0102: PUSHIX 0x0003
+  0103: COMM 0x0018
+  0104: PUSHI 0x0002000a
+  0106: COMM 0x0055
+  0107: PUSHIX 0x0003
+  0108: COMM 0x0049
+  0109: PUSHIS 0x0078
+  010a: PUSHIS 0x0001
+  010b: COMM SCREEN_FADE_B
+  010c: PUSHIS 0x003c
+  010d: COMM WAIT_FOR_TIMER_LIMIT
+  010e: COMM 0x004e
+  010f: PUSHIS 0x01c4
+  0110: COMM 0x0067
+  0111: PUSHREG
+  0112: POPIX 0x0004
+  0113: PUSHIS 0x0001
+  0114: PUSHIX 0x0004
+  0115: EQ
+  0116: IF 0x0000  # "_2"
+  0117: PUSHIS 0x0006
+  0118: COMM CALL_EVENT
+  0119: GOTO 0x0002  # "_1"
+  011a: PUSHIS 0x0002
+  011b: PUSHIX 0x0004
+  011c: EQ
+  011d: IF 0x0001  # "_3"
+  011e: PUSHIS 0x000a
+  011f: COMM CALL_EVENT
+  0120: GOTO 0x0002  # "_1"
+  0121: PUSHIS 0x0006
+  0122: COMM CALL_EVENT
+  0123: GOTO 0x0002  # "_1"
+  0124: END
+end
+
+section 3 type=3 stride=0x1 count=1284 offset=0x574
+  msg1
+  message ANATO_01 speaker=none
+    page
+      control f2 08 ff ff
+      font "エーイチ、その光に"
+      glyphs 89bf
+      font "れるな!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANATO_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "これは結界…"
+      newline
+      font "あの女のやりそうなことだ"
+      font "。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "それにしても"
+      glyphs 86f0
+      font "めかしい…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "こもってばかりおるから"
+      newline
+      font "今様のものを知る"
+      glyphs 88b6
+      font "がないのだろう。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANATO_03 speaker=0
+    page
+      control f2 08 ff ff
+      font "さて…"
+      newline
+      font "かような子"
+      glyphs 88b7
+      font "だまし、"
+      newline
+      font "私が一息に解いて見せよう"
+      font "!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "エーイチ!"
+      newline
+      font "しかと見ておけ…"
+      newline
+      font "これがオリエントの神、ア"
+      font "ナトの力だ!!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANATO_04 speaker=0
+    page
+      control f2 08 ff ff
+      font "ここから先は私も"
+      glyphs 888a
+      font "に行こう。"
+      newline
+      font "あの女に無"
+      glyphs 8696 8697
+      font "を"
+      glyphs 88b9
+      font "びねばならんのでな…"
+      newline
+      glyphs 81e6 81e6 81e6 81e6 81e6
+      font "…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AMA_01 speaker=1
+    page
+      control f2 08 ff ff
+      font "アナト!"
+      newline
+      font "よくもこの"
+      glyphs 84d1
+      font "へぬけぬけと…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AMA_02 speaker=1
+    page
+      control f2 08 ff ff
+      font "そなたによって"
+      glyphs 85d2
+      font "されたのは"
+      newline
+      font "我が"
+      glyphs 86f7 85d1
+      font "ばかりでない!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AMA_03 speaker=1
+    page
+      control f2 08 ff ff
+      font "我が名と…"
+      newline
+      font "そして大"
+      glyphs 85b1 859d 88b0 8685
+      font "の神々が"
+      newline
+      glyphs 85d2
+      font "されたのだ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AMA_04 speaker=1
+    page
+      control f2 08 ff ff
+      glyphs 84a2
+      font "えがたきに"
+      glyphs 84a2
+      font "え、"
+      glyphs 88ba
+      font "びがたきを"
+      glyphs 88ba
+      font "び、"
+      newline
+      font "我々日本は再び日の出ずる"
+      font "時を待った。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "そして機は満ちた…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AMA_05 speaker=1
+    page
+      control f2 08 ff ff
+      font "この"
+      glyphs 88bb 87fc
+      font "を今こそ晴らさん!!"
+      newline
+      glyphs 859d 88b0 8685
+      font "の怒りと"
+      glyphs 86ca
+      font "しみを"
+      newline
+      glyphs 83f1 83f2
+      font "の"
+      glyphs 88bc
+      font "にて思い知るがいいわーっ"
+      font "!!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    font "アナト"
+  endspeaker
+  speaker 1
+    font "アマテラス"
+  endspeaker
+end

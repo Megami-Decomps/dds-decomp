@@ -9,8 +9,8 @@ procedure e925_main reserved=0x00000000
 code
 e925_main:
   PROC e925_main
-  PUSHIS 0
-  COMM 0x0000
+  PUSHMSG MSG_000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 end
 

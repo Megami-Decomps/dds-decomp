@@ -9,8 +9,8 @@ procedure e926_main reserved=0x00000000
 code
 e926_main:
   PROC e926_main
-  PUSHIS 0
-  COMM 0x0000
+  PUSHMSG MSG_000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 end
 

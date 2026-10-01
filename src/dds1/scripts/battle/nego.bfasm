@@ -1,0 +1,1742 @@
+flw0 2
+profile dds1
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=42 float=0
+
+procedure NormalNegoStart reserved=0x00000000
+procedure FailNegoStart reserved=0x00000000
+procedure NegoInit reserved=0x00000000
+procedure NegoMain reserved=0x00000000
+procedure NegoExit reserved=0x00000000
+procedure NegoFail reserved=0x00000000
+procedure NegoFailIntr reserved=0x00000000
+procedure NegoFailAttack reserved=0x00000000
+procedure NegoFailEscape reserved=0x00000000
+procedure NegoStart reserved=0x00000000
+procedure NegoStartTest reserved=0x00000000
+procedure AftyBad reserved=0x00000000
+procedure AftyNormal reserved=0x00000000
+procedure AftyGood reserved=0x00000000
+procedure AftyPerfect reserved=0x00000000
+procedure DealMain reserved=0x00000000
+procedure DealMoney reserved=0x00000000
+procedure DealMoneyIntr reserved=0x00000000
+procedure DealMag reserved=0x00000000
+procedure DealItem reserved=0x00000000
+procedure DealSuccess reserved=0x00000000
+procedure DealFail reserved=0x00000000
+procedure RemunareMain reserved=0x00000000
+procedure RemunareJoin reserved=0x00000000
+procedure RemunareMoneyAndGoods reserved=0x00000000
+procedure RemunareMoney reserved=0x00000000
+procedure RemunareMag reserved=0x00000000
+procedure RemunareItem reserved=0x00000000
+procedure RemunareInfo reserved=0x00000000
+procedure RaptureMain reserved=0x00000000
+procedure RaptureJoin reserved=0x00000000
+procedure RaptureMoneyAndGoods reserved=0x00000000
+procedure RaptureMoney reserved=0x00000000
+procedure RaptureMag reserved=0x00000000
+procedure RaptureItem reserved=0x00000000
+procedure RaptureInfo reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _8 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _16 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _27 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _33 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _36 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _38 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _42 reserved=0x00000000
+jump_label _41 reserved=0x00000000
+jump_label _44 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _46 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _40 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _52 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _54 reserved=0x00000000
+jump_label _53 reserved=0x00000000
+jump_label _56 reserved=0x00000000
+jump_label _55 reserved=0x00000000
+jump_label _58 reserved=0x00000000
+jump_label _57 reserved=0x00000000
+jump_label _59 reserved=0x00000000
+jump_label _62 reserved=0x00000000
+jump_label _63 reserved=0x00000000
+jump_label _61 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _66 reserved=0x00000000
+jump_label _64 reserved=0x00000000
+jump_label _68 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _71 reserved=0x00000000
+jump_label _72 reserved=0x00000000
+jump_label _70 reserved=0x00000000
+
+code
+NormalNegoStart:
+  PROC NormalNegoStart
+  CALL NegoInit
+  JUMP NegoMain
+  END
+FailNegoStart:
+  PROC FailNegoStart
+  CALL NegoInit
+  PUSHIS 100
+  POPLIX 0x0000
+  COMM 0x00fb
+  PUSHIS 0
+  POPLIX 0x000d
+  PUSHIS 0
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00d7
+  PUSHIS 0
+  PUSHIS 1
+  MINUS
+  COMM 0x00db
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00db
+  COMM 0x00d5
+  PUSHMSG DUMMY_ERROR
+  COMM MESSAGE_REQUEST_AND_POLL
+  CALL NegoExit
+  PUSHIS 0
+  COMM 0x00fc
+  END
+NegoInit:
+  PROC NegoInit
+  PUSHIS 0
+  POPLIX 0x0000
+  COMM 0x00c8
+  PUSHREG
+  POPLIX 0x0001
+  COMM 0x00c9
+  PUSHREG
+  POPLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00d4
+  PUSHREG
+  POPLIX 0x0003
+  PUSHLIX 0x0002
+  COMM 0x00d4
+  PUSHREG
+  POPLIX 0x0004
+  COMM 0x00d2
+  PUSHREG
+  POPLIX 0x0005
+  COMM 0x00d3
+  PUSHREG
+  POPLIX 0x0006
+  PUSHIS 4
+  PUSHIS 1
+  PUSHLIX 0x0005
+  SUB
+  DIV
+  POPLIX 0x0007
+  PUSHIS 1
+  PUSHIS 4
+  PUSHLIX 0x0007
+  MUL
+  PUSHIS 1
+  PUSHLIX 0x0005
+  SUB
+  SUB
+  ADD
+  POPLIX 0x0007
+  PUSHIS 1
+  POPLIX 0x000d
+  PUSHIS 1
+  PUSHLIX 0x0003
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 1
+  PUSHLIX 0x0004
+  PUSHIS 0
+  COMM 0x0071
+  END
+NegoMain:
+  PROC NegoMain
+  COMM 0x00f4
+  PUSHREG
+  POPLIX 0x000e
+  PUSHIS 0
+  POPLIX 0x000f
+_1:
+  PUSHLIX 0x000e
+  PUSHLIX 0x000f
+  LT
+  IF _2
+  PUSHLIX 0x000f
+  COMM 0x00f5
+  PUSHREG
+  POPLIX 0x0008
+  PUSHLIX 0x0008
+  PUSHLIX 0x0002
+  NEQ
+  IF _5
+  PUSHIS 1
+  PUSHLIX 0x000e
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0010
+  PUSHIS 0
+  PUSHLIX 0x0010
+  EQ
+  IF _3
+  JUMP NegoFailIntr
+  GOTO _3
+_3:
+  GOTO _5
+_5:
+  PUSHIS 1
+  PUSHLIX 0x000f
+  ADD
+  POPLIX 0x000f
+  GOTO _1
+_2:
+  PUSHIS 0
+  PUSHLIX 0x0002
+  COMM 0x00cc
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00cc
+  PUSHIS 16
+  PUSHLIX 0x0001
+  PUSHLIX 0x0002
+  COMM 0x00e4
+  PUSHIS 16
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00e4
+  PUSHIS 16
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00e2
+  PUSHLIX 0x0001
+  COMM 0x00e3
+  PUSHIS 0
+  PUSHIS 1
+  MINUS
+  COMM 0x00db
+  PUSHIS 1
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00db
+  PUSHIS 0
+  PUSHIS 0
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00d8
+  PUSHLIX 0x0005
+  COMM 0x00e5
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0001
+  COMM 0x00cd
+  PUSHIS 30
+  PUSHIS 1
+  MUL
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x00d5
+  PUSHIS 1
+  IF _8
+  CALL NegoStartTest
+  GOTO _7
+_8:
+  PUSHIS 0
+  POPLIX 0x000a
+  CALL NegoFail
+  GOTO _7
+_7:
+  JUMP NegoExit
+  END
+NegoExit:
+  PROC NegoExit
+  PUSHIS 1
+  PUSHIS 1
+  MINUS
+  COMM 0x00db
+  PUSHIS 0
+  PUSHLIX 0x000d
+  NEQ
+  IF _9
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x00d9
+  GOTO _9
+_9:
+  COMM 0x00d6
+  COMM 0x00e6
+  PUSHIS 1
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00cc
+  PUSHIS 16
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0001
+  COMM 0x00e4
+  PUSHIS 16
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0001
+  COMM 0x00e2
+  PUSHIS 0
+  PUSHLIX 0x0002
+  GE
+  IF _11
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00db
+  PUSHIS 0
+  PUSHLIX 0x0002
+  COMM 0x00cc
+  PUSHIS 16
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0002
+  COMM 0x00e4
+  GOTO _11
+_11:
+  PUSHLIX 0x0002
+  COMM 0x00f6
+  PUSHLIX 0x0000
+  COMM 0x00d1
+  END
+NegoFail:
+  PROC NegoFail
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0011
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _14
+  JUMP NegoFailEscape
+  GOTO _13
+_14:
+  JUMP NegoFailAttack
+  GOTO _13
+_13:
+  END
+NegoFailIntr:
+  PROC NegoFailIntr
+  PUSHLIX 0x0008
+  COMM 0x00d4
+  PUSHREG
+  POPLIX 0x0012
+  PUSHIS 1
+  PUSHLIX 0x0012
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 8
+  PUSHIS 5
+  PUSHLIX 0x0008
+  COMM 0x00f8
+  PUSHIS 8
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHIS 12
+  PUSHLIX 0x0008
+  COMM 0x00cd
+  PUSHIS 8
+  PUSHIS 1
+  PUSHLIX 0x0008
+  COMM 0x00d7
+  COMM 0x00d5
+  PUSHMSG DUMMY_FAIL
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHLIX 0x0008
+  COMM 0x00cc
+  COMM 0x00d6
+  PUSHIS 0
+  POPLIX 0x0000
+  PUSHLIX 0x0000
+  COMM 0x00d1
+  END
+NegoFailAttack:
+  PROC NegoFailAttack
+  PUSHIS 0
+  POPLIX 0x0000
+  COMM 0x00e6
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 0
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00d7
+  PUSHIS 0
+  PUSHIS 12
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHLIX 0x000a
+  COMM MESSAGE_REQUEST_AND_POLL
+  END
+NegoFailEscape:
+  PROC NegoFailEscape
+  PUSHIS 3
+  POPLIX 0x0000
+  COMM 0x00e6
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 0
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00d7
+  PUSHIS 0
+  PUSHIS 12
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHIS 0
+  PUSHLIX 0x000c
+  EQ
+  IF _16
+  PUSHIS 1
+  POPLIX 0x0013
+  GOTO _15
+_16:
+  PUSHIS 2
+  POPLIX 0x0013
+  GOTO _15
+_15:
+  PUSHLIX 0x0013
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 30
+  PUSHIS 0
+  PUSHLIX 0x0002
+  COMM 0x00ce
+  PUSHLIX 0x0002
+  COMM 0x00cf
+  PUSHLIX 0x0002
+  COMM 0x00f7
+  PUSHIS 1
+  MINUS
+  POPLIX 0x0002
+  END
+NegoStart:
+  PROC NegoStart
+  PUSHIS 0
+  POPLIX 0x0014
+  PUSHIS 86
+  PUSHLIX 0x0004
+  EQ
+  IF _20
+  PUSHIS 1
+  PUSHLIX 0x0007
+  EQ
+  IF _18
+  PUSHIS 1
+  POPLIX 0x0014
+  GOTO _17
+_18:
+  PUSHIS 3
+  PUSHLIX 0x0007
+  EQ
+  IF _17
+  PUSHIS 2
+  POPLIX 0x0014
+  GOTO _17
+_17:
+  GOTO _20
+_20:
+  PUSHIS 1
+  PUSHLIX 0x0014
+  EQ
+  IF _23
+  JUMP AftyBad
+  GOTO _22
+_23:
+  PUSHIS 0
+  PUSHLIX 0x0014
+  EQ
+  IF _24
+  JUMP AftyNormal
+  GOTO _22
+_24:
+  JUMP AftyPerfect
+  GOTO _22
+_22:
+  END
+NegoStartTest:
+  PROC NegoStartTest
+  PUSHIS 0
+  POPLIX 0x0015
+  PUSHLIX 0x0007
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00fa
+  PUSHREG
+  POPLIX 0x0015
+  PUSHIS 0
+  PUSHLIX 0x0015
+  EQ
+  IF _26
+  JUMP AftyNormal
+  GOTO _25
+_26:
+  PUSHIS 0
+  PUSHLIX 0x0015
+  LT
+  IF _27
+  PUSHIS 1
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0015
+  MUL
+  SUB
+  POPLIX 0x000a
+  JUMP AftyBad
+  GOTO _25
+_27:
+  PUSHIS 1
+  PUSHLIX 0x0015
+  SUB
+  POPLIX 0x000a
+  JUMP AftyPerfect
+  GOTO _25
+_25:
+  END
+AftyBad:
+  PROC AftyBad
+  PUSHIS 15
+  PUSHLIX 0x000a
+  ADD
+  POPLIX 0x000a
+  JUMP NegoFailAttack
+  END
+AftyNormal:
+  PROC AftyNormal
+  PUSHIS 2
+  PUSHLIX 0x0006
+  EQ
+  IF _29
+  JUMP RemunareMain
+  GOTO _28
+_29:
+  PUSHIS 1
+  PUSHLIX 0x0006
+  PUSHIS 10
+  ADD
+  SUB
+  COMM MESSAGE_REQUEST_AND_POLL
+  JUMP DealMain
+  GOTO _28
+_28:
+  END
+AftyGood:
+  PROC AftyGood
+  PUSHIS 0
+  POPLIX 0x0016
+  PUSHIS 0
+  PUSHLIX 0x0016
+  LT
+  IF _31
+  JUMP DealSuccess
+  GOTO _30
+_31:
+  JUMP DealMain
+  GOTO _30
+_30:
+  END
+AftyPerfect:
+  PROC AftyPerfect
+  PUSHIS 13
+  PUSHLIX 0x000a
+  ADD
+  POPLIX 0x000a
+  PUSHLIX 0x000a
+  COMM MESSAGE_REQUEST_AND_POLL
+  JUMP RemunareMain
+  END
+DealMain:
+  PROC DealMain
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0018
+  PUSHIS 0
+  POPLIX 0x000c
+  PUSHIS 0
+  PUSHLIX 0x0018
+  EQ
+  IF _33
+  CALL DealMoney
+  GOTO _32
+_33:
+  PUSHIS 1
+  PUSHLIX 0x0018
+  EQ
+  IF _34
+  CALL DealMag
+  GOTO _32
+_34:
+  CALL DealItem
+  GOTO _32
+_32:
+  PUSHIS 0
+  PUSHLIX 0x000c
+  EQ
+  IF _38
+  PUSHIS 10000
+  COMM 0x000a
+  PUSHREG
+  POPLIX 0x0017
+  PUSHIS 5000
+  PUSHLIX 0x0017
+  LT
+  IF _36
+  PUSHMSG DUMMY_REQ_CONTINUE
+  COMM MESSAGE_REQUEST_AND_POLL
+  JUMP DealMain
+  GOTO _35
+_36:
+  JUMP DealSuccess
+  GOTO _35
+_35:
+  GOTO _37
+_38:
+  JUMP DealFail
+  GOTO _37
+_37:
+  END
+DealMoney:
+  PROC DealMoney
+  PUSHLIX 0x0004
+  COMM 0x0028
+  PUSHREG
+  POPLIX 0x000b
+  PUSHIS 1000
+  PUSHLIX 0x000b
+  MUL
+  POPLIX 0x000b
+  PUSHIS 1
+  PUSHLIX 0x0001
+  COMM 0x00e7
+  PUSHREG
+  POPLIX 0x001a
+  PUSHIS 0
+  POPLIX 0x001b
+_39:
+  PUSHIS 1
+  IF _40
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHIS 0
+  PUSHLIX 0x000b
+  PUSHIS 2
+  COMM 0x0071
+  PUSHLIX 0x001b
+  PUSHIS 18
+  ADD
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 24
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0019
+  PUSHIS 0
+  PUSHLIX 0x0019
+  EQ
+  IF _46
+  PUSHIS 0
+  COMM 0x001f
+  PUSHREG
+  POPLIX 0x001c
+  PUSHLIX 0x000b
+  PUSHLIX 0x001c
+  GE
+  IF _42
+  PUSHLIX 0x000b
+  MINUS
+  COMM 0x001f
+  PUSHIS 0
+  POPLIX 0x000c
+  GOTO _41
+_42:
+  PUSHMSG DUMMY_REQ_EMPTY_MONEY
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 2
+  POPLIX 0x000c
+  GOTO _41
+_41:
+  GOTO _40
+  GOTO _45
+_46:
+  PUSHLIX 0x001b
+  PUSHLIX 0x001a
+  LE
+  IF _44
+  PUSHMSG DUMMY_REQ_FAIL_MONEY
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  POPLIX 0x000c
+  GOTO _40
+  GOTO _43
+_44:
+  PUSHLIX 0x001b
+  COMM 0x00de
+  PUSHREG
+  POPLIX 0x0008
+  PUSHLIX 0x001b
+  COMM 0x00df
+  PUSHREG
+  POPLIX 0x0009
+  CALL DealMoneyIntr
+  PUSHIS 1
+  PUSHLIX 0x001b
+  ADD
+  POPLIX 0x001b
+  GOTO _43
+_43:
+  GOTO _45
+_45:
+  GOTO _39
+_40:
+  END
+DealMoneyIntr:
+  PROC DealMoneyIntr
+  COMM 0x00d6
+  PUSHLIX 0x0001
+  PUSHLIX 0x0008
+  NEQ
+  IF _47
+  PUSHLIX 0x0001
+  POPLIX 0x001d
+  COMM 0x00e6
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00cc
+  PUSHIS 16
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0001
+  COMM 0x00e4
+  PUSHIS 16
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0001
+  COMM 0x00e2
+  PUSHLIX 0x0008
+  POPLIX 0x0001
+  PUSHIS 16
+  PUSHLIX 0x0001
+  PUSHLIX 0x0002
+  COMM 0x00e4
+  PUSHIS 1
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00cc
+  PUSHIS 16
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00e4
+  PUSHIS 16
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x00e2
+  PUSHLIX 0x0001
+  COMM 0x00e3
+  PUSHIS 0
+  PUSHLIX 0x001d
+  COMM 0x00db
+  GOTO _47
+_47:
+  PUSHLIX 0x0009
+  POPLIX 0x0005
+  PUSHLIX 0x0005
+  COMM 0x00e5
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0001
+  COMM 0x00cd
+  PUSHIS 30
+  PUSHIS 1
+  MUL
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  COMM 0x00d5
+  PUSHIS 4113
+  PUSHLIX 0x0009
+  EQ
+  IF _49
+  PUSHIS 2
+  PUSHLIX 0x000b
+  DIV
+  POPLIX 0x000b
+  GOTO _49
+_49:
+  END
+DealMag:
+  PROC DealMag
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHLIX 0x0004
+  COMM 0x0028
+  PUSHREG
+  POPLIX 0x000b
+  PUSHIS 0
+  PUSHLIX 0x000b
+  PUSHIS 2
+  COMM 0x0071
+  PUSHMSG DUMMY_REQ_MAG
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 24
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001f
+  PUSHIS 0
+  PUSHLIX 0x001f
+  EQ
+  IF _54
+  PUSHIS 0
+  COMM 0x001f
+  PUSHREG
+  POPLIX 0x001e
+  PUSHLIX 0x000b
+  PUSHLIX 0x001e
+  GE
+  IF _52
+  PUSHLIX 0x000b
+  MINUS
+  COMM 0x001f
+  PUSHIS 0
+  POPLIX 0x000c
+  GOTO _51
+_52:
+  PUSHMSG DUMMY_REQ_FAIL_MAG
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 2
+  POPLIX 0x000c
+  GOTO _51
+_51:
+  GOTO _53
+_54:
+  PUSHMSG DUMMY_REQ_FAIL_MAG
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  POPLIX 0x000c
+  GOTO _53
+_53:
+  END
+DealItem:
+  PROC DealItem
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHIS 4
+  COMM 0x000a
+  PUSHREG
+  POPLIX 0x000b
+  PUSHIS 3
+  PUSHLIX 0x000b
+  PUSHIS 2
+  COMM 0x0071
+  PUSHMSG DUMMY_REQ_ITEM
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 24
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0021
+  PUSHIS 0
+  PUSHLIX 0x0021
+  EQ
+  IF _58
+  PUSHIS 0
+  PUSHLIX 0x000b
+  COMM 0x0070
+  PUSHREG
+  POPLIX 0x0020
+  PUSHIS 0
+  PUSHLIX 0x0020
+  GT
+  IF _56
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x000b
+  COMM 0x0070
+  PUSHIS 0
+  POPLIX 0x000c
+  GOTO _55
+_56:
+  PUSHMSG DUMMY_REQ_FAIL_ITEM
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 2
+  POPLIX 0x000c
+  GOTO _55
+_55:
+  GOTO _57
+_58:
+  PUSHMSG DUMMY_REQ_FAIL_ITEM
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  POPLIX 0x000c
+  GOTO _57
+_57:
+  END
+DealSuccess:
+  PROC DealSuccess
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0022
+  PUSHIS 0
+  PUSHLIX 0x0022
+  EQ
+  IF _59
+  JUMP NegoFailEscape
+  GOTO _59
+_59:
+  JUMP RemunareMain
+  END
+DealFail:
+  PROC DealFail
+  JUMP RaptureMain
+  END
+RemunareMain:
+  PROC RemunareMain
+  PUSHIS 3
+  POPLIX 0x0000
+  PUSHLIX 0x0006
+  POPLIX 0x0023
+  PUSHIS 1
+  PUSHLIX 0x0023
+  EQ
+  IF _62
+  JUMP RemunareJoin
+  GOTO _61
+_62:
+  PUSHIS 2
+  PUSHLIX 0x0023
+  EQ
+  IF _63
+  JUMP RemunareMoneyAndGoods
+  GOTO _61
+_63:
+  JUMP RemunareInfo
+  GOTO _61
+_61:
+  END
+RemunareJoin:
+  PROC RemunareJoin
+  COMM 0x00e6
+  PUSHIS 0
+  PUSHLIX 0x0001
+  COMM 0x00db
+  PUSHIS 0
+  PUSHIS 1
+  PUSHLIX 0x0002
+  COMM 0x00d7
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHMSG DUMMY_SUCCESS_INVITE
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 30
+  PUSHIS 0
+  PUSHLIX 0x0002
+  COMM 0x00ce
+  PUSHLIX 0x0002
+  COMM 0x00cf
+  PUSHLIX 0x0002
+  COMM 0x00d0
+  PUSHIS 1
+  MINUS
+  POPLIX 0x0002
+  END
+RemunareMoneyAndGoods:
+  PROC RemunareMoneyAndGoods
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0024
+  PUSHIS 0
+  PUSHLIX 0x0024
+  EQ
+  IF _65
+  JUMP RemunareMoney
+  GOTO _64
+_65:
+  PUSHIS 1
+  PUSHLIX 0x0024
+  EQ
+  IF _66
+  JUMP RemunareMag
+  GOTO _64
+_66:
+  JUMP RemunareItem
+  GOTO _64
+_64:
+  END
+RemunareMoney:
+  PROC RemunareMoney
+  PUSHLIX 0x0004
+  COMM 0x0028
+  PUSHREG
+  POPLIX 0x0025
+  PUSHIS 0
+  PUSHLIX 0x0025
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHMSG DUMMY_SUCCESS_MONEY
+  COMM MESSAGE_REQUEST_AND_POLL
+  END
+RemunareMag:
+  PROC RemunareMag
+  PUSHLIX 0x0004
+  COMM 0x0028
+  PUSHREG
+  POPLIX 0x0026
+  PUSHIS 0
+  PUSHLIX 0x0026
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHMSG DUMMY_SUCCESS_MAG
+  COMM MESSAGE_REQUEST_AND_POLL
+  END
+RemunareItem:
+  PROC RemunareItem
+  PUSHIS 0
+  PUSHLIX 0x0004
+  COMM 0x0027
+  PUSHREG
+  POPLIX 0x0027
+  PUSHIS 3
+  PUSHLIX 0x0027
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHMSG DUMMY_SUCCESS_ITEM
+  COMM MESSAGE_REQUEST_AND_POLL
+  END
+RemunareInfo:
+  PROC RemunareInfo
+  PUSHIS 0
+  PUSHIS 11
+  PUSHLIX 0x0002
+  COMM 0x00cd
+  PUSHMSG DUMMY_SUCCESS_INFO
+  COMM MESSAGE_REQUEST_AND_POLL
+  END
+RaptureMain:
+  PROC RaptureMain
+  PUSHIS 0
+  POPLIX 0x0000
+  PUSHLIX 0x0006
+  POPLIX 0x0028
+  PUSHIS 1
+  PUSHLIX 0x0028
+  EQ
+  IF _68
+  JUMP RaptureJoin
+  GOTO _67
+_68:
+  PUSHIS 2
+  PUSHLIX 0x0028
+  EQ
+  IF _69
+  JUMP RaptureMoneyAndGoods
+  GOTO _67
+_69:
+  JUMP RaptureInfo
+  GOTO _67
+_67:
+  END
+RaptureJoin:
+  PROC RaptureJoin
+  PUSHIS 37
+  POPLIX 0x000a
+  JUMP NegoFail
+  END
+RaptureMoneyAndGoods:
+  PROC RaptureMoneyAndGoods
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x000a
+  PUSHREG
+  SUB
+  POPLIX 0x0029
+  PUSHIS 0
+  PUSHLIX 0x0029
+  EQ
+  IF _71
+  JUMP RaptureMoney
+  GOTO _70
+_71:
+  PUSHIS 1
+  PUSHLIX 0x0029
+  EQ
+  IF _72
+  JUMP RaptureMag
+  GOTO _70
+_72:
+  JUMP RaptureItem
+  GOTO _70
+_70:
+  END
+RaptureMoney:
+  PROC RaptureMoney
+  PUSHIS 38
+  POPLIX 0x000a
+  JUMP NegoFail
+  END
+RaptureMag:
+  PROC RaptureMag
+  PUSHIS 39
+  POPLIX 0x000a
+  JUMP NegoFail
+  END
+RaptureItem:
+  PROC RaptureItem
+  PUSHIS 40
+  POPLIX 0x000a
+  JUMP NegoFail
+  END
+RaptureInfo:
+  PROC RaptureInfo
+  PUSHIS 41
+  POPLIX 0x000a
+  JUMP NegoFail
+  END
+end
+
+messages msg1
+  message DUMMY_FAIL speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_ESCAPE speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      glyphs 81c2 81d4
+      font "、やってられるかってんだ"
+      font "!"
+      newline
+      font "あばよ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_ESCAPE_ANGRY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      glyphs 81c2 81d4
+      font "、やってられるかってんだ"
+      font "!"
+      newline
+      font "あばよ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_FAIL_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_FAIL_MAG speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_FAIL_ITEM speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_EMPTY_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_EMPTY_MAG speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_EMPTY_ITEM speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_ATTACK speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "死んで"
+      glyphs 88b9
+      font "びろや!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_PLAN_INVITE speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "オ"
+      glyphs 81fd
+      font "様を引き抜くってか?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_PLAN_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "何かよこせってか?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_PLAN_INFO speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "いい"
+      glyphs 87af 87c6
+      font "はないかだと?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_STYLE_SUCCESS speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "キラーメ"
+      glyphs 81d4
+      font "セージ"
+      glyphs 8083
+      font "1"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_STYLE_SUCCESS2 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "キラーメ"
+      glyphs 81d4
+      font "セージ"
+      glyphs 8083
+      font "2"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_STYLE_FAIL speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      glyphs 81e9 81d4
+      font "、それで脅してるつもりか"
+      font "?"
+      newline
+      font "ガキはとっとと帰んな。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_STYLE_FAIL2 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      glyphs 81e1
+      font "～カ。"
+      newline
+      font "アタマ"
+      glyphs 87e2
+      font "いお前に"
+      newline
+      font "だまされるオ"
+      glyphs 81fd
+      font "かよ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "魔"
+      glyphs 8c93
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_MONEY0 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "魔"
+      glyphs 8c93
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_MONEY1 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "魔"
+      glyphs 8c93
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_MONEY2 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "魔"
+      glyphs 8c93
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_MONEY3 speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "魔"
+      glyphs 8c93
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_MAG speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "マグ"
+      glyphs 81de
+      font "タイト"
+      newline
+    endpage
+  endmessage
+  message DUMMY_REQ_ITEM speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "アイテム"
+      newline
+    endpage
+  endmessage
+  select DUMMY_REQ_SEL
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message DUMMY_REQ_CONTINUE speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+    endpage
+  endmessage
+  message DUMMY_HELP_SUCCESS speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_HELP_FAIL speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_SUCCESS_HELP speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_SUCCESS_NOHELP speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_FAIL_HELP speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_REQ_FAIL_NOHELP speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_SUCCESS_INVITE speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_SUCCESS_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_SUCCESS_MAG speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_SUCCESS_ITEM speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_SUCCESS_INFO speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_INVITE speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_MONEY speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_MAG speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_ITEM speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_FAIL_INFO speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "あ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message DUMMY_ERROR speaker=32768
+    page
+      control f2 08 ff ff
+      control f2 09 01 ff
+      control f2 06 01 ff
+      control f2 02 01 ff
+      control f2 07 09 ff
+      font "まだ何か"
+      glyphs 849e
+      font "か。"
+      newline
+      font "話はもう"
+      glyphs 86e7
+      font "んだろうが!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+end
+
+strings
+  zero 240
+end
