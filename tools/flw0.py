@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Inspect and losslessly rewrite DDS BF/FLW0 script containers.
+"""Inspect, disassemble, and assemble DDS BF/FLW0 script containers.
 
-The writer implemented here preserves the input layout.  It keeps descriptor
-order, offsets, gaps, padding, and bytes outside typed fields exactly as they
-were read.  Edits which require moving or resizing data belong in a separate
-relayout mode and are intentionally rejected by this module.
+Version-1 source preserves descriptor order, offsets, gaps, padding, and bytes
+outside typed fields exactly. Version-2 source resolves symbols and derives a
+canonical physical layout, so code and data can change size.
 """
 
 from __future__ import annotations
@@ -666,7 +665,7 @@ def _parse_code_payload(content: list[tuple[int, str]], section: Section) -> byt
 
 
 def parse_source(text: str) -> Flw0File:
-    """Assemble text produced by :func:`render_source`."""
+    """Assemble physical version-1 or symbolic version-2 source."""
 
     numbered = enumerate(text.splitlines(), 1)
     meaningful = [
@@ -674,8 +673,12 @@ def parse_source(text: str) -> Flw0File:
         for number, line in numbered
         if line.strip() and not line.lstrip().startswith("#")
     ]
+    if meaningful and meaningful[0][1] == "flw0 2":
+        import flw0_symbolic
+
+        return flw0_symbolic.parse(text)
     if not meaningful or meaningful[0][1] != "flw0 1":
-        raise Flw0Error("source must begin with 'flw0 1'")
+        raise Flw0Error("source must begin with 'flw0 1' or 'flw0 2'")
 
     header_values: dict[str, str] | None = None
     section_records: list[tuple[Section, list[tuple[int, str]]]] = []
@@ -894,13 +897,18 @@ def main() -> int:
     rewrite_parser.add_argument("output", type=Path)
 
     disassemble_parser = commands.add_parser(
-        "disassemble", help="write lossless low-level FLW0 source"
+        "disassemble", help="write physical or symbolic FLW0 source"
     )
     disassemble_parser.add_argument("input", type=Path)
     disassemble_parser.add_argument("output", nargs="?", type=Path)
+    disassemble_parser.add_argument(
+        "--symbolic",
+        action="store_true",
+        help="derive symbolic, relayout-capable version-2 source",
+    )
 
     assemble_parser = commands.add_parser(
-        "assemble", help="assemble low-level FLW0 source"
+        "assemble", help="assemble physical or symbolic FLW0 source"
     )
     assemble_parser.add_argument("input", type=Path)
     assemble_parser.add_argument("output", type=Path)
@@ -917,7 +925,13 @@ def main() -> int:
             args.output.write_bytes(parse(args.input.read_bytes()).to_bytes())
             return 0
         if args.command == "disassemble":
-            source = render_source(parse(args.input.read_bytes()))
+            script = parse(args.input.read_bytes())
+            if args.symbolic:
+                import flw0_symbolic
+
+                source = flw0_symbolic.render(script)
+            else:
+                source = render_source(script)
             if args.output is None:
                 print(source, end="")
             else:

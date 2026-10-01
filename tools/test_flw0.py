@@ -6,6 +6,7 @@ from __future__ import annotations
 import struct
 import sys
 import unittest
+from hashlib import sha1
 from pathlib import Path
 
 
@@ -14,6 +15,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import flw0
+import flw0_symbolic
 
 
 def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
@@ -170,6 +172,100 @@ class Flw0Tests(unittest.TestCase):
         parsed = flw0.parse(bytes(original))
         source = flw0.render_source(parsed)
         self.assertEqual(flw0.parse_source(source).to_bytes(), bytes(original))
+
+    def test_symbolic_source_round_trip_is_exact(self) -> None:
+        original = _fixture()
+        source = flw0_symbolic.render(flw0.parse(original))
+        self.assertIn("procedure synthetic_001", source)
+        self.assertIn("PROC synthetic_001", source)
+        self.assertIn("PUSHIS 42", source)
+        self.assertNotIn("declared_size", source)
+        self.assertNotIn("physical_size", source)
+        self.assertEqual(flw0.parse_source(source).to_bytes(), original)
+
+    def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
+        source = """\
+flw0 2
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+procedure main
+procedure helper name="helper_proc" reserved=7
+jump_label finished
+code
+main:
+  PROC main
+  CALL helper
+  IF finished
+helper:
+  PROC helper
+finished:
+  END
+end
+messages
+  bytes 010203
+end
+strings
+  zero 16
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            [word.raw for word in script.code_words()],
+            [7, (1 << 16) | 11, 28, (1 << 16) | 7, 9],
+        )
+        self.assertEqual(
+            [(row.name, row.start_pc, row.reserved) for row in script.named_rows(0)],
+            [("main", 0, 0), ("helper_proc", 3, 7)],
+        )
+        self.assertEqual(
+            [(row.name, row.start_pc) for row in script.named_rows(1)],
+            [("finished", 4)],
+        )
+        self.assertEqual(script.header.int_local_count, 2)
+        self.assertEqual(script.header.float_local_count, 1)
+        self.assertEqual(script.header.declared_size, script.sections[4].offset)
+
+        grown = flw0.parse_source(source.replace("finished:\n", "  PUSHIS -1\nfinished:\n"))
+        self.assertEqual(
+            grown.sections[2].element_count,
+            script.sections[2].element_count + 1,
+        )
+        self.assertEqual(grown.named_rows(1)[0].start_pc, 5)
+        self.assertEqual(grown.named_rows(0)[1].start_pc, 3)
+        self.assertEqual(grown.sections[4].offset, script.sections[4].offset + 4)
+        self.assertEqual(len(grown.to_bytes()), len(script.to_bytes()) + 4)
+        self.assertIn("PUSHIS -1", flw0_symbolic.render(grown))
+
+    def test_symbolic_source_rejects_unresolved_names(self) -> None:
+        source = """\
+flw0 2
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  CALL missing
+end
+messages
+end
+strings
+end
+"""
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown procedure 'missing'"):
+            flw0.parse_source(source)
+
+        without_label = source.replace("main:\n", "")
+        with self.assertRaisesRegex(flw0.Flw0Error, "has no code label"):
+            flw0.parse_source(without_label.replace("  CALL missing\n", "  END\n"))
+
+    def test_tracked_e670_source_assembles_exact_file(self) -> None:
+        path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        rebuilt = flw0.parse_source(path.read_text(encoding="utf-8")).to_bytes()
+        self.assertEqual(len(rebuilt), 436)
+        self.assertEqual(
+            sha1(rebuilt).hexdigest(),
+            "f662f1c11775216fd98f34fb034fec5f8e0e3177",
+        )
 
 
 if __name__ == "__main__":
