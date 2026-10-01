@@ -153,6 +153,86 @@ SHARED_DDS_COMMANDS = (
         0x1E1, "CLEAR_WORLD_OBJECT_PENDING_VALUE", 1, writes_result=False
     ),
     NativeCommand(0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0, writes_result=False),
+    NativeCommand(
+        0x1FA,
+        "READ_SUCTION_WARP_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "STATE_CODE"),
+                    (1, "SOURCE_VECTOR_ID"),
+                    (2, "EFFECT_UNIT_ID"),
+                    (3, "MAP_ENTRY_ID"),
+                    (4, "MOTION_ID"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x1FB,
+        "READ_BARRIER_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "BARRIER_MODEL_FLAG"),
+                    (1, "EFFECT_UNIT_ID"),
+                    (2, "SOURCE_VECTOR_ID"),
+                    (5, "COMPLETION_FLAG"),
+                    (6, "MAP_ENTRY_ID"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(0x1FF, "FIND_FIELD_EFFECT_BY_NAME", 1, writes_result=True),
+    NativeCommand(
+        0x200,
+        "READ_ELEVATOR_TABLE_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "DESTINATION_COUNT"),
+                    (14, "REMAINING_DESTINATIONS"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x208,
+        "READ_LADDER_TABLE_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "DIRECTION"),
+                    (1, "SOURCE_VECTOR_ID"),
+                    (2, "EFFECT_UNIT_ID"),
+                    (3, "USE_DIRECT_ACTION_WINDOW"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x20C,
+        "READ_DOOR_WARP_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(((0, "MOTION_DURATION"), (1, "FADE_MODE"))),
+        ),
+    ),
+    NativeCommand(
+        0x21D,
+        "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT",
+        1,
+        writes_result=True,
+    ),
 )
 
 DDS1_EVENT_IDS = frozenset(

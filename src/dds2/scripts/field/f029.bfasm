@@ -956,14 +956,8 @@ _47:
     EQ
     IF _51
     RESTORE_CAMERA_NODE_MODE()
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0007
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0008
+    local_int[7] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[8] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[7] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1013,14 +1007,8 @@ _53:
     return
     goto _55
   _55:
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0009
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000a
+    local_int[9] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[10] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[9] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1066,14 +1054,8 @@ _61:
     return
     goto _63
   _63:
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000b
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000c
+    local_int[11] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[12] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[11] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1162,14 +1144,8 @@ _74:
   return
 hasigo_label:
   PROC hasigo_label
-  push 0
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x000e
-  push 3
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0011
+  local_int[14] = READ_LADDER_TABLE_VALUE(DIRECTION)
+  local_int[17] = READ_LADDER_TABLE_VALUE(USE_DIRECT_ACTION_WINDOW)
   local_int[13] = 1
 _77:
   if_not (local_int[13]) goto _78
@@ -1188,7 +1164,7 @@ _79:
 _84:
   push 1
   push 6
-  COMM 0x021d
+  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
   PUSHREG
   EQ
   IF _81
@@ -1213,7 +1189,7 @@ _85:
 _90:
   push 1
   push 7
-  COMM 0x021d
+  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
   PUSHREG
   EQ
   IF _87
@@ -1236,14 +1212,8 @@ _78:
   COMM 0x011b
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push 1
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x000f
-  push 2
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0010
+  local_int[15] = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
+  local_int[16] = READ_LADDER_TABLE_VALUE(EFFECT_UNIT_ID)
   ADD_EFFECT_UNIT_TO_WORLD(local_int[16])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[15])
@@ -1552,38 +1522,14 @@ elvstart_label:
   PROC elvstart_label
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   local_int[29] = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
-  push 0
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001e
-  push 14
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0025
-  push 2
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001f
-  push 3
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0020
-  push 4
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0021
-  push 5
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0022
-  push 6
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0023
-  push 7
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0024
+  local_int[30] = READ_ELEVATOR_TABLE_VALUE(DESTINATION_COUNT)
+  local_int[37] = READ_ELEVATOR_TABLE_VALUE(REMAINING_DESTINATIONS)
+  local_int[31] = READ_ELEVATOR_TABLE_VALUE(2)
+  local_int[32] = READ_ELEVATOR_TABLE_VALUE(3)
+  local_int[33] = READ_ELEVATOR_TABLE_VALUE(4)
+  local_int[34] = READ_ELEVATOR_TABLE_VALUE(5)
+  local_int[35] = READ_ELEVATOR_TABLE_VALUE(6)
+  local_int[36] = READ_ELEVATOR_TABLE_VALUE(7)
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(4)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
@@ -1752,26 +1698,11 @@ _176:
   return
 suikomi_label:
   PROC suikomi_label
-  push 0
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x002b
-  push 1
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0028
-  push 2
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0027
-  push 3
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0029
-  push 4
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x002a
+  local_int[43] = READ_SUCTION_WARP_VALUE(STATE_CODE)
+  local_int[40] = READ_SUCTION_WARP_VALUE(SOURCE_VECTOR_ID)
+  local_int[39] = READ_SUCTION_WARP_VALUE(EFFECT_UNIT_ID)
+  local_int[41] = READ_SUCTION_WARP_VALUE(MAP_ENTRY_ID)
+  local_int[42] = READ_SUCTION_WARP_VALUE(MOTION_ID)
   if (local_int[43] == 12) {
     RESTORE_CAMERA_NODE_MODE()
     SCREEN_FADE_B(0, 5)
@@ -1813,13 +1744,11 @@ _181:
       WAIT_FOR_TIMER_LIMIT(5)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[40])
-      push 5
-      COMM 0x01fa
-      PUSHREG
-      IF _183
-      COMM 0x00a4
-      ADD_EFFECT_UNIT_TO_WORLD(-(1))
-      goto _183
+      result = READ_SUCTION_WARP_VALUE(5)
+      if (result) {
+        COMM 0x00a4
+        ADD_EFFECT_UNIT_TO_WORLD(-(1))
+      }
     _183:
       SCREEN_FADE_A(0, 15)
       WAIT_FOR_TIMER_LIMIT(25)
@@ -1873,34 +1802,13 @@ _193:
   return
 baria_label:
   PROC baria_label
-  push 0
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002d
-  push 1
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002e
-  push 2
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002f
-  push 3
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0030
-  push 4
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0030
-  push 5
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0031
-  push 6
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0033
+  local_int[45] = READ_BARRIER_VALUE(BARRIER_MODEL_FLAG)
+  local_int[46] = READ_BARRIER_VALUE(EFFECT_UNIT_ID)
+  local_int[47] = READ_BARRIER_VALUE(SOURCE_VECTOR_ID)
+  local_int[48] = READ_BARRIER_VALUE(3)
+  local_int[48] = READ_BARRIER_VALUE(4)
+  local_int[49] = READ_BARRIER_VALUE(COMPLETION_FLAG)
+  local_int[51] = READ_BARRIER_VALUE(MAP_ENTRY_ID)
   push 0
   push local_int[49]
   COMM TEST_MODEL_FLAG
@@ -2019,10 +1927,7 @@ _207:
     if_not (result) goto _212
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_01)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0034
+    local_int[52] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01))
     PREPARE_UNIT_MOTION_STATE(local_int[52], 1, 10, 20, 3)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
@@ -2085,10 +1990,7 @@ _214:
     if_not (result) goto _226
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_02)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0035
+    local_int[53] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02))
     PREPARE_UNIT_MOTION_STATE(local_int[53], 1, 10, 20, 3)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
@@ -2188,10 +2090,7 @@ _228:
     if (result) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
-      push string(k_01npc_01_2)
-      COMM 0x01ff
-      PUSHREG
-      POPLIX 0x0037
+      local_int[55] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_2))
       PREPARE_UNIT_MOTION_STATE(local_int[55], 1, 10, 20, 3)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -2217,14 +2116,8 @@ _232:
     if (result) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
-      push string(k_01npc_01_3)
-      COMM 0x01ff
-      PUSHREG
-      POPLIX 0x0038
-      push string(k_01npc_02_2)
-      COMM 0x01ff
-      PUSHREG
-      POPLIX 0x0039
+      local_int[56] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_3))
+      local_int[57] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02_2))
       PREPARE_UNIT_MOTION_STATE(local_int[56], 1, 10, 20, 3)
       PREPARE_UNIT_MOTION_STATE(local_int[57], 1, 10, 20, 3)
       WAIT_FOR_TIMER_LIMIT(10)
@@ -2362,7 +2255,7 @@ _236:
   while (1) {
     push 1
     push 11
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _238
@@ -2384,7 +2277,7 @@ _240:
   while (1) {
     push 1
     push 11
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _242
@@ -2607,7 +2500,7 @@ _250:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _252
@@ -3044,7 +2937,7 @@ _304:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _306
@@ -3084,7 +2977,7 @@ _308:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _310
@@ -3666,7 +3559,7 @@ _360:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _362
@@ -3706,7 +3599,7 @@ _364:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _366
@@ -3750,7 +3643,7 @@ _368:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _370
@@ -3776,7 +3669,7 @@ _372:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _374
@@ -3802,7 +3695,7 @@ _376:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _378
@@ -3827,7 +3720,7 @@ _380:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _382
@@ -3852,7 +3745,7 @@ _384:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _386
@@ -3878,7 +3771,7 @@ _388:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _390
@@ -3904,7 +3797,7 @@ _392:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _394
@@ -3929,7 +3822,7 @@ _396:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _398
@@ -3954,7 +3847,7 @@ _400:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _402
@@ -3979,7 +3872,7 @@ _404:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _406
@@ -4006,7 +3899,7 @@ _408:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _410
@@ -4033,7 +3926,7 @@ _412:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _414
@@ -4135,7 +4028,7 @@ _418:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _420
@@ -4160,7 +4053,7 @@ _422:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _424
@@ -4185,7 +4078,7 @@ _426:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _428
@@ -4212,7 +4105,7 @@ _430:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _432
@@ -4237,7 +4130,7 @@ _434:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _436
@@ -4262,7 +4155,7 @@ _438:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _440
@@ -4287,7 +4180,7 @@ _442:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _444
@@ -4313,7 +4206,7 @@ _446:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _448
@@ -4339,7 +4232,7 @@ _450:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _452
@@ -4364,7 +4257,7 @@ _454:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _456
@@ -4389,7 +4282,7 @@ _458:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _460
@@ -4414,7 +4307,7 @@ _462:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _464
@@ -4441,7 +4334,7 @@ _466:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _468
@@ -4468,7 +4361,7 @@ _470:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _472
@@ -4493,7 +4386,7 @@ _474:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _476
@@ -4518,7 +4411,7 @@ _478:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _480
@@ -4543,7 +4436,7 @@ _482:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _484
@@ -4568,7 +4461,7 @@ _486:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _488
@@ -4593,7 +4486,7 @@ _490:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _492
@@ -4618,7 +4511,7 @@ _494:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _496
@@ -4645,7 +4538,7 @@ _498:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _500
@@ -4672,7 +4565,7 @@ _502:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _504
@@ -4861,7 +4754,7 @@ _510:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _512
@@ -4888,7 +4781,7 @@ _514:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _516
@@ -4913,7 +4806,7 @@ _518:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _520
@@ -4939,7 +4832,7 @@ _522:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _524
@@ -4966,7 +4859,7 @@ _526:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _528
@@ -4991,7 +4884,7 @@ _530:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _532
@@ -5019,7 +4912,7 @@ _534:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _536
@@ -5046,7 +4939,7 @@ _538:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _540
@@ -5071,7 +4964,7 @@ _542:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _544
@@ -5097,7 +4990,7 @@ _546:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _548
@@ -5122,7 +5015,7 @@ _550:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _552
@@ -5147,7 +5040,7 @@ _554:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _556
@@ -5172,7 +5065,7 @@ _558:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _560
@@ -5197,7 +5090,7 @@ _562:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _564
@@ -5225,7 +5118,7 @@ _566:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _568
@@ -5252,7 +5145,7 @@ _570:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _572
@@ -5277,7 +5170,7 @@ _574:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _576
@@ -5303,7 +5196,7 @@ _578:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _580
@@ -5428,7 +5321,7 @@ _584:
   while (1) {
     push 1
     push 5
-    COMM 0x021d
+    COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
     PUSHREG
     EQ
     IF _586

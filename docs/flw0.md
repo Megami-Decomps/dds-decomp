@@ -447,6 +447,13 @@ tables and both implementations:
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
+| `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
+| `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
+| `FIND_FIELD_EFFECT_BY_NAME` | `0x1FF` | 1 | Finds a field effect by its type-5 name and returns its handle |
+| `READ_ELEVATOR_TABLE_VALUE` | `0x200` | 1 | Returns a value from the selected elevator-destination row |
+| `READ_LADDER_TABLE_VALUE` | `0x208` | 1 | Returns the direction, object IDs, or action-window mode for the selected ladder warp |
+| `READ_DOOR_WARP_VALUE` | `0x20C` | 1 | Returns the motion duration or fade mode for the selected door warp |
+| `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
@@ -455,8 +462,14 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 43,600 of 53,389 native calls in the complete DDS1
-corpus and 31,095 of 38,839 calls in the complete DDS2 corpus. It also makes
+The warp-table commands use selector names only where the paired handlers and
+their script consumers establish the field's role. Barrier selectors `3` and
+`4`, elevator payload columns `2` through `13`, and the DDS2-only suction
+selector `5` remain numeric because their meanings are incomplete or differ
+between the games.
+
+The reviewed set names 44,544 of 53,389 native calls in the complete DDS1
+corpus and 32,306 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
