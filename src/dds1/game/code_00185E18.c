@@ -179,7 +179,33 @@ void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinate
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectangle);
+typedef struct EffBlurPixelRect {
+    s32 extent;        /* 0x00 */
+    u32 color;         /* 0x04: first word of the BlurSource */
+    s32 blendControl;  /* 0x08 */
+    f32 rotation;      /* 0x0C */
+    f32 scale;         /* 0x10 */
+    s32 centerX;       /* 0x14 */
+    s32 centerY;       /* 0x18 */
+    s32 left;          /* 0x1C */
+    s32 top;           /* 0x20 */
+    s32 right;         /* 0x24 */
+    s32 bottom;        /* 0x28 */
+} EffBlurPixelRect;
+
+extern void effDrawBlurRectangle(BlurSource *source);
+
+void effDrawBlurPixelRectangle(EffBlurPixelRect *work) {
+    s32 x = work->centerX + 0x100;
+    s32 y = work->centerY + 0xE0;
+    s32 extent = work->extent;
+
+    work->left = x - extent;
+    work->top = y - extent;
+    work->right = x + extent;
+    work->bottom = y + extent;
+    effDrawBlurRectangle((BlurSource *)&work->color);
+}
 
 typedef struct EffBlurTemplateBody {
     s32 extent;        /* 0x00 */

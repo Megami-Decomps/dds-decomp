@@ -4,11 +4,36 @@ INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A638);
 
 INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A690);
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A730);
+typedef struct ScoreResetWork {
+    u8 pad00[0x74];
+    s32 unk74;
+    s32 unk78;
+    s32 unk7C;
+} ScoreResetWork;
+
+extern void func_0035B6E0(const char *, ...);
+void func_0031A730(ScoreResetWork *work) {
+    u32 maximum = work->unk78;
+    u32 score = work->unk7C;
+
+    if (score < maximum) {
+        work->unk7C = maximum;
+        score = maximum;
+    }
+    func_0035B6E0("************************Score SetGlobal!![%d / %d]\n", (s32)score, (s32)maximum);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A770);
 
-INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A7F8);
+
+void func_0031A7F8(ScoreResetWork *work) {
+    s32 score = work->unk7C;
+
+    work->unk78 = score;
+    work->unk74 = score;
+    func_0035B6E0("************************Score Reset!![%d]\n", score);
+}
 
 typedef struct TimerWork {
     u8 pad00[0x80];
