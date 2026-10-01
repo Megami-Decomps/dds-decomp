@@ -648,7 +648,60 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 a, s32 b, s32 c, s32 d, s32 
     func_002D4678(packet + 1, a, b, c, d, e, f, 0, g);
 }
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D48A8);
+typedef struct SdfResRef {
+    u8 pad00[0xC];
+    s32 handle;     /* 0xC */
+} SdfResRef;
+
+typedef struct SdfTexView {
+    s16 x;          /* 0x0 */
+    u8 pad2[2];
+    s16 y;          /* 0x4 */
+    u8 unk6;        /* 0x6 */
+    u8 unk7;        /* 0x7 */
+    SdfResRef *res[3]; /* 0x8 */
+} SdfTexView;
+
+typedef struct SdfTexScenePacket {
+    SdfPacket header;    /* 0x00 */
+    u64 draw[8];         /* 0x20 */
+    SdfPacket tex0[2];   /* 0x60 */
+    SdfPacket tex1[2];   /* 0xA0 */
+    u64 limits[10];      /* 0xE0 */
+    u64 regs[8];         /* 0x130 */
+} SdfTexScenePacket;
+
+extern u8 D_003BD332;
+
+/* Build a textured scene packet: two texture setups, view bounds, GS registers and draw tail. */
+void func_002D48A8(SdfTexScenePacket *packet, SdfTexView *view, s32 index) {
+    s32 tex;
+    s32 shade;
+    s32 x;
+    s32 y;
+    s32 w;
+    s32 h;
+
+    sdfInitializeDmaReferenceTag(&packet->header, 0x15);
+    tex = view->res[index]->handle;
+    shade = view->res[2]->handle;
+    x = view->x;
+    w = view->unk6;
+    y = view->y;
+    h = view->unk7;
+    func_002D4678(packet->tex0, tex, x, y, w, shade, h, D_003BD332, 0);
+    func_002D4678(packet->tex1, tex, x, y, w, shade, h, D_003BD332, 1);
+    sdfBuildCenteredViewBoundsPacket(packet->limits, view->x, view->y, view->unk6, view->unk7);
+    packet->regs[0] = 0x517FB;
+    packet->regs[1] = 0x47;
+    packet->regs[2] = 0x44;
+    packet->regs[3] = 0x42;
+    packet->regs[4] = 0x517FB;
+    packet->regs[5] = 0x48;
+    packet->regs[6] = 0x44;
+    packet->regs[7] = 0x43;
+    sdfInitDrawPacket(packet->draw);
+}
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D49E8);
 
