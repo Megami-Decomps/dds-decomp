@@ -1,0 +1,23 @@
+wap 1 profile=dds2
+
+elevator 0 area=16 floor_count=4 floors=-1,1,2,1003,0,0 blocks=13,8,12,0,0,0
+
+entry 0 kind=8
+  scene args=648,0,0
+  warp args=0,1,0
+  camera mode=1 table=30
+  after flag=2 script=@warpscr_start
+end
+
+entry 2 kind=1 area=1 name=@01d_01
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=event args=649,0,15
+end
+
+entry 6
+  after script="" script_padding=667465725f73686f6f74696e6700
+end
+
+entry 53
+  camera mode=1
+end

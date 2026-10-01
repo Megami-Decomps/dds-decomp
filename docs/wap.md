@@ -1,0 +1,127 @@
+# Field actor and warp tables (`.WAP`)
+
+`tools/wap.py` converts the field actor, door, elevator, and transition tables
+used by both DDS games to compact, editable `.wapasm` source. The tracked
+corpus contains one table for every maintained field: 24 in DDS1 and 22 in
+DDS2.
+
+```sh
+python3 tools/wap.py disassemble \
+  --scripts f004.bfasm --interactions f004.infasm \
+  f004.wap f004.wapasm
+python3 tools/wap.py assemble \
+  --scripts f004.bfasm --interactions f004.infasm \
+  f004.wapasm f004.wap
+python3 tools/wap.py verify f004.wap
+```
+
+Every tracked table assembles to its retail SHA-1. `ninja dds1 dds2` checks
+the WAP corpus along with the executables, scripts, and INF tables;
+`ninja dds1-field-data dds2-field-data` checks the field data alone.
+
+## Physical profiles
+
+WAP has no binary header. Its file size selects one of three layouts:
+
+| Source profile | Elevator rows | Actor/warp rows | File size | Retail use |
+|---|---:|---:|---:|---|
+| `legacy` | `5 × 0x20` | `256 × 0x64` | `0x64a0` | DDS1 `f009` |
+| `dds1` | `5 × 0x20` | `256 × 0x6c` | `0x6ca0` | Other DDS1 fields |
+| `dds2` | `8 × 0x20` | `256 × 0x6c` | `0x6d00` | DDS2 fields |
+
+The legacy profile is the layout inherited from Nocturne. DDS extends each
+actor/warp row by eight bytes, and DDS2 also expands the elevator table from
+five rows to eight. The DDS-only tail is live runtime data, so the profiles
+are explicit rather than inferred from a game name.
+
+## Elevator rows
+
+An elevator row is a signed little-endian structure:
+
+| Offset | Type | Source field | Runtime role |
+|---:|---|---|---|
+| `0x00` | `s32` | `area` | Area/table selector |
+| `0x04` | `s16` | `sound` | Elevator sound effect |
+| `0x06` | `s16` | `floor_count` | Number of floor choices |
+| `0x08` | `6 × s16` | `floors` | Logical floor identifiers |
+| `0x14` | `6 × s16` | `blocks` | Matching automap block identifiers |
+
+The common retail row is `{area=1, sound=0, floor_count=1}` with zeroed floor
+and block arrays. Source only declares rows that differ from it:
+
+```text
+elevator 0 area=52 floor_count=3 floors=3,8,9,0,0,0 blocks=2,3,2,0,0,0
+```
+
+## Actor and transition rows
+
+Each of the 256 repeated rows has the following common `0x64`-byte layout:
+
+| Offset | Type | Source field | Established role |
+|---:|---|---|---|
+| `0x00` | `u8` | `kind` | Actor/door behavior dispatch |
+| `0x01` | `u8` | `flag_mode` | Flag-gate mode |
+| `0x02` | `s16` | `flag` | Optional model/event flag gate |
+| `0x04` | `s16` | `area` | One-based area selector |
+| `0x06` | `char[12]` | `name` | Actor, door, or event-trigger name |
+| `0x12` | `3 × s16` | `scene args` | Kind-dependent selectors |
+| `0x18` | `char[12]` | `scene primary` | Primary scene-object name |
+| `0x24` | `char[12]` | `scene secondary` | Secondary scene-object name |
+| `0x30` | `u8` | `warp type` | Transition dispatch |
+| `0x31` | `u8` | `warp attributes` | Transition state bits |
+| `0x32` | `3 × s16` | `warp args` | Type-dependent transition arguments |
+| `0x38` | `char[12]` | `warp position` | Destination position resource |
+| `0x44` | `u8` | `camera mode` | Destination camera behavior |
+| `0x45` | `u8` | `camera table` | Room/camera table selector |
+| `0x46` | `char[12]` | `camera name` | Destination camera resource |
+| `0x52` | `u8` | `after bgm` | Destination BGM selector |
+| `0x53` | `u8` | `after footstep` | Destination footstep selector |
+| `0x54` | `u8` | `after flag` | Post-transition action flags |
+| `0x55` | `char[15]` | `after script` | Post-transition procedure name |
+
+Warp types `field`, `elevator`, `facility`, and `event` encode the verified
+values `0..3`. Other warp types and all actor/door kinds remain numeric because
+their argument meanings vary by dispatch path. The grouped source keeps that
+overloading visible instead of assigning one speculative name to each value:
+
+```text
+entry 5 kind=1 area=1 name=@01d_03
+  scene args=1,2,65 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=23,1,0
+  camera table=81
+end
+```
+
+The common inactive entry has zero control fields, empty actor/scene names,
+position `"01pos_01"`, camera `"01cam_01"`, BGM and footstep selectors `1`,
+and no after action. Entry declarations replace that template, and omitted
+groups retain it.
+
+The extended profiles append an eight-byte `tail`. Its control byte has two
+verified actions: bit 0 applies a field flag using tail arguments, and bit 1
+calls the paired parameter helper. The remaining high control bits supply the
+flag value. The arguments stay numeric until their shared helper is recovered:
+
+```text
+  tail control=5 args=0,0,23,0,0,0,0
+```
+
+Fixed strings normally use zero padding. A small set of DDS2 rows retains
+nonzero bytes after the first string terminator; those bytes are ignored by
+the runtime but are part of the retail file. Canonical source records the
+residue explicitly as `script_padding=...` so assembly remains exact without
+presenting it as a live procedure name.
+
+## Cross-file symbols
+
+With paired BF and INF source, the disassembler writes `name=@SYMBOL` when an
+entry name exactly matches an INF interaction target and `script=@SYMBOL` when
+an after-script name exactly matches a BF procedure. Assembly verifies both
+links against the paired source and rejects a missing target. Other names stay
+quoted strings; no fuzzy or cross-field guess is made.
+
+Run the codec and complete-corpus regression tests with:
+
+```sh
+python3 tools/test_wap.py
+```

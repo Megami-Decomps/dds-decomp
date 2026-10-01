@@ -1,0 +1,24 @@
+wap 1 profile=dds2
+
+entry 0 kind=8
+  scene args=631,0,0
+  warp args=0,3,0 position="01pos_02"
+  camera mode=1 table=45
+  after flag=2 script=@warpscr_ev631
+end
+
+entry 2 kind=1 area=1 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 4 kind=1 area=2 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+end
+
+entry 6 kind=1 area=3 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+end

@@ -1,0 +1,77 @@
+wap 1 profile=dds2
+
+entry 0 kind=1 area=1 name="01d_01"
+  scene primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8 script="" script_padding=6172707363725f73746172740000
+end
+
+entry 1 kind=1 area=1 name=@01d_02
+  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,4,0
+  camera mode=1
+end
+
+entry 3 kind=1 area=2 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after script="" script_padding=667465725f30303262746c000000
+end
+
+entry 4 kind=1 area=2 name=@01d_02
+  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,5,0
+  camera mode=1
+  after script="" script_padding=667465725f30303762746c000000
+end
+
+entry 5
+  after script="" script_padding=667465725f30333062746c000000
+end
+
+entry 6 kind=1 area=3 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after script="" script_padding=667465725f30343662746c000000
+end
+
+entry 8 kind=1 area=4 name="01d_01"
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,1,0 position="01pos_02"
+  camera mode=1 table=40
+  after flag=8
+end
+
+entry 10 kind=1 area=5 name="01d_01"
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,2,0 position="01pos_02"
+  camera mode=1 table=40
+end
+
+entry 28
+  after script="" script_padding=6172707363725f3030325f303100
+end
+
+entry 29
+  after script="" script_padding=645f3031645f3032630000000000
+end
+
+entry 42
+  after script="" script_padding=6172707363725f3030355f303400
+end
+
+entry 47
+  after script="" script_padding=6172707363725f3030375f303100
+end
+
+entry 102
+  after script="" script_padding=6172707363725f3032315f303600
+end
+
+entry 139
+  after script="" script_padding=6172707363725f3033315f303300
+end
+
+entry 190
+  after script="" script_padding=6172707363725f3034345f303200
+end

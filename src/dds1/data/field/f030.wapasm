@@ -1,0 +1,1008 @@
+wap 1 profile=dds1
+
+elevator 0 area=9 floor_count=2 floors=-60,1,0,0,0,0
+elevator 1 area=9 floor_count=2 floors=-60,-15,0,0,0,0
+
+entry 0 kind=8
+  scene args=500,0,0
+  warp args=30,2,0 position="01pos_50"
+end
+
+entry 1 kind=8
+  scene args=662,0,0
+  warp args=30,1,0
+  after footstep=2
+end
+
+entry 2 kind=8
+  scene args=501,0,0
+  warp args=0,10,0 position="01pos_05"
+end
+
+entry 3 kind=8
+  scene args=550,0,0
+  warp args=0,2,0 position="01pos_08"
+  camera mode=1 table=89
+  after flag=2 script=@002_NPCON
+end
+
+entry 4 kind=1 area=1 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,12,0
+end
+
+entry 5 kind=1 area=1 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=facility args=5,1,0
+end
+
+entry 6 kind=9
+  scene args=91,0,0
+  warp args=0,2,0 position="01pos_03"
+  camera mode=1 table=89
+  after footstep=2 flag=2 script=@002_NPCON
+end
+
+entry 7 kind=9
+  scene args=94,0,0
+  warp args=0,12,0 position="01pos_02"
+end
+
+entry 8 kind=9
+  scene args=95,0,0
+  warp args=0,10,0
+end
+
+entry 9 kind=9
+  scene args=96,0,0
+  warp args=7,2,0
+  camera mode=1 table=36
+end
+
+entry 11 kind=1 area=2 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=elevator args=2,0,0
+  camera mode=1 table=71
+end
+
+entry 12 kind=1 area=2 name="01d_02"
+  scene args=3,1,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp type=elevator args=1,0,0 position="01pos_02"
+end
+
+entry 13 kind=9
+  scene args=92,0,0
+  warp args=0,1,0 position="01pos_03"
+  camera mode=1
+end
+
+entry 14 kind=9
+  scene args=93,0,0
+  warp args=0,3,0
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 16 kind=1 area=3 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp type=elevator args=2,1,0
+  camera mode=1
+end
+
+entry 17 kind=1 area=3 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,5,0
+end
+
+entry 18 kind=1 area=3 name="01d_03"
+  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,5,0 position="01pos_03"
+end
+
+entry 19 kind=1 area=3 name="01d_04"
+  scene args=1,2,64 primary="md_01d_04" secondary="md_01d_04b"
+  warp args=0,7,0
+end
+
+entry 20 kind=1 area=3 name="01d_05"
+  scene args=1,2,64 primary="md_01d_05" secondary="md_01d_05b"
+  warp args=0,6,0
+end
+
+entry 21 kind=1 area=3 name="01d_08"
+  scene args=1,2,64 primary="md_01d_08" secondary="md_01d_08b"
+  warp args=0,5,0 position="01pos_02"
+end
+
+entry 22 kind=1 area=3 name="01d_10"
+  scene args=1,2,64 primary="md_01d_10" secondary="md_01d_10b"
+  warp args=0,7,0 position="01pos_02"
+end
+
+entry 23 kind=7 area=3
+  scene args=4,37,0
+  warp args=30,3,0 position="01pos_11"
+  camera mode=1 table=71
+end
+
+entry 25 kind=9
+  scene args=99,0,0
+  warp args=0,2,0 position="01pos_04"
+  camera mode=1 table=89
+  after footstep=2
+end
+
+entry 26 kind=1 area=4 name="01d_07"
+  scene args=1,2,64 primary="md_01d_07" secondary="md_01d_07b"
+  warp args=0,8,0
+end
+
+entry 27 kind=1 area=4 name="01d_09"
+  scene args=1,2,64 primary="md_01d_09" secondary="md_01d_09b"
+  warp args=0,6,0 position="01pos_02"
+end
+
+entry 29 kind=1 area=5 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,3,0 position="01pos_02"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 30 kind=1 area=5 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,3,0 position="01pos_08"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 31 kind=1 area=5 name="01d_03"
+  scene args=1,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,3,0 position="01pos_03"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 33 kind=1 area=6 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,3,0 position="01pos_05"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 34 kind=1 area=6 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,4,0 position="01pos_09"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 36 kind=1 area=7 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,3,0 position="01pos_04"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 37 kind=1 area=7 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,3,0 position="01pos_10"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 39 kind=1 area=8 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,4,0 position="01pos_07"
+  camera mode=1 table=71
+  after footstep=2
+end
+
+entry 40 kind=1 area=8 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,13,0
+end
+
+entry 42 kind=1 area=10 name=@01d_01
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=7,2,0 position="01pos_02"
+  camera mode=1 table=36
+  after flag=8
+end
+
+entry 43 kind=1 area=10 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,11,0
+end
+
+entry 44 kind=1 area=10 name="01d_20"
+  scene args=1,2,64 primary="md_01d_20" secondary="md_01d_20b"
+  warp type=facility args=3,12,2
+  after script="md_01d_20c"
+end
+
+entry 45 kind=7 area=10
+  scene args=3,12,0
+  warp args=30,10,0 position="01pos_22"
+end
+
+entry 47 kind=1 area=11 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,10,0 position="01pos_02"
+end
+
+entry 48 kind=9
+  scene args=97,0,0
+  warp args=0,1,0 position="01pos_30"
+  after flag=2 script=@001_SERAGO
+end
+
+entry 49 kind=1 flag=9 area=12 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,1,0
+  camera mode=1
+end
+
+entry 50 kind=9
+  scene args=40,0,0
+  warp type=event args=613,0,0
+end
+
+entry 51 kind=8
+  scene args=613,0,0
+  warp args=0,1,0 position="01pos_10"
+  camera mode=1
+  after flag=2 script=@012_system_mes
+end
+
+entry 53 kind=1 area=13 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,8,0 position="01pos_02"
+end
+
+entry 54 kind=1 area=13 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,15,0
+end
+
+entry 55 kind=1 area=13 name="01d_03"
+  scene args=2,1,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp type=facility args=3,13,2
+  after script="md_01d_03c"
+end
+
+entry 56 kind=7 area=13
+  scene args=3,13,0
+  warp args=30,13,0 position="01pos_03"
+end
+
+entry 58 kind=1 area=15 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,13,0 position="01pos_02"
+end
+
+entry 59 kind=1 area=15 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,16,0
+end
+
+entry 61 kind=1 area=16 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,15,0 position="01pos_02"
+end
+
+entry 62 kind=2 area=16 name="01d_02"
+  warp args=0,17,0 position="01pos_02"
+end
+
+entry 64 kind=1 area=17 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,20,0
+end
+
+entry 65 kind=2 area=17 name="01d_02"
+  warp args=0,16,0 position="01pos_02"
+end
+
+entry 66 kind=2 area=17 name="01d_03"
+  warp args=0,18,0 position="01pos_03"
+end
+
+entry 68 kind=1 area=18 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,22,0
+end
+
+entry 69 kind=2 area=18 name="01d_02"
+  warp args=0,19,0
+end
+
+entry 70 kind=2 area=18 name="01d_03"
+  warp args=0,17,0 position="01pos_03"
+end
+
+entry 72 kind=2 area=19 name=@01d_01
+  warp args=0,18,0 position="01pos_02"
+end
+
+entry 74 kind=1 area=20 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,17,0
+end
+
+entry 75 kind=2 area=20 name="01d_02"
+  warp args=0,21,0 position="01pos_03"
+end
+
+entry 76 kind=12 area=20 name="01d_03"
+  scene args=17,0,0
+  warp type=4
+  tail control=81 args=0,0,3,0,0,0,0
+end
+
+entry 77 kind=12 area=20 name="01d_04"
+  scene args=18,0,0
+  warp type=4
+  tail control=81 args=0,0,2,0,0,0,0
+end
+
+entry 79 kind=2 area=21 name="01d_03"
+  warp args=0,20,0 position="01pos_02"
+end
+
+entry 81 kind=7 area=22
+  scene args=4,24,0
+  warp args=30,22,0 position="01pos_04"
+end
+
+entry 82 kind=1 area=22 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,18,0
+end
+
+entry 83 kind=1 area=22 name="01d_02"
+  scene args=2,1,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,23,0
+  camera mode=1
+end
+
+entry 85 kind=1 area=23 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,22,0 position="01pos_02"
+end
+
+entry 86 kind=9
+  scene args=31,0,0
+  warp args=0,53,0 position="01pos_02"
+  camera mode=1 table=10
+end
+
+entry 88 kind=1 area=25 name=@01d_01
+  scene args=2,1,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,26,0
+end
+
+entry 89 kind=1 area=25 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,24,0
+end
+
+entry 90 kind=1 area=25 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,26,0 position="01pos_03"
+end
+
+entry 91 kind=9
+  scene args=32,0,0
+  warp args=0,56,0 position="01pos_02"
+  camera mode=1 table=72
+end
+
+entry 93 kind=1 area=26 name=@01d_01
+  scene args=2,1,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,25,0
+  camera mode=1 table=72
+end
+
+entry 94 kind=11 area=26 name="01d_02"
+  scene args=0,2,6 primary="01pos_03" secondary="01cam_03"
+  warp args=0,27,0 position="01pos_03"
+end
+
+entry 95 kind=11 area=26 name="01d_04"
+  scene args=0,2,6 primary="01pos_04" secondary="01cam_06"
+  warp args=0,27,0 position="01pos_34"
+end
+
+entry 96 kind=1 area=26 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,24,0
+end
+
+entry 97 kind=1 area=26 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,25,0 position="01pos_03"
+end
+
+entry 98 kind=9
+  scene args=33,0,0
+  warp args=31,1,0 position="01pos_02"
+end
+
+entry 100 kind=1 area=27 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,32,0
+end
+
+entry 101 kind=1 area=27 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,28,0
+end
+
+entry 103 kind=1 area=28 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,27,0 position="01pos_02"
+end
+
+entry 104 kind=1 area=28 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,29,0
+end
+
+entry 105 kind=1 area=28 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,27,0 position="01pos_05"
+end
+
+entry 106 kind=11 area=28 name="01d_10"
+  scene args=1,3,22 primary="01pos_04" secondary="01cam_01"
+  warp args=0,31,0 position="01pos_39"
+end
+
+entry 107 kind=12 area=28 name="01d_11"
+  scene args=19,0,0
+  warp type=4
+  tail control=113 args=0,0,4,0,0,0,0
+end
+
+entry 109 kind=1 area=29 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,28,0 position="01pos_02"
+end
+
+entry 110 kind=1 area=29 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,30,0
+end
+
+entry 112 kind=1 area=30 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,29,0 position="01pos_02"
+end
+
+entry 114 kind=11 area=31 name="01eve_03"
+  scene args=1,3,22 primary="01pos_40" secondary="01cam_01"
+  warp args=0,28,0 position="01pos_03"
+end
+
+entry 116 kind=1 area=32 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,27,0
+end
+
+entry 117 kind=1 area=32 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,36,0
+end
+
+entry 118 kind=1 area=32 name="01d_03"
+  scene args=3,0,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,33,0
+end
+
+entry 120 kind=1 area=33 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,32,0 position="01pos_03"
+end
+
+entry 121 kind=1 area=33 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,36,0 position="01pos_02"
+end
+
+entry 122 kind=1 area=33 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp attributes=2 args=0,34,0
+  camera table=65
+end
+
+entry 123 kind=12 area=33 name="01d_04"
+  scene args=20,0,0
+  warp type=4
+  tail control=133 args=0,0,2,0,0,0,0
+end
+
+entry 124 kind=7 area=33
+  scene args=4,26,0
+  warp args=30,33,0 position="01pos_05"
+end
+
+entry 126 kind=1 area=34 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp attributes=4 args=0,33,0 position="01pos_03"
+end
+
+entry 127 kind=1 area=34 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,35,0
+  camera table=65
+end
+
+entry 129 kind=1 area=35 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,34,0 position="01pos_02"
+  camera table=65
+end
+
+entry 130 kind=1 area=36 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,32,0 position="01pos_02"
+end
+
+entry 131 kind=1 area=36 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,33,0 position="01pos_02"
+end
+
+entry 132 kind=1 area=36 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,37,0
+end
+
+entry 133 kind=1 area=36 name="01d_05"
+  scene args=3,2,64 primary="md_01d_05" secondary="md_01d_05b"
+  warp args=0,55,0
+end
+
+entry 134 kind=11 area=36 name="01d_04"
+  scene args=0,4,6 primary="01pos_04" secondary="01cam_02"
+  warp args=0,55,0 position="01pos_04"
+end
+
+entry 135 kind=11 area=36 name="01d_06"
+  scene args=0,4,6 primary="01pos_07" secondary="01cam_03"
+  warp args=0,55,0 position="01pos_05"
+end
+
+entry 136 kind=11 area=36 name="01eve_04"
+  scene args=2,3,21 primary="01pos_06" secondary="01cam_01"
+  warp args=0,27,0 position="01pos_33"
+end
+
+entry 138 kind=1 area=37 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,36,0 position="01pos_03"
+end
+
+entry 139 kind=1 area=37 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,38,0
+end
+
+entry 140 kind=1 area=37 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,39,0 position="01pos_02"
+end
+
+entry 141 kind=1 area=38 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,37,0 position="01pos_02"
+end
+
+entry 143 kind=1 area=38 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,40,0
+end
+
+entry 144 kind=1 area=38 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,39,0
+end
+
+entry 146 kind=1 area=39 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,38,0 position="01pos_03"
+  camera name="01cam_03"
+end
+
+entry 147 kind=1 area=39 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,37,0 position="01pos_03"
+end
+
+entry 148 kind=11 area=39 name="01d_03"
+  scene args=0,3,6 primary="01pos_04" secondary="01cam_01"
+  warp position="01pos_03"
+end
+
+entry 149 kind=11 area=39 name="01d_04"
+  scene args=0,3,6 primary="01pos_05" secondary="01cam_02"
+  warp position="01pos_06"
+end
+
+entry 151 kind=7 area=40
+  scene args=4,27,0
+  warp args=30,40,0 position="01pos_06"
+end
+
+entry 152 kind=1 area=40 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,38,0 position="01pos_02"
+end
+
+entry 153 kind=1 area=40 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,45,0
+end
+
+entry 154 kind=1 area=40 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,42,0
+end
+
+entry 155 kind=12 area=40 name="01d_05"
+  scene args=21,0,0
+  warp type=4
+  tail control=161 args=0,0,3,0,0,0,0
+end
+
+entry 157 kind=1 area=41 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,45,0 position="01pos_02"
+end
+
+entry 158 kind=11 area=41 name="01eve_01"
+  scene args=1,2,22 primary="01pos_02" secondary="01cam_01"
+  warp args=0,44,0 position="01pos_41"
+end
+
+entry 160 kind=1 area=42 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,40,0 position="01pos_03"
+end
+
+entry 161 kind=1 area=42 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,43,0
+end
+
+entry 163 kind=1 area=43 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,42,0 position="01pos_02"
+end
+
+entry 165 kind=11 area=44 name="01eve_10"
+  scene args=1,2,22 primary="01pos_01" secondary="01cam_01"
+  warp args=0,40,0 position="01pos_04"
+end
+
+entry 167 kind=1 area=45 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,40,0 position="01pos_02"
+end
+
+entry 168 kind=1 area=45 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,41,0
+end
+
+entry 169 kind=1 area=45 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,46,0
+end
+
+entry 170 kind=1 area=45 name="01d_04"
+  scene args=3,2,64 primary="md_01d_04" secondary="md_01d_04b"
+  warp args=0,47,0
+end
+
+entry 171 kind=1 area=45 name="01d_05"
+  scene args=3,2,64 primary="md_01d_05" secondary="md_01d_05b"
+  warp attributes=2 args=0,48,0
+  camera table=65
+end
+
+entry 172 kind=12 area=45 name="01d_06"
+  scene args=22,0,0
+  warp type=4
+  tail control=181 args=0,0,2,0,0,0,0
+end
+
+entry 174 kind=1 area=46 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,45,0 position="01pos_03"
+end
+
+entry 175 kind=1 area=46 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,47,0 position="01pos_02"
+end
+
+entry 177 kind=1 area=47 name=@01d_01
+  scene args=3,0,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,45,0 position="01pos_04"
+end
+
+entry 178 kind=1 area=47 name="01d_02"
+  scene args=3,0,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,46,0 position="01pos_02"
+end
+
+entry 179 kind=11 area=47 name="01eve_09"
+  scene args=1,2,22 primary="01pos_05" secondary="01cam_03"
+  warp position="01pos_38"
+end
+
+entry 180 kind=11 area=47 name="01eve_05"
+  scene args=2,5,21 primary="01pos_03" secondary="01cam_05"
+  warp args=0,50,0 position="01pos_34"
+end
+
+entry 181 kind=11 area=47 name="01eve_08"
+  scene args=1,4,22 primary="01pos_08" secondary="01cam_07"
+  warp args=0,26,0 position="01pos_37"
+end
+
+entry 182 kind=11 area=47 name="01eve_07"
+  scene args=2,3,21 primary="01pos_07" secondary="01cam_04"
+  warp args=0,26,0 position="01pos_38"
+end
+
+entry 183 kind=11 area=47 name="01eve_11"
+  scene args=1,3,22 primary="01pos_06" secondary="01cam_01"
+  warp args=0,26,0 position="01pos_36"
+end
+
+entry 184 kind=11 area=47 name="01eve_10"
+  scene args=1,5,22 primary="01pos_04" secondary="01cam_06"
+  warp args=0,50,0 position="01pos_35"
+end
+
+entry 186 kind=1 area=48 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp attributes=4 args=0,45,0 position="01pos_05"
+end
+
+entry 187 kind=1 area=48 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,49,0
+  camera table=65
+end
+
+entry 189 kind=1 area=49 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,48,0 position="01pos_02"
+  camera table=65
+end
+
+entry 191 kind=11 area=50 name="01eve_06"
+  scene args=1,2,22 primary="01pos_01" secondary="01cam_01"
+  warp args=0,45,0 position="01pos_35"
+end
+
+entry 193 kind=1 area=51 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,52,0
+end
+
+entry 194 kind=1 area=51 name="01d_02"
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,53,0
+  camera mode=1 table=10
+end
+
+entry 196 kind=1 area=52 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,51,0
+end
+
+entry 197 kind=1 area=52 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,54,0
+end
+
+entry 198 kind=11 area=52 name="01eve_01"
+  scene args=1,5,22 primary="01pos_21" secondary="01cam_01"
+  warp position="01pos_11"
+end
+
+entry 199 kind=11 area=52 name="01eve_09"
+  scene args=2,5,21 primary="01pos_22" secondary="01cam_02"
+  warp position="01pos_35"
+end
+
+entry 200 kind=11 area=52 name="01d_03"
+  scene args=0,2,6 primary="01pos_32" secondary="01cam_10"
+  warp args=0,51,0 position="01pos_04"
+end
+
+entry 201 kind=11 area=52 name="01d_04"
+  scene args=0,2,6 primary="01pos_33" secondary="01cam_09"
+  warp args=0,51,0 position="01pos_03"
+end
+
+entry 202 kind=11 area=52 name="01eve_14"
+  scene args=2,10,21 primary="01pos_23" secondary="01cam_03"
+  warp position="01pos_12"
+end
+
+entry 203 kind=11 area=52 name="01eve_10"
+  scene args=1,10,22 primary="01pos_24" secondary="01cam_04"
+  warp position="01pos_36"
+end
+
+entry 204 kind=11 area=52 name="01eve_03"
+  scene args=2,6,21 primary="01pos_25" secondary="01cam_05"
+  warp position="01pos_13"
+end
+
+entry 205 kind=11 area=52 name="01eve_11"
+  scene args=1,6,22 primary="01pos_26" secondary="01cam_06"
+  warp position="01pos_38"
+end
+
+entry 206 kind=11 area=52 name="01eve_04"
+  scene args=1,9,22 primary="01pos_34" secondary="01cam_11"
+  warp position="01pos_14"
+end
+
+entry 207 kind=11 area=52 name="01eve_12"
+  scene args=1,7,22 primary="01pos_28" secondary="01cam_07"
+  warp position="01pos_15"
+end
+
+entry 208 kind=11 area=52 name="01eve_05"
+  scene args=2,7,21 primary="01pos_27" secondary="01cam_08"
+  warp position="01pos_40"
+end
+
+entry 209 kind=11 area=52 name="01eve_06"
+  scene args=1,8,22 primary="01pos_06" secondary="01cam_15"
+  warp position="01pos_16"
+end
+
+entry 210 kind=11 area=52 name="01eve_07"
+  scene args=2,4,21 primary="01pos_30" secondary="01cam_13"
+  warp position="01pos_17"
+end
+
+entry 211 kind=11 area=52 name="01eve_13"
+  scene args=1,4,22 primary="01pos_29" secondary="01cam_12"
+  warp position="01pos_37"
+end
+
+entry 212 kind=11 area=52 name="01eve_08"
+  scene args=1,3,22 primary="01pos_31" secondary="01cam_14"
+  warp position="01pos_18"
+end
+
+entry 214 kind=1 area=53 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,51,0 position="01pos_02"
+end
+
+entry 215 kind=9
+  scene args=34,0,0
+  warp args=0,23,0 position="01pos_02"
+  camera mode=1 table=10
+end
+
+entry 217 kind=9
+  scene args=61,0,0
+  warp position="01pos_11"
+end
+
+entry 219 kind=1 area=54 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,52,0 position="01pos_02"
+end
+
+entry 220 kind=1 area=54 name="01d_02"
+  scene args=2,1,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,56,0
+  camera mode=1 table=72
+end
+
+entry 222 kind=1 area=55 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,36,0 position="01pos_05"
+end
+
+entry 224 kind=7 area=56
+  scene args=4,25,0
+  warp args=30,56,0 position="01pos_03"
+  camera mode=1 table=72
+end
+
+entry 225 kind=1 area=56 name=@01d_01
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,54,0 position="01pos_02"
+end
+
+entry 226 kind=9
+  scene args=35,0,0
+  warp args=0,25,0 position="01pos_02"
+  camera mode=1 table=72
+end
+
+entry 228 kind=1 area=57 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,58,0
+  camera mode=1 table=72
+end
+
+entry 229 kind=1 area=57 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,59,0
+end
+
+entry 231 kind=1 area=58 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,57,0
+end
+
+entry 232 kind=1 area=58 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,59,0
+end
+
+entry 234 kind=1 area=59 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,58,0 position="01pos_02"
+  camera mode=1 table=72
+end
+
+entry 235 kind=1 area=59 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,60,0
+end
+
+entry 237 kind=1 area=60 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,59,0 position="01pos_02"
+end
+
+entry 238 kind=1 area=60 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,61,0
+end
+
+entry 240 kind=1 area=61 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,60,0 position="01pos_02"
+end
+
+entry 241 kind=1 area=61 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=0,63,0
+end
+
+entry 242 kind=1 area=61 name="01d_03"
+  scene args=3,2,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=0,62,0
+end
+
+entry 244 kind=1 area=62 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,61,0 position="01pos_03"
+end
+
+entry 246 kind=1 area=63 name=@01d_01
+  scene args=3,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,61,0 position="01pos_02"
+end
+
+entry 247 kind=1 area=63 name="01d_02"
+  scene args=3,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=31,1,0
+end
