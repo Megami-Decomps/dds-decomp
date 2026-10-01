@@ -20,6 +20,17 @@ extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void func_001686F0(void *);
 extern void func_00169370(void *);
 extern void func_003297C8(void *);
+extern void func_00168280();
+extern void func_001053F0(s32, s32, f32);
+extern s32 kwlnTextureSetReferenceFlagIfPresent();
+extern void func_0035B6E0(const char *);
+extern f32 D_0037F850[];
+extern f32 D_0037F860[];
+extern u8 D_00380870[];
+extern s32 D_00435CD0;
+extern s8 D_00436408;
+extern s32 D_0043640C;
+extern s32 D_00436410;
 
 typedef struct EffectEntry {
     u8 pad00[0x10];
@@ -187,7 +198,40 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167A10);
 
-INCLUDE_ASM(const s32, "game/code_001670C0", func_00167E00);
+void func_00167E00(s32 frames) {
+    u8 *entry;
+    s32 i;
+    u64 clearValue;
+
+    if (D_00436408 != 0) {
+        func_00168280();
+    }
+    if (frames != 0) {
+        D_0037F850[0] = 0.0f;
+        D_0037F850[1] = 0.0f;
+        D_0037F850[2] = 0.0f;
+        D_0037F860[0] = 0.0f;
+        D_0037F860[1] = 0.0f;
+        D_0037F860[2] = 0.0f;
+        D_00435CD0 = 0x80808080;
+        func_001053F0(0x100, 0xE0, D_0037F850[0]);
+        kwlnTextureSetReferenceFlagIfPresent();
+        i = 0;
+        entry = D_00380870;
+        clearValue = 0x80008000ULL;
+        entry += 0x1b70;
+        do {
+            i++;
+            *(u64 *)(entry - 0x10) = clearValue;
+            *(u64 *)entry = clearValue;
+            entry += 0x1f40;
+        } while (i != 2);
+        D_00436410 = frames;
+        D_00436408 = 1;
+        D_0043640C = 0;
+        func_0035B6E0("dds3CrossfadeStart\n");
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001670C0", func_00167EE8);
 
