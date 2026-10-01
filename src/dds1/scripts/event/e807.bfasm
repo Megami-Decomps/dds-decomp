@@ -458,11 +458,19 @@ section 2 type=2 stride=0x4 count=441 offset=0x350
 end
 
 section 3 type=3 stride=0x1 count=147 offset=0xa34
-  bytes 07000000930000004d5347310000000090000000030000000100000000000200
-  bytes 0000000018000000600000000100000000000000000000004d53475f30303100
-  bytes 00000000000000000000000000000000010000003c00000022000000f208ffff
-  bytes f20706ff829d83cd83e2818c8bac819681a680e480f180fb82890af104000000
-  bytes 6400000083cd83e2818c85b200000000071616
+  msg1
+  message MSG_001 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 06 ff
+      glyphs 829d 83cd 83e2 818c 8bac 8196 81a6 80e4 80f1 80fb 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    glyphs 83cd 83e2 818c 85b2
+  endspeaker
 end
 
 section 4 type=4 stride=0x1 count=96 offset=0xac7 extent=0xd7

@@ -79,11 +79,63 @@ later addresses and offsets without hand-editing bookkeeping.
 
 The symbolic disassembler accepts the standard DDS five-section layout and
 canonical 32-byte name rows. It rejects irregular layouts rather than hiding
-bytes; use version 1 for those files. Message payloads remain raw until their
-internal format is understood. The tracked DDS1 event corpus has 97 symbolic
-sources and seven lossless physical sources whose nonzero trailing bytes lie
-outside the five declared sections (`e503`, `e510`, `e697`, `e705`, `e802`,
-`e807`, and `e809`).
+bytes; use version 1 for those files. The tracked DDS1 event corpus has 97
+symbolic sources and seven lossless physical sources whose nonzero trailing
+bytes lie outside the five declared sections (`e503`, `e510`, `e697`, `e705`,
+`e802`, `e807`, and `e809`).
+
+### Embedded messages
+
+The `messages msg1` block is editable source for the BMD/`MSG1` bank embedded
+in section 3. It exposes dialog names and kinds, page or option boundaries,
+speaker references, and the separate speaker table:
+
+```text
+messages msg1
+  message MSG_START_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 80e9 81a8
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select CHOICE
+    option
+      text "Yes"
+    endoption
+    option
+      text "No"
+    endoption
+  endselect
+  speaker 0
+    glyphs 83f4 8dd4 8ee1
+  endspeaker
+end
+```
+
+`text` holds printable ASCII, `glyphs` holds exact two-byte character codes,
+`newline` emits byte `0x0A`, and `control` preserves a complete DDS control
+sequence. The lead byte determines the control length, so the assembler can
+reject a truncated sequence. `bytes` remains available inside a page, option,
+or speaker when a stream does not fit those forms. NUL terminators, record
+offsets, text lengths, alignment, and the packed relocation table are derived.
+Changing message text in symbolic source therefore moves every later record
+and pointer automatically.
+
+The character codes are kept numeric until a verified DDS character map is
+available; they are not guessed through Shift-JIS. This still separates text
+from controls and makes the ASCII portions directly readable. A selection may
+declare `ext`, `pattern`, `reserved`, or `trailing` only when its physical
+record uses those fields. `trailing=00`, for example, retains one extra byte
+after the final option terminator.
+
+Physical version-1 sources use the same records after an `msg1` marker inside
+their type-3 section. Their section size remains fixed. Across the tracked
+corpus, this form covers all 36 nonempty banks: 179 dialogs, 257 message pages,
+16 selection options, and 27 speaker strings. Banks outside the verified
+layout fall back to local raw bytes rather than receiving a partial decode.
 
 ### String symbols
 
@@ -274,12 +326,13 @@ as a 16-bit two's-complement value. Procedure and jump target names after `#`
 are explanatory comments in this first format; the numeric table index remains
 the assembled operand.
 
-Raw message and unknown sections use `bytes HEX`; string pools use it locally
-for data that cannot be represented by a `string` declaration. An all-zero
-region uses the shorter `zero SIZE`. Unusual procedure or label rows fall back
-to `row HEX`, and other bytes outside declared section extents use `preserve`
-with an absolute offset. These escapes are local: understood code and table
-rows stay readable even when another part of the file is opaque.
+Unknown sections and unrecognized message banks use `bytes HEX`; string pools
+use it locally for data that cannot be represented by a `string` declaration.
+An all-zero region uses the shorter `zero SIZE`. Unusual procedure or label
+rows fall back to `row HEX`, and other bytes outside declared section extents
+use `preserve` with an absolute offset. These escapes are local: understood
+code and table rows stay readable even when another part of the file is
+opaque.
 
 The header exposes the signed integer and float local counts used by the DDS
 VM. Other fields retain offset-based names when their purpose is not established.

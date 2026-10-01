@@ -189,50 +189,152 @@ section 2 type=2 stride=0x4 count=175 offset=0x90
 end
 
 section 3 type=3 stride=0x1 count=1385 offset=0x34c
-  bytes 07000000690500004d5347310000000058050000110000000800000000000200
-  bytes 0000000050000000000000001401000000000000980100000000000068020000
-  bytes 0000000044030000000000009003000000000000d003000000000000a8040000
-  bytes 380500000000000000000000000000004d53475f4b4549544149000000000000
-  bytes 00000000000000000100ffff74000000a0000000f208fffff20706fff20206ff
-  bytes 8de081a984c484a684fc80ea86ab80e2818480e281a981860a8bff80f580e280
-  bytes e88b9783f780ea85e280f0818480eb80fd0a82a683eb80e283f48189818b80e5
-  bytes 84e985e381ad81aa818480e281a9818c0a808080e885cd80e284a684fc89ae81
-  bytes 81818480e5808182a70a84a684fc89ae818181840a84a684fc89ae818181840a
-  bytes 80eb81b180fd819c81a08181818480810af104004d53475f4b45495441495f30
-  bytes 3100000000000000000000000100ffff380100005d000000f208fffff20711ff
-  bytes 86ac81a082a683cc82a7818985ad80ff85ec80e980e480f18186818d818580eb
-  bytes 818880e9818180fd82890a84f086c8828880e081a781a481a98ce181a8818c86
-  bytes a086da81a0848180f6818880e9818180fd82890a000000004d53475f4b454954
-  bytes 41495f303200000000000000000000000100ffffbc010000ab000000f208ffff
-  bytes f20711ff82a683cc82a7818d8a958b98818c868781a881b088da80ed80f58288
-  bytes 0a878488b5818d84bb8ca0818989ac80ff819080f580ea81aa818480e280fd82
-  bytes 890a8b9c899e81b086ed819e83e185a380fd80ff818c89e4818d8b9d80e981aa
-  bytes 82880a83db80fd80ff818d85f580e281898afe81b086bc80eb82880a83ee80eb
-  bytes 86e3818180fd83f484cd818d86d086ed818684ff88a281890a89b380ed8de581
-  bytes b180fe82890a00004d53475f4b45495441495f30330000000000000000000000
-  bytes 0100ffff8c020000b5000000f208fffff20711ff85b383fe80ea89e580e68288
-  bytes 84f08488818c83d181b0869f80e680fd86c282880a8486859b818c8b8680ea83
-  bytes dc81898a8c80fd81ad81a98de681a681a80a8de780e284d3818480eb80fd8289
-  bytes 0a8b86818d83e981b080ed818b81a780f981848de881b08ddd81a882880a8de9
-  bytes 80ef88f280f080fd80e981b184a4818c8cd88189818680ee81ab81b08d9780e2
-  bytes 80fd82890a80fb80f5818487b281b081a080fd80f0818484e6818180fd82890a
-  bytes 000000004d53475f4b45495441495f303400000000000000000000000100ffff
-  bytes 6803000026000000f208fffff20711ff82a683cc82a7818d8b86818985ec80e9
-  bytes 8181818486a0818180fd82890a0000004d53475f4b45495441495f3035000000
-  bytes 00000000000000000100ffffb40300001b000000f208fffff20711ff83e00a81
-  bytes ad0a81aa0a81840a80e00a81aa0a00004d53475f4b45495441495f3036000000
-  bytes 00000000000000000100fffff4030000b2000000f208fffff20711ff80f181aa
-  bytes 80ea82a683cc82a7818c86a086da818c828880fb818c85f9819c81a8818580e0
-  bytes 818180fd82890a8b86818d8bca8dea81898bda80f480f381aa80fd84aa83dc81
-  bytes 8985ec80ef81840a89a381a8818480e2818180fd82890a8b86818d879385de81
-  bytes 8c8deb80e28288879385de818c889a8bd181b081a080fd81a780f7819780ed82
-  bytes 880a8bb983eb818c8c9a8d9780ed878488b58196818684b281b1818580e28181
-  bytes 80fd82890a0000004d53475f4b45495441495f30370000000000000000000000
-  bytes 0100ffffcc0400006c000000f208fffff20711fff20206ff84eb8cbf81898aca
-  bytes 819f81a981f281fc81ef81bd85cb85d60a85fe84c485c78dec82c186bf8ded85
-  bytes cb85d60a8ddd87be80f5818483ef89a48189818881ab80e4808180810a80800a
-  bytes 83ef89a48ddd87be818d80f180ff81a7808180810af104000204040404040404
-  bytes 02166242686e26206c
+  msg1
+  message MSG_KEITAI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 06 ff
+      control f2 02 06 ff
+      glyphs 8de0 81a9 84c4 84a6 84fc 80ea 86ab 80e2 8184 80e2 81a9 8186
+      newline
+      glyphs 8bff 80f5 80e2 80e8 8b97 83f7 80ea 85e2 80f0 8184 80eb 80fd
+      newline
+      glyphs 82a6 83eb 80e2 83f4 8189 818b 80e5 84e9 85e3 81ad 81aa 8184
+      glyphs 80e2 81a9 818c
+      newline
+      glyphs 8080 80e8 85cd 80e2 84a6 84fc 89ae 8181 8184 80e5 8081 82a7
+      newline
+      glyphs 84a6 84fc 89ae 8181 8184
+      newline
+      glyphs 84a6 84fc 89ae 8181 8184
+      newline
+      glyphs 80eb 81b1 80fd 819c 81a0 8181 8184 8081
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_KEITAI_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 86ac 81a0 82a6 83cc 82a7 8189 85ad 80ff 85ec 80e9 80e4 80f1
+      glyphs 8186 818d 8185 80eb 8188 80e9 8181 80fd 8289
+      newline
+      glyphs 84f0 86c8 8288 80e0 81a7 81a4 81a9 8ce1 81a8 818c 86a0 86da
+      glyphs 81a0 8481 80f6 8188 80e9 8181 80fd 8289
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_02 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 82a6 83cc 82a7 818d 8a95 8b98 818c 8687 81a8 81b0 88da 80ed
+      glyphs 80f5 8288
+      newline
+      glyphs 8784 88b5 818d 84bb 8ca0 8189 89ac 80ff 8190 80f5 80ea 81aa
+      glyphs 8184 80e2 80fd 8289
+      newline
+      glyphs 8b9c 899e 81b0 86ed 819e 83e1 85a3 80fd 80ff 818c 89e4 818d
+      glyphs 8b9d 80e9 81aa 8288
+      newline
+      glyphs 83db 80fd 80ff 818d 85f5 80e2 8189 8afe 81b0 86bc 80eb 8288
+      newline
+      glyphs 83ee 80eb 86e3 8181 80fd 83f4 84cd 818d 86d0 86ed 8186 84ff
+      glyphs 88a2 8189
+      newline
+      glyphs 89b3 80ed 8de5 81b1 80fe 8289
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_03 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 85b3 83fe 80ea 89e5 80e6 8288 84f0 8488 818c 83d1 81b0 869f
+      glyphs 80e6 80fd 86c2 8288
+      newline
+      glyphs 8486 859b 818c 8b86 80ea 83dc 8189 8a8c 80fd 81ad 81a9 8de6
+      glyphs 81a6 81a8
+      newline
+      glyphs 8de7 80e2 84d3 8184 80eb 80fd 8289
+      newline
+      glyphs 8b86 818d 83e9 81b0 80ed 818b 81a7 80f9 8184 8de8 81b0 8ddd
+      glyphs 81a8 8288
+      newline
+      glyphs 8de9 80ef 88f2 80f0 80fd 80e9 81b1 84a4 818c 8cd8 8189 8186
+      glyphs 80ee 81ab 81b0 8d97 80e2 80fd 8289
+      newline
+      glyphs 80fb 80f5 8184 87b2 81b0 81a0 80fd 80f0 8184 84e6 8181 80fd
+      glyphs 8289
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_04 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 82a6 83cc 82a7 818d 8b86 8189 85ec 80e9 8181 8184 86a0 8181
+      glyphs 80fd 8289
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_05 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 83e0
+      newline
+      glyphs 81ad
+      newline
+      glyphs 81aa
+      newline
+      glyphs 8184
+      newline
+      glyphs 80e0
+      newline
+      glyphs 81aa
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_06 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      glyphs 80f1 81aa 80ea 82a6 83cc 82a7 818c 86a0 86da 818c 8288 80fb
+      glyphs 818c 85f9 819c 81a8 8185 80e0 8181 80fd 8289
+      newline
+      glyphs 8b86 818d 8bca 8dea 8189 8bda 80f4 80f3 81aa 80fd 84aa 83dc
+      glyphs 8189 85ec 80ef 8184
+      newline
+      glyphs 89a3 81a8 8184 80e2 8181 80fd 8289
+      newline
+      glyphs 8b86 818d 8793 85de 818c 8deb 80e2 8288 8793 85de 818c 889a
+      glyphs 8bd1 81b0 81a0 80fd 81a7 80f7 8197 80ed 8288
+      newline
+      glyphs 8bb9 83eb 818c 8c9a 8d97 80ed 8784 88b5 8196 8186 84b2 81b1
+      glyphs 8185 80e2 8181 80fd 8289
+      newline
+    endpage
+  endmessage
+  message MSG_KEITAI_07 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 11 ff
+      control f2 02 06 ff
+      glyphs 84eb 8cbf 8189 8aca 819f 81a9 81f2 81fc 81ef 81bd 85cb 85d6
+      newline
+      glyphs 85fe 84c4 85c7 8dec 82c1 86bf 8ded 85cb 85d6
+      newline
+      glyphs 8ddd 87be 80f5 8184 83ef 89a4 8189 8188 81ab 80e4 8081 8081
+      newline
+      glyphs 8080
+      newline
+      glyphs 83ef 89a4 8ddd 87be 818d 80f1 80ff 81a7 8081 8081
+      newline
+      control f1 04
+    endpage
+  endmessage
 end
 
 section 4 type=4 stride=0x1 count=32 offset=0x8b5 extent=0x23
