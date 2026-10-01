@@ -314,6 +314,33 @@ class BattleTableTests(unittest.TestCase):
             ),
         )
 
+    def test_enemy_ai_reference_validation(self) -> None:
+        game = "dds2"
+        directory = ROOT / f"src/{game}/data/battle"
+        symbols = _battle_symbols(game)
+        unit = battle_tbl.parse_unit_source(
+            (directory / "unit.tblasm").read_text(encoding="utf-8"), symbols
+        )
+        aicalc_source = directory / "aicalc.tblasm"
+        aicalc = battle_tbl.parse_aicalc_source(
+            aicalc_source.read_text(encoding="utf-8"),
+            aicalc_source.parent,
+            symbols,
+        )
+        enemy_id = next(
+            index
+            for index, enemy in enumerate(aicalc.enemies)
+            if enemy != battle_tbl.EnemyAi()
+        )
+        enemies = list(unit.enemies)
+        enemies[enemy_id] = battle_tbl.EnemyTemplate()
+        invalid_unit = replace(unit, enemies=tuple(enemies))
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError,
+            f"enemy AI {enemy_id} references an empty UNIT enemy template",
+        ):
+            battle_tbl.validate_aicalc_unit(aicalc, invalid_unit)
+
     def test_every_encount_record_family_round_trips(self) -> None:
         profile = battle_tbl.ENCOUNT_PROFILES["dds2"]
         model = battle_tbl.default_encount(profile)
@@ -531,11 +558,13 @@ end
                                 raw_controls.add(line.strip())
                 self.assertEqual(controls, expected_controls[game])
                 self.assertEqual(raw_controls, {"control f1 11"})
-                unit = battle_tbl.parse_unit_source(
-                    (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
-                )
                 skill = battle_tbl.parse_skill_source(
                     (ROOT / f"src/{game}/data/battle/skill.tblasm").read_text()
+                )
+                symbols = battle_tbl.battle_symbols_from_message(table, skill)
+                unit = battle_tbl.parse_unit_source(
+                    (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text(),
+                    symbols,
                 )
                 battle_tbl.validate_message_references(table, unit, skill)
 
@@ -565,6 +594,10 @@ end
         self.assertEqual(symbols.skills.by_name["MARAGI_1B0"], 432)
         self.assertEqual(symbols.skills.by_name["SKILL_000"], 0)
         self.assertEqual(len(symbols.skills.by_name), 608)
+        self.assertEqual(symbols.enemies.by_name["ISIS_002"], 2)
+        self.assertEqual(symbols.enemies.by_name["ISIS_10C"], 268)
+        self.assertEqual(symbols.enemies.by_name["ENEMY_000"], 0)
+        self.assertEqual(len(symbols.enemies.by_name), 384)
 
         profile = battle_tbl.aicalc_command_profile("dds1", symbols)
         select = profile.by_name["AI_SELECT_SKILL"]
@@ -594,15 +627,17 @@ end
                 source = ROOT / f"src/{game}/data/battle/{name}.tblasm"
                 source_text = source.read_text(encoding="utf-8")
                 if name == "encount":
-                    model = battle_tbl.parse_encount_source(source_text)
+                    model = battle_tbl.parse_encount_source(source_text, symbols)
                     data = battle_tbl.encode_encount(model)
                     rendered = battle_tbl.render_encount_source(
-                        battle_tbl.decode_encount(data)
+                        battle_tbl.decode_encount(data), symbols
                     )
                 elif name == "unit":
-                    model = battle_tbl.parse_unit_source(source_text)
+                    model = battle_tbl.parse_unit_source(source_text, symbols)
                     data = battle_tbl.encode_unit(model)
-                    rendered = battle_tbl.render_unit_source(battle_tbl.decode_unit(data))
+                    rendered = battle_tbl.render_unit_source(
+                        battle_tbl.decode_unit(data), symbols
+                    )
                 elif name == "skill":
                     model = battle_tbl.parse_skill_source(source_text)
                     data = battle_tbl.encode_skill(model)
@@ -627,10 +662,12 @@ end
                 self.assertEqual(rendered, source_text)
 
             encount = battle_tbl.parse_encount_source(
-                (ROOT / f"src/{game}/data/battle/encount.tblasm").read_text()
+                (ROOT / f"src/{game}/data/battle/encount.tblasm").read_text(),
+                symbols,
             )
             unit = battle_tbl.parse_unit_source(
-                (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
+                (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text(),
+                symbols,
             )
             battle_tbl.validate_encount_unit(encount, unit)
             skill = battle_tbl.parse_skill_source(
@@ -645,6 +682,7 @@ end
                 symbols,
             )
             battle_tbl.validate_aicalc_references(aicalc, skill)
+            battle_tbl.validate_aicalc_unit(aicalc, unit)
 
 
 if __name__ == "__main__":
