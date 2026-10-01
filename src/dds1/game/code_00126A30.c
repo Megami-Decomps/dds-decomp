@@ -2562,14 +2562,14 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
 typedef struct {
     u8 type;
     u8 pad1[3];
-    s32 blendWeight; /* 0x04: exported to the display state as slot 14 */
+    s32 unk4; /* 0x04: exported to the display state as slot 14; never read back */
     s32 fadeValue;
     s32 swayMode;
     u8 pad10[0xC];
-    s32 baseVectorX; /* 0x1C: first component of the vector handed to */
-    s32 baseVectorY; /* 0x20: evtSetDrawVectorTarget, alongside baseVectorZ/W */
-    s32 baseVectorZ; /* 0x24 */
-    s32 baseVectorW; /* 0x28 */
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
     s32 fixedVectorX;
     s32 fixedVectorY;
     s32 fixedVectorZ;
@@ -2612,7 +2612,7 @@ void fldApplyLightSetCurrent(void) {
 
     area = light->type;
     D_0032E570[13] = area;
-    D_0032E570[14] = light->blendWeight;
+    D_0032E570[14] = light->unk4;
     value = light->fadeValue;
     D_0032E570[15] = value;
     D_0032E570[16] = light->swayMode;
@@ -2623,7 +2623,7 @@ void fldApplyLightSetCurrent(void) {
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtSetDrawVectorTarget(0, light->baseVectorX, light->baseVectorZ, light->baseVectorY, light->baseVectorW);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
@@ -2671,7 +2671,7 @@ void fldApplyLightSetIndex(s32 index) {
     D_003BAD98 = index;
     area = light->type;
     D_0032E570[13] = area;
-    D_0032E570[14] = light->blendWeight;
+    D_0032E570[14] = light->unk4;
     value = light->fadeValue;
     D_0032E570[15] = value;
     D_0032E570[16] = light->swayMode;
@@ -2682,7 +2682,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtSetDrawVectorTarget(0, light->baseVectorX, light->baseVectorZ, light->baseVectorY, light->baseVectorW);
+    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
@@ -3960,7 +3960,42 @@ s32 fldGetActorStat1(u32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldGetActorMotionEntry);
+s32 fldGetActorMotionEntry(u32 kind) {
+    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
+    s16 index = entry->motion;
+    s32 *found;
+    s32 flags;
+
+    switch (kind) {
+    case 0:
+        return D_00336A60[index].defaultMotionId;
+    case 1:
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[index].primaryName);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 2:
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00336A60[index].secondaryName);
+        if (found != NULL) {
+            return found[1];
+        }
+    case 3:
+        D_003BAE44 = D_00336A60[index].unk24;
+        return 0;
+    case 4:
+        D_003BAE48 = D_00336A60[index].unk34;
+        return 0;
+    case 5:
+        return D_00336A60[index].unk44;
+    case 6:
+        flags = entry->flags64;
+        if (flags & 1) {
+            return entry->value67;
+        }
+        return -1;
+    }
+    return 0;
+}
 
 s32 fldGetRowValue(u32 kind) {
     s32 slot = D_003BAE4C;
