@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import shlex
 import struct
 import sys
@@ -209,6 +210,132 @@ class UnitTable:
     alternate_affinities: tuple[AffinityRow, ...]
     enemies: tuple[EnemyTemplate, ...]
     enemy_affinities: tuple[AffinityRow, ...]
+
+
+@dataclass(frozen=True)
+class SkillProfile:
+    name: str
+    action_attr_count: int
+    action_count: int
+    requirement_count: int
+    coefficient_count: int
+    item_count: int
+    bonus_count: int
+    group_count: int
+    group_width: int
+
+    @property
+    def requirement_start(self) -> int:
+        return 0x1AB
+
+
+SKILL_PROFILES = {
+    profile.name: profile
+    for profile in (
+        SkillProfile("dds1", 608, 512, 85, 192, 192, 0, 16, 16),
+        SkillProfile("dds2", 672, 544, 117, 256, 256, 64, 48, 24),
+    )
+}
+
+
+@dataclass(frozen=True)
+class SkillActionAttribute:
+    action_attribute: int = 0
+    auxiliary: int = 0
+
+
+@dataclass(frozen=True)
+class SkillAction:
+    flags: int = 0
+    use: int = 0
+    effect_type: int = 0
+    cost_type: int = 0
+    cost: int = 0
+    cost_base: int = 0
+    target_type: int = 0
+    target_area: int = 0
+    target_rule: int = 0
+    target_random: int = 0
+    untargetable_status: int = 0
+    target_program: int = 0
+    hit_type: int = 0
+    hit_level: int = 0
+    hit_program: int = 0
+    hits_min: int = 0
+    hits_max: int = 0
+    hp_type: int = 0
+    hp_power: int = 0
+    mp_type: int = 0
+    mp_power: int = 0
+    hp_base: int = 0
+    mp_base: int = 0
+    effect_percent: int = 0
+    ailment_type: int = 0
+    ailment_level: int = 0
+    base_status: int = 0
+    support_type: int = 0
+    support_points: int = 0
+    death_type: int = 0
+    lookup_id: int = 0
+    program: int = 0
+    magic_base: int = 0
+    magic_limit: int = 0
+
+
+@dataclass(frozen=True)
+class SkillRequirement:
+    conditions: tuple[int, ...] = (0, 0, 0)
+    count: int = 0
+    flags: int = 0
+
+
+@dataclass(frozen=True)
+class PartySkillDefaults:
+    base_value: int = 0
+    value_02: int = 0
+    multiplier_bits: int = 0
+    flags_08: int = 0
+    flags_0a: int = 0
+    value_0c: int = 0
+    repeat_min: int = 0
+    repeat_max: int = 0
+    value_10: int = 0
+    value_12: int = 0
+
+
+@dataclass(frozen=True)
+class SkillItemEntry:
+    flags: int = 0
+    item_id: int = 0
+    value: int = 0
+    auxiliary: int = 0
+
+
+@dataclass(frozen=True)
+class ProfileBonus:
+    stats: tuple[int, ...] = (0,) * 5
+    tier: int = 0
+
+
+@dataclass(frozen=True)
+class SkillGroup:
+    skills: tuple[int, ...] = ()
+
+
+@dataclass(frozen=True)
+class SkillTable:
+    profile: SkillProfile
+    action_attributes: tuple[SkillActionAttribute, ...]
+    actions: tuple[SkillAction, ...]
+    requirements: tuple[SkillRequirement, ...]
+    coefficient_bits: tuple[int, ...]
+    party_defaults: tuple[PartySkillDefaults, ...]
+    items: tuple[SkillItemEntry, ...]
+    profile_bonuses: tuple[ProfileBonus, ...]
+    groups: tuple[SkillGroup, ...]
+
+
+SKILL_ACTION_FORMAT = "<BBBBHHBBBBHHBBHBBHhHhhhHBBHIbBHIhh"
 
 
 def default_zone(profile: EncountProfile) -> Zone:
@@ -845,6 +972,257 @@ def encode_unit(table: UnitTable) -> bytes:
     )
 
 
+def _skill_profile_from_segments(segments: tuple[bytes, ...]) -> SkillProfile:
+    for profile in SKILL_PROFILES.values():
+        sizes = (
+            profile.action_attr_count * 2,
+            profile.action_count * 0x38,
+            profile.requirement_count * 0x10,
+            profile.coefficient_count * 4,
+            16 * 0x14,
+            profile.item_count * 8,
+        )
+        if profile.bonus_count:
+            sizes += (profile.bonus_count * 6,)
+        sizes += (profile.group_count * profile.group_width * 2,)
+        if tuple(map(len, segments)) == sizes:
+            return profile
+    sizes = ", ".join(f"{len(segment):#x}" for segment in segments)
+    raise BattleTableError(f"unsupported SKILL segment sizes: {sizes}")
+
+
+def decode_skill(data: bytes) -> SkillTable:
+    """Decode and validate a retail DDS1 or DDS2 ``SKILL.TBL``."""
+
+    segments = _split_segments(data)
+    profile = _skill_profile_from_segments(segments)
+    action_attributes = tuple(
+        SkillActionAttribute(*struct.unpack_from("<bb", segments[0], offset))
+        for offset in range(0, len(segments[0]), 2)
+    )
+    actions = tuple(
+        SkillAction(*struct.unpack_from(SKILL_ACTION_FORMAT, segments[1], offset))
+        for offset in range(0, len(segments[1]), 0x38)
+    )
+    requirements = tuple(
+        SkillRequirement(
+            struct.unpack_from("<3I", segments[2], offset),
+            struct.unpack_from("<H", segments[2], offset + 0xC)[0],
+            struct.unpack_from("<H", segments[2], offset + 0xE)[0],
+        )
+        for offset in range(0, len(segments[2]), 0x10)
+    )
+    coefficient_bits = struct.unpack(f"<{profile.coefficient_count}I", segments[3])
+    party_defaults = tuple(
+        PartySkillDefaults(*struct.unpack_from("<HHIHHHBBHH", segments[4], offset))
+        for offset in range(0, len(segments[4]), 0x14)
+    )
+    items = tuple(
+        SkillItemEntry(*struct.unpack_from("<4H", segments[5], offset))
+        for offset in range(0, len(segments[5]), 8)
+    )
+    segment_index = 6
+    if profile.bonus_count:
+        profile_bonuses = tuple(
+            ProfileBonus(tuple(struct.unpack_from("<5b", segments[segment_index], offset)),
+                         struct.unpack_from("<b", segments[segment_index], offset + 5)[0])
+            for offset in range(0, len(segments[segment_index]), 6)
+        )
+        segment_index += 1
+    else:
+        profile_bonuses = ()
+
+    groups = []
+    group_segment = segments[segment_index]
+    for index in range(profile.group_count):
+        values = struct.unpack_from(
+            f"<{profile.group_width}h",
+            group_segment,
+            index * profile.group_width * 2,
+        )
+        try:
+            end = values.index(-1)
+        except ValueError:
+            end = len(values)
+        if any(value != -1 for value in values[end:]):
+            raise BattleTableError(f"skill group {index} has data after its terminator")
+        groups.append(SkillGroup(tuple(values[:end])))
+
+    return SkillTable(
+        profile,
+        action_attributes,
+        actions,
+        requirements,
+        coefficient_bits,
+        party_defaults,
+        items,
+        profile_bonuses,
+        tuple(groups),
+    )
+
+
+def default_skill(profile: SkillProfile) -> SkillTable:
+    return SkillTable(
+        profile,
+        (SkillActionAttribute(),) * profile.action_attr_count,
+        (SkillAction(),) * profile.action_count,
+        (SkillRequirement(),) * profile.requirement_count,
+        (0,) * profile.coefficient_count,
+        (PartySkillDefaults(),) * 16,
+        (SkillItemEntry(),) * profile.item_count,
+        (ProfileBonus(),) * profile.bonus_count,
+        (SkillGroup(),) * profile.group_count,
+    )
+
+
+def encode_skill(table: SkillTable) -> bytes:
+    """Encode one SKILL model to its exact physical profile."""
+
+    profile = SKILL_PROFILES.get(table.profile.name)
+    if profile != table.profile:
+        raise BattleTableError(f"unknown or modified SKILL profile {table.profile.name!r}")
+    expected = (
+        ("action attributes", len(table.action_attributes), profile.action_attr_count),
+        ("actions", len(table.actions), profile.action_count),
+        ("requirements", len(table.requirements), profile.requirement_count),
+        ("coefficients", len(table.coefficient_bits), profile.coefficient_count),
+        ("party defaults", len(table.party_defaults), 16),
+        ("items", len(table.items), profile.item_count),
+        ("profile bonuses", len(table.profile_bonuses), profile.bonus_count),
+        ("groups", len(table.groups), profile.group_count),
+    )
+    for name, actual, wanted in expected:
+        if actual != wanted:
+            raise BattleTableError(f"SKILL needs {wanted} {name}, found {actual}")
+    validate_skill_references(table)
+
+    action_attributes = bytearray(profile.action_attr_count * 2)
+    for index, row in enumerate(table.action_attributes):
+        struct.pack_into(
+            "<bb", action_attributes, index * 2,
+            _s8(row.action_attribute, f"action attribute {index}"),
+            _s8(row.auxiliary, f"action attribute {index} auxiliary"),
+        )
+
+    action_data = bytearray(profile.action_count * 0x38)
+    for index, row in enumerate(table.actions):
+        context = f"action {index}"
+        struct.pack_into(
+            SKILL_ACTION_FORMAT, action_data, index * 0x38,
+            _u8(row.flags, f"{context} flags"),
+            _u8(row.use, f"{context} use"),
+            _u8(row.effect_type, f"{context} effect_type"),
+            _u8(row.cost_type, f"{context} cost_type"),
+            _u16(row.cost, f"{context} cost"),
+            _u16(row.cost_base, f"{context} cost_base"),
+            _u8(row.target_type, f"{context} target_type"),
+            _u8(row.target_area, f"{context} target_area"),
+            _u8(row.target_rule, f"{context} target_rule"),
+            _u8(row.target_random, f"{context} target_random"),
+            _u16(row.untargetable_status, f"{context} untargetable_status"),
+            _u16(row.target_program, f"{context} target_program"),
+            _u8(row.hit_type, f"{context} hit_type"),
+            _u8(row.hit_level, f"{context} hit_level"),
+            _u16(row.hit_program, f"{context} hit_program"),
+            _u8(row.hits_min, f"{context} hits_min"),
+            _u8(row.hits_max, f"{context} hits_max"),
+            _u16(row.hp_type, f"{context} hp_type"),
+            _s16(row.hp_power, f"{context} hp_power"),
+            _u16(row.mp_type, f"{context} mp_type"),
+            _s16(row.mp_power, f"{context} mp_power"),
+            _s16(row.hp_base, f"{context} hp_base"),
+            _s16(row.mp_base, f"{context} mp_base"),
+            _u16(row.effect_percent, f"{context} effect_percent"),
+            _u8(row.ailment_type, f"{context} ailment_type"),
+            _u8(row.ailment_level, f"{context} ailment_level"),
+            _u16(row.base_status, f"{context} base_status"),
+            _u32(row.support_type, f"{context} support_type"),
+            _s8(row.support_points, f"{context} support_points"),
+            _u8(row.death_type, f"{context} death_type"),
+            _u16(row.lookup_id, f"{context} lookup_id"),
+            _u32(row.program, f"{context} program"),
+            _s16(row.magic_base, f"{context} magic_base"),
+            _s16(row.magic_limit, f"{context} magic_limit"),
+        )
+
+    requirement_data = bytearray(profile.requirement_count * 0x10)
+    for index, row in enumerate(table.requirements):
+        context = f"requirement {profile.requirement_start + index:#x}"
+        if len(row.conditions) != 3:
+            raise BattleTableError(f"{context} needs three conditions")
+        struct.pack_into(
+            "<3IHH", requirement_data, index * 0x10,
+            *(_u32(value, f"{context} condition") for value in row.conditions),
+            _u16(row.count, f"{context} count"),
+            _u16(row.flags, f"{context} flags"),
+        )
+
+    coefficient_data = struct.pack(
+        f"<{profile.coefficient_count}I",
+        *(_u32(value, "coefficient bits") for value in table.coefficient_bits),
+    )
+    party_data = bytearray(16 * 0x14)
+    for index, row in enumerate(table.party_defaults):
+        context = f"party defaults {index}"
+        struct.pack_into(
+            "<HHIHHHBBHH", party_data, index * 0x14,
+            _u16(row.base_value, f"{context} base_value"),
+            _u16(row.value_02, f"{context} value_02"),
+            _u32(row.multiplier_bits, f"{context} multiplier"),
+            _u16(row.flags_08, f"{context} flags_08"),
+            _u16(row.flags_0a, f"{context} flags_0a"),
+            _u16(row.value_0c, f"{context} value_0c"),
+            _u8(row.repeat_min, f"{context} repeat_min"),
+            _u8(row.repeat_max, f"{context} repeat_max"),
+            _u16(row.value_10, f"{context} value_10"),
+            _u16(row.value_12, f"{context} value_12"),
+        )
+
+    item_data = bytearray(profile.item_count * 8)
+    for index, row in enumerate(table.items):
+        context = f"item entry {index}"
+        struct.pack_into(
+            "<4H", item_data, index * 8,
+            _u16(row.flags, f"{context} flags"),
+            _u16(row.item_id, f"{context} item_id"),
+            _u16(row.value, f"{context} value"),
+            _u16(row.auxiliary, f"{context} auxiliary"),
+        )
+
+    segments: list[bytes] = [
+        bytes(action_attributes), bytes(action_data), bytes(requirement_data),
+        coefficient_data, bytes(party_data), bytes(item_data),
+    ]
+    if profile.bonus_count:
+        bonus_data = bytearray(profile.bonus_count * 6)
+        for index, row in enumerate(table.profile_bonuses):
+            if len(row.stats) != 5:
+                raise BattleTableError(f"profile bonus {index} needs five stats")
+            struct.pack_into(
+                "<6b", bonus_data, index * 6,
+                *(_s8(value, f"profile bonus {index} stat") for value in row.stats),
+                _s8(row.tier, f"profile bonus {index} tier"),
+            )
+        segments.append(bytes(bonus_data))
+
+    group_data = bytearray(profile.group_count * profile.group_width * 2)
+    for index, row in enumerate(table.groups):
+        if len(row.skills) > profile.group_width:
+            raise BattleTableError(
+                f"skill group {index} has more than {profile.group_width} skills"
+            )
+        values = tuple(
+            _range(value, 0, 0x7FFF, f"skill group {index} skill")
+            for value in row.skills
+        ) + (-1,) * (profile.group_width - len(row.skills))
+        struct.pack_into(
+            f"<{profile.group_width}h", group_data,
+            index * profile.group_width * 2, *values,
+        )
+    segments.append(bytes(group_data))
+    return _join_segments(tuple(segments))
+
+
 def validate_encount_unit(encount: EncountTable, unit: UnitTable) -> None:
     """Validate encounter enemy IDs against the paired UNIT profile."""
 
@@ -861,6 +1239,56 @@ def validate_encount_unit(encount: EncountTable, unit: UnitTable) -> None:
                 raise BattleTableError(f"{context} references enemy {enemy_id} outside UNIT")
             if unit.enemies[enemy_id] == EnemyTemplate():
                 raise BattleTableError(f"{context} references empty enemy {enemy_id}")
+
+
+def validate_skill_references(skill: SkillTable) -> None:
+    """Validate skill IDs, requirement counts, and condition-group references."""
+
+    for index, row in enumerate(skill.requirements):
+        skill_id = skill.profile.requirement_start + index
+        if not 0 <= row.count <= 3:
+            raise BattleTableError(f"requirement {skill_id:#x} count is outside 0..3")
+        for condition_index, condition in enumerate(row.conditions):
+            if condition == 0xFFFFFFFF:
+                continue
+            kind = condition & 0xF0000000
+            value = condition & 0x0FFFFFFF
+            if kind == 0 and condition and value >= len(skill.action_attributes):
+                raise BattleTableError(
+                    f"requirement {skill_id:#x} condition {condition_index} "
+                    f"references skill {value} outside SKILL"
+                )
+            if kind == 0x40000000:
+                group = value
+                if group >= len(skill.groups):
+                    raise BattleTableError(
+                        f"requirement {skill_id:#x} condition {condition_index} "
+                        f"references group {group} outside SKILL"
+                    )
+    for group_index, group in enumerate(skill.groups):
+        for member_index, skill_id in enumerate(group.skills):
+            if skill_id >= len(skill.action_attributes):
+                raise BattleTableError(
+                    f"skill group {group_index} member {member_index} references "
+                    f"skill {skill_id} outside SKILL"
+                )
+
+
+def validate_unit_skill(unit: UnitTable, skill: SkillTable) -> None:
+    """Validate UNIT skill IDs against the paired SKILL ID table."""
+
+    if unit.profile.name != skill.profile.name:
+        raise BattleTableError(
+            f"cannot join {unit.profile.name} UNIT with {skill.profile.name} SKILL"
+        )
+    for family, rows in (("party", unit.party), ("enemy", unit.enemies)):
+        for row_index, row in enumerate(rows):
+            for slot_index, skill_id in enumerate(row.skills):
+                if skill_id >= len(skill.action_attributes):
+                    raise BattleTableError(
+                        f"{family} {row_index} skill slot {slot_index} references "
+                        f"skill {skill_id} outside SKILL"
+                    )
 
 
 def _tokens(line: str, line_number: int) -> list[str]:
@@ -899,6 +1327,34 @@ def _int_list(text: str, line_number: int, context: str) -> tuple[int, ...]:
     return tuple(_integer(value, line_number, context) for value in text.split(","))
 
 
+def _condition(text: str, line_number: int) -> int:
+    if text == "any":
+        return 0
+    if text == "none":
+        return 0xFFFFFFFF
+    tags = {
+        "skill": 0,
+        "attribute-mask": 0x10000000,
+        "unit-mask": 0x20000000,
+        "group": 0x40000000,
+    }
+    if ":" in text:
+        tag, payload = text.split(":", 1)
+        if tag not in tags:
+            raise BattleTableError(f"line {line_number}: unknown condition kind {tag!r}")
+        value = _integer(payload, line_number, "condition value")
+        if not 0 <= value <= 0x0FFFFFFF:
+            raise BattleTableError(f"line {line_number}: condition value is too large")
+        return tags[tag] | value
+    return _integer(text, line_number, "condition")
+
+
+def _condition_values(text: str, line_number: int) -> tuple[int, ...]:
+    if not text:
+        return ()
+    return tuple(_condition(value, line_number) for value in text.split(","))
+
+
 def _index(text: str, line_number: int, count: int, context: str) -> int:
     value = _integer(text, line_number, context)
     if not 0 <= value < count:
@@ -931,6 +1387,200 @@ def _sized_list(
     if len(values) > size:
         raise BattleTableError(f"line {line_number}: {key} has more than {size} values")
     return values + (0,) * (size - len(values))
+
+
+def _float_bits(text: str, line_number: int, context: str) -> int:
+    try:
+        value = float(text)
+    except ValueError as exc:
+        raise BattleTableError(f"line {line_number}: invalid {context} {text!r}") from exc
+    if not math.isfinite(value):
+        raise BattleTableError(f"line {line_number}: {context} must be finite")
+    try:
+        packed = struct.pack("<f", value)
+    except OverflowError as exc:
+        raise BattleTableError(f"line {line_number}: {context} is outside f32 range") from exc
+    return struct.unpack("<I", packed)[0]
+
+
+def _parse_bits_or_float(
+    fields: dict[str, str], line_number: int, context: str
+) -> int:
+    present = {key for key in ("value", "bits") if key in fields}
+    if len(present) != 1:
+        raise BattleTableError(
+            f"line {line_number}: {context} needs exactly one of value= or bits="
+        )
+    if "value" in fields:
+        return _float_bits(fields["value"], line_number, context)
+    return _integer(fields["bits"], line_number, context)
+
+
+def parse_skill_source(text: str) -> SkillTable:
+    """Assemble SKILL source on top of the selected profile's empty tables."""
+
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(text.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        raise BattleTableError("empty battle table source")
+    first_number, first_line = meaningful[0]
+    first = _tokens(first_line, first_number)
+    if len(first) != 4 or first[:2] != ["battle-table", "1"]:
+        raise BattleTableError(
+            "source must begin with 'battle-table 1 kind=skill profile=PROFILE'"
+        )
+    header = _fields(first[2:], first_number, {"kind", "profile"}, "header")
+    if header.get("kind") != "skill":
+        raise BattleTableError("SKILL source needs kind=skill")
+    try:
+        profile = SKILL_PROFILES[header["profile"]]
+    except KeyError as exc:
+        raise BattleTableError(f"unknown SKILL profile {header.get('profile')!r}") from exc
+
+    model = default_skill(profile)
+    action_attributes = list(model.action_attributes)
+    actions = list(model.actions)
+    requirements = list(model.requirements)
+    coefficient_bits = list(model.coefficient_bits)
+    party_defaults = list(model.party_defaults)
+    items = list(model.items)
+    profile_bonuses = list(model.profile_bonuses)
+    groups = list(model.groups)
+    seen: set[tuple[str, int]] = set()
+
+    action_fields = set(SkillAction.__dataclass_fields__)
+    for line_number, line in meaningful[1:]:
+        tokens = _tokens(line, line_number)
+        directive = tokens[0]
+        if len(tokens) < 2:
+            raise BattleTableError(f"line {line_number}: {directive} needs an index")
+
+        if directive == "action-attribute":
+            index = _index(tokens[1], line_number, profile.action_attr_count, "skill id")
+            fields = _fields(
+                tokens[2:], line_number, {"attribute", "auxiliary"}, directive
+            )
+            row = SkillActionAttribute(
+                _value(fields, "attribute", 0, line_number),
+                _value(fields, "auxiliary", 0, line_number),
+            )
+            target = action_attributes
+        elif directive == "action":
+            index = _index(tokens[1], line_number, profile.action_count, "action id")
+            fields = _fields(tokens[2:], line_number, action_fields, directive)
+            row = SkillAction(
+                **{
+                    name: _value(fields, name, 0, line_number)
+                    for name in SkillAction.__dataclass_fields__
+                }
+            )
+            target = actions
+        elif directive == "requirement":
+            skill_id = _integer(tokens[1], line_number, "skill id")
+            index = skill_id - profile.requirement_start
+            if not 0 <= index < profile.requirement_count:
+                raise BattleTableError(
+                    f"line {line_number}: requirement skill id {skill_id:#x} is outside "
+                    f"{profile.requirement_start:#x}.."
+                    f"{profile.requirement_start + profile.requirement_count - 1:#x}"
+                )
+            fields = _fields(tokens[2:], line_number, {"conditions", "count", "flags"}, directive)
+            conditions = _condition_values(fields.get("conditions", ""), line_number)
+            if len(conditions) != 3:
+                raise BattleTableError(f"line {line_number}: requirement needs three conditions")
+            row = SkillRequirement(
+                conditions,
+                _value(fields, "count", 0, line_number),
+                _value(fields, "flags", 0, line_number),
+            )
+            target = requirements
+        elif directive == "coefficient":
+            offset = _integer(tokens[1], line_number, "coefficient offset")
+            if offset & 3 or not 0 <= offset < profile.coefficient_count * 4:
+                raise BattleTableError(f"line {line_number}: invalid coefficient offset {offset:#x}")
+            index = offset // 4
+            fields = _fields(tokens[2:], line_number, {"value", "bits"}, directive)
+            row = _parse_bits_or_float(fields, line_number, directive)
+            target = coefficient_bits
+        elif directive == "party-default":
+            index = _index(tokens[1], line_number, 16, "party index")
+            allowed = {
+                "base_value", "value_02", "multiplier", "multiplier_bits",
+                "flags_08", "flags_0a", "value_0c", "repeat_min", "repeat_max",
+                "value_10", "value_12",
+            }
+            fields = _fields(tokens[2:], line_number, allowed, directive)
+            if "multiplier" in fields and "multiplier_bits" in fields:
+                raise BattleTableError(f"line {line_number}: duplicate multiplier representation")
+            multiplier_bits = (
+                _float_bits(fields["multiplier"], line_number, "multiplier")
+                if "multiplier" in fields
+                else _value(fields, "multiplier_bits", 0, line_number)
+            )
+            row = PartySkillDefaults(
+                _value(fields, "base_value", 0, line_number),
+                _value(fields, "value_02", 0, line_number),
+                multiplier_bits,
+                _value(fields, "flags_08", 0, line_number),
+                _value(fields, "flags_0a", 0, line_number),
+                _value(fields, "value_0c", 0, line_number),
+                _value(fields, "repeat_min", 0, line_number),
+                _value(fields, "repeat_max", 0, line_number),
+                _value(fields, "value_10", 0, line_number),
+                _value(fields, "value_12", 0, line_number),
+            )
+            target = party_defaults
+        elif directive == "item-entry":
+            index = _index(tokens[1], line_number, profile.item_count, "item entry index")
+            fields = _fields(tokens[2:], line_number, {"flags", "item", "value", "auxiliary"}, directive)
+            row = SkillItemEntry(
+                _value(fields, "flags", 0, line_number),
+                _value(fields, "item", 0, line_number),
+                _value(fields, "value", 0, line_number),
+                _value(fields, "auxiliary", 0, line_number),
+            )
+            target = items
+        elif directive == "profile-bonus":
+            bonus_id = _integer(tokens[1], line_number, "profile bonus id")
+            index = bonus_id - 0xC0
+            if not 0 <= index < profile.bonus_count:
+                raise BattleTableError(f"line {line_number}: invalid profile bonus id {bonus_id:#x}")
+            fields = _fields(tokens[2:], line_number, {"stats", "tier"}, directive)
+            stats = _int_list(fields.get("stats", ""), line_number, "stats")
+            if len(stats) != 5:
+                raise BattleTableError(f"line {line_number}: profile bonus needs five stats")
+            row = ProfileBonus(stats, _value(fields, "tier", 0, line_number))
+            target = profile_bonuses
+        elif directive == "group":
+            index = _index(tokens[1], line_number, profile.group_count, "group index")
+            fields = _fields(tokens[2:], line_number, {"skills"}, directive)
+            row = SkillGroup(_int_list(fields.get("skills", ""), line_number, "skills"))
+            target = groups
+        else:
+            raise BattleTableError(f"line {line_number}: unknown directive {directive!r}")
+
+        key = (directive, index)
+        if key in seen:
+            raise BattleTableError(f"line {line_number}: duplicate {directive} {tokens[1]}")
+        seen.add(key)
+        target[index] = row
+
+    result = SkillTable(
+        profile,
+        tuple(action_attributes),
+        tuple(actions),
+        tuple(requirements),
+        tuple(coefficient_bits),
+        tuple(party_defaults),
+        tuple(items),
+        tuple(profile_bonuses),
+        tuple(groups),
+    )
+    encode_skill(result)
+    return result
 
 
 def parse_unit_source(text: str) -> UnitTable:
@@ -1637,6 +2287,158 @@ def render_unit_source(table: UnitTable) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _f32_text(bits: int) -> str | None:
+    value = struct.unpack("<f", struct.pack("<I", bits))[0]
+    if not math.isfinite(value):
+        return None
+    for precision in range(1, 10):
+        text = format(value, f".{precision}g")
+        if struct.unpack("<I", struct.pack("<f", float(text)))[0] == bits:
+            return text
+    return repr(value)
+
+
+def _append_float_bits(fields: list[str], key: str, bits: int) -> None:
+    if bits == 0:
+        return
+    text = _f32_text(bits)
+    if text is not None and 0.0001 <= abs(float(text)) <= 1000:
+        fields.append(f"{key}={text}")
+    else:
+        fields.append(f"{key}_bits={bits:#x}")
+
+
+def _condition_text(value: int) -> str:
+    if value == 0:
+        return "any"
+    if value == 0xFFFFFFFF:
+        return "none"
+    tag = value & 0xF0000000
+    payload = value & 0x0FFFFFFF
+    if tag == 0:
+        return f"skill:{payload}"
+    if tag == 0x10000000:
+        return f"attribute-mask:{payload:#x}"
+    if tag == 0x20000000:
+        return f"unit-mask:{payload:#x}"
+    if tag == 0x40000000:
+        return f"group:{payload}"
+    return f"{value:#x}"
+
+
+def _condition_list(values: tuple[int, ...]) -> str:
+    return ",".join(_condition_text(value) for value in values)
+
+
+def render_skill_source(table: SkillTable) -> str:
+    """Render complete canonical SKILL source with consumer-backed records."""
+
+    encode_skill(table)
+    lines = [f"battle-table 1 kind=skill profile={table.profile.name}", ""]
+    for index, row in enumerate(table.action_attributes):
+        if row == SkillActionAttribute():
+            continue
+        fields: list[str] = []
+        _append(fields, "attribute", row.action_attribute)
+        _append(fields, "auxiliary", row.auxiliary)
+        lines.append(f"action-attribute {index} {' '.join(fields)}")
+    lines.append("")
+
+    action_renderers = (
+        ("flags", "hex"), ("use", "int"), ("effect_type", "int"),
+        ("cost_type", "int"), ("cost", "int"), ("cost_base", "int"),
+        ("target_type", "int"), ("target_area", "int"),
+        ("target_rule", "int"), ("target_random", "int"),
+        ("untargetable_status", "hex"), ("target_program", "int"),
+        ("hit_type", "int"), ("hit_level", "int"),
+        ("hit_program", "int"), ("hits_min", "int"),
+        ("hits_max", "int"), ("hp_type", "int"), ("hp_power", "int"),
+        ("mp_type", "int"), ("mp_power", "int"), ("hp_base", "int"),
+        ("mp_base", "int"), ("effect_percent", "int"),
+        ("ailment_type", "int"), ("ailment_level", "int"),
+        ("base_status", "hex"), ("support_type", "hex"),
+        ("support_points", "int"), ("death_type", "int"),
+        ("lookup_id", "int"), ("program", "int"),
+        ("magic_base", "int"), ("magic_limit", "int"),
+    )
+    for index, row in enumerate(table.actions):
+        if row == SkillAction():
+            continue
+        fields = []
+        for attribute, style in action_renderers:
+            value = getattr(row, attribute)
+            if style == "hex":
+                _append_hex(fields, attribute, value)
+            else:
+                _append(fields, attribute, value)
+        lines.append(f"action {index} {' '.join(fields)}")
+    lines.append("")
+
+    for index, row in enumerate(table.requirements):
+        if row == SkillRequirement():
+            continue
+        skill_id = table.profile.requirement_start + index
+        fields = [f"conditions={_condition_list(row.conditions)}"]
+        _append(fields, "count", row.count)
+        _append_hex(fields, "flags", row.flags)
+        lines.append(f"requirement {skill_id:#x} {' '.join(fields)}")
+    lines.append("")
+
+    for index, bits in enumerate(table.coefficient_bits):
+        if bits == 0:
+            continue
+        text = _f32_text(bits)
+        if text is not None and 0.0001 <= abs(float(text)) <= 1000:
+            field = f"value={text}"
+        else:
+            field = f"bits={bits:#x}"
+        lines.append(f"coefficient {index * 4:#x} {field}")
+    lines.append("")
+
+    for index, row in enumerate(table.party_defaults):
+        if row == PartySkillDefaults():
+            continue
+        fields = []
+        _append(fields, "base_value", row.base_value)
+        _append(fields, "value_02", row.value_02)
+        _append_float_bits(fields, "multiplier", row.multiplier_bits)
+        _append_hex(fields, "flags_08", row.flags_08)
+        _append_hex(fields, "flags_0a", row.flags_0a)
+        _append(fields, "value_0c", row.value_0c)
+        _append(fields, "repeat_min", row.repeat_min)
+        _append(fields, "repeat_max", row.repeat_max)
+        _append(fields, "value_10", row.value_10)
+        _append(fields, "value_12", row.value_12)
+        lines.append(f"party-default {index} {' '.join(fields)}")
+    lines.append("")
+
+    for index, row in enumerate(table.items):
+        if row == SkillItemEntry():
+            continue
+        fields = []
+        _append_hex(fields, "flags", row.flags)
+        _append(fields, "item", row.item_id)
+        _append(fields, "value", row.value)
+        _append(fields, "auxiliary", row.auxiliary)
+        lines.append(f"item-entry {index} {' '.join(fields)}")
+    if table.profile_bonuses:
+        lines.append("")
+        for index, row in enumerate(table.profile_bonuses):
+            if row == ProfileBonus():
+                continue
+            lines.append(
+                f"profile-bonus {0xC0 + index:#x} "
+                f"stats={_list(row.stats)} tier={row.tier}"
+            )
+    lines.append("")
+
+    for index, row in enumerate(table.groups):
+        if not row.skills:
+            continue
+        lines.append(f"group {index} skills={_list(row.skills)}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _read(path: Path) -> bytes:
     try:
         return path.read_bytes()
@@ -1661,6 +2463,8 @@ def _command_disassemble(args: argparse.Namespace) -> None:
         source = render_encount_source(decode_encount(data))
     elif segment_count == 5:
         source = render_unit_source(decode_unit(data))
+    elif segment_count in {7, 8}:
+        source = render_skill_source(decode_skill(data))
     else:
         raise BattleTableError(
             f"unsupported battle table with {segment_count} segments"
@@ -1689,6 +2493,8 @@ def _command_assemble(args: argparse.Namespace) -> None:
         data = encode_encount(parse_encount_source(source))
     elif header.get("kind") == "unit":
         data = encode_unit(parse_unit_source(source))
+    elif header.get("kind") == "skill":
+        data = encode_skill(parse_skill_source(source))
     else:
         raise BattleTableError(f"unsupported battle table kind {header.get('kind')!r}")
     _write_bytes(args.output, data)
