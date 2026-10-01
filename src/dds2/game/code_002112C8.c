@@ -947,7 +947,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit) {
     s32 roll = 0;
     s16 pick;
     BattleCtx *ctx = *btlActionScratchWork;
-    u16 rank = unit->unk134;
+    u16 rank = unit->actionTime;
     s32 delayPending = func_001B39E8(4) < (u32)(rank + 0xF);
 
     if (ctx->lowHpActionHold <= 0) {
@@ -1647,7 +1647,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
         u16 bestIndex = 0;
 
         for (i = 0; i < count; i++) {
-            u16 value = ((BtlUnit *)btlGetIndexListEntry(list, i))->unk134;
+            u16 value = ((BtlUnit *)btlGetIndexListEntry(list, i))->actionTime;
 
             if (best >= value) {
                 picked[bestIndex] = 0;
@@ -1678,7 +1678,7 @@ u32 btlAppendSelfAfterTargetScan(s32 battle) {
     void *list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)battle)->unk_60, (u32)((BtlTask *)battle)->unit);
+    btlAppendIndexListEntry(((BtlTask *)battle)->targetList, (u32)((BtlTask *)battle)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -1735,7 +1735,7 @@ extern u32 btlGetEffectActor(void);
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, actor);
     return 1;
 }
 
@@ -1743,7 +1743,7 @@ u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
     u64 unitId;
 
     unitId = func_00219318();
-    btlAppendIndexListEntry(((BtlTask *)task)->unk_60, unitId);
+    btlAppendIndexListEntry(((BtlTask *)task)->targetList, unitId);
     return 1;
 }
 

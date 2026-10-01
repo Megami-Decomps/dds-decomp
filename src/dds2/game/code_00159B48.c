@@ -165,7 +165,7 @@ typedef struct EffResourceRef {
 } EffResourceRef;
 
 void effRetainResource(s32 index) {
-    s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].unk00, 0);
+    s32 *effect = (s32 *)billCreateIndexed(D_003AA884[index].billboardKind, 0);
     s32 *resource = ((EffResourceRef *)D_00451EE0[index])->resource;
     s32 references = resource[2];
 

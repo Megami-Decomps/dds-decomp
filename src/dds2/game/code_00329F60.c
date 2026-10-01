@@ -344,16 +344,16 @@ void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
     SdfTexPacketTail *last;
 
-    WaitSema(obj->unk0);
-    last = (SdfTexPacketTail *)obj->unk10;
+    WaitSema(obj->semaphoreId);
+    last = (SdfTexPacketTail *)obj->packetTail;
     if (last != NULL) {
         last->next = 0;
         last->tag = ((u64)(address & 0x0FFFFFFF) << 32) | 0x20000000;
     } else {
         obj->unkC = (void *)address;
     }
-    obj->unk10 = (s32)packet;
-    SignalSema(obj->unk0);
+    obj->packetTail = (s32)packet;
+    SignalSema(obj->semaphoreId);
 }
 
 void sdfTexQueueResourceRelease(s32 address) {
@@ -369,22 +369,22 @@ void sdfTexQueueResourceRelease(s32 address) {
             entry->mode = 1;
             entry->handle = func_00329930(address);
         }
-        WaitSema(obj->unk0);
-        if (obj->unk8 != NULL) {
-            ((SdfTexReleaseEntry *)obj->unk8)->next = entry;
+        WaitSema(obj->semaphoreId);
+        if (obj->releaseTail != NULL) {
+            ((SdfTexReleaseEntry *)obj->releaseTail)->next = entry;
         } else {
             obj->unk4 = entry;
         }
-        obj->unk8 = entry;
-        SignalSema(obj->unk0);
+        obj->releaseTail = entry;
+        SignalSema(obj->semaphoreId);
     }
 }
 
 void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->unk4 = NULL;
-    semaphore->unk8 = NULL;
+    semaphore->releaseTail = NULL;
     semaphore->unkC = NULL;
-    semaphore->unk10 = 0;
+    semaphore->packetTail = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032AFF0);
@@ -395,44 +395,44 @@ void sdfTexInitializeSemaphore(void) {
     SdfSemaObj *obj;
 
     obj = &sdfTextureQueueWork;
-    obj->unk0 = sdfCreateSemaphore(1, 0x7F, 0);
+    obj->semaphoreId = sdfCreateSemaphore(1, 0x7F, 0);
     sdfResetSemaphoreState(obj);
 }
 
 u32 sdfTexGetPrimaryBuffer(SdfTex *texture) {
-    return (u32)texture->unk28;
+    return (u32)texture->primaryBuffer;
 }
 
 /* Size in bytes of a packed primary texture buffer: only the low 15 bits
  * contribute to its 16-byte block count. */
 s32 sdfTexGetPrimaryBufferSize(SdfTex *tex) {
-    SdfTexBuf *buf = tex->unk28;
+    SdfTexBuf *buf = tex->primaryBuffer;
 
     if (buf == NULL) {
         return 0;
     }
-    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+    return ((buf->gifTagWord & 0x7FFF) + 1) << 4;
 }
 
 s32 sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture) {
     SdfTexBuf *buffer;
 
-    buffer = texture->unk2C;
+    buffer = texture->secondaryBuffer;
     if (buffer == NULL) {
         sdfTexCreateSecondPacket();
-        buffer = texture->unk2C;
+        buffer = texture->secondaryBuffer;
     }
     return (s32)buffer;
 }
 
 /* Mirror the primary-buffer size calculation for the secondary buffer. */
 s32 sdfTexGetSecondaryBufferSize(SdfTex *tex) {
-    SdfTexBuf *buf = tex->unk2C;
+    SdfTexBuf *buf = tex->secondaryBuffer;
 
     if (buf == NULL) {
         return 0;
     }
-    return ((buf->unk0 & 0x7FFF) + 1) << 4;
+    return ((buf->gifTagWord & 0x7FFF) + 1) << 4;
 }
 
 u8 func_0032B240(SdfTex *texture) {
@@ -473,36 +473,36 @@ s32 sdfFormatBitsPerPixelC(u32 format) {
 INCLUDE_ASM(const s32, "game/code_00329F60", func_0032B2C0);
 
 u64 func_0032B318(SdfTex *texture) {
-    return texture->unk28->unk20;
+    return texture->primaryBuffer->textureState;
 }
 
 u64 func_0032B328(SdfTex *texture) {
-    return texture->unk28->unk10;
+    return texture->primaryBuffer->samplingState;
 }
 
 u64 func_0032B338(SdfTex *texture) {
-    return texture->unk28->unk30;
+    return texture->primaryBuffer->clampState;
 }
 
 void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf;
 
-    buf = texture->unk28;
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
+    buf = texture->primaryBuffer;
+    buf->samplingState = (buf->samplingState & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
 void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
-    SdfTexBuf *buf = tex->unk2C;
+    SdfTexBuf *buf = tex->secondaryBuffer;
 
     if (buf == NULL) {
         sdfTexCreateSecondPacket();
-        buf = tex->unk2C;
+        buf = tex->secondaryBuffer;
     }
-    buf->unk10 = (minFilter << 6) | ((magFilter << 5) | (buf->unk10 & ~0x1E0));
+    buf->samplingState = (minFilter << 6) | ((magFilter << 5) | (buf->samplingState & ~0x1E0));
 }
 
 void func_0032B3E0(SdfTex *texture, u8 value) {
-    texture->unk1F = value;
+    texture->clampMode = value;
     func_0032BE60();
 }
 
@@ -512,14 +512,14 @@ void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, 
     s32 width;
     s32 height;
 
-    if (texture->unk1A == 0x13 || texture->unk1A == 0x1B) {
+    if (texture->pixelFormat == 0x13 || texture->pixelFormat == 0x1B) {
         width = 0x10;
         height = 0x10;
     } else {
         width = 8;
         height = 2;
     }
-    func_0032B3F8(resourceWord, width, height, texture->unk19, pixels, mode);
+    func_0032B3F8(resourceWord, width, height, texture->clutFormat, pixels, mode);
 }
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {
@@ -547,11 +547,11 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 
     ref->refCount = 1;
     tex->unk18 = arg6;
-    tex->unk19 = paletteFormat;
-    tex->unkC = x;
-    tex->unkE = y;
-    tex->unk1A = pixelFormat;
-    tex->unk1B = maxMipLevel;
+    tex->clutFormat = paletteFormat;
+    tex->width = x;
+    tex->height = y;
+    tex->pixelFormat = pixelFormat;
+    tex->maxMipLevel = maxMipLevel;
     tex->secondaryResource = (SdfTexResource *)secondary;
     tex->primaryResource = (SdfTexResource *)primary;
     tex->reference = ref;

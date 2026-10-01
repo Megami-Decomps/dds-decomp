@@ -58,8 +58,8 @@ void sdfTexRelease(SdfTex *texture) {
         sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
     }
     sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
-    sdfReleaseChipBlock(texture->unk28);
-    sdfReleaseChipBlock(texture->unk2C);
+    sdfReleaseChipBlock(texture->primaryBuffer);
+    sdfReleaseChipBlock(texture->secondaryBuffer);
     next = texture->next;
     prev = texture->prev;
     if (prev != NULL) {
@@ -71,7 +71,7 @@ void sdfTexRelease(SdfTex *texture) {
         sdfResourceListHead = prev;
     }
     sdfFreeMemoryFromEitherHeap(texture->data);
-    sdfFreeMemoryFromEitherHeap(texture->unk3C);
+    sdfFreeMemoryFromEitherHeap(texture->auxiliaryAllocation);
     sdfReleaseChipBlock(texture->reference);
     sdfReleaseChipBlock(texture);
 }
@@ -119,18 +119,18 @@ void *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant) {
     packet = func_00328D68(0x40);
     primary = sdfTexGetPrimaryResourceWord(texture);
     secondary = sdfTexGetSecondaryResourceWord(texture);
-    func_0032BBF8(packet, texture->unkC, texture->unkE, primary, texture->unk1A, secondary, texture->unk19, 1, texture->unk1B, texture->unk1C, texture->unk1F, variant);
+    func_0032BBF8(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
     return packet;
 }
 
 /* Store the first packet on the texture. */
 void sdfTexCreateFirstPacket(SdfTex *texture) {
-    texture->unk28 = sdfTexCreateResourcePacket(texture, 0);
+    texture->primaryBuffer = sdfTexCreateResourcePacket(texture, 0);
 }
 
 /* Store the second packet on the texture. */
 void sdfTexCreateSecondPacket(SdfTex *texture) {
-    texture->unk2C = sdfTexCreateResourcePacket(texture, 1);
+    texture->secondaryBuffer = sdfTexCreateResourcePacket(texture, 1);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032BE60);

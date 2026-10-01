@@ -21,7 +21,8 @@ extern void func_00308808(s32, s32, s32, s32, s32, s32, s32);
 
 /* Mantra record zeroed before each update call (0x1C4). */
 typedef struct {
-    u8 pad0[4];     /* 0x0 */
+    u16 flags;      /* 0x0: low bit marks an active unit */
+    u16 pad2;       /* 0x2 */
     u16 unk4;       /* 0x4 */
     u8 pad6[0x1BE]; /* 0x6 */
 } MtrRecord;

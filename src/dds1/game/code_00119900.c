@@ -26,7 +26,8 @@ typedef struct Entry1A4 {
     u16 rosterIndex; /* 0x4: entry identifier */
     u16 unk6; /* 0x6 */
     u16 unk8; /* 0x8: script-visible halfword */
-    u8 padA[4];
+    u8 padA[2];
+    u16 unkC; /* 0xC */
     u16 unkE; /* 0xE */
     u8 pad10[4]; /* 0x10 */
     u16 level; /* 0x14: clamped at level 99 by dds3Clamp99 */
@@ -206,9 +207,43 @@ void evtAdvanceCounterValue(s32 counterAddress, s32 increment) {
     *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_00119F08);
+extern s32 datUnitHasSkill(Entry1A4 *, s32);
+extern s32 datAbilityParameters;
 
-extern void func_00119F08(Entry1A4 *, s32);
+/* Skill-driven cursor shifts: the ability's float rate scales the entry's two halfwords into an X and a Y step. */
+void func_00119F08(Entry1A4 *entry, u32 skill) {
+    f32 rate;
+    s32 dx;
+    s32 dy;
+
+    if (datUnitHasSkill(entry, skill) == 0) {
+        return;
+    }
+    dx = 0;
+    dy = 0;
+    rate = *(f32 *)(datAbilityParameters + skill * 8 - 0x1000);
+    switch (skill) {
+    case 0x22B:
+        if (rate > 0.0f) {
+            dx = (s32)((f32)entry->unk8 * rate);
+            dy = (s32)((f32)entry->unkC * rate);
+        }
+        break;
+    case 0x22A:
+    case 0x22C:
+    case 0x250:
+        if (rate > 0.0f) {
+            dy = (s32)((f32)entry->unkC * rate);
+        }
+        break;
+    }
+    if (dx > 0) {
+        datMoveCursorX(entry, dx);
+    }
+    if (dy > 0) {
+        datMoveCursorY(entry, dy);
+    }
+}
 
 void evtUpdateFlaggedStats(void) {
     s32 offset = 0;
@@ -225,8 +260,6 @@ void evtUpdateFlaggedStats(void) {
         remaining--;
     } while (remaining >= 0);
 }
-
-extern s32 datUnitHasSkill(Entry1A4 *, s32);
 
 s32 evtHasMatchingFlaggedEntry(s32 mask) {
     s32 index = 0;

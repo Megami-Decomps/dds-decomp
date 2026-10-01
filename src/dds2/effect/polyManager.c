@@ -8,82 +8,164 @@ enum {
     POLY_RESET_DURATION = 0xFFFFFFF
 };
 
-typedef struct PolyTransform {
-    u8 pad0[0xC8];
-    f32 scaleC8;
-    f32 scaleCC;
-    f32 scaleD0;
+/* A cell's coordinate vectors and packed colors are separate owned arrays. */
+typedef struct {
+    f32 *points;
+    u32 *colors;
+    s32 count;
+    u32 unk0C;
+    u32 color;
+} PolyStripEntry; /* 0x14 */
+
+typedef struct PolyStrip {
+    s16 kind;
+    s16 unk02;
+    s32 entryCount;
+    s32 count;
+    s32 groupDivisor;
+    u32 allocation;
+    PolyStripEntry *entries;
+    f32 *points;
+    u32 *colors;
+    u32 asset;
+    struct PolyStrip *next;
+    u32 unk28;
+} PolyStrip; /* 0x2C: parAllocateCellSystem's header */
+
+/* Basic node: +0xDC is a cell-system pointer, not the band's float step. */
+typedef struct {
+    u8 pad00[0xC8];
+    u16 segments;
+    u8 padCA[2];
+    f32 radius;
+    f32 pairDisplacement;
     u8 padD4[8];
-    f32 scaleDC;
-} PolyTransform;
+    PolyStrip *strip;
+    s32 *ages;
+} PolyNode;
 
-typedef struct PolyEntryPool {
-    u8 pad00[0x10];
-    u32 entryCount; /* 0x10 */
-    u32 duration; /* 0x14: lifetime used by native age comparisons */
-    u8 pad18[0x50];
-    u32 startColorRampFrames; /* 0x68: color interpolation window from the start */
-    u32 endColorRampFrames; /* 0x6C: color interpolation window before duration */
-    u8 pad70[0x88];
-    s32 *records; /* 0xF8: five words per entry; -0xFFFFFF marks inactive */
-} PolyEntryPool;
-
-/* Point buffer of one strip; `count` is copied from the strip's own count. */
+/* The allocated ring families copy this common 0xC0-byte prefix and append
+ * their own parameters/resources; their tails are not interchangeable. */
 typedef struct {
-    f32 *points; /* 0x0 */
-    u32 colorBufferAddress; /* 0x4: per-point colors owned by the cell system */
-    s32 count;    /* 0x8 */
-    u32 unkC;     /* 0xC */
-    u32 color;    /* 0x10: packed color set by the native color-ramp updater */
-} PolyStripEntry; /* 0x14 bytes */
+    f32 origin[4];
+    u32 entryCount;                /* 0x10 */
+    s32 duration;                  /* 0x14 */
+    u32 templateSize;              /* 0x18 */
+    u8 pad1C[4];
+    f32 matrix[16];                /* 0x20 */
+    u32 color;                     /* 0x60 */
+    u8 loop;                       /* 0x64 */
+    u8 pad65[3];
+    u32 startColorRampFrames;      /* 0x68 */
+    u32 endColorRampFrames;        /* 0x6C */
+    u8 pad70[0x50];
+} PolyRingHead; /* 0xC0 */
+
+/* +4 is the per-update radius delta, not an absolute radius. */
+typedef struct {
+    s32 age;
+    f32 radiusStep;
+} PolyBandRecord; /* 0x08 */
 
 typedef struct {
-    u8 pad00[8];             /* 0x0 */
-    s32 count;               /* 0x8 */
-    u8 pad0C[8];             /* 0xC */
-    PolyStripEntry *entries; /* 0x14 */
-} PolyStrip;
+    PolyRingHead head;
+    u32 spawnDelayStep;
+    u32 segments;
+    f32 radialWidth;
+    f32 initialRadius;
+    f32 targetRadius;
+    f32 initialRadiusJitter;
+    f32 targetRadiusJitter;
+    f32 liftStep;
+    u8 padE0[0x10];
+    PolyStrip *strip;              /* 0xF0 */
+    PolyBandRecord *records;       /* 0xF4 */
+    u32 allocation;                /* 0xF8 */
+    u8 padFC[4];
+} PolyBand; /* 0x100, followed by eight-byte records */
 
-/* Node with a scale at 0xD0 and its strip at 0xDC. */
 typedef struct {
-    u8 pad00[0xD0];     /* 0x0 */
-    f32 scale;          /* 0xD0 */
-    u8 padD4[8];        /* 0xD4 */
-    PolyStrip *strip;   /* 0xDC */
-} PolyScaledStripNode;
+    s32 age;
+    u32 radius; /* Native initializer deliberately converts a float to u32. */
+} PolyArcRecord; /* 0x08 */
 
+typedef struct {
+    PolyRingHead head;
+    u32 spawnDelayStep;
+    u32 segments;
+    f32 radialWidth;
+    f32 radius;
+    f32 radiusJitter;
+    u8 padD4[0xC];
+    PolyStrip *strip;              /* 0xE0 */
+    PolyArcRecord *records;        /* 0xE4 */
+    u32 allocation;                /* 0xE8 */
+    u8 padEC[4];
+} PolyArc; /* 0xF0, followed by eight-byte records */
+
+typedef struct {
+    s32 age;
+    f32 radius;
+    f32 radiusStep;
+    f32 rotationXRadians;
+    f32 rotationYRadians;
+} PolyRotatingBandRecord; /* 0x14 */
+
+typedef struct {
+    PolyRingHead head;
+    u32 spawnDelayStep;
+    u32 segments;
+    f32 radialWidth;
+    f32 initialRadius;
+    f32 targetRadius;
+    f32 initialRadiusJitter;
+    f32 targetRadiusJitter;
+    u32 spawnDelayGroupSize;
+    f32 rotationXDegrees;
+    f32 rotationStepDegrees;
+    u8 padE8[0xC];
+    PolyStrip *strip;              /* 0xF4 */
+    PolyRotatingBandRecord *records; /* 0xF8 */
+    u32 allocation;                /* 0xFC */
+} PolyRotatingBand; /* 0x100, followed by 20-byte records */
+
+void parReleaseCellSystem(PolyStrip *strip);
+void parPrependCellNode(PolyStrip *strip);
+void func_003297C8(u32 handle);
+void sdfReleaseChipBlock(void *arg);
+void func_00165690(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-/* Release the cell system, then the node itself; retain the existing raw address view. */
-void effPolyDestroyWork(u32 work) {
-    parReleaseCellSystem(*(u32 *)((s32)work + 0xdc));
-    sdfReleaseChipBlock(work);
+/* Release the cell system, then the basic node itself. */
+void effPolyDestroyWork(PolyNode *obj) {
+    parReleaseCellSystem(obj->strip);
+    sdfReleaseChipBlock(obj);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165600);
 
-/* Multiply both existing floating parameters without assigning them axis-specific roles. */
-void polyScaleTransformPair(float factor, PolyTransform *transform) {
-    transform->scaleCC = transform->scaleCC * factor;
-    transform->scaleD0 = transform->scaleD0 * factor;
+/* Scale the basic ring radius and its point-pair displacement. */
+void polyScaleTransformPair(f32 scale, PolyNode *obj) {
+    obj->radius = obj->radius * scale;
+    obj->pairDisplacement = obj->pairDisplacement * scale;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
 
 /* Run the shared finish step, then enqueue this node's cell system. */
-void polyFinishAndReleaseNodeHandle(s32 work) {
+void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     func_00165690();
-    parPrependCellNode(*(u32 *)(work + 0xdc));
+    parPrependCellNode(obj->strip);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165860);
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
-void polyStripPushPairsApart(PolyScaledStripNode *node, s32 index) {
+void polyStripPushPairsApart(PolyNode *node, s32 index) {
     PolyStrip *strip = node->strip;
     PolyStripEntry *entry = &strip->entries[index];
     f32 scale[4];
@@ -93,7 +175,7 @@ void polyStripPushPairsApart(PolyScaledStripNode *node, s32 index) {
 
     p = entry->points;
     pairs = strip->count / 2;
-    scale[0] = scale[1] = scale[2] = node->scale;
+    scale[0] = scale[1] = scale[2] = node->pairDisplacement;
     VU0_LOAD_VF(vf12, scale);
     for (i = 0; i < pairs; i++) {
         VU0_LOAD_VF(vf10, p + 4);
@@ -142,68 +224,39 @@ u32 func_00165A78(u32 elapsed, u32 duration, u32 color) {
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165B98);
 
 /* Release the band's cell system and backing allocation handle, not the node itself. */
-void polyReleaseBandNodeResources(s32 work) {
-    parReleaseCellSystem(*(u32 *)(work + 0xf0));
-    func_003297C8(*(u32 *)(work + 0xf8));
+void polyReleaseBandNodeResources(PolyBand *obj) {
+    parReleaseCellSystem(obj->strip);
+    func_003297C8(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165CF0);
 
-/* Band node: an origin, a transform, the ring's segment count and a strip at 0xF0. */
-typedef struct {
-    f32 origin[4];      /* 0x0 */
-    u8 pad10[0x10];     /* 0x10 */
-    f32 matrix[16];     /* 0x20 */
-    u8 pad60[0x64];     /* 0x60 */
-    u32 segments;       /* 0xC4 */
-    f32 radialWidth;    /* 0xC8: added to the supplied radius for the other row */
-    u8 padCC[0x24];     /* 0xCC */
-    PolyStrip *strip;   /* 0xF0 */
-} PolyBand;
 
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
 
-/* Ring record: the age counter and the per-frame radius change. */
-typedef struct PolyRingRecord {
-    s32 age;   /* 0x0 */
-    f32 step;  /* 0x4 */
-} PolyRingRecord;
-
-/* Band node as seen by the ring spawner: two base radii, each with a random jitter fraction, and the record table. */
-typedef struct PolyRingSpawner {
-    u8 pad00[0x14];
-    s32 duration;       /* 0x14 */
-    u8 pad18[0xB4];
-    f32 startRadius;    /* 0xCC */
-    f32 endRadius;      /* 0xD0 */
-    f32 startJitter;    /* 0xD4 */
-    f32 endJitter;      /* 0xD8 */
-    u8 padDC[0x18];
-    PolyRingRecord *records; /* 0xF4 */
-} PolyRingSpawner;
 
 extern u8 D_003AA868[];
 extern f32 effMiscRandUnitFloat(void *state);
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
-void func_00165D38(PolyRingSpawner *spawner, s32 index) {
-    PolyRingRecord *record = spawner->records;
+void func_00165D38(PolyBand *spawner, s32 index) {
+    PolyBandRecord *record = spawner->records;
     f32 spread;
     f32 start;
     f32 end;
 
     record += index;
-    spread = spawner->startJitter;
-    start = spawner->startRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
-    spread = spawner->endJitter;
-    end = spawner->endRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    spread = spawner->initialRadiusJitter;
+    start = spawner->initialRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    spread = spawner->targetRadiusJitter;
+    end = spawner->targetRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     record->age = 0;
-    if (spawner->duration > 0) {
-        record->step = (end - start) / (f32)spawner->duration;
+    if (spawner->head.duration > 0) {
+        record->radiusStep = (end - start) / (f32)spawner->head.duration;
     } else {
-        record->step = end - start;
+        record->radiusStep = end - start;
     }
-    polyBandLayoutRing((PolyBand *)spawner, index, start);
+    polyBandLayoutRing(spawner, index, start);
 }
 
 /* Write radii radius and radius + radialWidth, then close the strip with its first pair. */
@@ -227,9 +280,9 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
     VEC3_SPLAT(baseRadiusVector, radius);
     VEC3_SPLAT(offsetRadiusVector, radius + band->radialWidth);
     step = 3.14159265f * 2.0f / (f32)band->segments;
-    VU0_LOAD_MATRIX(band->matrix);
+    VU0_LOAD_MATRIX(band->head.matrix);
     angle = 0.0f;
-    VU0_LOAD_VF(vf12, band->origin);
+    VU0_LOAD_VF(vf12, band->head.origin);
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[1] = 0;
@@ -253,28 +306,11 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
-typedef struct {
-    u32 age; /* Native update interprets these stored bits as a signed age. */
-    f32 radius;
-} PolyLiftedRingRecord; /* 8 bytes */
 
-typedef struct {
-    f32 origin[4];      /* 0x0 */
-    u8 pad10[0x10];     /* 0x10 */
-    f32 matrix[16];     /* 0x20 */
-    u8 pad60[0x64];     /* 0x60 */
-    u32 segments;       /* 0xC4 */
-    u8 padC8[0x14];     /* 0xC8 */
-    f32 lift;           /* 0xDC */
-    u8 padE0[0x10];     /* 0xE0 */
-    PolyStrip *strip;   /* 0xF0 */
-    PolyLiftedRingRecord *recs; /* 0xF4 */
-} PolyLiftedRing;
-
-/* Add a uniformly scaled ring and local-y lift to existing point pairs, then close the strip. */
-void polyStripBuildScaledRing(PolyLiftedRing *ring, s32 index) {
+/* Add one radius step and local-y lift step to existing point pairs, then close the strip. */
+void polyStripBuildScaledRing(PolyBand *ring, s32 index) {
     PolyStrip *strip = ring->strip;
-    PolyLiftedRingRecord *rec = &ring->recs[index];
+    PolyBandRecord *rec = &ring->records[index];
     PolyStripEntry *entry = &strip->entries[index];
     f32 dir[4];
     f32 scale[4];
@@ -289,11 +325,11 @@ void polyStripBuildScaledRing(PolyLiftedRing *ring, s32 index) {
     entry->count = strip->count;
     out = entry->points;
     pairs = strip->count >> 1;
-    scale[2] = scale[1] = scale[0] = rec->radius;
-    lift[1] = ring->lift;
+    scale[2] = scale[1] = scale[0] = rec->radiusStep;
+    lift[1] = ring->liftStep;
     lift[2] = lift[0] = 0;
     step = 3.14159265f * 2.0f / (f32)ring->segments;
-    VU0_LOAD_MATRIX(ring->matrix);
+    VU0_LOAD_MATRIX(ring->head.matrix);
     angle = 0.0f;
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
@@ -322,12 +358,12 @@ void polyStripBuildScaledRing(PolyLiftedRing *ring, s32 index) {
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
 
-/* Scale the four existing parameters in retail order; they are not proven XYZW components. */
-void effPolyScaleFourComponents(float factor, PolyTransform *transform) {
-    transform->scaleC8 = transform->scaleC8 * factor;
-    transform->scaleDC = transform->scaleDC * factor;
-    transform->scaleCC = transform->scaleCC * factor;
-    transform->scaleD0 = transform->scaleD0 * factor;
+/* Scale the band's row width, lift step, and initial/target radii in retail order. */
+void effPolyScaleFourComponents(f32 scale, PolyBand *obj) {
+    obj->radialWidth = obj->radialWidth * scale;
+    obj->liftStep = obj->liftStep * scale;
+    obj->initialRadius = obj->initialRadius * scale;
+    obj->targetRadius = obj->targetRadius * scale;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
@@ -335,38 +371,20 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
-void polyReleaseNodeCellSystemAndBuffer(s32 work) {
-    parReleaseCellSystem(*(u32 *)(work + 0xe0));
-    func_003297C8(*(u32 *)(work + 0xe8));
+void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
+    parReleaseCellSystem(obj->strip);
+    func_003297C8(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001664A8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001664F0);
 
-typedef struct {
-    s32 time;   /* 0x0 */
-    u32 radius; /* 0x4 */
-} PolyArcRec; /* 8 bytes */
-
-typedef struct {
-    f32 origin[4];      /* 0x0 */
-    u8 pad10[4];        /* 0x10 */
-    s32 duration;       /* 0x14 */
-    u8 pad18[8];        /* 0x18 */
-    f32 matrix[16];     /* 0x20 */
-    u8 pad60[0x64];     /* 0x60 */
-    u32 segments;       /* 0xC4 */
-    f32 width;          /* 0xC8 */
-    u8 padCC[0x14];     /* 0xCC */
-    PolyStrip *strip;   /* 0xE0 */
-    PolyArcRec *recs;   /* 0xE4 */
-} PolyArc;
 
 /* Lay a ring of point pairs for strip entry `index` on an arc of the node: the inner row sits at the arc's sine radius, the outer row `width` further out. */
 void polyUpdateArcRingStripPoints(PolyArc *obj, s32 index) {
     PolyStrip *strip = obj->strip;
-    PolyArcRec *rec = &obj->recs[index];
+    PolyArcRecord *rec = &obj->records[index];
     PolyStripEntry *entry = &strip->entries[index];
     f32 dir[4];
     f32 ring[4];
@@ -385,14 +403,14 @@ void polyUpdateArcRingStripPoints(PolyArc *obj, s32 index) {
     out = entry->points;
     pairs = strip->count >> 1;
     radius = rec->radius;
-    angle = (f32)rec->time / (f32)obj->duration * 3.14159265f;
+    angle = (f32)rec->age / (f32)obj->head.duration * 3.14159265f;
     inner = radius * sdfSinPoly(angle);
     drop = radius * sdfEvaluateCosineViaSinePhaseShift(angle) - radius;
     step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX(obj->matrix);
-    width = obj->width;
+    VU0_LOAD_MATRIX(obj->head.matrix);
+    width = obj->radialWidth;
     angle = 0.0f;
-    VU0_LOAD_VF(vf12, obj->origin);
+    VU0_LOAD_VF(vf12, obj->head.origin);
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = ring[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[2] = sdfSinPoly(angle);
@@ -420,9 +438,9 @@ void polyUpdateArcRingStripPoints(PolyArc *obj, s32 index) {
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
 
-/* Scale only the first member of the existing floating pair. */
-void polyScaleTransformFirstComponent(float factor, PolyTransform *transform) {
-    transform->scaleCC = transform->scaleCC * factor;
+/* Scale the arc's base radius, leaving its jitter fraction unchanged. */
+void polyScaleTransformFirstComponent(f32 scale, PolyArc *obj) {
+    obj->radius = obj->radius * scale;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
@@ -430,86 +448,41 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166980);
 
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
-void polyReleaseCellBoundNodeResources(s32 work) {
-    parReleaseCellSystem(*(u32 *)(work + 0xf4));
-    func_003297C8(*(u32 *)(work + 0xfc));
+void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
+    parReleaseCellSystem(obj->strip);
+    func_003297C8(obj->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166AE0);
 
-/* Rotating-band record: age, start radius, per-frame radius step, start angle and ring phase. */
-typedef struct PolyRotatingRecord {
-    s32 age;        /* 0x00 */
-    f32 radius;     /* 0x04 */
-    f32 radiusStep; /* 0x08 */
-    f32 angle;      /* 0x0C */
-    f32 phase;      /* 0x10 */
-} PolyRotatingRecord; /* 0x14 */
-
-/* Band node as seen by the rotating spawner: jittered base radii, delay group size, start angle and the record table. */
-typedef struct PolyRotatingSpawner {
-    u8 pad00[0x14];
-    s32 duration;       /* 0x14 */
-    u8 pad18[0xB4];
-    f32 startRadius;    /* 0xCC */
-    f32 endRadius;      /* 0xD0 */
-    f32 startJitter;    /* 0xD4 */
-    f32 endJitter;      /* 0xD8 */
-    u32 groupSize;      /* 0xDC */
-    f32 angleScale;     /* 0xE0 */
-    u8 padE4[0x14];
-    PolyRotatingRecord *records; /* 0xF8 */
-} PolyRotatingSpawner;
 
 /* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
-void func_00166B40(PolyRotatingSpawner *spawner, u32 index) {
-    PolyRotatingRecord *record = spawner->records;
+void func_00166B40(PolyRotatingBand *spawner, u32 index) {
+    PolyRotatingBandRecord *record = spawner->records;
     f32 spread;
 
     record += index;
-    spread = spawner->startJitter;
+    spread = spawner->initialRadiusJitter;
     record->age = 0;
-    record->radius = spawner->startRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
-    spread = spawner->endJitter;
-    record->radiusStep = (spawner->endRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->duration;
-    record->angle = spawner->angleScale * 0.017453292f;
-    record->phase = 6.2831852f / (f32)spawner->groupSize * (f32)(index % spawner->groupSize);
+    record->radius = spawner->initialRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    spread = spawner->targetRadiusJitter;
+    record->radiusStep = (spawner->targetRadius * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
+    record->rotationXRadians = spawner->rotationXDegrees * 0.017453292f;
+    record->rotationYRadians = 6.2831852f / (f32)spawner->spawnDelayGroupSize * (f32)(index % spawner->spawnDelayGroupSize);
 }
 
-typedef struct {
-    u8 ageBytes[4]; /* Native updates use this signed age word; retain its byte-array view. */
-    f32 radius;
-    f32 radiusStep;
-    f32 rotationXRadians;
-    f32 rotationYRadians;
-} PolyRotatingBandRecord; /* 0x14 bytes */
-
-/* Band node with its own rotation records at 0xF8 and a strip at 0xF4. */
-typedef struct {
-    f32 origin[4];      /* 0x0 */
-    u8 pad10[0x10];     /* 0x10 */
-    f32 matrix[16];     /* 0x20 */
-    u8 pad60[0x64];     /* 0x60 */
-    u32 segments;       /* 0xC4 */
-    f32 radialWidth;    /* 0xC8: separation between the two radius rows */
-    u8 padCC[0x18];     /* 0xCC */
-    f32 rotationStepDegrees; /* 0xE4: converted to radians before advancing Y rotation */
-    u8 padE8[0xC];      /* 0xE8 */
-    PolyStrip *strip;   /* 0xF4 */
-    PolyRotatingBandRecord *recs; /* 0xF8 */
-} PolyRotatingBand;
 
 /* Build the paired ring using current radius/rotation, then retain their next-step values. */
 void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
 {
     PolyStrip *strip = obj->strip;
-    PolyRotatingBandRecord *rec = &obj->recs[index];
+    PolyRotatingBandRecord *rec = &obj->records[index];
     PolyStripEntry *entry = &strip->entries[index];
     f32 dir[4];
     f32 baseRadiusVector[4];
     f32 offsetRadiusVector[4];
     f32 step;
-    f32 radiusOrAngle; /* Radius before emission; angular phase inside the loop. */
+    f32 value; /* Radius before emission; angular phase inside the loop. */
     f32 *out;
     f32 *first;
     s32 pairs;
@@ -522,19 +495,19 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     func_00336818(rec->rotationYRadians);
     sdfMultiplyVuMatrixInPlace();
     rec->rotationYRadians += obj->rotationStepDegrees * (3.14159265f / 180.0f);
-    radiusOrAngle = rec->radius;
-    rec->radius = radiusOrAngle + rec->radiusStep;
+    value = rec->radius;
+    rec->radius = value + rec->radiusStep;
     step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX_B(obj->matrix);
+    VU0_LOAD_MATRIX_B(obj->head.matrix);
     sdfMultiplyVuMatrixInPlace();
-    VEC3_SPLAT(baseRadiusVector, radiusOrAngle);
-    VEC3_SPLAT(offsetRadiusVector, radiusOrAngle + obj->radialWidth);
-    radiusOrAngle = 0.0f;
-    VU0_LOAD_VF(vf12, obj->origin);
+    VEC3_SPLAT(baseRadiusVector, value);
+    VEC3_SPLAT(offsetRadiusVector, value + obj->radialWidth);
+    value = 0.0f;
+    VU0_LOAD_VF(vf12, obj->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = sdfEvaluateCosineViaSinePhaseShift(radiusOrAngle);
+        dir[0] = sdfEvaluateCosineViaSinePhaseShift(value);
         dir[1] = 0;
-        dir[2] = sdfSinPoly(radiusOrAngle);
+        dir[2] = sdfSinPoly(value);
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, dir);
@@ -548,39 +521,39 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
         VU0_ADD(vf10, vf10, vf12);
         VU0_STORE_VF(vf10, out);
         out += 8;
-        radiusOrAngle += step;
+        value += step;
     }
     first = entry->points;
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
-/* Scale the same floating pair as polyScaleTransformPair, preserving the duplicate body. */
-void polyScaleNodeFloatingParameters(float factor, PolyTransform *transform) {
-    transform->scaleCC = transform->scaleCC * factor;
-    transform->scaleD0 = transform->scaleD0 * factor;
+/* Scale the rotating band's initial and target radii. */
+void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *obj) {
+    obj->initialRadius = obj->initialRadius * scale;
+    obj->targetRadius = obj->targetRadius * scale;
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166EC0);
 
 /* Reset active records but leave inactive sentinel entries untouched. */
-void polyResetEntries(PolyEntryPool *pool) {
-    u32 entryCount;
-    s32 *record;
-    u32 index;
+void polyResetEntries(PolyRotatingBand *obj) {
+    u32 count;
+    PolyRotatingBandRecord *entry;
+    u32 i;
 
-    entryCount = pool->entryCount;
-    index = 0;
-    pool->duration = POLY_RESET_DURATION;
-    pool->endColorRampFrames = 0;
-    pool->startColorRampFrames = 0;
-    record = pool->records;
-    if (entryCount != 0) {
+    count = obj->head.entryCount;
+    i = 0;
+    obj->head.duration = POLY_RESET_DURATION;
+    obj->head.endColorRampFrames = 0;
+    obj->head.startColorRampFrames = 0;
+    entry = obj->records;
+    if (count != 0) {
         do {
-            if (*record != POLY_INACTIVE_ENTRY_AGE) {
-                *record = POLY_RESET_ENTRY_AGE;
+            if (entry->age != POLY_INACTIVE_ENTRY_AGE) {
+                entry->age = POLY_RESET_ENTRY_AGE;
             }
-            index = index + 1;
-            record = record + 5;
-        } while (index < entryCount);
+            i++;
+            entry++;
+        } while (i < count);
     }
 }

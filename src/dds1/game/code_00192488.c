@@ -185,7 +185,7 @@ void effFillRandRecords(EffEmit *emitter) {
     do {
         func_001926A8(primitive, index);
         record->randomIndex = effMiscRand(&D_0034DF38) % modulus;
-        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->unk16C, index);
+        keyframe = (EffRec38 *)effMathGetSlotAt(primitive->slotLookup, index);
         index++;
         randomIndex = record->randomIndex;
         scale = keyframe->randomScale;
@@ -200,9 +200,9 @@ INCLUDE_ASM(const s32, "game/code_00192488", func_00192CC8);
 void effFreeBuffers(EffPrim *primitive) {
     if (primitive != NULL) {
         if (primitive->unk14 != NULL) {
-            func_002D0918(primitive->unk4);
+            func_002D0918(primitive->secondaryResource);
         }
-        func_002D0918(primitive->unk0);
+        func_002D0918(primitive->primaryResource);
     }
 }
 

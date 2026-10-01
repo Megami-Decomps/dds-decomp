@@ -282,6 +282,9 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
+extern char D_003AC750[];
+
+
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
 
 s32 evtCommandReadSecondaryWorldIdValue(void) {

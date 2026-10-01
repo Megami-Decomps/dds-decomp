@@ -591,7 +591,6 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00195E60);
 INCLUDE_ASM(const s32, "interface/frFont", func_00195ED8);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195FA8);
-
 void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 dx;

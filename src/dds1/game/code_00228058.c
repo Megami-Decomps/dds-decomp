@@ -61,7 +61,6 @@ extern SolarWorldState *datGameState;
 extern s64 kwlnTaskIsRegistered(u64);
 
 s32 scrReadIntParameter(s32 idx);
-
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
 extern char D_003ACA78[];

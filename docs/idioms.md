@@ -370,6 +370,13 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `daddu $2,$0,$0` slot copies that retail has. Name the label for its meaning
   (`fail`, `notFound`), never for the epilogue (DDS1/DDS2
   `btlFindEligibleTargetForMultiActorCommand`).
+- A void function whose last call sits inside `if (cond) { ... }` sibcalls it
+  (`j`, epilogue duplicated). When retail keeps `jal` plus one shared epilogue,
+  write the guard as an early `if (!cond) { return; }` followed by the body; the
+  `return;` makes the final call a normal call (DDS1 `func_00119F08` / DDS2
+  `func_0011A808`: nested form gave `j datMoveCursorY`, early return gives the
+  retail `jal`). Returning the callee's result through a local instead only adds
+  `daddu` moves.
 
 ## Pointer and loop addressing
 

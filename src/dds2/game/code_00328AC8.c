@@ -131,8 +131,8 @@ SdfCursorNode *sdfAdvanceCursorWalk(SdfCursorState *state, SdfCursorWalk *walk) 
     }
     return node;
 }
-
 INCLUDE_ASM(const s32, "game/code_00328AC8", func_00328CA0);
+
 
 typedef struct SdfCursorSlot {
     struct SdfCursorSlot *next;

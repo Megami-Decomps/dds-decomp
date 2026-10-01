@@ -12,8 +12,8 @@ typedef struct EffCntRec {
 /* Effect primitive work: owned buffers, channel-B cursor and random records (0x170).
  * Shared by DDS1/2 effect and panel units. */
 typedef struct EffPrim {
-    void *unk0;            /* +0x00: buffer freed by effFreeBuffers */
-    void *unk4;            /* +0x04: buffer freed by effFreeBuffers */
+    void *primaryResource; /* +0x00: resource released by effFreeBuffers */
+    void *secondaryResource; /* +0x04: resource released by effFreeBuffers */
     u32 recordCount;       /* +0x08: number of keyframe records */
     u16 unkC;              /* +0x0C: flag set during creation */
     u8 unkE[2];
@@ -29,22 +29,22 @@ typedef struct EffPrim {
     u32 randomModulus;     /* +0x48: modulus for each random slot */
     u8 unk4C[0x11C];
     EffCntRec *counterRecords; /* +0x168 */
-    s32 *unk16C;           /* +0x16C: slot lookup base */
+    s32 *slotLookup;       /* +0x16C: slot lookup base */
 } EffPrim;
 
-/* Type-indexed effect work and sound handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
+/* Type-indexed effect work and texture handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffWork {
     u32 type;
-    void *unk4;
-    u32 unk8;
+    void *payload; /* Type-specific callback argument; also owned by list roots. */
+    u32 listHead;  /* First node when this work owns a list. */
     u8 unkC[8];
     u32 unk14;
     u8 unk18[8];
     u32 unk20;
     u32 unk24;
     u8 unk28[0x10];
-    void *unk38;
-    u32 unk3C; /* Sound handle. */
+    void *next;
+    u32 textureHandle; /* Retained texture reference. */
 } EffWork;
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
@@ -75,7 +75,7 @@ typedef struct EffSub {
     u8 unk50;
 } EffSub;
 
-/* Message resource with length-prefixed names (0x44); DDS1/2 game/code_0018CAC8/00194700.c. */
+/* Message resource with prefixed name records (0x44); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffMsg {
     s32 unk0;
     s32 unk4;
@@ -83,9 +83,9 @@ typedef struct EffMsg {
     u32 unk28;
     u32 unk2C;
     u8 unk30[4];
-    u32 *unk34; /* Length-prefixed name at +4. */
+    u32 *nameRecord; /* Name text starts at +4; the formatter returns the first word. */
     u8 unk38[8];
-    u32 *unk40; /* Length-prefixed name at +4. */
+    u32 *prefixRecord; /* Prefix string pointer is stored in the second word. */
 } EffMsg;
 
 /* Effect allocator slot and float value (0x38); DDS1/2 game/code_0018CAC8/00194700.c. */
@@ -97,9 +97,9 @@ typedef struct EffSlot38 {
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
-    void *unk0; /* Slot array base. */
+    void *slots; /* Slot array base, read by effMathGetSlotAt. */
     u32 unk4;   /* Slot count. */
-    void *unk8; /* Allocation handle. */
+    void *allocation; /* Allocation handle. */
 } EffArrHdr;
 
 /* Billboard instance and kind-specific payload (0x64); DDS1/2 effect/billManager.c and game billboard units. */
@@ -134,23 +134,23 @@ typedef struct BillObj {
 /* Billboard entry count and payload (0x30); DDS1/2 effect/billManager.c. */
 typedef struct BillData {
     u8 pad[8];
-    s32 unk8;
+    s32 childRefCount;
     s32 entryCount;
     u8 pad10[4];
-    s32 unk14;
+    s32 listRefCount;
     u8 pad18[24];
 } BillData;
 
 /* Billboard callbacks and metadata (0xC); DDS1/2 effect/billManager.c and game billboard units. */
 typedef struct {
     void *(*func)();
-    void (*unk4)();
+    void (*callback)();
     u32 unk8;
 } BillDispatch;
 
 /* Resource index configuration (0xC); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectConfig {
-    s16 unk00;
+    s16 billboardKind;
     u8 pad02[10];
 } EffectConfig;
 

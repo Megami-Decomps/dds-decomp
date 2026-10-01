@@ -43,7 +43,7 @@ typedef struct MenuStaffContext {
     s32 group;            /* 0x60 */
     s32 spriteArg0;       /* 0x64 */
     s32 spriteArg1;       /* 0x68 */
-    s32 unk6C;
+    s32 windowResource; /* Source resource for the window's fixed sprite slots. */
     u8 pad70[0x54];
     s32 spriteArg2;       /* 0xC4 */
     u8 padC8[0x40];

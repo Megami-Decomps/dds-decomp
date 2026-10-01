@@ -28,7 +28,7 @@ typedef struct BtlState {
     u8 pad1F0[4];
     u32 battleFlags; /* 0x1F4 */
     u8 pad1F8[4];
-    u32 unk_1FC;
+    u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
     u8 pad200[0x24];
     BtlTask *tasks; /* 0x224 */
     BtlUnit *units; /* 0x228 */
@@ -139,7 +139,7 @@ typedef struct BtlState {
     u8 pad4EC[0xDC];
     void (*bossCleanup)(void); /* 0x5C8 */
     u8 pad5CC[0x120];
-    s32 (*unk_6EC)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
+    s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
     u8 pad6F0[0x28];
     struct BattleLinkedEffectState *effect; /* 0x718 */
     u8 pad71C[0xC];

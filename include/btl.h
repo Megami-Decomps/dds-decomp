@@ -125,7 +125,7 @@ typedef struct BtlUnit {
     u8 pad1C[0x14];
     f32 positionX;   /* 0x30: current unit position */
     f32 positionY;   /* 0x34 */
-    f32 unk38;
+    f32 positionZ; /* 0x38 */
     u8 pad3C[0x14];
     f32 unk50;
     u32 baseColor;
@@ -146,9 +146,9 @@ typedef struct BtlUnit {
     s32 resourceIndex; /* 0xC8 */
     u8 unkCC;
     u8 padCD[0x1B];
-    u32 unkE8;
+    u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
     s32 unkEC;
-    s32 unkF0;
+    s32 effectState; /* 0xF0: same actor effect state as DDS1 */
     f32 fF4;
     s16 unkF8;
     s16 unkFA;
@@ -172,9 +172,9 @@ typedef struct BtlUnit {
     u8 pad126[8];
     u16 conditionFlags; /* 0x12E */
     u8 pad130a[4];
-    u16 unk134;   /* 0x134: queried unit parameter */
+    u16 actionTime; /* 0x134: action timestamp used by the low-HP delay check */
     u8 pad130[0x3C];
-    u16 unk172;
+    u16 unk172; /* Index into datItemSkillRecords for the default action operand. */
     struct BtlUnit *prev; /* 0x174 */
     struct BtlUnit *next; /* 0x178 */
     u8 pad17C[0x168];
@@ -186,7 +186,7 @@ typedef struct BtlUnit {
     struct SoundResourceLink *link31C;
     struct SoundLink *link320;
     struct ActiveSoundNode *node324;
-    s32 unk328;
+    s32 unk328; /* Owner of the actor model's file slots and allocation handles. */
     void *gunResource;
     u16 unk330;
     u8 pad332[2];
@@ -194,7 +194,7 @@ typedef struct BtlUnit {
     u8 pad338[4];
     s32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     BtlUnitExt *ext; /* 0x340 */
-    s32 unk344;
+    s32 unk344; /* Alternate SDF model used by the transparency path. */
     u8 pad348[4];
     s32 unk34C;
     s32 unk350;

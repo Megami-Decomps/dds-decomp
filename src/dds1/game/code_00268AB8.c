@@ -16,6 +16,7 @@ extern u8 D_003DC1C0[];
 
 extern u8 D_003DC1D0[];
 
+
 extern void *mnuTitleCameraObject;
 
 extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero bytes no C function emits */
@@ -663,8 +664,6 @@ s64 func_0026B1C0(void) {
     func_0026CB10(D_003DC1C0, D_003DC1D0);
     return mnuApplyInnerEffectVectorsAndTickObject();
 }
-
-INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD80);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026B1F0);
 
