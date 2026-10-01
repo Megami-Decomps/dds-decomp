@@ -25,13 +25,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x10];  /* 0x80 */
     f32 unk90;       /* 0x90 nested work parameter */
     u8 pad94[0x8];   /* 0x94 */
@@ -73,13 +73,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
@@ -114,13 +114,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
@@ -155,13 +155,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
@@ -196,13 +196,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
@@ -245,13 +245,13 @@ typedef struct {
     u8 pad3C[0x18];  /* 0x3C */
     u32 unk54;       /* 0x54 spawn parameter */
     f32 unk58;       /* 0x58 spawn parameter */
-    u32 unk5C;       /* 0x5C nested work handle */
+    u32 nestedWork;  /* 0x5C nested work handle */
     u32 unk60;       /* 0x60 resource handle */
     u32 unk64;       /* 0x64 resource handle */
     u8 pad68[0xC];   /* 0x68 */
     u32 optionalHandle; /* 0x74 freed if nonzero */
     u8 pad78[0x4];   /* 0x78 */
-    u32 unk7C;       /* 0x7C nested work handle */
+    u32 linkedWork;  /* 0x7C nested work handle */
     u8 pad80[0x1C];  /* 0x80 */
     u32 unk9C;       /* 0x9C spawn parameter */
     f32 unkA0;       /* 0xA0 spawn parameter */
@@ -363,7 +363,7 @@ typedef struct {
     f32 scale;         /* 0x1338: configurable scale */
     u32 unk133C;       /* 0x133C cleared on init */
     u32 unk1340;       /* 0x1340 cleared on init */
-    u32 color1344;     /* 0x1344 initialised to grey 0x80808080 */
+    u32 baseColor;    /* 0x1344 initialised to grey 0x80808080 */
     u32 secondaryHandle; /* 0x1348: parameter block 1 */
     u32 primaryHandle;   /* 0x134C: parameter block 0 */
     u32 allocationHandle; /* 0x1350: backing allocation */
@@ -709,7 +709,7 @@ void effTwinEffectRelease(EffPCPWork *work) {
     u32 *b;
 
     a = &work->unk1C;
-    b = &work->unk5C;
+    b = &work->nestedWork;
     for (i = 7; i >= 0; i--) {
         func_001629F0(*b);
         b++;
@@ -1182,7 +1182,7 @@ void effPcpSetDelayedPairColor(EffPCPWork *work, u32 val) {
 void effPcpChargeInitTail(EffPCPChargeWork *work) {
     work->unk133C = 0;
     work->unk1340 = 0;
-    work->color1344 = 0x80808080;
+    work->baseColor = 0x80808080;
 }
 
 EffPCPChargeWork *effCreateChargeWork(void *source) {
@@ -2636,9 +2636,9 @@ typedef struct {
 
 typedef struct {
     EffPCPBlock52 head;
-    u32 color34;
-    u32 unk38;
-    u32 unk3C;
+    u32 color;        /* 0x34: grey 0x80808080 */
+    u32 sourceWord;   /* 0x38: copied from head word 3 */
+    u32 cleared;      /* 0x3C: zeroed on copy */
 } EffPCPFlat40;
 
 void *effPcpCopyWorkLong(src)
@@ -2648,9 +2648,9 @@ void *effPcpCopyWorkLong(src)
 
     dst = func_002CFEB8(0x40);
     dst->head = src->head;
-    dst->color34 = 0x80808080;
-    dst->unk3C = 0;
-    dst->unk38 = src->head.word[3];
+    dst->color = 0x80808080;
+    dst->cleared = 0;
+    dst->sourceWord = src->head.word[3];
     return dst;
 }
 
@@ -3166,8 +3166,8 @@ typedef struct {
 
 typedef struct {
     EffPCPBlock80 head;
-    u32 unk50;
-    u32 color54;
+    u32 state;
+    u32 color;
     u32 handleA[7];
     u32 handleB[7];
     u32 handleC[7];
@@ -3182,8 +3182,8 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
 
     work = func_002CFEB8(0xAC);
     work->head = *(EffPCPBlock80 *)block0;
-    work->unk50 = 0;
-    work->color54 = 0x80808080;
+    work->state = 0;
+    work->color = 0x80808080;
     handle = work->handleA;
     for (i = 0; i < 7; i++) {
         handle[0] = func_0014FD20(blocks[i]);
@@ -3219,8 +3219,8 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 
     work = func_002CFEB8(0xAC);
     work->head = src->head;
-    work->unk50 = 0;
-    work->color54 = 0x80808080;
+    work->state = 0;
+    work->color = 0x80808080;
     from = src->handleC;
     to = work->handleC;
     for (i = 0; i < 7; i++) {
@@ -3641,7 +3641,7 @@ void effPcpCopySpinSingleVector(void *dst, void *src) {
 }
 
 void effSpinSingleSetColor(EffPCPWork *work, u32 val) {
-    work->unk5C = val;
+    work->nestedWork = val;
 }
 
 void effSpinSingleSetScale(EffPCPWork *work, f32 val) {
@@ -3719,7 +3719,7 @@ void func_0017F4C0(void *dst, void *src) {
 }
 
 void effSpinPairSetColor(EffPCPWork *work, u32 val) {
-    work->unk5C = val;
+    work->nestedWork = val;
 }
 
 void effSpinPairSetScale(EffPCPWork *work, f32 val) {
@@ -3795,7 +3795,7 @@ void func_0017F7C0(void *dst, void *src) {
 }
 
 void effPcpSetSpinColor(EffPCPWork *work, u32 val) {
-    work->unk5C = val;
+    work->nestedWork = val;
 }
 
 void effPcpSetSpinScale(EffPCPWork *work, f32 val) {
@@ -4214,7 +4214,7 @@ void func_001808B0(void) {
 }
 
 void effPcpReleaseBeamClone(EffPCPWork *work) {
-    effPcpReleaseNestedWork((EffPCPWork *)work->unk5C);
+    effPcpReleaseNestedWork((EffPCPWork *)work->nestedWork);
     sdfReleaseChipBlock(work);
 }
 
@@ -4225,7 +4225,7 @@ void effPcpCopyBeamVector(void *dst, void *src) {
 }
 
 void effPcpNestedWorkSetFloat(EffPCPWork *work, f32 value) {
-    ((EffPCPWork *)work->unk5C)->unk90 = value;
+    ((EffPCPWork *)work->nestedWork)->unk90 = value;
 }
 
 void func_00180B40(EffPCPWork *work, u32 val) {
@@ -4235,14 +4235,14 @@ void func_00180B40(EffPCPWork *work, u32 val) {
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPcpCopyNestedMatrix(EffPCPWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(&((EffPCPWork *)work->unk5C)->pad3C[4]);
+    VU0_STORE_MATRIX(&((EffPCPWork *)work->nestedWork)->pad3C[4]);
 }
 
 void effRotateNested(EffPCPWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
     func_002DD8E8(1.5707963f);
     sdfComposeVuMatrixFromRegisters();
-    VU0_STORE_MATRIX((void *)work->unk5C);
+    VU0_STORE_MATRIX((void *)work->nestedWork);
 }
 
 typedef struct EffPCPRingGeoNode {
@@ -4441,7 +4441,7 @@ void func_00181040(void) {
 }
 
 void effPcpReleaseLinkedBeamClone(EffPCPWork *work) {
-    effPcpReleaseNestedWork((EffPCPWork *)work->unk7C);
+    effPcpReleaseNestedWork((EffPCPWork *)work->linkedWork);
     sdfReleaseChipBlock(work);
 }
 
@@ -4449,7 +4449,7 @@ typedef struct EffPCPBeamNode {
     u8 pad00[0x80];
     u128 vec80;
     u8 pad90[8];
-    u32 color98;
+    u32 color;             /* 0x98 */
 } EffPCPBeamNode;
 
 typedef struct EffPCPBeamTimer {
@@ -4496,7 +4496,7 @@ void effPcpUpdateBeamTimeline(EffPCPBeamTimer *work) {
     }
     color = effBlendColor(work->color & 0xFFFFFF, work->color, t);
     beam = work->beam;
-    beam->color98 = color;
+    beam->color = color;
     PCP_COPY_VECTOR(&beam->vec80, work);
     func_00180370(beam);
     work->frame++;
@@ -4507,7 +4507,7 @@ void effPcpCopyLinkedBeamVector(void *dst, void *src) {
 }
 
 void effPcpLinkedWorkSetFloat(EffPCPWork *work, f32 value) {
-    ((EffPCPWork *)work->unk7C)->unk90 = value;
+    ((EffPCPWork *)work->linkedWork)->unk90 = value;
 }
 
 void func_001811D0(EffPCPWork *work, u32 val) {
@@ -4517,7 +4517,7 @@ void func_001811D0(EffPCPWork *work, u32 val) {
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
 void effPcpCopyLinkedBeamMatrix(EffPCPWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
-    VU0_STORE_MATRIX(&((EffPCPWork *)work->unk7C)->pad3C[4]);
+    VU0_STORE_MATRIX(&((EffPCPWork *)work->linkedWork)->pad3C[4]);
 }
 
 /* Block-set parameter head (0x164 bytes, copied whole into each new work). */
@@ -4940,7 +4940,88 @@ void func_00182188(EffPCPWorkF10 *work, f32 val) {
     work->unk10 = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00182190);
+/* Placement block handed to every spawned event entry. */
+typedef struct EffPCPEventPlace {
+    f32 pos[7];
+    f32 scaleA;
+    f32 scaleB;
+    f32 scaleC;
+    f32 scaleD;
+    u32 color;
+} EffPCPEventPlace;
+
+extern EffPCPEventOwner *func_00190100(void *params);
+
+typedef struct EffPCPEntryBlockBSrc {
+    u8 pad00[0x58];
+    u32 count; /* 0x58 */
+} EffPCPEntryBlockBSrc;
+
+typedef struct EffPCPEntryBlockB {
+    u32 word[65];
+} EffPCPEntryBlockB; /* 0x104-byte header copied from the source */
+
+typedef struct EffPCPEntryB {
+    void *event; /* 0x00 */
+    s32 delay;   /* 0x04 */
+    u8 pad08[0x10];
+} EffPCPEntryB;
+
+typedef struct EffPCPEntryWorkB {
+    u8 pad00[0x5C];
+    s32 life; /* 0x5C */
+    u8 pad60[0xA4];
+    EffPCPEntryB *entries;   /* 0x104 */
+    EffPCPEventOwner *owner; /* 0x108 */
+    u8 flag;                 /* 0x10C */
+    u8 pad10D[3];
+    f32 scale;               /* 0x110 */
+    u32 color;               /* 0x114 */
+    u32 handle;              /* 0x118 */
+} EffPCPEntryWorkB;
+
+/* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
+EffPCPEntryWorkB *func_00182190(EffPCPEntryBlockBSrc *src, void *params) {
+    u32 count = src->count;
+    u32 handle = (u32)func_002D03F8(count * 24 + 0x11C);
+    EffPCPEntryWorkB *work = sdfResourceRetainAddress((void *)handle);
+    EffPCPEventPlace place;
+    EffPCPEntryB *entry;
+    s32 life;
+    u32 i;
+
+    *(EffPCPEntryBlockB *)work = *(EffPCPEntryBlockB *)src;
+    entry = (EffPCPEntryB *)((u8 *)work + 0x11C);
+    work->handle = handle;
+    work->color = 0x80808080;
+    work->flag = 1;
+    work->entries = entry;
+    work->scale = 1.0f;
+    work->owner = func_00190100(params);
+    place.pos[0] = 0;
+    place.pos[1] = 0;
+    place.pos[2] = 0;
+    place.pos[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    place.color = 0x80808080;
+    life = work->life;
+    for (i = 0; i < count; i++) {
+        entry->event = (void *)func_00190130(work->owner, 2, &place);
+        if (life > 0) {
+            entry->delay = -(effMiscRand(D_0034DF38) % life);
+        } else {
+            entry->delay = 0;
+        }
+        entry++;
+    }
+    return work;
+}
 
 void func_00182398(void *args) {
     void *param0;
@@ -5026,18 +5107,6 @@ void effPcpDriftSetScale(EffPCPWork *work, f32 val) {
 void func_00182A38(EffPCPWork *work, u32 val) {
     work->unk114 = val;
 }
-
-/* Placement block handed to every spawned event entry. */
-typedef struct EffPCPEventPlace {
-    f32 pos[7];
-    f32 scaleA;
-    f32 scaleB;
-    f32 scaleC;
-    f32 scaleD;
-    u32 color;
-} EffPCPEventPlace;
-
-extern EffPCPEventOwner *func_00190100(void *params);
 
 typedef struct EffPCPDriftSrc {
     u8 pad00[0x18];

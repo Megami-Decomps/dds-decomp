@@ -301,7 +301,55 @@ void func_0016FF48(u8 *work, f32 value) {
     *(f32 *)(work + 0x5C) = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016FF50);
+/* Record pool header: the allocation holds the 0x10-byte and 0x4-byte record
+ * arrays first, then this 0x70-byte header whose first 0x50 bytes stay zero. */
+typedef struct EffectPool {
+    u8 pad00[0x50];
+    s32 kind;          /* 0x50: 2 on creation */
+    u32 color;         /* 0x54: 0x80808080 on creation */
+    s32 count;         /* 0x58 */
+    f32 scale;         /* 0x5C: 1.0f on creation */
+    s32 recordBase;    /* 0x60 */
+    s32 auxRecordBase; /* 0x64 */
+    u32 resource;      /* 0x68 */
+    u32 buffer;        /* 0x6C */
+} EffectPool;
+
+extern void *memset(void *dst, s32 value, u32 size);
+extern u32 sdfCreateAssetWithDrawEntries(void);
+extern void func_002DA420(u32 asset, f32 value);
+extern u8 D_003D6550[];
+
+EffectPool *func_0016FF50(s32 groups) {
+    EffectPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 slots;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    slots = groups * 3;
+    first = slots * 4;
+    second = slots;
+    size = (first + second) * 4 + 0x70;
+    handle = func_002D03F8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffectPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->color = 0x80808080;
+    pool->kind = 2;
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_002DA420(pool->resource, 1.0f);
+    memset(D_003D6550, 0, 0x2C);
+    *(u16 *)(D_003D6550 + 4) = 0x4000;
+    return pool;
+}
 
 void effReleaseRecordPoolResourceAndBuffer(EffectRecordGroup *group) {
     sdfQueueAssetRelease(group->handle68);
@@ -318,7 +366,34 @@ s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170250);
+EffectPool *func_00170250(s32 groups) {
+    EffectPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    first = groups * 16;
+    second = groups * 4;
+    size = (first + second) * 4 + 0x70;
+    handle = func_002D03F8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffectPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->kind = 2;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->color = 0x80808080;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_002DA420(pool->resource, 1.0f);
+    memset(D_003D6550, 0, 0x2C);
+    *(u16 *)(D_003D6550 + 4) = 0x4000;
+    return pool;
+}
 
 void func_00170350(EffectRecordGroup *group) {
     sdfQueueAssetRelease(group->handle68);

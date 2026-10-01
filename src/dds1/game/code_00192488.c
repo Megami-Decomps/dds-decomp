@@ -58,7 +58,68 @@ extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, void *arg1);
 extern void func_001935B8(EffPrim *arg0, void *arg1);
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_00192488);
+/* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
+typedef struct EffChanHead {
+    u8 pad00[0x44];
+    u32 count;      /* 0x44: number of random records */
+    u8 pad48[4];
+    s32 spread;     /* 0x4C: modulus of the start delay */
+    u8 pad50[0x118];
+} EffChanHead; /* 0x168 */
+
+typedef struct EffChanRecord {
+    s32 delay;      /* 0x00 */
+    void *param;    /* 0x04 */
+} EffChanRecord; /* 0x8 */
+
+typedef struct EffChanSourceOwner {
+    u8 pad00[4];
+    void *param;    /* 0x04 */
+} EffChanSourceOwner;
+
+typedef struct EffChanSource {
+    EffChanHead head;
+    EffChanSourceOwner *owner; /* 0x168 */
+} EffChanSource;
+
+typedef struct EffChanWork {
+    EffChanHead head;
+    EffChanRecord *records; /* 0x168 */
+    s32 *slots;             /* 0x16C */
+    void *buffer;           /* 0x170 */
+} EffChanWork;
+
+extern void *effAllocSlotArray(u32 count);
+extern void *effParamWorkDuplicate(void *param);
+
+/* Create a channel work: clone the header, allocate the slot array, then give every record a duplicated parameter and a random negative start delay. */
+EffChanWork *func_00192488(EffChanSource *src) {
+    u32 count = src->head.count;
+    void *handle = func_002D03F8(count * sizeof(EffChanRecord) + sizeof(EffChanWork));
+    EffChanWork *work = sdfResourceRetainAddress(handle);
+    EffChanRecord *record = (EffChanRecord *)(work + 1);
+    void *param;
+    s32 spread;
+    u32 i;
+
+    work->head = src->head;
+    work->buffer = handle;
+    work->records = record;
+    if (work->head.spread <= 0) {
+        work->head.spread = 1;
+    }
+    work->slots = effAllocSlotArray(count);
+    if (count != 0) {
+        param = src->owner->param;
+        spread = work->head.spread;
+        for (i = 0; i < count; i++) {
+            record->param = effParamWorkDuplicate(param);
+            record->delay = -(effMiscRand(D_0034DF38) % spread);
+            record++;
+        }
+    }
+    return work;
+}
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_00192638);
 

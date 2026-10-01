@@ -5,7 +5,24 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00167178);
 
-INCLUDE_ASM(const s32, "game/code_00167178", func_00167350);
+typedef struct EffThunderGroup {
+    u8 pad00[0xA0];
+    s32 count;         /* 0xA0 */
+    u8 pad_A4[0x54];
+    u32 handles[1];    /* 0xF8 */
+} EffThunderGroup;
+
+extern void effPCPThunderFree3(u32 handle);
+extern void sdfReleaseChipBlock(void *block);
+
+void func_00167350(EffThunderGroup *group) {
+    s32 i;
+
+    for (i = 0; i < group->count - 1; i++) {
+        effPCPThunderFree3(group->handles[i]);
+    }
+    sdfReleaseChipBlock(group);
+}
 
 u32 func_001673C0(u32 arg0) {
     return arg0;
@@ -121,4 +138,55 @@ INCLUDE_ASM(const s32, "game/code_00167178", func_00169D78);
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_00169E10);
 
-INCLUDE_ASM(const s32, "game/code_00167178", func_0016A088);
+typedef struct EffFlashRecordPart {
+    u32 unk00;
+    s32 age; /* 0x04 */
+    u8 pad08[8];
+} EffFlashRecordPart; /* 0x10 */
+
+typedef struct EffFlashRecordHandle {
+    u8 pad00[0x50];
+    u32 unk50;
+} EffFlashRecordHandle;
+
+typedef struct EffFlashRecordWork {
+    u8 pad00[0x10];
+    u32 particleCount;    /* 0x10 */
+    u8 pad14[0x18];
+    u32 unk2C;            /* 0x2C */
+    EffFlashRecordPart *parts; /* 0x30 */
+    u32 updateCount;      /* 0x34 */
+    u32 colorParam;       /* 0x38 */
+    f32 renderScale;      /* 0x3C */
+    u32 ownedBuffer;      /* 0x40 */
+    u32 resourceHandle;   /* 0x44 */
+} EffFlashRecordWork; /* 0x48 */
+
+extern u32 func_002D03F8(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern s32 func_0016FF50();
+
+/* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
+EffFlashRecordWork *func_0016A088(src)
+    EffFlashRecordWork *src;
+{
+    u32 handle = func_002D03F8(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
+    EffFlashRecordWork *work = (EffFlashRecordWork *)sdfResourceRetainAddress(handle);
+    EffFlashRecordHandle *record;
+    u32 i;
+
+    memcpy(work, src, 0x30);
+    work->parts = (EffFlashRecordPart *)(work + 1);
+    work->colorParam = 0x80808080;
+    work->ownedBuffer = handle;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    record = (EffFlashRecordHandle *)func_0016FF50(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = work->unk2C;
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = 0;
+    }
+    return work;
+}

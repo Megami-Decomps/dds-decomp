@@ -265,7 +265,26 @@ void kwlnDrawSetE08Triple(u32 first, u32 second, u32 third) {
     D_003C2E08.unk08 = third;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106738);
+typedef struct {
+    u32 w[9];
+} DrawWord36;
+
+extern DrawWord36 D_003C2DE0;
+extern u16 D_003BD75C;
+extern u16 D_003BD75E;
+extern u32 effGetCh75Work(void);
+
+void func_00106738(s32 mode) {
+    D_003C2DE0 = *(DrawWord36 *)effGetCh75Work();
+    D_003BD75C = 0;
+    D_003BD75E = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= 0xFFBFFFFF;
+        effCopyCh75Common(&D_003C2E08);
+    } else {
+        kwlnDrawControlFlags |= 0x400000;
+    }
+}
 
 void kwlnDrawSetupE08(s32 mode) {
     DrawBlkE08 *blk = &D_003C2E08;
@@ -390,7 +409,22 @@ void kwlnDrawSetC70Triple(u32 first, u32 second, u32 third) {
     D_003C2C70.unk18 = third;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106BC8);
+extern DrawBlkD30 D_003C2C40;
+extern u16 D_003BD720;
+extern u16 D_003BD722;
+extern u32 effGetCh71Work(void);
+
+void func_00106BC8(s32 mode) {
+    D_003C2C40 = *(DrawBlkD30 *)effGetCh71Work();
+    D_003BD720 = 0;
+    D_003BD722 = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= 0xFFFF7FFF;
+        effCopyCh71Common(&D_003C2C70);
+    } else {
+        kwlnDrawControlFlags |= 0x8000;
+    }
+}
 
 void kwlnDrawSetupC70(s32 mode) {
     DrawBlkC70 *blk = &D_003C2C70;

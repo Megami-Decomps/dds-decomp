@@ -207,14 +207,28 @@ void func_00186CB8(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectWithResource);
-
 typedef struct BlurRect {
     s32 extent;     /* 0x00 half-size source */
     BlurSource source; /* 0x04: passed to blur packet construction */
     /* Center and bounds are part of the packet source, not a separate layout. */
     u32 resource;   /* 0x2C */
 } BlurRect;
+
+/* Pixel-coordinate variant of the fixed-point rectangle below: the extent is not halved for Y. */
+void effDrawBlurPixelRectWithResource(BlurRect *rect) {
+    s32 centerX, centerY, halfExtent;
+
+    if (func_0011E278(rect) == 0) {
+        centerX = rect->source.centerX + 0x100;
+        centerY = rect->source.centerY + 0xE0;
+        halfExtent = rect->extent;
+        rect->source.left = centerX - halfExtent;
+        rect->source.top = centerY - halfExtent;
+        rect->source.right = centerX + halfExtent;
+        rect->source.bottom = centerY + halfExtent;
+        effDrawBlurSource(&rect->source, rect->resource, 0);
+    }
+}
 
 /* GS coordinates use sixteenth-pixel X and half-height Y; extent is halved for Y. */
 void effDrawBlurFixedPointRectangle(BlurRect *rect) {

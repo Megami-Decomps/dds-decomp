@@ -38,7 +38,7 @@ void func_00111840(void *arg);
 void sdfReleaseChipBlock(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
-void func_00114B18(void *bill, void *vec, s32 extra);
+EffectObj *func_00114B18(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
 EffectObj *func_00114CE8(void *bill, void *vec, s32 extra);
 EffectObj *func_00114E90(void *bill, void *vec, s32 extra);
@@ -130,7 +130,37 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     return obj;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114B18);
+EffectObj *func_00114B18(void *bill, void *vec, s32 extra) {
+    u8 vector[0x10];
+    EffectObj *obj;
+    EffectData *data;
+    void *handle;
+    void *id;
+
+    memset(vector, 0, sizeof(vector));
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    if (obj == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, vector);
+    effCopyVector(bill, vector);
+    data = obj->data;
+    data->bill = bill;
+    data->flags = 0;
+    data->state = 2;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    handle = effObjGetObjectHandle(obj);
+    *(s32 *)((u8 *)handle + 8) = 2;
+    id = func_00111388();
+    if (id != NULL) {
+        *(void **)((u8 *)handle + 0x24) = id;
+        dds3EnsureWorldNodeInSlot(id, obj);
+    }
+    return obj;
+}
 
 /* Resolve the object's billboard and forward its vector and extra argument. */
 void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {

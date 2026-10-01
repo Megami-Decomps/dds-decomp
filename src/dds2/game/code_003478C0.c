@@ -339,7 +339,27 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348A30);
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348AA0);
+typedef struct SdfKeyTreeNode {
+    struct SdfKeyTreeNode *child; /* 0x00 */
+    struct SdfKeyTreeNode *next;  /* 0x04 */
+    void *item;                   /* 0x08 */
+} SdfKeyTreeNode;
+
+extern void func_00348A30(void *item, s32 first, s32 second);
+
+/* Walk a key tree depth first, applying func_00348A30 to every node's item. */
+void func_00348AA0(SdfKeyTreeNode *node, s32 first, s32 second) {
+    SdfKeyTreeNode *next;
+
+    do {
+        if (node->child != NULL) {
+            func_00348AA0(node->child, first, second);
+        }
+        func_00348A30(node->item, first, second);
+        next = node->next;
+        node = next;
+    } while (next != NULL);
+}
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348B10);
 

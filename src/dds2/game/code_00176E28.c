@@ -22,7 +22,8 @@ typedef struct EffRecordPool {
     u8 pad00[0x50];
     u32 settingA;  /* 0x50 */
     u32 settingB;  /* 0x54 */
-    u8 pad58[8];
+    s32 count;     /* 0x58 */
+    f32 scale;     /* 0x5C */
     s32 recordBase;    /* 0x60: address of stride-dependent records */
     s32 auxRecordBase; /* 0x64: address of stride-dependent auxiliary records */
     u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
@@ -306,7 +307,41 @@ void func_00177BA0(u8 *work, f32 value) {
     *(f32 *)(work + 0x5C) = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
+extern void *memset(void *dst, s32 value, u32 size);
+extern u32 sdfCreateAssetWithDrawEntries(void);
+extern void func_003332D0(u32 asset, f32 value);
+extern u8 D_00451FF0[];
+
+EffRecordPool *func_00177BA8(s32 groups) {
+    EffRecordPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 slots;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    slots = groups * 3;
+    first = slots * 4;
+    second = slots;
+    size = (first + second) * 4 + 0x70;
+    handle = func_003292A8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffRecordPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->settingB = 0x80808080;
+    pool->settingA = 2;
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_003332D0(pool->resource, 1.0f);
+    memset(D_00451FF0, 0, 0x2C);
+    *(u16 *)(D_00451FF0 + 4) = 0x4000;
+    return pool;
+}
 
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
@@ -323,7 +358,34 @@ s32 effGetGroupIndexRecord(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0xc;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177EA8);
+EffRecordPool *func_00177EA8(s32 groups) {
+    EffRecordPool *pool;
+    u32 handle;
+    u32 *block;
+    s32 first;
+    s32 second;
+    u32 size;
+
+    first = groups * 16;
+    second = groups * 4;
+    size = (first + second) * 4 + 0x70;
+    handle = func_003292A8(size);
+    block = (u32 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffRecordPool *)(block + (first + second));
+    pool->recordBase = (s32)block;
+    pool->settingA = 2;
+    pool->auxRecordBase = (s32)(block + first);
+    pool->count = second;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->settingB = 0x80808080;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_003332D0(pool->resource, 1.0f);
+    memset(D_00451FF0, 0, 0x2C);
+    *(u16 *)(D_00451FF0 + 4) = 0x4000;
+    return pool;
+}
 
 void func_00177FA8(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
