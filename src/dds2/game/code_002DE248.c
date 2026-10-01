@@ -1167,7 +1167,75 @@ void effReleaseFadeBlendWork(void) {
     func_0018E8F0();
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002DEF30);
+typedef struct EffFadeMapOut {
+    s32 mode;
+    u32 color;
+    u32 param;
+    f32 rateB;
+    f32 rateA;
+    s32 posX;
+    s32 posY;
+} EffFadeMapOut;
+
+void func_002DEF30(EffFadeWork *work) {
+    EffRateConfig *config = (EffRateConfig *)work->config;
+    EffFadeMapOut *out = (EffFadeMapOut *)work->map;
+    s32 progress = config->progress;
+    s32 limit = 0;
+    f32 rate;
+    f32 pos[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress != 0) {
+        limit = work->frameLimit;
+    }
+    if (progress < limit) {
+        return;
+    }
+    rate = func_002D7770(&config->rateB, limit, progress);
+    if (config->fixedMode != 0) {
+        out->posX = 0;
+        out->posY = 0;
+        out->mode = (s32)(rate * 16.0f);
+    } else {
+        s32 mode;
+        s32 px;
+        s32 py;
+
+        rate *= work->scale;
+        VU0_LOAD_VF(vf10, work);
+        mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
+        out->mode = mode;
+        if (mode == 0) {
+            return;
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        py = (s32)(pos[1] * 16.0f) - 0x8000;
+        px = (s32)(pos[0] * 16.0f) - 0x8000;
+        out->posX = px;
+        out->posY = py << 1;
+    }
+    second = func_002D7458(&config->blendA, &config->blendB2, limit, progress);
+    color1[0] = work->baseColor;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed);
+    blended[0] = packed;
+    out->color = blended[0];
+    out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->rateB = func_002D7770(&config->rateA, limit, progress) * 0.01f;
+    out->param = work->param;
+    effDrawBlurFixedPointRectangle(out);
+}
 
 void effSetFadeMapParameter(EffKindWork *work, u32 value) {
     ((EffMapOutWide *)work->handle)->target = value;

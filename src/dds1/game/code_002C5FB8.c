@@ -543,7 +543,17 @@ float fldVec3AngleBetween(float *left, float *right) {
     return func_002FA1C0(fldNormalizedVectorDot(left, right));
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8648);
+void func_002C8648(float *out, float *left, float *right) {
+    struct Vector4 { float x, y, z, w; } a, b;
+
+    a = *(struct Vector4 *)left;
+    b = *(struct Vector4 *)right;
+    func_002C84F0(&a.x);
+    func_002C84F0(&b.x);
+    out[0] = a.y * b.z - a.z * b.y;
+    out[1] = a.z * b.x - a.x * b.z;
+    out[2] = a.x * b.y - a.y * b.x;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8710);
 

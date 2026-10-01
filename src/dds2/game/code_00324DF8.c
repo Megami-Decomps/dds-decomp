@@ -187,7 +187,17 @@ f32 func_00326AE0(void *a, void *b) {
     return func_003532B8(sdfVec3DotNormalized(a, b));
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326B00);
+void func_00326B00(float *out, float *left, float *right) {
+    SdfVec4 a, b;
+
+    a = *(SdfVec4 *)left;
+    b = *(SdfVec4 *)right;
+    sdfVec3Normalize(&a.x);
+    sdfVec3Normalize(&b.x);
+    out[0] = a.y * b.z - a.z * b.y;
+    out[1] = a.z * b.x - a.x * b.z;
+    out[2] = a.x * b.y - a.y * b.x;
+}
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00326BC8);
 

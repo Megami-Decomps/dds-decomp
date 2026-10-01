@@ -56,7 +56,55 @@ u32 mnuRemoveResourceNodeById(u32 list) {
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321018);
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321090);
+typedef struct SdfLink {
+    u8 pad00[8];
+    struct SdfLink *prev;
+    struct SdfLink *next;
+} SdfLink;
+
+typedef struct SdfLinkList {
+    u32 pad00;
+    SdfLink *prev;
+    SdfLink *next;
+} SdfLinkList;
+
+void func_00321090(SdfLinkList *list, SdfLink *a, SdfLink *b) {
+    SdfLink *tmpNext;
+    SdfLink *tmpPrev;
+
+    if (a != NULL && b != NULL) {
+        if (a->prev != NULL) {
+            a->prev->next = b;
+        }
+        if (a->next != NULL) {
+            a->next->prev = b;
+        }
+        if (b->prev != NULL) {
+            b->prev->next = a;
+        }
+        if (b->next != NULL) {
+            b->next->prev = a;
+        }
+        tmpNext = a->next;
+        a->next = b->next;
+        tmpPrev = a->prev;
+        a->prev = b->prev;
+        b->next = tmpNext;
+        b->prev = tmpPrev;
+        if (a->next == NULL) {
+            list->prev = a;
+        }
+        if (a->prev == NULL) {
+            list->next = a;
+        }
+        if (b->next == NULL) {
+            list->prev = b;
+        }
+        if (b->prev == NULL) {
+            list->next = b;
+        }
+    }
+}
 
 ResourceNode *mnuFindResourceNodeByValue(list, value)
     ResourceList *list;

@@ -238,7 +238,27 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
     evtViewerDispatchFlagMode(world);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuFxWorldDropOutOfRange);
+extern void func_0022BFD8();
+
+void mnuFxWorldDropOutOfRange(FxWorld *world, s32 threshold) {
+    FxNode *node;
+    FxChild *child;
+
+    if (world->count <= 0) {
+        return;
+    }
+    for (node = world->nodes; node != NULL; node = node->next) {
+        child = node->children;
+        while (child != NULL) {
+            if (child->offset + node->base < threshold) {
+                child = child->next;
+            } else {
+                func_0022BFD8(world, node, child);
+                child = node->children;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002429F0);
 
