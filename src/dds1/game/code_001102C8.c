@@ -4,10 +4,19 @@ extern u32 func_00128780(u32, u32, u32, u32, u32, u32);
 
 extern u32 func_001281E0(u32);
 
+struct WorldListNode;
+
+typedef struct WorldNodeVtbl {
+    u8 pad00[8];
+    void (*update)(struct WorldListNode *); /* 0x08 */
+    void (*draw)(struct WorldListNode *);   /* 0x0C */
+} WorldNodeVtbl;
+
 typedef struct WorldListNode {
     u8 pad00[0xF];
     u8 kind;                    /* 0x0F */
-    u8 pad10[0x10];
+    WorldNodeVtbl *vtbl;        /* 0x10 */
+    u8 pad14[0xC];
     struct WorldListNode *next; /* 0x20 */
     struct WorldListNode *prev; /* 0x24 */
     u8 pad28[8];
@@ -21,12 +30,14 @@ typedef struct {
 } WorldList;
 
 typedef struct {
-    u8 pad00[8];
+    s32 value00; /* 0x00 */
+    u32 resource; /* 0x04: allocation holding the lists */
     WorldList *lists;    /* 0x08 */
     u32 value0C; /* 0x0C */
     u32 value10; /* 0x10 */
     u32 handle14; /* 0x14: stored result from either resource call below */
-    u8 pad18[8];
+    u32 value18; /* 0x18 */
+    u32 value1C; /* 0x1C */
     s32 value20; /* 0x20 */
 } WorldObjectData;
 
@@ -90,13 +101,102 @@ u32 dds3AdvanceObjectValueCursor(s16 *values) {
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_001104F8);
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110578);
+extern void *func_002CFEB8(s32 size);
+extern u32 func_002D03F8(s32 size);
+extern void sdfReleaseChipBlock(void *block);
+extern WorldList *sdfResourceRetainAddress(u32 resource);
+
+u32 func_00110578(WorldObject *object) {
+    WorldObjectData *data = func_002CFEB8(0x40);
+    WorldList *lists;
+    s32 i;
+
+    if (data != NULL) {
+        data->value00 = -1;
+        data->value20 = 1;
+        data->resource = 0;
+        data->lists = NULL;
+        data->value0C = 0;
+        data->value10 = 0;
+        data->handle14 = 0;
+        data->value18 = 0;
+        data->value1C = 0;
+        data->resource = func_002D03F8(0xD8);
+        if (data->resource == 0) {
+            sdfReleaseChipBlock(data);
+            return 0;
+        }
+        lists = sdfResourceRetainAddress(data->resource);
+        data->lists = lists;
+        for (i = 0x11; i >= 0; i--) {
+            lists->count = 0;
+            lists->head = NULL;
+            lists->tail = NULL;
+            lists++;
+        }
+        object->data = data;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_00110638);
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110710);
+u32 func_00110710(WorldObject *object) {
+    WorldObjectData *data = object->data;
+    WorldListNode *node;
+    WorldListNode *next;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_001107C8);
+    if (data == NULL) {
+        return 0;
+    }
+    for (i = 0; i <= 0x11; i++) {
+        if (data->lists[i].count != 0) {
+            node = data->lists[i].head;
+            if (node->vtbl != NULL && node->vtbl->update != NULL) {
+                do {
+                    next = node->next;
+                    node->vtbl->update(node);
+                    node = next;
+                } while (next != NULL);
+            }
+        }
+    }
+    return 1;
+}
+
+extern void fldSubmitVisibleWorldBackground(void);
+
+u32 func_001107C8(WorldObject *object) {
+    WorldObjectData *data = object->data;
+    WorldListNode *node;
+    WorldListNode *next;
+
+    if (data == NULL) {
+        return 0;
+    }
+    if (data->value20 == 0) {
+        return 1;
+    }
+    if (data->lists[2].count == 0) {
+        return 1;
+    }
+    node = data->lists[2].head;
+    if (node->vtbl == NULL) {
+        return 1;
+    }
+    if (node->vtbl->draw == NULL) {
+        return 1;
+    }
+    fldSubmitVisibleWorldBackground();
+    do {
+        next = node->next;
+        node->vtbl->draw(node);
+        node = next;
+    } while (next != NULL);
+    return 1;
+}
 
 void dds3SetWorldObjectDataValue(WorldObject *object, s8 value) {
     if (object->data != NULL) {
@@ -153,7 +253,26 @@ u32 func_00110A38(WorldObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_00110A48);
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110AB0);
+extern void *dds3AppendWorldIndexNode(s32 index);
+extern void func_001102C8();
+
+void *func_00110AB0(WorldObject *object, s32 kind) {
+    WorldObjectData *data = object->data;
+    void *index;
+    WorldListNode *node;
+
+    if (data->lists[kind].count == 0) {
+        return NULL;
+    }
+    index = dds3AppendWorldIndexNode(0);
+    node = data->lists[kind].head;
+    do {
+        func_001102C8(index, 1);
+        dds3WriteIndexedWorldObjectWord(index, node);
+        node = node->next;
+    } while (node != NULL);
+    return index;
+}
 
 void dds3AttachResourceHandleToWorldObject(WorldObject *object, u32 resourceId) {
     WorldObjectData *data;
