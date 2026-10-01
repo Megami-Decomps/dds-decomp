@@ -328,41 +328,21 @@ kireta_label:
   RESTORE_CAMERA_NODE_MODE()
   ACTIVATE_MESSAGE_PANEL()
   SET_SOLAR_OVERLAY_MODE(6)
-  push 1
-  push 0
-  COMM 0x01f1
-  PUSHREG
-  EQ
-  IF _1
-  MESSAGE_REQUEST_AND_POLL(message(COMP_LIGHTMAEND))
-  goto _1
+  if (CONSUME_FIELD_SKILL_END_NOTICE(LIGHTOMA) == 1) {
+    MESSAGE_REQUEST_AND_POLL(message(COMP_LIGHTMAEND))
+  }
 _1:
-  push 1
-  push 1
-  COMM 0x01f1
-  PUSHREG
-  EQ
-  IF _3
-  MESSAGE_REQUEST_AND_POLL(message(COMP_REFUTOMAEND))
-  goto _3
+  if (CONSUME_FIELD_SKILL_END_NOTICE(LIFTOMA) == 1) {
+    MESSAGE_REQUEST_AND_POLL(message(COMP_REFUTOMAEND))
+  }
 _3:
-  push 1
-  push 2
-  COMM 0x01f1
-  PUSHREG
-  EQ
-  IF _5
-  MESSAGE_REQUEST_AND_POLL(message(COMP_REBERAMAEND))
-  goto _5
+  if (CONSUME_FIELD_SKILL_END_NOTICE(RIBERAMA) == 1) {
+    MESSAGE_REQUEST_AND_POLL(message(COMP_REBERAMAEND))
+  }
 _5:
-  push 1
-  push 3
-  COMM 0x01f1
-  PUSHREG
-  EQ
-  IF _7
-  MESSAGE_REQUEST_AND_POLL(message(COMP_ESTOMAEND))
-  goto _7
+  if (CONSUME_FIELD_SKILL_END_NOTICE(ESTOMA) == 1) {
+    MESSAGE_REQUEST_AND_POLL(message(COMP_ESTOMAEND))
+  }
 _7:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   RELEASE_CURRENT_OBJECT()
@@ -614,9 +594,7 @@ _10:
 warp_label:
   PROC warp_label
   RESTORE_CAMERA_NODE_MODE()
-  COMM 0x0219
-  PUSHREG
-  POPLIX 0x0006
+  local_int[6] = READ_WARP_EFFECT_MODE()
   if (local_int[6] == 1) {
     COMM 0x0204
     WAIT_FOR_TIMER_LIMIT(20)
@@ -885,9 +863,7 @@ _88:
   return
 npctalk_label:
   PROC npctalk_label
-  COMM 0x0207
-  PUSHREG
-  POPLIX 0x0016
+  local_int[22] = READ_FIELD_INTERACTION_KIND()
   local_int[23] = 1
 _91:
   if_not (local_int[23]) goto _92
@@ -977,30 +953,16 @@ _92:
   SET_SOLAR_OVERLAY_MODE(6)
   local_int[17] = 1
   local_int[21] = 0
-  COMM 0x01fe
-  PUSHREG
-  POPLIX 0x0018
+  local_int[24] = READ_CURRENT_SCENE_SELECTION_RESOURCE()
 _124:
   if_not (1) goto _125
   if (local_int[17] < 10) {
-    push -(1)
-    push local_int[17]
-    COMM 0x0205
-    PUSHREG
-    POPLIX 0x0011
+    local_int[17] = ADVANCE_FIELD_INTERACTION(local_int[17], -(1))
   } else {
   _140:
     local_int[16] = 0
-    push 0
-    push local_int[17]
-    COMM 0x0206
-    PUSHREG
-    POPLIX 0x0012
-    push 2
-    push local_int[17]
-    COMM 0x0206
-    PUSHREG
-    POPLIX 0x0019
+    local_int[18] = READ_FIELD_INTERACTION_VALUE(local_int[17], ROW_TYPE)
+    local_int[25] = READ_FIELD_INTERACTION_VALUE(local_int[17], 2)
     if_not (local_int[18] == -(1)) goto _138
     if (local_int[21] == 1) {
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1013,11 +975,7 @@ _124:
   _128:
     goto _137
   _138:
-    push 1
-    push local_int[17]
-    COMM 0x0206
-    PUSHREG
-    POPLIX 0x0013
+    local_int[19] = READ_FIELD_INTERACTION_VALUE(local_int[17], MESSAGE_ID)
     if_not (local_int[21] == 0) goto _132
     local_int[21] = 1
     ACTIVATE_MESSAGE_PANEL()
@@ -1038,11 +996,7 @@ _124:
   _134:
     goto _137
   _137:
-    push local_int[16]
-    push local_int[17]
-    COMM 0x0205
-    PUSHREG
-    POPLIX 0x0011
+    local_int[17] = ADVANCE_FIELD_INTERACTION(local_int[17], local_int[16])
     WAIT_FOR_TIMER_START()
     goto _139
   }
@@ -1200,9 +1154,7 @@ _151:
       COMM 0x0209
       WAIT_FOR_TIMER_LIMIT(4)
       WAIT_FOR_TIMER_LIMIT(20)
-      COMM 0x020b
-      PUSHREG
-      POPLIX 0x0024
+      local_int[36] = POLL_ELEVATOR_MOVE_STATE()
     _158:
       while (local_int[36] != 1) {
         if (local_int[36] == 2) {
@@ -1217,9 +1169,7 @@ _151:
         }
       _160:
         WAIT_FOR_TIMER_START()
-        COMM 0x020b
-        PUSHREG
-        POPLIX 0x0024
+        local_int[36] = POLL_ELEVATOR_MOVE_STATE()
       }
     _159:
       WAIT_FOR_TIMER_LIMIT(20)
