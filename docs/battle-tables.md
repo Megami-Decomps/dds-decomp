@@ -273,25 +273,29 @@ Each enemy has three decision tiers. A tier evaluates three packed predicates
 and uses their truth pattern to read one of eight route bytes. Retail routes
 normally select one of seven groups or use `8` to continue to another tier.
 Each group contains five `{weight, action, effect}` choices. The source makes
-those boundaries explicit while retaining numeric selector IDs where the
-predicate or effect handler has not earned a stable gameplay name:
+those boundaries explicit. Predicate and effect operation names come from the
+profile-specific native callback tables and the behavior of their handlers:
 
 ```text
 enemy-ai ISIS_002 script=ai_ishisu_zako
-  decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(2),TURN_REACHED_LIMIT(2),HAS_AVAILABLE_OPTION(0) routes=0,8,8,2,8,8,8,8
   choice 0 0 weight=100 action=special:0
   choice 1 0 weight=50 action=skill:MARIN_KARIN
   choice 5 0 weight=100 action=preset:1:4
 end
 ```
 
-A packed predicate or effect writes `selector:argument`; the physical word
-uses its high 10 bits for the native handler selector and its low 22 bits for
-the argument. Action values distinguish direct `skill` IDs, six native
-`preset` families, DDS2 `weighted` tables, and built-in `special` actions.
-Direct skill actions are checked against the paired `SKILL.TBL`. Script
-references use the actual procedure names from the AI program rather than
-bare table indices.
+A named operation writes `NAME(argument)`. Its physical word uses the high 10
+bits for the native handler selector and the low 22 bits for the argument.
+Selectors whose behavior remains unresolved retain the exact
+`selector:argument` form. The selector tables differ between DDS1 and DDS2, so
+the assembler resolves names through the selected game profile rather than
+assuming that equal numbers mean equal behavior.
+
+Action values distinguish direct `skill` IDs, six native `preset` families,
+DDS2 `weighted` tables, and built-in `special` actions. Direct skill actions
+are checked against the paired `SKILL.TBL`. Script references use the actual
+procedure names from the AI program rather than bare table indices.
 
 Skill symbols come from the indexed `skill-name` rows in the paired battle
 `MSG.TBL` source. Names are normalized to uppercase identifiers, so direct
