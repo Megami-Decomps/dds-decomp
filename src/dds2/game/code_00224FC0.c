@@ -163,7 +163,38 @@ s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002261A8);
+extern void func_002254C8(u32, u32, u32);
+
+s32 func_002261A8(BattleActionUnit *unit) {
+    u16 flags = ((BattleActionTableEntry *)D_00435E30)[unit->type].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & 0x10) == 0) {
+            func_00224F88((u32)unit);
+        } else {
+            func_00224F88((u32)unit);
+        }
+        unit->transitionState = 0;
+    } else if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_002254C8((u32)unit, (u32)unit, 0);
+    } else if (flags & 0x8) {
+        if (btlGetIndexListCount(unit->actor->targetIndexList) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00224EE8((u32)unit);
+            unit->transitionState = 0;
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00224F88((u32)unit);
+        }
+    } else {
+        return 0;
+    }
+    btlClearRuntimeFlag2000();
+    return 1;
+}
 
 s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
     u32 flags = unit->flags;
@@ -314,7 +345,32 @@ u32 func_00226868(BattleActionUnit *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226900);
+extern void btlInitializeEffectVectorsFromSourceRecords();
+
+void func_00226900(void) {
+    BtlUnit *unit = *(BtlUnit **)((u8 *)func_001AA6F8() + 0x24C);
+
+    if (unit == NULL) {
+        return;
+    }
+    do {
+        if ((unit->flags & 1) != 0) {
+            if (unit->mode == 0x118) {
+                if ((unit->statBits & 0x2000) != 0) {
+                    unit->bodyOffset[0] = 0.0f;
+                    unit->bodyOffset[1] = -100.0f;
+                    unit->bodyOffset[2] = 60.0f;
+                    unit->bodyOffset[3] = 0.0f;
+                    unit->reach = 180.0f;
+                    unit->height = 220.0f;
+                } else {
+                    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x118);
+                }
+            }
+        }
+        unit = unit->nextActor;
+    } while (unit != NULL);
+}
 
 /* Release the command restriction for each active group-0x400 unit of kind 0x118. */
 void btlClearSpecialEnemyEntryFlags(void) {

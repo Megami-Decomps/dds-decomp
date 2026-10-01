@@ -1244,7 +1244,36 @@ s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223DD8);
+s32 func_00223DD8(ActionUnit *unit) {
+    u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & 0x10) == 0) {
+            btlChooseBrahmaGroupCamera((u32)unit);
+        } else {
+            btlChooseBrahmaGroupCamera((u32)unit);
+        }
+        unit->pendingAction = 0;
+    } else if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_00222450(unit, unit, 0);
+    } else if (flags & 0x8) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlUnitSetCameraOffset((u32)unit);
+            unit->pendingAction = 0;
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlChooseBrahmaGroupCamera((u32)unit);
+        }
+    } else {
+        return 0;
+    }
+    btlClearRuntimeFlag2000();
+    return 1;
+}
 
 extern u8 *btlCreateEffObjB(s32, s32);
 extern u8 *btlCreateEffObjD(s32, s32);
@@ -1421,7 +1450,36 @@ s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224DF0);
+s32 func_00224DF0(ActionUnit *unit) {
+    u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
+
+    if (flags & 0x4000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & 0x10) == 0) {
+            func_002240C0((u32)unit);
+        } else {
+            func_002240C0((u32)unit);
+        }
+        unit->pendingAction = 0;
+    } else if (flags & 0x8000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        func_00224598(unit, unit, 0);
+    } else if (flags & 0x8) {
+        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlRaiseActionCameraPoints((u32)unit);
+            unit->pendingAction = 0;
+        } else {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_002240C0((u32)unit);
+        }
+    } else {
+        return 0;
+    }
+    btlClearRuntimeFlag2000();
+    return 1;
+}
 
 void func_00224EE8(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
