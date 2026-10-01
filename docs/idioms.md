@@ -296,6 +296,14 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 - Repeated `unit->entrySlots[index].f` accesses retain separate address
   pseudos and `daddu` copies; caching a slot pointer merges them
   (`func_001ADDD0`).
+- A countdown pointer loop in retail (`addiu v1,-1; sb ..,0(v0); bgez v1;
+  addiu v0,-1`, pointer starting at `base + N-1`) is an ascending index
+  loop in the source: `for (i = 0; i < N; i++) buf[i] = c;`. When the
+  counter is only the exit test, the loop pass strength-reduces and
+  reverses it. Writing it descending gives an indexed `addu` per iteration
+  or a folded `lui hi(sym+N-1)` instead (DDS1 `func_00101440`). An
+  up-counting `slti/bnez` counter beside pointer ivs means the counter has
+  another use.
 - A struct containing `u32 slot[25]` keeps `slot[i]`'s `sll 2` outside
   the loop; a bare pointer indexed by `i + 3` strength-reduces
   (`func_0030DAA0`).
