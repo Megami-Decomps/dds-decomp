@@ -252,7 +252,39 @@ void func_0030AA68(const char *fmt, ...) {
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AAB0);
+/* Counter kind -> timer preset. Values 4 and 5 have no arm of their own, so
+ * they fall through to the default of 1. */
+s32 func_0030AAB0(s32 kind) {
+    s32 preset = 1;
+
+    switch (kind - 4) {
+    case 0:
+        preset = 1;
+        break;
+    case 3:
+        preset = 3;
+        break;
+    case 4:
+        preset = 2;
+        break;
+    case 5:
+        preset = 7;
+        break;
+    case 6:
+        preset = 8;
+        break;
+    case 7:
+        preset = 4;
+        break;
+    case 8:
+        preset = 6;
+        break;
+    case 9:
+        preset = 5;
+        break;
+    }
+    return preset;
+}
 
 /* The 0x1C flag takes precedence over 0x13 when selecting the map variant. */
 void fldInitializeLmapTaskVariant(LmapTaskState *task) {
