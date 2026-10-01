@@ -59,6 +59,8 @@ def _name(data: bytes, offset: int, context: str) -> str:
     value, separator, padding = raw.partition(b"\0")
     if separator and any(padding):
         raise Msg1Error(f"{context} has nonzero name padding")
+    if any(byte < 0x20 or byte > 0x7E for byte in value):
+        raise Msg1Error(f"{context} name is not printable ASCII")
     try:
         return value.decode("ascii")
     except UnicodeDecodeError as exc:
@@ -289,6 +291,8 @@ def _encoded_name(name: str) -> bytes:
         raw = name.encode("ascii")
     except UnicodeEncodeError as exc:
         raise Msg1Error(f"dialog name {name!r} is not ASCII") from exc
+    if any(byte < 0x20 or byte > 0x7E for byte in raw):
+        raise Msg1Error(f"dialog name {name!r} is not printable ASCII")
     if len(raw) > NAME_SIZE:
         raise Msg1Error(f"dialog name {name!r} exceeds {NAME_SIZE} bytes")
     return raw + bytes(NAME_SIZE - len(raw))
