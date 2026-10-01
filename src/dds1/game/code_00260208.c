@@ -179,7 +179,7 @@ typedef struct MenuIconRef {
 
 /* Reward bundle: three icon/counter refs followed by the macca amount. */
 typedef struct MenuIconBatch {
-    MenuIconRef refs[3]; /* 0x00 */
+    MenuIconRef icons[3]; /* 0x00 */
     u32 resource;        /* 0x0C */
 } MenuIconBatch;
 
@@ -228,7 +228,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", brsApplyPartyRewards);
 
 /* Apply item/icon rewards before awarding the party's accumulated gains. */
 void brsApplyRewardBundle(u32 partyWork, MenuIconBatch *batch, u32 rewardState) {
-    gstApplyCounterDeltaTable(batch->refs);
+    gstApplyCounterDeltaTable(batch->icons);
     gstApplyBundleMacca(batch);
     brsApplyPartyRewards(partyWork, rewardState);
 }

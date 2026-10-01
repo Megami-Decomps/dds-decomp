@@ -73,10 +73,10 @@ typedef struct RosterFlagValue {
     u8 pad5[0x47];
 } RosterFlagValue; /* 0x4C */
 typedef struct EventIndexRecord {
-    u8 pad0[2];
+    u8 pad00[2];
     u16 index; /* 0x02 */
-    u8 pad4[4];
-} EventIndexRecord;
+    u8 pad04[4];
+} EventIndexRecord; /* stride 0x08 */
 
 
 typedef struct EvtScriptContext {

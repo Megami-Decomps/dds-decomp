@@ -572,14 +572,17 @@ typedef struct FileQueue {
     f32 quat[4];
     f32 scale;        /* 0x60 */
     u8 unk64[4];
+    /* 0x68: bitmask; bits 0x60 select the rotation branch. Left as unk68 because
+     * renaming it alone changes codegen in fileJobNotifyPair. The DDS2 twin
+     * calls this transformWord. */
     u32 unk68;
-    u8 unk6C[8];
-    f32 baseScale;    /* 0x74 */
-    u8 unk78[8];
+    u8 pad6C[8];
+    f32 transformValue; /* 0x74 */
+    u8 pad78[8];
     s32 count;
     u32 unk84;
-    FileJob *head;
-    FileJob *tail;
+    FileJob *last;   /* 0x88: append end */
+    FileJob *first;  /* 0x8C: traversal start */
 } FileQueue;
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
@@ -2857,14 +2860,14 @@ void fileJobResetAndInitTransform(FileJob *job) {
 
 void fileQueueAppend(FileQueue *queue, FileJob *job) {
     job->next = NULL;
-    if (queue->head != NULL) {
-        queue->head->next = job;
-        job->prev = queue->head;
+    if (queue->last != NULL) {
+        queue->last->next = job;
+        job->prev = queue->last;
     } else {
-        queue->tail = job;
+        queue->first = job;
         job->prev = NULL;
     }
-    queue->head = job;
+    queue->last = job;
     queue->count++;
 }
 
@@ -2874,7 +2877,7 @@ void fileQueueInsertAfter(FileQueue *queue, FileJob *after, FileJob *job) {
         job->next = after->next;
     } else {
         job->next = NULL;
-        queue->head = job;
+        queue->last = job;
     }
     after->next = job;
     job->prev = after;
@@ -2885,12 +2888,12 @@ void fileQueueRemove(FileQueue *queue, FileJob *job) {
     if (job->prev != NULL) {
         job->prev->next = job->next;
     } else {
-        queue->tail = job->next;
+        queue->first = job->next;
     }
     if (job->next != NULL) {
         job->next->prev = job->prev;
     } else {
-        queue->head = job->prev;
+        queue->last = job->prev;
     }
     queue->count--;
 }
@@ -2937,9 +2940,9 @@ void fileQueueUpdate(FileQueue *queue)
         fileQueueSetRotation(queue, aimQuat);
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
-    total = queue->scale * queue->baseScale;
+    total = queue->scale * queue->transformValue;
     limit = queue->unk84;
-    for (job = queue->tail; job != NULL; job = job->next) {
+    for (job = queue->first; job != NULL; job = job->next) {
         if (limit < job->unk80) {
             continue;
         }
@@ -2974,7 +2977,7 @@ void fileQueueUpdate(FileQueue *queue)
 }
 
 void fileQueueDestroy(FileQueue *queue) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         FileJob *next = job->next;
         if ((job->flags & 1) == 0) {
@@ -3000,9 +3003,9 @@ FileQueue *fileQueueClone(FileQueue *source) {
 
     PCP_COPY_VECTOR(queue, source);
     PCP_COPY_VECTOR((u8 *)queue + 0x10, (u8 *)source + 0x10);
-    queue->baseScale = source->baseScale;
+    queue->transformValue = source->transformValue;
     queue->unk68 = source->unk68;
-    for (src = source->tail; src != NULL; src = src->next) {
+    for (src = source->first; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
         job->id = (u32)fileJobCreateChild((FileJob *)src->id);
         fileJobCopyHeader(job, src);
@@ -3019,7 +3022,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
 void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
     FileJob *job;
 
-    for (job = queue->tail; job != NULL; job = job->next) {
+    for (job = queue->first; job != NULL; job = job->next) {
         fileJobNotifyComplete((void *)job->id);
     }
 }
@@ -3041,8 +3044,8 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
     VU0_LOAD_VF(vf10, queue->quat);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX(rot);
-    scale = queue->scale * queue->baseScale;
-    for (job = queue->tail; job != NULL; job = job->next) {
+    scale = queue->scale * queue->transformValue;
+    for (job = queue->first; job != NULL; job = job->next) {
         VU0_LOAD_VF(vf10, base);
         if (job->xformFlags & 4) {
             VU0_SCALAR_OP(-5.0f, "vaddx.y vf10, vf0, vf2x");
@@ -3073,7 +3076,7 @@ void fileQueueSetRotation(FileQueue *queue, void *rot)
     VU0_LOAD_VF(vf10, queue->axis);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, queue->offset);
-    for (job = queue->tail; job != NULL; job = job->next) {
+    for (job = queue->first; job != NULL; job = job->next) {
         VU0_LOAD_VF(vf10, job->quat);
         VU0_LOAD_VF(vf11, quat);
         effMiscQuatMultiplyVU();
@@ -3091,8 +3094,8 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     f32 jobScale;
 
     queue->scale = scale;
-    total = scale * queue->baseScale;
-    for (job = queue->tail; job != NULL; job = job->next) {
+    total = scale * queue->transformValue;
+    for (job = queue->first; job != NULL; job = job->next) {
         jobScale = job->scale;
         if (job->scaleFlags & 1) {
             jobScale = jobScale * total;
@@ -3178,7 +3181,7 @@ void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref
     u32 flags;
 
     if (!(job->flags & 1)) {
-        for (node = queue->tail; node != NULL; node = node->next) {
+        for (node = queue->first; node != NULL; node = node->next) {
             if ((node->flags & 1) && node->id == job->id) {
                 fileQueueLinkJobToSectorLeader(queue, node, ref);
             }
@@ -3255,7 +3258,7 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_002954F0);
 INCLUDE_ASM(const s32, "game/code_0028A150", func_002959E8);
 
 FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if (job->id == id) {
             return job;
@@ -3266,7 +3269,7 @@ FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
 }
 
 FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if ((job->flags & 1) != 0 && job->id == id) {
             return job;
@@ -3277,7 +3280,7 @@ FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
 }
 
 FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if ((job->flags & 3) == 2 && job->sector == sector) {
             return job;
@@ -3288,7 +3291,7 @@ FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector) {
 }
 
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     while (job != NULL) {
         if (index-- == 0) {
             return job;
@@ -3299,7 +3302,7 @@ FileJob *fileQueueGetAt(FileQueue *queue, s32 index) {
 }
 
 s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target) {
-    FileJob *job = queue->tail;
+    FileJob *job = queue->first;
     s32 index = 0;
     while (job != NULL) {
         if (job == target) {
@@ -3314,7 +3317,7 @@ s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target) {
 s32 fileQueueCountLinkedJobs(FileQueue *queue) {
     FileJob *job;
     s32 count = 0;
-    for (job = queue->tail; job != NULL; job = job->next) {
+    for (job = queue->first; job != NULL; job = job->next) {
         count++;
     }
     return count;

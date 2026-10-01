@@ -516,10 +516,10 @@ extern void dds3DispatchIndexedCallback(u16 *, float);
 
 /* Grid-sized effect object: width/height pair with an alternate pair at 0xB8. */
 typedef struct EffGrid {
-    u8 pad_0x00[0x20]; // 0x00
+    u8 pad00[0x20]; // 0x00
     s32 width;         // 0x20
     s32 height;        // 0x24
-    u8 pad_0x28[0x90]; // 0x28
+    u8 pad28[0x90]; // 0x28
     s32 altHeight;     // 0xB8
 } EffGrid; // 0xBC
 
@@ -545,8 +545,8 @@ typedef struct EffSurfaceParams {
 /* Effect kind descriptor tables (0x14-byte entries, layout inferred from field accesses). */
 typedef struct EffKindDesc {
     u32 (*create)(void *);   // 0x00
-    u8 pad_0x04[8];          // 0x04
-    void (*apply)(); // 0x0C
+    u8 reserved[8];  // 0x04
+    void (*initialize)(s32, s32); // 0x0C
     u32 size;                // 0x10
 } EffKindDesc; // 0x14
 
@@ -1351,7 +1351,7 @@ EffKindWork *effCreateKindWorkFromFile(EffFileRequest *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
-        if (D_0037E770[effect->kind].apply != NULL) {
+        if (D_0037E770[effect->kind].initialize != NULL) {
             u32 kind = work->secondaryMode;
             effect->sourceKind = kind;
             switch (kind) {
@@ -1362,7 +1362,7 @@ EffKindWork *effCreateKindWorkFromFile(EffFileRequest *work) {
                 effect->target = effGetResourceFirstWord(secondary[0]);
                 break;
             }
-            D_0037E770[effect->kind].apply(effect, effect->target);
+            D_0037E770[effect->kind].initialize(effect, effect->target);
         }
     }
     return effect;
@@ -1445,7 +1445,7 @@ EffKindWork *effCreateKindWorkFromFileB(EffFileRequest *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
 
     if (secondary != NULL) {
-        if (D_0037E7E8[effect->kind].apply != NULL) {
+        if (D_0037E7E8[effect->kind].initialize != NULL) {
             u32 kind = work->secondaryMode;
             effect->sourceKind = kind;
             switch (kind) {
@@ -1456,7 +1456,7 @@ EffKindWork *effCreateKindWorkFromFileB(EffFileRequest *work) {
                 effect->target = effGetResourceFirstWord(secondary[0]);
                 break;
             }
-            D_0037E7E8[effect->kind].apply(effect, effect->target);
+            D_0037E7E8[effect->kind].initialize(effect, effect->target);
         }
     }
     return effect;
@@ -7106,7 +7106,7 @@ extern u32 D_0038F2F0[];
 
 /* Asset object slot linked to the shared effect-file state. */
 typedef struct EffQueuedFileObject {
-    u8 pad_00[0x34];
+    u8 pad00[0x34];
     u8 *linkedState; /* 0x34 */
 } EffQueuedFileObject;
 
@@ -8481,34 +8481,35 @@ typedef struct EffRequest {
 typedef struct EffectListNode {
     u32 state;
     struct EffectListNode *next;
-    u32 unk_08;
-    u32 unk_0C;
-    u32 unk_10;
-    void **dest; // 0x14: where the loaded resource pointer goes
+    u32 value;
+    u32 length;
+    u32 kind;
+    void **reference; // 0x14: where the loaded resource pointer goes
 } EffectListNode;
 
 typedef struct EffectList {
     u32 mode;
     s32 count;
-    EffectListNode *head;
-    EffectListNode *tail;
+    EffectListNode *first;
+    EffectListNode *last;
     EffRequest *request;
 } EffectList;
 
-s32 effAppendListEntry(EffectList *list, u32 field08, u32 field0C, u32 field10, u32 field14) {
+s32 effAppendListEntry(EffectList *list, u32 value, u32 length,
+                          u32 kind, u32 reference) {
     EffectListNode *node = func_002CFEB8(sizeof(EffectListNode));
     memset(node, 0, sizeof(EffectListNode));
     node->next = NULL;
-    node->unk_10 = field10;
-    node->unk_08 = field08;
-    node->unk_0C = field0C;
-    node->dest = (void **)field14;
-    if (list->tail == NULL) {
-        list->head = node;
-        list->tail = node;
+    node->kind = kind;
+    node->value = value;
+    node->length = length;
+    node->reference = (void **)reference;
+    if (list->last == NULL) {
+        list->first = node;
+        list->last = node;
     } else {
-        list->tail->next = node;
-        list->tail = node;
+        list->last->next = node;
+        list->last = node;
     }
     return ++list->count;
 }
@@ -8516,12 +8517,12 @@ s32 effAppendListEntry(EffectList *list, u32 field08, u32 field0C, u32 field10, 
 extern void sdfReleaseChipBlock(void *);
 
 s32 effRemoveListEntry(EffectList *list) {
-    EffectListNode *node = list->head;
+    EffectListNode *node = list->first;
     EffectListNode *next = node->next;
     sdfReleaseChipBlock(node);
-    list->head = next;
+    list->first = next;
     if (--list->count == 0) {
-        list->tail = NULL;
+        list->last = NULL;
     }
     return list->count;
 }
@@ -8529,7 +8530,7 @@ s32 effRemoveListEntry(EffectList *list) {
 /* Drives the head request of the list: mode 0 asks for a resource by name, modes 1 and 2 stream a package and hand each
  * finished job's buffer to the entry's destination. Returns the remaining entry count. */
 s32 effPollResourceList(EffectList *list) {
-    EffectListNode *node = list->head;
+    EffectListNode *node = list->first;
     EffLoadedItem *item;
     u32 buffer;
 
@@ -8537,19 +8538,19 @@ s32 effPollResourceList(EffectList *list) {
         switch (list->mode) {
         case 0:
             if (node->state == 0) {
-                effRequestResourceByMode(node->unk_08, node->unk_0C, node->unk_10, node->dest);
+                effRequestResourceByMode(node->value, node->length, node->kind, node->reference);
                 node->state = 1;
-            } else if (*node->dest != NULL) {
+            } else if (*node->reference != NULL) {
                 effRemoveListEntry(list);
             }
             break;
         case 1:
         case 2:
-            if (node->state == 0 && node->unk_0C != 0) {
+            if (node->state == 0 && node->length != 0) {
                 if (list->request != NULL) {
                     func_00288788(list->request);
                 }
-                list->request = func_00288A80(node->unk_0C);
+                list->request = func_00288A80(node->length);
                 if (list->mode == 2) {
                     func_00288C50(list->request);
                 }
@@ -8557,10 +8558,10 @@ s32 effPollResourceList(EffectList *list) {
             } else if (fileRequestIsReady(list->request) != 0) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
-                        node = list->head;
+                        node = list->first;
                         buffer = item->buffer;
-                        *node->dest = func_002BD9C0(buffer, node->unk_10);
-                        if (node->unk_10 == 0) {
+                        *node->reference = func_002BD9C0(buffer, node->kind);
+                        if (node->kind == 0) {
                             func_002D0918(buffer);
                         }
                         effRemoveListEntry(list);

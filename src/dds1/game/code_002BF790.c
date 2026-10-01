@@ -616,9 +616,9 @@ typedef struct GridListNode {
 } GridListNode;
 
 typedef struct GridListOwner {
-    u8 pad0[6];
+    u8 pad00[6];
     u16 count;                  /* 0x06 */
-    u8 pad8[8];
+    u8 pad08[8];
     GridListNode *list;         /* 0x10 */
 } GridListOwner;
 

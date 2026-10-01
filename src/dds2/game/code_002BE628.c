@@ -52,7 +52,7 @@ extern void mnuPositionPanelItemPoints(s32, s32, s32);
 extern s8 D_003E7928[];
 
 typedef struct MenuSelectionEntry {
-    u8 pad0[0xE];
+    u8 pad00[0xE];
     u16 flags;
 } MenuSelectionEntry;
 
@@ -1075,7 +1075,146 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C44E8);
+extern u8 D_0037F530[];
+
+/* Translate a mask of pad buttons into held/pressed flags: low bits test each digital button (sign bit or pressure bit), the high bits
+ * report the same inputs as plain non-zero tests. Select (bit 0) overrides everything else. */
+s32 func_002C44E8(s32 buttons) {
+    s32 out = 0;
+
+    if (buttons & 0x1) {
+        if (D_0037F510[0x21] < 0) {
+            out = 1;
+        }
+    }
+    if (buttons & 0x2) {
+        if (D_0037F510[0x23] < 0) {
+            out |= 0x2;
+        }
+    }
+    if (buttons & 0x10) {
+        if (D_0037F530[6] & 2) {
+            out |= 0x10;
+        }
+    }
+    if (buttons & 0x20) {
+        if (D_0037F530[7] & 2) {
+            out |= 0x20;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_0037F530[4] & 2) {
+            out |= 0x40;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_0037F530[5] & 2) {
+            out |= 0x80;
+        }
+    }
+    if (buttons & 0x4) {
+        if (D_0037F510[0x22] < 0) {
+            out |= 0x4;
+        }
+    }
+    if (buttons & 0x8) {
+        if (D_0037F510[0x20] < 0) {
+            out |= 0x8;
+        }
+    }
+    if (buttons & 0x200) {
+        if (D_0037F530[0xA] & 2) {
+            out |= 0x200;
+        }
+    }
+    if (buttons & 0x100) {
+        if (D_0037F530[8] & 2) {
+            out |= 0x100;
+        }
+    }
+    if (buttons & 0x800) {
+        if (D_0037F530[0xB] & 2) {
+            out |= 0x800;
+        }
+    }
+    if (buttons & 0x400) {
+        if (D_0037F530[9] & 2) {
+            out |= 0x400;
+        }
+    }
+    if (buttons & 0x1000) {
+        if (D_0037F510[0x2C] < 0) {
+            out |= 0x1000;
+        }
+    }
+    if (buttons & 0x2000) {
+        if (D_0037F510[0x2D] < 0) {
+            out |= 0x2000;
+        }
+    }
+    if (buttons & 0x20000) {
+        if (D_0037F510[0x2A] < 0) {
+            out |= 0x20000;
+        }
+    }
+    if (buttons & 0x10000) {
+        if (D_0037F510[0x28] < 0) {
+            out |= 0x10000;
+        }
+    }
+    if (buttons & 0x80000) {
+        if (D_0037F510[0x2B] < 0) {
+            out |= 0x80000;
+        }
+    }
+    if (buttons & 0x40000) {
+        if (D_0037F510[0x29] < 0) {
+            out |= 0x40000;
+        }
+    }
+    if (buttons & 0x10) {
+        if (D_0037F510[0x26] != 0) {
+            out |= 0x100000;
+        }
+    }
+    if (buttons & 0x20) {
+        if (D_0037F510[0x27] != 0) {
+            out |= 0x200000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_0037F510[0x24] != 0) {
+            out |= 0x400000;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_0037F510[0x25] != 0) {
+            out |= 0x800000;
+        }
+        if (D_0037F510[0x2A] != 0) {
+            out |= 0x1000000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_0037F510[0x28] != 0) {
+            out |= 0x2000000;
+        }
+    }
+    if (buttons & 0x80) {
+        if (D_0037F510[0x2B] != 0) {
+            out |= 0x4000000;
+        }
+    }
+    if (buttons & 0x40) {
+        if (D_0037F510[0x29] != 0) {
+            out |= 0x8000000;
+        }
+    }
+    if (out & 1) {
+        out = out & 1;
+    }
+    return out;
+}
 
 void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
     s32 top = 0;

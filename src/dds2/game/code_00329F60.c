@@ -43,8 +43,8 @@ extern u8 D_00439148;
 void sdfPendingQueuePush(void *request, s32 value);
 
 typedef struct SdfTexHead {
-    SdfTex *unk0; /* 0x0 */
-    SdfTex *unk4; /* 0x4 */
+    SdfTex *next; /* 0x0: SdfTex-compatible linked-list prefix */
+    SdfTex *prev; /* 0x4 */
     void *unk8; /* 0x8 */
     void *unkC; /* 0xC */
     s32 unk10; /* 0x10 */
@@ -266,8 +266,8 @@ void sdfTexInitializeLists(void) {
 
     head = func_00328D68(0x1C);
     head->unk10 = 0x100000;
-    head->unk0 = NULL;
-    head->unk4 = NULL;
+    head->next = NULL;
+    head->prev = NULL;
     head->unk8 = NULL;
     head->unkC = NULL;
     sdfTextureListHead = head;

@@ -2189,10 +2189,10 @@ void fldClearObjectEntryHandles(void) {
 typedef struct FieldPair48 {
     f32 pos[4];
     f32 vel[4];
-    s32 unk20;
+    s32 hasVectors;
     s32 active;
     s32 unk28;
-    s16 unk2C;
+    s16 objectSlot;
     s16 unk2E;
 } FieldPair48; /* 0x30 bytes */
 
@@ -2207,16 +2207,16 @@ void fldInitSparkTable(void) {
 
     if (D_0032E4B4[0] == 0) {
         for (i = 0; i < 64; i++) {
-            fldSparkSlots[i].unk20 = 0;
+            fldSparkSlots[i].hasVectors = 0;
             fldSparkSlots[i].active = 0;
             fldSparkSlots[i].unk28 = 0;
-            fldSparkSlots[i].unk2C = -1;
+            fldSparkSlots[i].objectSlot = -1;
             fldSparkSlots[i].unk2E = effMiscRand(0) % 60 + 15;
         }
     } else {
         for (i = 0; i < 64; i++) {
-            fldSparkSlots[i].unk20 = 0;
-            fldSparkSlots[i].unk2C = -1;
+            fldSparkSlots[i].hasVectors = 0;
+            fldSparkSlots[i].objectSlot = -1;
         }
     }
 }
@@ -2227,7 +2227,7 @@ void fldResetSparkTable(void) {
     for (i = 0; i < 64; i++) {
         fldSparkSlots[i].active = 0;
         fldSparkSlots[i].unk28 = 0;
-        fldSparkSlots[i].unk2C = -1;
+        fldSparkSlots[i].objectSlot = -1;
         fldSparkSlots[i].unk2E = effMiscRand(0) % 60 + 15;
     }
 }
@@ -2235,7 +2235,7 @@ void fldResetSparkTable(void) {
 s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     PCP_COPY_VECTOR(fldSparkSlots[index].pos, pos);
     PCP_COPY_VECTOR(fldSparkSlots[index].vel, vel);
-    fldSparkSlots[index].unk20 = 1;
+    fldSparkSlots[index].hasVectors = 1;
     return 1;
 }
 
@@ -2256,16 +2256,16 @@ void fldFreeSparkSlot(s32 index) {
     s16 slot;
 
     vec = D_003A0918;
-    if (fldSparkSlots[index].unk20 == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].unk2C != -1) {
+    if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.v[0] = fldSparkSlots[index].pos[0];
         vec.v[2] = fldSparkSlots[index].pos[2];
-        effObjSetInnerFirstVec(D_003D62E0[fldSparkSlots[index].unk2C].unk0, &vec);
-        obj = D_003D62E0[fldSparkSlots[index].unk2C].unk0;
+        effObjSetInnerFirstVec(D_003D62E0[fldSparkSlots[index].objectSlot].unk0, &vec);
+        obj = D_003D62E0[fldSparkSlots[index].objectSlot].unk0;
         flags = dds3GetUnk0C(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
-        slot = fldSparkSlots[index].unk2C;
-        fldSparkSlots[index].unk2C = -1;
+        slot = fldSparkSlots[index].objectSlot;
+        fldSparkSlots[index].objectSlot = -1;
         D_003D62E0[slot].unk4 = -1;
     }
 }
@@ -2281,7 +2281,7 @@ void fldUpdateSparkSlots(void) {
 
     func_0014B688();
     for (i = 0; i < 64 && i < D_003D62A0[12]; i++) {
-        if (fldSparkSlots[i].unk20 != 0 && fldSparkSlots[i].active != 0) {
+        if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             func_0014BA50(i, fldSparkSlots[i].unk28);
         }
     }
@@ -2295,7 +2295,7 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
     for (i = 0; i < 64 && i < D_003D62A0[12]; i++) {
-        if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].unk2C != -1) {
+        if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
             f32 dx = x - fldSparkSlots[i].pos[0];
             f32 dy = y - fldSparkSlots[i].pos[1];
             f32 dz = z - fldSparkSlots[i].pos[2];
