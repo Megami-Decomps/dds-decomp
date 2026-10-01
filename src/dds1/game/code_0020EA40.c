@@ -1,3 +1,4 @@
+#include "pcp_vu0.h"
 #include "common.h"
 #include "btl.h"
 #include "ee_mmi.h"
@@ -1122,12 +1123,13 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
     s32 blended[4];
     u32 packed;
     u32 unit = 0x3C000000;
+
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
+    VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];

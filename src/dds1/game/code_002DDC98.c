@@ -918,13 +918,7 @@ void func_002E15D0(u8 *node, void *matrix) {
     func_002DDD60(node + 0x30);
     VU0_LOAD_VF_MEMORY(vf10, node + 0x90);
     VU0_STORE_MATRIX(D_00398470);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        ".set reorder");
+    VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_STORE_VF(vf10, D_003984F0);
     memcpy(D_003983D0, node, 0xA0);
 }

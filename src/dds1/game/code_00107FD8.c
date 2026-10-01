@@ -1,3 +1,5 @@
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
 #include "common.h"
 
 #include "kwln.h"
@@ -477,7 +479,7 @@ void evtSelStateDestroy(void) {
         sdfReleaseChipBlock(D_003BD760);
         D_003BA948 = 0;
         __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324590) : "memory");
+        VU0_STORE_VF(vf10, D_00324590);
     }
 }
 
