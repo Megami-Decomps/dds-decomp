@@ -107,7 +107,7 @@ void scrProcDestroyTask(ScrProcTask *process) {
 typedef struct ScriptNameNode {
     char name[1];                 /* 0x0: the name text is stored in place */
     u8 pad01[0xE3];
-    s32 unkE4;                    /* 0xE4: task id, or 0 for a plain process */
+    s32 taskId;                    /* 0xE4: task id, or 0 for a plain process */
     u8 padE8[4];
     struct ScriptNameNode *next;   /* 0xEC */
 } ScriptNameNode;
@@ -131,8 +131,8 @@ void scrDestroyAllNamedProcesses(void)
     while (1) {
         next = node->next;
         if (scrIsCurrentWorkTask(node) == 0) {
-            if (node->unkE4 != 0) {
-                kwlnTaskDestroyWithHierarchy(node->unkE4, 0);
+            if (node->taskId != 0) {
+                kwlnTaskDestroyWithHierarchy(node->taskId, 0);
             } else {
                 scrProcDestroyTask((ScrProcTask *)node);
             }

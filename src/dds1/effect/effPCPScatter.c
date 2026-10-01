@@ -63,7 +63,7 @@ typedef struct {
     f32 unk1C;
     u32 *firstWords;
     u32 *secondWords;
-    void *unk28;
+    void *resource; /* 0x28: draw asset created with sdfCreateAssetWithDrawEntries */
     u32 allocation;
     u32 unk30;
 } PcpScatterPool;
@@ -526,8 +526,8 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->unk1C = 1.0f;
     pool->color14 = 0x80808080;
     pool->unk30 = 0;
-    pool->unk28 = sdfCreateAssetWithDrawEntries();
-    func_002DA420(pool->unk28, 1.0f);
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_002DA420(pool->resource, 1.0f);
     memset(D_003D6580, 0, 0x2C);
     *(u16 *)(D_003D6580 + 4) = 0x4000;
     return pool;
@@ -1209,7 +1209,108 @@ void effScatterRingUpdateScaledLong(PcpScatterWork13 *work, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174ED0);
+/* Instance C as the update pass sees it: like instance B with a longer header and a two-stage colour. */
+typedef struct PcpScatterUpdateC {
+    u8 pad00[0x40];
+    f32 vec[4];          /* 0x40 */
+    u8 pad50[0x44];
+    u8 loop;             /* 0x94 */
+    u8 pad95[3];
+    s32 duration;        /* 0x98 */
+    u32 particleCount;   /* 0x9C */
+    u8 padA0[4];
+    u32 delayRange;      /* 0xA4 */
+    s32 fadeIn;          /* 0xA8 */
+    s32 fadeRange;       /* 0xAC */
+    u8 padB0[0x44];
+    s32 colorA;          /* 0xF4 */
+    s32 colorB;          /* 0xF8 */
+    u8 padFC[0x88];
+    PcpScatterParticle *particles; /* 0x184 */
+    f32 scale;           /* 0x188 */
+    s32 color;           /* 0x18C */
+    s32 age;             /* 0x190 */
+    PcpScatterDraw *draw; /* 0x194 */
+} PcpScatterUpdateC;
+
+extern void func_00174940(void *work, u32 index);
+
+/* Per-frame update of a fading, optionally looping scatter instance whose colour blends between two keys over its lifetime. */
+void func_00174ED0(PcpScatterUpdateC *work) {
+    s32 loop;
+    s32 duration = work->duration;
+    PcpScatterDraw *draw = work->draw;
+    PcpScatterParticle *particle = work->particles;
+    u32 count = work->particleCount;
+    s32 fadeIn;
+    s32 fadeRange;
+    u32 delay;
+    s32 age;
+    s32 remaining;
+    f32 total;
+    f32 t;
+    f32 u;
+    s32 colorMul;
+    s32 colorA;
+    s32 colorB;
+    s32 color;
+    u32 i;
+
+    age = work->age;
+    loop = work->loop;
+    fadeIn = work->fadeIn;
+    fadeRange = work->fadeRange;
+    delay = work->delayRange;
+    colorA = work->colorA;
+    colorB = work->colorB;
+    colorMul = work->color;
+    if (duration < age) {
+        return;
+    }
+    remaining = duration - age;
+    if (fadeRange >= remaining && fadeRange != 0) {
+        total = (f32)remaining / (f32)fadeRange;
+    } else {
+        total = 1.0f;
+    }
+    for (i = 0; i < count; i++) {
+        s32 particleAge = particle->age;
+
+        if (duration < particleAge) {
+            draw->colors[i] = 0;
+        } else {
+            if (particleAge == 0) {
+                func_00174940(work, i);
+            } else if (particleAge > 0) {
+                u = (f32)particleAge;
+                color = effBlendColor(colorA, colorB, u / (f32)duration);
+                if (particleAge < fadeIn && fadeIn != 0) {
+                    t = u / (f32)fadeIn;
+                } else {
+                    t = 1.0f;
+                }
+                color = effMultiplyPackedColors(colorMul, color);
+                draw->colors[i] = effBlendColor(color & 0xFFFFFF, color, t * total);
+                effScatterRingUpdateScaledLong((PcpScatterWork13 *)work, i);
+            }
+            if (loop != 0 && !(age < duration)) {
+                particle->age = -(effMiscRand(D_0034DF38) % delay);
+            } else {
+                particle->age++;
+            }
+        }
+        particle++;
+    }
+    if (loop != 0 && age >= duration) {
+        work->age = 0;
+    } else {
+        work->age++;
+    }
+    draw->scale = work->scale;
+    PCP_COPY_VECTOR(draw, work->vec);
+    effScatterStoreSourceTransformMatrix(draw, work);
+    func_00175DD0(draw);
+}
 
 void func_001751A8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);

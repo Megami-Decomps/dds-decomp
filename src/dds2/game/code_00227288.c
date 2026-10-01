@@ -327,7 +327,7 @@ typedef struct BattleGroupNode {
     BattleGroupSlot slots[8];
     s32 unk_A0;
     s32 unk_A4;
-    s32 unk_A8;
+    s32 partList;
     f32 unk_AC;
     f32 unk_B0;
 } BattleGroupNode;
@@ -2464,7 +2464,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg
     node->flag = flag & 1;
     node->unk_A0 = 0;
     node->unk_A4 = 0;
-    node->unk_A8 = 0;
+    node->partList = 0;
     node->unk_AC = 1.0f;
     node->unk_B0 = 100.0f;
 }
@@ -2503,7 +2503,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
             }
         }
     }
-    mdlDestroyPartList(node->unk_A8);
+    mdlDestroyPartList(node->partList);
     func_003297C8(node->unk_A0);
     sdfReleaseChipBlock(node);
 }
