@@ -623,7 +623,45 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FED20);
+typedef struct AiSlot {
+    u8 weight;
+    u8 pad1;
+    u16 actionId;
+    u32 actionArg;
+} AiSlot;
+
+/* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
+typedef struct AiSpecies {
+    u8 pad00[0x40];
+    AiSlot slot[25];
+    u8 pad108[0x54];
+} AiSpecies;
+
+extern AiSpecies *D_003BAA24;
+extern void func_001FF560(BtlJyokyoOwner *unit, u16 species, s32 *row, s32 arg);
+extern u32 btlPickWeightedAiSlot();
+extern s32 btlRunAiAction();
+
+/* Choose a row and a weighted slot of the unit's species AI table and run that action. */
+s32 func_001FED20(BtlTask *task) {
+    s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
+    BtlJyokyoOwner *unit;
+    u16 species;
+    s32 row;
+    s32 index;
+
+    unit = (BtlJyokyoOwner *)task->unit;
+    btlActionScratchWork = (s32)work;
+    species = unit->unk124;
+    work[0] = (s32)task;
+    work[1] = species;
+    func_001FF560(unit, species, &row, 0);
+    index = btlPickWeightedAiSlot(unit, species, row);
+    btlRunAiAction(task, D_003BAA24[species].slot[row * 5 + index].actionId,
+                   D_003BAA24[species].slot[row * 5 + index].actionArg);
+    sdfReleaseChipBlock(btlActionScratchWork);
+    return 1;
+}
 
 void btlShiftActorStateHistory(u8 *work, s8 flag) {
     s32 *slot;

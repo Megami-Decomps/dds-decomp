@@ -825,6 +825,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F20);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00268380);
 
+
 void fldStopSceneTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00424F00, 0);
     kwlnTaskDestroyWithHierarchyByName(D_00424F10, 0);
@@ -1035,7 +1036,40 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00269478);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00269638);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002698A0);
+typedef struct GridPanelHost {
+    u8 pad00[0x64];
+    s32 grid;           /* 0x64 */
+    u8 pad68[0x40];
+    s32 settings[1];    /* 0xA8 */
+} GridPanelHost;
+
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+
+/* Reset grid entry 0x1A, then configure it from the panel's setting slot chosen by `kind`. */
+void func_002698A0(u32 kind, GridPanelHost *host) {
+    s32 flags = 0;
+    s32 value = 0;
+    s32 slot = 0;
+
+    switch (kind) {
+    case 2:
+        flags = 2;
+        value = 4;
+        slot = 3;
+        break;
+    case 3:
+        flags = 2;
+        value = 7;
+        slot = 2;
+        break;
+    case 4:
+        value = 4;
+        slot = 3;
+        break;
+    }
+    itfSetGridEntryQuantizedAndRefresh(host->grid, 0x1A, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(host->grid, 0x1A, host->settings[slot], 0, value, flags);
+}
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424FC8);
 
