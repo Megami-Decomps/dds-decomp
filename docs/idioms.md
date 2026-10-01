@@ -689,6 +689,21 @@ survives only when `fold_rtx` reduces an if-converted select with a known
 condition to one register arm; the matching test shapes all had a dead second
 arm, which is a lever, so these stay asm until the real construct is found.
 
+Two related mechanisms are known:
+
+- **A `move $3,$2` right after a call, with no `move $2,$3` before the
+  return, means the function returns the call result.** cse deletes the final
+  `v0 = slot`, but the `(use v0)` at the end keeps `$2` live through the whole
+  function, so the result variable conflicts with `$2` and gets `$3`. A
+  function typed `void` that shows this is really `return slot;` (DDS2
+  `func_0031DFB8`).
+- **A plain copy never survives inside one extended basic block.** When a
+  pseudo is copied from another, cse makes the one that lives longer the
+  canonical register and rewrites the other's later reads to it, so
+  `u32 result = param;` in any placement collapses into one register. A
+  retail copy needs the two values' uses separated by a block boundary (a
+  label with two predecessors) or the older value used later than the copy.
+
 ### FP registers: local-alloc before global-alloc
 
 A pseudo born and dying once inside one basic block is a local qty, allocated
