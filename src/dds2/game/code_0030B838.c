@@ -223,7 +223,15 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BA98);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BBA8);
+extern void sdfCommitPendingVectorAndMarkChanged();
+
+/* Latch the base vectors into the pending pair and flag the change. */
+void func_0030BBA8(void) {
+    D_004388C0 = 1;
+    D_00400990 = D_00400970;
+    D_004009A0 = D_00400980;
+    sdfCommitPendingVectorAndMarkChanged();
+}
 
 /* Reset the current selection before installing the requested index. */
 void sdfSetSelectedIndex(u32 index) {

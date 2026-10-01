@@ -17,6 +17,7 @@ typedef struct DevConsState {
     u8 *cells; /* 0x1C: two bytes per character cell */
 } DevConsState;
 
+
 extern void *memmove(void *dst, const void *src, u32 n);
 
 extern void *memset(void *dst, s32 c, u32 n);

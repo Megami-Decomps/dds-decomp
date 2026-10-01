@@ -439,7 +439,7 @@ typedef struct {
     s32 descriptorResource; /* 0x2428 */
     u8 pad242C[4];
     s32 menuState; /* 0x2430 */
-    u8 pad2434[4];
+    s32 shopFlag;  /* 0x2434: 1 once the shop descriptor was submitted */
     u32 auxResource; /* 0x2438 */
     u32 options; /* 0x243C: two two-bit fields */
     u8 pad2440[4];
@@ -581,7 +581,37 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243B28);
+extern s32 D_003BA8F8;
+extern void func_001054D0(s32, s32, f32);
+extern void func_00243BF0(CampScene *scene);
+extern void mnuShopSubmitDescriptor(CampScene *scene);
+extern void func_00243EC8(CampScene *scene);
+
+/* Camp scene opening steps 1..5, each falling into the next; stages 0 and 2 do nothing, other values advance by one. */
+void func_00243B28(CampScene *scene) {
+    switch (scene->menuState) {
+    case 1:
+        if (D_003BA8F8 == 0) {
+            func_001054D0(0x200, 0xE0, 100.75f);
+        }
+        scene->menuState = scene->menuState + 1;
+    case 3:
+        func_00243BF0(scene);
+        scene->menuState = scene->menuState + 1;
+    case 4:
+        mnuShopSubmitDescriptor(scene);
+        scene->menuState = scene->menuState + 1;
+    case 5:
+        if (scene->shopFlag == 1) {
+            func_00243EC8(scene);
+        }
+    case 0:
+        break;
+    default:
+        scene->menuState = scene->menuState + 1;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243BF0);
 

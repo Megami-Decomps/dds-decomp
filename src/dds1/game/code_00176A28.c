@@ -35,6 +35,7 @@ typedef struct EffBillboardParams {
 extern void *func_002CFEB8(s32 size);
 extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
+extern void effReleaseOptionalResource(s32 work);
 
 void func_00176A28(s32 work, u32 value) {
     ((EffResourceWork *)work)->value60 = value;

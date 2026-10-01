@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 extern u64 effParamTableGetBlock(u64, u64);
 
@@ -249,7 +250,13 @@ s32 func_001781A0(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x10;
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_001781B0);
+u8 *func_001781B0(u32 count) {
+    u8 *matrix;
+
+    matrix = (u8 *)func_00177760(count);
+    EE_MMI_UNIT_MATRIX(matrix);
+    return matrix;
+}
 
 void func_001781F8(void *work) {
     effReleaseRecordGroupAssetAndHandle(work);

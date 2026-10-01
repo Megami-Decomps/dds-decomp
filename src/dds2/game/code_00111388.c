@@ -41,7 +41,21 @@ ActionObj *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_00111388", func_001113F0);
+extern s32 dds3GetWorldSlotValue();
+extern u32 dds3ResetObjectValueCursor();
+extern s32 dds3SeekWorldNode();
+extern void func_001104F0();
+extern u32 dds3WriteIndexedWorldObjectWord();
+
+void func_001113F0(s32 object, u8 *node) {
+    s32 slot = dds3GetWorldSlotValue(object, func_00111388(node[0xF]));
+
+    dds3ResetObjectValueCursor(slot);
+    if (dds3SeekWorldNode(slot, node) != 1) {
+        func_001104F0(slot, 1);
+        dds3WriteIndexedWorldObjectWord(slot, node);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_00111480);
 

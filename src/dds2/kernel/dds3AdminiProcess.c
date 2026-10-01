@@ -54,21 +54,45 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_001029D0);
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102B48);
-
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102BC8);
-
 extern void* kwlnTaskGetUserValue(void* task);
 extern void sdfReleaseChipBlock(void* ptr);
 /* One dispatch row per mode: three function pointers, 12 bytes each. The three
  * columns are consecutive symbols, D_003847D0 / D_003847D4 / D_003847D8. */
 typedef struct AdminDispatch {
     void (*entry)(void);
-    void (*destroy)(void);
+    s32 (*destroy)(void);
     void (*cleanup)(void);
 } AdminDispatch;
 
 extern AdminDispatch D_003847D0[];
+
+typedef void (*AdminStep)(void);
+
+extern void func_001029D0(void);
+
+/* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
+   cleared. Returns the next step function, or NULL if the callback failed. */
+AdminStep func_00102B48(void *task) {
+    AdminWork *work = kwlnTaskGetUserValue(task);
+    s32 mode = work->unk08;
+    s32 (*destroy)(void);
+    s32 result;
+
+    if (mode >= 0) {
+        destroy = D_003847D0[mode].destroy;
+        if (destroy != NULL) {
+            result = destroy();
+            if (result < 0) {
+                return NULL;
+            }
+            work->unk21 = result + 1;
+            work->unk08 = -1;
+        }
+    }
+    return func_001029D0;
+}
+
+INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102BC8);
 
 /* Run the mode's destroy callback (the row's second pointer), then free the
  * attached data block and the task itself. */

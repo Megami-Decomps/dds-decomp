@@ -792,10 +792,6 @@ typedef struct BattleFieldBlocks {
     s32 fieldTB;
 } BattleFieldBlocks;
 
-#define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
-
-#define VU_STORE10(p) __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
-
 extern f32 *D_0037F770[];
 
 extern u8 D_0037F780[];
@@ -5584,9 +5580,9 @@ void btlFlagUserAndTargetDefeat(ActionUnit *command, ActionUnit *unused) {
         btlFlagUnitDefeatCandidate(target);
     }
     btlUnitGetMuzzlePosVU(user);
-    VU_STORE10(userPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);
-    VU_STORE10(targetPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         command->flags |= 0x200;
@@ -5614,9 +5610,9 @@ void btlSetupActionCameraPair(ActionUnit *command) {
     }
     func_001EF668(command, command->pos30);
     btlUnitGetMuzzlePosVU(user);
-    VU_STORE10(userPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);
-    VU_STORE10(targetPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
     if (userPos[0] < targetPos[0]) {
         command->flags |= 0x200;
     } else {
@@ -5626,7 +5622,7 @@ void btlSetupActionCameraPair(ActionUnit *command) {
     command->unk13C = 0;
     command->unk154 = 15.0f;
     btlInterpolateVectorStep(command->pos30);
-    VU_STORE10(lookPos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, lookPos);
     btlUnitGetMuzzlePosVU(user);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, command->pos30);
@@ -6117,15 +6113,15 @@ void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)func_001AA6F8();
     fldApplyLightSetCurrent();
     btlInitTintTransitionResource(0x80, 0);
-    VU_LOAD10((u8 *)D_0037F770[0] + 0x10);
-    VU_STORE10(context + 0x10);
-    VU_STORE10(context + 0x40);
-    VU_LOAD10(D_0037F770[0]);
-    VU_STORE10(context + 0x20);
-    VU_STORE10(context + 0x50);
-    VU_LOAD10(D_0037F780);
-    VU_STORE10(context + 0x30);
-    VU_STORE10(context + 0x60);
+    VU0_LOAD_VF(vf10, (u8 *)D_0037F770[0] + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x40);
+    VU0_LOAD_VF(vf10, D_0037F770[0]);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x20);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x50);
+    VU0_LOAD_VF(vf10, D_0037F780);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x60);
     ((BtlWork *)context)->tint71C = 0x807E5C5E;
 }
 

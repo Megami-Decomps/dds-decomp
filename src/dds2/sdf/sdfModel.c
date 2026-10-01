@@ -211,7 +211,44 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     } while (i != 2);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331740);
+typedef struct SdfSlotPair {
+    s32 first;
+    s32 second;
+} SdfSlotPair;
+
+typedef struct SdfSlotEntry {
+    SdfSlotPair pair[2];
+} SdfSlotEntry;
+
+typedef struct SdfSlotBuf {
+    u8 pad00[4];
+    s16 count;             /* 0x04 */
+    u8 pad06[6];
+    SdfSlotEntry *entries; /* 0x0C */
+} SdfSlotBuf;
+
+extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
+
+/* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
+void func_00331740(SdfModel *model, s32 count) {
+    SdfSlotBuf *buf;
+    SdfSlotEntry *entries;
+    s32 i;
+    s32 j;
+
+    if (count > 0) {
+        buf = sdfDevCreateBufferedRequest(count, 0x10, 1);
+        model->unk10 = buf;
+        entries = buf->entries;
+        for (i = 0; i != count; i++) {
+            for (j = 0; j != 2; j++) {
+                entries[i].pair[j].first = 0;
+                entries[i].pair[j].second = 0;
+            }
+        }
+        buf->count = count;
+    }
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelCreateFromAssetData);
 

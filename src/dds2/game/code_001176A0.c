@@ -85,7 +85,37 @@ extern u32 func_001190B0(s32 channel, s32 arg1, SdfPackedValue *item);
 
 extern void scrDestroyWorkTask(void);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001176A0);
+typedef struct SdfCurveTable {
+    u8 pad00[4];
+    f32 *values;          /* 0x04 */
+} SdfCurveTable;
+
+typedef struct SdfCurveUser {
+    u8 pad00[4];
+    u32 flags;            /* 0x04: bit 2 = curve active */
+    u8 pad08[4];
+    f32 time;             /* 0x0C */
+    u8 pad10[0xC];
+    SdfCurveTable *curve; /* 0x1C */
+} SdfCurveUser;
+
+extern void func_00116DE8(s32 *index, f32 *fraction, void *table, f32 time);
+
+/* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
+f32 func_001176A0(SdfCurveUser *user) {
+    s32 index;
+    f32 fraction;
+    SdfCurveTable *curve;
+    f32 *values;
+
+    if (user->flags & 4) {
+        curve = user->curve;
+        func_00116DE8(&index, &fraction, curve, user->time);
+        values = curve->values;
+        return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
+    }
+    return 0.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00117728);
 

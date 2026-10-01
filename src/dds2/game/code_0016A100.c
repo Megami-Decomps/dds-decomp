@@ -10,7 +10,7 @@
 typedef struct EffDispatchEntry {
     void *(*func)(void *); /* 0x00 handler, may be NULL */
     u8 pad04[0x08];        /* 0x04 */
-    u32 unk0C;             /* 0x0C fallback selector (create table only) */
+    void *(*altFunc)(void *); /* 0x0C create table only: set means the entry handler takes the raw source data */
     u8 pad10[0x18];        /* 0x10 */
 } EffDispatchEntry; /* 0x28 */
 
@@ -302,7 +302,24 @@ void func_0016AB30(void) {
     mdlBroadcastMasked();
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AB48);
+extern EffDispatchEntry D_003B01B0[];
+extern void **D_003AFFD0[];
+extern u32 func_0016AEA0(u32 *word);
+extern u32 func_0016AEA8(s32 address);
+
+EffParamWorkEx *func_0016AB48(u32 *source) {
+    EffParamWorkEx *work;
+
+    work = func_00328D68(0xC);
+    work->id = func_0016AEA0(source);
+    work->unk04 = func_0016AEA8((s32)source);
+    if (D_003B01B0[work->id].altFunc == NULL) {
+        work->data = D_003B01B0[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    } else {
+        work->data = D_003B01B0[work->id].func(source);
+    }
+    return work;
+}
 
 void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B8[work->id].func)(work->data);
@@ -313,7 +330,19 @@ void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B4[work->id].func)(work->data);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AC78);
+EffParamWorkEx *func_0016AC78(EffParamWorkEx *src) {
+    EffParamWorkEx *work;
+
+    work = func_00328D68(0xC);
+    work->id = src->id;
+    work->unk04 = src->unk04;
+    if (D_003B01B0[work->id].altFunc == NULL) {
+        work->data = D_003B01B0[work->id].func(D_003AFFD0[work->id][work->unk04]);
+    } else {
+        work->data = D_003B01B0[work->id].altFunc(src->data);
+    }
+    return work;
+}
 
 void effParamWorkExCallback0(EffParamWorkEx *work) {
     if (D_003B01C0[work->id].func != NULL) {
