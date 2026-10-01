@@ -46,7 +46,7 @@ typedef struct PacAlloc {
     s32 entryCount; /* 0x0 */
     s32 entryIndex; /* 0x4 */
     u8 pad8[24]; /* 0x8 */
-    s32 unk20; /* 0x20 */
+    s32 resource; /* 0x20 */
 } PacAlloc;
 
 typedef struct PacBuf {
@@ -417,7 +417,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->allocation;
-    func_002DA058(state->queueTail->resourceHandle, allocation->unk20);
+    func_002DA058(state->queueTail->resourceHandle, allocation->resource);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;

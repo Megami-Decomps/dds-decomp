@@ -23,7 +23,7 @@ typedef struct MovObj {
     u8 pad4[0xC];
     s32 unk10;
     u8 pad14[0x4];
-    s32 unk18;
+    s32 remainingBytes;
     MovSub *stream;
 } MovObj;
 
@@ -39,7 +39,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
     s32 remaining;
 
     stream = movie->stream;
-    remaining = movie->unk18;
+    remaining = movie->remainingBytes;
     if (remaining == 0) {
         return;
     }
