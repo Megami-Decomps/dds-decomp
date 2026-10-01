@@ -117,7 +117,39 @@ f32 func_001176A0(SdfCurveUser *user) {
     return 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00117728);
+typedef struct SdfCounter {
+    s32 direction;   /* 0x00: 0 counts up, 1 counts down */
+    u32 flags;       /* 0x04: 8 = frozen, 0x20 = wrap */
+    f32 limit;       /* 0x08 */
+    f32 value;       /* 0x0C */
+} SdfCounter;
+
+/* Step the counter by one; returns 0 when it ran out and does not wrap. */
+s32 func_00117728(SdfCounter *counter) {
+    s32 result = 1;
+
+    if (counter->flags & 8) {
+        return 1;
+    }
+    if (counter->direction == 0) {
+        if (counter->limit > counter->value) {
+            counter->value = counter->value + 1.0f;
+        } else if (counter->flags & 0x20) {
+            counter->value = 0.0f;
+        } else {
+            result = 0;
+        }
+    } else if (counter->direction == 1) {
+        if (counter->value > 0.0f) {
+            counter->value = counter->value - 1.0f;
+        } else if (counter->flags & 0x20) {
+            counter->value = counter->limit;
+        } else {
+            result = 0;
+        }
+    }
+    return result;
+}
 
 void func_001177D0(u32 *destination, u32 value) {
     *destination = value;
