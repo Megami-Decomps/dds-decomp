@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern s32 kwlnTaskGetTaskByName(char *);
+extern s32 kwlnTaskGetUserValue();
+extern s8 brsTaskIsUiUpdateAllowed(s32);
 extern s32 func_002877A8(void);
 
 extern s32 kwlnFadeIsActive(void);
@@ -523,7 +526,21 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
+s32 func_002629A8(void) {
+    s32 task = kwlnTaskGetTaskByName(D_003AFAB8);
+    s32 work;
+
+    if (task == 0) {
+        return 0;
+    }
+    work = kwlnTaskGetUserValue(task);
+    if (0x100 - *(s32 *)(work + 0x1574) <= 0 &&
+        brsTaskIsUiUpdateAllowed(work) != 0 &&
+        *(s8 *)(work + 0xD3C) == 1) {
+        return 1;
+    }
+    return *(s8 *)(work + 0xD3C);
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
