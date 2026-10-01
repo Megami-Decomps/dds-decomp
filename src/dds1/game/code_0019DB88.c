@@ -9,7 +9,7 @@ typedef struct SoundQueue {
     s32 unk08;
     u16 drawFlags;
     u16 unk0E;
-    u32 unk10;
+    struct SoundQueueNode *head;
     u32 unk14;
 } SoundQueue;
 
@@ -124,7 +124,7 @@ extern s8 D_00324530[];
 
 extern u32 kwlnTaskGetUserValue(s64);
 
-extern s8 D_00358308[13];
+extern u32 D_00358308[];
 
 extern u32 D_003BB240;
 
@@ -134,8 +134,14 @@ extern s32 itfLoadTextureFromAsset(u32);
 
 extern u8 D_003D6EB0[0x18];
 
+/* Message-window nodes are linked through the word at offset 0x24. */
+typedef struct MessageNodeLink {
+    u8 pad00[0x24];
+    s32 next;
+} MessageNodeLink;
+
 void func_0019DB88(s32 node) {
-    for (; node != 0; node = *(s32 *)(node + 0x24)) {
+    for (; node != 0; node = ((MessageNodeLink *)node)->next) {
         frFontEnableContextMode(node);
     }
 }
@@ -173,13 +179,23 @@ void func_0019DCB8(UiPanel *panel) {
     }
 }
 
+/* The first message-window glyph block starts at ItfMesState +0x14. */
+typedef struct UiGlyphBlock {
+    u32 x;
+    u32 y;
+    void *glyphChain;
+    u16 unk0C;
+    u16 pad0E;
+} UiGlyphBlock;
+
 void func_0019DDA8(u32 *cursorWords, s32 resetPosition) {
+    UiGlyphBlock *cursor = (UiGlyphBlock *)cursorWords;
     if (resetPosition != 0) {
-        *cursorWords = 0x280;
-        cursorWords[1] = 0xa10;
+        cursor->x = 0x280;
+        cursor->y = 0xa10;
     }
-    cursorWords[2] = 0;
-    *(u16 *)(cursorWords + 3) = 0xffff;
+    cursor->glyphChain = 0;
+    cursor->unk0C = 0xffff;
 }
 
 void func_0019DDD0(UiCursor *cur, s32 resetPos) {
@@ -231,10 +247,26 @@ void func_0019DE18(UiCursorResetBlock *cursor) {
     cursor->unk22 = 0;
 }
 
+/* Paired resource slots: each occupied marker owns the handle at its index. */
+typedef struct UiResourceSlots {
+    s32 markers[32];
+    s32 handles[32];
+} UiResourceSlots;
+
+/* Message-window resource block at ItfMesState +0xA4. */
+typedef struct UiWindowResourceBlock {
+    u32 unk00;
+    void *resource;
+    u32 handle;
+    u8 pad0C[0x1C];
+    u32 unk28;
+} UiWindowResourceBlock;
+
 void func_0019DE58(u32 *object) {
-    object[0] = 0;
-    object[1] = 0;
-    object[2] = 0;
+    UiWindowResourceBlock *block = (UiWindowResourceBlock *)object;
+    block->unk00 = 0;
+    block->resource = 0;
+    block->handle = 0;
     func_0019E048((s32)object, 0, 0);
 }
 
@@ -242,7 +274,7 @@ void func_0019DE88(s32 words) {
     s32 remaining;
     u32 *cursor;
 
-    cursor = (u32 *)(words + 0x7c);
+    cursor = (u32 *)&((UiResourceSlots *)words)->markers[31];
     remaining = 0x1f;
     do {
         remaining = remaining - 1;
@@ -257,7 +289,16 @@ typedef struct BtlFade {
     s16 phase;
     s16 alpha;
     s16 timer;
+    u32 unk08;
 } BtlFade;
+
+/* Both the sequence selector and fade belong to the same sound UI object. */
+typedef struct SoundUiState {
+    u8 pad00[0x40];
+    SoundSeq selection;
+    u8 pad64[0x16C];
+    BtlFade fade;
+} SoundUiState;
 
 void func_0019DEB8(s32 fadeAddress, s32 preserveKind) {
     if (preserveKind == 0) {
@@ -266,7 +307,7 @@ void func_0019DEB8(s32 fadeAddress, s32 preserveKind) {
     ((BtlFade *)fadeAddress)->phase = 0;
     ((BtlFade *)fadeAddress)->timer = 0;
     ((BtlFade *)fadeAddress)->alpha = 0x40;
-    *(u32 *)(fadeAddress + 8) = 0;
+    ((BtlFade *)fadeAddress)->unk08 = 0;
 }
 
 void func_0019DED8(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
@@ -275,8 +316,15 @@ void func_0019DED8(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
     ((BtlFade *)fadeAddress)->timer = timer;
 }
 
+/* Effects carry three releaseable primitive handles at 0xA4. */
+typedef struct BattleEffect {
+    u32 flags;
+    u8 pad04[0xA0];
+    u32 resourceHandles[3];
+} BattleEffect;
+
 void btlReleaseEffectResourceHandles(u8 *effect) {
-    u32 *handles = (u32 *)(effect + 0xA4);
+    u32 *handles = ((BattleEffect *)effect)->resourceHandles;
     if (handles[0] != 0) {
         itfPanelReleasePrimitiveResources(handles[0]);
         handles[0] = 0;
@@ -289,7 +337,7 @@ void btlReleaseEffectResourceHandles(u8 *effect) {
         itfPanelReleasePrimitiveResources(handles[2]);
         handles[2] = 0;
     }
-    *(u32 *)effect &= ~0xF00;
+    ((BattleEffect *)effect)->flags &= ~0xF00;
 }
 
 void func_0019DF70(s32 *resourceFlags) {
@@ -298,7 +346,7 @@ void func_0019DF70(s32 *resourceFlags) {
     remaining = 0x1f;
     do {
         if (*resourceFlags != 0) {
-            func_002D0918(resourceFlags[0x20]);
+            func_002D0918(((UiResourceSlots *)resourceFlags)->handles[0]);
             *resourceFlags = 0;
         }
         remaining = remaining - 1;
@@ -356,7 +404,7 @@ void func_0019E7B0(UiPanel *panel, s32 dy) {
 }
 
 s32 sndSeqSelectPoll(s32 obj) {
-    SoundSeq *sel = (SoundSeq *)(obj + 0x40);
+    SoundSeq *sel = &((SoundUiState *)obj)->selection;
     s32 dir = 0;
     s32 index;
     if (D_00324510.prev & 2) {
@@ -372,7 +420,7 @@ s32 sndSeqSelectPoll(s32 obj) {
     }
     if (dir != 0) {
         sndStepSequenceIndex(sel, dir);
-        func_0019DEB8(obj + 0x1D0, 1);
+        func_0019DEB8((s32)&((SoundUiState *)obj)->fade, 1);
     }
     if (D_00324510.confirm < 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
@@ -418,7 +466,7 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EA88);
 
 
 void btlUpdateFadeIndicator(u8 *obj) {
-    BtlFade *fade = (BtlFade *)(obj + 0x1D0);
+    BtlFade *fade = &((SoundUiState *)obj)->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
         if (fade->timer > 0) {
@@ -475,16 +523,16 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F4C8);
 
 typedef struct SoundQueueNode {
     s32 unk00;
-    s32 next;    /* 0x04 */
-    s32 window;  /* 0x08: released when flushing the message queue */
-    u32 object;  /* 0x0C: updated by the sound-queue visitor */
+    struct SoundQueueNode *next; /* 0x04 */
+    s32 window;                  /* 0x08: released when flushing the message queue */
+    u32 object;                  /* 0x0C: updated by the sound-queue visitor */
 } SoundQueueNode;
 
 s32 sndVisitQueuedResources(void) {
-    s32 node = *(s32 *)D_003D6EB0;
+    SoundQueueNode *node = *(SoundQueueNode **)D_003D6EB0;
     while (node != 0) {
-        func_0019E0F8(((SoundQueueNode *)node)->object);
-        node = ((SoundQueueNode *)node)->next;
+        func_0019E0F8(node->object);
+        node = node->next;
     }
     return 0;
 }
@@ -496,11 +544,11 @@ extern void sdfTexReleaseReferenceViaHandler(s32 texture);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F6A0);
 
 void sndFlushMessageQueue(void) {
-    u32 node = D_003D6EA0.unk10;
+    SoundQueueNode *node = D_003D6EA0.head;
     s32 window;
     while (node != 0) {
-        window = ((SoundQueueNode *)node)->window;
-        node = ((SoundQueueNode *)node)->next;
+        window = node->window;
+        node = node->next;
         itfMesDestroyWindow(window);
     }
     sdfTexReleaseReferenceViaHandler(D_003D6EA0.allocation);
@@ -537,10 +585,16 @@ extern void func_0019FCA8(void);
 
 extern s32 sndUpdateTestMsgTask(void);
 
+/* The process task stores its message-window handle at offset 0xCC. */
+typedef struct TestMessageTaskData {
+    u8 pad00[0xCC];
+    s32 window;
+} TestMessageTaskData;
+
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
-    itfMesSetWindowCallbackAddress(*(s32 *)(kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)) + 0xCC), func_0019FCA8);
+    itfMesSetWindowCallbackAddress(((TestMessageTaskData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->window, func_0019FCA8);
     kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))func_0019FBD8, 0, 0);
     kwlnTaskCreate((u32)D_003A1500, 0x2AFE, 0, 0, (s32 (*)(s64))sndUpdateTestMsgTask, 0, 0);
 }
@@ -552,7 +606,7 @@ void sndCycleTestMessageResource(void) {
     }
     D_003BB240 = (D_003BB240 + 1) & 3;
     if (D_003BB240 != 3) {
-        D_003BB244 = itfLoadTextureFromAsset(*(u32 *)(D_00358308 + D_003BB240 * 4));
+        D_003BB244 = itfLoadTextureFromAsset(D_00358308[D_003BB240]);
     }
 }
 
