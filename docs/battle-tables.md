@@ -1,14 +1,16 @@
 # Battle table source
 
 `tools/battle_tbl.py` converts the core battle data tables used by both games
-to editable `.tblasm` source. It currently supports `ENCOUNT.TBL` and
-`UNIT.TBL`:
+to editable `.tblasm` source. It currently supports `ENCOUNT.TBL`, `UNIT.TBL`,
+and `SKILL.TBL`:
 
 ```sh
 python3 tools/battle_tbl.py disassemble ENCOUNT.TBL encount.tblasm
 python3 tools/battle_tbl.py assemble encount.tblasm ENCOUNT.TBL
 python3 tools/battle_tbl.py disassemble UNIT.TBL unit.tblasm
 python3 tools/battle_tbl.py assemble unit.tblasm UNIT.TBL
+python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
+python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
 ninja dds1-battle-data dds2-battle-data
 ```
 
@@ -130,3 +132,47 @@ offset-based names. Unknown byte spans use fixed-length hexadecimal values.
 The assembler validates every row count, list width, integer range, segment
 size, and alignment byte before writing a table. Corpus tests also join every
 nonzero encounter enemy ID to a populated enemy template in the paired game.
+
+## Skill source
+
+`SKILL.TBL` connects skill IDs to battle behavior, costs, targeting, power,
+requirements, item records, and shared calculation constants. DDS1 has seven
+segments and DDS2 has eight:
+
+| Segment | DDS1 | DDS2 | Contents |
+|---:|---:|---:|---|
+| 0 | 608 × `0x02` | 672 × `0x02` | action attribute and auxiliary value by skill ID |
+| 1 | 512 × `0x38` | 544 × `0x38` | executable action records |
+| 2 | 85 × `0x10` | 117 × `0x10` | requirements for skill IDs `0x1ab` and above |
+| 3 | `0x300` | `0x400` | calculation coefficients |
+| 4 | 16 × `0x14` | 16 × `0x14` | party-unit battle defaults |
+| 5 | 192 × `0x08` | 256 × `0x08` | item and event entries |
+| 6 | — | 64 × `0x06` | DDS2 profile stat bonuses |
+| 6 / 7 | 16 × 16 skills | 48 × 24 skills | named requirement groups |
+
+The action record exposes the fields used directly by battle and menu code,
+including use and effect types, cost, targeting, hit behavior, HP and MP
+effects, ailments, support effects, and magic scaling. Multi-byte fields are
+split at their actual boundaries, so hit type and hit level, for example, can
+be edited independently:
+
+```text
+action 1 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+```
+
+High skill IDs carry three tagged requirements. The source writes the tags as
+`skill`, `attribute-mask`, `unit-mask`, or `group`; `any` is an unconditional
+slot and `none` is an unused slot. Group references resolve to the skill lists
+at the end of the same file:
+
+```text
+requirement 0x1b3 conditions=skill:530,skill:533,group:12 count=3
+group 12 skills=46,47,48
+```
+
+Floating-point constants use decimal values when they round-trip exactly to
+the stored `f32`. Non-float words in the coefficient pool use `bits=0x...`.
+The DDS2-only profile rows expose five stat bonuses and their tier. The corpus
+checks validate group references and every skill ID stored by party and enemy
+unit records, including passive IDs that have an attribute row but no
+executable action row.
