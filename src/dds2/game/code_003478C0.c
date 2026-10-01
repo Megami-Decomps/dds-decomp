@@ -76,7 +76,7 @@ extern void func_00348B10();
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_003478C0);
 
-void func_00347948(SdfAllocWork *work) {
+void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     sdfPacEnqueuePacket(work);
     work->buffer = func_00328D68(0x30);
     work->handler = func_003478C0;
@@ -118,7 +118,7 @@ INCLUDE_ASM(const s32, "game/code_003478C0", func_00348408);
 
 INCLUDE_ASM(const s32, "game/code_003478C0", func_00348540);
 
-void func_00348630(void) {
+void sdfStartAndSuspendWorkerThread(void) {
     s32 stack = func_00328390(func_00348540, 0x1000, 0x4C);
 
     _StartThread(stack, 0);

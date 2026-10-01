@@ -295,12 +295,12 @@ void func_00162ED8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_00162EF0);
 
-void func_00162FA0(EffParamWorkEx *work) {
+void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
     ((void (*)(void *))D_00353888[work->id].func)(work->data);
     sdfReleaseChipBlock(work);
 }
 
-void func_00162FE8(EffParamWorkEx *work) {
+void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
     ((void (*)(void *))D_00353884[work->id].func)(work->data);
 }
 

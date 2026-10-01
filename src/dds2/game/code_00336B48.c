@@ -142,7 +142,7 @@ extern VuGeomRef D_00468210[];
 
 extern void func_00336EC0(void *, u32, void *, u32, u32, f32, f32, f32);
 
-extern void func_00339160(s32 workAddress);
+extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
 
 extern u8 D_0037B080[];
 
@@ -210,7 +210,7 @@ extern void sdfAppendReferencePacket(s32, void *);
 extern void func_0033AEA8(void *);
 
 extern void func_0033AC10(void);
-extern void func_003306C0(void);
+extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
 extern s32 func_0032C150(void *);
 extern u8 D_00372C00[];
@@ -301,16 +301,9 @@ void func_00336C10(void *matrix) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfVuTransformVector(void *dst, void *src) {
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "lqc2 vf10, 0x0(%1)           \n"
-        "vmulax.xyzw ACC, vf28, vf10x \n"
-        "vmadday.xyzw ACC, vf29, vf10y \n"
-        "vmaddaz.xyzw ACC, vf30, vf10z \n"
-        "vmaddw.xyzw vf10, vf31, vf10w \n"
-        "sqc2 vf10, 0x0(%0) \n"
-        ".set reorder"
-        : : "r"(dst), "r"(src) : "memory");
+    VU0_LOAD_VF(vf10, src);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF(vf10, dst);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -332,62 +325,39 @@ f32 sdfVuDot3(void *left, void *right) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void sdfVuCross3(void *dst, void *src1, void *src2) {
-    __asm__ volatile (
-        ".set noreorder             \n"
-        "lqc2 vf10, 0x0(%1)         \n"
-        "lqc2 vf11, 0x0(%2)         \n"
-        "vopmula.xyz ACC, vf10, vf11 \n"
-        "vopmsub.xyz vf10, vf11, vf10 \n"
-        "sqc2 vf10, 0x0(%0) \n"
-        ".set reorder"
-        : : "r"(dst), "r"(src1), "r"(src2) : "memory");
+    VU0_LOAD_VF(vf10, src1);
+    VU0_LOAD_VF(vf11, src2);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, dst);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* Build a VU basis from the normalized target-origin direction and up vector. */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
-    __asm__ volatile (
-        ".set noreorder             \n"
-        "lqc2 vf10, 0x0(%1)         \n"
-        "vmove.xyzw vf31, vf10     \n"
-        "vmove.xyzw vf11, vf10     \n"
-        "lqc2 vf10, 0x0(%0)         \n"
-        "vsub.xyzw vf10, vf10, vf11 \n"
-        "vmul.xyz vf2, vf10, vf10  \n"
-        "vmulax.w ACC, vf0, vf2x   \n"
-        "vmadday.w ACC, vf0, vf2y  \n"
-        "vmaddz.w vf2, vf0, vf2z   \n"
-        "vrsqrt Q, vf0w, vf2w      \n"
-        "vwaitq                    \n"
-        "vmulq.xyz vf10, vf10, Q   \n"
-        "vmove.xyzw vf30, vf10     \n"
-        "vmove.xyzw vf11, vf10     \n"
-        "lqc2 vf10, 0x0(%2)         \n"
-        "vopmula.xyz ACC, vf10, vf11 \n"
-        "vopmsub.xyz vf10, vf11, vf10 \n"
-        "vmul.xyz vf2, vf10, vf10  \n"
-        "vmulax.w ACC, vf0, vf2x   \n"
-        "vmadday.w ACC, vf0, vf2y  \n"
-        "vmaddz.w vf2, vf0, vf2z   \n"
-        "vrsqrt Q, vf0w, vf2w      \n"
-        "vwaitq                    \n"
-        "vmulq.xyz vf10, vf10, Q   \n"
-        "vmove.xyzw vf28, vf10     \n"
-        "vmove.xyzw vf11, vf10     \n"
-        "vmove.xyzw vf10, vf30     \n"
-        "vopmula.xyz ACC, vf10, vf11 \n"
-        "vopmsub.xyz vf10, vf11, vf10 \n"
-        "vmove.xyzw vf29, vf10 \n"
-        ".set reorder"
-        : : "r"(target), "r"(origin), "r"(up) : "memory");
+    VU0_LOAD_VF(vf10, origin);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, target);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF_MEMORY(vf10, up);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf29, vf10);
     func_003363D0();
 }
 
 void func_00336D30(void) {
 }
 
-void func_00336D38(VuWork *work, s32 n) {
+void sdfVuConfigureWorkRingDma(VuWork *work, s32 n) {
     u32 end = (u32)work + 0x78;
     if (n < 0x80) {
         work->ringWrapCount = 0x80 - n;
@@ -429,12 +399,12 @@ void sdfInitializeVuWorkParameters(VuWork *work, u16 *params, u32 mask) {
     D_00439184 = selected & 0x78;
     work->payload = payload;
     work->state = 0;
-    func_00336D38(work, second);
+    sdfVuConfigureWorkRingDma(work, second);
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: rotate the three vectors at vectors + 0x40 by the 3x3 of the global matrix into vf24-vf26, store them */
-void func_00336E60(void *vectors) {
+void sdfVuRotateObjectBasis(void *vectors) {
     void *m = (void *)D_00439188;
     __asm__ volatile (
         ".set noreorder                \n"
@@ -462,7 +432,7 @@ void func_00336E60(void *vectors) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
 
-void func_00336F88(void *out, VuAsset *work, void *reference, f32 deltaX, f32 deltaY) {
+void sdfVuTransformWorkAtOffset(void *out, VuAsset *work, void *reference, f32 deltaX, f32 deltaY) {
     func_00336EC0(out, D_00439188, reference,
                   work->param8, work->param4,
                   work->scale,
@@ -744,7 +714,7 @@ void func_00339000(work)
     }
 }
 
-void func_00339160(s32 workAddress) {
+void sdfVuEmitSelectedNodePacket(s32 workAddress) {
     if ((*(u32 *)(workAddress + 0x44) & 0x10) != 0) {
         func_00338B30();
         return;
@@ -756,12 +726,12 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_00339188);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339270);
 
-void func_00339390(u32 workAddress) {
+void sdfVuApplySelectedWorkFlags(u32 workAddress) {
     u32 flags;
     s32 address;
 
     address = (s32)workAddress;
-    func_00339160(address);
+    sdfVuEmitSelectedNodePacket(address);
     flags = *(u32 *)(address + 0x44);
     if ((flags & 0x1000) != 0) {
         func_00339188(workAddress);
@@ -777,7 +747,7 @@ extern void func_00337FD8(VuWork *);
 extern void func_00337688(u32, s32);
 extern void func_003385C0(VuWork *);
 
-void func_003393F0(VuWork *work) {
+void sdfVuBeginPacketFromWork(VuWork *work) {
     u128 saved[3];
     u32 cursor = sdfGetPacketCursor();
     u32 base = (cursor + 0x3F) & ~0x3F;
@@ -786,29 +756,21 @@ void func_003393F0(VuWork *work) {
     work->header = base + 0x30;
     work->cursor = work->dataStart = (u8 *)(((base + 0x40) & 0x0FFFFFFF) | 0x30000000);
     if (work->selectedFlags & 0x4000) {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "sqc2 vf24, 0x0(%0)\n"
-            "sqc2 vf25, 0x10(%0)\n"
-            "sqc2 vf26, 0x20(%0)\n"
-            ".set reorder"
-            : : "r"(saved));
+        VU0_STORE_VF_UNCLOBBERED(vf24, saved);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, saved);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, saved);
         func_00337FD8(work);
-        func_00339390((u32)work);
-        func_00336D38(work, work->param1);
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf24, 0x0(%0)\n"
-            "lqc2 vf25, 0x10(%0)\n"
-            "lqc2 vf26, 0x20(%0)\n"
-            ".set reorder"
-            : : "r"(saved));
+        sdfVuApplySelectedWorkFlags((u32)work);
+        sdfVuConfigureWorkRingDma(work, work->param1);
+        VU0_LOAD_VF(vf24, saved);
+        VU0_LOAD_VF_AT(vf25, 16, saved);
+        VU0_LOAD_VF_AT(vf26, 32, saved);
         func_00337688(work->ringSrc, work->param1);
         func_003385C0(work);
-        func_00339390((u32)work);
+        sdfVuApplySelectedWorkFlags((u32)work);
     } else {
         func_00337FD8(work);
-        func_00339390((u32)work);
+        sdfVuApplySelectedWorkFlags((u32)work);
     }
 }
 
@@ -844,24 +806,24 @@ void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *
     }
 }
 
-void func_0033A090(u32 matrixAddress) {
+void sdfVuSelectTransformMatrix(u32 matrixAddress) {
     D_00439188 = matrixAddress;
 }
 
 extern u8 D_00476240[];
 
-void func_0033A098(u8 *object) {
+void sdfVuCacheObjectVector(u8 *object) {
     if (D_0043918C != (u32)object) {
         D_0043918C = (u32)object;
         PCP_COPY_VECTOR(D_00476240, object + 0x10);
     }
 }
 
-void func_0033A0C0(f32 scale) {
+void sdfVuSetGlobalScale(f32 scale) {
     D_00439190 = scale;
 }
 
-void func_0033A0C8(void) {
+void sdfVuClearTransformCache(void) {
     D_00439188 = 0;
     D_0043918C = 0;
 }
@@ -876,7 +838,7 @@ void sdfConsUploadDmaProgram(s32 size) {
     D_00439180 = sdfResourceRetainAddress(D_00438A40);
 }
 
-u32 func_0033A170(s32 tex) {
+u32 sdfConsGetTextureDrawPacketSize(s32 tex) {
     return 0x50;
 }
 
@@ -896,13 +858,13 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *p, void *tex, s32 dat
 }
 
 s32 sdfConsCreateDrawPacket(s32 list, s32 tex, s32 data) {
-    SdfDrawPacket *packet = sdfConsInitTextureDrawPacket(sdfAllocPacketAligned(func_0033A170(tex)), (void *)tex, data);
+    SdfDrawPacket *packet = sdfConsInitTextureDrawPacket(sdfAllocPacketAligned(sdfConsGetTextureDrawPacketSize(tex)), (void *)tex, data);
     sdfAppendPacket(list, (u32)packet);
     return (s32)packet;
 }
 
-u32 func_0033A290(u32 packet, s32 size) {
-    func_0032D460(packet, (size >> 4) - 2);
+u32 sdfConsFinalizePacketHeader(u32 packet, s32 size) {
+    sdfInitializeDmaReferenceTag(packet, (size >> 4) - 2);
     return packet;
 }
 
@@ -910,7 +872,7 @@ s32 sdfConsCalculateDrawPacketSize(s32 width, s32 height) {
     return (width * height + 2) << 4;
 }
 
-s32 func_0033A2D0(s32 size) {
+s32 sdfConsMeasurePacketWithHeader(s32 size) {
     return size + 0x20;
 }
 
@@ -950,7 +912,7 @@ typedef struct SdfVuBonePacket {
     u32 reservedB;
 } SdfVuBonePacket;
 
-void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
+void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
@@ -982,7 +944,7 @@ extern u8 D_0040B620[];
 extern u8 D_0040B6A0[];
 extern u8 D_0040B580[];
 
-void func_0033A480(u8 *node, void *matrix) {
+void sdfConsCacheTransformedNode(u8 *node, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(D_0040B660);
     func_00336C10(node + 0x30);
@@ -1111,7 +1073,7 @@ typedef struct SdfProjPacket {
     u32 reservedC;
 } SdfProjPacket;
 
-void func_0033AAA0(SdfProjPacket *packet, SdfProjParams *params) {
+void sdfConsBuildFrustumPacket(SdfProjPacket *packet, SdfProjParams *params) {
     f32 rangeMax = params->rangeMax;
     f32 rangeMin = params->rangeMin;
     f32 near = params->near;
@@ -1146,7 +1108,7 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 address, s32 size) 
 
 extern u8 D_0037F330[];
 
-void func_0033ABB8(s32 list, DmaPacketHeader *packet) {
+void sdfConsAppendProgramReferencePacket(s32 list, DmaPacketHeader *packet) {
     packet->address = (u32)D_0037B610 & 0x0FFFFFFF;
     packet->quadwords = (D_0037F330 - D_0037B610) >> 4;
     packet->tag = 0;
@@ -1159,7 +1121,7 @@ void func_0033ABB8(s32 list, DmaPacketHeader *packet) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
 
-void func_0033AD68(void) {
+void sdfInitializeResourceQueuesAndTextureWords(void) {
     u64 v;
     func_0033AC10();
     v = func_0032B318(D_00438A70);
@@ -1174,7 +1136,7 @@ void func_0033AD68(void) {
     v = func_0032B318(D_00438A80);
     D_0037F1F4[0] = v;
     D_0037F1F4[1] = v >> 32;
-    func_003306C0();
+    sdfInitializeObjectListRequest();
     sdfRegisterResourceQueueCallbacks();
 }
 

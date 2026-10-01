@@ -426,7 +426,7 @@ EffectOwnerRecord *list;
     } while (--remaining >= 0);
 }
 
-extern void func_002BF790(u32, u32, u32, u32, u32, s32, s32);
+extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, s32, s32);
 
 extern void itfGridLookupValueOrDefault(void *, s32);
 
@@ -437,7 +437,7 @@ u32 effDispatchRecordBuckets(u32 active, EffectOwnerRecord *list, s32 option) {
     do {
         EffectRecord *record = *entry;
         while (record != 0) {
-            func_002BF790(0, 0, 0, 0, (u32)list->owner, record->slot, option);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (u32)list->owner, record->slot, option);
             if (active != 0) {
                 itfGridLookupValueOrDefault(list->owner, record->slot);
             }
@@ -664,7 +664,7 @@ void effResolveAndReleaseResource(u32 *handle) {
     if (*handle != 0) {
         u32 data = sdfResourceRetainAddress(*handle);
         effResolveResourceSlots(handle, data, 0, -1);
-        func_002D0A60(*handle);
+        sdfDecrementAllocationReferenceCount(*handle);
     }
 }
 
@@ -672,7 +672,7 @@ void effResolveAndReleaseSelectedResource(u32 *handle, s32 slot) {
     if (*handle != 0) {
         u32 data = sdfResourceRetainAddress(*handle);
         effResolveResourceSlots(handle, data, 0, slot);
-        func_002D0A60(*handle);
+        sdfDecrementAllocationReferenceCount(*handle);
     }
 }
 

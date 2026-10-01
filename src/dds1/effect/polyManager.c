@@ -9,7 +9,7 @@ typedef struct {
     f32 unkCC;    /* 0xCC scaled by polyScaleTransformPair/func_0015F2B0/polyScaleTransformFirstComponent */
     f32 unkD0;    /* 0xD0 scaled by polyScaleTransformPair/func_0015F2B0 */
     u8 padD4[8];  /* 0xD4 */
-    u32 unkDC;    /* 0xDC handle released by effPolyDestroyWork/func_0015B918 */
+    u32 unkDC;    /* 0xDC handle released by effPolyDestroyWork/parPrependCellNode */
 } PolyNode;
 
 /* Node of four f32s scaled together by effPolyScaleFourComponents. */
@@ -86,8 +86,8 @@ typedef struct {
     PolyStripEntry *entries; /* 0x14 */
 } PolyStrip;
 
-void func_0015B8B8(u32 arg);
-void func_0015B918(u32 arg);
+void parReleaseCellSystem(u32 arg);
+void parPrependCellNode(u32 arg);
 void func_0015DAA0(void);
 void sdfReleaseChipBlock(void *arg);
 void func_002D0918(void *arg);
@@ -98,7 +98,7 @@ extern void func_002DD968(f32 angle);
 extern void func_002DDC50(void);
 
 void effPolyDestroyWork(PolyNode *obj) {
-    func_0015B8B8(obj->unkDC);
+    parReleaseCellSystem(obj->unkDC);
     sdfReleaseChipBlock(obj);
 }
 
@@ -113,7 +113,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015DAA0);
 
 void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     func_0015DAA0();
-    func_0015B918(obj->unkDC);
+    parPrependCellNode(obj->unkDC);
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DC70);
@@ -154,7 +154,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015DE88);
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DFA8);
 
 void polyReleaseBandNodeResources(PolyNodeF0 *obj) {
-    func_0015B8B8(obj->unkF0);
+    parReleaseCellSystem(obj->unkF0);
     func_002D0918(obj->unkF8);
 }
 
@@ -302,7 +302,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E5D8);
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E760);
 
 void func_0015E888(PolyNodeE0 *obj) {
-    func_0015B8B8(obj->unkE0);
+    parReleaseCellSystem(obj->unkE0);
     func_002D0918(obj->unkE8);
 }
 
@@ -321,7 +321,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015EC08);
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015ED90);
 
 void func_0015EEC0(PolyNodeF4 *obj) {
-    func_0015B8B8(obj->unkF4);
+    parReleaseCellSystem(obj->unkF4);
     func_002D0918(obj->unkFC);
 }
 

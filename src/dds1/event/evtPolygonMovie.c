@@ -219,7 +219,7 @@ extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern void func_002887A0(s32 arg);
 extern void func_002D0918(s32 arg);
-extern s32 func_00269710(void);
+extern s32 mnuQueryTitleSoundBusy(void);
 extern void func_002696F8(void);
 extern void func_003003F0(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *ptr);
@@ -890,7 +890,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         if (work->res6C != 0) {
             func_002D0918(work->res6C);
         }
-        if (func_00269710() == 1) {
+        if (mnuQueryTitleSoundBusy() == 1) {
             func_002696F8();
         }
         func_003003F0("sound stop all. \n");

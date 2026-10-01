@@ -98,7 +98,7 @@ u32 func_00225798(BattleActionUnit *unit) {
     return 0;
 }
 
-extern void func_00217378(s32, s32);
+extern void btlFaceLinkedTargetAndFlagDirection(s32, s32);
 extern void func_00224F88(u32);
 
 s32 func_00225828(BattleActionUnit *unit) {
@@ -110,7 +110,7 @@ s32 func_00225828(BattleActionUnit *unit) {
                 if ((actor->owner->flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217378(unit, unit);
+                btlFaceLinkedTargetAndFlagDirection(unit, unit);
                 return 1;
             }
         }

@@ -995,7 +995,7 @@ void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     func_00308380(0x5100DL, packet);
     func_00308380(0x3000DL, packet);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
-    func_00308DB0(packet);
+    uiDrawActiveSurfaceRegion(packet);
     func_0026E788(0, -15, 0, amount, 0x60, 0x20, packet);
     func_0026E788(0, -15, 0, amount, 0x61, 0x20, packet);
     func_0026E788(0, 0, 0, amount, 0x62, 0x20, packet);
@@ -2777,7 +2777,7 @@ void func_0027A7F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027A800);
 
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378C0);
 
@@ -2789,7 +2789,7 @@ void func_0027AF40(s32 unused, u8 *object) {
 
     object[0x20] = 0;
     object[0x21] = 0;
-    index = func_00341240(0) * 3.0f;
+    index = effMiscRandUnitFloat(0) * 3.0f;
     object[0x22] = table[index];
 }
 
@@ -2812,7 +2812,7 @@ void func_0027C078(s32 unused, u8 *object) {
     u8 table[4] = {0, 10, 20, 30};
     u8 index;
 
-    index = func_00341240(0) * 3.0f;
+    index = effMiscRandUnitFloat(0) * 3.0f;
     object[0x20] = table[index];
 }
 
@@ -2825,7 +2825,7 @@ s32 mnuDrawMantraPulseIcon(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *obje
 
     object[0x20] += 1;
     if (object[0x20] > 0x82) {
-        object[0x20] = table[(u8)(func_00341240(0) * 3.0f)];
+        object[0x20] = table[(u8)(effMiscRandUnitFloat(0) * 3.0f)];
     }
     t = 0.0f;
     if (object[0x20] >= 0x32) {
@@ -2890,7 +2890,7 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
     func_00308380(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     func_00308380(0x3000DL, packet);
-    func_00308DB0(packet);
+    uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
     func_00308E60(packet);
     return 0;
@@ -2989,7 +2989,7 @@ s32 btlDrawPanelB(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
     func_00308380(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     func_00308380(0x3000DL, packet);
-    func_00308DB0(packet);
+    uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
     func_00308E60(packet);
     return 0;
@@ -3228,14 +3228,14 @@ u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
     MantraSparkle *spark;
 
     memset(emitter, 0, 0xA8);
-    emitter->duration = func_00341240(0) * 20.0f + 5.0f;
+    emitter->duration = effMiscRandUnitFloat(0) * 20.0f + 5.0f;
     emitter->kind = kind;
     spark = func_00284818(emitter);
-    spark->age = spark->life * func_00341240(0) + 0.0f;
+    spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     spark = func_00284818(emitter);
-    spark->age = spark->life * func_00341240(0) + 0.0f;
+    spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     spark = func_00284818(emitter);
-    spark->age = spark->life * func_00341240(0) + 0.0f;
+    spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     return (u32)emitter;
 }
 
@@ -3310,9 +3310,9 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
             memset(slot, 0, 0x10);
             slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
             if (wide) {
-                slot->w.half[1] = (s32)(func_00341240(0) * 10.0f) * 36;
+                slot->w.half[1] = (s32)(effMiscRandUnitFloat(0) * 10.0f) * 36;
             } else {
-                slot->w.half[1] = (s32)(func_00341240(0) * 20.0f) * 18;
+                slot->w.half[1] = (s32)(effMiscRandUnitFloat(0) * 20.0f) * 18;
             }
             slot->life = 14;
             if (side != 0) {
@@ -3360,9 +3360,9 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
             memset(slot, 0, 0x10);
             slot->w.flags = ((slot->w.flags | 1) & 0xFFFFFFF9) | ((side & 3) << 1);
             if (wide) {
-                slot->w.half[1] = (s32)(func_00341240(0) * 10.0f) * 36;
+                slot->w.half[1] = (s32)(effMiscRandUnitFloat(0) * 10.0f) * 36;
             } else {
-                slot->w.half[1] = func_00341240(0) * 360.0f;
+                slot->w.half[1] = effMiscRandUnitFloat(0) * 360.0f;
             }
             slot->life = 30;
             if (side != 0) {
@@ -3415,10 +3415,10 @@ void mnuTickMantraSparkParticles(s32 *state) {
 
     state[0] = state[0] - 1;
     if (state[0] < 0) {
-        value = func_00341240(0) * 60.0f + 60.0f;
+        value = effMiscRandUnitFloat(0) * 60.0f + 60.0f;
         state[1] = value;
         state[0] = value;
-        *(f32 *)(state + 2) = func_00341240(0) * 0.20000005f + 0.4f;
+        *(f32 *)(state + 2) = effMiscRandUnitFloat(0) * 0.20000005f + 0.4f;
     }
     particle = (MantraSpark *)(state + 3);
     for (i = 7; i >= 0; i--) {
@@ -3432,16 +3432,16 @@ void mnuUpdateSparkle(MantraSpark *spark) {
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
-            spark->timer = spark->timerMax = func_00341240(0) * 30.0f + 1.0f;
-        } else if (func_00341240(0) > 0.7f) {
-            spark->timer = spark->timerMax = func_00341240(0) * 30.0f + 0.0f;
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 1.0f;
+        } else if (effMiscRandUnitFloat(0) > 0.7f) {
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 0.0f;
         } else {
             spark->phase = 1;
-            spark->timer = spark->timerMax = func_00341240(0) * 60.0f + 45.0f;
-            spark->z = (func_00341240(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
-            spark->size = func_00341240(0) * 10.0f;
-            spark->x = func_00341240(0) * 512.0f + -256.0f;
-            spark->y = func_00341240(0) * 448.0f + -128.0f;
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 60.0f + 45.0f;
+            spark->z = (effMiscRandUnitFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = effMiscRandUnitFloat(0) * 10.0f;
+            spark->x = effMiscRandUnitFloat(0) * 512.0f + -256.0f;
+            spark->y = effMiscRandUnitFloat(0) * 448.0f + -128.0f;
         }
     }
 }

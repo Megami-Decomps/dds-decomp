@@ -206,4 +206,112 @@
     "vaddz.x vf2, vf2, vf2z\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
 
+
+/* ---- shared idioms for the remaining hand-written COP2 blocks ----
+ * Each macro is one retail pattern; two consecutive calls assemble to the same
+ * text as one fused block (every macro brackets itself with .set noreorder /
+ * reorder, which the assembler reduces to nothing between two of them). */
+
+/* vf2.x source for the vmulx/vmaddx family: qmtc2.ni of a GPR that already
+ * holds the float bits (retail loads 1.0f or a saved scale into a register
+ * first); VU0_MUL_VF2X is the vmulx that consumes it. VU0_SCALE_VF is the two
+ * fused. */
+#define VU0_SET_VF2X(r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" \
+    : : "r" (r))
+/* dst = src * vf2.x (all four components). */
+#define VU0_MUL_VF2X(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw " #dst ", " #src ", vf2x\n\t.set reorder")
+/* The same broadcast through the SDK scratch $3 (mfc1 $3; qmtc2.ni $3,vf2;
+ * insn), for blocks that run while $2 holds a live value. */
+#define VU0_SCALAR_OP_R3(f, insn) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $3, %0\n\tqmtc2.ni $3, vf2\n\t" insn "\n\t.set reorder" \
+    : : "f" (f))
+#define VU0_SCALAR_OP_R3_CLOBBER(f, insn) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $3, %0\n\tqmtc2.ni $3, vf2\n\t" insn "\n\t.set reorder" \
+    : : "f" (f) : "$3")
+/* The broadcast through a gcc-chosen early-clobber GPR (mfc1 tmp,f; qmtc2.ni
+ * tmp,vf2; insn), as the effect model scalers write it. */
+#define VU0_SCALAR_OP_TMP(tmp, f, insn) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 %0, %1\n\tqmtc2.ni %0, vf2\n\t" insn "\n\t.set reorder" \
+    : "=&r" (tmp) : "f" (f))
+#define VU0_SCALAR_OP_TMP_MEMORY(tmp, f, insn) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 %0, %1\n\tqmtc2.ni %0, vf2\n\t" insn "\n\t.set reorder" \
+    : "=&r" (tmp) : "f" (f) : "memory")
+/* Two scalars broadcast at once: vf2.x = f2, vf3.x = f3 (the mfc1 pair comes
+ * first, then the qmtc2 pair), followed by VU0_WEIGHTED_SUM_VF2X_VF3X or the
+ * rotation steps of the sdf angle routines. */
+#define VU0_SET_SCALARS_VF2_VF3(f2, f3) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tmfc1 $3, %1\n\tqmtc2.ni $2, vf2\n\tqmtc2.ni $3, vf3\n\t.set reorder" \
+    : : "f" (f2), "f" (f3))
+/* dst = a * vf2.x + b * vf3.x (vmulax ACC; vmaddx): the nlerp mix of two
+ * quaternions weighted by remaining/amount. */
+#define VU0_WEIGHTED_SUM_VF2X_VF3X(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, " #a ", vf2x\n\tvmaddx.xyzw " #dst ", " #b ", vf3x\n\t.set reorder")
+/* vf10.<axis> = r (a GPR holding the float) with the plain, non-.ni qmtc2 the
+ * script-command setters use: qmtc2 r,vf02; vaddx.axis vf10,vf00,vf02x. */
+#define VU0_SET_AXIS_GPR(axis, r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2 %0, vf2\n\tvaddx." #axis " vf10, vf0, vf2x\n\t.set reorder" \
+    : : "r" (r))
+/* Identity matrix in four VU registers built from vf0 = (0,0,0,1): row order
+ * a,b,c,d; (vf28,vf29,vf30,vf31) is the primary bank, (vf24..vf27) the second.
+ *   vsub a,vf0,vf0; vmr32 c,vf0; vmove d,vf0; vaddw.x a,a,vf0w; vmr32 b,c */
+#define VU0_SET_UNIT_MATRIX(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #a ", vf0, vf0\n\tvmr32.xyzw " #c ", vf0\n\t" \
+    "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
+/* vf24-vf27 = vf28-vf31: the primary matrix becomes the second bank before the
+ * point projection overwrites it. */
+#define VU0_MOVE_MATRIX_TO_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
+    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
+/* A quadword between a VU0 register and a C lvalue (the "m" operand form,
+ * `lqc2 vf,%0` / `sqc2 vf,%0`, without the register-offset spelling). */
+#define VU0_LOAD_VF_FROM(vf, lvalue) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", %0\n\t.set reorder" \
+    : : "m" (lvalue))
+#define VU0_STORE_VF_TO(vf, lvalue) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", %0\n\t.set reorder" \
+    : "=m" (lvalue))
+#define VU0_STORE_VF_TO_MEMORY(vf, lvalue) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", %0\n\t.set reorder" \
+    : "=m" (lvalue) : : "memory")
+/* Quadword at src + off (a byte offset); sdf node structs keep several vectors
+ * in one record. */
+#define VU0_LOAD_VF_AT(vf, off, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_STORE_VF_AT_UNCLOBBERED(vf, off, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (dst))
+/* dst = a * b on xyz only (w kept): the scale of the three matrix rows by the
+ * object scale vector. */
+#define VU0_MUL_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
+/* dst = -src on all four components (ACC = vf0 * vf0x = 0, then 0 - src*1):
+ * the negated quaternion for the shorter-arc nlerp. */
+#define VU0_NEGATE_VF(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf0, vf0x\n\tvmsubw.xyzw " #dst ", " #src ", vf0w\n\t.set reorder")
+/* out = a . b over all four components as a C float (quaternion dot): vf1 =
+ * (1,1,1,x); vmul.xyzw vf2,a,b; vadday.x/vmaddaz.x/vmaddw.x fold y, z, w into
+ * x; qmfc2.ni $2,vf2; mtc1 $2,out. Unlike VU0_DOT_XYZ it declares no clobber. */
+#define VU0_DOT_XYZW(out, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz vf1, vf0, vf0w\n\tvmul.xyzw vf2, " #a ", " #b "\n\t" \
+    "vadday.x ACC, vf2, vf2y\n\tvmaddaz.x ACC, vf1, vf2z\n\tvmaddw.x vf2, vf1, vf2w\n\t" \
+    "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out))
+/* out = |vf|^2 in the retail quaternion form (vmulay.x in place of vadday.x). */
+#define VU0_LENGTH_SQ_XYZW(out, vf) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz vf1, vf0, vf0w\n\tvmul.xyzw vf2, " #vf ", " #vf "\n\t" \
+    "vmulay.x ACC, vf2, vf2y\n\tvmaddaz.x ACC, vf1, vf2z\n\tvmaddw.x vf2, vf1, vf2w\n\t" \
+    "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out))
+/* vf10 /= |vf10| over xyzw (quaternion normalise):
+ *   vmul.xyzw vf2,vf10,vf10; vaddax.w; vmadday.w; vmaddz.w vf3; vrsqrt Q,vf0w,vf3w;
+ *   vwaitq; vmulq.xyzw vf10,vf10,Q  (retail leaves the component letters off
+ *   the vf2 operands of the first two ACC steps) */
+#define VU0_NORMALIZE_XYZW_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw vf2, vf10, vf10\n\tvaddax.w ACC, vf2, vf2\n\t" \
+    "vmadday.w ACC, vf0, vf2\n\tvmaddz.w vf3, vf0, vf2\n\tvrsqrt Q, vf0w, vf3w\n\t" \
+    "vwaitq\n\tvmulq.xyzw vf10, vf10, Q\n\t.set reorder")
+
 #endif

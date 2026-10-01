@@ -9,7 +9,7 @@ s32 dds3InvokeAreaCallback(void *arg);
 
 s32 func_00110720(s32 object, s32 (*callback)(void *));
 
-s32 func_00110FE8(WorldObjectPointer *object, s32 index, s32 value) {
+s32 dds3ContainsNodeInObjectChain(WorldObjectPointer *object, s32 index, s32 value) {
     u32 *node;
 
     if (object == NULL || value == 0) {
@@ -25,7 +25,7 @@ s32 func_00110FE8(WorldObjectPointer *object, s32 index, s32 value) {
     return 0;
 }
 
-s32 func_00111050(WorldObjectPointer *object, s32 value) {
+s32 dds3ContainsNodeInAnyObjectChain(WorldObjectPointer *object, s32 value) {
     u8 *p;
     s32 i;
 
@@ -103,7 +103,7 @@ void dds3DestroyWorldIndexNode(u32 node);
 
 void sdfReleaseChipBlock(void *arg);
 
-void func_00111278(WorldObjectPointer *object) {
+void dds3DestroyObjectPointerChains(WorldObjectPointer *object) {
     u32 *p;
     u32 i;
 

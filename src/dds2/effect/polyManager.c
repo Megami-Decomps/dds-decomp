@@ -52,7 +52,7 @@ extern void func_00336818(f32 angle);
 extern void func_00336B00(void);
 
 void effPolyDestroyWork(u32 work) {
-    func_001634A8(*(u32 *)((s32)work + 0xdc));
+    parReleaseCellSystem(*(u32 *)((s32)work + 0xdc));
     sdfReleaseChipBlock(work);
 }
 
@@ -67,7 +67,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165690);
 
 void polyFinishAndReleaseNodeHandle(s32 work) {
     func_00165690();
-    func_00163508(*(u32 *)(work + 0xdc));
+    parPrependCellNode(*(u32 *)(work + 0xdc));
 }
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165860);
@@ -108,7 +108,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165A78);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165B98);
 
 void polyReleaseBandNodeResources(s32 work) {
-    func_001634A8(*(u32 *)(work + 0xf0));
+    parReleaseCellSystem(*(u32 *)(work + 0xf0));
     func_003297C8(*(u32 *)(work + 0xf8));
 }
 
@@ -256,7 +256,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
 void func_00166478(s32 work) {
-    func_001634A8(*(u32 *)(work + 0xe0));
+    parReleaseCellSystem(*(u32 *)(work + 0xe0));
     func_003297C8(*(u32 *)(work + 0xe8));
 }
 
@@ -275,7 +275,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166980);
 
 void func_00166AB0(s32 work) {
-    func_001634A8(*(u32 *)(work + 0xf4));
+    parReleaseCellSystem(*(u32 *)(work + 0xf4));
     func_003297C8(*(u32 *)(work + 0xfc));
 }
 

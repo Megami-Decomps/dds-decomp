@@ -21,16 +21,16 @@ extern L2dDevice D_003805A8;
 
 extern SdfListHead *sdfAllocatePacketList(void *(*alloc)(s32));
 
-extern void func_003305D0(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top,
+extern void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top,
                           s32 right, s32 bottom, s32 depth, void *(*alloc)(s32));
 
 /* Emit one filled rectangle into a fresh packet list. */
-void func_0011F0F8(L2dRect *rect)
+void l2dDrawColoredRect(L2dRect *rect)
 {
     SdfListHead *list;
 
     list = sdfAllocatePacketList(0);
-    func_003305D0(list, rect->color, 0, rect->left, rect->top,
+    sdfAppendClosedRectanglePacket(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);
     D_003805A8.fill(&D_003805A8, list);

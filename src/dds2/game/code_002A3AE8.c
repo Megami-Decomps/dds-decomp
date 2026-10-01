@@ -8,7 +8,7 @@ extern s32 D_003E38A0[];
 
 extern s32 D_00437A40;
 
-extern void func_002A3DE8(void);
+extern void mnuReleaseMenuResourceSlots(void);
 
 extern void func_002A3C58(void);
 
@@ -54,7 +54,7 @@ extern void mnuListAppendNode(s32, s32);
 
 extern void func_002A5A78();
 
-void func_002A3BE0(void) {
+void mnuRecreateMenuSelectionList(void) {
     s32 i;
     s32 node;
     if (((SpriteMenuState *)D_00437A40)->list != 0) {
@@ -76,7 +76,7 @@ u32 func_002A3C78(void) {
     return *((SpriteMenuList *)((SpriteMenuState *)D_00437A40)->list)->selected;
 }
 
-void func_002A3C90(s32 steps) {
+void mnuSelectMenuListCursorByAdvance(s32 steps) {
     mnuSelectFirstListNode(((SpriteMenuState *)D_00437A40)->list);
     if (0 < steps) {
         do {
@@ -88,7 +88,7 @@ void func_002A3C90(s32 steps) {
 
 extern s8 D_0037F510[];
 
-s32 func_002A3CE0(void) {
+s32 mnuIsAnyMenuInputPressed(void) {
     if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0 ||
         D_0037F510[0x22] < 0 || D_0037F510[0x20] < 0 ||
         D_0037F510[0x2a] < 0 || D_0037F510[0x2b] < 0 ||
@@ -105,7 +105,7 @@ extern u8 D_003E3760[];
 
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3D70);
 
-void func_002A3DE8(void) {
+void mnuReleaseMenuResourceSlots(void) {
     u32 *state = (u32 *)D_00437A40;
     if (state[1] != 0) {
         effDestroyResourceSlotSet(state[1]);

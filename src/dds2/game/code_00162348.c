@@ -113,11 +113,11 @@ extern s32 parObjGetMode();
 
 extern void func_001618E0(s32);
 
-extern void func_00162B60();
+extern void parUpdateBillboardCrossStrip();
 
-extern void func_00162C48();
+extern void parUpdateBillboardCrossTriangle();
 
-extern void func_00162D38();
+extern void parUpdateTrackPolygonCrossAxes();
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
@@ -151,7 +151,7 @@ extern void *memcpy(void *dst, void *src, u32 n);
 extern void *func_00328D68(s32);
 extern void func_00165600(void *);
 
-/* Emitter descriptor copied into a fresh allocation by func_00165500. */
+/* Emitter descriptor copied into a fresh allocation by parCloneEmitterAndInitCells. */
 typedef struct ParEmitDesc {
     u8 pad00[0x10];
     s32 count;          /* 0x10 */
@@ -179,7 +179,7 @@ typedef struct ParBlock {
     s32 handle;      /* 0x14 */
 } ParBlock;
 
-extern s32 func_003335E0();
+extern s32 sdfCreateAssetWithDrawEntries();
 
 extern void func_003332D0(s32, f32);
 
@@ -299,7 +299,7 @@ s64 func_001629A0(ParObj *work) {
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
-void func_001629C0(ParScaleObj *obj) {
+void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     f32 scale;
 
     switch (obj->kind) {
@@ -333,13 +333,13 @@ void parDispatchKindUpdate(ParSystem *work) {
         func_001618E0(work->vertexWordCount);
         return;
     case 2:
-        func_00162B60(work->handle);
+        parUpdateBillboardCrossStrip(work->handle);
         return;
     case 3:
-        func_00162C48((s32)work->cells);
+        parUpdateBillboardCrossTriangle((s32)work->cells);
         return;
     case 4:
-        func_00162D38((s32)work->cells);
+        parUpdateTrackPolygonCrossAxes((s32)work->cells);
         break;
     }
 }
@@ -361,33 +361,26 @@ void parDispatchKindInit(ParSystem *work, s32 index) {
     }
 }
 
-void func_00162B60(s32 particle, s32 index, u32 color) {
+void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     u128 axis[2];
-    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_00451F30);
 ;
-    __asm__ volatile (
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q");
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
     VU0_LOAD_VF(vf11, D_00451F40);
 ;
-    __asm__ volatile (
-        "vmul.xyzw vf10, vf10, vf11\n\t"
-        "vmove.xyzw vf2, vf10\n\t"
-        "vmove.xyzw vf10, vf12\n\t"
-        "vmove.xyzw vf12, vf2\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        "vadd.xyzw vf10, vf10, vf12");
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf2, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf12, vf2);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_ADD(vf10, vf10, vf12);
     VU0_STORE_VF(vf10, &axis[0]);
 ;
-    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
 ;
     func_00163518(particle, index, axis);
@@ -395,34 +388,28 @@ void func_00162B60(s32 particle, s32 index, u32 color) {
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-void func_00162C48(s32 particle, s32 index, u32 color) {
+void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     u128 axis[3];
-    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_00451F30);
 ;
-    __asm__ volatile (
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q");
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
     VU0_LOAD_VF(vf11, D_00451F40);
 ;
-    __asm__ volatile (
-        "vmul.xyzw vf10, vf10, vf11\n\t"
-        "vmove.xyzw vf2, vf10\n\t"
-        "vmove.xyzw vf10, vf12\n\t"
-        "vmove.xyzw vf12, vf2");
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf2, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf12, vf2);
     VU0_STORE_VF(vf10, &axis[1]);
 ;
-    __asm__ volatile ("vmove.xyzw vf11, vf10\n\tvadd.xyzw vf10, vf10, vf12");
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_ADD(vf10, vf10, vf12);
     VU0_STORE_VF(vf10, &axis[0]);
 ;
-    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[2]);
 ;
     func_00163628(particle, index, axis);
@@ -430,33 +417,26 @@ void func_00162C48(s32 particle, s32 index, u32 color) {
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-void func_00162D38(s32 particle, s32 index, u32 color) {
+void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color) {
     u128 axis[2];
-    __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_SUB(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_00451F30);
 ;
-    __asm__ volatile (
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q");
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
     VU0_LOAD_VF(vf11, D_00451F40);
 ;
-    __asm__ volatile (
-        "vmul.xyzw vf10, vf10, vf11\n\t"
-        "vmove.xyzw vf2, vf10\n\t"
-        "vmove.xyzw vf10, vf12\n\t"
-        "vmove.xyzw vf12, vf2\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        "vadd.xyzw vf10, vf10, vf12");
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf2, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_MOVE_VF(vf12, vf2);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_ADD(vf10, vf10, vf12);
     VU0_STORE_VF(vf10, &axis[0]);
 ;
-    __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
 ;
     func_00190120(particle, index, axis);
@@ -482,13 +462,13 @@ void func_00162E40(void) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
-void func_00162FC8(ParReleaseRecord *record) {
+void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->released = 1;
     sdfQueueAssetRelease(record->asset);
     func_003297C8(record->allocation);
 }
 
-void func_00163000(ParListNode *node) {
+void parPrependRecordListNode(ParListNode *node) {
     node->next = D_00436400;
     D_00436400 = node;
 }
@@ -520,7 +500,7 @@ void parControlInit(void) {
     D_00451F60.flags = 0x4000;
 }
 
-ParSystem *func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
+ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
     s32 handle;
     s32 base;
@@ -566,7 +546,7 @@ ParSystem *func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
         cell->vertices = (u8 *)system->colors + i * perCell * 4;
         parCellInit(system, i);
     }
-    system->object = func_003335E0();
+    system->object = sdfCreateAssetWithDrawEntries();
     func_003332D0(system->object, 1.0f);
     system->kind = kind;
     system->cellCount = count;
@@ -579,7 +559,7 @@ ParSystem *func_00163290(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     return system;
 }
 
-void func_001634A8(ParSystem *system) {
+void parReleaseCellSystem(ParSystem *system) {
     sdfQueueAssetRelease(system->object);
     func_003297C8(system->handle);
 }
@@ -592,14 +572,14 @@ void parCellInit(ParSystem *system, s32 index) {
     cell->vertexCount = 0;
 }
 
-void func_00163508(ParCellNode *node) {
+void parPrependCellNode(ParCellNode *node) {
     node->next = D_00436404;
     D_00436404 = node;
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163518);
 
-void func_001635D0(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
     s32 count = system->vertexWordCount;
     u8 *vertex = *(u8 **)cell;
@@ -623,7 +603,7 @@ void func_001635D0(ParSystem *system, s32 index, void *delta) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163628);
 
-void func_001636F0(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta) {
     ParCell *cell = system->cells + index;
     s32 count = cell->vertexCount / 3;
     u8 *vertex = (u8 *)cell->history;
@@ -820,7 +800,7 @@ void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
     }
 }
 
-void func_00163EE0(ParSystem *system, s32 middleWord, s32 edgeWord) {
+void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 3;
@@ -920,7 +900,7 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164208);
 
-void func_00164318(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 6;
@@ -990,7 +970,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00164690);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164748);
 
-void func_00164848(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     s32 perCell = words / 5;
@@ -1039,7 +1019,7 @@ void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164CB0);
 
-ParBlock *func_00165300(s32 count) {
+ParBlock *parAllocateDrawBlock(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
     s32 handle = func_003292A8((colorBytes + points) * 4 + 0x18);
@@ -1051,17 +1031,17 @@ ParBlock *func_00165300(s32 count) {
     block->vertices = vertices;
     block->handle = handle;
     block->base = base;
-    block->object = func_003335E0();
+    block->object = sdfCreateAssetWithDrawEntries();
     func_003332D0(block->object, 1.0f);
     return block;
 }
 
-void func_001653A8(ParBlock *block) {
+void parReleaseDrawBlock(ParBlock *block) {
     sdfQueueAssetRelease(block->object);
     func_003297C8(block->handle);
 }
 
-void func_001653D8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
+void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     s32 list = sdfAllocPacketAligned(0x20);
     ParDrawState state;
     s32 remaining;
@@ -1088,7 +1068,7 @@ void func_001653D8(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     emitter->finish(emitter, list);
 }
 
-ParEmitDesc *func_00165500(ParEmitDesc *src) {
+ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     ParEmitDesc *desc = func_00328D68(src->count * 4 + 0xF0);
 
     memset(desc, 0, 0xF0);
@@ -1099,7 +1079,7 @@ ParEmitDesc *func_00165500(ParEmitDesc *src) {
     if (desc->unkC8 < 3) {
         desc->unkC8 = 3;
     }
-    desc->unkDC = func_00163290(desc->count, desc->unkC8, 1, 0);
+    desc->unkDC = parAllocateCellSystem(desc->count, desc->unkC8, 1, 0);
     parDispatchSub(desc->unkDC, 0, desc->unkD4, desc->unkD8);
     func_00165600(desc);
     return desc;

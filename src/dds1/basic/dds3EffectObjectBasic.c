@@ -63,7 +63,7 @@ extern void *billCreateIndexed(s32 kind, u32 billId);
 
 extern void *func_00151E60(void *arg);
 
-extern s32 func_002D9E58(void *param, s32 id);
+extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
 
 extern void effEventReleaseNode(void *node);
 
@@ -339,7 +339,7 @@ typedef struct {
 
 typedef struct {
     u8 pad0[0x18]; /* 0x0 */
-    void *param;   /* 0x18: forwarded to func_002D9E58 */
+    void *param;   /* 0x18: forwarded to sdfLoadMapRecordLookAtBasis */
 } BillParam;
 
 void effObjForwardOwnerBillEntry(EffectObj *obj) {
@@ -355,7 +355,7 @@ void effObjForwardOwnerBillEntry(EffectObj *obj) {
             if (bill->state != 0) {
                 return;
             }
-            func_002D9E58(((BillParam *)bill->params)->param, data->entryId);
+            sdfLoadMapRecordLookAtBasis(((BillParam *)bill->params)->param, data->entryId);
         }
     }
 }

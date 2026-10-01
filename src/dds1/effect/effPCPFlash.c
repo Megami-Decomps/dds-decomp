@@ -7,8 +7,8 @@ extern void func_00170048(u32 res);
 extern void func_00170350(u32 res);
 extern void func_0016FC28(u32 res);
 extern void func_002D0918(u32 res);
-extern s32 func_00170238(s32 base, s32 index);
-extern s32 func_0018DDF8(s32 color, s32 param);
+extern s32 effGetGroupIndexRecord(s32 base, s32 index);
+extern s32 effMultiplyPackedColors(s32 color, s32 param);
 extern u8 D_0034DF38[];
 extern f32 *func_0016FF08(u32 handle, s32 index);
 extern f32 D_00354900[];
@@ -19,7 +19,7 @@ extern f32 D_00354940[];
 extern f32 D_00354950[];
 extern f32 D_003548F0[];
 extern f32 D_00354970[];
-extern f32 *func_00170220(u32 handle, s32 index);
+extern f32 *effGetGroupRecordByIndex(u32 handle, s32 index);
 extern f32 *func_00170538(u32 handle, s32 index);
 extern f32 func_002E78F8(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -485,19 +485,19 @@ void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->first = func_0018DDF8(rgb2, param);
-    slot->second = func_0018DDF8(rgb2, param);
-    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, param);
+    slot->second = effMultiplyPackedColors(rgb2, param);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashTrianglePulseWriteCorners(PcpFlashWork1 *work, s32 index, void *view)
 {
     PcpFlashParticle10 *part = &work->parts[index];
-    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 *quad = effGetGroupRecordByIndex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
@@ -596,7 +596,7 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam);
+                color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam);
                 effWriteFlashColorSlot(work, index, color);
             }
         }
@@ -660,20 +660,20 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 index, s32 param)
     slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->color[0] = func_0018DDF8(rgb2, param);
-    slot->color[1] = func_0018DDF8(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, param);
+    slot->color[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        slot->color[2] = func_0018DDF8(0x80000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
-        slot->color[4] = func_0018DDF8(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        slot->color[2] = func_0018DDF8(0xFF000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
-        slot->color[4] = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
-extern f32 func_002E8398(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 
 void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orientation) {
@@ -682,9 +682,9 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     f32 factor;
     f32 scale;
 
-    direction[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    direction[1] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    direction[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    direction[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     __asm__ volatile(".set noreorder
 	lqc2 $vf10, 0(%0)
 	.set reorder" : : "r"(direction));
@@ -702,14 +702,14 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     part->position[0] = direction[0];
     part->position[1] = direction[1];
     part->position[2] = direction[2];
-    factor = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
+    factor = effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f;
     scale = work->maxScale * factor;
     part->initialScale = scale;
     part->scale = scale;
-    factor = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
+    factor = (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
     part->upSpan = work->upSpan * factor;
     part->acrossSpan = work->acrossSpan * factor;
-    part->angle = work->initialAngleSpread * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
+    part->angle = work->initialAngleSpread * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
@@ -778,15 +778,9 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
     position[1] = part->position[1];
     position[2] = part->position[2];
     func_002DD8B8(part->angle, orientation);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddz.xyzw vf10, vf30, vf10z\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(position) : "memory");
+    VU0_LOAD_VF(vf10, position);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, position);
     part->position[0] = position[0];
     part->position[1] = position[1];
     part->position[2] = position[2];
@@ -857,7 +851,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam);
+                color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam);
                 effFlashColorSlot5Set(work, index, color);
             }
         }
@@ -913,16 +907,16 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashWork3 *work, s32 index, s32 p
     slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->color[0] = func_0018DDF8(rgb2, param);
-    slot->color[1] = func_0018DDF8(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, param);
+    slot->color[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        slot->color[2] = func_0018DDF8(0x80000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
-        slot->color[4] = func_0018DDF8(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        slot->color[2] = func_0018DDF8(0xFF000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
-        slot->color[4] = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -1064,7 +1058,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
                 } else {
                     blend = (f32)(lifetime - age) / (f32)half;
                 }
-                color = func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam);
+                color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam);
                 effFlashOrbitScalingSetParticleColors(work, index, color);
             }
         }
@@ -1168,16 +1162,16 @@ void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 index, s32 param
     slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->color[0] = func_0018DDF8(rgb2, param);
-    slot->color[1] = func_0018DDF8(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, param);
+    slot->color[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        slot->color[2] = func_0018DDF8(0x80000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
-        slot->color[4] = func_0018DDF8(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        slot->color[2] = func_0018DDF8(0xFF000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
-        slot->color[4] = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -1294,35 +1288,35 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashWork6 *work, s32 index, s32 p
     slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->color[0] = func_0018DDF8(rgb2, param);
-    slot->color[1] = func_0018DDF8(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, param);
+    slot->color[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        slot->color[2] = func_0018DDF8(0x80000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
-        slot->color[4] = func_0018DDF8(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        slot->color[2] = func_0018DDF8(0xFF000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
-        slot->color[4] = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
-extern f32 func_002E8398(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 
 void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     PcpFlashPtc20A *part = work->parts + index;
     f32 factor;
     f32 scale;
 
-    part->angle = func_002E8398(D_0034DF38) * 6.2831853f;
-    factor = func_002E8398(D_0034DF38) * 0.3f + 0.7f;
+    part->angle = effMiscRandUnitFloat(D_0034DF38) * 6.2831853f;
+    factor = effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f;
     scale = work->maxScale * factor;
     part->initialScale = scale;
     part->scale = scale;
-    factor = (func_002E8398(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
+    factor = (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f) * 0.5f;
     part->upSpan = work->upSpan * factor;
     part->acrossSpan = work->acrossSpan * factor;
-    part->increment = work->angularSpread * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
+    part->increment = work->angularSpread * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
@@ -1470,7 +1464,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
                         blend = 1.0f;
                     }
                 }
-                color = func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam);
+                color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam);
                 effFlashRotatingQuadSetParticleColors(work, index, color);
             }
         }
@@ -1523,19 +1517,19 @@ void effFlashRadialTriangleSetParticleColors(PcpFlashWork7 *work, s32 index, s32
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->first = func_0018DDF8(rgb2, param);
-    slot->second = func_0018DDF8(rgb2, param);
-    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, param);
+    slot->second = effMultiplyPackedColors(rgb2, param);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
 {
     PcpFlashPtc10 *part = &work->parts[index];
-    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 *quad = effGetGroupRecordByIndex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
@@ -1635,7 +1629,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
                     }
                 }
                 active++;
-                effFlashRadialTriangleSetParticleColors(work, index, func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam));
+                effFlashRadialTriangleSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = 0;
@@ -1843,7 +1837,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
                         blend = 1.0f;
                     }
                 }
-                func_0016DBA0(work, index, func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam));
+                func_0016DBA0(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = ~(effMiscRand(D_0034DF38) % range);
@@ -1903,16 +1897,16 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashWork9 *work, s32 index, s32 pa
     slot = (PcpFlashColorSlot5 *)func_0016FF20(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->color[0] = func_0018DDF8(rgb2, param);
-    slot->color[1] = func_0018DDF8(rgb2, param);
+    slot->color[0] = effMultiplyPackedColors(rgb2, param);
+    slot->color[1] = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        slot->color[2] = func_0018DDF8(0x80000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0xFF000000, param);
-        slot->color[4] = func_0018DDF8(0x80000000, param);
+        slot->color[2] = effMultiplyPackedColors(0x80000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        slot->color[4] = effMultiplyPackedColors(0x80000000, param);
     } else {
-        slot->color[2] = func_0018DDF8(0xFF000000, param);
-        slot->color[3] = func_0018DDF8(rgb1 | 0x40000000, param);
-        slot->color[4] = func_0018DDF8(0xFF000000, param);
+        slot->color[2] = effMultiplyPackedColors(0xFF000000, param);
+        slot->color[3] = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        slot->color[4] = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -2058,7 +2052,7 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
                         blend = 1.0f;
                     }
                 }
-                effFlashFadingOrbitSetParticleColors(work, index, func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam));
+                effFlashFadingOrbitSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = ~(effMiscRand(D_0034DF38) % range);
@@ -2115,19 +2109,19 @@ void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashWork10 *work, s32 ind
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashColorSlot *)func_00170238(work->resourceHandle, index);
+    slot = (PcpFlashColorSlot *)effGetGroupIndexRecord(work->resourceHandle, index);
     rgb1 = work->colorA & 0xFFFFFF;
     rgb2 = work->colorB & 0xFFFFFF;
-    slot->first = func_0018DDF8(rgb2, param);
-    slot->second = func_0018DDF8(rgb2, param);
-    slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
+    slot->first = effMultiplyPackedColors(rgb2, param);
+    slot->second = effMultiplyPackedColors(rgb2, param);
+    slot->third = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
 }
 
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
 {
     PcpFlashPtc10 *part = &work->parts[index];
-    f32 *quad = func_00170220(work->resourceHandle, index);
+    f32 *quad = effGetGroupRecordByIndex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
     f32 step;
@@ -2228,7 +2222,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
                     }
                 }
                 active++;
-                effFlashOffsetRadialTriangleSetParticleColors(work, index, func_0018DDF8(effBlendColor(0, part->color, blend), fadeParam));
+                effFlashOffsetRadialTriangleSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam));
             }
             if (age == lifetime && restart != 0) {
                 part->age = 0;

@@ -252,7 +252,7 @@ void *sdfAllocAndClearQuadwords(s32 size);
 void sdfReleaseChipBlock(void *a0);
 void *func_002CFEB8(s32 size);
 ArrObj *sdfDevCreateBufferedRequest(u16 n, s32 e1, s32 e2);
-s32 func_002DB1C8(void *a0, s32 a1, s32 a2);
+s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 s32 sdfModelFindDrawNode(void *a0, s32 a1);
 void func_002DA3C0(void *a0, s32 a1);
 void func_002DA3D8(void *a0, s32 a1);
@@ -260,10 +260,10 @@ void func_002DA3F0(void *a0, s32 a1);
 void func_002DA408(void *a0, s32 a1);
 void func_002DA420(void *a0, f32 a1);
 Blk *sdfEnsurePrimaryTextSubParam(void *a0);
-void func_002DA548(void *a0, void *a1);
+void sdfCopyPrimaryTextScalars(void *a0, void *a1);
 void func_002DA5B0(void *a0, s32 a1);
 Blk *sdfEnsureSecondaryTextSubParam(void *a0);
-void func_002DA6B0(void *a0, void *a1);
+void sdfCopySecondaryTextScalars(void *a0, void *a1);
 void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2);
 void func_002DB3D0(Motion *a0, s32 a1, s32 a2, f32 t0, f32 t1);
@@ -740,7 +740,7 @@ void sdfMotionApplyFiveFloatKeys(HasSub *a0, f32 t) {
 
     func_002DB7C8(a0, &b0, t);
     sdfMotionBlendFiveKeyValues(&b0, b1);
-    func_002DA548(a0->sub, b1);
+    sdfCopyPrimaryTextScalars(a0->sub, b1);
 }
 
 void sdfMotionBlendFiveFloatKeys(HasArr *a0, f32 t1, f32 t2) {
@@ -751,7 +751,7 @@ void sdfMotionBlendFiveFloatKeys(HasArr *a0, f32 t1, f32 t2) {
     func_002DB7C8(a0, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b2);
     sdfMotionBlendFiveFloats(b1, a0->f10, b2, t2);
-    func_002DA548(a0->sub, b1);
+    sdfCopyPrimaryTextScalars(a0->sub, b1);
 }
 
 void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
@@ -775,7 +775,7 @@ void sdfMotionApplySecondaryTextKeys(HasSub *a0, f32 t) {
 
     func_002DB7C8(a0, &b0, t);
     sdfMotionBlendFiveKeyValues(&b0, b1);
-    func_002DA6B0(a0->sub, b1);
+    sdfCopySecondaryTextScalars(a0->sub, b1);
 }
 
 void sdfMotionBlendSecondaryTextKeys(HasArr *a0, f32 t1, f32 t2) {
@@ -786,7 +786,7 @@ void sdfMotionBlendSecondaryTextKeys(HasArr *a0, f32 t1, f32 t2) {
     func_002DB7C8(a0, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfMotionBlendFiveFloats(b2, a0->f10, b1, t2);
-    func_002DA6B0(a0->sub, b2);
+    sdfCopySecondaryTextScalars(a0->sub, b2);
 }
 
 void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
@@ -829,14 +829,14 @@ void sdfMotionApplySelectedTextKey(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
-    func_002DA548(a0->sub, b.firstKey);
+    sdfCopyPrimaryTextScalars(a0->sub, b.firstKey);
 }
 
 void sdfMotionApplySampleToTarget(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
-    func_002DA548(a0->sub, b.firstKey);
+    sdfCopyPrimaryTextScalars(a0->sub, b.firstKey);
 }
 
 void func_002DCF60(void) {
@@ -854,12 +854,12 @@ void sdfMotionApplySampledSecondaryTextValue(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
-    func_002DA6B0(a0->sub, b.firstKey);
+    sdfCopySecondaryTextScalars(a0->sub, b.firstKey);
 }
 
 void func_002DD000(HasSub *a0, f32 t) {
     KeyOut b;
 
     func_002DB7C8(a0, &b, t);
-    func_002DA6B0(a0->sub, b.firstKey);
+    sdfCopySecondaryTextScalars(a0->sub, b.firstKey);
 }

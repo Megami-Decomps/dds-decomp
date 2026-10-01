@@ -2,7 +2,7 @@
 
 extern s32 func_002D03F8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
-extern void func_00285490(u8 *);
+extern void mnuClearPanelTransitionState(u8 *);
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
@@ -343,7 +343,7 @@ typedef struct CampKeyTrack {
 
 extern s32 evtViewerTestIndexedCondition(u32);
 
-void func_002432D0(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
+void mnuFindCampKeyTrackNeighbors(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
     s32 base;
 
     *out1 = 0;
@@ -575,7 +575,7 @@ void mnuCampCheckClockDivisor(void) {
     quotient = 1 / info[0];
 }
 
-void func_00243B00(CampScene *scene) {
+void mnuEnterCampSceneMenuState(CampScene *scene) {
     if ((scene->menuState == 0) || (scene->menuState == 5)) {
         scene->menuState = 1;
     }
@@ -686,7 +686,7 @@ void mnuShopRegisterSceneObject(CampScene *scene, s32 identifier) {
     }
 }
 
-void func_002441E8(CampScene *scene) {
+void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     s32 count = 0;
     if (scene->registeredCount > 0) {
         s32 *entry = scene->registeredIds;
@@ -917,7 +917,7 @@ ShopScene *mnuShopCreateScene(void) {
     obj = (ShopScene *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
-    func_00285490((u8 *)obj + 8);
+    mnuClearPanelTransitionState((u8 *)obj + 8);
     mnuShopLoadSpriteAssets(obj);
     func_00244258(obj);
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);

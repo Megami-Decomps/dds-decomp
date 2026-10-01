@@ -5,7 +5,7 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_001760F8(void *work);
 
-extern void func_0015B8B8(u32 handle);
+extern void parReleaseCellSystem(u32 handle);
 extern void effReleaseAttachedResources(u32 handle);
 extern void func_001770F8(u32 handle);
 extern void func_002D0918(u32 handle);
@@ -13,13 +13,13 @@ extern void func_002D0918(u32 handle);
 /* Needle effect work: three resource handles released on free. */
 typedef struct {
     u8 unk00[0x68]; /* 0x00 */
-    u32 resource68; /* 0x68 released by func_0015B8B8 */
+    u32 resource68; /* 0x68 released by parReleaseCellSystem */
     u32 resource6C; /* 0x6C released by effReleaseAttachedResources/func_001770F8 */
     u32 resource70; /* 0x70 released by func_002D0918 */
 } EffPCPNeedleWork;
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    func_0015B8B8(work->resource68);
+    parReleaseCellSystem(work->resource68);
     effReleaseAttachedResources(work->resource6C);
     func_002D0918(work->resource70);
 }

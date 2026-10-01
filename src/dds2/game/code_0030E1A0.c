@@ -300,7 +300,7 @@ f32 *func_00310320(f32 *vec, f32 *mat) {
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_003103C8);
 
-float func_00310608(float x, float y) {
+float sdfPowFloatByTruncatedExponent(float x, float y) {
     float p = 1.0f;
     s32 i = 1;
 
@@ -341,7 +341,7 @@ float sdfQuatDot(float *left, float *right) {
 }
 
 /* Sum the three components of the cross product. */
-float func_00310B60(float *left, float *right) {
+float sdfSumCrossProductComponents(float *left, float *right) {
     return (left[1] * right[2] - left[2] * right[1]) +
                   (left[2] * *right - *left * right[2]) +
                   (*left * right[1] - left[1] * *right);

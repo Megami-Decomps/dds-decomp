@@ -519,7 +519,7 @@ extern void func_003320E8();
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
-extern u8 func_00127398(void);
+extern u8 fldGetCampSceneControlMode(void);
 
 extern u8 func_001275D0(void);
 
@@ -528,7 +528,7 @@ extern s32 fileMenuTaskExists(void);
 extern s32 D_00435EE0;
 
 s32 fldFieldTaskUpdate(void) {
-    if (func_00127398() != 0) {
+    if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
     if (func_001275D0() != 0) {
@@ -1246,7 +1246,7 @@ extern FldVec4 D_00413788[]; /* default camera up vectors (3 copies), the first 
 
 extern void func_001363D8(void);
 
-extern void func_00110A88(s32, s32);
+extern void dds3SetWorldObjectDataValue(s32, s32);
 
 extern s32 D_00436260;
 
@@ -1273,7 +1273,7 @@ void fldEnterSceneCamera(void) {
     func_001363D8();
     cam->unk70 = 4;
     frFontSetSharedRenderFlags(0x54);
-    func_00110A88(dds3GetWorldObject(), 1);
+    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
     D_00436268 = 0;
     D_00436248 = cam->stage;
     D_0043624C = cam->unkC0;
@@ -2084,7 +2084,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldTestSceneLifecycleFlags(1) != 0) {
             return;
         }
-        if (func_00127398() != 0) {
+        if (fldGetCampSceneControlMode() != 0) {
             return;
         }
         if (func_001275D0() != 0) {
@@ -2122,9 +2122,9 @@ void fldFireRoomEffects(void) {
 
 extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 func_0033EB10(u32, void *, u32);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void func_0033EAE0(u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
 
 typedef struct FldNpcPalette {
     u32 word[0x80];
@@ -2149,8 +2149,8 @@ void fldLoadNpcPalette(s32 field) {
             func_0035C860(path, "%sF%03d.NPL", directory, field);
         }
         command = sdfDevCreateCommandState(path);
-        func_0033EB10(command, &D_0044FD90, 0x200);
-        func_0033EAE0(command);
+        sdfDevQueueReadAndWait(command, &D_0044FD90, 0x200);
+        sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
@@ -2967,7 +2967,7 @@ extern s32 D_00451D3C[];
 
 s32 func_001533D0(void) {
     if (D_00451D3C[0] != 1) {
-        if (func_00127398() != 0) {
+        if (fldGetCampSceneControlMode() != 0) {
             func_0035B6E0(D_00413F78);
         }
     }

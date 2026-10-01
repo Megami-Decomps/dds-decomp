@@ -130,7 +130,7 @@ extern s32 datMoveCursorX(void *, s32);
 
 extern s32 datMoveCursorY(void *, s32);
 
-extern u8 func_001AA308(void);
+extern u8 btlIsRuntimeAllocated(void);
 
 extern f32 func_001AD978(void);
 
@@ -745,7 +745,7 @@ s32 evtRollRandomScale(void) {
 }
 
 s32 func_0011DE08(void) {
-    s32 available = func_001AA308();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -759,7 +759,7 @@ s32 func_0011DE08(void) {
 }
 
 s32 func_0011DE58(void) {
-    s32 available = func_001AA308();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -773,7 +773,7 @@ s32 func_0011DE58(void) {
 }
 
 s32 func_0011DEA8(void) {
-    s32 available = func_001AA308();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -787,7 +787,7 @@ s32 func_0011DEA8(void) {
 }
 
 s32 evtPushAvailableChoiceRatio(void) {
-    s32 available = func_001AA308();
+    s32 available = btlIsRuntimeAllocated();
     u64 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -803,7 +803,7 @@ s32 evtPushAvailableChoiceRatio(void) {
 }
 
 s32 evtPushAvailableFloatValue(void) {
-    s32 v0 = func_001AA308();
+    s32 v0 = btlIsRuntimeAllocated();
     f32 val = 0.0f;
 
     if (v0 != 0) {
@@ -814,7 +814,7 @@ s32 evtPushAvailableFloatValue(void) {
 }
 
 s32 evtPushAvailableIntegerValue(void) {
-    s32 v0 = func_001AA308();
+    s32 v0 = btlIsRuntimeAllocated();
     s32 val = 0;
 
     if (v0 != 0) {

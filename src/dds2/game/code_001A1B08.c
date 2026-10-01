@@ -63,7 +63,7 @@ extern PanelHold D_003B4780;
 
 extern PanelEntry D_0045296C[];
 
-extern void func_001A19C8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern void func_001A4988(s32 window, s32 arg1, s32 arg2);
 extern s32 scrGetWindow(void);
@@ -82,7 +82,7 @@ extern u8 D_004365E0[8];
 extern void func_001A09C0(PanelRect *rect, u32 *colors, u32 tail, s32 width, u64 command);
 extern u32 D_003B4760[];
 extern void *sdfAllocPacketAligned(s32);
-extern u64 *func_0033A290(void *, s32);
+extern u64 *sdfConsFinalizePacketHeader(void *, s32);
 extern void sdfAppendPacket(void *, void *);
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
@@ -137,7 +137,7 @@ void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     p->y = y1;
 }
 
-void func_001A1E98(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelCornerGrid(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[3];
     s32 ys[2];
     s32 i;
@@ -157,7 +157,7 @@ void func_001A1E98(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     }
 }
 
-void func_001A1F08(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfSetPanelInsetVertexColumns(u8 *base, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[4];
     s32 ys[2];
     PanelVert *v = (PanelVert *)(base + 4);
@@ -211,7 +211,7 @@ void func_001A2010(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     itfScaleVectors((s32 *)(base + 0x120), red, green, blue, alpha, D_003B4548, 4);
 }
 
-void func_001A2070(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x20);
 
     panelSetVec4(vec, red, green, blue, alpha);
@@ -276,7 +276,7 @@ void func_001A2598(PanelObj *panel, u64 command) {
     itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->unkC, command);
 }
 
-void func_001A25D0(PanelObj *panel, u64 command) {
+void itfEmitPanelQuadPacket(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 3;
 
@@ -292,7 +292,7 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A29D8);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
 
-void func_001A2C98(PanelObj *panel, u64 command) {
+void itfDrawTintedPanelRect(PanelObj *panel, u64 command) {
     PanelRect rect;
 
     D_003B4760[3] = panel->unk38 * 0x67 / 128;
@@ -303,9 +303,9 @@ void func_001A2C98(PanelObj *panel, u64 command) {
     func_001A09C0(&rect, D_003B4760, panel->unkC, 0x240, command);
 }
 
-void func_001A2D10(void *list) {
+void itfAppendGsPanelStatePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
-    u64 *entry = func_0033A290(packet, 0x40);
+    u64 *entry = sdfConsFinalizePacketHeader(packet, 0x40);
 
     entry[4] = 0x5101B;
     entry[5] = 0x47;
@@ -340,7 +340,7 @@ s32 itfPanelStartEntry(void) {
 }
 
 void itfPanelEmitRecord(s32 index, s32 value) {
-    func_001A19C8(D_0045296C[index].ptr->unkA8, 0, value, 0, 0, 0);
+    itfAdvancePanelLayoutAndNotify(D_0045296C[index].ptr->unkA8, 0, value, 0, 0, 0);
 }
 
 s8 itfPanelGetStatus(s32 index) {

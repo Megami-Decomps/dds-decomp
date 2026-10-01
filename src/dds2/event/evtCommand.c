@@ -39,7 +39,7 @@ extern s32 D_00389780[];
 
 void fldInitializeAlternateSequence(s32 request, s32 sequence, s32 variant, char *name);
 
-void func_0033DAD8(const char *msg, ...);
+void sdfPrintFormattedDevMessage(const char *msg, ...);
 
 void func_0025D390(s32 first, s32 second);
 
@@ -442,11 +442,11 @@ s32 evtCommandDispatchFieldBE(void)
     s32 firstArg;
     s32 secondArg;
 
-    func_0033DAD8("FIELD_BE start\n");
+    sdfPrintFormattedDevMessage("FIELD_BE start\n");
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
     func_0025D390(firstArg, secondArg);
-    func_0033DAD8("FIELD_BE end\n");
+    sdfPrintFormattedDevMessage("FIELD_BE end\n");
     return 1;
 }
 
@@ -471,7 +471,7 @@ u32 func_00241838(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
-    func_0023B0D0(0, value);
+    evtApplyIndexValueToWorldNodes(0, value);
     return 1;
 }
 
@@ -479,7 +479,7 @@ u32 func_00241868(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
-    func_0023B0D0(1, value);
+    evtApplyIndexValueToWorldNodes(1, value);
     return 1;
 }
 
@@ -692,14 +692,14 @@ s32 evtCommandWaitForCampTask(void) {
     if (evtFindTaskById(id) == 0) {
         msg = "load BE (%d)..\n";
         func_0010AE38(msg, id);
-        func_0033DAD8(msg, id);
+        sdfPrintFormattedDevMessage(msg, id);
         func_00101968((s32)work->campTask, mnuCampCreateTask(id));
         return 0;
     }
     if (evtGetTaskValueWord(id) == 2) {
         msg = D_00421ED8;
         func_0010AE38(msg, id);
-        func_0033DAD8(msg, id);
+        sdfPrintFormattedDevMessage(msg, id);
         return 1;
     }
     return 0;

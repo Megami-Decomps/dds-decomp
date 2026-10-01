@@ -171,7 +171,7 @@ extern void dds3ClearObjectFlags(void *object, s32 flags);
 
 extern void func_00113660(void *arg0, s32 arg1);
 
-extern void func_001136A0(void *arg0);
+extern void evtResetObjectPendingValue(void *arg0);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
@@ -433,7 +433,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     work->unkB2 = 0;
 }
 
-s32 func_0023DA48(EvtUnit *eventUnit, s32 value) {
+s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
     s32 result = 0;
 
     if (value != 0) {
@@ -598,7 +598,7 @@ u32 evtGetWorldObjectId(void) {
     return 1;
 }
 
-u32 func_0023E758(void) {
+u32 evtOpCreateLinkedCameraViewer(void) {
     s32 param0;
     s32 param1;
     s32 value;
@@ -610,7 +610,7 @@ u32 func_0023E758(void) {
     return 1;
 }
 
-u32 func_0023E7A0(void) {
+u32 evtOpBindMotionSoundToModel(void) {
     s32 param0;
     s32 rid;
     s32 model;
@@ -635,7 +635,7 @@ u32 func_0023E7A0(void) {
     return scrSetIntegerReturnValue(model);
 }
 
-u32 func_0023E898(void) {
+u32 evtOpUseSourceVectorForWorldObject(void) {
     u64 scriptParam0;
     u64 scriptParam1;
 
@@ -696,7 +696,7 @@ u32 evtOpClearWorldObjectStateFlags(void) {
     return 1;
 }
 
-u32 func_0023EA28(void) {
+u32 evtOpQueueWorldObjectPendingValue(void) {
     void *ctx;
     s32 id;
     void *unit;
@@ -712,7 +712,7 @@ u32 func_0023EA28(void) {
     return 1;
 }
 
-u32 func_0023EA90(void) {
+u32 evtOpClearWorldObjectPendingValue(void) {
     void *ctx;
     s32 id;
     void *unit;
@@ -724,7 +724,7 @@ u32 func_0023EA90(void) {
     if (unit == NULL) {
         return ret;
     }
-    func_001136A0(unit);
+    evtResetObjectPendingValue(unit);
     return 1;
 }
 
@@ -786,7 +786,7 @@ u32 evtSetWorldUnitFirstVector(void) {
     return 1;
 }
 
-u32 func_0023EC80(void) {
+u32 evtOpSetWorldUnitRotationFromAngles(void) {
     f32 v[4];
     void *ctx;
     s32 id;
@@ -873,7 +873,7 @@ u32 evtOpSetUnitParams6(void) {
     return 1;
 }
 
-void func_0023EFF8(void) {
+void evtInvokeStoredWindowMotion(void) {
     evtActivateStoredUnitMotionSlot(D_004371EC);
 }
 
@@ -953,12 +953,12 @@ u32 evtOpBeginWindowCallback(void) {
         if (window < 0) {
             return 1;
         }
-        itfMesSetWindowCallbackAddress(window, func_0023EFF8);
+        itfMesSetWindowCallbackAddress(window, evtInvokeStoredWindowMotion);
     }
     return 1;
 }
 
-u32 func_0023F308(void) {
+u32 evtOpActivateUnitMotionOnWindowEvent(void) {
     EvtUnit *unit;
 
     unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
@@ -977,12 +977,12 @@ u32 func_0023F308(void) {
         if (window < 0) {
             return 1;
         }
-        itfMesSetWindowCallbackAddress(window, func_0023EFF8);
+        itfMesSetWindowCallbackAddress(window, evtInvokeStoredWindowMotion);
     }
     return 1;
 }
 
-u32 func_0023F3A8(void) {
+u32 evtOpIsUnitMotionIdleOrTimed(void) {
     s32 id;
     EvtUnit *unit;
     u32 ret = 1;
@@ -995,7 +995,7 @@ u32 func_0023F3A8(void) {
     return evtIsUnitMotionIdleOrTimedMode(unit) != 0;
 }
 
-u32 func_0023F3E8(void) {
+u32 evtOpTestUnitMotionNodeFlag(void) {
     s32 id;
     EvtUnit *unit;
     s32 off;
@@ -1316,7 +1316,7 @@ u32 evtOpEndUnitValueTransition(void) {
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_00240280);
 
-u32 func_00240368(void) {
+u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
     u8 buf2[16];
     s32 param0;
@@ -1337,7 +1337,7 @@ u32 func_00240368(void) {
     return 1;
 }
 
-u32 func_00240420(void) {
+u32 evtOpCreateAndFlagObjectFromResourceName(void) {
     f32 buf1[4];
     f32 buf2[4];
     s32 param0;
@@ -1505,7 +1505,7 @@ u32 func_00240A60(void) {
     return 1;
 }
 
-u32 func_00240AA0(void) {
+u32 evtOpSetModelObjectPosition(void) {
     EvtModelObj *obj;
     EvtModelHeader *header;
 
@@ -1524,7 +1524,7 @@ u32 func_00240AA0(void) {
     return 1;
 }
 
-u32 func_00240B68(void) {
+u32 evtOpSetModelObjectRotationFromAngles(void) {
     f32 v[4];
     EvtModelObj *obj;
     f32 toRad;
@@ -1548,7 +1548,7 @@ u32 func_00240B68(void) {
     return 1;
 }
 
-u32 func_00240C48(void) {
+u32 evtOpCopyModelTransformFromSource(void) {
     EvtModelObj *obj;
     EvtSourceObj *source;
     EvtSourceVec *vec;

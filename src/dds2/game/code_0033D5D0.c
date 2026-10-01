@@ -186,14 +186,14 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033D5D0);
 extern void func_0033D5D0(void *packet, const char *fmt, void *args);
 void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index);
 
-void func_0033D7B8(void *packet, const char *fmt, ...) {
+void sdfFormatSifPacket(void *packet, const char *fmt, ...) {
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, fmt);
     func_0033D5D0(packet, fmt, args);
 }
 
-void func_0033D810(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
+void sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
     SifCommand packet;
     __builtin_va_list args;
 
@@ -238,7 +238,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DA30);
 extern s32 func_00360E78(char *dst, const char *fmt, void *args);
 extern void func_0033DA30(const char *text);
 
-s32 func_0033DAD8(const char *fmt, ...) {
+s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
     char buffer[0x100];
     __builtin_va_list args;
     s32 length;
@@ -280,7 +280,7 @@ extern s32 D_004391BC;
 extern s32 func_0034D430(s32 arg, u8 *options);
 extern s32 sceCdStatus(void);
 
-void func_0033DBF8(s32 request) {
+void sdfDevSeekDiscRequest(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -315,7 +315,7 @@ void sdfDevSignalPendingSemaphore(void) {
     }
 }
 
-void func_0033DCD0(s32 request) {
+void sdfDevSeekDiscWithRequestGate(s32 request) {
     u8 options[4];
     s32 ready;
 
@@ -347,7 +347,7 @@ void func_0033DCD0(s32 request) {
 
 extern s32 func_0034D500(s32 size, s32 buffer, s32 count, s32 *status);
 
-void func_0033DD90(s32 size, s32 buffer) {
+void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     s32 status;
     s32 result;
 
@@ -360,12 +360,12 @@ void func_0033DD90(s32 size, s32 buffer) {
         }
         if (sceCdStatus() == 1) {
             sdfDevWaitForDisc();
-            func_0033DBF8(D_004391BC);
+            sdfDevSeekDiscRequest(D_004391BC);
         } else {
             WaitSema(D_004391B8);
             func_0034D4C8();
             SignalSema(D_004391B8);
-            func_0033DBF8(D_004391BC);
+            sdfDevSeekDiscRequest(D_004391BC);
         }
     }
     D_004391BC += size;
@@ -378,7 +378,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E008);
 extern s32 D_004391AC;
 extern s32 D_004391B4;
 
-s32 func_0033E1C0(const char *name) {
+s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 result;
     s32 request[4];
     s32 file;
@@ -390,9 +390,9 @@ s32 func_0033E1C0(const char *name) {
         D_004391A8 = file;
         D_004391B4 = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
-            func_0033DCD0(request[0]);
+            sdfDevSeekDiscWithRequestGate(request[0]);
         } else {
-            func_0033DBF8(request[0]);
+            sdfDevSeekDiscRequest(request[0]);
         }
         result = *(s32 *)(file + 8);
     }
@@ -565,24 +565,24 @@ s32 sdfPathExists(char *path) {
     return fd >= 0;
 }
 
-void func_0033EAE0(DevState *state) {
+void sdfDevWaitThenReleaseCommandState(DevState *state) {
     sdfDevQueueActiveOperation();
     WaitSema(D_00438AE4);
     sdfDevQueueReleaseState(state);
 }
 
-void func_0033EB10(void) {
+void sdfDevQueueReadAndWait(void) {
     sdfDevQueueRead();
     WaitSema(D_00438AE4);
 }
 
-u32 func_0033EB30(void) {
-    func_0033FB98();
+u32 sdfDevQueueControlAndWait(void) {
+    sdfDevQueueControlRequest();
     WaitSema(D_00438AE4);
     return D_004391C8;
 }
 
-u32 func_0033EB58(void) {
+u32 sdfDevQueueOperationAndWait(void) {
     sdfDevQueueOperation();
     WaitSema(D_00438AE4);
     return D_004391CC;
@@ -616,7 +616,7 @@ extern DevState *D_00438B14;
 extern DevState *D_00438B18;
 extern s16 D_00438B10;
 
-void func_0033ED38(DevState *state) {
+void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *prev;
     DevState *next;
     s64 interrupts;
@@ -725,7 +725,7 @@ s32 sdfDevQueueOperation(DevState *state, s32 operationArg, s32 options) {
     return 0;
 }
 
-s32 func_0033FB98(DevState *state) {
+s32 sdfDevQueueControlRequest(DevState *state) {
     if (state->state != 7) {
         return -1;
     }
@@ -779,7 +779,7 @@ s32 sdfDevQueueActiveOperation(DevState *request) {
 s32 sdfDevQueueReleaseState(DevState *state) {
     if (state->state < 9) {
         if (state->state >= 7) {
-            func_0033ED38(state);
+            sdfDevUnlinkAndFreeState(state);
             return 0;
         }
     }
@@ -968,22 +968,22 @@ void sdfDestroyDevRequest(DevRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-extern void func_00329910(s32 handle);
+extern void sdfDecrementAllocationReferenceCount(s32 handle);
 extern void func_00329600(s32 handle, s32 size);
-void func_003405D8(DevRequest *request, s32 count);
+void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
 void sdfDevBufferedRequestGrow(DevRequest *request) {
     if (request->handle == 0) {
-        func_003405D8(request, request->mode);
+        sdfDevResizeBufferedRequest(request, request->mode);
         return;
     }
-    func_00329910(request->handle);
+    sdfDecrementAllocationReferenceCount(request->handle);
     request->count = request->count + request->mode;
     func_00329600(request->handle, (s16)request->count * request->stride);
     request->buffer = sdfResourceRetainAddress(request->handle);
 }
 
-void func_003405D8(DevRequest *request, s32 count) {
+void sdfDevResizeBufferedRequest(DevRequest *request, s32 count) {
     if (request->handle == 0) {
         if (count > 0) {
             request->count = count;
@@ -997,7 +997,7 @@ void func_003405D8(DevRequest *request, s32 count) {
         request->count = 0;
         request->buffer = 0;
     } else {
-        func_00329910(request->handle);
+        sdfDecrementAllocationReferenceCount(request->handle);
         request->count = count;
         func_00329600(request->handle, request->stride * count);
         request->buffer = sdfResourceRetainAddress(request->handle);

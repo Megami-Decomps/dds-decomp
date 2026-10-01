@@ -6,7 +6,7 @@ extern s64 mnuGetSoundBufferStateLocked(void);
 extern void func_00336538(f32);
 extern void func_003364B8(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 D_0037F550[];
@@ -252,7 +252,7 @@ struct BtlUnit {
 };
 
 extern void btlResetIndexWork();
-extern void func_00210DC8(BtlUnit *);
+extern void btlAdvanceHistoryCounter(BtlUnit *);
 extern void fldUpdateSceneGroupTask(BtlUnit *);
 extern void btlUnitTurnEndStateSelect(BtlUnit *);
 
@@ -444,7 +444,7 @@ typedef struct XformData {
     f32 f24;
 } XformData;
 
-/* Two camera vectors are written at work+0x50 and work+0x60 by func_002001F0. */
+/* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
     u8 pad00[0x50];
     f32 eye[3];
@@ -541,7 +541,7 @@ extern u32 D_00435CD4;
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void func_002A2550(void);
+extern void mnuResetTitleStreamLocked(void);
 
 extern void func_002A2200(s32);
 
@@ -664,7 +664,7 @@ typedef struct SoundTransition {
     u16 queuedId;
 } SoundTransition;
 
-extern s32 func_00201578(u32 *);
+extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern u32 D_00436AD8;
 
@@ -835,7 +835,7 @@ extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
 extern s32 func_002DEB80(void *);
 extern char D_003BDCC8[];
-extern void func_002A2A70(void);
+extern void mnuReleaseSoundBufferLocked(void);
 extern void func_0023CA60(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(s32, s32);
@@ -943,7 +943,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
         }
         return 0;
     case 4:
-        return func_001AC098(argument[2]);
+        return btlGetLoggedIndexedCommandItem(argument[2]);
     case 2:
     case 3:
     case 7:
@@ -1638,13 +1638,13 @@ void btlUpdateAutoMusic(void) {
         if ((s8)D_0037F510[0x22] < 0 || (s8)D_0037F510[0x23] < 0) {
             ((BtlWork *)context)->battleFlags = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
-            func_001B8278(0);
+            btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_004178A8);
         }
     } else if ((s8)D_0037F510[0x22] < 0) {
         ((BtlWork *)context)->battleFlags = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
-        func_001B8278(1);
+        btlSetTrackedTaskDisplayMode(1);
         btlBossDebugPrintf(D_004178B8);
     }
 }
@@ -2129,7 +2129,7 @@ void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
 
     available = mdlFlagTest(0xc0f);
     if (available != 0) {
-        func_0022CB68(effect, model);
+        btlReleaseFoundModelEntry(effect, model);
         return;
     }
 }
@@ -2343,10 +2343,9 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
         u8 *work = (u8 *)func_001AA6F8();
         VU0_LOAD_VF(vf10, vec);
         VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)unit + 0x60);
-        __asm__ volatile("lqc2 vf11, 0(%0)\n\t"
-                         "vadd.xyzw vf10, vf10, vf11\n\t"
-                         "sqc2 vf10, 0(%1)"
-                         : : "r"(work), "r"(pos));
+        VU0_LOAD_VF(vf11, work);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         if (unit->flags & 2) {
             pos[2] += unit->positionZOffset;
             effObjSetInnerFirstVec(unit->effectObject, pos);
@@ -2360,16 +2359,13 @@ void func_001E3108(u8 *unit, s128 *dst) {
 
 void btlGetUnitWorldPos(u8 *unit, s128 *dst) {
     u8 *work = (u8 *)func_001AA6F8();
-    __asm__ volatile(".set noreorder\n\t"
-                     "lqc2 vf10, 0(%0)\n\t"
-                     "lqc2 vf11, 0(%1)\n\t"
-                     "vadd.xyzw vf10, vf10, vf11\n\t"
-                     "sqc2 vf10, 0(%2)\n\t"
-                     ".set reorder"
-                     : : "r"(unit + 0x60), "r"(work), "r"(dst) : "memory");
+    VU0_LOAD_VF(vf10, unit + 0x60);
+    VU0_LOAD_VF(vf11, work);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, dst);
 }
 
-extern s32 func_00332D48(s32, s32);
+extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
@@ -2383,7 +2379,7 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return func_00332D48(unit->ext->info->unk18, mode);
+    return sdfLoadMapRecordPositionVector(unit->ext->info->unk18, mode);
 }
 
 void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
@@ -2394,7 +2390,7 @@ void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E3230);
 
-extern s32 func_00332D08(s32, s32);
+extern s32 sdfLoadMapRecordLookAtBasis(s32, s32);
 
 s8 btlSetActorAlternateEffectParameter(unit, mode)
     BtlUnit *unit;
@@ -2409,18 +2405,12 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return func_00332D08(unit->ext->info->unk18, mode);
+    return sdfLoadMapRecordLookAtBasis(unit->ext->info->unk18, mode);
 }
 
 void btlSetAlternateEffectParameterOrMuzzlePosition(void) {
     if (btlSetActorAlternateEffectParameter() == 0) {
-        __asm__ volatile(".set noreorder\n\t"
-                         "vsub.xyzw vf28, vf0, vf0\n\t"
-                         "vmr32.xyzw vf30, vf0\n\t"
-                         "vmove.xyzw vf31, vf0\n\t"
-                         "vaddw.x vf28, vf28, vf0w\n\t"
-                         "vmr32.xyzw vf29, vf30\n\t"
-                         ".set reorder");
+        VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     }
 }
 
@@ -2692,7 +2682,7 @@ u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
     return 1;
 }
 
-SoundTask *func_001E44E0(BtlUnit *unit, s32 index, s32 value, f32 scale) {
+SoundTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 value, f32 scale) {
     SoundTask *task = btlAllocTask(16);
     SoundTaskArgs *args;
     task->enabled = 1;
@@ -2827,7 +2817,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     return 0;
 }
 
-SoundTask *func_001E4908(BtlUnit *unit, s32 index, f32 scale) {
+SoundTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale) {
     SoundTask *task = btlAllocTask(24);
     SoundTaskArgs *args;
     task->enabled = 1;
@@ -3485,7 +3475,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         }
     }
     if (0.5f < args->scale) {
-        scale = args->scale * (func_00341240(D_0037F550) * 0.5f + 0.5f);
+        scale = args->scale * (effMiscRandUnitFloat(D_0037F550) * 0.5f + 0.5f);
         if (args->count & 1) {
             scale = -scale;
         }
@@ -4227,7 +4217,7 @@ SoundTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
     return task;
 }
 
-SoundTask *func_001E8BE0(s32 actor, s32 mode, u32 command) {
+SoundTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 command) {
     SoundTask *task = btlCreateCommandSoundTask(actor, mode);
     SoundTaskArgs *args = btlGetTaskArguments((s32)task);
 
@@ -4235,7 +4225,7 @@ SoundTask *func_001E8BE0(s32 actor, s32 mode, u32 command) {
     return task;
 }
 
-SoundTask *func_001E8C20(s32 actor, s32 option, s32 flag, s32 mode, s32 command) {
+SoundTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option, s32 flag, s32 mode, s32 command) {
     SoundTask *task = btlCreateCommandSoundTask(actor, mode);
     SoundTaskArgs *args = btlGetTaskArguments((s32)task);
 
@@ -4279,7 +4269,7 @@ SoundTask *btlCreateFloatTask28(BtlUnit *actor, f32 a, f32 b, f32 c, f32 d, f32 
     return task;
 }
 
-s32 func_001E8E08(f32 *args) {
+s32 btlApplyEffectCameraKeyframes(f32 *args) {
     s32 context = func_001AA6F8();
     func_001E8258(1, *(s32 *)args, 0, 0, 0);
     btlSetEffectCameraKeys(context + 0x70, args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
@@ -4296,7 +4286,7 @@ SoundTask *btlCreateFloatTask29(BtlUnit *actor, f32 a1, f32 a2, f32 a3, f32 a4, 
     if (actor != 0 && actor->link18 != 0) {
         task->owner = actor->link18->owner;
     }
-    task->callback = func_001E8E08;
+    task->callback = btlApplyEffectCameraKeyframes;
     task->onStart = 0;
     args = (f32 *)btlGetTaskArguments((s32)task);
     *(BtlUnit **)args = actor;
@@ -4323,7 +4313,7 @@ u32 func_001E9008(u32 taskArgs) {
     s32 work;
 
     work = func_001AA6F8();
-    func_001E8E08(taskArgs);
+    btlApplyEffectCameraKeyframes(taskArgs);
     ((BtlWork *)work)->runtimeFlags |= 0x80000;
     return 1;
 }
@@ -4384,12 +4374,9 @@ void btlInitMotionTransformFromVectors(u8 *object, f32 *origin, f32 *direction) 
     VU0_LOAD_VF(vf10, D_003E9130);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, object + 0x10);
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(1.0f));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        ".set reorder");
+    VU0_SET_VF2X(1.0f);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, origin);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, object);
@@ -6056,11 +6043,11 @@ s32 btlAreWorkBuffersReady(void) {
 void btlReleaseWorkBuffers(void) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     if (work->secondaryBuffer != 0) {
-        func_00328470(work->secondaryBuffer);
+        sdfReleaseChipOrRetainedResource(work->secondaryBuffer);
         work->secondaryBuffer = 0;
     }
     if (work->primaryBuffer != 0) {
-        func_00328470(work->primaryBuffer);
+        sdfReleaseChipOrRetainedResource(work->primaryBuffer);
         work->primaryBuffer = 0;
     }
 }
@@ -6106,7 +6093,7 @@ void btlFreeFieldBlocks(void) {
     ((BtlWork *)blocks)->battleFlags &= ~2;
 }
 
-void func_002001F0(void) {
+void btlInitializeSceneLightingAndTint(void) {
     u8 *context = (u8 *)func_001AA6F8();
     fldApplyLightSetCurrent();
     btlInitTintTransitionResource(0x80, 0);
@@ -6456,7 +6443,7 @@ SoundTask *func_00201540(void) {
     return task;
 }
 
-s32 func_00201578(u32 *taskArgs) {
+s32 btlQueueTintTransitionWhenEnabled(u32 *taskArgs) {
     BtlWork *work = (BtlWork *)func_001AA6F8();
     if (!(work->battleFlags & 0x20000000)) {
         btlQueueTintTransition(taskArgs[0], *(u16 *)(taskArgs + 1));
@@ -6470,7 +6457,7 @@ SoundTask *sndCreateAcquireTask(s32 value, s32 option) {
     SoundTaskArgs *args;
     task->enabled = 1;
     task->taskId = 5;
-    task->callback = func_00201578;
+    task->callback = btlQueueTintTransitionWhenEnabled;
     task->status = 0;
     task->onStart = 0;
     args = btlGetTaskArguments((s32)task);
@@ -7384,7 +7371,7 @@ void btlRefreshSoundEntries(void) {
     func_001AA6F8();
     for (i = 0; i < 0x31; i++) {
         if (D_003BDE18[i].unk4 != 0) {
-            func_00203D48(i, D_003BDE18[i].unk4);
+            btlCreateIndexedSoundResourceNode(i, D_003BDE18[i].unk4);
         }
     }
 }
@@ -7400,7 +7387,7 @@ void sndFreeBattleSoundEntries(void) {
     }
 }
 
-void func_00203D48(s32 slotIndex, u32 handle) {
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, u32 handle) {
     u32 flags;
     s32 work;
     u32 *node;
@@ -7431,9 +7418,9 @@ extern void fileQueueSetPosition(s32, f32 *);
 
 extern void fileQueueUpdate(s32);
 
-void func_00203E18(s32 *args) {
+void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];
-    if (func_00332D48(*(s32 *)(args[1] + 0x18), 1) == 0) {
+    if (sdfLoadMapRecordPositionVector(*(s32 *)(args[1] + 0x18), 1) == 0) {
         mdlLoadPrimaryVectorVU(args[1]);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
@@ -7477,7 +7464,7 @@ void func_00203F08(s32 soundIndex, s32 sceneIndex) {
         v = 5;
     }
     if (mnuPollTitleStreamStateLocked() != 0) {
-        func_002A2550();
+        mnuResetTitleStreamLocked();
     }
     if (v == 5) {
         func_002A2200(4);
@@ -8076,7 +8063,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
     } else if (fileIsRequestReadyInCurrentMode(args->loadHandle) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
-            func_002A2A70();
+            mnuReleaseSoundBufferLocked();
         }
         resource = fileGetResourceHandle(args->loadHandle);
         data = sdfResourceRetainAddress(resource);
@@ -8118,7 +8105,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     char path[0x70];
     if (work->earringPlaybackCount == 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
-            func_002A2A70();
+            mnuReleaseSoundBufferLocked();
         }
         unit = args->unit;
         if (unit->flags & 0x200) {

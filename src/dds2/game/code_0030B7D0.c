@@ -20,7 +20,7 @@ extern void func_00110BE0(s32, s32);
 
 extern s32 func_00112E30(s32, SdfQuad *, SdfQuad *);
 
-void func_0030B7D0(void) {
+void fldCreateLocalMapCamera(void) {
     D_004388B4 = func_00112E30(dds3AdvanceWorldCounter(), &D_00400970, &D_00400980);
     dds3SetWorldEntryCallbackTarget(D_004388B4, "Lmap_Cam");
     effObjSetInnerFloat(D_004388B4, 2.0f);

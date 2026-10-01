@@ -20,8 +20,8 @@ void func_002C1430(s32 object);
 void func_002C0A48(s32 property, s32 object);
 void func_002C0950(s32 property, s32 object);
 void func_002C0DD8(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
-void func_002C1380(s32 object);
-f32 func_002E8398(s32 seed);
+void uiDrawActiveSurfaceRegion(s32 object);
+f32 effMiscRandUnitFloat(s32 seed);
 
 extern u32 D_003BBDD0[];
 
@@ -36,7 +36,7 @@ void evtReleaseSolarNoiseSprite(u32 *sprite) {
 void evtInitializeSolarOverlay(s32 object) {
     func_002C0950(0x30000, object);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0, object);
-    func_002C1380(object);
+    uiDrawActiveSurfaceRegion(object);
     func_002C0950(0x30000, object);
 }
 
@@ -117,7 +117,7 @@ void evtUpdateSolarPointTimers(s32 object) {
             point->age = age;
             if ((s16)age > point->duration) {
                 point->age = 0;
-                point->duration = (s16)(func_002E8398(0) * 30.0f + 120.0f);
+                point->duration = (s16)(effMiscRandUnitFloat(0) * 30.0f + 120.0f);
             }
         } else {
             point->age = 0;

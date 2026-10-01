@@ -83,17 +83,7 @@ void effMiscNormalizeVU(void)
 f32 effMiscQuatLengthSqVU(void)
 {
     f32 result;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vaddw.xyz vf1, vf0, vf0w\n"
-        "vmul.xyzw vf2, vf10, vf10\n"
-        "vmulay.x ACC, vf2, vf2y\n"
-        "vmaddaz.x ACC, vf1, vf2z\n"
-        "vmaddw.x vf2, vf1, vf2w\n"
-        "qmfc2.ni $2, vf2\n"
-        "mtc1 $2, %0\n"
-        ".set reorder\n"
-        : "=f"(result));
+    VU0_LENGTH_SQ_XYZW(result, vf10);
     return result;
 }
 
@@ -101,17 +91,7 @@ f32 effMiscQuatLengthSqVU(void)
 f32 effMiscQuaternionDotVU(void)
 {
     f32 result;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vaddw.xyz vf1, vf0, vf0w\n"
-        "vmul.xyzw vf2, vf10, vf11\n"
-        "vadday.x ACC, vf2, vf2y\n"
-        "vmaddaz.x ACC, vf1, vf2z\n"
-        "vmaddw.x vf2, vf1, vf2w\n"
-        "qmfc2.ni $2, vf2\n"
-        "mtc1 $2, %0\n"
-        ".set reorder\n"
-        : "=f"(result));
+    VU0_DOT_XYZW(result, vf10, vf11);
     return result;
 }
 
@@ -120,21 +100,9 @@ void effMiscAxisAngleToQuaternionVU(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        ".set reorder\n"
-        : : "f"(trigValue));
+    VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
     trigValue = func_003407A0(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.w vf10, vf0, vf2x\n"
-        ".set reorder\n"
-        : : "f"(trigValue));
+    VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
 }
 
 /* As above, but write the second VU quaternion register (vf11). */
@@ -142,21 +110,9 @@ void effMiscAxisAngleToQuaternionVf11(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf11, vf11, vf2x\n"
-        ".set reorder\n"
-        : : "f"(trigValue));
+    VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
     trigValue = func_003407A0(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.w vf11, vf0, vf2x\n"
-        ".set reorder\n"
-        : : "f"(trigValue));
+    VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
 }
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
@@ -214,24 +170,10 @@ void func_00341028(f32 amount)
     f32 sinTheta;
     f32 theta;
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vaddw.xyz vf1, vf0, vf0w\n"
-        "vmul.xyzw vf2, vf10, vf11\n"
-        "vadday.x ACC, vf2, vf2y\n"
-        "vmaddaz.x ACC, vf1, vf2z\n"
-        "vmaddw.x vf2, vf1, vf2w\n"
-        "qmfc2.ni $2, vf2\n"
-        "mtc1 $2, %0\n"
-        ".set reorder\n"
-        : "=f"(dot));
+    VU0_DOT_XYZW(dot, vf10, vf11);
     if (dot < 0.0f) {
         dot = -dot;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "vmulax.xyzw ACC, vf0, vf0x\n"
-            "vmsubw.xyzw vf12, vf11, vf0w\n"
-            ".set reorder\n");
+        VU0_NEGATE_VF(vf12, vf11);
     } else {
         VU0_MOVE_VF(vf12, vf11);
     }
@@ -244,16 +186,8 @@ void func_00341028(f32 amount)
         w0 = sdfSinPoly(w0 * theta) / sinTheta;
         w1 = sdfSinPoly(w1 * theta) / sinTheta;
     }
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "mfc1 $3, %1\n"
-        "qmtc2.ni $2, vf2\n"
-        "qmtc2.ni $3, vf3\n"
-        "vmulax.xyzw ACC, vf10, vf2x\n"
-        "vmaddx.xyzw vf10, vf12, vf3x\n"
-        ".set reorder\n"
-        : : "f"(w0), "f"(w1));
+    VU0_SET_SCALARS_VF2_VF3(w0, w1);
+    VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
     effMiscNormalizeVU();
 }
 
@@ -261,38 +195,16 @@ void func_00341028(f32 amount)
 void effMiscQuaternionNlerpVU(f32 amount)
 {
     f32 dot;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vaddw.xyz vf1, vf0, vf0w\n"
-        "vmul.xyzw vf2, vf10, vf11\n"
-        "vadday.x ACC, vf2, vf2y\n"
-        "vmaddaz.x ACC, vf1, vf2z\n"
-        "vmaddw.x vf2, vf1, vf2w\n"
-        "qmfc2.ni $2, vf2\n"
-        "mtc1 $2, %0\n"
-        ".set reorder\n"
-        : "=f"(dot));
+    VU0_DOT_XYZW(dot, vf10, vf11);
     if (dot < 0.0f) {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "vmulax.xyzw ACC, vf0, vf0x\n"
-            "vmsubw.xyzw vf12, vf11, vf0w\n"
-            ".set reorder\n");
+        VU0_NEGATE_VF(vf12, vf11);
     } else {
         VU0_MOVE_VF(vf12, vf11);
     }
     {
         f32 remaining = 1.0f - amount;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "mfc1 $2, %0\n"
-            "mfc1 $3, %1\n"
-            "qmtc2.ni $2, vf2\n"
-            "qmtc2.ni $3, vf3\n"
-            "vmulax.xyzw ACC, vf10, vf2x\n"
-            "vmaddx.xyzw vf10, vf12, vf3x\n"
-            ".set reorder\n"
-            : : "f"(remaining), "f"(amount));
+        VU0_SET_SCALARS_VF2_VF3(remaining, amount);
+        VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
     }
     effMiscNormalizeVU();
 }

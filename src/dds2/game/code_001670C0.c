@@ -85,7 +85,7 @@ void *effBillCreateDispatch(s32 index, void *arg) {
     return effect;
 }
 
-void *func_00167110(EffectDispatchState *effect) {
+void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
     EffectDispatchState *result = D_003AAF80[effect->handler].func();
 
     result->handler = effect->handler;
@@ -101,14 +101,14 @@ void func_001671A0(EffectDispatchState *effect) {
     D_003AAF84[effect->handler].func();
 }
 
-void func_001671D8(EffectDispatchState *effect) {
+void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {
     D_003AAFB0[effect->handler]();
     effect->valueB2 = 1;
 }
 
-void func_00167220(EffectDispatchState *effect) {
+void effRunPreHandlerAndActivate(EffectDispatchState *effect) {
     D_003AAFC0[effect->handler]();
-    func_001671D8(effect);
+    effInvokeHandlerAndMarkActive(effect);
 }
 
 u16 effBillGetQueuedCount(EffectDispatchState *effect) {
@@ -157,7 +157,7 @@ s32 func_00167400(EffectDispatchState *effect) {
     return (s32)effect + 0x20;
 }
 
-void *func_00167408(s32 height, s32 flags) {
+void *effCreateSizedDrawPacket(s32 height, s32 flags) {
     void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
     sdfConsInitPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
     return packet;

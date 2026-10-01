@@ -171,7 +171,7 @@ void func_00231DB0(u32 arg0, u32 arg1) {
     mdlRequestAsset(arg0, arg1, 1);
 }
 
-void func_00231DC8(MdlLink *link) {
+void mdlUnlinkGroupEntry(MdlLink *link) {
     MdlLink *prev = link->prev;
     MdlLink *next = link->next;
     MdlGroup *group;
@@ -239,7 +239,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     }
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
-    func_00231DC8((MdlLink *)ctx);
+    mdlUnlinkGroupEntry((MdlLink *)ctx);
     sdfReleaseChipBlock(ctx);
 }
 
@@ -504,7 +504,7 @@ u16 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
 }
 
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
-    func_00333060(ctx->inner->resourceHandle);
+    sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00232F78);

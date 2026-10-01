@@ -786,7 +786,7 @@ u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
     return *(u16 *)&((ScriptFlagEntry *)func_00314B80(context, entryId))->flags;
 }
 
-void func_00316450(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
+void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_0019FC38(x, y, first, width, (u32)D_00405CA8, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
@@ -831,7 +831,7 @@ void func_00316648(void) {
     func_002DEB80(fileResolvePrimaryBuffer());
 }
 
-void func_00316668(s32 work) {
+void sdfReleaseFlagListResource(s32 work) {
     func_003297C8(*(u32 *)(work + 0x54));
 }
 

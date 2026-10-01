@@ -73,7 +73,7 @@ extern void effPcpScatterCreatePoolResource(PcpScatterWork3 *work, u32 resId);
 extern u32 effMiscRand(void *table);
 extern u32 effParamWorkCreate(s32 kind, void *params);
 extern u8 D_0034DF38[];
-extern f32 func_002E8398(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern f32 func_002E78F8(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
@@ -369,15 +369,15 @@ void effScatterSpriteSpawn(PcpScatterWork10 *work, s32 index)
     f32 dir[4];
     f32 jitter;
 
-    sprite->spinAngle = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    sprite->spinAngle = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
     jitter = work->startRadiusJitter;
-    sprite->startRadius = work->startRadius * (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter));
+    sprite->startRadius = work->startRadius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
     jitter = work->endRadiusJitter;
-    sprite->radiusStep = (work->endRadius * (func_002E8398(D_0034DF38) * jitter + (1.0f - jitter)) - sprite->startRadius) / (f32)work->lifetime;
+    sprite->radiusStep = (work->endRadius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) - sprite->startRadius) / (f32)work->lifetime;
     sprite->initialSize = work->initialSize;
-    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    dir[1] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
-    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    dir[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
@@ -497,7 +497,7 @@ void func_00172C60(void)
 }
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern void *func_002DA730(void);
+extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(void *obj, f32 value);
 extern u8 D_003D6580[0x2C];
 
@@ -526,7 +526,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->unk1C = 1.0f;
     pool->color14 = 0x80808080;
     pool->unk30 = 0;
-    pool->unk28 = func_002DA730();
+    pool->unk28 = sdfCreateAssetWithDrawEntries();
     func_002DA420(pool->unk28, 1.0f);
     memset(D_003D6580, 0, 0x2C);
     *(u16 *)(D_003D6580 + 4) = 0x4000;

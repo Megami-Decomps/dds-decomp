@@ -8,7 +8,7 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
 
-void func_002D0900(u8 *node) {
+void sdfSkipNextListNode(u8 *node) {
     u8 *next = *(u8 **)(*(u8 **)(node + 4) + 4);
     *(u8 **)next = node;
     *(u8 **)(node + 4) = next;
@@ -54,7 +54,7 @@ u32 sdfResourceRetainAddress(SdfResource *resource) {
     return resource->address;
 }
 
-void func_002D0A60(u8 *work) {
+void sdfDecrementAllocationReferenceCount(u8 *work) {
     u16 value = *(u16 *)(work + 0xE);
     if (value != 0) {
         *(u16 *)(work + 0xE) = value - 1;

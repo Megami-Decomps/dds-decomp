@@ -70,7 +70,7 @@ void func_00113438(EffectObject *obj, u32 value) {
     data->timer = 0;
 }
 
-void func_00113478(EffectObject *obj) {
+void evtResetObjectPendingValue(EffectObject *obj) {
     EffectObjectData *data;
 
     data = obj->data;
@@ -80,10 +80,10 @@ void func_00113478(EffectObject *obj) {
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113490);
 
-void func_00113538(EffectObject *obj) {
+void evtDestroyEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
-    func_00113AA8();
+    evtEndObjectValueTransition();
     effObjFreeInner(obj);
     data = obj->data;
     if (data->handle != -1) {
@@ -102,7 +102,7 @@ INCLUDE_ASM(const s32, "game/code_001130E0", func_001135B0);
 
 INCLUDE_ASM(const s32, "game/code_001130E0", func_00113888);
 
-void func_00113AA8(EffectObject *obj) {
+void evtEndObjectValueTransition(EffectObject *obj) {
     EffectObjectData *data;
 
     data = obj->data;
@@ -223,7 +223,7 @@ extern void effObjInnerCreate();
 extern void *func_002CFEB8(s32 size);
 extern u32 func_001117A8();
 
-s32 func_00114508(EffectObject *obj) {
+s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
     effObjInnerCreate(obj);

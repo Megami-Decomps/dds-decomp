@@ -13,7 +13,7 @@ void func_00220508(void *unit, s32 flag);
 
 void effObjSetFlags(void *unit, s32 flag);
 
-void func_00220560(s32 which, s32 value);
+void evtApplyIndexValueToWorldNodes(s32 which, s32 value);
 
 void func_001028E8(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
@@ -113,7 +113,7 @@ extern char D_003ACA40[]; /* "LIGHT_PATH_MOVE error!\n" */
 
 extern char D_003ACA58[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
-void func_002E4C28(const char *msg, ...);
+void sdfPrintFormattedDevMessage(const char *msg, ...);
 
 void func_00241F78(s32 first, s32 second);
 
@@ -471,11 +471,11 @@ s32 evtCommandDispatchFieldBE(void)
     s32 firstArg;
     s32 secondArg;
 
-    func_002E4C28("FIELD_BE start\n");
+    sdfPrintFormattedDevMessage("FIELD_BE start\n");
     firstArg = scrReadIntParameter(0);
     secondArg = scrReadIntParameter(1);
     func_00241F78(firstArg, secondArg);
-    func_002E4C28("FIELD_BE end\n");
+    sdfPrintFormattedDevMessage("FIELD_BE end\n");
     return 1;
 }
 
@@ -501,7 +501,7 @@ s32 func_00226BD8(void)
     s32 value;
 
     value = scrReadIntParameter(0);
-    func_00220560(0, value);
+    evtApplyIndexValueToWorldNodes(0, value);
     return 1;
 }
 
@@ -510,7 +510,7 @@ s32 func_00226C08(void)
     s32 value;
 
     value = scrReadIntParameter(0);
-    func_00220560(1, value);
+    evtApplyIndexValueToWorldNodes(1, value);
     return 1;
 }
 
@@ -718,14 +718,14 @@ s32 evtCommandWaitForCampTask(void) {
     if (evtFindTaskById(id) == 0) {
         msg = D_003AC958;
         func_0010AC10(msg, id);
-        func_002E4C28(msg, id);
+        sdfPrintFormattedDevMessage(msg, id);
         func_00101A80((s32)work->campTask, mnuCampCreateTask(id));
         return 0;
     }
     if (evtGetTaskValueWord(id) == 2) {
         msg = D_003AC968;
         func_0010AC10(msg, id);
-        func_002E4C28(msg, id);
+        sdfPrintFormattedDevMessage(msg, id);
         return 1;
     }
     return 0;

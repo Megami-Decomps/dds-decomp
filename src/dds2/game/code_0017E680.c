@@ -18,7 +18,7 @@ typedef struct EffResourceWork {
     u32 resource70;
 } EffResourceWork;
 
-/* Billboard set allocated by func_0017ED78. */
+/* Billboard set allocated by effCreateBillboardResourceWork. */
 typedef struct EffBillboardWork {
     u8 pad00[0x10];
     u32 mode;   /* 0x10 */
@@ -27,7 +27,7 @@ typedef struct EffBillboardWork {
     u32 handle; /* 0x1C */
 } EffBillboardWork;
 
-/* Creation parameters read by func_0017ED78. */
+/* Creation parameters read by effCreateBillboardResourceWork. */
 typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
@@ -86,7 +86,7 @@ void func_0017ED50(void *dst, void *src) {
 }
 
 /* Create the shared billboard set with its default colour and scale. */
-EffBillboardWork *func_0017ED78(EffBillboardParams *params) {
+EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
     EffBillboardWork *billboard = (EffBillboardWork *)func_00328D68(0x20);
 
     billboard->mode = params->mode;

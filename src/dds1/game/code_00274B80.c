@@ -613,7 +613,7 @@ void func_00276DA0(s32 x, s32 context) {
     s32 y;
     s32 handle;
 
-    func_00197220(0x13);
+    itfSetTextDrawLimit(0x13);
     x = x * 8;
     y = x + 0xbc0;
     for (i = 0; i < 3; i++, y += 0xa8) {
@@ -623,21 +623,21 @@ void func_00276DA0(s32 x, s32 context) {
             frFontQueueGlyphInSelectedSlot(handle);
         }
     }
-    func_00197220(-1);
+    itfSetTextDrawLimit(-1);
 }
 
-extern void func_002BF790(s32, s32, s32, s32, s32, s32, s32);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 
 void func_00276E90(s32 flag, s32 obj) {
     s32 y;
 
     for (y = 0x360; y < 0xE40; y += 0x38) {
-        func_002BF790(0xE80, y, 0, 1, ((StaffMenuWork *)obj)->resourceList, 2, 0x53);
+        itfDrawGridWithResolvedSlot(0xE80, y, 0, 1, ((StaffMenuWork *)obj)->resourceList, 2, 0x53);
     }
-    func_002BF790(0x10F0, 0x358, 0, 1, ((StaffMenuWork *)obj)->resourceList, 4, 0x53);
-    func_002BF790(0x1050, 0x500, 0, 1, ((StaffMenuWork *)obj)->resourceList, 3, 0x53);
+    itfDrawGridWithResolvedSlot(0x10F0, 0x358, 0, 1, ((StaffMenuWork *)obj)->resourceList, 4, 0x53);
+    itfDrawGridWithResolvedSlot(0x1050, 0x500, 0, 1, ((StaffMenuWork *)obj)->resourceList, 3, 0x53);
     if (flag == 0) {
-        func_002BF790(-0x140, -0xA0, 0, 1, ((StaffMenuWork *)obj)->resourceList, 7, 0x53);
+        itfDrawGridWithResolvedSlot(-0x140, -0xA0, 0, 1, ((StaffMenuWork *)obj)->resourceList, 7, 0x53);
     }
 }
 
@@ -669,16 +669,16 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
 void func_00277220(u8 *entry, s32 id, s32 packedGroup, s32 group, s32 obj, s32 spriteFlags) {
     func_00283110(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     func_002833B0(0, 0, 0, entry, group, spriteFlags);
-    func_002BF790(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
+    itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
     mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + *(u16 *)(entry + 4) * 17 + 0x110, spriteFlags);
-    func_002BF790(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
+    itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
     func_00276DA0(-0x16, id);
 }
 
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32, s32);
 
-void func_00277328(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
+void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
     func_00283838(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0x1200, 0x730, 0, drawGroup, spriteFlags);
 }

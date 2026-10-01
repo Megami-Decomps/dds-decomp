@@ -13,7 +13,7 @@ typedef struct {
 } EffPCPNeedleWork;
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    func_001634A8(work->resource68);
+    parReleaseCellSystem(work->resource68);
     effReleaseAttachedResources(work->resource6C);
     func_003297C8(work->resource70);
 }

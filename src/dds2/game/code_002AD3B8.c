@@ -30,7 +30,7 @@ extern char D_00437BD8[];
 extern s32 D_003E7400[];
 extern s32 func_002BDA50();
 extern s32 func_002BDA78();
-extern s32 func_00306F80(s32, s32, s32, s32, s32, s32, s32);
+extern s32 itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
@@ -547,7 +547,7 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
     char buf[16];
     s32 handle;
 
-    func_00306F80(0x1C0, 0xA10, 0, 0, *(s32 *)(panel + 0xC4), 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, *(s32 *)(panel + 0xC4), 2, 0x53);
     if (id != 0) {
         func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + D_00435E20 + 0x18));
         handle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)buf, 0);

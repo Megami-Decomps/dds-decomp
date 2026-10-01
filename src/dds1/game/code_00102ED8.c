@@ -91,7 +91,7 @@ extern void func_00104290(void);
 extern void *D_003BD6A8;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
-extern s32 func_002E4960();
+extern s32 sdfCreateFormattedSifCommand();
 extern u64 sdfCreateResetPacketList(void);
 extern u32 func_00100518(void);
 extern u8 D_003C2620[];
@@ -267,7 +267,7 @@ void kwlnTextureDrawPageCounter(void *task) {
     s32 current = kwlnTextureGetPageIndex();
     s32 count = kwlnTextureCountIncompleteResources();
     func_003014F0(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
-    sdfAppendPacket(task, func_002E4960(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
+    sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
@@ -381,7 +381,7 @@ s32 kwlnEnsureDefaultResource(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105150);
 
-void func_00105320(void) {
+void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
     sdfCameraBuildProjection(&D_003245E0);
     sdfCameraBuildProjection(&D_00324980);
@@ -452,7 +452,7 @@ void func_00105888(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
-u64 func_001059F0(s32 arg0) {
+u64 evtBuildFrameStatePacketList(s32 arg0) {
     u64 list = sdfCreateResetPacketList();
 
     sdfAppendPacket(list, D_003C2620 + arg0 * 0x160 + func_00100518() * 0xB0);
@@ -579,10 +579,10 @@ void kwlnDrawBlurErrorCounters(void) {
             task = sdfAllocPacketAligned(0x20);
             sdfInitPacketList(task);
             if (D_003BA934 > 0) {
-                sdfAppendPacket(task, func_002E4960(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_003BA934));
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_003BA934));
             }
             if (D_003BA938 > 0) {
-                sdfAppendPacket(task, func_002E4960(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_003BA938));
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_003BA938));
             }
             D_00325708.submit(&D_00325708, task);
         }

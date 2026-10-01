@@ -106,7 +106,7 @@ extern UiSurface D_00324B48[];
 
 extern UiOwnerRef *D_00357D88[];
 
-extern void func_00199998(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 
 extern void func_00199A68(UiSprite *sprite, UiSurface *surface);
 
@@ -140,7 +140,7 @@ typedef struct MessageNodeLink {
     s32 next;
 } MessageNodeLink;
 
-void func_0019DB88(s32 node) {
+void frFontEnableNodeContextModes(s32 node) {
     for (; node != 0; node = ((MessageNodeLink *)node)->next) {
         frFontEnableContextMode(node);
     }
@@ -188,7 +188,7 @@ typedef struct UiGlyphBlock {
     u16 pad0E;
 } UiGlyphBlock;
 
-void func_0019DDA8(u32 *cursorWords, s32 resetPosition) {
+void itfResetCursorPositionAndState(u32 *cursorWords, s32 resetPosition) {
     UiGlyphBlock *cursor = (UiGlyphBlock *)cursorWords;
     if (resetPosition != 0) {
         cursor->x = 0x280;
@@ -270,7 +270,7 @@ void func_0019DE58(u32 *object) {
     func_0019E048((s32)object, 0, 0);
 }
 
-void func_0019DE88(s32 words) {
+void itfClearDrawStateWords(s32 words) {
     s32 remaining;
     u32 *cursor;
 
@@ -300,7 +300,7 @@ typedef struct SoundUiState {
     BtlFade fade;
 } SoundUiState;
 
-void func_0019DEB8(s32 fadeAddress, s32 preserveKind) {
+void itfResetBattleFadeState(s32 fadeAddress, s32 preserveKind) {
     if (preserveKind == 0) {
         ((BtlFade *)fadeAddress)->kind = 0;
     }
@@ -392,10 +392,10 @@ void func_0019E7B0(UiPanel *panel, s32 dy) {
     pos->y += dy;
     itfMesOffsetNodeChain(pos->chain, 0, dy);
     if (place->sprite != 0) {
-        func_00199998(place->sprite, 0, dy, 0, 0, 0);
+        itfAdvancePanelLayoutAndNotify(place->sprite, 0, dy, 0, 0, 0);
     }
     if (place->frame != 0) {
-        func_00199998(place->frame, 0, dy, 0, dy, 0);
+        itfAdvancePanelLayoutAndNotify(place->frame, 0, dy, 0, dy, 0);
     }
     if (origin->tex != 0) {
         origin->y += dy;
@@ -420,7 +420,7 @@ s32 sndSeqSelectPoll(s32 obj) {
     }
     if (dir != 0) {
         sndStepSequenceIndex(sel, dir);
-        func_0019DEB8((s32)&((SoundUiState *)obj)->fade, 1);
+        itfResetBattleFadeState((s32)&((SoundUiState *)obj)->fade, 1);
     }
     if (D_00324510.confirm < 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);

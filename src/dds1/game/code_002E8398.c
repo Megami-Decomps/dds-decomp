@@ -5,7 +5,7 @@ extern s8 D_003BDA80;
 extern u32 effMiscRand(void *state);
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
-f32 func_002E8398(void *state) {
+f32 effMiscRandUnitFloat(void *state) {
     u32 value = effMiscRand(state) & 0xFFFFFF;
 
     return (f32)value * 5.9604644775390625e-8f;

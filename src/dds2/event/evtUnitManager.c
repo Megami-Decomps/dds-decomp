@@ -274,17 +274,8 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023C870);
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
 void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
     unit->unk1B2 = arg;
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.w vf10, vf10, vf0x\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q\n\t"
-        ".set reorder");
+    VU0_CLEAR_W(vf10);
+    VU0_NORMALIZE_VF10();
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
     evtLoadUnitDirectionVectorVU(unit);
     VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);

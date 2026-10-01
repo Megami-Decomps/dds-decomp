@@ -66,11 +66,11 @@ typedef struct SdfUnitMode {
 extern u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char D_003BA9E0[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
-extern s32 func_002D0A60(s32 allocation);
+extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
 extern s32 func_002D0918(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
-void func_001177A8(void);
+void evtResetWorldAndProfileRuntime(void);
 extern void *func_002D03F8(s32 size);
 extern void *sdfResourceRetainAddress(void *resource);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
@@ -167,7 +167,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_003BA9E0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
     D_003BAA00 = (s32)state;
-    func_001177A8();
+    evtResetWorldAndProfileRuntime();
 }
 
 /* Tear down the "GBWK" task hierarchy, clear the backing scene allocation
@@ -178,7 +178,7 @@ void sdfDestroyRuntimeTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BA9E0, 0);
     func_00117808();
     handle = ((SdfRuntime *)D_003BAA00)->backingAllocation;
-    func_002D0A60(handle);
+    sdfDecrementAllocationReferenceCount(handle);
     func_002D0918(handle);
     D_003BAA00 = 0;
 }
@@ -192,7 +192,7 @@ s32 sdfBumpTickCounters(void) {
     return 0;
 }
 
-void func_001177A8(void) {
+void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
     ((SdfRuntime *)D_003BAA00)->updateMode = 8;

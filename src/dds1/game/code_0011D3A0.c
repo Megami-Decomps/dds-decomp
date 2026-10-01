@@ -18,7 +18,7 @@ extern u32 D_003BABD0;
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s64 func_00110400(u64);
 extern u64 func_00110458(u64);
-extern s64 func_001104B0(u64);
+extern s64 dds3AdvanceObjectValueCursor(u64);
 extern u64 func_00110AB0(u64, u64);
 extern s64 func_00113E30(u64);
 
@@ -380,7 +380,7 @@ u32 func_0011E278(void) {
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011E280);
 
 extern s32 fldGetEncounterRuntimeResult(void);
-extern u8 func_00124F08(void);
+extern u8 fldGetCampSceneControlMode(void);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00129900(s32);
 extern void func_00134348(void);
@@ -392,7 +392,7 @@ s32 fldTestDrawUpdate(void) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
-    if (func_00124F08() == 1) {
+    if (fldGetCampSceneControlMode() == 1) {
         return 0;
     }
     fldSelectDisplayBuffer(0x53);
@@ -460,7 +460,7 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 
-extern u32 func_00110490(u64);
+extern u32 dds3ResetObjectValueCursor(u64);
 extern s32 dds3TestObjectFlags(u64, s32);
 extern void dds3DestroyWorldIndexNode(u64);
 extern void fldSelectDisplayBuffer(s32);
@@ -474,7 +474,7 @@ void fldSubmitVisibleWorldBackground(void) {
 
     list = func_00110AB0(dds3GetWorldSecondaryObject(), 5);
     if (list != 0) {
-        if (func_00110490(list) != 0) {
+        if (dds3ResetObjectValueCursor(list) != 0) {
             do {
                 item = func_00110458(list);
                 if (dds3TestObjectFlags(item, 0x200) != 0) {
@@ -482,7 +482,7 @@ void fldSubmitVisibleWorldBackground(void) {
                         found = 1;
                     }
                 }
-            } while (func_001104B0(list) != 0);
+            } while (dds3AdvanceObjectValueCursor(list) != 0);
         }
         dds3DestroyWorldIndexNode(list);
     }
@@ -504,29 +504,29 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
 extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], D_0032FA10[], D_0032E5C8[], D_00336A60[];
 extern void *D_003BAD64;
 extern u32 sdfDevCreateCommandState(const char *);
-extern u32 func_002E5C68(u32, void *, u32);
-extern void func_002E5C38(u32);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
 void fldLoadFieldTables(void) {
     u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
 
-    func_002E5C68(command, D_0033EC90, 0x3D8);
-    func_002E5C68(command, D_0033F068, 0x3800);
-    func_002E5C68(command, D_00342868, 0x3800);
-    func_002E5C68(command, D_00346068, 0x1C00);
-    func_002E5C68(command, D_00347C68, 0x640);
-    func_002E5C68(command, D_003482A8, 0xC80);
-    func_002E5C68(command, D_00349030, 0x3840);
-    func_002E5C68(command, D_0034C8F0, 0x1000);
-    func_002E5C68(command, D_0032EF18, 0xC8);
-    func_002E5C68(command, D_0032EFE0, 0x190);
-    func_002E5C68(command, D_0032F510, 0x500);
-    func_002E5C68(command, D_0032FA10, 0xC00);
-    func_002E5C68(command, D_003BAD64, 0x2A0);
-    func_002E5C68(command, D_0032C9B0, 0x1400);
-    func_002E5C68(command, D_0032DDB0, 0x600);
-    func_002E5C68(command, D_0032E5C8, 0x880);
-    func_002E5C68(command, D_00336A60, 0x1200);
-    func_002E5C38(command);
+    sdfDevQueueReadAndWait(command, D_0033EC90, 0x3D8);
+    sdfDevQueueReadAndWait(command, D_0033F068, 0x3800);
+    sdfDevQueueReadAndWait(command, D_00342868, 0x3800);
+    sdfDevQueueReadAndWait(command, D_00346068, 0x1C00);
+    sdfDevQueueReadAndWait(command, D_00347C68, 0x640);
+    sdfDevQueueReadAndWait(command, D_003482A8, 0xC80);
+    sdfDevQueueReadAndWait(command, D_00349030, 0x3840);
+    sdfDevQueueReadAndWait(command, D_0034C8F0, 0x1000);
+    sdfDevQueueReadAndWait(command, D_0032EF18, 0xC8);
+    sdfDevQueueReadAndWait(command, D_0032EFE0, 0x190);
+    sdfDevQueueReadAndWait(command, D_0032F510, 0x500);
+    sdfDevQueueReadAndWait(command, D_0032FA10, 0xC00);
+    sdfDevQueueReadAndWait(command, D_003BAD64, 0x2A0);
+    sdfDevQueueReadAndWait(command, D_0032C9B0, 0x1400);
+    sdfDevQueueReadAndWait(command, D_0032DDB0, 0x600);
+    sdfDevQueueReadAndWait(command, D_0032E5C8, 0x880);
+    sdfDevQueueReadAndWait(command, D_00336A60, 0x1200);
+    sdfDevWaitThenReleaseCommandState(command);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120AE8);
@@ -929,7 +929,7 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FB60);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00122498);
 
-f32 func_00122710(f32 angle) {
+f32 fldSnapAngleToCardinalDirection(f32 angle) {
     f32 best;
     s32 index;
     f32 diff;
@@ -1006,7 +1006,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
     if (status == 0) {
         return;
     }
-    func_00110490(list);
+    dds3ResetObjectValueCursor(list);
     do {
         object = func_00110458(list);
         status = func_00113E30(object);
@@ -1018,7 +1018,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
                 func_00113E20(object, 0);
             }
         }
-        status = func_001104B0(list);
+        status = dds3AdvanceObjectValueCursor(list);
     } while (status != 0);
     dds3DestroyWorldIndexNode(list);
 }
@@ -1189,7 +1189,7 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->options = 0;
 }
 
-void func_001230D0(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                     s32 code, s32 link, const char *subname) {
     if (kwlnTaskGetTaskByName(D_0039FBC0) != NULL) {
         if (D_0032E3B0[4] == stage) {
@@ -1666,7 +1666,7 @@ u8 func_00124EE0(void) {
     return scrFindNamedProcessNode(D_0039FCB0) != 0;
 }
 
-u8 func_00124F08(void) {
+u8 fldGetCampSceneControlMode(void) {
     if (D_003BABEC > 0) {
         return 2;
     }

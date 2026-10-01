@@ -54,7 +54,7 @@ extern void evtStopTestTasks(void);
 
 extern void evtDestroySkyTask(void);
 
-extern void *func_002DA730(void);
+extern void *sdfCreateAssetWithDrawEntries(void);
 
 extern s8 D_003BA948;
 
@@ -229,7 +229,7 @@ void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
 
 void evtEnsureDrawVectorState(void) {
     if (D_003BD6B0 == NULL) {
-        D_003BD6B0 = func_002DA730();
+        D_003BD6B0 = sdfCreateAssetWithDrawEntries();
         ((EvtDrawState *)D_003BD6B0)->value1C = 1.0f;
     }
 }
@@ -259,7 +259,7 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, void *);
 
-extern u8 *func_002E13E0(void *, s32);
+extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
 extern void *sdfCreateResetPacketList(void);
 
@@ -267,7 +267,7 @@ extern void func_002D5608(void *);
 
 extern void sdfPktInit(void *, s32, s32, s32, s32);
 
-extern void *func_002E4908();
+extern void *sdfFormatSifPacket();
 
 void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst) {
     void *list = sdfAllocPacketAligned(0x20);
@@ -275,7 +275,7 @@ void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = 0x47;
     sdfAppendPacket(list, packet);
@@ -291,7 +291,7 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = 0x48;
     sdfAppendPacket(list, packet);
@@ -309,7 +309,7 @@ void evtSubmitTexturePacket(s32 value) {
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_002E13E0(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = ((u64)value << 32) | 0x64;
     command->registerId = 0x42;
     sdfAppendPacket(list, packet);
@@ -325,7 +325,7 @@ extern u8 D_00326ED0[];
 
 extern void func_002D4C80(const void *, void *, s32);
 
-extern void func_002D40E8(void *, void *);
+extern void sdfAppendDmaTagToList(void *, void *);
 
 void func_00108E60(void) {
     void *list = sdfAllocPacketAligned(0x20);
@@ -333,7 +333,7 @@ void func_00108E60(void) {
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_002D4C80(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
-    func_002D40E8(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
         surface->submit(surface, list);
@@ -348,7 +348,7 @@ void func_00108F00(void) {
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, texture, 0);
-    func_002D40E8(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &D_00324B48[D_003BA8E8];
         surface->submit(surface, list);
@@ -404,7 +404,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     func_002D5608(packet);
     sdfAppendPacket(list, packet);
     sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, func_002E4908(pkt, drawArg));
+    sdfAppendPacket(list, sdfFormatSifPacket(pkt, drawArg));
     surface = (EvtDrawSurface *)D_00325748;
     surface->submit(surface, list);
 }
@@ -478,7 +478,8 @@ void evtSelStateDestroy(void) {
     if (D_003BA948 != 0) {
         sdfReleaseChipBlock(D_003BD760);
         D_003BA948 = 0;
-        __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_CLEAR_W(vf10);
         VU0_STORE_VF(vf10, D_00324590);
     }
 }
@@ -590,7 +591,7 @@ u32 evtPollFileMenuModeTwo(void) {
     return status;
 }
 
-u8 func_0010A3E8(void) {
+u8 evtWaitFileMenuTaskExit(void) {
     s64 operationResult;
 
     operationResult = fileMenuTaskExists();
@@ -619,7 +620,7 @@ u32 func_0010A478(void) {
     return 0;
 }
 
-void func_0010A480(void) {
+void evtStartSelectionFadeOut(void) {
     kwlnFadeBackgroundStartOut(0);
 }
 
@@ -853,7 +854,7 @@ u32 evtDestroySkyAndCampTasks(void) {
     return 0;
 }
 
-u8 func_0010A908(void) {
+u8 evtWaitSkyCampTaskState(void) {
     s64 taskState;
 
     taskState = mnuPollTaskState();
@@ -920,7 +921,7 @@ u32 func_0010AA38(void) {
     return 0;
 }
 
-void func_0010AA40(void) {
+void evtLaunchFontTestScene(void) {
     func_001983A8();
 }
 

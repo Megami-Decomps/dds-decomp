@@ -134,7 +134,7 @@ extern void func_0026A248(void);
 
 extern void mnuCreateTitleEffectTask(void);
 
-void func_00269480(void) {
+void mnuInitializeTitleAudioAndEffects(void) {
     if (D_003BC58C != 0) {
         func_002E8E50();
         return;
@@ -190,7 +190,7 @@ void mnuResetTitleEffectState(s32 command) {
     state->frameCounter = 0;
 }
 
-void func_00269628(s32 value) {
+void mnuSetTitleVoicePrefixIndex(s32 value) {
     ((TitleEffectState *)kwlnTaskGetUserValue(D_003BC588))->soundNameIndex = value;
 }
 
@@ -214,7 +214,7 @@ void func_002696F8(void) {
     func_002E97E8();
 }
 
-void func_00269710(void) {
+void mnuQueryTitleSoundBusy(void) {
     sdfSoundIsCommandBusy();
 }
 
@@ -286,18 +286,18 @@ u32 func_002698C0(void) {
     return 1;
 }
 
-u32 func_002698E0(void) {
-    func_0026A808();
-    func_0026A950();
+u32 mnuResetTitlePlaybackCommands(void) {
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
     return 1;
 }
 
-u32 func_00269908(void) {
+u32 mnuAdvanceTitleStreamFromScript(void) {
     mnuAdvanceTitleStateUnderSemaphore();
     return 1;
 }
 
-u8 func_00269928(void) {
+u8 mnuIsTitleStreamIdle(void) {
     s64 soundState;
 
     soundState = mnuPollTitleStreamStateLocked();
@@ -327,7 +327,7 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_002699A0);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269A68);
 
-void func_00269B50(u32 arg0) {
+void mnuInitTitleSoundRemoteRequest(u32 arg0) {
     sceSdRemoteInit();
     func_002699A0(arg0);
     D_003BC5BC = 0;
@@ -390,7 +390,7 @@ extern u8 D_003DB1C0[];
 
 void mnuCreateTitleStreamThread(void) {
     D_003BD8D0 = sdfCreateSemaphore(1, 0xff, 0);
-    func_002CFA68(&D_003BD8C8, mnuRunTitleStreamThread, D_003DB1C0,
+    sdfStartTrackedThread(&D_003BD8C8, mnuRunTitleStreamThread, D_003DB1C0,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
 }
@@ -469,7 +469,7 @@ INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A778);
 
-void func_0026A808(void) {
+void mnuMarkTitleStreamResetPending(void) {
     WaitSema(D_003BD8D0);
     D_003D9140[1] = 0;
     D_003D9140[4] = 2;
@@ -509,7 +509,7 @@ void mnuResetTitleStream(void) {
     }
 }
 
-void func_0026A950(void) {
+void mnuResetTitleStreamLocked(void) {
     WaitSema(D_003BD8D0);
     mnuResetTitleStream();
     SignalSema(D_003BD8D0);
@@ -561,13 +561,13 @@ void mnuReleaseSoundBuffer(void) {
     state[8] = 0;
 }
 
-void func_0026AE50(void) {
+void mnuResetSoundBufferLocked(void) {
     WaitSema(D_003BD8D0);
     mnuResetSoundBuffer();
     SignalSema(D_003BD8D0);
 }
 
-void func_0026AE80(void) {
+void mnuReleaseSoundBufferLocked(void) {
     WaitSema(D_003BD8D0);
     mnuReleaseSoundBuffer();
     SignalSema(D_003BD8D0);
@@ -634,7 +634,7 @@ u32 func_0026BD38(void) {
     return 0;
 }
 
-void func_0026BD58(void) {
+void mnuRestartRuntimeAfterViewer(void) {
     evtDestroySecondaryWorldNode();
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();

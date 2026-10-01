@@ -135,7 +135,7 @@ void effMagatuhiFillColorTable(EffMagatuhiWork *work, u32 colorA, u32 colorB) {
     }
 }
 
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
 
 /* Owner of the value table an effect variant's particles write through. */
@@ -335,14 +335,14 @@ void effMagatuhiInitParticleA(EffMagatuhiFamilyA *work, s32 index) {
     f32 t;
 
     elem->unk00 = 0;
-    elem->f04 = -work->f6C * func_00341240(D_003AA868);
-    elem->f08 = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
+    elem->f04 = -work->f6C * effMiscRandUnitFloat(D_003AA868);
+    elem->f08 = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
     blend = work->blend68;
-    elem->f0C = work->f64 * (func_00341240(D_003AA868) * blend + (1.0f - blend));
+    elem->f0C = work->f64 * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
     blend = work->blend78;
-    elem->f10 = work->f70 * (func_00341240(D_003AA868) * blend + (1.0f - blend));
+    elem->f10 = work->f70 * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend));
     blend = work->blend7C;
-    t = func_00341240(D_003AA868) * blend + (1.0f - blend);
+    t = effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend);
     elem->f14 = (work->f74 * t - elem->f10) / (f32)work->frames;
     func_001918B8(work->owner->valueWork, index);
     effMagatuhiSetValue(work->owner->valueWork, index, 0);

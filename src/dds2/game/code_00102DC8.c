@@ -57,7 +57,7 @@ extern s32 kwlnTextureCountIncompleteResources(void);
 
 extern s32 func_0035C860();
 
-extern s32 func_0033D810();
+extern s32 sdfCreateFormattedSifCommand();
 
 extern void sdfAppendPacket();
 
@@ -286,7 +286,7 @@ void kwlnTextureDrawPageCounter(void *task) {
     s32 current = kwlnTextureGetPageIndex();
     s32 count = kwlnTextureCountIncompleteResources();
     func_0035C860(buffer, "TEX VIEWER [%d/%d]", current, count - 1);
-    sdfAppendPacket(task, func_0033D810(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
+    sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFFFFF80, 0, buffer));
 }
 
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
@@ -409,7 +409,7 @@ extern u8 D_0037F980[];
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
 
-void func_00105240(void) {
+void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
     sdfCameraBuildProjection(D_0037F5E0);
     sdfCameraBuildProjection(D_0037F980);
@@ -480,7 +480,7 @@ void func_001057A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
-u64 func_00105910(s32 arg0) {
+u64 evtBuildFrameStatePacketList(s32 arg0) {
     u64 list = sdfCreateResetPacketList();
 
     sdfAppendPacket(list, D_0043DDA0 + arg0 * 0x160 + func_00100400() * 0xB0);
@@ -607,10 +607,10 @@ void kwlnDrawBlurErrorCounters(void) {
             task = sdfAllocPacketAligned(0x20);
             sdfInitPacketList(task);
             if (D_00435D04 > 0) {
-                sdfAppendPacket(task, func_0033D810(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_00435D04));
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_00435D04));
             }
             if (D_00435D08 > 0) {
-                sdfAppendPacket(task, func_0033D810(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_00435D08));
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_00435D08));
             }
             D_00380708.submit(&D_00380708, task);
         }

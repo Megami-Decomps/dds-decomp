@@ -7,14 +7,14 @@ extern char D_003ADB20[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
 void func_00232720(void);
-void func_00134C68(void);
+void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void evtEventViewerReset(u64 arg0);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(s32 arg0);
 extern s32 mnuPollTitleStreamStateLocked(void);
-extern void func_0026A808(void);
+extern void mnuMarkTitleStreamResetPending(void);
 extern void func_0023EF90(s32 arg0, void *arg1);
 
 extern u32 D_003BA904;
@@ -25,7 +25,7 @@ s32 dds3GetWorldObject(void);
 void func_001109B8(s32 arg0, u32 arg1);
 f32 dds3GetCameraValue(s32 arg0);
 s32 func_00106488(f32 arg0);
-void func_00270030(void);
+void mnuStopMovieDrawTask(void);
 void func_00270068(void);
 
 /* Handles retained by the viewer and by its owning task context. */
@@ -348,14 +348,14 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022F550);
 s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
     if (viewer->timedActive == 1) {
         if (viewer->glyphAdvancePosition < viewer->timedStart) {
-            func_00270030();
+            mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd == -1) {
             func_00270068();
         } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
-            func_00270030();
+            mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
@@ -774,7 +774,7 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00232108);
 
-u32 func_002323E8(u32 unused0, u32 unused1, u32 viewerAddr) {
+u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewerAddr) {
     if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
         ((EventViewerState *)viewerAddr)->unk22AC = 0;
         ((EventViewerState *)viewerAddr)->unk22B4 = 0;
@@ -807,7 +807,7 @@ void *evtViewerInitializeUpdateSequence(void) {
     u64 viewer;
 
     viewer = kwlnTaskGetUserValue();
-    func_00134C68();
+    fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     D_003BA904 |= 0x2000000;
     return (void *)evtViewerScheduleFrameVariableTask;
@@ -832,7 +832,7 @@ void *evtViewerAdvanceUpdate(void) {
         }
         if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
             if (viewer->unk2440 == 0x78) {
-                func_0026A808();
+                mnuMarkTitleStreamResetPending();
             }
             viewer->unk2440++;
             D_003BA904 |= 0x2000000;
@@ -847,12 +847,12 @@ void *evtViewerAdvanceUpdate(void) {
 INCLUDE_ASM(const s32, "game/code_0022CBA0", evtViewerStartUpdate);
 
 extern f32 D_00324590[];
-extern void func_002441E8();
+extern void mnuReleaseCampSceneRegisteredIds();
 extern void evtResetUnitVectorSlots();
 extern void mnuCampLinkFontGlyph();
 extern void func_0014A298();
 extern void func_00105888();
-extern void func_00270030();
+extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void func_002D0A10();
@@ -867,7 +867,7 @@ void evtViewerCleanupMessageWindow(s32 viewerAddr);
 void evtViewerReleaseResources(viewer)
     EventViewerState *viewer;
 {
-    func_002441E8();
+    mnuReleaseCampSceneRegisteredIds();
     evtResetUnitVectorSlots();
     evtViewerCleanupMessageWindow((s32)viewer);
     mnuCampLinkFontGlyph(viewer);
@@ -875,7 +875,7 @@ void evtViewerReleaseResources(viewer)
     func_00105888();
     D_00324590[0] = D_00324590[1] = D_00324590[2] = D_00324590[3] = 0.0f;
     if (viewer->timedActive == 1) {
-        func_00270030();
+        mnuStopMovieDrawTask();
         viewer->timedActive = 0;
     }
     while (sdfCheckPendingWorkWithInterrupts() != 0) {

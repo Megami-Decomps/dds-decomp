@@ -58,12 +58,12 @@ u32 func_00110458(WorldObject *object) {
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
-u32 func_00110490(s16 *values) {
+u32 dds3ResetObjectValueCursor(s16 *values) {
     values[2] = *values;
     return (u32)~(s32)*values >> 0x1f;
 }
 
-u32 func_001104B0(s16 *values) {
+u32 dds3AdvanceObjectValueCursor(s16 *values) {
     if (values[2] < 0) {
         return 0;
     }
@@ -81,7 +81,7 @@ INCLUDE_ASM(const s32, "game/code_001102C8", func_00110710);
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_001107C8);
 
-void func_00110860(WorldObject *object, s8 value) {
+void dds3SetWorldObjectDataValue(WorldObject *object, s8 value) {
     if (object->data != NULL) {
         object->data->value20 = (s32)value;
     }

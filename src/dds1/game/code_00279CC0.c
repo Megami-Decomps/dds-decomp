@@ -8,7 +8,7 @@ extern s32 mnuGetSelectionFromFlags(s32);
 
 extern void effReleaseTextureHandlesAndResetSlots(s32);
 
-extern void func_002BF9E0(s32, s32, s32, s32, s32, s32);
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
@@ -256,7 +256,7 @@ s64 func_0027A0A8(s32 callback) {
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
-    s32 item = func_00197E08(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
+    s32 item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
     func_001958A0(item, 1, 0x53);
     frFontQueueGlyphInSelectedSlot(item);
@@ -387,11 +387,11 @@ typedef struct MenuContextSprites {
 } MenuContextSprites;
 
 void mnuDrawSkillMenuFrameIcons(s32 context) {
-    func_002BF790(0x1c0, 0xa60, 0, 1, ((MenuContextSprites *)context)->sprite74, 0x1f, 0x53);
-    func_002BF790(0x150, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    func_002BF790(0xbb0, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
-    func_002BF790(0x250, 0x9c0, 0, 1, ((MenuContextSprites *)context)->spriteE4, 0x18, 0x53);
-    func_002BF790(0xce0, 0x9e0, 0, 1, ((MenuContextSprites *)context)->sprite64, 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1c0, 0xa60, 0, 1, ((MenuContextSprites *)context)->sprite74, 0x1f, 0x53);
+    itfDrawGridWithResolvedSlot(0x150, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0xbb0, 0xa00, 0, 1, ((MenuContextSprites *)context)->sprite74, 0, 0x53);
+    itfDrawGridWithResolvedSlot(0x250, 0x9c0, 0, 1, ((MenuContextSprites *)context)->spriteE4, 0x18, 0x53);
+    itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, ((MenuContextSprites *)context)->sprite64, 2, 0x53);
 }
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -546,18 +546,18 @@ void mnuReleaseAssets(MenuAssets *assets) {
 
 void mnuDrawCampBackdropDecoration(s32 menu, u32 drawArg) {
     MenuAssets *assets = (MenuAssets *)menu;
-    func_002C14E0(drawArg);
-    func_002BF790(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
-    func_002BF790(0xfffffffffffffb90, 0x808, 0, 0x61, assets->sprites[4], 1, drawArg);
-    func_002BF790(0x1050, 0xfffffffffffffc18, 0, 0x61, assets->sprites[4], 2, drawArg);
-    func_002BF790(0x10b0, 0x3c0, 0, 0x61, assets->sprites[4], 3, drawArg);
-    func_002BF790(0x1300, 0xb70, 0, 0x61, assets->sprites[4], 4, drawArg);
+    uiDrawTexturedSurfaceAtFarDepth(drawArg);
+    itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
+    itfDrawGridWithResolvedSlot(0xfffffffffffffb90, 0x808, 0, 0x61, assets->sprites[4], 1, drawArg);
+    itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, assets->sprites[4], 2, drawArg);
+    itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, assets->sprites[4], 3, drawArg);
+    itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, assets->sprites[4], 4, drawArg);
     func_002C1548(0, drawArg);
     itfGridLookupValueOrDefault(assets->sprites[4], 0);
     itfGridLookupValueOrDefault(assets->sprites[4], 1);
-    func_002BF790(0, 0, 0, 0x60, assets->sprites[1], 0, drawArg);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, assets->sprites[1], 0, drawArg);
     itfGridLookupValueOrDefault(assets->sprites[1], 0);
-    func_002C1588(drawArg);
+    uiDrawSurfaceAtNearDepth(drawArg);
 }
 
 extern void itfGridLookupValueOrDefault(s32, s32);
@@ -582,7 +582,7 @@ void mnuDrawCursorIcons(s32 menu, s32 arg) {
 void mnuDrawBackdrop(s32 *assets, s32 option) {
     func_002C0950(0x30000);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
-    func_002BF790(0, 0, 0, 0, assets[0], 0, option);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets[0], 0, option);
     mnuDrawCursorIcons(assets, option);
     mnuDrawCampBackdropDecoration((s32)assets, option);
 }
@@ -738,7 +738,7 @@ typedef struct MenuSpriteGrid {
 void mnuSetGridSpriteSlot(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
     grid->slots[row * 4 + col].sprite = sprite;
     grid->slots[row * 4 + col].effect = effect;
-    func_002BF9E0(sprite, effect, x, y, x, y);
+    itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
 }
 
 void *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
@@ -1003,7 +1003,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, s32 menu, s32 panel, s32 drawAr
         s32 index = selected * 4 + i;
         s32 sprite = grid->slots[index].sprite;
         if (sprite != 0) {
-            func_002BF790(x, y, depth, 0, sprite, grid->slots[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, grid->slots[index].effect, drawArg);
         }
         i++;
     } while (i < 4);
@@ -1105,16 +1105,16 @@ void func_0027C480(u8 *panel, s32 x, s32 y, u32 sprite,
     MenuWindowContainer *window = (MenuWindowContainer *)panel;
     window->x = x;
     window->y = y;
-    func_002BF9E0(x, y, -0x70, -0x68, -0x70, -0x68);
+    itfSetGridEntryQuantizedAndRefresh(x, y, -0x70, -0x68, -0x70, -0x68);
     window->sprite = sprite;
     window->effect = effect;
     if (sprite != 0) {
-        func_002BF9E0(sprite, effect, 0x60, -0xd0, 0, 0);
+        itfSetGridEntryQuantizedAndRefresh(sprite, effect, 0x60, -0xd0, 0, 0);
     }
     window->overlaySprite = sprite;
     window->overlayColor = color;
     if (sprite != 0) {
-        func_002BF9E0(sprite, color, 0x60, -0xd0, 0, 0);
+        itfSetGridEntryQuantizedAndRefresh(sprite, color, 0x60, -0xd0, 0, 0);
     }
 }
 
@@ -1130,7 +1130,7 @@ void func_0027C570(s32 value, s32 *entry, s32 x, s32 y, s32 option) {
     entry[10] = option;
 }
 
-void func_0027C590(u8 *panel, const void *layout, u32 left, u32 top,
+void mnuSetWindowPanelBounds(u8 *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom) {
     memcpy(panel + 0x4c, layout, 0x38);
     ((MenuWindowContainer *)panel)->left = left;
@@ -1325,16 +1325,16 @@ void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
 }
 
 void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *group, s32 param) {
-    func_002BF790(x, y, z, 0, group->sprites[0], 0, param);
+    itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[0], 0, param);
     if (mask & 1) {
-        func_002BF790(x, y, z, 0, group->sprites[1], 0, param);
-        func_002BF790(x, y, z, 0, group->sprites[2], 0, param);
-        func_002BF790(x, y, z, 0, group->sprites[3], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[1], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[2], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[3], 0, param);
     }
     if (mask & 2) {
-        func_002BF790(x, y, z, 0, group->sprites[4], 0, param);
-        func_002BF790(x, y, z, 0, group->sprites[5], 0, param);
-        func_002BF790(x, y, z, 0, group->sprites[6], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[4], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
+        itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
     }
     itfGridLookupValueOrDefault(group->sprites[1], 0);
     itfGridLookupValueOrDefault(group->sprites[2], 0);
@@ -1760,7 +1760,7 @@ void mnuActivatePendingPanelResource(u32 *menu) {
         dest += 2;
     } while (--remaining >= 0);
     if (menu[8] != 0) {
-        func_002BF9E0(menu[8], menu[9], 0, 0, 0x400, 0);
+        itfSetGridEntryQuantizedAndRefresh(menu[8], menu[9], 0, 0, 0x400, 0);
         effConfigureWithDefaultSetting(menu[8], menu[9], menu[18],
                                           0, 10, 2);
     }
@@ -1772,9 +1772,9 @@ void func_0027E790(u32 *menu, s32 x, s32 y, s32 color) {
     menu[13] = y;
     menu[14] = x;
     menu[15] = color;
-    func_002BF9E0(x, y, 0, 0, -0x400, 0);
+    itfSetGridEntryQuantizedAndRefresh(x, y, 0, 0, -0x400, 0);
     effConfigureIndexedSlotResource(x, y, menu[16], 0, 3);
-    func_002BF9E0(x, color, 0, 0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(x, color, 0, 0, 0, 0);
     effConfigureWithDefaultSetting(x, color, menu[17], 0, 10, 0);
 }
 
@@ -1784,8 +1784,8 @@ u8 mnuHasScrollPanelOverlay(s32 panel) {
 
 void func_0027E860(u8 *panel, s32 y, s32 unknown,
                    u32 *sprite, s32 flag) {
-    func_002C1380(flag);
-    func_002BF790((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
+    uiDrawActiveSurfaceRegion(flag);
+    itfDrawGridWithResolvedSlot((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
                    sprite[6], sprite[7], flag);
     func_002C1430(flag);
 }
@@ -1870,7 +1870,7 @@ typedef struct MenuPanelResources {
     u32 rightHandle;         /* 0xF0 */
 } MenuPanelResources;
 
-void func_0027F050(s32 panel, u32 resource, u32 left, u32 center, s32 right
+void mnuLoadPanelSectionResources(s32 panel, u32 resource, u32 left, u32 center, s32 right
                                     ) {
     u32 handle;
 
@@ -2032,16 +2032,16 @@ u32 func_0027F730(u32 resource) {
     memset(item, 0, 0x24);
     sprite = effCreateResourceSlotSet(resource, 0x1F, 1);
     item->sprites[0] = sprite;
-    func_002BF9E0(sprite, 0, 0, 0x40, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0, 0x40, 0, 0);
     sprite = effCreateResourceSlotSet(resource, 0x1E, 1);
     item->sprites[1] = sprite;
-    func_002BF9E0(sprite, 0, 0x5E0, -0x20, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x20, 0, 0);
     sprite = effCreateResourceSlotSet(resource, 7, 1);
     item->sprites[2] = sprite;
-    func_002BF9E0(sprite, 0, 0x5E0, -0x18, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x18, 0, 0);
     sprite = effCreateResourceSlotSet(resource, 0x1D, 1);
     item->sprites[3] = sprite;
-    func_002BF9E0(sprite, 0, 0xB40, 0x40, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0xB40, 0x40, 0, 0);
     return (u32)item;
 }
 

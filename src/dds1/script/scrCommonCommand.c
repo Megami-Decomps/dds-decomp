@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "scr.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
@@ -301,12 +302,13 @@ s32 func_0010DDF8(void)
     f32 y;
     f32 z;
     x = bfWaitReadArgFloat(1);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.x $vf10, $vf00, $vf02x" :: "r"(x));
+    VU0_SET_AXIS_GPR(x, x);
     y = bfWaitReadArgFloat(2);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.y $vf10, $vf00, $vf02x" :: "r"(y));
+    VU0_SET_AXIS_GPR(y, y);
     z = bfWaitReadArgFloat(3);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
-    __asm__ volatile ("vmulx.w $vf10, $vf10, $vf00x\n\tsqc2 $vf10, %0" : "=m"(v));
+    VU0_SET_AXIS_GPR(z, z);
+    VU0_CLEAR_W(vf10);
+    VU0_STORE_VF_TO(vf10, v);
     func_00107FD8(scrReadIntParameter(0), 0, &v);
     return 1;
 }
@@ -324,12 +326,13 @@ s32 func_0010DF20(void)
     f32 y;
     f32 z;
     x = bfWaitReadArgFloat(1);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.x $vf10, $vf00, $vf02x" :: "r"(x));
+    VU0_SET_AXIS_GPR(x, x);
     y = bfWaitReadArgFloat(2);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.y $vf10, $vf00, $vf02x" :: "r"(y));
+    VU0_SET_AXIS_GPR(y, y);
     z = bfWaitReadArgFloat(3);
-    __asm__ volatile ("qmtc2 %0, $vf02\n\tvaddx.z $vf10, $vf00, $vf02x" :: "r"(z));
-    __asm__ volatile ("vmove.w $vf10, $vf00\n\tsqc2 $vf10, %0" : "=m"(v));
+    VU0_SET_AXIS_GPR(z, z);
+    VU0_SET_W_ONE(vf10);
+    VU0_STORE_VF_TO(vf10, v);
     func_00108218(scrReadIntParameter(0), &v);
     return 1;
 }

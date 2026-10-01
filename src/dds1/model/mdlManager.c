@@ -36,7 +36,7 @@ typedef struct MdlNode MdlNode;
 typedef struct MdlInner {
     MdlEntryTable *entries; /* 0x0 */
     u8 unk4[4];  /* 0x4 */
-    u32 resourceHandle; /* 0x8: released through func_002DA1B0 */
+    u32 resourceHandle; /* 0x8: released through sdfUpdateActiveResourceListScalars */
     u8 unkC[8];  /* 0xC */
     MdlNode *list; /* 0x14: intrusive list walked by func_00218320/368 */
     u8 unk18[4]; /* 0x18 */
@@ -120,7 +120,7 @@ MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void func_00217CA8(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
 
 extern void *func_00288B90();
-extern u32 func_002EB090(void *);
+extern u32 sndBuildResourceHandleListFromOffsets(void *);
 extern void mdlSetResourceAmount(MdlCtx *ctx, u32 *node, f32 amount);
 
 extern u32 D_003BD878;
@@ -220,7 +220,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(void *arg0, MdlLoadReq *req) {
     u32 size;
 
     handle = func_00288B90();
-    size = func_002EB090(handle);
+    size = sndBuildResourceHandleListFromOffsets(handle);
     req->size = size;
     handle = fileGetResourceHandle(arg0);
     func_002D0918(handle);
@@ -288,7 +288,7 @@ typedef struct MdlLink {
 
 extern void btlDestroyGroupNode();
 
-void func_002172B0(MdlLink *link) {
+void mdlUnlinkGroupEntry(MdlLink *link) {
     MdlLink *prev = link->prev;
     MdlLink *next = link->next;
     MdlGroup *group;
@@ -355,7 +355,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
     }
     mdlReleaseDevSlots(ctx);
     sdfReleaseDevSlot(inner, 1, 1);
-    func_002172B0((MdlLink *)ctx);
+    mdlUnlinkGroupEntry((MdlLink *)ctx);
     sdfReleaseChipBlock(ctx);
 }
 
@@ -612,7 +612,7 @@ s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 id) {
 }
 
 void mdlReleaseInnerResourceHandle(MdlCtx *ctx) {
-    func_002DA1B0(ctx->inner->resourceHandle);
+    sdfUpdateActiveResourceListScalars(ctx->inner->resourceHandle);
 }
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00218460);

@@ -15,7 +15,7 @@ typedef struct {
     WorldEntry *entry;
 } WorldObject;
 
-void func_0010FB00(u8 *arg0) {
+void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
     u8 *obj = *(u8 **)(arg0 + 0x1C);
     u32 flags = *(u32 *)(obj + 0xC0);
 

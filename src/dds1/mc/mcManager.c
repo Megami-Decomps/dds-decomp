@@ -84,7 +84,7 @@ void func_00289F10(u32 port, u32 request) {
     func_002F6F60(port, 0, request);
 }
 
-s32 func_00289F30(void) {
+s32 mcPollNormalizedCommandStatus(void) {
     s32 command;
     s32 result;
 
@@ -101,7 +101,7 @@ void func_00289F80(u32 port, u32 request, u32 buffer) {
     func_002F61D8(port, 0, request, buffer);
 }
 
-s32 func_00289FA8(s32 *resultOut) {
+s32 mcPollCommandStatusWithResult(s32 *resultOut) {
     u32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);
@@ -143,6 +143,29 @@ void func_0028A070(void) {
 /* Like the result poll, but only report completion, not the SDK result. */
 s32 mcPollCompletionStatus(void) {
     u32 cmdId;
+    s32 status;
+    s32 result = func_002F6858(1, &cmdId, &status);
+
+    if (result == 1) {
+        if (status >= 0) {
+            return result;
+        }
+        if (status == -4) {
+            return -2;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+void fileWriteBegin(s32 request, u32 first, u32 second) {
+    func_002F6670();
+}
+
+/* Poll the memory-card write: busy is 0, success 1, and the card's
+ * -4 status is translated to the menu's -2 error. */
+s32 fileWriteWait(void) {
+    s32 cmdId;
     s32 status;
     s32 result = func_002F6858(1, &cmdId, &status);
 

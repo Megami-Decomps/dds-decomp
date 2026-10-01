@@ -104,7 +104,7 @@ extern s32 D_003898FC[];
 extern s32 D_00389780[];
 extern s32 D_00399F60[];
 extern u8 D_00399EA0[][16];
-extern s32 func_00127398(void);
+extern s32 fldGetCampSceneControlMode(void);
 extern s32 func_001275D0(void);
 extern s32 fileMenuTaskExists(void);
 extern s32 func_00127320(void);
@@ -179,9 +179,9 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 func_0033EB10(u32, void *, u32);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void func_0033EAE0(u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
 
 extern s32 D_00436184;
 
@@ -355,7 +355,7 @@ typedef struct FldZone {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
-void func_00137818(void) {
+void fldInitializeCameraColorResource(void) {
     D_00438ECC = func_00343ED0(D_00413350, &D_00438ED0, 0);
     D_00436100 = func_0032C138((void *)D_00438ED0);
     D_004360F8 = func_002DEB80(D_00444990);
@@ -436,10 +436,10 @@ void fldAllocateRecordStorage(void) {
 }
 
 void fldReleaseRecordStorage(void) {
-    func_00329910(D_00436190);
+    sdfDecrementAllocationReferenceCount(D_00436190);
     func_003298C0(D_00436190);
     D_00436180 = 0;
-    func_00329910(D_0043618C);
+    sdfDecrementAllocationReferenceCount(D_0043618C);
     func_003298C0(D_0043618C);
     D_00436178 = 0;
 }
@@ -536,7 +536,7 @@ void fldResetRecordState(void) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
 
-s32 func_00139400(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldZone *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -609,7 +609,7 @@ void func_0013AA80(void) {
 void func_0013AA88(void) {
 }
 
-f32 func_0013AA90(f32 margin, s32 mode, s32 count, f32 *pos, FldZone *zone) {
+f32 fldGetPositionZoneClearance(f32 margin, s32 mode, s32 count, f32 *pos, FldZone *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -662,7 +662,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B4F8);
 void func_0013B810(void) {
 }
 
-void func_0013B818(void) {
+void fldResetZoneRecordsAndActorSlots(void) {
     s32 i;
     s32 j;
 
@@ -816,7 +816,7 @@ u32 fldDestroyTaskSlot(u32 index) {
 
 extern s8 D_00387D60[];
 extern u8 D_00435F24;
-extern u8 *func_001406E8(void);
+extern u8 *fldSelectCurrentActorOnNextFloor(void);
 
 s32 fldRestartSceneResourceTask(void) {
     u8 *object;
@@ -829,7 +829,7 @@ s32 fldRestartSceneResourceTask(void) {
     }
     D_00387D60[0] = 0;
     D_00435F24 = 0;
-    object = func_001406E8();
+    object = fldSelectCurrentActorOnNextFloor();
     if (scrFindNamedProcessNode((u32)object) == 0) {
         evtStartSceneResourceTask(dds3GetWorldObject(), object);
     }
@@ -964,8 +964,8 @@ void fldLoadInfoTable(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_0035C860(path, D_00413448, directory, field);
         command = sdfDevCreateCommandState(path);
-        func_0033EB10(command, D_0038E2D0, 0x3B80);
-        func_0033EAE0(command);
+        sdfDevQueueReadAndWait(command, D_0038E2D0, 0x3B80);
+        sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
@@ -1108,7 +1108,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 }
 
 /* Use the selected actor slot only when it belongs to this area and kind 10. */
-u8 *func_001406E8(void) {
+u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + index * 108);
     if (entry->area == D_00389784[0] + 1 && entry->kind == 10) {
@@ -1443,8 +1443,8 @@ void fldLoadActorWaypointTable(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_0035C860(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
-        func_0033EB10(command, D_003931A0, 0x6D00);
-        func_0033EAE0(command);
+        sdfDevQueueReadAndWait(command, D_003931A0, 0x6D00);
+        sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
@@ -1573,7 +1573,7 @@ s32 func_00144028(void *task) {
     if (D_00389780[0] >= 200) {
         return 0;
     }
-    if (func_00127398() != 0) {
+    if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
     if (func_001275D0() != 0) {
@@ -1598,9 +1598,9 @@ s32 func_00144028(void *task) {
     if (menu->pending != 0) {
         func_00143D90(menu->position);
         func_00143F78(D_00399F60[menu->choice] - 9, 0x130);
-        func_0019B8B0(0x13);
+        itfSetTextDrawLimit(0x13);
         func_0012DDC0(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
-        func_0019B8B0(-1);
+        itfSetTextDrawLimit(-1);
         menu->position++;
         menu->pending = 0;
     } else {

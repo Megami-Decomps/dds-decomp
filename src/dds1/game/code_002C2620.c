@@ -79,7 +79,7 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2620);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2658);
 
-LmapNode *func_002C26C8(LmapList *list) {
+LmapNode *fldLmapAdvanceCursor(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *next;
 
@@ -106,7 +106,7 @@ LmapNode *func_002C26C8(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_002C2768(LmapList *list) {
+LmapNode *fldLmapRewindCursor(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *next;
 
@@ -133,7 +133,7 @@ LmapNode *func_002C2768(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_002C27F8(LmapList *list) {
+LmapNode *fldLmapAdvanceThroughWindow(LmapList *list) {
     LmapNode *result = 0;
     s32 i;
     s32 steps;
@@ -143,12 +143,12 @@ LmapNode *func_002C27F8(LmapList *list) {
     }
     steps = list->capacity * 2 - list->count;
     for (i = 0; i < steps; i++) {
-        result = func_002C26C8(list);
+        result = fldLmapAdvanceCursor(list);
     }
     return result;
 }
 
-LmapNode *func_002C2870(LmapList *list) {
+LmapNode *fldLmapRewindThroughWindow(LmapList *list) {
     LmapNode *result = 0;
     s32 i;
     s32 steps;
@@ -158,7 +158,7 @@ LmapNode *func_002C2870(LmapList *list) {
     }
     steps = list->capacity + list->count;
     for (i = 0; i < steps; i++) {
-        result = func_002C2768(list);
+        result = fldLmapRewindCursor(list);
     }
     return result;
 }
@@ -308,7 +308,7 @@ u32 fldGetLmapStage(void) {
     return stage;
 }
 
-void func_002C3690(void) {
+void fldDisplayLocalMapCounterMessage(void) {
     char text[32];
 
     func_003014F0(text, D_003BD250, sdfCounterGetDisplayWordPointer());

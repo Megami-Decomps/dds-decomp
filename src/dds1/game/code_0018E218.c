@@ -99,12 +99,12 @@ extern u8 D_00325748[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket();
-extern s32 func_002E4960();
+extern s32 sdfCreateFormattedSifCommand();
 
 extern BDWork2C *func_00186C18(void *arg);
 extern BDWork2C *func_00186F90(void *arg);
 extern BDWork24 *func_00187FC0(void *arg);
-extern BDWork2C *func_00187460(void *arg);
+extern BDWork2C *effCloneBlurWorkWithSlots(void *arg);
 extern void func_00186498(Work30 *arg);
 extern void func_00186CD0(BDWork2C *arg);
 extern void func_00187098(BDWork2C *arg);
@@ -171,7 +171,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     u8 *scene;
 
     sdfInitPacketList(task);
-    sdfAppendPacket(task, func_002E4960((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, arg2, arg3));
+    sdfAppendPacket(task, sdfCreateFormattedSifCommand((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, arg2, arg3));
     scene = D_00325748;
     (*(void (**)(void *, void *))(scene + 0x10))(scene, task);
 }
@@ -342,7 +342,7 @@ void effInitWorks(void) {
     D_003BD808 = func_00186C18(D_003558D8);
     D_003BD804 = func_00186F90(D_003558A8);
     D_003BD80C = func_00187FC0(D_00355948);
-    D_003BD810 = func_00187460(D_00355970);
+    D_003BD810 = effCloneBlurWorkWithSlots(D_00355970);
     *(s32 *)effGetCh76Work() = 4;
 }
 

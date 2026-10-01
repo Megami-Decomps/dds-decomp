@@ -547,7 +547,7 @@ s32 func_00200628(actor, kind)
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002007A8);
 
-extern s32 func_001A8448(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 extern const s32 D_003A5A08[10];
 
@@ -556,7 +556,7 @@ s32 btlUnitHasAllTenActions(void *actor) {
     s32 i;
     memcpy(actions, D_003A5A08, sizeof(actions));
     for (i = 0; i < 10; i++) {
-        if (func_001A8448(actor, actions[i]) == 0) {
+        if (btlTestSelectedItemCategoryMask(actor, actions[i]) == 0) {
             return 0;
         }
     }
@@ -1001,12 +1001,12 @@ s32 func_00201828(s32 unused, s32 action) {
     return 1;
 }
 
-extern s32 func_001A8050(s32, s32);
+extern s32 btlWouldUiValueFallBelowQuarter(s32, s32);
 
 extern u8 D_003BD476;
 
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
-    if (func_001A8050(actor, 0) != 0) {
+    if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (D_003BD476 == 0) {
             btlBossDebugPrintf(D_003A5A80);
         }
@@ -1224,7 +1224,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                         }
                         value = func_001A2F50((void *)unit, index);
                         if (func_001A55A8((void *)unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && func_001A8448((void *)unit, index) != 0)) {
+                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, index) != 0)) {
                             return 1;
                         }
                     }
@@ -1232,7 +1232,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                 }
                 value = func_001A2F50((void *)unit, action);
                 if (func_001A55A8((void *)unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && func_001A8448((void *)unit, action) != 0)) {
+                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, action) != 0)) {
                     return 1;
                 }
             }
@@ -1245,7 +1245,7 @@ s64 func_00202158(void) {
     return func_001A8CE0(0);
 }
 
-extern s32 func_001A8448(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 extern s32 func_001A53D8(void *, s32);
 
@@ -1265,7 +1265,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        if (func_001A8448(unit, index) != 0 ||
+                        if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
                             func_001A53D8(unit, index) != 0 ||
                             func_001A5578(unit, index) != 0 ||
                             func_001A55A8(unit, index) != 0) {
@@ -1274,7 +1274,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     }
                     return 1;
                 }
-                if (func_001A8448(unit, action) != 0 ||
+                if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
                     func_001A53D8(unit, action) != 0 ||
                     func_001A5578(unit, action) != 0) {
                     return 0;
@@ -1598,7 +1598,7 @@ s32 func_00203CA8(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00203E38);
 
-s32 func_00203F98(s32 actor) {
+s32 btlAppendSelfAfterTargetScan(s32 actor) {
     void *list = btlAllocateIndexList(13);
     func_001A30F8(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
@@ -1772,7 +1772,7 @@ typedef struct BtlLinkedCommand {
     f32 value130;      /* 0x130: initialized to 30 for this motion */
 } BtlLinkedCommand;
 
-void func_002044F0(u8 *command, u8 *unused) {
+void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -1814,7 +1814,7 @@ s32 func_00204AC8(s32 unused, s32 unit, s32 index) {
         return result;
     }
     if (D_003BAA50[index * 0x38 + 2] == 2) {
-        if (func_001A8050(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
+        if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
             return 1;
         }
         return 4;
@@ -3851,7 +3851,7 @@ s32 func_0020B580(u8 *unit) {
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
-            func_002044F0(unit, unit);
+            btlFaceLinkedTargetAndFlagDirection(unit, unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             func_0020B348(unit, unit, 0);

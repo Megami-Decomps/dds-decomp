@@ -354,26 +354,26 @@ void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params
     s32 row;
     s32 col;
 
-    sdfAppendPacket(list, func_002E4960(labelX, y, z, 0, "MARK0:%d", params->mark0));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0xC0, z, 0, "START:%d", params->start));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0x120, z, 0, "END  :%d", params->end));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
-    sdfAppendPacket(list, func_002E4960(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y, z, 0, "MARK0:%d", params->mark0));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0xC0, z, 0, "START:%d", params->start));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x120, z, 0, "END  :%d", params->end));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
     for (row = 0; row != 4; row++) {
         color = params->colors[row];
         sdfAppendPacket(list, func_0011D3E8(x + 0x480, boxY, z, 0x300, 0x180, (color & 0xFFFFFF) | 0x80000000, 0x60404040));
         for (col = 0; col != 4; col++) {
-            sdfAppendPacket(list, func_002E4960(labelX, boxY, z, D_003679B0[col], D_003679B8[col]));
-            sdfAppendPacket(list, func_002E4960(x + 0x240, boxY, z, 0, D_003BBBB0, color & 0xFF));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, boxY, z, D_003679B0[col], D_003679B8[col]));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x240, boxY, z, 0, D_003BBBB0, color & 0xFF));
             color >>= 8;
             boxY += 0x60;
         }
         boxY += 0x60;
     }
     if (selected >= 0) {
-        sdfAppendPacket(list, func_002E4960(x, y + D_00367980[selected], z, 0, D_003BBBB8));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y + D_00367980[selected], z, 0, D_003BBBB8));
     }
 }
 
@@ -822,11 +822,15 @@ void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *rec, f32 *out) {
 
     __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(matrix + 0xC0));
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(info->pos));
-    __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\tvmaddw.xyzw vf10, vf31, vf0w\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_MOVE_VF(vf11, vf10);
     __asm__ volatile(".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\tvmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\tvwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(scale));
-    __asm__ volatile(".set noreorder\n\tvmulx.xyzw vf10, vf10, vf2x\n\tvadd.xyzw vf10, vf10, vf11\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(out));
+    VU0_SUB(vf10, vf10, vf12);
+    VU0_NORMALIZE_VF10();
+    VU0_SET_VF2X(scale);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, out);
 }
 
 extern void effCopyVector(s32 handle, f32 *src);
@@ -892,7 +896,7 @@ s32 func_0021A608(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return func_0011D3E8(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
-void func_0021A628(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
+void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
     s32 packet;
 
     packet = D_003D7B10[0];
@@ -1176,11 +1180,11 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B510);
 
 extern s32 D_00367B10[];
 
-extern s32 func_002E4960();
+extern s32 sdfCreateFormattedSifCommand();
 
 void func_0021B950(void) {
-    func_0021A628(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(D_003D7A50.resources[12], func_002E4960(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[D_003D7A50.unk34]));
+    mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[D_003D7A50.unk34]));
 }
 
 u32 func_0021B9D0(void) {
@@ -1194,8 +1198,8 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B9F8);
 extern s32 D_00367B18[];
 
 void func_0021BDD0(void) {
-    func_0021A628(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(D_003D7A50.resources[12], func_002E4960(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[D_003D7A50.unk36]));
+    mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[D_003D7A50.unk36]));
 }
 
 s32 func_0021BE50(void) {
@@ -1401,7 +1405,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
     if (D_003D7A50.unk0A < 4) {
         if (D_003D7A50.unk0A >= 2) {
             list = sdfCreateResetPacketList();
-            __asm__ volatile(".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\tvmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder");
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
             sdfAppendPacket(list, func_002EF2E0(D_00367B80, D_00367BE0, 6, 0x80));
             D_00325048.submit(&D_00325048, list);
         }

@@ -133,7 +133,7 @@ s32 mnuPrepareTerminalPanelState(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
 
     func_00249DD0(state);
-    func_0024B358(0, state);
+    mnuApplyFadeTrackMode(0, state);
     return 1;
 }
 
@@ -188,7 +188,7 @@ u32 func_0024D398(void) {
 s32 mnuStartTerminalPanelFadeOut(void) {
     s32 state = kwlnTaskGetUserValue();
 
-    func_0024B358(1, state);
+    mnuApplyFadeTrackMode(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }

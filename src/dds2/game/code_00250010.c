@@ -24,7 +24,7 @@ extern void func_0012D3E0(void);
 
 extern void sdfAppendPacket(s32 list, s32 packet);
 
-extern s32 func_0033D810();
+extern s32 sdfCreateFormattedSifCommand();
 
 typedef struct {
     s16 enabled;
@@ -335,7 +335,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423380);
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423390);
 
 s32 func_00250508(s32 list, s32 x, s32 y) {
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -380,7 +380,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 func_00250880(s32 list, s32 x, s32 y) {
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -395,19 +395,19 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423428);
 void evtDrawValueChangeInstructionRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423428));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423428));
         return;
     case 3:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004233F0));
         return;
     case 5:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423400));
         break;
     }
 }
@@ -454,35 +454,35 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    sdfAppendPacket(target, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
 void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_004374A0, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
         return;
     case 3:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
         return;
     case 5:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004233F0));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004233F0));
         return;
     case 6:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423400));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423400));
         return;
     case 7:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
         return;
     case 8:
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
         break;
     case 9:
         break;
@@ -568,7 +568,7 @@ s32 evtDrawStringEntry(s32 list, s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->title == NULL) {
         return 0;
     }
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, ctx->title));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->title));
     return 2;
 }
 
@@ -587,7 +587,7 @@ void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx
         } else {
             color = 0;
         }
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D8, ctx->itemNames[index]));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374D8, ctx->itemNames[index]));
     }
 }
 
@@ -621,7 +621,7 @@ extern char D_004374D0[];
 s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     func_0035C860(text, D_004374E0, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, text));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, text));
     return 2;
 }
 
@@ -641,7 +641,7 @@ void evtDrawKeyboardRow(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
                 color = 5;
             }
         }
-        sdfAppendPacket(list, func_0033D810(x + (i + 1) * 0xC0, y, 0xFEFFFF, color, D_004374E8, D_003C9688[row * 12 + i]));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + (i + 1) * 0xC0, y, 0xFEFFFF, color, D_004374E8, D_003C9688[row * 12 + i]));
     }
 }
 
@@ -659,7 +659,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423688);
 s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     char text[32];
     func_0035C860(text, "[E%3d_%03d.PM1+2+3]", D_004372B0, D_004372B2);
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, text));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, text));
     return 2;
 }
 
@@ -672,9 +672,9 @@ extern char D_00437510[]; /* "NAME:" */
 void func_00251DE8(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;
     kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
-    sdfAppendPacket(list, func_0033D810(x, 0x7AE0, 0xFEFFFF, 0xE, D_00437510));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_00437510));
     if (sel[2] >= 0) {
-        sdfAppendPacket(list, func_0033D810(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_004374D0, base + sel[2] * 32 + 0x24));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_004374D0, base + sel[2] * 32 + 0x24));
     }
 }
 
@@ -755,7 +755,7 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         if (node != NULL) {
             func_00252378(list, x, y, color, node, ctx);
         } else {
-            sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
@@ -799,7 +799,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, " -----------------------"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " -----------------------"));
         return;
     }
     count = 0;
@@ -809,7 +809,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
                 if (node->name != NULL) {
                     count++;
                     if (count == index) {
-                        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D8, node->name));
+                        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374D8, node->name));
                         return;
                     }
                 }
@@ -840,11 +840,11 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
     if (slot >= 0) {
         node = func_001111A8(dds3GetWorldObject(), ctx->entryName[slot]);
     }
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0xE, D_004376A8, index));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004376A8, index));
     if (node != NULL) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376B0, node->name));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004376B0, node->name));
     } else {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "   -----------------------"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 
@@ -887,7 +887,7 @@ typedef struct EvtMessageMenuWork {
 } EvtMessageMenuWork;
 
 s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtMessageMenuWork *ctx) {
-    sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->window->entryHandle)));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_00423EC0, itfMesGetEntryCount(ctx->window->entryHandle)));
     return 2;
 }
 
@@ -924,7 +924,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423FE0);
 INCLUDE_RODATA(const s32, "game/code_00250010", jtbl_00423FF0);
 
 s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+    sdfAppendPacket(target, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
@@ -934,7 +934,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00254250);
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254458);
 
-s32 func_00254620(s32 *index) {
+s32 evtIsMenuTableEntryEnabled(s32 *index) {
     return D_003C9730[*index].enabled != 0;
 }
 
@@ -951,7 +951,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254940);
 
 s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, func_0033D810(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+    sdfAppendPacket(target, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
 
@@ -973,19 +973,19 @@ void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376F0));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004376F0));
     } else if (index == 1) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004376E8));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004376E8));
         return;
     } else if (index == 2) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_00424090));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_00424090));
         return;
     }
     n = 3;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D0, group->info->name));
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374D0, group->info->name));
                 return;
             }
             n++;
@@ -1011,13 +1011,13 @@ void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx
     switch (kind) {
     case 0:
         if (ctx->text0 != NULL) {
-            sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text0));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text0));
             return;
         }
         break;
     case 1:
         if (ctx->text1 != NULL) {
-            sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text1));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_004374D0, ctx->text1));
         }
         break;
     }
@@ -1068,18 +1068,18 @@ void evtViewerDrawGroupRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_00437768));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_00437768));
         return;
     }
     if (index == 1) {
-        sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, "DEFFAULT"));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "DEFFAULT"));
         return;
     }
     n = 2;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 0x18) {
             if (n == index) {
-                sdfAppendPacket(list, func_0033D810(x, y, 0xFEFFFF, color, D_004374D0, ctx->entryName[group->value08]));
+                sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004374D0, ctx->entryName[group->value08]));
                 return;
             }
             n++;
@@ -1613,8 +1613,8 @@ void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *
 
 INCLUDE_ASM(const s32, "game/code_00250010", func_0025A280);
 
-extern void func_0025F5D0(EvtRuntime *runtime);
-extern void func_002A7FD0(void);
+extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
+extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void func_003298C0(s32 resource);
 extern void kwlnTextureReleaseHeldReference(void);
@@ -1634,9 +1634,9 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path2[0x80];
     s32 handle;
 
-    func_0025F5D0(runtime);
+    mnuReleaseCampSceneRegisteredIds(runtime);
     if (runtime->timedActive == 1) {
-        func_002A7FD0();
+        mnuStopMovieDrawTask();
         runtime->timedActive = 0;
     }
     while (sdfCheckPendingWorkWithInterrupts() != 0) {

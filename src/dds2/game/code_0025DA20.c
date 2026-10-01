@@ -4,7 +4,7 @@ extern s32 evtViewerTestIndexedCondition(u32);
 
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
-extern void func_002C3E58(u8 *);
+extern void mnuClearPanelTransitionState(u8 *);
 extern void func_0025F7F0(u8 *);
 extern void func_002945B8(u8 *);
 extern void func_002C1B58(u8 *, s32);
@@ -463,7 +463,7 @@ INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E460);
 
-void func_0025E6F0(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
+void mnuFindCampKeyTrackNeighbors(CampKeyTrack *track, s32 value, CampKeyNode **out1, CampKeyNode **out2) {
     s32 base;
 
     *out1 = 0;
@@ -661,7 +661,7 @@ void mnuCampCheckClockDivisor(void) {
     quotient = 1 / info[0];
 }
 
-void func_0025EEE8(CampScene *scene) {
+void mnuEnterCampSceneMenuState(CampScene *scene) {
     if ((scene->menuState == 0) || (scene->menuState == 5)) {
         scene->menuState = 1;
     }
@@ -773,7 +773,7 @@ void fldRegisterCampSceneId(CampScene *scene, s32 id) {
     }
 }
 
-void func_0025F5D0(CampScene *scene) {
+void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
     s32 count = 0;
     if (scene->idCount > 0) {
         s32 *entry = scene->registeredIds;
@@ -1101,7 +1101,7 @@ u8 *mnuTerminalCreateContext(void) {
     obj = sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     ((ShopEffectScene *)obj)->resourceHandle = handle;
-    func_002C3E58(obj + 0xC);
+    mnuClearPanelTransitionState(obj + 0xC);
     func_0025F7F0(obj);
     ((ShopEffectScene *)obj)->options = func_00260460();
     ((ShopEffectScene *)obj)->availableCount = func_00260468();

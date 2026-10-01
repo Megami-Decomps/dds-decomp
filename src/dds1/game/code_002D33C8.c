@@ -396,7 +396,7 @@ void sdfAppendReferencePacket(SdfListHead *list, u32 packet) {
     list->last = packet + 0x10;
 }
 
-void func_002D40E8(SdfListHead *list, u32 packet) {
+void sdfAppendDmaTagToList(SdfListHead *list, u32 packet) {
     s32 last;
 
     last = list->last;
@@ -557,7 +557,7 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
     return head;
 }
 
-void func_002D4540(SdfListHead *list) {
+void sdfClearLinkedPacketList(SdfListHead *list) {
     list->unk0 = 0;
     list->first = 0;
     list->last = 0;
@@ -575,12 +575,12 @@ void sdfAppendLinkedPacketNode(SdfListHead *list, u32 *node) {
     *node = 0;
 }
 
-void func_002D4578(SdfListHead *list) {
+void sdfClearPacketListHead(SdfListHead *list) {
     list->unk0 = 0;
     list->first = 0;
 }
 
-void func_002D4588(s32 *head, s32 node) {
+void sdfAppendPacketChainNode(s32 *head, s32 node) {
     if (head[1] == 0) {
         *head = node;
     }
@@ -590,7 +590,7 @@ void func_002D4588(s32 *head, s32 node) {
     head[1] = node;
 }
 
-void func_002D45B0(SdfPacket *packet, s32 address) {
+void sdfInitializeDmaReferenceTag(SdfPacket *packet, s32 address) {
     s64 temp;
 
     temp = address + 1;
@@ -600,7 +600,7 @@ void func_002D45B0(SdfPacket *packet, s32 address) {
     packet->unk18 = 0xE;
 }
 
-void func_002D45F0(u64 *packet, u32 address, s32 count) {
+void sdfBuildDmaReferenceChain(u64 *packet, u32 address, s32 count) {
     packet[0] = 0x10000001;
     packet[1] = 0x5000000110000000ULL;
     packet[2] = (u64)count | 0x1000000000008000ULL;
@@ -614,7 +614,7 @@ void func_002D45F0(u64 *packet, u32 address, s32 count) {
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4678);
 
 /* Encode symmetric positive/negative X and Y bounds into two packet words. */
-void func_002D4730(u64 *packet, s32 x, s32 y, s32 unused0, s32 unused1) {
+void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 x, s32 y, s32 unused0, s32 unused1) {
     u32 low = ((0x1000 - y) << 19) | ((0x1000 - x) << 3);
     u32 high = ((y + 0x1000) << 19) | ((x + 0x1000) << 3);
 
@@ -643,8 +643,8 @@ void sdfInitDrawPacket(u64 *packet) {
 
 extern void func_002D4678(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_002D4800(SdfPacket *packet, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
-    func_002D45B0(packet, 5);
+void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g) {
+    sdfInitializeDmaReferenceTag(packet, 5);
     func_002D4678(packet + 1, a, b, c, d, e, f, 0, g);
 }
 
@@ -674,10 +674,10 @@ typedef struct SdfSceneNode {
 extern void func_002D49E8();
 
 void sdfInitSceneNode(SdfSceneNode *node, SdfViewBox *view) {
-    func_002D45B0(&node->header, 0x15);
+    sdfInitializeDmaReferenceTag(&node->header, 0x15);
     node->view = view;
     node->handler = func_002D49E8;
-    func_002D4730(node->limits, view->x, view->y, view->unk6, view->unk7);
+    sdfBuildCenteredViewBoundsPacket(node->limits, view->x, view->y, view->unk6, view->unk7);
     node->regs[0] = 0x517FB;
     node->regs[1] = 0x47;
     node->regs[2] = 0x44;
@@ -696,18 +696,18 @@ void sdfAppendLinkedPacketPayload(SdfListHead *list, SdfListHead *other, u32 *no
 
 void func_002D4C80(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        func_002D45F0(packet, source + 0x180, 1);
+        sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
         return;
     }
-    func_002D45F0(packet, source + 400, 1);
+    sdfBuildDmaReferenceChain(packet, source + 400, 1);
 }
 
 void func_002D4CC8(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        func_002D45F0(packet, source + 0x70, 1);
+        sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
         return;
     }
-    func_002D45F0(packet, source + 0xb0, 1);
+    sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
 }
 
 void sdfAppendDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
@@ -727,7 +727,7 @@ void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4DD0);
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
-    func_002D45B0(packet->packets, 2);
+    sdfInitializeDmaReferenceTag(packet->packets, 2);
     packet->mode = mode;
     packet->source = source;
     packet->data = data;
@@ -737,11 +737,11 @@ void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 re
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4EE8);
 
-void func_002D4FE8(s32 value) {
+void sdfSetNonnegativePacketIndex(s32 value) {
     D_003BD333 = (value < 0) ? 0 : value;
 }
 
-void func_002D5000(void) {
+void sdfResetPacketSlotState(void) {
     D_003BD333 = 0;
     D_00398158[0] = 0;
     D_003BD338 = 0;
@@ -916,13 +916,13 @@ void func_002D5998(SdfPacket *packet) {
     packet->unk18 = 0xE;
 }
 
-void func_002D59F8(u64 *packet) {
+void sdfInitializeTextureFlushRegister(u64 *packet) {
     *packet = 0;
     packet[1] = 0x3f;
 }
 
-void func_002D5A08(SdfPacket *packet) {
-    func_002D59F8((u64 *)(packet + 1));
+void sdfInitializeTextureFlushPacket(SdfPacket *packet) {
+    sdfInitializeTextureFlushRegister((u64 *)(packet + 1));
     packet->unk0 = 2;
     packet->unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8001);
@@ -931,7 +931,7 @@ void func_002D5A08(SdfPacket *packet) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D5A68);
 
-void func_002D5B18(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28) {
+void sdfInitializeExtendedDrawPacket(SdfPacket *arg0, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s64 arg5, u32 arg6, s32 arg7, s32 arg_sp0, s32 arg_sp8, s32 arg_sp10, s32 arg_sp18, s32 arg_sp20, s32 arg_sp28) {
     /* arg1 and below flow through untouched to func_002D5A68. */
     arg0->unk0 = 5;
     arg0->unk8 = (((u64)0x50000005 << 16 | 0x1000) << 16);
@@ -949,12 +949,12 @@ void sdfCreateExtendedPacket(s32 list, u32 arg1, s32 arg2, s64 arg3, s64 arg4, s
         alloc = sdfAllocPacketAligned;
     }
     buffer = alloc(0x60);
-    func_002D5B18((SdfPacket *)buffer, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
+    sdfInitializeExtendedDrawPacket((SdfPacket *)buffer, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
                    arg_sp0, arg_sp8, arg_sp10, arg_sp18, arg_sp20, arg_sp28);
     sdfAppendPacket(list, buffer);
 }
 
-void func_002D5C90(SdfBigPacket *packet, s32 entryIndex) {
+void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
     packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(D_003980E8[entryIndex ^ packet->unk08]->unk0C >> 6);
 }
 
@@ -976,7 +976,7 @@ void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s3
 }
 
 
-void func_002D5EB0(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -1300,7 +1300,7 @@ void sdfBuildFillPacket101(s32 dstAddr, s32 color, s32 primitive, s32 left, s32 
 
 extern void sdfBuildFillPacket101(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_002D7580(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
+void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -1335,7 +1335,7 @@ void sdfBuildQuadPacket(s32 dstAddr, s32 color, s32 primitive, s32 left, s32 top
 
 extern void sdfBuildQuadPacket(s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_002D7720(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
+void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
@@ -1348,7 +1348,7 @@ void func_002D7720(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 to
     sdfAppendPacket(list, buffer);
 }
 
-void func_002D7810(void) {
+void sdfInitializeObjectListRequest(void) {
     sdfInitializeSynchronizedRequest(&D_003BDA08, sdfDestroyObjectList);
 }
 
@@ -1456,7 +1456,7 @@ void sdfReleaseDevSlot(SdfDevSlot *slot, s32 recycle, s32 release) {
 }
 
 void func_002D7B50(u32 *handle) {
-    func_002E7730(*handle);
+    sdfDevResizeBufferedRequest(*handle);
 }
 
 /* Node of the object tree: first child, else next sibling, else back up. */
@@ -1499,7 +1499,7 @@ void sdfCollectTreeNodes(SdfTree *tree) {
 }
 
 /* DevRequest +4 tracks occupied slots; +6 is capacity and +C is the element buffer. */
-void func_002D7BD8(s32 *list, u32 owner, u32 node) {
+void sdfAppendBufferedRouteNode(s32 *list, u32 owner, u32 node) {
     s16 usedCount;
     s32 elements;
     s32 request;

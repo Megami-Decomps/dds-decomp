@@ -2,7 +2,7 @@
 
 #include "pcp_vu0.h"
 
-extern s32 func_0033D810();
+extern s32 sdfCreateFormattedSifCommand();
 
 extern void sdfReleaseChipBlock();
 extern void *sdfAllocAndClearQuadwords(s32 size);
@@ -506,26 +506,26 @@ void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params
     s32 row;
     s32 col;
 
-    sdfAppendPacket(list, func_0033D810(labelX, y, z, 0, "MARK0:%d", params->mark0));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0xC0, z, 0, "START:%d", params->start));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0x120, z, 0, "END  :%d", params->end));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
-    sdfAppendPacket(list, func_0033D810(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y, z, 0, "MARK0:%d", params->mark0));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x60, z, 0, "MARK1:%d", params->mark1));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0xC0, z, 0, "START:%d", params->start));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x120, z, 0, "END  :%d", params->end));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x180, z, 0, "ITRVL:%d", params->interval));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x1E0, z, 0, "FACE :%d", params->face));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, y + 0x240, z, 0, "BLEND:%d", params->blend));
     for (row = 0; row != 4; row++) {
         color = params->colors[row];
         sdfAppendPacket(list, func_0011F250(x + 0x480, boxY, z, 0x300, 0x180, (color & 0xFFFFFF) | 0x80000000, 0x60404040));
         for (col = 0; col != 4; col++) {
-            sdfAppendPacket(list, func_0033D810(labelX, boxY, z, D_003C8760[col], D_003C8768[col]));
-            sdfAppendPacket(list, func_0033D810(x + 0x240, boxY, z, 0, D_00436FF0, color & 0xFF));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(labelX, boxY, z, D_003C8760[col], D_003C8768[col]));
+            sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x240, boxY, z, 0, D_00436FF0, color & 0xFF));
             color >>= 8;
             boxY += 0x60;
         }
         boxY += 0x60;
     }
     if (selected >= 0) {
-        sdfAppendPacket(list, func_0033D810(x, y + D_003C8730[selected], z, 0, D_00436FF8));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y + D_003C8730[selected], z, 0, D_00436FF8));
     }
 }
 
@@ -887,11 +887,15 @@ void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *rec, f32 *out) {
 
     VU0_LOAD_MATRIX(matrix + 0xC0);
     VU0_LOAD_VF(vf10, info->pos);
-    __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\tvmaddw.xyzw vf10, vf31, vf0w\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf12, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\tvmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\tvwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(scale));
-    __asm__ volatile(".set noreorder\n\tvmulx.xyzw vf10, vf10, vf2x\n\tvadd.xyzw vf10, vf10, vf11\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(out));
+    VU0_SUB(vf10, vf10, vf12);
+    VU0_NORMALIZE_VF10();
+    VU0_SET_VF2X(scale);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, out);
 }
 
 void mdlDispatchViewerAnchorRecord(MdlResourceOwner *owner, MdlAnchorRec *rec) {
@@ -947,7 +951,7 @@ s32 func_00235178(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return func_0011F250(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
-void func_00235198(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
+void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 height, s32 unused) {
     s32 packet;
 
     packet = D_00453610[0];
@@ -1205,9 +1209,9 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00236080);
 void func_002364C0(void) {
     s32 packets;
 
-    func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = D_00453550.packetList;
-    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[D_00453550.labelIndexA]));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C0[D_00453550.labelIndexA]));
 }
 
 u32 func_00236540(void) {
@@ -1221,9 +1225,9 @@ INCLUDE_ASM(const s32, "game/code_00233660", func_00236568);
 void func_00236940(void) {
     s32 packets;
 
-    func_00235198(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
+    mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     packets = D_00453550.packetList;
-    sdfAppendPacket(packets, func_0033D810(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[D_00453550.labelIndexB]));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x8A40L, 0x7960, 0xFF0080, 0, D_003C88C8[D_00453550.labelIndexB]));
 }
 
 s32 func_002369C0(void) {

@@ -403,7 +403,7 @@ f32 sdfQuatForwardDot(f32 *direction, f32 *target) {
     return fldNormalizedVectorDot(quaternion, target);
 }
 
-f32 func_003118E8(f32 *direction, f32 *target) {
+f32 sdfDivideVerticalMagnitudeByForwardDot(f32 *direction, f32 *target) {
     f32 quaternion[4];
     f32 projection;
     f32 component;
@@ -447,7 +447,7 @@ s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     return frFontQueueGlyphInSelectedSlot(handle);
 }
 
-s32 func_00311AE8(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
+s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
     u64 handle = func_0019F460(x << 4, y << 3, first, second, third, 0);
     s32 result = frFontMeasureGlyphChain(handle);
     func_0019D550(handle, 1, option);
@@ -455,7 +455,7 @@ s32 func_00311AE8(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
     return result;
 }
 
-s32 func_00311B58(s32 x, s32 y, u64 first, u64 second, s8 type, u64 name, s32 flag, s32 option) {
+s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u64 first, u64 second, s8 type, u64 name, s32 flag, s32 option) {
     u64 handle = func_0019CE78(name, 0, type, 0, 0);
     s32 result = 0;
     frFontSetChildColors(handle, second);
@@ -611,7 +611,7 @@ void sdfSetTaskSecondaryCallback(s32 arg0, s32 arg1) {
     }
 }
 
-SdfListNode *func_00312320(SdfList *list, SdfListNode *node) {
+SdfListNode *sdfRemoveAndReindexListNode(SdfList *list, SdfListNode *node) {
     SdfListNode *it;
 
     if (node == NULL) {
@@ -648,7 +648,7 @@ SdfListNode *sdfListRemoveNode(SdfList *list, SdfListNode *node) {
     if (node == NULL) {
         return NULL;
     }
-    neighbour = func_00312320(list, node);
+    neighbour = sdfRemoveAndReindexListNode(list, node);
     list->onRemove(node->index, node->value);
     sdfReleaseChipBlock(node);
     return neighbour;
@@ -672,7 +672,7 @@ void sdfClearTaskList(TaskList *list) {
     }
 }
 
-void func_003124B0(SdfLink *list, SdfLink *a, SdfLink *b) {
+void sdfSwapLinkedListNodes(SdfLink *list, SdfLink *a, SdfLink *b) {
     SdfLink *tmpNext;
     SdfLink *tmpPrev;
 
@@ -1141,7 +1141,7 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00313A58);
 
-float func_00313B90(float arg0, float arg1, float arg2) {
+float sdfMultiplyAddFloat(float arg0, float arg1, float arg2) {
     return arg0 + arg1 * arg2;
 }
 

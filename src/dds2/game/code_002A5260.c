@@ -29,9 +29,9 @@ extern void func_003458E8(u32);
 
 extern void func_002A5A78();
 
-void func_002A2408(void);
+void mnuMarkTitleStreamResetPending(void);
 
-void func_002A2550(void);
+void mnuResetTitleStreamLocked(void);
 
 extern void func_002A5260(s32, s32);
 
@@ -133,7 +133,7 @@ void func_002A5EE8(u32 arg0, s32 arg1) {
 }
 
 void func_002A5F40(void) {
-    func_002A7FD0();
+    mnuStopMovieDrawTask();
     if (D_00437A40 != 0) {
         *(u32 *)(D_00437A40 + 0x10c) = 0;
     }
@@ -689,12 +689,12 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A75A8);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7730);
 
-void func_002A78B0(void) {
+void mnuFinishStaffMovieAndFreeState(void) {
     s64 pending;
 
     D_00435BAC = 2;
-    func_002A2408();
-    func_002A2550();
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
     func_002A6018();
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
@@ -703,7 +703,7 @@ void func_002A78B0(void) {
     D_00437AB0 = (u32 *)0x0;
 }
 
-void func_002A7900(void) {
+void mnuReleaseMovieResourceAfterPendingWork(void) {
     effDestroyResourceSlotSet(D_00437AB0[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
@@ -745,7 +745,7 @@ void mnuCreateStaffTask(void) {
     ((StaffTaskState *)D_00437AB0)->unkC = 0;
     D_00435BAC = 1;
     func_0019BD48();
-    kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, func_002A78B0, 0);
+    kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
@@ -766,7 +766,7 @@ s32 mnuMovieDraw(void) {
 
 extern char D_0042A338[]; /* "mnuMovieDraw" */
 
-void func_002A7A98(u32 resource, void *data) {
+void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
     if (D_00437ACC == 0) {
         func_00346778(D_003E5608, data, resource);
         D_00437ACC = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
@@ -782,7 +782,7 @@ void func_002A7AF0(index)
 s32 index;
 {
     u32 *entry = (u32 *)&D_003E4C48[index];
-    func_002A7A98(*entry, entry + 1);
+    mnuStartMovieDrawTaskForResource(*entry, entry + 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7B28);
@@ -980,7 +980,7 @@ void func_002A7F98(s32 index) {
     func_002A7E60(*entry, entry + 1);
 }
 
-void func_002A7FD0(void) {
+void mnuStopMovieDrawTask(void) {
     if (D_00437ACC == 0) {
         return;
     }

@@ -120,7 +120,7 @@ typedef struct EffModelCreateRequest {
 } EffModelCreateRequest;
 
 
-extern float func_00341240(void *);
+extern float effMiscRandUnitFloat(void *);
 extern s32 func_002FF0B8(EffectStateSnapshot *, s32);
 
 #include "ee_mmi.h"
@@ -282,7 +282,7 @@ extern void sdfTexReleaseReference();
 
 extern void effReleaseSharedReference();
 
-extern s64 func_001AA308(void);
+extern s64 btlIsRuntimeAllocated(void);
 
 extern s64 btlIsCurrentActorFullyMarked(void);
 
@@ -669,7 +669,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     model = func_00232198(group, id);
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
-    __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2");
+    VU0_SCALAR_OP_CLOBBER(owner->scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlStoreTertiaryVectorVU(model);
     owner->model = (s32)model;
 }
@@ -733,7 +733,7 @@ typedef struct EffBattleTexHeaders {
 } EffBattleTexHeaders;
 
 extern s32 func_0032B240();
-extern u8 *func_0032B500(void *, u32, u8 *, s32);
+extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
 extern s32 func_0032B3F8(u32, s16, s16, u8, u8 *, s32);
 extern u32 sdfTexGetPrimaryResourceWord(void *);
 extern u32 sdfTexGetSecondaryResourceWord(void *);
@@ -764,7 +764,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         }
         pixels = header + (header[1] & 0xF0) + 0x40;
         if (func_0032B240(tex) != 0) {
-            pixels = func_0032B500(tex, sdfTexGetSecondaryResourceWord(tex), pixels, 1);
+            pixels = sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), pixels, 1);
         }
         width = tex->width;
         height = tex->height;
@@ -780,7 +780,7 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
 
     owner = effCreateModelOwner(source);
     effUploadModelTextures(owner);
-    battleActive = func_001AA308();
+    battleActive = btlIsRuntimeAllocated();
     if ((battleActive != 0) && (battleActive = btlIsCurrentActorFullyMarked(), battleActive == 0)) {
         effFloorModelListPush(owner);
     }
@@ -801,7 +801,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     *(u32 *)owner = *(u32 *)source;
     effRecreateModelFromSource(owner, source);
     effUploadModelTextures(owner);
-    marked = func_001AA308();
+    marked = btlIsRuntimeAllocated();
     if ((marked != 0) && (marked = btlIsCurrentActorFullyMarked(), marked == 0)) {
         effFloorModelListPush(owner);
     }
@@ -1050,13 +1050,7 @@ void func_002DDA50(s32 model) {
 void effScaleModelVec(u8 *work, float scale) {
     u32 bits;
     VU0_SET_ONES_XYZ(vf10);
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 %0, %1\n\t"
-        "qmtc2.ni %0, $vf2\n\t"
-        "vmulx.xyzw vf10, vf10, $vf2x\n\t"
-        ".set reorder"
-        : "=&r"(bits) : "f"(scale) : "memory");
+    VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlStoreTertiaryVectorVU(*(void **)(work + 0xC0));
 }
 
@@ -1340,7 +1334,7 @@ void func_002DEB98(void) {
 }
 
 void func_002DEBB0(void) {
-    func_00316668();
+    sdfReleaseFlagListResource();
 }
 
 void func_002DEBC8(s32 p) {
@@ -1616,7 +1610,7 @@ void effSetWideFadeMapParameter(s32 work, u32 value) {
 }
 
 void func_002DF358(s32 work) {
-    func_0018F098(work + 0xc0);
+    effCloneBlurWorkWithSlots(work + 0xc0);
 }
 
 void func_002DF370(void) {
@@ -2262,23 +2256,12 @@ void func_002E0F30(BillCellDrawWork *work) {
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2353,23 +2336,12 @@ void func_002E1908(BillCellDrawWork *work) {
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2444,23 +2416,12 @@ void func_002E22C8(BillCellDrawWork *work) {
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2583,23 +2544,12 @@ void func_002E2C48(BillCellDrawWork *work) {
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2720,23 +2670,12 @@ void func_002E35F0(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2844,31 +2783,11 @@ void func_002E4070(u8 *work) {
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
@@ -2877,23 +2796,12 @@ void func_002E4070(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -2954,31 +2862,11 @@ void func_002E4AC8(u8 *work) {
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
@@ -2987,23 +2875,12 @@ void func_002E4AC8(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -3111,31 +2988,11 @@ void func_002E5540(u8 *work) {
     second = func_002D7458(config, config + 0x24, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmove.xyzw vf11, vf10\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color1) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
@@ -3144,23 +3001,12 @@ void func_002E5540(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002E5E88(out, mtx);
 }
 
@@ -3240,14 +3086,7 @@ void effResetActiveInstanceFrame(u8 *work) {
 
 extern FnTbl28 D_003E9960[];
 
-void effAdvanceActiveInstanceFrame(work)
-s32 *work;
-{
-    if ((D_00437E08 & 2) == 0) {
-        D_003E9960[work[0x2C / 4]].fn();
-        work[0x28 / 4]++;
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", effAdvanceActiveInstanceFrame);
 
 void effDispatchActiveInstanceDraw(s32 work) {
     D_003E9964[*(s32 *)(work + 0x2C)].fn((void *)work);
@@ -3291,7 +3130,7 @@ typedef struct EffTrackSet {
     u8 *allocation; // 0x2C
 } EffTrackSet;
 
-extern s32 *func_003335E0(void);
+extern s32 *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(void *, f32);
 extern u16 D_004582B0[];
 extern s32 D_00437E58[2];
@@ -3355,7 +3194,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->allocation = base;
     set->flag = 0;
     set->unk18 = 0;
-    set->handle = func_003335E0();
+    set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_004582B0, 0, 0x2C);
     D_004582B0[2] = 0x4000;
@@ -3541,23 +3380,12 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9100);
-        __asm__ volatile (
-            ".set noreorder\n"
-            "mfc1 $2, %0\n"
-            "qmtc2.ni $2, vf2\n"
-            "vmulx.xyzw vf10, vf10, vf2x\n"
-            "vmulx.xyzw vf28, vf28, vf10x\n"
-            "vmuly.xyzw vf29, vf29, vf10y\n"
-            "vmulz.xyzw vf30, vf30, vf10z\n"
-            "lqc2 vf10, 0(%1)\n"
-            "vmove.w vf10, vf0\n"
-            "vmove.xyzw vf31, vf10\n"
-            "sqc2 vf28, 0(%2)\n"
-            "sqc2 vf29, 0x10(%2)\n"
-            "sqc2 vf30, 0x20(%2)\n"
-            "sqc2 vf31, 0x30(%2)\n"
-            ".set reorder"
-            : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+        VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALE_MATRIX_ROWS(vf10);
+        VU0_LOAD_VF(vf10, work);
+        VU0_SET_W_ONE(vf10);
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(mtx);
         func_002E76C8(out, mtx);
     }
 }
@@ -3710,23 +3538,12 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9100);
-        __asm__ volatile (
-            ".set noreorder\n"
-            "mfc1 $2, %0\n"
-            "qmtc2.ni $2, vf2\n"
-            "vmulx.xyzw vf10, vf10, vf2x\n"
-            "vmulx.xyzw vf28, vf28, vf10x\n"
-            "vmuly.xyzw vf29, vf29, vf10y\n"
-            "vmulz.xyzw vf30, vf30, vf10z\n"
-            "lqc2 vf10, 0(%1)\n"
-            "vmove.w vf10, vf0\n"
-            "vmove.xyzw vf31, vf10\n"
-            "sqc2 vf28, 0(%2)\n"
-            "sqc2 vf29, 0x10(%2)\n"
-            "sqc2 vf30, 0x20(%2)\n"
-            "sqc2 vf31, 0x30(%2)\n"
-            ".set reorder"
-            : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+        VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_SCALE_MATRIX_ROWS(vf10);
+        VU0_LOAD_VF(vf10, work);
+        VU0_SET_W_ONE(vf10);
+        VU0_MOVE_VF(vf31, vf10);
+        VU0_STORE_MATRIX(mtx);
         func_002E76C8(out, mtx);
     }
 }
@@ -3757,10 +3574,7 @@ void effCreateClassWorkFromFile(s32 request) {
 
 extern EffOp24 D_003E9B88[];
 
-void effDestroyClassWork(u32 *obj) {
-    D_003E9B88[obj[0x2C / 4]].run(obj[0x30 / 4]);
-    sdfReleaseChipBlock(obj);
-}
+INCLUDE_ASM(const s32, "game/code_002DC138", effDestroyClassWork);
 
 void effCreateClassWorkFromRequest(s32 work) {
     effPayloadPointerSet(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
@@ -3797,7 +3611,7 @@ void func_002E75A0(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst + 1, src);
 }
 
-void func_002E75B8(s32 work, u32 value) {
+void effSetClassWorkColor(s32 work, u32 value) {
     ((EffClassWork *)work)->color = value;
 }
 
@@ -3839,7 +3653,7 @@ u8 *effCreatePointSet4(u32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = func_003335E0();
+    set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_004582E0, 0, 0x2C);
     D_004582E0[2] = 0x4000;
@@ -4260,7 +4074,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->allocation = base;
     node->tail = data;
     node->field_24 = 0;
-    node->handle = func_003335E0();
+    node->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(node->handle, 1.0f);
     memset(&D_00458310, 0, sizeof(EffMotionSetup));
     D_00458310.flags = 0x4000;
@@ -4552,12 +4366,12 @@ void effSeedBillScaleRange(u8 *work) {
     EffScaleRange *range = ((EffScaleRangeWork *)work)->range;
     s32 steps = config->steps;
     u8 *entry = range->entries;
-    f32 start = config->startBase * (func_00341240(D_0037F550) * config->startRand + (1.0f - config->startRand));
+    f32 start = config->startBase * (effMiscRandUnitFloat(D_0037F550) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
 
     if (steps > 0) {
-        f32 end = config->endBase * (func_00341240(D_0037F550) * config->endRand + (1.0f - config->endRand));
+        f32 end = config->endBase * (effMiscRandUnitFloat(D_0037F550) * config->endRand + (1.0f - config->endRand));
         range->start = start;
         range->delta = (end - start) / (f32)steps;
     } else {
@@ -4717,7 +4531,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = func_003335E0();
+    set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_004583A0, 0, 0x2C);
     D_004583A0[2] = 0x4000;
@@ -4814,11 +4628,11 @@ void effSetStripRecordVector(s32 node) {
     mnuRecordSetVector(((EffectStripNode *)node)->active);
 }
 
-void func_002EED88(s32 node) {
+void effSetStripRecordSecondaryVector(s32 node) {
     fileSetRecordSecondVector(((EffectStripNode *)node)->active);
 }
 
-void func_002EEDA0(s32 node, u32 color) {
+void effSetStripRecordColor(s32 node, u32 color) {
     ((EffectStripNode *)node)->color = color;
 }
 
@@ -5003,23 +4817,12 @@ void func_002EF8C0(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002F1888(out, mtx);
 }
 
@@ -5178,23 +4981,12 @@ void func_002F0530(BillCellDrawWork *work) {
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(work->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002F1888(out, mtx);
 }
 
@@ -5343,18 +5135,8 @@ void func_002F10C0(u8 *work) {
     EE_MMI_RGBA_UNPACK(color1, unit);
     VU0_MOVE_VF(vf11, vf10);
     color2[0] = second;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lw $2, 0(%1)\n"
-        "pextlb $2, $0, $2\n"
-        "pextlh $2, $0, $2\n"
-        "qmtc2.ni $2, vf10\n"
-        "vitof0.xyzw vf10, vf10\n"
-        "qmtc2.ni %0, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(unit), "r"(color2) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->field_08 = blended[0];
@@ -5363,23 +5145,12 @@ void func_002F10C0(u8 *work) {
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        "vmulx.xyzw vf28, vf28, vf10x\n"
-        "vmuly.xyzw vf29, vf29, vf10y\n"
-        "vmulz.xyzw vf30, vf30, vf10z\n"
-        "lqc2 vf10, 0(%1)\n"
-        "vmove.w vf10, vf0\n"
-        "vmove.xyzw vf31, vf10\n"
-        "sqc2 vf28, 0(%2)\n"
-        "sqc2 vf29, 0x10(%2)\n"
-        "sqc2 vf30, 0x20(%2)\n"
-        "sqc2 vf31, 0x30(%2)\n"
-        ".set reorder"
-        : : "f"(((BillCellDrawWork *)work)->scale), "r"(work), "r"(mtx) : "$2", "memory");
+    VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
     func_002F1888(out, mtx);
 }
 
@@ -5522,7 +5293,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = func_003335E0();
+    work->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(work->handle, 1.0f);
     memset(&D_004583D0, 0, sizeof(EffMotionSetup));
     D_004583D0.flags = 0x4000;
@@ -5745,8 +5516,8 @@ void effInitializeAnimationPositions(u8 *work) {
 
     fileClearRecordReferences((s32)payload);
     for (; i < count; i++) {
-        positions[0] = func_00341240(D_0037F550);
-        positions[1] = func_00341240(D_0037F550);
+        positions[0] = effMiscRandUnitFloat(D_0037F550);
+        positions[1] = effMiscRandUnitFloat(D_0037F550);
         positions += 2;
     }
 }
@@ -6092,7 +5863,7 @@ u32 repeat;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = func_003335E0();
+    work->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(work->handle, 1.0f);
     memset(&D_00458400, 0, sizeof(EffMotionSetup));
     D_00458400.flags = 0x4000;
@@ -6177,8 +5948,8 @@ void effSeedParticleSpanParameters(u8 *work) {
             if (spans != 0) {
                 do {
                     span++;
-                    entry->first = func_00341240(D_0037F550) * config->firstRand + (1.0f - config->firstRand);
-                    entry->second = config->secondBase * (func_00341240(D_0037F550) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->first = effMiscRandUnitFloat(D_0037F550) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (effMiscRandUnitFloat(D_0037F550) * config->rangeRand + (1.0f - config->rangeRand));
                     entry->pad_08 = 0;
                     entry++;
                 } while (span < spans);
@@ -6270,7 +6041,7 @@ void func_002F5708(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst + 1, src);
 }
 
-void func_002F5720(s32 work, u32 value) {
+void effSetModelResourceColor(s32 work, u32 value) {
     *(u32 *)(work + 0x24) = value;
 }
 
@@ -6297,7 +6068,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->allocation = base;
     set->tail = data;
     set->flag = 0;
-    set->handle = func_003335E0();
+    set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_00458430, 0, 0x2C);
     D_00458430[2] = 0x4000;
@@ -6542,7 +6313,7 @@ void effSyncLinkedActorChildParameter(void) {
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002F64D8);
 
 s64 effComputeLightDirectionVU(void *model, void *target) {
-    if (func_001AA308() == 0) {
+    if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
     if (D_00437E94 == 0) {
@@ -6550,18 +6321,9 @@ s64 effComputeLightDirectionVU(void *model, void *target) {
     }
     mdlLoadPrimaryVectorVU(model);
     VU0_LOAD_VF(vf11, D_004584B0);
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vsub.xyzw $vf10, $vf10, $vf11\n\t"
-        "vmulx.w $vf10, $vf10, $vf0x\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        ".set reorder");
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_CLEAR_W(vf10);
+    VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, D_00458470);
     func_0033A7E8(target, D_003E9F50, D_004584A0);
     return 1;
@@ -7142,7 +6904,7 @@ void func_002F8378(u8 *work) {
         VU0_LOAD_VF(vf10, work);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
-    func_00332D08(*(s32 *)(handle[1] + 0x18), 0);
+    sdfLoadMapRecordLookAtBasis(*(s32 *)(handle[1] + 0x18), 0);
     VU0_STORE_VF_UNCLOBBERED(vf31, origin);
     effCopyClassResourcePosition((s128 *)handle[0], (s128 *)target);
     state = *(u8 **)(handle[0] + 0x34);
@@ -7187,13 +6949,7 @@ void effApplyModelTransform(u8 *work) {
     func_00232AD0(*(void **)(modelContext + 4));
     VU0_SET_ONES_XYZ(vf10);
     scale = *(float *)(work + 0x20);
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 %0, %1\n\t"
-        "qmtc2.ni %0, $vf2\n\t"
-        "vmulx.xyzw vf10, vf10, $vf2x\n\t"
-        ".set reorder"
-        : "=&r"(bits) : "f"(scale) : "memory");
+    VU0_SCALAR_OP_TMP_MEMORY(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlStoreTertiaryVectorVU(*(void **)(modelContext + 4));
     *(float *)(*(u8 **)(*(u8 **)(modelContext + 4) + 0x1C) + 0x20) =
         *(float *)(animation + 0x94);
@@ -7201,13 +6957,13 @@ void effApplyModelTransform(u8 *work) {
     effDrawClassResourceWork(*(s32 *)modelContext);
 }
 
-extern s32 *func_003335E0(void);
+extern s32 *sdfCreateAssetWithDrawEntries(void);
 
 s32 *func_002F8590() {
     s32 *work = sdfAllocAndClearQuadwords(0xC);
     s32 *position;
     work[2] = 0;
-    position = func_003335E0();
+    position = sdfCreateAssetWithDrawEntries();
     work[1] = (s32)position;
     *(f32 *)((u8 *)position + 0x1C) = 1.0f;
     return work;
@@ -7286,7 +7042,7 @@ s32 *effCreateMotionResource(s32 *context) {
     s32 *work = (s32 *)func_00328D68(8);
 
     work[0] = 0;
-    work[1] = (s32)func_003335E0();
+    work[1] = (s32)sdfCreateAssetWithDrawEntries();
     func_003332D0((void *)work[1], 1.0f);
     memset(&D_004584C0, 0, sizeof(EffMotionSetup));
     D_004584C0.flags = 0x4000;
@@ -7371,7 +7127,7 @@ u8 *effAllocateResourcePayload(u16 kind, void *source) {
 u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, s32 secondary, u32 param) {
     u8 *effect = effAllocateResourcePayload(kind, source);
 
-    if (func_001AA308() != 0) {
+    if (btlIsRuntimeAllocated() != 0) {
         if (D_003EA018[kind].init != NULL) {
             ((EffActiveResource *)effect)->resource = (u32)D_003EA018[kind].init(source, secondaryKind, secondary, param);
         }
@@ -7390,7 +7146,7 @@ void effCreateActiveResourceFromFile(s32 *source) {
 }
 
 void effDestroyResourceInstance(u32 *obj) {
-    if (func_001AA308()) {
+    if (btlIsRuntimeAllocated()) {
         if (D_003EA020[obj[0x2C / 4]].fn != NULL) {
             D_003EA020[obj[0x2C / 4]].fn(obj[0x30 / 4]);
         }
@@ -7419,7 +7175,7 @@ u8 *func_002F9780(u8 *source) {
 }
 
 void effClearCallbackFrame(u32 *obj) {
-    if (func_001AA308()) {
+    if (btlIsRuntimeAllocated()) {
         if (D_003EA018[obj[0x2C / 4]].fn != NULL) {
             D_003EA018[obj[0x2C / 4]].fn(obj);
         }
@@ -7430,7 +7186,7 @@ void effClearCallbackFrame(u32 *obj) {
 void effAdvanceCallbackFrame(work)
 u8 *work;
 {
-    if (func_001AA308() != 0 && (D_00437E08 & 2) == 0) {
+    if (btlIsRuntimeAllocated() != 0 && (D_00437E08 & 2) == 0) {
         s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
         FnTbl28 *entry = &D_003EA028[kind];
         void (*callback)(void *) = entry->fn;
@@ -7442,7 +7198,7 @@ u8 *work;
 }
 
 void effDispatchEnabledCallback(u8 *work) {
-    if (func_001AA308() != 0) {
+    if (btlIsRuntimeAllocated() != 0) {
         void (*callback)(void *) = D_003EA02C[((EffActiveResource *)work)->kind.signedIndex].fn;
         if (callback != NULL) {
             callback(work);
@@ -7455,15 +7211,15 @@ void effAdvanceActiveResourceCallbacks(u32 work) {
     effDispatchEnabledCallback(work);
 }
 
-void func_002F99B0(s128 *dst, s128 *src) {
+void effCopyActiveResourceVector(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_002F99C0(s128 *dst, s128 *src) {
+void effCopyActiveResourceSecondaryVector(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst + 1, src);
 }
 
-void func_002F99D8(s32 work, u32 color) {
+void effSetActiveResourceColor(s32 work, u32 color) {
     ((EffActiveResource *)work)->color = color;
 }
 
@@ -7515,7 +7271,7 @@ void effReplaceSharedResource(u8 *dst, u8 *src) {
     }
 }
 
-void func_002F9DE8(s32 work) {
+void effResetParticleStateWord(s32 work) {
     *(u32 *)(work + 8) = 0;
 }
 
@@ -7525,7 +7281,7 @@ void func_002FA388(u32 *target, u32 value) {
     *target = value;
 }
 
-extern f32 func_00341240(void *);
+extern f32 effMiscRandUnitFloat(void *);
 
 /* Normalize the seed vector with the original VU0 macro-mode operations. */
 void effInitializeParticleDirection(u8 *work, float *entry) {
@@ -7535,9 +7291,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
         vector[1] = *(float *)(work + 0x18);
         vector[2] = *(float *)(work + 0x1C);
     } else {
-        vector[0] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
-        vector[1] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
-        vector[2] = (func_00341240(D_0037F550) - 0.5f) * 2.0f;
+        vector[0] = (effMiscRandUnitFloat(D_0037F550) - 0.5f) * 2.0f;
+        vector[1] = (effMiscRandUnitFloat(D_0037F550) - 0.5f) * 2.0f;
+        vector[2] = (effMiscRandUnitFloat(D_0037F550) - 0.5f) * 2.0f;
     }
     __asm__ volatile(
         ".set noreorder\n\t"
@@ -7557,9 +7313,9 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[1] = vector[1];
     entry[5] =
         *(float *)(work + 0x24) *
-        (func_00341240(D_0037F550) * *(float *)(work + 0x28) +
+        (effMiscRandUnitFloat(D_0037F550) * *(float *)(work + 0x28) +
          (1.0f - *(float *)(work + 0x28)));
-    entry[4] = func_00341240(D_0037F550) * 6.2831853f;
+    entry[4] = effMiscRandUnitFloat(D_0037F550) * 6.2831853f;
 }
 
 extern void func_00336768(f32 *, f32);
@@ -7924,7 +7680,7 @@ void btlInitializeEffectWork(void) {
 s32 btlUpdateEffectWork(void) {
     if (D_004386CC != NULL) {
         if ((func_002FCA58(0) & 1) == 0) {
-            func_002FC160();
+            effResetFileResourceStores();
             return 0;
         }
     }
@@ -7934,7 +7690,7 @@ s32 btlUpdateEffectWork(void) {
 void func_002FC158(void) {
 }
 
-void func_002FC160(void) {
+void effResetFileResourceStores(void) {
     effResetFileResources();
     effResetFileResourceManager();
 }
@@ -7955,26 +7711,14 @@ void effComputeBattleCameraPositionVU(u8 *effect) {
         VU0_LOAD_VF(vf10, effect + 0x40);
     }
     if ((flags & 0x80) != 0) {
-        __asm__ volatile(
-            ".set noreorder\n\t"
-            "mfc1 $2, %0\n\t"
-            "qmtc2.ni $2, $vf2\n\t"
-            "vmulx.xyzw $vf10, $vf10, $vf2x\n\t"
-            ".set reorder"
-            : : "f"(*(f32 *)((u8 *)D_004386B8 + 0x74)) : "$2");
+        VU0_SCALAR_OP_CLOBBER(*(f32 *)((u8 *)D_004386B8 + 0x74), "vmulx.xyzw vf10, vf10, vf2x");
     }
     VU0_LOAD_VF(vf11, D_0045C1E0);
     VU0_ADD(vf10, vf10, vf11);
     VU0_LOAD_VF(vf11, D_004386B8);
     VU0_ADD(vf10, vf10, vf11);
     if ((flags & 4) != 0) {
-        __asm__ volatile(
-            ".set noreorder\n\t"
-            "mfc1 $2, %0\n\t"
-            "qmtc2.ni $2, $vf2\n\t"
-            "vaddx.y $vf10, $vf0, $vf2x\n\t"
-            ".set reorder"
-            : : "f"(-5.0f) : "$2");
+        VU0_SCALAR_OP_CLOBBER(-5.0f, "vaddx.y vf10, vf0, vf2x");
     }
 }
 
@@ -8053,7 +7797,7 @@ s32 effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
     return job;
 }
 
-void func_002FC5C8(u32 work) {
+void effInvokeFileJobWithBattleCamera(u32 work) {
     if (D_004386B4 == 0) {
         effApplyBattleCameraToObject();
         fileJobInvokeTypeCallback(work);
@@ -8127,7 +7871,7 @@ s32 effPollPrimaryFile(void) {
     return result;
 }
 
-void func_002FC718(void) {
+void effQueueNamedResourceRequest(void) {
     func_003002A8();
     effQueueResource(D_004386E0, D_0045C1A0);
 }
@@ -8151,7 +7895,7 @@ s32 effPollNamedFile(void) {
     return result;
 }
 
-void func_002FC808(void) {
+void effQueueAttachedResourceRequest(void) {
     func_003002A8();
     effQueueResource(D_004386E8, D_0045C1A0);
 }
@@ -9168,7 +8912,7 @@ typedef struct EffMappingObject {
     s32 value108;      // 0x108
 } EffMappingObject;
 
-s32 func_003012B0(s32 request) {
+s32 effMapObjectWithTemporaryMappingTable(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -9770,13 +9514,13 @@ u32 effQueueGeneratedFileJob(void) {
         u32 queuedFile;
         job = (u8 *)fileCreateJob(6);
         command = sdfDevCreateCommandState(&fileInfo);
-        dataLength = func_0033EB30(command);
+        dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
         allocation = func_003292A8(totalLength);
         buffer = (u8 *)sdfResourceRetainAddress(allocation);
         memset(buffer, 0, headerBytes);
-        func_0033EB10(command, buffer + headerBytes, dataLength);
-        func_0033EAE0(command);
+        sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
+        sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, buffer, totalLength, 1);
         entry = (EffFileJobEntry *)fileAppendJob(D_004386B8, job);
         D_004386C8 = (u32)entry;
@@ -10317,7 +10061,7 @@ s32 effDispatchRecordBuckets(s32 refresh, u8 *buckets, s32 context) {
     for (index = 0xF; index >= 0; index--, head++) {
         EffectRecordNode *node = *head;
         while (node != 0) {
-            func_00306F80(0, 0, 0, 0, *(u32 *)buckets, node->index, context);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, *(u32 *)buckets, node->index, context);
             if (refresh != 0) {
                 itfGridLookupValueOrDefault(*(u32 *)buckets, node->index);
             }
@@ -10557,7 +10301,7 @@ void effResolveAndReleaseResource(u32 *owner) {
         u32 resource = owner[0];
         u32 mapped = sdfResourceRetainAddress(resource);
         effResolveResourceSlots(owner, mapped, 0, -1);
-        func_00329910(owner[0]);
+        sdfDecrementAllocationReferenceCount(owner[0]);
     }
 }
 
@@ -10566,7 +10310,7 @@ void effResolveAndReleaseSelectedResource(u32 *owner, s32 mapping) {
         u32 resource = owner[0];
         u32 mapped = sdfResourceRetainAddress(resource);
         effResolveResourceSlots(owner, mapped, 0, mapping);
-        func_00329910(owner[0]);
+        sdfDecrementAllocationReferenceCount(owner[0]);
     }
 }
 

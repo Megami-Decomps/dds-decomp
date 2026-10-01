@@ -2,7 +2,7 @@
 
 extern s32 D_00435E5C;
 
-extern void func_00306F80();
+extern void itfDrawGridWithResolvedSlot();
 
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -988,7 +988,7 @@ void mnuDrawPartySkillAndStatusPanel(u8 *entry, s32 id, s32 packedGroup, s32 gro
     mnuDrawSlotIcons(0x14a, id);
 }
 
-void func_002B3720(u32 entry, u32 unused1, u32 group, u32 resource,
+void mnuDrawProfilePanelAndSprite(u32 entry, u32 unused1, u32 group, u32 resource,
                                     u32 unused4, u32 spriteFlags) {
     func_002C16F0(0, 0, 0, entry, *(u8 *)((s32)entry + 0x55), group, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
@@ -1380,7 +1380,7 @@ void ptySkillMenuCopyPageState(s32 context) {
 
     slot = windows + index;
     window = *slot;
-    func_00306F80(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
+    itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
     mnuSetPanelState(party[8], index);
     func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
     if (window->list->cursor->index == 0) {
@@ -1695,7 +1695,7 @@ s64 func_002B6800(s32 callback) {
 }
 
 void mnuDrawSelectionLabel(u16 id) {
-    s32 label = func_0019FE00(0x11B0, 0xA88, 0, 0, id, 1);
+    s32 label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frFontSetChildColors(label, 0xA09DC35A);
     func_0019D550(label, 1, 0x53);
@@ -2027,7 +2027,7 @@ void mnuDrawAndAdvanceCampSparks(MenuSparkSet *fx, s32 arg) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            func_00306F80(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->sheet, fx->handle[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->sheet, fx->handle[6], arg);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -2088,7 +2088,7 @@ void mnuDrawBadgeFade(MenuBadgeSet *set, s32 arg) {
         }
     }
     if (!(set->flags & 2)) {
-        func_00306F80(layout.place[1].x, layout.place[1].y, 0, 0, set->sheet, set->handle[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->sheet, set->handle[layout.place[1].slot], arg);
     }
 }
 
@@ -2104,11 +2104,11 @@ void mnuDrawCampIconBackdrop(MenuBadgeSet *set, s32 arg) {
     func_00308380(0x30000, arg);
     func_00308808(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
-        func_00306F80(blank[i].x, blank[i].y, 0, 0, set->sheet, set->handle[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->sheet, set->handle[blank[i].slot], arg);
     }
     if (!(set->flags & 2)) {
         for (i = 0; i < 2; i++) {
-            func_00306F80(layout.place[i].x, layout.place[i].y, 0, 0, set->sheet, set->handle[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->sheet, set->handle[layout.place[i].slot], arg);
         }
     }
     if (!(set->flags & 4)) {
@@ -2236,7 +2236,7 @@ typedef struct MenuSpriteGrid {
 void mnuSetGridSpriteSlot(MenuSpriteGrid *grid, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
     grid->slots[row * 4 + col].sprite = sprite;
     grid->slots[row * 4 + col].effect = effect;
-    func_003071D0(sprite, effect, x, y, x, y);
+    itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
 }
 
 void *mnuWalkNodeList(s32 index, MenuList *list) {
@@ -2538,7 +2538,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 layer, s32 selection, s32 entries, s32
         s32 off = (eq * 4 + i) * 8;
         s32 value = *(s32 *)(base8 + off);
         if (value != 0) {
-            func_00306F80(x, y, layer, 0, value, *(s32 *)(baseC + off), opacity);
+            itfDrawGridWithResolvedSlot(x, y, layer, 0, value, *(s32 *)(baseC + off), opacity);
         }
         i++;
     } while (i < 4);
@@ -2648,7 +2648,7 @@ typedef struct MenuPanelBounds {
     u32 bottom;    /* 0x88 */
 } MenuPanelBounds;
 
-void func_002B95E8(u8 *panel, const void *layout, u32 left, u32 top,
+void mnuSetWindowPanelBounds(u8 *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom) {
     memcpy(panel + 0x58, layout, 0x38);
     ((MenuPanelBounds *)panel)->left = left;
@@ -2726,9 +2726,9 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
     obj->sprite[0] = (void *)effCreateResourceSlotSet(res, idx[0], 1);
     obj->sprite[1] = (void *)effCreateResourceSlotSet(res, idx[1], 1);
     obj->sprite[2] = (void *)effCreateResourceSlotSet(res, idx[2], 1);
-    func_003071D0(obj->sprite[0], 0, w, h, w, h);
-    func_003071D0(obj->sprite[1], 0, w, h, w, h);
-    func_003071D0(obj->sprite[2], 0, w, h, w, h);
+    itfSetGridEntryQuantizedAndRefresh(obj->sprite[0], 0, w, h, w, h);
+    itfSetGridEntryQuantizedAndRefresh(obj->sprite[1], 0, w, h, w, h);
+    itfSetGridEntryQuantizedAndRefresh(obj->sprite[2], 0, w, h, w, h);
 }
 
 u32 *func_002B9918(u32 first, u32 second, u32 third,
@@ -3431,7 +3431,7 @@ typedef struct MenuSlotEffectHandles {
     u32 handles[3];
 } MenuSlotEffectHandles;
 
-void func_002BB850(s32 slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
+void mnuLoadPanelSectionResources(s32 slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
                                     ) {
     u32 handle;
 
@@ -3624,7 +3624,7 @@ void mnuClearEntries(u8 *menu) {
     *(u32 *)menu &= ~0x80;
 }
 
-extern void func_003071D0();
+extern void itfSetGridEntryQuantizedAndRefresh();
 
 typedef struct MenuIconEntry {
     u32 id;
@@ -3652,7 +3652,7 @@ u32 mnuCreateIconBundle(u32 resource) {
     for (i = 0; i < 3; i++) {
         void *sprite = (void *)effCreateResourceSlotSet(resource, layout.entry[i].id, 1);
         set->sprite[i] = sprite;
-        func_003071D0(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
+        itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
     return (u32)set;
 }

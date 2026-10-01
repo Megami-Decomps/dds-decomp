@@ -18,7 +18,7 @@ extern s32 D_003BC878;
 extern s32 D_003BC87C;
 extern s32 sdfTexReleaseReferenceViaHandler();
 extern s32 dds3GetWorldObject();
-extern void func_00110860();
+extern void dds3SetWorldObjectDataValue();
 extern void fileWaitReady();
 extern void sdfReleaseMemorySlot();
 extern u8 D_00324690[];
@@ -105,7 +105,7 @@ extern s32 sdfResourceRetainAddress();
 
 extern s64 sdfDevCreateCommandState(u64);
 
-extern u64 func_002E5C88(s64);
+extern u64 sdfDevQueueControlAndWait(s64);
 
 extern u32 D_003BC8F8;
 
@@ -429,7 +429,7 @@ extern void *mcDispatchReadCallback(void);
 
 extern void *mcHandleSearchResult(void);
 
-extern s32 func_00289F30(void);
+extern s32 mcPollNormalizedCommandStatus(void);
 
 extern void *fileBuildMainBlobAndWrite();
 
@@ -586,31 +586,6 @@ extern void fileQueueAppend(FileQueue *queue, FileJob *job);
 
 extern s8 D_003BC8D5;
 
-void fileWriteBegin(s32 request, u32 first, u32 second) {
-    func_002F6670();
-}
-
-extern s32 func_002F6858(s32, s32 *, s32 *);
-
-/* Poll the memory-card write: busy is 0, success 1, and the card's
- * -4 status is translated to the menu's -2 error. */
-s32 fileWriteWait(void) {
-    s32 cmdId;
-    s32 status;
-    s32 result = func_002F6858(1, &cmdId, &status);
-
-    if (result == 1) {
-        if (status >= 0) {
-            return result;
-        }
-        if (status == -4) {
-            return -2;
-        }
-        return -1;
-    }
-    return 0;
-}
-
 void fileDestroyMenuTask(void) {
     if (D_003BC7F0 != 0) {
         kwlnTaskDestroyWithHierarchy(D_003BC7F0, 1);
@@ -730,9 +705,9 @@ s32 fileIsLoadStepComplete(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028A5E8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_0028A5E8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileShowStatusDialog);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileShowStatusDialog);
 
 void fileSetMenuFlowState(u32 state) {
     s32 previous;
@@ -744,7 +719,7 @@ void fileSetMenuFlowState(u32 state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028AB48);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_0028AB48);
 
 void fileClearAllSlotFlags(void) {
     fileReqMarkSlotMetadataDirty(D_003BC7E8);
@@ -782,11 +757,11 @@ void *fileBeginSlotOpen(void) {
     return fileReadSlotPreviewBegin;
 }
 
-extern s32 func_00289FA8(s32 *);
+extern s32 mcPollCommandStatusWithResult(s32 *);
 extern void func_0028A070(s32, u32, s32);
 extern void *fileReadSlotPreviewWait(void);
 void *fileReadSlotPreviewBegin(void) {
-    s32 status = func_00289FA8(&D_003BD91C);
+    s32 status = mcPollCommandStatusWithResult(&D_003BD91C);
 
     if (status == 0) {
         return NULL;
@@ -1129,7 +1104,7 @@ void *fileSlotSelectPollClear(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BAC0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_0028BAC0);
 
 extern s8 D_00324510[];
 
@@ -1206,7 +1181,7 @@ void *fileBeginDetectionRequest(u32 callback) {
     return func_0028BF38;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028BF38);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_0028BF38);
 
 void *fileBeginReadSlotIcon(void) {
     u8 buf[0x50];
@@ -1451,7 +1426,7 @@ void *filePrepareMainBlobWrite(void) {
 }
 
 void *fileBuildMainBlobAfterDelete(void) {
-    s32 t = func_00289F30();
+    s32 t = mcPollNormalizedCommandStatus();
 
     if (t == 0) {
         return NULL;
@@ -1500,7 +1475,7 @@ void *fileRequestBaseIcon(void) {
                           func_0028C8F8, &D_003BC7F8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileBuildMainBlobAndWrite);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileBuildMainBlobAndWrite);
 
 void *mcChooseLoadPath(void) {
     u32 entry = D_003BC7E8;
@@ -1522,7 +1497,30 @@ void *fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback
     return fileWriteWaitOpen;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileWriteWaitOpen);
+extern void fileWriteBegin(s32 request, u32 first, u32 second);
+extern void *fileFinishRequest(void);
+
+void *fileWriteWaitOpen(void) {
+    s32 status = mcPollCommandStatusWithResult(&D_003BD91C);
+
+    if (status == 0) {
+        return NULL;
+    }
+    if (status == 1) {
+        if (D_003BD934 != NULL && *D_003BD934 != 0) {
+            return fileFinishRequest;
+        }
+        fileWriteBegin(D_003BD91C, *D_003BD928, *D_003BD92C);
+        return mcHandleLoadResult;
+    }
+    if (status == -1) {
+        fileSetMenuFlowState(0);
+        D_003BC854 = 4;
+        return fileAbortSlotScanOnInput;
+    }
+    return NULL;
+}
+
 
 void *mcHandleLoadResult(void) {
     s32 status = fileWriteWait();
@@ -1619,7 +1617,7 @@ void *fileBeginSlotCreate(void) {
 }
 
 void *fileLoadMainBlobBegin(void) {
-    s32 status = func_00289FA8(&D_003BD91C);
+    s32 status = mcPollCommandStatusWithResult(&D_003BD91C);
     u32 size;
 
     if (status == 0) {
@@ -1681,17 +1679,17 @@ void *mcdHandleSaveSetupDone(void) {
     return fileAbortSlotScanOnInput;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileSlotBrowserUpdate);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileSlotBrowserUpdate);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2658);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2658);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2668);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2668);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2678);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2678);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2688);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2688);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileDrawSlotListAndPreview);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileDrawSlotListAndPreview);
 
 void *fileRunMenuState(s32 arg) {
     void *next;
@@ -1740,7 +1738,7 @@ s32 fileDrawMenuFrame(s32 work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileEnterMcPackScene);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileEnterMcPackScene);
 
 void func_0028F440(void) {
     fileReleaseMenuResources();
@@ -1802,7 +1800,7 @@ void fileReleaseMenuResources(void) {
         }
         world = dds3GetWorldObject();
         if (world != 0) {
-            func_00110860(world, 1);
+            dds3SetWorldObjectDataValue(world, 1);
         }
         if (D_003BC7F8 != 0) {
             fileWaitReady(D_003BC7F8);
@@ -1828,7 +1826,7 @@ u32 fileGetSelectionPendingFlag(void) {
     return D_003BC84C;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_0028F630);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_0028F630);
 
 extern void *D_003BD908;
 extern void *D_003BD90C;
@@ -1846,7 +1844,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     return (s32)func_0028F630;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", fileShowPromptDialog);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
 
 u32 func_00290478(void) {
     return D_003BC81C;
@@ -1871,7 +1869,7 @@ void fileSetMenuValueAndInitializeFlags(u32 value) {
     D_0037D4A0.unk4 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002904C8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002904C8);
 
 void fileCursorStepUp(void) {
     D_0037D4A0.unk4++;
@@ -1887,11 +1885,11 @@ void fileFadeStepDown(void) {
     D_0037D4D0[0] = D_0037D4D0[0] <= 0 ? 0 : D_0037D4D0[0] > 0x80 ? 0x80 : D_0037D4D0[0];
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B26C8);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B26C8);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", jtbl_003B26E0);
+INCLUDE_RODATA(const s32, "game/code_0028A150", jtbl_003B26E0);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2718);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2718);
 
 void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     s32 uv[21][2] = {
@@ -1962,7 +1960,7 @@ void fileCursorPulseUpdate(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290A88);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00290A88);
 
 void fileLoadSetMode(s8 mode) {
     D_0037D4A0.unk14 = 0;
@@ -2050,13 +2048,13 @@ s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B28A0);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28A0);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B28C0);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28C0);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B28D0);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28D0);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B28E8);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28E8);
 
 s32 fileTestSlotFlagsBit(kind, flags)
     s32 kind;
@@ -2082,17 +2080,17 @@ void fileTestSavedSlotFlags(u32 kind) {
     fileTestSlotFlagsBit(kind, D_003BAA00 + 0xa54);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2920);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2920);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2940);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2940);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2960);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2960);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2980);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2980);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29A0);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B29A0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00290FE0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00290FE0);
 
 typedef struct FileConfigListNode {
     u8 pad00[0x58];
@@ -2202,11 +2200,11 @@ u32 fileGetConfigTaskSlot(s32 slot) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29D8);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B29D8);
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B29E8);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B29E8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00291418);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00291418);
 
 s32 fileStartQueuedLoad(void) {
     if (((FileConfigTask *)D_003BD938)->pending == 0) {
@@ -2230,9 +2228,9 @@ u32 fileGetConfigTaskFailure(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002918F8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002918F8);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292720);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00292720);
 
 void fileManagerResetSubsystems(void) {
     func_003003F0(D_003BC900);
@@ -2306,7 +2304,7 @@ void mnuProjectViewPoint(void) {
         : : "r"(D_00324660) : "memory");
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00292CE0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00292CE0);
 
 extern s32 func_00292CE0();
 
@@ -2421,7 +2419,7 @@ void vuBuildLookAtBasis(void)
     VU0_MOVE_VF(vf29, vf10);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293158);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00293158);
 
 FileJob *fileCreateJob(u16 type) {
     u16 kind = type;
@@ -2577,11 +2575,11 @@ void fileJobCopyCommandIntoPrimaryData(u64 job, u64 state, u16 option) {
 
     command = sdfDevCreateCommandState(state);
     if (command != 0) {
-        size = func_002E5C88(command);
+        size = sdfDevQueueControlAndWait(command);
         handle = func_002D03F8(size);
         address = sdfResourceRetainAddress(handle);
-        func_002E5C68(command, address, size);
-        func_002E5C38(command);
+        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, address, size, option);
         func_002D0918(handle);
         return;
@@ -2612,18 +2610,18 @@ void fileJobCopyCommandIntoSecondaryData(u64 job, u64 state, u16 selector) {
 
     command = sdfDevCreateCommandState(state);
     if (command != 0) {
-        size = func_002E5C88(command);
+        size = sdfDevQueueControlAndWait(command);
         handle = func_002D03F8(size);
         address = sdfResourceRetainAddress(handle);
-        func_002E5C68(command, address, size);
-        func_002E5C38(command);
+        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevWaitThenReleaseCommandState(command);
         fileJobSetSecondaryData(job, address, size, selector);
         func_002D0918(handle);
         return;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00293AE0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00293AE0);
 
 extern u8 D_003BD476;
 extern char D_003BC928[];
@@ -2676,11 +2674,11 @@ void *fileJobCreateFromCommandState(entry)
 
     command = sdfDevCreateCommandState(entry);
     if (command != 0) {
-        size = func_002E5C88(command);
+        size = sdfDevQueueControlAndWait(command);
         handle = func_002D03F8(size);
         address = sdfResourceRetainAddress(handle);
-        func_002E5C68(command, address, size);
-        func_002E5C38(command);
+        sdfDevQueueReadAndWait(command, address, size);
+        sdfDevWaitThenReleaseCommandState(command);
         job = fileDuplicateJob((void *)address);
         func_002D0918(handle);
         return job;
@@ -2802,7 +2800,7 @@ void func_002940B8(FileJob *job) {
     sdfReleaseChipBlock(job);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002940D0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002940D0);
 
 void func_00294318(u32 unused, u32 handle) {
     func_002940D0(handle);
@@ -3001,7 +2999,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294938);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00294938);
 
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
@@ -3135,11 +3133,11 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00295018);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00295018);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002954F0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002954F0);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002959E8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002959E8);
 
 FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
     FileJob *job = queue->tail;
@@ -3310,7 +3308,7 @@ LoadObj *fileCreateGridLoaderRecord(FileCellGrid *grid) {
     return fileLoadObjectCreate((void *)(count <= 0x12C ? count : 0x12C));
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A0E0", D_003B2A18);
+INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2A18);
 
 LoadObj *effLoadObjectCreateFromJob(FileJob *job) {
     void *primary = fileResolvePrimaryBuffer(job);
@@ -3518,7 +3516,7 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002966D8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002966D8);
 
 void func_00296E98(s32 object) {
     fileAcquireLoadObjectRecord(object);
@@ -3555,9 +3553,9 @@ void fileResetSlotStates(FileRecordSlots *record) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00296F58);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00296F58);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297270);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00297270);
 
 /* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
 typedef struct FileKeyOut {
@@ -3668,9 +3666,9 @@ void fileCopyAndInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297658);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00297658);
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00297CB0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00297CB0);
 
 typedef struct ScaleEntry {
     f32 unk0;
@@ -3719,7 +3717,7 @@ void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
     dst->unkE0 = src->unkE0 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002985D0);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002985D0);
 
 void effLoadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
@@ -3737,7 +3735,7 @@ void effLoadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
     dst->unkDC = src->unkDC * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00298D28);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00298D28);
 
 void effLoadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
@@ -3756,9 +3754,9 @@ void effLoadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
     dst->unkF0 = src->unkF0 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_002995F8);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_002995F8);
 
-void func_00299DD8(ScaleOwner *owner, f32 scale) {
+void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
     ScaleSet *dst = owner->dst;
     ScaleSet *src = owner->src;
     u32 i;
@@ -3773,7 +3771,7 @@ void func_00299DD8(ScaleOwner *owner, f32 scale) {
     dst->unkE4 = src->unkE4 * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00299E58);
+INCLUDE_ASM(const s32, "game/code_0028A150", func_00299E58);
 
 void effLoadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
@@ -3866,137 +3864,137 @@ void fileSetRecordSecondVector(void *record, const u128 *value) {
     PCP_COPY_VECTOR(*(u128 **)((u8 *)record + 0x20) + 1, value);
 }
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7E8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7E8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7EC);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7EC);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7ED);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7ED);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7F0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7F0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7F8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7F8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC7FC);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7FC);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC800);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC800);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC804);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC804);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC808);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC808);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC80C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC80C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC810);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC810);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC814);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC814);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC818);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC818);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC81C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC81C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC820);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC820);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC824);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC824);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC828);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC828);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC82C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC82C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC830);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC830);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC834);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC834);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC838);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC838);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC83C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC83C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC840);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC840);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC844);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC844);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC848);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC848);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC84C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC84C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC850);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC850);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC854);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC854);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC858);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC858);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC85C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC85C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC860);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC860);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC864);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC864);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC868);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC868);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC86C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC86C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC870);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC870);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC874);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC874);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC878);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC878);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC87C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC87C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC880);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC880);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC884);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC884);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC888);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC888);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC88C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC88C);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC890);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC890);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC894);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC894);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC898);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC898);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8A0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8A0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8A8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8A8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8B0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8B0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8B8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8B8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8C0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8C0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8D0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8D0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8D5);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8D5);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8D8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8D8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8DC);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8DC);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8E0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8E0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8E8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8E8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8F0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8F0);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC8F8);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8F8);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC900);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC900);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC908);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC908);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC910);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC910);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC918);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC918);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC920);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC920);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC928);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC928);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC930);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC930);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC938);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC938);
 
-INCLUDE_SDATA(const s32, "game/code_0028A0E0", D_003BC940);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC940);
 

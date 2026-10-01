@@ -720,7 +720,7 @@ Entry84W *func_002CE9E0(u16 index) {
     return &D_00391230[index];
 }
 
-void func_002CEA10(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
+void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     u32 handle = func_00197C40(x, y, first, width, (u32)D_00394680, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
@@ -767,7 +767,7 @@ void func_002CEC08(void) {
     func_0029CE50(fileResolvePrimaryBuffer());
 }
 
-void func_002CEC28(s32 context) {
+void sdfReleaseFlagListResource(s32 context) {
     func_002D0918(((SdfFlagListWork *)context)->resource);
 }
 

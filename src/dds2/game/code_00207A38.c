@@ -196,7 +196,7 @@ extern u32 btlGetSubtaskTargetMode(void);
 
 extern void btlCmdSimpleC(s32, u16);
 
-extern s32 func_00210EA0(s32 context, s32 actor, u32 mask);
+extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 
 extern void scrSetIntegerReturnValue();
 
@@ -360,19 +360,11 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     VU0_LOAD_VF(vf10, unit->unk_70);;
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, unit->muzzleOffset);;
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
-        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
-        "lqc2 vf11, 0(%0)\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        :
-        : "r"(pos));
+    VU0_SET_VF2X(unit->sizeScale);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_LOAD_VF(vf11, pos);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
@@ -382,19 +374,11 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
     VU0_LOAD_VF(vf10, unit->unk_70);;
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, unit->bodyOffset);;
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
-        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
-        "lqc2 vf11, 0(%0)\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        :
-        : "r"(pos));
+    VU0_SET_VF2X(unit->sizeScale);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_LOAD_VF(vf11, pos);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 void btlUnitGetEffectPosVU(BtlUnit *unit) {
@@ -408,19 +392,11 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     VU0_LOAD_VF(vf10, unit->unk_70);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, unit->muzzleOffset);
-    __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(unit->sizeScale));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
-        "vmaddw.xyzw vf10, vf31, vf10w\n\t"
-        "lqc2 vf11, 0(%0)\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        :
-        : "r"(pos));
+    VU0_SET_VF2X(unit->sizeScale);
+    VU0_MUL_VF2X(vf10, vf10);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_LOAD_VF(vf11, pos);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
@@ -546,9 +522,10 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 if (target != unit) {
                     if (unit->flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
-                                        __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" : : "f"(pos.f[1]) : "$2");
+                                        VU0_SCALAR_OP_CLOBBER(pos.f[1], "vaddx.y vf10, vf0, vf2x");
                         VU0_LOAD_VF(vf11, &pos);;
-                        __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmul.xyz $vf2, $vf10, $vf10\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tvsqrt Q, $vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dist) : : "$2");
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(dist);
                         if (first) {
                             best = dist;
                             nearest = unit;
@@ -715,33 +692,19 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00209258);
 
 /* vu0 routine: unit normal of the triangle (a, b, c); result in vf10 (VU register convention) */
 void btlTriangleNormalVU(f32 *a, f32 *b, f32 *c) {
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%1)\n\t"
-        "lqc2 vf11, 0(%0)\n\t"
-        "vsub.xyzw vf10, vf10, vf11\n\t"
-        "vmove.xyzw vf12, vf10\n\t"
-        "lqc2 vf11, 0(%2)\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "vsub.xyzw vf11, vf11, vf10\n\t"
-        "vmove.xyzw vf10, vf12\n\t"
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        "vmove.xyzw vf10, vf12\n\t"
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q\n\t"
-        ".set reorder"
-        :
-        : "r"(a), "r"(b), "r"(c)
-        : "memory");
+    VU0_LOAD_VF(vf10, b);
+    VU0_LOAD_VF(vf11, a);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf11, c);
+    VU0_LOAD_VF_MEMORY(vf10, a);
+    VU0_SUB(vf11, vf11, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
 }
 
 f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
@@ -751,7 +714,8 @@ f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
     VU0_STORE_VF(vf10, normal);;
     VU0_LOAD_VF(vf10, a);;
     VU0_LOAD_VF(vf11, c);;
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmove.xyzw $vf11, $vf10\n\t.set reorder");
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, normal);;
         VU0_DOT_XYZ(dot, vf10, vf11);
     return dot;
@@ -760,31 +724,13 @@ f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
 /* vu0 routine: vf10 = c + normalize(d - c) * dist */
 void btlPointOffPlaneVU(f32 *a, f32 *b, f32 *c, f32 *d) {
     f32 dist = btlTriangleNormalDotEdge(a, b, c);
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "lqc2 vf11, 0(%1)\n\t"
-        "vsub.xyzw vf10, vf10, vf11\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q\n\t"
-        ".set reorder"
-        :
-        : "r"(d), "r"(c));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $2, %0\n\t"
-        "qmtc2.ni $2, vf2\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "lqc2 vf11, 0(%1)\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        :
-        : "f"(dist), "r"(c));
+    VU0_LOAD_VF(vf10, d);
+    VU0_LOAD_VF(vf11, c);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(dist, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, c);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 /* vu0 routine: vf10 = c + n * dot(n, a - c), n = unit normal of triangle (a, b, c) */
@@ -808,16 +754,9 @@ void btlProjectOnPlaneVU(f32 *a, f32 *b, f32 *c) {
         ".set reorder"
         : "=f"(dot)
         : "r"(a), "r"(c), "r"(normal));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $2, %0\n\t"
-        "qmtc2.ni $2, vf2\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        "lqc2 vf11, 0(%1)\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        :
-        : "f"(dot), "r"(c));
+    VU0_SCALAR_OP(dot, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, c);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 s32 btlPointInBox(BtlVec3 *a, BtlVec3 *b, BtlVec3 *p) {
@@ -845,21 +784,9 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
     VU0_MOVE_VF(vf11, vf10);;
     color2[0] = colorA;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        ".set reorder"
-        : : "f"(1.0f - t) : "$2");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $3, %0\n"
-        "qmtc2.ni $3, vf2\n"
-        "vmulx.xyzw vf11, vf11, vf2x\n"
-        "vadd.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "f"(t) : "$3");
+    VU0_SCALAR_OP_CLOBBER(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3_CLOBBER(t, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     
@@ -871,27 +798,11 @@ u32 btlBlendColor(u32 colorA, u32 colorB, f32 t) {
 u32 btlBlendColorVec(f32 *a, f32 *b, f32 t) {
     u32 packed;
     s32 blended[4];
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "lqc2 vf11, 0(%1)\n\t"
-        ".set reorder"
-        : : "r"(a), "r"(b));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $2, %0\n\t"
-        "qmtc2.ni $2, vf2\n\t"
-        "vmulx.xyzw vf10, vf10, vf2x\n\t"
-        ".set reorder"
-        : : "f"(1.0f - t));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "mfc1 $3, %0\n\t"
-        "qmtc2.ni $3, vf2\n\t"
-        "vmulx.xyzw vf11, vf11, vf2x\n\t"
-        "vadd.xyzw vf10, vf10, vf11\n\t"
-        ".set reorder"
-        : : "f"(t));
+    VU0_LOAD_VF(vf10, a);
+    VU0_LOAD_VF(vf11, b);
+    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_R3(t, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];
@@ -1295,7 +1206,7 @@ u32 btlScriptCmdSimpleI(void) {
 s32 func_0020A4F0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[0] = choice;
         context->selectionFlagsA |= 1;
@@ -1309,7 +1220,7 @@ s32 func_0020A4F0(void) {
 s32 func_0020A580(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x7000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[1] = choice;
         context->selectionFlagsA |= 2;
@@ -1323,7 +1234,7 @@ s32 func_0020A580(void) {
 s32 func_0020A610(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x7000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[1] = choice;
         context->selectionFlagsA |= 2;
@@ -1337,7 +1248,7 @@ s32 func_0020A610(void) {
 s32 func_0020A6A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1351,7 +1262,7 @@ s32 func_0020A6A0(void) {
 s32 btlCmdSelectChoiceSlot2Code0C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xc00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xc00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1365,7 +1276,7 @@ s32 btlCmdSelectChoiceSlot2Code0C(void) {
 s32 func_0020A7C0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x1000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x1000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1379,7 +1290,7 @@ s32 func_0020A7C0(void) {
 s32 btlCmdSelectChoiceSlot3Code1C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x1c00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x1c00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[3] = choice;
         context->selectionFlagsA |= 8;
@@ -1393,7 +1304,7 @@ s32 btlCmdSelectChoiceSlot3Code1C(void) {
 s32 func_0020A8E0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x2000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[4] = choice;
         context->selectionFlagsA |= 0x10;
@@ -1407,7 +1318,7 @@ s32 func_0020A8E0(void) {
 s32 func_0020A970(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x2400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[5] = choice;
         context->selectionFlagsA |= 0x20;
@@ -1421,7 +1332,7 @@ s32 func_0020A970(void) {
 s32 func_0020AA00(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x2800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[6] = choice;
         context->selectionFlagsA |= 0x40;
@@ -1440,7 +1351,7 @@ u32 btlScriptSetChoiceFlag(void) {
     context = (BtlCommandCtx *)func_0010D8D0();
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    if (func_00210EA0((s32)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[6] = first;
         context->selectionFlagsA |= 0x40;
@@ -1454,7 +1365,7 @@ u32 btlScriptSetChoiceFlag(void) {
 s32 func_0020AB38(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x3000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesA[7] = choice;
         context->selectionFlagsA |= 0x80;
@@ -1468,7 +1379,7 @@ s32 func_0020AB38(void) {
 s32 func_0020ABC8(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x3400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesExtra[0] = choice;
         context->selectionFlagsA |= 0x100;
@@ -1482,7 +1393,7 @@ s32 func_0020ABC8(void) {
 s32 func_0020AC58(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x3800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesExtra[1] = choice;
         context->selectionFlagsA |= 0x200;
@@ -1496,7 +1407,7 @@ s32 func_0020AC58(void) {
 s32 func_0020ACE8(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x3C00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3C00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesExtra[2] = choice;
         context->selectionFlagsA |= 0x400;
@@ -1510,7 +1421,7 @@ s32 func_0020ACE8(void) {
 s32 func_0020AD78(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x4000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesExtra[3] = choice;
         context->selectionFlagsA |= 0x800;
@@ -1524,7 +1435,7 @@ s32 func_0020AD78(void) {
 s32 func_0020AE08(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x4400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesExtra[4] = choice;
         context->selectionFlagsA |= 0x1000;
@@ -1537,7 +1448,7 @@ s32 func_0020AE08(void) {
 
 u32 func_0020AE98(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000;
     } else {
@@ -1549,7 +1460,7 @@ u32 func_0020AE98(void) {
 
 u32 func_0020AF10(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000000;
     } else {
@@ -1562,7 +1473,7 @@ u32 func_0020AF10(void) {
 s32 func_0020AF90(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x5800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5800000)) {
         scrSetIntegerReturnValue(1);
         context->choiceD8 = choice;
         context->selectionFlagsA |= 0x4000;
@@ -1576,7 +1487,7 @@ s32 func_0020AF90(void) {
 s32 func_0020B020(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x5C00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5C00000)) {
         scrSetIntegerReturnValue(1);
         context->choiceD8 = choice;
         context->selectionFlagsA |= 0x4000;
@@ -1591,7 +1502,7 @@ u32 func_0020B0B0(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1603,7 +1514,7 @@ u32 func_0020B100(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1615,7 +1526,7 @@ u32 func_0020B150(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1626,7 +1537,7 @@ u32 func_0020B150(void) {
 s32 func_0020B1A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0A800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0A800000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[0] = choice;
         context->selectionFlagsA |= 0x40000;
@@ -1640,7 +1551,7 @@ s32 func_0020B1A0(void) {
 s32 func_0020B240(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0AC00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0AC00000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[1] = choice;
         context->selectionFlagsA |= 0x80000;
@@ -1653,7 +1564,7 @@ s32 func_0020B240(void) {
 
 u32 func_0020B2E0(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x12C00000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1663,7 +1574,7 @@ u32 func_0020B2E0(void) {
 
 u32 func_0020B350(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13000000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1674,7 +1585,7 @@ u32 func_0020B350(void) {
 s32 func_0020B3C0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0BC00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0BC00000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[2] = choice;
         context->selectionFlagsA |= 0x100000;
@@ -1688,7 +1599,7 @@ s32 func_0020B3C0(void) {
 s32 func_0020B460(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0C000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C000000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[3] = choice;
         context->selectionFlagsA |= 0x200000;
@@ -1702,7 +1613,7 @@ s32 func_0020B460(void) {
 s32 func_0020B500(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0C400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C400000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[4] = choice;
         context->selectionFlagsA |= 0x400000;
@@ -1716,7 +1627,7 @@ s32 func_0020B500(void) {
 s32 func_0020B5A0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0C800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C800000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[4] = choice;
         context->selectionFlagsA |= 0x400000;
@@ -1730,7 +1641,7 @@ s32 func_0020B5A0(void) {
 s32 func_0020B640(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0x0CC00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0CC00000)) {
         scrSetIntegerReturnValue(1);
         context->savedChoices[5] = choice;
         context->selectionFlagsA |= 0x800000;
@@ -1744,7 +1655,7 @@ s32 func_0020B640(void) {
 s32 func_0020B6E0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xd800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xd800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesB[0] = choice;
         context->selectionFlagsB |= 1;
@@ -1758,7 +1669,7 @@ s32 func_0020B6E0(void) {
 s32 func_0020B770(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xdc00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xdc00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesB[1] = choice;
         context->selectionFlagsB |= 2;
@@ -1772,7 +1683,7 @@ s32 func_0020B770(void) {
 s32 func_0020B800(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xe000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe000000)) {
         scrSetIntegerReturnValue(1);
         context->choicesB[2] = choice;
         context->selectionFlagsB |= 4;
@@ -1786,7 +1697,7 @@ s32 func_0020B800(void) {
 s32 func_0020B890(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xe400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesB[3] = choice;
         context->selectionFlagsB |= 8;
@@ -1800,7 +1711,7 @@ s32 func_0020B890(void) {
 s32 func_0020B920(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xE800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xE800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesC[0] = choice;
         context->selectionFlagsB |= 0x10;
@@ -1814,7 +1725,7 @@ s32 func_0020B920(void) {
 s32 func_0020B9B0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xEC00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xEC00000)) {
         scrSetIntegerReturnValue(1);
         context->choicesC[1] = choice;
         context->selectionFlagsB |= 0x20;
@@ -1828,7 +1739,7 @@ s32 func_0020B9B0(void) {
 s32 func_0020BA40(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xF400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF400000)) {
         scrSetIntegerReturnValue(1);
         context->choicesC[6] = choice;
         context->selectionFlagsB |= 0x400;
@@ -1842,7 +1753,7 @@ s32 func_0020BA40(void) {
 s32 func_0020BAD0(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, context->actor, choice | 0xF800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF800000)) {
         scrSetIntegerReturnValue(1);
         context->choicesC[7] = choice;
         context->selectionFlagsB |= 0x800;
@@ -1855,7 +1766,7 @@ s32 func_0020BAD0(void) {
 
 u32 func_0020BB60(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13400000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1865,7 +1776,7 @@ u32 func_0020BB60(void) {
 
 s32 func_0020BBD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13800000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x13800000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1876,7 +1787,7 @@ s32 func_0020BBD0(void) {
 s32 func_0020BC40(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[2] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x40;
@@ -1890,7 +1801,7 @@ s32 func_0020BC40(void) {
 s32 func_0020BCD0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[8] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x1000;
@@ -1904,7 +1815,7 @@ s32 func_0020BCD0(void) {
 s32 func_0020BD60(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[3] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x80;
@@ -1919,7 +1830,7 @@ u32 func_0020BDE8(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1929,7 +1840,7 @@ u32 func_0020BDE8(void) {
 
 u32 func_0020BE38(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1941,7 +1852,7 @@ u32 func_0020BEA8(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1953,7 +1864,7 @@ u32 func_0020BEF8(void) {
     s32 context;
 
     context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);
@@ -1964,7 +1875,7 @@ u32 func_0020BEF8(void) {
 s32 func_0020BF48(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choice100 = choice;
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x1000000;
@@ -1978,7 +1889,7 @@ s32 func_0020BF48(void) {
 s32 func_0020BFE0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choice108 = choice;
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x4000000;
@@ -2061,7 +1972,7 @@ u32 func_0020C290(void) {
 s32 func_0020C298(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12000000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12000000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[10] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x4000;
@@ -2075,7 +1986,7 @@ s32 func_0020C298(void) {
 s32 func_0020C328(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12400000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12400000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[11] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x8000;
@@ -2089,7 +2000,7 @@ s32 func_0020C328(void) {
 s32 func_0020C3C0(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
-    if (func_00210EA0((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x11C00000)) {
+    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x11C00000)) {
         scrSetIntegerReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[9] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x2000;
@@ -2102,7 +2013,7 @@ s32 func_0020C3C0(void) {
 
 s32 func_0020C450(void) {
     s32 context = func_0010D8D0();
-    if (func_00210EA0(context, ((BtlCommandCtx *)context)->actor, 0x12800000)) {
+    if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x12800000)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);

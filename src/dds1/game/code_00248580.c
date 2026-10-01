@@ -53,7 +53,7 @@ typedef struct MenuProgressWork {
     s32 initState;           /* 0x80 */
 } MenuProgressWork;
 
-extern s32 func_00248BA0(s32, s32);
+extern s32 mnuCreateDualPercentPanel(s32, s32);
 
 extern s32 func_002CFEB8(s32);
 
@@ -158,7 +158,7 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
-extern s32 func_00248BA0(s32, s32);
+extern s32 mnuCreateDualPercentPanel(s32, s32);
 
 extern s32 func_002CFEB8(s32);
 
@@ -166,7 +166,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
-s32 func_00248BA0(s32 resource, s32 context) {
+s32 mnuCreateDualPercentPanel(s32 resource, s32 context) {
     s32 panel = func_002CFEB8(0xa8);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(*(u16 *)(resource + 6), *(u16 *)(resource + 8)),
@@ -177,7 +177,7 @@ s32 func_00248BA0(s32 resource, s32 context) {
     return panel;
 }
 
-void func_00248C38(s32 arg0) {
+void mnuReleaseDualPercentPanel(s32 arg0) {
     if (arg0 != 0) {
         mnuReleaseSpriteTextures();
         mnuReleaseSpriteTextures((s32)arg0 + 0x54);
@@ -191,7 +191,7 @@ void mnuUpdateGroupResources(u8 *scene) {
     MenuProgressNode *node = *(MenuProgressNode **)(*(u8 **)(scene + 0x74) + 0x10);
 
     while (node != NULL) {
-        node->panel = func_00248BA0(D_003BAA00 + node->itemIndex * 420 + 0xA60, (s32)scene);
+        node->panel = mnuCreateDualPercentPanel(D_003BAA00 + node->itemIndex * 420 + 0xA60, (s32)scene);
         node = node->next;
     }
 }
@@ -200,7 +200,7 @@ void mnuDestroyThresholdNodePanels(s32 owner) {
     s32 entry;
 
     for (entry = (s32)((MenuProgressWork *)owner)->list->firstProgressNode; entry != 0; entry = (s32)((MenuProgressNode *)entry)->next) {
-        func_00248C38(((MenuProgressNode *)entry)->panel);
+        mnuReleaseDualPercentPanel(((MenuProgressNode *)entry)->panel);
     }
 }
 
@@ -255,7 +255,7 @@ void func_00248E18(s32 arg0) {
 }
 
 void func_00248E30(s32 arg0) {
-    func_00248C38(((MenuProgressWork *)arg0)->list->selectedNode->panel);
+    mnuReleaseDualPercentPanel(((MenuProgressWork *)arg0)->list->selectedNode->panel);
     func_0027B888((u32)((MenuProgressWork *)arg0)->list);
 }
 
@@ -508,14 +508,14 @@ void func_00249C08(s8 enabled) {
     if (enabled == '\x01') {
         worldObject = dds3GetWorldObject();
         if (worldObject != 0) {
-            func_00110860(worldObject, 1);
+            dds3SetWorldObjectDataValue(worldObject, 1);
         }
         D_003BC3E1 = 1;
     }
     else {
         worldObject = dds3GetWorldObject();
         if (worldObject != 0) {
-            func_00110860(worldObject, 0);
+            dds3SetWorldObjectDataValue(worldObject, 0);
         }
         D_003BC3E1 = 0;
     }
@@ -565,7 +565,7 @@ void func_00249D80(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249DD0);
 
-extern void func_00285490(void *);
+extern void mnuClearPanelTransitionState(void *);
 
 extern void mnuLoadResourceHandles(s32);
 
@@ -590,7 +590,7 @@ u8 *func_00249E20(s32 reduced, s32 slot) {
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x164);
     ((MenuProgressWork *)obj)->allocation = handle;
-    func_00285490(obj + 8);
+    mnuClearPanelTransitionState(obj + 8);
     mnuLoadResourceHandles(obj);
     mnuTerminalCreateEffects((MenuSlotState *)obj);
     ((MenuProgressWork *)obj)->mode = reduced;

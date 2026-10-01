@@ -130,28 +130,13 @@ void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
 void func_002DDBF8(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf24x\n"
-        "vmadday.xyzw ACC, vf29, vf24y\n"
-        "vmaddaz.xyzw ACC, vf30, vf24z\n"
-        "vmaddw.xyzw vf2, vf31, vf24w\n"
-        "vmulax.xyzw ACC, vf28, vf25x\n"
-        "vmadday.xyzw ACC, vf29, vf25y\n"
-        "vmaddaz.xyzw ACC, vf30, vf25z\n"
-        "vmaddw.xyzw vf3, vf31, vf25w\n"
-        "vmulax.xyzw ACC, vf28, vf26x\n"
-        "vmadday.xyzw ACC, vf29, vf26y\n"
-        "vmaddaz.xyzw ACC, vf30, vf26z\n"
-        "vmaddw.xyzw vf4, vf31, vf26w\n"
-        "vmulax.xyzw ACC, vf28, vf27x\n"
-        "vmadday.xyzw ACC, vf29, vf27y\n"
-        "vmaddaz.xyzw ACC, vf30, vf27z\n"
-        "vmaddw.xyzw vf31, vf31, vf27w\n"
-        "vmove.xyzw vf28, vf2\n"
-        "vmove.xyzw vf29, vf3\n"
-        "vmove.xyzw vf30, vf4\n"
-        ".set reorder\n");
+    VU0_APPLY_MATRIX(vf2, vf24);
+    VU0_APPLY_MATRIX(vf3, vf25);
+    VU0_APPLY_MATRIX(vf4, vf26);
+    VU0_APPLY_MATRIX(vf31, vf27);
+    VU0_MOVE_VF(vf28, vf2);
+    VU0_MOVE_VF(vf29, vf3);
+    VU0_MOVE_VF(vf30, vf4);
 }
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
