@@ -4657,23 +4657,18 @@ EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     return work;
 }
 
-typedef struct {
-    u8 pad00[0x70];
-    u32 handle[1];
-} EffPCPSprayHandleBlock;
-
-void effDestroyIndexedResources(EffPCPWork *work) {
+void effDestroyIndexedResources(EffPCPSprayWork *work) {
     u32 i = 0;
 
-    if (work->unk18 != 0) {
-        u32 *handle = ((EffPCPSprayHandleBlock *)work)->handle;
+    if (work->count != 0) {
+        u32 *handle = work->handle;
         do {
             if (*handle != 0) {
                 func_001629F0(*handle);
             }
             handle++;
             i++;
-        } while (i < work->unk18);
+        } while (i < work->count);
     }
     sdfReleaseChipBlock(work);
 }
