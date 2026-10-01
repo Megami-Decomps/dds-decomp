@@ -1226,6 +1226,60 @@ end
             "CALC_MONEY_BASE": (0x05A, 0, True),
             "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
         }
+        ai_expected = {
+            "RANDOM_ONE_TO": (0x00A, 1, True),
+            "AI_SELECT_BASIC_ATTACK": (0x030, 0, False),
+            "AI_SELECT_SKILL": (0x033, 1, False),
+            "AI_SELECT_ACTION_TARGETS": (0x034, 0, False),
+            "AI_SELECT_LOWEST_HP_TARGET": (0x035, 0, False),
+            "AI_SELECT_TARGETS_WITH_ACTION_MASK": (0x036, 1, False),
+            "AI_SELECT_TABLE_ACTION": (0x03D, 0, False),
+            "AI_CLEAR_SCENE_TRANSITION": (0x03E, 0, False),
+            "AI_BEGIN_SCENE_TRANSITION": (0x03F, 0, False),
+            "AI_UNIT_HP_AT_OR_BELOW_RATE": (0x07B, 1, True),
+            "AI_UNIT_PASSES_ACTION_TEN_CHECK": (0x08C, 0, True),
+            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
+            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
+            "AI_ACTOR_HISTORY_COUNTER": (0x14C, 0, True),
+            "AI_ANY_PLAYER_PASSES_QUERY": (0x19A, 1, True),
+            "AI_UNIT_ACTION_MODE_ZERO": (0x1A7, 1, True),
+            "AI_APPEND_SELF_TO_TARGETS": (0x1B0, 0, False),
+            "AI_EFFECT_ACTIVE": (0x1B6, 0, True),
+            "AI_EFFECT_VALUE": (0x1BD, 0, True),
+            "AI_SCENE_FADE_COUNT": (0x1BE, 0, True),
+            "AI_GLOBAL_HISTORY_COUNTER": (0x1C5, 0, True),
+            "AI_SELECT_TARGETS_BLOCKING_ELEMENT": (0x1C7, 1, False),
+            "AI_SET_ACTOR_UNIT_PARAMETER": (0x1CA, 1, False),
+            "AI_QUEUE_UNBOUND_COMMAND_SOUND": (0x1D4, 0, False),
+            "AI_SET_CAMERA_BLEND_START": (0x1D5, 7, False),
+            "AI_SET_CAMERA_BLEND_END": (0x1D6, 7, False),
+            "AI_RUN_CAMERA_BLEND": (0x1D7, 2, False),
+        }
+        dds1_ai_expected = {
+            "AI_ENEMY_COUNT_AT_MOST": (0x07E, 1, True),
+            "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
+            "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
+            "AI_MOVE_CAMERA": (0x0F4, 7, False),
+            "AI_ENEMY_HAS_ACTION": (0x19E, 1, True),
+        }
+        dds2_ai_expected = {
+            "AI_SELECT_WEIGHTED_TABLE_ENTRY": (0x01D, 1, False),
+            "AI_SET_CONTEXT_FLAG_ONE": (0x05B, 0, False),
+            "AI_ENEMY_COUNT_AT_MOST": (0x07E, 1, True),
+            "AI_PLAYER_COUNT_AT_MOST": (0x07F, 1, True),
+            "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
+            "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
+            "AI_HAS_PLAYER_UNIT_MODE": (0x084, 1, True),
+            "AI_HAS_OTHER_ENEMY_UNIT_MODE": (0x085, 1, True),
+            "AI_TURN_COUNT": (0x0E0, 0, True),
+            "AI_SELECT_DIRECT_ACTION": (0x0E1, 1, False),
+            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
+            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
+            "AI_ACTIVE_SUBTASK": (0x1D8, 0, True),
+            "AI_SUBTASK_TARGET_MODE": (0x1D9, 0, True),
+            "AI_SPECIAL_BATTLE_OBJECT_VALUE": (0x1DB, 0, True),
+            "AI_MARKED_ACTION_SCENE_ACTIVE": (0x1DE, 0, True),
+        }
         shared_expected = {
             name: contract for name, contract in expected.items()
             if not name.startswith("CALC_")
@@ -1328,7 +1382,13 @@ end
                     commands,
                     shared_expected
                     | battle_expected
-                    | (dds2_only if profile.name == "dds2-aicalc" else {}),
+                    | (dds2_only if profile.name == "dds2-aicalc" else {})
+                    | ai_expected
+                    | (
+                        dds2_ai_expected
+                        if profile.name == "dds2-aicalc"
+                        else dds1_ai_expected
+                    ),
                 )
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
