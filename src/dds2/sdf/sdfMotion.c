@@ -11,16 +11,16 @@ typedef struct VObj {
 } VObj;
 
 typedef struct {
-    void *unk0;
-    void *unk4;
+    void *dispatch; /* 0x00: binding callback table */
+    void *source;   /* 0x04: source supplied during binding */
 } Pair;
 
-void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2);
+void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch);
 
 typedef struct {
     u8 pad[0x30];
-    u8 mode;
-    u8 previousMode;
+    u8 state;
+    u8 previousState;
 } MotionState;
 
 typedef struct SdfMotionTrack {
@@ -88,7 +88,7 @@ typedef struct SdfMotionOutput {
     Pair pair;
     u32 value;
     SdfMotionTarget *target;
-    u32 sampledValue;
+    u32 capturedValue; /* 0x10: first word of the saved target state */
 } SdfMotionOutput;
 
 void *func_00328D68(s32 size);
@@ -117,29 +117,31 @@ extern void *D_0040B4F8[];
 
 typedef struct {
     s32 u0;
-    s16 n4;
+    s16 objectCount; /* 0x04: number of allocated binding objects */
     s16 pad6;
     s32 u8;
-    void **arrC;
+    void **objects; /* 0x0C: binding objects, each beginning with a callback table */
 } ArrObj;
 
+/* Native motion constructor/tick layout. A blend lead starts the frame clock
+ * below zero; blend callbacks normalize nonnegative elapsed frames by duration. */
 typedef struct {
-    void *unk0;
-    void *unk4;
-    void *unk8;
+    void *next;        /* 0x00: owner's intrusive motion list */
+    void *owner;       /* 0x04: owner whose list head is at +0x14 */
+    void *motionTable; /* 0x08: motion entries and binding-command data */
     s32 unkC;
-    ArrObj *unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
+    ArrObj *request;        /* 0x10 */
+    f32 blendDurationFrames; /* 0x14 */
+    f32 blendStartFrame;    /* 0x18: negative lead when a blend is requested */
+    f32 currentFrame;       /* 0x1C: advanced by frameStep on each tick */
+    f32 frameStep;          /* 0x20: initialized to 1.0 */
     s32 unk24;
-    s32 unk28;
-    s16 unk2C;
-    u16 unk2E;
+    s32 unk28;        /* 0x28: model code treats this as s16 searchId/slotIndex */
+    s16 motionIndex;  /* 0x2C: selects an entry in motionTable */
+    u16 frameCount;   /* 0x2E: selected entry's duration */
     u8 state;
     u8 previousState;
-    u8 unk32;
+    u8 loopEnabled;   /* 0x32: wraps the frame clock instead of finishing */
     u8 pad33;
 } Motion;
 
@@ -186,7 +188,7 @@ typedef struct {
     s32 u4;
     s32 u8;
     SubF *sub;
-    f32 res;
+    f32 capturedValue; /* 0x10: target value saved before blending */
 } CmdF;
 
 typedef struct {
@@ -204,7 +206,7 @@ typedef struct {
     s32 u4;
     s32 u8;
     void *sub;
-    Blk blk;
+    Blk capturedParams; /* 0x10: saved primary/secondary text scalars */
 } DstBlk;
 
 Blk *sdfEnsurePrimaryTextSubParam(void *a0);
@@ -215,9 +217,10 @@ void sdfInvokeMotionObjectCallback(VObj *object) {
     object->vtable->invoke();
 }
 
-void sdfSetMotionPointerPair(Pair *a0, void *a1, void *a2) {
-    a0->unk0 = a2;
-    a0->unk4 = a1;
+/* Install the binding's dispatch table and source without touching its payload. */
+void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
+    binding->dispatch = dispatch;
+    binding->source = source;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003340E0);
@@ -237,7 +240,7 @@ typedef struct LinkOwner {
 typedef struct MotionNode {
     Link link;
     LinkOwner *owner;
-    s32 u8;
+    s32 motionTable; /* 0x08: motion-table address */
     s32 uC;
     ArrObj *request;
 } MotionNode;
@@ -248,8 +251,8 @@ void sdfDestroyMotion(MotionNode *node)
     Link *prev;
     Link *cur;
     ArrObj *request;
-    void **cb;
-    s32 n;
+    void **objects;
+    s32 objectCount;
     s32 i;
 
     if (node == NULL) {
@@ -266,10 +269,10 @@ void sdfDestroyMotion(MotionNode *node)
         }
     }
     request = node->request;
-    n = request->n4;
-    cb = request->arrC;
-    for (i = 0; i < n; i++) {
-        sdfInvokeMotionObjectCallback(cb[i]);
+    objectCount = request->objectCount;
+    objects = request->objects;
+    for (i = 0; i < objectCount; i++) {
+        sdfInvokeMotionObjectCallback(objects[i]);
     }
     sdfDestroyDevRequest(node->request);
     sdfReleaseChipBlock(node);
@@ -277,6 +280,7 @@ void sdfDestroyMotion(MotionNode *node)
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334280);
 
+/* Select a motion with no lead-in and no blend duration. */
 void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
     func_00334280(a0, a1, a2, 0.0f, 0.0f);
 }
@@ -287,18 +291,19 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334510);
 
 /* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionSuspend(MotionState *state) {
-    u8 mode;
+    u8 previousState;
 
-    mode = state->mode;
-    if (mode != 6) {
-        state->previousMode = mode;
-        state->mode = 6;
+    previousState = state->state;
+    if (previousState != 6) {
+        state->previousState = previousState;
+        state->state = 6;
     }
 }
 
+/* Resume only a suspended motion, restoring the state saved by suspend. */
 void sdfMotionResume(MotionState *state) {
-    if (state->mode == 6) {
-        state->mode = state->previousMode;
+    if (state->state == 6) {
+        state->state = state->previousState;
     }
 }
 
@@ -326,6 +331,7 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_003347B0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334808);
 
+/* Interpolate exactly five scalar channels, retaining the retail arithmetic order. */
 void sdfMotionBlendFiveFloats(f32 *dst, f32 *src1, f32 *src2, f32 weight) {
     s32 i;
     f32 inverseWeight;
@@ -654,8 +660,9 @@ void sdfMotionBlendInterpolatedFloat(u8 *motion, f32 unused, f32 scale) {
                   *(f32 *)(motion + 0x10) + sdfInterpolateMotionKeys(&sample) * scale - *(f32 *)(motion + 0x10) * scale);
 }
 
+/* Capture the bound float as the base value for a later blend. */
 void sdfMotionReadBoundFloat(CmdF *a0) {
-    a0->res = a0->sub->f1C;
+    a0->capturedValue = a0->sub->f1C;
 }
 
 void *sdfMotionCreateTextBlendBinding(void *source, s32 unused, s32 options) {
@@ -682,15 +689,16 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
 
     func_00334678(output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b2);
-    sdfMotionBlendFiveFloats(b1, (f32 *)&output->sampledValue, b2, t2);
+    sdfMotionBlendFiveFloats(b1, (f32 *)&output->capturedValue, b2, t2);
     sdfCopyPrimaryTextScalars(output->target, b1);
 }
 
+/* Save the current primary text scalars for the blend callback. */
 void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
     Blk *p;
 
     p = sdfEnsurePrimaryTextSubParam(a0->sub);
-    a0->blk = *p;
+    a0->capturedParams = *p;
 }
 
 void *sdfMotionCreateSecondaryTextBinding(void *source, s32 unused, s32 options) {
@@ -717,15 +725,16 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
 
     func_00334678(output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b1);
-    sdfMotionBlendFiveFloats(b2, (f32 *)&output->sampledValue, b1, t2);
+    sdfMotionBlendFiveFloats(b2, (f32 *)&output->capturedValue, b1, t2);
     sdfCopySecondaryTextScalars(output->target, b2);
 }
 
+/* Save the current secondary text scalars for the blend callback. */
 void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
     Blk *p;
 
     p = sdfEnsureSecondaryTextSubParam(a0->sub);
-    a0->blk = *p;
+    a0->capturedParams = *p;
 }
 
 void *func_00335BE0(void *source, s32 unused, s32 options) {
@@ -747,7 +756,7 @@ void sdfMotionApplyInterpolatedKey(u8 *motion, f32 t1) {
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335C80);
 
 void sdfCopyMotionTargetValue(SdfMotionOutput *output) {
-    output->sampledValue = output->target->value;
+    output->capturedValue = output->target->value;
 }
 
 void *sdfMotionCreateDirectTextKeyBinding(void *source, s32 unused, s32 options) {
