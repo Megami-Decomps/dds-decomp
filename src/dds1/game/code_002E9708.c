@@ -243,9 +243,111 @@ void sdfSoundStartRpcServer(void) {
     sceSifRpcLoop(queue);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9C80);
-
+extern s32 D_003BDA8C;
+extern void func_002E8938(s32, void *, s32);
 extern u8 D_003FE0C0[];
+
+void func_002E9C80(u32 kind, u8 *src) {
+    u8 *table;
+    u8 *dst;
+    s32 i;
+
+    switch (kind) {
+    case 0:
+        table = D_003FE0C0;
+        dst = table + 0x210;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 1:
+        table = D_003FE0C0;
+        dst = table + 0x290;
+        for (i = 0; i < 0x80; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 2:
+        table = D_003FE0C0;
+        dst = table + 0x310;
+        for (i = 0; i < 0x80; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 3:
+        table = D_003FE0C0;
+        dst = table + 0x390;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 4:
+        table = D_003FE0C0;
+        dst = table + 0x410;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 5:
+        table = D_003FE0C0;
+        dst = table + 0x490;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 6:
+        table = D_003FE0C0;
+        dst = table + 0x510;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 7:
+        table = D_003FE0C0;
+        dst = table + 0x590;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 8:
+        table = D_003FE0C0;
+        dst = table + 0x610;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 9:
+        table = D_003FE0C0;
+        dst = table + 0x690;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 10:
+        table = D_003FE0C0;
+        dst = table + 0x710;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 11:
+        table = D_003FE0C0;
+        dst = table + 0x790;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 12:
+        table = D_003FE0C0;
+        dst = table + 0x810;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    }
+    func_002E8938(D_003BDA8C, D_003FE0C0, 0x8D0);
+    func_002E8900(0x1F0, 0, 0, 0);
+}
 
 void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     u8 *table;

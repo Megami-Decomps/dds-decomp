@@ -1101,11 +1101,103 @@ f32 fldAngleDifference(f32 a, f32 b) {
     return b - a;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124110);
-
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CA8);
 
-INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CF0);
+f32 func_00124110(f32 angle) {
+    f32 compass[16] = {0.0f, 22.5f, 45.0f, 67.5f, 90.0f, 112.5f, 135.0f, 157.5f, 180.0f, 202.5f, 225.0f, 247.5f, 270.0f, 292.5f, 315.0f, 337.5f};
+    f32 best;
+    s32 index;
+    f32 diff;
+
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    best = 900.0f;
+    index = -1;
+    diff = fabsf(fldAngleDifference(0.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 0;
+    }
+    diff = fabsf(fldAngleDifference(22.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 1;
+    }
+    diff = fabsf(fldAngleDifference(45.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 2;
+    }
+    diff = fabsf(fldAngleDifference(67.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 3;
+    }
+    diff = fabsf(fldAngleDifference(90.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 4;
+    }
+    diff = fabsf(fldAngleDifference(112.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 5;
+    }
+    diff = fabsf(fldAngleDifference(135.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 6;
+    }
+    diff = fabsf(fldAngleDifference(157.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 7;
+    }
+    diff = fabsf(fldAngleDifference(180.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 8;
+    }
+    diff = fabsf(fldAngleDifference(202.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 9;
+    }
+    diff = fabsf(fldAngleDifference(225.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 10;
+    }
+    diff = fabsf(fldAngleDifference(247.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 11;
+    }
+    diff = fabsf(fldAngleDifference(270.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 12;
+    }
+    diff = fabsf(fldAngleDifference(292.5f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 13;
+    }
+    diff = fabsf(fldAngleDifference(315.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 14;
+    }
+    diff = fabsf(fldAngleDifference(337.5f, angle));
+    if (diff < best) {
+        index = 15;
+    }
+    return compass[index];
+}
 
 /* Snap an angle in degrees to the nearest of the eight compass directions. */
 f32 func_001244A8(f32 angle) {
