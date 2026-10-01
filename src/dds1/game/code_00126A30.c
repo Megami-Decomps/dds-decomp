@@ -88,7 +88,7 @@ extern FldCamRow D_0032FA10[];
 extern f32 D_00330650[];
 extern f32 D_00330660[];
 extern f32 sdfSinPoly(f32);
-extern f32 func_002E78F8(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
 extern void dds3SetWorldObjectDataValue(u64, s8);
 extern void sdfInitPacketList(u64);
@@ -152,7 +152,7 @@ extern u64 sdfAllocPacketAligned(u64);
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
 extern s32 D_003BACD8;
-extern s32 func_002CF530(u32);
+extern s32 sdfAllocateBlockBySizeThreshold(u32);
 
 extern u32 D_003BACD0;
 
@@ -223,7 +223,7 @@ extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *func_002CFEB8(s32 size);
 extern void kwlnTaskSetUserValue(u32 arg0, void *arg1);
-extern s32 func_00140F70(u32 task);
+extern s32 fldDrawPendingTitleBannerWhenIdle(u32 task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -234,10 +234,10 @@ extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
 extern u32 D_003BAC48;
 extern u32 D_003BAC34;
 extern u8 D_003BAC90[];
-extern void func_002D0A10(u32 arg0);
+extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern void func_00288788(u32 arg0);
-extern void func_00218320(s32 arg0);
-extern void func_00218368(s32 arg0);
+extern void mdlSuspendAllContextMotions(s32 arg0);
+extern void mdlResumeAllContextMotions(s32 arg0);
 extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 D_003BAE14;
@@ -246,7 +246,7 @@ extern void *func_002D03F8(s32 size);
 extern void *sdfResourceRetainAddress(void *p);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern s32 *func_00110F80();
+extern s32 *dds3FindObjectChainNodeByName();
 extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
 extern void fldPlayPendingSounds();
@@ -516,7 +516,7 @@ void fldFreeDisplayObjects(void) {
 
         if (node != NULL) {
             do {
-                func_002D0A10(node->resourceHandle);
+                sdfQueueNonzeroResourceId(node->resourceHandle);
                 node = node->next;
             } while (node != NULL);
         }
@@ -570,7 +570,7 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
 extern u32 D_003BAC60, D_003BAC64, D_003BAC68, D_003BAC6C;
 extern u32 D_003BAC70, D_003BAC74, D_003BAC78, D_003BAC7C;
 
-void *func_00127C40(void **destination, s32 area, s32 room) {
+void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (D_0032E3B0[31] == area) {
         if (D_0032E3B0[32] == room) {
             void *buffer = func_002D03F8(D_003BAC70);
@@ -718,26 +718,26 @@ void fldLoadAreaPackedResources(void) {
             switch (entry->kind) {
             case 1:
                 func_0013D598(entry->payload);
-                func_002D0A10(entry->blockHandle);
+                sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 2:
                 fldSetNpcPalette(entry->payload);
-                func_002D0A10(entry->blockHandle);
+                sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 3:
                 fldUploadSkyBuffer(entry->payload);
-                func_002D0A10(entry->blockHandle);
+                sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 4:
                 fldCopyActorWaypointTable(entry->payload);
-                func_002D0A10(entry->blockHandle);
+                sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
                 D_003BAC48 = (u32)func_002D03F8(sdfMemoryGetBlockSize(entry->blockHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress(D_003BAC48),
                        (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
                        sdfMemoryGetBlockSize(entry->blockHandle));
-                func_002D0A10(entry->blockHandle);
+                sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 6:
                 fldSetSceneRecordChunk(entry->payload, entry->blockHandle);
@@ -752,7 +752,7 @@ void fldReleaseAreaResourceCache(void) {
     u32 resourceHandle = D_003BAC48;
 
     if (resourceHandle != 0) {
-        func_002D0A10(resourceHandle);
+        sdfQueueNonzeroResourceId(resourceHandle);
         D_003BAC48 = 0;
     }
     resourceHandle = D_003BAC34;
@@ -821,7 +821,7 @@ void fldReleaseFieldResources(void) {
     D_003BAC14 = 0;
     for (i = 0; i < 4; i++) {
         if (D_003C91E0[i] != 0) {
-            func_002D0A10(D_003C91E0[i]);
+            sdfQueueNonzeroResourceId(D_003C91E0[i]);
             D_003C91E0[i] = 0;
             D_003C91F0[i] = 0;
         }
@@ -846,19 +846,19 @@ void fldReleaseFieldResources(void) {
     D_003BAC10 = 0;
     D_003BAC4C = 0;
     if (D_003BAC50 != 0) {
-        func_002D0A10(D_003BAC50);
+        sdfQueueNonzeroResourceId(D_003BAC50);
         D_003BAC50 = 0;
     }
     if (D_003BAC54 != 0) {
-        func_002D0A10(D_003BAC54);
+        sdfQueueNonzeroResourceId(D_003BAC54);
         D_003BAC54 = 0;
     }
     if (D_003BAC58 != 0) {
-        func_002D0A10(D_003BAC58);
+        sdfQueueNonzeroResourceId(D_003BAC58);
         D_003BAC58 = 0;
     }
     if (D_003BAC5C != 0) {
-        func_002D0A10(D_003BAC5C);
+        sdfQueueNonzeroResourceId(D_003BAC5C);
         D_003BAC5C = 0;
     }
     if (D_0032E3B0[4] < 0xC8 && D_0032E3B0[7] != D_0032E3B0[4]) {
@@ -870,7 +870,7 @@ void fldReleaseFieldResources(void) {
         if (node != 0) {
             do {
                 if (i > 0) {
-                    func_002D0A10(node->resourceHandle);
+                    sdfQueueNonzeroResourceId(node->resourceHandle);
                 }
                 node = node->next;
                 i++;
@@ -1583,7 +1583,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
 
 void fldAllocateBackgroundBuffer(void) {
     if (D_003BACD8 == 0) {
-        D_003BACD8 = func_002CF530(0x70000);
+        D_003BACD8 = sdfAllocateBlockBySizeThreshold(0x70000);
     }
 }
 
@@ -1915,12 +1915,12 @@ void fldUpdateCameraProjectionEndpoints(void) {
 
     D_00330650[0] = cam->x - sdfSinPoly(cam->angle * 3.14f / 180.0f) * 80.0f;
     D_00330650[1] = cam->y + D_0032FA10[cam->rowIdx].y;
-    D_00330650[2] = cam->z - func_002E78F8(cam->angle * 3.14f / 180.0f) * 80.0f;
+    D_00330650[2] = cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->angle * 3.14f / 180.0f) * 80.0f;
     D_00330650[3] = 1.0f;
     angle = cam->angle * 3.14f / 180.0f;
     D_00330660[0] = cam->x + sdfSinPoly(angle) * D_0032FA10[cam->rowIdx].dist;
     D_00330660[1] = cam->y + D_0032FA10[cam->rowIdx].targetY;
-    D_00330660[2] = cam->z + func_002E78F8(angle) * D_0032FA10[cam->rowIdx].dist;
+    D_00330660[2] = cam->z + sdfEvaluateCosineViaSinePhaseShift(angle) * D_0032FA10[cam->rowIdx].dist;
     D_00330660[3] = 1.0f;
 }
 
@@ -2050,11 +2050,11 @@ void fldReleaseCameraModel(u32 enabled) {
     if (enabled == 0) {
         D_003BAD40 = 0;
         if (D_003BAB38 != 0) {
-            func_00218368(D_003BAB38);
+            mdlResumeAllContextMotions(D_003BAB38);
         }
     } else {
         D_003BAD40 = enabled;
-        func_00218320(D_003BAB38);
+        mdlSuspendAllContextMotions(D_003BAB38);
     }
 }
 
@@ -2204,12 +2204,12 @@ void fldDisableCameraObjectFlag(void) {
 }
 
 void fldClearCameraObjectHighlightFlag(void) {
-    func_00112930(D_003BAB34, 0);
+    dds3SetOwnedWorldInnerValue(D_003BAB34, 0);
     dds3ClearObjectFlags(D_003BAB34, 0x800);
 }
 
 void fldSetCameraObjectHighlightFlag(void) {
-    func_00112930(D_003BAB34, 0x80);
+    dds3SetOwnedWorldInnerValue(D_003BAB34, 0x80);
     dds3SetObjectFlags(D_003BAB34, 0x800);
 }
 
@@ -2386,7 +2386,7 @@ void fldReleaseSkyResources(void) {
         D_003BAD70 = 0;
     }
     if (D_003BD7C4 != 0) {
-        func_002D0A10(D_003BD7C4);
+        sdfQueueNonzeroResourceId(D_003BD7C4);
         D_003BD7C4 = 0;
     }
     if (D_003BAD68 != 0) {
@@ -2484,7 +2484,7 @@ u32 func_00132B90(void) {
     return D_0032E5A8[0];
 }
 
-void func_00132BA0(u32 value) {
+void fldBeginSelectedValueTransition(u32 value) {
     u32 previousValue = D_0032E59C[0];
 
     D_003BAD9C = value;
@@ -2503,7 +2503,7 @@ extern s32 D_0032E3C0[];
 extern s16 D_0032E4D8[];
 extern s32 D_003BAD58;
 
-void func_00133280(s32 speed) {
+void fldApplyPendingSceneValueWithSpeed(s32 speed) {
     if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
         speed = 0;
     }
@@ -2804,7 +2804,7 @@ void fldInitializeCameraColorResource(void) {
     D_003BAD70 = func_002D3288((void *)D_003BD7C8);
     D_003BAD68 = func_0029CE50(D_003C9240);
     if (D_003BD7C4 != 0) {
-        func_002D0A10(D_003BD7C4);
+        sdfQueueNonzeroResourceId(D_003BD7C4);
         D_003BD7C4 = 0;
     }
     fldUpdateCameraColorEffect(D_003BAD64);
@@ -2875,10 +2875,10 @@ void fldAllocateRecordStorage(void) {
 
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount(D_003BAE00);
-    func_002D0A10(D_003BAE00);
+    sdfQueueNonzeroResourceId(D_003BAE00);
     D_003BADF0 = 0;
     sdfDecrementAllocationReferenceCount(D_003BADFC);
-    func_002D0A10(D_003BADFC);
+    sdfQueueNonzeroResourceId(D_003BADFC);
     D_003BADE8 = 0;
 }
 
@@ -3443,7 +3443,7 @@ s32 fldHasActiveTasks(void) {
     return 0;
 }
 
-s32 func_0013C5D0(void) {
+s32 fldGetCurrentSceneSelectionId(void) {
     s32 slot = D_003BAE3C;
 
     if (slot < 0) {
@@ -3681,7 +3681,7 @@ s32 func_0013DB28(void) {
     return D_00337D12[D_003BAE64 * 54];
 }
 
-s32 func_0013DB58(s32 query) {
+s32 fldQuerySelectedActorMotionState(s32 query) {
     FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + D_003BAE64 * 108);
 
     if (query == 0 && entry->kind == 1) {
@@ -3712,59 +3712,7 @@ extern void fldReleaseActorTasksById(s32);
 extern u32 D_003CE3E0[][23];
 extern s32 D_0032E530[];
 
-void func_0013DC08(s32 checkTaskRecord) {
-    s32 index;
-    s32 kind;
-    s32 record;
-    FldActorEntry *entry;
-
-    if (checkTaskRecord != 0) {
-        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D6A0())->key);
-        if (record == 0) {
-            return;
-        }
-        if (fldFindActorEntryByName((const char *)record) == 0) {
-            return;
-        }
-    }
-    index = D_003BAE64;
-    entry = (FldActorEntry *)(D_00337D00 + index * 108);
-    kind = entry->kind;
-    if (kind == 1) {
-        if (entry->floor == D_0032E3C4[0] + 1) {
-            fldPlayFieldSeVolumePan(entry->sound);
-            fldReleaseActorTasksById(D_003CE3E0[index][1]);
-            return;
-        }
-    } else if (kind == 2) {
-        if (entry->floor == D_0032E3B0[5] + 1) {
-            s32 motion = entry->motion;
-
-            D_0032E3B0[94] = 1;
-            *(f32 *)&D_0032E3B0[93] = *(f32 *)&D_003CE3E0[index][11];
-            if (motion == 1) {
-                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
-                return;
-            }
-            kwlnFadeInStart(0, 0, 0, 0xF);
-            return;
-        }
-    } else if (kind == 3) {
-        kwlnFadeSetRGB(0, 0, 0);
-        return;
-    } else if (kind == 5) {
-        if (entry->motion == 0) {
-            D_0032E530[0] = 0x64;
-        } else {
-            D_0032E530[0] = -0x64;
-        }
-    } else if (kind == 10) {
-    } else if (kind == 11) {
-    } else if (kind == 12) {
-    } else if (kind == 4) {
-        fldApplyPendingCameraHeading();
-    }
-}
+INCLUDE_ASM(const s32, "game/code_00126A30", fldApplyActorEntryTrigger);
 
 extern s32 func_00110ED0(u64, s32, void *);
 extern void func_001109B8(u64, s32);
@@ -3785,7 +3733,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DF60);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013E5A8);
 
-void func_0013EC10(s32 mode, s32 index) {
+void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     switch (mode) {
     case 0:
         D_003BAE5C = 3;
@@ -3816,12 +3764,12 @@ s32 fldGetActorStat0(s32 mode) {
     case 0:
         return actor->motion;
     case 1:
-        entry = func_00110F80(dds3GetWorldObject(), actor->motionName);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = func_00110F80(dds3GetWorldObject(), actor->otherName);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
@@ -3859,12 +3807,12 @@ s32 fldGetActorStat1(u32 kind) {
         }
         return 0;
     case 1:
-        found = func_00110F80(dds3GetWorldObject(), entry->motionName);
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), entry->motionName);
         if (found != NULL) {
             return found[1];
         }
     case 2:
-        found = func_00110F80(dds3GetWorldObject(), entry->otherName);
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), entry->otherName);
         if (found != NULL) {
             return found[1];
         }
@@ -4015,7 +3963,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00140BE8);
 void func_00140F68(void) {
 }
 
-extern s32 fldGetCampSceneControlMode(void), func_00125140(void), fileMenuTaskExists(void);
+extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
 extern s32 func_00124E90(void), func_00124EB8(void), func_00124EE0(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern u16 *kwlnTaskGetUserValue(u32);
@@ -4024,7 +3972,7 @@ extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-s32 func_00140F70(u32 task) {
+s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
     u16 *ticket;
     u8 *label;
     s32 width;
@@ -4033,7 +3981,7 @@ s32 func_00140F70(u32 task) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
-    if (func_00125140() != 0) {
+    if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -4065,7 +4013,7 @@ s32 func_00140F70(u32 task) {
     return 0;
 }
 
-void * func_00141098(u32 task) {
+void * fldInitializeTitleBannerTask(u32 task) {
     u16 *ticket = func_002CFEB8(8);
 
     ticket[1] = 1;
@@ -4073,7 +4021,7 @@ void * func_00141098(u32 task) {
     ticket[2] = 0;
     ticket[3] = 0;
     kwlnTaskSetUserValue(task, ticket);
-    return (void *)func_00140F70;
+    return (void *)fldDrawPendingTitleBannerWhenIdle;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC10);

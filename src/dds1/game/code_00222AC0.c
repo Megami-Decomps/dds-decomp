@@ -143,7 +143,7 @@ extern void effObjSetInnerSecondVec(void *, void *);
 extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 extern void evtResetObjectPendingValue(void *arg0);
-extern void func_00113438(void *arg0, s32 arg1);
+extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
 extern s32 func_0010D6A0(void);
 extern void func_0010AC10(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
@@ -383,13 +383,13 @@ s32 evtStartUnitModeWithValue(EvtUnit *work, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00222ED8);
 
-extern void func_00242BD0(f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
 
 void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        func_00242BD0(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].vec[12], &D_003D7BD8[i].vec[13]);
+        mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].vec[12], &D_003D7BD8[i].vec[13]);
         D_003D7BD8[i].state = 0;
         D_003D7BD8[i].id = 0;
     }
@@ -646,7 +646,7 @@ u32 evtOpQueueWorldObjectPendingValue(void) {
     if (unit == NULL) {
         return ret;
     }
-    func_00113438(unit, scrReadIntParameter(1));
+    evtArmEffectObjectPendingValue(unit, scrReadIntParameter(1));
     return 1;
 }
 
@@ -1040,7 +1040,7 @@ u32 evtCommandSetUnitValue(void) {
     return 1;
 }
 
-u32 func_00224AD0(void) {
+u32 evtCmdSetWorldUnitStatePair(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -1054,7 +1054,7 @@ u32 func_00224AD0(void) {
     return 1;
 }
 
-u32 func_00224B28(void) {
+u32 evtCmdPrepareUnitMotionAndLogState(void) {
     s32 id;
     EvtUnit *unit;
 
@@ -1367,7 +1367,7 @@ u32 evtOpSetModelCutAndScale(void) {
     return 1;
 }
 
-u32 func_00225B10(void) {
+u32 evtCmdCreateEffectObjectFromResource(void) {
     s32 param0;
     EvtUnit *unit;
 

@@ -76,17 +76,17 @@ typedef struct CampCurrency {
 } CampCurrency;
 
 
-extern void func_00314C68(void *);
+extern void scrClearPackedScriptFlags(void *);
 
 extern void mnuClearEntryBlocked(s32);
 
 extern void mdlFlagClear(s32);
 
-extern void func_00314838(void);
+extern void scrClearProfileFlagsTable(void);
 
 extern void func_00315A50(void);
 
-extern void func_00314D90(void);
+extern void scrResetAndSetPairedGlobalFlags(void);
 
 extern void ptyClearProfileRecords(void);
 
@@ -130,7 +130,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         PartyRecord *rec = (PartyRecord *)(D_00435DD0 + offset + 0xA60);
         offset += 0x1C4;
         if (rec->flags & 1) {
-            func_00314C68(rec);
+            scrClearPackedScriptFlags(rec);
             rec->unk1B2 = 0;
         }
         i--;
@@ -140,9 +140,9 @@ void ptyResetPartyRecordsAndProfiles(void) {
         mnuClearEntryBlocked(i);
     }
     mdlFlagClear(0x901);
-    func_00314838();
+    scrClearProfileFlagsTable();
     func_00315A50();
-    func_00314D90();
+    scrResetAndSetPairedGlobalFlags();
     ptyClearProfileRecords();
     ptyRebuildAllProfiles();
 }
@@ -375,7 +375,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
     }
 }
 
-void func_002A93F8(s32 kind, u8 *work) {
+void mnuReleaseStaffCategoryTextureHandles(s32 kind, u8 *work) {
     s32 count;
     s32 i = 0;
     u8 *buffer = mnuGetStaffCategoryEntries(kind, &count, work);
@@ -424,7 +424,7 @@ void func_002A9460(s32 kind, u8 *work) {
         return;
     }
     if (old != 0) {
-        func_002A93F8(old, work);
+        mnuReleaseStaffCategoryTextureHandles(old, work);
     }
     if (kind != 0) {
         movReleaseCategoryModels(kind, work);
@@ -596,7 +596,7 @@ extern s32 func_002A9BF8(void *, s32, s32, s32, u8 *, void *);
 
 extern void mnuSetWindowContainerState(s32, s32);
 
-extern void func_002BAF10(u8 *);
+extern void mnuInitializeWindowFadeState(u8 *);
 
 extern void func_002BAF50(s32, u8 *);
 
@@ -616,7 +616,7 @@ void mnuStaffInitResourceLists(u8 *work) {
     list = func_002A9BF8(D_003E5708, 2, 0x1C0, 0x10, work, 0);
     ((StaffResourceHeader *)work)->resourceLists[2] = list;
     mnuSetWindowContainerState(list, 0x100);
-    func_002BAF10(ctx);
+    mnuInitializeWindowFadeState(ctx);
     func_002BAF50(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
@@ -624,7 +624,7 @@ extern void mnuDestroyWindowContainer(u32);
 
 extern void mnuReleaseResourceList(u32);
 
-void func_002A9F08(u8 *work) {
+void mnuReleaseStaffSpriteAndResourceHandles(u8 *work) {
     u32 *handles = ((StaffResourceHeader *)work)->resourceLists;
     u32 i;
 
@@ -728,7 +728,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
         return;
     }
     mnuDrainPanelTransitions(work + 8, task);
-    func_002A9F08(work);
+    mnuReleaseStaffSpriteAndResourceHandles(work);
     mnuDestroyScrollPanel(((CampVisualWork *)work)->modelHandle);
     mnuShutdownContext(work + 0x284);
     dspCloseChannel();

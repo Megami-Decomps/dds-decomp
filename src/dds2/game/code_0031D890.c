@@ -52,7 +52,7 @@ u32 *itfClaimFreeWideSlot(WideSlotPool *pool) {
     return (u32 *)0x0;
 }
 
-u32 *func_0031D998(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
+u32 *itfClaimWideSlotWithTaggedPayload(u32 a, u32 b, u32 c, s8 tag, WideSlotPool *pool) {
     u32 *slot = itfClaimFreeWideSlot(pool);
     u32 bits = (tag & 0xFF) << 1;
 
@@ -100,7 +100,7 @@ u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
 }
 
 /* Claim a compact slot and fill its two payload words; returns the slot (NULL if the pool is full). */
-u32 *func_0031DFB8(u32 first, u32 second, CompactSlotPool *pool) {
+u32 *itfClaimCompactSlotWithPayload(u32 first, u32 second, CompactSlotPool *pool) {
     u32 *slot = itfClaimFreeCompactSlot(pool);
 
     if (slot != NULL) {

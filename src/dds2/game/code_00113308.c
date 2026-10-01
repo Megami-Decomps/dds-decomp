@@ -80,7 +80,7 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_00113408);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113560);
 
-void func_00113660(EffectObject *object, u32 value) {
+void evtArmEffectObjectPendingValue(EffectObject *object, u32 value) {
     EffectObjectData *data;
 
     data = object->data;
@@ -202,7 +202,7 @@ void func_00114068(u32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114070);
 
-void func_00114110(EffectObject *object) {
+void evtReleaseEffectObjectHandleAndData(EffectObject *object) {
     EffectObjectData *data;
 
     effObjFreeInner();

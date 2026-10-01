@@ -50,7 +50,7 @@ s32 mnuCheckTableSums(MenuSumBytes *bytes, MenuSumTable *table) {
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B008);
 
-s64 func_0029B320(s32 request) {
+s64 mnuDrawItemPanelDuringRequest(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0029AA48(context);
@@ -71,7 +71,7 @@ u32 func_0029B3C0(void) {
     context = kwlnTaskGetUserValue();
     mnuSetPanelGroupSelection(*(u32 *)(context + 0xad34), 0xffffffffffffffff);
     dspStartEntry(0x17);
-    func_0026C648(0);
+    evtSetMessageWindowOptionWhenOpen(0);
     evtCaptureMessageWindowSoundMode(0xa3);
     return 1;
 }
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B950);
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029BB28);
 
 u32 func_0029BBC0(void) {
-    func_0026C710();
+    evtFinishMessageWindowAndNotify();
     return 1;
 }
 

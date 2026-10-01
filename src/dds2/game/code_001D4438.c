@@ -11,14 +11,14 @@ extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 extern void func_00101968(s32, s32);
 extern s32 kwlnTaskDestroyWithHierarchy(s32, s32);
-extern s32 func_001B88C8(s32);
-extern s32 func_001B7DC0(void);
+extern s32 btlGetTrackedTaskHandle(s32);
+extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 func_001B81E8(void);
 extern s32 func_001B8538(void);
 extern s32 func_001B8740(void);
 extern s32 func_001CC9C0(s32);
 extern s32 btlBossDebugPrintf(const char *, ...);
-extern u32 func_001CCBB8(void);
+extern u32 fldGetSceneScriptTaskUserData(void);
 extern char *D_004367B8;
 typedef struct SceneWorkBuffers {
     void *first;
@@ -48,7 +48,7 @@ extern s32 func_001B4040();
 extern s32 func_001B4210();
 extern void func_0022AF90();
 extern void func_00229728();
-extern void func_00203F08();
+extern void btlSelectSceneAudioTrack();
 
 typedef struct {
     void (*initialize)(s32);
@@ -83,7 +83,7 @@ typedef struct SceneObject {
     s32 state;
 } SceneObject;
 
-extern SceneObject *func_001CA7E0(void);
+extern SceneObject *fldGetSceneObjectTaskUserData(void);
 
 typedef struct SceneActor {
     u8 pad_00[0xC8];
@@ -238,7 +238,7 @@ extern SceneDescriptor *D_00435E04;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
 extern u32 func_001C82D8(s32, s8);
-extern s32 func_00201108(BattleEffectParams *, s32);
+extern s32 btlCreateEffectTaskWithSourceParams(BattleEffectParams *, s32);
 extern s32 btlCountTasksForOwner(s64);
 
 extern SceneInitializer D_003B6938[];
@@ -283,7 +283,7 @@ extern SceneParty *D_00435DD0;
 extern s32 D_00435E38;
 
 extern s32 func_00206090();
-extern void func_00206060();
+extern void btlRepositionPartyAroundBattleCenter();
 extern s32 func_001AC648();
 extern void func_001AEEA8();
 extern void kwlnFadeBackgroundStartOut();
@@ -299,21 +299,21 @@ extern void kwlnFadeStartIn();
 extern s32 fldGetEncounterRuntimeResult();
 extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
-extern void func_001AF060();
+extern void btlSyncModelFlagFromEventThresholds();
 extern void func_00204000();
 extern void func_001E9410();
 extern void btlSpawnBattleWorldAction();
 extern void btlCreateRainEffect();
 extern s32 btlReleaseScriptResourceA();
 extern s32 btlReleaseScriptResource();
-extern s32 func_00201540();
+extern s32 btlCreateSoundUpdateTask();
 extern s32 btlCreateSoundReleaseTask();
 extern s32 btlCreateWaitUnitListIdleTask();
 extern s32 btlCreateApplyToActiveActorsTask();
-extern s32 func_002028C8();
+extern s32 btlCreateFadeStateResetTask();
 extern void func_001B8078();
 extern void func_001B81B0();
-extern void func_001D3E00(void);
+extern void fldEnableSceneGroupAdvancement(void);
 extern s8 D_0037F531[];
 
 typedef struct SceneKindTable {
@@ -324,13 +324,13 @@ typedef struct SceneKindTable {
 extern SceneKindTable *D_00438F4C;
 extern void func_001C8518();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
-extern char *func_001C8A28(s32, s16 *);
+extern char *fldGetCachedSceneActorNameAndId(s32, s16 *);
 
 extern void func_001C92A0(s32, s32, s32, s32);
 extern void func_001C9EA0(s32);
 extern void func_001C9BE8(s32);
 extern void func_001C98E8(s32);
-extern void func_001C9DC8(s32);
+extern void btlDrawRetreatCommandLabel(s32);
 
 typedef struct SceneCheckArgs {
     u16 mode;
@@ -342,7 +342,7 @@ typedef struct SceneCheckArgs {
 extern s32 func_001ABDE8();
 extern s32 func_001ABA40();
 
-extern void func_001BD978(void);
+extern void btlReleaseBattleScratchBlocks(void);
 
 typedef struct SceneGlobalState {
     u8 pad00[0x38];
@@ -409,7 +409,7 @@ extern void btlAppendIndexListEntry();
 extern void btlCopyIndexList();
 extern void func_001AC0F8();
 extern s32 func_001AC360();
-extern s32 func_001AC510();
+extern s32 btlFindEligibleTargetForMultiActorCommand();
 
 typedef struct SceneCoordinateRecord {
     u8 pad00[0xC];
@@ -955,7 +955,7 @@ extern s32 func_001AA6F8(void);
 
 extern void mdlStoreTertiaryVectorVU(s32);
 
-extern void func_00232C18(f32, s32);
+extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(u32, u8, f32, f32);
 
@@ -1174,7 +1174,7 @@ extern s32 D_003BC0C8[];
 extern void func_001F02E0(s32, s32);
 extern void func_001F0690(s32);
 extern void func_001F3E48(s32);
-extern void func_001FF820(s32, s32);
+extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
 
 extern void func_001FA480(s32, s32, s32);
 
@@ -1234,9 +1234,9 @@ typedef struct BtlCommandTask {
     BtlUnit *linked;      /* 0x34 */
 } BtlCommandTask;
 
-extern s32 func_001AD1C0(void *, s32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(void *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
-extern void func_001ADC48(BtlUnit *);
+extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
 
@@ -1263,7 +1263,7 @@ extern void fldUpdateSceneGroupTask(SceneTask *task);
 
 extern u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex);
 
-extern void func_001D43C0(s32 task);
+extern void btlClearSceneTaskActiveFlag(s32 task);
 
 void btlActionSeqStateSelect(u8 *task) {
     u8 *work = (u8 *)func_001AA6F8();
@@ -1431,7 +1431,7 @@ extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 /* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change
  * instruction scheduling in this otherwise matching callback. */
-s64 func_001D4908(u8 *task) {
+s64 btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
     u8 *unit;
     u8 *work;
     s32 handle;
@@ -1538,7 +1538,7 @@ void func_001D4FE0(void) {
 extern s32 btlCreateEffObjB();
 extern s32 btlStartTask();
 extern s32 sndHasActiveActor();
-extern s64 func_001A9920(void);
+extern s64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlCreateCommandSoundUpdateTask(void);
 extern s32 btlCreateSecondaryCommandSoundTask(void);
 extern s32 btlCreateCommandSoundTask();
@@ -1565,7 +1565,7 @@ void func_001D4FE8(u8 *task) {
     u32 hp, mp;
     if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
         unit = ((SceneTask *)task)->actor;
-        ownerId = func_001A9920();
+        ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
         if (unit->status.words.activeFlags & 0x200) {
@@ -1667,7 +1667,7 @@ void btlCommandResultEffectSelect(u8 *task) {
         } else {
             selection = ((SceneTask *)task)->commandValue;
         }
-        switch (func_0022C1B0(task, selection)) {
+        switch (btlGetCommandBlockReason(task, selection)) {
         case 2:
             btlStartTask(btlCreateEffObjB(((SceneTask *)task)->actor, 0x82));
             sndSetStationedSeVolume(0xD);
@@ -1709,7 +1709,7 @@ typedef struct SceneAiEntry {
 
 extern SceneAiEntry *D_00435DF4;
 extern s32 btlAllocAndCheck();
-extern void func_00210DB0();
+extern void btlAssignTaskResultAndArgument();
 extern void btlBindActorSlot();
 extern void func_00210F58();
 extern s32 func_0020EBD0();
@@ -1727,7 +1727,7 @@ s32 func_001D5950(SceneTask *task) {
                     index = task->actor->kind;
                     scene->pendingTask = 0;
                     if (D_00435DF4[index].kind != 1 && btlAllocAndCheck(task) != 0) {
-                        func_00210DB0(task);
+                        btlAssignTaskResultAndArgument(task);
                     } else if (D_00435DF4[index].slot != 0) {
                         btlBindActorSlot(task, D_00435DF4[index].slot);
                     } else {
@@ -1762,7 +1762,7 @@ s32 func_001D5950(SceneTask *task) {
     }
 }
 
-void func_001D5B38(s32 task) {
+void btlMarkSceneTaskAfterReset(s32 task) {
     func_001C35F0(task, 0, 0);
     ((SceneTask *)task)->flags = ((SceneTask *)task)->flags | 0x20;
 }
@@ -1833,7 +1833,7 @@ void btlCommandStartSoundTasks(u8 *task) {
     u8 *object;
     if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
         unit = (u8 *)((SceneTask *)task)->actor;
-        ownerId = func_001A9920();
+        ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
         if (((SceneActor *)unit)->status.words.activeFlags & 0x200) {
@@ -1885,7 +1885,7 @@ void btlCommandPrintAndFetchOwner(SceneTask *task) {
 
 extern void func_00201828();
 
-void func_001D5EE8(u8 *task) {
+void btlProcessEligibleCommandTaskEffects(u8 *task) {
     u8 *commandData = task + 0x20;
     u8 *work = (u8 *)func_001AA6F8();
     s32 owner = (s32)((SceneTask *)task)->actor;
@@ -1990,7 +1990,7 @@ void btlCommandTaskStartEffects(BtlCommandTask *task) {
         }
         effectId = (task->actor->flags & 0x200) ? 0xF : 0x1E;
         countdown = 0x32;
-        if (func_001AD1C0(&task->actor->unk120, 0xDF) != 0) {
+        if (btlDoesEnabledStatusMatchCurrentId(&task->actor->unk120, 0xDF) != 0) {
             countdown = 0;
         }
         break;
@@ -2070,7 +2070,7 @@ void btlCommandTaskReturnUpdate(BtlUnit *task) {
 
     unit->flags = flags & ~1;
     if (flags & 0x200) {
-        func_00206060();
+        btlRepositionPartyAroundBattleCenter();
         func_001AC648();
     }
     if (btlCountTasksByKind(0x3F) != 0) {
@@ -2199,7 +2199,7 @@ void btlUnitTurnEndCommit(BtlUnit *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC9C0);
 
-void func_001DCC48(BtlUnit *task) {
+void btlRemoveEligibleActorSceneTask(BtlUnit *task) {
     BtlUnit *unit = task->link18;
     BtlWork *work;
     s32 hookResult;
@@ -2210,7 +2210,7 @@ void func_001DCC48(BtlUnit *task) {
         }
         btlResetIndexWork((u8 *)task + 0x20);
         unit->unk314 = -1;
-        func_001ADC48(unit);
+        btlClearAllActorEntrySlots(unit);
         fldUpdateSceneGroupTask((SceneTask *)task);
         btlRemoveTaskFromSceneGroup((SceneTask *)task);
         btlDispatchStateHandler(task, 1);
@@ -2267,7 +2267,7 @@ void btlCommandTaskReleaseActor(BtlCommandTask *task) {
             task->flags &= ~8;
         }
     }
-    func_001D43C0((s32)task);
+    btlClearSceneTaskActiveFlag((s32)task);
     task->flags |= 2;
 }
 
@@ -2294,7 +2294,7 @@ void func_001DCEC0(void) {
     func_0022F068();
 }
 
-void func_001DCED8(u32 unit) {
+void btlAdvanceUnitWhenActionGateClears(u32 unit) {
     s64 status;
 
     status = func_0022F180();

@@ -20,7 +20,7 @@ extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-extern void func_0031BFC0(void);
+extern void mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(u32 handle);
 

@@ -56,7 +56,7 @@ extern u32 D_00436190;
 
 extern s32 D_004361F8;
 
-extern void func_003298C0(u32 resource);
+extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -105,7 +105,7 @@ extern s32 D_00389780[];
 extern s32 D_00399F60[];
 extern u8 D_00399EA0[][16];
 extern s32 fldGetCampSceneControlMode(void);
-extern s32 func_001275D0(void);
+extern s32 fldGetSceneReadyOrPendingState(void);
 extern s32 fileMenuTaskExists(void);
 extern s32 func_00127320(void);
 extern s32 func_00127348(void);
@@ -263,7 +263,7 @@ extern u8 D_0038E2D0[];
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
-extern s32 *func_001111A8();
+extern s32 *dds3FindObjectChainNodeByName();
 
 typedef struct FldNpcMotion {
     s32 defaultMotionId;
@@ -360,7 +360,7 @@ void fldInitializeCameraColorResource(void) {
     D_00436100 = func_0032C138((void *)D_00438ED0);
     D_004360F8 = func_002DEB80(D_00444990);
     if (D_00438ECC != 0) {
-        func_003298C0(D_00438ECC);
+        sdfQueueNonzeroResourceId(D_00438ECC);
         D_00438ECC = 0;
     }
     fldUpdateCameraColorEffect(D_004360F4);
@@ -437,10 +437,10 @@ void fldAllocateRecordStorage(void) {
 
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount(D_00436190);
-    func_003298C0(D_00436190);
+    sdfQueueNonzeroResourceId(D_00436190);
     D_00436180 = 0;
     sdfDecrementAllocationReferenceCount(D_0043618C);
-    func_003298C0(D_0043618C);
+    sdfQueueNonzeroResourceId(D_0043618C);
     D_00436178 = 0;
 }
 
@@ -931,7 +931,7 @@ s32 fldHasActiveTasks(void) {
     return 0;
 }
 
-s32 func_0013F1B8(void) {
+s32 fldGetCurrentSceneSelectionId(void) {
     s32 index = D_004361CC;
 
     if (index < 0) {
@@ -1125,7 +1125,7 @@ s32 func_00140750(void) {
 
 /* Inspect two independent properties of the selected actor, depending on mode:
  * mode 0 derives a size from the first two states; mode 1 tests a flag. */
-s32 func_00140780(s32 mode) {
+s32 fldQuerySelectedActorMotionState(s32 mode) {
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + D_004361F4 * 0x6C);
     s16 a;
     u32 result;
@@ -1224,7 +1224,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140BC8);
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_001411F8);
 
-void func_00141840(s32 mode, s32 index) {
+void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
     switch (mode) {
     case 0:
         D_004361EC = 3;
@@ -1257,12 +1257,12 @@ s32 fldGetActorStat0(s32 mode) {
     case 0:
         return actor->state;
     case 1:
-        entry = func_001111A8(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = func_001111A8(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
         if (entry != NULL) {
             return entry[1];
         }
@@ -1302,12 +1302,12 @@ s32 func_001421C0(u32 mode) {
         }
         return 0;
     case 1:
-        entry = func_001111A8(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = func_001111A8(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
         if (entry != NULL) {
             return entry[1];
         }
@@ -1334,12 +1334,12 @@ s32 fldGetActorMotionEntry(u32 kind) {
     case 0:
         return D_00391FA0[index].defaultMotionId;
     case 1:
-        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].primaryName);
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[index].primaryName);
         if (found != NULL) {
             return found[1];
         }
     case 2:
-        found = func_001111A8(dds3GetWorldObject(), D_00391FA0[index].secondaryName);
+        found = dds3FindObjectChainNodeByName(dds3GetWorldObject(), D_00391FA0[index].secondaryName);
         if (found != NULL) {
             return found[1];
         }
@@ -1576,7 +1576,7 @@ s32 func_00144028(void *task) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
-    if (func_001275D0() != 0) {
+    if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -1612,7 +1612,7 @@ s32 func_00144028(void *task) {
 extern void *func_00328D68(s32 size);
 extern void kwlnTaskSetUserValue(s32, void *);
 
-void *func_00144178(s32 task) {
+void *fldInitializeTitleBannerTask(s32 task) {
     s16 *node = func_00328D68(8);
     node[1] = 1;
     node[0] = 0;

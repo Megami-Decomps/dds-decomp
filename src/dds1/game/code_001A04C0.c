@@ -5,7 +5,7 @@ extern s32 func_001190B0();
 
 extern s32 func_001191B0();
 
-extern u64 func_001A0CB0();
+extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern void btlUpdateScene(void);
 
@@ -49,7 +49,7 @@ void func_001A0CA0(void) {
     D_003BB2E8 = 1;
 }
 
-u64 func_001A0CB0(void) {
+u64 btlAdvanceRuntimeSequenceCounter(void) {
     s64 value = D_003BB2E8 + 1;
 
     if (value < 0) {
@@ -61,7 +61,7 @@ u64 func_001A0CB0(void) {
     return value;
 }
 
-void func_001A0CD8(void) {
+void btlClearModelFlagRange(void) {
     s32 temp_v0;
     s32 temp_v1;
 
@@ -92,7 +92,7 @@ s32 btlUpdateActiveBattleFrame(void) {
         func_001DBE68();
         ++*(s32 *)(D_003BB2E4 + 0x1F0);
     } else {
-        func_001A1068();
+        btlExitWhenAudioAndTasksIdle();
     }
     return 0;
 }
@@ -104,7 +104,7 @@ s32 btlUpdateBattleFieldPresentation(void) {
     }
     if ((*(u32 *)(state + 0x1F4) & 1) != 0) {
         btlTickFieldSwayAndTint();
-        func_001EFF00();
+        btlDispatchLinkedEffectWhenBattleGatesClear();
         btlSweepFloorModelLists();
         func_001DA780();
         func_0020FC48();
@@ -134,7 +134,7 @@ void btlCreateDrawTasks(void) {
     func_00101A80(mainTask, drawTask);
 }
 
-void func_001A0ED0(void) {
+void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     s64 temp_v0;
 
     temp_v0 = kwlnTaskFindByPriority(0x3f9);
@@ -200,7 +200,7 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15A8);
 
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15C8);
 
-s32 func_001A1068(void) {
+s32 btlExitWhenAudioAndTasksIdle(void) {
     if (D_003BB2E4 == 0) {
         btlBossDebugPrintf(D_003A15A8);
         return 0;
@@ -230,7 +230,7 @@ s32 func_001A1068(void) {
     sndClearList();
     brsTaskTryDestroy();
     btlClearSoundAndModelResources();
-    func_001A0ED0();
+    btlDestroyDrawTaskAtPriorityWhenPresent();
     itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x4A0));
     itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x49C));
     itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x498));
@@ -266,7 +266,7 @@ s32 btlIsCurrentActorFullyMarked(void) {
     return (*(s32 *)(D_003BB2E4 + 0x1f4) & 0x6000000) == 0x6000000;
 }
 
-s32 func_001A1480(void) {
+s32 btlHasPendingRuntimeActivity(void) {
     s32 state;
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
@@ -281,7 +281,7 @@ s32 func_001A1480(void) {
     return *(u32 *)(state + 0x694) != 0;
 }
 
-void func_001A14C8(void) {
+void btlResetActorEntryState(void) {
     s32 context = D_003BB2E4;
     s32 *entries = (s32 *)(D_003BAA00 + 0xBF8);
     u32 i;
@@ -316,7 +316,7 @@ extern EncBgRow *D_003BAA44;
 
 extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
 
-s32 func_001A1668(s32 *outCode, s32 *outParameter) {
+s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
     s16 i;
 
@@ -380,7 +380,7 @@ void func_001A1880(u8 *object, s32 value) {
     datMoveCursorY(object, value);
 }
 
-u16 func_001A1898(s32 object) {
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
     u16 maximum = func_001A17F8(object);
     u32 value = func_001A1838(object);
     *(u16 *)(object + 8) = value;
@@ -390,7 +390,7 @@ u16 func_001A1898(s32 object) {
     return *(u16 *)(object + 6);
 }
 
-u16 func_001A18E8(s32 object) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
     u16 maximum = func_001A1800(object);
     u32 value = func_001A1850(object);
     *(u16 *)(object + 12) = value;

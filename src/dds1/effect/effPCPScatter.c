@@ -27,7 +27,7 @@ extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern void func_001629F0(u32 handle);
-extern void func_002DDBF8(void);
+extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
    another unit). Each is entered with and without spawn arguments, so they
@@ -74,11 +74,11 @@ extern u32 effMiscRand(void *table);
 extern u32 effParamWorkCreate(s32 kind, void *params);
 extern u8 D_0034DF38[];
 extern f32 effMiscRandUnitFloat(void *state);
-extern f32 func_002E78F8(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
-extern void func_002DDC50(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 extern s32 effGetScatterWideBlock(u32 object, s32 index);
 extern s32 effGetScatterNarrowBlock(u32 object, s32 index);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
@@ -270,7 +270,7 @@ void func_00171510(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00171520(PcpScatterWork8 *work, u32 *values)
+void effSetScatterDuplicatedHandles(PcpScatterWork8 *work, u32 *values)
 {
     work->duplicatedHandles = values;
 }
@@ -735,7 +735,7 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
     step = ring->angleStep;
     func_002DD608(ring->unk00);
     func_002DD968(ring->tiltAngle);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->tiltDamping;
     ring->radius = radius;
@@ -743,7 +743,7 @@ void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = func_002E78F8(angle) * radius;
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -781,7 +781,7 @@ void effPcpScatterTransformMatrix(PcpScatterWork4 *work, void *source)
 {
     VU0_LOAD_MATRIX(source);
     VU0_LOAD_MATRIX_B(&work->pad50[0]);
-    func_002DDBF8();
+    sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
 
@@ -907,7 +907,7 @@ void effScatterRingUpdateScaled(PcpScatterWork12 *work, s32 index)
     step = ring->angleStep;
     func_002DD608(ring->unk00);
     func_002DD968(ring->tiltAngle);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->tiltDamping;
     ring->radius = radius;
@@ -916,7 +916,7 @@ void effScatterRingUpdateScaled(PcpScatterWork12 *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = func_002E78F8(angle) * radius;
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -954,7 +954,7 @@ void effScatterComposeWorkMatrix(PcpScatterWork5 *work, void *source)
 {
     VU0_LOAD_MATRIX(source);
     VU0_LOAD_MATRIX_B(&work->pad50[0]);
-    func_002DDBF8();
+    sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
 
@@ -1029,7 +1029,7 @@ void func_00174880(void *data)
     effScatterInstanceCreateC(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
-PcpScatterWork6 *func_001748C8(PcpScatterWork6 *work)
+PcpScatterWork6 *effCreateScatterChildSharingParentResource(PcpScatterWork6 *work)
 {
     PcpScatterWork6 *child;
 
@@ -1038,7 +1038,7 @@ PcpScatterWork6 *func_001748C8(PcpScatterWork6 *work)
     return child;
 }
 
-void func_00174910(PcpScatterWork6 *work)
+void effReleaseScatterObjectAndOwnedBuffer(PcpScatterWork6 *work)
 {
     effReleaseScatterObject(work->scatterObject);
     func_002D0918(work->ownedBuffer);
@@ -1080,7 +1080,7 @@ void effScatterRingUpdateScaledLong(PcpScatterWork13 *work, s32 index)
     step = ring->angleStep;
     func_002DD608(ring->unk00);
     func_002DD968(ring->tiltAngle);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->tiltDamping;
     ring->radius = radius;
@@ -1089,7 +1089,7 @@ void effScatterRingUpdateScaledLong(PcpScatterWork13 *work, s32 index)
     for (i = 0; i < count; i++) {
         f32 s;
 
-        vertex[0] = func_002E78F8(angle) * radius;
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
         vertex[1] += rise;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];
@@ -1112,12 +1112,12 @@ void func_001751A8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_001751C0(PcpScatterWork6 *work, f32 value)
+void effSetScatterWorkScale(PcpScatterWork6 *work, f32 value)
 {
     work->scale = value;
 }
 
-void func_001751C8(PcpScatterWork6 *work, u32 value)
+void effSetScatterWorkColor(PcpScatterWork6 *work, u32 value)
 {
     work->color = value;
 }
@@ -1127,7 +1127,7 @@ void func_001751D0(PcpScatterWork6 *work, void *source)
 {
     VU0_LOAD_MATRIX(source);
     VU0_LOAD_MATRIX_B(&work->pad50[0]);
-    func_002DDBF8();
+    sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(work);
 }
 
@@ -1207,7 +1207,7 @@ void effScatterFlatRingUpdate(PcpScatterWork14 *work, s32 index)
     ring->angularSpeed *= work->angularDamping;
     height = ring->height;
     for (i = 0; i < count; i++) {
-        vertex[0] = func_002E78F8(angle) * radius;
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
         vertex[1] = 0;
         s = sdfSinPoly(angle);
         vertex[4] = vertex[0];

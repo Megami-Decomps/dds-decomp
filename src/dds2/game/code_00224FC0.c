@@ -260,7 +260,7 @@ s32 btlSelectDisabledCommand(BattleActionUnit *battler) {
     return (battler->entryFlags & 0x2000) ? 15 : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002266D8);
+INCLUDE_ASM(const s32, "game/code_00224FC0", btlTrackSpecialEnemyCommandRestrictionByTurn);
 
 s32 btlClearUnitRestrictionFlag(void) {
     BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
@@ -316,7 +316,7 @@ u32 func_00226868(BattleActionUnit *unit) {
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226900);
 
 /* Release the command restriction for each active group-0x400 unit of kind 0x118. */
-void func_002269E0(void) {
+void btlClearSpecialEnemyEntryFlags(void) {
     BattleActionUnit *unit = ((BattleActionContext *)func_001AA6F8())->firstUnit;
     while (unit != 0) {
         u32 flags = unit->flags;
@@ -370,7 +370,7 @@ typedef struct BattleEffectResetView {
     f32 speed;
 } BattleEffectResetView;
 
-void func_00226BB8(void) {
+void btlBeginEffectActorFadeOut(void) {
     BattleEffectResetView *effect = (BattleEffectResetView *)((BattleActionContext *)func_001AA6F8())->effect;
     BattleEffectUnitView *actor = effect->actor;
     if (actor != 0) {
@@ -405,7 +405,7 @@ INCLUDE_RODATA(const s32, "game/code_00224FC0", D_0041B4D0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226C98);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226E98);
+INCLUDE_ASM(const s32, "game/code_00224FC0", btlCheckActiveEffectForSpecialTarget);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226F58);
 

@@ -98,7 +98,7 @@ void dds3UnlinkNodeFromList(s32 *list, s32 node, s32 linkOffset) {
     }
 }
 
-void func_0011D030(Dds3Node *node, Dds3NodeVTable *vtable) {
+void dds3RegisterOwnedIntrusiveNode(Dds3Node *node, Dds3NodeVTable *vtable) {
     dds3AppendIntrusiveNode((s32 *)&D_003BD7A8, (s32)node, 0);
     node->vtable = vtable;
 }
@@ -108,7 +108,7 @@ void dds3DestroyLinkedNode(Dds3Node *node) {
     node->vtable->destroy((s32)node);
 }
 
-void func_0011D0B0(void) {
+void dds3DestroyAllOwnedIntrusiveNodes(void) {
     u32 current;
     while ((current = D_003BD7A8) != 0) {
         dds3DestroyLinkedNode(current);
@@ -140,7 +140,7 @@ void dds3UpdateLinkedNodes(void) {
     }
 }
 
-void func_0011D178(GlyphOwner *owner) {
+void frFontSubmitAndFreeGlyphOwner(GlyphOwner *owner) {
     frFontQueueGlyphInSelectedSlot(owner->glyph);
     sdfReleaseChipBlock(owner);
 }
@@ -160,7 +160,7 @@ Dds3Node *dds3CreateFontNode(u32 arg0, u32 arg1, u32 arg2) {
     frFontSetContextPair(obj, arg0, arg1);
     node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
     node->unk10 = obj;
-    func_0011D030(node, (Dds3NodeVTable *)&D_003BAAD0);
+    dds3RegisterOwnedIntrusiveNode(node, (Dds3NodeVTable *)&D_003BAAD0);
     return node;
 }
 

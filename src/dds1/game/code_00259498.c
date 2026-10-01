@@ -33,7 +33,7 @@ INCLUDE_ASM(const s32, "game/code_00259498", func_0025B0F0);
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025B350);
 
-void func_0025B7B0(void *unused, void *allocation) {
+void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
     if (allocation != 0) {
         sdfReleaseChipBlock(allocation);
     }

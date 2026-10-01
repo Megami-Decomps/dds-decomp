@@ -115,7 +115,7 @@ typedef struct ScriptNameNode {
 extern ScriptNameNode *D_003BA994;
 extern s32 strcmp(const char *a, const char *b);
 
-extern s32 func_00118140(void *);
+extern s32 scrIsCurrentWorkTask(void *);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 /* Walk the script-name table, releasing each node's task or process. */
@@ -130,7 +130,7 @@ void scrDestroyAllNamedProcesses(void)
     }
     while (1) {
         next = node->next;
-        if (func_00118140(node) == 0) {
+        if (scrIsCurrentWorkTask(node) == 0) {
             if (node->unkE4 != 0) {
                 kwlnTaskDestroyWithHierarchy(node->unkE4, 0);
             } else {

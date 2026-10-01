@@ -117,7 +117,7 @@ extern s8 D_00453560[];
 
 void func_00236568(void);
 
-void func_00236940(void);
+void mdlDrawViewerSelectionLabel(void);
 
 extern s32 func_00101740(void *name);
 
@@ -1206,7 +1206,7 @@ u32 func_00236058(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236080);
 
-void func_002364C0(void) {
+void mdlDrawViewerIndexedLabelOverlay(void) {
     s32 packets;
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
@@ -1216,13 +1216,13 @@ void func_002364C0(void) {
 
 u32 func_00236540(void) {
     func_00236080();
-    func_002364C0();
+    mdlDrawViewerIndexedLabelOverlay();
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00236568);
 
-void func_00236940(void) {
+void mdlDrawViewerSelectionLabel(void) {
     s32 packets;
 
     mdlAppendViewerRectToDrawList(0x8A10L, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
@@ -1233,7 +1233,7 @@ void func_00236940(void) {
 s32 func_002369C0(void) {
     func_00236568();
     if (D_00453560[0] == 0) {
-        func_00236940();
+        mdlDrawViewerSelectionLabel();
     }
     return 0;
 }

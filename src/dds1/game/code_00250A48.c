@@ -21,7 +21,7 @@ typedef struct MnuTransWork {
 } MnuTransWork;
 
 extern MnuTransRec *mnuAppendDisplayListNode(MnuTransHead *head);
-extern u32 *func_0024FA18(void);
+extern u32 *mnuGetSelectedNodeValue(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
 extern void mnuReinitializeSceneGrid(MnuTransWork *work);
@@ -40,17 +40,17 @@ void mnuBeginTransition(MnuTransWork *work, s32 mode) {
         transition->mode = mode;
         if (mode == 1) {
             work->state = 10;
-            transition->startId = *func_0024FA18();
+            transition->startId = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
-            transition->endId = *func_0024FA18();
+            transition->endId = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
             work->state = -10;
-            transition->startId = *func_0024FA18();
+            transition->startId = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
-            transition->endId = *func_0024FA18();
+            transition->endId = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
         }
     }

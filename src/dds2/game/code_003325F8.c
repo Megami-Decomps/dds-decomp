@@ -334,7 +334,7 @@ void func_00332E50(u32 mode) {
 }
 
 void *sdfDevCreateBufferedRequest(s32, s32, s32);
-SdfResourceList *func_00332E58(s32 capacity) {
+SdfResourceList *sdfCreateConfiguredBufferedResourceList(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, 4, 4);
 }
 
@@ -378,7 +378,7 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *src) {
         return NULL;
     }
     count = src->count;
-    dst = func_00332E58(count);
+    dst = sdfCreateConfiguredBufferedResourceList(count);
     for (i = 0; i < count; i++) {
         dst->items[i] = func_0032B6B0(src->items[i]);
     }

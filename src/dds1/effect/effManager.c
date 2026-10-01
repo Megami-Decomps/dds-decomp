@@ -84,7 +84,7 @@ void func_0014FB70(EffNode *node) {
     D_0034DE18[node->type].fn2C(node->instance);
 }
 
-s32 func_0014FBA8(EffNode *node) {
+s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
     if (D_0034DE18[node->type].fn10 == NULL) {
         return 1;
     }

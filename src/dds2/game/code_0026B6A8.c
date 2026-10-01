@@ -42,7 +42,7 @@ extern s32 D_00435E48;
 
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
-extern void func_0026B680(s32);
+extern void evtCloseDisplayChannelAndEnsureMessageWindow(s32);
 extern void func_0026C918(s32, void *);
 extern void dspSetActive();
 
@@ -61,7 +61,7 @@ s32 dspStartFlagEvent(s32 context) {
             }
             for (i = 0; i < sizeof(D_003CE6E8) / sizeof(D_003CE6E8[0]); i++) {
                 if (mdlFlagTest(D_003CE6E8[i].needFlag) != 0 && mdlFlagTest(D_003CE6E8[i].doneFlag) == 0) {
-                    func_0026B680(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E5C + D_003CE6E8[i].areaIndex * 0x19));
                     func_0026C918(1, (void *)(D_00435E50 + D_003CE6E8[i].nameIndex * 0x13));
@@ -75,7 +75,7 @@ s32 dspStartFlagEvent(s32 context) {
                 slot = (PartySlotHeader *)(D_00435DD0 + i * 0x1C4 + 0xA60);
                 if ((slot->flags & 1) != 0 && mdlFlagTest(D_003CE728[slot->id].needFlag) != 0
                     && mdlFlagTest(D_003CE728[slot->id].doneFlag) == 0) {
-                    func_0026B680(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0026C918(0, (void *)(D_00435E48 + slot->id * 0x11));
                     dspStartEntry(4);

@@ -142,11 +142,11 @@ extern SdfQuad D_004009A0;
 extern s32 mnuCreateListState(s32, s32, s32);
 extern void *func_00328D68(s32);
 extern void *memset(void *, s32, u32);
-extern s32 func_0030B600(void);
+extern s32 mdlCollectFlagBitsIntoMask(void);
 extern SdfCounterChannel *mnuListAppendNode(s32, s32);
-extern u8 *func_0030C568(s32);
+extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
-extern s16 func_0030C9D0(s32);
+extern s16 sdfGetCounterChannelValueAtIndex(s32);
 extern void func_0030C250(s32, s32);
 extern void func_0030CC68();
 extern u8 D_00400AF0[];
@@ -155,13 +155,13 @@ extern void sdfReleaseChipBlock();
 extern void mnuDestroyListState();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
-extern void func_0030D938(s32, s32);
+extern void sdfDrawCounterChannelInfoLabel(s32, s32);
 extern void func_0030D4F8(void);
 extern void mnuCallInitWide();
 
 extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
 
-extern void func_0030F2A8(s32, s32, u32, u8 *);
+extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
 extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00108BD8(s32);
@@ -269,7 +269,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C250);
 
 /* Create display channels for the enabled bits of the counter mask. */
-s32 func_0030C378(s32 mask, s32 index) {
+s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     SdfCounterDisplay *display;
     SdfCounterChannel *channel;
     s32 completedMask;
@@ -281,7 +281,7 @@ s32 func_0030C378(s32 mask, s32 index) {
     ((SdfCounterRuntime *)D_004388C4)->timer = func_00328D68(0x24);
     memset(((SdfCounterRuntime *)D_004388C4)->timer, 0, 0x24);
     ((SdfCounterRuntime *)D_004388C4)->draw = (SdfCounterDrawFn)func_0030CC68;
-    completedMask = func_0030B600();
+    completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
             channel = mnuListAppendNode(D_004388C4, 0);
@@ -289,7 +289,7 @@ s32 func_0030C378(s32 mask, s32 index) {
             memset(display, 0, 0x10);
             display->value = i + 1;
             display->word = (u32 *)(D_00400AF0 + i * 0x18);
-            display->info = func_0030C568(i + 1);
+            display->info = sdfResolveSceneCounterInfo(i + 1);
             if ((completedMask >> i) & 1) {
                 display->flag = 1;
             }
@@ -314,11 +314,11 @@ s32 func_0030C378(s32 mask, s32 index) {
         ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x7E;
     }
     sdfCounterSelectChannelByIndex(D_004388C4, index);
-    func_0030C250(func_0030C9D0(index) - 1, 0xB);
+    func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
     return 1;
 }
 
-u8 *func_0030C568(s32 scene) {
+u8 *sdfResolveSceneCounterInfo(s32 scene) {
     if (scene == 4) {
         if (mdlFlagTest(0x13)) {
             scene = 10;
@@ -344,11 +344,11 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
     }
 }
 
-void func_0030C640(void) {
+void sdfDestroyActiveCounterRuntime(void) {
     sdfCounterDestroyRuntime(D_004388C4);
 }
 
-s64 func_0030C660(void) {
+s64 sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickCountdown();
     mnuTickMapTimers();
     return func_0030D438();
@@ -366,7 +366,7 @@ s32 sdfCounterGetDisplayValue(void) {
     return ((SdfCounterRuntime *)D_004388C4)->channel->display->value;
 }
 
-s16 func_0030C9D0(s32 remaining) {
+s16 sdfGetCounterChannelValueAtIndex(s32 remaining) {
     SdfCounterChannel *task = ((SdfCounterRuntime *)D_004388C4)->first;
     if (remaining > 0) {
         do {
@@ -463,7 +463,7 @@ void mnuTickMapTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D3A8);
 
-s32 func_0030D3C0(void) {
+s32 sdfCounterGetSelectionBoundaryFlags(void) {
     SdfCounterRuntime *rt = (SdfCounterRuntime *)D_004388C4;
     s32 count;
     s32 done;
@@ -475,7 +475,7 @@ s32 func_0030D3C0(void) {
     return ((count + rt->base - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
 }
 
-void func_0030D408(s16 x, s16 y) {
+void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)D_004388C4)->timer;
     timer->startX = timer->curX;
     timer->startY = timer->curY;
@@ -511,7 +511,7 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     func_00108BD8(0);
 }
 
-s32 func_0030D780(u64 arg0) {
+s32 frMeasureAndQueueCounterText(u64 arg0) {
     u64 text;
     s32 width;
 
@@ -594,14 +594,14 @@ u32 func_0030D900(s32 context) {
     return mask;
 }
 
-void func_0030D938(s32 x, s32 y) {
+void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
     SdfCounterDisplay *display;
     f32 fade;
     s32 width;
 
     display = ((SdfCounterRuntime *)D_004388C4)->channel->display;
     fade = 1.0f - (f32)((SdfCounterRuntime *)D_004388C4)->timer->value / 10.0f;
-    width = func_0030D780((u64)display->info);
+    width = frMeasureAndQueueCounterText((u64)display->info);
     x = (f32)x - (f32)width * 0.5f;
     if (display->value == 2) {
         x -= 0x10;
@@ -618,10 +618,10 @@ void func_0030D938(s32 x, s32 y) {
     } else {
         x -= 0x14;
     }
-    func_0030F2A8(x, y, (u8)(u32)(fade * 128.0f) | 0x80808000, display->info);
+    sdfCounterDrawGlyphAtGridCell(x, y, (u8)(u32)(fade * 128.0f) | 0x80808000, display->info);
 }
 
-void func_0030DAA0(SdfSlotSet *set) {
+void sdfInstallNonzeroSpriteSlots(SdfSlotSet *set) {
     s32 i;
     for (i = 0; i < 25; i++) {
         if (set->slot[i] != 0) {
@@ -630,7 +630,7 @@ void func_0030DAA0(SdfSlotSet *set) {
     }
 }
 
-void func_0030DAE8(void) {
+void sdfReleaseAllSpriteSlots(void) {
     s32 remaining = 24;
     u32 *slot = D_0045C7C0;
     do {
@@ -680,7 +680,7 @@ s32 fldReleaseLocalMapResources(void) {
     return 1;
 }
 
-void func_0030E130(void) {
+void sdfCounterInitializeDisplayAnimation(void) {
     s32 value;
 
     D_00439098 = 0;
@@ -689,13 +689,13 @@ void func_0030E130(void) {
     D_004390A0 = 0x3c;
 }
 
-void func_0030E160(void) {
+void sdfCounterAdvanceBoundedAnimationValue(void) {
     if ((s32)D_00439098 < 0x3C) {
         D_00439098++;
     }
 }
 
-void func_0030E180(void) {
+void sdfCounterStepDownAnimationValue(void) {
     if ((s32)D_00439098 > 0) {
         D_00439098 -= 2;
     } else {

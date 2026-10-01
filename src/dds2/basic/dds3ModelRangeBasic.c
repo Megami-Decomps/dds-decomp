@@ -21,7 +21,7 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     resource = data->unk4;
     if (resource != 0) {
         handle = func_00329930(resource);
-        func_003298C0(handle);
+        sdfQueueNonzeroResourceId(handle);
     }
     sdfReleaseChipBlock(data);
 }

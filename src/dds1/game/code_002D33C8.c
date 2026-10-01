@@ -95,7 +95,7 @@ SdfResource *sdfFindResourceById(s32 id) {
     return NULL;
 }
 
-void func_002D3598(void) {
+void sdfRegisterTextureReleaseRequestHandler(void) {
     sdfInitializeSynchronizedRequest(&D_003BD9F0, sdfTexRelease);
 }
 

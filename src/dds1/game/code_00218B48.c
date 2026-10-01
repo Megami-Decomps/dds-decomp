@@ -110,7 +110,7 @@ s32 mdlUpdateViewerCursor(s16 *, s32);
 
 void func_0021B9F8(void);
 
-void func_0021BDD0(void);
+void mdlDrawViewerSelectionLabel(void);
 
 void sdfAppendPacket(s32, s32);
 
@@ -1182,14 +1182,14 @@ extern s32 D_00367B10[];
 
 extern s32 sdfCreateFormattedSifCommand();
 
-void func_0021B950(void) {
+void mdlDrawViewerIndexedLabelOverlay(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[D_003D7A50.unk34]));
 }
 
 u32 func_0021B9D0(void) {
     func_0021B510();
-    func_0021B950();
+    mdlDrawViewerIndexedLabelOverlay();
     return 0;
 }
 
@@ -1197,7 +1197,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B9F8);
 
 extern s32 D_00367B18[];
 
-void func_0021BDD0(void) {
+void mdlDrawViewerSelectionLabel(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[D_003D7A50.unk36]));
 }
@@ -1205,7 +1205,7 @@ void func_0021BDD0(void) {
 s32 func_0021BE50(void) {
     func_0021B9F8();
     if (D_003D7A60[0] == 0) {
-        func_0021BDD0();
+        mdlDrawViewerSelectionLabel();
     }
     return 0;
 }

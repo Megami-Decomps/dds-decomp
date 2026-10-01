@@ -92,7 +92,7 @@ void func_00111968(void) {
 }
 
 /* Number of slots a given object kind occupies in the slot ring. */
-s32 func_00111980(u32 kind)
+s32 dds3GetObjectSlotRingOccupancy(u32 kind)
 {
     s32 slots = 0;
 

@@ -48,7 +48,7 @@ typedef struct StaffWindowHeader {
 
 /* Refresh the bullet-item window if inventory is empty; return whether the
  * window still has entries. */
-s32 func_00273050(s32 itemId, s32 context) {
+s32 mnuIsStaffWindowReadyForItem(s32 itemId, s32 context) {
     StaffWindowResources *resources = ((StaffDisplayContext *)context)->resources;
 
     if (*(u8 *)((itemId & 0xFFFF) + D_003BAA00 + 0x12A0) == 0) {

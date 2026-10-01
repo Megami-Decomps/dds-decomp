@@ -51,7 +51,7 @@ extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
 extern void func_002C7D00(s32);
-extern void func_003298C0(s32);
+extern void sdfQueueNonzeroResourceId(s32);
 extern void func_003297C8(s32);
 extern void sdfReleaseChipBlock(s32);
 
@@ -98,7 +98,7 @@ void evtReleaseEventPackResources(void) {
             func_002C7D00(resources->objectHandle);
         }
         if (resources->resourceHandle != 0) {
-            func_003298C0(resources->resourceHandle);
+            sdfQueueNonzeroResourceId(resources->resourceHandle);
         }
         if (resources->sceneAllocation1 != 0) {
             func_003297C8(resources->sceneAllocation1);

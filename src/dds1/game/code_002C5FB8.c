@@ -74,7 +74,7 @@ extern u32 D_003DFED0[];
 
 extern u32 D_003DFEE0[];
 
-s32 func_002D0A10(u32 sprite);
+s32 sdfQueueNonzeroResourceId(u32 sprite);
 
 typedef struct {
     u32 *word;         /* 0x00 */
@@ -265,7 +265,7 @@ s32 fldReleaseLocalMapResources(void) {
     return 1;
 }
 
-void func_002C63D8(void) {
+void sdfCounterInitializeDisplayAnimation(void) {
     s32 count;
 
     D_003BD978 = 0;
@@ -274,13 +274,13 @@ void func_002C63D8(void) {
     D_003BD980 = 0x3c;
 }
 
-void func_002C6408(void) {
+void sdfCounterAdvanceBoundedAnimationValue(void) {
     if ((s32)D_003BD978 < 0x3C) {
         D_003BD978++;
     }
 }
 
-void func_002C6428(void) {
+void sdfCounterStepDownAnimationValue(void) {
     if ((s32)D_003BD978 > 0) {
         D_003BD978 -= 2;
     } else {
@@ -323,7 +323,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7180);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7430);
 
-void func_002C7700(void) {
+void sdfCommitPendingVectorAndMarkChanged(void) {
     D_003DFEE0[0] = D_003DFED0[0];
     D_003DFEE0[1] = D_003DFED0[1];
     D_003DFEE0[2] = D_003DFED0[2];
@@ -338,7 +338,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7A60);
 
 s64 func_002C7B38(u32 *sprite) {
     if (sprite != NULL) {
-        return func_002D0A10(*sprite);
+        return sdfQueueNonzeroResourceId(*sprite);
     }
 }
 
@@ -375,7 +375,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     record->handle = handle;
     record->image = func_002D3288(descriptor);
     if (record->handle != 0) {
-        func_002D0A10((void *)record->handle);
+        sdfQueueNonzeroResourceId((void *)record->handle);
         record->handle = 0;
         record->descriptor = 0;
     }
@@ -392,7 +392,7 @@ u32 fldReleaseMapResource(s32 *image) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7DC0);
 
-void func_002C7EC8(s32 gridX, s32 gridY, u64 style, u64 flags) {
+void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u64 style, u64 flags) {
     u64 glyph;
 
     glyph = func_00197760(gridX << 4, gridY << 3, 0, style, flags, 0);
@@ -426,7 +426,7 @@ void sdfVec3AddComponents(float x, float y, float z, float *dst) {
     dst[2] = dst[2] + z;
 }
 
-void func_002C84B8(Vec3 *v, float x, float y, float z) {
+void sdfSetVectorComponents(Vec3 *v, float x, float y, float z) {
     v->x = x;
     v->y = y;
     v->z = z;
@@ -472,7 +472,7 @@ typedef struct SdfMat4 {
 } SdfMat4;
 
 /* Transpose through a local copy so source and destination may alias. */
-void func_002C8E30(SdfMat4 *dst, SdfMat4 *src) {
+void sdfTransposeMatrix(SdfMat4 *dst, SdfMat4 *src) {
     SdfMat4 t = *src;
 
     dst->m[0] = t.m[0];
@@ -495,7 +495,7 @@ void func_002C8E30(SdfMat4 *dst, SdfMat4 *src) {
 
 extern void *memcpy(void *, const void *, u32);
 
-f32 *func_002C8F40(f32 *vec, f32 *mat) {
+f32 *sdfTransformDirectionByMatrix(f32 *vec, f32 *mat) {
     f32 out[4];
     f32 x = vec[0];
     f32 y = vec[1];

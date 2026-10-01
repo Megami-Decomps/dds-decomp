@@ -37,7 +37,7 @@ struct PcpFlashWork1 {
 };
 
 extern s32 effGetGroupIndexRecord(s32 base, s32 index);
-extern f32 *func_00177B60(u32 handle, s32 index);
+extern f32 *effGetIndexedEffectGroupRecord(u32 handle, s32 index);
 extern f32 D_003B1230[];
 extern f32 D_003B1260[];
 extern f32 D_003B1240[];
@@ -48,7 +48,7 @@ extern f32 D_003B12A0[];
 extern f32 D_003B1220[];
 extern f32 *effGetGroupRecordByIndex(u32 handle, s32 index);
 extern f32 *func_00178190(u32 handle, s32 index);
-extern f32 func_003407A0(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
@@ -406,7 +406,7 @@ typedef struct PcpFlashRotationWork {
     PcpFlashRotatingParticle *parts;
 } PcpFlashRotationWork;
 
-extern void func_00336768(f32 angle, void *orientation);
+extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 void effFlashTrianglePulseSpawnFromTable(u64 table) {
     u64 effectParams;
@@ -420,7 +420,7 @@ void func_00171E20(void) {
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashWork1 *work) {
-    func_00177CA0(work->resourceHandle);
+    effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -474,7 +474,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashWork1 *work, s32 index, void *vie
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, base);
-    func_00336768(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -484,7 +484,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashWork1 *work, s32 index, void *vie
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    func_00336768(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -607,7 +607,7 @@ void func_001724D0(void) {
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashWork2 *work) {
-    func_00177880(work->resourceHandle);
+    effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -624,7 +624,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashWork2 *work, f32 value)
     work->renderScale = value;
 }
 
-extern s32 func_00177B78(s32 base);
+extern s32 effGetIndexedEffectGroupIndexEntry(s32 base);
 
 typedef struct PcpFlashColorSlot5 {
     s32 color[5];
@@ -636,7 +636,7 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 flag, s32 param) {
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    slot = (PcpFlashColorSlot5 *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -695,7 +695,7 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
 void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
-    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 center[4];
     f32 scale[4];
     f32 across[4];
@@ -756,7 +756,7 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
     position[0] = part->position[0];
     position[1] = part->position[1];
     position[2] = part->position[2];
-    func_00336768(part->angle, orientation);
+    sdfBuildVuRotationFromAxisAngle(part->angle, orientation);
     VU0_LOAD_VF(vf10, position);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, position);
@@ -866,7 +866,7 @@ void func_00172E88(void) {
 }
 
 void effFlashOrbitScalingDestroy(PcpFlashWork3 *work) {
-    func_00177880(work->resourceHandle);
+    effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -888,7 +888,7 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashWork3 *work, s32 flag, s32 pa
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    slot = (PcpFlashColorSlot5 *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -908,7 +908,7 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashWork3 *work, s32 flag, s32 pa
 void effFlashArcQuadScaling(PcpFlashWork3 *work, s32 index)
 {
     PcpFlashPtc14 *part = &work->parts[index];
-    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -928,7 +928,7 @@ void effFlashArcQuadScaling(PcpFlashWork3 *work, s32 index)
     widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = func_003407A0(part->angle);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
     unit[1] = 0;
     sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
@@ -1114,7 +1114,7 @@ void func_00173FB0(void) {
 }
 
 void effFlashOrbitArcDestroy(PcpFlashWork5 *work) {
-    func_00177880(work->resourceHandle);
+    effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -1136,7 +1136,7 @@ void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 flag, s32 param)
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    slot = (PcpFlashColorSlot5 *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -1156,7 +1156,7 @@ void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 flag, s32 param)
 void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
 {
     PcpFlashPtc10 *part = &work->parts[index];
-    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -1168,7 +1168,7 @@ void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
     VEC3_SPLAT(scaleA, work->normalSpan);
     VEC3_SPLAT(scaleB, work->acrossSpan);
     VEC3_SPLAT(scaleC, work->upSpan);
-    unit[0] = func_003407A0(part->accumulator);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
     unit[1] = 0;
     sinv = sdfSinPoly(part->accumulator);
     unit[2] = sinv;
@@ -1265,7 +1265,7 @@ void func_00174828(void) {
 }
 
 void effFlashRotatingQuadDestroy(PcpFlashWork6 *work) {
-    func_00177880(work->resourceHandle);
+    effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -1287,7 +1287,7 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashWork6 *work, s32 flag, s32 pa
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    slot = (PcpFlashColorSlot5 *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -1326,7 +1326,7 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
 void effFlashRotatedQuad(PcpFlashWork6 *work, s32 index, void *view)
 {
     PcpFlashPtc20A *part = &work->parts[index];
-    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 base[4];
     f32 scale[4];
     f32 across[4];
@@ -1343,7 +1343,7 @@ void effFlashRotatedQuad(PcpFlashWork6 *work, s32 index, void *view)
     VEC3_SPLAT(across, acrossLen);
     upLen = part->upSpan * ratio;
     VEC3_SPLAT(up, upLen);
-    func_00336768(part->angle, view);
+    sdfBuildVuRotationFromAxisAngle(part->angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1518,7 +1518,7 @@ void func_00175058(void) {
 }
 
 void effFlashRadialTriangleDestroy(PcpFlashWork7 *work) {
-    func_00177CA0(work->resourceHandle);
+    effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -1564,7 +1564,7 @@ void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
     radius = part->accumulator;
     VEC3_SPLAT(size, radius);
     angle = step * (f32)index;
-    func_00336768(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1581,7 +1581,7 @@ void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    func_00336768(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -1735,7 +1735,7 @@ void effFlashRotatedStripPair(PcpFlashWork8 *work, s32 index, void *view)
     VEC3_SPLAT(inner, innerEdge);
     span = part->span;
     VEC3_SPLAT(size, span);
-    func_00336768(part->angle, view);
+    sdfBuildVuRotationFromAxisAngle(part->angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1893,7 +1893,7 @@ void func_00176138(void) {
 }
 
 void effFlashFadingOrbitDestroy(PcpFlashWork9 *work) {
-    func_00177880(work->resourceHandle);
+    effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -1915,7 +1915,7 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashWork9 *work, s32 flag, s32 par
     s32 colorA;
     s32 colorB;
 
-    slot = (PcpFlashColorSlot5 *)func_00177B78(work->resourceHandle);
+    slot = (PcpFlashColorSlot5 *)effGetIndexedEffectGroupIndexEntry(work->resourceHandle);
     colorA = work->colorA & 0xFFFFFF;
     colorB = work->colorB & 0xFFFFFF;
     slot->color[0] = effMultiplyPackedColors(colorB, param);
@@ -1935,7 +1935,7 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashWork9 *work, s32 flag, s32 par
 void effFlashArcQuadScalingB(PcpFlashWork9 *work, s32 index)
 {
     PcpFlashPtc14 *part = &work->parts[index];
-    f32 *quad = func_00177B60(work->resourceHandle, index);
+    f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
     f32 scaleA[4];
@@ -1955,7 +1955,7 @@ void effFlashArcQuadScalingB(PcpFlashWork9 *work, s32 index)
     widthC = work->upSpan * ratio;
     VEC3_SPLAT(scaleB, widthB);
     VEC3_SPLAT(scaleC, widthC);
-    unit[0] = func_003407A0(part->angle);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->angle);
     unit[1] = 0;
     sinv = sdfSinPoly(part->angle);
     unit[2] = sinv;
@@ -2126,7 +2126,7 @@ void func_001768B8(void) {
 }
 
 void effFlashOffsetRadialTriangleDestroy(PcpFlashWork10 *work) {
-    func_00177CA0(work->resourceHandle);
+    effReleaseRecordPoolResourceAndBuffer(work->resourceHandle);
     func_003297C8(work->ownedBuffer);
 }
 
@@ -2172,7 +2172,7 @@ void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
     radius = part->accumulator;
     VEC3_SPLAT(size, radius);
     angle = step * (f32)index;
-    func_00336768(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -2189,7 +2189,7 @@ void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    func_00336768(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);

@@ -250,7 +250,7 @@ void itfSetTextDrawLimit(s32 limit) {
     D_003BB168 = limit;
 }
 
-u64 func_00197238(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
+u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64 measureFlag, u64 entryFlag, u64 colors, u64 source) {
     u64 glyph;
     s32 kind = 4;
 
@@ -784,7 +784,7 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198C70);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00198DF0);
+INCLUDE_ASM(const s32, "game/code_00196478", itfQueueColoredTexturedQuadPacket);
 
 void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, u64 command) {
     u64 packet;

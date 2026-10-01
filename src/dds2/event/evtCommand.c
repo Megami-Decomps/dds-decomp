@@ -7,7 +7,7 @@ s32 scrReadIntParameter(s32 idx);
 
 void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
-void func_00115F40(void *unit);
+void dds3ResetWorldResourceState(void *unit);
 
 void scrSetIntegerReturnValue(s32 value);
 
@@ -63,9 +63,9 @@ void func_00110B50(void *unit);
 
 s32 func_001287B8(s32 id);
 
-void func_0023AFC8(void *unit, s32 enabled);
+void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
-void func_0023B078(void *unit, s32 flag);
+void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
 
 void effObjSetFlags(void *unit, s32 flag);
 
@@ -132,7 +132,7 @@ extern u32 D_00389770[];
 
 void func_0023AE70(void *unit, s32 value);
 
-s32 func_0023AEB0(void *target, void *path);
+s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
 extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
@@ -150,7 +150,7 @@ s32 evtCommandEnablePathUnit(void)
     id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
-        func_0023B078(unit, 1);
+        evtDispatchSupportedNodeOnClear(unit, 1);
         effObjSetFlags(unit, 1);
     }
     return 1;
@@ -197,7 +197,7 @@ s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
     return 1;
 }
 
-s32 func_00241090(void)
+s32 evtCmdResetWorldResourceState(void)
 {
     s32 id;
     void *unit;
@@ -207,7 +207,7 @@ s32 func_00241090(void)
     if (unit == NULL) {
         return 1;
     }
-    func_00115F40(unit);
+    dds3ResetWorldResourceState(unit);
     return 1;
 }
 
@@ -219,7 +219,7 @@ s32 func_002410D0(void)
     id = scrReadIntParameter(0);
     unit = evtFindWorldObjectByIdAndKind(7, id);
     if (unit != NULL) {
-        func_0023B078(unit, 0);
+        evtDispatchSupportedNodeOnClear(unit, 0);
     }
     return 1;
 }
@@ -238,7 +238,7 @@ s32 evtCommandAttachLightToUnitPath(void) {
         func_0010AE38("EFFECT_PATH_MOVE not found path!\n", effect);
         return 1;
     }
-    func_0023AEB0(path, effect);
+    evtStageRelinkOwnedNodeResource(path, effect);
     return 1;
 }
 
@@ -249,12 +249,12 @@ typedef struct EvtIdNode {
     s32 value; /* 0x04 */
 } EvtIdNode;
 
-extern EvtIdNode *func_001111A8(s32 world, char *id);
+extern EvtIdNode *dds3FindObjectChainNodeByName(s32 world, char *id);
 
 s32 evtCommandReadSecondaryWorldIdValue(void) {
     EvtIdNode *node;
 
-    node = func_001111A8(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
+    node = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
     if (node == NULL) {
         func_0035B6E0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         func_0010AE38("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
@@ -928,7 +928,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
             return 1;
         }
     }
-    func_0023AFC8(unit, 1);
+    evtToggleWorldSlotScaledValueFlag(unit, 1);
     return 1;
 }
 
@@ -948,14 +948,14 @@ s32 evtCommandClearUnitScaledValueFlag(void)
             return 1;
         }
     }
-    func_0023AFC8(unit, 0);
+    evtToggleWorldSlotScaledValueFlag(unit, 0);
     return 1;
 }
 
 s32 evtCommandMoveLightAlongPathOrWarn(void) {
     void *path = evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0));
 
-    if (func_0023AEB0(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {
+    if (evtStageRelinkOwnedNodeResource(evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1)), path) != 0) {
         return 1;
     }
     func_0035B6E0(D_00421FB0);

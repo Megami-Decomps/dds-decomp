@@ -14,9 +14,9 @@ extern s32 D_00435E50;
 
 extern s32 D_00435DD0;
 
-extern u32 func_00314690(u16);
+extern u32 ptyGetProfileRecordCap(u16);
 
-extern u32 func_00314B80(u32, u16);
+extern u32 ptyGetProfileRecordPointer(u32, u16);
 
 /* 24-byte table entries (full layout unknown; stride inferred from index math). */
 typedef struct Entry24B {
@@ -86,7 +86,7 @@ typedef struct ScriptFlagSlot {
 
 extern ScriptFlagSlot D_00404AA8[];
 
-extern u32 func_00315FC8(u16);
+extern u32 scrGetEntryRequirementFlags(u16);
 
 extern u8 D_00401324[];
 
@@ -145,7 +145,7 @@ extern void func_0019D550(u32, s32, s32);
 
 extern void frFontQueueGlyphInSelectedSlot(u32);
 
-void func_00313BB8(s32 left, s32 right) {
+void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     s32 file = func_00359A98("debug.log", D_00438908);
     if (file != 0) {
         func_00359AC0(file, D_00438910, left, right);
@@ -161,7 +161,7 @@ INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313C70);
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313D80);
 
-void func_00313F88(u8 *work) {
+void ptyLoadPresetSkillSlots(u8 *work) {
     u16 *source = D_004052E8[((ScrVmOperand *)work)->h04];
     u16 *slots = ((ScriptFlagWork *)work)->slotIds;
     u32 index;
@@ -177,7 +177,7 @@ void func_00313F88(u8 *work) {
     } while (index < 8);
 }
 
-void func_00314020(u8 *work) {
+void ptyMarkPresetSkillPool(u8 *work) {
     u16 *source = D_004052F8[((ScrVmOperand *)work)->h04];
     u32 index = 0;
     do {
@@ -223,19 +223,19 @@ void ptyRecomputeMaxHpMp(u32 unit) {
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00314500);
 
-u32 func_00314668(u32 scriptId, s32 *record) {
+u32 scrGetIndexedRecordAddress(u32 scriptId, s32 *record) {
     *record = D_00435E50 + (scriptId & 0xffff) * 0x13;
     return 1;
 }
 
-u32 func_00314690(u16 scriptId) {
+u32 ptyGetProfileRecordCap(u16 scriptId) {
     return D_00401328[scriptId][0];
 }
 
-void func_003146B8(u32 work, u16 scriptId, u32 value) {
+void ptySetProfileRecordValue(u32 work, u16 scriptId, u32 value) {
     u32 *record;
 
-    record = (u32 *)func_00314B80(work, scriptId);
+    record = (u32 *)ptyGetProfileRecordPointer(work, scriptId);
     *record = value;
 }
 
@@ -243,12 +243,12 @@ void ptySetProfileRecordToCap(u32 work, u16 scriptId) {
     u32 *record;
     u32 cap;
 
-    record = (u32 *)func_00314B80(work, scriptId);
-    cap = func_00314690(scriptId);
+    record = (u32 *)ptyGetProfileRecordPointer(work, scriptId);
+    cap = ptyGetProfileRecordCap(scriptId);
     *record = cap;
 }
 
-u32 func_00314728(u8 *work, u32 amount) {
+u32 ptyAddProfileRecordValueClamped(u8 *work, u32 amount) {
     u32 *total;
     u32 limit;
     u8 scriptId;
@@ -256,7 +256,7 @@ u32 func_00314728(u8 *work, u32 amount) {
     total = ptyGetCurrentProfileRecord((s32)work);
     scriptId = ((ScriptFlagWork *)work)->scriptId;
     *total += amount;
-    limit = func_00314690(scriptId);
+    limit = ptyGetProfileRecordCap(scriptId);
     if (limit < *total) {
         *total = limit;
     }
@@ -287,7 +287,7 @@ u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
     return 0;
 }
 
-void func_00314838(void) {
+void scrClearProfileFlagsTable(void) {
     memset(D_00435DD0 + 0x16f10, 0, 0x300);
 }
 
@@ -301,11 +301,11 @@ s32 func_00314990(s32 work, u16 id) {
     return (flags[0x16f10 / 4 + ((ScrVmOperand *)work)->h04 * 12 + word] & (1 << shift)) != 0;
 }
 
-s32 func_00314A08(u8 *work) {
+s32 prfAreAllRequiredProfileFlagsSet(u8 *work) {
     u32 index;
     for (index = 0; index < 0xB0; index++) {
         u16 id = index;
-        if (!(func_00315FC8(id) & 1) && !func_00314990(work, id)) {
+        if (!(scrGetEntryRequirementFlags(id) & 1) && !func_00314990(work, id)) {
             return 0;
         }
     }
@@ -322,11 +322,11 @@ s32 func_00314B00(s32 work, u16 id) {
     return (flags[0x16f10 / 4 + ((ScrVmOperand *)work)->h04 * 12 + word] & (1 << (shift + 1))) != 0;
 }
 
-u32 func_00314B78(s32 work) {
+u32 scrGetSelectedScriptEntryId(s32 work) {
     return ((ScriptFlagWork *)work)->scriptId;
 }
 
-u32 func_00314B80(u32 ref, u16 index) {
+u32 ptyGetProfileRecordPointer(u32 ref, u16 index) {
     u32 entry = D_00435DD0 + ((ScrVmOperand *)ref)->h04 * 0x580;
 
     return entry + (index << 3) + 0x17210;
@@ -335,19 +335,19 @@ u32 func_00314B80(u32 ref, u16 index) {
 u32 ptyGetProfileRecordValue(u32 work, u16 scriptId) {
     u32 *record;
 
-    record = (u32 *)func_00314B80(work, scriptId);
+    record = (u32 *)ptyGetProfileRecordPointer(work, scriptId);
     return *record;
 }
 
 u32 *ptyGetCurrentProfileRecord(s32 work) {
-    return (u32 *)func_00314B80(work, func_00314B78(work));
+    return (u32 *)ptyGetProfileRecordPointer(work, scrGetSelectedScriptEntryId(work));
 }
 
 u8 func_00314C10(s32 work) {
     return ((ScriptFlagWork *)work)->scriptId;
 }
 
-u8 func_00314C18(u8 *context, u32 entryId) {
+u8 scrSelectScriptEntryAndInitialize(u8 *context, u32 entryId) {
     ((ScriptFlagWork *)context)->scriptId = entryId;
     func_00314A80(context, (u16)entryId);
     return ((ScriptFlagWork *)context)->scriptId;
@@ -363,7 +363,7 @@ void scrDecodePackedFlagIndex(s32 unused, u32 v, u32 *a, u32 *b) {
     *b = lo << 2;
 }
 
-void func_00314C68(s32 work) {
+void scrClearPackedScriptFlags(s32 work) {
     memset(((ScriptFlagWork *)work)->flagWords, 0, 0x154);
 }
 
@@ -374,7 +374,7 @@ s32 scrSetFlag(u8 *work, u16 index) {
     return 1;
 }
 
-void func_00314CE8(u8 *work, u16 id) {
+void scrRemoveAvailableSkillFlagAndSlot(u8 *work, u16 id) {
     u32 word, shift;
     u32 status = ptyGetSkillNibbleState(work, id);
     if (status == 1) {
@@ -386,7 +386,7 @@ void func_00314CE8(u8 *work, u16 id) {
     }
 }
 
-void func_00314D90(void) {
+void scrResetAndSetPairedGlobalFlags(void) {
     u32 first;
     s32 last;
 
@@ -431,7 +431,7 @@ void scrClearSecondaryScriptFlag(u8 *work, u16 index) {
     ((ScriptFlagWork *)work)->flagWords[word] &= ~(4U << shift);
 }
 
-void func_00314F90(u8 *work) {
+void scrClearAllSecondaryScriptFlags(u8 *work) {
     s32 index = 0;
     do {
         scrClearSecondaryScriptFlag(work, (u16)index);
@@ -524,7 +524,7 @@ u8 func_003151D0(u16 scriptId) {
     return D_00401324[scriptId * 36];
 }
 
-u16 func_003151F8(u16 scriptId) {
+u16 prfGetRequiredProfileLevel(u16 scriptId) {
     return *(u16 *)((u8 *)D_00401326 + scriptId * 36);
 }
 
@@ -532,7 +532,7 @@ u8 func_00315220(u16 scriptId) {
     return D_00401325[scriptId * 36];
 }
 
-u32 func_00315248(u16 id, s32 sub) {
+u32 prfGetIndexedProfileByte(u16 id, s32 sub) {
     return D_0040132C[sub + id * 36];
 }
 
@@ -540,7 +540,7 @@ u32 scrCallIfOperandReady(u8 *operand, s32 value) {
     s32 selected = func_00314C10((s32)operand);
 
     if (func_00314C10((s32)operand)) {
-        return func_00315248((u16)selected, value);
+        return prfGetIndexedProfileByte((u16)selected, value);
     }
 }
 
@@ -557,15 +557,15 @@ u32 func_00315318(void) {
 
 s32 ptyCheckLevelAtLeastProfileParam7b6(u8 *work, u16 scriptId) {
     s32 current = ((ScrVmOperand *)work)->level;
-    if (current < (s32)func_003151F8(scriptId)) return 0;
+    if (current < (s32)prfGetRequiredProfileLevel(scriptId)) return 0;
     return 1;
 }
 
-void func_00315350(u32 unused0, u32 unused1, u32 output) {
+void scrClearPairedEntryOutput(u32 unused0, u32 unused1, u32 output) {
     memset(output, 0, 8);
 }
 
-u8 func_00315370(s32 work, u16 id) {
+u8 scrIsSelectedScriptEntryId(s32 work, u16 id) {
     return ((ScriptFlagWork *)work)->scriptId == id;
 }
 
@@ -714,11 +714,11 @@ void func_00315FA0(u32 context, u32 value, u16 id) {
     func_00315C68(context, 0, value, id, 0);
 }
 
-u32 func_00315FC8(u16 index) {
+u32 scrGetEntryRequirementFlags(u16 index) {
     return *(u32 *)D_00401320[index];
 }
 
-u32 func_00315FF0(u16 index) {
+u32 scrGetEntryState(u16 index) {
     return D_00402BE0[index].state;
 }
 
@@ -750,14 +750,14 @@ void sdfSetAllFlagsFromTable(void) {
     } while (index++ >= 0);
 }
 
-ScriptEntry44 *func_003162D8(u16 id) {
+ScriptEntry44 *scrGetEntryDescriptor(u16 id) {
     return &D_00402BE0[id];
 }
 
 void scrSetEntryFlag(u32 context, u16 entryId, u32 bit) {
     ScriptFlagEntry *entry;
     if (bit < 16) {
-        entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+        entry = (ScriptFlagEntry *)ptyGetProfileRecordPointer(context, entryId);
         entry->flags |= 1 << bit;
     }
 }
@@ -765,7 +765,7 @@ void scrSetEntryFlag(u32 context, u16 entryId, u32 bit) {
 void scrClearEntryFlag(u32 context, u16 entryId, u32 bit) {
     ScriptFlagEntry *entry;
     if (bit < 16) {
-        entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+        entry = (ScriptFlagEntry *)ptyGetProfileRecordPointer(context, entryId);
         entry->flags &= ~(1 << bit);
     }
 }
@@ -774,16 +774,16 @@ s32 scrTestEntryFlag(u32 context, u16 entryId, u32 bit) {
     if (bit >= 16) {
         return 0;
     }
-    return (((ScriptFlagEntry *)func_00314B80(context, entryId))->flags & (1 << bit)) != 0;
+    return (((ScriptFlagEntry *)ptyGetProfileRecordPointer(context, entryId))->flags & (1 << bit)) != 0;
 }
 
 void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags) {
-    ScriptFlagEntry *entry = (ScriptFlagEntry *)func_00314B80(context, entryId);
+    ScriptFlagEntry *entry = (ScriptFlagEntry *)ptyGetProfileRecordPointer(context, entryId);
     entry->flags = (entry->flags & 0xFFFF0000) | lowFlags;
 }
 
 u16 scrGetEntryLowFlags(u32 context, u16 entryId) {
-    return *(u16 *)&((ScriptFlagEntry *)func_00314B80(context, entryId))->flags;
+    return *(u16 *)&((ScriptFlagEntry *)ptyGetProfileRecordPointer(context, entryId))->flags;
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
@@ -839,11 +839,11 @@ INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316680);
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316C88);
 
-float func_00316DD0(ScrVmOperand *op) {
+float scrGetOperandFloatValue(ScrVmOperand *op) {
     return op->f50;
 }
 
-void func_00316DD8(ScrVmOperand *op, float value) {
+void scrSetOperandFloatValue(ScrVmOperand *op, float value) {
     op->f50 = value;
 }
 

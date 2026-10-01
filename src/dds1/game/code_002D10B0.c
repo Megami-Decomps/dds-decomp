@@ -40,7 +40,7 @@ extern u32 D_003BD2F8;
 void *func_002CFEB8(s32 size);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
-void func_002D1B90(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
@@ -190,11 +190,11 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1AB8);
+INCLUDE_ASM(const s32, "game/code_002D10B0", sdfCoalesceUnusedTextureBlocks);
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B28);
 
-void func_002D1B90(void *arg0) {
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0) {
     SdfTexHead *node = (SdfTexHead *)arg0;
     s32 state;
 
@@ -203,10 +203,10 @@ void func_002D1B90(void *arg0) {
     }
     state = func_00312C08();
     node->unk8 = NULL;
-    func_002D1AB8(node);
+    sdfCoalesceUnusedTextureBlocks(node);
     if (node->next != NULL) {
         if (((SdfTexHead *)node->next)->unk8 == NULL) {
-            func_002D1AB8((SdfTexHead *)node->next);
+            sdfCoalesceUnusedTextureBlocks((SdfTexHead *)node->next);
         }
     }
     if (state != 0) {
@@ -229,7 +229,7 @@ void sdfTexInitializeLists(void) {
     head->unkC = NULL;
     D_003BD9E0 = head;
     D_003BD9E4 = head;
-    sdfInitializeSynchronizedRequest(&D_003BD9E8, func_002D1B90);
+    sdfInitializeSynchronizedRequest(&D_003BD9E8, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
@@ -257,11 +257,11 @@ SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     return node;
 }
 
-SdfTexHead *func_002D1D10(void) {
+SdfTexHead *sdfGetTextureListHead(void) {
     return D_003BD9E0;
 }
 
-SdfTexHead *func_002D1D18(void) {
+SdfTexHead *sdfGetTextureBlockListHead(void) {
     return D_003BD9E4;
 }
 

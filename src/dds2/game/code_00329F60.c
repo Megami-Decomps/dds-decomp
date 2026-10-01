@@ -16,7 +16,7 @@ typedef struct SdfTexBlock {
 } SdfTexBlock;
 
 extern void sdfReleaseChipBlock();
-s32 func_0032A968(SdfTexBlock *block);
+s32 sdfCoalesceUnusedTextureBlocks(SdfTexBlock *block);
 
 typedef struct SdfTexReleaseEntry {
     struct SdfTexReleaseEntry *next; /* 0x00 */
@@ -59,7 +59,7 @@ extern SdfTexHead *D_00439140;
 
 void *func_00328D68(s32 size);
 
-s32 func_0032AA40(SdfTexBlock *block);
+s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexBlock *block);
 
 void sdfInitializeSynchronizedRequest(void *request, void (*onComplete)(void *));
 
@@ -213,7 +213,7 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
     return node;
 }
 
-s32 func_0032A968(SdfTexBlock *block) {
+s32 sdfCoalesceUnusedTextureBlocks(SdfTexBlock *block) {
     SdfTexBlock *prev = block->prev;
 
     if (prev != NULL) {
@@ -239,17 +239,17 @@ INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A9D8);
 extern s32 func_0036DE70();
 
 
-s32 func_0032AA40(SdfTexBlock *block) {
+s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexBlock *block) {
     s32 interruptsEnabled;
     SdfTexBlock *next;
 
     if (block != NULL) {
         interruptsEnabled = func_0036DE70();
         block->used = 0;
-        func_0032A968(block);
+        sdfCoalesceUnusedTextureBlocks(block);
         next = block->next;
         if (next != NULL && next->used == 0) {
-            func_0032A968(next);
+            sdfCoalesceUnusedTextureBlocks(next);
         }
         if (interruptsEnabled != 0) {
             EIntr();
@@ -272,7 +272,7 @@ void sdfTexInitializeLists(void) {
     head->unkC = NULL;
     D_00439140 = head;
     D_00439144 = head;
-    sdfInitializeSynchronizedRequest(&D_00439148, func_0032AA40);
+    sdfInitializeSynchronizedRequest(&D_00439148, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
@@ -300,11 +300,11 @@ SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
     return node;
 }
 
-u32 func_0032ABC0(void) {
+u32 sdfGetTextureListHead(void) {
     return D_00439140;
 }
 
-u32 func_0032ABC8(void) {
+u32 sdfGetTextureBlockListHead(void) {
     return D_00439144;
 }
 

@@ -2,7 +2,7 @@
 
 extern void func_002D00B8(void *);
 extern void *func_002D0A80(void *);
-extern void func_002D0A10(void *);
+extern void sdfQueueNonzeroResourceId(void *);
 
 extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
@@ -18,7 +18,7 @@ extern void *func_002CFEB8();
 
 extern u32 D_003BD2CC;
 
-s64 func_002CF530(s64 size) {
+s64 sdfAllocateBlockBySizeThreshold(s64 size) {
     if (size >= 0x401) {
         sdfResourceRetainAddress(func_002D03F8());
     } else {
@@ -43,7 +43,7 @@ void sdfReleaseChipOrRetainedResource(void *data) {
             func_002D00B8(data);
             return;
         }
-        func_002D0A10(func_002D0A80(data));
+        sdfQueueNonzeroResourceId(func_002D0A80(data));
     }
 }
 

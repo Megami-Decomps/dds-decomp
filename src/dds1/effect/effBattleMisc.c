@@ -214,10 +214,10 @@ extern u8 D_00324680[];
 extern u8 D_00324690[];
 extern u8 D_003246A0[];
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
-extern void func_002DD520(void);
+extern void sdfInvertRigidVuTransform(void);
 extern void func_002DD608(f32 value);
 extern void func_002DD968(f32 value);
-extern void func_002DDC50(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* Build a 4x4 basis matrix into `out`: look-at for kinds 4 / sub 9, else a table-driven rotation. */
 void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
@@ -226,7 +226,7 @@ void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
 
     if (param->kind == 4 || param->sub == 9) {
         sdfVuBuildLookAtBasis(D_00324680, D_00324690, D_003246A0);
-        func_002DD520();
+        sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
     } else {
         if (param->kind == 5 || param->kind == 3 || param->sub == 8 || param->sub == 10) {
@@ -237,7 +237,7 @@ void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
         }
         func_002DD608(tilt);
         func_002DD968(angle);
-        func_002DDC50();
+        sdfMultiplyVuMatrixInPlace();
     }
     VU0_STORE_MATRIX(out);
 }

@@ -632,7 +632,7 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
     return loaded != 0 && D_003BC7FC == 1;
 }
 
-void func_0028A288(s32 x, s32 y, u32 first, u32 second) {
+void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 first, u32 second) {
     D_003BD8EC = func_00197760(x << 4, y << 3, 0, first, second, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
     frFontQueueGlyphInSelectedSlot(D_003BD8EC);
@@ -1846,7 +1846,7 @@ s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
 
-u32 func_00290478(void) {
+u32 fileGetLoadSelectionState(void) {
     return D_003BC81C;
 }
 
@@ -2543,7 +2543,7 @@ void fileJobInvokeScaleCallback(FileJob *job, f32 scale) {
     }
 }
 
-void func_002937A0(FileJob *job) {
+void fileDispatchJobTypeCallback(FileJob *job) {
     u16 idx = ((FileJob *)job)->type;
     void (*cb)(void *) = D_0037E14C[idx].cb20;
     if (cb != NULL) {

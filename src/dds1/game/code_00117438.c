@@ -140,7 +140,7 @@ u32 func_00117650(EvtScaledValue *value) {
 }
 
 /* Load the vector at the scaled value's +0x18 pointer into VF10. */
-void func_00117658(EvtScaledValue *value) {
+void evtLoadValueVectorIntoVu(EvtScaledValue *value) {
     void *vec = (void *)func_00117650(value);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
@@ -202,7 +202,7 @@ void evtResetWorldAndProfileRuntime(void) {
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
-    func_001ACCF0();
+    btlClearSharedBattleStateWords();
 }
 
 void func_00117808(void) {
@@ -225,7 +225,7 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 func_00118140(s64 expectedValue) {
+u8 scrIsCurrentWorkTask(s64 expectedValue) {
     s64 currentValue;
 
     currentValue = scrGetWorkTaskHandle();

@@ -551,7 +551,7 @@ void effPCPThunderFree4(EffPCPThunderWorkB *work) {
     func_003297C8(work->unk64);
 }
 
-void func_0016DD58(u8 *p, void *src) {
+void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
     __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
     __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
     __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");

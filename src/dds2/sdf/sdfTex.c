@@ -7,7 +7,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfTex *D_004389F8;
 
-void func_0032AA40(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 void sdfReleaseChipBlock(void *arg0);
 
@@ -55,9 +55,9 @@ void sdfTexRelease(SdfTex *texture) {
     SdfTex *prev;
 
     if (texture->reference->unk0 == NULL) {
-        func_0032AA40(texture->primaryResource);
+        sdfUpdateTextureHeadsWithInterruptsMasked(texture->primaryResource);
     }
-    func_0032AA40(texture->secondaryResource);
+    sdfUpdateTextureHeadsWithInterruptsMasked(texture->secondaryResource);
     sdfReleaseChipBlock(texture->unk28);
     sdfReleaseChipBlock(texture->unk2C);
     next = texture->next;

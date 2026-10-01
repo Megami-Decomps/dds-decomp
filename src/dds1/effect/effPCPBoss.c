@@ -20,7 +20,7 @@ extern u32 func_001619E8(void);
 extern u32 func_00161860(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
-extern void func_002DD520(void);
+extern void sdfInvertRigidVuTransform(void);
 extern void effParamWorkCallback0(EffParamWork *handle, void *vec);
 extern void effParamWorkCallback2(EffParamWork *handle, void *matrix);
 extern void effParamWorkCallback3(EffParamWork *handle, u32 value);
@@ -133,16 +133,16 @@ extern void func_0015D078(u32 system, u32 value);
 extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern EffBossRecords *func_0016FB08(u32 cellCount);
-extern u32 func_0016FF08(EffBossRecords *records, s32 index);
-extern EffBossIndex *func_0016FF20(EffBossRecords *records, s32 index);
+extern u32 effGetIndexedEffectGroupRecord(EffBossRecords *records, s32 index);
+extern EffBossIndex *effGetIndexedEffectGroupIndexEntry(EffBossRecords *records, s32 index);
 extern void effSetVectorIncrementBits(EffBossRecords *records, u32 bits);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 extern f32 D_003B9308;
 extern void func_00184630(EffBossWork *work);
-extern EffBossWork *func_00184A08(EffBossWork *src);
-extern void func_0016FC28(EffBossRecords *records);
+extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
+extern void effReleaseRecordGroupAssetAndHandle(EffBossRecords *records);
 extern void func_002D0918(u32 handle);
 extern void parReleaseCellSystem(u32 system);
 
@@ -184,7 +184,7 @@ void effPCPBossApplyTwoBlocks(void *data) {
     effBossCreate(firstBlock, secondBlock);
 }
 
-EffBossWork *func_00184A08(EffBossWork *src) {
+EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src) {
     EffBossWork *work;
 
     work = func_002CFEB8(sizeof(EffBossWork));
@@ -201,7 +201,7 @@ void effBossDestroy(EffBossWork *work) {
 
     if (work->groupsHandle != 0) {
         for (i = 0; i < work->groupCount; i++) {
-            func_0016FC28(work->groups[i].records);
+            effReleaseRecordGroupAssetAndHandle(work->groups[i].records);
         }
         func_002D0918(work->groupsHandle);
     }
@@ -277,7 +277,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
         }
         direction = work->parameterVector;
         sdfVuBuildLookAtBasis(work, direction, D_003556C0);
-        func_002DD520();
+        sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
         VU0_STORE_MATRIX(matrix);
     } else {
@@ -485,7 +485,7 @@ EffBossWork *effBossCloneWithGroups(EffBossWork *src) {
     EffBossWork *work;
     u32 i;
 
-    work = func_00184A08(src);
+    work = effBossCloneWorkAndParameters(src);
     for (i = 0; i < work->groupCount; i++) {
         work->groups[i].unk1C = src->groups[i].unk1C;
         work->groups[i].unk18 = src->groups[i].unk18;

@@ -12,7 +12,7 @@ extern s32 func_002CFEB8(s32);
 void func_002DD038(void) {
 }
 
-s32 func_002DD040(void *object, s32 command) {
+s32 sdfDispatchMotionCommand(void *object, s32 command) {
     return D_00398360[(u16)command](object, command);
 }
 
@@ -40,7 +40,7 @@ typedef struct MotionBlend {
 
 extern void func_002DB7C8(void *, void *);
 
-s32 func_002DD0C8(s32 source, s32 unused, s32 entryIndex) {
+s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
     s32 entry = func_002CFEB8(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_00398368, entryIndex);
@@ -90,7 +90,7 @@ typedef struct PoseCopy {
     Block16 dst;
 } PoseCopy;
 
-void func_002DD348(PoseCopy *pose) {
+void sdfCopyPoseRecord(PoseCopy *pose) {
     pose->dst = *pose->src;
 }
 
@@ -164,13 +164,13 @@ void sdfSetAlternateIdentityMatrixVU(void) {
 }
 
 /* libvu0: sceVu0UnitMatrix */
-void func_002DD4A8(void *dst) {
+void sdfWriteIdentityMatrixToMemory(void *dst) {
     EE_MMI_UNIT_MATRIX(dst);
 }
 
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
-void func_002DD4D8(void) {
+void sdfTransposeVuMatrix(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "qmfc2.ni $8, vf28\n"
@@ -193,7 +193,7 @@ void func_002DD4D8(void) {
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
-void func_002DD520(void) {
+void sdfInvertRigidVuTransform(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "qmfc2.ni $8, vf28\n"
@@ -219,7 +219,7 @@ void func_002DD520(void) {
 }
 
 /* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
-void func_002DD578(void) {
+void sdfInvertScaledVuTransform(void) {
     __asm__ volatile (
         ".set noreorder\n"
         "vmula.xyz ACC, vf28, vf28\n"

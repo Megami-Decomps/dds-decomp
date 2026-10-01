@@ -235,7 +235,7 @@ extern void func_0014BF98(s32 handle);
 
 extern s32 fldFindEffectByName(char *str);
 
-extern s32 func_0014E620(void);
+extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern void *func_00328D68(s32 size);
 
@@ -342,7 +342,7 @@ extern void func_00149CE0(void);
 
 extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
-extern s32 func_0013F1B8(void);
+extern s32 fldGetCurrentSceneSelectionId(void);
 
 typedef struct {
     s32 *resource;
@@ -521,7 +521,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
 
 extern u8 fldGetCampSceneControlMode(void);
 
-extern u8 func_001275D0(void);
+extern u8 fldGetSceneReadyOrPendingState(void);
 
 extern s32 fileMenuTaskExists(void);
 
@@ -531,7 +531,7 @@ s32 fldFieldTaskUpdate(void) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
-    if (func_001275D0() != 0) {
+    if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -544,7 +544,7 @@ s32 fldFieldTaskUpdate(void) {
         return 0;
     }
     if (D_00435EE0 != -0x3e7) {
-        func_0014D838(0x80, 0, 0);
+        fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_0014B0F8(0);
     }
@@ -1065,7 +1065,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (D_00436278 != 0) {
-        func_003298C0(D_00436278);
+        sdfQueueNonzeroResourceId(D_00436278);
     }
     D_00436278 = 0;
     D_00436270 = 0;
@@ -1696,7 +1696,7 @@ void fldReleaseTextureSlots(void) {
         if (D_003A8E50[i] != 0) {
             effDestroyNode(D_003A8E50[i]);
             D_003A8E50[i] = 0;
-            func_003298C0(D_003A8E30[i]);
+            sdfQueueNonzeroResourceId(D_003A8E30[i]);
             D_003A8E30[i] = 0;
             D_003A8E40[i] = 0;
         }
@@ -1719,7 +1719,7 @@ void fldReleaseIndexedResourceEffect(void) {
     if (D_0043632C != 0) {
         effDestroyNode(D_0043632C);
         D_0043632C = 0;
-        func_003298C0(D_00436324);
+        sdfQueueNonzeroResourceId(D_00436324);
         D_00436324 = 0;
         D_00436328 = 0;
     }
@@ -2073,7 +2073,7 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014D838);
+INCLUDE_ASM(const s32, "game/code_001442D0", fldDrawAnimatedFieldBanner);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DB50);
 
@@ -2087,7 +2087,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldGetCampSceneControlMode() != 0) {
             return;
         }
-        if (func_001275D0() != 0) {
+        if (fldGetSceneReadyOrPendingState() != 0) {
             return;
         }
         if (D_00436344 != 0) {
@@ -2171,8 +2171,8 @@ s32 fldFindEffectByName(char *name) {
     return 0;
 }
 
-s32 func_0014E620(void) {
-    s32 index = func_0013F1B8();
+s32 fldGetCurrentSceneSelectionResource(void) {
+    s32 index = fldGetCurrentSceneSelectionId();
     if (index >= 0) {
         return D_0044FFB0[index].resource[1];
     }
@@ -2409,13 +2409,13 @@ void fldLoadWeatherEffects(void) {
 
     handle = func_00343ED0("/fld/f/bin/d2_hunt1.tmx", &data, 0);
     D_004363AC = func_0032C138(data);
-    func_003298C0(handle);
+    sdfQueueNonzeroResourceId(handle);
     handle = func_00343ED0("/fld/f/bin/d2_hunt2.tmx", &data, 0);
     D_004363B0 = func_0032C138(data);
-    func_003298C0(handle);
+    sdfQueueNonzeroResourceId(handle);
     handle = func_00343ED0("/fld/f/bin/d2_hunt3.tmx", &data, 0);
     D_004363B4 = func_0032C138(data);
-    func_003298C0(handle);
+    sdfQueueNonzeroResourceId(handle);
     D_00436380 = func_00343ED0("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     D_00436388 = func_001579C8(D_00436384);
     D_0043638C = 0;
@@ -2440,13 +2440,13 @@ void fldReleaseWeatherEffects(void) {
     effDestroyNode(D_00436388);
     D_00436388 = 0;
     D_0043638C = 0;
-    func_003298C0(D_00436380);
+    sdfQueueNonzeroResourceId(D_00436380);
     D_00436380 = 0;
     D_00436384 = 0;
     effDestroyNode(D_00436398);
     D_00436398 = 0;
     D_0043639C = 0;
-    func_003298C0(D_00436390);
+    sdfQueueNonzeroResourceId(D_00436390);
     D_00436390 = 0;
     D_00436394 = 0;
 }
@@ -2709,7 +2709,7 @@ void fldFinishDeferredExit(void) {
     if (D_00389770[0x45] == 2) {
         func_0026C900();
         if (!evtGetMessageWindowControlState()) {
-            func_0026C710();
+            evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             func_00125F58();
             D_00389770[0x45] = 0;
@@ -2761,7 +2761,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_001514F8);
 
 void fldReleaseTargetGuideResource(void) {
     if (D_004363C4 != 0) {
-        func_003298C0(D_004363C4);
+        sdfQueueNonzeroResourceId(D_004363C4);
         D_004363C4 = 0;
         D_004363C8 = 0;
         D_004363CC = 0;
@@ -2827,7 +2827,7 @@ void fldCalcTargetDistanceYaw(f32 *distance, f32 *angle) {
     *angle = yaw;
 }
 
-f32 func_00151918(f32 cur, f32 target, f32 speed, f32 minStep) {
+f32 fldApproachTargetAngleWithMinimumStep(f32 cur, f32 target, f32 speed, f32 minStep) {
     f32 delta = fldAngleDifference(cur, target);
     f32 step = delta / speed;
 

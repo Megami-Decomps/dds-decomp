@@ -283,7 +283,7 @@ u32 func_0020D548(void) {
     return 7;
 }
 
-s32 func_0020D550(s32 battler, s32 action) {
+s32 btlGetEnabledEnemyActionResponse(s32 battler, s32 action) {
     BtlUnit *unit = (BtlUnit *)battler;
     if ((unit->flags & 0x400) == 0) {
         return -1;
@@ -311,7 +311,7 @@ s32 func_0020D598(s32 battler, s32 action) {
     return -1;
 }
 
-s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
+s32 btlOffsetSpecialTargetPositionForAction(BtlUnit *unit, s32 unused1, s32 unused2) {
     BtlTask *link = unit->task;
     BtlUnit *other;
     f32 pos[4] __attribute__((aligned(16)));
@@ -334,10 +334,10 @@ s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
     return 0;
 }
 
-extern s32 func_0020D5E0();
+extern s32 btlOffsetSpecialTargetPositionForAction();
 
 s64 func_0020D668(void *unit, s8 unused1, s8 unused2) {
-    return func_0020D5E0(unit, unused1, unused2);
+    return btlOffsetSpecialTargetPositionForAction(unit, unused1, unused2);
 }
 
 s32 func_0020D690(s32 battler, s32 action) {

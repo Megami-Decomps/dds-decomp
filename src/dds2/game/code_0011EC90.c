@@ -12,7 +12,7 @@ extern s32 dds3FindEntryIndex(s32 rosterIndex);
 
 extern s32 scrSetFlag(u8 *work, u16 index);
 
-extern void func_00314F90(u8 *work);
+extern void scrClearAllSecondaryScriptFlags(u8 *work);
 
 extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
 
@@ -88,7 +88,7 @@ s32 func_0011ED88(void) {
         u8 *entry = (u8 *)(D_00435DD0 + index * 0x1C4 + 0xA60);
 
         scrSetFlag(entry, b);
-        func_00314F90(entry);
+        scrClearAllSecondaryScriptFlags(entry);
         scrSetSecondaryScriptFlag(entry, b);
         result = 1;
     }
@@ -132,7 +132,7 @@ void dds3UnlinkNodeFromList(s32 *list, s32 node, s32 linkOffset) {
     }
 }
 
-void func_0011EE98(Dds3Node *node, Dds3NodeOps *ops) {
+void dds3RegisterOwnedIntrusiveNode(Dds3Node *node, Dds3NodeOps *ops) {
     dds3AppendIntrusiveNode((s32 *)&D_00438EB0, (s32)node, 0);
     node->ops = ops;
 }
@@ -142,7 +142,7 @@ void dds3DestroyLinkedNode(Dds3Node *node) {
     node->ops->destroy((s32)node);
 }
 
-void func_0011EF18(void) {
+void dds3DestroyAllOwnedIntrusiveNodes(void) {
     Dds3Node *current;
     while ((current = (Dds3Node *)D_00438EB0) != 0) {
         dds3DestroyLinkedNode(current);
@@ -175,7 +175,7 @@ void dds3UpdateLinkedNodes(void) {
     }
 }
 
-void func_0011EFE0(GlyphOwner *owner) {
+void frFontSubmitAndFreeGlyphOwner(GlyphOwner *owner) {
     frFontQueueGlyphInSelectedSlot(owner->glyph);
     sdfReleaseChipBlock(owner);
 }
@@ -194,7 +194,7 @@ s32 dds3CreateFontNode(s32 size, s32 a1, s32 a2) {
     frFontSetContextPair((void *)obj, size, a1);
     node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
     *(s32 *)((u8 *)node + 0x10) = obj;
-    func_0011EE98(node, &D_00435EA8);
+    dds3RegisterOwnedIntrusiveNode(node, &D_00435EA8);
     return (s32)node;
 }
 

@@ -101,7 +101,7 @@ extern void func_002E7F20(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
 extern void effObjAddInnerFirstVec(void *obj, void *vec);
-extern void func_00220600(EvtUnit *unit);
+extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 func_00222498(EvtUnit *unit, f32 *dir, f32 scale);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
@@ -335,7 +335,7 @@ void func_00222278(EvtUnit *unit, u16 value)
     unit->unkBC = value;
 }
 
-void func_00222280(u8 *work, f32 value) {
+void evtSetTransitionMotionScale(u8 *work, f32 value) {
     ((EvtTransitionWork *)work)->motionScale = value;
 }
 
@@ -436,7 +436,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 
     func_00222498(unit, unit->vec70, unit->unkB6 * 0.01f);
     if (unit->unkB6 != 0) {
-        func_00220600(unit);
+        evtComputePlanarTargetDirectionVu(unit);
         obj = unit->effObj;
     } else {
         VU0_LOAD_VF(vf10, unit->vec70);

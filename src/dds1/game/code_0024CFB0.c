@@ -82,7 +82,7 @@ typedef struct PartySlotHeader {
 extern SceneFlagEntry D_0036ABB8[4];
 extern PartyFlagPair D_0036ABF8[];
 
-void func_0024CFB0(s32 arg0) {
+void evtCloseDisplayChannelAndEnsureMessageWindow(s32 arg0) {
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(*(u32 *)(arg0 + 0x60));
 }
@@ -102,7 +102,7 @@ s32 dspStartFlagEvent(s32 context) {
             }
             for (i = 0; i < sizeof(D_0036ABB8) / sizeof(D_0036ABB8[0]); i++) {
                 if (mdlFlagTest(D_0036ABB8[i].needFlag) != 0 && mdlFlagTest(D_0036ABB8[i].doneFlag) == 0) {
-                    func_0024CFB0(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0024DD90(0, D_003BAA84 + D_0036ABB8[i].areaIndex * 0x19);
                     func_0024DD90(1, D_003BAA78 + D_0036ABB8[i].nameIndex * 0x13);
@@ -116,7 +116,7 @@ s32 dspStartFlagEvent(s32 context) {
                 slot = (PartySlotHeader *)(D_003BAA00 + i * 0x1A4 + 0xA60);
                 if ((slot->flags & 1) != 0 && mdlFlagTest(D_0036ABF8[slot->id].needFlag) != 0
                     && mdlFlagTest(D_0036ABF8[slot->id].doneFlag) == 0) {
-                    func_0024CFB0(context);
+                    evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
                     func_0024DD90(0, D_003BAA70 + slot->id * 0x11);
                     dspStartEntry(4);
@@ -266,7 +266,7 @@ void evtResetDrawTransitions(void) {
     func_0018F6E8();
 }
 
-void func_0024D738(void) {
+void evtShutdownStageAndResetDrawTransitions(void) {
     evtCommandShutdownStage();
     evtResetDrawTransitions();
 }
@@ -404,7 +404,7 @@ s32 evtCaptureMessageWindowSoundMode(s32 arg0) {
     return 1;
 }
 
-void func_0024DAE8(s32 arg0) {
+void evtSetMessageWindowOptionWhenOpen(s32 arg0) {
     if (D_003BC408 >= 0) {
         D_003BC414 = arg0;
     }
@@ -421,7 +421,7 @@ s32 sndGetActiveMode(void) {
     return itfPanelGetPairSecond(D_003BC408);
 }
 
-s8 func_0024DB40(void) {
+s8 evtGetCapturedMessageWindowSoundMode(void) {
     return D_003BC415;
 }
 
@@ -442,7 +442,7 @@ u32 evtCleanupMessageWindow(s32 notify) {
     return result;
 }
 
-void func_0024DBB0(void) {
+void evtFinishMessageWindowAndNotify(void) {
     evtCleanupMessageWindow(1);
 }
 
@@ -540,7 +540,7 @@ s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
     return 1;
 }
 
-u32 func_0024DF20(s32 index) {
+u32 evtGetBoundedDisplayValue(s32 index) {
     index = (index < 0x10) ? index : 0xf;
     return D_003D8100[index];
 }

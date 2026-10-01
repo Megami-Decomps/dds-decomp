@@ -28,7 +28,7 @@ extern f32 func_00353040(f32 angle);
 extern f32 func_00353140(f32 angle);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-void func_00336768(const RwV3d* axis, f32 angle)
+void sdfBuildVuRotationFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_00336638(angle, axis, &matrix);
@@ -42,7 +42,7 @@ INCLUDE_ASM(const s32, "game/code_00336768", func_00336818);
 INCLUDE_ASM(const s32, "game/code_00336768", func_00336898);
 
 /* Build an axis-angle matrix in the VU0 secondary matrix registers. */
-void func_00336918(const RwV3d* axis, f32 angle)
+void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d* axis, f32 angle)
 {
     RwMatrix matrix;
     func_00336638(angle, axis, &matrix);
@@ -52,10 +52,10 @@ void func_00336918(const RwV3d* axis, f32 angle)
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void func_00336898(f32 angle);
-extern void func_00336B00(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
-void func_00336948(f32 angle)
+void sdfRotateVuMatrixAboutX(f32 angle)
 {
     f32 c = func_00353040(angle);
     f32 s = func_00353140(angle);
@@ -76,7 +76,7 @@ void func_00336948(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
-void func_003369A8(f32 angle)
+void sdfRotateVuMatrixAboutY(f32 angle)
 {
     f32 c = func_00353040(angle);
     f32 s = func_00353140(angle);
@@ -97,7 +97,7 @@ void func_003369A8(f32 angle)
 }
 
 /* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
-void func_00336A08(f32 angle)
+void sdfRotateVuMatrixAboutZ(f32 angle)
 {
     f32 c = func_00353040(angle);
     f32 s = func_00353140(angle);
@@ -122,13 +122,13 @@ void vu0RotMatrixXYZFromVec3(const RwV3d *rot)
 {
     func_003364B8(rot->x);
     func_00336818(rot->y);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
     func_00336898(rot->z);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
-void func_00336AA8(void)
+void sdfComposeVuMatrixFromRegisters(void)
 {
     VU0_APPLY_MATRIX(vf2, vf24);
     VU0_APPLY_MATRIX(vf3, vf25);
@@ -141,7 +141,7 @@ void func_00336AA8(void)
 
 /* Persona 4 func_004bd450 @ 004BD450 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
-void func_00336B00(void)
+void sdfMultiplyVuMatrixInPlace(void)
 {
     __asm__ volatile (
         ".set noreorder                              \n"

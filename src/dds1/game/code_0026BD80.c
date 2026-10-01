@@ -130,13 +130,13 @@ s64 func_0026C1F8(s32 parameter) {
     return mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
-extern void func_002C0A48(s32, s32);
-extern void func_002C0950(s32, s32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
+extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
 extern s32 func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
 
 s64 func_0026C230(s32 parameter) {
-    func_002C0A48(0x44, 0x3E);
-    func_002C0950(0x3000D, 0x3E);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
+    sdfSubmitGsTestOneRegisterPacket(0x3000D, 0x3E);
     return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
@@ -187,7 +187,7 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CD88);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026D108);
 
-void func_0026D138(void) {
+void mnuClearGlobalMenuStateFields(void) {
     MenuState *state = (MenuState *)D_003BC5D0;
 
     state->word34 = 0;

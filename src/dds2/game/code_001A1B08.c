@@ -193,7 +193,7 @@ void itfPanelSetVertexPairs(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1)
     pair[1].y = y1;
 }
 
-void func_001A1FB0(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x140);
 
     panelSetVec4(vec, red, green, blue, 1);
@@ -269,7 +269,7 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2340);
 
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2450);
 
-void func_001A2598(PanelObj *panel, u64 command) {
+void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;
 
     colors->unkC = panel->unk38;

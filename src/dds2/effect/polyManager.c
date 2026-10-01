@@ -45,11 +45,11 @@ typedef struct {
     PolyStrip *strip;   /* 0xDC */
 } PolyScaledStripNode;
 
-extern f32 func_003407A0(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
-extern void func_00336B00(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 void effPolyDestroyWork(u32 work) {
     parReleaseCellSystem(*(u32 *)((s32)work + 0xdc));
@@ -153,7 +153,7 @@ void polyBandLayoutRing(PolyBand *obj, s32 index, f32 width)
     angle = 0.0f;
     VU0_LOAD_VF(vf12, obj->origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = func_003407A0(angle);
+        dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[1] = 0;
         dir[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, dir);
@@ -218,7 +218,7 @@ void polyStripBuildScaledRing(PolyRing2 *obj, s32 index) {
     VU0_LOAD_MATRIX(obj->matrix);
     angle = 0.0f;
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = func_003407A0(angle);
+        dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[1] = 0;
         dir[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, dir);
@@ -255,7 +255,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001661C8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166350);
 
-void func_00166478(s32 work) {
+void polyReleaseNodeCellSystemAndBuffer(s32 work) {
     parReleaseCellSystem(*(u32 *)(work + 0xe0));
     func_003297C8(*(u32 *)(work + 0xe8));
 }
@@ -327,19 +327,19 @@ void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
     pairs = strip->count >> 1;
     func_003364B8(rec->unk0C);
     func_00336818(rec->unk10);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
     rec->unk10 += obj->unkE4 * (3.14159265f / 180.0f);
     angle = rec->unk04;
     rec->unk04 = angle + rec->unk08;
     step = 3.14159265f * 2.0f / (f32)obj->segments;
     VU0_LOAD_MATRIX_B(obj->matrix);
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
     VEC3_SPLAT(wide, angle);
     VEC3_SPLAT(narrow, angle + obj->unkC8);
     angle = 0.0f;
     VU0_LOAD_VF(vf12, obj->origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = func_003407A0(angle);
+        dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[1] = 0;
         dir[2] = sdfSinPoly(angle);
         VU0_LOAD_VF(vf10, dir);
@@ -361,7 +361,7 @@ void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
-void func_00166EA0(float factor, PolyTransform *transform) {
+void polyScaleNodeFloatingParameters(float factor, PolyTransform *transform) {
     transform->scaleCC = transform->scaleCC * factor;
     transform->scaleD0 = transform->scaleD0 * factor;
 }

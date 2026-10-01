@@ -149,7 +149,7 @@ SdfResource *sdfFindResourceById(s32 id) {
 extern SdfSynchronizedRequest D_00439150;
 extern void sdfTexRelease();
 
-void func_0032C448(void) {
+void sdfRegisterTextureReleaseRequestHandler(void) {
     sdfInitializeSynchronizedRequest(&D_00439150, (u32)sdfTexRelease);
 }
 

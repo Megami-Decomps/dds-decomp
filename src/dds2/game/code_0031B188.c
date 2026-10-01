@@ -43,12 +43,12 @@ extern u32 mdlGetBroadcastValue(u32 model);
 
 extern void func_00328160(f32 *out);
 
-extern void func_00232AD0(u32 model);
+extern void mdlUpdateContextRotationBasisFromQuaternion(u32 model);
 
 void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
 
-void func_0031C578(s32 node);
+void mnuDeactivateModelNode(s32 node);
 
 extern u8 *func_00232198(s32 first, s32 second);
 extern void mdlAddEntryFlaggedEx(u8 *model, s32 entry, s32 flags, f32 x, f32 y);
@@ -134,7 +134,7 @@ void mnuClearNodeRecords(s32 *list) {
     }
 }
 
-void func_0031B668(s32 *list) {
+void mnuClearAllNodeBroadcastFlags(s32 *list) {
     u8 *node = (u8 *)list[0];
     s32 index = 0;
     if (list[1] > 0) {
@@ -146,7 +146,7 @@ void func_0031B668(s32 *list) {
     }
 }
 
-void func_0031B6D0(s32 *list) {
+void mnuDestroyNodeJobQueues(s32 *list) {
     u8 *node = (u8 *)list[0];
     s16 index = 0;
 
@@ -176,7 +176,7 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 
 /* Resolves a model from a resource and releases its temporary resource data. */
 
-u32 func_0031BBB0(u32 *owner, u32 resource) {
+u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
     u32 data = func_00343ED0(resource, &handle, &other);
@@ -190,12 +190,12 @@ INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BC10);
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BDE8);
 
-void func_0031BFA0(void) {
+void mnuPauseEffectQueueFrameAdvance(void) {
     fileSetRenderFlag(2);
 }
 
 
-void func_0031BFC0(void) {
+void mnuResumeEffectQueueFrameAdvance(void) {
     fileClearRenderFlag(2);
 }
 
@@ -218,19 +218,19 @@ void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w) {
     }
 }
 
-void func_0031C1A0(s32 *list) {
+void mnuDeactivateAllModelNodes(s32 *list) {
     u8 *node = (u8 *)list[0];
     s32 index = 0;
     if (list[1] > 0) {
         do {
-            func_0031C578((s32)node);
+            mnuDeactivateModelNode((s32)node);
             node += 0x50;
             index++;
         } while (index < list[1]);
     }
 }
 
-void func_0031C208(s32 *list) {
+void mnuDestroyAllModelNodeContexts(s32 *list) {
     u8 *node = (u8 *)list[0];
     s16 index = 0;
     if (list[1] > 0) {
@@ -272,7 +272,7 @@ u8 *mnuAcquireUnusedModelNode(u32 *group) {
     return 0;
 }
 
-void func_0031C3C8(s32 *list, s8 value) {
+void mnuSetActiveNodeModelVisibility(s32 *list, s8 value) {
     u8 *node = (u8 *)list[0];
     s32 index = 0;
 
@@ -281,7 +281,7 @@ void func_0031C3C8(s32 *list, s8 value) {
             u32 active = ((MnuModelNode *)node)->flags & 1;
 
             if (active == 1) {
-                func_0031C900(node, value);
+                mnuSetModelNodeVisibility(node, value);
             }
             index++;
             node += 0x50;
@@ -290,7 +290,7 @@ void func_0031C3C8(s32 *list, s8 value) {
 }
 
 /* Set the model Z of every active node. */
-void func_0031C458(MnuNodeList *list, f32 z) {
+void mnuOverrideActiveNodeModelDepth(MnuNodeList *list, f32 z) {
     MnuModelNode *node = list->nodes;
     s32 i;
 
@@ -305,7 +305,7 @@ void func_0031C458(MnuNodeList *list, f32 z) {
 }
 
 /* Restore each active node's model Z from its saved modelZ. */
-void func_0031C4A0(MnuNodeList *list) {
+void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
     MnuModelNode *node = list->nodes;
     s32 i;
 
@@ -329,7 +329,7 @@ void mnuCreateNodeModelEntry(u8 *node, s32 first, s32 second, s32 flag, f32 x, f
     }
 }
 
-void func_0031C578(s32 arg0) {
+void mnuDeactivateModelNode(s32 arg0) {
     MnuModelNode *node = (MnuModelNode *)arg0;
     node->flags = 0;
     *node->model = *node->model | 1;
@@ -361,7 +361,7 @@ void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
 }
 
 /* Translate the primary (0x00) vector and load it into the model. */
-void func_0031C5E8(u8 *node, f32 x, f32 y, f32 z) {
+void mnuTranslateNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     MnuModelNode *n = (MnuModelNode *)node;
 
     n->primary[3] = 0;
@@ -372,7 +372,7 @@ void func_0031C5E8(u8 *node, f32 x, f32 y, f32 z) {
     mdlStorePrimaryVectorVU(n->model);
 }
 
-void func_0031C630(u8 *node) {
+void mnuRefreshNodeSecondaryVector(u8 *node) {
     f32 vec[4];
 
     func_00328160(vec);
@@ -381,7 +381,7 @@ void func_0031C630(u8 *node) {
     ((MnuModelNode *)node)->secondary[2] = vec[2];
     ((MnuModelNode *)node)->secondary[3] = vec[3];
     VU0_LOAD_VF(vf10, node + 0x10);
-    func_00232AD0((u32)((MnuModelNode *)node)->model);
+    mdlUpdateContextRotationBasisFromQuaternion((u32)((MnuModelNode *)node)->model);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
@@ -398,7 +398,7 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
     mdlStoreTertiaryVectorVU(n->model);
 }
 
-void func_0031C888(u8 *node) {
+void mnuBroadcastNodeModelState(u8 *node) {
     mdlBroadcastMasked((u32)((MnuModelNode *)node)->model);
 }
 
@@ -406,13 +406,13 @@ void func_0031C888(u8 *node) {
 void func_0031C8A8(void) {
 }
 
-void func_0031C8B0(u8 *node, u8 value) {
+void mnuSetNodeModelBroadcastByte(u8 *node, u8 value) {
     u32 broadcast = mdlGetBroadcastValue((u32)((MnuModelNode *)node)->model) & 0xFFFFFF;
 
     mdlBroadcastMasked((u32)((MnuModelNode *)node)->model, broadcast | ((u32)value << 24));
 }
 
-void func_0031C900(u8 *node, s8 selector) {
+void mnuSetModelNodeVisibility(u8 *node, s8 selector) {
     MnuModelNode *entry = (MnuModelNode *)node;
     if (selector == 1) {
         *entry->model &= ~1U;

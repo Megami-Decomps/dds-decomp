@@ -188,18 +188,18 @@ INCLUDE_ASM(const s32, "game/code_00176E28", func_00177408);
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177760);
 
-void func_00177880(EffRecordPool *pool) {
+void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
     func_003297C8(pool->buffer);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001778B0);
 
-s32 func_00177B60(EffRecordPool *pool, s32 index) {
+s32 effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index) {
     return pool->recordBase + index * 0x50;
 }
 
-s32 func_00177B78(EffRecordPool *pool, s32 index) {
+s32 effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x14;
 }
 
@@ -217,7 +217,7 @@ void func_00177BA0(u8 *work, f32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00177BA8);
 
-void func_00177CA0(EffRecordPool *pool) {
+void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
     sdfQueueAssetRelease(pool->resource);
     func_003297C8(pool->buffer);
 }
@@ -252,7 +252,7 @@ s32 func_001781A0(EffRecordPool *pool, s32 index) {
 INCLUDE_ASM(const s32, "game/code_00176E28", func_001781B0);
 
 void func_001781F8(void *work) {
-    func_00177880(work);
+    effReleaseRecordGroupAssetAndHandle(work);
 }
 
 INCLUDE_ASM(const s32, "game/code_00176E28", func_00178210);

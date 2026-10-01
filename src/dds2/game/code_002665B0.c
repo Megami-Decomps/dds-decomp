@@ -239,17 +239,17 @@ void mnuReleaseResourceGroup(s32 address) {
 void func_00266928(s32 address, u32 value) {
     MenuResourceGroup *group = (MenuResourceGroup *)address;
     if (group->reducedMode == 0) {
-        func_00304FB0(group->primary);
-        func_00304FB0(group->secondary, value);
-        func_00304FB0(group->tertiary, value);
-        func_00304FB0(group->quaternary, value);
+        effReleaseSlotTextureReferencesAndResetWork(group->primary);
+        effReleaseSlotTextureReferencesAndResetWork(group->secondary, value);
+        effReleaseSlotTextureReferencesAndResetWork(group->tertiary, value);
+        effReleaseSlotTextureReferencesAndResetWork(group->quaternary, value);
         return;
     }
-    func_00304FB0(group->primary);
-    func_00304FB0(group->secondary, value);
+    effReleaseSlotTextureReferencesAndResetWork(group->primary);
+    effReleaseSlotTextureReferencesAndResetWork(group->secondary, value);
 }
 
-void func_002669B0(u32 address) {
+void mnuReleaseResourceGroupTextureHandles(u32 address) {
     func_00266928(address, 0);
 }
 
@@ -408,11 +408,11 @@ void mnuBuildTerminalNodeList(MenuProgressHost *host) {
     mnuRefreshThresholdNodeFlags(host->progressList);
 }
 
-void func_002671E8(MenuProgressHost *host) {
+void mnuReleaseProgressWorkList(MenuProgressHost *host) {
     mnuDestroyListState((s32)host->progressList);
 }
 
-void func_00267200(MenuProgressHost *host) {
+void mnuReleaseSelectedProgressPanel(MenuProgressHost *host) {
     mnuReleaseDualPercentPanel(host->progressList->selected->childPanel);
     func_002B86E8((u32)host->progressList);
 }
@@ -459,7 +459,7 @@ s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback)
     return (s32)list;
 }
 
-void func_00267680(MenuProgressHost *host) {
+void mnuHighlightProgressNodeFromOwnerSelection(MenuProgressHost *host) {
     s32 state = host->state;
     if (state < 2) {
         if (state < 0) {
@@ -473,7 +473,7 @@ void func_00267680(MenuProgressHost *host) {
     }
 }
 
-void func_002676F0(MenuProgressHost *host) {
+void mnuHighlightProgressNodeByMode(MenuProgressHost *host) {
     s32 state = host->state;
     s32 selectedIndex;
     if (state != 0) {
@@ -525,8 +525,8 @@ void mnuTerminalBuildMenus(MenuProgressHost *host) {
     func_002A91A0((u8 *)host + 0xE8);
     mnuCreateThresholdNodePanels(host);
     func_002673B8(host);
-    func_00267680(host);
-    func_002676F0(host);
+    mnuHighlightProgressNodeFromOwnerSelection(host);
+    mnuHighlightProgressNodeByMode(host);
 }
 
 void mnuReleaseWorkResources(u8 *work) {
@@ -538,7 +538,7 @@ void mnuReleaseWorkResources(u8 *work) {
     }
     mnuDestroyThresholdNodePanels((s32)work);
     func_002A9200(work + 0xE8);
-    func_002671E8((s32)work);
+    mnuReleaseProgressWorkList((s32)work);
     mnuDestroyListState((s32)host->secondaryList);
 }
 
@@ -566,7 +566,7 @@ void mnuTerminalFadeOrClose(s32 flag, s32 scene) {
     evtSetBoundedDisplayValue(1, 1);
 }
 
-void func_002679E8(u8 *work) {
+void mnuResetProgressModeFromOwner(u8 *work) {
     MenuProgressHost *host = (MenuProgressHost *)work;
     u8 *owner = (u8 *)host->secondaryList;
     host->state = 0;
@@ -585,7 +585,7 @@ s32 mnuCreateProgressHost(void) {
     return (s32)host;
 }
 
-void func_00267A80(u32 *hostWords) {
+void mnuReleaseStaffAndTitleVisualResources(u32 *hostWords) {
     mnuReleaseStaffMenuTextureHandles(hostWords + 2);
     mnuReleaseTitleEffectSprites(hostWords + 2);
     func_00303D58(hostWords[1]);
@@ -612,7 +612,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00267B40);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 
-void func_00267D30(s32 unused, MenuProgressHost *host) {
+void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
         s32 effect = mnuCreateProfilePanel();
         host->currentEffect = effect;
@@ -629,7 +629,7 @@ s32 func_00267DE0(s32 x, s32 y, s32 mode, MenuProgressHost *host) {
     return mnuDrawAndAdvanceProfilePanel(x, y, mode, host->currentEffect);
 }
 
-s32 func_00267E00(s32 resource, MenuProgressHost *host, s32 mode) {
+s32 mnuDrawLoadedProgressPanels(s32 resource, MenuProgressHost *host, s32 mode) {
     if (host->loadState != 2) {
         return 0;
     }
@@ -710,7 +710,7 @@ void mnuTerminalCreateEffects(MenuSlotState *state) {
     obj->inner->pair->b = 0;
 }
 
-void func_00268090(s32 object) {
+void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     s32 *batch = (s32 *)(object + 0xA8);
     u32 i;
 
@@ -832,7 +832,7 @@ s64 func_00268588(s32 callback) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
-s32 func_002685C0(void) {
+s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     s32 fadeActive = kwlnFadeIsActive();
 
     if (fadeActive != 0) {

@@ -19,10 +19,10 @@ extern u8 D_003CE1A8[];
 extern s32 D_00435E5C;
 extern char D_00437850[];
 extern s32 func_00265038();
-extern s32 func_0026C6A0();
-extern void func_00260380();
+extern s32 evtGetCapturedMessageWindowSoundMode();
+extern void mnuShopReleaseWindowSprites();
 extern void func_00260020();
-extern s32 func_0025FE70();
+extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuAdvanceListCursorDefault();
 extern void func_0025FC08();
 extern s32 func_0026BC80();
@@ -36,7 +36,7 @@ extern char D_00437840[];
 extern void mdlFlagSet();
 extern void mdlFlagClear();
 extern void func_0026C7F8();
-extern s32 func_002604A0();
+extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
 extern void func_0026C918();
 extern void dspStartEntry();
@@ -121,14 +121,14 @@ s32 evtMenuPersistSelectedSlot(void) {
     EvtSelectionNode *node;
     u8 *record;
     s32 slot;
-    func_00260380(1, context);
+    mnuShopReleaseWindowSprites(1, context);
     func_00260020(context);
     for (node = ((EvtMenuContext *)context)->selection->list->first;
          node != 0 && node->id != selectedId; node = node->next) {
         mnuAdvanceListCursorDefault((s32)((EvtMenuContext *)context)->selection->list);
     }
     record = ((EvtMenuContext *)context)->selection->list->record;
-    slot = func_0025FE70(context);
+    slot = mnuCampHasEligibleOwnedItems(context);
     *(u16 *)(record + 0x12) = slot;
     ((EvtMenuContext *)context)->selectedSlot = slot;
     return 1;
@@ -194,7 +194,7 @@ u32 evtMenuSetProgressFlag(s32 context) {
 
 void func_002659E0(void) {
     char text[0x40];
-    s32 index = func_002604A0();
+    s32 index = mnuCampResolveProgressTierValue();
     dspSetActive(1);
     func_0035C860(text, D_00437840, index);
     func_0026C918(0, text);

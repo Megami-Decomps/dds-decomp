@@ -6,7 +6,7 @@ extern u32 D_004367CC;
 
 extern s32 dds3FindEntryIndex();
 
-extern s32 func_001AAA80(s32);
+extern s32 btlGetIndexedPartyEntryRecord(s32);
 
 extern s32 func_00101820(u32);
 
@@ -132,7 +132,7 @@ extern s32 D_00435E20;
 
 extern s32 D_004367F4;
 
-extern s32 func_001B88C8(s32);
+extern s32 btlGetTrackedTaskHandle(s32);
 
 extern s32 D_003B6928[];
 
@@ -158,11 +158,11 @@ extern s32 btlCheckSpecialAbility(s32, s32);
 
 extern s32 mdlFlagTest(s32);
 
-extern u32 func_002C55C0(s32);
+extern u32 mnuGetPartyEntryCurrentId(s32);
 
 extern s8 *D_00435E24;
 
-extern s32 func_001AD1C0(s32, u32);
+extern s32 btlDoesEnabledStatusMatchCurrentId(s32, u32);
 
 extern s32 evtCheckValueThreshold(s32, s32);
 
@@ -361,7 +361,7 @@ void frFontEnableNodeContextModes(s32 fontObject) {
     }
 }
 
-void func_001A5BF8(UiPanel *panel) {
+void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPos *pos = &panel->pos;
     UiPanelPlacement *place = &panel->place;
     s32 top;
@@ -378,7 +378,7 @@ void func_001A5BF8(UiPanel *panel) {
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void func_001A5CE8(UiPanel *panel) {
+void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     UiPanelOrigin *origin = &panel->origin;
     UiPanelPlacement *place = &panel->place;
     if (origin->tex != 0 && !(panel->flags & 0x10000)) {
@@ -403,7 +403,7 @@ void itfResetCursorPositionAndState(u32 *arg0, s32 arg1) {
     *(u16 *)(arg0 + 3) = 0xffff;
 }
 
-void func_001A5E00(UiCursor *cur, s32 resetPos) {
+void itfMesResetCursorState(UiCursor *cur, s32 resetPos) {
     if (resetPos != 0) {
         cur->x = 0x4B0;
         cur->y = 0xAF8;
@@ -421,7 +421,7 @@ void func_001A5E00(UiCursor *cur, s32 resetPos) {
     cur->unk8 = 0;
 }
 
-void func_001A5E48(s32 object) {
+void itfInitializeCursorResetState(s32 object) {
     *(u32 *)(object + 0) = 0x560;
     *(u32 *)(object + 4) = 0xC88;
     *(s32 *)(object + 8) = 0;
@@ -438,7 +438,7 @@ void func_001A5E48(s32 object) {
 
 extern void func_001A6078();
 
-void func_001A5E88(s32 *object) {
+void itfResetWindowResourceBlock(s32 *object) {
     object[0] = 0;
     object[1] = 0;
     object[2] = 0;
@@ -475,7 +475,7 @@ void itfResetBattleFadeState(s32 arg0, s32 arg1) {
     *(u32 *)(arg0 + 8) = 0;
 }
 
-void func_001A5F08(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+void btlSetFadePhaseAlphaTimer(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     *(s16 *)(arg0 + 2) = arg1;
     *(s16 *)(arg0 + 4) = arg2;
     *(s16 *)(arg0 + 6) = arg3;
@@ -499,7 +499,7 @@ void btlReleaseEffectResourceHandles(BattleEffect *effect) {
 }
 
 /* Release the handles in the second half for occupied entries in the first. */
-void func_001A5FA0(UiResourceSlots *slots) {
+void itfReleaseUiResourceSlotHandles(UiResourceSlots *slots) {
     s32 remaining;
     s32 *entries = slots->markers;
 
@@ -532,7 +532,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 
-void func_001A6128(u32 arg0) {
+void itfUpdateBattleDisplayAndFadeIndicator(u32 arg0) {
     func_001A6160();
     func_001A6350(arg0);
     func_001A6528(arg0);
@@ -545,7 +545,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6528);
 
-void func_001A67E0(UiPanel *panel, s32 dy) {
+void itfMesShiftPanelVertically(UiPanel *panel, s32 dy) {
     UiPanelOrigin *origin = &panel->origin;
     UiPos *pos = &panel->pos;
     UiPanelPlacement *place = &panel->place;
@@ -660,7 +660,7 @@ void btlUpdateFadeIndicator(u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6BF8);
 
-void func_001A6DA8(UiPanel *panel) {
+void itfMesRenderActivePanelSprites(UiPanel *panel) {
     UiPanelPlacement *place;
     if (panel->flags & 0x80000) {
         return;
@@ -698,7 +698,7 @@ extern SndQueueNode *D_00452950[];
 s32 sndVisitQueuedResources(void) {
     SndQueueNode *node;
     for (node = D_00452950[0]; node != 0; node = node->next) {
-        func_001A6128(node->value);
+        itfUpdateBattleDisplayAndFadeIndicator(node->value);
     }
     return 0;
 }
@@ -832,7 +832,7 @@ void func_001A9910(void) {
     D_004366E8 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9920);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlAdvanceRuntimeSequenceCounter);
 
 void btlClearModelFlagRange(void) {
     s32 temp_v0;
@@ -868,7 +868,7 @@ extern s32 btlSweepFinishedTasks(void);
 
 extern s32 func_001E9130(void);
 
-extern s32 func_001A9D70(void);
+extern s32 btlExitWhenAudioAndTasksIdle(void);
 
 s32 btlUpdateActiveBattleFrame(void) {
     if (D_004366E4 == 0) {
@@ -888,7 +888,7 @@ s32 btlUpdateActiveBattleFrame(void) {
         func_001E9130();
         ((BattleController *)D_004366E4)->frame = ((BattleController *)D_004366E4)->frame + 1;
     } else {
-        func_001A9D70();
+        btlExitWhenAudioAndTasksIdle();
     }
     return 0;
 }
@@ -946,7 +946,7 @@ void btlCreateDrawTasks(void) {
     func_00101968(draw, kwlnTaskCreate((s32)"battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
-void func_001A9B40(void) {
+void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     s64 task;
 
     task = func_00101820(0x3f9);
@@ -959,7 +959,7 @@ void func_001A9B40(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9B80);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9D70);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlExitWhenAudioAndTasksIdle);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 
@@ -980,7 +980,7 @@ s32 btlIsCurrentActorFullyMarked(void) {
     return (((BattleController *)D_004366E4)->flags & 0x06000000) == 0x06000000;
 }
 
-s32 func_001AA350(void) {
+s32 btlHasPendingRuntimeActivity(void) {
     s32 state;
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
@@ -1014,7 +1014,7 @@ void btlResetActorEntryState(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA400);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AA570);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlResolveQueuedSceneRequestParameters);
 
 s32 func_001AA6F8(void) {
     return D_004366E4;
@@ -1052,7 +1052,7 @@ void func_001AA788(void) {
     datMoveCursorY();
 }
 
-u16 func_001AA7A0(s32 object) {
+u16 btlRefreshUnitMaximumHpAndClampCurrentHp(s32 object) {
     u16 maximum = func_001AA700(object);
     u32 value = func_001AA740(object);
     *(u16 *)(object + 8) = value;
@@ -1062,7 +1062,7 @@ u16 func_001AA7A0(s32 object) {
     return *(u16 *)(object + 6);
 }
 
-u16 func_001AA7F0(s32 object) {
+u16 btlRefreshUnitMaximumMpAndClampCurrentMp(s32 object) {
     u16 maximum = func_001AA708(object);
     u32 value = func_001AA758(object);
     *(u16 *)(object + 12) = value;
@@ -1099,26 +1099,26 @@ s32 btlGetActorEntryData(UiObject *actor) {
     s32 entry;
 
     if ((actor->flags & 0x400) == 0) {
-        entry = func_001AAA80(actor->kind);
+        entry = btlGetIndexedPartyEntryRecord(actor->kind);
         return entry;
     }
     return (s32)&actor->entryMask;
 }
 
-s32 func_001AAA40(void) {
+s32 btlGetCurrentPartyEntryRecord(void) {
     s32 temp_v0;
 
     temp_v0 = dds3FindEntryIndex();
     return D_00435DD0 + temp_v0 * 0x1c4 + 0xa60;
 }
 
-s32 func_001AAA80(s32 index) {
+s32 btlGetIndexedPartyEntryRecord(s32 index) {
     return D_00435DD0 + index * 0x1c4 + 0xa60;
 }
 
 void btlSyncPlayerWork(UiObject *actor) {
     BtlEntry *src = (BtlEntry *)&actor->entryMask;
-    BtlEntry *dst = (BtlEntry *)func_001AAA80(actor->kind);
+    BtlEntry *dst = (BtlEntry *)btlGetIndexedPartyEntryRecord(actor->kind);
     s32 maxHp;
     s32 maxMp;
     if (src->flags & 0x1000) {
@@ -1144,7 +1144,7 @@ void btlSyncPlayerWork(UiObject *actor) {
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
-s32 func_001AABC0(UiObject *object) {
+s32 btlFindPartyEntryIndexForActor(UiObject *object) {
     return dds3FindEntryIndex(object->index);
 }
 
@@ -1188,11 +1188,11 @@ void func_001AB8D8(void) {
     func_00119A78();
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB8F0);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlApplyCommandAbilityMultiplier);
 
-s32 func_001AB9F0(s32 battler, s32 slot) {
+s32 btlGetSlotValueAdjustedForSpecialAbility(s32 battler, s32 slot) {
     s32 value = D_00435E24[slot * 16 - 0x1aa4];
-    if (func_001AD1C0(battler + 0x120, 0xe4) && (u32)value >= 2) {
+    if (btlDoesEnabledStatusMatchCurrentId(battler + 0x120, 0xe4) && (u32)value >= 2) {
         value--;
     }
     return value;
@@ -1231,14 +1231,14 @@ void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
     func_00119C78(arg0, arg1);
 }
 
-s32 func_001ABFD8(s32 arg0, s32 arg1) {
+s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1) {
     if (arg0 == 0) {
         return D_00435DE0 + arg1 * 0x270;
     }
     return D_00435DF0 + arg1 * 0x270;
 }
 
-s32 func_001AC020(s32 arg0, s32 arg1) {
+s32 btlSelectSharedOrIndexedTransformParameters(s32 arg0, s32 arg1) {
     if (arg0 == 0) {
         return (s32)D_003B4DC0;
     }
@@ -1268,7 +1268,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC0F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC510);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlFindEligibleTargetForMultiActorCommand);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
 
@@ -1276,7 +1276,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC750);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ACD10);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ACF68);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlEncodeActorIndexAsSelectionMask);
 
 void func_001AD090(void) {
     func_00119F68();
@@ -1302,11 +1302,11 @@ s32 btlCheckSpecialAbility(s32 arg0, s32 ability) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD118);
 
-s32 func_001AD1C0(s32 status, u32 value) {
+s32 btlDoesEnabledStatusMatchCurrentId(s32 status, u32 value) {
     if (*(u16 *)status & 0x20) {
         return 0;
     }
-    return func_002C55C0(status) == value;
+    return mnuGetPartyEntryCurrentId(status) == value;
 }
 
 s32 btlSelectActorAction(s32 state) {
@@ -1317,7 +1317,7 @@ s32 btlSelectActorAction(s32 state) {
     return selection;
 }
 
-s32 func_001AD248(s32 arg) {
+s32 btlIsEventThresholdSatisfiedForEntry(s32 arg) {
     s32 id = arg & 0xFFFF;
     switch (id) {
     case 0x8A:
@@ -1455,7 +1455,7 @@ s32 btlCountAvailableParticipants(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ADBD0);
 
-void func_001ADC48(u32 arg0) {
+void btlClearAllActorEntrySlots(u32 arg0) {
     u32 temp_v0;
     u32 temp_v1;
 
@@ -1549,7 +1549,7 @@ s32 btlHasSpecialAbility274(s32 unit, u32 slot) {
     return 0;
 }
 
-s32 func_001AEB20(s32 unit, u32 slot) {
+s32 btlHasEnabledSpecialAbilityForSlot(s32 unit, u32 slot) {
     if (((BattleController *)func_001AA6F8())->flags21C & 0x20000) {
         return 0;
     }
@@ -1564,10 +1564,10 @@ s32 func_001AEB20(s32 unit, u32 slot) {
             return 1;
         }
     }
-    if (slot == 8 && func_001AD1C0(unit + 0x120, 0xF0)) {
+    if (slot == 8 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF0)) {
         return 1;
     }
-    if (slot == 9 && func_001AD1C0(unit + 0x120, 0xF1)) {
+    if (slot == 9 && btlDoesEnabledStatusMatchCurrentId(unit + 0x120, 0xF1)) {
         return 1;
     }
     return 0;
@@ -1575,7 +1575,7 @@ s32 func_001AEB20(s32 unit, u32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEC18);
 
-f32 func_001AED08(void) {
+f32 btlGetClampedBattleTableValue(void) {
     u16 index = *(u16 *)(func_001AA6F8() + 0x47c);
     if (index > 4) {
         index = 4;
@@ -1605,7 +1605,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AED98);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEEA8);
 
-void func_001AF060(void) {
+void btlSyncModelFlagFromEventThresholds(void) {
     if (evtCheckValueThreshold(0x53, 1) || evtCheckValueThreshold(0x54, 1)) {
         mdlFlagSet(0xa20);
     } else {
@@ -1631,7 +1631,7 @@ s32 btlTestActorStatusPredicate(u8 *unit) {
     return (*(u16 *)(unit + 0x12E) & 0x2806) != 0;
 }
 
-s32 func_001B08F8(UiObject *object) {
+s32 btlComputeStatusPenaltyFifth(UiObject *object) {
     u16 status;
     s32 amount;
 
@@ -1679,7 +1679,7 @@ f32 func_001B0B20(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0B30);
 
-u8 func_001B0C18(UiObject *object, s32 index) {
+u8 btlGetActorDisplayByteWithDefault(UiObject *object, s32 index) {
     if (index == 0) {
         if ((object->flags & 0x400) != 0) {
             return *(u8 *)(D_00435DEC + object->index * 76 + 0x48);
@@ -1734,7 +1734,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B17E8);
 void func_001B1F78(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1F80);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlCalculateEnemyExperienceReward);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B20C8);
 
@@ -1761,7 +1761,7 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     return money;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2298);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlCalculateHuntEpReward);
 
 u32 func_001B2380(void) {
     return 0;
@@ -1778,13 +1778,13 @@ s32 btlCalculateAbilityRecoveryAmount(u8 *unit) {
     return recovery;
 }
 
-extern s32 func_001B47E0();
+extern s32 btlHasEnemyRecordDefeatExemptionFlag();
 
-s32 func_001B2430(u8 *unit, s32 delta) {
+s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *unit, s32 delta) {
     if (btlGetEntryFlagsUnlessDisabled((s32)unit + 0x120) & 4) {
         return 0;
     }
-    if (func_001B47E0(unit) != 0) {
+    if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
         return 0;
     }
     if ((*(u16 *)(unit + 0x12E) & 0x7FFF) == 0x4000) {
@@ -1796,7 +1796,7 @@ s32 func_001B2430(u8 *unit, s32 delta) {
     return *(u16 *)(unit + 0x126) + delta < 1;
 }
 
-s32 func_001B24C0(UiObject *object) {
+s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
     return object->currentValue * 100 / object->maximumValue < 26;
 }
 
@@ -1812,7 +1812,7 @@ s32 btlBothSidesActive(UiObject *unit) {
     UiObject *actor;
     s32 a;
     s32 b;
-    if (func_001B2430((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
         return 0;
     }
     if (unit->flags & 0x60) {
@@ -1847,7 +1847,7 @@ s32 btlIsUiObjectIndexAllowed(UiObject *object) {
     return 1;
 }
 
-s32 func_001B2620(UiObject *object) {
+s32 btlIsUnitStatusFlagClear(UiObject *object) {
     if ((object->statusFlags & 0x1000) != 0) {
         return 0;
     }
@@ -1858,7 +1858,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
-s32 func_001B27E8(s32 arg0, UiObject *unit, s32 arg2) {
+s32 btlSelectedEntryHitsElement(s32 arg0, UiObject *unit, s32 arg2) {
     u32 kind;
     s32 mask;
     u32 power;
@@ -1867,7 +1867,7 @@ s32 func_001B27E8(s32 arg0, UiObject *unit, s32 arg2) {
     }
     func_001AA6F8();
     kind = btlGetActorIndexedSignedValue(arg0, arg2);
-    mask = func_001ACF68(kind);
+    mask = btlEncodeActorIndexAsSelectionMask(kind);
     power = *(u16 *)(unit->selectedEntryIndex * 0x38 + D_00435E20 + 0x2E);
     if (power == 0) {
         return 0;
@@ -1881,7 +1881,7 @@ s32 func_001B27E8(s32 arg0, UiObject *unit, s32 arg2) {
     return (D_003B4F78[power * 3] & mask) != 0;
 }
 
-s32 func_001B28C8(s32 arg0) {
+s32 btlGetActionRecordLookupValue(s32 arg0) {
     u16 temp_v0;
 
     temp_v0 = *(u16 *)(D_00435E20 + arg0 * 56 + 0x2e);
@@ -1895,7 +1895,7 @@ s32 btlTestSelectedItemCategoryMask(UiObject *unit, s32 arg) {
         return 0;
     }
     kind = *(u16 *)(D_00435E20 + index * 56 + 0x2E);
-    return (D_003B4F78[kind * 3] & func_001ACF68(arg)) != 0;
+    return (D_003B4F78[kind * 3] & btlEncodeActorIndexAsSelectionMask(arg)) != 0;
 }
 
 s32 fldGetSelectedUnitStat(UiObject *unit) {
@@ -1903,7 +1903,7 @@ s32 fldGetSelectedUnitStat(UiObject *unit) {
     if (index == -1) {
         return 0;
     }
-    return func_001B28C8(index);
+    return btlGetActionRecordLookupValue(index);
 }
 
 s32 btlGetSelectedUnitProperty(UiObject *unit) {
@@ -1920,7 +1920,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B29F0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2AF8);
 
-s32 func_001B2CC0(u8 *unit) {
+s32 btlIsSelectedActorStatusAndRecordClear(u8 *unit) {
     s32 work = func_001AA6F8();
     if (*(s8 *)(D_00435E04 + *(s32 *)(work + 0x2A0) * 40) != 0) {
         return 0;
@@ -1931,7 +1931,7 @@ s32 func_001B2CC0(u8 *unit) {
     return *(u8 *)((u8 *)D_00435DF4 + *(u16 *)(unit + 0x124) * 0x15C) == 0;
 }
 
-s32 func_001B2D38(s32 arg0) {
+s32 btlAreUnitStatusAndEntryFlagsClear(s32 arg0) {
     if ((*(u16 *)(arg0 + 0x12e) & 0x40) != 0) {
         return 0;
     }
@@ -1942,7 +1942,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2D70);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2F50);
 
-s32 func_001B3188(UiObject *object) {
+s32 btlHasAdjacentActorRecordStatus(UiObject *object) {
     u8 *status = (u8 *)(D_00435DEC + object->index * 76 + 0x3E);
     u32 i;
     for (i = 0; i < 2; i++) {
@@ -1953,7 +1953,7 @@ s32 func_001B3188(UiObject *object) {
     return 0;
 }
 
-u32 func_001B31E8(s32 arg0) {
+u32 btlIsActorHighStateFlagClear(s32 arg0) {
     return ((*(s32 *)(arg0 + 0x110) >> 0x1a) ^ 1U) & 1;
 }
 
@@ -1961,7 +1961,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B3200);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B32F8);
 
-u8 func_001B33C8(u32 arg0) {
+u8 btlHasAvailableOption(u32 arg0) {
     s64 temp_v0;
 
     temp_v0 = func_001B32F8(arg0, 0);
@@ -1977,7 +1977,7 @@ s32 btlChooseRandomAvailableOption(s32 object) {
     return -1;
 }
 
-s32 func_001B3430(s32 object) {
+s32 btlChooseEligibleSkill(s32 object) {
     s32 choices[24];
     s32 count = 0;
     u32 i;
@@ -2022,7 +2022,7 @@ f32 btlGetActionCategoryMultiplier(s32 unit, s32 unused, s32 index) {
     return rate;
 }
 
-f32 func_001B3588(s32 unused0, s32 unused1, s32 index) {
+f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
     s32 category = *(u16 *)(D_00435E20 + index * 56 + 0x1A);
     if (category < 14) {
         if (category >= 12) {
@@ -2032,11 +2032,11 @@ f32 func_001B3588(s32 unused0, s32 unused1, s32 index) {
     return 0.0f;
 }
 
-f32 func_001B35D0(s32 unused0, s32 unused1, s32 index) {
+f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 index) {
     return (f32)*(u16 *)(D_00435E20 + index * 56 + 0x22) / 100.0f;
 }
 
-s32 func_001B3610(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
+s32 btlAdjustPointsForCombatFlags(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
     s32 entry;
     u16 code;
     if (flags & 0x20000) {
@@ -2068,7 +2068,7 @@ s32 func_001B3610(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
     return value;
 }
 
-s32 func_001B36B8(u32 flags, u32 otherFlags, s32 index) {
+s32 btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, s32 index) {
     s32 entry;
     u16 code;
     if (flags & 0x20000) {
@@ -2160,7 +2160,7 @@ void func_001B3918(u32 arg0) {
     btlAverageCurrentValueForMask(arg0, 0);
 }
 
-s32 func_001B3930(s32 mask, s8 skipDown) {
+s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     UiObject *unit;
     s32 total = 0;
     s32 count = 0;
@@ -2183,11 +2183,11 @@ s32 func_001B3930(s32 mask, s8 skipDown) {
 }
 
 void func_001B39E8(u32 arg0) {
-    func_001B3930(arg0, 1);
+    btlAverageMaskedActorStat(arg0, 1);
 }
 
 void func_001B3A00(u32 arg0) {
-    func_001B3930(arg0, 0);
+    btlAverageMaskedActorStat(arg0, 0);
 }
 
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
@@ -2246,7 +2246,7 @@ void btlClearUnitStatusMask(void) {
     }
 }
 
-s32 func_001B45C8(s32 object) {
+s32 btlHasSpecialAbilityOrModelFlag(s32 object) {
     if (btlCheckSpecialAbility(object, 0x279)) {
         return 1;
     }
@@ -2273,7 +2273,7 @@ s32 btlRollActorEligibilityWithAbilityOverride(u8 *unit) {
     return btlRollAiBucket() < 5;
 }
 
-s32 func_001B47E0(UiObject *object) {
+s32 btlHasEnemyRecordDefeatExemptionFlag(UiObject *object) {
     if ((object->flags & 0x400) == 0) {
         return 0;
     }
@@ -2295,7 +2295,7 @@ u32 func_001B5268(void) {
     return 0xffffffff;
 }
 
-void func_001B5288(UiObject *object, s32 resource) {
+void btlRestoreUnitMinimumValueAndClearStatus(UiObject *object, s32 resource) {
     object->flags &= ~0x20;
     object->statusFlags &= ~0x4080;
     *(u32 *)(resource + 0x28) &= ~1;
@@ -2307,7 +2307,7 @@ void func_001B5288(UiObject *object, s32 resource) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B52D8);
 
-s32 func_001B5440(s32 object, s32 other, s32 offset, s32 index) {
+s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
     s32 (*predicate)(s32, s32, s32);
     s32 table;
     predicate = *(s32 (**)(s32, s32, s32))(func_001AA6F8() + 0x6cc);
@@ -2317,7 +2317,7 @@ s32 func_001B5440(s32 object, s32 other, s32 offset, s32 index) {
     if (index == 0x91) {
         return 0;
     }
-    table = func_001ABFD8(*(s32 *)(object + 0xc4), *(s32 *)(object + 0xc8));
+    table = btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xc4), *(s32 *)(object + 0xc8));
     if (*(s16 *)(table + offset * 20 + 0x2c) != 2) {
         return 0;
     }
@@ -2327,7 +2327,7 @@ s32 func_001B5440(s32 object, s32 other, s32 offset, s32 index) {
     return 1;
 }
 
-s32 func_001B5510(s32 object) {
+s32 btlIsActorModeActionCodeAllowed(s32 object) {
     s32 value;
     if (*(s32 *)(object + 0xdc) != 1) {
         return 1;
@@ -2411,14 +2411,14 @@ s32 btlCountFlaggedSceneActors(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5810);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlInitializeCommandPanelSlotTables);
 
-s16 func_001B5930(s8 classId) {
+s16 btlGetActorIdForClass(s8 classId) {
     ActorClassIds table = D_00415B08;
     return table.values[classId];
 }
 
-void func_001B5978(s8 classId, u32 *first, u32 *second) {
+void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
     ActorClassPairTable pairs = D_00415B18;
     *first = pairs.values[classId * 2];
     *second = pairs.values[classId * 2 + 1];
@@ -2432,7 +2432,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B18);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5A20);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5D78);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlPopulateCommandPanelGrid);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5E98);
 
@@ -2442,7 +2442,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6438);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6A20);
 
-void func_001B6C80(void) {
+void btlReleaseAndClearChipBlock(void) {
     sdfReleaseChipBlock(D_004367FC);
     D_004367FC = 0;
 }
@@ -2453,7 +2453,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B6FC0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B70B8);
 
-void func_001B7208(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
+void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
     *(u8 *)(arg0 + 0) = 1;
     *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
     *(u16 *)(arg0 + 2) = arg1;
@@ -2610,7 +2610,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7718);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7830);
 
-void func_001B7900(void) {
+void btlClearSharedBattleStateWords(void) {
     u32 *puVar1;
     s32 temp_v0;
 
@@ -2649,10 +2649,10 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7B20);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7BF0);
 
-u32 func_001B7DC0(void) {
+u32 btlIsNamedBattleTaskRegistered(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(10);
+    temp_v0 = btlGetTrackedTaskHandle(10);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2682,7 +2682,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7E40);
 u32 func_001B7FB8(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(0xb);
+    temp_v0 = btlGetTrackedTaskHandle(0xb);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2731,7 +2731,7 @@ void func_001B81B0(void) {
 u32 func_001B81E8(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(9);
+    temp_v0 = btlGetTrackedTaskHandle(9);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2760,7 +2760,7 @@ void btlSetTaskPhase5(void) {
 }
 
 void btlSetTrackedTaskDisplayMode(s32 mode) {
-    s32 task = func_001B88C8(7);
+    s32 task = btlGetTrackedTaskHandle(7);
     s32 *state;
     if (task != 0) {
         state = (s32 *)kwlnTaskGetUserValue(task);
@@ -2778,14 +2778,14 @@ void btlSetTrackedTaskDisplayMode(s32 mode) {
 
 void func_001B82E8(void) {
     func_001AA6F8();
-    kwlnTaskGetUserValue(func_001B88C8(7));
+    kwlnTaskGetUserValue(btlGetTrackedTaskHandle(7));
     *(u8 *)(D_004367F4 + 0x48) = 0;
 }
 
 u32 func_001B8320(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(6);
+    temp_v0 = btlGetTrackedTaskHandle(6);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2804,7 +2804,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8368);
 u32 func_001B8538(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(1);
+    temp_v0 = btlGetTrackedTaskHandle(1);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2823,7 +2823,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8580);
 u32 func_001B8740(void) {
     s64 temp_v0;
 
-    temp_v0 = func_001B88C8(0);
+    temp_v0 = btlGetTrackedTaskHandle(0);
     if (temp_v0 != 0) {
         temp_v0 = kwlnTaskIsRegistered(temp_v0);
         if (temp_v0 == 0) {
@@ -2837,16 +2837,16 @@ u32 func_001B8740(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8788);
+INCLUDE_ASM(const s32, "game/code_001A5BB8", btlReplaceDialogTasksAndQueueMessage);
 
-s32 func_001B88C8(s32 arg0) {
+s32 btlGetTrackedTaskHandle(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = D_004367F4 + arg0 * 4;
     return *(s32 *)temp_v0;
 }
 
-void func_001B88E0(s32 arg0, s32 arg1) {
+void btlSetTrackedTaskHandle(s32 arg0, s32 arg1) {
     s32 temp_v0;
 
     temp_v0 = D_004367F4 + arg0 * 4;
@@ -2880,7 +2880,7 @@ void itfMesCloseAllWindows(s32 handle) {
         }
     }
     sdfReleaseChipBlock(set);
-    func_001B88E0(0xA, 0);
+    btlSetTrackedTaskHandle(0xA, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415D58);
@@ -2899,11 +2899,11 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
 
 extern void btlInitCursorAndApplyAction(s32, s32, s32);
 
-void func_001B9A10(s32 handle) {
+void btlReleaseTaskAndRefreshCursorIfFlagged(s32 handle) {
     u8 *work = (u8 *)func_001AA6F8();
     u8 *actor;
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
-    func_001B88E0(0xB, 0);
+    btlSetTrackedTaskHandle(0xB, 0);
     actor = *(u8 **)(work + 0x184);
     if (*(u16 *)(*(u8 **)(actor + 0x18) + 0x12E) & 0x80) {
         btlInitCursorAndApplyAction((s32)work + 0x70, (s32)work + 0x70, (s32)actor);
@@ -2975,12 +2975,12 @@ void btlReleaseMessageWindowTask(void) {
     u8 *window = (u8 *)kwlnTaskGetUserValue();
     itfMesCleanupWindow(*(s32 *)(window + 0x24), 0);
     sdfReleaseChipBlock(window);
-    func_001B88E0(9, 0);
+    btlSetTrackedTaskHandle(9, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB8D0);
 
-u8 func_001BB970(s32 arg0) {
+u8 btlHasRequiredActorStatusBits(s32 arg0) {
     return (~*(u64 *)(arg0 + 0x110) & 0x201) == 0;
 }
 
@@ -3016,7 +3016,7 @@ void btlStartRegisteredChildTask(void) {
     u8 *work = (u8 *)func_001AA6F8();
     s32 task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, func_001BC108, sdfAllocAndClearQuadwords(0x20));
     func_00101968(*(s32 *)(work + 0x2C4), task);
-    func_001B88E0(7, task);
+    btlSetTrackedTaskHandle(7, task);
 }
 
 void func_001BBA60(s32 arg0) {
@@ -3030,7 +3030,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BBA80);
 
 void func_001BC108(void) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
-    func_001B88E0(7, 0);
+    btlSetTrackedTaskHandle(7, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004163A0);
@@ -3069,7 +3069,7 @@ extern void func_001BC8A8();
 
 extern void func_001BCFB0();
 
-s32 func_001BD618(void) {
+s32 btlUpdatePhaseGatedTaskUntilTimeout(void) {
     s32 *state = (s32 *)kwlnTaskGetUserValue();
     s32 frame;
     if ((u32)((func_001C7D48() - 1) & 0xFF) < 2U) {
@@ -3090,7 +3090,7 @@ s32 func_001BD618(void) {
 
 void func_001BD6B8(void) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
-    func_001B88E0(6, 0);
+    btlSetTrackedTaskHandle(6, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004164B8);
@@ -3099,7 +3099,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004164C8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BD6E8);
 
-void func_001BD978(void) {
+void btlReleaseBattleScratchBlocks(void) {
     sdfReleaseChipBlock(D_00438F4C);
     sdfReleaseChipBlock(D_00438F50);
 }
@@ -3118,7 +3118,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEBD0);
 
 void func_001BEEF8(void) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
-    func_001B88E0(5, 0);
+    btlSetTrackedTaskHandle(5, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEF28);
@@ -3128,7 +3128,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF3C8);
 void btlFreeRegisteredTaskData(s32 handle) {
     func_001AA6F8();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
-    func_001B88E0(1, 0);
+    btlSetTrackedTaskHandle(1, 0);
 }
 
 extern s8 D_0037F53D[];
@@ -3151,7 +3151,7 @@ void btlReleaseDialogTaskData(s32 handle) {
     window = (u8 *)kwlnTaskGetUserValue(handle);
     itfMesCleanupWindow(*(s32 *)(window + 4), 0);
     sdfReleaseChipBlock(window);
-    func_001B88E0(0, 0);
+    btlSetTrackedTaskHandle(0, 0);
 }
 
 void btlCreateMessageWindow(void) {
@@ -3166,7 +3166,7 @@ void btlCreateMessageWindow(void) {
     *(s32 *)(window + 0x24) = 0x60808080;
     *(s32 *)(window + 0x38) = 0xBB;
     *(s32 *)(window + 0x3C) = 0x196;
-    func_001B88E0(4, 1);
+    btlSetTrackedTaskHandle(4, 1);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004165A0);
@@ -3189,11 +3189,11 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416620);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BFB58);
 
-void func_001BFFD8(void) {
+void btlReleaseRegisteredTaskBuffer(void) {
     func_001AA6F8();
     sdfReleaseChipBlock(D_004367F8);
     D_004367F8 = 0;
-    func_001B88E0(4, 0);
+    btlSetTrackedTaskHandle(4, 0);
 }
 
 s32 func_001C0008(void) {
@@ -3230,7 +3230,7 @@ typedef struct FlagEntry {
     u8 pad6[6];
 } FlagEntry;
 
-extern FlagEntry *func_001C8A28(s32, u16 *);
+extern FlagEntry *fldGetCachedSceneActorNameAndId(s32, u16 *);
 extern s32 func_001B7940(s32, s32);
 
 s64 btlClearFlagEntries(void) {
@@ -3239,7 +3239,7 @@ s64 btlClearFlagEntries(void) {
     FlagEntry *entries;
     s32 i;
     if (task != 0) {
-        entries = func_001C8A28(kwlnTaskGetUserValue(task), &count);
+        entries = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
             func_001B7940(entries[i].id, 0);
         }
@@ -3256,8 +3256,8 @@ s64 btlDestroyTaskC(void) {
     s64 result = func_00101740(D_004367EC);
     if (result != 0) {
         dspCloseChannel();
-        if (func_001B88C8(0xC) != 0) {
-            kwlnTaskDestroyWithHierarchy(func_001B88C8(0xC), 0);
+        if (btlGetTrackedTaskHandle(0xC) != 0) {
+            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xC), 0);
         }
         result = 1;
     }
@@ -3268,14 +3268,14 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416650);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C0240);
 
-extern s32 func_0026C710();
+extern s32 evtFinishMessageWindowAndNotify();
 
-void func_001C05D0(s32 handle) {
+void btlFinishTrackedBattleTaskAndCloseWindow(s32 handle) {
     u8 *work = (u8 *)func_001AA6F8();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
-    func_001B88E0(0xC, 0);
+    btlSetTrackedTaskHandle(0xC, 0);
     *(u32 *)(work + 0x218) |= 0x100000;
-    func_0026C710();
+    evtFinishMessageWindowAndNotify();
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416680);
@@ -3290,21 +3290,21 @@ s64 btlDestroyTaskD(void) {
     s64 result = func_00101740(D_004367F0);
     if (result != 0) {
         dspCloseChannel();
-        if (func_001B88C8(0xD) != 0) {
-            kwlnTaskDestroyWithHierarchy(func_001B88C8(0xD), 0);
+        if (btlGetTrackedTaskHandle(0xD) != 0) {
+            kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xD), 0);
         }
         result = 1;
     }
     return result;
 }
 
-void func_001C0DD0(s32 handle) {
+void btlReleaseDialogTaskAndMarkBattleState(s32 handle) {
     BattleController *battle = (BattleController *)func_001AA6F8();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
-    func_001B88E0(0xD, 0);
+    btlSetTrackedTaskHandle(0xD, 0);
     battle->flags |= 0x100000;
     *(u32 *)(D_004367F4 + 0x3C) &= ~0x100;
-    func_0026C710();
+    evtFinishMessageWindowAndNotify();
 }
 
 extern u8 D_004166F0[];
@@ -3330,7 +3330,7 @@ void btlInitSoundSlotTable(void) {
         destination += 2;
         source += 2;
     }
-    func_001B88E0(2, 1);
+    btlSetTrackedTaskHandle(2, 1);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004166F0);
@@ -3342,10 +3342,10 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416740);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1300);
 
 void btlReleaseSelectionTaskBuffer(void) {
-    if (func_001B88C8(2) != 0) {
+    if (btlGetTrackedTaskHandle(2) != 0) {
         sdfReleaseChipBlock(D_00438F48);
     }
-    func_001B88E0(2, 0);
+    btlSetTrackedTaskHandle(2, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1520);
@@ -3362,14 +3362,14 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void func_001C2390(void) {
     func_003297C8(*(u32 *)kwlnTaskGetUserValue());
-    func_001B88E0(3, 0);
+    btlSetTrackedTaskHandle(3, 0);
 }
 
-s32 func_001C23C0(void) {
+s32 btlAreLinkedSceneCountersAtThreshold(void) {
     s32 base;
     s32 i;
-    if (func_001B88C8(8) == 0) {
-        if (func_001B88C8(2) != 0) {
+    if (btlGetTrackedTaskHandle(8) == 0) {
+        if (btlGetTrackedTaskHandle(2) != 0) {
             base = D_00438F48;
             for (i = 0; i < 4; i++) {
                 if (*(s16 *)(base + 2 + i * 2) < 0x80) {
@@ -3421,9 +3421,9 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
-void func_001C35B8(void) {
+void btlReleaseTrackedTaskResource(void) {
     func_003297C8(*(u32 *)(kwlnTaskGetUserValue(func_00101740(D_004367CC)) + 0x1200));
-    func_001B88E0(8, 0);
+    btlSetTrackedTaskHandle(8, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004167E0);

@@ -36,7 +36,7 @@ INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AA68);
 
 INCLUDE_ASM(const s32, "game/code_0029AA48", func_0029AC20);
 
-s64 func_0029AD98(s32 request) {
+s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (func_002993D0(context) != 0) {
@@ -47,7 +47,7 @@ s64 func_0029AD98(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_0029AE10(s32 request) {
+s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (func_002993D0(context) != 0) {
@@ -114,7 +114,7 @@ void mnuClearItemSelectionSlots(MenuLayoutContext *context) {
     } while (-1 < remaining);
 }
 
-void func_0029AF80(u32 arg0, u32 arg1) {
+void mnuRefreshPartyUnitVitalsPanels(u32 arg0, u32 arg1) {
     func_00314298(arg0, (s32)arg1 + 0x3f4);
     mnuRefreshSelectedUnitPanels(arg0, arg1);
 }

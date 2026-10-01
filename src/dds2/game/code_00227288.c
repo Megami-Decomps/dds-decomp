@@ -91,7 +91,7 @@ typedef struct PadButtons {
 
 extern PadButtons D_0040B7D8[];
 
-extern s32 func_00106108();
+extern s32 kwlnFadeIsBackgroundOverlayActive();
 
 extern void btlReleaseOwnedData(void);
 
@@ -459,7 +459,7 @@ extern BtlMenuDrawer D_00380748;
 
 extern void sdfReleaseChipBlock(void *);
 
-extern void func_003298C0(void *);
+extern void sdfQueueNonzeroResourceId(void *);
 
 extern void mdlDestroyContext(s32);
 
@@ -490,7 +490,7 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227528);
 
-s32 func_00227660(BattleCombatant *unit, s32 code) {
+s32 btlRemapEffectActiveCombatantAction(BattleCombatant *unit, s32 code) {
     u32 id;
     if (!(unit->status & 1)) {
         return code;
@@ -887,7 +887,7 @@ u32 btlGetEffectActor(void) {
     return state->actor;
 }
 
-s32 func_002291C0(void) {
+s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     BtlState *battle = (BtlState *)func_001AA6F8();
     BtlUnit *unit = battle->units;
     BattleLinkedEffectState *effect = battle->effect;
@@ -921,7 +921,7 @@ u32 func_00229278(void) {
     return 0xffffffff;
 }
 
-s32 func_00229280(void) {
+s32 btlConsumeReadyEventScriptResource(void) {
     s32 result = -1;
     s32 state;
 
@@ -973,7 +973,7 @@ void func_002292D8(void) {
     }
 }
 
-s32 func_00229378(void) {
+s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
     BattleEffectUnitNode *node = *(BattleEffectUnitNode **)(func_001AA6F8() + 0x24c);
     while (node != 0) {
         if (node->status & 1) {
@@ -984,7 +984,7 @@ s32 func_00229378(void) {
     return -1;
 }
 
-void func_002293D8(BattleCombatant *unit) {
+void btlMarkBattleUnitEntryForActiveKind(BattleCombatant *unit) {
     u32 flags = unit->status;
     if ((flags & 0x200) && unit->kind == 2) {
         unit->status = flags | 0x1000;
@@ -993,7 +993,7 @@ void func_002293D8(BattleCombatant *unit) {
     }
 }
 
-void func_00229420(BattleCombatant *unit) {
+void btlSetAlternateKindForEnabledSpecialUnit(BattleCombatant *unit) {
     if ((unit->status & 0x400) &&
         unit->kind == 0x144 &&
         mdlFlagTest(0x841)) {
@@ -1394,7 +1394,7 @@ s32 func_0022B7A0(void) {
     return 1;
 }
 
-u32 func_0022B8E0(void) {
+u32 btlCmdGetIndexedBattleStateValue(void) {
     u32 index = scrReadIntParameter(0);
     u32 value = 0;
     if (index < 100) {
@@ -1646,7 +1646,7 @@ s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
     return 1;
 }
 
-u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
+u16 btlDetermineCommandCounterEligibility(u8 **entries, s32 count, s32 unused, s32 command) {
     s32 result = -1;
     if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->options & 1) {
         if (((BtlCommandRecord *)(D_00435E20 + command * 0x38))->requirementBits == 0) {
@@ -1686,7 +1686,7 @@ u16 func_0022C040(u8 **entries, s32 count, s32 unused, s32 command) {
     return (result < 0) ? 0 : result;
 }
 
-s32 func_0022C1B0(BtlTask *task, s32 command) {
+s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
     BtlCommandRecord *record;
     void *list;
     s32 count;
@@ -1967,7 +1967,7 @@ void btlReleaseOwnedData(void) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022D2F8);
 
-void func_0022DD18(void) {
+void btlInitFadeColors(void) {
     func_0022D040();
     D_00453060.color10 = 0x80808080;
     if (D_00453060.unk_06 < 2) {
@@ -1977,7 +1977,7 @@ void func_0022DD18(void) {
     }
 }
 
-s32 func_0022DD70(void) {
+s32 btlUpdateFadeIn(void) {
     func_0022D2F8(D_00453060.color14, D_00453060.color10);
     if ((D_00453060.color14 & 0xFF000000) != 0) {
         D_00453060.color14 -= 0x08000000;
@@ -1989,7 +1989,7 @@ s32 func_0022DD70(void) {
 void func_0022DDC8(void) {
 }
 
-s32 func_0022DDD0(void) {
+s32 btlFadeSharedOverlayAlpha(void) {
     s32 result = func_0022D2F8(D_00453060.color14, D_00453060.color10);
     if ((D_00453060.color10 & 0xFF000000) > 0x08000000) {
         D_00453060.color10 -= 0x08000000;
@@ -2037,12 +2037,12 @@ void btlInitializeGraphicsRuntime(void) {
     D_00380608.invoke(&D_00380608, surface);
 }
 
-void func_0022DF98(void) {
+void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &D_00453060;
     void *surface = sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(surface, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
     D_00380608.invoke(&D_00380608, surface);
-    func_003298C0(runtime->handle);
+    sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
     runtime->options |= 1;
@@ -2060,7 +2060,7 @@ void btlInitializeOverlayGraphics(void) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022E0E0);
 
-void func_0022E338(void) {
+void btlClearRuntimeState(void) {
     BattleRuntimeState *state = &D_00453060;
     memset(state, 0, sizeof(*state));
     state->flags = 0;
@@ -2078,7 +2078,7 @@ void btlResetRuntimeState(void);
 void btlResetAsyncState(void) {
     void *handle = D_00453060.handle;
     if (handle != 0) {
-        func_003298C0(handle);
+        sdfQueueNonzeroResourceId(handle);
         D_00453060.handle = 0;
         D_00453060.resource = 0;
     }
@@ -2093,7 +2093,7 @@ void btlActivateRuntime(u8 condition) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (func_00106108() != 0) {
+    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
         battle->options |= 4;
     }
 }
@@ -2338,13 +2338,13 @@ s32 mnuQueueColoredGlyphAtPosition(s32 width, s32 height, s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022ED90);
 
-s32 func_0022EE88(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
+s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
     s32 offset = ((MenuList *)settings)->rows * 24 + 4;
     func_0020D1C0(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
     return func_0022ED90(first, second, mode, settings, extra);
 }
 
-s32 func_0022EF18(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
     void *handle;
     u32 first;
     u32 count;
@@ -2518,7 +2518,7 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 ini
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
-    func_00231588(group, type);
+    btlRemoveCurrentGroupedEntity(group, type);
     node = func_00328D68(sizeof(BattleGroupNode));
     head = (BattleGroupNode *)D_003C86F0[group];
     if (head != NULL) {
@@ -2573,7 +2573,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     }
     if (flag != 0) {
         sdfResourceListRelease((void *)node->resourceList, 1);
-        func_003298C0((void *)node->ownedResource);
+        sdfQueueNonzeroResourceId((void *)node->ownedResource);
         for (i = 0; i != 8; i++) {
             if (node->slots[i].resourceHandle != 0) {
                 func_003297C8(node->slots[i].resourceHandle);
@@ -2585,7 +2585,7 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     sdfReleaseChipBlock(node);
 }
 
-void func_00231588(void) {
+void btlRemoveCurrentGroupedEntity(void) {
     s32 *node;
 
     node = btlFindGroupedEntity();
@@ -2640,7 +2640,7 @@ extern MotionObject *func_003340E0();
 
 /* Creates the object for record `index`; the record is reached as table->entries[index]
    at each use (the repeated array address is what keeps two address registers live). */
-MotionObject *func_00231618(MotionOwner *owner, s32 index) {
+MotionObject *motionOwnerCreateObjectForRecord(MotionOwner *owner, s32 index) {
     void *resource = owner->records->entries[index].resource;
     s16 slot = owner->records->entries[index].slot;
     MotionObject *object = func_003340E0(owner->heap, resource);

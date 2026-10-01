@@ -344,7 +344,7 @@ extern EffPCPWork *effPcpSpanCreate(void *param0, void *param1);
 
 extern u32 func_00157A50(u32 handle);
 
-extern void func_00336AA8(void);
+extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void func_00336538(f32 scale);
 
@@ -1664,8 +1664,8 @@ typedef struct EffSpawnGroup {
 extern EffSpawnParams D_003B1670[];
 extern u8 D_003B1680[];
 extern f32 sdfSinPoly(f32);
-extern f32 func_003407A0(f32);
-extern void func_00336768(f32 *axis, f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
  * (60 degrees). Direction is normalised on the VU, scaled per axis and offset
@@ -1688,7 +1688,7 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
     out = group->handles;
     do {
         if ((i & 1) == 0) {
-            sinv = func_003407A0(angle);
+            sinv = sdfEvaluateCosineViaSinePhaseShift(angle);
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
@@ -1809,7 +1809,7 @@ void func_00180DA8(EffPCPWorkF14 *work, u32 value) {
 extern EffSpawnParams D_003B16D0[];
 
 /* 12-piece spread on a cone around a random axis (rotation matrix built by
- * func_00336768 into the VU0 matrix registers). */
+ * sdfBuildVuRotationFromAxisAngle into the VU0 matrix registers). */
 void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
     s32 i;
     f32 angle = 0.0f;
@@ -1825,7 +1825,7 @@ void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
     i = 0;
     do {
         if ((i & 1) == 0) {
-            sinv = func_003407A0(angle);
+            sinv = sdfEvaluateCosineViaSinePhaseShift(angle);
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
@@ -1839,7 +1839,7 @@ void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
         D_003B16D0->vel[1] = 0;
         D_003B16D0->vel[0] = sinv * radius;
         D_003B16D0->vel[2] = cosv * radius;
-        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_003AA868) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B16D0->pos[0] = 0;
         D_003B16D0->pos[2] = 0;
@@ -1906,7 +1906,7 @@ void func_00181220(EffPCPWorkF14 *work, u32 value) {
 extern EffSpawnParams D_003B1730[];
 
 /* 30-piece spread: pieces are placed on a cone around a random axis (rotation
- * matrix built by func_00336768 into the VU0 matrix registers). */
+ * matrix built by sdfBuildVuRotationFromAxisAngle into the VU0 matrix registers). */
 void effPcpSpawnConeThirty(EffSpawnGroup *group) {
     s32 i;
     f32 angle = 0.0f;
@@ -1921,7 +1921,7 @@ void effPcpSpawnConeThirty(EffSpawnGroup *group) {
     i = 0;
     do {
         if ((i & 1) == 0) {
-            sinv = func_003407A0(angle);
+            sinv = sdfEvaluateCosineViaSinePhaseShift(angle);
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
@@ -1934,7 +1934,7 @@ void effPcpSpawnConeThirty(EffSpawnGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1730->pos[0] = 0;
         D_003B1730->pos[2] = 0;
@@ -2016,7 +2016,7 @@ void effPcpSpawnWideConeTwelve(EffSpawnGroup *group) {
     i = 0;
     do {
         if ((i & 1) == 0) {
-            sinv = func_003407A0(angle);
+            sinv = sdfEvaluateCosineViaSinePhaseShift(angle);
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
@@ -2030,7 +2030,7 @@ void effPcpSpawnWideConeTwelve(EffSpawnGroup *group) {
         D_003B1790->vel[1] = 0;
         D_003B1790->vel[0] = sinv * radius;
         D_003B1790->vel[2] = cosv * radius;
-        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1790->pos[0] = 0;
         D_003B1790->pos[2] = 0;
@@ -2115,7 +2115,7 @@ void effPcpSpawnFixedOriginTwelve(EffSpawnGroup *group) {
         params->lifetime = life;
         angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
         dist = (effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 600.0f;
-        params->vel[0] = params->pos[0] + func_003407A0(angle) * dist;
+        params->vel[0] = params->pos[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * dist;
         params->vel[1] = params->pos[1] + sdfSinPoly(angle) * dist;
         params->vel[2] = 0;
         group->handles[i] = effThunderFragCreate(params);
@@ -2164,7 +2164,7 @@ void func_00181EA0(EffPCPWorkF14 *work, u32 value) {
 
 extern void func_003364B8(f32 angle);
 extern void func_00336898(f32 angle);
-extern void func_00336B00(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 extern EffSpawnParams D_003B1890[];
 
 /* 8 pieces flung sideways from below; the rotation matrix is composed by the
@@ -2187,7 +2187,7 @@ void effPcpSpawnSidewaysEight(EffSpawnGroup *group) {
         params->pos[2] = 0;
         func_003364B8((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         func_00336898((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
-        func_00336B00();
+        sdfMultiplyVuMatrixInPlace();
         VU0_LOAD_VF($vf10, params->pos);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF($vf10, params->pos);
@@ -2338,7 +2338,7 @@ void effPcpSpawnVariableHeightParticles(EffSpawnGroup *group) {
     i = 0;
     do {
         if ((i & 1) == 0) {
-            sinv = func_003407A0(angle);
+            sinv = sdfEvaluateCosineViaSinePhaseShift(angle);
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
@@ -2351,7 +2351,7 @@ void effPcpSpawnVariableHeightParticles(EffSpawnGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
         height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1990->pos[0] = 0;
         D_003B1990->pos[2] = 0;
@@ -3051,7 +3051,7 @@ void effPcpReleaseShortThunderFadeWork(u32 work) {
     sdfReleaseChipBlock(work);
 }
 
-void *func_00184200(void) {
+void *effAllocateInitializedThunderFadeWork(void) {
     void *work;
 
     work = func_00328D68(0x20);
@@ -3259,7 +3259,7 @@ void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
     func_00336538(3.1415927f);
         VU0_LOAD_MATRIX_B(src);
 ;
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX(dst);
 ;
 }
@@ -3477,7 +3477,7 @@ void func_001862C0(void) {
     work->mode = 2;
 }
 
-EffPCPBlockCloneWork *func_001862E8(EffPCPBlockCloneWork *src) {
+EffPCPBlockCloneWork *effCloneBlockWorkFromSource(EffPCPBlockCloneWork *src) {
     EffPCPBlockCloneWork *work;
 
     work = func_00328D68(0x10C);
@@ -3678,7 +3678,7 @@ void effSpinEffectUpdate(EffPCPSpinWork *work) {
     func_00336538(work->angle);
         VU0_LOAD_MATRIX_B(work->matrix);
 ;
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX(mtx);
 ;
     effParamWorkCallback2(handle, mtx);
@@ -3754,7 +3754,7 @@ void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
     func_00336538(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
     effParamWorkCallback2(handle[0], mtx);
@@ -3832,7 +3832,7 @@ void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
     func_00336538(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
     effParamWorkCallback2(handle[0], mtx);
@@ -4224,7 +4224,7 @@ void effPcpCopyNestedMatrix(EffPCPWork *work, void *src) {
 void effRotateNested(EffPCPWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
     func_00336798(1.5707963f);
-    func_00336AA8();
+    sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX((void *)work->nestedWork);
 }
 

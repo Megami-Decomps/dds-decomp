@@ -23,7 +23,7 @@ extern s32 brsTaskConsumeDone(void);
 
 extern s32 fileConsumeConfigTaskReady(void);
 
-extern s32 func_00260848(void);
+extern s32 mnuCampConsumePanelTaskCompletion(void);
 
 extern s32 fldPollSceneState(void);
 
@@ -508,7 +508,7 @@ u8 evtWaitFileMenuTaskThree(void) {
     return operationResult == 0;
 }
 
-void func_0010A3C8(u32 unused, u32 *value) {
+void evtOpenTitleMenuWithOptionalValue(u32 unused, u32 *value) {
     if (value == 0) {
         func_002A3A50(0);
         return;
@@ -516,8 +516,8 @@ void func_0010A3C8(u32 unused, u32 *value) {
     func_002A3A50(*value);
 }
 
-u32 func_0010A3F8(void) {
-    func_002A3A70();
+u32 evtCloseTitleMenu(void) {
+    mnuDestroyTitleMenuTask();
     return 0;
 }
 
@@ -593,7 +593,7 @@ u32 evtPollSelectedAreaReady(void) {
     s64 operationResult;
     u32 status;
 
-    func_00125EE8();
+    fldShutdownSceneTasksAndWorld();
     operationResult = fldIsFieldResourceWaitFinished();
     status = 0xffffffff;
     if (operationResult != 0) {
@@ -736,7 +736,7 @@ void evtDispatchSelectionCommand(s32 source, s32 *params) {
 }
 
 void func_0010A820(void) {
-    func_001A9D70();
+    btlExitWhenAudioAndTasksIdle();
 }
 
 u32 evtEnsureSelectionTask(void) {
@@ -841,7 +841,7 @@ u32 evtDestroySkyAndCampTasks(void) {
 u8 evtWaitSkyCampTaskState(void) {
     s64 result;
 
-    result = func_00260848();
+    result = mnuCampConsumePanelTaskCompletion();
     return result == 0;
 }
 
@@ -993,7 +993,7 @@ void evtOpenFileMenuFromParams(u32 unused, u32 *menuArgs) {
     func_002CE208(4);
 }
 
-extern void func_002D0A90();
+extern void fileReleaseMenuFlowResource();
 
 s32 evtPollFileMenuAndRelease(void) {
     func_002CE750();
@@ -1001,7 +1001,7 @@ s32 evtPollFileMenuAndRelease(void) {
     if (func_002CE920() == 0) {
         return -1;
     }
-    func_002D0A90();
+    fileReleaseMenuFlowResource();
     return 0;
 }
 

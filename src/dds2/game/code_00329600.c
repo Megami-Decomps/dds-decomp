@@ -49,7 +49,7 @@ void sdfReleaseMemorySlot(s32 *slot) {
     }
 }
 
-void func_003298C0(s32 arg0) {
+void sdfQueueNonzeroResourceId(s32 arg0) {
     s32 id = arg0;
 
     if (id != 0) {

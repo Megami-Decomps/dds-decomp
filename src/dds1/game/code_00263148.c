@@ -92,7 +92,7 @@ s32 kwlnItemDismissOverlay(MenuItemScene *scene) {
 }
 
 /* Record the first visit to the item-selection scene. */
-u32 func_002633D8(void) {
+u32 mnuMarkItemSelectionSceneVisited(void) {
     s64 alreadyVisited;
 
     alreadyVisited = mdlFlagTest(0x911);
@@ -144,7 +144,7 @@ INCLUDE_ASM(const s32, "game/code_00263148", func_00263B78);
 extern s32 brsAdvanceSkillPackagePanel(s32);
 extern void func_00263B78(s32, s32);
 
-s64 func_00263C98(s32 request) {
+s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -155,7 +155,7 @@ s64 func_00263C98(s32 request) {
     return menuRunPanel(context, 1, request);
 }
 
-s64 func_00263D10(s32 request) {
+s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
@@ -222,7 +222,7 @@ void mnuClearItemSelectionSlots(MenuItemScene *scene) {
     } while (-1 < remaining);
 }
 
-void func_00263E70(u32 unit, u32 menu) {
+void mnuRefreshPartyUnitVitalsPanels(u32 unit, u32 menu) {
     ptyRecomputeMaxVitals(unit, (s32)menu + 0x3d0);
     mnuRefreshSelectedUnitPanels(unit, menu);
 }

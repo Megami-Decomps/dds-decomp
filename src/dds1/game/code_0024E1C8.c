@@ -157,7 +157,7 @@ typedef struct MnuResourceTask {
 } MnuResourceTask;
 
 /* Return the selection record address used by labels and transition IDs. */
-u32 func_0024FA18(void) {
+u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *taskObject;
 
     taskObject = (MnuResourceTask *)func_002CB3B8(D_003BC4CC, 0);
@@ -181,7 +181,7 @@ extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 extern void func_0024F8D8(void *);
 
-u32 *func_0024FAC8(void) {
+u32 *mnuAllocateEmptyResourceListState(void) {
     s32 handle = func_002D03F8(0x10);
     u32 *block = sdfMemoryGetBlockAddress(handle);
 
@@ -195,7 +195,7 @@ u32 *func_0024FAC8(void) {
 
 extern void sdfReleaseChipBlock(void *);
 extern void mnuDestroyListState(void *);
-extern void func_00249930(s32);
+extern void mnuReleaseMenuVisualWorkResources(s32);
 extern void func_002D0918(s32);
 
 typedef struct MenuCleanupNode {
@@ -224,7 +224,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     }
     sdfReleaseChipBlock(owner->resource);
     mnuDestroyListState(owner);
-    func_00249930(*(s32 *)(record + 0x24));
+    mnuReleaseMenuVisualWorkResources(*(s32 *)(record + 0x24));
     func_002D0918(taskData[0]);
 }
 

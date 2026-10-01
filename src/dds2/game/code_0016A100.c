@@ -63,7 +63,7 @@ extern void mdlBroadcastMasked();
 
 extern void mdlStorePrimaryVectorVU(void *work);
 
-extern void func_00232AD0(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 
 extern void mdlStoreTertiaryVectorVU(void *work);
 
@@ -209,7 +209,7 @@ void effParamInitWork(EffInitWork *work) {
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0180));
     mdlStorePrimaryVectorVU(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0190));
-    func_00232AD0(work);
+    mdlUpdateContextRotationBasisFromQuaternion(work);
     __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B01A0));
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);

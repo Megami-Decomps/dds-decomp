@@ -12,7 +12,7 @@ extern void mnuSetCommandPhase(MenuActionOwner *, u32);
 
 extern void func_00297200(MenuActionOwner *, u32);
 
-extern void func_002971C0(MenuActionOwner *, u32);
+extern void mnuStorePendingMenuCommandValue(MenuActionOwner *, u32);
 
 extern s8 D_0043798B;
 
@@ -85,7 +85,7 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00296E98);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297000);
 
-void func_002971C0(MenuActionOwner *owner, u32 value) {
+void mnuStorePendingMenuCommandValue(MenuActionOwner *owner, u32 value) {
     MenuAction *action;
 
     action = owner->action;

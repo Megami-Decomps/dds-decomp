@@ -6,15 +6,15 @@ extern u32 D_00437210[];
 
 void effDestroyResourceSlotSet(u32 sprite);
 
-void func_00308380(s32 property, s32 object);
+void sdfSubmitGsTestOneRegisterPacket(s32 property, s32 object);
 
 void func_00308808(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 
 void uiDrawActiveSurfaceRegion(s32 object);
 
-void func_00308E60(s32 object);
+void sdfDispatchSurfaceWithPreparedTexturePacket(s32 object);
 
-void func_00308478(s32 property, s32 object);
+void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
 void func_00243958(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
@@ -50,16 +50,16 @@ void evtReleaseSolarNoiseSprite(u32 *sprite) {
 }
 
 void evtInitializeSolarOverlay(s32 object) {
-    func_00308380(0x30000, object);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
     func_00308808(0, 0, 0, 0x2000, 0xE00, 0, object);
     uiDrawActiveSurfaceRegion(object);
-    func_00308380(0x30000, object);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
 }
 
 void evtFinalizeSolarOverlay(s32 object) {
-    func_00308E60(object);
-    func_00308478(0x44, object);
-    func_00308380(0x50000, object);
+    sdfDispatchSurfaceWithPreparedTexturePacket(object);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, object);
 }
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_002438F0);

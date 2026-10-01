@@ -78,7 +78,7 @@ extern ActionObj *func_00110AA8();
 
 extern void dds3EnsureSlotData();
 
-ActionObj *func_00112DE8(s32 value) {
+ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
     ActionObj *obj = func_00110AA8(4);
 
     obj->unk4 = value;

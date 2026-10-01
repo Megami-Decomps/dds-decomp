@@ -83,7 +83,7 @@ void fileReqInit(s32 arg0);
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_00288E70);
 
-void func_00289030(FileJob *job) {
+void fileStartChunkedReadWhenReady(FileJob *job) {
     WaitSema(D_003DC658.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(D_003DC658.sema);
@@ -96,7 +96,7 @@ void func_00289030(FileJob *job) {
 
 INCLUDE_ASM(const s32, "game/code_00288E70", func_002890B8);
 
-void func_002892F8(FileJob *job) {
+void fileStartChunkedWriteWhenReady(FileJob *job) {
     WaitSema(D_003DC658.sema);
     if (job->state != FILE_JOB_READY) {
         SignalSema(D_003DC658.sema);

@@ -10,7 +10,7 @@ extern u32 D_0045C7A0[];
 
 extern u32 D_0045C7B0[];
 
-s32 func_003298C0(u32 sprite);
+s32 sdfQueueNonzeroResourceId(u32 sprite);
 
 typedef struct MapResource {
     u32 image;
@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E940);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E958);
 
-void func_0030EA70(void) {
+void sdfCommitPendingVectorAndMarkChanged(void) {
     D_0045C7B0[0] = D_0045C7A0[0];
     D_0045C7B0[1] = D_0045C7A0[1];
     D_0045C7B0[2] = D_0045C7A0[2];
@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EE40);
 
 s64 func_0030EF18(u32 *sprite) {
     if (sprite != NULL) {
-        return func_003298C0(*sprite);
+        return sdfQueueNonzeroResourceId(*sprite);
     }
 }
 
@@ -170,7 +170,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     record->handle = handle;
     record->image = func_0032C138(descriptor);
     if (record->handle != 0) {
-        func_003298C0((void *)record->handle);
+        sdfQueueNonzeroResourceId((void *)record->handle);
         record->handle = 0;
         record->descriptor = 0;
     }
@@ -187,7 +187,7 @@ u32 fldReleaseMapResource(s32 *image) {
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F1A0);
 
-void func_0030F2A8(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
+void sdfCounterDrawGlyphAtGridCell(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
     u64 handle;
 
     handle = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
@@ -264,7 +264,7 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FD50);
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FFB0);
 
 /* Transpose through a local copy so source and destination may alias. */
-void func_00310210(SdfMat4 *dst, SdfMat4 *src) {
+void sdfTransposeMatrix(SdfMat4 *dst, SdfMat4 *src) {
     SdfMat4 t = *src;
 
     dst->m[0] = t.m[0];
@@ -285,7 +285,7 @@ void func_00310210(SdfMat4 *dst, SdfMat4 *src) {
     dst->m[15] = t.m[15];
 }
 
-f32 *func_00310320(f32 *vec, f32 *mat) {
+f32 *sdfTransformDirectionByMatrix(f32 *vec, f32 *mat) {
     f32 out[4];
     f32 x = vec[0];
     f32 y = vec[1];

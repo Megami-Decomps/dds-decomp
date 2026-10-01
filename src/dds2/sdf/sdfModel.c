@@ -106,7 +106,7 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
 
 
-extern void func_00336B00(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 extern void func_0033AEA8(u32 arg0);
 
@@ -296,7 +296,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
         : "r" (parentMatrix)
         : "memory"
     );
-    func_00336B00();
+    sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->transformed;
     __asm__ volatile (
         ".set noreorder          \n"
@@ -379,13 +379,13 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
 }
 
 /* Store four message words, then notify the consumer of the second word. */
-void func_00331B38(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
+void sdfStoreMessageWordsAndNotifyConsumer(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4) {
     arg0[3] = arg4;
     *arg0 = arg1;
     arg0[2] = arg3;
     arg0[1] = (s32)arg2;
-    func_00348BD8(arg2);
+    sdfInstallPoolNodeReleaseCallbacks(arg2);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B68);

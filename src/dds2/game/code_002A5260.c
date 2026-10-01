@@ -64,7 +64,7 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A55B8);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5890);
 
-void func_002A58C0(void) {
+void mnuClearGlobalMenuStateFields(void) {
     MenuTitleState *state = (MenuTitleState *)D_00437A40;
 
     state->phase = 0;
@@ -164,7 +164,7 @@ u32 func_002A5F68(void) {
     return state;
 }
 
-extern void func_003458F0(u32, u32, u32, u32, u32);
+extern void sdfSetGridScaledDrawBounds(u32, u32, u32, u32, u32);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5F80);
 
@@ -714,7 +714,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    func_003298C0(*D_00437AB0);
+    sdfQueueNonzeroResourceId(*D_00437AB0);
     D_00437AB0 = (u32 *)0x0;
 }
 
@@ -734,7 +734,7 @@ void func_002A7938(void) {
     D_00437AB4 = 0;
     mnuLoadMovieRollSprite();
     func_003458E8(1);
-    func_003458F0(0x80, 0x60, 0x180, 0x100, 0x80808080);
+    sdfSetGridScaledDrawBounds(0x80, 0x60, 0x180, 0x100, 0x80808080);
 }
 
 extern u32 D_00435CBC;

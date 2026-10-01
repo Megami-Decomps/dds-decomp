@@ -65,7 +65,7 @@ u32 func_0010D8D0(void) {
     return D_00438E8C->unkF0;
 }
 
-s32 func_0010D8E0(void) {
+s32 scrHasNegativeMarkerDuringCommandTimer(void) {
     if (scrGetCommandTimer() == 0) {
         return 0;
     }

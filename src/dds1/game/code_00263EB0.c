@@ -41,7 +41,7 @@ INCLUDE_ASM(const s32, "game/code_00263EB0", func_00263EF8);
 extern void mnuDrawItemPanelBackdrop(s32);
 extern void func_00263B78(s32, s32);
 
-s64 func_002641E0(s32 request) {
+s64 mnuDrawItemPanelDuringRequest(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);
@@ -56,13 +56,13 @@ s64 func_00264238(s32 input) {
     return menuRunPanel(context, 2, input);
 }
 
-u32 func_00264280(void) {
+u32 mnuBeginPanelEntryAndCaptureSoundMode(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
     mnuSetPanelGroupSelection(*(u32 *)(context + 0xd10), 0xffffffffffffffff);
     dspStartEntry(0x16);
-    func_0024DAE8(0);
+    evtSetMessageWindowOptionWhenOpen(0);
     evtCaptureMessageWindowSoundMode(0x1d);
     return 1;
 }
@@ -134,7 +134,7 @@ s64 func_002646F8(s32 input) {
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264740);
 
 u32 func_002647B0(void) {
-    func_0024DBB0();
+    evtFinishMessageWindowAndNotify();
     return 1;
 }
 

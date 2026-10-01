@@ -6,7 +6,7 @@ extern s32 mnuGetMantraSourceValue(u16);
 extern f32 sdfSinPoly(f32);
 extern void func_00311DB0(s32, s32, s32, s32, s32, char *, s32, s32);
 
-extern u32 func_00284AE0(void);
+extern u32 mnuAllocateMantraPanelBurstPool(void);
 
 extern u32 mnuAllocateMantraSparkleEmitter(s16);
 
@@ -18,8 +18,8 @@ void func_003297C8(u32 sprite);
 
 void mnuFreeMantraSparkleEmitter(u32 sprite);
 
-void func_00284B48(u32 *obj);
-u32 func_002850B8(void);
+void mnuReleaseMantraPanelBurstPool(u32 *obj);
+u32 mnuAllocateMantraBackgroundBurstPool(void);
 extern void func_00286270();
 u32 mnuQueueNextMantraSelection(u32);
 u32 func_0026F778(u32);
@@ -33,7 +33,7 @@ typedef struct MantraNodePos {
 } MantraNodePos;
 extern MantraNodePos *func_0026CF70(s16);
 extern MantraNodePos *func_0026D098(s16);
-extern s32 func_00314B78(s32);
+extern s32 scrGetSelectedScriptEntryId(s32);
 extern u32 mnuGetSelectedNodeValue(u8 *);
 extern u32 mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
@@ -44,7 +44,7 @@ s32 func_00271368();
 void func_00271510();
 u32 func_002712E0();
 void mnuMantraSetupSlot(u32);
-void func_00271348();
+void mnuReleaseMantraFadeDrawData();
 typedef struct MantraIconEntry {
     /* 0x0 */ u32 active : 1;
     u32 state : 4;
@@ -89,7 +89,7 @@ extern void mnuReleaseMantraGaugeData();
 extern s32 func_00274EA8();
 extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
-extern void func_00274E88();
+extern void mnuReleaseMantraRecordPanelData();
 extern u32 D_00453D00[12];
 extern u8 *D_00435DD0;
 
@@ -337,7 +337,7 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     if (entryId != 0) {
         memset(buffer, 0, 0x20);
         func_00314500(entryId, 1, buffer);
-        func_00311C50(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
+        frFontDrawStyledGlyphChainAndMeasure(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
         func_0026E788(x, y, depth, fade, 0x50, 0, drawArg);
     } else {
         func_0026E788(x, y, depth, fade, 0x54, 0, drawArg);
@@ -396,19 +396,19 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
             func_00311DB0(x + 0x9A, y + 0x190, depth, flags, 4, text, 0, drawArg);
         } else {
             func_0035C860(text, D_004378B0);
-            func_00311C50(x + 0xA2, y + 0x18C, depth, (u32)(fade * 0.5f) | 0xA09D7D00, 0, text, 0x80000000, drawArg);
+            frFontDrawStyledGlyphChainAndMeasure(x + 0xA2, y + 0x18C, depth, (u32)(fade * 0.5f) | 0xA09D7D00, 0, text, 0x80000000, drawArg);
         }
     } else {
         func_0026E788(x, y, depth, fade, 0x57, 0, drawArg);
     }
 }
 
-extern MantraSourceEntry *func_003162D8(u16);
+extern MantraSourceEntry *scrGetEntryDescriptor(u16);
 
 /* Pick the value of the first active slot, preferring slot 0. */
 s32 mnuGetMantraSourceValue(u16 index) {
     s32 result = 0;
-    MnuSourceEntrySlots *entry = (MnuSourceEntrySlots *)func_003162D8(index);
+    MnuSourceEntrySlots *entry = (MnuSourceEntrySlots *)scrGetEntryDescriptor(index);
     s32 slot = 0;
 
     if (entry->flags & 0x20) {
@@ -867,7 +867,7 @@ u32 mnuRegisterMantraBackgroundDraw(u32 pool) {
                          mnuInitMantraBackgroundDraw, mnuReleaseMantraBackgroundDraw, 0, 0, 0);
 }
 
-void func_00270050(u32 pool) {
+void mnuBeginMantraBackgroundDrawExit(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 0);
@@ -912,14 +912,14 @@ u32 mnuInitMantraBackgroundDraw(void) {
     *(u16 *)data = 1;
     ((MantraBackgroundState *)data)->transitionWord &= ~0xf;
     *(u8 *)(data + 5) = 0;
-    ((MantraBackgroundState *)data)->iconPool = func_002850B8();
+    ((MantraBackgroundState *)data)->iconPool = mnuAllocateMantraBackgroundBurstPool();
     func_0010AE38("BG Draw Init\n");
     return data;
 }
 
 void mnuReleaseMantraBackgroundDraw(u32 obj) {
     s32 data = (s32)((MantraDrawItem *)obj)->data;
-    func_00285120(*(u32 **)(data + 0x18));
+    mnuReleaseMantraBackgroundBurstPool(*(u32 **)(data + 0x18));
     sdfReleaseChipBlock(data);
     func_0010AE38("BG Draw Release\n");
 }
@@ -989,19 +989,19 @@ s32 func_00270210(s32 unused, s32 item) {
 extern void func_0026EDB0(s32, s32, s32, s32, s32, s32, s32, f32);
 
 void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
-    func_00308478(0x44, packet);
-    func_00308380(0x30000, packet);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808(0, 0, 0, 0x2000, 0xE00, 0, packet);
-    func_00308380(0x5100DL, packet);
-    func_00308380(0x3000DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(0, -15, 0, amount, 0x60, 0x20, packet);
     func_0026E788(0, -15, 0, amount, 0x61, 0x20, packet);
     func_0026E788(0, 0, 0, amount, 0x62, 0x20, packet);
     func_0026E788(0, 0, 0, amount, 0x63, 0x20, packet);
-    func_00308E60(packet);
-    func_00308478(0x54, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    sdfSubmitGsAlphaOneRegisterPacket(0x54, packet);
     func_0026E788(0, 0, 0, amount, 0x58, 0x60, packet);
     amount = amount * pulse * 0.5f;
     func_0026E788(0, 0, 0, amount, 0x5A, 0, packet);
@@ -1017,28 +1017,28 @@ u32 mnuRegisterMantraBackgroundMaskDraw(u32 pool) {
                          mnuInitMantraBackgroundMaskDraw, mnuReleaseMantraBackgroundMaskDraw, 0, 0, 0);
 }
 
-void func_00270CC0(u32 pool) {
+void mnuBeginMantraBackgroundMaskExit(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 4);
     *(u16 *)item->data = 3;
 }
 
-void func_00270CE8(u32 pool) {
+void mnuBeginMantraBackgroundMaskFadeIn(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 4);
     *(u16 *)item->data = 6;
 }
 
-void func_00270D10(u32 pool) {
+void mnuBeginMantraBackgroundMaskFadeOut(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 4);
     *(u16 *)item->data = 5;
 }
 
-void func_00270D38(u32 pool) {
+void mnuKeepMantraBackgroundMaskVisible(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 4);
@@ -1115,7 +1115,7 @@ s32 mnuDrawMantraBackgroundMaskPulse(s32 unused, s32 item) {
 
 u32 mnuCreateMantraFadeDrawItem(u32 list, u32 tag, u32 category) {
     MantraDrawItemBits *item = (MantraDrawItemBits *)mnuRegisterMantraDrawItem(list, 1, func_00271368, func_00271510,
-                                                                    func_002712E0, func_00271348, 0, 0, tag);
+                                                                    func_002712E0, mnuReleaseMantraFadeDrawData, 0, 0, tag);
     item->category = category;
     return (u32)item;
 }
@@ -1205,7 +1205,7 @@ void mnuQueueMantraLimitLineFlags(s32 pool, u32 flags) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002712E0);
 
-void func_00271348(u32 obj) {
+void mnuReleaseMantraFadeDrawData(u32 obj) {
     sdfReleaseChipBlock(((MantraDrawItem *)obj)->data);
 }
 
@@ -1274,7 +1274,7 @@ u32 mnuRegisterMantraTitleDraw(u32 pool) {
                          mnuInitMantraTitleDraw, mnuReleaseMantraTitleDraw, 0, 0, 0);
 }
 
-void func_00272C18(u32 pool) {
+void mnuBeginMantraTitleDrawExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 6);
     *(u16 *)item->data = 3;
 }
@@ -1410,7 +1410,7 @@ u32 mnuRegisterMantraInfoDraw(u32 pool) {
                          mnuInitMantraInfoDraw, mnuReleaseMantraInfoDraw, 10, 0, 0);
 }
 
-void func_00273498(u32 pool) {
+void mnuBeginMantraInfoDrawExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 7);
     *(u16 *)item->data = 3;
 }
@@ -1537,7 +1537,7 @@ u32 mnuRegisterMantraGaugeDraw(u32 pool) {
                          mnuInitMantraGaugeData, mnuReleaseMantraGaugeData, 0, 0, 0);
 }
 
-void func_00273FD0(u32 pool) {
+void mnuBeginMantraScrollCursorExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 8);
     *(u16 *)item->data = 3;
 }
@@ -1725,7 +1725,7 @@ u32 mnuRegisterMantraUnitPanelDraw(u32 pool, u32 resource) {
                          mnuInitMantraUnitPanelDraw, mnuReleaseMantraUnitPanelDraw, 10, 0, resource);
 }
 
-void func_00274628(u32 pool) {
+void mnuBeginMantraUnitPanelExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 9);
     *(u16 *)item->data = 3;
 }
@@ -1862,10 +1862,10 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274A70);
 
 u32 mnuRegisterMantraTypeOnePanelDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 10, func_00274EA8, func_00274FF8,
-                         mnuCreateTypeOneRecord, func_00274E88, 0, 0, 0);
+                         mnuCreateTypeOneRecord, mnuReleaseMantraRecordPanelData, 0, 0, 0);
 }
 
-void func_00274DD0(u32 pool) {
+void mnuBeginMantraRecordPanelExit(u32 pool) {
     MantraDrawItem *item;
 
     item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 10);
@@ -1891,7 +1891,7 @@ u32 mnuCreateTypeOneRecord(void) {
     return (u32)record;
 }
 
-void func_00274E88(u32 obj) {
+void mnuReleaseMantraRecordPanelData(u32 obj) {
     sdfReleaseChipBlock(((MantraDrawItem *)obj)->data);
 }
 
@@ -2387,7 +2387,7 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     *(u32 *)data = mnuAllocateMantraIconPool(0xA);
     *(u16 *)(data + 4) = 1;
     slot = menu + 0x240;
-    first = func_0026CF70(func_00314B78(mnuGetSelectedNodeValue(menu)));
+    first = func_0026CF70(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x / 10.0f * 40.0f, first->y / 10.0f * 39.0f, *(MantraIconPool **)data, 0x20);
     second = *(MantraNodePos **)(slot + 0x560);
     mnuSpawnMantraIcon(second->x / 10.0f * 40.0f, second->y / 10.0f * 39.0f, *(MantraIconPool **)data, 0x10);
@@ -2457,7 +2457,7 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     *(u32 *)data = mnuAllocateMantraIconPool(0xA);
     *(u16 *)(data + 4) = 1;
     slot = menu + 0x240;
-    first = func_0026CF70(func_00314B78(mnuGetSelectedNodeValue(menu)));
+    first = func_0026CF70(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x * 20 / 10.0f, first->y * 20 / 10.0f, *(MantraIconPool **)data, 0x60);
     second = *(MantraNodePos **)(slot + 0x560);
     mnuSpawnMantraIcon(second->x * 20 / 10.0f, second->y * 20 / 10.0f, *(MantraIconPool **)data, 0x50);
@@ -2495,7 +2495,7 @@ u32 mnuRegisterMantraIconListCDraw(u32 pool, u32 resource) {
                          mnuCreateMantraIconListC, mnuReleaseMantraFadeData, 0, 0, resource);
 }
 
-void func_002797C0(u32 pool) {
+void mnuBeginMantraIconListExit(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 3);
     if (item != 0) {
         ((MantraFadeData *)item->data)->state = 3;
@@ -2555,7 +2555,7 @@ void func_002799A0(u32 pool) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002799D8);
 
-void func_00279C38(u32 *sprite) {
+void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
     if (sprite != 0) {
         func_003297C8(*sprite);
     }
@@ -2808,7 +2808,7 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027B678);
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378D8);
 
-void func_0027C078(s32 unused, u8 *object) {
+void mnuRandomizeMantraPulseIconPhase(s32 unused, u8 *object) {
     u8 table[4] = {0, 10, 20, 30};
     u8 index;
 
@@ -2887,12 +2887,12 @@ void btlReleasePanelASprite(u32 obj) {
 s32 btlDrawPanelA(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
     func_0026E788(x, y, 0, a3, 0x77, 0, packet);
     func_0026E788(x, y, 0, a3, 0x89, 0, packet);
-    func_00308380(0x30000, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
-    func_00308380(0x3000DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
-    func_00308E60(packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     return 0;
 }
 
@@ -2974,24 +2974,24 @@ void btlInitPanelBSprites(u32 unused, s32 view) {
 
     resource = mnuAllocateMantraSparkleEmitter(0);
     ((MantraPanelSpriteView *)view)->spriteHandle = resource;
-    resource = func_00284AE0();
+    resource = mnuAllocateMantraPanelBurstPool();
     ((MantraPanelSpriteView *)view)->burstPool = resource;
 }
 
 void btlReleasePanelBSprites(s32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
-    func_00284B48((u32 *)((MantraPanelSpriteView *)obj)->burstPool);
+    mnuReleaseMantraPanelBurstPool((u32 *)((MantraPanelSpriteView *)obj)->burstPool);
 }
 
 s32 btlDrawPanelB(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
     func_0026E788(x, y, 0, a3, 0x77, 0, packet);
     func_0026E788(x, y, 0, a3, 0x87, 0, packet);
-    func_00308380(0x30000, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
-    func_00308380(0x3000DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
     uiDrawActiveSurfaceRegion(packet);
     func_0026E788(x, y, 0, 0x80, 0x91, 0x60, packet);
-    func_00308E60(packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
     return 0;
 }
 
@@ -3004,14 +3004,14 @@ void func_0027FB68(void) {
 }
 
 s32 btlDrawPanelC(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
-    func_00308380(0x30000, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
-    func_00308380(0x5100DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
     func_0026E788(x, y, 0, a3, 0x77, 0, packet);
     func_0026E788(x, y, 0, a3, 0x9A, 0, packet);
-    func_00308380(0x30000, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
-    func_00308380(0x5100DL, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
     return 0;
 }
 
@@ -3059,7 +3059,7 @@ void func_0027FDC0(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027FDC8);
 
-void func_00280390(u32 unused, s32 view) {
+void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
     ((MantraPanelSpriteView *)view)->stateA = 0;
     ((MantraPanelSpriteView *)view)->stateB = 0;
     ((MantraPanelSpriteView *)view)->stateC = 0;
@@ -3131,11 +3131,11 @@ void mnuInitMantraPanelAccentSprite(u32 unused, s32 view) {
     ((MantraPanelSpriteView *)view)->spriteHandle = spriteHandle;
 }
 
-void func_00281CB8(u32 obj) {
+void mnuReleaseMantraPanelAccentSprite(u32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
 }
 
-u32 func_00281CD8(u32 ctx, u32 x, u32 y, u32 direction, u32 unused,
+u32 mnuDrawMantraPanelAccentSprites(u32 ctx, u32 x, u32 y, u32 direction, u32 unused,
                   u32 sprite, u32 animation) {
     func_0026E788(ctx, x, y, direction, 0x77, 0, animation);
     func_0026E788(ctx, x, y, direction, 0xf7, 0, animation);
@@ -3258,7 +3258,7 @@ typedef struct MantraBurstHeader {
     u32 reserved;         /* 0x0C */
 } MantraBurstHeader;
 
-u32 func_00284AE0(void) {
+u32 mnuAllocateMantraPanelBurstPool(void) {
     u32 handle = func_003292A8(0x650);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
@@ -3268,7 +3268,7 @@ u32 func_00284AE0(void) {
     return block;
 }
 
-void func_00284B48(u32 *obj) {
+void mnuReleaseMantraPanelBurstPool(u32 *obj) {
     if (*obj != 0) {
         func_003297C8(*obj);
     }
@@ -3294,7 +3294,7 @@ typedef struct MantraBurstPool {
     u16 tick;
 } MantraBurstPool;
 
-extern f32 func_003407A0(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side) {
     s32 base = 0x7A;
@@ -3316,10 +3316,10 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
             }
             slot->life = 14;
             if (side != 0) {
-                slot->x = (base + 39.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->x = (base + 39.0f) * sdfEvaluateCosineViaSinePhaseShift(slot->w.half[1] * 0.017453293f);
                 slot->y = (base + 39.0f) * sdfSinPoly(slot->w.half[1] * 0.017453293f);
             } else {
-                slot->x = (base + 19.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->x = (base + 19.0f) * sdfEvaluateCosineViaSinePhaseShift(slot->w.half[1] * 0.017453293f);
                 slot->y = (base + 19.0f) * sdfSinPoly(slot->w.half[1] * 0.017453293f);
             }
             return slot;
@@ -3328,7 +3328,7 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
     return 0;
 }
 
-u32 func_002850B8(void) {
+u32 mnuAllocateMantraBackgroundBurstPool(void) {
     u32 handle = func_003292A8(0x650);
     u32 block = sdfMemoryGetBlockAddress(handle);
     memset((void *)block, 0, 0x650);
@@ -3338,7 +3338,7 @@ u32 func_002850B8(void) {
     return block;
 }
 
-void func_00285120(u32 *obj) {
+void mnuReleaseMantraBackgroundBurstPool(u32 *obj) {
     if (*obj != 0) {
         func_003297C8(*obj);
     }
@@ -3366,10 +3366,10 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
             }
             slot->life = 30;
             if (side != 0) {
-                slot->x = (base + 50.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->x = (base + 50.0f) * sdfEvaluateCosineViaSinePhaseShift(slot->w.half[1] * 0.017453293f);
                 slot->y = (base + 25.0f) * sdfSinPoly(slot->w.half[1] * 0.017453293f);
             } else {
-                slot->x = (base + 100.0f) * func_003407A0(slot->w.half[1] * 0.017453293f);
+                slot->x = (base + 100.0f) * sdfEvaluateCosineViaSinePhaseShift(slot->w.half[1] * 0.017453293f);
                 slot->y = (base + 30.0f) * sdfSinPoly(slot->w.half[1] * 0.017453293f);
             }
             return slot;

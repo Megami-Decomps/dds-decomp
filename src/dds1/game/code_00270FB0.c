@@ -297,7 +297,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
 
 extern void effReleaseTextureHandlesAndResetSlots(u32);
 
-void func_002712A0(kind, work)
+void mnuReleaseStaffCategoryTextureHandles(kind, work)
 s32 kind;
 u8 *work;
 {
@@ -323,7 +323,7 @@ void mnuSetStaffDisplayMode(s32 next, u8 *context) {
     s32 previous = ((StaffDisplayModeState *)context)->displayMode;
     if (next != previous) {
         if (previous != 0) {
-            func_002712A0(previous);
+            mnuReleaseStaffCategoryTextureHandles(previous);
         }
         if (next != 0) {
             movReleaseCategoryModels(next, context);
@@ -355,7 +355,7 @@ void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
     } while (index < 2);
 }
 
-void func_00271480(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
+void mnuInitializeStaffPageWindows(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
     mnuInitPageWindow(arg0, arg3, arg1[3], 7, arg1[4], 0, *arg1, 0x11);
     func_0027FAA8(arg0, *arg1);
     func_0027FBE0(arg0, arg1 + 9);
@@ -433,7 +433,7 @@ s32 mnuStaffSlotsAllFilled(s32 unused, StaffSlots *slots) {
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_002717D8);
 
-s64 func_00271948(u32 *resources) {
+s64 mnuReleaseStaffResourceSlotGroups(u32 *resources) {
     s32 i;
 
     mnuReleaseStaffResourceGroups(resources + 0x18);
@@ -469,7 +469,7 @@ void mnuCreateStaffPanelSet(StaffSpriteHandles *menu) {
     mnuSetWindowContainerState(menu->images[2], 0x100);
 }
 
-void func_00271DF8(StaffSpriteHandles *handles) {
+void mnuReleaseStaffSpriteAndResourceHandles(StaffSpriteHandles *handles) {
     u32 *image = handles->images;
     u32 index = 0;
     do {
@@ -492,12 +492,12 @@ void mnuDestroyStaffMenuTask(u32 task) {
         return;
     }
     mnuDrainPanelTransitions(work + 8, task);
-    func_00271DF8((StaffSpriteHandles *)work);
+    mnuReleaseStaffSpriteAndResourceHandles((StaffSpriteHandles *)work);
     mnuDestroyScrollPanel(((StaffSpriteHandles *)work)->scrollPanel);
     mnuShutdownContext(work + 0x15C);
     dspCloseChannel();
     mnuReleaseAssets(work + 0x13C);
-    func_00271948(work);
+    mnuReleaseStaffResourceSlotGroups(work);
     mnuReleaseStaffSpriteHandles((StaffSpriteHandles *)work);
     func_002BC618(*(u32 *)(work + 0x5c));
     func_002D0918(*(u32 *)work);

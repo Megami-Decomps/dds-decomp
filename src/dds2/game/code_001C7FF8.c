@@ -13,9 +13,9 @@ extern void func_00101968(s32, s32);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32, s32);
 
-extern s32 func_001B88C8(s32);
+extern s32 btlGetTrackedTaskHandle(s32);
 
-extern s32 func_001B7DC0(void);
+extern s32 btlIsNamedBattleTaskRegistered(void);
 
 extern s32 func_001B81E8(void);
 
@@ -25,7 +25,7 @@ extern s32 func_001B8740(void);
 
 extern s32 func_001CC9C0(s32);
 
-extern u32 func_001CCBB8(void);
+extern u32 fldGetSceneScriptTaskUserData(void);
 
 extern char *D_004367B8;
 
@@ -56,7 +56,7 @@ typedef struct SceneObject {
     s32 state;
 } SceneObject;
 
-extern SceneObject *func_001CA7E0(void);
+extern SceneObject *fldGetSceneObjectTaskUserData(void);
 
 typedef struct SceneActor {
     u8 pad_00[0xC8];
@@ -258,10 +258,10 @@ void fldInitializeBattleSceneFlow(void) {
     if ((scene->flags & 0x400) != 0) {
         if (scene->variant == 1) {
             func_001B82E8(0);
-            func_00210E48();
+            btlResetBattleHistoryCounters();
         } else {
             func_001B82E8(1);
-            func_00210E48();
+            btlResetBattleHistoryCounters();
         }
     }
     btlToggleModelFlagOnInput();
@@ -288,7 +288,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u64 first, u64 second) {
     itfSetTextDrawLimit(0xffffffffffffffff);
 }
 
-void func_001C8158(s32 x, s32 y, s32 z, s32 w, u16 index) {
+void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
@@ -327,7 +327,7 @@ extern void func_001C8518();
 
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
-extern char *func_001C8A28(s32, s16 *);
+extern char *fldGetCachedSceneActorNameAndId(s32, s16 *);
 
 /* Advance the per-kind scene counter table: refresh the slot for the current
  * scene kind, then return its value (clamped to 4 unless noClamp is set). */
@@ -343,7 +343,7 @@ u32 func_001C83D0(s32 ctx, s8 kind, s8 noClamp) {
         D_00438F4C->value[0] = buf[0] + 1;
         break;
     case 4:
-        func_001C8A28(ctx, buf);
+        fldGetCachedSceneActorNameAndId(ctx, buf);
         D_00438F4C->value[4] = buf[0];
         break;
     case 2:
@@ -398,7 +398,7 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
 }
 
 /* Cache the resolved entry ID while returning the shared name buffer. */
-char *func_001C8A28(s32 object, s16 *outId) {
+char *fldGetCachedSceneActorNameAndId(s32 object, s16 *outId) {
     s32 cachedId = D_004367C0;
     if (cachedId == 0) {
         cachedId = func_001AC750(*(s32 *)(*(s32 *)(object + 0x2C) + 0x18), D_003B5D10);
@@ -418,7 +418,7 @@ extern void func_001C9BE8(s32);
 
 extern void func_001C98E8(s32);
 
-extern void func_001C9DC8(s32);
+extern void btlDrawRetreatCommandLabel(s32);
 
 void fldDispatchSceneKindHandler(s32 sceneContext) {
     switch (func_001C82D8(sceneContext, D_004367FC->kind)) {
@@ -435,7 +435,7 @@ void fldDispatchSceneKindHandler(s32 sceneContext) {
         func_001C98E8(sceneContext);
         return;
     case 6:
-        func_001C9DC8(sceneContext);
+        btlDrawRetreatCommandLabel(sceneContext);
     }
 }
 
@@ -453,7 +453,7 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436860);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
 
-void func_001C9DC8(s32 unused) {
+void btlDrawRetreatCommandLabel(s32 unused) {
     char text[8] = "Retreat";
     s32 color;
     s32 handle;
@@ -524,12 +524,12 @@ INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416A10);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CA490);
 
-extern void func_001BD978(void);
+extern void btlReleaseBattleScratchBlocks(void);
 
 void fldClearBattleSceneObject(void) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
     ((BattleSceneWork *)func_001AA6F8())->sceneObject = 0;
-    func_001BD978();
+    btlReleaseBattleScratchBlocks();
 }
 
 void fldInitializeSceneObject(u32 *state, u32 owner) {
@@ -539,7 +539,7 @@ void fldInitializeSceneObject(u32 *state, u32 owner) {
     state[10] = owner + 0x20;
 }
 
-SceneObject *func_001CA7E0(void) {
+SceneObject *fldGetSceneObjectTaskUserData(void) {
     u32 handle = func_00101740(D_004367BC);
     if (handle == 0) {
         return (SceneObject *)handle;
@@ -552,7 +552,7 @@ s32 fldGetSceneObjectState(void) {
     if (handle == 0) {
         return handle;
     }
-    return func_001CA7E0()->state;
+    return fldGetSceneObjectTaskUserData()->state;
 }
 
 s32 btlHasSpecialActiveSceneActor(void) {
@@ -649,8 +649,8 @@ s32 fldSelectSceneMode(void) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CAB60);
 
-void func_001CB158(void) {
-    SceneObject *object = func_001CA7E0();
+void fldSetSceneObjectAndGroupStates(void) {
+    SceneObject *object = fldGetSceneObjectTaskUserData();
     if (object != 0) {
         object->state = 5;
         D_004367FC->mode = 3;
@@ -710,7 +710,7 @@ extern BtlPanelBlock *D_00436804;
 
 extern void func_00306C28(s32, s32, s32, u8 *, s32, BtlPanelRes *, s32, s32);
 
-void func_001CC7C8(s32 width) {
+void btlDrawCenteredPanelSegments(s32 width) {
     u8 color[16] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
     s32 half = width / 2;
     s32 x = width - half + 0x105;
@@ -790,7 +790,7 @@ extern void func_001AC0F8();
 
 extern s32 func_001AC360();
 
-extern s32 func_001AC510();
+extern s32 btlFindEligibleTargetForMultiActorCommand();
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
@@ -821,7 +821,7 @@ s32 func_001CC9C0(s32 source) {
     work->entry = 0;
     switch (work->result) {
     case 0:
-        id = func_001AC510(source, work->listA);
+        id = btlFindEligibleTargetForMultiActorCommand(source, work->listA);
         work->entry = id;
         btlAppendIndexListEntry(work->listB, btlGetIndexListEntry(work->listA, id));
         break;
@@ -846,7 +846,7 @@ void fldReleaseSceneSprite(s64 arg) {
     ((BattleSceneWork *)func_001AA6F8())->spriteObject = 0;
 }
 
-u32 func_001CCBB8(void) {
+u32 fldGetSceneScriptTaskUserData(void) {
     u32 handle = func_00101740(D_004367B8);
     if (handle == 0) {
         return handle;
@@ -857,14 +857,14 @@ u32 func_001CCBB8(void) {
 u32 fldGetSceneScriptState(void) {
     SceneScriptState *state;
 
-    state = (SceneScriptState *)func_001CCBB8();
+    state = (SceneScriptState *)fldGetSceneScriptTaskUserData();
     return state->state;
 }
 
 u32 fldGetSceneScriptValue(void) {
     SceneScriptState *state;
 
-    state = (SceneScriptState *)func_001CCBB8();
+    state = (SceneScriptState *)fldGetSceneScriptTaskUserData();
     return state->value10;
 }
 
@@ -872,17 +872,17 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     BattleSceneWork *scene;
     s32 task;
     func_00101740(D_004367B8);
-    if (func_001B7DC0() != 0) {
-        kwlnTaskDestroyWithHierarchy(func_001B88C8(0xA), 0);
+    if (btlIsNamedBattleTaskRegistered() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xA), 0);
     }
     if (func_001B81E8() != 0) {
-        kwlnTaskDestroyWithHierarchy(func_001B88C8(9), 0);
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
     }
     if (func_001B8538() != 0) {
-        kwlnTaskDestroyWithHierarchy(func_001B88C8(1), 0);
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
     }
     if (func_001B8740() != 0) {
-        kwlnTaskDestroyWithHierarchy(func_001B88C8(0), 0);
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BattleSceneWork *)func_001AA6F8();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, (void (*)(void))fldStepSceneStateMachine,
@@ -891,10 +891,10 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     scene->spriteObject = task;
 }
 
-void func_001CCD50(void) {
+void fldMarkActiveSceneScriptState(void) {
     SceneScriptState *state;
 
-    state = (SceneScriptState *)func_001CCBB8();
+    state = (SceneScriptState *)fldGetSceneScriptTaskUserData();
     if (state != 0) {
         state->state = 6;
     }

@@ -27,7 +27,7 @@ void func_002E8628(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8640);
 
-void func_002E86C8(void) {
+void sdfServiceUnblockedWorkerThread(void) {
     for (;;) {
         do {
             SleepThread();

@@ -49,7 +49,7 @@ typedef struct ObjWithWork {
     u32 *work;
 } ObjWithWork;
 
-s32 func_00111400(ObjWithWork *obj) {
+s32 dds3AllocateClearedObjectWork(ObjWithWork *obj) {
     obj->work = func_002CFEB8(0x10);
     memset(obj->work, 0, 0x10);
     return 1;

@@ -87,7 +87,7 @@ u32 effGetScatterEntry(ScatterObject *object, s32 index) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void func_001760C8(void *work, void *src) {
+void effScatterStoreSourceTransformMatrix(void *work, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX((u8 *)work + 0x10);
 }

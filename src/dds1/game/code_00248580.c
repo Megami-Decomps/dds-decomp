@@ -118,7 +118,7 @@ void mnuReleaseVisualResources(MenuVisualWork *work) {
     effResolveAndReleaseResource(work->secondResource);
 }
 
-void func_002485B0(MenuVisualWork *work) {
+void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->firstResource);
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
@@ -250,11 +250,11 @@ void mnuBuildTerminalNodeList(MenuProgressWork *host) {
     mnuRefreshThresholdNodeFlags(host->list);
 }
 
-void func_00248E18(s32 arg0) {
+void mnuReleaseProgressWorkList(s32 arg0) {
     mnuDestroyListState((u32)((MenuProgressWork *)arg0)->list);
 }
 
-void func_00248E30(s32 arg0) {
+void mnuReleaseSelectedProgressPanel(s32 arg0) {
     mnuReleaseDualPercentPanel(((MenuProgressWork *)arg0)->list->selectedNode->panel);
     func_0027B888((u32)((MenuProgressWork *)arg0)->list);
 }
@@ -300,7 +300,7 @@ s32 mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, s32 callback)
 
 extern s32 mnuWalkNodeList(s32, s32);
 
-void func_002493B0(s32 object) {
+void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
     s32 state = ((MenuProgressWork *)object)->mode;
     if (state < 2) {
         if (state < 0) {
@@ -316,7 +316,7 @@ void func_002493B0(s32 object) {
 
 extern s32 mnuWalkNodeList(s32, s32);
 
-void func_00249420(s32 object) {
+void mnuHighlightProgressNodeByMode(s32 object) {
     s32 state = ((MenuProgressWork *)object)->mode;
     s32 selectedIndex;
     if (state != 0) {
@@ -371,8 +371,8 @@ void mnuTerminalBuildMenus(MenuProgressWork *host) {
     mnuResolveStaffImageHandles((u8 *)host + 0xE0);
     mnuUpdateGroupResources((u8 *)host);
     func_00249058(host);
-    func_002493B0(host);
-    func_00249420(host);
+    mnuHighlightProgressNodeFromOwnerSelection(host);
+    mnuHighlightProgressNodeByMode(host);
 }
 
 extern void mnuDestroyListState(u32);
@@ -387,7 +387,7 @@ void mnuReleaseWorkResources(u8 *work) {
     }
     mnuDestroyThresholdNodePanels((s32)work);
     mnuReleaseStaffImageHandles(work + 0xE0);
-    func_00248E18((s32)work);
+    mnuReleaseProgressWorkList((s32)work);
     mnuDestroyListState((u32)((MenuProgressWork *)work)->owner);
 }
 
@@ -419,7 +419,7 @@ void mnuFadeOrPlayCloseSfx(s32 skip, u8 *work) {
     evtSetBoundedDisplayValue(1, 1);
 }
 
-void func_002496D8(u8 *work) {
+void mnuResetProgressModeFromOwner(u8 *work) {
     u8 *owner = (u8 *)((MenuProgressWork *)work)->owner;
     ((MenuProgressWork *)work)->mode = 0;
     ((MenuProgressWork *)work)->initState = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
@@ -450,7 +450,7 @@ u8 *mnuCreateWorkBlock(void) {
     return work;
 }
 
-void func_00249770(u32 *arg0) {
+void mnuReleaseStaffMenuContextAndResources(u32 *arg0) {
     mnuShutdownContext(arg0 + 100);
     mnuReleaseStaffMenuTextureHandles(arg0 + 2);
     mnuReleaseStaffResourceGroups(arg0 + 2);
@@ -462,7 +462,7 @@ extern s32 mnuStaffSlotsAllFilled(s32, s32 *);
 
 extern void mnuReleaseStaffMenuResources(s32 *);
 
-extern void func_00271480(s32, s32 *, s32, s32);
+extern void mnuInitializeStaffPageWindows(s32, s32 *, s32, s32);
 
 s32 mnuTickInitState(u8 *work) {
     s32 state = ((MenuProgressWork *)work)->initState;
@@ -479,14 +479,14 @@ s32 mnuTickInitState(u8 *work) {
         return 1;
     }
     mnuReleaseStaffMenuResources(group);
-    func_00271480((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
+    mnuInitializeStaffPageWindows((s32)(work + 0x190), group, 0, (s32)(work + 0x84));
     ((MenuProgressWork *)work)->initState = 2;
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
-void func_00249930(s32 arg0) {
+void mnuReleaseMenuVisualWorkResources(s32 arg0) {
     mnuClearEntries(arg0 + 400);
     mnuReleasePartyIconBundles(arg0 + 400);
     mnuDestroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
@@ -502,7 +502,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00249998);
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249A60);
 
-void func_00249C08(s8 enabled) {
+void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
     s64 worldObject;
 
     if (enabled == '\x01') {
@@ -554,7 +554,7 @@ void mnuTerminalCreateEffects(MenuSlotState *state) {
     obj->inner->pair->b = 0;
 }
 
-void func_00249D80(s32 object) {
+void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     s32 *batch = ((MenuSlotState *)object)->effect;
     u32 i;
 

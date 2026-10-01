@@ -215,7 +215,7 @@ typedef struct SifClient {
 
 extern SifClient D_003F9B50;
 extern u8 D_003BD3C8;
-extern s32 func_002CF4E0();
+extern s32 sdfCreateThreadWithAllocatedWorkspace();
 extern s32 func_002CF930(void);
 extern s32 sdfGetElapsedTimerTicks(s32);
 extern s32 sceSifMBindRpc(void *, s32, s32);
@@ -225,7 +225,7 @@ extern void _StartThread(s32, s32);
 void func_002E4AE0(void) {
     s32 start;
 
-    _StartThread(func_002CF4E0(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
+    _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
     while (sceSifMBindRpc(&D_003F9B50, 0x646E7270, 0) >= 0) {
         if (D_003F9B50.server != NULL) {
             D_003BD3C8 = 1;
@@ -392,7 +392,7 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5398);
 
-void func_002E55E0(void) {
+void sdfServicePendingOperationUnderSemaphore(void) {
     if (D_003BDA48 != 0) {
         WaitSema(D_003BDA58);
         func_002F4620();
@@ -888,7 +888,7 @@ void func_002E70F0(s32 index) {
             entry = sdfDevWorkerThread;
         }
         D_003BD430 = 0x48;
-        thread = func_002CF4E0(entry, 0x4000, 0x48);
+        thread = sdfCreateThreadWithAllocatedWorkspace(entry, 0x4000, 0x48);
         worker->handle = thread;
         _StartThread(thread, (s32)worker);
     }
@@ -1061,7 +1061,7 @@ f32 sdfSinPoly(f32 angle) {
 }
 
 
-void func_002E78F8(f32 angle) {
+void sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
     sdfSinPoly(angle + 1.5707963f);
 }
 

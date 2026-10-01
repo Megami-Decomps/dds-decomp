@@ -149,7 +149,7 @@ typedef struct MenuAnimationSlot {
     s32 counterAddress; /* 0x04: address of the frame counter */
 } MenuAnimationSlot;
 
-void func_0025C830(s32 animationContext, s32 owner) {
+void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 owner) {
     u8 *grid = *(u8 **)(owner + 0x484);
     s32 row;
     s32 col;
@@ -172,10 +172,10 @@ INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025CFA0);
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025D100);
 
-extern void func_0025C830(s32, s32);
+extern void mnuAdvanceActiveGridSlotAnimations(s32, s32);
 
-void func_0025D2C0(s32 arg0, s32 arg1) {
-    func_0025C830(arg1, arg0);
+void mnuAdvanceDisplayGridAndLoopingFrame(s32 arg0, s32 arg1) {
+    mnuAdvanceActiveGridSlotAnimations(arg1, arg0);
     mnuAdvanceLoopingFrame((s32 *)(arg0 + 0x490));
 }
 
@@ -205,7 +205,7 @@ MenuListNode *mnuAllocateMenuListNode(void) {
     return node;
 }
 
-DspListNode *func_0025DAD0(DspListHead *head) {
+DspListNode *mnuAppendNodeToDisplayList(DspListHead *head) {
     DspListNode *node = head->first;
     if (node == NULL) {
         node = mnuAllocateMenuListNode();
@@ -272,7 +272,7 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
 extern s32 mnuAdvanceDisplayList(s32, s32, s32);
 extern void mnuDrawMantraCostIcon(s32, s32, s32, s32, s32, s32);
 
-void func_0025DD80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+void mnuDrawMantraCostAfterListAdvance(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     if (mnuAdvanceDisplayList(arg1, arg2, arg3) != 0) {
         mnuDrawMantraCostIcon(0, 0, 0, arg0, arg2, arg3);
     }

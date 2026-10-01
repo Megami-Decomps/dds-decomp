@@ -228,7 +228,7 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
         prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 
-void func_00266130(u32 fontContext) {
+void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
     frFontSetGlyphChainDimensions(fontContext, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
 }

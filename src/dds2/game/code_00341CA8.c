@@ -32,7 +32,7 @@ void sndDispatchCommandWithoutPayload(u32 command) {
 }
 
 /* Send a NUL-terminated command string; the transport excludes the terminator. */
-u32 func_00341D48(s32 command, char *text) {
+u32 sndSubmitTextCommandPayload(s32 command, char *text) {
     u32 length = strlen(text);
 
     return func_003417A8(command | 0x70, 0, text, length);

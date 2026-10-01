@@ -157,7 +157,7 @@ extern void *func_002CFEB8(s32 size);
 
 extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
-extern s32 func_00141320(void);
+extern s32 fldFieldTaskUpdate(void);
 
 extern s32 D_0032E3C0[];
 
@@ -181,7 +181,7 @@ typedef struct {
 
 extern FldEnt110 *D_003BAA48;
 
-extern s32 func_0013C5D0(void);
+extern s32 fldGetCurrentSceneSelectionId(void);
 
 typedef struct {
     s32 *unk0;
@@ -223,21 +223,21 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
 
 extern s32 fldGetCampSceneControlMode(void);
 
-extern s32 func_00125140(void);
+extern s32 fldGetSceneReadyOrPendingState(void);
 
 extern s32 fldTitleIsActive(void);
 
-extern void func_001493D0(s32, s32, s32);
+extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
 extern void func_00147188(s32);
 
 extern s32 D_003BAB08;
 
-s32 func_00141320(void) {
+s32 fldFieldTaskUpdate(void) {
     if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
-    if (func_00125140() != 0) {
+    if (fldGetSceneReadyOrPendingState() != 0) {
         return 0;
     }
     if (fileMenuTaskExists() != 0) {
@@ -247,7 +247,7 @@ s32 func_00141320(void) {
         return 0;
     }
     if (D_003BAB08 != -999) {
-        func_001493D0(0x80, 0, 0);
+        fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_00147188(0);
     }
@@ -263,7 +263,7 @@ void *fldFieldTaskCreate(s32 task) {
     work[2] = 0;
     work[3] = 0;
     kwlnTaskSetUserValue(task, work);
-    return func_00141320;
+    return fldFieldTaskUpdate;
 }
 
 void fldFieldTaskDestroy(void) {
@@ -739,7 +739,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (D_003BAEE4 != 0) {
-        func_002D0A10(D_003BAEE4);
+        sdfQueueNonzeroResourceId(D_003BAEE4);
     }
     D_003BAEE4 = 0;
     D_003BAEDC = 0;
@@ -1419,7 +1419,7 @@ void fldReleaseTextureSlots(void) {
         if (D_0034C890[i] != 0) {
             effDestroyNode(D_0034C890[i]);
             D_0034C890[i] = 0;
-            func_002D0A10(D_0034C870[i]);
+            sdfQueueNonzeroResourceId(D_0034C870[i]);
             D_0034C870[i] = 0;
             D_0034C880[i] = 0;
         }
@@ -1821,7 +1821,7 @@ extern f32 sdfSinPoly(f32);
 
 extern void func_00129178(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
-void func_001493D0(s32 alpha, s32 x, s32 y) {
+void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
     if (D_0032E4C8[0] != 1) {
@@ -1894,7 +1894,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldGetCampSceneControlMode() != 0) {
             return;
         }
-        if (func_00125140() != 0) {
+        if (fldGetSceneReadyOrPendingState() != 0) {
             return;
         }
         if (D_003BAF90 != 0) {
@@ -1976,8 +1976,8 @@ s32 fldFindEffectByName(const char *name) {
     return 0;
 }
 
-s32 func_0014A250(void) {
-    s32 index = func_0013C5D0();
+s32 fldGetCurrentSceneSelectionResource(void) {
+    s32 index = fldGetCurrentSceneSelectionId();
 
     if (index < 0) {
         return 0;
@@ -2000,7 +2000,7 @@ void func_0014A2C8(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", fldTitle);
 
-void func_0014A930(void) {
+void fldReleaseTitleTextureReference(void) {
     if (D_003BAFB4 != 0) {
         sdfTexReleaseReferenceViaHandler(D_003BAFB4);
         D_003BAFB4 = 0;
@@ -2037,7 +2037,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFB4 = func_002D3288(size);
     func_002D0918(handle);
     if (fldTitleIsActive() == 0) {
-        kwlnTaskCreate(D_003A0800, 0x2B0A, 0, 1, fldTitle, func_0014A930, 0);
+        kwlnTaskCreate(D_003A0800, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }
 }
 
@@ -2088,7 +2088,7 @@ void fldLoadWeatherEffects(void) {
 
     handle = func_002EB028("/fld/f/bin/limit_00.tmx", &size, 0);
     D_003BAFF4 = func_002D3288(size);
-    func_002D0A10(handle);
+    sdfQueueNonzeroResourceId(handle);
     D_003BAFC8 = func_002EB028("/fld/f/bin/FH_DAM_2.EPL", &D_003BAFCC, 0);
     D_003BAFD0 = func_0014FE28(D_003BAFCC);
     D_003BAFD4 = 0;
@@ -2097,7 +2097,7 @@ void fldLoadWeatherEffects(void) {
     D_003BAFE4 = 0;
 }
 
-void func_0014B4D0(void) {
+void fldReleaseWeatherEffects(void) {
     if (D_003BAFF4 != 0) {
         sdfTexReleaseReferenceViaHandler(D_003BAFF4);
         D_003BAFF4 = 0;
@@ -2105,13 +2105,13 @@ void func_0014B4D0(void) {
     effDestroyNode(D_003BAFD0);
     D_003BAFD0 = 0;
     D_003BAFD4 = 0;
-    func_002D0A10(D_003BAFC8);
+    sdfQueueNonzeroResourceId(D_003BAFC8);
     D_003BAFC8 = 0;
     D_003BAFCC = 0;
     effDestroyNode(D_003BAFE0);
     D_003BAFE0 = 0;
     D_003BAFE4 = 0;
-    func_002D0A10(D_003BAFD8);
+    sdfQueueNonzeroResourceId(D_003BAFD8);
     D_003BAFD8 = 0;
     D_003BAFDC = 0;
 }
@@ -2314,7 +2314,7 @@ extern s32 D_003D62A0[];
 
 extern void evtCaptureMessageWindowSoundMode(s32);
 
-extern void func_0024DAE8(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
 
 extern void mdlFlagSet(s32);
 
@@ -2328,7 +2328,7 @@ extern void func_001239C8(void);
 
 extern void fldClearObjectEntryHandles(void);
 
-extern void func_0014B4D0(void);
+extern void fldReleaseWeatherEffects(void);
 
 extern void fldStartSceneBgmAlternate(void);
 
@@ -2348,7 +2348,7 @@ void fldFinishEventFieldState(void) {
         D_0032E5C4[0] = 0;
         func_001239C8();
         fldClearObjectEntryHandles();
-        func_0014B4D0();
+        fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
         func_00123E00();
         state->eventActive = 0;
@@ -2377,7 +2377,7 @@ void fldResetEventSceneState(void) {
     D_0032E5C4[0] = 0;
     D_0032E3B0[0x46] = 0;
     fldClearObjectEntryHandles();
-    func_0014B4D0();
+    fldReleaseWeatherEffects();
     func_00123E00();
     D_0032E3B0[0x45] = 1;
     ((FldResetWork *)D_0032E3B0)->eventActive = 0;
@@ -2397,7 +2397,7 @@ void fldFinishDeferredExit(void) {
     if (D_0032E3B0[0x45] == 2) {
         func_0024DD78();
         if (!evtGetMessageWindowControlState()) {
-            func_0024DBB0();
+            evtFinishMessageWindowAndNotify();
             dspCloseChannel();
             func_00123E00();
             D_0032E3B0[0x45] = 0;

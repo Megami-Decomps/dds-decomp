@@ -2,14 +2,14 @@
 
 extern u64 sdfSoundIsCommandBusy(void);
 
-extern u64 func_0014A250(void);
+extern u64 fldGetCurrentSceneSelectionResource(void);
 
 extern s32 D_0032E4E4[];
 
-u32 func_0014F4C8(void) {
+u32 fldCmdGetCurrentSceneSelectionResource(void) {
     u64 value;
 
-    value = func_0014A250();
+    value = fldGetCurrentSceneSelectionResource();
     scrSetIntegerReturnValue(value);
     return 1;
 }

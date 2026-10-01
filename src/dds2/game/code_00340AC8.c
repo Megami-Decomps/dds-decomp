@@ -11,7 +11,7 @@ extern EffRandState D_0040BAE8;
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 extern f32 sdfSinPoly(f32 angle);
 
-extern f32 func_003407A0(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 extern void sdfAtan2(f32 x, f32 y);
 
@@ -101,7 +101,7 @@ void effMiscAxisAngleToQuaternionVU(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf10, vf10, vf2x");
-    trigValue = func_003407A0(halfAngle);
+    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf10, vf0, vf2x");
 }
 
@@ -111,7 +111,7 @@ void effMiscAxisAngleToQuaternionVf11(f32 angle)
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSinPoly(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.xyzw vf11, vf11, vf2x");
-    trigValue = func_003407A0(halfAngle);
+    trigValue = sdfEvaluateCosineViaSinePhaseShift(halfAngle);
     VU0_SCALAR_OP(trigValue, "vmulx.w vf11, vf0, vf2x");
 }
 
@@ -162,7 +162,7 @@ INCLUDE_ASM(const s32, "game/code_00340AC8", func_00340EE0);
 
 /* Spherical interpolation of quaternions vf10 and vf11 by amount, taking the
  * shorter arc and leaving the normalized result in vf10. */
-void func_00341028(f32 amount)
+void effMiscSlerpQuaternionVu(f32 amount)
 {
     f32 dot;
     f32 w0;
@@ -210,7 +210,7 @@ void effMiscQuaternionNlerpVU(f32 amount)
 }
 
 /* vu0 routine: rotate the global vector by the quaternion matrix, atan2 of the result x and y */
-void func_003411A0(void)
+void effMiscComputeQuaternionRotatedReferenceAngle(void)
 {
     f32 x;
     f32 y;

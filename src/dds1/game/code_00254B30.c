@@ -47,7 +47,7 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00254C68);
 
 extern void *memset(void *, s32, u32);
 extern void func_002CD0D8(u32, s32, void *);
-extern void func_002CA858(s32, s32, s32, u32, s32, void *, u32, s32);
+extern void frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, s32, void *, u32, s32);
 
 /* Fetch an indexed display record and draw it with the requested tag bits. */
 void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry, s32 context) {
@@ -57,7 +57,7 @@ void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 attributes, u32 entry,
 
     memset(buffer, 0, 0x20);
     func_002CD0D8(id, 1, buffer);
-    func_002CA858(x + 0x35, y + 0x136, layer, tag, 4, buffer, 0x80000000, context);
+    frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, tag, 4, buffer, 0x80000000, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00254EF0);
@@ -85,13 +85,13 @@ extern s32 fldGetSceneMetadataNode();
 extern void func_0024DD90(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
 extern void func_003014F0(void *, void *, s32);
-extern void func_0024DAE8(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtCaptureMessageWindowSoundMode(s32);
 
 /* Populate four menu labels from the current selection and scene metadata. */
 void itfDspPopulatePrimaryLabels(void) {
-    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
@@ -100,14 +100,14 @@ void itfDspPopulatePrimaryLabels(void) {
     func_0024DD90(2, &D_003BAA78[scene->sceneId]);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
-    func_0024DAE8(0);
+    evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(0);
     evtCaptureMessageWindowSoundMode(8);
 }
 
 /* Populate the same menu labels, selecting the alternate display signal. */
 void itfDspPopulateAlternateLabels(void) {
-    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
@@ -116,14 +116,14 @@ void itfDspPopulateAlternateLabels(void) {
     func_0024DD90(2, &D_003BAA78[scene->sceneId]);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     func_0024DD90(3, text);
-    func_0024DAE8(0);
+    evtSetMessageWindowOptionWhenOpen(0);
     dspStartEntry(1);
     evtCaptureMessageWindowSoundMode(8);
 }
 
 /* Populate menu labels for the third display signal. */
 void itfDspPopulateThirdLabels(void) {
-    DspSelection *selection = (DspSelection *)func_0024FA18();
+    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
@@ -169,7 +169,7 @@ typedef struct DspParticle {
     u8 size;       /* 0x0B */
 } DspParticle;
 
-void func_00255838(DspParticle *spark) {
+void mnuUpdateSparkle(DspParticle *spark) {
     spark->timer = spark->timer - 1;
     if (spark->timer < 0) {
         if (spark->phase != 0) {
@@ -212,7 +212,7 @@ void func_002559F8(DspParticleState *state) {
     /* Advance every particle, including those waiting for their next phase. */
     particle = state->particles;
     for (i = 7; i >= 0; i--) {
-        func_00255838(particle);
+        mnuUpdateSparkle(particle);
         particle++;
     }
 }
@@ -256,7 +256,7 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_003BC478[];
 
-void func_00256290(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
     Bytes7 table = D_003BC478[0];
 
     func_0024E260(x, y, layer, scale, table.b[entry->index], context);
@@ -368,7 +368,7 @@ void func_00256E88(void) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
 
-extern s32 func_0024FA18(void);
+extern s32 mnuGetSelectedNodeValue(void);
 extern u32 func_00255FF8(u8 *, s32);
 
 typedef struct {
@@ -386,8 +386,8 @@ typedef struct {
     DspEntryContainer *entries; /* 0x484 */
 } DspDisplayObject;
 
-void func_002570A8(DspDisplayObject *obj, s32 scale, s32 context) {
-    s32 target = func_0024FA18();
+void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, s32 context) {
+    s32 target = mnuGetSelectedNodeValue();
     u8 *entry = obj->entries->link->entry;
     u32 flags;
     s32 kind;

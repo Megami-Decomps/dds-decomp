@@ -247,7 +247,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103F58);
 extern u32 D_00438DA0[2];
 extern void sdfDevConsSetEntryPair(s32, s32, s32);
 
-void func_00104020(void) {
+void kwlnPadResetMotorLevelsAndOutput(void) {
     D_00438D90[0] = 0;
     D_00438D90[1] = 0;
     D_00438DA0[0] = 0;
@@ -670,7 +670,7 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
     D_0037F5EC[2] = 2041.0f;
 }
 
-s32 func_00106108(void) {
+s32 kwlnFadeIsBackgroundOverlayActive(void) {
     if (D_00435CD4 & 0x0C000000) {
         return 1;
     }

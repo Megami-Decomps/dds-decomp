@@ -612,7 +612,7 @@ void func_00197BB0(Work24 *src) {
 extern EffLoader D_003B2C90;
 extern s8 D_0043652F;
 
-s8 func_00197C08(void) {
+s8 effAdvancePendingChannelState(void) {
     if (D_0043652F == 0) {
         if (D_003B2C90.load != 0) {
             *D_003B2C90.result = D_003B2C90.load(&D_003B2AF8);

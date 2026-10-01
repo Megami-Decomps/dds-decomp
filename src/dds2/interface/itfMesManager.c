@@ -245,7 +245,7 @@ void itfMesDestroyWindow(s32 window);
 
 void frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
 
-void func_001A5E00(void *, s32);
+void itfMesResetCursorState(void *, s32);
 
 void itfResetCursorPositionAndState(void *, s32);
 
@@ -275,9 +275,9 @@ extern u32 func_003292A8();
 
 extern u32 sdfResourceRetainAddress();
 
-extern void func_001A5E48();
+extern void itfInitializeCursorResetState();
 
-extern void func_001A5E88();
+extern void itfResetWindowResourceBlock();
 
 extern void itfClearDrawStateWords();
 
@@ -533,9 +533,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->unk12 = 0;
     mes->callbackAddress = 0;
     itfResetCursorPositionAndState(&mes->blk14, 1);
-    func_001A5E00(&mes->blk24, 1);
-    func_001A5E48(&mes->blk40);
-    func_001A5E88(&mes->blkA4);
+    itfMesResetCursorState(&mes->blk24, 1);
+    itfInitializeCursorResetState(&mes->blk40);
+    itfResetWindowResourceBlock(&mes->blkA4);
     itfClearDrawStateWords(mes->tableD0);
     itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
     D_00452940.activeWindowCount++;
@@ -567,7 +567,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
         frFontQueueGlyphInSelectedSlot(blk24->glyphChain);
         blk24->glyphChain = NULL;
     }
-    func_001A5E00(blk24, 0);
+    itfMesResetCursorState(blk24, 0);
     mes->flags &= ~7;
     mes->flags &= 0xFFFDFFFF;
     if (releasePrimaryBlock == 0) {
@@ -905,7 +905,7 @@ typedef struct ItfMesWindowRec {
 
 extern ItfMesWindowRec D_00452960[];
 extern void btlReleaseEffectResourceHandles();
-extern void func_001A5FA0();
+extern void itfReleaseUiResourceSlotHandles();
 extern void itfReleasePoolNode();
 
 void itfMesDestroyWindow(s32 window) {
@@ -915,7 +915,7 @@ void itfMesDestroyWindow(s32 window) {
         itfMesCleanupWindow(window, 1);
         itfMesResetWindow(window);
         btlReleaseEffectResourceHandles(mes);
-        func_001A5FA0(mes->tableD0);
+        itfReleaseUiResourceSlotHandles(mes->tableD0);
         mes->flags = 0;
         func_003297C8(rec->handle);
         rec->mes = NULL;

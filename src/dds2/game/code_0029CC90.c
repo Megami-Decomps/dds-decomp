@@ -203,11 +203,11 @@ extern s32 ptyCalcLevelUps(u8 *);
 
 extern s32 ptyComputeTotalExp(u8 *, s32);
 
-extern u32 func_00314728(u8 *, u32);
+extern u32 ptyAddProfileRecordValueClamped(u8 *, u32);
 
 extern s32 func_00314C10(s32);
 
-extern u32 func_00314690(u16);
+extern u32 ptyGetProfileRecordCap(u16);
 
 /* Match the progress-row layout in DDS1 game/code_002653A0.c. */
 typedef struct BrsUnitExp {
@@ -233,9 +233,9 @@ void brsBuildUnitProgressRow(u8 *state, u8 *entry) {
     mnuTitleInitFourParameters(((BrsProgressRow *)state)->levelProgress, 0x6E0, 0x50,
         ((BrsUnitExp *)entry)->totalExp - ptyComputeTotalExp(entry, levelDelta),
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
-    profilePoints = func_00314728(entry, 0);
+    profilePoints = ptyAddProfileRecordValueClamped(entry, 0);
     mnuTitleInitFourParameters(((BrsProgressRow *)state)->profileProgress, 0x3C0, 0x50, profilePoints,
-        func_00314690(func_00314C10((s32)entry) & 0xFFFF));
+        ptyGetProfileRecordCap(func_00314C10((s32)entry) & 0xFFFF));
 }
 
 u32 func_0029DA58(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {

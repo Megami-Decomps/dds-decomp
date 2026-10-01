@@ -149,7 +149,7 @@ extern u8 D_003BAE78[];
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
-extern u32 *func_00110F80(u64 world, const char *name);
+extern u32 *dds3FindObjectChainNodeByName(u64 world, const char *name);
 
 extern void func_003003F0(const char *fmt, ...);
 
@@ -370,12 +370,12 @@ s32 fldCmdReleaseCurrentObject(void) {
     return 1;
 }
 
-u32 func_0014D458(void) {
+u32 fldCmdSetSceneControlFlag(void) {
     fldSetSceneControlFlags(0x10);
     return 1;
 }
 
-u32 func_0014D478(void) {
+u32 fldCmdClearSceneControlFlag(void) {
     fldClearSceneControlFlags(0x10);
     return 1;
 }
@@ -416,7 +416,7 @@ extern FldVec3 D_00330620;
 
 extern f32 sdfSinPoly(f32);
 
-extern f32 func_002E78F8(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern s32 func_001312D8();
 
@@ -433,10 +433,10 @@ s32 fldUpdateLookAtSegment(void) {
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
-    near.z = cam->z + func_002E78F8((cam->angle + 180.0f) * 3.14f / 180.0f);
+    near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
     far.x = cam->x + sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     far.y = cam->y - 200.0f - 10.0f + 60.0f;
-    far.z = cam->z + func_002E78F8(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
+    far.z = cam->z + sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * 550.0f;
     D_00330610.x = near.x;
     D_00330610.y = near.y;
     D_00330610.z = near.z;
@@ -572,7 +572,7 @@ u32 fldCmdFreeDisplayObjects(void) {
 }
 
 s32 fldFindSearchId(const char *name) {
-    u32 *entry = func_00110F80(dds3GetWorldSecondaryObject(), name);
+    u32 *entry = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), name);
     if (entry != 0) {
         return entry[1];
     }
@@ -645,7 +645,7 @@ typedef struct FldWorldItem {
     s32 *data;
 } FldWorldItem;
 
-extern FldWorldItem *func_00110458(u64);
+extern FldWorldItem *dds3ReadIndexedWorldObjectWord(u64);
 
 extern void func_00113E20(FldWorldItem *, s32);
 
@@ -681,7 +681,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
         if (func_00110400(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = func_00110458(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -737,7 +737,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         if (func_00110400(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
-                item = func_00110458(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
@@ -1279,12 +1279,12 @@ u32 func_0014F010(void) {
     return 1;
 }
 
-u32 func_0014F050(void) {
+u32 fldCmdResetCameraMoveTracking(void) {
     fldResetCameraMoveTracking();
     return 1;
 }
 
-u32 func_0014F070(void) {
+u32 fldCmdQueryCameraMoveTracking(void) {
     u64 result;
 
     result = fldEvaluateCameraMoveTracking();

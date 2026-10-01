@@ -17,7 +17,7 @@ extern u32 D_003BABD0;
 
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s64 func_00110400(u64);
-extern u64 func_00110458(u64);
+extern u64 dds3ReadIndexedWorldObjectWord(u64);
 extern s64 dds3AdvanceObjectValueCursor(u64);
 extern u64 func_00110AB0(u64, u64);
 extern s64 func_00113E30(u64);
@@ -49,7 +49,7 @@ extern void fldSetCameraMoveMode(s32);
 extern void func_0013E5A8(u32 arg0);
 extern u32 fldGetSceneReadyFlag(void);
 extern s32 scrFindNamedProcessNode(const char *arg0);
-extern void func_002D8C88(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 extern u32 D_003BAB34;
@@ -71,7 +71,7 @@ extern s32 func_00102A60(void);
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
-extern void func_002D0A10(u32 arg0);
+extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern s32 D_003BABEC;
 extern u8 D_0034C8F0[];
 extern void fldActivateObjectById(s32);
@@ -476,7 +476,7 @@ void fldSubmitVisibleWorldBackground(void) {
     if (list != 0) {
         if (dds3ResetObjectValueCursor(list) != 0) {
             do {
-                item = func_00110458(list);
+                item = dds3ReadIndexedWorldObjectWord(list);
                 if (dds3TestObjectFlags(item, 0x200) != 0) {
                     if (dds3TestObjectFlags(item, 1) == 0) {
                         found = 1;
@@ -990,7 +990,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001228D8);
 
 extern f32 func_001228D8();
 
-f32 func_001229A8(void) {
+f32 fldGetNormalizedComplementaryAngle(void) {
     s32 angle = (s32)(360.0f - func_001228D8() + 90.0f);
     return (f32)(angle % 360);
 }
@@ -1017,7 +1017,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
     }
     dds3ResetObjectValueCursor(list);
     do {
-        object = func_00110458(list);
+        object = dds3ReadIndexedWorldObjectWord(list);
         status = func_00113E30(object);
         if (status == 4) {
             if (clearMode == 0) {
@@ -1040,7 +1040,7 @@ extern void fileRestoreSlotFlagsToState(void);
 void fldSetDeferredFieldCommand(u32, u32);
 extern void func_001028E8(s32, void *, s32, s32);
 
-void func_00122CB8(void) {
+void fldPrepareDeferredSceneTransition(void) {
     if (*(s16 *)(D_003BAA00 + 0xe) != 0) {
         func_00118020(1);
     } else {
@@ -1073,7 +1073,7 @@ void fldStartSequenceRecord(void) {
         return;
     }
     if (*(s16 *)(D_003BAA00 + 0xE) != 0) {
-        func_00122CB8();
+        fldPrepareDeferredSceneTransition();
         return;
     }
     func_00120C08(1);
@@ -1092,7 +1092,7 @@ extern u64 D_003BAB98[], D_003BABA0[], D_003BABA8[], D_003BABB0[];
 extern u8 D_0032F240[];
 extern void func_003003F0(void *);
 extern void fldInitDisplayObjects(void);
-extern void func_00122ED0(void);
+extern void fldResetPlayerSceneTransformState(void);
 extern void fldResetPendingSounds(void);
 extern void func_002E8430(void *, s32);
 extern void fldParseMixLb(void);
@@ -1103,7 +1103,7 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BAB70);
     fldInitDisplayObjects();
     func_003003F0(D_003BAB78);
-    func_00122ED0();
+    fldResetPlayerSceneTransformState();
     func_003003F0(D_003BAB80);
     fldResetPendingSounds();
     func_003003F0(D_003BAB88);
@@ -1119,7 +1119,7 @@ void fldInitializeDisplayAndTables(void) {
     func_003003F0(D_003BABB0);
 }
 
-void func_00122ED0(void) {
+void fldResetPlayerSceneTransformState(void) {
     u32 *buffer = D_0032F1A0;
 
     VU0_STORE_VF(vf0, buffer);
@@ -1326,7 +1326,7 @@ void fldLoadPlayerModel(void) {
 
 void fldUnloadPlayerModel(void) {
     if (D_003BAB54 != 0) {
-        func_002D0A10(D_003BAB54);
+        sdfQueueNonzeroResourceId(D_003BAB54);
         D_003BAB54 = 0;
         D_0032E4EC[0] = 0;
     }
@@ -1345,13 +1345,13 @@ void fldPrepareResourceBuffer(void) {
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
-    func_002D0A10(D_003BAB58);
+    sdfQueueNonzeroResourceId(D_003BAB58);
     D_003BAB58 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_003BAB58 != 0) {
-        func_002D0A10(D_003BAB58);
+        sdfQueueNonzeroResourceId(D_003BAB58);
         D_003BAB58 = 0;
     }
     if (D_0032E3D0[0] == 0 && D_003BABE8 == 0) {
@@ -1609,7 +1609,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_001248D0(void) {
-    func_002D8C88(D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer(D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
 
@@ -1687,7 +1687,7 @@ u8 fldGetCampSceneControlMode(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00124F58);
 
-u8 func_00125140(void) {
+u8 fldGetSceneReadyOrPendingState(void) {
     if (D_003BABF0 > 0) {
         return 2;
     }
@@ -1820,7 +1820,7 @@ u8 fldIsFieldResourceWaitFinished(void) {
 }
 
 void func_00126038(void) {
-    func_0013EC10();
+    fldSelectActorFromSceneIndexTables();
 }
 
 void func_00126050(void) {

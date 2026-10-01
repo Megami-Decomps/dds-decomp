@@ -35,8 +35,8 @@ typedef struct FrFontSysLocal {
     s32 unk14C;             /* 0x14C */
     void *unk150;           /* 0x150: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
     void *unk154;           /* 0x154: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
-    void *unk158;           /* 0x158: passed to func_002D1B90 by frFontReleaseAll */
-    void *unk15C;           /* 0x15C: passed to func_002D1B90 by frFontReleaseAll */
+    void *unk158;           /* 0x158: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
+    void *unk15C;           /* 0x15C: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
     u8 unk160[0x34];        /* 0x160 */
     void *glyphSlots[2];     /* 0x194: glyph chain slots */
 } FrFontSysLocal;
@@ -47,9 +47,9 @@ extern u32 D_003565F8[];
 extern void frFontFreeAllEntries(void);
 extern void *func_00194840(void *arg0);
 extern u32 itfReleaseMemNodeBuffer(s32 arg0);
-extern void func_00193B70(void);
+extern void fmGslReleaseActiveResourceBuffers(void);
 extern void func_002D0918(void *arg0);
-extern void func_002D1B90(void *arg0);
+extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 void frFontListInsert(FntNode *node) {
     FntNode *head = D_003D68C0.head;
@@ -105,9 +105,9 @@ void frFontReleaseAll(void) {
     func_00194840(D_003D6C80.glyphSlots[1]);
     itfReleaseMemNodeBuffer(D_003D6C80.unk150);
     itfReleaseMemNodeBuffer(D_003D6C80.unk154);
-    func_00193B70();
-    func_002D1B90(D_003D6C80.unk158);
-    func_002D1B90(D_003D6C80.unk15C);
+    fmGslReleaseActiveResourceBuffers();
+    sdfUpdateTextureHeadsWithInterruptsMasked(D_003D6C80.unk158);
+    sdfUpdateTextureHeadsWithInterruptsMasked(D_003D6C80.unk15C);
 }
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_001944A0);

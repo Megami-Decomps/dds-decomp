@@ -20,7 +20,7 @@ void *func_00110628(void *arg0, void *arg1, s32 arg2);
 
 void dds3ResetObjectValueCursor(void *arg);
 
-void *func_00110680(void *arg);
+void *dds3ReadIndexedWorldObjectWord(void *arg);
 
 s32 dds3AdvanceObjectValueCursor(void *arg);
 
@@ -202,7 +202,7 @@ s32 dds3SeekWorldNode(void *iterator, void *target) {
     void *candidate;
 
     do {
-        candidate = func_00110680(iterator);
+        candidate = dds3ReadIndexedWorldObjectWord(iterator);
         if (candidate == NULL) {
             return 0;
         }

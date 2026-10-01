@@ -17,13 +17,13 @@ extern u8 D_003BF950[];
 
 extern u32 btlHasMarkedEntry14(u32);
 
-extern void func_001E9F30(u32);
+extern void btlFaceActionParticipantsTowardLinkedTarget(u32);
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
 extern void btlFlagUnitDefeatCandidate(u32);
 
-extern u32 func_0021F808(void);
+extern u32 btlIsMarkedActionSceneStateActive(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -39,7 +39,7 @@ extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
 extern void btlUnitSetCameraOffset(u32);
 
-extern void func_00224020(u32);
+extern void btlRaiseActionCameraPoints(u32);
 
 extern void func_00224EE8(u32);
 
@@ -51,9 +51,9 @@ extern void func_00217898(u32, u32, u32, u32, u32, f32, f32, f32);
 
 extern void func_0023CE10(u32, u32);
 
-extern void func_0023CE18(u32, f32);
+extern void evtSetTransitionMotionScale(u32, f32);
 
-extern void func_002228C0(u32);
+extern void btlChooseBrahmaGroupCamera(u32);
 
 extern void func_002240C0(u32);
 
@@ -196,7 +196,7 @@ typedef struct BattleActorHandle {
 extern void func_001E2758(ActionUnit *);
 extern void func_001E22D8(ActionUnit *, s32, s32, f32);
 /* When the action-state byte changes, restore the marked unit's saved motion. */
-void func_0021EE10(void) {
+void btlRestoreMarkedUnitMotionOnStateChange(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     u8 *state = scene->state;
     ActionUnit *unit;
@@ -225,7 +225,7 @@ void func_0021EE10(void) {
     }
 }
 
-void func_0021EEF8(u32 unused, u32 actor) {
+void btlToggleActionByteForFlaggedActor(u32 unused, u32 actor) {
     u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     if (*(u32 *)(actor + 0x28) & 0x8000) {
         if (((BattleActionByteState *)state)->previous != 0) {
@@ -236,24 +236,24 @@ void func_0021EEF8(u32 unused, u32 actor) {
     }
 }
 
-u32 func_0021EF48(ActionUnit *unit, ActionUnit *actor, u32 action) {
+u32 btlGetMarkedUnitActionResponse(ActionUnit *unit, ActionUnit *actor, u32 action) {
     u8 *state = ((BattleActionScene *)func_001AA6F8())->state;
     state[2] = action == 0x196;
     if ((unit->flags & 0x200) &&
         (actor->flags & 0x400) &&
         actor->mode == 0x115) {
-        return func_0021F808() ? 4 : 0;
+        return btlIsMarkedActionSceneStateActive() ? 4 : 0;
     }
     return 0;
 }
 
-s32 func_0021EFD8(ActionUnit *unit) {
+s32 btlGetMarkedUnitActionStatus(ActionUnit *unit) {
     if (unit == 0) {
-        return func_0021F808() ? 0xf : -1;
+        return btlIsMarkedActionSceneStateActive() ? 0xf : -1;
     }
     if ((unit->flags & 0x400) &&
         unit->mode == 0x115 &&
-        func_0021F808()) {
+        btlIsMarkedActionSceneStateActive()) {
         return 0xf;
     }
     return -1;
@@ -263,7 +263,7 @@ extern u8 *D_00435E30;
 extern char D_0041AAC8[]; /* format string */
 extern char D_00436CF0[];
 extern s32 func_0035C860(char *, const char *, ...);
-void func_0021F040(s32 unit, u32 action, char *buffer) {
+void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer) {
     u32 value;
 
     if (action == 0x196) {
@@ -289,7 +289,7 @@ void func_0021F040(s32 unit, u32 action, char *buffer) {
 
 extern void func_001E3108(ActionUnit *, void *);
 extern void btlSetUnitPosition(ActionUnit *, void *);
-void func_0021F0E8(void) {
+void btlCenterMarkedFormationAroundLead(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     ActionUnit *unit;
     ActionUnit *lead = 0;
@@ -417,7 +417,7 @@ u32 btlHasActiveSpecialMotionActor(void) {
     return 0;
 }
 
-u32 func_0021F808(void) {
+u32 btlIsMarkedActionSceneStateActive(void) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
     if (battle->mode != 0x30e) {
         return 0;
@@ -473,7 +473,7 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
     return 0;
 }
 
-s32 func_002205C0(ActionUnit *unit, s32 action) {
+s32 btlRemapMarkedUnitCommand(ActionUnit *unit, s32 action) {
     u32 flags = unit->flags;
 
     if ((flags & 0x400) == 0) {
@@ -557,7 +557,7 @@ void func_00220998(void) {
     func_0011AEE0(9);
 }
 
-void func_002209B0(ActionUnit *unit) {
+void btlMarkUnitActionAndStatusForMode(ActionUnit *unit) {
     if ((unit->flags & 0x200) != 0 &&
         unit->mode == 9) {
         unit->stateFlags |= 0x2000;
@@ -570,7 +570,7 @@ u32 btlStartAction19A(ActionUnit *unit) {
     if (action < 0x19C) {
         if (action >= 0x19A) {
             unit->flags |= 0x800;
-            func_001E9F30((u32)unit);
+            btlFaceActionParticipantsTowardLinkedTarget((u32)unit);
             return 1;
         }
     }
@@ -588,18 +588,18 @@ u32 btlTickAction19A(ActionUnit *unit) {
     return 0;
 }
 
-extern s32 func_001B2430(ActionUnit *, s32);
-extern void func_001B5288(ActionUnit *, u32 *);
-s32 func_00220A78(ActionUnit *unit, u32 *entry) {
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(ActionUnit *, s32);
+extern void btlRestoreUnitMinimumValueAndClearStatus(ActionUnit *, u32 *);
+s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
     ActionUnit **state;
 
     if (unit->flags & 0x400) {
         state = (ActionUnit **)((BattleActionScene *)func_001AA6F8())->state;
         entry[0x28 / 4] &= ~1;
         entry[0x28 / 4] &= ~2;
-        if (func_001B2430(unit, 0)) {
+        if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
             if (*state != 0 && *state != unit) {
-                func_001B5288(unit, entry);
+                btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
             } else {
                 *state = unit;
             }
@@ -611,7 +611,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00220B20);
 
 extern u8 *btlCreateScriptResourceTask(ActionUnit *, s32);
 extern u8 *sndCreateStationedSeTask(s32);
-void func_00220C38(ActionUnit *unit) {
+void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     ActionUnit **slot = (ActionUnit **)scene->state;
     u8 *task;
@@ -640,7 +640,7 @@ u32 btlGetSelectedActorAction(void) {
     return unit->mode;
 }
 
-void func_00220D48(ActionUnit *unit, u32 state) {
+void btlClearActionPhaseOnNegativeState(ActionUnit *unit, u32 state) {
     if ((unit->flags & 0x400) &&
         unit->mode == 0x116 &&
         *(s32 *)state < 0) {
@@ -650,7 +650,7 @@ void func_00220D48(ActionUnit *unit, u32 state) {
     }
 }
 
-u32 func_00220D98(u32 unused1, u32 unused2, u32 action) {
+u32 btlActivateMarkedActionFromCommand(u32 unused1, u32 unused2, u32 action) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
     BattleActionFlagState *target = (BattleActionFlagState *)battle->state;
     if (action == 0x1a5) {
@@ -713,7 +713,7 @@ s32 func_00220F68(ActionUnit *unit) {
     return *scene->state != 0 ? 0x10 : -1;
 }
 
-u32 func_00221060(ActionUnit *unit, u32 command) {
+u32 btlAcceptLinkedActorCommand(ActionUnit *unit, u32 command) {
     if ((unit->flags & 0x400) == 0) {
         return 0;
     }
@@ -723,7 +723,7 @@ u32 func_00221060(ActionUnit *unit, u32 command) {
     return command == 0x10;
 }
 
-u32 func_00221090(void) {
+u32 btlIsLinkedActionSceneStateActive(void) {
     BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
     if (battle->mode != 0x30f) {
         return 0;
@@ -731,10 +731,10 @@ u32 func_00221090(void) {
     return *(u8 *)battle->state != 0;
 }
 
-u32 func_002210D0(ActionUnit *unit) {
+u32 btlStartLinkedDefeatCandidateAction(ActionUnit *unit) {
     if (unit->action == 0x1a4) {
         unit->flags |= 0x800;
-        func_001E9F30((u32)unit);
+        btlFaceActionParticipantsTowardLinkedTarget((u32)unit);
         btlClearAllUnitDefeatCandidates();
         btlFlagUnitDefeatCandidate(((ActionStateLink *)unit->stateFlags)->owner);
         return 1;
@@ -742,7 +742,7 @@ u32 func_002210D0(ActionUnit *unit) {
     return 0;
 }
 
-u32 func_00221128(ActionUnit *unit) {
+u32 btlTickLinkedDefeatCandidateAction(ActionUnit *unit) {
     if (unit->action == 0x1a4) {
         btlSetRuntimeFlag2000(unit);
         return 1;
@@ -751,7 +751,7 @@ u32 func_00221128(ActionUnit *unit) {
 }
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221158);
 
-u32 func_00221390(ActionUnit *unit) {
+u32 btlInitializeMarkedActionTimer(ActionUnit *unit) {
     if (unit->action == 0x6b) {
         if (btlHasMarkedEntry14((u32)unit)) {
             unit->actionTimer = 0;
@@ -763,7 +763,7 @@ u32 func_00221390(ActionUnit *unit) {
     return 0;
 }
 
-u32 func_002213E0(ActionUnit *unit) {
+u32 btlStartMarkedActionRuntimeUpdate(ActionUnit *unit) {
     if (unit->action == 0x6b) {
         btlSetRuntimeFlag2000(unit);
         return 1;
@@ -790,7 +790,7 @@ u32 btlTickAction6B(u32 unit) {
     return 1;
 }
 
-u32 func_00221498(ActionUnit *unit) {
+u32 btlResetDelayedActionTimer(ActionUnit *unit) {
     if (unit->action == 0x6c) {
         unit->actionTimer = 0;
         return 0;
@@ -798,7 +798,7 @@ u32 func_00221498(ActionUnit *unit) {
     return 0;
 }
 
-u32 func_002214C0(ActionUnit *unit) {
+u32 btlTickDelayedMarkedAction(ActionUnit *unit) {
     if (unit->action != 0x6c) {
         return 0;
     }
@@ -864,7 +864,7 @@ void btlMarkSpecialActionUnit(ActionUnit *actor) {
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002218C8);
 
 extern void btlBossDebugPrintf(const char *, ...);
-s32 func_00221988(ActionUnit *unit) {
+s32 btlAdvanceBrahmaRatioOnAction(ActionUnit *unit) {
     f32 *state;
     u8 *table;
 
@@ -883,7 +883,7 @@ s32 func_00221988(ActionUnit *unit) {
     }
 }
 
-f32 func_00221A30(ActionUnit *unit, u32 actor, u32 action, u32 mode) {
+f32 btlGetBrahmaActionScale(ActionUnit *unit, u32 actor, u32 action, u32 mode) {
     f32 factor = 1.0f;
     if (action == 0x19f && mode == 1 && (unit->flags & 0x400)) {
         BattleActionScene *battle = (BattleActionScene *)func_001AA6F8();
@@ -941,18 +941,18 @@ u32 btlGetSpecialActionGroupEntry(ActionUnit *unit, u32 group) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00221BC8);
 
-void func_00221E28(ActionUnit *unit, u32 group, f32 opacity) {
+void btlApplySpecialActionRenderGroup(ActionUnit *unit, u32 group, f32 opacity) {
     if ((unit->flags & 0x400) == 0) {
         func_0023CE10(unit->rendererHandle, group);
-        func_0023CE18(unit->rendererHandle, opacity);
+        evtSetTransitionMotionScale(unit->rendererHandle, opacity);
     } else {
         group = btlGetSpecialActionGroupEntry(unit, group);
         func_0023CE10(unit->rendererHandle, group);
-        func_0023CE18(unit->rendererHandle, opacity);
+        evtSetTransitionMotionScale(unit->rendererHandle, opacity);
     }
 }
 
-void func_00221EA0(ActionUnit *unit, u32 *entry) {
+void btlPrepareSpecialActionSelection(ActionUnit *unit, u32 *entry) {
     u8 *state;
 
     if (unit->flags & 0x400) {
@@ -960,8 +960,8 @@ void func_00221EA0(ActionUnit *unit, u32 *entry) {
             state = ((BattleActionScene *)func_001AA6F8())->state;
             entry[0x28 / 4] &= ~1;
             entry[0x28 / 4] &= ~2;
-            if (func_001B2430(unit, 0)) {
-                func_001B5288(unit, entry);
+            if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
+                btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
                 state[8] = 1;
             }
         }
@@ -983,7 +983,7 @@ u32 func_00221F40(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-u32 func_00221FE8(u32 unit, u32 action) {
+u32 btlGetMarkedActionMotionCode(u32 unit, u32 action) {
     switch (action) {
     case 0x178:
     case 0x17d:
@@ -996,7 +996,7 @@ u32 func_00221FE8(u32 unit, u32 action) {
 extern s32 btlFindUnitByActor(ActionUnit *);
 extern void fldAppendSceneGroupHandle(s32);
 extern void btlAppendIndexListEntry(s32, u32);
-s32 func_00222028(void) {
+s32 btlQueueMarkedSpecialActorSceneGroup(void) {
     BattleActionScene *scene = (BattleActionScene *)func_001AA6F8();
     ActionUnit *unit;
     ActionUnit *found;
@@ -1113,7 +1113,7 @@ extern s32 effMiscRandMod(s32, s32);
 extern char D_0041ACA8[]; /* "BRAHMA:I-0 ++++\n" */
 extern char D_0041ACC0[];
 extern void btlSetEffectCameraKeys(u32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-void func_00222768(u32 unit) {
+void btlChooseBrahmaIndividualCamera(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
         btlBossDebugPrintf(D_0041ACA8);
@@ -1134,7 +1134,7 @@ INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041ACA8);
 
 INCLUDE_RODATA(const s32, "game/code_0021EE10", D_0041ACC0);
 
-void func_002228C0(u32 unit) {
+void btlChooseBrahmaGroupCamera(u32 unit) {
     switch (effMiscRandMod(0, 2)) {
     case 0:
         btlBossDebugPrintf("BRAHMA:ALL-0 ++++\n");
@@ -1151,7 +1151,7 @@ void func_002228C0(u32 unit) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222A08);
 
-u32 func_00222D18(ActionUnit *unit) {
+u32 btlApplySingleTargetCameraOffset(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = ((ActionStateLink *)actor)->owner;
     if (((ActionUnit *)owner)->flags & 0x200) {
@@ -1170,7 +1170,7 @@ u32 func_00222D18(ActionUnit *unit) {
 }
 
 extern void btlFaceLinkedTargetAndFlagDirection(s32, s32);
-s32 func_00222DA8(s32 object) {
+s32 btlAimAtLinkedTargetOrGroupCamera(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
@@ -1186,14 +1186,14 @@ s32 func_00222DA8(s32 object) {
         }
     } else {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002228C0(object);
+        btlChooseBrahmaGroupCamera(object);
         return 1;
     }
     return 0;
 }
 
 extern void func_00217470(s32, s32, f32, f32, f32);
-s32 func_00222E58(s32 object) {
+s32 btlLiftTowardLinkedTarget(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
@@ -1220,16 +1220,16 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223350);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223BD8);
 
-s32 func_00223D10(ActionUnit *unit) {
+s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
     u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
         if ((flags & 0x10) == 0) {
-            func_002228C0((u32)unit);
+            btlChooseBrahmaGroupCamera((u32)unit);
         } else {
-            func_002228C0((u32)unit);
+            btlChooseBrahmaGroupCamera((u32)unit);
         }
         return 1;
     }
@@ -1240,7 +1240,7 @@ s32 func_00223D10(ActionUnit *unit) {
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
-        func_002228C0((u32)unit);
+        btlChooseBrahmaGroupCamera((u32)unit);
         return 1;
     }
     return 0;
@@ -1250,8 +1250,8 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00223DD8);
 
 extern u8 *btlCreateEffObjB(s32, s32);
 extern u8 *btlCreateEffObjD(s32, s32);
-extern s64 func_001A9920(void);
-void func_00223ED0(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
+extern s64 btlAdvanceRuntimeSequenceCounter(void);
+void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
     s32 *state;
     u8 *task;
     s32 kind;
@@ -1273,12 +1273,12 @@ void func_00223ED0(ActionUnit *unit, u32 action, u32 unused, u64 owner) {
         task = btlCreateEffObjB(unit->parentUnit, kind);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
-        ((BattleActionTask *)task)->resourceOwner = func_001A9920();
+        ((BattleActionTask *)task)->resourceOwner = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(task);
         task = btlCreateEffObjD(unit->parentUnit, 0x19F);
         task[0] = 4;
         *(u64 *)(task + 8) = owner;
-        value = func_001A9920();
+        value = btlAdvanceRuntimeSequenceCounter();
         ((BattleActionTask *)task)->delay = 0x26;
         ((BattleActionTask *)task)->resourceOwner = value;
         btlStartTask(task);
@@ -1311,7 +1311,7 @@ u32 func_00224010(u32 unused, s32 motion) {
     return result;
 }
 
-void func_00224020(u32 unit) {
+void btlRaiseActionCameraPoints(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
                   0.8f, 1.5f, 0.25f);
     ((ActionUnit *)unit)->cameraPointAHeight += 650.0f;
@@ -1327,7 +1327,7 @@ void func_002240C0(u32 unit) {
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
 
-u32 func_002240F8(ActionUnit *unit) {
+u32 btlRaiseSingleTargetCameraPoints(ActionUnit *unit) {
     u32 actor = unit->stateFlags;
     u32 owner = ((ActionStateLink *)actor)->owner;
     if (((ActionUnit *)owner)->flags & 0x200) {
@@ -1337,7 +1337,7 @@ u32 func_002240F8(ActionUnit *unit) {
                 return 0;
             }
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00224020((u32)unit);
+            btlRaiseActionCameraPoints((u32)unit);
             unit->pendingAction = 0;
             return 1;
         }
@@ -1345,7 +1345,7 @@ u32 func_002240F8(ActionUnit *unit) {
     return 0;
 }
 
-s32 func_00224188(s32 object) {
+s32 btlAimLinkedTargetOrSetCameraTransform(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
@@ -1367,7 +1367,7 @@ s32 func_00224188(s32 object) {
     return 0;
 }
 
-s32 func_00224238(s32 object) {
+s32 btlLiftLinkedTargetAndUpdateMotion(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
     if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x200) != 0) {
@@ -1399,7 +1399,7 @@ s64 btlUnitWrapB(void) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247D0);
 
-s32 func_00224D28(ActionUnit *unit) {
+s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
     u32 flags = ((BattleActionTableEntry *)D_00435E30)[unit->action].flags;
 
     if (flags & 0x1000) {
@@ -1415,7 +1415,7 @@ s32 func_00224D28(ActionUnit *unit) {
     if (flags & 0x2000) {
         if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->targetHandle) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_00224020((u32)unit);
+            btlRaiseActionCameraPoints((u32)unit);
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();

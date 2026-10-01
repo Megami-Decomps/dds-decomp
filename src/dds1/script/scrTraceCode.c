@@ -108,7 +108,7 @@ u32 scrStoreLocalFloat(ScrData *scr)
     return 1;
 }
 
-u32 func_0010C7E0(ScrData *scr)
+u32 scrAdvanceTraceProgramCounter(ScrData *scr)
 {
     scr->pc++;
     return 1;

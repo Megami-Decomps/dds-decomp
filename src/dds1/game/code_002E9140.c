@@ -94,7 +94,7 @@ u8 func_002E95B0(s32 index) {
     return D_003FE250[index].unk5;
 }
 
-s32 func_002E95C8(s32 index) {
+s32 sndGetNonnegativeEntryBalance(s32 index) {
     FE250Entry *entry = &D_003FE250[index];
     s32 difference = entry->unk4 - entry->unk5;
 

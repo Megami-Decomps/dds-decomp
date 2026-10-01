@@ -77,7 +77,7 @@ u32 dds3GetCameraHandle(CameraObject *camera) {
 }
 
 
-ActionObj *func_00112BC0(s32 value) {
+ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
     ActionObj *obj = func_00110880(4);
 
     obj->unk4 = value;

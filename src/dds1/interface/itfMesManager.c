@@ -82,7 +82,7 @@ typedef struct ItfMesState {
     s16 unk10;          /* 0x10 */
     s16 unk12;          /* 0x12 */
     ItfMesBlk14 blk14;    /* 0x14: passed to itfResetCursorPositionAndState */
-    ItfMesBlk24 blk24;    /* 0x24: passed to func_0019DDD0 */
+    ItfMesBlk24 blk24;    /* 0x24: passed to itfMesResetCursorState */
     ItfMesBlk40 blk40;  /* 0x40 */
     u8 unkA0[4];        /* 0xA0 */
     ItfMesBlkA4 blkA4;  /* 0xA4 */
@@ -256,7 +256,7 @@ void func_0019C9F0(s32 window, s32 arg1, s32 arg2);
 
 void frFontQueueGlyphInSelectedSlot(FrFontGlyph *arg0);
 
-void func_0019DDD0(void *arg0, s32 arg1);
+void itfMesResetCursorState(void *arg0, s32 arg1);
 
 void itfResetCursorPositionAndState(void *arg0, s32 arg1);
 
@@ -314,9 +314,9 @@ extern u32 func_002D03F8();
 
 extern u32 sdfResourceRetainAddress();
 
-extern void func_0019DE18();
+extern void itfInitializeCursorResetState();
 
-extern void func_0019DE58();
+extern void itfResetWindowResourceBlock();
 
 extern void itfClearDrawStateWords();
 
@@ -539,9 +539,9 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->unk12 = 0;
     mes->callbackAddress = 0;
     itfResetCursorPositionAndState(&mes->blk14, 1);
-    func_0019DDD0(&mes->blk24, 1);
-    func_0019DE18(&mes->blk40);
-    func_0019DE58(&mes->blkA4);
+    itfMesResetCursorState(&mes->blk24, 1);
+    itfInitializeCursorResetState(&mes->blk40);
+    itfResetWindowResourceBlock(&mes->blkA4);
     itfClearDrawStateWords(mes->tableD0);
     itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
     D_003D6EA0.activeWindowCount++;
@@ -573,7 +573,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
         frFontQueueGlyphInSelectedSlot(blk24->glyphChain);
         blk24->glyphChain = NULL;
     }
-    func_0019DDD0(blk24, 0);
+    itfMesResetCursorState(blk24, 0);
     mes->flags &= ~7;
     mes->flags &= 0xFFFDFFFF;
     if (arg1 == 0) {
@@ -927,7 +927,7 @@ extern ItfMesWindowRec D_003D6EC0[];
 
 extern void btlReleaseEffectResourceHandles();
 
-extern void func_0019DF70(s32 *arg0);
+extern void itfReleaseUiResourceSlotHandles(s32 *arg0);
 
 extern void func_002D0918(u32 allocation);
 
@@ -941,7 +941,7 @@ void itfMesDestroyWindow(s32 window) {
         itfMesCleanupWindow(window, 1);
         itfMesResetWindow(window);
         btlReleaseEffectResourceHandles(mes);
-        func_0019DF70(mes->tableD0);
+        itfReleaseUiResourceSlotHandles(mes->tableD0);
         mes->flags = 0;
         func_002D0918(rec->handle);
         rec->mes = NULL;

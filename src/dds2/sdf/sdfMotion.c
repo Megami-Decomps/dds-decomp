@@ -625,7 +625,7 @@ void func_003356E8(u8 *motion, f32 t1) {
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00335728);
 
-void func_003357D8(SdfMotionBinding *binding) {
+void sdfMotionCopyTrackValueToBinding(SdfMotionBinding *binding) {
     binding->current.word = binding->track->value28;
 }
 
@@ -790,7 +790,7 @@ void sdfMotionApplySampledSecondaryTextValue(SdfMotionOutput *output, f32 t1) {
     sdfCopySecondaryTextScalars(output->target, sample[0]);
 }
 
-void func_00335EB0(SdfMotionOutput *output, f32 t1) {
+void sdfMotionSampleTextScalarsAtTime(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
     func_00334678(output, sample, t1);

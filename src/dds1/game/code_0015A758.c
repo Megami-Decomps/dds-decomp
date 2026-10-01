@@ -250,7 +250,7 @@ void parCopyVector(void *dst, void *src) {
 }
 
 void func_0015AD78(void) {
-    func_0015A6F8();
+    parComposeEffectTransformMatrices();
 }
 
 void func_0015AD90(ParObj *work, u32 value) {

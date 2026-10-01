@@ -178,7 +178,7 @@ extern void sdfReleaseChipBlock(void *);
 
 extern u32 func_0027D4A0(u32);
 
-extern u32 func_0027F730(u32);
+extern u32 mnuCreateFadeSpriteResourceSet(u32);
 
 extern s32 func_002CFEB8(u32);
 
@@ -336,7 +336,7 @@ s32 mnuCloseSkillSelection(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     mnuDestroySkillSelectionWindow(selection);
     mnuClearPartyPanelActiveFlags(context + 0x15c);
-    func_00278868(selection);
+    mnuCloseItemSelectionState(selection);
     return 1;
 }
 
@@ -365,7 +365,7 @@ s64 mnuUpdateSkillListInput(s32 callback) {
         mnuPlayInputSound(0, buttons, ((MenuWindow *)list[8 + menu[11]])->field14);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
-            func_0027E790(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
+            mnuActivatePanelAndConfigureGridResources(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
         }
         return 0;
     }
@@ -580,7 +580,7 @@ void mnuDrawCursorIcons(s32 menu, s32 arg) {
 }
 
 void mnuDrawBackdrop(s32 *assets, s32 option) {
-    func_002C0950(0x30000);
+    sdfSubmitGsTestOneRegisterPacket(0x30000);
     func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
     itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets[0], 0, option);
     mnuDrawCursorIcons(assets, option);
@@ -1100,7 +1100,7 @@ void mnuSetWindowContainerState(s32 window, u32 fade) {
     ((MenuWindowContainer *)window)->fade = fade;
 }
 
-void func_0027C480(u8 *panel, s32 x, s32 y, u32 sprite,
+void mnuConfigureWindowSpriteAndGrid(u8 *panel, s32 x, s32 y, u32 sprite,
                    u32 effect, u32 color) {
     MenuWindowContainer *window = (MenuWindowContainer *)panel;
     window->x = x;
@@ -1119,7 +1119,7 @@ void func_0027C480(u8 *panel, s32 x, s32 y, u32 sprite,
 }
 
 void mnuForwardDupArg(s32 panel, s32 x, s32 y, s32 sprite, s32 effect) {
-    func_0027C480(panel, x, y, sprite, effect, effect);
+    mnuConfigureWindowSpriteAndGrid(panel, x, y, sprite, effect, effect);
 }
 
 void func_0027C570(s32 value, s32 *entry, s32 x, s32 y, s32 option) {
@@ -1741,7 +1741,7 @@ void mnuDestroyScrollPanel(u32 panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_0027E6B8(s32 panel, u32 unused0, u32 unused1, u32 selection) {
+void mnuStoreScrollPanelSelectionAndGridPosition(s32 panel, u32 unused0, u32 unused1, u32 selection) {
     itfGridStorePosition(panel + 0x10);
     ((MenuScrollPanel *)panel)->selection = selection;
 }
@@ -1766,7 +1766,7 @@ void mnuActivatePendingPanelResource(u32 *menu) {
     }
 }
 
-void func_0027E790(u32 *menu, s32 x, s32 y, s32 color) {
+void mnuActivatePanelAndConfigureGridResources(u32 *menu, s32 x, s32 y, s32 color) {
     mnuActivatePendingPanelResource(menu);
     menu[12] = x;
     menu[13] = y;
@@ -1782,12 +1782,12 @@ u8 mnuHasScrollPanelOverlay(s32 panel) {
     return ((MenuScrollPanel *)panel)->overlaySprite != 0;
 }
 
-void func_0027E860(u8 *panel, s32 y, s32 unknown,
+void mnuDrawPanelGridAndSubmitSurface(u8 *panel, s32 y, s32 unknown,
                    u32 *sprite, s32 flag) {
     uiDrawActiveSurfaceRegion(flag);
     itfDrawGridWithResolvedSlot((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
                    sprite[6], sprite[7], flag);
-    func_002C1430(flag);
+    sdfDispatchSurfaceWithPreparedTexturePacket(flag);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027E8D8);
@@ -2025,7 +2025,7 @@ typedef struct MenuFadeSpriteSet {
     s32 fadeOut;
 } MenuFadeSpriteSet;
 
-u32 func_0027F730(u32 resource) {
+u32 mnuCreateFadeSpriteResourceSet(u32 resource) {
     MenuFadeSpriteSet *item = (MenuFadeSpriteSet *)func_002CFEB8(0x24);
     s32 sprite;
 
@@ -2098,7 +2098,7 @@ typedef struct MenuPartyIconSlot {
 void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource) {
     u32 sprites;
 
-    sprites = func_0027F730(resource);
+    sprites = mnuCreateFadeSpriteResourceSet(resource);
     ((MenuPartyIconSlot *)(window + 0x15c))[index].bundle = sprites;
 }
 
@@ -2231,14 +2231,14 @@ void mnuFillPanelLists(s32 menu, s32 *counts) {
     }
 }
 
-void func_00280228(s32 menu) {
+void mnuDestroyWindowOwnedLists(s32 menu) {
     MenuWindow *window = (MenuWindow *)menu;
     mnuDestroyListState(window->listA);
     mnuDestroyListState(window->listB);
 }
 
 void mnuRebuildScrollLists(s32 menu, s32 counts) {
-    func_00280228(menu);
+    mnuDestroyWindowOwnedLists(menu);
     mnuFillPanelLists(menu, counts);
 }
 
@@ -2302,7 +2302,7 @@ void mnuShutdownContext(s32 context) {
         mnuReleaseHandles(context + 0x78 + i * 0x134);
     }
     mnuReleasePartyPanelSpriteTextures(context);
-    func_00280228(context);
+    mnuDestroyWindowOwnedLists(context);
 }
 
 void mnuResolveUnselectedPageHandles(MenuWindow *window) {
@@ -2448,7 +2448,7 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280A90);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00280BC0);
 
-s32 func_00280D98(s32 unusedX, s32 unusedY, s32 unusedDepth, u32 *window, s32 option) {
+s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth, u32 *window, s32 option) {
     s32 result = func_00280A90(window, option);
 
     switch (result) {
@@ -2487,7 +2487,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     frFontQueueGlyphInSelectedSlot(item);
 }
 
-void func_002811D0(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
+void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                      s32 partyIndex, s32 param) {
     s32 outValue;
     s32 cost = ptyGetCurrentProfileId(D_003BAA00 + partyIndex * 0x1A4 + 0xA60);

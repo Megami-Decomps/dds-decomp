@@ -14,7 +14,7 @@ typedef struct SdfVec4 {
 extern f32 sdfVec3Normalize();
 
 
-extern u64 func_003283E0(u64);
+extern u64 sdfAllocateBlockBySizeThreshold(u64);
 
 extern u64 func_0035A828(u64);
 
@@ -45,7 +45,7 @@ typedef struct ResourceList {
     ResourceNode *first;
 } ResourceList;
 
-s32 func_00320F68(u32 list, u32 node);
+s32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
 ResourceNode *mnuFindResourceNodeById();
 
@@ -64,13 +64,13 @@ u32 func_00324E18(u32 *pair, u32 key, u32 value) {
     return 0;
 }
 
-void func_00324E80(u32 *pair, u32 key) {
+void mnuRemoveMatchedNodesFromLinkedResourceLists(u32 *pair, u32 key) {
     u32 node = mnuFindResourceNodeById(pair[0], key);
     if (node == 0) {
         return;
     }
-    func_00320F68(pair[1], mnuFindResourceNodeByHandle(pair[1], *(u32 *)(node + 0x10)));
-    func_00320F68(pair[0], node);
+    dds3RemoveListNodeAndNotify(pair[1], mnuFindResourceNodeByHandle(pair[1], *(u32 *)(node + 0x10)));
+    dds3RemoveListNodeAndNotify(pair[0], node);
 }
 
 extern s32 func_00321018(u32);
@@ -97,7 +97,7 @@ u64 func_00324F50(s32 owner, u64 resource) {
 }
 
 s64 func_00324F98(u32 *pair) {
-    return func_00320F68(pair[1], mnuFindResourceNodeByHandle(pair[1]));
+    return dds3RemoveListNodeAndNotify(pair[1], mnuFindResourceNodeByHandle(pair[1]));
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324FD0);
@@ -258,10 +258,10 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", sdfCreateThread);
 
-void func_00328390(u64 destination, u64 source, u64 option) {
+void sdfCreateThreadWithAllocatedWorkspace(u64 destination, u64 source, u64 option) {
     u64 handle;
 
-    handle = func_003283E0(source);
+    handle = sdfAllocateBlockBySizeThreshold(source);
     sdfCreateThread(destination, handle, source, option);
 }
 

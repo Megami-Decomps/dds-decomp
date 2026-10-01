@@ -7,7 +7,7 @@ extern u8 D_00324610[];
 extern u8 D_00324650[];
 extern u8 D_00324660[];
 extern void func_002DDD60(void *);
-extern void func_002DDC50(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* Sub-record behind MdlCtx.sub (+0x8/+0xA read by func_002183D0/E0). */
 typedef struct MdlSub {
@@ -38,7 +38,7 @@ typedef struct MdlInner {
     u8 unk4[4];  /* 0x4 */
     u32 resourceHandle; /* 0x8: released through sdfUpdateActiveResourceListScalars */
     u8 unkC[8];  /* 0xC */
-    MdlNode *list; /* 0x14: intrusive list walked by func_00218320/368 */
+    MdlNode *list; /* 0x14: intrusive list walked by mdlSuspendAllContextMotions/368 */
     u8 unk18[4]; /* 0x18 */
     u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
     u128 vector20; /* 0x20: matrix row 0 (vf28) */
@@ -242,18 +242,18 @@ typedef struct MdlLoadCmd {
     u32 handle;    /* 0x14 */
 } MdlLoadCmd;
 
-extern s32 func_002EB168();
+extern s32 sdfRelocatePackedResourcePayload();
 
 void mdlFinishLoadCmd(s32 arg0, MdlLoadCmd *cmd) {
     cmd->handle = fileGetResourceHandle(arg0);
-    cmd->size = func_002EB168(func_00288B90(arg0));
+    cmd->size = sdfRelocatePackedResourcePayload(func_00288B90(arg0));
     func_002887A0(arg0);
     if (cmd->deferred == 0) {
         mdlExecuteAndFreeJob((MdlPacket *)cmd);
     }
 }
 
-extern s32 func_002EB1F0();
+extern s32 sdfRelocatePackedResourceWordsFromHeader();
 
 typedef struct MdlLoadJob {
     u8 unk0[0x18]; /* 0x0 */
@@ -263,7 +263,7 @@ typedef struct MdlLoadJob {
 
 void mdlFinishLoadJob(s32 arg0, MdlLoadJob *job) {
     job->handle = fileGetResourceHandle(arg0);
-    job->sizeWord = func_002EB1F0(func_00288B90(arg0));
+    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_00288B90(arg0));
     func_002887A0(arg0);
     mdlExecuteAndFreeJob((MdlPacket *)job);
 }
@@ -381,7 +381,7 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
     }
 }
 
-extern MdlNode *func_00216B00(MdlCtx *, s32);
+extern MdlNode *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 extern void func_002DB3D0(MdlNode *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
@@ -398,7 +398,7 @@ void func_00217CA8(MdlCtx *ctx, s32 id, s32 arg2, s32 arg3, f32 arg4, f32 arg5) 
         }
     }
     if (node == NULL) {
-        node = func_00216B00(ctx, id);
+        node = motionOwnerCreateObjectForRecord(ctx, id);
     }
     slot = node->slotIndex;
     ctx->slots[slot] = node;
@@ -510,7 +510,7 @@ void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* Store vf10 as the secondary vector, then the rotation matrix rows built by the VU0 routine. */
-void func_00217FB8(MdlCtx *ctx) {
+void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
     VU0_STORE_VF(vf10, &ctx->inner->vector60);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF(vf28, &ctx->inner->vector20);
@@ -548,7 +548,7 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
     mdlSetAllResourceFrames(ctx, value);
 }
 
-void func_00218100(MdlCtx *ctx, f32 amount) {
+void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
     u32 *node;
 
     for (node = ctx->list14; node != NULL; node = (u32 *)*node) {
@@ -567,7 +567,7 @@ void mdlProjectPointVU(MdlCtx *ctx, void *point)
     VU0_MOVE_VF(vf27, vf31);
     VU0_LOAD_MATRIX(&ctx->inner->vector20);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    func_002DDC50();
+    sdfMultiplyVuMatrixInPlace();
     VU0_LOAD_VF(vf10, point);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();
@@ -599,7 +599,7 @@ void mdlProjectPoints(MdlCtx *ctx, f32 (*in)[4], f32 (*out)[4], s32 count)
     }
 }
 
-void func_00218320(MdlCtx *ctx) {
+void mdlSuspendAllContextMotions(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {
@@ -607,7 +607,7 @@ void func_00218320(MdlCtx *ctx) {
     }
 }
 
-void func_00218368(MdlCtx *ctx) {
+void mdlResumeAllContextMotions(MdlCtx *ctx) {
     MdlNode *node;
 
     for (node = ctx->inner->list; node != NULL; node = node->next) {

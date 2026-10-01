@@ -250,7 +250,7 @@ s32 evtViewFindGlyphAtOrBefore(EventViewerState *viewer) {
 }
 
 extern s32 dds3GetSlot(s32 owner, s32 kind);
-extern void func_0024F130(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
+extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
 /* The viewer follows two lists within the same world layer. These partial
  * layouts name only offsets traversed here; the owning world remains opaque. */
@@ -310,7 +310,7 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
                                     time = node->time;
                                     extra = 0;
                                 }
-                                func_0024F130(object, 0, time, endTime, extra);
+                                evtSetMovieClipPositionClampedToDuration(object, 0, time, endTime, extra);
                                 break;
                             }
                             node = node->next;
@@ -946,7 +946,7 @@ extern void func_0014E668();
 extern void func_001057A8();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
-extern void func_003298C0();
+extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
@@ -980,7 +980,7 @@ void evtViewerRelease(viewer)
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        func_003298C0(viewer->pendingResource);
+        sdfQueueNonzeroResourceId(viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }

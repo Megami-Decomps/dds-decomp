@@ -49,7 +49,7 @@ extern f32 func_003532B8(f32);
 
 extern f32 sdfSinPoly(f32);
 
-extern f32 func_003407A0(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
@@ -143,7 +143,7 @@ typedef struct SdfGrid {
 } SdfGrid;
 
 extern void func_00310888(f32 *, f32 *);
-extern void func_00310320(f32 *, f32 *);
+extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
 extern void func_0030FA28(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
@@ -260,13 +260,13 @@ void func_00310EB0(f32 *out, f32 x, f32 y, f32 z) {
     f32 sz;
 
     half = -x * 0.5f;
-    cx = func_003407A0(half);
+    cx = sdfEvaluateCosineViaSinePhaseShift(half);
     sx = sdfSinPoly(half);
     half = -y * 0.5f;
-    cy = func_003407A0(half);
+    cy = sdfEvaluateCosineViaSinePhaseShift(half);
     sy = sdfSinPoly(half);
     half = -z * 0.5f;
-    cz = func_003407A0(half);
+    cz = sdfEvaluateCosineViaSinePhaseShift(half);
     sz = sdfSinPoly(half);
     out[0] = sz * sy * cx + cz * cy * sx;
     out[1] = cz * sy * cx - sz * cy * sx;
@@ -356,7 +356,7 @@ void sdfQuatExp(f32 *out, f32 *in) {
     f32 x = in[0], y = in[1], z = in[2];
     f32 length = fsqrtf(x * x + y * y + z * z);
     f32 sine = sdfSinPoly(length);
-    out[3] = func_003407A0(length);
+    out[3] = sdfEvaluateCosineViaSinePhaseShift(length);
     if (length > 0.0f) {
         out[0] = sine * in[0] / length;
         out[1] = sine * in[1] / length;
@@ -390,7 +390,7 @@ void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     memset(vector, 0, sizeof(vector));
     vector[2] = 1.0f;
     func_00310888(matrix, rotation);
-    func_00310320(vector, matrix);
+    sdfTransformDirectionByMatrix(vector, matrix);
     func_0030F8D0(vector);
     memcpy(out, vector, sizeof(vector));
 }
@@ -426,7 +426,7 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     f32 dist;
 
     func_00310888(matrix, rotation);
-    func_00310320(forward, matrix);
+    sdfTransformDirectionByMatrix(forward, matrix);
     dot = fldNormalizedVectorDot(up, forward);
     func_0030F8D0(forward);
     dist = plane[1];
@@ -472,7 +472,7 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u64 first, u64 second, s8 
     return result;
 }
 
-s32 func_00311C50(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32 option) {
+s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32 option) {
     u64 handle = func_0019F460(x << 4, y << 3, z, w, style, 0);
     s32 result = 0;
     frFontSetChainFlag(handle, flags);
@@ -970,7 +970,7 @@ void func_00312E20(void) {
 
 INCLUDE_ASM(const s32, "game/code_00310BC8", func_00312E28);
 
-void func_00312F58(ShortPair2C *p, s32 a, s32 b) {
+void sdfSetShortPairValues(ShortPair2C *p, s32 a, s32 b) {
     p->h2C = a;
     p->h2E = b;
 }

@@ -146,7 +146,7 @@ void frFontEnableNodeContextModes(s32 node) {
     }
 }
 
-void func_0019DBC8(UiPanel *panel) {
+void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPos *pos = &panel->pos;
     UiPanelPlacement *place = &panel->place;
     s32 spriteTop;
@@ -163,7 +163,7 @@ void func_0019DBC8(UiPanel *panel) {
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void func_0019DCB8(UiPanel *panel) {
+void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     UiPanelOrigin *origin = &panel->origin;
     UiPanelPlacement *place = &panel->place;
     if (origin->tex != 0 && !(panel->flags & 0x10000)) {
@@ -198,7 +198,7 @@ void itfResetCursorPositionAndState(u32 *cursorWords, s32 resetPosition) {
     cursor->unk0C = 0xffff;
 }
 
-void func_0019DDD0(UiCursor *cur, s32 resetPos) {
+void itfMesResetCursorState(UiCursor *cur, s32 resetPos) {
     if (resetPos != 0) {
         cur->x = 0x4B0;
         cur->y = 0xAF8;
@@ -232,7 +232,7 @@ typedef struct UiCursorResetBlock {
     s16 unk22;
 } UiCursorResetBlock;
 
-void func_0019DE18(UiCursorResetBlock *cursor) {
+void itfInitializeCursorResetState(UiCursorResetBlock *cursor) {
     cursor->x = 0x560;
     cursor->y = 0xC48;
     cursor->unk08 = 0;
@@ -262,7 +262,7 @@ typedef struct UiWindowResourceBlock {
     u32 unk28;
 } UiWindowResourceBlock;
 
-void func_0019DE58(u32 *object) {
+void itfResetWindowResourceBlock(u32 *object) {
     UiWindowResourceBlock *block = (UiWindowResourceBlock *)object;
     block->unk00 = 0;
     block->resource = 0;
@@ -310,7 +310,7 @@ void itfResetBattleFadeState(s32 fadeAddress, s32 preserveKind) {
     ((BtlFade *)fadeAddress)->unk08 = 0;
 }
 
-void func_0019DED8(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
+void btlSetFadePhaseAlphaTimer(s32 fadeAddress, s16 phase, s16 alpha, s16 timer) {
     ((BtlFade *)fadeAddress)->phase = phase;
     ((BtlFade *)fadeAddress)->alpha = alpha;
     ((BtlFade *)fadeAddress)->timer = timer;
@@ -340,7 +340,7 @@ void btlReleaseEffectResourceHandles(u8 *effect) {
     ((BattleEffect *)effect)->flags &= ~0xF00;
 }
 
-void func_0019DF70(s32 *resourceFlags) {
+void itfReleaseUiResourceSlotHandles(s32 *resourceFlags) {
     s32 remaining;
 
     remaining = 0x1f;
@@ -372,7 +372,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
 
-void func_0019E0F8(u32 object) {
+void itfUpdateBattleDisplayAndFadeIndicator(u32 object) {
     func_0019E130();
     func_0019E320(object);
     func_0019E4F8(object);
@@ -385,7 +385,7 @@ INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E320);
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E4F8);
 
-void func_0019E7B0(UiPanel *panel, s32 dy) {
+void itfMesShiftPanelVertically(UiPanel *panel, s32 dy) {
     UiPanelOrigin *origin = &panel->origin;
     UiPos *pos = &panel->pos;
     UiPanelPlacement *place = &panel->place;
@@ -495,7 +495,7 @@ void btlUpdateFadeIndicator(u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EBC8);
 
-void func_0019ED78(UiPanel *panel) {
+void itfMesRenderActivePanelSprites(UiPanel *panel) {
     UiPanelPlacement *place;
     if (panel->flags & 0x80000) {
         return;
@@ -531,7 +531,7 @@ typedef struct SoundQueueNode {
 s32 sndVisitQueuedResources(void) {
     SoundQueueNode *node = *(SoundQueueNode **)D_003D6EB0;
     while (node != 0) {
-        func_0019E0F8(node->object);
+        itfUpdateBattleDisplayAndFadeIndicator(node->object);
         node = node->next;
     }
     return 0;
