@@ -36,7 +36,23 @@ void l2dDrawColoredRect(L2dRect *rect)
     D_003805A8.fill(&D_003805A8, list);
 }
 
-INCLUDE_ASM(const s32, "misc/l2d", func_0011F170);
+extern void *sdfAllocAndClearQuadwords(s32 size);
+extern void dds3RegisterOwnedIntrusiveNode(void *node, void *owner);
+extern s32 D_00435EB0;
+
+/* Allocate a rectangle record and register it with its owner list. */
+L2dRect *func_0011F170(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
+    L2dRect *rect = sdfAllocAndClearQuadwords(0x28);
+
+    rect->left = left;
+    rect->top = top;
+    rect->width = width;
+    rect->height = height;
+    rect->depth = depth;
+    rect->color = color;
+    dds3RegisterOwnedIntrusiveNode(rect, &D_00435EB0);
+    return rect;
+}
 
 INCLUDE_SDATA(const s32, "misc/l2d", D_00435EB0);
 
