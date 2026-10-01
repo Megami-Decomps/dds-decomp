@@ -18,7 +18,7 @@ e701_main:
   PUSHREG
   EQ
   IF _2
-  PUSHIS 657
+  PUSHEVENT e657
   COMM CALL_EVENT
   GOTO _1
 _2:
@@ -34,7 +34,7 @@ _2:
   EQ
   AND
   IF _1
-  PUSHIS 659
+  PUSHEVENT e659
   COMM CALL_EVENT
   GOTO _1
 _1:

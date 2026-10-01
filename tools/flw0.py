@@ -535,6 +535,26 @@ def _message_push_symbol(
     return message_symbols[message_index]
 
 
+def _event_push_symbol(
+    raw: int,
+    next_raw: int | None,
+    command_profile: flw0_profiles.CommandProfile | None,
+) -> str | None:
+    if command_profile is None or next_raw is None:
+        return None
+    command = command_profile.by_name.get("CALL_EVENT")
+    if command is None:
+        return None
+    event_id = raw >> 16
+    if (
+        raw & 0xFFFF != OPCODE_IDS["PUSHIS"]
+        or next_raw & 0xFFFF != OPCODE_IDS["COMM"]
+        or next_raw >> 16 != command.command_id
+    ):
+        return None
+    return command_profile.events_by_id.get(event_id)
+
+
 def _render_code(
     flw0: Flw0File,
     section: Section,
@@ -568,6 +588,15 @@ def _render_code(
         )
         if message_symbol is not None:
             lines.append(f"  {pc:04x}: PUSHMSG {message_symbol}")
+            pc += 1
+            continue
+        event_symbol = _event_push_symbol(
+            raw,
+            words[pc + 1] if pc + 1 < len(words) else None,
+            command_profile,
+        )
+        if event_symbol is not None:
+            lines.append(f"  {pc:04x}: PUSHEVENT {event_symbol}")
             pc += 1
             continue
         if opcode in _EXTENDED_OPCODES:
@@ -947,6 +976,22 @@ def _parse_code_payload(
             words.append(
                 (message_symbols[symbol] << 16) | OPCODE_IDS["PUSHIS"]
             )
+            continue
+        if mnemonic == "PUSHEVENT":
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: PUSHEVENT takes one symbol")
+            if command_profile is None:
+                raise Flw0Error(
+                    f"line {line_number}: named event target requires a profile"
+                )
+            symbol = tokens[1]
+            event_id = command_profile.events_by_name.get(symbol)
+            if event_id is None:
+                raise Flw0Error(
+                    f"line {line_number}: unknown {command_profile.name} "
+                    f"event target {symbol!r}"
+                )
+            words.append((event_id << 16) | OPCODE_IDS["PUSHIS"])
             continue
         if mnemonic == "WORD":
             if len(tokens) != 2:

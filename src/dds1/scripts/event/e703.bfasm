@@ -23,7 +23,7 @@ e703_main:
   PUSHREG
   EQ
   IF _4
-  PUSHIS 670
+  PUSHEVENT e670
   COMM CALL_EVENT
   GOTO _3
 _4:

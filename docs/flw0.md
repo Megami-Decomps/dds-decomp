@@ -150,6 +150,25 @@ pseudo-instruction only for the adjacent `PUSHIS` and
 Other integer pushes remain numeric, including computed or ambiguous message
 references.
 
+An adjacent literal target for the profiled event command uses the maintained
+event script's resource name:
+
+```text
+  PUSHEVENT e602
+  COMM CALL_EVENT
+```
+
+`PUSHEVENT` also assembles to `PUSHIS`. The selected game profile binds names
+to the event IDs present in its maintained corpus. This mirrors the runtime,
+which formats event ID 602 as
+`/event/e600/e602/scr/e602.bf`. The disassembler emits the name only for an
+adjacent literal `PUSHIS` followed by `CALL_EVENT` and only when that event
+target is maintained for the selected game. Dynamic values and references to
+absent targets stay numeric.
+
+The reading view carries the same evidence as `CALL_EVENT(event(e602))` while
+leaving an unresolved literal as `CALL_EVENT(10)`.
+
 Physical version-1 sources use the same records after an `msg1` marker inside
 their type-3 section. Their section size remains fixed. Across the tracked
 corpus, this form covers all 36 nonempty banks: 179 dialogs, 257 message pages,
@@ -274,6 +293,10 @@ the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
 or ambiguous message operand remains numeric.
+
+The same profile information resolves 31 DDS1 and 43 DDS2 event calls to
+maintained `eNNN` sources. The remaining 11 DDS1 and four DDS2 literal event
+operands have no maintained target and remain numeric.
 
 ## Tracked corpora
 
