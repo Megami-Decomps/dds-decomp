@@ -205,6 +205,39 @@ class Flw0Tests(unittest.TestCase):
         view = flw0_view.render(script, "dds1")
         self.assertIn("MESSAGE_REQUEST_AND_POLL(message(MSG_B))", view)
 
+    def test_event_references_use_names_in_both_source_formats(self) -> None:
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                (602 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x066 << 16) | flw0.OPCODE_IDS["COMM"],
+                (10 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x066 << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ]
+        )
+        script = flw0.parse(original)
+
+        physical = flw0.render_source(script, "dds1")
+        symbolic = flw0_symbolic.render(script, "dds1")
+        self.assertIn("0001: PUSHEVENT e602", physical)
+        self.assertIn("  PUSHEVENT e602", symbolic)
+        self.assertIn("0003: PUSHIS 0x000a", physical)
+        self.assertIn("  PUSHIS 10", symbolic)
+        self.assertEqual(flw0.parse_source(physical).to_bytes(), original)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
+        view = flw0_view.render(script, "dds1")
+        self.assertIn("CALL_EVENT(event(e602))", view)
+        self.assertIn("CALL_EVENT(10)", view)
+
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown dds1 event target"):
+            flw0.parse_source(symbolic.replace("PUSHEVENT e602", "PUSHEVENT e010"))
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "named event target requires a profile"
+        ):
+            flw0.parse_source(symbolic.replace("profile dds1\n", ""))
+
     def test_duplicate_message_names_keep_numeric_operands(self) -> None:
         message_data = msg1.encode(
             msg1.Bank(
@@ -705,6 +738,18 @@ end
                 }
                 self.assertEqual(commands, expected)
 
+    def test_dds_event_namespaces_match_maintained_sources(self) -> None:
+        root = TOOLS.parent
+        for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
+            with self.subTest(profile=profile.name):
+                source_dir = root / f"src/{profile.name}/scripts/event"
+                event_ids = {
+                    int(path.stem[1:])
+                    for path in source_dir.glob("e*.bfasm")
+                    if path.stem[1:].isdigit()
+                }
+                self.assertEqual(profile.event_ids, event_ids)
+
     def test_reading_view_lifts_verified_commands_and_result_flow(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
         source = path.read_text(encoding="utf-8")
@@ -880,6 +925,7 @@ end
         font_directives = 0
         glyph_directives = 0
         message_references = 0
+        event_references = 0
         short_string_counts = 0
         for expected, source in records:
             with self.subTest(source=source.relative_to(source_dir)):
@@ -891,6 +937,7 @@ end
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
                 message_references += len(re.findall(r"\bPUSHMSG\b", text))
+                event_references += len(re.findall(r"\bPUSHEVENT\b", text))
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
@@ -941,6 +988,7 @@ end
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
+        self.assertEqual(event_references, 31)
         self.assertEqual(short_string_counts, 30)
 
     def test_tracked_dds2_script_corpus_assembles_exact_hashes(self) -> None:
@@ -970,6 +1018,7 @@ end
             "commands": 0,
             "profiled_commands": 0,
             "message_references": 0,
+            "event_references": 0,
             "font": 0,
             "glyphs": 0,
             "short_string_counts": 0,
@@ -999,6 +1048,9 @@ end
                 )
                 totals["message_references"] += len(
                     re.findall(r"\bPUSHMSG\b", text)
+                )
+                totals["event_references"] += len(
+                    re.findall(r"\bPUSHEVENT\b", text)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -1047,6 +1099,7 @@ end
             (totals["profiled_commands"], totals["message_references"]),
             (23630, 1910),
         )
+        self.assertEqual(totals["event_references"], 43)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)
 
