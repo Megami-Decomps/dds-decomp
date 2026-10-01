@@ -61,24 +61,21 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00229100);
 /* Indexed solar-table pass, then the shared layer setup with the 0xA rate. */
 void func_00229230(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
     s32 n;
+    s32 tmp;
+    s32 *p;
     if (t0 == 0) {
         return;
     }
     n = t0;
     evtInitializeSolarOverlay(t2);
-    {
-        s32 tmp = 0;
-        s32 *p;
-        if (n >= 8) {
-            goto afterloop;
-        }
+    tmp = 0;
+    if (n < 8) {
         p = (s32 *)D_0036832C + t0 * 8;
-        do {
+        while (n < 8) {
             func_002CAAC8(p[-1], 0xFF, &tmp, p[0], 1, t2);
             n++;
             p += 8;
-        } while (n < 8);
-afterloop: ;
+        }
     }
     evtFinalizeSolarOverlay(t2);
     func_00228CA0(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
@@ -88,24 +85,21 @@ afterloop: ;
 /* Indexed solar-table pass, then the shared layer setup with the 0x10 rate. */
 void func_00229320(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
     s32 n;
+    s32 tmp;
+    s32 *p;
     if (t0 == 0) {
         return;
     }
     n = t0;
     evtInitializeSolarOverlay(t2);
-    {
-        s32 tmp = 0;
-        s32 *p;
-        if (n >= 8) {
-            goto afterloop;
-        }
+    tmp = 0;
+    if (n < 8) {
         p = (s32 *)D_0036832C + t0 * 8;
-        do {
+        while (n < 8) {
             func_002CAAC8(p[-1], 0xFF, &tmp, p[0], 1, t2);
             n++;
             p += 8;
-        } while (n < 8);
-afterloop: ;
+        }
     }
     evtFinalizeSolarOverlay(t2);
     func_00228CA0(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
