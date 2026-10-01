@@ -377,6 +377,15 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `func_0011A808`: nested form gave `j datMoveCursorY`, early return gives the
   retail `jal`). Returning the callee's result through a local instead only adds
   `daddu` moves.
+- A `dsrl $4,$4,N` (64-bit shift) feeding a 32-bit `andi`/`ori`/call argument is
+  a shift of a narrow (`u8`/`u16`/`s8`/`s16`) parameter: the register is already
+  zero/sign-extended, so cc1 emits `dsrl` and the mask drops the extension. A
+  `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
+  `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
+  `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
+  0x110, 0, 0, 0); }` matches (DDS1 `func_002E9810`/`func_002E9918`/
+  `func_002E94E0`/`func_002E9510`, DDS2 `func_003426B8`/`func_00342388`/
+  `func_003423B8`).
 
 ## Pointer and loop addressing
 
