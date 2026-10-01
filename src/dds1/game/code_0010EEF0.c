@@ -28,7 +28,7 @@ struct EffTransformNode {
     u32 kindTag;      /* 0x0C: node kind in the top byte */
     EffTransformOwner *owner; /* 0x10 */
     u32 word14;       /* 0x14 */
-    u32 word18;       /* 0x18 */
+    u32 ownerData;    /* 0x18: owner-specific payload; camera nodes use CameraData */
     EffTransformNode *inner;  /* 0x1C */
     EffTransformNode *prev;   /* 0x20 */
     EffTransformNode *next;   /* 0x24 */
@@ -175,7 +175,7 @@ EffTransformNode *func_0010F418(u32 kind) {
     owner = D_003299C0[kind];
     node->owner = owner;
     node->word14 = 0;
-    node->word18 = 0;
+    node->ownerData = 0;
     node->inner = NULL;
     node->prev = NULL;
     node->next = NULL;
