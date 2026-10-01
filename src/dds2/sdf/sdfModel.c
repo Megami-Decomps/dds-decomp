@@ -272,7 +272,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     zAxis = drawNode->vectors[4];
     __asm__ volatile ("lqc2 vf30, 0(%0)" :: "r" (zAxis) : "memory");
     scale = drawNode->vectors[1];
-    __asm__ volatile ("lqc2 vf10, 0(%0)" :: "r" (scale) : "memory");
+        VU0_LOAD_VF_MEMORY(vf10, scale);
     __asm__ volatile (
         ".set noreorder                   \n"
         "vmulx.xyzw vf28, vf28, vf10x     \n"

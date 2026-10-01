@@ -210,28 +210,14 @@ void effObjFetchInnerFirstVec(EffTransformNode *node) {
 void effObjFetchInnerSecondVecNorm(EffTransformNode *node) {
     u8 *p = (u8 *)&node->inner->vec50;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "lqc2 vf10, 0(%0)    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
     effMiscNormalizeVU();
 }
 
 void effObjFetchInnerThirdVec(EffTransformNode *node) {
     u8 *p = (u8 *)&node->inner->vec60;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "lqc2 vf10, 0(%0)    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
 void effObjAddInnerFirstVec(EffTransformNode *node, void *vector) {

@@ -891,10 +891,10 @@ void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *rec, f32 *out) {
     f32 scale = rec->scale;
 
     __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(matrix + 0xC0));
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(info->pos));
+        VU0_LOAD_VF(vf10, info->pos);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    __asm__ volatile(".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r"(D_00324690));
+        VU0_LOAD_VF(vf12, D_00324690);
     VU0_SUB(vf10, vf10, vf12);
     VU0_NORMALIZE_VF10();
     VU0_SET_VF2X(scale);
@@ -1887,12 +1887,12 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
         if (source != NULL) {
             base = source->firstVec;
             effObjSetInnerFirstVec(target, base);
-            __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+                        VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
             base += 0x10;
-            __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(base));
+                        VU0_LOAD_VF(vf11, base);
             effMiscQuatMultiplyVU();
-            __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(quaternion));
+                        VU0_STORE_VF(vf10, quaternion);
             effObjSetInnerSecondVec(target, quaternion);
             effObjFetchInnerFirstVec(target);
             __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(target->inner + 0x70));
