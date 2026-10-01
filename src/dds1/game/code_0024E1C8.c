@@ -140,24 +140,40 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F858);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F8D8);
 
-/* The current resource task stores this value three pointers below the task object. */
-u32 func_0024FA18(void) {
-    s32 taskObject;
+/* Resource-task -> list -> selection chain used by the mantra display. */
+typedef struct MnuResourceSelectionNode {
+    u8 pad00[0x70];
+    u32 selectionAddress;
+} MnuResourceSelectionNode;
 
-    taskObject = func_002CB3B8(D_003BC4CC, 0);
-    return *(u32 *)(*(s32 *)(*(s32 *)(taskObject + 0xc) + 0x1c) + 0x70);
+typedef struct MnuResourceList {
+    u8 pad00[0x1C];
+    MnuResourceSelectionNode *selectionNode;
+} MnuResourceList;
+
+typedef struct MnuResourceTask {
+    u8 pad00[0xC];
+    MnuResourceList *menuList;
+} MnuResourceTask;
+
+/* Return the selection record address used by labels and transition IDs. */
+u32 func_0024FA18(void) {
+    MnuResourceTask *taskObject;
+
+    taskObject = (MnuResourceTask *)func_002CB3B8(D_003BC4CC, 0);
+    return taskObject->menuList->selectionNode->selectionAddress;
 }
 
 void mnuStopResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
-    mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
-    mnuRetreatListCursorDefault(*(s32 *)(object + 0xC));
+    mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
+    mnuRetreatListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
 void mnuResetResourceAnimation(void) {
     s32 object = func_002CB3B8(D_003BC4CC, 0);
-    mnuClearListFlagsOneAndTwo(*(s32 *)(object + 0xC));
-    mnuAdvanceListCursorDefault(*(s32 *)(object + 0xC));
+    mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
+    mnuAdvanceListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
 extern s32 func_002D03F8(s32);

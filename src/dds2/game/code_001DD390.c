@@ -260,7 +260,9 @@ extern void btlUnitTurnEndStateSelect(BtlUnit *);
 typedef struct BattleActionLinkState {
     u8 pad00[0x18];
     BtlUnit *unit;          /* 0x18 */
-    u8 pad1C[0x44];
+    u8 pad1C[0x28];
+    s32 resourceNodeIndex;   /* 0x44: index into BtlEffectResource.nodes */
+    u8 pad48[0x18];
     s32 actorIndices;       /* 0x60 */
     u8 pad64[0x24];
     u8 *entries;            /* 0x88 */
@@ -3060,7 +3062,7 @@ s32 btlBeginModelChange(u32 *arguments) {
 
     if (status == 0) {
         btlRequestModelAssetByMode(owner, model, variant);
-        *(u32 *)(owner + 0x118) = (*(u32 *)(owner + 0x118) | 1) & ~2;
+        ((BtlUnit *)owner)->gunResourceFlags = (((BtlUnit *)owner)->gunResourceFlags | 1) & ~2;
         return btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
     }
     return status;
@@ -3376,7 +3378,7 @@ void btlFinishSelectedUnitEffect(u32 *arguments) {
         sndReleaseAllVoices(arguments[1]);
     }
     btlClearUnitDefeatCandidate(arguments[0]);
-    *(u32 *)(arguments[0] + 0x110) |= 0x40;
+    ((BtlUnit *)arguments[0])->flags |= 0x40;
 }
 
 SoundTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
@@ -4420,8 +4422,8 @@ void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f3
                    f32 vx1, f32 vy1, f32 vz1, f32 vw1, f32 scale, f32 f154) {
     btlInitMotionTransformFromComponents((u8 *)fx + 0x30, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
     btlInitMotionTransformFromComponents((u8 *)fx + 0xC0, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
-    *(f32 *)(fx + 0x154) = f154;
-    *(u32 *)(fx + 0x110) |= 0x41;
+    ((ActionUnit *)fx)->unk154 = f154;
+    ((ActionUnit *)fx)->flags |= 0x41;
 }
 
 u32 btlGetActiveUnitId(void) {
@@ -4913,7 +4915,7 @@ s32 func_001EA598(u8 *fx) {
     }
     task = (u8 *)((ActionUnit *)fx)->link;
     owner = (u8 *)((BattleActionLinkState *)task)->unit;
-    index = *(s32 *)(task + 0x44);
+    index = ((BattleActionLinkState *)task)->resourceNodeIndex;
     table = (u8 *)func_001ABFD8(((BtlUnit *)owner)->resourceKind, ((BtlUnit *)owner)->resourceIndex);
     if (((ActionUnit *)fx)->category == 0x91) {
         return 0;
