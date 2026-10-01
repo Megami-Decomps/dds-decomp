@@ -1,0 +1,4765 @@
+battle-table 1 kind=encounter profile=dds2
+
+encounter 1 enemies=99,99,99,99,99 flags=0xd bgm=23
+
+encounter 2 enemies=96 flags=0x100
+
+encounter 3 enemies=96,96 flags=0x100
+
+encounter 4 enemies=96,96,96 flags=0x100
+
+encounter 5 enemies=60 flags=0x100
+
+encounter 6 enemies=60,60 flags=0x100
+
+encounter 7 enemies=60,60,60 flags=0x100
+
+encounter 8 enemies=76 flags=0x100
+
+encounter 9 enemies=76,76 flags=0x100
+
+encounter 10 enemies=76,76,76 flags=0x100
+
+encounter 11 enemies=76,76,76,76 flags=0x100
+
+encounter 12 enemies=77 flags=0x100
+
+encounter 13 enemies=77,77 flags=0x100
+
+encounter 14 enemies=42 flags=0x100
+
+encounter 15 enemies=75 flags=0x100
+
+encounter 16 enemies=75,75 flags=0x100
+
+encounter 17 enemies=96,77 flags=0x100
+
+encounter 18 enemies=75,60 flags=0x100
+
+encounter 19 enemies=76,75,76 flags=0x100
+
+encounter 20 enemies=33 flags=0x100
+
+encounter 21 enemies=33,33 flags=0x100
+
+encounter 22 enemies=41
+
+encounter 23 enemies=41,41
+
+encounter 24 enemies=41,41,41
+
+encounter 25 enemies=40
+
+encounter 26 enemies=40,40
+
+encounter 27 enemies=40,40,40
+
+encounter 28 enemies=59
+
+encounter 29 enemies=59,59
+
+encounter 30 enemies=59,59,59
+
+encounter 31 enemies=59,59,59,59
+
+encounter 32 enemies=59,59,59,59,59
+
+encounter 33 enemies=74
+
+encounter 34 enemies=74,74
+
+encounter 35 enemies=74,74,74
+
+encounter 36 enemies=93
+
+encounter 37 enemies=93,93
+
+encounter 38 enemies=93,93,93
+
+encounter 39 enemies=93,93,93,93
+
+encounter 40 enemies=58
+
+encounter 41 enemies=58,58
+
+encounter 42 enemies=92
+
+encounter 43 enemies=92,92
+
+encounter 44 enemies=94
+
+encounter 45 enemies=94,94
+
+encounter 46 enemies=94,94,94
+
+encounter 47 enemies=94,94,94,94
+
+encounter 48 enemies=59,93,59
+
+encounter 49 enemies=41,73
+
+encounter 50 enemies=93,40
+
+encounter 51 enemies=41,40,41
+
+encounter 52 enemies=58,92
+
+encounter 53 enemies=73
+
+encounter 54 enemies=73,73
+
+encounter 55 enemies=73,73,73
+
+encounter 56 enemies=74,40
+
+encounter 57 enemies=71
+
+encounter 58 enemies=71,71
+
+encounter 59 enemies=71,71,71
+
+encounter 60 enemies=30 flags=0x2000
+
+encounter 61 enemies=30,30 flags=0x2000
+
+encounter 62 enemies=30,30,30 flags=0x2000
+
+encounter 63 enemies=32
+
+encounter 64 enemies=32,32
+
+encounter 65 enemies=32,32,32
+
+encounter 66 enemies=56 flags=0x5030002
+
+encounter 67 enemies=57
+
+encounter 68 enemies=57,57
+
+encounter 69 enemies=72
+
+encounter 70 enemies=72,72
+
+encounter 71 enemies=72,72,72
+
+encounter 72 enemies=70
+
+encounter 73 enemies=70,70
+
+encounter 74 enemies=39
+
+encounter 75 enemies=90
+
+encounter 76 enemies=71,32
+
+encounter 77 enemies=32,30
+
+encounter 78 enemies=71,30
+
+encounter 79 enemies=57,72
+
+encounter 80 enemies=70,57
+
+encounter 81 enemies=71,32,71
+
+encounter 82 enemies=30,32,30
+
+encounter 83 enemies=72,70
+
+encounter 84 enemies=27
+
+encounter 85 enemies=27,27
+
+encounter 86 enemies=97 flags=0x2000
+
+encounter 87 enemies=27,27,27
+
+encounter 88 enemies=19
+
+encounter 89 enemies=19,19
+
+encounter 90 enemies=19,19,19
+
+encounter 91 enemies=31
+
+encounter 92 enemies=31,31
+
+encounter 93 enemies=31,31,31
+
+encounter 94 enemies=29
+
+encounter 95 enemies=29,29
+
+encounter 96 enemies=29,29,29
+
+encounter 97 enemies=53
+
+encounter 98 enemies=53,53
+
+encounter 99 enemies=54
+
+encounter 100 enemies=54,54
+
+encounter 101 enemies=54,54,54
+
+encounter 102 enemies=18
+
+encounter 103 enemies=18,18
+
+encounter 104 enemies=18,18,18
+
+encounter 105 enemies=55
+
+encounter 106 enemies=55,55
+
+encounter 107 enemies=55,55,55
+
+encounter 108 enemies=52
+
+encounter 109 enemies=52,52
+
+encounter 110 enemies=52,52,52
+
+encounter 111 enemies=88
+
+encounter 112 enemies=88,88
+
+encounter 113 enemies=67
+
+encounter 114 enemies=67,67
+
+encounter 115 enemies=67,67,67
+
+encounter 116 enemies=27,31
+
+encounter 117 enemies=19,31
+
+encounter 118 enemies=27,19
+
+encounter 119 enemies=19,54
+
+encounter 120 enemies=29,53
+
+encounter 121 enemies=54,53,54
+
+encounter 122 enemies=18,53
+
+encounter 123 enemies=55,52,55
+
+encounter 124 enemies=88,18
+
+encounter 125 enemies=52,67
+
+encounter 126 enemies=98 flags=0x2000
+
+encounter 127 enemies=97,98 flags=0x2000
+
+encounter 128 enemies=97,97 flags=0x2000
+
+encounter 129 enemies=98,98 flags=0x2000
+
+encounter 130 enemies=18,29
+
+encounter 131 enemies=18,55
+
+encounter 132 enemies=55,53,55
+
+encounter 133 enemies=27,31,29
+
+encounter 134 enemies=80
+
+encounter 135 enemies=80,80
+
+encounter 136 enemies=80,80,80
+
+encounter 137 enemies=80,77
+
+encounter 138 enemies=109 flags=0x2000
+
+encounter 139 enemies=109,109 flags=0x2000
+
+encounter 140 enemies=110 flags=0x2000
+
+encounter 141 enemies=110,110 backgrounds=8192,0
+
+encounter 142 enemies=109,110 flags=0x2000
+
+encounter 143 enemies=69
+
+encounter 144 enemies=69,69
+
+encounter 145 enemies=69,69,69
+
+encounter 146 enemies=7
+
+encounter 147 enemies=7,7
+
+encounter 148 enemies=7,7,7
+
+encounter 149 enemies=28 flags=0x2000
+
+encounter 150 enemies=28,28 flags=0x2000
+
+encounter 151 enemies=28,28,28 flags=0x2000
+
+encounter 152 enemies=8
+
+encounter 153 enemies=8,8
+
+encounter 154 enemies=8,8,8
+
+encounter 155 enemies=68
+
+encounter 156 enemies=68,68
+
+encounter 157 enemies=68,68,68
+
+encounter 158 enemies=6
+
+encounter 159 enemies=6,6
+
+encounter 160 enemies=6,6,6
+
+encounter 161 enemies=87
+
+encounter 162 enemies=87,87
+
+encounter 163 enemies=87,87,87
+
+encounter 164 enemies=50
+
+encounter 165 enemies=50,50
+
+encounter 166 enemies=50,50,50
+
+encounter 167 enemies=51
+
+encounter 168 enemies=51,51
+
+encounter 169 enemies=51,51,51
+
+encounter 170 enemies=36
+
+encounter 171 enemies=20
+
+encounter 172 enemies=20,20
+
+encounter 173 enemies=20,20,20
+
+encounter 174 enemies=28,69,28
+
+encounter 175 enemies=69,7
+
+encounter 176 enemies=7,8
+
+encounter 177 enemies=68,69
+
+encounter 178 enemies=6,87
+
+encounter 179 enemies=6,8
+
+encounter 180 enemies=6,51
+
+encounter 181 enemies=50,20
+
+encounter 182 enemies=20,6
+
+encounter 183 enemies=87,8,6
+
+encounter 184 enemies=111 flags=0x2000
+
+encounter 185 enemies=111,111 flags=0x2000
+
+encounter 186 enemies=112 flags=0x2000
+
+encounter 187 enemies=112,112 flags=0x2000
+
+encounter 188 enemies=5
+
+encounter 189 enemies=38
+
+encounter 190 enemies=38,38
+
+encounter 191 enemies=38,38,38
+
+encounter 192 enemies=46,46,46
+
+encounter 193 enemies=46,46,46,46
+
+encounter 194 enemies=46,46,46,46,46 flags=0x100
+
+encounter 195 enemies=89
+
+encounter 196 enemies=89,89
+
+encounter 197 enemies=89,89,89
+
+encounter 198 enemies=49
+
+encounter 199 enemies=49,49
+
+encounter 200 enemies=49,49,49
+
+encounter 201 enemies=66
+
+encounter 202 enemies=66,66
+
+encounter 203 enemies=66,66,66
+
+encounter 204 enemies=82
+
+encounter 205 enemies=82,82
+
+encounter 206 enemies=82,82,82
+
+encounter 207 enemies=35
+
+encounter 208 enemies=35,35
+
+encounter 209 enemies=35,35,35
+
+encounter 210 enemies=85
+
+encounter 211 enemies=85,85
+
+encounter 212 enemies=85,85,85
+
+encounter 213 enemies=64,64
+
+encounter 214 enemies=64,64,64
+
+encounter 215 enemies=64,64,64,64 flags=0x100
+
+encounter 216 enemies=64,64,64,64,64 flags=0x100
+
+encounter 217 enemies=84,84,84,84,84 flags=0x4
+
+encounter 218 enemies=4
+
+encounter 219 enemies=4,4
+
+encounter 220 enemies=4,4,4
+
+encounter 221 enemies=83
+
+encounter 222 enemies=83,83
+
+encounter 223 enemies=83,83,83
+
+encounter 224 enemies=95
+
+encounter 225 enemies=111,112 flags=0x2000
+
+encounter 226 enemies=38,89,38
+
+encounter 227 enemies=65,49,65
+
+encounter 228 enemies=49,65
+
+encounter 229 enemies=65,89,65
+
+encounter 230 enemies=49,38
+
+encounter 231 enemies=66,82
+
+encounter 232 enemies=35,82
+
+encounter 233 enemies=38,35,38
+
+encounter 234 enemies=38,82
+
+encounter 235 enemies=64,85
+
+encounter 236 enemies=65,85,65
+
+encounter 237 enemies=85,65
+
+encounter 238 enemies=84,85,84
+
+encounter 239 enemies=4,83
+
+encounter 240 enemies=65,4,65
+
+encounter 241 enemies=38,83,38
+
+encounter 242 enemies=24 flags=0x2000
+
+encounter 243 enemies=24,24 flags=0x2000
+
+encounter 244 enemies=24,24,24 flags=0x2000
+
+encounter 245 enemies=104
+
+encounter 246 enemies=104,104
+
+encounter 247 enemies=104,104,104
+
+encounter 248 enemies=86
+
+encounter 249 enemies=86,86
+
+encounter 250 enemies=86,86,86
+
+encounter 251 enemies=81
+
+encounter 252 enemies=81,81
+
+encounter 253 enemies=81,81,81
+
+encounter 254 enemies=23
+
+encounter 255 enemies=48
+
+encounter 256 enemies=48,48
+
+encounter 257 enemies=48,48,48
+
+encounter 258 enemies=48,48,48,48
+
+encounter 259 enemies=62
+
+encounter 260 enemies=62,62
+
+encounter 261 enemies=62,62,62
+
+encounter 262 enemies=15
+
+encounter 263 enemies=15,15
+
+encounter 264 enemies=15,15,15
+
+encounter 265 enemies=91
+
+encounter 266 enemies=104,24
+
+encounter 267 enemies=86,104
+
+encounter 268 enemies=86,24,86
+
+encounter 269 enemies=81,21
+
+encounter 270 enemies=81,104
+
+encounter 271 enemies=81,63
+
+encounter 272 enemies=15,24
+
+encounter 273 enemies=62,86
+
+encounter 274 enemies=21,48,21
+
+encounter 275 enemies=81,15,62
+
+encounter 276 enemies=21
+
+encounter 277 enemies=21,21
+
+encounter 278 enemies=21,21,21
+
+encounter 279 enemies=63
+
+encounter 280 enemies=63,63
+
+encounter 281 enemies=63,63,63
+
+encounter 282 enemies=24,63,24
+
+encounter 283 enemies=22
+
+encounter 284 enemies=22,22
+
+encounter 285 enemies=22,22,22
+
+encounter 286 enemies=25 flags=0x2000
+
+encounter 287 enemies=25,25 flags=0x2000
+
+encounter 288 enemies=25,25,25 flags=0x2000
+
+encounter 289 enemies=43
+
+encounter 290 enemies=43,43
+
+encounter 291 enemies=43,43,43
+
+encounter 293 enemies=37
+
+encounter 294 enemies=47
+
+encounter 295 enemies=47,47
+
+encounter 296 enemies=47,47,47
+
+encounter 297 enemies=45
+
+encounter 298 enemies=45,45
+
+encounter 299 enemies=45,45,45
+
+encounter 300 enemies=11
+
+encounter 301 enemies=11,11
+
+encounter 302 enemies=11,11,11
+
+encounter 303 enemies=16
+
+encounter 304 enemies=16,16
+
+encounter 305 enemies=16,16,16
+
+encounter 306 enemies=268
+
+encounter 307 enemies=25,43,25
+
+encounter 308 enemies=79,43
+
+encounter 309 enemies=25,22
+
+encounter 310 enemies=45,22,45
+
+encounter 311 enemies=45,47
+
+encounter 312 enemies=79,45
+
+encounter 313 enemies=22,47,22
+
+encounter 314 enemies=11,16
+
+encounter 315 enemies=16,22
+
+encounter 316 enemies=79,22,79
+
+encounter 317 enemies=45,16,45
+
+encounter 318 enemies=79,11,22
+
+encounter 319 enemies=79
+
+encounter 320 enemies=79,79
+
+encounter 321 enemies=79,79,79
+
+encounter 322 enemies=3
+
+encounter 323 enemies=3,3
+
+encounter 324 enemies=3,3,3
+
+encounter 325 enemies=78
+
+encounter 326 enemies=78,78
+
+encounter 327 enemies=78,78,78
+
+encounter 328 enemies=113
+
+encounter 329 enemies=113,113
+
+encounter 330 enemies=113,113,113
+
+encounter 331 enemies=1
+
+encounter 332 enemies=1,1
+
+encounter 333 enemies=1,1,1
+
+encounter 334 enemies=26
+
+encounter 335 enemies=12
+
+encounter 336 enemies=12,12
+
+encounter 337 enemies=12,12,12
+
+encounter 338 enemies=44
+
+encounter 339 enemies=44,44
+
+encounter 340 enemies=44,44,44
+
+encounter 341 enemies=34
+
+encounter 342 enemies=9
+
+encounter 343 enemies=9,9
+
+encounter 344 enemies=9,9,9
+
+encounter 345 enemies=14
+
+encounter 346 enemies=14,14
+
+encounter 347 enemies=14,14,14
+
+encounter 348 enemies=61
+
+encounter 349 enemies=61,61
+
+encounter 350 enemies=61,61,61
+
+encounter 351 enemies=13
+
+encounter 352 enemies=13,13
+
+encounter 353 enemies=13,13,13
+
+encounter 354 enemies=17
+
+encounter 355 enemies=268
+
+encounter 356 enemies=3,78,3
+
+encounter 357 enemies=113,1
+
+encounter 358 enemies=78,1
+
+encounter 359 enemies=113,3,113
+
+encounter 360 enemies=12,44,12
+
+encounter 361 enemies=78,44,78
+
+encounter 362 enemies=9,14
+
+encounter 363 enemies=9,3,61
+
+encounter 364 enemies=9,61
+
+encounter 365 enemies=14,78,14
+
+encounter 366 enemies=3,13,3
+
+encounter 367 enemies=13,61
+
+encounter 368 enemies=78,13,78
+
+encounter 369 enemies=12,44
+
+encounter 370 enemies=78,12
+
+encounter 371 enemies=108 flags=0x2
+
+encounter 372 enemies=328 flags=0x40004
+
+encounter 373 enemies=328,328 flags=0x2004
+
+encounter 374 enemies=328,328,328 flags=0x2004
+
+encounter 375 enemies=2 flags=0x942
+
+encounter 376 enemies=10 flags=0x942
+
+encounter 377 enemies=61,78,61
+
+encounter 378 enemies=61,14,61
+
+encounter 379 enemies=53,18,53
+
+encounter 380 enemies=54,55
+
+encounter 381 enemies=8,7,8
+
+encounter 382 enemies=28,7,28
+
+encounter 383 enemies=87,68,87
+
+encounter 384 enemies=51,50,51
+
+encounter 385 enemies=61,13,61
+
+encounter 386 enemies=13,9
+
+encounter 387 enemies=3,14,3
+
+encounter 388 enemies=78,14,78
+
+encounter 389 enemies=13,14
+
+encounter 768 voice=1 enemies=315,257,315 backgrounds=221,3 flags=0xd0d bgm=4 event=927
+
+encounter 769 voice=1 enemies=258 backgrounds=222,4 flags=0xd0d bgm=3 event=901
+
+encounter 770 voice=1 enemies=0,259 backgrounds=223,3 flags=0xd0b bgm=4 event=922
+
+encounter 771 voice=1 enemies=332,333,331 backgrounds=224,3 flags=0xd0d bgm=4 event=920
+
+encounter 772 voice=1 enemies=313,314,312 backgrounds=224,4 flags=0xd0d bgm=4 event=920
+
+encounter 773 voice=1 next=842 enemies=334,334,334,334 backgrounds=224,5 flags=0xd0d bgm=4 event=903
+
+encounter 774 voice=1 enemies=333 backgrounds=225,3 flags=0xd0b bgm=6 event=904
+
+encounter 775 voice=1 enemies=266,265 backgrounds=227,4 flags=0xd0d bgm=3 event=905
+
+encounter 776 voice=1 enemies=306,305 backgrounds=227,3 flags=0xd0d bgm=3 event=906
+
+encounter 777 voice=1 enemies=308,310,309 backgrounds=227,5 flags=0xd0d bgm=4 event=907
+
+encounter 778 voice=1 enemies=317,269,318 backgrounds=227,6 flags=0xd0d bgm=4 event=908
+
+encounter 779 voice=1 enemies=273,272,274 backgrounds=226,3 flags=0xd0d bgm=6 event=909
+
+encounter 780 voice=1 enemies=270,271 backgrounds=226,4 flags=0xd0d bgm=4 event=919
+
+encounter 781 voice=1 enemies=275,276 backgrounds=228,3 flags=0xd0d bgm=3
+
+encounter 782 voice=1 enemies=0,277 backgrounds=228,4 flags=0xd0b bgm=3 event=910
+
+encounter 783 voice=1 enemies=278 backgrounds=228,5 flags=0xd0d bgm=4 event=921
+
+encounter 784 voice=1 enemies=279 backgrounds=230,6 flags=0xd0d bgm=2 event=911
+
+encounter 785 voice=1 enemies=280 backgrounds=230,7 flags=0xd0d bgm=2 event=912
+
+encounter 786 voice=1 enemies=302,303 backgrounds=230,8 flags=0xd0d bgm=2 event=913
+
+encounter 787 voice=1 enemies=282 backgrounds=230,9 flags=0xd0d bgm=2 event=914
+
+encounter 788 voice=1 enemies=283 backgrounds=230,5 flags=0xd0d bgm=6 event=915
+
+encounter 789 voice=1 enemies=285 backgrounds=230,4 flags=0xcd0d bgm=7 event=916
+
+encounter 790 voice=1 item=120 item_count=1 enemies=292 backgrounds=223,7 flags=0xd0d bgm=6 event=925
+
+encounter 791 voice=1 item=114 item_count=1 enemies=293 backgrounds=226,5 flags=0xd0d bgm=6
+
+encounter 792 voice=1 item=126 item_count=1 enemies=291 backgrounds=224,8 flags=0xd0d bgm=6 event=926
+
+encounter 793 voice=1 enemies=290 backgrounds=221,4 flags=0xd0d bgm=6 event=928
+
+encounter 794 voice=1 enemies=294 backgrounds=230,10 flags=0xd0d bgm=6 event=923
+
+encounter 795 voice=1 enemies=295 backgrounds=230,11 flags=0xd0b bgm=6 event=917
+
+encounter 796 voice=1 enemies=296 backgrounds=230,12 flags=0xd0d bgm=6 event=918
+
+encounter 797 voice=1 enemies=297 backgrounds=230,13 flags=0xd0d bgm=6 event=924
+
+encounter 798 voice=1 enemies=0,321 backgrounds=223,10 flags=0xd0d bgm=4 event=902
+
+encounter 799 voice=1 enemies=330 backgrounds=229,1 flags=0xd0d bgm=23
+
+encounter 800 voice=1 next=778 enemies=317,317,317 backgrounds=227,6 flags=0xd0d bgm=4 event=908
+
+encounter 801 voice=1 enemies=322,322 backgrounds=221,1 flags=0x90c bgm=5
+
+encounter 802 voice=1 enemies=76,76 backgrounds=221,5 flags=0x90d bgm=5
+
+encounter 803 voice=1 item=22 item_count=2 enemies=319,319 backgrounds=221,2 flags=0x90a bgm=5
+
+encounter 804 voice=1 enemies=96,60 backgrounds=221,1 flags=0x90b bgm=5
+
+encounter 805 voice=1 item=21 item_count=3 enemies=323 backgrounds=221,1 flags=0x90b bgm=5
+
+encounter 806 voice=1 next=807 enemies=293 backgrounds=221,4 flags=0xd0d bgm=6 event=928
+
+encounter 807 voice=1 next=808 enemies=292 backgrounds=221,4 flags=0xd0d bgm=6 event=928
+
+encounter 808 voice=1 next=793 enemies=291 backgrounds=221,4 flags=0xd0d bgm=6 event=928
+
+encounter 809 voice=1 item=27 item_count=2 enemies=80 backgrounds=221,6 flags=0x90b bgm=3
+
+encounter 810 voice=1 bgm=4
+
+encounter 811 voice=1 bgm=4 event=922
+
+encounter 812 voice=1 enemies=93,326 backgrounds=222,2 flags=0x90b bgm=3
+
+encounter 813 voice=1 enemies=71,71 backgrounds=223,1 flags=0x90d bgm=3
+
+encounter 814 voice=1 enemies=96,75 backgrounds=221,1 flags=0x90d bgm=5
+
+encounter 815 voice=1 next=816 enemies=33,96 backgrounds=221,2 flags=0x90d bgm=5
+
+encounter 816 voice=1 enemies=42 flags=0x90d bgm=5
+
+encounter 817 voice=1 enemies=54,54 backgrounds=224,2 flags=0x90b bgm=3
+
+encounter 818 voice=1 enemies=67,52 backgrounds=224,2 flags=0x90b bgm=3
+
+encounter 819 voice=1 enemies=40,73 backgrounds=222,2 flags=0x90b bgm=3
+
+encounter 820 voice=1 enemies=74,58 flags=0x90d bgm=3
+
+encounter 821 voice=1 enemies=94,58,94 backgrounds=222,2 flags=0x90d bgm=3
+
+encounter 822 voice=1 enemies=324 flags=0xd0b bgm=23 event=929
+
+encounter 823 voice=1 enemies=69,69,69 backgrounds=225,1 flags=0xd0d bgm=3
+
+encounter 824 voice=1 enemies=8,69,8 flags=0xd0d bgm=3
+
+encounter 825 voice=1 enemies=51,51 backgrounds=225,2 flags=0xd0b bgm=3
+
+encounter 826 voice=1 enemies=6,20,6 backgrounds=225,2 flags=0xd0d bgm=3
+
+encounter 827 voice=1 enemies=104,104 backgrounds=226,6 flags=0xd0d bgm=3
+
+encounter 828 voice=1 enemies=63,63 backgrounds=226,2 flags=0xd0d bgm=3
+
+encounter 829 voice=1 enemies=81,81 backgrounds=226,2 flags=0xd0d bgm=3
+
+encounter 830 voice=1 enemies=25,25 backgrounds=228,1 flags=0xd0d bgm=3
+
+encounter 831 voice=1 next=833 enemies=45,79 backgrounds=228,1 flags=0xd0d bgm=3
+
+encounter 832 voice=1 enemies=16,16 backgrounds=228,7 flags=0xd0b bgm=3
+
+encounter 833 voice=1 enemies=37 flags=0xd0d bgm=3
+
+encounter 834 voice=1 enemies=32,72,32 backgrounds=223,8 flags=0xd0d bgm=3
+
+encounter 835 voice=1 enemies=38,38 backgrounds=227,7 flags=0xd0d bgm=3
+
+encounter 836 voice=1 enemies=268 backgrounds=229,4 flags=0xd0d bgm=3
+
+encounter 837 voice=1 enemies=49,49 backgrounds=227,11 flags=0xd0d bgm=3 event=930
+
+encounter 838 voice=1 enemies=3,3 backgrounds=229,3 flags=0xd0d bgm=3
+
+encounter 839 voice=1 enemies=78,78 backgrounds=229,3 flags=0xd0d bgm=3
+
+encounter 840 voice=1 enemies=34 backgrounds=229,3 flags=0xd0d bgm=3
+
+encounter 841 voice=1 enemies=17 backgrounds=230,16 flags=0xd0d bgm=3
+
+encounter 842 voice=1 enemies=316,263,316 backgrounds=224,5 flags=0xd0d bgm=4 event=903
+
+encounter 843 voice=1 enemies=338 backgrounds=224,1 flags=0x903
+
+encounter 844 voice=1 enemies=339 backgrounds=224,2 flags=0x903
+
+encounter 845 voice=1 enemies=335,7 backgrounds=225,1 flags=0x90b bgm=3
+
+encounter 846 voice=1 enemies=336,15 backgrounds=226,2 flags=0x90b bgm=3
+
+encounter 847 voice=1 enemies=337,45 backgrounds=228,2 flags=0x90b bgm=3
+
+encounter 848 voice=1 enemies=97,97 backgrounds=224,2 flags=0xa0d bgm=3
+
+encounter 849 voice=1 enemies=18,18 backgrounds=224,2 flags=0x90d bgm=3
+
+encounter 850 voice=1 next=852 enemies=88,88 backgrounds=224,1 flags=0x90b bgm=3
+
+encounter 851 voice=1 enemies=97,97 backgrounds=224,2 flags=0xa0b bgm=3
+
+encounter 852 voice=1 enemies=88,88 backgrounds=224,2 flags=0x90d bgm=3
+
+encounter 853 voice=1
+
+encounter 854 voice=1
+
+encounter 855 voice=1
+
+encounter 856 voice=1
+
+encounter 857 voice=1
+
+encounter 858 voice=1
+
+encounter 859 voice=1
+
+encounter 860 voice=1
+
+encounter 861 voice=1
+
+encounter 862 voice=1
+
+encounter 863 voice=1
+
+encounter 864 voice=1
+
+encounter 865 voice=1
+
+encounter 866 voice=1
+
+encounter 867 voice=1
+
+encounter 868 voice=1
+
+encounter 869 voice=1
+
+encounter 870 voice=1
+
+encounter 871 voice=1
+
+encounter 872 voice=1
+
+encounter 873 voice=1
+
+encounter 874 voice=1
+
+encounter 875 voice=1
+
+encounter 876 voice=1
+
+encounter 877 voice=1
+
+encounter 878 voice=1
+
+encounter 879 voice=1
+
+encounter 880 voice=1
+
+encounter 881 voice=1
+
+encounter 882 voice=1
+
+encounter 883 voice=1
+
+encounter 884 voice=1
+
+encounter 885 voice=1
+
+encounter 886 voice=1
+
+encounter 887 voice=1
+
+encounter 888 voice=1
+
+encounter 889 voice=1
+
+encounter 890 voice=1
+
+encounter 891 voice=1
+
+encounter 892 voice=1
+
+encounter 893 voice=1
+
+encounter 894 voice=1
+
+encounter 895 voice=1
+
+encounter 896 voice=1
+
+encounter 897 voice=1
+
+encounter 898 voice=1
+
+encounter 899 voice=1
+
+encounter 900 voice=1
+
+encounter 901 voice=1
+
+encounter 902 voice=1
+
+encounter 903 voice=1
+
+encounter 904 voice=1
+
+encounter 905 voice=1
+
+encounter 906 voice=1
+
+encounter 907 voice=1
+
+encounter 908 voice=1
+
+encounter 909 voice=1
+
+encounter 910 voice=1
+
+encounter 911 voice=1
+
+encounter 912 voice=1
+
+encounter 913 voice=1
+
+encounter 914 voice=1
+
+encounter 915 voice=1
+
+encounter 916 voice=1
+
+encounter 917 voice=1
+
+encounter 918 voice=1
+
+encounter 919 voice=1
+
+encounter 920 voice=1
+
+encounter 921 voice=1
+
+encounter 922 voice=1
+
+encounter 923 voice=1
+
+encounter 924 voice=1
+
+encounter 925 voice=1
+
+encounter 926 voice=1
+
+encounter 927 voice=1
+
+encounter 928 item=36 item_count=1 enemies=32,32 backgrounds=223,2 flags=0x90a
+
+encounter 929 item=115 item_count=1 enemies=29,29 backgrounds=224,1 flags=0x90a
+
+encounter 930 item=110 item_count=1 enemies=68,68,68 backgrounds=225,2 flags=0x90a
+
+encounter 931 item=116 item_count=1 enemies=5 backgrounds=227,10 flags=0x90a
+
+encounter 932 item=120 item_count=1 enemies=23 backgrounds=226,2 flags=0x90a
+
+encounter 933 item=111 item_count=1 enemies=45,45 backgrounds=228,2 flags=0x90a
+
+encounter 934 item=114 item_count=1 enemies=268 backgrounds=229,1 flags=0x90a
+
+encounter 935 voice=1 item=35 item_count=1 enemies=61,78,61 backgrounds=229,1 flags=0x90a
+
+encounter 936 voice=1 item=104 item_count=1 enemies=13,78 backgrounds=229,1 flags=0x90a
+
+encounter 937 voice=1 item=12 item_count=1 enemies=3,9,3 backgrounds=229,1 flags=0x90a
+
+encounter 938 voice=1
+
+encounter 939 voice=1
+
+encounter 940 voice=1
+
+encounter 941 voice=1
+
+encounter 942 voice=1
+
+encounter 943 voice=1
+
+encounter 944 voice=1
+
+encounter 945 voice=1
+
+encounter 946 voice=1
+
+encounter 947 voice=1
+
+encounter 948 voice=1
+
+encounter 949 voice=1
+
+encounter 950 voice=1
+
+encounter 951 voice=1
+
+encounter 952 voice=1
+
+encounter 953 voice=1
+
+encounter 954 voice=1
+
+encounter 955 voice=1
+
+encounter 956 voice=1
+
+encounter 957 voice=1
+
+encounter 958 voice=1
+
+encounter 959 voice=1
+
+encounter 960 voice=1
+
+encounter 961 voice=1
+
+encounter 962 voice=1
+
+encounter 963 voice=1
+
+encounter 964 voice=1
+
+encounter 965 voice=1
+
+encounter 966 voice=1
+
+encounter 967 voice=1
+
+encounter 968 voice=1
+
+encounter 969 voice=1
+
+encounter 970 voice=1
+
+encounter 971 voice=1
+
+encounter 972 voice=1
+
+encounter 973 voice=1
+
+encounter 974 voice=1
+
+encounter 975 voice=1
+
+encounter 976 voice=1
+
+encounter 977 voice=1
+
+encounter 978 voice=1
+
+encounter 979 voice=1
+
+encounter 980 voice=1
+
+encounter 981 voice=1
+
+encounter 982 voice=1
+
+encounter 983 voice=1
+
+encounter 984 voice=1
+
+encounter 985 voice=1
+
+encounter 986 voice=1
+
+encounter 987 voice=1
+
+encounter 988 voice=1
+
+encounter 989 voice=1
+
+encounter 990 voice=1
+
+encounter 991 voice=1
+
+encounter 992 voice=1 enemies=103,103,103,103 flags=0xd0c
+
+encounter 993 voice=1 enemies=102,102,102,102 flags=0xd0c
+
+encounter 994 voice=1 enemies=101,101,101,101 flags=0xd0c
+
+encounter 995 voice=1 enemies=100,100,100,100 flags=0xd0c
+
+encounter 996 voice=1
+
+encounter 997 voice=1
+
+encounter 998 voice=1
+
+encounter 999 voice=1
+
+encounter 1000 voice=1
+
+encounter 1001 voice=1
+
+encounter 1002 voice=1
+
+encounter 1003 voice=1
+
+encounter 1004 voice=1
+
+encounter 1005 voice=1
+
+encounter 1006 voice=1
+
+encounter 1007 voice=1
+
+encounter 1008 voice=1 enemies=99,99,99,99,99 flags=0xd0a bgm=23
+
+encounter 1009 voice=1 enemies=99,99,99,99,99 flags=0xd0a bgm=23
+
+encounter 1010 voice=1 enemies=105,105,105,105,105 flags=0xd0a bgm=23
+
+encounter 1011 voice=1 enemies=105,105,105,105,105 flags=0xd0a bgm=23
+
+encounter 1012 voice=1 enemies=106,106,106,106,106 flags=0xd0a bgm=23
+
+encounter 1013 voice=1 enemies=106,106,106,106,106 flags=0xd0a bgm=23
+
+encounter 1014 voice=1 enemies=107,107,107,107,107 flags=0xd0a bgm=23
+
+encounter 1015 voice=1
+
+encounter 1016 voice=1
+
+encounter 1017 voice=1
+
+encounter 1018 voice=1
+
+encounter 1019 voice=1
+
+encounter 1020 voice=1
+
+encounter 1021 voice=1
+
+encounter 1022 voice=1
+
+encounter 1023 voice=1
+
+default-map 0 map=21
+  entry 0 flag_a=2055 flag_b=-1
+  entry 1 zone=1 flag_a=2055 flag_b=-1
+  entry 2 zone=1 flag_a=2055 flag_b=-1
+  entry 3 zone=1 flag_a=2055 flag_b=-1
+  entry 4 zone=1 flag_a=2055 flag_b=-1
+  entry 5 zone=1 flag_a=2055 flag_b=-1
+  entry 6 zone=1 flag_a=2055 flag_b=-1
+  entry 7 zone=1 flag_a=2055 flag_b=-1
+  entry 8 zone=1 flag_a=2055 flag_b=-1
+  entry 9 zone=1 flag_a=2055 flag_b=-1
+  entry 10 flag_a=2055 flag_b=-1
+  entry 11 zone=1 flag_a=2055 flag_b=-1
+  entry 12 zone=2 flag_a=2055 flag_b=-1
+  entry 13 flag_a=2055 flag_b=-1
+  entry 14 flag_a=2055 flag_b=-1
+  entry 15 flag_a=2055 flag_b=-1
+  entry 16 zone=2 flag_a=2055 flag_b=-1
+  entry 17 zone=2 flag_a=2055 flag_b=-1
+  entry 18 zone=2 flag_a=2055 flag_b=-1
+  entry 19 zone=2 flag_a=2055 flag_b=-1
+  entry 20 zone=3 flag_a=2055 flag_b=-1
+  entry 21 zone=3 flag_a=2055 flag_b=-1
+  entry 22 zone=3 flag_a=2055 flag_b=-1
+  entry 23 zone=3 flag_a=2055 flag_b=-1
+  entry 24 zone=3 flag_a=2055 flag_b=-1
+  entry 25 zone=3 flag_a=2055 flag_b=-1
+  entry 26 zone=3 flag_a=2055 flag_b=-1
+  entry 27 zone=3 flag_a=2055 flag_b=-1
+  entry 28 zone=3 flag_a=2055 flag_b=-1
+  entry 29 zone=1 flag_a=2055 flag_b=-1
+  entry 30 flag_a=2055 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 1 map=22
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=2066 zone_a=4 flag_b=-1
+  entry 2 flag_a=2066 zone_a=4 flag_b=-1
+  entry 3 zone=4 flag_a=-1 flag_b=-1
+  entry 4 zone=4 flag_a=-1 flag_b=-1
+  entry 5 zone=5 flag_a=-1 flag_b=-1
+  entry 6 zone=5 flag_a=-1 flag_b=-1
+  entry 7 zone=6 flag_a=-1 flag_b=-1
+  entry 8 zone=6 flag_a=-1 flag_b=-1
+  entry 9 flag_a=2057 flag_b=-1
+  entry 10 flag_a=2065 zone_a=4 flag_b=-1
+  entry 11 flag_a=2065 zone_a=4 flag_b=-1
+  entry 12 flag_a=2058 zone_a=4 flag_b=-1
+  entry 13 zone=4 flag_a=-1 flag_b=-1
+  entry 14 zone=5 flag_a=-1 flag_b=-1
+  entry 15 zone=5 flag_a=-1 flag_b=-1
+  entry 16 zone=5 flag_a=-1 flag_b=-1
+  entry 17 zone=5 flag_a=-1 flag_b=-1
+  entry 18 zone=6 flag_a=-1 flag_b=-1
+  entry 19 zone=6 flag_a=-1 flag_b=-1
+  entry 20 zone=6 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 2 map=23
+  entry 0 flag_a=2060 zone_a=9 flag_b=-1
+  entry 1 zone=7 flag_a=2060 zone_a=9 flag_b=-1
+  entry 2 zone=7 flag_a=2060 zone_a=9 flag_b=-1
+  entry 3 zone=8 flag_a=2060 zone_a=9 flag_b=-1
+  entry 4 zone=8 flag_a=2060 zone_a=9 flag_b=-1
+  entry 5 flag_a=2060 flag_b=-1
+  entry 6 flag_a=2060 flag_b=-1
+  entry 7 flag_a=2060 zone_a=9 flag_b=-1
+  entry 8 zone=8 flag_a=2060 zone_a=9 flag_b=-1
+  entry 9 zone=8 flag_a=2060 zone_a=9 flag_b=-1
+  entry 10 flag_a=2059 zone_a=9 flag_b=-1
+  entry 11 flag_a=2059 zone_a=9 flag_b=-1
+  entry 12 flag_a=2059 zone_a=9 flag_b=-1
+  entry 13 flag_a=2059 flag_b=-1
+  entry 14 flag_a=2059 zone_a=9 flag_b=-1
+  entry 15 flag_a=2059 flag_b=-1
+  entry 16 flag_a=2059 zone_a=9 flag_b=-1
+  entry 17 flag_a=2059 flag_b=-1
+  entry 18 zone=9 flag_a=2059 zone_a=9 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 3 map=24
+  entry 0 flag_a=2063 flag_b=-1
+  entry 1 flag_a=2063 flag_b=-1
+  entry 2 zone=10 flag_a=2063 flag_b=-1
+  entry 3 zone=10 flag_a=2063 flag_b=-1
+  entry 4 zone=10 flag_a=2063 flag_b=-1
+  entry 5 zone=10 flag_a=2063 flag_b=-1
+  entry 6 zone=10 flag_a=2063 flag_b=-1
+  entry 7 zone=10 flag_a=2063 flag_b=-1
+  entry 8 zone=10 flag_a=2063 flag_b=-1
+  entry 9 zone=10 flag_a=2063 flag_b=-1
+  entry 10 zone=10 flag_a=2063 flag_b=-1
+  entry 11 zone=10 flag_a=2063 flag_b=-1
+  entry 12 zone=10 flag_a=2063 flag_b=-1
+  entry 13 zone=11 flag_a=2063 flag_b=-1
+  entry 14 zone=11 flag_a=2063 flag_b=-1
+  entry 15 zone=11 flag_a=2063 flag_b=-1
+  entry 16 flag_a=2063 flag_b=-1
+  entry 17 zone=11 flag_a=2063 flag_b=-1
+  entry 18 zone=11 flag_a=2063 flag_b=-1
+  entry 19 zone=11 flag_a=2063 flag_b=-1
+  entry 20 zone=11 flag_a=2063 flag_b=-1
+  entry 21 flag_a=2063 flag_b=-1
+  entry 22 zone=11 flag_a=2063 flag_b=-1
+  entry 23 zone=11 flag_a=2063 flag_b=-1
+  entry 24 zone=11 flag_a=2063 flag_b=-1
+  entry 25 flag_a=2063 flag_b=-1
+  entry 26 flag_a=2092 zone_a=12 flag_b=-1
+  entry 27 zone=12 flag_a=2063 flag_b=-1
+  entry 28 zone=12 flag_a=2063 flag_b=-1
+  entry 29 zone=12 flag_a=2063 flag_b=-1
+  entry 30 zone=12 flag_a=2063 flag_b=-1
+  entry 31 zone=12 flag_a=2063 flag_b=-1
+  entry 32 zone=11 flag_a=2063 flag_b=-1
+  entry 33 zone=12 flag_a=2063 flag_b=-1
+  entry 34 zone=12 flag_a=2063 flag_b=-1
+  entry 35 zone=12 flag_a=2063 flag_b=-1
+  entry 36 zone=12 flag_a=2063 flag_b=-1
+  entry 37 flag_a=2093 zone_a=13 flag_b=-1
+  entry 38 zone=13 flag_a=2063 flag_b=-1
+  entry 39 zone=13 flag_a=2063 flag_b=-1
+  entry 40 zone=13 flag_a=2063 flag_b=-1
+  entry 41 zone=13 flag_a=2063 flag_b=-1
+  entry 42 zone=13 flag_a=2063 flag_b=-1
+  entry 43 zone=13 flag_a=2063 flag_b=-1
+  entry 44 zone=13 flag_a=2063 flag_b=-1
+  entry 45 zone=13 flag_a=2063 flag_b=-1
+  entry 46 zone=13 flag_a=2063 flag_b=-1
+  entry 47 zone=13 flag_a=2063 flag_b=-1
+  entry 48 zone=13 flag_a=2063 flag_b=-1
+  entry 49 flag_a=2063 flag_b=-1
+  entry 50 zone=13 flag_a=2063 flag_b=-1
+  entry 51 zone=13 flag_a=2063 flag_b=-1
+  entry 52 flag_a=2063 flag_b=-1
+  entry 53 flag_a=2063 flag_b=-1
+  entry 54 zone=13 flag_a=2063 flag_b=-1
+  entry 55 zone=13 flag_a=2063 flag_b=-1
+  entry 56 zone=13 flag_a=2063 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 4 map=25
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 zone=14 flag_a=-1 flag_b=-1
+  entry 3 zone=14 flag_a=-1 flag_b=-1
+  entry 4 zone=14 flag_a=-1 flag_b=-1
+  entry 5 zone=14 flag_a=-1 flag_b=-1
+  entry 6 zone=14 flag_a=-1 flag_b=-1
+  entry 7 zone=14 flag_a=-1 flag_b=-1
+  entry 8 zone=14 flag_a=-1 flag_b=-1
+  entry 9 zone=14 flag_a=-1 flag_b=-1
+  entry 10 zone=15 flag_a=-1 flag_b=-1
+  entry 11 zone=15 flag_a=-1 flag_b=-1
+  entry 12 zone=15 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 zone=15 flag_a=-1 flag_b=-1
+  entry 15 zone=15 flag_a=-1 flag_b=-1
+  entry 16 zone=15 flag_a=-1 flag_b=-1
+  entry 17 zone=15 flag_a=-1 flag_b=-1
+  entry 18 zone=15 flag_a=-1 flag_b=-1
+  entry 19 zone=15 flag_a=-1 flag_b=-1
+  entry 20 zone=15 flag_a=-1 flag_b=-1
+  entry 21 zone=15 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 zone=15 flag_a=-1 flag_b=-1
+  entry 24 zone=15 flag_a=-1 flag_b=-1
+  entry 25 zone=15 flag_a=-1 flag_b=-1
+  entry 26 zone=15 flag_a=-1 flag_b=-1
+  entry 27 zone=16 flag_a=-1 flag_b=-1
+  entry 28 zone=16 flag_a=-1 flag_b=-1
+  entry 29 zone=16 flag_a=-1 flag_b=-1
+  entry 30 zone=16 flag_a=-1 flag_b=-1
+  entry 31 zone=16 flag_a=-1 flag_b=-1
+  entry 32 zone=16 flag_a=-1 flag_b=-1
+  entry 33 zone=16 flag_a=-1 flag_b=-1
+  entry 34 zone=16 flag_a=-1 flag_b=-1
+  entry 35 zone=16 flag_a=-1 flag_b=-1
+  entry 36 zone=16 flag_a=-1 flag_b=-1
+  entry 37 zone=16 flag_a=-1 flag_b=-1
+  entry 38 zone=16 flag_a=-1 flag_b=-1
+  entry 39 zone=16 flag_a=-1 flag_b=-1
+  entry 40 zone=16 flag_a=-1 flag_b=-1
+  entry 41 zone=16 flag_a=-1 flag_b=-1
+  entry 42 zone=16 flag_a=-1 flag_b=-1
+  entry 43 zone=16 flag_a=-1 flag_b=-1
+  entry 44 zone=16 flag_a=-1 flag_b=-1
+  entry 45 zone=16 flag_a=-1 flag_b=-1
+  entry 46 zone=16 flag_a=-1 flag_b=-1
+  entry 47 zone=16 flag_a=-1 flag_b=-1
+  entry 48 zone=16 flag_a=-1 flag_b=-1
+  entry 49 zone=16 flag_a=-1 flag_b=-1
+  entry 50 zone=16 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 5 map=27
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 zone=17 flag_a=-1 flag_b=-1
+  entry 4 zone=17 flag_a=-1 flag_b=-1
+  entry 5 zone=17 flag_a=-1 flag_b=-1
+  entry 6 zone=17 flag_a=-1 flag_b=-1
+  entry 7 zone=17 flag_a=-1 flag_b=-1
+  entry 8 zone=17 flag_a=-1 flag_b=-1
+  entry 9 zone=17 flag_a=-1 flag_b=-1
+  entry 10 zone=17 flag_a=-1 flag_b=-1
+  entry 11 zone=17 flag_a=-1 flag_b=-1
+  entry 12 zone=17 flag_a=-1 flag_b=-1
+  entry 13 zone=17 flag_a=-1 flag_b=-1
+  entry 14 zone=18 flag_a=-1 flag_b=-1
+  entry 15 zone=18 flag_a=-1 flag_b=-1
+  entry 16 flag_a=2084 zone_a=18 flag_b=-1
+  entry 17 zone=17 flag_a=-1 flag_b=-1
+  entry 18 zone=19 flag_a=-1 flag_b=-1
+  entry 19 flag_a=2085 zone_a=19 flag_b=-1
+  entry 20 zone=20 flag_a=-1 flag_b=-1
+  entry 21 zone=20 flag_a=-1 flag_b=-1
+  entry 22 zone=20 flag_a=-1 flag_b=-1
+  entry 23 flag_a=2086 zone_a=20 flag_b=-1
+  entry 24 zone=20 flag_a=-1 flag_b=-1
+  entry 25 zone=20 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 zone=18 flag_a=-1 flag_b=-1
+  entry 31 zone=18 flag_a=-1 flag_b=-1
+  entry 32 zone=18 flag_a=-1 flag_b=-1
+  entry 33 zone=18 flag_a=-1 flag_b=-1
+  entry 34 zone=18 flag_a=-1 flag_b=-1
+  entry 35 zone=18 flag_a=-1 flag_b=-1
+  entry 36 zone=18 flag_a=-1 flag_b=-1
+  entry 37 zone=19 flag_a=-1 flag_b=-1
+  entry 38 zone=19 flag_a=-1 flag_b=-1
+  entry 39 zone=19 flag_a=-1 flag_b=-1
+  entry 40 zone=19 flag_a=-1 flag_b=-1
+  entry 41 zone=19 flag_a=-1 flag_b=-1
+  entry 42 zone=19 flag_a=-1 flag_b=-1
+  entry 43 zone=19 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 zone=18 flag_a=-1 flag_b=-1
+  entry 46 zone=19 flag_a=-1 flag_b=-1
+  entry 47 zone=19 flag_a=-1 flag_b=-1
+  entry 48 zone=19 flag_a=-1 flag_b=-1
+  entry 49 zone=19 flag_a=-1 flag_b=-1
+  entry 50 zone=17 flag_a=-1 flag_b=-1
+  entry 51 zone=19 flag_a=-1 flag_b=-1
+  entry 52 zone=19 flag_a=-1 flag_b=-1
+  entry 53 zone=19 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 zone=19 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 6 map=26
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 zone=21 flag_a=-1 flag_b=-1
+  entry 3 zone=21 flag_a=-1 flag_b=-1
+  entry 4 zone=21 flag_a=-1 flag_b=-1
+  entry 5 zone=21 flag_a=-1 flag_b=-1
+  entry 6 zone=21 flag_a=-1 flag_b=-1
+  entry 7 zone=21 flag_a=-1 flag_b=-1
+  entry 8 zone=21 flag_a=-1 flag_b=-1
+  entry 9 zone=21 flag_a=-1 flag_b=-1
+  entry 10 zone=22 flag_a=-1 flag_b=-1
+  entry 11 zone=22 flag_a=-1 flag_b=-1
+  entry 12 zone=22 flag_a=-1 flag_b=-1
+  entry 13 zone=22 flag_a=-1 flag_b=-1
+  entry 14 zone=22 flag_a=-1 flag_b=-1
+  entry 15 zone=22 flag_a=-1 flag_b=-1
+  entry 16 zone=22 flag_a=-1 flag_b=-1
+  entry 17 zone=22 flag_a=-1 flag_b=-1
+  entry 18 zone=22 flag_a=-1 flag_b=-1
+  entry 19 zone=22 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 zone=22 flag_a=-1 flag_b=-1
+  entry 22 zone=22 flag_a=-1 flag_b=-1
+  entry 23 zone=22 flag_a=-1 flag_b=-1
+  entry 24 zone=22 flag_a=-1 flag_b=-1
+  entry 25 zone=22 flag_a=-1 flag_b=-1
+  entry 26 zone=22 flag_a=-1 flag_b=-1
+  entry 27 zone=22 flag_a=-1 flag_b=-1
+  entry 28 zone=22 flag_a=-1 flag_b=-1
+  entry 29 zone=22 flag_a=-1 flag_b=-1
+  entry 30 zone=22 flag_a=-1 flag_b=-1
+  entry 31 zone=22 flag_a=-1 flag_b=-1
+  entry 32 zone=22 flag_a=-1 flag_b=-1
+  entry 33 zone=22 flag_a=-1 flag_b=-1
+  entry 34 zone=23 flag_a=-1 flag_b=-1
+  entry 35 zone=23 flag_a=-1 flag_b=-1
+  entry 36 zone=23 flag_a=-1 flag_b=-1
+  entry 37 zone=23 flag_a=-1 flag_b=-1
+  entry 38 zone=23 flag_a=-1 flag_b=-1
+  entry 39 zone=23 flag_a=-1 flag_b=-1
+  entry 40 zone=23 flag_a=-1 flag_b=-1
+  entry 41 zone=23 flag_a=-1 flag_b=-1
+  entry 42 zone=23 flag_a=-1 flag_b=-1
+  entry 43 zone=23 flag_a=-1 flag_b=-1
+  entry 44 zone=23 flag_a=-1 flag_b=-1
+  entry 45 zone=23 flag_a=-1 flag_b=-1
+  entry 46 zone=23 flag_a=-1 flag_b=-1
+  entry 47 zone=23 flag_a=-1 flag_b=-1
+  entry 48 zone=23 flag_a=-1 flag_b=-1
+  entry 49 zone=23 flag_a=-1 flag_b=-1
+  entry 50 zone=23 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 zone=23 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 7 map=28
+  entry 0 zone=24 flag_a=2076 zone_a=25 flag_b=2076 zone_b=26
+  entry 1 flag_a=2075 flag_b=2076
+  entry 2 flag_a=2075 flag_b=2076
+  entry 3 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 4 flag_a=2075 flag_b=2076
+  entry 5 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 6 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 7 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 8 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 9 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 10 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 11 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 12 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 13 flag_a=2075 flag_b=2076
+  entry 14 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 15 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 16 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 17 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 18 flag_a=2075 flag_b=2076
+  entry 19 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 20 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 21 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 22 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 23 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 24 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 25 flag_a=2075 flag_b=2076
+  entry 26 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 27 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 28 flag_a=2075 flag_b=2076
+  entry 29 flag_a=2075 flag_b=2076
+  entry 30 flag_a=2075 flag_b=2076
+  entry 31 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 32 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 33 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 34 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 35 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 36 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 37 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 38 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 39 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 40 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 41 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 42 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 43 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 44 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 45 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 46 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 47 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 48 zone=24 flag_a=2075 zone_a=25 flag_b=2076 zone_b=26
+  entry 49 flag_a=2075 flag_b=2076
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 8 map=29
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 zone=27 flag_a=-1 flag_b=-1
+  entry 3 zone=27 flag_a=-1 flag_b=-1
+  entry 4 zone=27 flag_a=-1 flag_b=-1
+  entry 5 zone=27 flag_a=-1 flag_b=-1
+  entry 6 zone=27 flag_a=-1 flag_b=-1
+  entry 7 zone=27 flag_a=-1 flag_b=-1
+  entry 8 zone=27 flag_a=-1 flag_b=-1
+  entry 9 zone=27 flag_a=-1 flag_b=-1
+  entry 10 zone=27 flag_a=-1 flag_b=-1
+  entry 11 zone=27 flag_a=-1 flag_b=-1
+  entry 12 zone=27 flag_a=-1 flag_b=-1
+  entry 13 zone=27 flag_a=-1 flag_b=-1
+  entry 14 zone=27 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 zone=28 flag_a=-1 flag_b=-1
+  entry 18 zone=28 flag_a=-1 flag_b=-1
+  entry 19 zone=28 flag_a=-1 flag_b=-1
+  entry 20 zone=28 flag_a=-1 flag_b=-1
+  entry 21 zone=28 flag_a=-1 flag_b=-1
+  entry 22 zone=28 flag_a=-1 flag_b=-1
+  entry 23 zone=28 flag_a=-1 flag_b=-1
+  entry 24 zone=28 flag_a=-1 flag_b=-1
+  entry 25 zone=28 flag_a=-1 flag_b=-1
+  entry 26 zone=28 flag_a=-1 flag_b=-1
+  entry 27 zone=28 flag_a=-1 flag_b=-1
+  entry 28 zone=28 flag_a=-1 flag_b=-1
+  entry 29 zone=28 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 zone=29 flag_a=-1 flag_b=-1
+  entry 33 zone=29 flag_a=-1 flag_b=-1
+  entry 34 zone=29 flag_a=-1 flag_b=-1
+  entry 35 zone=29 flag_a=-1 flag_b=-1
+  entry 36 zone=29 flag_a=-1 flag_b=-1
+  entry 37 zone=32 flag_a=-1 flag_b=-1
+  entry 38 zone=29 flag_a=-1 flag_b=-1
+  entry 39 zone=29 flag_a=-1 flag_b=-1
+  entry 40 zone=29 flag_a=-1 flag_b=-1
+  entry 41 zone=29 flag_a=-1 flag_b=-1
+  entry 42 zone=29 flag_a=-1 flag_b=-1
+  entry 43 zone=29 flag_a=-1 flag_b=-1
+  entry 44 zone=29 flag_a=-1 flag_b=-1
+  entry 45 zone=29 flag_a=-1 flag_b=-1
+  entry 46 zone=29 flag_a=-1 flag_b=-1
+  entry 47 zone=29 flag_a=-1 flag_b=-1
+  entry 48 zone=29 flag_a=-1 flag_b=-1
+  entry 49 zone=29 flag_a=-1 flag_b=-1
+  entry 50 zone=29 flag_a=-1 flag_b=-1
+  entry 51 zone=29 flag_a=-1 flag_b=-1
+  entry 52 zone=29 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 9 map=30
+  entry 0 flag_a=2080 zone_a=33 flag_b=-1
+  entry 1 flag_a=2080 zone_a=33 flag_b=-1
+  entry 2 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 3 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 4 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 5 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 6 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 7 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 8 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 9 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 10 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 11 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 12 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 13 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 14 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 15 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 16 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 17 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 30 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 31 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 34 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 35 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 38 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 39 zone=30 flag_a=2080 zone_a=33 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 zone=31 flag_a=-1 flag_b=-1
+  entry 42 zone=31 flag_a=-1 flag_b=-1
+  entry 43 zone=31 flag_a=-1 flag_b=-1
+  entry 44 zone=31 flag_a=-1 flag_b=-1
+  entry 45 zone=31 flag_a=-1 flag_b=-1
+  entry 46 zone=31 flag_a=-1 flag_b=-1
+  entry 47 zone=31 flag_a=-1 flag_b=-1
+  entry 48 zone=31 flag_a=-1 flag_b=-1
+  entry 49 zone=31 flag_a=-1 flag_b=-1
+  entry 50 zone=31 flag_a=-1 flag_b=-1
+  entry 51 zone=31 flag_a=-1 flag_b=-1
+  entry 52 zone=31 flag_a=-1 flag_b=-1
+  entry 53 zone=31 flag_a=-1 flag_b=-1
+  entry 54 zone=31 flag_a=-1 flag_b=-1
+  entry 55 zone=31 flag_a=-1 flag_b=-1
+  entry 56 zone=31 flag_a=-1 flag_b=-1
+  entry 57 zone=31 flag_a=-1 flag_b=-1
+  entry 58 zone=31 flag_a=-1 flag_b=-1
+  entry 59 zone=31 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 10
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 11
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 12
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 13
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 14
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+default-map 15
+  entry 0 flag_a=-1 flag_b=-1
+  entry 1 flag_a=-1 flag_b=-1
+  entry 2 flag_a=-1 flag_b=-1
+  entry 3 flag_a=-1 flag_b=-1
+  entry 4 flag_a=-1 flag_b=-1
+  entry 5 flag_a=-1 flag_b=-1
+  entry 6 flag_a=-1 flag_b=-1
+  entry 7 flag_a=-1 flag_b=-1
+  entry 8 flag_a=-1 flag_b=-1
+  entry 9 flag_a=-1 flag_b=-1
+  entry 10 flag_a=-1 flag_b=-1
+  entry 11 flag_a=-1 flag_b=-1
+  entry 12 flag_a=-1 flag_b=-1
+  entry 13 flag_a=-1 flag_b=-1
+  entry 14 flag_a=-1 flag_b=-1
+  entry 15 flag_a=-1 flag_b=-1
+  entry 16 flag_a=-1 flag_b=-1
+  entry 17 flag_a=-1 flag_b=-1
+  entry 18 flag_a=-1 flag_b=-1
+  entry 19 flag_a=-1 flag_b=-1
+  entry 20 flag_a=-1 flag_b=-1
+  entry 21 flag_a=-1 flag_b=-1
+  entry 22 flag_a=-1 flag_b=-1
+  entry 23 flag_a=-1 flag_b=-1
+  entry 24 flag_a=-1 flag_b=-1
+  entry 25 flag_a=-1 flag_b=-1
+  entry 26 flag_a=-1 flag_b=-1
+  entry 27 flag_a=-1 flag_b=-1
+  entry 28 flag_a=-1 flag_b=-1
+  entry 29 flag_a=-1 flag_b=-1
+  entry 30 flag_a=-1 flag_b=-1
+  entry 31 flag_a=-1 flag_b=-1
+  entry 32 flag_a=-1 flag_b=-1
+  entry 33 flag_a=-1 flag_b=-1
+  entry 34 flag_a=-1 flag_b=-1
+  entry 35 flag_a=-1 flag_b=-1
+  entry 36 flag_a=-1 flag_b=-1
+  entry 37 flag_a=-1 flag_b=-1
+  entry 38 flag_a=-1 flag_b=-1
+  entry 39 flag_a=-1 flag_b=-1
+  entry 40 flag_a=-1 flag_b=-1
+  entry 41 flag_a=-1 flag_b=-1
+  entry 42 flag_a=-1 flag_b=-1
+  entry 43 flag_a=-1 flag_b=-1
+  entry 44 flag_a=-1 flag_b=-1
+  entry 45 flag_a=-1 flag_b=-1
+  entry 46 flag_a=-1 flag_b=-1
+  entry 47 flag_a=-1 flag_b=-1
+  entry 48 flag_a=-1 flag_b=-1
+  entry 49 flag_a=-1 flag_b=-1
+  entry 50 flag_a=-1 flag_b=-1
+  entry 51 flag_a=-1 flag_b=-1
+  entry 52 flag_a=-1 flag_b=-1
+  entry 53 flag_a=-1 flag_b=-1
+  entry 54 flag_a=-1 flag_b=-1
+  entry 55 flag_a=-1 flag_b=-1
+  entry 56 flag_a=-1 flag_b=-1
+  entry 57 flag_a=-1 flag_b=-1
+  entry 58 flag_a=-1 flag_b=-1
+  entry 59 flag_a=-1 flag_b=-1
+  entry 60 flag_a=-1 flag_b=-1
+  entry 61 flag_a=-1 flag_b=-1
+  entry 62 flag_a=-1 flag_b=-1
+  entry 63 flag_a=-1 flag_b=-1
+end
+
+zone 0 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 1 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=200
+    slot 0 encounter=2 weight=150 modifier=-3
+    slot 1 encounter=3 weight=150 modifier=3
+    slot 2 encounter=5 weight=150 modifier=-3
+    slot 3 encounter=6 weight=100 modifier=3
+    slot 4 encounter=9 weight=200
+    slot 5 encounter=10 weight=50 modifier=3
+    slot 6 encounter=2 weight=50 modifier=-3
+    slot 7 encounter=372 weight=100
+    slot 8 encounter=373 weight=50
+  end
+end
+
+zone 2 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=372 weight=50
+    slot 1 encounter=3 weight=75
+    slot 2 encounter=4 weight=50 modifier=3
+    slot 3 encounter=373 weight=100
+    slot 4 encounter=6 weight=25
+    slot 5 encounter=7 weight=75 modifier=3
+    slot 6 encounter=374 weight=50
+    slot 7 encounter=9 weight=25 modifier=-2
+    slot 8 encounter=10 weight=50 modifier=2
+    slot 9 encounter=11 weight=50 modifier=3
+    slot 10 encounter=12 weight=25 modifier=-3
+    slot 11 encounter=13 weight=100 modifier=3
+    slot 12 encounter=17 weight=100 modifier=3
+    slot 13 encounter=18 weight=100 modifier=3
+    slot 14 encounter=15 weight=25
+    slot 15 encounter=16 weight=100 modifier=3
+    slot 16 encounter=134 modifier=-3
+    slot 17 encounter=135
+    slot 18 encounter=136 modifier=3
+  end
+end
+
+zone 3 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=175
+    slot 0 encounter=3
+    slot 1 encounter=4 weight=50
+    slot 2 encounter=15 weight=25 modifier=-3
+    slot 3 encounter=16 weight=75
+    slot 4 encounter=20 weight=25 modifier=-3
+    slot 5 encounter=21 weight=75
+    slot 6 encounter=12 weight=50 modifier=-3
+    slot 7 encounter=13 weight=100
+    slot 8 encounter=14 weight=150
+    slot 9 encounter=17 weight=50 modifier=2
+    slot 10 encounter=18 weight=50 modifier=2
+    slot 11 encounter=19 weight=50 modifier=2
+    slot 12 encounter=11 weight=50 modifier=3
+    slot 13 encounter=134 weight=25 modifier=-3
+    slot 14 encounter=135 weight=50
+    slot 15 encounter=136 weight=50 modifier=3
+    slot 16 encounter=137 weight=50 modifier=-2
+    slot 17 encounter=373 weight=25
+    slot 18 encounter=374 weight=50
+  end
+end
+
+zone 4 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=210
+    slot 0 encounter=22 weight=100 modifier=-3 next_roll=3
+    slot 1 encounter=23 weight=75 modifier=1
+    slot 2 encounter=53 weight=100 modifier=-3 next_roll=3
+    slot 3 encounter=54 weight=75 modifier=1
+    slot 4 encounter=25 weight=100 modifier=-3 next_roll=3
+    slot 5 encounter=26 weight=50 modifier=1
+    slot 6 encounter=27
+    slot 7 encounter=29 weight=80
+    slot 8 encounter=30 weight=50 modifier=2
+    slot 9 encounter=31
+    slot 10 encounter=33 weight=100 modifier=-3 next_roll=3
+    slot 11 encounter=34 weight=70 modifier=1
+    slot 12 encounter=35
+    slot 13 encounter=37 weight=50 modifier=-2
+    slot 14 encounter=38 weight=50 modifier=1
+    slot 15 encounter=39
+    slot 16 encounter=48 weight=50 modifier=3
+    slot 17 encounter=50 weight=50 modifier=1
+  end
+end
+
+zone 5 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=210
+    slot 0 encounter=22 weight=50 modifier=-3 next_roll=3
+    slot 1 encounter=23 weight=75 modifier=1
+    slot 2 encounter=53 weight=50 modifier=-3 next_roll=3
+    slot 3 encounter=54 weight=75 modifier=1
+    slot 4 encounter=25 weight=25 modifier=-3 next_roll=3
+    slot 5 encounter=26 weight=50 modifier=1
+    slot 6 encounter=27 weight=25
+    slot 7 encounter=30 weight=25 modifier=1
+    slot 8 encounter=31 weight=25 modifier=3
+    slot 9 encounter=34 weight=50 modifier=1
+    slot 10 encounter=35 weight=50 modifier=3
+    slot 11 encounter=38 weight=25
+    slot 12 encounter=39 weight=25 modifier=3
+    slot 13 encounter=40 weight=75 modifier=-3 next_roll=3
+    slot 14 encounter=42 weight=75 modifier=-3 next_roll=3
+    slot 15 encounter=49 weight=100
+    slot 16 encounter=48 modifier=3
+    slot 17 encounter=50 weight=50 modifier=2
+    slot 18 encounter=56 weight=100
+    slot 19 encounter=32 weight=50 modifier=3
+  end
+end
+
+zone 6 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=210
+    slot 0 encounter=40 modifier=-3 next_roll=3
+    slot 1 encounter=41 weight=100
+    slot 2 encounter=42 modifier=-3 next_roll=3
+    slot 3 encounter=43 weight=100
+    slot 4 encounter=48 weight=50
+    slot 5 encounter=49 weight=50
+    slot 6 encounter=51 weight=100 modifier=2
+    slot 7 encounter=52 weight=150 modifier=-3
+    slot 8 encounter=22 weight=25 modifier=-3 next_roll=3
+    slot 9 encounter=23 weight=25
+    slot 10 encounter=24 weight=75 modifier=2
+    slot 11 encounter=53 weight=25 modifier=-3 next_roll=3
+    slot 12 encounter=54 weight=50
+    slot 13 encounter=55 weight=75 modifier=2
+    slot 14 encounter=44 weight=25 modifier=-3
+    slot 15 encounter=45 weight=50 modifier=1
+    slot 16 encounter=46 weight=50 modifier=2
+    slot 17 encounter=47 weight=50 modifier=3
+  end
+end
+
+zone 7 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=170
+    slot 0 encounter=57 weight=25 modifier=-3 next_roll=5
+    slot 1 encounter=58 weight=50 next_roll=3
+    slot 2 encounter=59 weight=25 modifier=3
+    slot 3 encounter=60 weight=25 modifier=-3 next_roll=5
+    slot 4 encounter=61 weight=75 next_roll=3
+    slot 5 encounter=62 weight=25 modifier=3
+    slot 6 encounter=63 weight=25 modifier=-3 next_roll=5
+    slot 7 encounter=64 weight=75 next_roll=3
+    slot 8 encounter=65 weight=25 modifier=3
+    slot 9 encounter=66 weight=150 modifier=-3 next_roll=5
+    slot 10 encounter=67 weight=50 modifier=-3 next_roll=3
+    slot 11 encounter=68 weight=75 modifier=1
+    slot 12 encounter=76 weight=125 modifier=1
+    slot 13 encounter=77 weight=150 modifier=1
+    slot 14 encounter=78 weight=100 modifier=1
+  end
+end
+
+zone 8 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=170
+    slot 0 encounter=57 modifier=-3 next_roll=5
+    slot 1 encounter=58 weight=50 next_roll=3
+    slot 2 encounter=59 weight=50 modifier=3
+    slot 3 encounter=61 weight=50 next_roll=3
+    slot 4 encounter=62 weight=25 modifier=2
+    slot 5 encounter=64 weight=50 modifier=1 next_roll=3
+    slot 6 encounter=65 weight=25 modifier=3
+    slot 7 encounter=66 weight=125 modifier=-3
+    slot 8 encounter=67 weight=50 modifier=-1 next_roll=5
+    slot 9 encounter=68 weight=50 modifier=1 next_roll=3
+    slot 10 encounter=69 weight=25 modifier=-1 next_roll=5
+    slot 11 encounter=70 weight=100 next_roll=3
+    slot 12 encounter=71 weight=25 modifier=2
+    slot 13 encounter=72 weight=50 modifier=-2 next_roll=5
+    slot 14 encounter=73 weight=50 modifier=2
+    slot 15 encounter=78 weight=50
+    slot 16 encounter=79 weight=75
+    slot 17 encounter=80 weight=75 modifier=-1
+    slot 18 encounter=81 weight=75 modifier=3
+  end
+end
+
+zone 9 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=160
+    slot 0 encounter=58 weight=25 next_roll=3
+    slot 1 encounter=59 weight=25 modifier=2
+    slot 2 encounter=61 weight=25 next_roll=3
+    slot 3 encounter=62 weight=25 modifier=1
+    slot 4 encounter=64 weight=25 next_roll=3
+    slot 5 encounter=65 weight=25 modifier=3
+    slot 6 encounter=69 modifier=-3 next_roll=5
+    slot 7 encounter=70 weight=50 next_roll=3
+    slot 8 encounter=71 weight=50 modifier=3
+    slot 9 encounter=72 modifier=-3 next_roll=5
+    slot 10 encounter=73 weight=50 next_roll=3
+    slot 11 encounter=74 weight=200 modifier=3
+    slot 12 encounter=75 weight=200 modifier=3
+    slot 13 encounter=79 weight=50
+    slot 14 encounter=80 weight=50
+    slot 15 encounter=81 weight=50 modifier=3
+    slot 16 encounter=82 weight=75 modifier=3
+    slot 17 encounter=83 weight=75
+  end
+end
+
+zone 10 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=86 weight=125 modifier=-3
+    slot 2 encounter=126 weight=125 modifier=-3
+    slot 3 encounter=84 weight=25 modifier=-2 next_roll=5
+    slot 4 encounter=85 weight=100 next_roll=3
+    slot 5 encounter=87 weight=25 modifier=3 next_roll=1
+    slot 6 encounter=88 weight=25 modifier=-3 next_roll=5
+    slot 7 encounter=89 weight=100 next_roll=3
+    slot 8 encounter=90 weight=25 modifier=3 next_roll=1
+    slot 9 encounter=91 weight=25 modifier=-2 next_roll=5
+    slot 10 encounter=92 weight=100 next_roll=3
+    slot 11 encounter=93 weight=50 modifier=3 next_roll=1
+    slot 12 encounter=116 weight=75
+    slot 13 encounter=117 weight=100
+    slot 14 encounter=118 weight=100
+  end
+end
+
+zone 11 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=94 weight=25 modifier=-3 next_roll=5
+    slot 1 encounter=95 weight=100 modifier=1 next_roll=3
+    slot 2 encounter=96 weight=100 modifier=2 next_roll=1
+    slot 3 encounter=97 weight=25 modifier=-3 next_roll=10
+    slot 4 encounter=98 weight=75 modifier=1 next_roll=5
+    slot 5 encounter=99 weight=25 modifier=2 next_roll=5
+    slot 6 encounter=100 weight=75 next_roll=3
+    slot 7 encounter=101 weight=75 modifier=1 next_roll=1
+    slot 8 encounter=119 weight=100 modifier=-2
+    slot 9 encounter=120 weight=100
+    slot 10 encounter=121 weight=100 modifier=1
+    slot 11 encounter=86 weight=25 modifier=-3
+    slot 12 encounter=128 weight=75 modifier=-3
+    slot 13 encounter=126 weight=25 modifier=-3
+    slot 14 encounter=129 weight=75 modifier=-3
+  end
+end
+
+zone 12 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=185
+    slot 0 encounter=102 weight=25 modifier=-2 next_roll=5
+    slot 1 encounter=103 weight=75 modifier=-1 next_roll=3
+    slot 2 encounter=104 weight=50 modifier=2
+    slot 3 encounter=105 weight=25 modifier=-2 next_roll=5
+    slot 4 encounter=106 weight=75 modifier=-1 next_roll=3
+    slot 5 encounter=107 weight=75 modifier=2
+    slot 6 encounter=130 weight=100
+    slot 7 encounter=131 weight=100 modifier=1
+    slot 8 encounter=132 weight=50 modifier=-1
+    slot 9 encounter=128 weight=100 modifier=-3
+    slot 10 encounter=129 weight=100 modifier=-3
+    slot 11 encounter=121 weight=50 modifier=1
+    slot 12 encounter=98 weight=75 next_roll=5
+    slot 13 encounter=379 weight=25
+    slot 14 encounter=380 weight=75
+  end
+end
+
+zone 13 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=180
+    slot 0 encounter=108 weight=25 modifier=2 next_roll=5
+    slot 1 encounter=109 weight=100 modifier=2 next_roll=3
+    slot 2 encounter=110 weight=75 modifier=2 next_roll=1
+    slot 3 encounter=111 weight=100 modifier=-1 next_roll=5
+    slot 4 encounter=112 weight=100 modifier=-1 next_roll=5
+    slot 5 encounter=113 weight=25 modifier=1 next_roll=5
+    slot 6 encounter=114 weight=75 modifier=-2 next_roll=3
+    slot 7 encounter=115 weight=100 modifier=2 next_roll=1
+    slot 8 encounter=133 weight=50 next_roll=10
+    slot 9 encounter=122 weight=50 next_roll=3
+    slot 10 encounter=123 weight=50 modifier=2
+    slot 11 encounter=124 weight=50 modifier=-3
+    slot 12 encounter=125 weight=100 modifier=-1
+    slot 13 encounter=127 weight=100 modifier=-3
+  end
+end
+
+zone 14 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=138 weight=20 modifier=-3 next_roll=5
+    slot 1 encounter=139 weight=50 modifier=-3 next_roll=5
+    slot 2 encounter=140 weight=20 modifier=-3 next_roll=5
+    slot 3 encounter=141 weight=50 modifier=-3 next_roll=5
+    slot 4 encounter=142 weight=60 modifier=-3
+    slot 5 encounter=381 weight=50
+    slot 6 encounter=144 weight=75 next_roll=3
+    slot 7 encounter=145 weight=25 modifier=2
+    slot 8 encounter=146 weight=25 modifier=-2 next_roll=5
+    slot 9 encounter=147 weight=50 next_roll=3
+    slot 10 encounter=148 weight=50 modifier=2
+    slot 11 encounter=382 weight=50
+    slot 12 encounter=150 weight=50 modifier=-2 next_roll=5
+    slot 13 encounter=151 weight=50
+    slot 15 encounter=153 weight=75 next_roll=3
+    slot 16 encounter=154 weight=25 modifier=2
+    slot 17 encounter=174 weight=75 modifier=3
+    slot 18 encounter=175 weight=100 modifier=2
+    slot 19 encounter=176 weight=100 modifier=2
+  end
+end
+
+zone 15 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=138 weight=20 modifier=-3 next_roll=5
+    slot 1 encounter=139 weight=50 modifier=-3 next_roll=5
+    slot 2 encounter=140 weight=20 modifier=-3 next_roll=5
+    slot 3 encounter=141 weight=50 modifier=-3 next_roll=5
+    slot 4 encounter=142 weight=60 modifier=-3
+    slot 5 encounter=383 weight=75
+    slot 6 encounter=144 weight=50 next_roll=3
+    slot 7 encounter=145 weight=50 modifier=2
+    slot 8 encounter=155 weight=25 modifier=-3
+    slot 9 encounter=156 weight=75
+    slot 10 encounter=157 weight=50 modifier=3
+    slot 12 encounter=159 weight=50 modifier=1
+    slot 13 encounter=160 weight=25 modifier=3
+    slot 14 encounter=161 weight=25
+    slot 15 encounter=162 weight=50
+    slot 16 encounter=163 weight=50
+    slot 17 encounter=177 weight=100 modifier=2
+    slot 18 encounter=178 weight=75 modifier=3
+    slot 19 encounter=179 weight=100 modifier=3
+  end
+end
+
+zone 16 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=180 weight=100 modifier=3
+    slot 1 encounter=139 weight=30 modifier=-3 next_roll=5
+    slot 2 encounter=140 modifier=-3 next_roll=5
+    slot 3 encounter=141 weight=30 modifier=-3 next_roll=5
+    slot 4 encounter=142 weight=65 modifier=-3
+    slot 5 encounter=144 weight=25 modifier=-2 next_roll=3
+    slot 6 encounter=145 weight=25 modifier=-2
+    slot 7 encounter=384 weight=75 modifier=-3 next_roll=5
+    slot 8 encounter=165 weight=50 next_roll=3
+    slot 9 encounter=166 weight=25 modifier=3
+    slot 10 encounter=167 weight=25 modifier=-3 next_roll=5
+    slot 11 encounter=168 weight=50 next_roll=3
+    slot 12 encounter=169 weight=25 modifier=3
+    slot 13 encounter=170 weight=100 next_roll=10
+    slot 14 encounter=171 weight=50 modifier=1 next_roll=5
+    slot 15 encounter=172 weight=50 modifier=2 next_roll=3
+    slot 16 encounter=173 weight=25 modifier=3
+    slot 17 encounter=181 weight=100 modifier=2
+    slot 18 encounter=182 weight=75 modifier=2
+    slot 19 encounter=183 weight=75 modifier=2
+  end
+end
+
+zone 17 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=205
+    slot 0 encounter=184 weight=25 modifier=-2 next_roll=5
+    slot 1 encounter=185 weight=50
+    slot 2 encounter=186 weight=25 modifier=-2 next_roll=5
+    slot 3 encounter=187 weight=50
+    slot 4 encounter=188 weight=100 modifier=-1
+    slot 5 encounter=189 weight=25 modifier=-2 next_roll=5
+    slot 6 encounter=190 weight=75 next_roll=3
+    slot 7 encounter=191 weight=50 modifier=2
+    slot 8 encounter=192 weight=50 modifier=1 next_roll=3
+    slot 9 encounter=193 weight=25 modifier=3
+    slot 10 encounter=195 weight=50 modifier=-3 next_roll=5
+    slot 11 encounter=196 weight=75
+    slot 12 encounter=198 weight=25 modifier=-2 next_roll=5
+    slot 13 encounter=199 weight=75
+    slot 14 encounter=225 weight=75
+    slot 15 encounter=226 weight=50
+    slot 16 encounter=228 weight=75 next_roll=3
+    slot 17 encounter=230 weight=75 next_roll=3
+  end
+end
+
+zone 18 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=205
+    slot 0 encounter=198 weight=50 modifier=-2 next_roll=5
+    slot 1 encounter=185 weight=50
+    slot 2 encounter=199 weight=50
+    slot 3 encounter=187 weight=50
+    slot 4 encounter=234 weight=25
+    slot 5 encounter=230 weight=50 next_roll=3
+    slot 6 encounter=190 weight=25
+    slot 7 encounter=191 weight=50
+    slot 8 encounter=201 weight=25 modifier=-1 next_roll=10
+    slot 9 encounter=202 weight=75 next_roll=5
+    slot 10 encounter=203 weight=75 modifier=1
+    slot 11 encounter=204 weight=25 modifier=-1 next_roll=5
+    slot 12 encounter=205 weight=50
+    slot 13 encounter=206 weight=50 modifier=2
+    slot 14 encounter=207 weight=25 modifier=-1 next_roll=5
+    slot 15 encounter=208 weight=50
+    slot 16 encounter=209 weight=50 modifier=1
+    slot 17 encounter=231 weight=75 modifier=1
+    slot 18 encounter=232 weight=75 modifier=1
+    slot 19 encounter=233 weight=75 modifier=2
+  end
+end
+
+zone 19 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=205
+    slot 0 encounter=229 weight=25
+    slot 1 encounter=192 weight=50 modifier=1 next_roll=3
+    slot 2 encounter=196 weight=75 next_roll=1
+    slot 3 encounter=193 weight=25 modifier=3
+    slot 4 encounter=188 weight=75 modifier=-1
+    slot 5 encounter=225 weight=50
+    slot 6 encounter=210 weight=25 modifier=-1 next_roll=5
+    slot 7 encounter=211 weight=50
+    slot 8 encounter=212 weight=50 modifier=2
+    slot 9 encounter=213 weight=25 modifier=-1 next_roll=5
+    slot 10 encounter=214 weight=50
+    slot 11 encounter=215 weight=50 modifier=3
+    slot 12 encounter=216 weight=25 modifier=3
+    slot 13 encounter=217 weight=75 modifier=3
+    slot 14 encounter=235 weight=75
+    slot 15 encounter=236 weight=100 modifier=1
+    slot 16 encounter=237 weight=100 next_roll=3
+    slot 17 encounter=238 weight=75
+  end
+end
+
+zone 20 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=205
+    slot 0 encounter=185 weight=25 modifier=-2 next_roll=5
+    slot 1 encounter=187 weight=25
+    slot 2 encounter=225 weight=25 modifier=-2 next_roll=5
+    slot 3 encounter=188 weight=25 modifier=-1
+    slot 4 encounter=190
+    slot 5 encounter=191 weight=25 modifier=1
+    slot 6 encounter=197 weight=25 modifier=3
+    slot 7 encounter=227 weight=75
+    slot 8 encounter=229 weight=75
+    slot 9 encounter=218 weight=25 modifier=-3 next_roll=5
+    slot 10 encounter=219 weight=50 next_roll=3
+    slot 11 encounter=220 weight=50 modifier=3
+    slot 12 encounter=221 weight=25 modifier=-2 next_roll=5
+    slot 13 encounter=222 weight=25
+    slot 14 encounter=223 weight=50
+    slot 15 encounter=224 weight=175 modifier=-2
+    slot 16 encounter=239 weight=100 next_roll=3
+    slot 17 encounter=240 weight=100 modifier=2
+    slot 18 encounter=241 weight=100 modifier=1
+  end
+end
+
+zone 21 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=242 weight=50 modifier=-3 next_roll=7
+    slot 1 encounter=243 weight=25 next_roll=5
+    slot 2 encounter=244 weight=25 modifier=3
+    slot 3 encounter=245 weight=75 modifier=-3 next_roll=7
+    slot 4 encounter=246 weight=100 next_roll=5
+    slot 5 encounter=247 weight=50 modifier=3
+    slot 6 encounter=248 weight=75 modifier=-3 next_roll=7
+    slot 7 encounter=249 weight=100 next_roll=5
+    slot 8 encounter=250 weight=50 modifier=3
+    slot 9 encounter=266 weight=150 modifier=-1
+    slot 10 encounter=267 weight=150 modifier=-1
+    slot 11 encounter=268 weight=150 modifier=-1
+  end
+end
+
+zone 22 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=242 weight=25 next_roll=5
+    slot 1 encounter=243 weight=25 next_roll=5
+    slot 2 encounter=244 weight=50 modifier=3
+    slot 3 encounter=251 weight=50 next_roll=10
+    slot 4 encounter=252 weight=75 next_roll=5
+    slot 5 encounter=253 weight=75 modifier=3
+    slot 6 encounter=254 weight=100 modifier=3
+    slot 7 encounter=269 weight=75 modifier=1
+    slot 8 encounter=270 weight=100 modifier=1
+    slot 9 encounter=271 weight=75 modifier=1
+    slot 10 encounter=246 weight=25 modifier=-2 next_roll=8
+    slot 11 encounter=247 weight=25 modifier=-2 next_roll=8
+    slot 12 encounter=249 weight=25 modifier=-2 next_roll=8
+    slot 13 encounter=250 weight=25 modifier=-2 next_roll=8
+    slot 14 encounter=282 weight=100
+    slot 15 encounter=279 weight=50 modifier=-3
+    slot 16 encounter=280 weight=50
+    slot 17 encounter=281 weight=50 modifier=3
+  end
+end
+
+zone 23 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=255 weight=25 modifier=-3
+    slot 1 encounter=256 weight=75
+    slot 2 encounter=257 weight=75
+    slot 3 encounter=258 weight=25 modifier=3
+    slot 4 encounter=259 weight=50 modifier=-3
+    slot 5 encounter=260 weight=25 modifier=-3
+    slot 6 encounter=261 weight=25
+    slot 7 encounter=262 weight=25
+    slot 8 encounter=263 weight=50
+    slot 9 encounter=264 weight=25 modifier=3
+    slot 10 encounter=265 weight=100
+    slot 11 encounter=272 weight=100
+    slot 12 encounter=273 weight=100
+    slot 13 encounter=274 weight=100 modifier=2
+    slot 14 encounter=275 weight=100 modifier=2
+    slot 15 encounter=254 weight=100 modifier=-2
+  end
+end
+
+zone 24 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=283 weight=25 next_roll=8
+    slot 1 encounter=284 weight=50 next_roll=5
+    slot 2 encounter=285 weight=25
+    slot 3 encounter=319 weight=50 modifier=-1 next_roll=8
+    slot 4 encounter=320 weight=25 modifier=-2 next_roll=5
+    slot 5 encounter=321 weight=25 modifier=-3
+    slot 6 encounter=286 weight=50 modifier=-3 next_roll=15
+    slot 7 encounter=287 weight=75 next_roll=10
+    slot 8 encounter=288 weight=100 modifier=3
+    slot 9 encounter=289 weight=50 modifier=-3 next_roll=8
+    slot 10 encounter=290 weight=75 next_roll=5
+    slot 11 encounter=291 weight=75 modifier=3
+    slot 12 encounter=307 weight=125 modifier=1
+    slot 13 encounter=308 weight=125 modifier=1
+    slot 14 encounter=309 weight=125 modifier=1
+  end
+end
+
+zone 25 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=283 next_roll=8
+    slot 1 encounter=284 weight=50 next_roll=5
+    slot 2 encounter=285 weight=25
+    slot 3 encounter=319 modifier=-1 next_roll=8
+    slot 4 encounter=320 weight=25 modifier=-2 next_roll=5
+    slot 5 encounter=321 weight=25 modifier=-3
+    slot 6 encounter=293 weight=150
+    slot 7 encounter=294 weight=50 next_roll=8
+    slot 8 encounter=295 weight=75 next_roll=5
+    slot 9 encounter=296 weight=75
+    slot 10 encounter=297 weight=75 modifier=-3 next_roll=8
+    slot 11 encounter=298 weight=75 next_roll=5
+    slot 12 encounter=299 weight=75 modifier=3
+    slot 13 encounter=310 weight=50 modifier=-2
+    slot 14 encounter=311 weight=50
+    slot 15 encounter=312 weight=100
+    slot 16 encounter=313 weight=100
+  end
+end
+
+zone 26 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=283 next_roll=8
+    slot 1 encounter=284 weight=50 next_roll=5
+    slot 2 encounter=285 weight=50
+    slot 3 encounter=319 modifier=-1 next_roll=8
+    slot 4 encounter=320 weight=25 modifier=-2 next_roll=5
+    slot 5 encounter=321 weight=50 modifier=-3
+    slot 6 encounter=300 weight=50 modifier=-3 next_roll=8
+    slot 7 encounter=301 weight=75 next_roll=5
+    slot 8 encounter=302 weight=75 modifier=3
+    slot 9 encounter=303 weight=50 modifier=-3 next_roll=8
+    slot 10 encounter=304 weight=100 next_roll=5
+    slot 11 encounter=305 weight=75 modifier=3
+    slot 12 encounter=306
+    slot 13 encounter=314 weight=100 modifier=-2
+    slot 14 encounter=316 weight=100
+    slot 15 encounter=317 weight=100
+    slot 16 encounter=318 weight=100 modifier=3
+  end
+end
+
+zone 27 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=322 weight=25 next_roll=10
+    slot 1 encounter=323 weight=25 next_roll=5
+    slot 2 encounter=324 modifier=2
+    slot 3 encounter=325 weight=25 modifier=-3 next_roll=10
+    slot 4 encounter=326 weight=25 next_roll=5
+    slot 6 encounter=328 weight=25 modifier=-3 next_roll=10
+    slot 7 encounter=329 weight=50 next_roll=5
+    slot 8 encounter=330 weight=75
+    slot 9 encounter=331 weight=25 modifier=-3 next_roll=10
+    slot 10 encounter=332 weight=50 next_roll=5
+    slot 11 encounter=333 weight=75 modifier=2
+    slot 12 encounter=334 weight=150 modifier=-3
+    slot 13 encounter=357 weight=150
+    slot 14 encounter=358 weight=150
+    slot 15 encounter=359 weight=150
+  end
+end
+
+zone 28 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=322 next_roll=10
+    slot 1 encounter=323 weight=25 next_roll=5
+    slot 2 encounter=324 weight=25
+    slot 3 encounter=325 next_roll=10
+    slot 4 encounter=326 weight=50 next_roll=5
+    slot 6 encounter=335 weight=25 next_roll=10
+    slot 7 encounter=336 weight=50 next_roll=5
+    slot 8 encounter=337 weight=50
+    slot 9 encounter=338 weight=25 modifier=-3 next_roll=10
+    slot 10 encounter=339 weight=50 modifier=-2 next_roll=5
+    slot 11 encounter=340 weight=50 modifier=-1
+    slot 12 encounter=341 weight=150
+    slot 13 encounter=360 weight=125
+    slot 14 encounter=361 weight=125
+    slot 15 encounter=369 weight=125
+    slot 16 encounter=370 weight=125
+  end
+end
+
+zone 29 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=324 weight=25 modifier=-3
+    slot 1 encounter=326 weight=25 next_roll=5
+    slot 2 encounter=342 weight=25 modifier=-3 next_roll=10
+    slot 3 encounter=343 weight=50 next_roll=5
+    slot 4 encounter=344 weight=50
+    slot 5 encounter=351 weight=25 modifier=-3 next_roll=10
+    slot 6 encounter=352 weight=50 next_roll=5
+    slot 7 encounter=353 weight=75 modifier=1
+    slot 8 encounter=349 weight=25 next_roll=5
+    slot 9 encounter=350 weight=50
+    slot 10 encounter=363 weight=75
+    slot 11 encounter=364 weight=100
+    slot 12 encounter=366 weight=100 modifier=1
+    slot 13 encounter=367 weight=75 modifier=1
+    slot 14 encounter=368 weight=50 modifier=1
+    slot 15 encounter=377 weight=50 next_roll=10
+    slot 16 encounter=385 weight=50
+    slot 17 encounter=386 weight=100
+  end
+end
+
+zone 30 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=190
+    slot 0 encounter=324 weight=75 next_roll=5
+    slot 1 encounter=326 weight=75 next_roll=5
+    slot 2 encounter=345 weight=10 next_roll=10
+    slot 3 encounter=346 weight=20
+    slot 4 encounter=347 weight=20
+    slot 5 encounter=354 weight=150 modifier=-3 next_roll=10
+    slot 6 encounter=355 weight=150 modifier=-3 next_roll=10
+    slot 7 encounter=362 weight=50
+    slot 8 encounter=365 weight=75
+    slot 9 encounter=375 weight=50
+    slot 10 encounter=376 weight=50
+    slot 11 encounter=378 weight=50 next_roll=5
+    slot 12 encounter=387 weight=50
+    slot 13 encounter=389 weight=25
+    slot 14 encounter=364 weight=75 modifier=-2
+    slot 15 encounter=386 weight=75 modifier=-2
+  end
+end
+
+zone 31 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=180
+    slot 0 encounter=334 weight=50 modifier=-1 next_roll=10
+    slot 1 encounter=341 weight=50 modifier=-1 next_roll=10
+    slot 2 encounter=354 weight=75 modifier=-1 next_roll=10
+    slot 3 encounter=355 weight=75 modifier=-1 next_roll=10
+    slot 4 encounter=356 weight=50 modifier=-1 next_roll=10
+    slot 5 encounter=357 weight=50 modifier=-1 next_roll=10
+    slot 6 encounter=358 weight=50 modifier=-1 next_roll=10
+    slot 7 encounter=359 weight=50 modifier=-1 next_roll=10
+    slot 8 encounter=360 weight=50 modifier=-1 next_roll=10
+    slot 9 encounter=361 weight=50 modifier=-1 next_roll=10
+    slot 10 encounter=362 weight=50 modifier=-1 next_roll=10
+    slot 11 encounter=376 weight=50
+    slot 12 encounter=364 weight=25 modifier=-1 next_roll=10
+    slot 13 encounter=365 weight=50 modifier=-1 next_roll=10
+    slot 14 encounter=366 weight=50 modifier=-1 next_roll=10
+    slot 15 encounter=367 weight=50 modifier=-1 next_roll=10
+    slot 16 encounter=368 weight=50 modifier=-1 next_roll=10
+    slot 17 encounter=369 weight=25 modifier=-1 next_roll=10
+    slot 18 encounter=370 weight=50 modifier=-1 next_roll=10
+    slot 19 encounter=375 weight=50
+  end
+end
+
+zone 32 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=324 weight=25 modifier=-3
+    slot 1 encounter=326 weight=25 next_roll=5
+    slot 2 encounter=342 weight=25 modifier=-3 next_roll=10
+    slot 3 encounter=343 weight=50 next_roll=5
+    slot 4 encounter=344 weight=50
+    slot 5 encounter=351 weight=25 modifier=-3 next_roll=10
+    slot 6 encounter=352 weight=50 next_roll=5
+    slot 7 encounter=353 weight=50 modifier=1
+    slot 8 encounter=349 weight=25 next_roll=5
+    slot 9 encounter=350 weight=50
+    slot 10 encounter=363 weight=75
+    slot 11 encounter=364 weight=50
+    slot 12 encounter=366 weight=50 modifier=1
+    slot 13 encounter=367 weight=50 modifier=1
+    slot 14 encounter=368 weight=50 modifier=1
+    slot 15 encounter=377 weight=50 next_roll=10
+    slot 16 encounter=385 weight=50
+    slot 17 encounter=386 weight=50
+    slot 18 encounter=822 weight=200
+  end
+end
+
+zone 33 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=195
+    slot 0 encounter=324 weight=75 next_roll=5
+    slot 1 encounter=326 weight=25 next_roll=5
+    slot 2 encounter=345 weight=10 next_roll=10
+    slot 3 encounter=346 weight=20
+    slot 4 encounter=347 weight=20
+    slot 5 encounter=354 weight=75 modifier=-3 next_roll=10
+    slot 6 encounter=355 weight=125 modifier=-3 next_roll=10
+    slot 7 encounter=362 weight=75
+    slot 8 encounter=365 weight=75
+    slot 9 encounter=375 weight=45
+    slot 10 encounter=376 weight=5
+    slot 11 encounter=378 weight=50 next_roll=5
+    slot 12 encounter=387 weight=100
+    slot 13 encounter=389 weight=50
+    slot 14 encounter=364 weight=125 modifier=-2
+    slot 15 encounter=386 weight=125 modifier=-2
+  end
+end
+
+zone 34 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 35 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 36 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 37 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 38 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 39 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 40 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 41 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 42 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 43 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 44 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 45 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 46 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 47 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 48 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 49 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 50 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 51 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 52 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 53 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 54 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 55 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 56 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 57 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 58 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 59 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 60 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 61 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 62 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 63 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 64 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 65 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 66 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 67 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 68 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 69 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 70 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 71 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 72 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 73 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 74 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 75 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 76 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 77 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 78 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 79 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 80 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 81 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 82 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 83 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 84 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 85 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 86 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 87 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 88 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 89 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 90 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 91 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 92 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 93 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 94 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 95 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 96 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1008 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 97 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1009 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 98 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1010 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 99 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1011 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 100 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1012 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 101 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1013 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 102 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+    slot 0 encounter=1014 weight=500
+    slot 1 encounter=822 weight=500
+  end
+end
+
+zone 103 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 104 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 105 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 106 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 107 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 108 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 109 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 110 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+zone 111 bgm=5
+  routes abc=8 ab=8 ac=8 bc=8 a=8 b=8 c=8 none=8
+  pool 0 threshold=150
+  end
+end
+
+override 0 map=23 flag=-1 chance=2 zone=96
+
+override 1 map=24 flag=-1 chance=2 zone=97
+
+override 2 map=25 flag=-1 chance=2 zone=98
+
+override 3 map=26 flag=-1 chance=2 zone=99
+
+override 4 map=27 flag=-1 chance=2 zone=100
+
+override 5 map=28 flag=-1 chance=2 zone=101
+
+override 6 map=29 flag=-1 chance=3 zone=102
+
+override 7 map=30 flag=-1 chance=3 zone=102
+
+override 8 flag=-1
+
+override 9 flag=-1
+
+override 10 flag=-1
+
+override 11 flag=-1
+
+override 12 flag=-1
+
+override 13 flag=-1
+
+override 14 flag=-1
+
+override 15 flag=-1
+
+background-map 0 map=21
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=6 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=6 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=6 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=8 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 1 map=22
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 2 map=23
+  entry 0 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=2061 background_a=4 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=2061 background_a=4 flag_b=-1 background_b=1
+  entry 3 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 4 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 5 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 6 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 7 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 8 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 9 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=2061 background_a=5 flag_b=-1 background_b=1
+  entry 11 background=3 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=3 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=3 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=8 flag_a=2061 background_a=9 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 3 map=24
+  entry 0 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 5 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 7 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 11 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 16 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 17 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 19 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 23 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 26 background=3 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 32 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 34 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 36 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 41 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 42 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 46 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 48 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 49 background=5 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 53 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 54 background=2 flag_a=2061 background_a=7 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=2061 background_a=6 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=2061 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 4 map=25
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=2072 background_a=6 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 5 map=26
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=6 flag_a=2072 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=5 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 6 map=27
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=9 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=9 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=9 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=7 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=10 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=8 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 7 map=28
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 20 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 39 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 40 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 41 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 42 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 43 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 44 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 45 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 46 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 47 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 48 background=7 flag_a=2072 background_a=2 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 8 map=29
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=2 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=4 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 9 map=30
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=18 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=15 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=15 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=15 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=15 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=20 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=16 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=17 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=3 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=19 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 10
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 11
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 12
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 13
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+background-map 14
+  entry 0 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 1 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 2 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 3 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 4 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 5 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 6 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 7 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 8 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 9 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 10 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 11 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 12 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 13 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 14 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 15 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 16 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 17 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 18 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 19 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 20 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 21 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 22 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 23 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 24 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 25 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 26 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 27 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 28 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 29 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 30 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 31 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 32 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 33 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 34 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 35 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 36 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 37 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 38 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 39 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 40 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 41 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 42 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 43 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 44 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 45 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 46 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 47 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 48 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 49 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 50 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 51 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 52 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 53 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 54 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 55 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 56 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 57 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 58 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 59 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 60 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 61 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 62 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+  entry 63 background=1 flag_a=-1 background_a=1 flag_b=-1 background_b=1
+end
+
+visual 0 header=23,5,10,992,1800,25,1,5,50,0,40,0,30,0,20,0
+  group 0 count=4 members=1,2,3,4,255,255,255,255 tail=3
+  group 1 count=4278781959 members=255,255,255,255,2,0,0,0 tail=4294903301
+  group 2 count=4294967295 members=3,0,0,0,7,8,9,255 tail=4294967295
+  group 3 count=3 members=1,2,3,255,255,255,255,255 tail=3
+  group 4 count=4278781702 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 5 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 6 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 1 header=24,16,9,993,1800,30,1,5,50,0,40,0,30,0,20,0
+  group 0 count=3 members=0,1,2,255,255,255,255,255 tail=2
+  group 1 count=4294903301 members=255,255,255,255,4,0,0,0 tail=134677250
+  group 2 count=4294967295 members=1,0,0,0,0,255,255,255 tail=4294967295
+  group 3 count=5 members=2,3,4,5,6,255,255,255 tail=4
+  group 4 count=134349056 members=255,255,255,255,1,0,0,0 tail=4294967047
+  group 5 count=4294967295 members=2,0,0,0,5,6,255,255 tail=4294967295
+  group 6 count=3 members=7,8,3,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 2 header=25,51,20,994,1800,35,1,5,50,0,40,0,30,0,20,0
+  group 0 count=3 members=2,3,4,255,255,255,255,255 tail=2
+  group 1 count=4294904072 members=255,255,255,255,6,0,0,0 tail=303108111
+  group 2 count=4294902016 members=1,0,0,0,19,255,255,255 tail=4294967295
+  group 3 count=3 members=15,16,17,255,255,255,255,255 tail=5
+  group 4 count=33752074 members=19,255,255,255,5,0,0,0 tail=252380934
+  group 5 count=4294967056 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 6 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 3 header=26,51,20,995,1800,70,1,5,50,0,40,0,30,0,20,0
+  group 0 count=3 members=2,3,4,255,255,255,255,255 tail=2
+  group 1 count=4294902016 members=255,255,255,255,6,0,0,0 tail=235735304
+  group 2 count=4294905871 members=3,0,0,0,4,5,6,255 tail=4294967295
+  group 3 count=4 members=16,17,18,19,255,255,255,255 tail=3
+  group 4 count=4279110924 members=255,255,255,255,4,0,0,0 tail=151257858
+  group 5 count=4294967295 members=2,0,0,0,10,11,255,255 tail=4294967295
+  group 6 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 4 header=28,13,23,995,1800,100,1,5,50,0,40,0,30,0,20,0
+  group 0 count=4 members=1,2,5,10,255,255,255,255 tail=2
+  group 1 count=4294905871 members=255,255,255,255,5,0,0,0 tail=201852678
+  group 2 count=4294967057 members=2,0,0,0,2,1,255,255 tail=4294967295
+  group 3 count=4 members=7,8,18,22,255,255,255,1 tail=3
+  group 4 count=4279505667 members=255,255,255,255,2,0,0,0 tail=4294906124
+  group 5 count=4294967295 members=4,0,0,0,14,15,16,22 tail=4294967295
+  group 6 count=3 members=0,19,20,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,1,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 5 header=99,99,12,992,2700,10,1,5,50,0,40,0,30,0,20,0
+  group 0 count=1 members=0,255,255,255,255,255,255,255 tail=2
+  group 1 count=4294902273 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 2 count=4294967295 members=4,0,0,0,6,7,8,9 tail=4294967295
+  group 3 count=5 members=10,11,255,255,255,255,255,255 tail=3
+  group 4 count=4278321408 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 5 count=4294967295 members=3,0,0,0,6,7,8,255 tail=4294967295
+  group 6 count=1 members=0,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 6 header=99,99,12,992,2700,10,1,5,50,0,40,0,30,0,20,0
+  group 0 count=1 members=0,255,255,255,255,255,255,255 tail=2
+  group 1 count=4294902273 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 2 count=4294967295 members=4,0,0,0,6,7,8,9 tail=4294967295
+  group 3 count=5 members=10,11,255,255,255,255,255,255 tail=3
+  group 4 count=4278321408 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 5 count=4294967295 members=3,0,0,0,6,7,8,255 tail=4294967295
+  group 6 count=1 members=0,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
+
+visual 7 header=99,99,12,992,2700,10,1,5,50,0,40,0,30,0,20,0
+  group 0 count=1 members=0,255,255,255,255,255,255,255 tail=2
+  group 1 count=4294902273 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 2 count=4294967295 members=4,0,0,0,6,7,8,9 tail=4294967295
+  group 3 count=5 members=10,11,255,255,255,255,255,255 tail=3
+  group 4 count=4278321408 members=255,255,255,255,3,0,0,0 tail=4278518787
+  group 5 count=4294967295 members=3,0,0,0,6,7,8,255 tail=4294967295
+  group 6 count=1 members=0,255,255,255,255,255,255,255 tail=4294967295
+  group 7 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 8 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 9 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 10 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+  group 11 count=4294967295 members=255,255,255,255,255,255,255,255 tail=4294967295
+end
