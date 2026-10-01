@@ -652,6 +652,11 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_003450D8);
 extern void sceIpuStopDMA(void *);
 
 /* IPU stream worker: queued stream node plus the DMA progress counters polled by this thread. */
+/* DMA control block embedded in the worker at 0x68. */
+typedef struct IpuDmaState {
+    u8 pad0[8];
+} IpuDmaState;
+
 typedef struct IpuWorker {
     SdfStreamNode *prev;
     SdfStreamNode *next;
@@ -670,7 +675,8 @@ typedef struct IpuWorker {
     u32 unk44;
     u8 pad48[0x1D];
     u8 unk65;
-    u8 pad66[0xA];
+    u8 pad66[2];
+    IpuDmaState dma; /* 0x68: embedded block, address handed to sceIpuStopDMA */
     u32 unk70;
 } IpuWorker;
 
@@ -684,7 +690,7 @@ void func_00345198(void) {
         if (work == NULL) {
             continue;
         }
-        sceIpuStopDMA((u8 *)work + 0x68);
+        sceIpuStopDMA(&work->dma);
         if (work->unk70 == 0) {
             work->unk11 = 0;
         }
