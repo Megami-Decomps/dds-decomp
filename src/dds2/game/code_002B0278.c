@@ -2030,10 +2030,12 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE48);
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 
 void mnuLoadEffectResources(u8 *effect) {
-    mnuInitializeMapPacket(0, D_003E7828, 0xb, (MapPacket *)effect);
+    MenuEffectResources *resources = (MenuEffectResources *)effect;
+
+    mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData((s32)D_003E7858, (s32)effect);
-    ((MenuEffectResources *)effect)->packet.unk_08 = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
-    ((MenuEffectResources *)effect)->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
+    resources->packet.unk_08 = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
+    resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation((s32)effect);
 }
 
