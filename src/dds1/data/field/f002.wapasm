@@ -1,0 +1,85 @@
+wap 1 profile=dds1
+
+entry 0 kind=7 area=1
+  scene args=4,36,0
+  warp args=0,1,0 position="01pos_04"
+  camera mode=1 table=10
+end
+
+entry 1 kind=7 area=1
+  scene args=5,1,0
+  warp args=0,1,0 position="01pos_05"
+  camera mode=1 table=10
+end
+
+entry 3 kind=1 area=1 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 4 kind=9 flag=7
+  scene args=80,0,0
+  warp args=0,2,0
+  camera mode=1 table=11
+end
+
+entry 5 kind=9 flag=6
+  scene args=80,0,0
+  warp type=event args=611,0,21
+end
+
+entry 6 kind=9
+  scene args=80,0,0
+  warp args=0,2,0
+  camera mode=1 table=11
+end
+
+entry 8 kind=9
+  scene args=81,0,0
+  warp args=0,1,0 position="01pos_02"
+  camera mode=1 table=10
+end
+
+entry 9 kind=1 flag=25 area=2 name=@01d_02
+  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=21,21,0
+  after footstep=4
+end
+
+entry 10 kind=1 area=2 name=@01d_02
+  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=21,1,0
+  after footstep=4
+end
+
+entry 11 kind=1 area=2 name="01d_01"
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=21,8,0
+  after footstep=4
+end
+
+entry 12 kind=9
+  scene args=82,0,0
+  warp args=21,14,0 position="01pos_02"
+  after footstep=4
+end
+
+entry 14 kind=1 area=3 name="01d_01"
+  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=21,13,0 position="01pos_02"
+  after footstep=4
+end
+
+entry 15 kind=1 area=3 name=@01d_02
+  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=21,14,0
+  after footstep=4
+  tail control=2 args=21,1,0,11,9,3,1
+end
+
+entry 16 kind=1 area=3 name="01d_03"
+  scene args=2,1,64 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=21,16,0 position="01pos_03"
+  after footstep=4
+end

@@ -1,0 +1,104 @@
+wap 1 profile=dds1
+
+entry 0 kind=8
+  scene args=617,0,0
+  warp args=0,1,0 position="01pos_06"
+  camera mode=1 table=20
+  after flag=2 script=@meri_enc_off
+end
+
+entry 1 kind=8
+  scene args=627,0,0
+  warp args=0,3,0
+  camera mode=1 table=20
+  after flag=2 script=@001_gail_in
+end
+
+entry 3 kind=1 area=1 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 4 kind=1 area=1 name="01d_02"
+  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 5 kind=1 area=1 name=@01d_03
+  scene args=1,2,65 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=23,1,0
+  camera table=81
+end
+
+entry 6 kind=1 area=1 name="01d_04"
+  scene args=1,2,65 primary="md_01d_04" secondary="md_01d_04b"
+  warp args=0,2,0
+end
+
+entry 7 kind=1 area=1 name=@01d_05
+  scene args=1,2,65 primary="md_01d_05" secondary="md_01d_05b"
+  warp args=23,23,0
+  camera table=81
+end
+
+entry 8 kind=1 area=1 name="01d_06"
+  scene args=1,2,0 primary="md_01d_06" secondary="md_01d_06b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 10 kind=1 flag=23 area=2 name="01d_01"
+  scene args=2,1,65 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,3,0 position="01pos_04"
+  camera mode=1 table=20
+  after flag=8
+end
+
+entry 11 kind=1 area=2 name="01d_01"
+  scene args=2,1,65 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=0,1,0 position="01pos_04"
+  camera mode=1 table=20
+  after flag=8
+end
+
+entry 13 kind=1 area=3 name="01d_01"
+  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 14 kind=1 area=3 name="01d_02"
+  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 15 kind=1 area=3 name=@01d_03
+  scene args=1,2,65 primary="md_01d_03" secondary="md_01d_03b"
+  warp args=23,1,0
+  camera table=81
+end
+
+entry 16 kind=1 area=3 name="01d_04"
+  scene args=1,2,65 primary="md_01d_04" secondary="md_01d_04b"
+  warp args=0,2,0
+end
+
+entry 17 kind=1 area=3 name=@01d_05
+  scene args=1,2,65 primary="md_01d_05" secondary="md_01d_05b"
+  warp args=23,23,0
+  camera table=81
+end
+
+entry 18 kind=1 area=3 name="01d_06"
+  scene args=1,2,0 primary="md_01d_06" secondary="md_01d_06b"
+  warp args=1,1,0
+  after flag=8
+end
+
+entry 30 kind=2 area=3 name="01d_01"
+  warp args=15,2,0 position="01pos_05"
+  after bgm=2
+end
