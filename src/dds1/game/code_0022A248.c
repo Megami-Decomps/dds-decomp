@@ -73,6 +73,7 @@ INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A8D8);
 
 void func_0022A960(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5) {
     s32 mirrored;
+    /* The phase arrives narrowed to a byte; a wider type changes the compare. */
     mirrored = (s8)evtGetMirroredSolarPhase();
     func_0022A8D8(arg4);
     if ((D_003BD88C & 1) != 0) {
@@ -86,11 +87,13 @@ void func_0022A960(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5) {
             if (D_003BD890 > 0) {
                 D_003BD890--;
             } else {
+                /* Clears only bit 0 while testing bit 2: the original quirk, kept verbatim. */
                 D_003BD88C &= ~1;
             }
         }
         if ((D_003BD88C & 1) != 0) {
-            s32 scaled = (s32)((f32)arg3 * ((f32)D_003BD890 / (f32)D_003BD894));
+            f32 ratio = (f32)D_003BD890 / (f32)D_003BD894;
+            s32 scaled = (s32)((f32)arg3 * ratio);
             func_0022A248(arg0, arg1, arg2, scaled, mirrored, arg4, arg5);
             return;
         }
