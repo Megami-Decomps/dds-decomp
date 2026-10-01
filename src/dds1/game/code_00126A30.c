@@ -3712,6 +3712,9 @@ typedef struct FldTaskRecordWork {
     u32 key;
 } FldTaskRecordWork;
 
+/* Kinds 10, 11 and 12 have no case body, and that is deliberate: retail tests
+   them in exactly this order (10, 11, 12, then 4), so moving any of them
+   changes the branch layout and stops matching. */
 void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     s32 index;
     s32 kind;
