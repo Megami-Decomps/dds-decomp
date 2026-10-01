@@ -52,6 +52,18 @@ class _State:
     result: _Value | None = None
 
 
+@dataclass(frozen=True)
+class _Region:
+    kind: str
+    start: int
+    end: int
+    condition_pc: int
+    body_start: int
+    false_start: int | None
+    true_terminal: int
+    false_terminal: int | None = None
+
+
 @dataclass
 class _Stack:
     """Mutable transfer-function view of a state's known stack suffix."""
@@ -202,9 +214,11 @@ def render(
     script: flw0.Flw0File,
     profile_name: str | None = None,
     semantic: bool = False,
+    structured: bool = False,
 ) -> str:
     """Render a conservative instruction-level or semantic reading view."""
 
+    semantic = semantic or structured
     try:
         profile = flw0_profiles.get(profile_name) if profile_name is not None else None
     except KeyError as exc:
@@ -449,15 +463,15 @@ def render(
             return tuple(targets)
         return (next_pc,) if next_pc in instruction_set else ()
 
-    predecessors = {pc: 0 for pc in instruction_pcs}
+    predecessor_sources: dict[int, list[int]] = {pc: [] for pc in instruction_pcs}
     for pc in instruction_pcs:
         for target in successors(pc):
-            predecessors[target] += 1
+            predecessor_sources[target].append(pc)
 
     roots = {
         target for target in procedure_pcs.values() if target in instruction_set
     }
-    roots.update(pc for pc, count in predecessors.items() if count == 0)
+    roots.update(pc for pc, sources in predecessor_sources.items() if not sources)
     if instruction_pcs and not roots:
         roots.add(instruction_pcs[0])
 
@@ -474,10 +488,13 @@ def render(
                 worklist.append(target)
 
     rendered: dict[int, str] = {}
+    conditions: dict[int, str] = {}
     consumed_origins: set[int] = set()
     for pc in instruction_pcs:
         _, _, statement, consumed = step(pc, input_states.get(pc, _State()))
         rendered[pc] = statement
+        if words[pc].opcode == flw0.OPCODE_IDS["IF"] and consumed:
+            conditions[pc] = consumed[0].text
         for value in consumed:
             consumed_origins.update(value.origins)
 
@@ -510,28 +527,190 @@ def render(
         )
     }
 
+    def is_suppressed(pc: int) -> bool:
+        opcode = words[pc].opcode
+        return semantic and (
+            opcode == flw0.OPCODE_IDS["PROC"]
+            or (opcode in pure_stack_opcodes and pc in consumed_origins)
+        )
+
+    positions = {pc: index for index, pc in enumerate(instruction_pcs)}
+    procedure_starts = set(procedure_pcs.values())
+    candidates: list[_Region] = []
+    if structured:
+        for condition_pc in conditions:
+            raw = words[condition_pc]
+            false_start = label_pcs.get(raw.operand_u16)
+            if false_start not in positions or false_start <= condition_pc:
+                continue
+            false_index = positions[false_start]
+            if false_index == 0:
+                continue
+            true_terminal = instruction_pcs[false_index - 1]
+            terminal_word = words[true_terminal]
+            if terminal_word.opcode != flw0.OPCODE_IDS["GOTO"]:
+                continue
+            terminal_target = label_pcs.get(terminal_word.operand_u16)
+            body_start = next_pcs[condition_pc]
+            if terminal_target == false_start:
+                region = _Region(
+                    "if",
+                    condition_pc,
+                    false_start,
+                    condition_pc,
+                    body_start,
+                    None,
+                    true_terminal,
+                )
+            elif terminal_target is not None and terminal_target > false_start:
+                false_terminal = None
+                end_index = positions.get(terminal_target)
+                if end_index is not None and end_index > 0:
+                    possible = instruction_pcs[end_index - 1]
+                    possible_word = words[possible]
+                    if (
+                        possible >= false_start
+                        and possible_word.opcode == flw0.OPCODE_IDS["GOTO"]
+                        and label_pcs.get(possible_word.operand_u16)
+                        == terminal_target
+                    ):
+                        false_terminal = possible
+                region = _Region(
+                    "ifelse",
+                    condition_pc,
+                    terminal_target,
+                    condition_pc,
+                    body_start,
+                    false_start,
+                    true_terminal,
+                    false_terminal,
+                )
+            elif terminal_target is not None and terminal_target < condition_pc:
+                condition_prefix = instruction_pcs[
+                    positions[terminal_target] : positions[condition_pc]
+                ]
+                if any(not is_suppressed(pc) for pc in condition_prefix):
+                    continue
+                region = _Region(
+                    "while",
+                    terminal_target,
+                    false_start,
+                    condition_pc,
+                    body_start,
+                    None,
+                    true_terminal,
+                )
+            else:
+                continue
+
+            if any(region.start < pc < region.end for pc in procedure_starts):
+                continue
+            has_external_entry = any(
+                source < region.start or source >= region.end
+                for pc in instruction_pcs
+                if region.start < pc < region.end
+                for source in predecessor_sources[pc]
+            )
+            crosses_ifelse_arms = False
+            if region.kind == "ifelse" and region.false_start is not None:
+                for pc in instruction_pcs:
+                    if not region.body_start <= pc <= region.true_terminal:
+                        continue
+                    for target in successors(pc):
+                        if region.false_start <= target < region.end:
+                            crosses_ifelse_arms = True
+                            break
+                    if crosses_ifelse_arms:
+                        break
+            if not has_external_entry and not crosses_ifelse_arms:
+                candidates.append(region)
+
+    crossing: set[_Region] = set()
+    for index, left in enumerate(candidates):
+        for right in candidates[index + 1 :]:
+            if (
+                left.start < right.start < left.end < right.end
+                or right.start < left.start < right.end < left.end
+            ):
+                crossing.update((left, right))
+    regions = {
+        region.start: region for region in candidates if region not in crossing
+    }
+
     lines = [
         (
-            "# FLW0 semantic reading view (advisory; assemble the .bfasm source)"
+            "# FLW0 structured reading view (advisory; assemble the .bfasm source)"
+            if structured
+            else "# FLW0 semantic reading view (advisory; assemble the .bfasm source)"
             if semantic
             else "# FLW0 reading view (advisory; assemble the .bfasm source)"
         ),
         f"profile {profile.name}" if profile is not None else "profile none",
         "",
     ]
-    for pc in instruction_pcs:
-        if pc in entries:
-            if pc:
-                lines.append("")
-            for kind, name in entries[pc]:
-                lines.append(f"{kind} {name} @ 0x{pc:04x}")
-        opcode = words[pc].opcode
-        if semantic and (
-            opcode == flw0.OPCODE_IDS["PROC"]
-            or (opcode in pure_stack_opcodes and pc in consumed_origins)
-        ):
-            continue
-        lines.append(f"  {pc:04x}: {rendered[pc]}")
+
+    def emit_entries(pc: int, indent: int, suppress: bool = False) -> None:
+        if suppress or pc not in entries:
+            return
+        if pc:
+            lines.append("")
+        prefix = "  " * indent
+        for kind, name in entries[pc]:
+            lines.append(f"{prefix}{kind} {name} @ 0x{pc:04x}")
+
+    def emit_range(
+        start: int,
+        end: int,
+        indent: int = 0,
+        suppress_first_entry: bool = False,
+    ) -> None:
+        index = positions.get(start, len(instruction_pcs))
+        first = True
+        while index < len(instruction_pcs):
+            pc = instruction_pcs[index]
+            if pc >= end:
+                return
+            region = regions.get(pc)
+            if region is not None and region.end <= end:
+                emit_entries(pc, indent, suppress_first_entry and first)
+                prefix = "  " * (indent + 1)
+                condition = conditions[region.condition_pc]
+                keyword = "while" if region.kind == "while" else "if"
+                lines.append(
+                    f"{prefix}{region.condition_pc:04x}: {keyword} ({condition}) {{"
+                )
+                emit_range(
+                    region.body_start,
+                    region.true_terminal,
+                    indent + 1,
+                )
+                if region.kind == "ifelse":
+                    lines.append(
+                        f"{prefix}{region.true_terminal:04x}: }} else {{"
+                    )
+                    false_end = region.false_terminal or region.end
+                    emit_range(
+                        region.false_start or false_end,
+                        false_end,
+                        indent + 1,
+                        suppress_first_entry=True,
+                    )
+                    closing_pc = region.false_terminal or region.end
+                else:
+                    closing_pc = region.true_terminal
+                lines.append(f"{prefix}{closing_pc:04x}: }}")
+                index = positions[region.end]
+                first = False
+                continue
+
+            emit_entries(pc, indent, suppress_first_entry and first)
+            if not is_suppressed(pc):
+                lines.append(f"{'  ' * (indent + 1)}{pc:04x}: {rendered[pc]}")
+            index += 1
+            first = False
+
+    if instruction_pcs:
+        emit_range(instruction_pcs[0], len(words))
 
     message_size = sum(section.logical_size for section in script.sections_of_type(3))
     string_sections = script.sections_of_type(4)
