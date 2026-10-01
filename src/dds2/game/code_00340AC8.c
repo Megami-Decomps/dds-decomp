@@ -25,22 +25,7 @@ extern f32 sdfAcosTable(f32 dot);
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
 void effMiscQuatMultiplyVU(void)
 {
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmul.xyzw vf2, vf10, vf11    \n"
-        "vopmula.xyz ACC, vf10, vf11  \n"
-        "vmaddaw.xyz ACC, vf11, vf10  \n"
-        "vmaddaw.xyz ACC, vf10, vf11  \n"
-        "vopmsub.xyz vf10, vf11, vf10 \n"
-        "vmulaw.w ACC, vf10, vf11     \n"
-        "vmsubax.w ACC, vf0, vf2      \n"
-        "vmsubay.w ACC, vf0, vf2      \n"
-        "vmsubz.w vf10, vf0, vf2      \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_QUAT_MUL_VF10_VF11();
 }
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */

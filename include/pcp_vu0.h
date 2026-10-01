@@ -228,6 +228,81 @@
     "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\tpcpyud $11, $13, $15\n\t" \
     "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\tqmtc2.ni $11, vf31\n\t" \
     ".set reorder\n")
+/* vf28-vf31 = rigid inverse of itself: transpose the 3x3 and set the
+ * translation row to -(R^T * t). The transpose uses vf0 (not vf31) as its
+ * fourth source, which is what distinguishes it from VU0_MATRIX4_TRANSPOSE.
+ * DDS1 sdfInvertRigidVuTransform / DDS2 code_00335EE8. */
+#define VU0_MATRIX4_INVERT_RIGID() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vmove.w vf31, vf0\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+/* Same, with the per-axis scale divided out first: rows are transposed and
+ * then divided by |row|^2 before the translation is negated. DDS1
+ * sdfInvertScaledVuTransform / DDS2 code_00335EE8. */
+#define VU0_MATRIX4_INVERT_SCALED() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\tvmadda.xyz ACC, vf29, vf29\n\tvmadd.xyz vf2, vf30, vf30\n\t" \
+    "vaddw.xyz vf3, vf0, vf0w\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "vdiv Q, vf0w, vf2x\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vwaitq\n\tvmulq.x vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2y\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vwaitq\n\tvmulq.y vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2z\n\t" \
+    "vwaitq\n\tvmulq.z vf3, vf3, Q\n\t" \
+    "vmul.xyz vf28, vf28, vf3\n\tvmul.xyz vf29, vf29, vf3\n\tvmul.xyz vf30, vf30, vf3\n\t" \
+    "vmula.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+/* Rotate the primary basis rows about the x axis by the angle whose cosine
+ * and sine are `c` and `s`: rows 29/30 are the (cos, -sin) / (sin, cos)
+ * combination that retail emits. DDS1 code_002DD8B8 / DDS2 code_00336768. */
+#define VU0_ROTATE_BASIS_X(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf29\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmaddx.xyzw $vf29, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf30, $vf3x\n\tvmsubx.xyzw $vf30, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+/* The y-axis counterpart: rows 28/30 combined, row 29 ends up negated. */
+#define VU0_ROTATE_BASIS_Y(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmsubx.xyzw $vf28, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf4, $vf2x\n\tvmaddx.xyzw $vf30, $vf30, $vf3x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+/* The z-axis counterpart: rows 28/29 combined with rows 29/30 negated. */
+#define VU0_ROTATE_BASIS_Z(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmaddx.xyzw $vf28, $vf29, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmsubx.xyzw $vf29, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+/* vf10 = quaternion product vf10 * vf11 (x,y,z then w, each with the
+ * negated-product fixup retail emits). DDS1 effMiscQuatMultiplyVU /
+ * DDS2 code_00340AC8. */
+#define VU0_QUAT_MUL_VF10_VF11() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmul.xyzw vf2, vf10, vf11\n\tvopmula.xyz ACC, vf10, vf11\n\t" \
+    "vmaddaw.xyz ACC, vf11, vf10\n\tvmaddaw.xyz ACC, vf10, vf11\n\t" \
+    "vopmsub.xyz vf10, vf11, vf10\n\tvmulaw.w ACC, vf10, vf11\n\t" \
+    "vmsubax.w ACC, vf0, vf2\n\tvmsubay.w ACC, vf0, vf2\n\tvmsubz.w vf10, vf0, vf2\n\t" \
+    ".set reorder\n" \
+    : : : "memory")
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
