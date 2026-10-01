@@ -429,6 +429,17 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                             str(source.with_name("aicalc-formulas.bfasm")),
                         )
                     )
+                elif source.stem == "msg":
+                    dependencies.extend(
+                        (
+                            "tools/msg1.py",
+                            "tools/dds1_msg1_chars.tsv",
+                            str(source.with_name("msg-items.msgasm")),
+                            str(source.with_name("msg-skills.msgasm")),
+                            str(source.with_name("msg-status-help.msgasm")),
+                            str(source.with_name("msg-command-help.msgasm")),
+                        )
+                    )
                 n.build(
                     str(output),
                     "battle_tbl",

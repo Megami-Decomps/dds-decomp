@@ -327,6 +327,71 @@ DDS2_BATTLE_CALC_COMMANDS = (
     NativeCommand(0x162, "CALC_MONEY_LEVEL_FACTOR", 0, writes_result=True),
 )
 
+
+# The AICALC AI programs use the same VM with a battle-command vocabulary.
+# Argument counts come from the native command table.  Query names follow the
+# packed-action handlers reached by each command; operational names follow the
+# command handler and its immediate callee.  Commands whose gameplay role is
+# still ambiguous deliberately remain numeric in source.
+BATTLE_AI_COMMANDS = (
+    NativeCommand(0x00A, "RANDOM_ONE_TO", 1, writes_result=True),
+    NativeCommand(0x030, "AI_SELECT_BASIC_ATTACK", 0, writes_result=False),
+    NativeCommand(0x033, "AI_SELECT_SKILL", 1, writes_result=False),
+    NativeCommand(0x034, "AI_SELECT_ACTION_TARGETS", 0, writes_result=False),
+    NativeCommand(0x035, "AI_SELECT_LOWEST_HP_TARGET", 0, writes_result=False),
+    NativeCommand(0x036, "AI_SELECT_TARGETS_WITH_ACTION_MASK", 1, writes_result=False),
+    NativeCommand(0x03D, "AI_SELECT_TABLE_ACTION", 0, writes_result=False),
+    NativeCommand(0x03E, "AI_CLEAR_SCENE_TRANSITION", 0, writes_result=False),
+    NativeCommand(0x03F, "AI_BEGIN_SCENE_TRANSITION", 0, writes_result=False),
+    NativeCommand(0x07B, "AI_UNIT_HP_AT_OR_BELOW_RATE", 1, writes_result=True),
+    NativeCommand(0x08C, "AI_UNIT_PASSES_ACTION_TEN_CHECK", 0, writes_result=True),
+    NativeCommand(0x0E6, "AI_RESET_COMMAND_CONTEXT", 0, writes_result=False),
+    NativeCommand(0x0FA, "AI_QUEUE_ACTOR_COMMAND_SOUND", 0, writes_result=False),
+    NativeCommand(0x14C, "AI_ACTOR_HISTORY_COUNTER", 0, writes_result=True),
+    NativeCommand(0x19A, "AI_ANY_PLAYER_PASSES_QUERY", 1, writes_result=True),
+    NativeCommand(0x1A7, "AI_UNIT_ACTION_MODE_ZERO", 1, writes_result=True),
+    NativeCommand(0x1B0, "AI_APPEND_SELF_TO_TARGETS", 0, writes_result=False),
+    NativeCommand(0x1B6, "AI_EFFECT_ACTIVE", 0, writes_result=True),
+    NativeCommand(0x1BD, "AI_EFFECT_VALUE", 0, writes_result=True),
+    NativeCommand(0x1BE, "AI_SCENE_FADE_COUNT", 0, writes_result=True),
+    NativeCommand(0x1C5, "AI_GLOBAL_HISTORY_COUNTER", 0, writes_result=True),
+    NativeCommand(0x1C7, "AI_SELECT_TARGETS_BLOCKING_ELEMENT", 1, writes_result=False),
+    NativeCommand(0x1CA, "AI_SET_ACTOR_UNIT_PARAMETER", 1, writes_result=False),
+    NativeCommand(0x1D4, "AI_QUEUE_UNBOUND_COMMAND_SOUND", 0, writes_result=False),
+    NativeCommand(0x1D5, "AI_SET_CAMERA_BLEND_START", 7, writes_result=False),
+    NativeCommand(0x1D6, "AI_SET_CAMERA_BLEND_END", 7, writes_result=False),
+    NativeCommand(0x1D7, "AI_RUN_CAMERA_BLEND", 2, writes_result=False),
+)
+
+
+DDS1_BATTLE_AI_COMMANDS = (
+    NativeCommand(0x07E, "AI_ENEMY_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x082, "AI_ANY_PLAYER_HAS_ACTION_MASK", 1, writes_result=True),
+    NativeCommand(0x083, "AI_ALL_PLAYERS_HAVE_ACTION_MASK", 1, writes_result=True),
+    NativeCommand(0x0F4, "AI_MOVE_CAMERA", 7, writes_result=False),
+    NativeCommand(0x19E, "AI_ENEMY_HAS_ACTION", 1, writes_result=True),
+)
+
+
+DDS2_BATTLE_AI_COMMANDS = (
+    NativeCommand(0x01D, "AI_SELECT_WEIGHTED_TABLE_ENTRY", 1, writes_result=False),
+    NativeCommand(0x05B, "AI_SET_CONTEXT_FLAG_ONE", 0, writes_result=False),
+    NativeCommand(0x07E, "AI_ENEMY_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x07F, "AI_PLAYER_COUNT_AT_MOST", 1, writes_result=True),
+    NativeCommand(0x082, "AI_ANY_PLAYER_HAS_ACTION_MASK", 1, writes_result=True),
+    NativeCommand(0x083, "AI_ALL_PLAYERS_HAVE_ACTION_MASK", 1, writes_result=True),
+    NativeCommand(0x084, "AI_HAS_PLAYER_UNIT_MODE", 1, writes_result=True),
+    NativeCommand(0x085, "AI_HAS_OTHER_ENEMY_UNIT_MODE", 1, writes_result=True),
+    NativeCommand(0x0E0, "AI_TURN_COUNT", 0, writes_result=True),
+    NativeCommand(0x0E1, "AI_SELECT_DIRECT_ACTION", 1, writes_result=False),
+    NativeCommand(0x0E2, "AI_SELECT_ACTION_BY_KIND", 2, writes_result=False),
+    NativeCommand(0x0F6, "AI_ENABLE_COMMAND_STATE_FLAG", 0, writes_result=False),
+    NativeCommand(0x1D8, "AI_ACTIVE_SUBTASK", 0, writes_result=True),
+    NativeCommand(0x1D9, "AI_SUBTASK_TARGET_MODE", 0, writes_result=True),
+    NativeCommand(0x1DB, "AI_SPECIAL_BATTLE_OBJECT_VALUE", 0, writes_result=True),
+    NativeCommand(0x1DE, "AI_MARKED_ACTION_SCENE_ACTIVE", 0, writes_result=True),
+)
+
 DDS1_EVENT_IDS = frozenset(
     (
         500, 501, 502, 503, 506, 510, 550, 601, 602, 603, 604, 605,
@@ -358,11 +423,20 @@ DDS2_EVENT_IDS = frozenset(
 DDS1 = CommandProfile("dds1", SHARED_DDS_COMMANDS, DDS1_EVENT_IDS)
 DDS2 = CommandProfile("dds2", SHARED_DDS_COMMANDS, DDS2_EVENT_IDS)
 DDS1_AICALC = CommandProfile(
-    "dds1-aicalc", SHARED_DDS_COMMANDS + BATTLE_CALC_COMMANDS, DDS1_EVENT_IDS
+    "dds1-aicalc",
+    SHARED_DDS_COMMANDS
+    + BATTLE_CALC_COMMANDS
+    + BATTLE_AI_COMMANDS
+    + DDS1_BATTLE_AI_COMMANDS,
+    DDS1_EVENT_IDS,
 )
 DDS2_AICALC = CommandProfile(
     "dds2-aicalc",
-    SHARED_DDS_COMMANDS + BATTLE_CALC_COMMANDS + DDS2_BATTLE_CALC_COMMANDS,
+    SHARED_DDS_COMMANDS
+    + BATTLE_CALC_COMMANDS
+    + DDS2_BATTLE_CALC_COMMANDS
+    + BATTLE_AI_COMMANDS
+    + DDS2_BATTLE_AI_COMMANDS,
     DDS2_EVENT_IDS,
 )
 

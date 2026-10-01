@@ -1,0 +1,91 @@
+messages msg1
+  message DEFCOM_00 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "RESERVE"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Do light phys damage to enemy"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_02 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Fire gun at enemy"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_03 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "End turn by expending half a turn icon"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_04 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Revert to human form"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_05 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Change to demon form"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_06 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Replace an ally"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_07 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Retreat from the front line"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message DEFCOM_08 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 06 01 ff
+      text "Run from battle"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
