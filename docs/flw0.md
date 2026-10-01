@@ -418,6 +418,7 @@ tables and both implementations:
 | `TEST_MODEL_FLAG` | `0x007` | 1 | Tests a model flag and returns the result |
 | `SET_MODEL_FLAG` | `0x008` | 1 | Sets a model flag |
 | `CLEAR_MODEL_FLAG` | `0x009` | 1 | Clears a model flag |
+| `RANDOM_ONE_TO` | `0x00A` | 1 | Returns a random integer from one through the supplied limit |
 | `WAIT_FOR_TIMER_START` | `0x00D` | 0 | Waits until the current command timer becomes nonzero |
 | `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
@@ -425,6 +426,9 @@ tables and both implementations:
 | `ADD_EFFECT_UNIT_TO_WORLD` | `0x012` | 1 | Adds the selected player object or effect-unit ID to the active world |
 | `CREATE_LINKED_CAMERA_VIEWER` | `0x015` | 2 | Creates the linked-camera viewer object and returns its fixed object ID |
 | `ADD_FLAGGED_EFFECT_UNIT_TO_WORLD` | `0x019` | 1 | Adds the selected player object, or marks and adds an effect-unit ID |
+| `FADE_BACKGROUND_IN` | `0x01F` | 1 | Starts the background fade-in with the supplied duration |
+| `READ_SOLAR_PHASE` | `0x027` | 0 | Returns the current solar phase |
+| `SUBMIT_EVENT_WITH_MODE` | `0x028` | 2 | Submits an event request with its execution mode |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `WAIT_FOR_UNIT_MOTION` | `0x049` | 1 | Waits until the selected unit's motion is idle or in its timed mode |
@@ -438,6 +442,7 @@ tables and both implementations:
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
 | `MOVE_OBJECT_ALONG_PATH` | `0x06B` | 3 | Binds the selected object to a path and applies its movement mode |
+| `CHANGE_ITEM_COUNT` | `0x070` | 2 | Adjusts the selected item or flag count and applies its range limit |
 | `SET_MESSAGE_WINDOW_GEOMETRY` | `0x071` | 3 | Applies three geometry values to the current message window |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
@@ -447,7 +452,26 @@ tables and both implementations:
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
+| `WAIT_FOR_CAMP_TASK` | `0x0C8` | 1 | Starts or waits for the selected camp task |
+| `BIND_MODEL_MOTION_SOUND` | `0x0C9` | 2 | Binds motion sound to a model and returns the resolved model ID |
+| `CREATE_EVENT_TEXTURE_TASK` | `0x0CC` | 2 | Creates a texture task from an event resource and returns its task handle |
 | `CREATE_FLAGGED_EFFECT_OBJECT` | `0x0CD` | 1 | Creates and flags an effect object from a resource name, returning its object ID or zero |
+| `SET_EFFECT_MODEL_CUT` | `0x0CE` | 2 | Selects one of an effect model's three event cuts |
+| `SET_EFFECT_MODEL_ROTATION` | `0x0CF` | 4 | Applies three angle values to an effect model |
+| `CREATE_EVENT_BED_EFFECT` | `0x0D0` | 2 | Creates and flags a BED effect from an event resource, returning its object ID or zero |
+| `ATTACH_EFFECT_TO_PATH` | `0x0D1` | 2 | Attaches an effect object to a path object |
+| `WAIT_FOR_EFFECT_PATH` | `0x0D2` | 1 | Waits for an effect object's path movement to finish |
+| `CREATE_MG1_EFFECT` | `0x0D3` | 1 | Creates and flags an MG1 effect from a resource name, returning its object ID or zero |
+| `CREATE_EVENT_MG1_EFFECT` | `0x0D4` | 2 | Creates and flags an MG1 effect from an event resource, returning its object ID or zero |
+| `CREATE_MG2_EFFECT` | `0x0D5` | 1 | Creates and flags an MG2 effect from a resource name, returning its object ID or zero |
+| `CREATE_EVENT_MG2_EFFECT` | `0x0D6` | 2 | Creates and flags an MG2 effect from an event resource, returning its object ID or zero |
+| `SET_MG1_EFFECT_POINTS` | `0x0D7` | 3 | Sets the two control objects used by an MG1 effect |
+| `SET_MG2_EFFECT_POINTS` | `0x0D8` | 5 | Sets the four control objects used by an MG2 effect |
+| `START_EVENT_BGM` | `0x0D9` | 2 | Starts an event BGM from its sound ID and fade value |
+| `SET_WORLD_NODE_BASE_MODE` | `0x0DB` | 1 | Applies the selected base-mode value to world nodes |
+| `DESTROY_EFFECT_OBJECT` | `0x0E3` | 1 | Destroys the selected effect object |
+| `START_CAMP_TASK_IF_ABSENT` | `0x0F7` | 1 | Starts the selected camp task when it is not already running |
+| `CAMP_TASK_READY` | `0x0F8` | 1 | Returns whether the selected camp task is ready |
 | `REQUEST_ALTERNATE_FIELD_SEQUENCE` | `0x100` | 2 | Starts an alternate field sequence from a mode and resource name |
 | `SET_FIELD_ENVIRONMENT` | `0x101` | 2 | Applies a field-environment selector and value |
 | `ENABLE_FIELD_MODELS` | `0x103` | 4 | Enables the selected field model set and applies its transition mode |
@@ -485,6 +509,31 @@ tables and both implementations:
 | `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
 
+The standard profiles also contain the paired battle-runtime commands used by
+the negotiation script and AICALC programs:
+
+| Source name | ID | Stack values consumed | Verified handler behavior |
+|---|---:|---:|---|
+| `AI_COUNTER_REACHED_LIMIT` | `0x0DF` | 1 | Tests the native battle counter against a limit and returns the result |
+| `AI_SELECT_ACTION_BY_KIND` | `0x0E2` | 2 | Selects an action kind and value in the battle command context |
+| `TRACE_BATTLE_RETREAT` | `0x0E4` | 0 | Emits the retail `BTL_TAIKYO` battle-debug trace |
+| `TRACE_BATTLE_ALL_RETREAT` | `0x0E5` | 0 | Emits the retail `BTL_ALLTAIKYO` battle-debug trace |
+| `AI_RESET_COMMAND_CONTEXT` | `0x0E6` | 0 | Resets the battle command context and sets its state flag |
+| `AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT` | `0x0E7` | 1 | Selects the lowest-HP target that blocks the supplied element |
+| `AI_MOVE_CAMERA` | `0x0F4` | 7 | Starts a seven-value battle camera move and schedules context reset |
+| `TRACE_BATTLE_CAMERA_ORIGINAL` | `0x0F5` | 0 | Emits the retail `BTL_CAM_ORG` battle-debug trace |
+| `AI_ENABLE_COMMAND_STATE_FLAG` | `0x0F6` | 0 | Sets bit one in the battle command-context flags |
+| `AI_QUEUE_ACTOR_COMMAND_SOUND` | `0x0FA` | 0 | Queues the actor command-sound tasks |
+| `TRACE_BATTLE_CAMERA_TWO_SHOT` | `0x0FB` | 0 | Emits the retail `BTL_CAM_2SHOT` battle-debug trace |
+| `TRACE_BATTLE_CAMERA_OBSTRUCTION` | `0x0FC` | 0 | Emits the retail `BTL_CAM_BOUGAI` battle-debug trace |
+
+The four `TRACE_` handlers call only the battle-debug printer. In particular,
+`0x0F5` does not restore camera state. Command `0x0DE` reaches a related
+counter predicate through a different packed-action path, but the distinction
+between the two paths is not established, so it remains numeric. These
+profiles therefore resolve every other native call in both negotiation
+scripts.
+
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
 source has no profile or the selected profile does not define it. Profiles are
@@ -504,8 +553,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 45,297 of 53,389 native calls in the complete DDS1
-corpus and 32,983 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 45,795 of 53,389 native calls in the complete DDS1
+corpus and 33,283 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic

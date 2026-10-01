@@ -377,10 +377,11 @@ game's native dispatch table and handlers. It covers action and target
 selection, HP and MP queries, queued and current actions, party state, history
 counters, scene transitions, and camera operations. Player/enemy group scans
 use the same `0x200`/`0x400` filters across the paired predicates and target
-selectors. Related-engine command identities support `AI_SELECT_ESCAPE`,
-`AI_SELECT_WAIT`, and `AI_RESTORE_BATTLE_CAMERA`; the DDS handlers establish
-their local contracts. This names 3,432 of 3,434 calls in DDS1 and 3,800 of
-3,801 calls in DDS2, allowing common code to read as conditions such as
+selectors. Related-engine command identities support `AI_SELECT_ESCAPE` and
+`AI_SELECT_WAIT`; the DDS handlers establish their local contracts. Command
+`0x0F5` is `TRACE_BATTLE_CAMERA_ORIGINAL` because both DDS handlers only emit
+the `BTL_CAM_ORG` battle-debug trace. This names 3,432 of 3,434 calls in DDS1
+and 3,800 of 3,801 calls in DDS2, allowing common code to read as conditions such as
 `AI_UNIT_MP_AT_OR_BELOW_RATE(25)`,
 `AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D)`, and actions such as
 `AI_SELECT_LOWEST_LEVEL_TARGET()`. Two calls to an exact DDS1 target-selection

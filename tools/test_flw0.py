@@ -710,7 +710,7 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 4079, 736),
+            "dds1": (129, 4079, 738),
             "dds2": (126, 3416, 1190),
         }
         for game, expected_counts in expected.items():
@@ -1156,6 +1156,7 @@ end
             "TEST_MODEL_FLAG": (0x007, 1, True),
             "SET_MODEL_FLAG": (0x008, 1, False),
             "CLEAR_MODEL_FLAG": (0x009, 1, False),
+            "RANDOM_ONE_TO": (0x00A, 1, True),
             "WAIT_FOR_TIMER_START": (0x00D, 0, False),
             "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
             "SCREEN_FADE_A": (0x00F, 2, False),
@@ -1163,6 +1164,9 @@ end
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
             "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
+            "FADE_BACKGROUND_IN": (0x01F, 1, False),
+            "READ_SOLAR_PHASE": (0x027, 0, True),
+            "SUBMIT_EVENT_WITH_MODE": (0x028, 2, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
             "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
@@ -1176,6 +1180,7 @@ end
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
             "MOVE_OBJECT_ALONG_PATH": (0x06B, 3, False),
+            "CHANGE_ITEM_COUNT": (0x070, 2, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
@@ -1185,7 +1190,26 @@ end
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "WAIT_FOR_CAMP_TASK": (0x0C8, 1, False),
+            "BIND_MODEL_MOTION_SOUND": (0x0C9, 2, True),
+            "CREATE_EVENT_TEXTURE_TASK": (0x0CC, 2, True),
             "CREATE_FLAGGED_EFFECT_OBJECT": (0x0CD, 1, True),
+            "SET_EFFECT_MODEL_CUT": (0x0CE, 2, False),
+            "SET_EFFECT_MODEL_ROTATION": (0x0CF, 4, False),
+            "CREATE_EVENT_BED_EFFECT": (0x0D0, 2, True),
+            "ATTACH_EFFECT_TO_PATH": (0x0D1, 2, False),
+            "WAIT_FOR_EFFECT_PATH": (0x0D2, 1, False),
+            "CREATE_MG1_EFFECT": (0x0D3, 1, True),
+            "CREATE_EVENT_MG1_EFFECT": (0x0D4, 2, True),
+            "CREATE_MG2_EFFECT": (0x0D5, 1, True),
+            "CREATE_EVENT_MG2_EFFECT": (0x0D6, 2, True),
+            "SET_MG1_EFFECT_POINTS": (0x0D7, 3, False),
+            "SET_MG2_EFFECT_POINTS": (0x0D8, 5, False),
+            "START_EVENT_BGM": (0x0D9, 2, False),
+            "SET_WORLD_NODE_BASE_MODE": (0x0DB, 1, False),
+            "DESTROY_EFFECT_OBJECT": (0x0E3, 1, False),
+            "START_CAMP_TASK_IF_ABSENT": (0x0F7, 1, False),
+            "CAMP_TASK_READY": (0x0F8, 1, True),
             "REQUEST_ALTERNATE_FIELD_SEQUENCE": (0x100, 2, False),
             "SET_FIELD_ENVIRONMENT": (0x101, 2, False),
             "ENABLE_FIELD_MODELS": (0x103, 4, False),
@@ -1222,6 +1246,18 @@ end
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
+            "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
+            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
+            "TRACE_BATTLE_RETREAT": (0x0E4, 0, False),
+            "TRACE_BATTLE_ALL_RETREAT": (0x0E5, 0, False),
+            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
+            "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT": (0x0E7, 1, False),
+            "AI_MOVE_CAMERA": (0x0F4, 7, False),
+            "TRACE_BATTLE_CAMERA_ORIGINAL": (0x0F5, 0, False),
+            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
+            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
+            "TRACE_BATTLE_CAMERA_TWO_SHOT": (0x0FB, 0, False),
+            "TRACE_BATTLE_CAMERA_OBSTRUCTION": (0x0FC, 0, False),
             "CALC_SET_RESULT": (0x16C, 1, False),
             "CALC_SOURCE_LEVEL": (0x16D, 0, True),
             "CALC_TARGET_LEVEL": (0x16E, 0, True),
@@ -1267,7 +1303,6 @@ end
             "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
         }
         ai_expected = {
-            "RANDOM_ONE_TO": (0x00A, 1, True),
             "AI_SELECT_BASIC_ATTACK": (0x030, 0, False),
             "AI_SELECT_ESCAPE": (0x031, 0, False),
             "AI_SELECT_WAIT": (0x032, 0, False),
@@ -1292,12 +1327,6 @@ end
             "AI_NO_PLAYER_BLOCKS_QUERY": (0x089, 1, True),
             "AI_UNIT_PASSES_ACTION_TEN_CHECK": (0x08C, 0, True),
             "START_SCREEN_QUAKE": (0x0AB, 2, False),
-            "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
-            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
-            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
-            "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT": (0x0E7, 1, False),
-            "AI_RESTORE_BATTLE_CAMERA": (0x0F5, 0, False),
-            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
             "AI_ACTOR_HISTORY_COUNTER": (0x14C, 0, True),
             "AI_SELECT_LOWEST_LEVEL_TARGET": (0x15B, 0, False),
             "AI_ANY_PLAYER_PASSES_QUERY": (0x19A, 1, True),
@@ -1343,7 +1372,6 @@ end
             "AI_ANY_ENEMY_HAS_ACTION_MASK": (0x081, 1, True),
             "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
             "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
-            "AI_MOVE_CAMERA": (0x0F4, 7, False),
             "AI_UNIT_MP_AT_OR_BELOW_RATE": (0x14B, 1, True),
             "AI_ENEMY_HAS_ACTION": (0x19E, 1, True),
             "AI_ANY_ENEMY_CURRENT_ACTION_MATCHES": (0x1AD, 1, True),
@@ -1361,7 +1389,6 @@ end
             "AI_HAS_PLAYER_UNIT_MODE": (0x084, 1, True),
             "AI_TURN_COUNT": (0x0E0, 0, True),
             "AI_SELECT_DIRECT_ACTION": (0x0E1, 1, False),
-            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
             "AI_LINKED_ACTION_SCENE_ACTIVE": (0x122, 0, True),
             "AI_HAS_ELIGIBLE_QUEUED_SPECIAL_ACTION": (0x141, 0, True),
             "AI_HAS_FLAG_800000": (0x151, 1, True),
@@ -1771,7 +1798,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 45297)
+        self.assertEqual(profiled_command_uses, 45795)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1825,8 +1852,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 85008, 11549),
-            "dds2": (140, 64968, 7225),
+            "dds1": (143, 84333, 10874),
+            "dds2": (140, 64462, 6719),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2003,7 +2030,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 45297)
+            (code_words, commands, profiled_commands), (168829, 53389, 45795)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2132,7 +2159,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (32983, 1910, 287),
+            (33283, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
