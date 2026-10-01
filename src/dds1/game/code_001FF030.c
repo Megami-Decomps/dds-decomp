@@ -1653,14 +1653,76 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002045E8);
+extern s32 func_001D6050(BtlUnit *, s32);
+extern f32 func_001A47F0(BtlTask *);
+extern f32 func_002F9F60(f32);
+extern f32 func_002FA060(f32);
+extern f32 func_002FA148(f32);
+extern void func_002DD688(f32);
+extern void func_001DB698();
+
+/* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
+   swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). The result is unused. */
+s32 func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 dir[4];
+    f32 extent;
+    f32 length;
+    f32 span;
+    f32 ratio;
+    f32 angle;
+    f32 width;
+
+    user = btlGetTargetUnitForLink(command);
+    target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    extent = user->reach * user->scale;
+    span = func_001D6050(user, user->unkEC);
+    span /= func_001A47F0(command->task);
+    ratio = (f32)command->state / span;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    }
+    out->fov = command->camera.fov;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] += user->height * user->scale * frontLift;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+    targetPos[1] += target->height * target->scale * backLift;
+    VU0_LOAD_VF(vf10, targetPos);
+    VU0_LOAD_VF(vf11, userPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    length *= ratio * (0.6f - 0.55f) + 0.55f;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, dir);
+    VU0_SCALE_VF_MFC1(vf10, length);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, out->position);
+    angle = ratio * 0.0f;
+    angle += 0.6108652f;
+    width = extent + length * func_002FA060(angle);
+    length *= func_002F9F60(angle);
+    length += width / func_002FA148(out->fov * 1.3333333f * 0.5f);
+    out->distance = length;
+    if (command->flags & 0x200) {
+        angle = -angle;
+    }
+    func_002DD688(angle);
+    VU0_LOAD_VF(vf10, dir);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF(vf10, out->direction);
+    func_001DB698(out);
+}
 
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlCopyMotionTransform();
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
-extern void func_001DB698();
-extern f32 func_002FA148(f32);
+
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
 void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
