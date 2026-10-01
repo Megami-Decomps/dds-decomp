@@ -14,6 +14,13 @@
     : : "r" (dst), "r" (src) : "$2", "memory")
 
 /*
+ * Fill the x, y and z components of a float vector with one value (plain C;
+ * the w component is left alone). Used by the PCP particle and strip
+ * builders to set up per-axis scales before the VU0 multiply.
+ */
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+/*
  * 64-byte (4-quadword) copy through vf28-vf31, as the field/effect matrix
  * setters do. COP2 has no plain-C form; .set noreorder keeps ee-as from
  * moving the sqc2 into a delay slot.

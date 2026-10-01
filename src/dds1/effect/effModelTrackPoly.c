@@ -109,8 +109,6 @@ void func_00188560(EffTrackPolyWork ***list) {
     }
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
 void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 {
@@ -164,8 +162,6 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-#undef VEC3_SPLAT
-
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188738);
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {

@@ -116,8 +116,6 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00165CF0);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00165D38);
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* Band node: an origin, a transform, the ring's segment count and a strip at 0xF0. */
 typedef struct {
     f32 origin[4];      /* 0x0 */
@@ -177,8 +175,6 @@ void polyBandLayoutRing(PolyBand *obj, s32 index, f32 width)
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
-#undef VEC3_SPLAT
-
 typedef struct {
     u32 unk0;
     f32 width;
@@ -287,8 +283,6 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_00166AE0);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166B40);
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 typedef struct {
     u8 pad00[4];
     f32 unk04;
@@ -367,8 +361,6 @@ void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
-#undef VEC3_SPLAT
-
 void func_00166EA0(float factor, PolyTransform *transform) {
     transform->scaleCC = transform->scaleCC * factor;
     transform->scaleD0 = transform->scaleD0 * factor;
