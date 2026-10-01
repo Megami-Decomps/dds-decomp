@@ -710,7 +710,7 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 4079, 736),
+            "dds1": (129, 4079, 738),
             "dds2": (126, 3416, 1190),
         }
         for game, expected_counts in expected.items():
@@ -1156,6 +1156,7 @@ end
             "TEST_MODEL_FLAG": (0x007, 1, True),
             "SET_MODEL_FLAG": (0x008, 1, False),
             "CLEAR_MODEL_FLAG": (0x009, 1, False),
+            "RANDOM_ONE_TO": (0x00A, 1, True),
             "WAIT_FOR_TIMER_START": (0x00D, 0, False),
             "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
             "SCREEN_FADE_A": (0x00F, 2, False),
@@ -1163,6 +1164,9 @@ end
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
             "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
+            "FADE_BACKGROUND_IN": (0x01F, 1, False),
+            "READ_SOLAR_PHASE": (0x027, 0, True),
+            "SUBMIT_EVENT_WITH_MODE": (0x028, 2, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
             "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
@@ -1176,6 +1180,7 @@ end
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
             "MOVE_OBJECT_ALONG_PATH": (0x06B, 3, False),
+            "CHANGE_ITEM_COUNT": (0x070, 2, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
@@ -1185,7 +1190,26 @@ end
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "WAIT_FOR_CAMP_TASK": (0x0C8, 1, False),
+            "BIND_MODEL_MOTION_SOUND": (0x0C9, 2, True),
+            "CREATE_EVENT_TEXTURE_TASK": (0x0CC, 2, True),
             "CREATE_FLAGGED_EFFECT_OBJECT": (0x0CD, 1, True),
+            "SET_EFFECT_MODEL_CUT": (0x0CE, 2, False),
+            "SET_EFFECT_MODEL_ROTATION": (0x0CF, 4, False),
+            "CREATE_EVENT_BED_EFFECT": (0x0D0, 2, True),
+            "ATTACH_EFFECT_TO_PATH": (0x0D1, 2, False),
+            "WAIT_FOR_EFFECT_PATH": (0x0D2, 1, False),
+            "CREATE_MG1_EFFECT": (0x0D3, 1, True),
+            "CREATE_EVENT_MG1_EFFECT": (0x0D4, 2, True),
+            "CREATE_MG2_EFFECT": (0x0D5, 1, True),
+            "CREATE_EVENT_MG2_EFFECT": (0x0D6, 2, True),
+            "SET_MG1_EFFECT_POINTS": (0x0D7, 3, False),
+            "SET_MG2_EFFECT_POINTS": (0x0D8, 5, False),
+            "START_EVENT_BGM": (0x0D9, 2, False),
+            "SET_WORLD_NODE_BASE_MODE": (0x0DB, 1, False),
+            "DESTROY_EFFECT_OBJECT": (0x0E3, 1, False),
+            "START_CAMP_TASK_IF_ABSENT": (0x0F7, 1, False),
+            "CAMP_TASK_READY": (0x0F8, 1, True),
             "REQUEST_ALTERNATE_FIELD_SEQUENCE": (0x100, 2, False),
             "SET_FIELD_ENVIRONMENT": (0x101, 2, False),
             "ENABLE_FIELD_MODELS": (0x103, 4, False),
@@ -1267,7 +1291,6 @@ end
             "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
         }
         ai_expected = {
-            "RANDOM_ONE_TO": (0x00A, 1, True),
             "AI_SELECT_BASIC_ATTACK": (0x030, 0, False),
             "AI_SELECT_ESCAPE": (0x031, 0, False),
             "AI_SELECT_WAIT": (0x032, 0, False),
@@ -1771,7 +1794,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 45297)
+        self.assertEqual(profiled_command_uses, 45765)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1825,8 +1848,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 85008, 11549),
-            "dds2": (140, 64968, 7225),
+            "dds1": (143, 84372, 10913),
+            "dds2": (140, 64473, 6730),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2003,7 +2026,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 45297)
+            (code_words, commands, profiled_commands), (168829, 53389, 45765)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2132,7 +2155,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (32983, 1910, 287),
+            (33257, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
