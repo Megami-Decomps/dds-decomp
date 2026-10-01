@@ -47,30 +47,30 @@ typedef struct EvtUnit {
     s32 previousTransitionValue; /* 0x88 */
     EvtUnitOwner *owner; /* 0x8c */
     u8 pad90[4];      /* 0x90 */
-    s32 unk94;         /* 0x94 */
+    s32 unused94;       /* 0x94: cleared by evtPrepareUnitMotionState, never read */
     u8 pad98[8];      /* 0x98 */
     s32 pathId;        /* 0xa0 */
     u8 padA4[4];      /* 0xa4 */
     u32 flags;         /* 0xa8 */
-    s16 unkAC;         /* 0xac */
+    s16 motionState;    /* 0xac: evtGetUnitMotionState; 0 = idle, 2 = transition */
     u8 padAE[4];      /* 0xae */
-    s16 unkB2;         /* 0xb2 */
-    s16 unkB4;         /* 0xb4 */
-    s16 unkB6;         /* 0xb6 */
+    s16 motionTicks;    /* 0xb2: >0 keeps a timed motion out of the idle state */
+    s16 directionScale;/* 0xb4: multiplied by 0.1 for the effect direction vector */
+    s16 directionOffset;/* 0xb6: multiplied by 0.01 to offset the plan target */
     u8 padB8[4];      /* 0xb8 */
-    u16 unkBC;         /* 0xbc */
+    u16 slotSelect;     /* 0xbc: written by func_00222278 */
     u8 padBE[6];      /* 0xbe */
-    s16 unkC4;         /* 0xc4 */
-    s16 unkC6;         /* 0xc6 */
-    s16 unkC8;         /* 0xc8 */
+    s16 transitionArg0; /* 0xc4 */
+    s16 transitionArg1; /* 0xc6 */
+    s16 transitionArg2; /* 0xc8 */
     u8 padCA[0x16];   /* 0xca */
     u8 slotFlags[12];  /* 0xe0 */
     u8 padEC[0x1C];   /* 0xec */
     s16 slotA[12];     /* 0x108 */
     s16 slotB[12];     /* 0x120 */
     s16 slotC[12];     /* 0x138 */
-    s16 unk150;        /* 0x150 */
-    s16 unk152;        /* 0x152 */
+    s16 unused150;      /* 0x150: never read or written */
+    s16 directionMode;  /* 0x152: passed in by evtSetUnitNormalizedDirection */
     u8 pad154[8];     /* 0x154 */
     s16 transitionElapsed; /* 0x15c */
     s16 transitionDuration; /* 0x15e */
@@ -254,7 +254,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_00221D00);
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from evtLoadUnitDirectionVectorVU to vec20 */
 void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
-    unit->unk152 = arg;
+    unit->directionMode = arg;
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
         VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
@@ -330,12 +330,12 @@ s32 evtReleaseUnitTransitionWork(u8 *work) {
 }
 
 s32 evtGetUnitMotionState(EvtUnit *unit) {
-    return unit->unkAC;
+    return unit->motionState;
 }
 
 void func_00222278(EvtUnit *unit, u16 value)
 {
-    unit->unkBC = value;
+    unit->slotSelect = value;
 }
 
 void evtSetTransitionMotionScale(u8 *work, f32 value) {
@@ -353,7 +353,7 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     if (state == 0) {
         return 1;
     }
-    if (state == 2 && unit->unkB2 > 0 && unit->owner->motion->mode == 5) {
+    if (state == 2 && unit->motionTicks > 0 && unit->owner->motion->mode == 5) {
         return 1;
     }
     return 0;
@@ -392,13 +392,13 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     unit->flags &= ~0x40;
     unit->flags &= ~0x400000;
     unit->flags &= ~0x800000;
-    unit->unkAC = 2;
-    unit->unkC4 = a;
-    unit->unkC6 = b;
-    unit->unkC8 = c;
+    unit->motionState = 2;
+    unit->transitionArg0 = a;
+    unit->transitionArg1 = b;
+    unit->transitionArg2 = c;
     unit->flags |= 0x80;
-    unit->unkB2 = 0;
-    unit->unk94 = 0;
+    unit->motionTicks = 0;
+    unit->unused94 = 0;
     switch (mode) {
     case 0:
         unit->flags |= 0x20;
@@ -437,8 +437,8 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 scale;
     EvtEffObj *obj;
 
-    func_00222498(unit, unit->vec70, unit->unkB6 * 0.01f);
-    if (unit->unkB6 != 0) {
+    func_00222498(unit, unit->vec70, unit->directionOffset * 0.01f);
+    if (unit->directionOffset != 0) {
         evtComputePlanarTargetDirectionVu(unit);
         obj = unit->effObj;
     } else {
@@ -448,7 +448,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
     }
-    scale = unit->unkB4 * 0.1f;
+    scale = unit->directionScale * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, v);
     effObjAddInnerFirstVec(obj, v);
