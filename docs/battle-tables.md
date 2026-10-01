@@ -5,14 +5,24 @@ to editable `.tblasm` source. It currently supports `ENCOUNT.TBL`, `UNIT.TBL`,
 `SKILL.TBL`, `AICALC.TBL`, and `MSG.TBL`:
 
 ```sh
-python3 tools/battle_tbl.py disassemble ENCOUNT.TBL encount.tblasm
-python3 tools/battle_tbl.py assemble encount.tblasm ENCOUNT.TBL
-python3 tools/battle_tbl.py disassemble UNIT.TBL unit.tblasm
-python3 tools/battle_tbl.py assemble unit.tblasm UNIT.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  ENCOUNT.TBL encount.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  encount.tblasm ENCOUNT.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm UNIT.TBL unit.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm unit.tblasm UNIT.TBL
 python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
 python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
-python3 tools/battle_tbl.py disassemble --messages msg.tblasm AICALC.TBL aicalc.tblasm
-python3 tools/battle_tbl.py assemble --messages msg.tblasm --skills skill.tblasm aicalc.tblasm AICALC.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  AICALC.TBL aicalc.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  aicalc.tblasm AICALC.TBL
 python3 tools/battle_tbl.py disassemble MSG.TBL msg.tblasm
 python3 tools/battle_tbl.py assemble msg.tblasm MSG.TBL
 ninja dds1-battle-data dds2-battle-data
@@ -66,7 +76,7 @@ selected profile. An encounter names its enemy slots and battle setup values:
 ```text
 battle-table 1 kind=encounter profile=dds1
 
-encounter 606 voice=2 enemies=109,109 backgrounds=228,1 flags=0x4 bgm=31 event=606
+encounter 1 enemies=JACK_FROST_036,MOTHMAN,MOTHMAN,MOTHMAN,JACK_FROST_036 backgrounds=222,2 flags=0xd
 ```
 
 Default-zone and background maps use separate vocabulary for the same physical
@@ -119,8 +129,17 @@ Enemy templates connect the encounter enemy IDs to combat stats, skill IDs,
 rewards, drops, and basic-attack behavior:
 
 ```text
-enemy 6 race=1 level=30 hp=220 max_hp=220 mp=288 max_mp=288 growth=6 stats=30,25,30,25,18 skills=22,84,85,50,164 macca=900 experience=221 atma_points=300
+enemy SARASVATI race=1 level=30 hp=220 max_hp=220 mp=288 max_mp=288 growth=6 stats=30,25,30,25,18 skills=MAZIO_016,TENTARAFOO,SONIC_WAVE,MP_THIEF_032,MEDIARAMA_0A4 macca=900 experience=221 atma_points=300
 ```
+
+Enemy identities come from the 384 indexed `enemy-name` rows in the paired
+`MSG.TBL`. The same symbol selects a UNIT template and affinity row, appears
+in ENCOUNT formation slots, and selects the corresponding AICALC row. Repeated
+display names all receive their hexadecimal ID, such as `JACK_FROST_036` and
+`JACK_FROST_143`; placeholder rows use `ENEMY_` followed by the hexadecimal
+ID. UNIT skill lists use the same SKILL symbols as battle AI. The normal build
+checks every nonzero encounter member and authored AI row against a populated
+UNIT template, and every UNIT skill against the paired SKILL domain.
 
 Affinity rows hold 19 packed `u32` values. Their low halfword is the numeric
 rate used by battle calculations; the high halfword contains behavior flags.
@@ -134,8 +153,9 @@ party-affinity 1 values=100,100,0x80000078,50,100,100,100,100,100,100,100,100,10
 Fields whose consumers establish a type but not a stable gameplay name retain
 offset-based names. Unknown byte spans use fixed-length hexadecimal values.
 The assembler validates every row count, list width, integer range, segment
-size, and alignment byte before writing a table. Corpus tests also join every
-nonzero encounter enemy ID to a populated enemy template in the paired game.
+size, and alignment byte before writing a table. Context-aware assembly also
+joins every nonzero encounter enemy ID to a populated template in the paired
+game.
 
 ## Skill source
 
@@ -257,7 +277,7 @@ those boundaries explicit while retaining numeric selector IDs where the
 predicate or effect handler has not earned a stable gameplay name:
 
 ```text
-enemy-ai 2 script=ai_ishisu_zako
+enemy-ai ISIS_002 script=ai_ishisu_zako
   decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
   choice 0 0 weight=100 action=special:0
   choice 1 0 weight=50 action=skill:MARIN_KARIN
@@ -285,8 +305,9 @@ second name registry.
 
 Only native-command arguments established as action IDs receive this symbol
 domain. Masks, modes, percentages, and uncertain arguments remain numeric.
-The normal build supplies both `msg.tblasm` for name resolution and
-`skill.tblasm` for range validation when assembling `AICALC.TBL`.
+The normal build supplies `msg.tblasm` for name resolution, `skill.tblasm` for
+the action domain, and `unit.tblasm` for the enemy identity join when
+assembling `AICALC.TBL`.
 
 DDS2's separate weighted tables contain eight `{value, weight}` entries. Zero
 entries are omitted from source:

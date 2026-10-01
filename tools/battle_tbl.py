@@ -473,6 +473,7 @@ class BattleSymbols:
 
     profile_name: str
     skills: flw0_profiles.IntegerSymbols
+    enemies: flw0_profiles.IntegerSymbols
 
 
 _EXPRESSION_NAMES = frozenset(("INF", "NAN", "RESULT"))
@@ -502,15 +503,17 @@ def _id_symbols(values: tuple[str, ...], prefix: str) -> flw0_profiles.IntegerSy
         bases.append(base)
 
     counts = Counter(bases)
-    used: set[str] = set()
-    symbols: list[tuple[int, str]] = []
-    for index, base in enumerate(bases):
-        candidate = base if counts[base] == 1 else f"{base}_{index:03X}"
-        if candidate in used:
-            candidate = f"{prefix}_{index:03X}"
-        used.add(candidate)
-        symbols.append((index, candidate))
-    return flw0_profiles.IntegerSymbols(tuple(symbols), complete=True)
+    names = [
+        base if counts[base] == 1 else f"{base}_{index:03X}"
+        for index, base in enumerate(bases)
+    ]
+    while len(names) != len(set(names)):
+        counts = Counter(names)
+        names = [
+            name if counts[name] == 1 else f"{name}_{index:03X}"
+            for index, name in enumerate(names)
+        ]
+    return flw0_profiles.IntegerSymbols(tuple(enumerate(names)), complete=True)
 
 
 def battle_symbols_from_message(
@@ -529,10 +532,13 @@ def battle_symbols_from_message(
     }
     skill_names = by_directive["skill-name"]
     if skill is not None:
+        if len(skill_names) < len(skill.action_attributes):
+            raise BattleTableError("skill-name rows do not cover the SKILL ID domain")
         skill_names = skill_names[: len(skill.action_attributes)]
     return BattleSymbols(
         table.profile.name,
         _id_symbols(skill_names, "SKILL"),
+        _id_symbols(by_directive["enemy-name"], "ENEMY"),
     )
 
 
@@ -1682,6 +1688,20 @@ def validate_aicalc_references(table: AiCalcTable, skill: SkillTable | None = No
                         )
 
 
+def validate_aicalc_unit(table: AiCalcTable, unit: UnitTable) -> None:
+    """Validate authored enemy AI rows against the paired UNIT templates."""
+
+    if table.profile.name != unit.profile.name:
+        raise BattleTableError(
+            f"cannot join {table.profile.name} AICALC with {unit.profile.name} UNIT"
+        )
+    for enemy_id, enemy in enumerate(table.enemies):
+        if enemy != EnemyAi() and unit.enemies[enemy_id] == EnemyTemplate():
+            raise BattleTableError(
+                f"enemy AI {enemy_id} references an empty UNIT enemy template"
+            )
+
+
 def _message_profile_from_segments(segments: tuple[bytes, ...]) -> MessageProfile:
     for profile in MESSAGE_PROFILES.values():
         fixed_sizes = tuple(row.width * row.count for row in profile.text_profiles)
@@ -1925,6 +1945,31 @@ def _int_list(text: str, line_number: int, context: str) -> tuple[int, ...]:
     return tuple(_integer(value, line_number, context) for value in text.split(","))
 
 
+def _symbolic_integer(
+    text: str,
+    line_number: int,
+    context: str,
+    symbols: flw0_profiles.IntegerSymbols | None,
+) -> int:
+    if symbols is not None and text in symbols.by_name:
+        return symbols.by_name[text]
+    return _integer(text, line_number, context)
+
+
+def _symbolic_list(
+    text: str,
+    line_number: int,
+    context: str,
+    symbols: flw0_profiles.IntegerSymbols | None,
+) -> tuple[int, ...]:
+    if not text:
+        return ()
+    return tuple(
+        _symbolic_integer(value, line_number, context, symbols)
+        for value in text.split(",")
+    )
+
+
 def _condition(text: str, line_number: int) -> int:
     if text == "any":
         return 0
@@ -1960,6 +2005,19 @@ def _index(text: str, line_number: int, count: int, context: str) -> int:
     return value
 
 
+def _symbolic_index(
+    text: str,
+    line_number: int,
+    count: int,
+    context: str,
+    symbols: flw0_profiles.IntegerSymbols | None,
+) -> int:
+    value = _symbolic_integer(text, line_number, context, symbols)
+    if not 0 <= value < count:
+        raise BattleTableError(f"line {line_number}: {context} {value} is outside 0..{count - 1}")
+    return value
+
+
 def _value(fields: dict[str, str], key: str, base: int, line: int) -> int:
     return _integer(fields[key], line, key) if key in fields else base
 
@@ -1982,6 +2040,19 @@ def _sized_list(
     fields: dict[str, str], key: str, size: int, line_number: int
 ) -> tuple[int, ...]:
     values = _int_list(fields.get(key, ""), line_number, key)
+    if len(values) > size:
+        raise BattleTableError(f"line {line_number}: {key} has more than {size} values")
+    return values + (0,) * (size - len(values))
+
+
+def _symbolic_sized_list(
+    fields: dict[str, str],
+    key: str,
+    size: int,
+    line_number: int,
+    symbols: flw0_profiles.IntegerSymbols | None,
+) -> tuple[int, ...]:
+    values = _symbolic_list(fields.get(key, ""), line_number, key, symbols)
     if len(values) > size:
         raise BattleTableError(f"line {line_number}: {key} has more than {size} values")
     return values + (0,) * (size - len(values))
@@ -2315,7 +2386,13 @@ def parse_aicalc_source(
             raise BattleTableError(f"line {line_number}: unknown directive {directive!r}")
         if len(tokens) < 2:
             raise BattleTableError(f"line {line_number}: enemy-ai needs an index")
-        enemy_id = _index(tokens[1], line_number, 384, "enemy AI index")
+        enemy_id = _symbolic_index(
+            tokens[1],
+            line_number,
+            384,
+            "enemy AI index",
+            symbols.enemies if symbols is not None else None,
+        )
         if enemy_id in seen_enemies:
             raise BattleTableError(f"line {line_number}: duplicate enemy-ai {enemy_id}")
         seen_enemies.add(enemy_id)
@@ -2570,7 +2647,9 @@ def parse_skill_source(text: str) -> SkillTable:
     return result
 
 
-def parse_unit_source(text: str) -> UnitTable:
+def parse_unit_source(
+    text: str, symbols: BattleSymbols | None = None
+) -> UnitTable:
     """Assemble UNIT source on top of the selected profile's zero template."""
 
     meaningful = [
@@ -2593,6 +2672,10 @@ def parse_unit_source(text: str) -> UnitTable:
         profile = UNIT_PROFILES[header["profile"]]
     except KeyError as exc:
         raise BattleTableError(f"unknown UNIT profile {header.get('profile')!r}") from exc
+    if symbols is not None and symbols.profile_name != profile.name:
+        raise BattleTableError(
+            f"cannot use {symbols.profile_name} battle symbols with {profile.name} UNIT"
+        )
 
     model = default_unit(profile)
     party = list(model.party)
@@ -2612,8 +2695,15 @@ def parse_unit_source(text: str) -> UnitTable:
         directive = tokens[0]
         if len(tokens) < 2:
             raise BattleTableError(f"line {line_number}: {directive} needs an index")
-        count = 384 if directive in {"enemy", "enemy-affinity"} else 16
-        index = _index(tokens[1], line_number, count, f"{directive} index")
+        enemy_directive = directive in {"enemy", "enemy-affinity"}
+        count = 384 if enemy_directive else 16
+        index = _symbolic_index(
+            tokens[1],
+            line_number,
+            count,
+            f"{directive} index",
+            symbols.enemies if symbols is not None and enemy_directive else None,
+        )
         key = (directive, index)
         if key in seen:
             raise BattleTableError(f"line {line_number}: duplicate {directive} {index}")
@@ -2640,7 +2730,13 @@ def parse_unit_source(text: str) -> UnitTable:
                 level=_value(fields, "level", 0, line_number),
                 stats=_sized_list(fields, "stats", 5, line_number),
                 unknown_1b_21=_bytes_field(fields, "unknown_1b_21", 7, line_number),
-                skills=_sized_list(fields, "skills", 24, line_number),
+                skills=_symbolic_sized_list(
+                    fields,
+                    "skills",
+                    24,
+                    line_number,
+                    symbols.skills if symbols is not None else None,
+                ),
                 equipped_bullet=_value(fields, "bullet", 0, line_number),
                 unknown_54=_value(fields, "unknown_54", 0, line_number),
                 current_profile=_value(fields, "current_profile", 0, line_number),
@@ -2675,7 +2771,13 @@ def parse_unit_source(text: str) -> UnitTable:
                 stats=_sized_list(fields, "stats", 5, line_number),
                 summon_category=_value(fields, "summon_category", 0, line_number),
                 unknown_16_17=_bytes_field(fields, "unknown_16_17", 2, line_number),
-                skills=_sized_list(fields, "skills", 8, line_number),
+                skills=_symbolic_sized_list(
+                    fields,
+                    "skills",
+                    8,
+                    line_number,
+                    symbols.skills if symbols is not None else None,
+                ),
                 macca=_value(fields, "macca", 0, line_number),
                 experience=_value(fields, "experience", 0, line_number),
                 atma_points=_value(fields, "atma_points", 0, line_number),
@@ -2706,7 +2808,9 @@ def parse_unit_source(text: str) -> UnitTable:
     return result
 
 
-def parse_encount_source(text: str) -> EncountTable:
+def parse_encount_source(
+    text: str, symbols: BattleSymbols | None = None
+) -> EncountTable:
     """Assemble ENCOUNT source on top of its zero/sentinel profile template."""
 
     meaningful = [
@@ -2729,6 +2833,10 @@ def parse_encount_source(text: str) -> EncountTable:
         profile = ENCOUNT_PROFILES[header["profile"]]
     except KeyError as exc:
         raise BattleTableError(f"unknown ENCOUNT profile {header.get('profile')!r}") from exc
+    if symbols is not None and symbols.profile_name != profile.name:
+        raise BattleTableError(
+            f"cannot use {symbols.profile_name} battle symbols with {profile.name} ENCOUNT"
+        )
 
     model = default_encount(profile)
     encounters = list(model.encounters)
@@ -2761,7 +2869,12 @@ def parse_encount_source(text: str) -> EncountTable:
             if key in seen:
                 raise BattleTableError(f"line {line_number}: duplicate encounter {index}")
             seen.add(key)
-            enemies = _int_list(fields.get("enemies", ""), line_number, "enemy")
+            enemies = _symbolic_list(
+                fields.get("enemies", ""),
+                line_number,
+                "enemy",
+                symbols.enemies if symbols is not None else None,
+            )
             if len(enemies) > 11:
                 raise BattleTableError(f"line {line_number}: encounter has more than 11 enemies")
             enemies += (0,) * (11 - len(enemies))
@@ -3042,6 +3155,31 @@ def _list(values: tuple[int, ...]) -> str:
     return ",".join(str(value) for value in values)
 
 
+def _symbolic_text(
+    value: int,
+    symbols: flw0_profiles.IntegerSymbols | None,
+    *,
+    zero_is_empty: bool = False,
+) -> str:
+    if zero_is_empty and value == 0:
+        return "0"
+    if symbols is not None and value in symbols.by_value:
+        return symbols.by_value[value]
+    return str(value)
+
+
+def _symbolic_text_list(
+    values: tuple[int, ...],
+    symbols: flw0_profiles.IntegerSymbols | None,
+    *,
+    zero_is_empty: bool = False,
+) -> str:
+    return ",".join(
+        _symbolic_text(value, symbols, zero_is_empty=zero_is_empty)
+        for value in values
+    )
+
+
 def _trimmed(values: tuple[int, ...]) -> tuple[int, ...]:
     end = len(values)
     while end and values[end - 1] == 0:
@@ -3074,10 +3212,17 @@ def _render_selector_maps(
         lines.extend(("end", ""))
 
 
-def render_encount_source(table: EncountTable) -> str:
+def render_encount_source(
+    table: EncountTable, symbols: BattleSymbols | None = None
+) -> str:
     """Render compact canonical source relative to the selected profile."""
 
     encode_encount(table)
+    if symbols is not None and symbols.profile_name != table.profile.name:
+        raise BattleTableError(
+            f"cannot use {symbols.profile_name} battle symbols with "
+            f"{table.profile.name} ENCOUNT"
+        )
     lines = [f"battle-table 1 kind=encounter profile={table.profile.name}", ""]
     for index, row in enumerate(table.encounters):
         if row == Encounter():
@@ -3090,7 +3235,14 @@ def render_encount_source(table: EncountTable) -> str:
         _append(fields, "next", row.next_encounter)
         enemies = _trimmed(row.enemies)
         if enemies:
-            fields.append(f"enemies={_list(enemies)}")
+            fields.append(
+                "enemies="
+                + _symbolic_text_list(
+                    enemies,
+                    symbols.enemies if symbols is not None else None,
+                    zero_is_empty=True,
+                )
+            )
         if row.background_a or row.background_b:
             fields.append(f"backgrounds={row.background_a},{row.background_b}")
         if row.flags:
@@ -3182,10 +3334,16 @@ def _packed_list(values: tuple[int, ...]) -> str:
     return ",".join(str(value) if value <= 0xFFFF else f"{value:#x}" for value in values)
 
 
-def render_unit_source(table: UnitTable) -> str:
+def render_unit_source(
+    table: UnitTable, symbols: BattleSymbols | None = None
+) -> str:
     """Render compact canonical UNIT source relative to the selected profile."""
 
     encode_unit(table)
+    if symbols is not None and symbols.profile_name != table.profile.name:
+        raise BattleTableError(
+            f"cannot use {symbols.profile_name} battle symbols with {table.profile.name} UNIT"
+        )
     lines = [f"battle-table 1 kind=unit profile={table.profile.name}", ""]
     empty_party = PartyTemplate(tail=bytes(table.profile.party_size - 0x56))
     for index, row in enumerate(table.party):
@@ -3207,7 +3365,14 @@ def render_unit_source(table: UnitTable) -> str:
         _append_bytes(fields, "unknown_1b_21", row.unknown_1b_21)
         skills = _trimmed(row.skills)
         if skills:
-            fields.append(f"skills={_list(skills)}")
+            fields.append(
+                "skills="
+                + _symbolic_text_list(
+                    skills,
+                    symbols.skills if symbols is not None else None,
+                    zero_is_empty=True,
+                )
+            )
         _append(fields, "bullet", row.equipped_bullet)
         _append(fields, "unknown_54", row.unknown_54)
         _append(fields, "current_profile", row.current_profile)
@@ -3245,7 +3410,14 @@ def render_unit_source(table: UnitTable) -> str:
             _append_bytes(fields, "unknown_16_17", row.unknown_16_17)
             skills = _trimmed(row.skills)
             if skills:
-                fields.append(f"skills={_list(skills)}")
+                fields.append(
+                    "skills="
+                    + _symbolic_text_list(
+                        skills,
+                        symbols.skills if symbols is not None else None,
+                        zero_is_empty=True,
+                    )
+                )
             _append(fields, "macca", row.macca)
             _append(fields, "experience", row.experience)
             _append(fields, "atma_points", row.atma_points)
@@ -3266,11 +3438,17 @@ def render_unit_source(table: UnitTable) -> str:
             _append(fields, "attack_repeats", row.attack_repeats)
             _append(fields, "result_parameter", row.result_parameter)
             _append_bytes(fields, "tail", row.tail)
-            lines.append(f"enemy {index} {' '.join(fields)}")
+            enemy = _symbolic_text(
+                index, symbols.enemies if symbols is not None else None
+            )
+            lines.append(f"enemy {enemy} {' '.join(fields)}")
         affinity = table.enemy_affinities[index]
         if affinity != AffinityRow():
             values = _trimmed(affinity.values)
-            lines.append(f"enemy-affinity {index} values={_packed_list(values)}")
+            enemy = _symbolic_text(
+                index, symbols.enemies if symbols is not None else None
+            )
+            lines.append(f"enemy-affinity {enemy} values={_packed_list(values)}")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -3509,7 +3687,10 @@ def render_aicalc_source(
                 ) from exc
         _append_hex(fields, "reserved", enemy.reserved)
         suffix = f" {' '.join(fields)}" if fields else ""
-        lines.extend(("", f"enemy-ai {enemy_id}{suffix}"))
+        enemy_name = _symbolic_text(
+            enemy_id, symbols.enemies if symbols is not None else None
+        )
+        lines.extend(("", f"enemy-ai {enemy_name}{suffix}"))
         for decision_index, decision in enumerate(enemy.decisions):
             if decision == AiDecision():
                 continue
@@ -3599,10 +3780,26 @@ def _load_skill_source(path: Path | None) -> SkillTable | None:
     return parse_skill_source(source)
 
 
+def _load_unit_source(
+    path: Path | None, symbols: BattleSymbols | None = None
+) -> UnitTable | None:
+    if path is None:
+        return None
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BattleTableError(f"cannot read unit source {path}: {exc}") from exc
+    return parse_unit_source(source, symbols)
+
+
 def _command_disassemble(args: argparse.Namespace) -> None:
     data = _read(args.input)
     message = _load_message_source(args.messages)
-    symbols = battle_symbols_from_message(message) if message is not None else None
+    skill = _load_skill_source(args.skills)
+    symbols = (
+        battle_symbols_from_message(message, skill) if message is not None else None
+    )
+    unit = _load_unit_source(args.units, symbols)
     segments = _split_segments(data)
     segment_count = len(segments)
     if (
@@ -3623,6 +3820,9 @@ def _command_disassemble(args: argparse.Namespace) -> None:
         and all(segment[8:12] == b"FLW0" for segment in segments[-2:])
     ):
         table = decode_aicalc(data)
+        validate_aicalc_references(table, skill)
+        if unit is not None:
+            validate_aicalc_unit(table, unit)
         command_profile = aicalc_command_profile(table.profile.name, symbols)
         ai_name = f"{args.output.stem}-ai.bfasm"
         formula_name = f"{args.output.stem}-formulas.bfasm"
@@ -3647,9 +3847,17 @@ def _command_disassemble(args: argparse.Namespace) -> None:
         _write_text(args.output.parent / formula_name, formula_source)
         source = render_aicalc_source(table, ai_name, formula_name, symbols)
     elif segment_count == 6:
-        source = render_encount_source(decode_encount(data))
+        table = decode_encount(data)
+        if unit is not None:
+            validate_encount_unit(table, unit)
+        source = render_encount_source(table, symbols)
     elif segment_count == 5:
-        source = render_unit_source(decode_unit(data))
+        table = decode_unit(data)
+        if skill is not None:
+            validate_unit_skill(table, skill)
+        if message is not None:
+            validate_message_references(message, table, skill)
+        source = render_unit_source(table, symbols)
     elif segment_count in {7, 8}:
         source = render_skill_source(decode_skill(data))
     else:
@@ -3681,15 +3889,26 @@ def _command_assemble(args: argparse.Namespace) -> None:
     symbols = (
         battle_symbols_from_message(message, skill) if message is not None else None
     )
+    unit = _load_unit_source(args.units, symbols)
     if header.get("kind") == "encounter":
-        data = encode_encount(parse_encount_source(source))
+        table = parse_encount_source(source, symbols)
+        if unit is not None:
+            validate_encount_unit(table, unit)
+        data = encode_encount(table)
     elif header.get("kind") == "unit":
-        data = encode_unit(parse_unit_source(source))
+        table = parse_unit_source(source, symbols)
+        if skill is not None:
+            validate_unit_skill(table, skill)
+        if message is not None:
+            validate_message_references(message, table, skill)
+        data = encode_unit(table)
     elif header.get("kind") == "skill":
         data = encode_skill(parse_skill_source(source))
     elif header.get("kind") == "aicalc":
         table = parse_aicalc_source(source, args.input.parent, symbols)
         validate_aicalc_references(table, skill)
+        if unit is not None:
+            validate_aicalc_unit(table, unit)
         data = encode_aicalc(table)
     elif header.get("kind") == "message":
         data = encode_message(parse_message_source(source, args.input.parent))
@@ -3709,12 +3928,17 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument(
             "--messages",
             type=Path,
-            help="battle MSG source used to resolve skill symbols",
+            help="battle MSG source used to resolve skill and enemy symbols",
         )
         command.add_argument(
             "--skills",
             type=Path,
             help="battle SKILL source used to validate action references",
+        )
+        command.add_argument(
+            "--units",
+            type=Path,
+            help="battle UNIT source used to validate enemy references",
         )
         command.add_argument("input", type=Path)
         command.add_argument("output", type=Path)
