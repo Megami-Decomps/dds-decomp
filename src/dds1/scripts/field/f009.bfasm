@@ -1,0 +1,2615 @@
+flw0 2
+profile dds1
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=50 float=0
+
+procedure takarasagasi_label reserved=0x00000000
+procedure hirakenai_label reserved=0x00000000
+procedure kireta_label reserved=0x00000000
+procedure itembox_label reserved=0x00000000
+procedure warp_label reserved=0x00000000
+procedure doorwarp_label reserved=0x00000000
+procedure dexitwarp_label reserved=0x00000000
+procedure dinwarp_label reserved=0x00000000
+procedure runwarp_label reserved=0x00000000
+procedure anawarp_label reserved=0x00000000
+procedure tobiwarp_label reserved=0x00000000
+procedure hasigo_label reserved=0x00000000
+procedure heal_label reserved=0x00000000
+procedure save_label reserved=0x00000000
+procedure npctalk_label reserved=0x00000000
+procedure elvstart_label reserved=0x00000000
+procedure suikomi_label reserved=0x00000000
+procedure baria_label reserved=0x00000000
+procedure proc_0012 name="001_start" reserved=0x00000000
+procedure proc_0013 name="001_01eve_01" reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _12 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _16 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _27 reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _33 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _10 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _41 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _40 reserved=0x00000000
+jump_label _48 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _46 reserved=0x00000000
+jump_label _55 reserved=0x00000000
+jump_label _53 reserved=0x00000000
+jump_label _54 reserved=0x00000000
+jump_label _59 reserved=0x00000000
+jump_label _57 reserved=0x00000000
+jump_label _58 reserved=0x00000000
+jump_label _63 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _68 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _61 reserved=0x00000000
+jump_label _62 reserved=0x00000000
+jump_label _72 reserved=0x00000000
+jump_label _71 reserved=0x00000000
+jump_label _75 reserved=0x00000000
+jump_label _73 reserved=0x00000000
+jump_label _74 reserved=0x00000000
+jump_label _79 reserved=0x00000000
+jump_label _77 reserved=0x00000000
+jump_label _78 reserved=0x00000000
+jump_label _83 reserved=0x00000000
+jump_label _85 reserved=0x00000000
+jump_label _87 reserved=0x00000000
+jump_label _89 reserved=0x00000000
+jump_label _91 reserved=0x00000000
+jump_label _93 reserved=0x00000000
+jump_label _95 reserved=0x00000000
+jump_label _97 reserved=0x00000000
+jump_label _100 reserved=0x00000000
+jump_label _101 reserved=0x00000000
+jump_label _102 reserved=0x00000000
+jump_label _103 reserved=0x00000000
+jump_label _104 reserved=0x00000000
+jump_label _105 reserved=0x00000000
+jump_label _106 reserved=0x00000000
+jump_label _107 reserved=0x00000000
+jump_label _108 reserved=0x00000000
+jump_label _109 reserved=0x00000000
+jump_label _110 reserved=0x00000000
+jump_label _99 reserved=0x00000000
+jump_label _112 reserved=0x00000000
+jump_label _81 reserved=0x00000000
+jump_label _82 reserved=0x00000000
+jump_label _116 reserved=0x00000000
+jump_label _118 reserved=0x00000000
+jump_label _121 reserved=0x00000000
+jump_label _120 reserved=0x00000000
+jump_label _124 reserved=0x00000000
+jump_label _123 reserved=0x00000000
+jump_label _126 reserved=0x00000000
+jump_label _125 reserved=0x00000000
+jump_label _127 reserved=0x00000000
+jump_label _129 reserved=0x00000000
+jump_label _131 reserved=0x00000000
+jump_label _133 reserved=0x00000000
+jump_label _135 reserved=0x00000000
+jump_label _114 reserved=0x00000000
+jump_label _115 reserved=0x00000000
+jump_label _138 reserved=0x00000000
+jump_label _139 reserved=0x00000000
+jump_label _140 reserved=0x00000000
+jump_label _141 reserved=0x00000000
+jump_label _142 reserved=0x00000000
+jump_label _137 reserved=0x00000000
+jump_label _146 reserved=0x00000000
+jump_label _144 reserved=0x00000000
+jump_label _145 reserved=0x00000000
+jump_label _149 reserved=0x00000000
+jump_label _150 reserved=0x00000000
+jump_label _148 reserved=0x00000000
+jump_label _154 reserved=0x00000000
+jump_label _155 reserved=0x00000000
+jump_label _153 reserved=0x00000000
+jump_label _157 reserved=0x00000000
+jump_label _158 reserved=0x00000000
+jump_label _156 reserved=0x00000000
+jump_label _159 reserved=0x00000000
+jump_label _162 reserved=0x00000000
+jump_label _161 reserved=0x00000000
+jump_label _163 reserved=0x00000000
+jump_label _151 reserved=0x00000000
+jump_label _152 reserved=0x00000000
+jump_label _165 reserved=0x00000000
+jump_label _169 reserved=0x00000000
+jump_label _167 reserved=0x00000000
+jump_label _168 reserved=0x00000000
+
+code
+takarasagasi_label:
+  PROC takarasagasi_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  COMM 0x021f
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  POPLIX 0x0001
+  PUSHIS 0
+  COMM 0x021f
+  PUSHREG
+  POPLIX 0x0002
+  PUSHIS 3
+  PUSHLIX 0x0000
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 0
+  PUSHLIX 0x0001
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 1
+  PUSHLIX 0x0002
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 43
+  COMM 0x0214
+  PUSHMSG TAKARASAGASI
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0001
+  PUSHLIX 0x0000
+  COMM 0x0070
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+hirakenai_label:
+  PROC hirakenai_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHMSG COMP_OPENERROR
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+kireta_label:
+  PROC kireta_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _1
+  PUSHMSG COMP_LIGHTMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _1
+_1:
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _3
+  PUSHMSG COMP_REFUTOMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _3
+_3:
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _5
+  PUSHMSG COMP_REBERAMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _5
+_5:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _7
+  PUSHMSG COMP_ESTOMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _7
+_7:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+itembox_label:
+  PROC itembox_label
+_9:
+  PUSHIS 1
+  IF _10
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _35
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM 0x0116
+  PUSHREG
+  IF _34
+  PUSHMSG TAKARA_STILLGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _33
+_34:
+  PUSHIS 0
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0003
+  PUSHIS 1
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0004
+  PUSHIS 2
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0005
+  PUSHIS 3
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0006
+  PUSHIS 4
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0007
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _12
+  PUSHMSG HOSEKI
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _11
+_12:
+  PUSHMSG TAKARA
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _11
+_11:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _14
+  PUSHIS 4
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0008
+  GOTO _13
+_14:
+  PUSHIS 8
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0008
+  GOTO _13
+_13:
+  PUSHIS 0
+  PUSHLIX 0x0008
+  EQ
+  IF _32
+  PUSHIS 1
+  PUSHLIX 0x0006
+  EQ
+  IF _23
+  COMM 0x0115
+  PUSHLIX 0x0007
+  COMM 0x0166
+  END
+  GOTO _22
+_23:
+  PUSHIS 2
+  PUSHLIX 0x0006
+  EQ
+  IF _24
+  COMM 0x0115
+  PUSHIS 34
+  COMM 0x0214
+  PUSHIS 100
+  PUSHIS 15
+  COMM 0x00ab
+  PUSHIS 15
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 15
+  PUSHIS 100
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 1
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _22
+_24:
+  PUSHIS 3
+  PUSHLIX 0x0006
+  EQ
+  IF _25
+  COMM 0x0115
+  PUSHIS 34
+  COMM 0x0214
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 2
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _22
+_25:
+  PUSHIS 4
+  PUSHLIX 0x0006
+  EQ
+  IF _26
+  COMM 0x0115
+  PUSHIS 34
+  COMM 0x0214
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 4
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _22
+_26:
+  PUSHIS 5
+  PUSHLIX 0x0006
+  EQ
+  IF _27
+  COMM 0x0115
+  PUSHIS 34
+  COMM 0x0214
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 5
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _22
+_27:
+  PUSHIS 6
+  PUSHLIX 0x0006
+  EQ
+  IF _28
+  COMM 0x0115
+  PUSHIS 34
+  COMM 0x0214
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 6
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _22
+_28:
+  PUSHIS 1
+  PUSHLIX 0x0003
+  LE
+  IF _20
+  COMM 0x0115
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 0
+  PUSHLIX 0x0004
+  EQ
+  IF _18
+  PUSHMSG TAKARA_KARAGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _17
+_18:
+  PUSHIS 32
+  COMM 0x0214
+  PUSHIS 3
+  PUSHLIX 0x0004
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 0
+  PUSHLIX 0x0005
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 127
+  PUSHLIX 0x0004
+  LE
+  PUSHIS 96
+  PUSHLIX 0x0004
+  GE
+  AND
+  IF _16
+  PUSHMSG TAKARA_GET2
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _15
+_16:
+  PUSHMSG TAKARA_GET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _15
+_15:
+  PUSHLIX 0x0005
+  PUSHLIX 0x0004
+  COMM 0x0070
+  GOTO _17
+_17:
+  GOTO _19
+_20:
+  PUSHIS 3
+  PUSHLIX 0x0003
+  EQ
+  IF _19
+  COMM 0x0115
+  PUSHIS 32
+  COMM 0x0214
+  PUSHIS 0
+  PUSHLIX 0x0007
+  PUSHIS 0
+  COMM 0x0071
+  PUSHMSG TAKARA_MAKA_GET
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0007
+  COMM 0x0139
+  GOTO _19
+_19:
+  GOTO _22
+_22:
+  GOTO _31
+_32:
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _30
+  PUSHMSG HOSEKI_NOGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _29
+_30:
+  PUSHMSG TAKARA_NOGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _29
+_29:
+  GOTO _31
+_31:
+  GOTO _33
+_33:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _35
+_35:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _9
+_10:
+  END
+warp_label:
+  PROC warp_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0219
+  PUSHREG
+  POPLIX 0x0009
+  PUSHIS 1
+  PUSHLIX 0x0009
+  EQ
+  IF _37
+  COMM 0x0204
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHF 0x3e051eb8
+  PUSHF 0x00000000
+  PUSHF 0x3dcccccd
+  PUSHIS 2
+  PUSHIS 175
+  PUSHIS 60
+  COMM 0x00ef
+  PUSHIS 101
+  PUSHIS 132
+  PUSHIS 132
+  PUSHIS 132
+  COMM 0x00f0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 256
+  COMM 0x00f1
+  PUSHIS 1
+  COMM 0x00f2
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  COMM 0x00f3
+  GOTO _37
+_37:
+  COMM 0x0202
+  END
+  END
+doorwarp_label:
+  PROC doorwarp_label
+_39:
+  PUSHIS 1
+  IF _40
+  COMM 0x0203
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _43
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000a
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000b
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x000a
+  EQ
+  IF _41
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _41
+_41:
+  PUSHIS 20
+  PUSHLIX 0x000b
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _43
+_43:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _39
+_40:
+  END
+dexitwarp_label:
+  PROC dexitwarp_label
+_45:
+  PUSHIS 1
+  IF _46
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _51
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM 0x020d
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG EXITWARP
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 2
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _48
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  GOTO _47
+_48:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _47
+_47:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000c
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000d
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x000c
+  EQ
+  IF _49
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _49
+_49:
+  PUSHIS 45
+  PUSHLIX 0x000d
+  COMM SCREEN_FADE_B
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _51
+_51:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _45
+_46:
+  END
+dinwarp_label:
+  PROC dinwarp_label
+_53:
+  PUSHIS 1
+  IF _54
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _55
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0204
+  PUSHIS 45
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _55
+_55:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _53
+_54:
+  END
+runwarp_label:
+  PROC runwarp_label
+  COMM 0x0203
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0204
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+anawarp_label:
+  PROC anawarp_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0203
+  COMM 0x0204
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIX 0x0000
+  COMM 0x0049
+  COMM 0x0202
+  END
+tobiwarp_label:
+  PROC tobiwarp_label
+_57:
+  PUSHIS 1
+  IF _58
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _59
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0203
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 5
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 70
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _59
+_59:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _57
+_58:
+  END
+hasigo_label:
+  PROC hasigo_label
+  PUSHIS 0
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000f
+  PUSHIS 1
+  POPLIX 0x000e
+_61:
+  PUSHLIX 0x000e
+  IF _62
+  COMM 0x0203
+  PUSHIS 0
+  PUSHLIX 0x000f
+  EQ
+  IF _68
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _63
+  PUSHIS 0
+  POPLIX 0x000e
+  GOTO _63
+_63:
+  GOTO _67
+_68:
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _65
+  PUSHIS 0
+  POPLIX 0x000e
+  GOTO _65
+_65:
+  GOTO _67
+_67:
+  PUSHIS 1
+  PUSHLIX 0x000e
+  EQ
+  IF _69
+  COMM WAIT_FOR_TIMER_START
+  GOTO _69
+_69:
+  GOTO _61
+_62:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 1
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0010
+  PUSHIS 2
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0011
+  PUSHLIX 0x0011
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0010
+  PUSHIX 0x0000
+  COMM 0x004a
+  COMM 0x0204
+  PUSHIS 0
+  PUSHLIX 0x000f
+  EQ
+  IF _72
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 8
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  GOTO _71
+_72:
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 9
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  GOTO _71
+_71:
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+heal_label:
+  PROC heal_label
+_73:
+  PUSHIS 1
+  IF _74
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _75
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 900
+  COMM 0x020f
+  END
+  GOTO _75
+_75:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _73
+_74:
+  END
+save_label:
+  PROC save_label
+_77:
+  PUSHIS 1
+  IF _78
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _79
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 901
+  COMM 0x020f
+  END
+  GOTO _79
+_79:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _77
+_78:
+  END
+npctalk_label:
+  PROC npctalk_label
+  COMM 0x0207
+  PUSHREG
+  POPLIX 0x0018
+  PUSHIS 1
+  POPLIX 0x0019
+_81:
+  PUSHLIX 0x0019
+  IF _82
+  PUSHIS 0
+  PUSHLIX 0x0018
+  EQ
+  IF _100
+  PUSHIS 0
+  POPLIX 0x0019
+  END
+  GOTO _99
+_100:
+  PUSHIS 1
+  PUSHLIX 0x0018
+  EQ
+  IF _101
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _83
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _83
+_83:
+  GOTO _99
+_101:
+  PUSHIS 2
+  PUSHLIX 0x0018
+  EQ
+  IF _102
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _85
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _85
+_85:
+  GOTO _99
+_102:
+  PUSHIS 100
+  PUSHLIX 0x0018
+  EQ
+  IF _103
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _87
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _87
+_87:
+  GOTO _99
+_103:
+  PUSHIS 101
+  PUSHLIX 0x0018
+  EQ
+  IF _104
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _99
+_104:
+  PUSHIS 102
+  PUSHLIX 0x0018
+  EQ
+  IF _105
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _89
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _89
+_89:
+  GOTO _99
+_105:
+  PUSHIS 103
+  PUSHLIX 0x0018
+  EQ
+  IF _106
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _99
+_106:
+  PUSHIS 104
+  PUSHLIX 0x0018
+  EQ
+  IF _107
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _91
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _91
+_91:
+  GOTO _99
+_107:
+  PUSHIS 105
+  PUSHLIX 0x0018
+  EQ
+  IF _108
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _93
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _93
+_93:
+  GOTO _99
+_108:
+  PUSHIS 106
+  PUSHLIX 0x0018
+  EQ
+  IF _109
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _95
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _95
+_95:
+  GOTO _99
+_109:
+  PUSHIS 107
+  PUSHLIX 0x0018
+  EQ
+  IF _110
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _97
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _97
+_97:
+  GOTO _99
+_110:
+  PUSHIS 199
+  PUSHLIX 0x0018
+  EQ
+  IF _99
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _99
+_99:
+  PUSHIS 1
+  PUSHLIX 0x0019
+  EQ
+  IF _112
+  COMM WAIT_FOR_TIMER_START
+  GOTO _112
+_112:
+  GOTO _81
+_82:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  POPLIX 0x0013
+  PUSHIS 0
+  POPLIX 0x0017
+  COMM 0x01fe
+  PUSHREG
+  POPLIX 0x001a
+_114:
+  PUSHIS 1
+  IF _115
+  PUSHIS 10
+  PUSHLIX 0x0013
+  LT
+  IF _126
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  GOTO _125
+_126:
+  PUSHIS 0
+  POPLIX 0x0012
+  PUSHIS 0
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0014
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0014
+  EQ
+  IF _124
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _116
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _116
+_116:
+  GOTO _123
+_124:
+  PUSHIS 1
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0015
+  PUSHIS 0
+  PUSHLIX 0x0017
+  EQ
+  IF _118
+  PUSHIS 1
+  POPLIX 0x0017
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHTYPE5 ppos01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x001a
+  COMM 0x01e0
+  GOTO _118
+_118:
+  PUSHIS 0
+  PUSHLIX 0x0014
+  EQ
+  IF _121
+  PUSHLIX 0x0015
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _120
+_121:
+  PUSHIS 1
+  PUSHLIX 0x0014
+  EQ
+  IF _120
+  PUSHLIX 0x0015
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0012
+  GOTO _120
+_120:
+  GOTO _123
+_123:
+  PUSHLIX 0x0012
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  COMM WAIT_FOR_TIMER_START
+  GOTO _125
+_125:
+  PUSHIS 200
+  PUSHLIX 0x0013
+  GE
+  IF _127
+  END
+  GOTO _127
+_127:
+  PUSHIS 100
+  PUSHLIX 0x0013
+  EQ
+  IF _131
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _129
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _129
+_129:
+  COMM 0x020e
+  END
+  GOTO _131
+_131:
+  PUSHIS 0
+  PUSHLIX 0x0013
+  EQ
+  IF _135
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _133
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _133
+_133:
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  GOTO _135
+_135:
+  GOTO _114
+_115:
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  END
+elvstart_label:
+  PROC elvstart_label
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01cam_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  POPLIX 0x001c
+  PUSHIS 0
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001d
+  PUSHIS 14
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0024
+  PUSHIS 2
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001e
+  PUSHIS 3
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001f
+  PUSHIS 4
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0020
+  PUSHIS 5
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0021
+  PUSHIS 6
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0022
+  PUSHIS 7
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0023
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 4
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHLIX 0x001c
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHLIX 0x0024
+  PUSHLIX 0x0024
+  COMM 0x0209
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG WARP_ELV_MSG
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  PUSHLIX 0x001d
+  EQ
+  IF _138
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 23
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_138:
+  PUSHIS 2
+  PUSHLIX 0x001d
+  EQ
+  IF _139
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 1
+  COMM 0x0071
+  PUSHLIX 0x0024
+  COMM 0x0040
+  PUSHIS 2
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 24
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_139:
+  PUSHIS 3
+  PUSHLIX 0x001d
+  EQ
+  IF _140
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 2
+  COMM 0x0071
+  PUSHLIX 0x0024
+  COMM 0x0040
+  PUSHIS 3
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 25
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_140:
+  PUSHIS 4
+  PUSHLIX 0x001d
+  EQ
+  IF _141
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 3
+  COMM 0x0071
+  PUSHLIX 0x0024
+  COMM 0x0040
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 26
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_141:
+  PUSHIS 5
+  PUSHLIX 0x001d
+  EQ
+  IF _142
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 4
+  COMM 0x0071
+  PUSHLIX 0x0024
+  COMM 0x0040
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 27
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_142:
+  PUSHIS 6
+  PUSHLIX 0x001d
+  EQ
+  IF _137
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 4
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0023
+  PUSHIS 5
+  COMM 0x0071
+  PUSHLIX 0x0024
+  COMM 0x0040
+  PUSHIS 6
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 28
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001b
+  GOTO _137
+_137:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x001d
+  PUSHLIX 0x001b
+  EQ
+  IF _149
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _148
+_149:
+  PUSHLIX 0x0024
+  PUSHLIX 0x001b
+  EQ
+  IF _150
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _148
+_150:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 4
+  PUSHIS 10
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0214
+  PUSHLIX 0x001b
+  PUSHLIX 0x0024
+  COMM 0x0209
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0025
+_144:
+  PUSHIS 1
+  PUSHLIX 0x0025
+  NEQ
+  IF _145
+  PUSHIS 2
+  PUSHLIX 0x0025
+  EQ
+  IF _146
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0215
+  COMM 0x020a
+  PUSHLIX 0x001b
+  COMM 0x0201
+  END
+  GOTO _146
+_146:
+  COMM WAIT_FOR_TIMER_START
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0025
+  GOTO _144
+_145:
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0215
+  PUSHIS 47
+  COMM 0x0214
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _148
+_148:
+  PUSHIS 48
+  COMM 0x0214
+  PUSHIS 0
+  PUSHTYPE5 str_01path_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHTYPE5 str_01all_d01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 0
+  PUSHTYPE5 str_01path_02
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHTYPE5 str_01all_d02
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006b
+  PUSHTYPE5 str_01all_d01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006c
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x020a
+  PUSHLIX 0x001b
+  COMM 0x0201
+  END
+suikomi_label:
+  PROC suikomi_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 6
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x002a
+  PUSHIS 1
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0027
+  PUSHIS 2
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0026
+  PUSHIS 3
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0028
+  PUSHIS 4
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0029
+  PUSHLIX 0x0028
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0111
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0027
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 2
+  PUSHIS 25
+  PUSHIS 3
+  PUSHLIX 0x0029
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHLIX 0x0026
+  COMM 0x0019
+  PUSHLIX 0x002a
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPLIX 0x002b
+  PUSHLIX 0x0027
+  PUSHLIX 0x002b
+  COMM 0x004a
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHLIX 0x002b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 6
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  END
+baria_label:
+  PROC baria_label
+  PUSHIS 0
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002c
+  PUSHIS 1
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002d
+  PUSHIS 2
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002e
+  PUSHIS 3
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002f
+  PUSHIS 4
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002f
+  PUSHIS 5
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0030
+  PUSHIS 0
+  PUSHLIX 0x0030
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _165
+_151:
+  PUSHIS 1
+  IF _152
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  IF _163
+  PUSHIS 0
+  PUSHLIX 0x002c
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _162
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2560
+  PUSHLIX 0x002c
+  EQ
+  IF _154
+  PUSHMSG FLD_BLUEICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _153
+_154:
+  PUSHIS 2561
+  PUSHLIX 0x002c
+  EQ
+  IF _155
+  PUSHMSG FLD_YERWICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _153
+_155:
+  PUSHMSG FLD_REDICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _153
+_153:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  GOTO _161
+_162:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHTYPE5 fld_f_bin_ICE_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0031
+  PUSHLIX 0x002e
+  PUSHLIX 0x0031
+  COMM 0x009d
+  PUSHLIX 0x002d
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x002e
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2560
+  PUSHLIX 0x002c
+  EQ
+  IF _157
+  PUSHMSG FLD_BLUEICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _156
+_157:
+  PUSHIS 2561
+  PUSHLIX 0x002c
+  EQ
+  IF _158
+  PUSHMSG FLD_YERWICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _156
+_158:
+  PUSHMSG FLD_REDICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _156
+_156:
+  PUSHMSG FLD_ICE_BREAK
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 33
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _159
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 0
+  PUSHLIX 0x0031
+  COMM 0x00ce
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 1
+  PUSHTYPE5 BARIA
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHTYPE5 BARIA_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 15
+  PUSHIS 1
+  COMM SCREEN_FADE_A
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHLIX 0x0031
+  COMM 0x009b
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHLIX 0x0030
+  COMM SET_MODEL_FLAG
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _159
+_159:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  GOTO _161
+_161:
+  GOTO _163
+_163:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _151
+_152:
+  GOTO _165
+_165:
+  END
+  END
+proc_0012:
+  PROC proc_0012
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHTYPE5 str_01pos_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x0068
+  PUSHREG
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x0012
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  END
+proc_0013:
+  PROC proc_0013
+_167:
+  PUSHIS 1
+  IF _168
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _169
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHTYPE5 str_01pos_01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x0068
+  PUSHREG
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_01_3
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x0012
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  GOTO _169
+_169:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _167
+_168:
+  END
+end
+
+messages msg1
+  message KAGIKOWARE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">ドアは変"
+      glyphs 89dc
+      font "し、"
+      newline
+      font "開きそうにない……"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EXITWARP speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">他のエリアに行きますか"
+      font "?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select EXITWARP_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message HOSEKI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">魔"
+      glyphs 84ce
+      font "の"
+      glyphs 88f4
+      font "がある。"
+      newline
+      font "開けてみますか?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select HOSEKI_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message HOSEKI_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">魔"
+      glyphs 84ce
+      font "の"
+      glyphs 88f4
+      font "をあきらめた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HOSEKI_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      font "を"
+      control f2 03 02 ff
+      glyphs 85a2
+      font "手に入れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 84be 88f4
+      font "がある。"
+      newline
+      font "開けますか?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select TAKARA_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message TAKARA_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 84be 88f4
+      font "をあきらめた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_STILLGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">すでに中身は"
+      glyphs 84f8
+      font "っ"
+      glyphs 819b
+      font "だ。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      font "を"
+      control f2 03 02 ff
+      glyphs 85a2
+      font "手に入れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      font "を"
+      control f2 03 02 ff
+      glyphs 85a2
+      font "手に入れた。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "これは高く"
+      glyphs 89aa
+      font "れそうだ"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_MAKA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      control f2 02 05 ff
+      control f2 03 01 ff
+      font "マ"
+      glyphs 81d4
+      font "カ"
+      control f2 02 01 ff
+      font "手に入れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 88f4
+      font "の中身はトラ"
+      glyphs 81d4
+      font "プだった。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font ">サー"
+      glyphs 81e6 86a7
+      font "は、"
+      newline
+      font "ダメージをうけた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_KARAGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">中身は"
+      glyphs 84f8
+      font "っ"
+      glyphs 819b
+      font "だった。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARASAGASI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      control f2 03 03 ff
+      font "は、何かを見つけた。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "………"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font ">"
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      font "を"
+      control f2 03 02 ff
+      glyphs 85a2
+      font "手に入れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_OPENERROR speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">ここでは使えない。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_LIGHTMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">光の"
+      glyphs 86ea
+      font "果が"
+      glyphs 86a2
+      font "れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_ESTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 8c8f
+      font "魔の"
+      glyphs 86ea
+      font "果が"
+      glyphs 86a2
+      font "れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REBERAMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 8ae0
+      font "魔の"
+      glyphs 86ea
+      font "果が"
+      glyphs 86a2
+      font "れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REFUTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 88c2
+      font "き足の"
+      glyphs 86ea
+      font "果が"
+      glyphs 86a2
+      font "れた。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message WARP_ELV_MSG speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">"
+      glyphs 8ca2 84ab
+      font "を選んで下さい。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select WARP_ELV_SEL1 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  select WARP_ELV_SEL2 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  select WARP_ELV_SEL3 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  select WARP_ELV_SEL4 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  select WARP_ELV_SEL5 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  select WARP_ELV_SEL6 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 06 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      font " "
+    endoption
+    option
+      control f2 08 ff ff
+      font "やめる"
+    endoption
+  endselect
+  message FLD_BLUEICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">エクストラエリアに"
+      glyphs 8ca5
+      font "がる"
+      newline
+      glyphs 84f9 86a4
+      font "の"
+      glyphs 8c87
+      font "がある"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_REDICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">エクストラエリアに"
+      glyphs 8ca5
+      font "がる"
+      newline
+      glyphs 86d3 86a4
+      font "の"
+      glyphs 8c87
+      font "がある"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_YERWICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">エクストラエリアに"
+      glyphs 8ca5
+      font "がる"
+      newline
+      glyphs 83f1 86a4
+      font "の"
+      glyphs 8c87
+      font "がある"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_ICE_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">破壊しますか?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select FLD_ICE_BREAK_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message INFTEST0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">メ"
+      glyphs 81d4
+      font "セージテスト"
+      newline
+      font "まずは"
+      glyphs 88f5
+      font "本だ……。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INFTEST1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font ">メ"
+      glyphs 81d4
+      font "セージテスト"
+      newline
+      font "次は選"
+      glyphs 87c5 8c91
+      font "だ。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select INFTEST1_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      font "はい"
+    endoption
+    option
+      control f2 08 ff ff
+      font "いいえ"
+    endoption
+  endselect
+  message INFTEST1_YES speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "はい…だと?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INFTEST1_NO speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "いいえ…だと?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+end
+
+strings count=64
+  string ppos01 "ppos01"
+  string str_01cam_01 "01cam_01"
+  string str_01all_d01 "01all_d01"
+  string str_01path_01 "01path_01"
+  string str_01all_d02 "01all_d02"
+  string str_01path_02 "01path_02"
+  string str_01all_d01_2 "01all_d01"
+  string fld_f_bin_ICE_BED "/fld/f/bin/ICE.BED"
+  string BARIA "BARIA"
+  string BARIA_2 "BARIA"
+  string str_01pos_01 "01pos_01"
+  string str_01cam_01_2 "01cam_01"
+  string str_01pos_01_2 "01pos_01"
+  string str_01cam_01_3 "01cam_01"
+end

@@ -183,10 +183,11 @@ creates a declaration when a referenced offset begins a printable,
 NUL-terminated ASCII string. Other operands remain numeric and the bytes stay
 in local `bytes` or `zero` directives.
 
-The DDS1 event corpus has 315 such instructions in 13 files. Every operand
-lands at the start of a distinct valid string, so all 315 are symbolic. Five
-physical version-1 files address records beyond the type-4 descriptor's logical
-length. Their section line carries an explicit physical `extent`, for example:
+The complete DDS1 corpus has 7,863 such instructions; the original event slice
+accounts for 315 instructions in 13 files. Every operand lands at the start of
+a valid string, so all 7,863 are symbolic. A physical version-1 source can
+preserve a string pool beyond the type-4 descriptor's logical length by giving
+the section an explicit physical `extent`, for example:
 
 ```text
 section 4 type=4 stride=0x1 count=48 offset=0x1243 extent=0x174
@@ -209,7 +210,8 @@ The count stays equal to the retail type-4 descriptor while the directives own
 the complete physical pool. The symbolic disassembler uses this form only when
 referenced, NUL-terminated strings account for every byte through the end of
 the file. Unreferenced trailing data still requires the physical format. All
-22 tracked DDS2 field scripts satisfy this stronger condition.
+30 affected DDS1 scripts and all 22 DDS2 field scripts satisfy this stronger
+condition.
 
 ### Native command profiles
 
@@ -266,22 +268,28 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 2,351 of 3,881 native calls in the DDS1 event corpus and
-23,630 of 38,850 calls in the complete DDS2 corpus. It also makes the adjacent
-message-command pattern safe to recognize, producing 188 symbolic DDS1 message
-references and 1,910 symbolic DDS2 references. Every other command and every
-dynamic or ambiguous message operand remains numeric.
+The reviewed set names 32,695 of 53,400 native calls in the complete DDS1
+corpus and 23,630 of 38,850 calls in the complete DDS2 corpus. It also makes
+the adjacent message-command pattern safe to recognize, producing 188 symbolic
+DDS1 message references in the original event slice, 2,368 across complete
+DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
+or ambiguous message operand remains numeric.
 
 ## Tracked corpora
 
-The repository tracks 104 DDS1 event scripts and all 140 DDS2 BF programs:
-117 event scripts, 22 field scripts, and the battle negotiation script. Of the
-DDS2 sources, 126 use symbolic version 2. Fourteen global event programs use
-the lossless physical form because they have a distinct four-section layout.
-The 66 nonempty DDS2 message banks contain 2,437 dialog records, 2,673 message
-pages, 1,149 selection options, and 177 speaker strings. Fifty-nine banks use
-editable MSG1 records; the seven banks outside the verified MSG1 layouts keep
-their bytes locally.
+The repository tracks both complete retail BF corpora. DDS1 has 143 programs:
+118 event scripts, 24 field scripts, and the battle negotiation script. DDS2
+has 140 programs: 117 event scripts, 22 field scripts, and its battle
+negotiation script. DDS1 uses 129 symbolic version-2 sources and 14 physical
+version-1 sources; DDS2 uses 126 symbolic and 14 physical sources. The physical
+sources are each game's 14 global event programs, which use a distinct
+four-section layout.
+
+DDS1 has 72 nonempty message banks. Sixty-seven decode to 2,702 dialog records,
+3,109 pages, 1,028 selection options, and 184 speaker strings; five banks retain
+local raw fallbacks. DDS2 has 66 nonempty banks, of which 59 decode to 2,437
+dialogs, 2,673 pages, 1,149 options, and 177 speakers. Its other seven banks
+also retain local raw fallbacks.
 
 Assemble one source directly with:
 
@@ -297,7 +305,7 @@ ninja dds2-scripts
 ```
 
 The normal `ninja dds1` and `ninja dds2` targets include their corresponding
-checks. Expected output hashes live in `config/dds1/event_scripts.sha1` and
+checks. Expected output hashes live in `config/dds1/scripts.sha1` and
 `config/dds2/scripts.sha1`, so verification does not require the original BF
 files.
 
