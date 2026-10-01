@@ -15,6 +15,7 @@ typedef struct MantraPulseGrid {
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void func_00257150();
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
+extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraPulseStripAndKind(void *object, s32 scale, s32 context) {
     itfDspDrawStrip(0, 0, 0, scale, context);
@@ -116,7 +117,13 @@ void func_00257BD8(DisplayGridWork *work, s32 argument) {
 
 INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraPulseFrame);
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257DF0);
+void func_00257DF0(s32 context, s32 layer) {
+    s32 x = *(s16 *)(context + 0x59C) - *(s16 *)(context + 0x5A0) - 9;
+    s32 y = *(s16 *)(context + 0x59E) - *(s16 *)(context + 0x5A2) + 0x45;
+
+    func_0024E260(x, y, 0, 0x80, 0x3E, layer);
+    func_0024E260(x, y, 0, 0x80, 0x3D, layer);
+}
 
 typedef struct {
     s32 x;

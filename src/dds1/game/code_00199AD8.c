@@ -76,22 +76,22 @@ extern s32 itfPanelGradientColorPair[];
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
 
-typedef struct PanelCursorItem {
+typedef struct PanelHoldItem {
     s32 first;  /* 0x0 */
     s16 second; /* 0x4 */
     s16 third;  /* 0x6 */
-} PanelCursorItem;
+} PanelHoldItem;
 
 /* Selection state shared by the id helpers below. */
-typedef struct PanelCursor {
+typedef struct PanelHold {
     s32 window;  /* 0x0: window id (>= 0 valid) */
     s16 unk4;  /* 0x4 */
     s16 count;   /* 0x6: entries used in items[] */
     s32 unk8;  /* 0x8 */
-    PanelCursorItem items[0x40]; /* 0xC: queued entries, count bounds them */
-} PanelCursor;
+    PanelHoldItem items[0x40]; /* 0xC: queued entries, count bounds them */
+} PanelHold;
 
-extern PanelCursor itfHeldPanelCursor;
+extern PanelHold itfHeldPanelCursor;
 
 /* Screen-space vertex (x, y) written by the panel rect builders. */
 typedef struct PanelPt {
@@ -352,7 +352,7 @@ void itfPanelSetStatus(s32 index, s8 status) {
 }
 
 s32 itfPanelAcquireHold(void) {
-    PanelCursor *cursor;
+    PanelHold *cursor;
     s32 window;
 
     window = scrGetWindow();
@@ -369,7 +369,7 @@ s32 itfPanelAcquireHold(void) {
 }
 
 s32 itfPanelReleaseHold(void) {
-    PanelCursor *cursor = &itfHeldPanelCursor;
+    PanelHold *cursor = &itfHeldPanelCursor;
 
     if (cursor->window < 0) {
         return 1;
@@ -384,7 +384,7 @@ s32 itfPanelReleaseHold(void) {
 
 /* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
 s32 itfCommandQueueHeldPanelEntry(void) {
-    PanelCursor *cursor = &itfHeldPanelCursor;
+    PanelHold *cursor = &itfHeldPanelCursor;
     s32 first;
     s32 second;
     s32 third;
