@@ -305,9 +305,14 @@ Lookup curves whose exact gameplay role remains uncertain retain neutral
 The AI programs use a separate battle-command vocabulary derived from each
 game's native dispatch table and handlers. It covers action and target
 selection, HP and party-state queries, history counters, scene transitions,
-and camera operations. This names 2,909 of 3,434 calls in DDS1 and 3,414 of
-3,801 calls in DDS2, allowing common code to read as conditions such as
-`AI_UNIT_HP_AT_OR_BELOW_RATE(25)` and actions such as
+and camera operations. Player/enemy group scans also name the paired action
+check and action-mode predicates, including their complementary forms. The
+native callbacks use the same `0x200`/`0x400` player/enemy filters as the
+established count and mask commands. This names 3,253 of 3,434 calls in DDS1
+and 3,703 of 3,801 calls in DDS2, allowing
+common code to read as conditions such as
+`AI_UNIT_HP_AT_OR_BELOW_RATE(25)`,
+`AI_ANY_ENEMY_ACTION_MODE_ZERO(7)`, and actions such as
 `AI_SELECT_SKILL(1)`. Calls whose handler role is still ambiguous remain as
 numeric `COMM` instructions; the profile does not infer names from usage
 alone.
