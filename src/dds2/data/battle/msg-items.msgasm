@@ -1,0 +1,2474 @@
+messages msg1
+  message item_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_002 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_003 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 300 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_004 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (S)"
+      control f1 0f
+      text "~1 ally"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_005 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~1 ally"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_006 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_007 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 300 HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_008 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore full HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_009 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 MP"
+      control f1 0f
+      text "~1 ally"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_00B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all MP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_00D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_00E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_00F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP or MP"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_010 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revive target"
+      control f1 0f
+      text "~Some HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_011 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revive target"
+      control f1 0f
+      text "~All HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_012 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revive 1 ally"
+      control f1 0f
+      text "~All HP"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_013 speaker=none
+    page
+      control f2 08 ff ff
+      text "??"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message item_014 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_015 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure poison"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_016 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure ache"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_017 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure mute"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_018 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure stun"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_019 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure stone"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Uncurse"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure panic/charm/"
+      control f1 0f
+      text "sleep"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_01F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_020 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_021 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_022 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel magic"
+      control f1 0f
+      text "~Next turn only"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_023 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel phys attack"
+      control f1 0f
+      text "~Next turn only"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_024 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cancel -kaja"
+      control f1 0f
+      text "~All enemies"
+      newline
+    endpage
+  endmessage
+  message item_025 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_026 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_027 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_028 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_029 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Electricity"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Electricity"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_02F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_030 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP by 1/2"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text "/non-human"
+      newline
+    endpage
+  endmessage
+  message item_031 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_032 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (low odds)"
+      control f1 0f
+      text "~All"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_033 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (high odds)"
+      control f1 0f
+      text "~All"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_034 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_035 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_036 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_037 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Almighty damage(M)"
+      control f1 0f
+      text "~All"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_038 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message item_039 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_03A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "See enemy info"
+      control f1 0f
+      text "~1 enemy"
+      control f1 0f
+      text "~Reusable"
+      newline
+    endpage
+  endmessage
+  message item_03B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fewer encounters"
+      control f1 0f
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "More encounters"
+      control f1 0f
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null damage zone"
+      control f1 0f
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Lights up dark areas"
+      control f1 0f
+      text "~Temporary"
+      newline
+    endpage
+  endmessage
+  message item_03F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_040 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_041 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_042 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null fire attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_043 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null ice attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_044 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null elec attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_045 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null force attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_046 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null earth attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message item_047 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_048 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_049 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_04F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_050 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Random item"
+      control f1 0f
+      text "~May contain "
+      control f1 0f
+      text "attack item"
+      newline
+    endpage
+  endmessage
+  message item_051 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Random item"
+      control f1 0f
+      text "~May contain "
+      control f1 0f
+      text "shield item"
+      newline
+    endpage
+  endmessage
+  message item_052 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Random item"
+      control f1 0f
+      text "~May contain "
+      control f1 0f
+      text "valuable item"
+      newline
+    endpage
+  endmessage
+  message item_053 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases "
+      control f1 0f
+      text "turn icons "
+      control f1 0f
+      text "by 2"
+      newline
+    endpage
+  endmessage
+  message item_054 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases blinking "
+      control f1 0f
+      text "turn icons by 4"
+      newline
+    endpage
+  endmessage
+  message item_055 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_056 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_057 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_058 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_059 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Strength +2"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Vitality +2"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Magic +2"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Agility +2"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Luck +2"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP/MP"
+      control f1 0f
+      text "~Max HP +10"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_05F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP/MP"
+      control f1 0f
+      text "~Max MP +10"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message item_060 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_061 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "A four-leaf clover"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_062 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Small white flower"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_063 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bright crimson flower"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_064 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light purple flower"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_065 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Beautiful flower with thorns"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_066 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cherry blossom"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_067 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Scented white flower"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_068 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Known as flower of heaven"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_069 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Symbol of peace"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_06A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "It is filled with vitality"
+      control f1 0f
+      control f1 11
+      text "Trade for $ at Mad Mart"
+      newline
+    endpage
+  endmessage
+  message item_06B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Flower that bloomed from"
+      control f1 0f
+      control f1 11
+      text "the seed James Mason "
+      control f1 0f
+      text "gave Amelia"
+      newline
+    endpage
+  endmessage
+  message item_06C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_06D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+2 Strength"
+      newline
+    endpage
+  endmessage
+  message item_06E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 Strength"
+      newline
+    endpage
+  endmessage
+  message item_06F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 Strength"
+      newline
+    endpage
+  endmessage
+  message item_070 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+2 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_071 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_072 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 Vitality"
+      newline
+    endpage
+  endmessage
+  message item_073 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+2 Magic"
+      newline
+    endpage
+  endmessage
+  message item_074 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 Magic"
+      newline
+    endpage
+  endmessage
+  message item_075 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 Magic"
+      newline
+    endpage
+  endmessage
+  message item_076 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+2 Agility"
+      newline
+    endpage
+  endmessage
+  message item_077 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 Agility"
+      newline
+    endpage
+  endmessage
+  message item_078 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 Agility"
+      newline
+    endpage
+  endmessage
+  message item_079 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+2 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 Luck"
+      newline
+    endpage
+  endmessage
+  message item_07C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+3 (Random) to "
+      control f1 0f
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+4 (Random) to "
+      control f1 0f
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enhances Karma Ring"
+      control f1 0f
+      control f1 11
+      text "+5 (Random) to "
+      control f1 0f
+      text "St, Vi, Ma, Ag or Lu"
+      newline
+    endpage
+  endmessage
+  message item_07F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_080 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+    endpage
+  endmessage
+  message item_081 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "A ring from the Junkyard."
+      control f1 0f
+      text "It doesn't work anymore."
+      newline
+    endpage
+  endmessage
+  message item_082 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Allows the user"
+      control f1 0f
+      text "to download Mantras."
+      newline
+    endpage
+  endmessage
+  message item_083 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Card acquired in"
+      control f1 0f
+      text "the EGG Installation."
+      newline
+    endpage
+  endmessage
+  message item_084 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Card acquired in"
+      control f1 0f
+      text "the EGG Installation."
+      newline
+    endpage
+  endmessage
+  message item_085 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Card acquired in"
+      control f1 0f
+      text "the EGG Installation,"
+      control f1 0f
+      text "labeled \"11771409\"."
+      newline
+    endpage
+  endmessage
+  message item_086 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Card acquired in"
+      control f1 0f
+      text "the EGG Installation,"
+      control f1 0f
+      text "labeled \"40051918\"."
+      newline
+    endpage
+  endmessage
+  message item_087 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Card acquired in"
+      control f1 0f
+      text "the EGG Installation,"
+      control f1 0f
+      text "labeled \"ABYSS\"."
+      newline
+    endpage
+  endmessage
+  message item_088 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Demon corpse acquired"
+      control f1 0f
+      text "in prison."
+      newline
+    endpage
+  endmessage
+  message item_089 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Canned meat made"
+      control f1 0f
+      text "from the demon"
+      control f1 0f
+      text "corpse."
+      newline
+    endpage
+  endmessage
+  message item_08A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "3-headed spear"
+      control f1 0f
+      text "acquired"
+      control f1 0f
+      text "from Parvati."
+      newline
+    endpage
+  endmessage
+  message item_08B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Sword acquired"
+      control f1 0f
+      text "from Narasimha."
+      newline
+    endpage
+  endmessage
+  message item_08C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Proof of intelligence."
+      control f1 0f
+      text "It says \"You have a"
+      control f1 0f
+      text "hee-high IQ!\""
+      newline
+    endpage
+  endmessage
+  message item_08D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key acquired"
+      control f1 0f
+      text "from the Tribhvana."
+      newline
+    endpage
+  endmessage
+  message item_08E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key obtained from"
+      control f1 0f
+      text "Lokapala spy."
+      control f1 0f
+      text "Opens B1 gate."
+      newline
+    endpage
+  endmessage
+  message item_08F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key obtained from"
+      control f1 0f
+      text "Lokapala spy."
+      control f1 0f
+      text "Opens B2 gate."
+      newline
+    endpage
+  endmessage
+  message item_090 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key obtained from"
+      control f1 0f
+      text "Lokapala spy."
+      control f1 0f
+      text "Opens B3 gate."
+      newline
+    endpage
+  endmessage
+  message item_091 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Label of food the"
+      control f1 0f
+      text "Jailer likes."
+      control f1 0f
+      text "It says \"Red 15\"."
+      newline
+    endpage
+  endmessage
+  message item_092 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key acquired in prison."
+      control f1 0f
+      text "Unlocks the control"
+      control f1 0f
+      text "room."
+      newline
+    endpage
+  endmessage
+  message item_093 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "3-headed spear"
+      control f1 0f
+      text "with Shiva's power."
+      newline
+    endpage
+  endmessage
+  message item_094 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Sword with"
+      control f1 0f
+      text "Vishnu's power."
+      newline
+    endpage
+  endmessage
+  message item_095 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Key acquired in "
+      control f1 0f
+      text "the Citadel."
+      newline
+    endpage
+  endmessage
+  message item_096 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Useful when "
+      control f1 0f
+      text "scuba diving."
+      newline
+    endpage
+  endmessage
+  message item_097 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_098 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_099 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09A speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09B speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09C speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09D speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_09F speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0A0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0A1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Shock"
+      newline
+    endpage
+  endmessage
+  message item_0A4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Freeze"
+      newline
+    endpage
+  endmessage
+  message item_0A5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Panic"
+      newline
+    endpage
+  endmessage
+  message item_0A6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Sleep"
+      newline
+    endpage
+  endmessage
+  message item_0A8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0A9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Stun"
+      newline
+    endpage
+  endmessage
+  message item_0AA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Curse"
+      newline
+    endpage
+  endmessage
+  message item_0AB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Mute"
+      newline
+    endpage
+  endmessage
+  message item_0AC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0AD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Poison"
+      newline
+    endpage
+  endmessage
+  message item_0AE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0AF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Charm"
+      newline
+    endpage
+  endmessage
+  message item_0B0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      control f1 0f
+      text "~Stone"
+      newline
+    endpage
+  endmessage
+  message item_0B1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Bullet"
+      newline
+    endpage
+  endmessage
+  message item_0B5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0B9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0BF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dummy Message"
+      control f1 0f
+      newline
+      text "Debug Message"
+      newline
+    endpage
+  endmessage
+  message item_0C0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0C1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0C2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0C3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0C4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0C5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0C6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0C7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0C8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0C9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0CA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0CB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0CC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0CD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0CE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0CF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0D0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0D1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0D2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0D3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0D4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0D5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases strength"
+      newline
+    endpage
+  endmessage
+  message item_0D6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases vitality"
+      newline
+    endpage
+  endmessage
+  message item_0D7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases magic"
+      newline
+    endpage
+  endmessage
+  message item_0D8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility"
+      newline
+    endpage
+  endmessage
+  message item_0D9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases luck"
+      newline
+    endpage
+  endmessage
+  message item_0DA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases agility in human form"
+      newline
+    endpage
+  endmessage
+  message item_0DB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases defense in human form"
+      newline
+    endpage
+  endmessage
+  message item_0DC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Void/miss will end the enemy's turn"
+      newline
+    endpage
+  endmessage
+  message item_0DD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases $ obtained after battle"
+      newline
+    endpage
+  endmessage
+  message item_0DE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enables two consecutive actions"
+      newline
+    endpage
+  endmessage
+  message item_0DF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Pass command will not expend a turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0E0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revert/Transform command will not expend a turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0E1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Draws the enemy's attention in battle"
+      newline
+    endpage
+  endmessage
+  message item_0E2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Auto-Phys Repel when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0E3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "1st person does 2x dmg; dmg down gradually thereafter"
+      newline
+    endpage
+  endmessage
+  message item_0E4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduces turn icons required for combos"
+      newline
+    endpage
+  endmessage
+  message item_0E5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Attack command does more damage when cursed"
+      newline
+    endpage
+  endmessage
+  message item_0E6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases HP healed when subject to healing magic"
+      newline
+    endpage
+  endmessage
+  message item_0E7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Max damage up, min damage down"
+      newline
+    endpage
+  endmessage
+  message item_0E8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Auto-Sukukaja/Tarunda when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0E9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Auto-Tarukaja/Rakunda when battle starts"
+      newline
+    endpage
+  endmessage
+  message item_0EA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomizes the number of turn icons"
+      newline
+    endpage
+  endmessage
+  message item_0EB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduces turn icon loss from missed attacks"
+      newline
+    endpage
+  endmessage
+  message item_0EC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduces turn icon loss from voided attacks"
+      newline
+    endpage
+  endmessage
+  message item_0ED speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Adds one turn icon"
+      newline
+    endpage
+  endmessage
+  message item_0EE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases all stats"
+      newline
+    endpage
+  endmessage
+  message item_0EF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases resistance to Almighty attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repels Expel attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repels Death attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nullifies Ice attacks"
+      newline
+    endpage
+  endmessage
+  message item_0F3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases all stats"
+      newline
+    endpage
+  endmessage
+  message item_0F4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Argilla's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gale's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cielo's tag ring from the Junkyard"
+      newline
+    endpage
+  endmessage
+  message item_0F7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nullifies all attacks except Almighty"
+      newline
+    endpage
+  endmessage
+  message item_0F8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "All normal battles will be in Berserk state"
+      newline
+    endpage
+  endmessage
+  message item_0F9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FB speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FC speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage
+  message item_0FF speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve"
+      newline
+    endpage
+  endmessage

@@ -1,0 +1,6968 @@
+messages msg1
+  message skill_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "RESERVED"
+      newline
+      text "SKILL"
+      newline
+    endpage
+  endmessage
+  message skill_001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_002 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_003 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_004 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_005 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_006 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_007 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_008 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_009 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_00a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_00f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_010 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_011 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_012 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_013 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_014 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_015 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_016 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_017 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_018 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_019 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_01c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_01f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_020 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_021 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_022 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_023 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_024 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_025 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_026 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_027 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_028 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_029 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_02c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_02d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_02f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_030 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_031 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain HP"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_032 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain MP"
+      control f1 0f
+      text "~Mute"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_033 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain HP and MP"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_034 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_035 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Forfeit HP"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_036 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Forfeit HP"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_037 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Add 2 blinking"
+      control f1 0f
+      text "turn icons"
+      newline
+    endpage
+  endmessage
+  message skill_038 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Add 4 blinking"
+      control f1 0f
+      text "turn icons"
+      newline
+    endpage
+  endmessage
+  message skill_039 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Inflict ailments"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_03a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Chance of forcing"
+      control f1 0f
+      text "1 enemy to"
+      control f1 0f
+      text "revert to human"
+      newline
+    endpage
+  endmessage
+  message skill_03b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Chance of forcing"
+      control f1 0f
+      text "all enemies to"
+      control f1 0f
+      text "revert to humans"
+      newline
+    endpage
+  endmessage
+  message skill_03c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP by half"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly reduce HP"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP by half"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_03f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP greatly"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_040 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_041 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (low odds)"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_042 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (high odds)"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_043 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (low odds)"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_044 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (high odds)"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_045 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Curse"
+      control f1 0f
+      text "~Death type"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_046 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Curse"
+      control f1 0f
+      text "~Death type"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_047 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Petrify"
+      control f1 0f
+      text "~Death type"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_048 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Petrify"
+      control f1 0f
+      text "~Death type"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_049 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mute"
+      control f1 0f
+      text "~Curse"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mute"
+      control f1 0f
+      text "~Curse"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_04b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Induce sleep"
+      control f1 0f
+      text "~Nerve"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Induce sleep"
+      control f1 0f
+      text "~Nerve"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_04d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Kill all "
+      control f1 0f
+      text "sleeping enemies"
+      control f1 0f
+      text "~Nerve"
+      newline
+    endpage
+  endmessage
+  message skill_04e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Stun"
+      control f1 0f
+      text "~Nerve"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_04f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Stun"
+      control f1 0f
+      text "~Nerve"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_050 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Poison"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_051 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Poison (high odds)"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_052 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Poison"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_053 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Panic"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_054 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Panic"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_055 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Panic"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_056 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Charm"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_057 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Charm"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_058 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Damage"
+      control f1 0f
+      text "~Charm"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_059 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega dmg/ailments"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_05b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP Greatly"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_05d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty/death"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_05f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_060 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Nerve/Stun"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_061 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Mute"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_062 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Curse"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_063 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (low HP=high dmg)"
+      newline
+    endpage
+  endmessage
+  message skill_064 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty/stun"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (100% stun)"
+      newline
+    endpage
+  endmessage
+  message skill_065 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_066 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_067 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_068 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_069 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_06f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_070 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_071 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Multi-hit"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_072 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Multi-hit"
+      control f1 0f
+      text "~Phys/poison"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_073 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys/poison"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_074 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys/panic"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_075 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Multi-hit"
+      control f1 0f
+      text "~Phys/curse"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_076 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Multi-hit"
+      control f1 0f
+      text "~Phys/stun"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_077 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_078 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_079 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Phys/sleep"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate dmg"
+      control f1 0f
+      text "~Phys/charm"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_07d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate dmg"
+      control f1 0f
+      text "~Phys/charm"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_07e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_07f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys/stun"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_080 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys/curse"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_081 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (high crit/low acc)"
+      newline
+    endpage
+  endmessage
+  message skill_082 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phy/mute"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_083 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_084 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_085 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys/panic"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_086 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (high accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_087 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys/poison"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_088 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (low accuracy)"
+      newline
+    endpage
+  endmessage
+  message skill_089 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys/stone"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_08b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys/mute"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty/def down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_08e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~Low odds"
+      newline
+    endpage
+  endmessage
+  message skill_08f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~Fair odds"
+      newline
+    endpage
+  endmessage
+  message skill_090 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~High odds"
+      newline
+    endpage
+  endmessage
+  message skill_091 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (high crit/low acc)"
+      newline
+    endpage
+  endmessage
+  message skill_092 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (all stats down)"
+      newline
+    endpage
+  endmessage
+  message skill_093 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~Multi-hit"
+      control f1 11
+      text " (100% hit)"
+      newline
+    endpage
+  endmessage
+  message skill_094 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_095 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_096 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_097 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_098 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_099 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill?"
+      newline
+    endpage
+  endmessage
+  message skill_09d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_09e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_09f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0a0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP moderately"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP greatly"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP fully"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP moderately"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP greatly"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP fully"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure charm/sleep/"
+      control f1 0f
+      text "panic"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure charm/sleep/"
+      control f1 0f
+      text "panic"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0a8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure mute"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0a9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure poison"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0aa speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure charm"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0ab speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revive target"
+      control f1 0f
+      text "~Some HP"
+      control f1 0f
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ac speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Revive target"
+      control f1 0f
+      text "~All HP"
+      control f1 0f
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ad speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP/MP"
+      control f1 0f
+      text "~Sacrifice"
+      control f1 0f
+      text "~Party"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0ae speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP/"
+      control f1 0f
+      text "cure ailments"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0af speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Share 50 MP"
+      control f1 0f
+      text "~1 ally"
+      control f1 11
+      text " (battle only)"
+      newline
+    endpage
+  endmessage
+  message skill_0b0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Phys attack down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Evade/acc down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Defense down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Magic attack down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0b4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cancel -nda"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Phys attack up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Evade/acc up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Defense up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Magic attack up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_0b9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cancel -kaja"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0ba speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Phys attack "
+      control f1 0f
+      text "greatly decreased"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Magic attack "
+      control f1 0f
+      text "greatly decreased"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Evade/acc "
+      control f1 0f
+      text "greatly decreased"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Defense down/"
+      control f1 0f
+      text "phys attack up"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0be speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Attack/def/"
+      control f1 0f
+      text "evade/acc down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0bf speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "See enemy info"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0c0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Phys atk dmg "
+      control f1 0f
+      text "more than doubles"
+      newline
+    endpage
+  endmessage
+  message skill_0c1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Magic atk dmg "
+      control f1 0f
+      text "more than doubles"
+      newline
+    endpage
+  endmessage
+  message skill_0c2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0c3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0c4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Encounter rate down"
+      control f1 0f
+      text "until next"
+      control f1 0f
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Encounter rate up"
+      control f1 0f
+      text "until next"
+      control f1 0f
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null damage zones"
+      control f1 0f
+      text "until next"
+      control f1 0f
+      text "MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_0c7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Unlock"
+      control f1 0f
+      text "blue barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0c8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Unlock"
+      control f1 0f
+      text "yellow barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0c9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Unlock"
+      control f1 0f
+      text "red barriers"
+      newline
+    endpage
+  endmessage
+  message skill_0ca speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Attacks decoy"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0cb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0cc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0cd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ce speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure ache"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0cf speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure stun"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure stone"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure madness"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure madness"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Uncurse"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_0d5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0d9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0da speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0db speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0dc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0dd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0de speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0df speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0e0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal (low odds)"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal (high odds)"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_0e5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0e6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal (low odds)"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0e7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal at MAX Noise"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal at MIN Noise"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0e9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal (high odds)"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_0ea speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0eb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ec speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ed speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ee speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ef speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Hunt"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_0f8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0f9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fa speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0fe speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_0ff speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_100 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_101 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_102 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_103 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_104 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_105 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_106 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_107 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_108 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_109 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_10f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_110 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_111 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_112 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 300 HP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_113 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_114 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_115 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 HP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_116 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 50 MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_117 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore 150 MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_118 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore MP fully"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_119 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore all HP/MP"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_11b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP or MP"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure ache"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_11f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP (M)"
+      control f1 0f
+      text "~???"
+      control f1 0f
+      text "~1 ally"
+      newline
+    endpage
+  endmessage
+  message skill_120 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_121 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_122 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_123 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_124 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_125 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_126 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_127 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_128 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_129 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_12f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_130 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_131 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Shock"
+      newline
+    endpage
+  endmessage
+  message skill_132 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Sleep"
+      newline
+    endpage
+  endmessage
+  message skill_133 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_134 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Panic"
+      newline
+    endpage
+  endmessage
+  message skill_135 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Freeze"
+      newline
+    endpage
+  endmessage
+  message skill_136 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_137 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_138 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Charm"
+      newline
+    endpage
+  endmessage
+  message skill_139 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Poison"
+      newline
+    endpage
+  endmessage
+  message skill_13b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      control f1 0f
+      text "~Mute"
+      newline
+    endpage
+  endmessage
+  message skill_13c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_13f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_140 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gun attack"
+      newline
+    endpage
+  endmessage
+  message skill_141 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_142 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_143 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_144 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_145 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_146 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_147 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_148 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_149 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_14f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_150 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null phys attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_151 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null fire attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_152 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null ice attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_153 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null elec attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_154 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null force attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_155 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null earth attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_156 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null expel attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_157 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null death attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_158 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null charm attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_159 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null poison attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null mute attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null panic attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null nerve attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain phys attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain fire attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_15f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain ice attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_160 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain elec attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_161 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain force attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_162 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain earth attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_163 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel phys attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_164 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel fire attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_165 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel ice attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_166 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel elec attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_167 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel force attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_168 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel earth attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_169 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel expel attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel death attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Expel/death"
+      control f1 0f
+      text "protection"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel phys attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel magic attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_16e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Prevent enemy"
+      control f1 0f
+      text "from escaping"
+      newline
+    endpage
+  endmessage
+  message skill_16f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null ailment attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_170 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_171 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_172 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_173 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_174 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_175 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_176 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_177 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_178 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_179 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_17f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_180 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Critical attack"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_181 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fire damage"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_182 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Critical attack"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_183 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_184 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Force damage"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_185 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain HP"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_186 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drain HP"
+      control f1 0f
+      text "~Turn into bat"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_187 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Force damage"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_188 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Earth damage"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_189 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_18f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_190 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_191 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_192 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_193 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_194 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_195 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_196 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_197 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_198 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_199 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_19f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1a9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1aa speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1ab speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ac speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly reduces HP"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ad speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ae speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1af speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_1b0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1b4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1b8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1b9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1ba speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_1bb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (shock) "
+      newline
+    endpage
+  endmessage
+  message skill_1bc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1bd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1be speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1bf speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Light damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Inflict ailments"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP by half"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP greatly"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (non-human)"
+      newline
+    endpage
+  endmessage
+  message skill_1c8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (low odds)"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1c9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Death (high odds)"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ca speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Mind/panic"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Charm"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Curse"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Stun"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ce speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Petrify"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1cf speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (high crit)"
+      newline
+    endpage
+  endmessage
+  message skill_1d1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Dmg relative to HP"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_1d5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force/stun"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fatal or curse"
+      control f1 0f
+      text "~Death"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1d8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP greatly/"
+      control f1 0f
+      text "defense up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1d9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Multiple -kaja effects"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1da speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_1db speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Phys"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_1dc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1dd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty/def down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1de speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduce HP greatly"
+      control f1 0f
+      text "~Expel"
+      control f1 0f
+      text "~All"
+      control f1 11
+      text " (high odds)"
+      newline
+    endpage
+  endmessage
+  message skill_1df speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP/"
+      control f1 0f
+      text "cure ailments"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1e0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(S)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(M)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(L)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fire damage(S)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fire damage(M)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Fire damage(L)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Earth damage(S)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Earth damage(M)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1e9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Earth damage(L)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ea speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Force damage(S)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1eb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Force damage(M)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ec speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Force damage(L)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ed speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(S)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ee speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(M)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1ef speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(L)"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(S)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(M)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Elec damage(L)"
+      control f1 0f
+      text "~All"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_1f3 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cure panic/charm/"
+      control f1 0f
+      text "sleep"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f4 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mute"
+      control f1 0f
+      text "~Curse"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1f5 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel phys attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f6 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repel magic "
+      control f1 0f
+      text "attacks"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f7 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP moderately"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f8 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP greatly"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1f9 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP fully"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1fa speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Attack/defense/"
+      control f1 0f
+      text "evade/acc down"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1fb speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cancel -nda"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_1fc speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Cancel -kaja"
+      control f1 0f
+      text "~All enemies"
+      newline
+    endpage
+  endmessage
+  message skill_1fd speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1fe speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_1ff speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~All"
+      newline
+    endpage
+  endmessage
+  message skill_200 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Fire/def down"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_201 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Fire"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_202 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_203 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Ice"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_204 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      text " (freeze)"
+      newline
+    endpage
+  endmessage
+  message skill_205 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Elec"
+      control f1 0f
+      text "~Random"
+      control f1 11
+      text " (shock)"
+      newline
+    endpage
+  endmessage
+  message skill_206 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega dmg"
+      control f1 0f
+      text "~Force/atk down"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_207 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Force"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_208 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Mega dmg"
+      control f1 0f
+      text "~Earth/evade/acc down"
+      control f1 0f
+      text "~1"
+      control f1 11
+      text " enemy"
+      newline
+    endpage
+  endmessage
+  message skill_209 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~Earth"
+      control f1 0f
+      text "~Random"
+      newline
+    endpage
+  endmessage
+  message skill_20a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Restore HP greatly/"
+      control f1 0f
+      text "defense up"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_20b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heals HP/status ailments/"
+      control f1 0f
+      text "revive"
+      control f1 0f
+      text "~Party"
+      newline
+    endpage
+  endmessage
+  message skill_20c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Moderate damage"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(S)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(M)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_20f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Ice damage(L)"
+      control f1 0f
+      text "~1 enemy"
+      control f1 11
+      control f1 0f
+      text "~Dmg relative to ammo"
+      newline
+    endpage
+  endmessage
+  message skill_210 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Heavy damage"
+      control f1 0f
+      text "~Almighty"
+      control f1 0f
+      text "~1 enemy"
+      newline
+    endpage
+  endmessage
+  message skill_211 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_212 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_213 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_214 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_215 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_216 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_217 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_218 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_219 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_21f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_220 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX HP"
+      control f1 0f
+      text "by 10%"
+      newline
+    endpage
+  endmessage
+  message skill_221 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX HP"
+      control f1 0f
+      text "by 20%"
+      newline
+    endpage
+  endmessage
+  message skill_222 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX HP"
+      control f1 0f
+      text "by 30%"
+      newline
+    endpage
+  endmessage
+  message skill_223 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX MP"
+      control f1 0f
+      text "by 10%"
+      newline
+    endpage
+  endmessage
+  message skill_224 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX MP"
+      control f1 0f
+      text "by 20%"
+      newline
+    endpage
+  endmessage
+  message skill_225 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Raise MAX MP"
+      control f1 0f
+      text "by 30%"
+      newline
+    endpage
+  endmessage
+  message skill_226 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Critical hit rate"
+      control f1 0f
+      text "doubled"
+      newline
+    endpage
+  endmessage
+  message skill_227 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Critical hit rate"
+      control f1 0f
+      text "greatly increases"
+      control f1 0f
+      text "during MAX Noise"
+      newline
+    endpage
+  endmessage
+  message skill_228 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Critical hit rate"
+      control f1 0f
+      text "greatly increases"
+      control f1 0f
+      text "during MIN Noise"
+      newline
+    endpage
+  endmessage
+  message skill_229 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy's defense"
+      control f1 0f
+      text "decreases with"
+      control f1 0f
+      text "critical hit"
+      newline
+    endpage
+  endmessage
+  message skill_22a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy panics with"
+      control f1 0f
+      text "normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy stunned"
+      control f1 0f
+      text "with normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Enemy petrified"
+      control f1 0f
+      text "with normal attack"
+      newline
+    endpage
+  endmessage
+  message skill_22d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases fire"
+      control f1 0f
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_22e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases ice"
+      control f1 0f
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_22f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases elec"
+      control f1 0f
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_230 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases force"
+      control f1 0f
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_231 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases earth"
+      control f1 0f
+      text "attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_232 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "fire attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_233 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "ice attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_234 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "elec attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_235 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "force attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_236 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "earth attack damage"
+      newline
+    endpage
+  endmessage
+  message skill_237 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Strengthens"
+      control f1 0f
+      text "repelled attacks"
+      newline
+    endpage
+  endmessage
+  message skill_238 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Doubles strength"
+      control f1 0f
+      text "of repelled attacks"
+      newline
+    endpage
+  endmessage
+  message skill_239 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~Light damage"
+      control f1 0f
+      text "~Low odds"
+      newline
+    endpage
+  endmessage
+  message skill_23a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~Moderate damage"
+      control f1 0f
+      text "~Fair odds"
+      newline
+    endpage
+  endmessage
+  message skill_23b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Randomly counter"
+      control f1 0f
+      text "~Heavy damage"
+      control f1 0f
+      text "~High odds"
+      newline
+    endpage
+  endmessage
+  message skill_23c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Phys attack up"
+      control f1 0f
+      text "when hungry"
+      newline
+    endpage
+  endmessage
+  message skill_23d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Absorb HP during"
+      control f1 0f
+      text "normal attacks"
+      newline
+    endpage
+  endmessage
+  message skill_23e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Normal attacks"
+      control f1 0f
+      text "hit all enemies"
+      newline
+    endpage
+  endmessage
+  message skill_23f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gain 1/2 Karma"
+      control f1 0f
+      text "when not in battle"
+      newline
+    endpage
+  endmessage
+  message skill_240 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gain full Karma"
+      control f1 0f
+      text "when not in battle"
+      newline
+    endpage
+  endmessage
+  message skill_241 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases AP"
+      control f1 0f
+      text "gained in battle"
+      control f1 11
+      control f1 0f
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_242 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "AP gained in battle"
+      control f1 11
+      control f1 0f
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_243 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases number"
+      control f1 0f
+      text "of magic fragments"
+      control f1 0f
+      text "received"
+      newline
+    endpage
+  endmessage
+  message skill_244 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Greatly increases"
+      control f1 0f
+      text "number of magic"
+      control f1 0f
+      text "fragments received"
+      newline
+    endpage
+  endmessage
+  message skill_245 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Null aches after"
+      control f1 0f
+      text "successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_246 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Encounter"
+      control f1 0f
+      text "rare demons"
+      control f1 0f
+      text "more often"
+      newline
+    endpage
+  endmessage
+  message skill_247 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Encounter"
+      control f1 0f
+      text "rare demons"
+      control f1 0f
+      text "less often"
+      newline
+    endpage
+  endmessage
+  message skill_248 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases success"
+      control f1 0f
+      text "of devouring"
+      control f1 0f
+      text "weak enemies"
+      newline
+    endpage
+  endmessage
+  message skill_249 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Some MP restored"
+      control f1 0f
+      text "after successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_24a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Some MP restored"
+      control f1 0f
+      text "after battle"
+      newline
+    endpage
+  endmessage
+  message skill_24b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "HP/MP fully restored"
+      control f1 0f
+      text "after battle"
+      newline
+    endpage
+  endmessage
+  message skill_24c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "MP restored"
+      control f1 0f
+      text "while walking"
+      control f1 0f
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_24d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Decreases surprise"
+      control f1 0f
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_24e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases chance"
+      control f1 0f
+      text "of first strike"
+      newline
+    endpage
+  endmessage
+  message skill_24f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Decreases chance"
+      control f1 0f
+      text "of being critically hit"
+      newline
+    endpage
+  endmessage
+  message skill_250 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases chance"
+      control f1 0f
+      text "of escaping from battle"
+      newline
+    endpage
+  endmessage
+  message skill_251 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Escape death"
+      control f1 0f
+      text "~1 time"
+      control f1 0f
+      text "~Demon form only"
+      newline
+    endpage
+  endmessage
+  message skill_252 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases chance"
+      control f1 0f
+      text "of recovering from"
+      control f1 0f
+      text "ailments each turn"
+      newline
+    endpage
+  endmessage
+  message skill_253 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Decreases"
+      control f1 0f
+      text "vulnerability"
+      control f1 0f
+      text "when petrified"
+      newline
+    endpage
+  endmessage
+  message skill_254 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Less HP required"
+      control f1 0f
+      text "for phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_255 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Less MP required"
+      control f1 0f
+      text "for magic attacks"
+      newline
+    endpage
+  endmessage
+  message skill_256 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Delays hunger"
+      newline
+    endpage
+  endmessage
+  message skill_257 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases failure"
+      control f1 0f
+      text "rate for"
+      control f1 0f
+      text "Atma creation"
+      newline
+    endpage
+  endmessage
+  message skill_258 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Induces hunger"
+      newline
+    endpage
+  endmessage
+  message skill_259 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases"
+      control f1 0f
+      text "receptiveness to"
+      control f1 0f
+      text "healing magic"
+      newline
+    endpage
+  endmessage
+  message skill_25a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Replaced by"
+      control f1 0f
+      text "inactive member"
+      control f1 0f
+      text "if killed"
+      newline
+    endpage
+  endmessage
+  message skill_25b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases HP"
+      control f1 0f
+      text "restored after"
+      control f1 0f
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_25c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to phys attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to fire attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to ice attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_25f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to elec attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_260 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to force attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_261 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to earth attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_262 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to expel attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_263 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases tolerance"
+      control f1 0f
+      text "to death attacks"
+      control f1 0f
+      text "~Can void weakness"
+      newline
+    endpage
+  endmessage
+  message skill_264 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls charm attacks"
+      newline
+    endpage
+  endmessage
+  message skill_265 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls poison attacks"
+      newline
+    endpage
+  endmessage
+  message skill_266 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls mute attacks"
+      newline
+    endpage
+  endmessage
+  message skill_267 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls panic attacks"
+      newline
+    endpage
+  endmessage
+  message skill_268 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls nerve attacks"
+      newline
+    endpage
+  endmessage
+  message skill_269 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls all attacks"
+      control f1 0f
+      text "except almighty"
+      newline
+    endpage
+  endmessage
+  message skill_26a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Allows evasion of"
+      control f1 0f
+      text "enemy attacks"
+      control f1 0f
+      text "while asleep"
+      newline
+    endpage
+  endmessage
+  message skill_26b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reduces power to"
+      control f1 0f
+      text "preserve enemy's"
+      control f1 0f
+      text "life (1 attack)"
+      newline
+    endpage
+  endmessage
+  message skill_26c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Increases AP gained"
+      control f1 0f
+      text "by party after"
+      control f1 0f
+      text "successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_26d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Gain AP when not"
+      control f1 0f
+      text "in battle"
+      newline
+    endpage
+  endmessage
+  message skill_26e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "50% of MP restored"
+      control f1 0f
+      text "after successful hunt"
+      newline
+    endpage
+  endmessage
+  message skill_26f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_270 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "MP rapidly restored"
+      control f1 0f
+      text "while walking"
+      control f1 0f
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_271 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls expel attacks"
+      newline
+    endpage
+  endmessage
+  message skill_272 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls death attacks"
+      newline
+    endpage
+  endmessage
+  message skill_273 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls nerve/charm/"
+      control f1 0f
+      text "mute/poison/panic"
+      control f1 0f
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_274 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Drains phys attacks"
+      newline
+    endpage
+  endmessage
+  message skill_275 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repels expel"
+      control f1 0f
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_276 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repels death"
+      control f1 0f
+      text "attacks"
+      newline
+    endpage
+  endmessage
+  message skill_277 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Nulls fire/ice/force/"
+      control f1 0f
+      text "elec/earth attacks"
+      newline
+    endpage
+  endmessage
+  message skill_278 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Repels fire/ice/"
+      control f1 0f
+      text "force/elec/"
+      control f1 0f
+      text "earth attacks"
+      newline
+    endpage
+  endmessage
+  message skill_279 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Start battles"
+      control f1 0f
+      text "in human form"
+      newline
+    endpage
+  endmessage
+  message skill_27a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Low HP increases"
+      control f1 0f
+      text "attack power"
+      newline
+    endpage
+  endmessage
+  message skill_27b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Easier to obtain items"
+      control f1 0f
+      text "after battles"
+      control f1 0f
+      text "~Active member"
+      newline
+    endpage
+  endmessage
+  message skill_27c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Prevents loss"
+      control f1 0f
+      text "of money"
+      newline
+    endpage
+  endmessage
+  message skill_27d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "High odds of"
+      control f1 0f
+      text "level-up events"
+      newline
+    endpage
+  endmessage
+  message skill_27e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Counterattack"
+      control f1 0f
+      text "with hunt"
+      newline
+    endpage
+  endmessage
+  message skill_27f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Counterattack"
+      control f1 0f
+      text "with hunt/death"
+      newline
+    endpage
+  endmessage
+  message skill_280 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Switching consumes"
+      control f1 0f
+      text "only 1/2 turn icon"
+      newline
+    endpage
+  endmessage
+  message skill_281 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_282 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_283 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_284 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_285 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_286 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_287 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_288 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_289 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_28f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_290 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_291 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_292 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_293 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_294 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_295 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_296 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_297 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_298 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_299 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29a speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29b speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29c speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29d speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29e speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
+  message skill_29f speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      text "Reserve Skill"
+      newline
+    endpage
+  endmessage
