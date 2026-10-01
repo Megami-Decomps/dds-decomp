@@ -102,14 +102,14 @@ void func_00269410(void) {
 void func_00269418(void) {
 }
 
-char *mnuBuildSoundResourcePath(char *arg0, char *arg1) {
-    *(u64p *)arg0 = *(u64p *)D_003BC590;
-    return strcat(arg0, arg1);
+char *mnuBuildSoundResourcePath(char *dst, char *filename) {
+    *(u64p *)dst = *(u64p *)D_003BC590;
+    return strcat(dst, filename);
 }
 
-char *mnuBuildVoiceResourcePath(char *arg0, char *arg1) {
-    *(u64p *)arg0 = *(u64p *)D_003BC598;
-    return strcat(arg0, arg1);
+char *mnuBuildVoiceResourcePath(char *dst, char *filename) {
+    *(u64p *)dst = *(u64p *)D_003BC598;
+    return strcat(dst, filename);
 }
 
 extern s8 D_003BC58C;
