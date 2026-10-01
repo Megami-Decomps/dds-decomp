@@ -725,115 +725,76 @@ _9:
     RESTORE_CAMERA_NODE_MODE()
     ACTIVATE_MESSAGE_PANEL()
     SET_SOLAR_OVERLAY_MODE(6)
-    COMM 0x0116
-    PUSHREG
-    IF _42
-    MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
-    goto _41
-  _42:
-    push 0
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0000
-    push 1
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0001
-    push 2
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0002
-    push 3
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0003
-    push 4
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0004
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
+    result = TEST_CURRENT_TREASURE_OPENED()
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
     } else {
-    _14:
-      result = TEST_MODEL_FLAG(49)
-      if (result) {
-        MESSAGE_REQUEST_AND_POLL(message(SUN_TAKARA))
+    _42:
+      local_int[0] = READ_TREASURE_TABLE_VALUE(0)
+      local_int[1] = READ_TREASURE_TABLE_VALUE(1)
+      local_int[2] = READ_TREASURE_TABLE_VALUE(2)
+      local_int[3] = READ_TREASURE_TABLE_VALUE(3)
+      local_int[4] = READ_TREASURE_TABLE_VALUE(4)
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
       } else {
-      _12:
-        MESSAGE_REQUEST_AND_POLL(message(TAKARA))
-        goto _11
+      _14:
+        result = TEST_MODEL_FLAG(49)
+        if (result) {
+          MESSAGE_REQUEST_AND_POLL(message(SUN_TAKARA))
+        } else {
+        _12:
+          MESSAGE_REQUEST_AND_POLL(message(TAKARA))
+          goto _11
+        }
+      _11:
+        goto _13
       }
-    _11:
-      goto _13
-    }
-  _13:
-    push 1
-    push 3
-    COMM 0x013c
-    if (local_int[0] == 1) {
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
-    } else {
-    _16:
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
-      goto _15
-    }
-  _15:
-    if_not (local_int[5] == 0) goto _40
-    if (local_int[3] == 1) {
-      COMM 0x0115
-      push local_int[4]
-      COMM 0x0166
-      return
-    } else {
-    _29:
-      if (local_int[3] == 2) {
-        COMM 0x0115
-        push 35
-        COMM 0x011b
-        COMM 0x011c
-        push 100
-        push 15
-        COMM 0x00ab
-        push 15
-        push 1
-        push 0
-        COMM 0x001a
-        push 15
-        push 100
-        push 1
-        COMM 0x001a
-        push 1
-        COMM 0x013a
-        MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-        COMM 0x011f
-        COMM 0x0121
+    _13:
+      push 1
+      push 3
+      COMM 0x013c
+      if (local_int[0] == 1) {
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
       } else {
-      _30:
-        if (local_int[3] == 3) {
-          COMM 0x0115
+      _16:
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+        goto _15
+      }
+    _15:
+      if_not (local_int[5] == 0) goto _40
+      if (local_int[3] == 1) {
+        MARK_CURRENT_TREASURE_OPENED()
+        push local_int[4]
+        COMM 0x0166
+        return
+      } else {
+      _29:
+        if (local_int[3] == 2) {
+          MARK_CURRENT_TREASURE_OPENED()
           push 35
           COMM 0x011b
           COMM 0x011c
-          push 200
-          push 20
+          push 100
+          push 15
           COMM 0x00ab
-          push 20
+          push 15
           push 1
           push 0
           COMM 0x001a
-          push 20
-          push 200
+          push 15
+          push 100
           push 1
           COMM 0x001a
-          push 2
+          push 1
           COMM 0x013a
           MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
           COMM 0x011f
           COMM 0x0121
         } else {
-        _31:
-          if (local_int[3] == 4) {
-            COMM 0x0115
+        _30:
+          if (local_int[3] == 3) {
+            MARK_CURRENT_TREASURE_OPENED()
             push 35
             COMM 0x011b
             COMM 0x011c
@@ -848,15 +809,15 @@ _9:
             push 200
             push 1
             COMM 0x001a
-            push 4
+            push 2
             COMM 0x013a
-            MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
+            MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
             COMM 0x011f
             COMM 0x0121
           } else {
-          _32:
-            if (local_int[3] == 5) {
-              COMM 0x0115
+          _31:
+            if (local_int[3] == 4) {
+              MARK_CURRENT_TREASURE_OPENED()
               push 35
               COMM 0x011b
               COMM 0x011c
@@ -871,15 +832,15 @@ _9:
               push 200
               push 1
               COMM 0x001a
-              push 5
+              push 4
               COMM 0x013a
-              MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
+              MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
               COMM 0x011f
               COMM 0x0121
             } else {
-            _33:
-              if (local_int[3] == 6) {
-                COMM 0x0115
+            _32:
+              if (local_int[3] == 5) {
+                MARK_CURRENT_TREASURE_OPENED()
                 push 35
                 COMM 0x011b
                 COMM 0x011c
@@ -894,102 +855,126 @@ _9:
                 push 200
                 push 1
                 COMM 0x001a
-                push 6
+                push 5
                 COMM 0x013a
-                MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
+                MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
                 COMM 0x011f
                 COMM 0x0121
               } else {
-              _34:
-                if (local_int[0] <= 1) {
-                  if (local_int[0] == 1) {
-                    push 34
-                    COMM 0x011b
-                  } else {
-                  _20:
-                    result = TEST_MODEL_FLAG(49)
-                    if (result) {
-                      push 43
-                      COMM 0x011b
-                    } else {
-                    _18:
-                      push 33
-                      COMM 0x011b
-                      goto _17
-                    }
-                  _17:
-                    goto _19
-                  }
-                _19:
+              _33:
+                if (local_int[3] == 6) {
+                  MARK_CURRENT_TREASURE_OPENED()
+                  push 35
+                  COMM 0x011b
                   COMM 0x011c
-                  COMM 0x0115
-                  FINISH_SCRIPT_MESSAGE_WINDOW()
-                  WAIT_FOR_TIMER_LIMIT(45)
-                  ACTIVATE_MESSAGE_PANEL()
-                  if (local_int[1] == 0) {
-                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
-                  } else {
-                  _24:
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
-                    SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
-                    if (local_int[1] >= 96 && local_int[1] <= 108) {
-                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
-                    } else {
-                    _22:
-                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET))
-                      goto _21
-                    }
-                  _21:
-                    push local_int[2]
-                    push local_int[1]
-                    COMM 0x0070
-                    goto _23
-                  }
-                _23:
+                  push 200
+                  push 20
+                  COMM 0x00ab
+                  push 20
+                  push 1
+                  push 0
+                  COMM 0x001a
+                  push 20
+                  push 200
+                  push 1
+                  COMM 0x001a
+                  push 6
+                  COMM 0x013a
+                  MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
                   COMM 0x011f
                   COMM 0x0121
                 } else {
-                _26:
-                  if (local_int[0] == 3) {
-                    COMM 0x0115
-                    push 32
-                    COMM 0x0214
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
-                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
-                    push local_int[4]
-                    COMM 0x0139
+                _34:
+                  if (local_int[0] <= 1) {
+                    if (local_int[0] == 1) {
+                      push 34
+                      COMM 0x011b
+                    } else {
+                    _20:
+                      result = TEST_MODEL_FLAG(49)
+                      if (result) {
+                        push 43
+                        COMM 0x011b
+                      } else {
+                      _18:
+                        push 33
+                        COMM 0x011b
+                        goto _17
+                      }
+                    _17:
+                      goto _19
+                    }
+                  _19:
+                    COMM 0x011c
+                    MARK_CURRENT_TREASURE_OPENED()
+                    FINISH_SCRIPT_MESSAGE_WINDOW()
+                    WAIT_FOR_TIMER_LIMIT(45)
+                    ACTIVATE_MESSAGE_PANEL()
+                    if (local_int[1] == 0) {
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
+                    } else {
+                    _24:
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
+                      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
+                      if (local_int[1] >= 96 && local_int[1] <= 108) {
+                        MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
+                      } else {
+                      _22:
+                        MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET))
+                        goto _21
+                      }
+                    _21:
+                      push local_int[2]
+                      push local_int[1]
+                      COMM 0x0070
+                      goto _23
+                    }
+                  _23:
+                    COMM 0x011f
+                    COMM 0x0121
+                  } else {
+                  _26:
+                    if (local_int[0] == 3) {
+                      MARK_CURRENT_TREASURE_OPENED()
+                      push 32
+                      COMM 0x0214
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
+                      push local_int[4]
+                      COMM 0x0139
+                    }
                   }
+                _25:
+                  goto _28
                 }
-              _25:
-                goto _28
               }
             }
           }
         }
       }
-    }
-  _28:
-    goto _39
-  _40:
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
-    } else {
-    _38:
-      result = TEST_MODEL_FLAG(49)
-      if (result) {
-        MESSAGE_REQUEST_AND_POLL(message(SUN_TAKARA_NOGET))
+    _28:
+      goto _39
+    _40:
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
       } else {
-      _36:
-        MESSAGE_REQUEST_AND_POLL(message(TAKARA_NOGET))
-        goto _35
+      _38:
+        result = TEST_MODEL_FLAG(49)
+        if (result) {
+          MESSAGE_REQUEST_AND_POLL(message(SUN_TAKARA_NOGET))
+        } else {
+        _36:
+          MESSAGE_REQUEST_AND_POLL(message(TAKARA_NOGET))
+          goto _35
+        }
+      _35:
+        goto _37
       }
-    _35:
-      goto _37
+    _37:
+      goto _39
+    _39:
+      goto _41
     }
-  _37:
-    goto _39
-  _39:
-    goto _41
   _41:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     RELEASE_CURRENT_OBJECT()
@@ -2060,15 +2045,8 @@ _195:
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(1, 30)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push string(BARIA)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(BARIA_2)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_MODELS(0, 0, string(BARIA), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(BARIA_2))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
     SCREEN_FADE_A(1, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -2085,10 +2063,7 @@ _195:
     WAIT_FOR_TIMER_LIMIT(15)
     SET_MODEL_FLAG(local_int[49])
     if (local_int[51] != -(1)) {
-      push local_int[51]
-      push 0
-      push 0
-      COMM 0x0111
+      ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[51])
     }
   _197:
     RELEASE_CURRENT_OBJECT()
@@ -3089,24 +3064,10 @@ proc_0016:
   SET_SOLAR_OVERLAY_MODE(0)
   COMM 0x021f
   SET_MODEL_FLAG(1408)
-  push string(atari_hoji_01)
-  push 20
-  push 26
-  COMM 0x0108
-  push 3
-  push 1
-  push 26
-  COMM 0x0111
-  push 0
-  push string(md_hoji_01)
-  push 54
-  push 26
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02)
-  push 54
-  push 26
-  COMM 0x0104
+  DISABLE_FIELD_COLLISION(26, 20, string(atari_hoji_01))
+  ENABLE_FIELD_MAP_ENTRY(26, 1, 3)
+  ENABLE_FIELD_MODELS(26, 54, string(md_hoji_01), 0)
+  DISABLE_FIELD_MODELS(26, 54, string(md_hoji_02), 0)
   push 0
   COMM 0x001f
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -3163,34 +3124,13 @@ _307:
   PUSHREG
   EQ
   IF _309
-  push 1
-  push 56
-  push 26
-  COMM 0x0112
-  push 4
-  push 56
-  push 26
-  COMM 0x0112
-  push 5
-  push 56
-  push 26
-  COMM 0x0112
-  push 6
-  push 56
-  push 26
-  COMM 0x0112
-  push 7
-  push 56
-  push 26
-  COMM 0x0112
-  push 1
-  push 57
-  push 26
-  COMM 0x0112
-  push 2
-  push 57
-  push 26
-  COMM 0x0112
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 1)
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 6)
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 7)
+  DISABLE_FIELD_MAP_ENTRY(26, 57, 1)
+  DISABLE_FIELD_MAP_ENTRY(26, 57, 2)
   goto _309
 _309:
   return
@@ -3293,9 +3233,7 @@ proc_0018:
     push 0
     COMM 0x0041
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push 100
-    COMM 0x0101
+    SET_FIELD_ENVIRONMENT(100, 0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_5))
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION_2))
@@ -3618,10 +3556,7 @@ proc_001f:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 10
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 10, 3)
   push 101
   COMM 0x020f
   return
@@ -3640,13 +3575,8 @@ proc_0020:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 11
-  push 26
-  COMM 0x0111
-  push string(str_01pos_06_3)
-  push 11
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 11, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(11, string(str_01pos_06_3))
   return
   goto _325
 _325:
@@ -3657,10 +3587,7 @@ warpscr_011_02:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 10
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 10, 3)
   push 101
   COMM 0x020f
   return
@@ -3677,19 +3604,14 @@ proc_0022:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 13
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 13, 3)
   push 4
   push 1
   push 22
   push 1
   push 6
   COMM 0x01f6
-  push string(str_01pos_06_4)
-  push 11
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(11, string(str_01pos_06_4))
   return
   goto _327
 _327:
@@ -3706,19 +3628,14 @@ proc_0023:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 13
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 13, 4)
   push 1
   push 4
   push 19
   push 4
   push 6
   COMM 0x01f6
-  push string(str_01pos_07_3)
-  push 11
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(11, string(str_01pos_07_3))
   return
   goto _329
 _329:
@@ -3735,13 +3652,8 @@ proc_0024:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 15
-  push 26
-  COMM 0x0111
-  push string(str_01pos_03_3)
-  push 17
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 15, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(17, string(str_01pos_03_3))
   return
   goto _331
 _331:
@@ -3758,13 +3670,8 @@ proc_0025:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 15
-  push 26
-  COMM 0x0111
-  push string(str_01pos_06_5)
-  push 15
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 15, 4)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(15, string(str_01pos_06_5))
   return
   goto _333
 _333:
@@ -3781,19 +3688,14 @@ proc_0026:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 16
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 16, 2)
   push 1
   push 4
   push 14
   push 22
   push 6
   COMM 0x01f6
-  push string(str_01pos_03_4)
-  push 14
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(14, string(str_01pos_03_4))
   return
   goto _335
 _335:
@@ -3810,19 +3712,14 @@ proc_0027:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 19
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 19, 3)
   push 1
   push 4
   push 1
   push 44
   push 5
   COMM 0x01f6
-  push string(str_01pos_07_4)
-  push 21
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(21, string(str_01pos_07_4))
   return
   goto _337
 _337:
@@ -3839,13 +3736,8 @@ proc_0028:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 21
-  push 26
-  COMM 0x0111
-  push string(str_01pos_02)
-  push 12
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 21, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(12, string(str_01pos_02))
   return
   goto _339
 _339:
@@ -3856,13 +3748,8 @@ warpscr_018_03:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 21
-  push 26
-  COMM 0x0111
-  push string(str_01pos_02_2)
-  push 12
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 21, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(12, string(str_01pos_02_2))
   return
   return
 proc_002a:
@@ -3877,13 +3764,8 @@ proc_002a:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 21
-  push 26
-  COMM 0x0111
-  push string(str_01pos_03_5)
-  push 19
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 21, 4)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(19, string(str_01pos_03_5))
   return
   goto _341
 _341:
@@ -3900,13 +3782,8 @@ proc_002b:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 23
-  push 26
-  COMM 0x0111
-  push string(str_01pos_06_6)
-  push 23
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 23, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(23, string(str_01pos_06_6))
   return
   goto _343
 _343:
@@ -3923,19 +3800,14 @@ proc_002c:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 24
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 24, 3)
   push 4
   push 1
   push 35
   push 31
   push 5
   COMM 0x01f6
-  push string(str_01pos_07_5)
-  push 23
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(23, string(str_01pos_07_5))
   return
   goto _345
 _345:
@@ -3952,19 +3824,14 @@ proc_002d:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 25
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 25, 2)
   push 4
   push 1
   push 32
   push 18
   push 5
   COMM 0x01f6
-  push string(str_01pos_03_6)
-  push 26
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(26, string(str_01pos_03_6))
   return
   goto _347
 _347:
@@ -3981,13 +3848,8 @@ proc_002e:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 27
-  push 26
-  COMM 0x0111
-  push string(str_01pos_03_7)
-  push 26
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 27, 4)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(26, string(str_01pos_03_7))
   return
   goto _349
 _349:
@@ -4004,13 +3866,8 @@ proc_002f:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 27
-  push 26
-  COMM 0x0111
-  push string(str_01pos_06_7)
-  push 27
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 27, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_06_7))
   return
   goto _351
 _351:
@@ -4027,19 +3884,14 @@ proc_0030:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 29
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 29, 3)
   push 4
   push 1
   push 22
   push 13
   push 5
   COMM 0x01f6
-  push string(str_01pos_06_8)
-  push 27
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_06_8))
   return
   goto _353
 _353:
@@ -4056,19 +3908,14 @@ proc_0031:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 30
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 30, 2)
   push 1
   push 4
   push 29
   push 4
   push 5
   COMM 0x01f6
-  push string(str_01pos_03_8)
-  push 32
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(32, string(str_01pos_03_8))
   return
   goto _355
 _355:
@@ -4085,19 +3932,14 @@ proc_0032:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 32
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 32, 3)
   push 4
   push 1
   push 10
   push 13
   push 5
   COMM 0x01f6
-  push string(str_01pos_06_9)
-  push 27
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_06_9))
   return
   goto _357
 _357:
@@ -4114,19 +3956,14 @@ proc_0033:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 33
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 33, 3)
   push 1
   push 4
   push 6
   push 7
   push 5
   COMM 0x01f6
-  push string(str_01pos_03_9)
-  push 32
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(32, string(str_01pos_03_9))
   return
   goto _359
 _359:
@@ -4143,19 +3980,14 @@ proc_0034:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 33
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 33, 4)
   push 4
   push 1
   push 10
   push 3
   push 5
   COMM 0x01f6
-  push string(str_01pos_07_6)
-  push 27
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(27, string(str_01pos_07_6))
   return
   goto _361
 _361:
@@ -4172,13 +4004,8 @@ proc_0035:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 34
-  push 26
-  COMM 0x0111
-  push string(str_01pos_06_10)
-  push 34
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 34, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(34, string(str_01pos_06_10))
   return
   goto _363
 _363:
@@ -4195,19 +4022,14 @@ proc_0036:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 36
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 36, 3)
   push 1
   push 4
   push 29
   push 2
   push 4
   COMM 0x01f6
-  push string(str_01pos_03_10)
-  push 37
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(37, string(str_01pos_03_10))
   return
   goto _365
 _365:
@@ -4224,13 +4046,8 @@ proc_0037:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 38
-  push 26
-  COMM 0x0111
-  push string(str_01pos_03_11)
-  push 41
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 38, 4)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(41, string(str_01pos_03_11))
   return
   goto _367
 _367:
@@ -4247,13 +4064,8 @@ proc_0038:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 38
-  push 26
-  COMM 0x0111
-  push string(str_01pos_03_12)
-  push 37
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 38, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(37, string(str_01pos_03_12))
   return
   goto _369
 _369:
@@ -4270,19 +4082,14 @@ proc_0039:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 39
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 39, 2)
   push 4
   push 1
   push 5
   push 16
   push 4
   COMM 0x01f6
-  push string(str_01pos_07_7)
-  push 38
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(38, string(str_01pos_07_7))
   return
   goto _371
 _371:
@@ -4299,13 +4106,8 @@ proc_003a:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 42
-  push 26
-  COMM 0x0111
-  push string(str_01pos_07_8)
-  push 42
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 42, 4)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(42, string(str_01pos_07_8))
   return
   goto _373
 _373:
@@ -4322,13 +4124,8 @@ proc_003b:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 42
-  push 26
-  COMM 0x0111
-  push string(str_01pos_07_9)
-  push 42
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 42, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(42, string(str_01pos_07_9))
   return
   goto _375
 _375:
@@ -4345,13 +4142,8 @@ proc_003c:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 43
-  push 26
-  COMM 0x0111
-  push string(str_01pos_04_2)
-  push 43
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 43, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(43, string(str_01pos_04_2))
   return
   goto _377
 _377:
@@ -4362,13 +4154,8 @@ warpscr_044_01:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 43
-  push 26
-  COMM 0x0111
-  push string(str_01pos_04_3)
-  push 43
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 43, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(43, string(str_01pos_04_3))
   return
   return
 proc_003e:
@@ -4383,13 +4170,8 @@ proc_003e:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 43
-  push 26
-  COMM 0x0111
-  push string(str_01pos_01)
-  push 44
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 43, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(44, string(str_01pos_01))
   return
   goto _379
 _379:
@@ -4400,13 +4182,8 @@ warpscr_045_01:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 43
-  push 26
-  COMM 0x0111
-  push string(str_01pos_01_2)
-  push 44
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 43, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(44, string(str_01pos_01_2))
   return
   return
 proc_0040:
@@ -4421,19 +4198,14 @@ proc_0040:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 2
-  push 46
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 46, 2)
   push 1
   push 4
   push 16
   push 13
   push 3
   COMM 0x01f6
-  push string(str_01pos_04_4)
-  push 43
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(43, string(str_01pos_04_4))
   return
   goto _381
 _381:
@@ -4450,19 +4222,14 @@ proc_0041:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 47
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 47, 3)
   push 1
   push 4
   push 16
   push 19
   push 3
   COMM 0x01f6
-  push string(str_01pos_01_3)
-  push 45
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(45, string(str_01pos_01_3))
   return
   goto _383
 _383:
@@ -4479,19 +4246,14 @@ proc_0042:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 47
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 47, 4)
   push 1
   push 4
   push 19
   push 19
   push 3
   COMM 0x01f6
-  push string(str_01pos_01_4)
-  push 44
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(44, string(str_01pos_01_4))
   return
   goto _385
 _385:
@@ -4508,19 +4270,14 @@ proc_0043:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 48
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 48, 3)
   push 1
   push 4
   push 19
   push 13
   push 3
   COMM 0x01f6
-  push string(str_01pos_06_11)
-  push 42
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(42, string(str_01pos_06_11))
   return
   goto _387
 _387:
@@ -4537,19 +4294,14 @@ proc_0044:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 3
-  push 49
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 49, 3)
   push 1
   push 4
   push 19
   push 6
   push 3
   COMM 0x01f6
-  push string(str_01pos_01_5)
-  push 48
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(48, string(str_01pos_01_5))
   return
   goto _389
 _389:
@@ -4566,19 +4318,14 @@ proc_0045:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_true), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 4
-  push 49
-  push 26
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(26, 49, 4)
   push 1
   push 4
   push 19
   push 2
   push 3
   COMM 0x01f6
-  push string(str_01pos_04_5)
-  push 56
-  COMM 0x0100
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(56, string(str_01pos_04_5))
   return
   goto _391
 _391:
@@ -4595,13 +4342,8 @@ proc_0046:
   RESTORE_CAMERA_NODE_MODE()
   result = CREATE_SCRIPT_TASK(procedure(warp_eff_false), 0)
   WAIT_FOR_TASK_REMOVAL(result)
-  push 5
-  push 56
-  push 26
-  COMM 0x0111
-  push string(str_01pos_05_3)
-  push 56
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(26, 56, 5)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(56, string(str_01pos_05_3))
   return
   goto _393
 _393:
@@ -4610,532 +4352,129 @@ warpscr_ev633:
   PROC warpscr_ev633
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
-  push 0
-  push string(md_hoji_01_2)
-  push 10
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_2)
-  push 10
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_3)
-  push 11
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_3)
-  push 11
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_4)
-  push 13
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_4)
-  push 13
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_5)
-  push 15
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_5)
-  push 15
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_6)
-  push 16
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_6)
-  push 16
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_7)
-  push 19
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_7)
-  push 19
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_8)
-  push 21
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_8)
-  push 21
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_9)
-  push 23
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_9)
-  push 23
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_10)
-  push 24
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_10)
-  push 24
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_11)
-  push 25
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_11)
-  push 25
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_12)
-  push 27
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_12)
-  push 27
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_13)
-  push 29
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_13)
-  push 29
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_14)
-  push 30
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_14)
-  push 30
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_15)
-  push 32
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_15)
-  push 32
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_16)
-  push 33
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_16)
-  push 33
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_17)
-  push 34
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_17)
-  push 34
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_18)
-  push 36
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_18)
-  push 36
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_19)
-  push 38
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_19)
-  push 38
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_20)
-  push 39
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_20)
-  push 39
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_21)
-  push 42
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_21)
-  push 42
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_22)
-  push 43
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_22)
-  push 43
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_23)
-  push 46
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_23)
-  push 46
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_24)
-  push 47
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_24)
-  push 47
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_25)
-  push 48
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_25)
-  push 48
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_26)
-  push 49
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_26)
-  push 49
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_27)
-  push 56
-  push 26
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_27)
-  push 56
-  push 26
-  COMM 0x0104
-  push 3
-  push 10
-  push 26
-  COMM 0x0112
-  push 3
-  push 11
-  push 26
-  COMM 0x0112
-  push 3
-  push 13
-  push 26
-  COMM 0x0112
-  push 4
-  push 13
-  push 26
-  COMM 0x0112
-  push 4
-  push 15
-  push 26
-  COMM 0x0112
-  push 5
-  push 15
-  push 26
-  COMM 0x0112
-  push 2
-  push 16
-  push 26
-  COMM 0x0112
-  push 3
-  push 19
-  push 26
-  COMM 0x0112
-  push 4
-  push 21
-  push 26
-  COMM 0x0112
-  push 5
-  push 21
-  push 26
-  COMM 0x0112
-  push 3
-  push 23
-  push 26
-  COMM 0x0112
-  push 3
-  push 24
-  push 26
-  COMM 0x0112
-  push 2
-  push 25
-  push 26
-  COMM 0x0112
-  push 4
-  push 27
-  push 26
-  COMM 0x0112
-  push 5
-  push 27
-  push 26
-  COMM 0x0112
-  push 3
-  push 29
-  push 26
-  COMM 0x0112
-  push 2
-  push 30
-  push 26
-  COMM 0x0112
-  push 3
-  push 32
-  push 26
-  COMM 0x0112
-  push 3
-  push 33
-  push 26
-  COMM 0x0112
-  push 4
-  push 33
-  push 26
-  COMM 0x0112
-  push 3
-  push 34
-  push 26
-  COMM 0x0112
-  push 3
-  push 36
-  push 26
-  COMM 0x0112
-  push 4
-  push 38
-  push 26
-  COMM 0x0112
-  push 5
-  push 38
-  push 26
-  COMM 0x0112
-  push 2
-  push 39
-  push 26
-  COMM 0x0112
-  push 4
-  push 42
-  push 26
-  COMM 0x0112
-  push 5
-  push 42
-  push 26
-  COMM 0x0112
-  push 2
-  push 43
-  push 26
-  COMM 0x0112
-  push 3
-  push 43
-  push 26
-  COMM 0x0112
-  push 2
-  push 46
-  push 26
-  COMM 0x0112
-  push 3
-  push 47
-  push 26
-  COMM 0x0112
-  push 4
-  push 47
-  push 26
-  COMM 0x0112
-  push 3
-  push 48
-  push 26
-  COMM 0x0112
-  push 3
-  push 49
-  push 26
-  COMM 0x0112
-  push 4
-  push 49
-  push 26
-  COMM 0x0112
-  push 5
-  push 56
-  push 26
-  COMM 0x0112
-  push string(atari_hoji_01_2)
-  push 10
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_3)
-  push 11
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_4)
-  push 13
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_5)
-  push 15
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_6)
-  push 16
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_7)
-  push 19
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_8)
-  push 21
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_9)
-  push 23
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_10)
-  push 24
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_11)
-  push 25
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_12)
-  push 27
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_13)
-  push 29
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_14)
-  push 30
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_15)
-  push 32
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_16)
-  push 33
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_17)
-  push 34
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_18)
-  push 36
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_19)
-  push 38
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_20)
-  push 39
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_21)
-  push 42
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_22)
-  push 43
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_23)
-  push 46
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_24)
-  push 47
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_25)
-  push 48
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_26)
-  push 49
-  push 26
-  COMM 0x0108
-  push string(atari_hoji_01_27)
-  push 56
-  push 26
-  COMM 0x0108
-  push 7
-  push 56
-  push 26
-  COMM 0x0111
+  DISABLE_FIELD_MODELS(26, 10, string(md_hoji_01_2), 0)
+  DISABLE_FIELD_MODELS(26, 10, string(md_hoji_02_2), 0)
+  DISABLE_FIELD_MODELS(26, 11, string(md_hoji_01_3), 0)
+  DISABLE_FIELD_MODELS(26, 11, string(md_hoji_02_3), 0)
+  DISABLE_FIELD_MODELS(26, 13, string(md_hoji_01_4), 0)
+  DISABLE_FIELD_MODELS(26, 13, string(md_hoji_02_4), 0)
+  DISABLE_FIELD_MODELS(26, 15, string(md_hoji_01_5), 0)
+  DISABLE_FIELD_MODELS(26, 15, string(md_hoji_02_5), 0)
+  DISABLE_FIELD_MODELS(26, 16, string(md_hoji_01_6), 0)
+  DISABLE_FIELD_MODELS(26, 16, string(md_hoji_02_6), 0)
+  DISABLE_FIELD_MODELS(26, 19, string(md_hoji_01_7), 0)
+  DISABLE_FIELD_MODELS(26, 19, string(md_hoji_02_7), 0)
+  DISABLE_FIELD_MODELS(26, 21, string(md_hoji_01_8), 0)
+  DISABLE_FIELD_MODELS(26, 21, string(md_hoji_02_8), 0)
+  DISABLE_FIELD_MODELS(26, 23, string(md_hoji_01_9), 0)
+  DISABLE_FIELD_MODELS(26, 23, string(md_hoji_02_9), 0)
+  DISABLE_FIELD_MODELS(26, 24, string(md_hoji_01_10), 0)
+  DISABLE_FIELD_MODELS(26, 24, string(md_hoji_02_10), 0)
+  DISABLE_FIELD_MODELS(26, 25, string(md_hoji_01_11), 0)
+  DISABLE_FIELD_MODELS(26, 25, string(md_hoji_02_11), 0)
+  DISABLE_FIELD_MODELS(26, 27, string(md_hoji_01_12), 0)
+  DISABLE_FIELD_MODELS(26, 27, string(md_hoji_02_12), 0)
+  DISABLE_FIELD_MODELS(26, 29, string(md_hoji_01_13), 0)
+  DISABLE_FIELD_MODELS(26, 29, string(md_hoji_02_13), 0)
+  DISABLE_FIELD_MODELS(26, 30, string(md_hoji_01_14), 0)
+  DISABLE_FIELD_MODELS(26, 30, string(md_hoji_02_14), 0)
+  DISABLE_FIELD_MODELS(26, 32, string(md_hoji_01_15), 0)
+  DISABLE_FIELD_MODELS(26, 32, string(md_hoji_02_15), 0)
+  DISABLE_FIELD_MODELS(26, 33, string(md_hoji_01_16), 0)
+  DISABLE_FIELD_MODELS(26, 33, string(md_hoji_02_16), 0)
+  DISABLE_FIELD_MODELS(26, 34, string(md_hoji_01_17), 0)
+  DISABLE_FIELD_MODELS(26, 34, string(md_hoji_02_17), 0)
+  DISABLE_FIELD_MODELS(26, 36, string(md_hoji_01_18), 0)
+  DISABLE_FIELD_MODELS(26, 36, string(md_hoji_02_18), 0)
+  DISABLE_FIELD_MODELS(26, 38, string(md_hoji_01_19), 0)
+  DISABLE_FIELD_MODELS(26, 38, string(md_hoji_02_19), 0)
+  DISABLE_FIELD_MODELS(26, 39, string(md_hoji_01_20), 0)
+  DISABLE_FIELD_MODELS(26, 39, string(md_hoji_02_20), 0)
+  DISABLE_FIELD_MODELS(26, 42, string(md_hoji_01_21), 0)
+  DISABLE_FIELD_MODELS(26, 42, string(md_hoji_02_21), 0)
+  DISABLE_FIELD_MODELS(26, 43, string(md_hoji_01_22), 0)
+  DISABLE_FIELD_MODELS(26, 43, string(md_hoji_02_22), 0)
+  DISABLE_FIELD_MODELS(26, 46, string(md_hoji_01_23), 0)
+  DISABLE_FIELD_MODELS(26, 46, string(md_hoji_02_23), 0)
+  DISABLE_FIELD_MODELS(26, 47, string(md_hoji_01_24), 0)
+  DISABLE_FIELD_MODELS(26, 47, string(md_hoji_02_24), 0)
+  DISABLE_FIELD_MODELS(26, 48, string(md_hoji_01_25), 0)
+  DISABLE_FIELD_MODELS(26, 48, string(md_hoji_02_25), 0)
+  DISABLE_FIELD_MODELS(26, 49, string(md_hoji_01_26), 0)
+  DISABLE_FIELD_MODELS(26, 49, string(md_hoji_02_26), 0)
+  DISABLE_FIELD_MODELS(26, 56, string(md_hoji_01_27), 0)
+  DISABLE_FIELD_MODELS(26, 56, string(md_hoji_02_27), 0)
+  DISABLE_FIELD_MAP_ENTRY(26, 10, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 11, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 13, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 13, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 15, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 15, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 16, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 19, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 21, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 21, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 23, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 24, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 25, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 27, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 27, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 29, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 30, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 32, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 33, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 33, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 34, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 36, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 38, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 38, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 39, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 42, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 42, 5)
+  DISABLE_FIELD_MAP_ENTRY(26, 43, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 43, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 46, 2)
+  DISABLE_FIELD_MAP_ENTRY(26, 47, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 47, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 48, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 49, 3)
+  DISABLE_FIELD_MAP_ENTRY(26, 49, 4)
+  DISABLE_FIELD_MAP_ENTRY(26, 56, 5)
+  DISABLE_FIELD_COLLISION(26, 10, string(atari_hoji_01_2))
+  DISABLE_FIELD_COLLISION(26, 11, string(atari_hoji_01_3))
+  DISABLE_FIELD_COLLISION(26, 13, string(atari_hoji_01_4))
+  DISABLE_FIELD_COLLISION(26, 15, string(atari_hoji_01_5))
+  DISABLE_FIELD_COLLISION(26, 16, string(atari_hoji_01_6))
+  DISABLE_FIELD_COLLISION(26, 19, string(atari_hoji_01_7))
+  DISABLE_FIELD_COLLISION(26, 21, string(atari_hoji_01_8))
+  DISABLE_FIELD_COLLISION(26, 23, string(atari_hoji_01_9))
+  DISABLE_FIELD_COLLISION(26, 24, string(atari_hoji_01_10))
+  DISABLE_FIELD_COLLISION(26, 25, string(atari_hoji_01_11))
+  DISABLE_FIELD_COLLISION(26, 27, string(atari_hoji_01_12))
+  DISABLE_FIELD_COLLISION(26, 29, string(atari_hoji_01_13))
+  DISABLE_FIELD_COLLISION(26, 30, string(atari_hoji_01_14))
+  DISABLE_FIELD_COLLISION(26, 32, string(atari_hoji_01_15))
+  DISABLE_FIELD_COLLISION(26, 33, string(atari_hoji_01_16))
+  DISABLE_FIELD_COLLISION(26, 34, string(atari_hoji_01_17))
+  DISABLE_FIELD_COLLISION(26, 36, string(atari_hoji_01_18))
+  DISABLE_FIELD_COLLISION(26, 38, string(atari_hoji_01_19))
+  DISABLE_FIELD_COLLISION(26, 39, string(atari_hoji_01_20))
+  DISABLE_FIELD_COLLISION(26, 42, string(atari_hoji_01_21))
+  DISABLE_FIELD_COLLISION(26, 43, string(atari_hoji_01_22))
+  DISABLE_FIELD_COLLISION(26, 46, string(atari_hoji_01_23))
+  DISABLE_FIELD_COLLISION(26, 47, string(atari_hoji_01_24))
+  DISABLE_FIELD_COLLISION(26, 48, string(atari_hoji_01_25))
+  DISABLE_FIELD_COLLISION(26, 49, string(atari_hoji_01_26))
+  DISABLE_FIELD_COLLISION(26, 56, string(atari_hoji_01_27))
+  ENABLE_FIELD_MAP_ENTRY(26, 56, 7)
   push 18
   push 9
   push 18
   push 1
   push 1
   COMM 0x01f6
-  push 3
-  push 1
-  push 26
-  COMM 0x0112
-  push string(atari_hoji_01_28)
-  push 20
-  push 26
-  COMM 0x0107
+  DISABLE_FIELD_MAP_ENTRY(26, 1, 3)
+  ENABLE_FIELD_COLLISION(26, 20, string(atari_hoji_01_28))
   SET_SOLAR_OVERLAY_MODE(3)
   RELEASE_CURRENT_OBJECT()
   return
@@ -5280,11 +4619,7 @@ _416:
   return
 proc_004f:
   PROC proc_004f
-  push 0
-  push string(md_01all_08)
-  push 21
-  push 26
-  COMM 0x0106
+  DISABLE_FIELD_ANIMATION(26, 21, string(md_01all_08), 0)
   return
 proc_0050:
   PROC proc_0050
@@ -5298,19 +4633,11 @@ _421:
     IF _423
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(6)
-    push 0
-    push string(md_01all_08_2)
-    push 21
-    push 26
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(26, 21, string(md_01all_08_2), 0)
     push 96
     COMM 0x0214
     WAIT_FOR_TIMER_LIMIT(100)
-    push 0
-    push string(md_01all_08_3)
-    push 21
-    push 26
-    COMM 0x0106
+    DISABLE_FIELD_ANIMATION(26, 21, string(md_01all_08_3), 0)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(DOOR_REACTION))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -6724,16 +6051,8 @@ warpscr_050_03:
   COMM 0x0217
   push 128
   COMM 0x0210
-  push 0
-  push string(md_hoji_02_28)
-  push 54
-  push 26
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_28)
-  push 54
-  push 26
-  COMM 0x0104
+  ENABLE_FIELD_MODELS(26, 54, string(md_hoji_02_28), 0)
+  DISABLE_FIELD_MODELS(26, 54, string(md_hoji_01_28), 0)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 0, 0, 0, 1)
   push 293
@@ -6819,16 +6138,8 @@ after_btl_054:
   SET_MODEL_FLAG(722)
   goto _720
 _720:
-  push 0
-  push string(md_hoji_01_29)
-  push 54
-  push 26
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_29)
-  push 54
-  push 26
-  COMM 0x0104
+  ENABLE_FIELD_MODELS(26, 54, string(md_hoji_01_29), 0)
+  DISABLE_FIELD_MODELS(26, 54, string(md_hoji_02_29), 0)
   WAIT_FOR_TIMER_LIMIT(30)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(URIEL_ESCAPE))
@@ -6854,11 +6165,7 @@ _722:
     SCREEN_FADE_B(0, 20)
     WAIT_FOR_TIMER_LIMIT(20)
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    push string(md_01all_01)
-    push 1
-    push 26
-    COMM 0x0104
+    DISABLE_FIELD_MODELS(26, 1, string(md_01all_01), 0)
     push 100
     COMM 0x020f
     return

@@ -374,107 +374,68 @@ _9:
     RESTORE_CAMERA_NODE_MODE()
     ACTIVATE_MESSAGE_PANEL()
     SET_SOLAR_OVERLAY_MODE(6)
-    COMM 0x0116
-    PUSHREG
-    IF _36
-    MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
-    goto _35
-  _36:
-    push 0
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0000
-    push 1
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0001
-    push 2
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0002
-    push 3
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0003
-    push 4
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0004
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
+    result = TEST_CURRENT_TREASURE_OPENED()
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
     } else {
-    _12:
-      MESSAGE_REQUEST_AND_POLL(message(TAKARA))
-      goto _11
-    }
-  _11:
-    push 1
-    push 3
-    COMM 0x013c
-    if (local_int[0] == 1) {
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
-    } else {
-    _14:
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
-      goto _13
-    }
-  _13:
-    if_not (local_int[5] == 0) goto _34
-    if (local_int[3] == 1) {
-      COMM 0x0115
-      push local_int[4]
-      COMM 0x0166
-      return
-    } else {
-    _25:
-      if (local_int[3] == 2) {
-        COMM 0x0115
-        push 35
-        COMM 0x011b
-        COMM 0x011c
-        push 100
-        push 15
-        COMM 0x00ab
-        push 15
-        push 1
-        push 0
-        COMM 0x001a
-        push 15
-        push 100
-        push 1
-        COMM 0x001a
-        push 1
-        COMM 0x013a
-        MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
-        COMM 0x011f
-        COMM 0x0121
+    _36:
+      local_int[0] = READ_TREASURE_TABLE_VALUE(0)
+      local_int[1] = READ_TREASURE_TABLE_VALUE(1)
+      local_int[2] = READ_TREASURE_TABLE_VALUE(2)
+      local_int[3] = READ_TREASURE_TABLE_VALUE(3)
+      local_int[4] = READ_TREASURE_TABLE_VALUE(4)
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
       } else {
-      _26:
-        if (local_int[3] == 3) {
-          COMM 0x0115
+      _12:
+        MESSAGE_REQUEST_AND_POLL(message(TAKARA))
+        goto _11
+      }
+    _11:
+      push 1
+      push 3
+      COMM 0x013c
+      if (local_int[0] == 1) {
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
+      } else {
+      _14:
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+        goto _13
+      }
+    _13:
+      if_not (local_int[5] == 0) goto _34
+      if (local_int[3] == 1) {
+        MARK_CURRENT_TREASURE_OPENED()
+        push local_int[4]
+        COMM 0x0166
+        return
+      } else {
+      _25:
+        if (local_int[3] == 2) {
+          MARK_CURRENT_TREASURE_OPENED()
           push 35
           COMM 0x011b
           COMM 0x011c
-          push 200
-          push 20
+          push 100
+          push 15
           COMM 0x00ab
-          push 20
+          push 15
           push 1
           push 0
           COMM 0x001a
-          push 20
-          push 200
+          push 15
+          push 100
           push 1
           COMM 0x001a
-          push 2
+          push 1
           COMM 0x013a
           MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
           COMM 0x011f
           COMM 0x0121
         } else {
-        _27:
-          if (local_int[3] == 4) {
-            COMM 0x0115
+        _26:
+          if (local_int[3] == 3) {
+            MARK_CURRENT_TREASURE_OPENED()
             push 35
             COMM 0x011b
             COMM 0x011c
@@ -489,15 +450,15 @@ _9:
             push 200
             push 1
             COMM 0x001a
-            push 4
+            push 2
             COMM 0x013a
-            MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
+            MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
             COMM 0x011f
             COMM 0x0121
           } else {
-          _28:
-            if (local_int[3] == 5) {
-              COMM 0x0115
+          _27:
+            if (local_int[3] == 4) {
+              MARK_CURRENT_TREASURE_OPENED()
               push 35
               COMM 0x011b
               COMM 0x011c
@@ -512,15 +473,15 @@ _9:
               push 200
               push 1
               COMM 0x001a
-              push 5
+              push 4
               COMM 0x013a
-              MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
+              MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
               COMM 0x011f
               COMM 0x0121
             } else {
-            _29:
-              if (local_int[3] == 6) {
-                COMM 0x0115
+            _28:
+              if (local_int[3] == 5) {
+                MARK_CURRENT_TREASURE_OPENED()
                 push 35
                 COMM 0x011b
                 COMM 0x011c
@@ -535,85 +496,109 @@ _9:
                 push 200
                 push 1
                 COMM 0x001a
-                push 6
+                push 5
                 COMM 0x013a
-                MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
+                MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
                 COMM 0x011f
                 COMM 0x0121
               } else {
-              _30:
-                if (local_int[0] <= 1) {
-                  if (local_int[0] == 1) {
-                    push 34
-                    COMM 0x011b
-                  } else {
-                  _16:
-                    push 33
-                    COMM 0x011b
-                    goto _15
-                  }
-                _15:
+              _29:
+                if (local_int[3] == 6) {
+                  MARK_CURRENT_TREASURE_OPENED()
+                  push 35
+                  COMM 0x011b
                   COMM 0x011c
-                  COMM 0x0115
-                  FINISH_SCRIPT_MESSAGE_WINDOW()
-                  WAIT_FOR_TIMER_LIMIT(45)
-                  ACTIVATE_MESSAGE_PANEL()
-                  if (local_int[1] == 0) {
-                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
-                  } else {
-                  _20:
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
-                    SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
-                    if (local_int[1] >= 96 && local_int[1] <= 127) {
-                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
-                    } else {
-                    _18:
-                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET))
-                      goto _17
-                    }
-                  _17:
-                    push local_int[2]
-                    push local_int[1]
-                    COMM 0x0070
-                    goto _19
-                  }
-                _19:
+                  push 200
+                  push 20
+                  COMM 0x00ab
+                  push 20
+                  push 1
+                  push 0
+                  COMM 0x001a
+                  push 20
+                  push 200
+                  push 1
+                  COMM 0x001a
+                  push 6
+                  COMM 0x013a
+                  MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
                   COMM 0x011f
                   COMM 0x0121
                 } else {
-                _22:
-                  if (local_int[0] == 3) {
-                    COMM 0x0115
-                    push 32
-                    COMM 0x0214
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
-                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
-                    push local_int[4]
-                    COMM 0x0139
+                _30:
+                  if (local_int[0] <= 1) {
+                    if (local_int[0] == 1) {
+                      push 34
+                      COMM 0x011b
+                    } else {
+                    _16:
+                      push 33
+                      COMM 0x011b
+                      goto _15
+                    }
+                  _15:
+                    COMM 0x011c
+                    MARK_CURRENT_TREASURE_OPENED()
+                    FINISH_SCRIPT_MESSAGE_WINDOW()
+                    WAIT_FOR_TIMER_LIMIT(45)
+                    ACTIVATE_MESSAGE_PANEL()
+                    if (local_int[1] == 0) {
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
+                    } else {
+                    _20:
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
+                      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
+                      if (local_int[1] >= 96 && local_int[1] <= 127) {
+                        MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
+                      } else {
+                      _18:
+                        MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET))
+                        goto _17
+                      }
+                    _17:
+                      push local_int[2]
+                      push local_int[1]
+                      COMM 0x0070
+                      goto _19
+                    }
+                  _19:
+                    COMM 0x011f
+                    COMM 0x0121
+                  } else {
+                  _22:
+                    if (local_int[0] == 3) {
+                      MARK_CURRENT_TREASURE_OPENED()
+                      push 32
+                      COMM 0x0214
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
+                      push local_int[4]
+                      COMM 0x0139
+                    }
                   }
+                _21:
+                  goto _24
                 }
-              _21:
-                goto _24
               }
             }
           }
         }
       }
+    _24:
+      goto _33
+    _34:
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
+      } else {
+      _32:
+        MESSAGE_REQUEST_AND_POLL(message(TAKARA_NOGET))
+        goto _31
+      }
+    _31:
+      goto _33
+    _33:
+      goto _35
     }
-  _24:
-    goto _33
-  _34:
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
-    } else {
-    _32:
-      MESSAGE_REQUEST_AND_POLL(message(TAKARA_NOGET))
-      goto _31
-    }
-  _31:
-    goto _33
-  _33:
-    goto _35
   _35:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     RELEASE_CURRENT_OBJECT()
@@ -1443,10 +1428,7 @@ suikomi_label:
   push 39
   COMM 0x011b
   COMM 0x011c
-  push local_int[39]
-  push 0
-  push 0
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[39])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[38])
   PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[40], 3, 25, 2)
@@ -1605,15 +1587,8 @@ _165:
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(1, 30)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push string(BARIA)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(BARIA_2)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_MODELS(0, 0, string(BARIA), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(BARIA_2))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
     SCREEN_FADE_A(1, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -1630,10 +1605,7 @@ _165:
     WAIT_FOR_TIMER_LIMIT(15)
     SET_MODEL_FLAG(local_int[47])
     if (local_int[49] != -(1)) {
-      push local_int[49]
-      push 0
-      push 0
-      COMM 0x0111
+      ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[49])
     }
   _176:
     RELEASE_CURRENT_OBJECT()
@@ -1704,26 +1676,10 @@ _186:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_02)
-    push 1
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_03)
-    push 1
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_03_2)
-    push 2
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04)
-    push 2
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 1, string(md_hoji_02), 0)
+    DISABLE_FIELD_MODELS(0, 1, string(md_hoji_03), 0)
+    ENABLE_FIELD_MODELS(0, 2, string(md_hoji_03_2), 0)
+    DISABLE_FIELD_MODELS(0, 2, string(md_hoji_04), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -1799,39 +1755,15 @@ _195:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_04_2)
-    push 1
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_05)
-    push 1
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_01)
-    push 6
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_02_2)
-    push 6
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 1, string(md_hoji_04_2), 0)
+    DISABLE_FIELD_MODELS(0, 1, string(md_hoji_05), 0)
+    ENABLE_FIELD_MODELS(0, 6, string(md_hoji_01), 0)
+    DISABLE_FIELD_MODELS(0, 6, string(md_hoji_02_2), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    push string(md_hoji_07)
-    push 9
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_06)
-    push 9
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 9, string(md_hoji_07), 0)
+    DISABLE_FIELD_MODELS(0, 9, string(md_hoji_06), 0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 15)
@@ -1904,26 +1836,10 @@ _204:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_07_2)
-    push 2
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_08)
-    push 2
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_03_3)
-    push 3
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04_3)
-    push 3
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 2, string(md_hoji_07_2), 0)
+    DISABLE_FIELD_MODELS(0, 2, string(md_hoji_08), 0)
+    ENABLE_FIELD_MODELS(0, 3, string(md_hoji_03_3), 0)
+    DISABLE_FIELD_MODELS(0, 3, string(md_hoji_04_3), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -1999,26 +1915,10 @@ _213:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_03_4)
-    push 4
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04_4)
-    push 4
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_02_3)
-    push 5
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_03_5)
-    push 5
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 4, string(md_hoji_03_4), 0)
+    DISABLE_FIELD_MODELS(0, 4, string(md_hoji_04_4), 0)
+    ENABLE_FIELD_MODELS(0, 5, string(md_hoji_02_3), 0)
+    DISABLE_FIELD_MODELS(0, 5, string(md_hoji_03_5), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -2096,26 +1996,10 @@ _222:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_04_5)
-    push 5
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_05_2)
-    push 5
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_02_4)
-    push 10
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_03_6)
-    push 10
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 5, string(md_hoji_04_5), 0)
+    DISABLE_FIELD_MODELS(0, 5, string(md_hoji_05_2), 0)
+    ENABLE_FIELD_MODELS(0, 10, string(md_hoji_02_4), 0)
+    DISABLE_FIELD_MODELS(0, 10, string(md_hoji_03_6), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -2191,49 +2075,17 @@ _231:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_03_7)
-    push 6
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04_6)
-    push 6
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_01_2)
-    push 8
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_02_5)
-    push 8
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 6, string(md_hoji_03_7), 0)
+    DISABLE_FIELD_MODELS(0, 6, string(md_hoji_04_6), 0)
+    ENABLE_FIELD_MODELS(0, 8, string(md_hoji_01_2), 0)
+    DISABLE_FIELD_MODELS(0, 8, string(md_hoji_02_5), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    push string(md_hoji_06_2)
-    push 1
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_07_3)
-    push 1
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_05_3)
-    push 9
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04_7)
-    push 9
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 1, string(md_hoji_06_2), 0)
+    DISABLE_FIELD_MODELS(0, 1, string(md_hoji_07_3), 0)
+    ENABLE_FIELD_MODELS(0, 9, string(md_hoji_05_3), 0)
+    DISABLE_FIELD_MODELS(0, 9, string(md_hoji_04_7), 0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 15)
@@ -2306,26 +2158,10 @@ _240:
     WAIT_FOR_TIMER_LIMIT(30)
     push 96
     COMM 0x0214
-    push 0
-    push string(md_hoji_03_8)
-    push 8
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_04_8)
-    push 8
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_04_9)
-    push 9
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_05_4)
-    push 9
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 8, string(md_hoji_03_8), 0)
+    DISABLE_FIELD_MODELS(0, 8, string(md_hoji_04_8), 0)
+    ENABLE_FIELD_MODELS(0, 9, string(md_hoji_04_9), 0)
+    DISABLE_FIELD_MODELS(0, 9, string(md_hoji_05_4), 0)
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -3073,26 +2909,10 @@ proc_0023:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   push 97
   COMM 0x0214
-  push 0
-  push string(md_hoji_04_10)
-  push 5
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_5)
-  push 5
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_6)
-  push 10
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_9)
-  push 10
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_04_10), 0)
+  ENABLE_FIELD_MODELS(0, 5, string(md_hoji_05_5), 0)
+  DISABLE_FIELD_MODELS(0, 10, string(md_hoji_02_6), 0)
+  ENABLE_FIELD_MODELS(0, 10, string(md_hoji_03_9), 0)
   WAIT_FOR_TIMER_LIMIT(30)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11_5))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[11], result)
@@ -3539,96 +3359,26 @@ proc_0029:
   PUSHREG
   EQ
   IF _285
-  push 0
-  push string(md_hoji_01_3)
-  push 1
-  push 0
-  COMM 0x0104
-  push 1
-  push 1
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_4)
-  push 2
-  push 0
-  COMM 0x0104
-  push 1
-  push 2
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_5)
-  push 3
-  push 0
-  COMM 0x0104
-  push 1
-  push 3
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_6)
-  push 4
-  push 0
-  COMM 0x0104
-  push 1
-  push 4
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_7)
-  push 5
-  push 0
-  COMM 0x0104
-  push 1
-  push 5
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_05_6)
-  push 6
-  push 0
-  COMM 0x0104
-  push 1
-  push 6
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_05_7)
-  push 8
-  push 0
-  COMM 0x0104
-  push 1
-  push 8
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_8)
-  push 9
-  push 0
-  COMM 0x0104
-  push 1
-  push 9
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_9)
-  push 10
-  push 0
-  COMM 0x0104
-  push 1
-  push 10
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_10)
-  push 23
-  push 0
-  COMM 0x0104
-  push 1
-  push 23
-  push 0
-  COMM 0x010a
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_01_3), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 1, 1)
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_01_4), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 2, 1)
+  DISABLE_FIELD_MODELS(0, 3, string(md_hoji_01_5), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 3, 1)
+  DISABLE_FIELD_MODELS(0, 4, string(md_hoji_01_6), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 4, 1)
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_01_7), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 5, 1)
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_05_6), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 6, 1)
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_05_7), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 8, 1)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_01_8), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 9, 1)
+  DISABLE_FIELD_MODELS(0, 10, string(md_hoji_01_9), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 10, 1)
+  DISABLE_FIELD_MODELS(0, 23, string(md_hoji_01_10), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 23, 1)
   goto _285
 _285:
   push 0
@@ -3642,191 +3392,49 @@ _285:
   SET_MODEL_FLAG(1152)
   SET_MODEL_FLAG(1174)
   SET_MODEL_FLAG(1163)
-  push string(atari_hoji_01)
-  push 27
-  push 23
-  COMM 0x0107
-  push string(atari_hoji_02)
-  push 27
-  push 23
-  COMM 0x0108
+  ENABLE_FIELD_COLLISION(23, 27, string(atari_hoji_01))
+  DISABLE_FIELD_COLLISION(23, 27, string(atari_hoji_02))
   CLEAR_MODEL_FLAG(1153)
-  push 0
-  push string(md_hoji_02_7)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_10)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_03_11)
-  push 2
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_11)
-  push 2
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_02_7), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_03_10), 0)
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_03_11), 0)
+  ENABLE_FIELD_MODELS(0, 2, string(md_hoji_04_11), 0)
   CLEAR_MODEL_FLAG(1154)
-  push 0
-  push string(md_hoji_04_12)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_8)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_11)
-  push 6
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_8)
-  push 6
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_07_4)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_3)
-  push 9
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_04_12), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_05_8), 0)
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_01_11), 0)
+  ENABLE_FIELD_MODELS(0, 6, string(md_hoji_02_8), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_07_4), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_06_3), 0)
   CLEAR_MODEL_FLAG(1156)
-  push 0
-  push string(md_hoji_07_5)
-  push 2
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_08_2)
-  push 2
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_03_12)
-  push 3
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_13)
-  push 3
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_07_5), 0)
+  ENABLE_FIELD_MODELS(0, 2, string(md_hoji_08_2), 0)
+  DISABLE_FIELD_MODELS(0, 3, string(md_hoji_03_12), 0)
+  ENABLE_FIELD_MODELS(0, 3, string(md_hoji_04_13), 0)
   CLEAR_MODEL_FLAG(1157)
-  push 0
-  push string(md_hoji_03_13)
-  push 4
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_14)
-  push 4
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_9)
-  push 5
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_14)
-  push 5
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 4, string(md_hoji_03_13), 0)
+  ENABLE_FIELD_MODELS(0, 4, string(md_hoji_04_14), 0)
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_02_9), 0)
+  ENABLE_FIELD_MODELS(0, 5, string(md_hoji_03_14), 0)
   CLEAR_MODEL_FLAG(1158)
-  push 0
-  push string(md_hoji_04_15)
-  push 5
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_9)
-  push 5
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_10)
-  push 10
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_15)
-  push 10
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_04_15), 0)
+  ENABLE_FIELD_MODELS(0, 5, string(md_hoji_05_9), 0)
+  DISABLE_FIELD_MODELS(0, 10, string(md_hoji_02_10), 0)
+  ENABLE_FIELD_MODELS(0, 10, string(md_hoji_03_15), 0)
   CLEAR_MODEL_FLAG(1159)
-  push 0
-  push string(md_hoji_03_16)
-  push 6
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_16)
-  push 6
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_12)
-  push 8
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_11)
-  push 8
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_06_4)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_07_6)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_05_10)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_17)
-  push 9
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_03_16), 0)
+  ENABLE_FIELD_MODELS(0, 6, string(md_hoji_04_16), 0)
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_01_12), 0)
+  ENABLE_FIELD_MODELS(0, 8, string(md_hoji_02_11), 0)
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_06_4), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_07_6), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_05_10), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_04_17), 0)
   CLEAR_MODEL_FLAG(1162)
-  push 0
-  push string(md_hoji_03_17)
-  push 8
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_18)
-  push 8
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_12)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_18)
-  push 9
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_03_17), 0)
+  ENABLE_FIELD_MODELS(0, 8, string(md_hoji_04_18), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_02_12), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_03_18), 0)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   SET_UNIT_LOW_FLAG(global_int[0])
   push 1
@@ -3939,10 +3547,7 @@ _289:
   SET_MODEL_FLAG(1177)
   CLEAR_MODEL_FLAG(1174)
   SET_MODEL_FLAG(1203)
-  push 1
-  push 8
-  push 23
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(23, 8, 1)
   push 3
   push 3
   push 29
@@ -3961,66 +3566,20 @@ _289:
   push 16
   push 1
   COMM 0x01f6
-  push string(atari_hoji_01_2)
-  push 27
-  push 23
-  COMM 0x0108
-  push string(atari_hoji_02_2)
-  push 27
-  push 23
-  COMM 0x0107
+  DISABLE_FIELD_COLLISION(23, 27, string(atari_hoji_01_2))
+  ENABLE_FIELD_COLLISION(23, 27, string(atari_hoji_02_2))
   SET_MODEL_FLAG(1162)
-  push 0
-  push string(md_hoji_03_19)
-  push 8
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_04_19)
-  push 8
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_20)
-  push 9
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_05_11)
-  push 9
-  push 0
-  COMM 0x0104
+  ENABLE_FIELD_MODELS(0, 8, string(md_hoji_03_19), 0)
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_04_19), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_04_20), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_05_11), 0)
   SET_MODEL_FLAG(1154)
-  push 0
-  push string(md_hoji_04_21)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_05_12)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_13)
-  push 6
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_13)
-  push 6
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_07_7)
-  push 9
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_06_5)
-  push 9
-  push 0
-  COMM 0x0104
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_04_21), 0)
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_05_12), 0)
+  ENABLE_FIELD_MODELS(0, 6, string(md_hoji_01_13), 0)
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_02_13), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_07_7), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_06_5), 0)
   goto _291
 _292:
   push 0
@@ -4292,26 +3851,10 @@ gate_close:
   push 97
   COMM 0x0214
   CLEAR_MODEL_FLAG(1159)
-  push 0
-  push string(md_hoji_03_20)
-  push 6
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_22)
-  push 6
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_14)
-  push 8
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_14)
-  push 8
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_03_20), 0)
+  ENABLE_FIELD_MODELS(0, 6, string(md_hoji_04_22), 0)
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_01_14), 0)
+  ENABLE_FIELD_MODELS(0, 8, string(md_hoji_02_14), 0)
   WAIT_FOR_TIMER_LIMIT(15)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
   push result
@@ -4325,164 +3868,44 @@ gate_close:
   push 97
   COMM 0x0214
   CLEAR_MODEL_FLAG(1162)
-  push 0
-  push string(md_hoji_03_21)
-  push 8
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_23)
-  push 8
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_04_24)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_13)
-  push 9
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_03_21), 0)
+  ENABLE_FIELD_MODELS(0, 8, string(md_hoji_04_23), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_04_24), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_05_13), 0)
   WAIT_FOR_TIMER_LIMIT(15)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   CLEAR_MODEL_FLAG(1153)
-  push 0
-  push string(md_hoji_02_15)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_22)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_03_23)
-  push 2
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_25)
-  push 2
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_02_15), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_03_22), 0)
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_03_23), 0)
+  ENABLE_FIELD_MODELS(0, 2, string(md_hoji_04_25), 0)
   CLEAR_MODEL_FLAG(1154)
-  push 0
-  push string(md_hoji_04_26)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_14)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_15)
-  push 6
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_16)
-  push 6
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_07_8)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_6)
-  push 9
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_04_26), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_05_14), 0)
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_01_15), 0)
+  ENABLE_FIELD_MODELS(0, 6, string(md_hoji_02_16), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_07_8), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_06_6), 0)
   CLEAR_MODEL_FLAG(1156)
-  push 0
-  push string(md_hoji_07_9)
-  push 2
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_08_3)
-  push 2
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_03_24)
-  push 3
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_27)
-  push 3
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_07_9), 0)
+  ENABLE_FIELD_MODELS(0, 2, string(md_hoji_08_3), 0)
+  DISABLE_FIELD_MODELS(0, 3, string(md_hoji_03_24), 0)
+  ENABLE_FIELD_MODELS(0, 3, string(md_hoji_04_27), 0)
   CLEAR_MODEL_FLAG(1157)
-  push 0
-  push string(md_hoji_03_25)
-  push 4
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_28)
-  push 4
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_02_17)
-  push 5
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_26)
-  push 5
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 4, string(md_hoji_03_25), 0)
+  ENABLE_FIELD_MODELS(0, 4, string(md_hoji_04_28), 0)
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_02_17), 0)
+  ENABLE_FIELD_MODELS(0, 5, string(md_hoji_03_26), 0)
   SET_MODEL_FLAG(1158)
-  push 0
-  push string(md_hoji_04_29)
-  push 5
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_05_15)
-  push 5
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_18)
-  push 10
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_03_27)
-  push 10
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_7)
-  push 1
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_07_10)
-  push 1
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_05_16)
-  push 9
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_30)
-  push 9
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 5, string(md_hoji_04_29), 0)
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_05_15), 0)
+  ENABLE_FIELD_MODELS(0, 10, string(md_hoji_02_18), 0)
+  DISABLE_FIELD_MODELS(0, 10, string(md_hoji_03_27), 0)
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_06_7), 0)
+  ENABLE_FIELD_MODELS(0, 1, string(md_hoji_07_10), 0)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_05_16), 0)
+  ENABLE_FIELD_MODELS(0, 9, string(md_hoji_04_30), 0)
   COMM 0x00a4
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
   SCREEN_FADE_A(0, 15)
@@ -4641,10 +4064,7 @@ proc_0037:
   EQ
   AND
   IF _327
-  push 1
-  push 8
-  push 23
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(23, 8, 1)
   push 3
   push 3
   push 29
@@ -4678,48 +4098,17 @@ _327:
   AND
   IF _330
   SET_MODEL_FLAG(1202)
-  push 2
-  push 23
-  push 23
-  COMM 0x0111
-  push string(atari_hoji_01_3)
-  push 23
-  push 23
-  COMM 0x0107
-  push string(atari_hoji_02_3)
-  push 23
-  push 23
-  COMM 0x0107
-  push 0
-  push string(md_hoji_02_19)
-  push 23
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_28)
-  push 23
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MAP_ENTRY(23, 23, 2)
+  ENABLE_FIELD_COLLISION(23, 23, string(atari_hoji_01_3))
+  ENABLE_FIELD_COLLISION(23, 23, string(atari_hoji_02_3))
+  DISABLE_FIELD_MODELS(0, 23, string(md_hoji_02_19), 0)
+  ENABLE_FIELD_MODELS(0, 23, string(md_hoji_03_28), 0)
   goto _329
 _330:
-  push string(atari_hoji_01_4)
-  push 23
-  push 23
-  COMM 0x0108
-  push string(atari_hoji_02_4)
-  push 23
-  push 23
-  COMM 0x0108
-  push 0
-  push string(md_hoji_03_29)
-  push 23
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_20)
-  push 23
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_COLLISION(23, 23, string(atari_hoji_01_4))
+  DISABLE_FIELD_COLLISION(23, 23, string(atari_hoji_02_4))
+  DISABLE_FIELD_MODELS(0, 23, string(md_hoji_03_29), 0)
+  ENABLE_FIELD_MODELS(0, 23, string(md_hoji_02_20), 0)
   goto _329
 _329:
   push 1
@@ -4728,96 +4117,26 @@ _329:
   PUSHREG
   EQ
   IF _331
-  push 0
-  push string(md_hoji_01_16)
-  push 1
-  push 0
-  COMM 0x0104
-  push 1
-  push 1
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_17)
-  push 2
-  push 0
-  COMM 0x0104
-  push 1
-  push 2
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_18)
-  push 3
-  push 0
-  COMM 0x0104
-  push 1
-  push 3
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_19)
-  push 4
-  push 0
-  COMM 0x0104
-  push 1
-  push 4
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_20)
-  push 5
-  push 0
-  COMM 0x0104
-  push 1
-  push 5
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_05_17)
-  push 6
-  push 0
-  COMM 0x0104
-  push 1
-  push 6
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_05_18)
-  push 8
-  push 0
-  COMM 0x0104
-  push 1
-  push 8
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_21)
-  push 9
-  push 0
-  COMM 0x0104
-  push 1
-  push 9
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_22)
-  push 10
-  push 0
-  COMM 0x0104
-  push 1
-  push 10
-  push 0
-  COMM 0x010a
-  push 0
-  push string(md_hoji_01_23)
-  push 23
-  push 0
-  COMM 0x0104
-  push 1
-  push 23
-  push 0
-  COMM 0x010a
+  DISABLE_FIELD_MODELS(0, 1, string(md_hoji_01_16), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 1, 1)
+  DISABLE_FIELD_MODELS(0, 2, string(md_hoji_01_17), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 2, 1)
+  DISABLE_FIELD_MODELS(0, 3, string(md_hoji_01_18), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 3, 1)
+  DISABLE_FIELD_MODELS(0, 4, string(md_hoji_01_19), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 4, 1)
+  DISABLE_FIELD_MODELS(0, 5, string(md_hoji_01_20), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 5, 1)
+  DISABLE_FIELD_MODELS(0, 6, string(md_hoji_05_17), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 6, 1)
+  DISABLE_FIELD_MODELS(0, 8, string(md_hoji_05_18), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 8, 1)
+  DISABLE_FIELD_MODELS(0, 9, string(md_hoji_01_21), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 9, 1)
+  DISABLE_FIELD_MODELS(0, 10, string(md_hoji_01_22), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 10, 1)
+  DISABLE_FIELD_MODELS(0, 23, string(md_hoji_01_23), 0)
+  DISABLE_FIELD_MODEL_GROUP(0, 23, 1)
   goto _331
 _331:
   return
