@@ -13,8 +13,8 @@ typedef struct {
     void *unk0;
     void *unk4;
     u8 pad8[0x10];
-    s32 unk18;      /* 0x18: live-node count */
-    FntNode *unk1C; /* 0x1C: sentinel link */
+    s32 liveNodeCount;      /* 0x18: live-node count */
+    FntNode *sentinel; /* 0x1C: sentinel link */
 } FmGslWork;
 
 extern FmGslWork frFontResourceList;
@@ -22,24 +22,24 @@ extern void func_002D0918(void *);
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmGslReleaseActiveResourceBuffers(void) {
-    if (frFontResourceList.unk1C == 0) {
+    if (frFontResourceList.sentinel == 0) {
         return 0;
     }
     func_002D0918(frFontResourceList.unk0);
     func_002D0918(frFontResourceList.unk4);
-    frFontResourceList.unk1C = 0;
+    frFontResourceList.sentinel = 0;
     return 1;
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
 FntNode *func_00193BB8(void) {
-    FntNode *node = frFontResourceList.unk1C->next;
+    FntNode *node = frFontResourceList.sentinel->next;
 
     if (node->unk0 == NULL) {
         return NULL;
     }
     node->prev->next = node->next;
-    frFontResourceList.unk18 -= 1;
+    frFontResourceList.liveNodeCount -= 1;
     node->next->prev = node->prev;
     return node;
 }

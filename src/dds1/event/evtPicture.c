@@ -1,9 +1,9 @@
 #include "common.h"
 
-/* Picture task data: an owner link and the attached texture handle. */
+/* Picture task data: active flags and the attached texture. */
 typedef struct {
-    u32 unk0;
-    void *unk4;
+    u32 flags;
+    void *texture;
 } Picture;
 
 extern void *kwlnTaskGetUserValue(void);
@@ -38,9 +38,9 @@ s32 evtUpdatePictureWhenFlagged(void) {
     Picture *picture;
 
     picture = kwlnTaskGetUserValue();
-    if (picture->unk0 & 1) {
-        if (picture->unk4 != 0) {
-            func_00235150(picture->unk4);
+    if (picture->flags & 1) {
+        if (picture->texture != 0) {
+            func_00235150(picture->texture);
         }
         return 0;
     }
@@ -52,9 +52,9 @@ void evtPictureReleaseTaskTextureAndState(void) {
     Picture *picture;
 
     picture = kwlnTaskGetUserValue();
-    if (picture->unk4 != 0) {
-        sdfTexReleaseReferenceViaHandler(picture->unk4);
-        picture->unk4 = 0;
+    if (picture->texture != 0) {
+        sdfTexReleaseReferenceViaHandler(picture->texture);
+        picture->texture = 0;
     }
     sdfReleaseChipBlock(picture);
 }

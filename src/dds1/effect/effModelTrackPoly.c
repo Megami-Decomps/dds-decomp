@@ -3,14 +3,14 @@
 
 /* Polygon-track data: its ring position wraps against the entry count. */
 typedef struct {
-    u8  pad_0x00[0x04]; /* 0x00 */
+    u32 kind;           /* 0x00: draw-target selector */
     u32 color;          /* 0x04 */
     s32 count;          /* 0x08 */
-    s32 unk0C;          /* 0x0C */
+    s32 activePointCount; /* 0x0C */
     s32 position;       /* 0x10 */
     s32 step;           /* 0x14 */
     u128 *points;      /* 0x18 */
-    u8  pad_0x1C[0x04]; /* 0x1C */
+    s32 uvBase;         /* 0x1C */
     void *nodeHandle;   /* 0x20 */
     void *resourceHandle; /* 0x24 */
 } EffTrackPolyData; /* 0x28 */
@@ -195,7 +195,7 @@ void effTrackPolyFreeData(EffTrackPolyData *data) {
 void effTrackPolyInitData(EffTrackPolyData *data) {
     data->position = 2;
     data->color = 0x80808080;
-    data->unk0C = 0;
+    data->activePointCount = 0;
 }
 
 void func_00188870(u32 *dst, u32 value) {
@@ -244,11 +244,112 @@ void func_00188A00(EffTrackPolyData *data, u128 *src) {
         PCP_COPY_VECTOR(&points[1], src + 1);
         data->position = 2;
     }
-    if (data->unk0C < count - 2) {
-        data->unk0C += 2;
+    if (data->activePointCount < count - 2) {
+        data->activePointCount += 2;
     }
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188A78);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188E10);
+/* Draw-state record read by func_0015FE20 (same layout as ParDrawState in code_0015A758). */
+typedef struct EffTrackPolyDraw {
+    u16 width;      /* 0x00 */
+    u16 height;     /* 0x02 */
+    u8 pad04[4];
+    u32 color;      /* 0x08 */
+    u8 pad0C[4];
+    u8 *points;     /* 0x10 */
+    u8 pad14[0xC];
+    s32 uvOffset;   /* 0x20 */
+    u8 pad24[8];
+} EffTrackPolyDraw; /* 0x2C */
+
+typedef struct EffTrackPolyFinish {
+    u8 pad00[0x10];
+    void (*finish)(void *, s32); /* 0x10 */
+} EffTrackPolyFinish;
+
+extern EffTrackPolyDraw D_003D6640;
+extern EffTrackPolyFinish *D_00355710[];
+extern EffTrackPolyFinish D_00325248;
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(s32);
+extern void sdfConsAppendClearPacket(s32, s32);
+extern void sdfConsAppendAssetPacket(s32, s32, s32);
+extern void sdfAppendPacket(s32, s32);
+extern s32 func_0015FE20(EffTrackPolyDraw *);
+
+/* Draw the track as strips of 16 point pairs: the ring buffer is walked as at most two runs (the recent end, then the wrapped start). */
+void func_00188E10(EffTrackPolyData *data) {
+    s32 list = sdfAllocPacketAligned(0x20);
+    s32 start[4];
+    s32 len[2];
+    EffTrackPolyDraw *draw;
+    s32 i;
+    s32 remaining;
+    s32 wrapped;
+    s32 recent;
+    s32 list2;
+    u64 *packet;
+
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, (s32)data->nodeHandle, 0);
+    recent = data->activePointCount;
+    start[0] = data->position - recent;
+    if (start[0] < 2) {
+        wrapped = start[0] - 2;
+        start[1] = 0;
+        start[0] = wrapped + data->count;
+        len[0] = -wrapped;
+        len[1] = recent - len[0] + 2;
+    } else {
+        len[0] = recent;
+        len[1] = 0;
+    }
+    D_003D6640.uvOffset = data->uvBase;
+    for (i = 0; i < 2; i++) {
+        draw = &D_003D6640;
+        draw->points = (u8 *)data->points + (start[i] << 4);
+        draw->color = data->color;
+        draw->width = 0x10;
+        draw->height = 0x12;
+        remaining = len[i];
+        while (remaining >= 0x12) {
+            remaining -= 0x10;
+            sdfAppendPacket(list, func_0015FE20(&D_003D6640));
+            D_003D6640.points += 0x100;
+            D_003D6640.uvOffset += 0x40;
+        }
+        if (remaining >= 4) {
+            draw->height = remaining;
+            draw->width = remaining - 2;
+            sdfAppendPacket(list, func_0015FE20(draw));
+            draw->uvOffset += remaining * 4;
+        }
+    }
+    if (data->kind < 4) {
+        D_00355710[data->kind]->finish(D_00355710[data->kind], list);
+    } else {
+        list2 = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list2);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[4] = 6;
+        packet[5] = 0x42;
+        sdfAppendPacket(list2, (s32)packet);
+        D_00325248.finish(&D_00325248, list2);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[4] = 0x42;
+        packet[5] = 0x42;
+        sdfAppendPacket(list, (s32)packet);
+        D_00325248.finish(&D_00325248, list);
+    }
+}
