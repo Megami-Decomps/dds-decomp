@@ -31,7 +31,13 @@ void scrSetIntegerReturnValue(s32 value);
 
 extern char D_003ACAE0[];
 
-void func_002287C0(void);
+u32 func_002287C0(s32 task);
+extern s32 fileMenuTaskExists(void);
+extern s32 func_0011E278(void);
+extern void func_0022A960(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
+extern void fldSelectDisplayBuffer(u32 row);
+extern void func_00129900(s32 arg);
+extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 extern u32 D_003BA904;
 extern s32 scrGetCommandTimer(void);
 
@@ -43,7 +49,7 @@ extern char D_003BBDC8[];
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
-extern u64 kwlnTaskGetUserValue(void);
+u32 kwlnTaskGetUserValue(s32 task);
 
 extern f32 D_003BBDB8; /* solar overlay alpha, interpolated toward 0 or 1 */
 
@@ -306,7 +312,46 @@ void evtDisableSolarOverlayAlpha(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-INCLUDE_ASM(const s32, "game/code_00228058", func_002287C0);
+u32 func_002287C0(s32 task) {
+    SolarWorldState *state;
+    u32 overlay;
+    f32 alpha;
+    f32 f;
+
+    f = 0.0f;
+    if ((fileMenuTaskExists() != 0) || (func_0011E278() != 0)) {
+        return 0;
+    }
+    overlay = kwlnTaskGetUserValue(task);
+    state = D_003BAA00;
+    alpha = *(f32 *)&D_003BBDB8;
+    if ((state->flags & 2) != 0) {
+        if (alpha < 1.0f) {
+            alpha += 0.1f;
+            if (alpha > 1.0f) {
+                alpha = 1.0f;
+            }
+            *(f32 *)&D_003BBDB8 = alpha;
+        }
+    } else {
+        if (alpha > f) {
+            alpha -= 0.1f;
+            if (alpha < f) {
+                alpha = f;
+            }
+            *(f32 *)&D_003BBDB8 = alpha;
+        }
+    }
+    if ((D_003BAA00->flags & 2) != 0) {
+        func_0022A960(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+        fldSelectDisplayBuffer(0x53);
+        func_00129900(0);
+        fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
+    } else if (alpha > 0.0f) {
+        func_0022A960(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228930);
 
@@ -320,10 +365,10 @@ void *evtCreateSolarOverlayWork(s32 owner) {
     return (void *)func_002287C0;
 }
 
-void evtFreeSolarOverlayWork(void) {
-    u64 overlay;
+void evtFreeSolarOverlayWork(s32 task) {
+    u32 overlay;
 
-    overlay = kwlnTaskGetUserValue();
+    overlay = kwlnTaskGetUserValue(task);
     evtReleaseSolarNoiseSprite(overlay);
     sdfReleaseChipBlock(overlay);
     D_003BBDC0 = 0;

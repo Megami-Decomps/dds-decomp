@@ -14,7 +14,7 @@ extern s32 scrGetCommandTimer(void);
 
 extern u32 D_00437200;
 
-extern u64 kwlnTaskGetUserValue(void);
+u32 kwlnTaskGetUserValue(s32 task);
 
 extern char D_00437208[];
 
@@ -36,11 +36,14 @@ void evtInitializeVisualData(s32 arg0);
 
 void kwlnTaskSetUserValue(s32 arg0, void *arg1);
 
-void func_00243430(void);
+u32 func_00243430(s32 task);
 
 void func_002457B8(s32 arg0);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+extern s32 fileMenuTaskExists(void);
+extern s32 func_001200E0(void);
+extern void func_00245618(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 
@@ -245,9 +248,12 @@ typedef struct {
     u8 phase;          /* 0xA41 */
     u8 padA42;          /* 0xA42 */
     u8 overlayFlag;     /* 0xA43: cleared separately from solar phase */
-    u32 phaseTimer;    /* 0xA44: cleared on phase change */
+    f32 phaseTimer;    /* 0xA44: cleared on phase change */
     u32 padA48;
     u32 unkA4C;        /* 0xA4C: cleared when the overlay starts */
+    u32 padA50;
+    u32 padA54;
+    u32 extFlags;      /* 0xA58 */
 } SolarWorldState;
 
 void evtClearSolarOverlayControl(void) {
@@ -305,7 +311,43 @@ void evtDisableSolarOverlayAlpha(void) {
     ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243430);
+u32 func_00243430(s32 task) {
+    SolarWorldState *state;
+    u32 overlay;
+    f32 alpha;
+    f32 f;
+
+    f = 0.0f;
+    if ((fileMenuTaskExists() != 0) || (func_001200E0() != 0)) {
+        return 0;
+    }
+    overlay = kwlnTaskGetUserValue(task);
+    state = (SolarWorldState *)D_00435DD0;
+    alpha = *(f32 *)&D_004371F8;
+    if ((state->flags & 2) != 0) {
+        if (alpha < 1.0f) {
+            alpha += 0.1f;
+            if (alpha > 1.0f) {
+                alpha = 1.0f;
+            }
+            *(f32 *)&D_004371F8 = alpha;
+        }
+    } else {
+        if (alpha > f) {
+            alpha -= 0.1f;
+            if (alpha < f) {
+                alpha = f;
+            }
+            *(f32 *)&D_004371F8 = alpha;
+        }
+    }
+    if ((((SolarWorldState *)D_00435DD0)->flags & 2) != 0) {
+        func_00245618(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+    } else if (alpha > 0.0f) {
+        func_00245618(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243568);
 
@@ -325,10 +367,10 @@ void *evtCreateSolarOverlayWork(s32 task) {
     return (void *)func_00243430;
 }
 
-void evtFreeSolarOverlayWork(void) {
-    u64 overlay;
+void evtFreeSolarOverlayWork(s32 task) {
+    u32 overlay;
 
-    overlay = kwlnTaskGetUserValue();
+    overlay = kwlnTaskGetUserValue(task);
     evtReleaseSolarNoiseSprite(overlay);
     sdfReleaseChipBlock(overlay);
     D_00437200 = 0;
