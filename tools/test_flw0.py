@@ -450,8 +450,9 @@ class Flw0Tests(unittest.TestCase):
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
         script = flw0.parse_source(path.read_text(encoding="utf-8"))
         source = flw0_symbolic.render(script, "dds1", semantic=True)
-        self.assertIn("result = CREATE_POLYGON_MOVIE(670, 1)", source)
-        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", source)
+        self.assertIn(
+            "WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(670, 1))", source
+        )
         self.assertNotIn("  PUSHIS 670", source)
         self.assertEqual(flw0.parse_source(source).to_bytes(), script.to_bytes())
 
@@ -502,6 +503,104 @@ class Flw0Tests(unittest.TestCase):
                 (1, "EQ"),
                 (1, "COMM WAIT_FOR_TIMER_LIMIT"),
             ],
+        )
+        selector = flw0_semantic.parse_expression(
+            "READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            selector.lower(),
+            ["PUSHIS 2", "COMM READ_TREASURE_TABLE_VALUE", "PUSHREG"],
+        )
+        self.assertEqual(
+            selector.render(), "READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)"
+        )
+        barrier_value = flw0_semantic.parse_expression(
+            "READ_BARRIER_VALUE(SOURCE_VECTOR_ID)",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            barrier_value.lower(),
+            ["PUSHIS 2", "COMM READ_BARRIER_VALUE", "PUSHREG"],
+        )
+        self.assertEqual(
+            barrier_value.render(), "READ_BARRIER_VALUE(SOURCE_VECTOR_ID)"
+        )
+        self.assertEqual(
+            flw0_semantic.parse_expression(
+                "READ_BARRIER_VALUE(3)", 1, flw0_profiles.DDS1
+            ).render(),
+            "READ_BARRIER_VALUE(3)",
+        )
+        dynamic_selector = flw0_semantic.parse_expression(
+            "READ_TREASURE_TABLE_VALUE(local_int[0])",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            dynamic_selector.lower(),
+            ["PUSHLIX 0", "COMM READ_TREASURE_TABLE_VALUE", "PUSHREG"],
+        )
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "not a symbolic value for argument 0"
+        ):
+            flw0_semantic.parse_expression(
+                "SET_SOLAR_OVERLAY_MODE(CONTENT_KIND)",
+                1,
+                flw0_profiles.DDS1,
+            )
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown value 'CONTENT_KIND'"):
+            flw0_semantic.parse_expression(
+                "CONTENT_KIND", 1, flw0_profiles.DDS1
+            )
+
+        result_condition = flw0.parse(
+            _fixture(
+                [
+                    flw0.OPCODE_IDS["PROC"],
+                    (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                    (6 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                    (0x21D << 16) | flw0.OPCODE_IDS["COMM"],
+                    flw0.OPCODE_IDS["PUSHREG"],
+                    flw0.OPCODE_IDS["EQ"],
+                    flw0.OPCODE_IDS["IF"],
+                    flw0.OPCODE_IDS["END"],
+                ],
+                jump_rows=(("done", 7),),
+            )
+        )
+        result_source = flw0_symbolic.render(
+            result_condition, "dds1", semantic=True
+        )
+        self.assertIn(
+            "if_not (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) goto done",
+            result_source,
+        )
+        self.assertEqual(
+            flw0.parse_source(result_source).to_bytes(), result_condition.to_bytes()
+        )
+
+        labelled_result = flw0.parse(
+            _fixture(
+                [
+                    flw0.OPCODE_IDS["PROC"],
+                    (0x068 << 16) | flw0.OPCODE_IDS["COMM"],
+                    flw0.OPCODE_IDS["PUSHREG"],
+                    flw0.OPCODE_IDS["POPLIX"],
+                    flw0.OPCODE_IDS["END"],
+                ],
+                jump_rows=(("capture", 2),),
+            )
+        )
+        labelled_source = flw0_symbolic.render(
+            labelled_result, "dds1", semantic=True
+        )
+        self.assertIn("result = READ_CURRENT_WORLD_OBJECT_ID()", labelled_source)
+        self.assertIn("capture:\n  PUSHREG", labelled_source)
+        self.assertEqual(
+            flw0.parse_source(labelled_source).to_bytes(), labelled_result.to_bytes()
         )
 
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
@@ -611,8 +710,8 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 2314, 736),
-            "dds2": (126, 1773, 1190),
+            "dds1": (129, 3983, 736),
+            "dds2": (126, 3328, 1190),
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0
@@ -1067,6 +1166,13 @@ end
             "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
+            "READ_SUCTION_WARP_VALUE": (0x1FA, 1, True),
+            "READ_BARRIER_VALUE": (0x1FB, 1, True),
+            "FIND_FIELD_EFFECT_BY_NAME": (0x1FF, 1, True),
+            "READ_ELEVATOR_TABLE_VALUE": (0x200, 1, True),
+            "READ_LADDER_TABLE_VALUE": (0x208, 1, True),
+            "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
+            "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
             with self.subTest(profile=profile.name):
@@ -1079,6 +1185,57 @@ end
                     for command in profile.commands
                 }
                 self.assertEqual(commands, expected)
+                treasure_fields = profile.by_name[
+                    "READ_TREASURE_TABLE_VALUE"
+                ].symbols_for_argument(0)
+                self.assertIsNotNone(treasure_fields)
+                self.assertEqual(
+                    treasure_fields.by_value,
+                    {
+                        0: "CONTENT_KIND",
+                        1: "ITEM_ID",
+                        2: "ITEM_QUANTITY",
+                        3: "TRAP_KIND",
+                        4: "AMOUNT",
+                    },
+                )
+                selector_domains = {
+                    "READ_SUCTION_WARP_VALUE": {
+                        0: "STATE_CODE",
+                        1: "SOURCE_VECTOR_ID",
+                        2: "EFFECT_UNIT_ID",
+                        3: "MAP_ENTRY_ID",
+                        4: "MOTION_ID",
+                    },
+                    "READ_BARRIER_VALUE": {
+                        0: "BARRIER_MODEL_FLAG",
+                        1: "EFFECT_UNIT_ID",
+                        2: "SOURCE_VECTOR_ID",
+                        5: "COMPLETION_FLAG",
+                        6: "MAP_ENTRY_ID",
+                    },
+                    "READ_ELEVATOR_TABLE_VALUE": {
+                        0: "DESTINATION_COUNT",
+                        14: "REMAINING_DESTINATIONS",
+                    },
+                    "READ_LADDER_TABLE_VALUE": {
+                        0: "DIRECTION",
+                        1: "SOURCE_VECTOR_ID",
+                        2: "EFFECT_UNIT_ID",
+                        3: "USE_DIRECT_ACTION_WINDOW",
+                    },
+                    "READ_DOOR_WARP_VALUE": {
+                        0: "MOTION_DURATION",
+                        1: "FADE_MODE",
+                    },
+                }
+                for command_name, expected_symbols in selector_domains.items():
+                    with self.subTest(command=command_name):
+                        symbols = profile.by_name[
+                            command_name
+                        ].symbols_for_argument(0)
+                        self.assertIsNotNone(symbols)
+                        self.assertEqual(symbols.by_value, expected_symbols)
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
         root = TOOLS.parent
@@ -1364,7 +1521,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 43600)
+        self.assertEqual(profiled_command_uses, 44544)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1411,15 +1568,15 @@ end
         self.assertIn("result = ACTION_WINDOW_REQUEST_AND_POLL(9)", view)
         self.assertIn("MOVE_OBJECT_ALONG_PATH(101, 202, 0)", view)
         self.assertIn("ENABLE_FIELD_MODELS(4, 3, 2, 1)", view)
-        self.assertIn("result = READ_TREASURE_TABLE_VALUE(4)", view)
+        self.assertIn("result = READ_TREASURE_TABLE_VALUE(AMOUNT)", view)
         self.assertIn("MARK_CURRENT_TREASURE_OPENED()", view)
         self.assertIn("result = TEST_CURRENT_TREASURE_OPENED()", view)
 
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 87109, 13650),
-            "dds2": (140, 67338, 9595),
+            "dds1": (143, 86116, 12657),
+            "dds2": (140, 65982, 8239),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1596,7 +1753,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 43600)
+            (code_words, commands, profiled_commands), (168829, 53389, 44544)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1725,7 +1882,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-                (31095, 1910, 287),
+                (32306, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)

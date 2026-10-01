@@ -91,90 +91,72 @@ e929_first:
   PUSHREG
   POPLIX 0x0006
   COMM 0x01d4
-  push 1
-  push 2113
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  push local_int[6] == 100
-  OR
-  IF _2
-  push 10
-  push 324
-  push 1
-  COMM 0x01b2
-  goto _1
-_2:
-  push 0
-  push 324
-  push 1
-  COMM 0x01b2
-  push 1
-  COMM 0x01ce
-  push 99
-  push 324
-  push 1
-  COMM 0x0197
-  goto _1
-_1:
-  push 1
-  push 2113
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  push local_int[6] == 100
-  OR
-  IF _7
-  MESSAGE_REQUEST_AND_POLL(message(MSG_ALL))
-  push 100
-  COMM 0x000a
-  PUSHREG
-  POPLIX 0x000a
-  if (local_int[10] <= 25) {
-    local_int[7] = 8
+  if (local_int[6] == 100 || TEST_MODEL_FLAG(2113) == 1) {
+    push 10
+    push 324
+    push 1
+    COMM 0x01b2
   } else {
-  _4:
-    if (local_int[10] <= 50) {
-      local_int[7] = 12
+  _2:
+    push 0
+    push 324
+    push 1
+    COMM 0x01b2
+    push 1
+    COMM 0x01ce
+    push 99
+    push 324
+    push 1
+    COMM 0x0197
+    goto _1
+  }
+_1:
+  if (local_int[6] == 100 || TEST_MODEL_FLAG(2113) == 1) {
+    MESSAGE_REQUEST_AND_POLL(message(MSG_ALL))
+    push 100
+    COMM 0x000a
+    PUSHREG
+    POPLIX 0x000a
+    if (local_int[10] <= 25) {
+      local_int[7] = 8
     } else {
-    _5:
-      if (local_int[10] <= 75) {
-        local_int[7] = 13
+    _4:
+      if (local_int[10] <= 50) {
+        local_int[7] = 12
       } else {
-      _6:
-        local_int[7] = 36
-        goto _3
+      _5:
+        if (local_int[10] <= 75) {
+          local_int[7] = 13
+        } else {
+        _6:
+          local_int[7] = 36
+          goto _3
+        }
       }
     }
+  _3:
+    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[7], 3)
+    push 7
+    push 324
+    push 1
+    COMM 0x01b2
+    push 3
+    COMM 0x01ce
+    push 97
+    push 324
+    push 1
+    COMM 0x0197
+    MESSAGE_REQUEST_AND_POLL(message(MSG_ITEM_ALL))
+    push local_int[7]
+    COMM 0x0150
+    SET_MODEL_FLAG(2113)
+    goto QUIZ_END
   }
-_3:
-  SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[7], 3)
-  push 7
-  push 324
-  push 1
-  COMM 0x01b2
-  push 3
-  COMM 0x01ce
-  push 97
-  push 324
-  push 1
-  COMM 0x0197
-  MESSAGE_REQUEST_AND_POLL(message(MSG_ITEM_ALL))
-  push local_int[7]
-  COMM 0x0150
-  SET_MODEL_FLAG(2113)
-  goto QUIZ_END
-  goto _7
 _7:
-  push 0
-  push 2112
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _9
-  MESSAGE_REQUEST_AND_POLL(message(MSG_1ST))
-  SET_MODEL_FLAG(2112)
-  goto _9
+  if (TEST_MODEL_FLAG(2112) == 0) {
+    MESSAGE_REQUEST_AND_POLL(message(MSG_1ST))
+    SET_MODEL_FLAG(2112)
+  }
 _9:
   MESSAGE_REQUEST_AND_POLL(message(MSG_CHECK))
   local_int[1] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(QUIZ_CHECK_SEL))
@@ -215,11 +197,7 @@ _15:
   if_not (local_int[3] == local_int[4]) goto _22
   SET_MODEL_FLAG(2303 - local_int[0])
   SET_MODEL_FLAG(2114)
-  push 0
-  push 2113
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
+  push TEST_MODEL_FLAG(2113) == 0
   push 100
   COMM 0x01ed
   PUSHREG
@@ -316,23 +294,19 @@ _26:
   goto _25
 _25:
 QUIZ_END:
-  push 1
-  push 2113
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _28
-  push 11
-  push 324
-  push 1
-  COMM 0x01b2
-  goto _27
-_28:
-  push 4
-  push 324
-  push 1
-  COMM 0x01b2
-  goto _27
+  if (TEST_MODEL_FLAG(2113) == 1) {
+    push 11
+    push 324
+    push 1
+    COMM 0x01b2
+  } else {
+  _28:
+    push 4
+    push 324
+    push 1
+    COMM 0x01b2
+    goto _27
+  }
 _27:
   push 0
   COMM 0x01ce

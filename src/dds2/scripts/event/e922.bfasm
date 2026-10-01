@@ -21,49 +21,32 @@ e922_main:
 e922_bind:
   PROC e922_bind
   COMM 0x003e
-  push 0
-  push 2067
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _6
-  SET_MODEL_FLAG(2067)
-  COMM 0x01d4
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_BIND1))
-  goto _5
-_6:
-  push 1
-  push 2095
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _2
-  SET_MODEL_FLAG(2096)
-  goto _1
-_2:
-  push 1
-  push 2094
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _3
-  SET_MODEL_FLAG(2095)
-  goto _1
-_3:
-  push 1
-  push 2067
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _1
-  SET_MODEL_FLAG(2094)
-  goto _1
-_1:
-  COMM 0x01d4
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_BIND2))
-  goto _5
+  if (TEST_MODEL_FLAG(2067) == 0) {
+    SET_MODEL_FLAG(2067)
+    COMM 0x01d4
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(MSG_BIND1))
+  } else {
+  _6:
+    if (TEST_MODEL_FLAG(2095) == 1) {
+      SET_MODEL_FLAG(2096)
+    } else {
+    _2:
+      if (TEST_MODEL_FLAG(2094) == 1) {
+        SET_MODEL_FLAG(2095)
+      } else {
+      _3:
+        if (TEST_MODEL_FLAG(2067) == 1) {
+          SET_MODEL_FLAG(2094)
+        }
+      }
+    }
+  _1:
+    COMM 0x01d4
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(MSG_BIND2))
+    goto _5
+  }
 _5:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   return

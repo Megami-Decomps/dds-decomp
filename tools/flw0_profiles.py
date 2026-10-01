@@ -6,11 +6,30 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class IntegerSymbols:
+    values: tuple[tuple[int, str], ...]
+
+    @property
+    def by_value(self) -> dict[int, str]:
+        return dict(self.values)
+
+    @property
+    def by_name(self) -> dict[str, int]:
+        return {name: value for value, name in self.values}
+
+
+@dataclass(frozen=True)
 class NativeCommand:
     command_id: int
     name: str
     stack_pop: int
     writes_result: bool | None = None
+    argument_symbols: tuple[IntegerSymbols | None, ...] = ()
+
+    def symbols_for_argument(self, index: int) -> IntegerSymbols | None:
+        if not self.argument_symbols:
+            return None
+        return self.argument_symbols[index]
 
 
 @dataclass(frozen=True)
@@ -105,7 +124,21 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x112, "DISABLE_FIELD_MAP_ENTRY", 3, writes_result=False),
     NativeCommand(0x113, "SET_FIELD_CAMERA_TABLE", 1, writes_result=False),
     NativeCommand(
-        0x114, "READ_TREASURE_TABLE_VALUE", 1, writes_result=True
+        0x114,
+        "READ_TREASURE_TABLE_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "CONTENT_KIND"),
+                    (1, "ITEM_ID"),
+                    (2, "ITEM_QUANTITY"),
+                    (3, "TRAP_KIND"),
+                    (4, "AMOUNT"),
+                )
+            ),
+        ),
     ),
     NativeCommand(
         0x115, "MARK_CURRENT_TREASURE_OPENED", 0, writes_result=False
@@ -120,6 +153,86 @@ SHARED_DDS_COMMANDS = (
         0x1E1, "CLEAR_WORLD_OBJECT_PENDING_VALUE", 1, writes_result=False
     ),
     NativeCommand(0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0, writes_result=False),
+    NativeCommand(
+        0x1FA,
+        "READ_SUCTION_WARP_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "STATE_CODE"),
+                    (1, "SOURCE_VECTOR_ID"),
+                    (2, "EFFECT_UNIT_ID"),
+                    (3, "MAP_ENTRY_ID"),
+                    (4, "MOTION_ID"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x1FB,
+        "READ_BARRIER_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "BARRIER_MODEL_FLAG"),
+                    (1, "EFFECT_UNIT_ID"),
+                    (2, "SOURCE_VECTOR_ID"),
+                    (5, "COMPLETION_FLAG"),
+                    (6, "MAP_ENTRY_ID"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(0x1FF, "FIND_FIELD_EFFECT_BY_NAME", 1, writes_result=True),
+    NativeCommand(
+        0x200,
+        "READ_ELEVATOR_TABLE_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "DESTINATION_COUNT"),
+                    (14, "REMAINING_DESTINATIONS"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x208,
+        "READ_LADDER_TABLE_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "DIRECTION"),
+                    (1, "SOURCE_VECTOR_ID"),
+                    (2, "EFFECT_UNIT_ID"),
+                    (3, "USE_DIRECT_ACTION_WINDOW"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
+        0x20C,
+        "READ_DOOR_WARP_VALUE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(((0, "MOTION_DURATION"), (1, "FADE_MODE"))),
+        ),
+    ),
+    NativeCommand(
+        0x21D,
+        "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT",
+        1,
+        writes_result=True,
+    ),
 )
 
 DDS1_EVENT_IDS = frozenset(
@@ -167,3 +280,16 @@ for _profile in PROFILES.values():
     assert len(_profile.by_name) == len(_profile.commands)
     assert len(_profile.events_by_id) == len(_profile.event_ids)
     assert len(_profile.events_by_name) == len(_profile.event_ids)
+    for _command in _profile.commands:
+        assert not _command.argument_symbols or (
+            len(_command.argument_symbols) == _command.stack_pop
+        )
+        for _symbols in _command.argument_symbols:
+            if _symbols is None:
+                continue
+            assert len(_symbols.by_value) == len(_symbols.values)
+            assert len(_symbols.by_name) == len(_symbols.values)
+            for _value, _name in _symbols.values:
+                assert -0x8000 <= _value <= 0x7FFF
+                assert _name.isidentifier() and _name.upper() == _name
+                assert _name not in {"NAN", "INF", "RESULT"}

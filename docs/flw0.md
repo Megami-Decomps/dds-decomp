@@ -132,6 +132,34 @@ can be named as `result` and read later:
   WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+When a profiled call's result is pushed immediately, canonical source keeps it
+as an expression through its exact consumer. This works even when older values
+are already pending on the VM stack:
+
+```text
+  WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(670, 1))
+  if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) {
+    # ...
+  }
+```
+
+The nested form lowers calls in the original order and emits one `PUSHREG` for
+each captured result. A label on the result push, a non-adjacent result read,
+or an unknown command retains explicit source instead of moving the value
+across an uncertain boundary.
+
+A profiled command may give a small integer argument a command-specific name:
+
+```text
+  local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+```
+
+Here `ITEM_QUANTITY` lowers exactly to `PUSHIS 2`. The name is valid only in
+that argument of `READ_TREASURE_TABLE_VALUE`, which keeps unrelated integer
+domains separate. The disassembler uses a name only for a direct profiled
+`PUSHIS`; computed selectors, wider `PUSHI` values, and values outside the
+reviewed set remain ordinary expressions or numbers.
+
 Canonical branches and loops use ordinary blocks while retaining the labels
 already required by the exact jump table:
 
@@ -429,12 +457,19 @@ tables and both implementations:
 | `ENABLE_FIELD_MAP_ENTRY` | `0x111` | 3 | Enables a selected field-map entry |
 | `DISABLE_FIELD_MAP_ENTRY` | `0x112` | 3 | Disables a selected field-map entry |
 | `SET_FIELD_CAMERA_TABLE` | `0x113` | 1 | Selects the current field camera-table value |
-| `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns one of the current room's five treasure-table values |
+| `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns `CONTENT_KIND`, `ITEM_ID`, `ITEM_QUANTITY`, `TRAP_KIND`, or `AMOUNT` from the current room's treasure table |
 | `MARK_CURRENT_TREASURE_OPENED` | `0x115` | 0 | Marks the current task's treasure object as opened |
 | `TEST_CURRENT_TREASURE_OPENED` | `0x116` | 0 | Returns whether the current task's treasure object is already open |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
+| `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
+| `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
+| `FIND_FIELD_EFFECT_BY_NAME` | `0x1FF` | 1 | Finds a field effect by its type-5 name and returns its handle |
+| `READ_ELEVATOR_TABLE_VALUE` | `0x200` | 1 | Returns a value from the selected elevator-destination row |
+| `READ_LADDER_TABLE_VALUE` | `0x208` | 1 | Returns the direction, object IDs, or action-window mode for the selected ladder warp |
+| `READ_DOOR_WARP_VALUE` | `0x20C` | 1 | Returns the motion duration or fade mode for the selected door warp |
+| `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
@@ -443,8 +478,14 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 43,600 of 53,389 native calls in the complete DDS1
-corpus and 31,095 of 38,839 calls in the complete DDS2 corpus. It also makes
+The warp-table commands use selector names only where the paired handlers and
+their script consumers establish the field's role. Barrier selectors `3` and
+`4`, elevator payload columns `2` through `13`, and the DDS2-only suction
+selector `5` remain numeric because their meanings are incomplete or differ
+between the games.
+
+The reviewed set names 44,544 of 53,389 native calls in the complete DDS1
+corpus and 32,306 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic

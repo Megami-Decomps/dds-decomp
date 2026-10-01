@@ -12,23 +12,14 @@ code
 e702_main:
   PROC e702_main
   WAIT_FOR_TIMER_START()
-  push 0
-  push 85
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _2
-  CALL_EVENT(672)
-  goto _1
-_2:
-  push 0
-  push 86
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _1
-  CALL_EVENT(673)
-  goto _1
+  if (TEST_MODEL_FLAG(85) == 0) {
+    CALL_EVENT(672)
+  } else {
+  _2:
+    if (TEST_MODEL_FLAG(86) == 0) {
+      CALL_EVENT(673)
+    }
+  }
 _1:
   COMM 0x002e
   return
