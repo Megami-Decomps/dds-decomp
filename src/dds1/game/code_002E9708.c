@@ -15,7 +15,7 @@ extern u32 D_003BD61C;
 extern u64 sndBuildResourceHandleListFromOffsets(u32);
 extern u64 func_002D3288(u32);
 
-extern u64 func_002EB028(u64, u32 *, u64);
+extern u64 func_002EB028(u64, u32 *, u32 *);
 
 extern u32 D_003BD49C;
 
@@ -111,7 +111,7 @@ extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
 extern s32 func_0030B5D0(s32);
-extern u64 func_002EAF70(u64, u32 *, u64, u64);
+extern u64 func_002EAF70(u64, u32 *, u32 *, s32);
 
 extern void func_002EB578(SoundNode *node, u8 *data, s32 size);
 
@@ -445,9 +445,33 @@ void sndPrintMemoryInfo(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAEB8);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EAF70);
+extern s32 sdfDevCreateCommandState(u64 name);
+extern s32 sdfDevQueueControlAndWait(s32 state);
+extern void sdfDevQueueReadAndWait(s32 state, s32 buffer, s32 size);
+extern void sdfDevWaitThenReleaseCommandState(s32 state);
 
-u64 func_002EB028(u64 name, u32 *info, u64 flags) {
+/* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
+ * outData receives the block address, outSize the file size; without outData the block is released. */
+u64 func_002EAF70(u64 name, u32 *outData, u32 *outSize, s32 extra) {
+    s32 state = sdfDevCreateCommandState(name);
+    s32 size = sdfDevQueueControlAndWait(state);
+    s32 handle = func_002D03F8(size + extra);
+    s32 address = sdfResourceRetainAddress(handle);
+
+    sdfDevQueueReadAndWait(state, address, size);
+    sdfDevWaitThenReleaseCommandState(state);
+    if (outData != NULL) {
+        *outData = address;
+    } else {
+        sdfDecrementAllocationReferenceCount(handle);
+    }
+    if (outSize != NULL) {
+        *outSize = size;
+    }
+    return handle;
+}
+
+u64 func_002EB028(u64 name, u32 *info, u32 *flags) {
     return func_002EAF70(name, info, flags, 0);
 }
 
