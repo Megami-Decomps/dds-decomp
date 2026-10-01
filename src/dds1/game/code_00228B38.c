@@ -48,7 +48,12 @@ void evtFinalizeSolarOverlay(s32 object) {
     sdfSubmitGsTestOneRegisterPacket(0x50000, object);
 }
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00228C38);
+void func_00228C38(s32 object) {
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, object);
+    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, 0, object);
+    ((void (*)(long long, s32))sdfSubmitGsTestOneRegisterPacket)(0x5100D, object);
+}
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00228CA0);
 
