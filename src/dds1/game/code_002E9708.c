@@ -172,7 +172,9 @@ void func_002E97E8(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9810);
+void func_002E9810(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+}
 
 void sdfSoundSetChannelCount(u32 channelCount) {
     if (0x10 < channelCount) {
@@ -202,7 +204,9 @@ void func_002E98F0(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002E9918);
+void func_002E9918(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+}
 
 s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     switch (event) {

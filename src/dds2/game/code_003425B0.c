@@ -199,7 +199,9 @@ void func_00342690(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003426B8);
+void func_003426B8(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
+}
 
 void sdfSoundSetChannelCount(u32 channels) {
     if (0x10 < channels) {

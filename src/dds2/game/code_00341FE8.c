@@ -155,9 +155,14 @@ u32 sndSendChannelControlCommand(u32 channel) {
     return sndSendCommandPacket((channel & 0xF) | 0x1C0, 0, NULL, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342388);
+/* Channel-group command packets: the group is bits 3-6 of the channel byte. */
+void func_00342388(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x140, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_003423B8);
+void func_003423B8(u8 channel) {
+    sndSendCommandPacket(((channel >> 3) & 0xF) | 0x150, 0, 0, 0);
+}
 
 void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
