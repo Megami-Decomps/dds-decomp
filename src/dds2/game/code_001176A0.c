@@ -509,6 +509,8 @@ void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
     }
 }
 
+INCLUDE_RODATA(const s32, "game/code_001176A0", D_00412B08);
+
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DB0);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DB8);

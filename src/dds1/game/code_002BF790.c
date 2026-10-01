@@ -857,11 +857,3 @@ s32 sdfGridSeekLastNode(s32 widget) {
     return sdfGridSeekSelectedNodeByIndex(((GridScrollControl *)widget)->count - 1, (void *)widget);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD218);
-
-INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD220);
-
-INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD228);
-
-INCLUDE_SDATA(const s32, "game/code_002BF790", D_003BD230);
-

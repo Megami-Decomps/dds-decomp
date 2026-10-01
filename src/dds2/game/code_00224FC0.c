@@ -118,7 +118,43 @@ s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", func_002258D8);
+extern void func_00217470(s32, s32, f32, f32, f32);
+extern void func_001E88A8(u32);
+
+typedef struct LiftUnitState {
+    u8 pad00[0x18];
+    struct LiftUnit *owner; /* 0x18 */
+    u8 pad1C[0x44];
+    u32 targetHandle;       /* 0x60 */
+} LiftUnitState;
+
+typedef struct LiftUnit {
+    u8 pad00[0x20];
+    f32 verticalOffset; /* 0x20 */
+    u8 pad24[0xEC];
+    u32 flags;          /* 0x110 */
+    s32 state;          /* 0x114: state-link address, as in the template */
+} LiftUnit;
+
+s32 func_002258D8(s32 object) {
+    s32 state = ((LiftUnit *)object)->state;
+
+    if ((((LiftUnit *)((LiftUnitState *)state)->owner)->flags & 0x200) != 0) {
+        if (btlGetIndexListCount(((LiftUnitState *)state)->targetHandle) == 1) {
+            s32 owner = btlGetIndexListEntry(((LiftUnitState *)state)->targetHandle, 0);
+            if ((((LiftUnit *)owner)->flags & 0x400) != 0) {
+                if ((((LiftUnit *)((LiftUnitState *)state)->owner)->flags & 0x1000) == 0) {
+                    return 0;
+                }
+                func_00217470(object, object, 1.25f, 0.0f, 30.0f);
+                ((LiftUnit *)object)->verticalOffset += 150.0f;
+                func_001E88A8(object);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 typedef struct BattleActionTableEntry {
     u8 pad00[3];

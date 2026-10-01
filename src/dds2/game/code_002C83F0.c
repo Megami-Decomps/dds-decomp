@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 
 /* File request entry: D_003DC698 table, 0x64 bytes per entry. */
 typedef struct FileReqEntry {
@@ -48,12 +49,6 @@ typedef struct FileJob {
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
 } FileJob;
 
-#define FILE_JOB_READY 3
-
-#define FILE_JOB_TRANSFERRING 4
-
-#define FILE_IO_MAX_CHUNK_BYTES 0x8000
-
 extern FileManWork D_00457F28;
 
 void WaitSema(s32 sema);
@@ -82,8 +77,6 @@ s32 fileManUpdate(void);
 
 /* Flag words of the entry table: entry arg0 occupies 0x19 words. */
 extern u32 D_00457F7C[];
-
-#define FILE_REQ_WORDS_PER_ENTRY 0x19
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 

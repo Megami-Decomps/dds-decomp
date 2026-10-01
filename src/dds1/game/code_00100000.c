@@ -2,6 +2,10 @@
 #include "kwln.h"
 
 extern u8 D_003BA709;
+extern u32 D_003BA704;
+extern u32 D_003BA71C;
+extern u32 D_003BA720;
+extern u32 D_003BA718;
 
 extern u32 D_003BA70C;
 extern u32 D_003BA710;
@@ -63,11 +67,18 @@ void func_00100548(u32 value) {
     D_003BA714 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_00100560);
+void func_00100560(u32 first, u32 second) {
+    u32 value = D_003BA704;
+    D_003BA714 = 1;
+    D_003BA718 = first;
+    D_003BA71C = value;
+    D_003BA720 = second;
+    D_003BA70C = 0;
+    D_003BA710 = 0;
+}
 
 extern u32 D_003BA710;
 extern u32 D_003BA714;
-extern u32 D_003BA718;
 
 void func_00100588(void) {
     D_003BA70C = 0;

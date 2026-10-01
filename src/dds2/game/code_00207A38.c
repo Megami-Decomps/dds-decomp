@@ -584,7 +584,34 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_00208F78);
+extern void func_001E22D8(u8 *, s32, s32, f32);
+
+void func_00208F78(void) {
+    BtlState *state = (BtlState *)func_001AA6F8();
+    BtlUnit *actor = state->units;
+
+    while (actor != NULL) {
+        btlFlagUnitDefeatCandidate((s32)actor);
+        btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
+        btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
+        if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->unkF0 != 0) ||
+            (actor->unkE8 & 2) != 0) {
+            func_001E2758((s32)actor);
+            actor->unkF8 = 0;
+            actor->unkFA = 0;
+            func_001E22D8((u8 *)actor, actor->effectIndex, actor->effectParameter, actor->effectScale);
+        }
+        actor->stateFlags &= ~0x8000;
+        actor->stateFlags &= ~0x200000;
+        actor = actor->nextActor;
+    }
+    {
+        void (*callback)(void) = *(void (**)(void))((u8 *)state + 0x624);
+        if (callback != 0) {
+            callback();
+        }
+    }
+}
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209078);
 
 

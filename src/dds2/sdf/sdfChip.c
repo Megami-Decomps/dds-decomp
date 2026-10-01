@@ -43,19 +43,19 @@ void sdfAllocAndClearQuadwords(s32 size) {
     sdfClearQuadwords(allocation, (size + 0xf) >> 4);
 }
 
-void sdfReleaseChipBlock(void *arg0) {
+void sdfReleaseChipBlock(void *memory) {
     SdfCursorSlot *slot;
     SdfChipOwner *owner;
-    SdfChipBlock *block = arg0;
+    SdfChipBlock *block = memory;
     SdfCursorSlot **link;
     s32 interrupts;
     s16 count;
     s32 index;
 
-    if (arg0 == NULL) {
+    if (memory == NULL) {
         return;
     }
-    index = (s32)arg0 - D_00439110;
+    index = (s32)memory - D_00439110;
     if (index < 0) {
         index += 0xFFF;
     }

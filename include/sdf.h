@@ -199,9 +199,6 @@ typedef struct SdfThreadNode {
 #define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
 #define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
 
-/* Enemy unit kind for SDF lookups. */
-#define SDF_UNIT_ENEMY 0x20
-
 /* Free-list kind for SDF pools. */
 #define SDF_POOL_FREE_KIND 0xFFFF
 

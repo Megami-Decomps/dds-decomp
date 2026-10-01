@@ -69,7 +69,7 @@ s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s64 mnuDrawStaffImageScreen(s32 arg0) {
+s64 mnuDrawStaffImageScreen(s32 callback) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -77,7 +77,7 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
     func_0027E8D8(-0x10, -8, 0, ((StaffScreenContext *)context)->display, 0x54);
     mnuCreateStaffImageSprite(0x14);
     func_002723B0(2, ((StaffScreenContext *)context)->actor);
-    return menuRunPanel(context, 1, arg0);
+    return menuRunPanel(context, 1, callback);
 }
 
 s64 func_00272B80(s32 request) {

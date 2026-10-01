@@ -403,17 +403,17 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     return 1;
 }
 
+
+extern s32 func_0023B1E8(EvtUnit *unit);
+extern void func_0035B6E0(const char *fmt, ...);
+
+/* Run a copy of the unit until func_0023B1E8 reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215D0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
-
-extern s32 func_0023B1E8(EvtUnit *unit);
-extern void func_0035B6E0(const char *fmt, ...);
-
-/* Run a copy of the unit until func_0023B1E8 reports done, and derive its per-step Y speed. */
 s32 func_0023D360(EvtUnit *unit) {
     EvtUnit copy;
     f32 delta[4];

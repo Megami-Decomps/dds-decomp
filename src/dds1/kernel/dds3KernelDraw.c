@@ -1,4 +1,5 @@
 #include "common.h"
+#include "gs_packet.h"
 #include "pcp_vu0.h"
 
 extern u32 kwlnDrawControlFlags;
@@ -20,8 +21,6 @@ extern u32 D_00324770[4];
  * byte symbols (e.g. D_003C2DCB = block+3) are declared separately
  * because those functions address the byte directly.
  */
-#define DRAW_VIEWPORT_WIDTH 0x200
-#define DRAW_VIEWPORT_HEIGHT 0x1C0
 
 typedef struct {
     u32 x;

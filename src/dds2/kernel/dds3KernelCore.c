@@ -46,7 +46,7 @@ extern void func_00100C28(void);
 
 extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 arg1);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
 extern void func_001019F0(KwlnTask* task);
 
@@ -162,7 +162,7 @@ void* kwlnTaskGetStateList(u32 state)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101100);
 
-void func_00101198(KwlnTask* task, void* arg1)
+void func_00101198(KwlnTask* task, void* unused)
 {
     if (task == 0) {
         return;
@@ -230,7 +230,7 @@ s32 kwlnTaskTickScheduler(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskCreate);
 
-s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
+s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 delayTicks)
 {
     KwlnTask* task;
 
@@ -238,7 +238,7 @@ s32 kwlnTaskDestroyWithHierarchyByName(const char* name, s32 arg1)
     if (task == 0) {
         return 0;
     }
-    return kwlnTaskDestroyWithHierarchy(task, arg1);
+    return kwlnTaskDestroyWithHierarchy(task, delayTicks);
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);

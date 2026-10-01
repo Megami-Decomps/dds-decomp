@@ -2081,8 +2081,9 @@ void mdlViewerStepEditedNumericValue(s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00239860);
-
 INCLUDE_ASM(const s32, "game/code_00233660", func_00239C08);
+
+
 
 void mdlResetViewerFlagsAndSolarOverlay(void) {
     mdlFlagClearAll();

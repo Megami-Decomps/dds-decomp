@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 
 /* File request entry: D_003DC698 table, 0x64 bytes per entry. */
 typedef struct FileReqEntry {
@@ -46,10 +47,6 @@ typedef struct FileJob {
     u8 unk14[0x14]; /* 0x14 */
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
 } FileJob;
-
-#define FILE_JOB_READY 3
-#define FILE_JOB_TRANSFERRING 4
-#define FILE_IO_MAX_CHUNK_BYTES 0x8000
 
 /* Completion node drained by fileManDispatchDone. */
 typedef struct FileCbNode {
@@ -160,9 +157,6 @@ void fileReqClearSlotMetadataDirty(s32 request) {
 void fileReqMarkSlotMetadataDirty(s32 request) {
     D_003DC698[request].slotMetadataDirty = 1;
 }
-
-/* The flag-word alias advances by the full 0x64-byte request-entry stride. */
-#define FILE_REQ_WORDS_PER_ENTRY 0x19
 
 void fileReqClearSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
