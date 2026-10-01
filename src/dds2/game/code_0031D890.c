@@ -87,7 +87,17 @@ u32 *itfClaimFreeCompactSlot(CompactSlotPool *pool) {
     return (u32 *)0x0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031DFB8);
+/* Claim a compact slot and fill its two payload words; returns the slot (NULL if the pool is full). */
+u32 *func_0031DFB8(u32 first, u32 second, CompactSlotPool *pool) {
+    u32 *slot = itfClaimFreeCompactSlot(pool);
+
+    if (slot != NULL) {
+        slot[1] = first;
+        slot[2] = second;
+        slot[3] = 0;
+    }
+    return slot;
+}
 
 /* Return a compact slot to the pool without disturbing its other flags. */
 void itfReleaseCompactSlot(u32 *flags) {
