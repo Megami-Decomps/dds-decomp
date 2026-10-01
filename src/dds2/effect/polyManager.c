@@ -23,7 +23,7 @@ typedef struct PolyEntryPool {
 
 /* Point buffer of one strip; `count` is copied from the strip's own count. */
 typedef struct {
-    u32 points;   /* 0x0 */
+    f32 *points; /* 0x0 */
     u32 unk4;     /* 0x4 */
     s32 count;    /* 0x8 */
     u32 unkC;     /* 0xC */
@@ -81,7 +81,7 @@ void polyStripPushPairsApart(PolyScaledStripNode *obj, s32 index) {
     s32 pairs;
     s32 i;
 
-    p = (f32 *)entry->points;
+    p = entry->points;
     pairs = strip->count / 2;
     scale[0] = scale[1] = scale[2] = obj->scale;
     VU0_LOAD_VF(vf12, scale);
@@ -144,7 +144,7 @@ void polyBandLayoutRing(PolyBand *obj, s32 index, f32 width)
     s32 i;
 
     entry->count = strip->count;
-    out = (f32 *)entry->points;
+    out = entry->points;
     pairs = strip->count / 2;
     VEC3_SPLAT(wide, width);
     VEC3_SPLAT(narrow, width + obj->unkC8);
@@ -171,7 +171,7 @@ void polyBandLayoutRing(PolyBand *obj, s32 index, f32 width)
         out += 8;
         angle += step;
     }
-    first = (f32 *)entry->points;
+    first = entry->points;
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
@@ -209,7 +209,7 @@ void polyStripBuildScaledRing(PolyRing2 *obj, s32 index) {
     s32 i;
 
     entry->count = strip->count;
-    out = (f32 *)entry->points;
+    out = entry->points;
     pairs = strip->count >> 1;
     scale[2] = scale[1] = scale[0] = rec->width;
     lift[1] = obj->lift;
@@ -239,7 +239,7 @@ void polyStripBuildScaledRing(PolyRing2 *obj, s32 index) {
         out += 8;
         angle += step;
     }
-    first = (f32 *)entry->points;
+    first = entry->points;
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
@@ -323,7 +323,7 @@ void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
     s32 i;
 
     entry->count = strip->count;
-    out = (f32 *)entry->points;
+    out = entry->points;
     pairs = strip->count >> 1;
     func_003364B8(rec->unk0C);
     func_00336818(rec->unk10);
@@ -357,7 +357,7 @@ void polyBandLayoutRingRotated(PolyBandC *obj, s32 index)
         out += 8;
         angle += step;
     }
-    first = (f32 *)entry->points;
+    first = entry->points;
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
