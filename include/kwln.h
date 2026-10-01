@@ -9,7 +9,7 @@ typedef s32 (*TaskUpdate)(KwlnTask *task);
 typedef void (*TaskDestroy)(KwlnTask *task);
 
 struct KwlnTask {
-    u8 unk00[0x18];
+    char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
     s32 nameSum;             /* 0x18 */
     u32 flags;               /* 0x1C */
     u32 unk20;
