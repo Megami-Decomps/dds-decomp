@@ -2,6 +2,14 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
+extern s32 func_0010D6A0(void);
+extern void fldPlayFieldSeVolumePan(s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeSetRGB(s32, s32, s32);
+extern void fldReleaseActorTasksById(s32);
+extern u32 D_003CE3E0[][23];
+extern s32 D_0032E530[];
+
 extern u8 D_00337D00[];
 typedef struct FldNpcMotion {
     s32 defaultMotionId;
@@ -3704,15 +3712,59 @@ typedef struct FldTaskRecordWork {
     u32 key;
 } FldTaskRecordWork;
 
-extern s32 func_0010D6A0(void);
-extern void fldPlayFieldSeVolumePan(s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeSetRGB(s32, s32, s32);
-extern void fldReleaseActorTasksById(s32);
-extern u32 D_003CE3E0[][23];
-extern s32 D_0032E530[];
+void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
+    s32 index;
+    s32 kind;
+    s32 record;
+    FldActorEntry *entry;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldApplyActorEntryTrigger);
+    if (checkTaskRecord != 0) {
+        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D6A0())->key);
+        if (record == 0) {
+            return;
+        }
+        if (fldFindActorEntryByName((const char *)record) == 0) {
+            return;
+        }
+    }
+    index = D_003BAE64;
+    entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    kind = entry->kind;
+    if (kind == 1) {
+        if (entry->floor == D_0032E3C4[0] + 1) {
+            fldPlayFieldSeVolumePan(entry->sound);
+            fldReleaseActorTasksById(D_003CE3E0[index][1]);
+            return;
+        }
+    } else if (kind == 2) {
+        if (entry->floor == D_0032E3B0[5] + 1) {
+            s32 motion = entry->motion;
+
+            D_0032E3B0[94] = 1;
+            *(f32 *)&D_0032E3B0[93] = *(f32 *)&D_003CE3E0[index][11];
+            if (motion == 1) {
+                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                return;
+            }
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            return;
+        }
+    } else if (kind == 3) {
+        kwlnFadeSetRGB(0, 0, 0);
+        return;
+    } else if (kind == 5) {
+        if (entry->motion == 0) {
+            D_0032E530[0] = 0x64;
+        } else {
+            D_0032E530[0] = -0x64;
+        }
+    } else if (kind == 10) {
+    } else if (kind == 11) {
+    } else if (kind == 12) {
+    } else if (kind == 4) {
+        fldApplyPendingCameraHeading();
+    }
+}
 
 extern s32 func_00110ED0(u64, s32, void *);
 extern void func_001109B8(u64, s32);
