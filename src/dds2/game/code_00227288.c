@@ -67,7 +67,7 @@ extern s8 D_00453068[];
 typedef struct BattleRuntimeState {
     u32 flags;
     u16 state;
-    u8 unk_06;
+    u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     u8 pending;
     s8 active;
     u8 unk_09[3];
@@ -176,14 +176,6 @@ typedef struct BattleLinkedEffectState {
     f32 speed;
 } BattleLinkedEffectState;
 
-typedef struct BattleEffectContext {
-    u8 pad00[0x2A0];
-    u32 battleId;
-    u8 pad2A4[0x24];
-    u32 targetObject;
-    u8 pad2CC[0x44C];
-    BattleLinkedEffectState *effect;
-} BattleEffectContext;
 
 
 typedef struct BattleScriptTask {
@@ -272,48 +264,6 @@ typedef struct BtlLinkedCommand {
 } BtlLinkedCommand;
 
 
-typedef struct BtlState {
-    u8 unk_000[0x1E4];
-    s16 unk_1C0;
-    u8 unk_1C2[0x32];
-    u32 unk_1F4;
-    u8 unk_1F8[4];
-    u32 unk_1FC;
-    u8 unk_200[0x24];
-    BtlTask *tasks;
-    BtlUnit *units;
-    u8 unk_22C[0x20];
-    u16 unk_24C;
-    u8 unk_24E[0x2E];
-    s32 battleMode;
-    u8 unk_2A4[0x448];
-    s32 (*unk_6EC)();
-    u8 unk_6F0[0x28];
-    struct BattleLinkedEffectState *effect;
-    u8 unk_71C[0xC];
-    s32 unk_728;
-    s32 unk_72C;
-    u8 unk_730[8];
-    s32 unk_738;
-    s32 unk_73C;
-    u8 unk_740[8];
-    s32 unk_748;
-    u8 unk_74C[0x10];
-    s32 unk_75C;
-    u8 unk_760[8];
-    s32 unk_768;
-    s32 unk_76C;
-    u8 unk_770[8];
-    s32 unk_778;
-    u8 unk_77C[0x10];
-    s32 unk_78C;
-    s32 table0[0x30];
-    s32 table1[0x180];
-    s32 table2[0x60];
-    s8 unk_E0C;
-    u8 unk_E0D;
-    s16 unk_E0E;
-} BtlState;
 
 extern s32 btlHasEffectActor(void);
 
@@ -350,30 +300,6 @@ typedef struct BattleScriptOwner {
 } BattleScriptOwner;
 
 /* Battle state fields used while locating and launching battle script resources. */
-typedef struct BattleScriptResources {
-    u8 pad00[0x1E4];
-    s16 scriptGroup;          /* 0x1E4: selects the resource path */
-    u8 pad1E6[2];
-    u32 startedFlags;         /* 0x1E8 */
-    u32 eventFlags;           /* 0x1EC */
-    s16 eventSubstate;        /* 0x1F0 */
-    u8 pad1F2[2];
-    s32 eventAction;          /* 0x1F4 */
-    s32 eventResult;          /* 0x1F8 */
-    void *eventAuxData;       /* 0x1FC */
-    void *eventData;          /* 0x200 */
-    BtlUnit *eventActor;      /* 0x204 */
-    s32 sequenceBaseHandle;   /* 0x208 */
-    s32 resourceHandle;       /* 0x20C */
-    void *assetData;          /* 0x210 */
-    u8 pad214[4];
-    u32 resourceFlags;        /* 0x218 */
-    u8 pad21C[0x60];
-    u8 encounterMode;         /* 0x27C */
-    u8 pad27D[0x47];
-    BattleScriptOwner *scriptOwner; /* 0x2C4 */
-    s32 taskHandle;           /* 0x2C8 */
-} BattleScriptResources;
 
 typedef struct BattleGroupIdEntry {
     struct BattleGroupIdEntry *next;
@@ -464,7 +390,7 @@ void func_00227288(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleLinkedEffectState *effect = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *effect = ((BtlState *)func_001AA6F8())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -486,7 +412,7 @@ s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     if (!(unit->flags & 0x400)) {
         return code;
     }
-    if (((BattleEffectContext *)func_001AA6F8())->effect->active != 1) {
+    if (((BtlState *)func_001AA6F8())->effect->active != 1) {
         return code;
     }
     id = unit->mode;
@@ -568,7 +494,7 @@ s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
     if ((task->flags & 8) == 0) {
         return -1;
     }
-    effect = ((BattleEffectContext *)func_001AA6F8())->effect;
+    effect = ((BtlState *)func_001AA6F8())->effect;
     return effect->actor == (u32)task->unit ? 12 : -1;
 }
 
@@ -597,7 +523,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
 s32 btlIsEffectActor(u32 actor) {
-    BattleLinkedEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *state = ((BtlState *)func_001AA6F8())->effect;
     u32 active = state->actor;
     if (active != 0) {
         return active == actor;
@@ -820,8 +746,8 @@ s32 func_00228F20(BtlLinkedCommand *command) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_00228F48);
 
 u32 btlGetEffectActive(void) {
-    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
-    u32 battleId = battle->battleId;
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    u32 battleId = battle->battleMode;
     BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
@@ -834,8 +760,8 @@ u32 btlGetEffectActive(void) {
 }
 
 s32 btlHasEffectActor(void) {
-    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
-    u32 battleId = battle->battleId;
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    u32 battleId = battle->battleMode;
     BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
@@ -848,8 +774,8 @@ s32 btlHasEffectActor(void) {
 }
 
 u32 btlGetEffectValue(void) {
-    BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
-    u32 battleId = battle->battleId;
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    u32 battleId = battle->battleMode;
     BattleLinkedEffectState *state;
     if (battleId != 0x312) {
         return 0;
@@ -862,7 +788,7 @@ u32 btlGetEffectValue(void) {
 }
 
 u32 btlGetEffectActor(void) {
-    BattleLinkedEffectState *state = ((BattleEffectContext *)func_001AA6F8())->effect;
+    BattleLinkedEffectState *state = ((BtlState *)func_001AA6F8())->effect;
     return state->actor;
 }
 
@@ -888,9 +814,9 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
 
 void btlArmEventResourceTrigger(void) {
     u8 *puVar1;
-    BattleEffectContext *battle;
+    BtlState *battle;
 
-    battle = (BattleEffectContext *)func_001AA6F8();
+    battle = (BtlState *)func_001AA6F8();
     puVar1 = (u8 *)battle->effect;
     puVar1[1] = 1;
     *puVar1 = 0;
@@ -1038,10 +964,10 @@ void btlRunCleanupAndLog(void) {
 void btlReleaseBossData(void) {
     u8 *battle = (u8 *)func_001AA6F8();
     void (*cleanup)(void);
-    if ((((BattleScriptResources *)battle)->resourceFlags & 0x80000) == 0) {
+    if ((((BtlState *)battle)->battleFlags & 0x80000) == 0) {
         return;
     }
-    cleanup = *(void (**)(void))(battle + 0x5C8);
+    cleanup = ((BtlState *)battle)->bossCleanup;
     if (cleanup != 0) {
         cleanup();
     }
@@ -1050,76 +976,76 @@ void btlReleaseBossData(void) {
         sdfReleaseChipOrRetainedResource(((BtlState *)battle)->effect);
         ((BtlState *)battle)->effect = 0;
     }
-    ((BattleScriptResources *)battle)->resourceFlags &= ~0x80000;
+    ((BtlState *)battle)->battleFlags &= ~0x80000;
     btlBossDebugPrintf(D_0041B640);
 }
 
 s32 btlFindScriptResource(char *name) {
     char path[128];
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
-    if (battle->resourceHandle == 0) {
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    if (battle->scriptHandle == 0) {
         return -1;
     }
-    func_0035C860(path, D_0041B650, battle->scriptGroup, name);
-    return bfFindScriptIndexByName(battle->resourceHandle, path);
+    func_0035C860(path, D_0041B650, battle->eventTaskId, name);
+    return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
 void btlStartSkillEventTask(u32 skill) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     s32 handle;
-    if (battle->scriptGroup == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
-                            battle->resourceHandle, skill);
+    handle = scrCreateTaskForProcessId(((BattleScriptOwner *)battle->scriptOwner)->processNumber - 1,
+                            battle->scriptHandle, skill);
     scrSetCurrentActor(handle, 0);
     func_00101968((s32)battle->scriptOwner, handle);
-    battle->taskHandle = handle;
+    battle->scriptTask = handle;
 }
 
 s32 btlReleaseScriptResource(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
-    if (battle->scriptGroup == -1) {
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (kwlnTaskIsRegistered(battle->taskHandle) == 0) {
-        battle->taskHandle = 0;
+    if (kwlnTaskIsRegistered(battle->scriptTask) == 0) {
+        battle->scriptTask = 0;
         return 1;
     }
     return 0;
 }
 
 s32 btlCanStartPrimaryScriptTask(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
-    if (battle->scriptGroup == -1) {
+    BtlState *battle = (BtlState *)func_001AA6F8();
+    if (battle->eventTaskId == -1) {
         return 0;
     }
-    if (battle->startedFlags & 1) {
+    if (battle->scriptFlags & 1) {
         return 0;
     }
-    if (battle->resourceHandle == 0) {
+    if (battle->scriptHandle == 0) {
         return 0;
     }
     return btlFindScriptResource(D_00436D00) != -1;
 }
 
 void btlStartPrimaryScriptTask(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     s32 scriptId;
     s32 taskId;
-    if (battle->scriptGroup == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
     scriptId = btlFindScriptResource(D_00436D00);
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
-                            battle->resourceHandle, scriptId);
+    taskId = scrCreateTaskForProcessId(((BattleScriptOwner *)battle->scriptOwner)->processNumber - 1,
+                            battle->scriptHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
-    battle->taskHandle = taskId;
-    battle->startedFlags |= 1;
+    battle->scriptTask = taskId;
+    battle->scriptFlags |= 1;
 }
 
 s64 btlReleaseScriptResourceA(void) {
@@ -1127,37 +1053,37 @@ s64 btlReleaseScriptResourceA(void) {
 }
 
 s32 btlHasScriptResource(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
 
-    if (battle->scriptGroup == -1) {
+    if (battle->eventTaskId == -1) {
         return 0;
     }
-    if (battle->resourceHandle == 0) {
+    if (battle->scriptHandle == 0) {
         return 0;
     }
-    if ((battle->resourceFlags & 0x800) == 0 || battle->encounterMode != 1) {
+    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 1) {
         return 0;
     }
     return btlFindScriptResource(D_00436D08) != -1;
 }
 
 void btlStartSecondaryScriptTask(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     s32 scriptId;
     s32 taskId;
-    if (battle->scriptGroup == -1) {
+    if (battle->eventTaskId == -1) {
         return;
     }
     scriptId = btlFindScriptResource(D_00436D08);
     if (scriptId == -1) {
         return;
     }
-    taskId = scrCreateTaskForProcessId(battle->scriptOwner->processNumber - 1,
-                            battle->resourceHandle, scriptId);
+    taskId = scrCreateTaskForProcessId(((BattleScriptOwner *)battle->scriptOwner)->processNumber - 1,
+                            battle->scriptHandle, scriptId);
     scrSetCurrentActor(taskId, 0);
     func_00101968((s32)battle->scriptOwner, taskId);
-    battle->taskHandle = taskId;
-    battle->startedFlags |= 2;
+    battle->scriptTask = taskId;
+    battle->scriptFlags |= 2;
 }
 
 s64 btlReleaseScriptResourceB(void) {
@@ -1177,7 +1103,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022AF90);
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B108);
 
 void btlReleaseEventData(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     void *data;
     if ((battle->eventFlags & 2) == 0) {
         return;
@@ -1187,12 +1113,12 @@ void btlReleaseEventData(void) {
         func_001686F0(data);
         battle->eventData = 0;
     }
-    data = battle->eventAuxData;
+    data = battle->eventRequest;
     if (data != 0) {
         sndReleaseAllVoices(data);
-        battle->eventAuxData = 0;
+        battle->eventRequest = 0;
     }
-    battle->eventSubstate = 0;
+    battle->eventActive = 0;
     battle->eventAction = -1;
     battle->eventFlags &= ~2;
     btlBossDebugPrintf(D_0041B768);
@@ -1203,13 +1129,13 @@ INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B768);
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022B288);
 
 void btlReleaseEventAssets(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     void *data;
     btlReleaseEventData();
-    data = battle->assetData;
+    data = battle->eventAssets;
     if (data != 0) {
         func_003297C8(data);
-        battle->assetData = 0;
+        battle->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
 }
@@ -1219,7 +1145,7 @@ s32 btlCommandSelectEventAction(void) {
     s32 unitId = scrReadIntParameter(1);
     s32 action = scrReadIntParameter(2);
     BtlUnit *unit;
-    BattleScriptResources *battle;
+    BtlState *battle;
     s32 result;
     if (selector == 0) {
         unit = (BtlUnit *)btlFindUnitByModeClear(unitId);
@@ -1232,15 +1158,15 @@ s32 btlCommandSelectEventAction(void) {
     if ((unit->flags & 2) == 0) {
         return 1;
     }
-    battle = (BattleScriptResources *)func_001AA6F8();
-    result = evtFindTaskResourceEntryByKey(battle->scriptGroup, action);
+    battle = (BtlState *)func_001AA6F8();
+    result = evtFindTaskResourceEntryByKey(battle->eventTaskId, action);
     if (result == 0) {
         return 1;
     }
     battle->eventResult = result;
-    battle->eventActor = unit;
+    battle->eventUnit = unit;
     battle->eventAction = action;
-    battle->eventSubstate = 1;
+    battle->eventActive = 1;
     return 1;
 }
 
@@ -1305,11 +1231,11 @@ s32 btlCommandPlayUnitMotion(void) {
 }
 
 s32 btlCommandSetSequenceVolumePan(void) {
-    BattleScriptResources *battle = (BattleScriptResources *)func_001AA6F8();
+    BtlState *battle = (BtlState *)func_001AA6F8();
     s32 index = scrReadIntParameter(0);
-    if (func_00342168(battle->sequenceBaseHandle) != 0) {
-        sndSetSequenceVolumePan(battle->sequenceBaseHandle + index, 0x7f, 0x3f);
-        btlBossDebugPrintf(D_0041B7E0, battle->sequenceBaseHandle + index);
+    if (func_00342168(battle->sequenceHandle) != 0) {
+        sndSetSequenceVolumePan(battle->sequenceHandle + index, 0x7f, 0x3f);
+        btlBossDebugPrintf(D_0041B7E0, battle->sequenceHandle + index);
     }
     return 1;
 }
@@ -1319,8 +1245,8 @@ s32 func_0022B760(void) {
     BtlState *state = (BtlState *)func_001AA6F8();
     s32 value = 100;
 
-    if (state->unk_6EC != NULL) {
-        value = state->unk_6EC();
+    if (state->queryCallback != NULL) {
+        value = state->queryCallback();
     }
     scrSetIntegerReturnValue(value);
     return 1;
@@ -1442,10 +1368,10 @@ u32 btlCreateScriptResourceTask(u32 object, u32 group) {
 
 u32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
     if (record->frames == 0) {
-        BattleEffectContext *battle = (BattleEffectContext *)func_001AA6F8();
+        BtlState *battle = (BtlState *)func_001AA6F8();
         u32 object;
         btlStartSkillEventTask(record->group);
-        object = battle->targetObject;
+        object = battle->scriptTask;
         if (object != 0) {
             scrSetCurrentActor(object, record->object);
         }
@@ -1950,7 +1876,7 @@ INCLUDE_ASM(const s32, "game/code_00227288", func_0022D2F8);
 void btlInitFadeColors(void) {
     func_0022D040();
     D_00453060.color10 = 0x80808080;
-    if (D_00453060.unk_06 < 2) {
+    if (D_00453060.fadeMode < 2) {
         D_00453060.color14 = 0x20FFFFFF;
     } else {
         D_00453060.color14 = 0x00FFFFFF;
@@ -2045,7 +1971,7 @@ void btlClearRuntimeState(void) {
     memset(state, 0, sizeof(*state));
     state->flags = 0;
     state->state = 0;
-    state->unk_06 = 0;
+    state->fadeMode = 0;
     state->pending = 0;
     state->active = 0;
     state->options = 0;
@@ -2067,7 +1993,7 @@ void btlResetAsyncState(void) {
 
 void btlActivateRuntime(u8 condition) {
     BattleRuntimeState *battle = &D_00453060;
-    battle->unk_06 = condition;
+    battle->fadeMode = condition;
     battle->flags = 0;
     battle->state = 1;
     battle->active = 1;

@@ -74,78 +74,6 @@ extern s32 func_001A17F0(void);
 
 struct BattleModelEntry;
 
-typedef struct BtlState {
-    u8 unk_000[0x1C0];
-    s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
-    u8 unk_1C2[2];
-    u32 scriptFlags;      /* 0x1C4 */
-    u32 eventFlags;       /* 0x1C8 */
-    s16 eventActive;      /* 0x1CC */
-    u8 unk_1CE[2];
-    s32 eventAction;      /* 0x1D0 */
-    s32 eventResult;      /* 0x1D4 */
-    void *eventRequest;   /* 0x1D8 */
-    void *eventData;      /* 0x1DC */
-    BtlUnit *eventUnit;   /* 0x1E0 */
-    s32 sequenceHandle;   /* 0x1E4 */
-    s32 scriptHandle;     /* 0x1E8 */
-    void *eventAssets;    /* 0x1EC */
-    u8 unk_1F0[4];
-    u32 unk_1F4;
-    u8 unk_1F8[4];
-    u32 unk_1FC;
-    u8 unk_200[0x24];
-    BtlTask *tasks;
-    BtlUnit *units;
-    u8 unk_22C[0x14];
-    struct BattleModelEntry *modelEntries; /* 0x240: head of doubly-linked model list */
-    u8 unk_244[4];
-    u16 turnPhase;    /* 0x248 */
-    u8 unk_24A[2];
-    u16 mode;
-    u8 unk_24E[2];
-    s32 turnCount;    /* 0x250 */
-    u8 unk_254[4];
-    u8 eventReady;        /* 0x258 */
-    u8 unk_259[3];
-    u16 phase;            /* 0x25C */
-    u8 unk_25E[0x1E];
-    s32 battleMode;   /* 0x27C */
-    u8 unk_280[0x1C];
-    s32 scriptProcess;    /* 0x29C */
-    s32 scriptTask;       /* 0x2A0 */
-    u8 unk_2A4[0x2F0];
-    void (*bossCleanup)(void); /* 0x594 */
-    u8 unk_598[0x20];
-    s32 unk_5B8;
-    u8 unk_5BC[0x14];
-    void (*cleanup)(void); /* 0x5D0 */
-    u8 unk_5D4[0xC0];
-    struct BattleEffectState *effect;
-    u8 unk_698[0xC];
-    s32 unk_6A4;
-    s32 unk_6A8;
-    u8 unk_6AC[8];
-    s32 unk_6B4;
-    s32 unk_6B8;
-    u8 unk_6BC[8];
-    s32 unk_6C4;
-    u8 unk_6C8[0x10];
-    s32 unk_6D8;
-    u8 unk_6DC[8];
-    s32 unk_6E4;
-    s32 unk_6E8;
-    u8 unk_6EC[8];
-    s32 unk_6F4;
-    u8 unk_6F8[0x10];
-    s32 unk_708;
-    s32 table0[0x20];
-    s32 table1[0x180];
-    s32 table2[0x20];
-    s8 unk_E0C;
-    u8 unk_E0D;
-    s16 unk_E0E;
-} BtlState;
 
 extern s32 func_0020DC38();
 
@@ -317,7 +245,7 @@ extern char D_003A66D8[];
 void btlReleaseBossData(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     void (*cleanup)(void);
-    if ((battle->unk_1F4 & 0x80000) == 0) {
+    if ((battle->battleFlags & 0x80000) == 0) {
         return;
     }
     cleanup = battle->bossCleanup;
@@ -329,7 +257,7 @@ void btlReleaseBossData(void) {
         sdfReleaseChipOrRetainedResource(battle->effect);
         battle->effect = 0;
     }
-    battle->unk_1F4 &= ~0x80000;
+    battle->battleFlags &= ~0x80000;
     btlBossDebugPrintf(D_003A66D8);
 }
 
@@ -352,10 +280,10 @@ void btlStartSkillEventTask(s32 skill) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(battle->scriptProcess + 0x20) - 1,
+    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptProcess, handle);
+    func_00101A80(battle->scriptOwner, handle);
     battle->scriptTask = handle;
 }
 
@@ -400,10 +328,10 @@ void btlStartPrimaryScriptTask(void) {
     if (skill == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(battle->scriptProcess + 0x20) - 1,
+    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptProcess, handle);
+    func_00101A80(battle->scriptOwner, handle);
     battle->scriptTask = handle;
     battle->scriptFlags |= 1;
 }
@@ -423,7 +351,7 @@ s32 btlHasScriptResource(void) {
     if (battle->scriptHandle == 0) {
         return 0;
     }
-    if ((battle->unk_1F4 & 0x800) == 0 || battle->eventReady != 1) {
+    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 1) {
         return 0;
     }
     return btlFindScriptResource(D_003BB8C0) != -1;
@@ -440,10 +368,10 @@ void btlStartSecondaryScriptTask(void) {
     if (skill == -1) {
         return;
     }
-    handle = scrCreateTaskForProcessId(*(s32 *)(battle->scriptProcess + 0x20) - 1,
+    handle = scrCreateTaskForProcessId(*(s32 *)((u8 *)battle->scriptOwner + 0x20) - 1,
                             battle->scriptHandle, skill);
     scrSetCurrentActor(handle, 0);
-    func_00101A80(battle->scriptProcess, handle);
+    func_00101A80(battle->scriptOwner, handle);
     battle->scriptTask = handle;
     battle->scriptFlags |= 2;
 }

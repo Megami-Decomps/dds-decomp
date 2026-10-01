@@ -571,7 +571,7 @@ typedef struct FileQueue {
     f32 position[4];
     f32 quat[4];
     f32 scale;        /* 0x60 */
-    u8 unk64[4];
+    u32 color;         /* 0x64: modulation colour */
     /* 0x68: bitmask; bits 0x60 select the rotation branch. Left as unk68 because
      * renaming it alone changes codegen in fileJobNotifyPair. The DDS2 twin
      * calls this transformWord. */

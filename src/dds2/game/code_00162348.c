@@ -484,9 +484,9 @@ typedef struct ParDrawState {
     s16 width;    /* 0x00 */
     s16 height;   /* 0x02 */
     s16 flags;    /* 0x04 */
-    u8 pad6[2];
-    s32 unk8;
-    void *unkC;
+    u8 pad06[2];
+    s32 unk08;
+    void *unk0C;
     s32 unk10;
     u8 pad14[0xC];
     s32 unk20;
@@ -1079,7 +1079,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     state.flags = 0x4000;
     state.unk10 = cmd->unk8;
     state.unk20 = cmd->unkC;
-    state.unk8 = cmd->unk4;
+    state.unk08 = cmd->unk4;
     while (remaining >= 0x30) {
         remaining -= 0x30;
         sdfAppendPacket(list, func_00167A10(&state));
