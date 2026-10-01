@@ -129,6 +129,88 @@ class EncountTable:
     visuals: tuple[VisualRow, ...]
 
 
+@dataclass(frozen=True)
+class UnitProfile:
+    name: str
+    party_size: int
+
+
+UNIT_PROFILES = {
+    profile.name: profile
+    for profile in (
+        UnitProfile("dds1", 0x1A4),
+        UnitProfile("dds2", 0x1C4),
+    )
+}
+
+
+@dataclass(frozen=True)
+class PartyTemplate:
+    flags: int = 0
+    affinity_source: int = 0
+    unit_id: int = 0
+    hp: int = 0
+    max_hp: int = 0
+    mp: int = 0
+    max_mp: int = 0
+    status: int = 0
+    experience: int = 0
+    level: int = 0
+    stats: tuple[int, ...] = (0,) * 5
+    unknown_1b_21: bytes = bytes(7)
+    skills: tuple[int, ...] = (0,) * 24
+    equipped_bullet: int = 0
+    unknown_54: int = 0
+    current_profile: int = 0
+    tail: bytes = b""
+
+
+@dataclass(frozen=True)
+class AffinityRow:
+    values: tuple[int, ...] = (0,) * 19
+
+
+@dataclass(frozen=True)
+class EnemyTemplate:
+    flags: int = 0
+    race: int = 0
+    level: int = 0
+    hp: int = 0
+    max_hp: int = 0
+    mp: int = 0
+    max_mp: int = 0
+    growth_profile: int = 0
+    unknown_0f: int = 0
+    stats: tuple[int, ...] = (0,) * 5
+    summon_category: int = 0
+    unknown_16_17: bytes = bytes(2)
+    skills: tuple[int, ...] = (0,) * 8
+    macca: int = 0
+    experience: int = 0
+    atma_points: int = 0
+    atma_bonus: int = 0
+    unknown_34_3d: bytes = bytes(10)
+    drop_items: tuple[int, ...] = (0, 0)
+    drop_rates: tuple[int, ...] = (0, 0)
+    conditional_drop_flag: int = 0
+    conditional_drop_item: int = 0
+    conditional_drop_rate: int = 0
+    attack_attribute: int = 0
+    attack_repeats: int = 0
+    result_parameter: int = 0
+    tail: bytes = bytes(3)
+
+
+@dataclass(frozen=True)
+class UnitTable:
+    profile: UnitProfile
+    party: tuple[PartyTemplate, ...]
+    party_affinities: tuple[AffinityRow, ...]
+    alternate_affinities: tuple[AffinityRow, ...]
+    enemies: tuple[EnemyTemplate, ...]
+    enemy_affinities: tuple[AffinityRow, ...]
+
+
 def default_zone(profile: EncountProfile) -> Zone:
     return Zone(pools=(EncounterPool(),) * profile.pool_count)
 
@@ -176,6 +258,10 @@ def _u16(value: int, context: str) -> int:
 
 def _u32(value: int, context: str) -> int:
     return _range(value, 0, 0xFFFFFFFF, context)
+
+
+def _s32(value: int, context: str) -> int:
+    return _range(value, -0x80000000, 0x7FFFFFFF, context)
 
 
 def _split_segments(data: bytes) -> tuple[bytes, ...]:
@@ -512,6 +598,253 @@ def encode_encount(table: EncountTable) -> bytes:
     )
 
 
+def _unit_profile_from_segments(segments: tuple[bytes, ...]) -> UnitProfile:
+    if len(segments) != 5:
+        raise BattleTableError(f"UNIT needs five segments, found {len(segments)}")
+    for profile in UNIT_PROFILES.values():
+        sizes = (16 * profile.party_size, 0x4C0, 0x4C0, 0x7200, 0x7200)
+        if tuple(map(len, segments)) == sizes:
+            return profile
+    sizes = ", ".join(f"{len(segment):#x}" for segment in segments)
+    raise BattleTableError(f"unsupported UNIT segment sizes: {sizes}")
+
+
+def _decode_affinities(data: bytes) -> tuple[AffinityRow, ...]:
+    if len(data) % 0x4C:
+        raise BattleTableError(f"affinity segment has invalid size {len(data):#x}")
+    return tuple(
+        AffinityRow(struct.unpack_from("<19I", data, offset))
+        for offset in range(0, len(data), 0x4C)
+    )
+
+
+def decode_unit(data: bytes) -> UnitTable:
+    """Decode and validate a retail DDS1 or DDS2 ``UNIT.TBL``."""
+
+    segments = _split_segments(data)
+    profile = _unit_profile_from_segments(segments)
+    party = []
+    for index in range(16):
+        row = segments[0][
+            index * profile.party_size : (index + 1) * profile.party_size
+        ]
+        party.append(
+            PartyTemplate(
+                flags=struct.unpack_from("<H", row, 0)[0],
+                affinity_source=struct.unpack_from("<H", row, 2)[0],
+                unit_id=struct.unpack_from("<H", row, 4)[0],
+                hp=struct.unpack_from("<H", row, 6)[0],
+                max_hp=struct.unpack_from("<H", row, 8)[0],
+                mp=struct.unpack_from("<H", row, 0xA)[0],
+                max_mp=struct.unpack_from("<H", row, 0xC)[0],
+                status=struct.unpack_from("<H", row, 0xE)[0],
+                experience=struct.unpack_from("<I", row, 0x10)[0],
+                level=struct.unpack_from("<H", row, 0x14)[0],
+                stats=tuple(row[0x16:0x1B]),
+                unknown_1b_21=row[0x1B:0x22],
+                skills=struct.unpack_from("<24H", row, 0x22),
+                equipped_bullet=struct.unpack_from("<H", row, 0x52)[0],
+                unknown_54=row[0x54],
+                current_profile=row[0x55],
+                tail=row[0x56:],
+            )
+        )
+
+    enemies = []
+    for offset in range(0, len(segments[3]), 0x4C):
+        row = segments[3][offset : offset + 0x4C]
+        enemies.append(
+            EnemyTemplate(
+                flags=struct.unpack_from("<I", row, 0)[0],
+                race=row[4],
+                level=row[5],
+                hp=struct.unpack_from("<H", row, 6)[0],
+                max_hp=struct.unpack_from("<H", row, 8)[0],
+                mp=struct.unpack_from("<H", row, 0xA)[0],
+                max_mp=struct.unpack_from("<H", row, 0xC)[0],
+                growth_profile=struct.unpack_from("<b", row, 0xE)[0],
+                unknown_0f=row[0xF],
+                stats=tuple(row[0x10:0x15]),
+                summon_category=row[0x15],
+                unknown_16_17=row[0x16:0x18],
+                skills=struct.unpack_from("<8H", row, 0x18),
+                macca=struct.unpack_from("<i", row, 0x28)[0],
+                experience=struct.unpack_from("<H", row, 0x2C)[0],
+                atma_points=struct.unpack_from("<H", row, 0x2E)[0],
+                atma_bonus=struct.unpack_from("<I", row, 0x30)[0],
+                unknown_34_3d=row[0x34:0x3E],
+                drop_items=tuple(row[0x3E:0x40]),
+                drop_rates=tuple(row[0x40:0x42]),
+                conditional_drop_flag=struct.unpack_from("<H", row, 0x42)[0],
+                conditional_drop_item=row[0x44],
+                conditional_drop_rate=row[0x45],
+                attack_attribute=struct.unpack_from("<b", row, 0x46)[0],
+                attack_repeats=row[0x47],
+                result_parameter=row[0x48],
+                tail=row[0x49:0x4C],
+            )
+        )
+    return UnitTable(
+        profile,
+        tuple(party),
+        _decode_affinities(segments[1]),
+        _decode_affinities(segments[2]),
+        tuple(enemies),
+        _decode_affinities(segments[4]),
+    )
+
+
+def default_unit(profile: UnitProfile) -> UnitTable:
+    return UnitTable(
+        profile,
+        tuple(PartyTemplate(tail=bytes(profile.party_size - 0x56)) for _ in range(16)),
+        (AffinityRow(),) * 16,
+        (AffinityRow(),) * 16,
+        (EnemyTemplate(),) * 384,
+        (AffinityRow(),) * 384,
+    )
+
+
+def _encode_affinities(rows: tuple[AffinityRow, ...], count: int, context: str) -> bytes:
+    if len(rows) != count:
+        raise BattleTableError(f"{context} needs {count} rows, found {len(rows)}")
+    output = bytearray(count * 0x4C)
+    for index, row in enumerate(rows):
+        if len(row.values) != 19:
+            raise BattleTableError(f"{context} {index} needs 19 values")
+        struct.pack_into(
+            "<19I",
+            output,
+            index * 0x4C,
+            *(_u32(value, f"{context} {index} value") for value in row.values),
+        )
+    return bytes(output)
+
+
+def encode_unit(table: UnitTable) -> bytes:
+    """Encode one UNIT model to its exact physical profile."""
+
+    profile = UNIT_PROFILES.get(table.profile.name)
+    if profile != table.profile:
+        raise BattleTableError(f"unknown or modified UNIT profile {table.profile.name!r}")
+    if len(table.party) != 16:
+        raise BattleTableError(f"UNIT needs 16 party templates, found {len(table.party)}")
+    if len(table.enemies) != 384:
+        raise BattleTableError(f"UNIT needs 384 enemy templates, found {len(table.enemies)}")
+
+    party_data = bytearray(16 * profile.party_size)
+    for index, row in enumerate(table.party):
+        context = f"party {index}"
+        if len(row.stats) != 5 or len(row.skills) != 24:
+            raise BattleTableError(f"{context} has invalid stats or skills")
+        if len(row.unknown_1b_21) != 7:
+            raise BattleTableError(f"{context} unknown_1b_21 needs 7 bytes")
+        if len(row.tail) != profile.party_size - 0x56:
+            raise BattleTableError(
+                f"{context} tail needs {profile.party_size - 0x56} bytes"
+            )
+        offset = index * profile.party_size
+        struct.pack_into(
+            "<8HIH5B",
+            party_data,
+            offset,
+            _u16(row.flags, f"{context} flags"),
+            _u16(row.affinity_source, f"{context} affinity source"),
+            _u16(row.unit_id, f"{context} unit"),
+            _u16(row.hp, f"{context} hp"),
+            _u16(row.max_hp, f"{context} max_hp"),
+            _u16(row.mp, f"{context} mp"),
+            _u16(row.max_mp, f"{context} max_mp"),
+            _u16(row.status, f"{context} status"),
+            _u32(row.experience, f"{context} experience"),
+            _u16(row.level, f"{context} level"),
+            *(_u8(value, f"{context} stat") for value in row.stats),
+        )
+        party_data[offset + 0x1B : offset + 0x22] = row.unknown_1b_21
+        struct.pack_into(
+            "<24H",
+            party_data,
+            offset + 0x22,
+            *(_u16(value, f"{context} skill") for value in row.skills),
+        )
+        struct.pack_into(
+            "<HBB",
+            party_data,
+            offset + 0x52,
+            _u16(row.equipped_bullet, f"{context} bullet"),
+            _u8(row.unknown_54, f"{context} unknown_54"),
+            _u8(row.current_profile, f"{context} current_profile"),
+        )
+        party_data[offset + 0x56 : offset + profile.party_size] = row.tail
+
+    enemy_data = bytearray(384 * 0x4C)
+    for index, row in enumerate(table.enemies):
+        context = f"enemy {index}"
+        if len(row.stats) != 5 or len(row.skills) != 8:
+            raise BattleTableError(f"{context} has invalid stats or skills")
+        if len(row.unknown_16_17) != 2 or len(row.unknown_34_3d) != 10:
+            raise BattleTableError(f"{context} has invalid unknown byte fields")
+        if len(row.drop_items) != 2 or len(row.drop_rates) != 2 or len(row.tail) != 3:
+            raise BattleTableError(f"{context} has invalid drop or tail fields")
+        offset = index * 0x4C
+        struct.pack_into(
+            "<IBB4HbB5BB",
+            enemy_data,
+            offset,
+            _u32(row.flags, f"{context} flags"),
+            _u8(row.race, f"{context} race"),
+            _u8(row.level, f"{context} level"),
+            _u16(row.hp, f"{context} hp"),
+            _u16(row.max_hp, f"{context} max_hp"),
+            _u16(row.mp, f"{context} mp"),
+            _u16(row.max_mp, f"{context} max_mp"),
+            _s8(row.growth_profile, f"{context} growth_profile"),
+            _u8(row.unknown_0f, f"{context} unknown_0f"),
+            *(_u8(value, f"{context} stat") for value in row.stats),
+            _u8(row.summon_category, f"{context} summon_category"),
+        )
+        enemy_data[offset + 0x16 : offset + 0x18] = row.unknown_16_17
+        struct.pack_into(
+            "<8HiHHI",
+            enemy_data,
+            offset + 0x18,
+            *(_u16(value, f"{context} skill") for value in row.skills),
+            _s32(row.macca, f"{context} macca"),
+            _u16(row.experience, f"{context} experience"),
+            _u16(row.atma_points, f"{context} atma_points"),
+            _u32(row.atma_bonus, f"{context} atma_bonus"),
+        )
+        enemy_data[offset + 0x34 : offset + 0x3E] = row.unknown_34_3d
+        enemy_data[offset + 0x3E : offset + 0x40] = bytes(
+            _u8(value, f"{context} drop item") for value in row.drop_items
+        )
+        enemy_data[offset + 0x40 : offset + 0x42] = bytes(
+            _u8(value, f"{context} drop rate") for value in row.drop_rates
+        )
+        struct.pack_into(
+            "<HBBbBB",
+            enemy_data,
+            offset + 0x42,
+            _u16(row.conditional_drop_flag, f"{context} conditional drop flag"),
+            _u8(row.conditional_drop_item, f"{context} conditional drop item"),
+            _u8(row.conditional_drop_rate, f"{context} conditional drop rate"),
+            _s8(row.attack_attribute, f"{context} attack attribute"),
+            _u8(row.attack_repeats, f"{context} attack repeats"),
+            _u8(row.result_parameter, f"{context} result parameter"),
+        )
+        enemy_data[offset + 0x49 : offset + 0x4C] = row.tail
+
+    return _join_segments(
+        (
+            bytes(party_data),
+            _encode_affinities(table.party_affinities, 16, "party affinity"),
+            _encode_affinities(table.alternate_affinities, 16, "alternate affinity"),
+            bytes(enemy_data),
+            _encode_affinities(table.enemy_affinities, 384, "enemy affinity"),
+        )
+    )
+
+
 def _tokens(line: str, line_number: int) -> list[str]:
     try:
         return shlex.split(line, comments=True, posix=True)
@@ -557,6 +890,165 @@ def _index(text: str, line_number: int, count: int, context: str) -> int:
 
 def _value(fields: dict[str, str], key: str, base: int, line: int) -> int:
     return _integer(fields[key], line, key) if key in fields else base
+
+
+def _bytes_field(
+    fields: dict[str, str], key: str, size: int, line_number: int
+) -> bytes:
+    if key not in fields:
+        return bytes(size)
+    try:
+        value = bytes.fromhex(fields[key])
+    except ValueError as exc:
+        raise BattleTableError(f"line {line_number}: invalid hexadecimal {key}") from exc
+    if len(value) != size:
+        raise BattleTableError(f"line {line_number}: {key} needs {size} bytes")
+    return value
+
+
+def _sized_list(
+    fields: dict[str, str], key: str, size: int, line_number: int
+) -> tuple[int, ...]:
+    values = _int_list(fields.get(key, ""), line_number, key)
+    if len(values) > size:
+        raise BattleTableError(f"line {line_number}: {key} has more than {size} values")
+    return values + (0,) * (size - len(values))
+
+
+def parse_unit_source(text: str) -> UnitTable:
+    """Assemble UNIT source on top of the selected profile's zero template."""
+
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(text.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        raise BattleTableError("empty battle table source")
+    first_number, first_line = meaningful[0]
+    first = _tokens(first_line, first_number)
+    if len(first) != 4 or first[:2] != ["battle-table", "1"]:
+        raise BattleTableError(
+            "source must begin with 'battle-table 1 kind=unit profile=PROFILE'"
+        )
+    header = _fields(first[2:], first_number, {"kind", "profile"}, "header")
+    if header.get("kind") != "unit":
+        raise BattleTableError("UNIT source needs kind=unit")
+    try:
+        profile = UNIT_PROFILES[header["profile"]]
+    except KeyError as exc:
+        raise BattleTableError(f"unknown UNIT profile {header.get('profile')!r}") from exc
+
+    model = default_unit(profile)
+    party = list(model.party)
+    party_affinities = list(model.party_affinities)
+    alternate_affinities = list(model.alternate_affinities)
+    enemies = list(model.enemies)
+    enemy_affinities = list(model.enemy_affinities)
+    affinity_targets = {
+        "party-affinity": party_affinities,
+        "alternate-affinity": alternate_affinities,
+        "enemy-affinity": enemy_affinities,
+    }
+    seen: set[tuple[str, int]] = set()
+
+    for line_number, line in meaningful[1:]:
+        tokens = _tokens(line, line_number)
+        directive = tokens[0]
+        if len(tokens) < 2:
+            raise BattleTableError(f"line {line_number}: {directive} needs an index")
+        count = 384 if directive in {"enemy", "enemy-affinity"} else 16
+        index = _index(tokens[1], line_number, count, f"{directive} index")
+        key = (directive, index)
+        if key in seen:
+            raise BattleTableError(f"line {line_number}: duplicate {directive} {index}")
+        seen.add(key)
+
+        if directive == "party":
+            allowed = {
+                "flags", "unit", "hp", "max_hp", "mp", "max_mp", "status",
+                "affinity_source",
+                "experience", "level", "stats", "unknown_1b_21", "skills",
+                "bullet", "unknown_54", "current_profile", "tail",
+            }
+            fields = _fields(tokens[2:], line_number, allowed, directive)
+            party[index] = PartyTemplate(
+                flags=_value(fields, "flags", 0, line_number),
+                affinity_source=_value(fields, "affinity_source", 0, line_number),
+                unit_id=_value(fields, "unit", 0, line_number),
+                hp=_value(fields, "hp", 0, line_number),
+                max_hp=_value(fields, "max_hp", 0, line_number),
+                mp=_value(fields, "mp", 0, line_number),
+                max_mp=_value(fields, "max_mp", 0, line_number),
+                status=_value(fields, "status", 0, line_number),
+                experience=_value(fields, "experience", 0, line_number),
+                level=_value(fields, "level", 0, line_number),
+                stats=_sized_list(fields, "stats", 5, line_number),
+                unknown_1b_21=_bytes_field(fields, "unknown_1b_21", 7, line_number),
+                skills=_sized_list(fields, "skills", 24, line_number),
+                equipped_bullet=_value(fields, "bullet", 0, line_number),
+                unknown_54=_value(fields, "unknown_54", 0, line_number),
+                current_profile=_value(fields, "current_profile", 0, line_number),
+                tail=_bytes_field(fields, "tail", profile.party_size - 0x56, line_number),
+            )
+        elif directive in affinity_targets:
+            fields = _fields(tokens[2:], line_number, {"values"}, directive)
+            affinity_targets[directive][index] = AffinityRow(
+                _sized_list(fields, "values", 19, line_number)
+            )
+        elif directive == "enemy":
+            allowed = {
+                "flags", "race", "level", "hp", "max_hp", "mp", "max_mp",
+                "growth", "unknown_0f", "stats", "summon_category",
+                "unknown_16_17", "skills", "macca", "experience", "atma_points",
+                "atma_bonus", "unknown_34_3d", "drop_items", "drop_rates",
+                "conditional_drop", "attack_attribute", "attack_repeats",
+                "result_parameter", "tail",
+            }
+            fields = _fields(tokens[2:], line_number, allowed, directive)
+            conditional = _sized_list(fields, "conditional_drop", 3, line_number)
+            enemies[index] = EnemyTemplate(
+                flags=_value(fields, "flags", 0, line_number),
+                race=_value(fields, "race", 0, line_number),
+                level=_value(fields, "level", 0, line_number),
+                hp=_value(fields, "hp", 0, line_number),
+                max_hp=_value(fields, "max_hp", 0, line_number),
+                mp=_value(fields, "mp", 0, line_number),
+                max_mp=_value(fields, "max_mp", 0, line_number),
+                growth_profile=_value(fields, "growth", 0, line_number),
+                unknown_0f=_value(fields, "unknown_0f", 0, line_number),
+                stats=_sized_list(fields, "stats", 5, line_number),
+                summon_category=_value(fields, "summon_category", 0, line_number),
+                unknown_16_17=_bytes_field(fields, "unknown_16_17", 2, line_number),
+                skills=_sized_list(fields, "skills", 8, line_number),
+                macca=_value(fields, "macca", 0, line_number),
+                experience=_value(fields, "experience", 0, line_number),
+                atma_points=_value(fields, "atma_points", 0, line_number),
+                atma_bonus=_value(fields, "atma_bonus", 0, line_number),
+                unknown_34_3d=_bytes_field(fields, "unknown_34_3d", 10, line_number),
+                drop_items=_sized_list(fields, "drop_items", 2, line_number),
+                drop_rates=_sized_list(fields, "drop_rates", 2, line_number),
+                conditional_drop_flag=conditional[0],
+                conditional_drop_item=conditional[1],
+                conditional_drop_rate=conditional[2],
+                attack_attribute=_value(fields, "attack_attribute", 0, line_number),
+                attack_repeats=_value(fields, "attack_repeats", 0, line_number),
+                result_parameter=_value(fields, "result_parameter", 0, line_number),
+                tail=_bytes_field(fields, "tail", 3, line_number),
+            )
+        else:
+            raise BattleTableError(f"line {line_number}: unknown directive {directive!r}")
+
+    result = UnitTable(
+        profile,
+        tuple(party),
+        tuple(party_affinities),
+        tuple(alternate_affinities),
+        tuple(enemies),
+        tuple(enemy_affinities),
+    )
+    encode_unit(result)
+    return result
 
 
 def parse_encount_source(text: str) -> EncountTable:
@@ -1021,6 +1513,112 @@ def render_encount_source(table: EncountTable) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _append_hex(fields: list[str], key: str, value: int, default: int = 0) -> None:
+    if value != default:
+        fields.append(f"{key}={value:#x}")
+
+
+def _append_bytes(fields: list[str], key: str, value: bytes) -> None:
+    if any(value):
+        fields.append(f"{key}={value.hex()}")
+
+
+def _packed_list(values: tuple[int, ...]) -> str:
+    return ",".join(str(value) if value <= 0xFFFF else f"{value:#x}" for value in values)
+
+
+def render_unit_source(table: UnitTable) -> str:
+    """Render compact canonical UNIT source relative to the selected profile."""
+
+    encode_unit(table)
+    lines = [f"battle-table 1 kind=unit profile={table.profile.name}", ""]
+    empty_party = PartyTemplate(tail=bytes(table.profile.party_size - 0x56))
+    for index, row in enumerate(table.party):
+        if row == empty_party:
+            continue
+        fields: list[str] = []
+        _append_hex(fields, "flags", row.flags)
+        _append(fields, "affinity_source", row.affinity_source)
+        _append(fields, "unit", row.unit_id)
+        _append(fields, "hp", row.hp)
+        _append(fields, "max_hp", row.max_hp)
+        _append(fields, "mp", row.mp)
+        _append(fields, "max_mp", row.max_mp)
+        _append_hex(fields, "status", row.status)
+        _append(fields, "experience", row.experience)
+        _append(fields, "level", row.level)
+        if any(row.stats):
+            fields.append(f"stats={_list(row.stats)}")
+        _append_bytes(fields, "unknown_1b_21", row.unknown_1b_21)
+        skills = _trimmed(row.skills)
+        if skills:
+            fields.append(f"skills={_list(skills)}")
+        _append(fields, "bullet", row.equipped_bullet)
+        _append(fields, "unknown_54", row.unknown_54)
+        _append(fields, "current_profile", row.current_profile)
+        _append_bytes(fields, "tail", row.tail)
+        lines.append(f"party {index} {' '.join(fields)}")
+    lines.append("")
+
+    affinity_families = (
+        ("party-affinity", table.party_affinities),
+        ("alternate-affinity", table.alternate_affinities),
+    )
+    for directive, rows in affinity_families:
+        for index, row in enumerate(rows):
+            if row == AffinityRow():
+                continue
+            values = _trimmed(row.values)
+            lines.append(f"{directive} {index} values={_packed_list(values)}")
+        lines.append("")
+
+    for index, row in enumerate(table.enemies):
+        if row != EnemyTemplate():
+            fields = []
+            _append_hex(fields, "flags", row.flags)
+            _append(fields, "race", row.race)
+            _append(fields, "level", row.level)
+            _append(fields, "hp", row.hp)
+            _append(fields, "max_hp", row.max_hp)
+            _append(fields, "mp", row.mp)
+            _append(fields, "max_mp", row.max_mp)
+            _append(fields, "growth", row.growth_profile)
+            _append(fields, "unknown_0f", row.unknown_0f)
+            if any(row.stats):
+                fields.append(f"stats={_list(row.stats)}")
+            _append(fields, "summon_category", row.summon_category)
+            _append_bytes(fields, "unknown_16_17", row.unknown_16_17)
+            skills = _trimmed(row.skills)
+            if skills:
+                fields.append(f"skills={_list(skills)}")
+            _append(fields, "macca", row.macca)
+            _append(fields, "experience", row.experience)
+            _append(fields, "atma_points", row.atma_points)
+            _append(fields, "atma_bonus", row.atma_bonus)
+            _append_bytes(fields, "unknown_34_3d", row.unknown_34_3d)
+            if any(row.drop_items):
+                fields.append(f"drop_items={_list(row.drop_items)}")
+            if any(row.drop_rates):
+                fields.append(f"drop_rates={_list(row.drop_rates)}")
+            conditional = (
+                row.conditional_drop_flag,
+                row.conditional_drop_item,
+                row.conditional_drop_rate,
+            )
+            if any(conditional):
+                fields.append(f"conditional_drop={_list(conditional)}")
+            _append(fields, "attack_attribute", row.attack_attribute)
+            _append(fields, "attack_repeats", row.attack_repeats)
+            _append(fields, "result_parameter", row.result_parameter)
+            _append_bytes(fields, "tail", row.tail)
+            lines.append(f"enemy {index} {' '.join(fields)}")
+        affinity = table.enemy_affinities[index]
+        if affinity != AffinityRow():
+            values = _trimmed(affinity.values)
+            lines.append(f"enemy-affinity {index} values={_packed_list(values)}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _read(path: Path) -> bytes:
     try:
         return path.read_bytes()
@@ -1039,8 +1637,17 @@ def _write_text(path: Path, text: str) -> None:
 
 
 def _command_disassemble(args: argparse.Namespace) -> None:
-    model = decode_encount(_read(args.input))
-    _write_text(args.output, render_encount_source(model))
+    data = _read(args.input)
+    segment_count = len(_split_segments(data))
+    if segment_count == 6:
+        source = render_encount_source(decode_encount(data))
+    elif segment_count == 5:
+        source = render_unit_source(decode_unit(data))
+    else:
+        raise BattleTableError(
+            f"unsupported battle table with {segment_count} segments"
+        )
+    _write_text(args.output, source)
 
 
 def _command_assemble(args: argparse.Namespace) -> None:
@@ -1048,7 +1655,25 @@ def _command_assemble(args: argparse.Namespace) -> None:
         source = args.input.read_text(encoding="utf-8")
     except OSError as exc:
         raise BattleTableError(f"cannot read {args.input}: {exc}") from exc
-    _write_bytes(args.output, encode_encount(parse_encount_source(source)))
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(source.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        raise BattleTableError("empty battle table source")
+    line_number, line = meaningful[0]
+    tokens = _tokens(line, line_number)
+    if len(tokens) != 4 or tokens[:2] != ["battle-table", "1"]:
+        raise BattleTableError("invalid battle table source header")
+    header = _fields(tokens[2:], line_number, {"kind", "profile"}, "header")
+    if header.get("kind") == "encounter":
+        data = encode_encount(parse_encount_source(source))
+    elif header.get("kind") == "unit":
+        data = encode_unit(parse_unit_source(source))
+    else:
+        raise BattleTableError(f"unsupported battle table kind {header.get('kind')!r}")
+    _write_bytes(args.output, data)
 
 
 def main(argv: list[str] | None = None) -> int:
