@@ -1,0 +1,57 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e619_001 reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+
+code
+e619_001:
+  PROC e619_001
+  PUSHIS 17
+  COMM 0x0008
+  COMM 0x01e8
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x000f
+  COMM 0x0043
+  COMM 0x0099
+  PUSHIS 1
+  PUSHIS 619
+  COMM 0x00aa
+  PUSHREG
+  COMM 0x00a7
+  PUSHIS 0
+  PUSHIX 0x00c8
+  EQ
+  IF _2
+  PUSHIS 500
+  COMM 0x0008
+  PUSHIS 501
+  COMM 0x0009
+  GOTO _1
+_2:
+  PUSHIS 500
+  COMM 0x0009
+  PUSHIS 501
+  COMM 0x0008
+  GOTO _1
+_1:
+  COMM 0x0043
+  COMM 0x0099
+  COMM 0x0051
+  PUSHIS 620
+  COMM 0x0066
+  COMM 0x002e
+  END
+end
+
+messages
+end
+
+strings
+  zero 240
+end

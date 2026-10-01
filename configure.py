@@ -272,19 +272,26 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         n.build(str(stamp), "check", f"config/{version}/checksum.sha1", implicit=[str(image)])
         version_outputs = [str(stamp)]
 
-        script_manifest = Path("config") / version / "event_scripts.sha1"
-        script_source_dir = Path("src") / version / "scripts" / "event"
+        all_scripts_manifest = Path("config") / version / "scripts.sha1"
+        event_scripts_manifest = Path("config") / version / "event_scripts.sha1"
+        if (ROOT / all_scripts_manifest).exists():
+            script_manifest = all_scripts_manifest
+            script_source_dir = Path("src") / version / "scripts"
+            script_output_dir = Path("build") / version / "scripts"
+            script_sources = sorted((ROOT / script_source_dir).rglob("*.bfasm"))
+            script_stamp = script_output_dir / "scripts.ok"
+        else:
+            script_manifest = event_scripts_manifest
+            script_source_dir = Path("src") / version / "scripts" / "event"
+            script_output_dir = Path("build") / version / "scripts" / "event"
+            script_sources = sorted((ROOT / script_source_dir).glob("*.bfasm"))
+            script_stamp = script_output_dir / "event.ok"
         if (ROOT / script_manifest).exists():
             script_outputs = []
-            for source in sorted((ROOT / script_source_dir).glob("*.bfasm")):
+            for source in script_sources:
                 source = source.relative_to(ROOT)
-                output = (
-                    Path("build")
-                    / version
-                    / "scripts"
-                    / "event"
-                    / source.with_suffix(".bf").name
-                )
+                relative = source.relative_to(script_source_dir).with_suffix(".bf")
+                output = script_output_dir / relative
                 n.build(
                     str(output),
                     "flw0",
@@ -297,7 +304,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     variables={"outdir": str(output.parent)},
                 )
                 script_outputs.append(str(output))
-            script_stamp = Path("build") / version / "scripts" / "event.ok"
             n.build(str(script_stamp), "check", str(script_manifest), implicit=script_outputs)
             n.build(f"{version}-scripts", "phony", str(script_stamp))
             version_outputs.append(str(script_stamp))
@@ -326,11 +332,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     configure_inputs = ["configure.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
-    configure_inputs += [
-        f"config/{v}/event_scripts.sha1"
-        for v in versions
-        if (ROOT / "config" / v / "event_scripts.sha1").exists()
-    ]
+    for version in versions:
+        for name in ("scripts.sha1", "event_scripts.sha1"):
+            manifest = ROOT / "config" / version / name
+            if manifest.exists():
+                configure_inputs.append(str(manifest.relative_to(ROOT)))
+                break
     n.build("build.ninja", "configure", implicit=configure_inputs,
             variables={"args": " ".join(sys.argv[1:])})
     n.default(defaults)

@@ -1,0 +1,3051 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=11 float=0
+
+procedure e929_main reserved=0x00000000
+procedure e929_QUIZ_CLEAR reserved=0x00000000
+procedure e929_first reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _4 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _6 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _21 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _12 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label QUIZ_END reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _27 reserved=0x00000000
+
+code
+e929_main:
+  PROC e929_main
+  PUSHIS 0
+  COMM 0x0000
+  END
+e929_QUIZ_CLEAR:
+  PROC e929_QUIZ_CLEAR
+  PUSHIS 9
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 5
+  COMM 0x01ce
+  PUSHIS 95
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 210
+  COMM 0x0000
+  PUSHIS 3
+  PUSHIS 140
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 12
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 6
+  COMM 0x01ce
+  PUSHIS 94
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 211
+  COMM 0x0000
+  PUSHIS 140
+  COMM 0x0150
+  PUSHIS 89
+  COMM 0x0150
+  PUSHIS 90
+  COMM 0x0150
+  PUSHIS 91
+  COMM 0x0150
+  PUSHIS 92
+  COMM 0x0150
+  PUSHIS 93
+  COMM 0x0150
+  PUSHIS 94
+  COMM 0x0150
+  PUSHIS 95
+  COMM 0x0150
+  PUSHIS 2113
+  COMM 0x0008
+  PUSHIS 30
+  MINUS
+  PUSHIS 94
+  COMM 0x0198
+  END
+e929_first:
+  PROC e929_first
+  COMM 0x003e
+  COMM 0x0001
+  COMM 0x01ed
+  PUSHREG
+  POPLIX 0x0006
+  COMM 0x01d4
+  PUSHIS 1
+  PUSHIS 2113
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 100
+  PUSHLIX 0x0006
+  EQ
+  OR
+  IF _2
+  PUSHIS 10
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  GOTO _1
+_2:
+  PUSHIS 0
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 1
+  COMM 0x01ce
+  PUSHIS 99
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  GOTO _1
+_1:
+  PUSHIS 1
+  PUSHIS 2113
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 100
+  PUSHLIX 0x0006
+  EQ
+  OR
+  IF _7
+  PUSHIS 201
+  COMM 0x0000
+  PUSHIS 100
+  COMM 0x000a
+  PUSHREG
+  POPLIX 0x000a
+  PUSHIS 25
+  PUSHLIX 0x000a
+  LE
+  IF _4
+  PUSHIS 8
+  POPLIX 0x0007
+  GOTO _3
+_4:
+  PUSHIS 50
+  PUSHLIX 0x000a
+  LE
+  IF _5
+  PUSHIS 12
+  POPLIX 0x0007
+  GOTO _3
+_5:
+  PUSHIS 75
+  PUSHLIX 0x000a
+  LE
+  IF _6
+  PUSHIS 13
+  POPLIX 0x0007
+  GOTO _3
+_6:
+  PUSHIS 36
+  POPLIX 0x0007
+  GOTO _3
+_3:
+  PUSHIS 3
+  PUSHLIX 0x0007
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 7
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 3
+  COMM 0x01ce
+  PUSHIS 97
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 202
+  COMM 0x0000
+  PUSHLIX 0x0007
+  COMM 0x0150
+  PUSHIS 2113
+  COMM 0x0008
+  GOTO QUIZ_END
+  GOTO _7
+_7:
+  PUSHIS 0
+  PUSHIS 2112
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _9
+  PUSHIS 200
+  COMM 0x0000
+  PUSHIS 2112
+  COMM 0x0008
+  GOTO _9
+_9:
+  PUSHIS 203
+  COMM 0x0000
+  PUSHIS 204
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0001
+  PUSHIS 0
+  PUSHLIX 0x0001
+  EQ
+  IF _26
+  PUSHIS 8
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 205
+  COMM 0x0000
+  PUSHIS 0
+  POPLIX 0x0009
+  PUSHIS 0
+  POPLIX 0x0008
+_11:
+  PUSHIS 0
+  PUSHLIX 0x0008
+  EQ
+  IF _12
+  PUSHIS 0
+  POPLIX 0x0005
+  PUSHIS 1
+  COMM 0x01eb
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0000
+  EQ
+  IF _15
+  PUSHIS 2
+  COMM 0x01eb
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0000
+  EQ
+  IF _13
+  PUSHIS 1
+  POPLIX 0x0005
+  GOTO _13
+_13:
+  GOTO _15
+_15:
+  PUSHIS 0
+  PUSHLIX 0x0005
+  EQ
+  IF _24
+  PUSHLIX 0x0000
+  COMM 0x01ec
+  PUSHREG
+  POPLIX 0x0004
+  PUSHIS 2
+  PUSHLIX 0x0000
+  MUL
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 2
+  PUSHLIX 0x0000
+  MUL
+  ADD
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0003
+  PUSHIS 1
+  PUSHLIX 0x0003
+  ADD
+  POPLIX 0x0003
+  PUSHLIX 0x0004
+  PUSHLIX 0x0003
+  EQ
+  IF _22
+  PUSHLIX 0x0000
+  PUSHIS 2303
+  SUB
+  COMM 0x0008
+  PUSHIS 2114
+  COMM 0x0008
+  PUSHIS 0
+  PUSHIS 2113
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 100
+  COMM 0x01ed
+  PUSHREG
+  NEQ
+  AND
+  IF _18
+  PUSHIS 6
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 2
+  COMM 0x01ce
+  PUSHIS 98
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 207
+  COMM 0x0000
+  PUSHLIX 0x0000
+  COMM 0x014f
+  PUSHREG
+  POPLIX 0x0007
+  PUSHIS 3
+  PUSHLIX 0x0007
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 3
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 3
+  COMM 0x01ce
+  PUSHIS 97
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 208
+  COMM 0x0000
+  PUSHLIX 0x0007
+  COMM 0x0150
+  GOTO _17
+_18:
+  CALL e929_QUIZ_CLEAR
+  PUSHIS 1
+  POPLIX 0x0008
+  GOTO _17
+_17:
+  PUSHIS 1
+  PUSHLIX 0x0009
+  ADD
+  POPLIX 0x0009
+  PUSHIS 0
+  PUSHLIX 0x0008
+  EQ
+  PUSHIS 20
+  PUSHLIX 0x0009
+  EQ
+  AND
+  IF _19
+  COMM 0x01ed
+  PUSHREG
+  PUSHIS 100
+  SUB
+  POPLIX 0x0007
+  PUSHIS 0
+  PUSHLIX 0x0007
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 213
+  COMM 0x0000
+  PUSHIS 1
+  POPLIX 0x0008
+  GOTO _19
+_19:
+  GOTO _21
+_22:
+  PUSHIS 5
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 4
+  COMM 0x01ce
+  PUSHIS 96
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  COMM 0x01ed
+  PUSHREG
+  PUSHIS 100
+  SUB
+  POPLIX 0x0007
+  PUSHIS 0
+  PUSHLIX 0x0007
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 209
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 96
+  COMM 0x0198
+  PUSHIS 1
+  POPLIX 0x0008
+  GOTO _21
+_21:
+  GOTO _23
+_24:
+  CALL e929_QUIZ_CLEAR
+  PUSHIS 1
+  POPLIX 0x0008
+  GOTO _23
+_23:
+  GOTO _11
+_12:
+  GOTO _25
+_26:
+  PUSHIS 13
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  PUSHIS 206
+  COMM 0x0000
+  GOTO _25
+_25:
+QUIZ_END:
+  PUSHIS 1
+  PUSHIS 2113
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _28
+  PUSHIS 11
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  GOTO _27
+_28:
+  PUSHIS 4
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x01b2
+  GOTO _27
+_27:
+  PUSHIS 0
+  COMM 0x01ce
+  PUSHIS 100
+  PUSHIS 324
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 212
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 100
+  COMM 0x0198
+  END
+end
+
+messages msg1
+  message QUIZ_000 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How am I hee-handed, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_000_SEL
+    option
+      control f2 08 ff ff
+      text "Right handed."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ambidextrous."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Lefty."
+    endoption
+  endselect
+  message QUIZ_001 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "When you hee repel a physical attack"
+      newline
+      text "ho, what color is the effect, hee ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_001_SEL
+    option
+      control f2 08 ff ff
+      text "Red"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Blue"
+    endoption
+    option
+      control f2 08 ff ff
+      text "White"
+    endoption
+  endselect
+  message QUIZ_002 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one of the ailments hee-below"
+      newline
+      text "has the highest priority ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_002_SEL
+    option
+      control f2 08 ff ff
+      text "Charm"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Curse"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Stun"
+    endoption
+  endselect
+  message QUIZ_003 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "There are attacks that hee kill you"
+      newline
+      text "if you're turned to ho stone."
+      newline
+      text "Physical, firearm, and what other two?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_003_SEL
+    option
+      control f2 08 ff ff
+      text "Electric and Force."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Earth and Fire."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Force and Earth."
+    endoption
+  endselect
+  message QUIZ_004 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If you cast Sukukaja 4 times, and then"
+      newline
+      text "the enemy casts Sukunda on you once,"
+      newline
+      text "how many Sukukajas will be active, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_004_SEL
+    option
+      control f2 08 ff ff
+      text "2."
+    endoption
+    option
+      control f2 08 ff ff
+      text "3."
+    endoption
+    option
+      control f2 08 ff ff
+      text "4."
+    endoption
+  endselect
+  message QUIZ_005 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "When cursed, you become weaker"
+      newline
+      text "to death spells..."
+      newline
+      text "True or False, hee or ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_005_SEL
+    option
+      control f2 08 ff ff
+      text "True."
+    endoption
+    option
+      control f2 08 ff ff
+      text "False."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Neither."
+    endoption
+  endselect
+  message QUIZ_006 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Void death hee-prevents which"
+      newline
+      text "ailments ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_006_SEL
+    option
+      control f2 08 ff ff
+      text "Stone."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Stun."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Charm."
+    endoption
+  endselect
+  message QUIZ_007 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What hee-happens when you're poisoned,"
+      newline
+      text "besides damage ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_007_SEL
+    option
+      control f2 08 ff ff
+      text "Defense drops."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Attack drops."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Luck drops."
+    endoption
+  endselect
+  message QUIZ_008 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What happens if MP Thief is used"
+      newline
+      text "while you're muted, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_008_SEL
+    option
+      control f2 08 ff ff
+      text "Nothing happens."
+    endoption
+    option
+      control f2 08 ff ff
+      text "HP is stolen as well."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Lots of MP will be stolen."
+    endoption
+  endselect
+  message QUIZ_009 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Bugaboo's affinity is... what?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_009_SEL
+    option
+      control f2 08 ff ff
+      text "Weak to force, voids ice."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Weak to force, strong to ice."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Weak to ice, voids force."
+    endoption
+  endselect
+  message QUIZ_010 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "When you're hee ho stunned, your "
+      newline
+      text "accuracy drops... But, what else"
+      newline
+      text "hee-happens?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_010_SEL
+    option
+      control f2 08 ff ff
+      text "Defense drops."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Items are lost more easily."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Attack goes down."
+    endoption
+  endselect
+  message QUIZ_011 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee-how are new skills learned ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_011_SEL
+    option
+      control f2 08 ff ff
+      text "Mantra."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Chakra."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma."
+    endoption
+  endselect
+  message QUIZ_012 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What does Argilla say if the battle"
+      newline
+      text "ends while she's hee ho-human?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_012_SEL
+    option
+      control f2 08 ff ff
+      text "\"I'll never give up...\""
+    endoption
+    option
+      control f2 08 ff ff
+      text "\"It's the only way...\""
+    endoption
+    option
+      control f2 08 ff ff
+      text "\"Yatta!\""
+    endoption
+  endselect
+  message QUIZ_013 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What happens if you eat Rancid Gravy,"
+      newline
+      text "hee ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_013_SEL
+    option
+      control f2 08 ff ff
+      text "HP's restored and I get muted."
+    endoption
+    option
+      control f2 08 ff ff
+      text "HP's restored and I get a stomach ache."
+    endoption
+    option
+      control f2 08 ff ff
+      text "HP's restored and I die."
+    endoption
+  endselect
+  message QUIZ_014 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If luck hee's up, then which of"
+      newline
+      text "the following ho-happens?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_014_SEL
+    option
+      control f2 08 ff ff
+      text "Ailment probability goes down."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Chance of enemy surprise attack lowers."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Encounter probability drops."
+    endoption
+  endselect
+  message QUIZ_015 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What hee-happens if a Wild Card is"
+      newline
+      text "used, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_015_SEL
+    option
+      control f2 08 ff ff
+      text "All -kaja spells take effect."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Attacks with almighty damage."
+    endoption
+    option
+      control f2 08 ff ff
+      text "It's hee-ho random."
+    endoption
+  endselect
+  message QUIZ_016 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the hee ho name of Roland's"
+      newline
+      text "demon form?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_016_SEL
+    option
+      control f2 08 ff ff
+      text "Pandora."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ramuh."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Indra."
+    endoption
+  endselect
+  message QUIZ_017 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee ISN'T one of Dyaus's"
+      newline
+      text "weaknesses ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_017_SEL
+    option
+      control f2 08 ff ff
+      text "Panic."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Nerve."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Elec."
+    endoption
+  endselect
+  message QUIZ_018 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the Cuvier Syndrome named"
+      newline
+      text "after?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_018_SEL
+    option
+      control f2 08 ff ff
+      text "The person who discovered it."
+    endoption
+    option
+      control f2 08 ff ff
+      text "The area it was found."
+    endoption
+    option
+      control f2 08 ff ff
+      text "The first victim."
+    endoption
+  endselect
+  message QUIZ_019 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If Solar Noise is at a minimum,"
+      newline
+      text "hee ho, what's it mean?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_019_SEL
+    option
+      control f2 08 ff ff
+      text "HP is restored."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Status Ailments are cured."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Items go down in value."
+    endoption
+  endselect
+  message QUIZ_020 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Serph's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_020_SEL
+    option
+      control f2 08 ff ff
+      text "Ice Crown."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Water Crown."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Princess Crown."
+    endoption
+  endselect
+  message QUIZ_021 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Gale's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_021_SEL
+    option
+      control f2 08 ff ff
+      text "Hurricane."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Typhoon."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Twister."
+    endoption
+  endselect
+  message QUIZ_022 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Argilla's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_022_SEL
+    option
+      control f2 08 ff ff
+      text "Shock Wave."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Seismic Wave."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Killer Wave."
+    endoption
+  endselect
+  message QUIZ_023 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Cielo's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_023_SEL
+    option
+      control f2 08 ff ff
+      text "Rainbow Arch."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Rainbow March."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Prism March."
+    endoption
+  endselect
+  message QUIZ_024 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Roland's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_024_SEL
+    option
+      control f2 08 ff ff
+      text "Electric Shock."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Thunder Bolt."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Lightning Bolt."
+    endoption
+  endselect
+  message QUIZ_025 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which Mantra is the cheapest?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_025_SEL
+    option
+      control f2 08 ff ff
+      text "Shura."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Yaksa."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Adamant."
+    endoption
+  endselect
+  message QUIZ_026 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What race am I, hee ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_026_SEL
+    option
+      control f2 08 ff ff
+      text "Brute."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Nether."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Deity."
+    endoption
+  endselect
+  message QUIZ_027 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the wrong way to hee cure"
+      newline
+      text "poison ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_027_SEL
+    option
+      control f2 08 ff ff
+      text "Posumudi."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Dis-Poison."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Odd Morsel."
+    endoption
+  endselect
+  message QUIZ_028 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which item doesn't come in strange"
+      newline
+      text "hee ho objects (treasure chests)?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_028_SEL
+    option
+      control f2 08 ff ff
+      text "Ammo."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Soma."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma Ring."
+    endoption
+  endselect
+  message QUIZ_029 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one of hee these is the real"
+      newline
+      text "fire spell ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_029_SEL
+    option
+      control f2 08 ff ff
+      text "Aki."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Magi."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Agi."
+    endoption
+  endselect
+  message QUIZ_030 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "When selling items at the hee ho Mad"
+      newline
+      text "Mart, how much money is 1 point?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_030_SEL
+    option
+      control f2 08 ff ff
+      text "$10"
+    endoption
+    option
+      control f2 08 ff ff
+      text "$100"
+    endoption
+    option
+      control f2 08 ff ff
+      text "$1000"
+    endoption
+  endselect
+  message QUIZ_031 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee is an electric spell ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_031_SEL
+    option
+      control f2 08 ff ff
+      text "Zao."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Zio."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Gio."
+    endoption
+  endselect
+  message QUIZ_032 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which ho is an earth spell hee?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_032_SEL
+    option
+      control f2 08 ff ff
+      text "Tera."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Chira."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Tina."
+    endoption
+  endselect
+  message QUIZ_033 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What sometimes hee-happens"
+      newline
+      text "when leveling up ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_033_SEL
+    option
+      control f2 08 ff ff
+      text "We receive damage."
+    endoption
+    option
+      control f2 08 ff ff
+      text "We find items."
+    endoption
+    option
+      control f2 08 ff ff
+      text "We learn new skills."
+    endoption
+  endselect
+  message QUIZ_034 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one of hee these do you earn"
+      newline
+      text "depending on the speed of battles?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_034_SEL
+    option
+      control f2 08 ff ff
+      text "Money."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma."
+    endoption
+    option
+      control f2 08 ff ff
+      text "AP."
+    endoption
+  endselect
+  message QUIZ_035 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one of hee these powers up"
+      newline
+      text "your Karma ho Ring?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_035_SEL
+    option
+      control f2 08 ff ff
+      text "Hollow Point."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cat's Eye."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Power Data."
+    endoption
+  endselect
+  message QUIZ_036 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What does Lokapala hee ho mean?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_036_SEL
+    option
+      control f2 08 ff ff
+      text "Goddess of War."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Guardians of the Gods."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Massive Gods."
+    endoption
+  endselect
+  message QUIZ_037 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Gale's hee ho habit?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_037_SEL
+    option
+      control f2 08 ff ff
+      text "Touching his forehead."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Biting his fingernails."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Sleeping outdoors."
+    endoption
+  endselect
+  message QUIZ_038 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where is hee Cielo's tribe color"
+      newline
+      text "located ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_038_SEL
+    option
+      control f2 08 ff ff
+      text "Posterior."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Waist."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Back."
+    endoption
+  endselect
+  message QUIZ_039 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where is Argilla's tribe color"
+      newline
+      text "located, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_039_SEL
+    option
+      control f2 08 ff ff
+      text "Her back."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Her cleavage."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Her skirt."
+    endoption
+  endselect
+  message QUIZ_040 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which stage of the Asura hee project"
+      newline
+      text "was the Junkyard ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_040_SEL
+    option
+      control f2 08 ff ff
+      text "Stage 1."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Stage 2."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Stage 3."
+    endoption
+  endselect
+  message QUIZ_041 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the hee disease called"
+      newline
+      text "that turns folks into stone ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_041_SEL
+    option
+      control f2 08 ff ff
+      text "Cuvier Syndrome."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ultraviolet Sector."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Atma Virus."
+    endoption
+  endselect
+  message QUIZ_042 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one of Fred's hee homeboys"
+      newline
+      text "was captured by the Society...?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_042_SEL
+    option
+      control f2 08 ff ff
+      text "Timmy."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Kathy."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ben."
+    endoption
+  endselect
+  message QUIZ_043 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Jenna's position in"
+      newline
+      text "Karma Society?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_043_SEL
+    option
+      control f2 08 ff ff
+      text "Medical Ops Instructor."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Strategic Unit Commander."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Chief Director."
+    endoption
+  endselect
+  message QUIZ_044 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What do the hee residents of Karma"
+      newline
+      text "City ho wear around their necks?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_044_SEL
+    option
+      control f2 08 ff ff
+      text "Karma Rings."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Aroma Circles."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma Circles."
+    endoption
+  endselect
+  message QUIZ_045 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee who owns the Mad Mart?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_045_SEL
+    option
+      control f2 08 ff ff
+      text "Kathy."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Mary."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Martha."
+    endoption
+  endselect
+  message QUIZ_046 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Who runs the Mad Mart Express, hee?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_046_SEL
+    option
+      control f2 08 ff ff
+      text "Jack."
+    endoption
+    option
+      control f2 08 ff ff
+      text "James."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Johnny."
+    endoption
+  endselect
+  message QUIZ_047 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Do you hee know the feline, ho?"
+      newline
+      text "It has one white ear, yo..."
+      newline
+      text "So, which hee is the white one?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_047_SEL
+    option
+      control f2 08 ff ff
+      text "Left paw."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Right ear."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Left ear."
+    endoption
+  endselect
+  message QUIZ_048 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee demon does Cielo ho"
+      newline
+      text "turn into?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_048_SEL
+    option
+      control f2 08 ff ff
+      text "Varnus."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Dyaus."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Vayu."
+    endoption
+  endselect
+  message QUIZ_049 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which skill hee-here does not"
+      newline
+      text "cause poison ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_049_SEL
+    option
+      control f2 08 ff ff
+      text "Vanity."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Wicked Curse."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Poison Rain."
+    endoption
+  endselect
+  message QUIZ_050 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Mabufudyne combo heequires"
+      newline
+      text "Bufudyne and ho, where ho equals...?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_050_SEL
+    option
+      control f2 08 ff ff
+      text "Ziodyne."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Zandyne."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Teradyne."
+    endoption
+  endselect
+  message QUIZ_051 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which attack hee below has different"
+      newline
+      text "ailment effects than the others, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_051_SEL
+    option
+      control f2 08 ff ff
+      text "Silent Howl."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Neural Shock."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Mind Scream."
+    endoption
+  endselect
+  message QUIZ_052 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which status does \"Spell Gloom\""
+      newline
+      text "decrease?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_052_SEL
+    option
+      control f2 08 ff ff
+      text "Physical attack."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Magic attack."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Aim and dodge %."
+    endoption
+  endselect
+  message QUIZ_053 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How much MP does Makatora give, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_053_SEL
+    option
+      control f2 08 ff ff
+      text "50"
+    endoption
+    option
+      control f2 08 ff ff
+      text "20"
+    endoption
+    option
+      control f2 08 ff ff
+      text "100"
+    endoption
+  endselect
+  message QUIZ_054 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sakura Rage hee's which ailment?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_054_SEL
+    option
+      control f2 08 ff ff
+      text "Panic."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Stun."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Charm."
+    endoption
+  endselect
+  message QUIZ_055 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee purchases 3 rations, while"
+      newline
+      text "ho buys 2 dis-poisons and a revival"
+      newline
+      text "bead... How much did they spend?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_055_SEL
+    option
+      control f2 08 ff ff
+      text "$1200"
+    endoption
+    option
+      control f2 08 ff ff
+      text "$1500"
+    endoption
+    option
+      control f2 08 ff ff
+      text "$950"
+    endoption
+  endselect
+  message QUIZ_056 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which demon ho does Gale transform"
+      newline
+      text "into hee?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_056_SEL
+    option
+      control f2 08 ff ff
+      text "Dyaus."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Vayu."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Arciel."
+    endoption
+  endselect
+  message QUIZ_057 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee ho demon does Argilla"
+      newline
+      text "transform into?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_057_SEL
+    option
+      control f2 08 ff ff
+      text "Prithivi."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Varna."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Jinana."
+    endoption
+  endselect
+  message QUIZ_058 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sera is a lot of things, but which"
+      newline
+      text "hee is she not?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_058_SEL
+    option
+      control f2 08 ff ff
+      text "Number 19."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cyber Shaman."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Angel."
+    endoption
+  endselect
+  message QUIZ_059 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which isn't true of battling in"
+      newline
+      text "Berserk hee state?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_059_SEL
+    option
+      control f2 08 ff ff
+      text "More critical hits."
+    endoption
+    option
+      control f2 08 ff ff
+      text "More AP gained."
+    endoption
+    option
+      control f2 08 ff ff
+      text "More Karma gained."
+    endoption
+  endselect
+  message QUIZ_060 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Magic Ring goes on sale when"
+      newline
+      text "your Mad Mart rank is hee ho 2."
+      newline
+      text "What else does too?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_060_SEL
+    option
+      control f2 08 ff ff
+      text "Power Ring."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Vital Ring."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Quick Ring."
+    endoption
+  endselect
+  message QUIZ_061 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which demon name is correct?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_061_SEL
+    option
+      control f2 08 ff ff
+      text "Pabilsag."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Pabilzag."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Babilzag."
+    endoption
+  endselect
+  message QUIZ_062 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which ailment cannot be hee'd"
+      newline
+      text "by panacea, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_062_SEL
+    option
+      control f2 08 ff ff
+      text "Sleep."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Panic."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Freeze."
+    endoption
+  endselect
+  message QUIZ_063 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which has the lowest HP"
+      newline
+      text "recovery rate, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_063_SEL
+    option
+      control f2 08 ff ff
+      text "Medical Gear."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Medical Kit."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Medical Tool."
+    endoption
+  endselect
+  message QUIZ_064 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's in front of the Mad Mart"
+      newline
+      text "in the underhee city?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_064_SEL
+    option
+      control f2 08 ff ff
+      text "GPS System."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Air conditioner."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Television."
+    endoption
+  endselect
+  message QUIZ_065 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee has Agidyne and Bufula, and Ho"
+      newline
+      text "has Teradyne and Zio. How many combo"
+      newline
+      text "skills are possible?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_065_SEL
+    option
+      control f2 08 ff ff
+      text "4"
+    endoption
+    option
+      control f2 08 ff ff
+      text "6"
+    endoption
+    option
+      control f2 08 ff ff
+      text "8"
+    endoption
+  endselect
+  message QUIZ_066 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the last hee ho command"
+      newline
+      text "on the \"Member\" list in battle?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_066_SEL
+    option
+      control f2 08 ff ff
+      text "Revert."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Withdraw."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Deploy."
+    endoption
+  endselect
+  message QUIZ_067 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "When Prithivi hee-performs a critical"
+      newline
+      text "attack, which part of her body hits ho"
+      newline
+      text "first?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_067_SEL
+    option
+      control f2 08 ff ff
+      text "Right arm."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Left arm."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Toothy cleavage."
+    endoption
+  endselect
+  message QUIZ_068 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "At the underground city Mad Mart,"
+      newline
+      text "what picture is between \"Mad\" and"
+      newline
+      text "\"Mart\" on the hee ho sign?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_068_SEL
+    option
+      control f2 08 ff ff
+      text "First aid kit."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Money bag."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ammo."
+    endoption
+  endselect
+  message QUIZ_069 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee hand has a blade when"
+      newline
+      text "Nekomata attacks ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_069_SEL
+    option
+      control f2 08 ff ff
+      text "Right."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Left."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Both."
+    endoption
+  endselect
+  message QUIZ_070 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's the attack power of \"bullet\""
+      newline
+      text "hee ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_070_SEL
+    option
+      control f2 08 ff ff
+      text "6"
+    endoption
+    option
+      control f2 08 ff ff
+      text "8"
+    endoption
+    option
+      control f2 08 ff ff
+      text "12"
+    endoption
+  endselect
+  message QUIZ_071 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which leg does the owner of Mad Mart"
+      newline
+      text "Express shake?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_071_SEL
+    option
+      control f2 08 ff ff
+      text "Right leg."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Left leg."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Neither leg."
+    endoption
+  endselect
+  message QUIZ_072 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How did Argilla distract the enemy"
+      newline
+      text "at the giant ship in the Junkyard?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_072_SEL
+    option
+      control f2 08 ff ff
+      text "Dressed up as Sera."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Changed into a bikini."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Kissed Jinana."
+    endoption
+  endselect
+  message QUIZ_073 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which Junkyard Tribe did the hee ho"
+      newline
+      text "Hip Hop Brothers belong to?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_073_SEL
+    option
+      control f2 08 ff ff
+      text "Embryon."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Solids."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Maribel."
+    endoption
+  endselect
+  message QUIZ_074 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which demon did you fight at the"
+      newline
+      text "underground cable to get a Karma"
+      newline
+      text "Ring, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_074_SEL
+    option
+      control f2 08 ff ff
+      text "Bugaboo."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Lamia."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ghoul."
+    endoption
+  endselect
+  message QUIZ_075 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What did Gale say when hee Roland"
+      newline
+      text "ho'ed him the footage of Colonel Beck?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_075_SEL
+    option
+      control f2 08 ff ff
+      text "\"That is not his face...\""
+    endoption
+    option
+      control f2 08 ff ff
+      text "\"It's the same face...\""
+    endoption
+    option
+      control f2 08 ff ff
+      text "\"Who's that guy...?\""
+    endoption
+  endselect
+  message QUIZ_076 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What hee ho skill does Kumbhanda use?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_076_SEL
+    option
+      control f2 08 ff ff
+      text "Rough Bind."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Dark Bind."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Black Bind."
+    endoption
+  endselect
+  message QUIZ_077 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How much MP does Bufu cost?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_077_SEL
+    option
+      control f2 08 ff ff
+      text "2"
+    endoption
+    option
+      control f2 08 ff ff
+      text "3"
+    endoption
+    option
+      control f2 08 ff ff
+      text "4"
+    endoption
+  endselect
+  message QUIZ_078 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Vetala says \"WITNESS THE FURY OF MY ___!\"."
+      newline
+      text "Fill in the blank, hee."
+      newline
+    endpage
+  endmessage
+  select QUIZ_078_SEL
+    option
+      control f2 08 ff ff
+      text "Shadow."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Madness."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Body."
+    endoption
+  endselect
+  message QUIZ_079 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What ho-happens when you press"
+      newline
+      text "the circle button and L1 at"
+      newline
+      text "the same time in hee field mode?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_079_SEL
+    option
+      control f2 08 ff ff
+      text "Turn 90 degrees left."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Turn 180 degrees."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Turn 90 degrees right."
+    endoption
+  endselect
+  message QUIZ_080 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How do you spell the Embryon"
+      newline
+      text "Leader's name?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_080_SEL
+    option
+      control f2 08 ff ff
+      text "Surf."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Serph."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Serf."
+    endoption
+  endselect
+  message QUIZ_081 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Jinana's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_081_SEL
+    option
+      control f2 08 ff ff
+      text "Aorura."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Aura."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Aurora."
+    endoption
+  endselect
+  message QUIZ_082 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Harley's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_082_SEL
+    option
+      control f2 08 ff ff
+      text "Burning Stalk."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Burning Stake."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Burning Stage."
+    endoption
+  endselect
+  message QUIZ_083 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Mick the Slug's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_083_SEL
+    option
+      control f2 08 ff ff
+      text "Fat Freak."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Borealis."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Solar Eclipse."
+    endoption
+  endselect
+  message QUIZ_084 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Bat's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_084_SEL
+    option
+      control f2 08 ff ff
+      text "Seismic Wave."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Solar Wave."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Sonic Wave."
+    endoption
+  endselect
+  message QUIZ_085 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Lupa's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_085_SEL
+    option
+      control f2 08 ff ff
+      text "Lava Flow."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Hell Hound."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Love "
+      font "げ"
+      text "Peace."
+    endoption
+  endselect
+  message QUIZ_086 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What was Varin's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_086_SEL
+    option
+      control f2 08 ff ff
+      text "Colonel Beck."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Turbulance."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Typhoon."
+    endoption
+  endselect
+  message QUIZ_087 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is Angel's Atma called?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_087_SEL
+    option
+      control f2 08 ff ff
+      text "Qualion."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Yin "
+      font "げ"
+      text "Yang."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Maelstrom."
+    endoption
+  endselect
+  message QUIZ_088 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What hee-organization was Angel in"
+      newline
+      text "ten years aho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_088_SEL
+    option
+      control f2 08 ff ff
+      text "World Stabilization Committee."
+    endoption
+    option
+      control f2 08 ff ff
+      text "The I.E.S.C."
+    endoption
+    option
+      control f2 08 ff ff
+      text "The Demon Research Club."
+    endoption
+  endselect
+  message QUIZ_089 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which terminal option is cheapest?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_089_SEL
+    option
+      control f2 08 ff ff
+      text "Restore 100 HP."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Restore 50 MP."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Uncurse."
+    endoption
+  endselect
+  message QUIZ_090 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What does Hecatoncheires wear"
+      newline
+      text "around his neck?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_090_SEL
+    option
+      control f2 08 ff ff
+      text "Bells."
+    endoption
+    option
+      control f2 08 ff ff
+      text "A lock."
+    endoption
+    option
+      control f2 08 ff ff
+      text "A pocket watch."
+    endoption
+  endselect
+  message QUIZ_091 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which item heestores the most"
+      newline
+      text "HP, ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_091_SEL
+    option
+      control f2 08 ff ff
+      text "HP Data."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Hero Ration."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Medical Tool."
+    endoption
+  endselect
+  message QUIZ_092 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which demon doesn't have"
+      newline
+      text "hee ho hooves?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_092_SEL
+    option
+      control f2 08 ff ff
+      text "Kelpie."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Empusa."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Tarrasque."
+    endoption
+  endselect
+  message QUIZ_093 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which hee item can you sell to"
+      newline
+      text "the Mad Mart ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_093_SEL
+    option
+      control f2 08 ff ff
+      text "Ammo."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma Rings."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Plants."
+    endoption
+  endselect
+  message QUIZ_094 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What hee happens when you take a step"
+      newline
+      text "during MAX Solar Noise?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_094_SEL
+    option
+      control f2 08 ff ff
+      text "1/8 Noise."
+    endoption
+    option
+      control f2 08 ff ff
+      text "7/8 Noise."
+    endoption
+    option
+      control f2 08 ff ff
+      text "It really depends."
+    endoption
+  endselect
+  message QUIZ_095 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee how many times does Serph shoot"
+      newline
+      text "his hee-handgun in the opening movie?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_095_SEL
+    option
+      control f2 08 ff ff
+      text "3 times."
+    endoption
+    option
+      control f2 08 ff ff
+      text "4 times."
+    endoption
+    option
+      control f2 08 ff ff
+      text "5 times."
+    endoption
+  endselect
+  message QUIZ_096 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Adil gave you the Hacking Disk,"
+      newline
+      text "the Frigid Shot, and what hee else?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_096_SEL
+    option
+      control f2 08 ff ff
+      text "2 Medical Tools."
+    endoption
+    option
+      control f2 08 ff ff
+      text "2 Medical Kits."
+    endoption
+    option
+      control f2 08 ff ff
+      text "2 Brave Rations."
+    endoption
+  endselect
+  message QUIZ_097 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which one enables Mantra download?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_097_SEL
+    option
+      control f2 08 ff ff
+      text "Hacking Disk."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Tag Ring."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Karma Society."
+    endoption
+  endselect
+  message QUIZ_098 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which type of Mantra hee is unlocked"
+      newline
+      text "when the Mantra surrounding it are"
+      newline
+      text "mastered ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_098_SEL
+    option
+      control f2 08 ff ff
+      text "Esoteric."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Magic."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Bonus."
+    endoption
+  endselect
+  message QUIZ_099 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Which item increases agility when"
+      newline
+      text "equipped on the Karma Ring ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_099_SEL
+    option
+      control f2 08 ff ff
+      text "Blue Diamond."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Yellow Crystal."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ruby."
+    endoption
+  endselect
+  message MSG_1ST speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee hum..."
+      newline
+      text "I'm so bored, ho..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I hee know!"
+      newline
+      text "I'll give you a quiz ho!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Don't be a jerk, give it a try."
+      newline
+      text "Every correct hee (answer) earns"
+      newline
+      text "a well-deserved ho (reward)!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_ALL speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee... So much for that quiz."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_ITEM_ALL speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'll give you this "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text ","
+      newline
+      text "so get the ho outta here!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_CHECK speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Are you down, hee ho?"
+      newline
+    endpage
+  endmessage
+  select QUIZ_CHECK_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message MSG_YES speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Let's get started, ho."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_NO speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Awwww... You suck!"
+      newline
+      text "You're too hee-boring. Maybe next"
+      newline
+      text "time, right ho?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_SEIKAI speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Correct!"
+      newline
+      text "That's right, hee ho!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_ITEM speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'll give you "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " ho."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HUSEIKAI speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hee ho..."
+      newline
+      text "WRONG, yo!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " questions left, ho."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_CLEAR speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "There's no more questions..."
+      newline
+      text "I lost, hee no..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_ITEM_CLEAR speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'm pissed, but hee-honest."
+      newline
+      text "I ho-happen to have something"
+      newline
+      text "for you."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "It's called Certificate."
+      newline
+      text "It says you hee-scored perfectly"
+      newline
+      text "on my ho quiz, yay!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "...This isn't hee-easy!"
+      newline
+      text "Anyways... Congrats. You can have"
+      newline
+      text "the "
+      control f2 02 05 ff
+      text "Certificate"
+      control f2 02 01 ff
+      text " and a "
+      control f2 02 05 ff
+      text "Data Set"
+      control f2 02 01 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_END speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Later ho."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_10 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Grrr... It's no fun for me, ho,"
+      newline
+      text "if you keep getting 'em right, bro!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "..."
+      control f2 03 01 ff
+      text " questions left, ho..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Jack Frost"
+  endspeaker
+end
+
+strings
+  zero 240
+end

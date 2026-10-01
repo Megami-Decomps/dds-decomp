@@ -79,10 +79,9 @@ later addresses and offsets without hand-editing bookkeeping.
 
 The symbolic disassembler accepts the standard DDS five-section layout and
 canonical 32-byte name rows. It rejects irregular layouts rather than hiding
-bytes; use version 1 for those files. The tracked DDS1 event corpus has 97
-symbolic sources and seven lossless physical sources whose nonzero trailing
-bytes lie outside the five declared sections (`e503`, `e510`, `e697`, `e705`,
-`e802`, `e807`, and `e809`).
+bytes; use version 1 for those files. It also accepts a short type-4 descriptor
+when `PUSHTYPE5` references account for the complete physical string pool, as
+described below.
 
 ### Embedded messages
 
@@ -116,12 +115,13 @@ end
 ```
 
 `text` holds printable single-byte ASCII. `font` holds characters from the
-DDS1 font-0 map and emits the corresponding two-byte glyph codes. The game
+verified font-0 map and emits the corresponding two-byte glyph codes. The game
 uses a 128-column font index beginning at code `0x8080`; it is not Shift-JIS.
 When two codes map to the same Unicode character, one spelling is preferred
 and the other remains an explicit `glyphs` directive, so disassembly and
 assembly remain byte-exact. `glyphs` is also the fallback for a code missing
-from the current map.
+from the current map. DDS2 reuses the mapped code range; sequel-only or
+otherwise unmapped codes remain explicit `glyphs` values.
 
 `newline` emits byte `0x0A`, and `control` preserves a complete DDS control
 sequence. The lead byte determines the control length, so the assembler can
@@ -197,6 +197,20 @@ physical bytes the following source directives own. This exposes the
 descriptor/physical-length mismatch without splitting the readable pool into
 unrelated top-level preservation records.
 
+Symbolic source represents the same layout with `count` on the strings block:
+
+```text
+strings count=32
+  string Camera01_MOTION "Camera01_MOTION"
+end
+```
+
+The count stays equal to the retail type-4 descriptor while the directives own
+the complete physical pool. The symbolic disassembler uses this form only when
+referenced, NUL-terminated strings account for every byte through the end of
+the file. Unreferenced trailing data still requires the physical format. All
+22 tracked DDS2 field scripts satisfy this stronger condition.
+
 ### Native command profiles
 
 Native `COMM` IDs belong to a specific game and executable version. A `profile`
@@ -242,22 +256,38 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The repository tracks all 104 available DDS1 event scripts under
-`src/dds1/scripts/event`. Assemble one source directly with:
+DDS2 sources declare `profile dds2`, but that profile currently contains no
+named commands. Its `COMM` operands remain numeric until their DDS2 handlers
+and stack behavior have been checked directly.
+
+## Tracked corpora
+
+The repository tracks 104 DDS1 event scripts and all 140 DDS2 BF programs:
+117 event scripts, 22 field scripts, and the battle negotiation script. Of the
+DDS2 sources, 126 use symbolic version 2. Fourteen global event programs use
+the lossless physical form because they have a distinct four-section layout.
+The 66 nonempty DDS2 message banks contain 2,437 dialog records, 2,673 message
+pages, 1,149 selection options, and 177 speaker strings. Fifty-nine banks use
+editable MSG1 records; the seven banks outside the verified MSG1 layouts keep
+their bytes locally.
+
+Assemble one source directly with:
 
 ```sh
 python3 tools/flw0.py assemble src/dds1/scripts/event/e670.bfasm e670.bf
 ```
 
-After configuring the repository, assemble and verify the complete corpus with:
+After configuring the repository, assemble and verify either corpus with:
 
 ```sh
 ninja dds1-scripts
+ninja dds2-scripts
 ```
 
-The normal `ninja dds1` target also includes this check. Expected output hashes
-live in `config/dds1/event_scripts.sha1`, so verification does not require the
-original BF files.
+The normal `ninja dds1` and `ninja dds2` targets include their corresponding
+checks. Expected output hashes live in `config/dds1/event_scripts.sha1` and
+`config/dds2/scripts.sha1`, so verification does not require the original BF
+files.
 
 ## Reading view
 

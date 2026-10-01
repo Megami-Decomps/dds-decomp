@@ -1,0 +1,46 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e901_main reserved=0x00000000
+procedure e901_dead reserved=0x00000000
+
+code
+e901_main:
+  PROC e901_main
+  PUSHIS 0
+  COMM 0x0000
+  END
+e901_dead:
+  PROC e901_dead
+  COMM 0x003e
+  PUSHIS 0
+  COMM 0x01ce
+  PUSHIS 100
+  PUSHIS 258
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 24
+  MINUS
+  PUSHIS 100
+  COMM 0x0198
+  END
+end
+
+messages msg1
+  message MSG_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "テスト中..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+end
+
+strings
+  zero 240
+end

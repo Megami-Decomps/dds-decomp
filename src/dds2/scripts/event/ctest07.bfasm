@@ -1,0 +1,55 @@
+flw0 1
+profile dds2
+
+header word00=0x00000000 declared_size=0x00000180 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0x180
+
+section 0 type=0 stride=0x20 count=1 offset=0x60
+  proc "ctest07" pc=0 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=2 offset=0x80
+  label "_1" pc=5 reserved=0x00000000
+  label "_2" pc=47 reserved=0x00000000
+end
+
+section 2 type=2 stride=0x4 count=48 offset=0xc0
+  0000: PROC 0x0000  # "ctest07"
+  0001: PUSHIS 0x0010
+  0002: COMM 0x004d
+  0003: PUSHIS 0x0078
+  0004: POPIX 0x0000
+  0005: PUSHIS 0x0001
+  0006: IF 0x0001  # "_2"
+  0007: PUSHI 0x00020001
+  0009: COMM 0x0012
+  000a: PUSHI 0x00030007
+  000c: PUSHI 0x00020001
+  000e: COMM 0x0013
+  000f: PUSHI 0x00020001
+  0011: COMM 0x0055
+  0012: PUSHIX 0x0000
+  0013: COMM 0x000e
+  0014: PUSHI 0x00020002
+  0016: COMM 0x0012
+  0017: PUSHI 0x00030008
+  0019: PUSHI 0x00020002
+  001b: COMM 0x0013
+  001c: PUSHI 0x00020002
+  001e: COMM 0x0055
+  001f: PUSHIX 0x0000
+  0020: COMM 0x000e
+  0021: PUSHI 0x00020003
+  0023: COMM 0x0012
+  0024: PUSHI 0x00030009
+  0026: PUSHI 0x00020003
+  0028: COMM 0x0013
+  0029: PUSHI 0x00020003
+  002b: COMM 0x0055
+  002c: PUSHIX 0x0000
+  002d: COMM 0x000e
+  002e: GOTO 0x0000  # "_1"
+  002f: END
+end
+
+section 3 type=3 stride=0x1 count=0 offset=0x180
+end
