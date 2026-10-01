@@ -9,9 +9,8 @@ procedure e917_main reserved=0x00000000
 code
 e917_main:
   PROC e917_main
-  PUSHMSG MSG_START_00
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_START_00))
+  return
 end
 
 messages msg1

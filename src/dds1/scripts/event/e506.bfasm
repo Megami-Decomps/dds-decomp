@@ -16,339 +16,260 @@ jump_label _1 reserved=0x00000000
 code
 e506_main:
   PROC e506_main
-  PUSHMSG MODE
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT MODE_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPIX 0x0002
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIX 0x0002
-  EQ
-  IF _2
-  PUSHIS 10
-  PUSHIS 506
-  COMM 0x004d
-  PUSHIS 46
-  PUSHIS 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0001
-  PUSHTYPE5 str_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIX 0x0001
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 1
-  PUSHTYPE5 p00
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM 0x008b
-  PUSHF 0x3ee147ae
-  PUSHF 0x3f59999a
-  PUSHF 0x3f9eb852
-  PUSHIS 0
-  COMM 0x00b4
-  PUSHF 0x3f35c28f
-  MINUS
-  PUSHF 0x3f11eb85
-  MINUS
-  PUSHF 0x3ed70a3d
-  MINUS
-  PUSHIS 0
-  COMM 0x00b5
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHIS 0
-  COMM 0x00b6
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x00bb
-  PUSHIS 15000
-  PUSHIS 255
-  PUSHIS 2000
-  PUSHIS 255
-  PUSHIS 0
-  COMM 0x00bc
-  PUSHTYPE5 Cam01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHTYPE5 Cam01_MOTION
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 Cam01_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  PUSHIS 40
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 125
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
-  MINUS
-  PUSHPROC dist_blur01
-  COMM CREATE_SCRIPT_TASK
-  PUSHIS 25
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
-  MINUS
-  PUSHPROC dist_blur02
-  COMM CREATE_SCRIPT_TASK
-  GOTO _1
-_2:
-  PUSHIS 1
-  PUSHIX 0x0002
-  EQ
-  IF _3
-  PUSHIS 10
-  PUSHIS 506
-  COMM 0x004d
-  PUSHIS 46
-  PUSHIS 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0001
-  PUSHTYPE5 str_3_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIX 0x0001
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 1
-  PUSHTYPE5 p00_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM 0x008b
-  PUSHF 0x3ee147ae
-  PUSHF 0x3f59999a
-  PUSHF 0x3f9eb852
-  PUSHIS 0
-  COMM 0x00b4
-  PUSHF 0x3f35c28f
-  MINUS
-  PUSHF 0x3f11eb85
-  MINUS
-  PUSHF 0x3ed70a3d
-  MINUS
-  PUSHIS 0
-  COMM 0x00b5
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHIS 0
-  COMM 0x00b6
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x00bb
-  PUSHIS 15000
-  PUSHIS 255
-  PUSHIS 2000
-  PUSHIS 255
-  PUSHIS 0
-  COMM 0x00bc
-  PUSHTYPE5 Cam01_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHTYPE5 Cam01_MOTION_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 Cam01_4
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  PUSHIS 40
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 1
-  MINUS
-  PUSHPROC dist_blur03
-  COMM CREATE_SCRIPT_TASK
-  GOTO _1
-_3:
-  PUSHIS 2
-  PUSHIX 0x0002
-  EQ
-  IF _1
-  PUSHIS 10
-  PUSHIS 506
-  COMM 0x004d
-  PUSHIS 46
-  PUSHIS 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0001
-  PUSHTYPE5 str_3_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIX 0x0001
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 1
-  PUSHTYPE5 p00_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0001
-  COMM 0x008b
-  PUSHF 0x3ee147ae
-  PUSHF 0x3f59999a
-  PUSHF 0x3f9eb852
-  PUSHIS 0
-  COMM 0x00b4
-  PUSHF 0x3f35c28f
-  MINUS
-  PUSHF 0x3f11eb85
-  MINUS
-  PUSHF 0x3ed70a3d
-  MINUS
-  PUSHIS 0
-  COMM 0x00b5
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHF 0x3e99999a
-  PUSHIS 0
-  COMM 0x00b6
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x00bb
-  PUSHIS 15000
-  PUSHIS 255
-  PUSHIS 2000
-  PUSHIS 255
-  PUSHIS 0
-  COMM 0x00bc
-  PUSHTYPE5 Cam01_5
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHTYPE5 Cam01_MOTION_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 Cam01_6
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  PUSHIS 40
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 1
-  MINUS
-  PUSHPROC mul_blur01
-  COMM CREATE_SCRIPT_TASK
-  GOTO _1
+  MESSAGE_REQUEST_AND_POLL(message(MODE))
+  global_int[2] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(MODE_SEL))
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  if (global_int[2] == 0) {
+    push 10
+    push 506
+    COMM 0x004d
+    push 46
+    push 3
+    COMM 0x0015
+    PUSHREG
+    POPIX 0x0001
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3))
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+    PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
+    push 0
+    push 0
+    push 0
+    push 0
+    push 1
+    push string(p00)
+    COMM READ_SECONDARY_WORLD_ID_VALUE
+    PUSHREG
+    push global_int[1]
+    COMM 0x008b
+    push float32(0.4399999976158142, bits=0x3ee147ae)
+    push float32(0.8500000238418579, bits=0x3f59999a)
+    push float32(1.2400000095367432, bits=0x3f9eb852)
+    push 0
+    COMM 0x00b4
+    push -float32(0.7099999785423279, bits=0x3f35c28f)
+    push -float32(0.5699999928474426, bits=0x3f11eb85)
+    push -float32(0.41999998688697815, bits=0x3ed70a3d)
+    push 0
+    COMM 0x00b5
+    push float32(0.30000001192092896, bits=0x3e99999a)
+    push float32(0.30000001192092896, bits=0x3e99999a)
+    push float32(0.30000001192092896, bits=0x3e99999a)
+    push 0
+    COMM 0x00b6
+    push 0
+    push 0
+    push 0
+    push 0
+    COMM 0x00bb
+    push 15000
+    push 255
+    push 2000
+    push 255
+    push 0
+    COMM 0x00bc
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01))
+    ADD_EFFECT_UNIT_TO_WORLD(result)
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION))
+    push result
+    push string(Cam01_2)
+    COMM READ_SECONDARY_WORLD_ID_VALUE
+    PUSHREG
+    COMM 0x0013
+    SCREEN_FADE_A(0, 40)
+    WAIT_FOR_TIMER_LIMIT(125)
+    result = CREATE_SCRIPT_TASK(procedure(dist_blur01), -(1))
+    WAIT_FOR_TIMER_LIMIT(25)
+    result = CREATE_SCRIPT_TASK(procedure(dist_blur02), -(1))
+  } else {
+  _2:
+    if (global_int[2] == 1) {
+      push 10
+      push 506
+      COMM 0x004d
+      push 46
+      push 3
+      COMM 0x0015
+      PUSHREG
+      POPIX 0x0001
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3_2))
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+      PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
+      push 0
+      push 0
+      push 0
+      push 0
+      push 1
+      push string(p00_2)
+      COMM READ_SECONDARY_WORLD_ID_VALUE
+      PUSHREG
+      push global_int[1]
+      COMM 0x008b
+      push float32(0.4399999976158142, bits=0x3ee147ae)
+      push float32(0.8500000238418579, bits=0x3f59999a)
+      push float32(1.2400000095367432, bits=0x3f9eb852)
+      push 0
+      COMM 0x00b4
+      push -float32(0.7099999785423279, bits=0x3f35c28f)
+      push -float32(0.5699999928474426, bits=0x3f11eb85)
+      push -float32(0.41999998688697815, bits=0x3ed70a3d)
+      push 0
+      COMM 0x00b5
+      push float32(0.30000001192092896, bits=0x3e99999a)
+      push float32(0.30000001192092896, bits=0x3e99999a)
+      push float32(0.30000001192092896, bits=0x3e99999a)
+      push 0
+      COMM 0x00b6
+      push 0
+      push 0
+      push 0
+      push 0
+      COMM 0x00bb
+      push 15000
+      push 255
+      push 2000
+      push 255
+      push 0
+      COMM 0x00bc
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_3))
+      ADD_EFFECT_UNIT_TO_WORLD(result)
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_2))
+      push result
+      push string(Cam01_4)
+      COMM READ_SECONDARY_WORLD_ID_VALUE
+      PUSHREG
+      COMM 0x0013
+      SCREEN_FADE_A(0, 40)
+      result = CREATE_SCRIPT_TASK(procedure(dist_blur03), -(1))
+    } else {
+    _3:
+      if (global_int[2] == 2) {
+        push 10
+        push 506
+        COMM 0x004d
+        push 46
+        push 3
+        COMM 0x0015
+        PUSHREG
+        POPIX 0x0001
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3_3))
+        ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+        PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
+        push 0
+        push 0
+        push 0
+        push 0
+        push 1
+        push string(p00_3)
+        COMM READ_SECONDARY_WORLD_ID_VALUE
+        PUSHREG
+        push global_int[1]
+        COMM 0x008b
+        push float32(0.4399999976158142, bits=0x3ee147ae)
+        push float32(0.8500000238418579, bits=0x3f59999a)
+        push float32(1.2400000095367432, bits=0x3f9eb852)
+        push 0
+        COMM 0x00b4
+        push -float32(0.7099999785423279, bits=0x3f35c28f)
+        push -float32(0.5699999928474426, bits=0x3f11eb85)
+        push -float32(0.41999998688697815, bits=0x3ed70a3d)
+        push 0
+        COMM 0x00b5
+        push float32(0.30000001192092896, bits=0x3e99999a)
+        push float32(0.30000001192092896, bits=0x3e99999a)
+        push float32(0.30000001192092896, bits=0x3e99999a)
+        push 0
+        COMM 0x00b6
+        push 0
+        push 0
+        push 0
+        push 0
+        COMM 0x00bb
+        push 15000
+        push 255
+        push 2000
+        push 255
+        push 0
+        COMM 0x00bc
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_5))
+        ADD_EFFECT_UNIT_TO_WORLD(result)
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_3))
+        push result
+        push string(Cam01_6)
+        COMM READ_SECONDARY_WORLD_ID_VALUE
+        PUSHREG
+        COMM 0x0013
+        SCREEN_FADE_A(0, 40)
+        result = CREATE_SCRIPT_TASK(procedure(mul_blur01), -(1))
+      }
+    }
+  }
 _1:
-  END
+  return
 dist_blur01:
   PROC dist_blur01
-  PUSHIS 100
-  PUSHIS 120
-  PUSHIS 25
+  push 100
+  push 120
+  push 25
   COMM 0x00bd
-  END
+  return
 dist_blur02:
   PROC dist_blur02
-  PUSHIS 100
-  PUSHIS 0
-  PUSHIS 10
+  push 100
+  push 0
+  push 10
   COMM 0x00bd
-  END
+  return
 dist_blur03:
   PROC dist_blur03
-  PUSHIS 100
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 950
-  PUSHIS 100
+  WAIT_FOR_TIMER_LIMIT(100)
+  push 950
+  push 100
   COMM 0x00ab
-  PUSHIS 0
-  PUSHF 0x3d8f5c29
-  PUSHF 0x3ba3d70a
-  PUSHF 0x3e6353f8
-  PUSHIS 100
-  PUSHIS 300
-  PUSHIS 100
+  push 0
+  push float32(0.07000000029802322, bits=0x3d8f5c29)
+  push float32(0.004999999888241291, bits=0x3ba3d70a)
+  push float32(0.22200000286102295, bits=0x3e6353f8)
+  push 100
+  push 300
+  push 100
   COMM 0x00ef
-  PUSHIS 85
-  PUSHIS 142
-  PUSHIS 142
-  PUSHIS 142
+  push 85
+  push 142
+  push 142
+  push 142
   COMM 0x00f0
-  PUSHIS 18
-  MINUS
-  PUSHIS 3
-  PUSHIS 176
+  push -(18)
+  push 3
+  push 176
   COMM 0x00f1
-  PUSHIS 0
+  push 0
   COMM 0x00f2
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 70
+  WAIT_FOR_TIMER_LIMIT(30)
+  push 70
   COMM 0x00f3
-  END
+  return
 mul_blur01:
   PROC mul_blur01
-  PUSHIS 120
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHF 0x3fba5e35
-  PUSHIS 0
+  WAIT_FOR_TIMER_LIMIT(120)
+  push 0
+  push float32(1.4559999704360962, bits=0x3fba5e35)
+  push 0
   COMM 0x00ea
-  PUSHIS 206
-  PUSHIS 128
-  PUSHIS 128
-  PUSHIS 128
+  push 206
+  push 128
+  push 128
+  push 128
   COMM 0x00eb
-  PUSHIS 17
-  MINUS
-  PUSHIS 12
-  PUSHIS 180
+  push -(17)
+  push 12
+  push 180
   COMM 0x00ec
-  PUSHIS 0
+  push 0
   COMM 0x00ed
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 70
+  WAIT_FOR_TIMER_LIMIT(30)
+  push 70
   COMM 0x00ee
-  END
+  return
 end
 
 messages msg1
