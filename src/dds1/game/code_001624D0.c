@@ -110,13 +110,13 @@ extern void *func_002183D0(void *arg);
 
 extern void *func_002183E0(void *arg);
 
-/* Callback table at D_003B0044 (0x28 bytes per entry). */
-typedef struct Cb3714C {
+/* Kind-specific callback slot, 0x28 bytes per entry. */
+typedef struct EffParamCallbackEntry {
     void (*cb)(void *arg); /* 0x00 */
     u8 pad4[0x24];         /* 0x04 */
-} Cb3714C;
+} EffParamCallbackEntry;
 
-extern Cb3714C D_00353714[];
+extern EffParamCallbackEntry D_00353714[];
 
 INCLUDE_ASM(const s32, "game/code_001624D0", func_001624D0);
 
