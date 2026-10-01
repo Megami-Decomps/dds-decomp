@@ -775,7 +775,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
     }
 }
 
-extern s32 func_003014F0();
+extern s32 func_003014F0(char *buffer, const char *fmt, ...);
 extern void func_002CB6F8();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
