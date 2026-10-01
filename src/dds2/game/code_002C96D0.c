@@ -2653,31 +2653,13 @@ void mnuProjectViewPoint(void) {
     VU0_LOAD_MATRIX(D_003846F0);
     matrix = D_0037F610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
     matrix += 0x40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(matrix) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        "vadd.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(D_0037F660) : "memory");
+    VU0_LOAD_VF(vf11, matrix);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D2D48);
@@ -4030,6 +4012,15 @@ void fileClearLoadObjectReferences(LoadObj *obj) {
     }
 }
 
+/* These one-argument calls are retail's own: each callee reads both $4 and
+   $5 (or the single $4), and each caller tail-jumps without setting the
+   later arguments. Declared unprototyped, with K&R definitions below, so
+   the calls keep compiling as they originally did. Hoisted here because
+   they must precede every caller. */
+extern void fileAcquireRecord();
+extern void mnuRecordSetVector();
+extern void fileSetRecordSecondVector();
+
 s32 fileAcquireLoadObjectRecord(LoadObj *obj) {
     if ((D_00437E08 & 2) == 0 && obj->recordWork != NULL) {
         fileAcquireRecord(obj->recordWork);
@@ -4416,7 +4407,9 @@ void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-void fileAcquireRecord(FileSlotTable *record) {
+void fileAcquireRecord(record)
+FileSlotTable *record;
+{
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
@@ -4428,7 +4421,10 @@ void fileReadVectorPtr20(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));
 }
 
-void mnuRecordSetVector(u8 *obj, void *src) {
+void mnuRecordSetVector(obj, src)
+u8 *obj;
+void *src;
+{
     PCP_COPY_VECTOR(*(u8 **)(obj + 0x20), src);
 }
 
@@ -4436,7 +4432,10 @@ void fileReadRecordSecondVector(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20) + 0x10);
 }
 
-void fileSetRecordSecondVector(u8 *obj, void *src) {
+void fileSetRecordSecondVector(obj, src)
+u8 *obj;
+void *src;
+{
     PCP_COPY_VECTOR(*(u8 **)(obj + 0x20) + 0x10, src);
 }
 
