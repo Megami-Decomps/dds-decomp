@@ -209,18 +209,6 @@ extern s32 func_001B32F8(s32, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
-typedef struct ActorClassIds {
-    s16 values[8];
-} ActorClassIds;
-
-extern const ActorClassIds btlActorIdsByClass;
-
-typedef struct ActorClassPairTable {
-    u32 values[14];
-} ActorClassPairTable;
-
-extern const ActorClassPairTable btlActorClassPairs;
-
 extern u32 btlLinkedSelectionTaskBuffer;
 
 typedef struct SndMessageNode {

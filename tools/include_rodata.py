@@ -53,7 +53,8 @@ def place(version):
         # The unit's rodata as splat last split it; INCLUDE_RODATA lines and per-symbol
         # files for anything else are left over from an earlier split.
         full = ROOT / "asm" / version / "data" / f"{unit}.rodata.s"
-        owned = {n for n, _ in LABEL.findall(full.read_text())} if full.exists() else set()
+        labels = dict(LABEL.findall(full.read_text())) if full.exists() else {}
+        owned = set(labels)
         unit_rodata = set(owned)
         # Symbols splat migrated into an asm function's own file come with its
         # INCLUDE_ASM and must not be included again.
@@ -78,7 +79,8 @@ def place(version):
         for m in DEF.finditer(text):
             code = function_text(text, m.start())
             for sym in retail_refs.get(m.group(1), ()):
-                if sym.startswith(("D_", "jtbl_")) and not re.search(rf"\b{sym}\b", code):
+                # Named (renamed D_) rodata counts too: compiled &= unit_rodata below.
+                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not re.search(rf"\b{sym}\b", code):
                     compiled.add(sym)
         # Only this unit's own rodata can be compiled here: other names a C
         # function writes differently (D_X[9] for retail's D_Y) are other data.
@@ -114,7 +116,7 @@ def place(version):
                 anchors.append((addr, None, sym, sym not in have))
         for sym, pos in compiled_at.items():
             if not any(a[2] == sym for a in anchors):
-                anchors.append((int(sym[-8:], 16), pos, None, False))
+                anchors.append((int(labels[sym], 16), pos, None, False))
         for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
             align_file(s)
             m = LABEL.search(s.read_text())
