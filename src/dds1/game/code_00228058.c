@@ -32,6 +32,8 @@ void scrSetIntegerReturnValue(s32 value);
 extern char D_003ACAE0[];
 
 void func_002287C0(void);
+extern u32 D_003BA904;
+extern s32 scrGetCommandTimer(void);
 
 void func_0022AB00(s32 arg0);
 
@@ -50,7 +52,7 @@ extern SolarWorldState *D_003BAA00;
 
 extern s64 kwlnTaskIsRegistered(u64);
 
-extern u64 scrReadIntParameter(u64);
+s32 scrReadIntParameter(s32 idx);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
@@ -233,7 +235,17 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00228058", func_00228650);
+u32 func_00228650(void) {
+    if (scrReadIntParameter(0) <= 0) {
+        D_003BA904 |= 0x2000000;
+        return 1;
+    }
+    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
+        D_003BA904 |= 0x2000000;
+        return 0;
+    }
+    return 1;
+}
 
 struct SolarWorldState {
     u8 pad00[0xA40];
