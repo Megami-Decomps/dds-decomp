@@ -134,7 +134,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         if (data != 0) {
             owner->model = func_002DC1D0(data, *(u32 *)(source + 0x24));
             VU0_SET_ONES_XYZ(vf10);
-            __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2", "memory");
+            VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);
         }
     }

@@ -430,18 +430,8 @@ void sdfProjectVuVectorToScreen(void) {
     VU0_LOAD_MATRIX(D_003296F0);
     matrix = D_00324610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
     matrix += 0x40;
     VU0_LOAD_VF_MEMORY(vf11, matrix);
     VU0_MUL(vf10, vf10, vf11);

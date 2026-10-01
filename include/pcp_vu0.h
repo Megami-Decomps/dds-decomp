@@ -523,5 +523,19 @@
     "sqc2 vf10, 0(%0)  \n" \
     ".set reorder" \
     : "=r" (dst) : "r" (base), "i" (off) : "memory")
+/* Scale the rows of the primary matrix by the full vector vf10 (no
+ * broadcast: vmul.xyz per row). This is the model root scale application
+ * both games spell out (DDS1/DDS2 sdfModelUpdateRootTransforms); it differs
+ * from VU0_SCALE_MATRIX_ROWS, which broadcasts one component per row. */
+#define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
+    "vmul.xyz vf30, vf30, vf10\n\t.set reorder" \
+    : : : "memory")
+/* Store vf28-vf31 to four C quadword lvalues in one block ("m" operands with
+ * a memory clobber, as the model root writeback spells it). */
+#define VU0_STORE_MATRIX_M(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, %0\n\tsqc2 vf29, %1\n\tsqc2 vf30, %2\n\tsqc2 vf31, %3\n\t" \
+    ".set reorder" \
+    : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")
 
 #endif

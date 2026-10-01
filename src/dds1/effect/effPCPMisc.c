@@ -139,46 +139,6 @@ typedef struct {
     u32 unk170;      /* 0x170 spawn parameter */
 } EffPCPWorkF14;
 
-typedef struct {
-    u8 pad00[0x10];  /* 0x00 task header */
-    u32 unk10;       /* 0x10 resource handle */
-    u32 unk14;       /* 0x14 resource handle */
-    f32 scale;       /* 0x18 effect scale for the ring and twin effects */
-    u32 unk1C;       /* 0x1C resource released on destroy */
-    u32 unk20;       /* 0x20 spawn parameter */
-    u32 unk24;       /* 0x24 spawn parameter */
-    u8 pad28[0x4];   /* 0x28 */
-    f32 unk2C;       /* 0x2C spawn parameter */
-    u32 unk30;       /* 0x30 resource released on destroy */
-    u32 unk34;       /* 0x34 resource released on destroy */
-    u32 unk38;       /* 0x38 resource released on destroy */
-    u8 pad3C[0x18];  /* 0x3C */
-    u32 unk54;       /* 0x54 spawn parameter */
-    f32 unk58;       /* 0x58 spawn parameter */
-    u32 nestedWork;  /* 0x5C nested work handle */
-    u32 unk60;       /* 0x60 resource handle */
-    u32 unk64;       /* 0x64 resource handle */
-    u8 pad68[0xC];   /* 0x68 */
-    u32 optionalHandle; /* 0x74 freed if nonzero */
-    u8 pad78[0x4];   /* 0x78 */
-    u32 linkedWork;  /* 0x7C nested work handle */
-    u8 pad80[0x1C];  /* 0x80 */
-    u32 unk9C;       /* 0x9C spawn parameter */
-    f32 unkA0;       /* 0xA0 spawn parameter */
-    u32 unkA4;       /* 0xA4 spawn parameter */
-    u32 unkA8;       /* 0xA8 resource released on destroy */
-    u32 unkAC;       /* 0xAC resource released on destroy */
-    u8 padB0[0x8];   /* 0xB0 */
-    u32 unkB8;       /* 0xB8 spawn parameter */
-    u32 mode;        /* 0xBC mode set through the singleton accessor */
-    u8 padC0[0x50];  /* 0xC0 */
-    f32 unk110;      /* 0x110 spawn parameter */
-    u32 unk114;      /* 0x114 spawn parameter */
-    u8 pad118[0x50]; /* 0x118 */
-    f32 unk168;      /* 0x168 spawn parameter */
-    u8 pad16C[0x4];  /* 0x16C */
-    u32 unk170;      /* 0x170 spawn parameter */
-} EffPCPWorkF18;
 
 typedef struct {
     u8 pad00[0x10];  /* 0x00 task header */
@@ -566,8 +526,15 @@ extern u8 D_00355460[];
 extern u8 D_00355520[];
 extern u8 D_003555E0[];
 
-void effPcpDispatchKindAndRelease(EffPCPWork *work) {
-    billDispatchByKind(work->unk1C);
+typedef struct EffPCPRingWork {
+    f32 pos[4];
+    u32 color10;
+    u32 color14;
+    f32 scale;
+    s32 handle;
+} EffPCPRingWork;
+void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
+    billDispatchByKind((u32)work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -579,13 +546,6 @@ extern void billSetChildScaleComponents(s32 handle, f32 sx, f32 sy);
 extern void billSetChildParameter(s32 handle, u32 color);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 
-typedef struct EffPCPRingWork {
-    f32 pos[4];
-    u32 color10;
-    u32 color14;
-    f32 scale;
-    s32 handle;
-} EffPCPRingWork;
 
 /* Places a ring of 10 shrinking, brightening copies of the handle along the
  * fixed view direction. */
@@ -629,11 +589,11 @@ void effPcpViewAlignedRingSetPosition(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00177308(EffPCPWork *work, u32 val) {
-    work->unk14 = val;
+void func_00177308(EffPCPRingWork *work, u32 val) {
+    work->color14 = val;
 }
 
-void effPcpViewAlignedRingSetScale(EffPCPWorkF18 *work, f32 val) {
+void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
     work->scale = val;
 }
 
@@ -703,13 +663,13 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
     return work;
 }
 
-void effTwinEffectRelease(EffPCPWork *work) {
+void effTwinEffectRelease(EffPCPTwinWork *work) {
     s32 i;
     u32 *a;
     u32 *b;
 
-    a = &work->unk1C;
-    b = &work->nestedWork;
+    a = &work->pair[0][0];
+    b = work->shared;
     for (i = 7; i >= 0; i--) {
         func_001629F0(*b);
         b++;
@@ -782,12 +742,12 @@ void effPcpCopyTwinVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effPcpSetTwinEffectScale(EffPCPWorkF18 *work, f32 val) {
+void effPcpSetTwinEffectScale(EffPCPTwinWork *work, f32 val) {
     work->scale = val;
 }
 
-void effPcpSetTwinEffectColor(EffPCPWork *work, u32 val) {
-    work->unk10 = val;
+void effPcpSetTwinEffectColor(EffPCPTwinWork *work, u32 val) {
+    work->color = val;
 }
 
 /* Re-rolls slot `index` of the staggered effect: random-angle rotation matrix
@@ -1360,16 +1320,7 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
         dir[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
         VU0_LOAD_VF($vf10, dir);
-        __asm__ volatile(
-            ".set noreorder\n\t"
-            "vmul.xyz $vf2, $vf10, $vf10\n\t"
-            "vmulax.w ACC, $vf0, $vf2x\n\t"
-            "vmadday.w ACC, $vf0, $vf2y\n\t"
-            "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-            "vrsqrt Q, $vf0w, $vf2w\n\t"
-            "vwaitq\n\t"
-            "vmulq.xyz $vf10, $vf10, Q\n\t"
-            ".set reorder");
+        VU0_NORMALIZE_VF10();
         VU0_STORE_VF($vf10, dir);
         reach = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
@@ -3148,14 +3099,7 @@ void func_0017CED0(EffPCPWork *work, u32 val) {
 
 void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
     func_002DD688(3.1415927f);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf24, 0(%0)\n"
-        "lqc2 vf25, 0x10(%0)\n"
-        "lqc2 vf26, 0x20(%0)\n"
-        "lqc2 vf27, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(src) : "memory");
+    VU0_LOAD_MATRIX_B(src);
     sdfComposeVuMatrixFromRegisters();
     VU0_STORE_MATRIX(dst);
 }
@@ -3166,7 +3110,7 @@ typedef struct {
 
 typedef struct {
     EffPCPBlock80 head;
-    u32 state;
+    u32 unk50;
     u32 color;
     u32 handleA[7];
     u32 handleB[7];
@@ -3182,7 +3126,7 @@ void *effPcpTripleHandleCreate(void *block0, u32 *blocks) {
 
     work = func_002CFEB8(0xAC);
     work->head = *(EffPCPBlock80 *)block0;
-    work->state = 0;
+    work->unk50 = 0;
     work->color = 0x80808080;
     handle = work->handleA;
     for (i = 0; i < 7; i++) {
@@ -3219,7 +3163,7 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 
     work = func_002CFEB8(0xAC);
     work->head = src->head;
-    work->state = 0;
+    work->unk50 = 0;
     work->color = 0x80808080;
     from = src->handleC;
     to = work->handleC;

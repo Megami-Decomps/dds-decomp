@@ -668,14 +668,9 @@ void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *or
      * and `orientation` CSE'd across them. */
     VU0_LOAD_VF(vf10, direction);
     VU0_LOAD_VF(vf11, orientation);
-    __asm__ volatile(".set noreorder
-	vopmula.xyz ACC, $vf10, $vf11
-	vopmsub.xyz $vf10, $vf11, $vf10
-	.set reorder");
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();;
-    __asm__ volatile(".set noreorder
-	sqc2 $vf10, 0(%0)
-	.set reorder" : : "r"(direction) : "memory");
+    VU0_STORE_VF(vf10, direction);
     part->position[0] = direction[0];
     part->position[1] = direction[1];
     part->position[2] = direction[2];
