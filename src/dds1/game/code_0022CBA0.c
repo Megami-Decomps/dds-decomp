@@ -28,6 +28,13 @@ s32 func_00106488(f32 arg0);
 void func_00270030(void);
 void func_00270068(void);
 
+/* Handles retained by the viewer and by its owning task context. */
+typedef struct EvtWindowContext {
+    s32 flags; /* 0x00 */
+    u8 pad04[0x100];
+    s32 windowHandle; /* 0x104 */
+} EvtWindowContext;
+
 typedef struct EventViewerState {
     u32 resourceHandle; /* 0x00 */
     u32 flags;
@@ -519,17 +526,17 @@ void evtViewerCleanupMessageWindow(s32 viewerAddr) {
     if (windowContext == 0) {
         return;
     }
-    window = *(s32 *)(windowContext + 0x104);
+    window = ((EvtWindowContext *)windowContext)->windowHandle;
     if (window == -1) {
         return;
     }
     itfMesCleanupWindow(window, 1);
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
-    itfMesFinishWindowAndClearStatus(*(s32 *)(windowContext + 0x104));
+    itfMesFinishWindowAndClearStatus(((EvtWindowContext *)windowContext)->windowHandle);
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
-    itfPanelSetPairFirst(*(s32 *)(windowContext + 0x104), 0);
+    itfPanelSetPairFirst(((EvtWindowContext *)windowContext)->windowHandle, 0);
     windowContext = ((EventViewerState *)viewerAddr)->windowContext;
-    itfMesResetWindow(*(s32 *)(windowContext + 0x104));
+    itfMesResetWindow(((EvtWindowContext *)windowContext)->windowHandle);
     ((EventViewerState *)viewerAddr)->windowActive = 0;
     ((EventViewerState *)viewerAddr)->pad23C4 = 0;
 }
@@ -809,10 +816,12 @@ void *evtViewerInitializeUpdateSequence(void) {
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
 void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
+    EvtWindowContext *window;
     s32 flags;
 
     func_00232E20(viewer->windowContext);
-    flags = *(s32 *)viewer->windowContext;
+    window = (EvtWindowContext *)viewer->windowContext;
+    flags = window->flags;
     if ((flags & 8) == 0) {
         D_003BA904 |= 0x2000000;
         return 0;

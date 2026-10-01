@@ -24,9 +24,14 @@ extern MnuMovieTransfer D_00457E60;
 
 extern char D_0042A418[];
 
+typedef struct MovieListNode {
+    struct MovieListNode *next;
+    char path[4];
+} MovieListNode;
+
 typedef struct MovieList {
     u32 task;
-    u32 *head;
+    MovieListNode *head;
     s16 top;       /* first visible entry */
     s16 cursor;
     s16 total;
@@ -142,10 +147,10 @@ s32 func_002A81C8(void) {
 }
 
 void mnuClearMovieList(void) {
-    u32 *node = D_00457E48.head;
+    MovieListNode *node = D_00457E48.head;
     if (node != NULL) {
         do {
-            u32 *next = (u32 *)*node;
+            MovieListNode *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
@@ -159,15 +164,15 @@ void mnuClearMovieList(void) {
 INCLUDE_ASM(const s32, "game/code_002A8048", func_002A8268);
 
 u32 mnuGetMovieListNodeAtOffset(void) {
-    u32 entry = (u32)D_00457E48.head;
+    MovieListNode *entry = D_00457E48.head;
     s32 remaining = D_00457E48.cursor;
     if (entry != 0 && remaining > 0) {
         do {
-            entry = *(u32 *)entry;
+            entry = entry->next;
             remaining--;
         } while (entry != 0 && remaining > 0);
     }
-    return entry;
+    return (u32)entry;
 }
 
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AE8);
@@ -177,7 +182,7 @@ INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF0);
 INCLUDE_SDATA(const s32, "game/code_002A8048", D_00437AF8);
 
 void mnuDrawMovieList(void) {
-    u32 *node;
+    MovieListNode *node;
     s32 packets;
     s32 selected;
     s32 i;
@@ -192,10 +197,10 @@ void mnuDrawMovieList(void) {
     node = D_00457E48.head;
     selected -= i;
     for (; i > 0; i--) {
-        node = (u32 *)*node;
+        node = node->next;
     }
-    for (i = 0; i < 8 && node != NULL; i++, node = (u32 *)*node) {
-        sdfAppendPacket(packets, func_0033D810(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', (s32)(node + 1)));
+    for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
+        sdfAppendPacket(packets, func_0033D810(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
     }
     if (D_00457E48.top != 0) {
         func_0032EF30(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
