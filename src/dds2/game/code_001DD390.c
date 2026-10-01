@@ -2341,8 +2341,8 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     f32 pos[4];
     if (!(unit->stateFlags & 0x80)) {
         u8 *work = (u8 *)func_001AA6F8();
-        __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(vec));
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"((u8 *)unit + 0x60));
+        VU0_LOAD_VF(vf10, vec);
+        VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)unit + 0x60);
         __asm__ volatile("lqc2 vf11, 0(%0)\n\t"
                          "vadd.xyzw vf10, vf10, vf11\n\t"
                          "sqc2 vf10, 0(%1)"
@@ -2444,15 +2444,15 @@ extern void effObjSetInnerSecondVec(s32, f32 *);
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
     if (!(unit->stateFlags & 0x100)) {
-        __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(quat));
+        VU0_LOAD_VF(vf10, quat);
         if (unit->flags & 0x10) {
-            __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_004179E0));
+            VU0_LOAD_VF(vf11, D_004179E0);
             effMiscQuatMultiplyVU();
         }
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"((u8 *)unit + 0x70));
-        __asm__ volatile(".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r"(D_004179E0));
+        VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)unit + 0x70);
+        VU0_LOAD_VF(vf11, D_004179E0);
         effMiscQuatMultiplyVU();
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(result));
+        VU0_STORE_VF_UNCLOBBERED(vf10, result);
         if (unit->flags & 2) {
             effObjSetInnerSecondVec(unit->effectObject, result);
         }
@@ -2522,11 +2522,11 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target) {
     s128 hit;
     if (unit->flags & 0x80000) {
         btlUnitGetBodyPosVU(unit);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
+        VU0_STORE_VF_UNCLOBBERED(vf10, &from);
         btlUnitGetBodyPosVU(target);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
+        VU0_STORE_VF_UNCLOBBERED(vf10, &to);
         if (btlAimHorizontalDirectionVU(&from, &to) != 0) {
-            __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&hit));
+            VU0_STORE_VF_UNCLOBBERED(vf10, &hit);
             btlSetUnitRotation(unit, &hit);
         }
     }
@@ -2540,11 +2540,11 @@ void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale) {
     s128 hit;
     if (unit->flags & 0x80000) {
         btlUnitGetBodyPosVU(unit);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
+        VU0_STORE_VF_UNCLOBBERED(vf10, &from);
         btlUnitGetBodyPosVU(target);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
+        VU0_STORE_VF_UNCLOBBERED(vf10, &to);
         func_00209258(&from, &to, scale);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&hit));
+        VU0_STORE_VF_UNCLOBBERED(vf10, &hit);
         btlSetUnitRotation(unit, &hit);
     }
 }
@@ -3128,7 +3128,7 @@ void func_001E59A0(s32 taskArgs) {
 s32 btlApplyUnitVectorFxWhenLoaded(FxTask *task) {
     BtlUnit *unit = task->unit;
     if (unit->flags & 2) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(task) : "memory");
+        VU0_LOAD_VF_MEMORY(vf10, task);
         evtSetUnitNormalizedDirection(unit->ext, task->unk10);
     }
     return 1;
@@ -3725,11 +3725,11 @@ u32 func_001E7438(s32 taskArgs) {
     s128 from;
     s128 to;
     btlUnitGetBodyPosVU(*(BtlUnit **)taskArgs);
-    __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&from));
+    VU0_STORE_VF_UNCLOBBERED(vf10, &from);
     btlUnitGetBodyPosVU(*(BtlUnit **)(taskArgs + 4));
-    __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&to));
+    VU0_STORE_VF_UNCLOBBERED(vf10, &to);
     if (btlAimHorizontalDirectionVU(&from, &to) != 0) {
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(hit));
+        VU0_STORE_VF_UNCLOBBERED(vf10, hit);
         btlSetUnitRotation(*(BtlUnit **)taskArgs, hit);
     }
     return 1;
@@ -4098,7 +4098,7 @@ void btlInterpolateVectorStep(f32 *src) {
     vec[0] = src[4] * step + src[0];
     vec[1] = src[5] * step + src[1];
     vec[2] = src[6] * step + src[2];
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 u32 func_001E8568(void) {
@@ -4379,25 +4379,20 @@ void func_001E95C8(s32 transform, f32 value) {
 }
 
 void btlInitMotionTransformFromVectors(u8 *object, f32 *origin, f32 *direction) {
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(direction));
+    VU0_LOAD_VF(vf10, direction);
     effMiscQuaternionToMatrixVU();
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(D_003E9130));
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddz.xyzw vf10, vf30, vf10z\n\t"
-        ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object + 0x10) : "memory");
+    VU0_LOAD_VF(vf10, D_003E9130);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, object + 0x10);
     __asm__ volatile(".set noreorder\n\tqmtc2.ni %0, vf2\n\t.set reorder" : : "r"(1.0f));
     __asm__ volatile(
         ".set noreorder\n\t"
         "vmulx.xyzw vf10, vf10, vf2x\n\t"
         "vmove.xyzw vf11, vf10\n\t"
         ".set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(origin));
-    __asm__ volatile(".set noreorder\n\tvadd.xyzw vf10, vf10, vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(object) : "memory");
+    VU0_LOAD_VF(vf10, origin);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, object);
     ((XformData *)object)->f20 = 1.0f;
     ((XformData *)object)->f24 = 0.6981317f;
     btlClearRuntimeFlag2000();
@@ -5468,7 +5463,7 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
         if (btlSetActorEffectParameter(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
         }
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(fx + 0xC0));
+        VU0_STORE_VF_UNCLOBBERED(vf10, fx + 0xC0);
         func_001E88A8(fx + 0xC0);
     }
 }
@@ -5815,15 +5810,15 @@ void btlUnitGetPosVU(u32 unit, u8 mode) {
     switch (mode) {
     case 1:
         btlSetActorEffectParameterOrMuzzlePosition(unit, 1);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+        VU0_STORE_VF(vf10, &pos);
         break;
     case 0:
     default:
         btlUnitGetMuzzlePosVU(unit);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+        VU0_STORE_VF(vf10, &pos);
         break;
     }
-    __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(&pos) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, &pos);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004184D8);
@@ -7440,10 +7435,10 @@ void func_00203E18(s32 *args) {
     f32 pos[4];
     if (func_00332D48(*(s32 *)(args[1] + 0x18), 1) == 0) {
         mdlLoadPrimaryVectorVU(args[1]);
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(pos) : "memory");
+        VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
     } else {
-        __asm__ volatile("sqc2 vf10, 0(%0)" : : "r"(pos) : "memory");
+        VU0_STORE_VF(vf10, pos);
     }
     fileQueueSetPosition(args[0], pos);
     fileQueueUpdate(args[0]);
