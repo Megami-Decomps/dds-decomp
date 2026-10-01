@@ -900,6 +900,31 @@ void parFadeAlphaTriangleAllCells(ParSystem *system, u32 middleWord, u32 edgeWor
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00164208);
 
+/* Ordered packed color words for the three particle vertex layouts. */
+typedef struct ParStripVertexColors {
+    s32 edge0;
+    s32 middle0;
+    s32 center0;
+    s32 center1;
+    s32 middle1;
+    s32 edge1;
+} ParStripVertexColors;
+
+typedef struct ParQuadVertexColors {
+    s32 edge0;
+    s32 middle0;
+    s32 middle1;
+    s32 edge1;
+} ParQuadVertexColors;
+
+typedef struct ParSymmetricVertexColors {
+    s32 edge0;
+    s32 middle0;
+    s32 center;
+    s32 middle1;
+    s32 edge1;
+} ParSymmetricVertexColors;
+
 void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -917,12 +942,12 @@ void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x0) = edgeWord;
-                    *(s32 *)(vertex + 0x4) = middleWord;
-                    *(s32 *)(vertex + 0x8) = centerWord;
-                    *(s32 *)(vertex + 0xC) = centerWord;
-                    *(s32 *)(vertex + 0x10) = middleWord;
-                    *(s32 *)(vertex + 0x14) = edgeWord;
+                    ((ParStripVertexColors *)vertex)->edge0 = edgeWord;
+                    ((ParStripVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParStripVertexColors *)vertex)->center0 = centerWord;
+                    ((ParStripVertexColors *)vertex)->center1 = centerWord;
+                    ((ParStripVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParStripVertexColors *)vertex)->edge1 = edgeWord;
                     vertex += 0x18;
                 } while (j != 0);
             }
@@ -953,10 +978,10 @@ void parFillCellVertexQuads(ParSystem *system, s32 middleWord, s32 edgeWord) {
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x8) = middleWord;
-                    *(s32 *)(vertex + 0x4) = middleWord;
-                    *(s32 *)(vertex + 0xC) = edgeWord;
-                    *(s32 *)(vertex + 0x0) = edgeWord;
+                    ((ParQuadVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParQuadVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParQuadVertexColors *)vertex)->edge1 = edgeWord;
+                    ((ParQuadVertexColors *)vertex)->edge0 = edgeWord;
                     vertex += 0x10;
                 } while (j != 0);
             }
@@ -987,11 +1012,11 @@ void parFillSymmetricCellColors(ParSystem *system, s32 centerWord, s32 middleWor
                 j = perCell;
                 do {
                     j--;
-                    *(s32 *)(vertex + 0x0) = edgeWord;
-                    *(s32 *)(vertex + 0x4) = middleWord;
-                    *(s32 *)(vertex + 0x8) = centerWord;
-                    *(s32 *)(vertex + 0xC) = middleWord;
-                    *(s32 *)(vertex + 0x10) = edgeWord;
+                    ((ParSymmetricVertexColors *)vertex)->edge0 = edgeWord;
+                    ((ParSymmetricVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParSymmetricVertexColors *)vertex)->center = centerWord;
+                    ((ParSymmetricVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParSymmetricVertexColors *)vertex)->edge1 = edgeWord;
                     vertex += 0x14;
                 } while (j != 0);
             }

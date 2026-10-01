@@ -2215,14 +2215,29 @@ extern s32 func_001ABFD8(s32, s32);
 
 extern void func_001E22D8(u8 *, s32, s32, f32);
 
+/* Per-model effect node records begin at +0x2C, with a 0x14-byte stride. */
+typedef struct BtlEffectNode {
+    s16 triggerKind;
+    u8 pad02[2];
+    s16 rateKind;
+    u8 pad06[2];
+    f32 scale;
+    u8 pad0C[8];
+} BtlEffectNode;
+
+typedef struct BtlEffectResource {
+    u8 pad00[0x2C];
+    BtlEffectNode nodes[1];
+} BtlEffectResource;
+
 void btlApplyScaledUnitEffectParameter(u8 *unit, s32 index, s32 option, f32 scale) {
     u8 *table = (u8 *)func_001ABFD8(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
-    func_001E22D8(unit, index, option, *(f32 *)(table + index * 0x14 + 0x34) * scale);
+    func_001E22D8(unit, index, option, ((BtlEffectResource *)table)->nodes[index].scale * scale);
 }
 
 s32 btlGetSlotRateKind(u8 *unit, s32 index) {
     u8 *table = (u8 *)func_001ABFD8(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
-    s32 value = *(s16 *)(table + index * 20 + 0x30);
+    s32 value = ((BtlEffectResource *)table)->nodes[index].rateKind;
     switch (value) {
     case 0:
         return 0;
@@ -2245,7 +2260,7 @@ void btlUpdateUnitEffects(void) {
                                                   ((BtlUnit *)object)->resourceIndex);
             s32 model = (s32)((BtlUnit *)object)->ext->info;
             s32 node = mdlGetNodeField2C(model, 0);
-            if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
+            if (((BtlEffectResource *)resource)->nodes[node].rateKind == 1 &&
                 func_001E2B60(object) == 0) {
                 func_001E2758(object);
                 func_001E22D8(object, ((BtlUnit *)object)->effectIndex,
@@ -3468,7 +3483,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         node = mdlGetNodeField2C((s32)args->unit->ext->info, 0);
         if (node < 0x1D) {
             u8 *resource = (u8 *)func_001ABFD8(args->unit->resourceKind, args->unit->resourceIndex);
-            if (*(s16 *)(resource + node * 20 + 0x30) == 2) {
+            if (((BtlEffectResource *)resource)->nodes[node].rateKind == 2) {
                 func_001E4378(args->unit);
                 btlBossDebugPrintf("btl:stiffen damage motion wait\n");
             }
@@ -4903,7 +4918,7 @@ s32 func_001EA598(u8 *fx) {
     if (((ActionUnit *)fx)->category == 0x91) {
         return 0;
     }
-    return *(s16 *)(table + index * 0x14 + 0x2C) == 2;
+    return ((BtlEffectResource *)table)->nodes[index].triggerKind == 2;
 }
 
 static inline s32 btlHasFlag(u32 flags, u32 mask) {

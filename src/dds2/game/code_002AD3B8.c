@@ -84,6 +84,10 @@ typedef struct MenuSceneConfig {
     s32 entries[5];
 } MenuSceneConfig;
 
+typedef struct MenuStaffWindow MenuStaffWindow;
+typedef struct MenuStaffNode MenuStaffNode;
+typedef struct MenuStaffList MenuStaffList;
+
 typedef struct MenuStaffContext {
     u8 pad00[0x60];
     s32 group;            /* 0x60 */
@@ -92,7 +96,9 @@ typedef struct MenuStaffContext {
     s32 unk6C;
     u8 pad70[0x54];
     s32 spriteArg2;       /* 0xC4 */
-    u8 padC8[0x1BC];
+    u8 padC8[0x40];
+    MenuStaffList *activeWindow; /* 0x108: window used by staff image states */
+    u8 pad10C[0x178];
     u32 windowFlags;      /* 0x284 */
     u8 pad288[0xA68C];
     s32 selection;        /* 0xA914 */
@@ -106,17 +112,30 @@ typedef struct MenuStaffContext {
 } MenuStaffContext;
 
 /* Each staff list owns a cursor-bearing window at +0x18. */
-typedef struct MenuStaffList {
+struct MenuStaffList {
     u8 pad00[0x18];
-    u8 *window;
-} MenuStaffList;
+    MenuStaffWindow *window;
+};
 
-typedef struct MenuStaffWindow {
+struct MenuStaffWindow {
     u8 pad00[0x18];
     s32 *cursor;
-    u8 pad1C[8];
+    MenuStaffNode *selectedNode; /* 0x1C */
+    s32 panelActive; /* 0x20: selects the alternate panel drawing path */
     s32 rowCount; /* 0x24 */
-} MenuStaffWindow;
+};
+
+struct MenuStaffNode {
+    u8 pad00[0x60];
+    s32 label;
+};
+
+typedef struct MenuStaffObject {
+    u8 pad00[0x18];
+    MenuStaffWindow *window;
+    u8 pad1C[0x78];
+    s32 spriteAlpha;
+} MenuStaffObject;
 
 /* Staff menu state: selected objects, three list variants, and pending transitions. */
 typedef struct MenuStaffChoices {
@@ -150,11 +169,11 @@ s64 func_002AD3B8(s32 callback) {
     mnuCreateStaffImageSprite(5);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
+    if (((MenuStaffObject *)object)->window->panelActive != 0) {
         func_002AD330(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, ((MenuStaffObject *)object)->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -210,7 +229,7 @@ s64 func_002AD618(s32 callback) {
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(7);
     func_002AAC98(0,
-        *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
+        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
@@ -262,7 +281,7 @@ s64 func_002AD808(s32 callback) {
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(9);
     func_002AAC98(0,
-        *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
+        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
@@ -313,7 +332,7 @@ s64 func_002AD9F8(s32 callback) {
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(11);
     func_002AAC98(0,
-        *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
+        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
@@ -329,7 +348,7 @@ u32 func_002ADAD8(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(*(u32 *)(*(s32 *)(context + 0xaa48) + 0xc), context + 0xb10c);
+    func_002BAF50((u32)((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->secondaryObject, context + 0xb10c);
     return 1;
 }
 
@@ -337,7 +356,7 @@ u32 func_002ADB18(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002BAF50(*(u32 *)(context + 0x108), context + 0xb10c);
+    func_002BAF50((u32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
     return 1;
 }
 
@@ -372,7 +391,7 @@ s64 func_002ADB48(s32 callback) {
         }
         func_002C48C8(window, &buttons);
         func_002B96D8(window);
-        mnuPlayInputSound(0, buttons, *(s32 *)(window + 0x18));
+        mnuPlayInputSound(0, buttons, (s32)((MenuStaffObject *)window)->window);
     }
     return 0;
 }
@@ -386,10 +405,10 @@ s64 mnuStaffImageEnterD(s32 callback) {
     mnuCreateStaffImageSprite(0xD);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->secondaryObject;
-    if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
+    if (((MenuStaffObject *)object)->window->panelActive != 0) {
         func_002AD330(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, *(s32 *)(object + 0x94), 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, ((MenuStaffObject *)object)->spriteAlpha, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
@@ -412,11 +431,11 @@ s64 func_002ADF90(s32 callback) {
     mnuCreateStaffImageSprite(6);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     object = menu->primaryObject;
-    if (*(s32 *)(*(s32 *)(object + 0x18) + 0x20) != 0) {
+    if (((MenuStaffObject *)object)->window->panelActive != 0) {
         func_002AD330(context, 0);
     } else {
         func_002AAC98(0,
-            *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(context + 0x108) + 0x18) + 0x1c) + 0x60),
+            ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
             (s32)D_003E7050, context, 1, 0x53);
     }
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
@@ -453,7 +472,7 @@ s32 func_002AE0B0(s32 unused) {
 s32 func_002AE1F0(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
+    func_002BAF50((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
     func_002ABEB0(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
@@ -547,7 +566,7 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
     char buf[16];
     s32 handle;
 
-    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, *(s32 *)(panel + 0xC4), 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (id != 0) {
         func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + D_00435E20 + 0x18));
         handle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)buf, 0);
@@ -566,6 +585,13 @@ void func_002AEA58(s32 callback) {
     func_002C4038(context + 8, context + 0x54, 2, callback);
 }
 
+/* One 0x2138-byte page slot supplies the resource checked before page setup. */
+typedef struct MenuStaffPanelSlot {
+    u8 pad00[0xDC];
+    s32 resourceHandle;
+    u8 padE0[0x2058];
+} MenuStaffPanelSlot;
+
 s32 func_002AEAA0(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     u32 *window = &context->windowFlags;
@@ -580,7 +606,7 @@ s32 func_002AEAA0(s32 unused) {
                          context->spriteArg2);
     func_002BC078(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(*(s32 *)(slot + 0xDC), 1);
+        func_002BB9C8(((MenuStaffPanelSlot *)slot)->resourceHandle, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -596,7 +622,7 @@ s32 func_002AEAA0(s32 unused) {
 s32 func_002AEC10(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
+    func_002BAF50((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
     func_002AC660(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
@@ -723,7 +749,7 @@ s32 func_002AF8E0(s32 unused) {
                          context->spriteArg2);
     func_002BC078(index, window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(*(s32 *)(slot + 0xDC), 1);
+        func_002BB9C8(((MenuStaffPanelSlot *)slot)->resourceHandle, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0, context->spriteArg1, context->group);
@@ -742,7 +768,7 @@ s32 func_002AF8E0(s32 unused) {
 s32 func_002AFA58(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     s32 entryList = context + 0x284;
-    func_002BAF50(*(s32 *)(context + 0x108), context + 0xb10c);
+    func_002BAF50((s32)((MenuStaffContext *)context)->activeWindow, context + 0xb10c);
     func_002ACA98(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
