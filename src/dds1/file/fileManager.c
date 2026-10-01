@@ -102,7 +102,21 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *link = node->next;
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002889D8);
+extern void func_002EDBD8(void *, u32);
+extern void func_002EDC40(void *);
+extern void func_00288818(void *, s32, u32, u32, u32);
+
+void *func_002889D8(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4) {
+    void *work = sdfAllocAndClearQuadwords(0x70);
+    void *data = (u8 *)work + 0x30;
+
+    func_002EDBD8(data, arg2);
+    if (arg1 != 0) {
+        func_002EDC40(data);
+    }
+    func_00288818(work, 1, arg0, arg3, arg4);
+    return work;
+}
 
 void func_00288A80(u32 request) {
     func_002889D8(request, 0, 0, 0, 0);

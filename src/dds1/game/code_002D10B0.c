@@ -192,7 +192,21 @@ SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", sdfCoalesceUnusedTextureBlocks);
+s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *node) {
+    SdfTexHead *next = node->prev;
+
+    if (next == NULL || next->unk8 != NULL) {
+        return 0;
+    }
+    node->unk10 += next->unk10;
+    if ((node->prev = next->prev) != NULL) {
+        next->prev->next = node;
+    } else {
+        D_003BD9E4 = node;
+    }
+    sdfReleaseChipBlock((SdfTex *)next);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B28);
 
