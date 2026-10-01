@@ -151,7 +151,7 @@ struct PcpScatterWork3 {
     u8 pad00[0x20];
     s32 unk20;
     s32 unk24;
-    u32 unk28;
+    u32 assetResource; /* 0x28: released with sdfQueueAssetRelease */
     u32 unk2C;
     PcpScatterRes *res;
     u8 pad34[0x20];
@@ -538,7 +538,7 @@ void effPcpScatterReleasePoolResources(PcpScatterWork3 *work)
     if (work->res != NULL) {
         effPcpScatterResRelease(work->res);
     }
-    sdfQueueAssetRelease(work->unk28);
+    sdfQueueAssetRelease(work->assetResource);
     func_002D0918(work->unk2C);
 }
 
