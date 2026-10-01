@@ -63,13 +63,6 @@ typedef struct SdfMapPositionChunk {
     SdfMapPositionRecord records[1]; /* 0x10 */
 } SdfMapPositionChunk;
 
-
-
-#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
-#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
-#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
-
-
 extern f32 D_00438A48;
 
 extern f32 D_00438A4C;

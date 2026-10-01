@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -32,9 +33,6 @@ extern s32 func_00170858(EffectRecordGroup *group, s32 index);
 extern f32 D_00354980[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
-
-#define EFFECT_RING_START_ANGLE (-1.5707963f)
-#define EFFECT_RING_FULL_TURN (6.2831853f)
 
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
  * `count` vertices spread evenly around the circle from -pi/2. */

@@ -4,9 +4,6 @@ extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DD78(void);
 
-#define MENU_SUM_MINIMUM 99
-#define MENU_SUM_COUNT 5
-
 typedef struct MenuSumBytes {
     u8 pad00[0x16];
     s8 values[MENU_SUM_COUNT];

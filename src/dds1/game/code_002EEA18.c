@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 typedef struct SdfPacCounter {
@@ -288,8 +289,6 @@ void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
         func_002EF958(path, depth, node, tree);
     }
 }
-
-#define SDF_POOL_FREE_KIND 0xFFFF
 
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next;

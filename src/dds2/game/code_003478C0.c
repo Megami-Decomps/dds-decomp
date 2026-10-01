@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "pcp_vu0.h"
 
 typedef struct SdfRequest {
@@ -53,8 +54,6 @@ extern s32 GetThreadId(void);
 extern void SleepThread(void);
 
 extern s32 D_00439224;
-
-#define SDF_POOL_FREE_KIND 0xFFFF
 
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next;

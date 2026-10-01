@@ -1,6 +1,5 @@
 #include "common.h"
-
-extern s32 evtViewerTestIndexedCondition(u32);
+#include "mnu.h"
 
 extern s32 func_003292A8(s32);
 extern u8 *sdfResourceRetainAddress(s32);
@@ -151,8 +150,6 @@ extern f32 D_00453C90[];
 extern s32 D_004377F0;
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
-
-#define CAMP_TASK_PRIORITY 0x3EC
 
 typedef struct CampTaskData {
     s32 taskId;

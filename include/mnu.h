@@ -25,6 +25,13 @@ static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alph
     vec[3] = alpha;
 }
 
+/* Summary-menu entry count and pass threshold. */
+#define MENU_SUM_COUNT 5
+#define MENU_SUM_MINIMUM 99
+
+/* Camp task priority for the menu task family. */
+#define CAMP_TASK_PRIORITY 0x3EC
+
 #ifdef VERSION_DDS2
 /* Staff menu task context (DDS2 layout). */
 typedef struct MenuStaffWindow MenuStaffWindow;
