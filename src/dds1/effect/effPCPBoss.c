@@ -184,7 +184,17 @@ void effPCPBossApplyTwoBlocks(void *data) {
     effBossCreate(firstBlock, secondBlock);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184A08);
+EffBossWork *func_00184A08(EffBossWork *src) {
+    EffBossWork *work;
+
+    work = func_002CFEB8(sizeof(EffBossWork));
+    memcpy(&work->head, &src->head, sizeof(EffBossHead));
+    work->unk9C = 0;
+    work->color = 0x80808080;
+    work->paramWork = effParamWorkDuplicate(src->paramWork);
+    func_00184630(work);
+    return work;
+}
 
 void effBossDestroy(EffBossWork *work) {
     u32 i;

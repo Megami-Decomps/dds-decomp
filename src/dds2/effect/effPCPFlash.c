@@ -507,6 +507,15 @@ typedef struct PcpFlashHandle {
     f32 renderScale;
 } PcpFlashHandle;
 
+typedef struct PcpFlashRadialHandle {
+    u8 pad00[0x50];
+    u32 unk50;
+} PcpFlashRadialHandle;
+
+extern s32 func_003292A8(s32 size);
+extern void *sdfResourceRetainAddress(s32 allocation);
+extern void *memcpy(void *dst, const void *src, u32 n);
+
 void effFlashUpdateWork1(PcpFlashWork1 *work) {
     f32 axis[4];
     s32 index;
@@ -1214,7 +1223,35 @@ void effFlashOrbitArcAdvanceAngle(PcpFlashWork5 *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_001742F0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174648);
+extern s32 func_00177760();
+
+PcpFlashWork6 *func_00174648(src)
+    PcpFlashWork6 *src;
+{
+    u32 handle = func_003292A8(src->particleCount * sizeof(PcpFlashPtc20A) + sizeof(PcpFlashWork6));
+    PcpFlashWork6 *work = (PcpFlashWork6 *)sdfResourceRetainAddress(handle);
+    PcpFlashRadialHandle *record;
+    u32 range;
+    u32 i;
+
+    memcpy(work, src, 0x4C);
+    work->parts = (PcpFlashPtc20A *)(work + 1);
+    work->ownedBuffer = handle;
+    work->colorParam = 0x80808080;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    if (work->randomRange == 0) {
+        work->randomRange = 1;
+    }
+    record = (PcpFlashRadialHandle *)func_00177760(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = *(u32 *)((u8 *)work + 0x48);
+    range = work->randomRange;
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = -(effMiscRand(D_003AA868) % range);
+    }
+    return work;
+}
 
 void effFlashRotatingQuadSpawnFromTable(u64 table) {
     u64 effectParams;
@@ -1444,7 +1481,30 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     func_001778B0(handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00174F00);
+extern PcpFlashRadialHandle *func_00177BA8(s32 count);
+
+PcpFlashWork7 *func_00174F00(src)
+    PcpFlashWork7 *src;
+{
+    u32 handle = func_003292A8(src->particleCount * sizeof(PcpFlashPtc10) + sizeof(PcpFlashWork7));
+    PcpFlashWork7 *work = (PcpFlashWork7 *)sdfResourceRetainAddress(handle);
+    PcpFlashRadialHandle *record;
+    u32 i;
+
+    memcpy(work, src, 0x3C);
+    work->parts = (PcpFlashPtc10 *)(work + 1);
+    work->colorParam = 0x80808080;
+    work->ownedBuffer = handle;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    record = func_00177BA8(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = *(u32 *)((u8 *)work + 0x38);
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = 0;
+    }
+    return work;
+}
 
 void effFlashRadialTriangleSpawnFromTable(u64 table) {
     u64 effectParams;
@@ -2031,7 +2091,28 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
     func_001778B0(handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00176758);
+PcpFlashWork10 *func_00176758(src)
+    PcpFlashWork10 *src;
+{
+    u32 handle = func_003292A8(src->particleCount * sizeof(PcpFlashPtc10) + sizeof(PcpFlashWork10));
+    PcpFlashWork10 *work = (PcpFlashWork10 *)sdfResourceRetainAddress(handle);
+    PcpFlashRadialHandle *record;
+    u32 i;
+
+    memcpy(work, src, 0x40);
+    work->parts = (PcpFlashPtc10 *)(work + 1);
+    work->colorParam = 0x80808080;
+    work->ownedBuffer = handle;
+    work->renderScale = 1.0f;
+    work->updateCount = 0;
+    record = func_00177BA8(work->particleCount);
+    work->resourceHandle = (u32)record;
+    record->unk50 = *(u32 *)((u8 *)work + 0x3C);
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = 0;
+    }
+    return work;
+}
 
 void effFlashOffsetRadialTriangleSpawnFromTable(u64 table) {
     u64 effectParams;
