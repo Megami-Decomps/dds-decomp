@@ -94,6 +94,17 @@ def _value(text: str, *identity: object, origin: int | None = None) -> _Value:
     return _Value(text, tuple(identity), origins)
 
 
+def _symbolize_argument(
+    command: flw0_profiles.NativeCommand, index: int, value: _Value
+) -> _Value:
+    if len(value.identity) != 2 or value.identity[0] != "constant16":
+        return value
+    symbols = command.symbols_for_argument(index)
+    integer = _signed(value.identity[1], 16)
+    name = symbols.by_value.get(integer) if symbols is not None else None
+    return _Value(name, value.identity, value.origins) if name is not None else value
+
+
 def _merge_value_origins(left: _Value, right: _Value) -> _Value:
     return _Value(left.text, left.identity, left.origins | right.origins)
 
@@ -310,7 +321,10 @@ def render(
             if command is None:
                 statement = f"COMM 0x{operand:04x}  # unknown stack effect"
                 return pc + 1, _State(), statement, ()
-            arguments = stack.arguments(command.stack_pop)
+            arguments = [
+                _symbolize_argument(command, index, value)
+                for index, value in enumerate(stack.arguments(command.stack_pop))
+            ]
             call = f"{command.name}({', '.join(value.text for value in arguments)})"
             if command.writes_result:
                 statement = f"result = {call}"
