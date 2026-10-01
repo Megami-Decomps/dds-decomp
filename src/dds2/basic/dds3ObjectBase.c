@@ -90,7 +90,48 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112058);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112168);
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112230);
+/* Mode word and blend weight at the end of ObjBase (0x3C / 0x40). */
+typedef struct ObjMode {
+    u8 pad00[0x3C];
+    s32 mode;    /* 0x3C */
+    f32 weight;  /* 0x40 */
+} ObjMode;
+
+/* Select the object's mode 0..6; modes 0, 4 and 5 use full weight, the others zero. */
+void func_00112230(void *obj, u32 mode) {
+    ObjMode *base = (ObjMode *)dds3GetObjectOwnedHandle(obj);
+
+    switch (mode) {
+    case 0:
+        base->mode = 0;
+        base->weight = 1.0f;
+        break;
+    case 1:
+        base->mode = 1;
+        base->weight = 0.0f;
+        break;
+    case 2:
+        base->mode = 2;
+        base->weight = 0.0f;
+        break;
+    case 3:
+        base->mode = 3;
+        base->weight = 0.0f;
+        break;
+    case 4:
+        base->mode = 4;
+        base->weight = 1.0f;
+        break;
+    case 5:
+        base->mode = 5;
+        base->weight = 1.0f;
+        break;
+    case 6:
+        base->mode = 6;
+        base->weight = 0.0f;
+        break;
+    }
+}
 
 s32 dds3InvokeSlot5Handler(void *object) {
     void *handler;

@@ -54,7 +54,8 @@ typedef struct DevState {
 
 typedef struct DevWorkerEntry {
     s32 handle; /* 0x00: thread ID at D_00398860, semaphore ID at D_00398864 */
-    u8 pad04[20];
+    s32 semaphore; /* 0x04 */
+    u8 pad08[16];
 } DevWorkerEntry;
 
 extern u8 D_003BD42F;
@@ -206,7 +207,35 @@ void sdfDevStartRpcServer(void) {
     sceSifRpcLoop(queue);
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4AE0);
+typedef struct SifClient {
+    u8 pad00[0x24];
+    void *server; /* 0x24: non-NULL once the bind succeeded */
+    u8 pad28[8];
+} SifClient;
+
+extern SifClient D_003F9B50;
+extern u8 D_003BD3C8;
+extern s32 func_002CF4E0();
+extern s32 func_002CF930(void);
+extern s32 sdfGetElapsedTimerTicks(s32);
+extern s32 sceSifMBindRpc(void *, s32, s32);
+extern void _StartThread(s32, s32);
+
+/* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
+void func_002E4AE0(void) {
+    s32 start;
+
+    _StartThread(func_002CF4E0(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
+    while (sceSifMBindRpc(&D_003F9B50, 0x646E7270, 0) >= 0) {
+        if (D_003F9B50.server != NULL) {
+            D_003BD3C8 = 1;
+            break;
+        }
+        start = func_002CF930();
+        while (sdfGetElapsedTimerTicks(start) < 4) {
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002E4720", func_002E4B80);
 
@@ -842,7 +871,28 @@ void sdfTickThreadPriorityOverride(void) {
     sdfRestoreDeviceThreadPriority();
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E70F0);
+extern void D_002E6538();
+extern void sdfDevWorkerThread();
+
+/* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
+void func_002E70F0(s32 index) {
+    DevWorkerEntry *worker = &D_00398860[index];
+    void (*entry)();
+    s32 thread;
+
+    thread = worker->handle;
+    if (thread < 0) {
+        worker->semaphore = sdfCreateSemaphore(0, 0xFF, 0);
+        entry = D_002E6538;
+        if (index != 3) {
+            entry = sdfDevWorkerThread;
+        }
+        D_003BD430 = 0x48;
+        thread = func_002CF4E0(entry, 0x4000, 0x48);
+        worker->handle = thread;
+        _StartThread(thread, (s32)worker);
+    }
+}
 
 void sdfPowerOffLoop(s32 semaphore) {
     s32 status;

@@ -196,7 +196,27 @@ u64 billCreateFromResource(u32 owner, u64 resource) {
     return billboard;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00159A50);
+/* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
+BillObj *func_00159A50(BillObj *source) {
+    BillObj *copy;
+    BillData *data;
+
+    if (source->unk2C == 1) {
+        copy = billCloneList(source);
+        func_00158D68(copy);
+        copy->unk2C = source->unk2C;
+        copy->unk28 = source->unk28;
+    } else {
+        copy = billAllocChild(NULL);
+        func_00158D68(copy);
+        copy->unk2C = source->unk2C;
+        copy->unk28 = source->unk28;
+        data = source->unk30;
+        data->unk8 = data->unk8 + 1;
+        copy->unk30 = data;
+    }
+    return copy;
+}
 
 void billDispatchByKind(BillObj *obj) {
     D_003AA998[obj->unk2C].func();
