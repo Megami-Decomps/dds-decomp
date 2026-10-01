@@ -20,10 +20,10 @@ typedef struct PanelRect {
 typedef struct PanelObj {
     u8 unk0[8];     /* 0x0 */
     PktRec *buf;    /* 0x8: packet buffer */
-    s32 unkC;       /* 0xC */
+    s32 tail;    /* 0xC: tail arg of itfDrawQuadFlat4 */
     PanelRect rect; /* 0x10 */
     u8 unk20[0x18]; /* 0x20 */
-    s32 unk38;      /* 0x38 */
+    s32 alpha;   /* 0x38: copied to a colour record's alpha */
     u8 handlerIndex; /* 0x3C: index into the panel handler table */
 } PanelObj;
 
@@ -61,9 +61,9 @@ typedef struct PanelHoldItem {
 typedef struct PanelHold {
     s32 window;
     s16 unk4;
-    s16 unk6;
+    s16 count;   /* 0x6: entries used in items[] */
     s32 unk8;
-    PanelHoldItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
+    PanelHoldItem items[0x40]; /* 0xC: queued entries, count bounds them */
 } PanelHold;
 
 extern PanelHold itfHeldPanelCursor;
@@ -277,9 +277,9 @@ void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
     PktRec *colors = buf + 4;
     s32 i;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].unkC = panel->alpha;
     for (i = 0; i < 3; i++) {
-        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->unkC, command);
+        itfDrawQuadFlat4(buf, colors, &D_003B45C8[i * 4], &D_003B45D8[i * 4], panel->tail, command);
     }
 }
 
@@ -292,17 +292,17 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2450);
 void itfDrawPanelQuadWithCommand(PanelObj *panel, u64 command) {
     PktRec *colors = panel->buf + 2;
 
-    colors->unkC = panel->unk38;
-    itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->unkC, command);
+    colors->unkC = panel->alpha;
+    itfDrawQuadFlat4(panel->buf, colors, D_004365C8, D_004365D0, panel->tail, command);
 }
 
 void itfEmitPanelQuadPacket(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 3;
 
-    colors[1].unkC = panel->unk38;
+    colors[1].unkC = panel->alpha;
     itfSendTablePacket(command, 2, 0);
-    itfEmitQuadListWide(buf, colors, D_004365D8, D_004365E0, 6, panel->unkC, command);
+    itfEmitQuadListWide(buf, colors, D_004365D8, D_004365E0, 6, panel->tail, command);
     itfSendTablePacket(command, 0, 0);
 }
 
@@ -315,12 +315,12 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A2AF0);
 void itfDrawTintedPanelRect(PanelObj *panel, u64 command) {
     PanelRect rect;
 
-    D_003B4760[3] = panel->unk38 * 0x67 / 128;
+    D_003B4760[3] = panel->alpha * 0x67 / 128;
     rect.x0 = panel->rect.x0;
     rect.y0 = panel->rect.y0;
     rect.x1 = panel->rect.x1;
     rect.y1 = panel->rect.y1;
-    func_001A09C0(&rect, D_003B4760, panel->unkC, 0x240, command);
+    func_001A09C0(&rect, D_003B4760, panel->tail, 0x240, command);
 }
 
 void itfAppendGsPanelStatePacket(void *list) {
@@ -383,7 +383,7 @@ s32 itfPanelAcquireHold(void) {
     hold->window = window;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->unk6 = 0;
+    hold->count = 0;
     func_001A4988(window, 3, 0);
     return 1;
 }
@@ -398,7 +398,7 @@ s32 itfPanelReleaseHold(void) {
     hold->window = -1;
     hold->unk4 = -1;
     hold->unk8 = -1;
-    hold->unk6 = 0;
+    hold->count = 0;
     return 1;
 }
 
@@ -412,16 +412,16 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     if (cursor->window < 0) {
         return 1;
     }
-    if (cursor->unk6 >= 0x40) {
+    if (cursor->count >= 0x40) {
         return 1;
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
-    cursor->items[cursor->unk6].second = first;
-    cursor->items[cursor->unk6].first = second;
-    cursor->items[cursor->unk6].third = third;
-    cursor->unk6++;
+    cursor->items[cursor->count].second = first;
+    cursor->items[cursor->count].first = second;
+    cursor->items[cursor->count].third = third;
+    cursor->count++;
     return 1;
 }
 
