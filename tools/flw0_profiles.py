@@ -47,17 +47,35 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x00E, "WAIT_FOR_TIMER_LIMIT", 1, writes_result=False),
     NativeCommand(0x00F, "SCREEN_FADE_A", 2, writes_result=False),
     NativeCommand(0x010, "SCREEN_FADE_B", 2, writes_result=False),
+    NativeCommand(0x012, "ADD_EFFECT_UNIT_TO_WORLD", 1, writes_result=False),
+    NativeCommand(
+        0x019, "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD", 1, writes_result=False
+    ),
     NativeCommand(0x043, "RESET_DRAW_EFFECTS", 0, writes_result=False),
     NativeCommand(0x046, "RETURN_TO_TITLE", 0, writes_result=False),
+    NativeCommand(0x049, "WAIT_FOR_UNIT_MOTION", 1, writes_result=False),
+    NativeCommand(
+        0x04A, "ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR", 2, writes_result=False
+    ),
+    NativeCommand(0x04B, "SET_UNIT_VALUE", 2, writes_result=False),
     NativeCommand(0x060, "RESTORE_CAMERA_NODE_MODE", 0, writes_result=False),
     NativeCommand(0x061, "RELEASE_CURRENT_OBJECT", 0, writes_result=False),
     NativeCommand(0x066, "CALL_EVENT", 1, writes_result=False),
+    NativeCommand(0x068, "READ_CURRENT_WORLD_OBJECT_ID", 0, writes_result=True),
+    NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
+    NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
     NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0, writes_result=False),
     NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1, writes_result=False),
     NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2, writes_result=True),
     NativeCommand(0x0C3, "SET_SOLAR_OVERLAY_MODE", 1, writes_result=False),
+    NativeCommand(
+        0x1E0, "QUEUE_WORLD_OBJECT_PENDING_VALUE", 2, writes_result=False
+    ),
+    NativeCommand(
+        0x1E1, "CLEAR_WORLD_OBJECT_PENDING_VALUE", 1, writes_result=False
+    ),
     NativeCommand(0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0, writes_result=False),
 )
 
