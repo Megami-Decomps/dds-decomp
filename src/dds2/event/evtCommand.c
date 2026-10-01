@@ -158,42 +158,42 @@ s32 evtCommandEnablePathUnit(void)
 
 /* The path search covers the six object kinds 4 through 9. */
 s32 evtCommandAssignEffectObjectOwner(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 found;
-    s32 i;
+    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 owner;
+    s32 objectKind;
 
-    if (path == NULL) {
+    if (effectPath == NULL) {
         return 1;
     }
-    i = 4;
+    objectKind = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
+        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        objectKind++;
+    } while (objectKind < 10 && owner == 0);
+    if (owner == 0) {
         return 1;
     }
-    effObjBindValidatedOwner(path, found);
+    effObjBindValidatedOwner(effectPath, owner);
     return 1;
 }
 
 s32 evtCommandAssignEffectObjectOwnerWithEntry(void) {
-    void *path = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    s32 found;
-    s32 i;
+    void *effectPath = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 owner;
+    s32 objectKind;
 
-    if (path == NULL) {
+    if (effectPath == NULL) {
         return 1;
     }
-    i = 4;
+    objectKind = 4;
     do {
-        found = (s32)evtFindWorldObjectByIdAndKind(i, scrReadIntParameter(1));
-        i++;
-    } while (i < 10 && found == 0);
-    if (found == 0) {
+        owner = (s32)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(1));
+        objectKind++;
+    } while (objectKind < 10 && owner == 0);
+    if (owner == 0) {
         return 1;
     }
-    effObjBindOwnerBillEntry(path, found, scrReadIntParameter(2));
+    effObjBindOwnerBillEntry(effectPath, owner, scrReadIntParameter(2));
     return 1;
 }
 
