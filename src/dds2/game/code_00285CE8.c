@@ -33,8 +33,8 @@ typedef struct {
     s16 unk1E;     /* 0x1E */
 } MtrGrid;
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
 
+INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285CE8);
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285D78);
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
@@ -100,7 +100,16 @@ void mtrMantraEventBitPop(s32 arg) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitResetUnit);
+extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
+void mtrMantraBitResetUnit(MtrRecord *record) {
+    s32 i;
+
+    for (i = 0; i < 0xB0; i++) {
+        scrSetEntryLowFlags((u32)record, i, 0);
+    }
+    evtPrintDeveloperConsoleMessage(
+        "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n", record->unk4);
+}
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitReset);
 
