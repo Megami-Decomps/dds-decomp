@@ -92,13 +92,13 @@ s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
 }
 
 extern s32 scrCreateTaskForProcessId();
-s32 evtReplaceScriptProcessTask(s32 first, s32 second, s32 *taskSlot) {
+s32 evtReplaceScriptProcessTask(s32 processId, s32 value, s32 *taskSlot) {
     s32 task;
 
     if (taskSlot != NULL) {
         evtDestroyRegisteredTaskIfPresent(*taskSlot);
     }
-    task = scrCreateTaskForProcessId(0x7D0, first, second);
+    task = scrCreateTaskForProcessId(0x7D0, processId, value);
     evtClearActiveFlag(0);
     if (taskSlot != NULL) {
         *taskSlot = task;
