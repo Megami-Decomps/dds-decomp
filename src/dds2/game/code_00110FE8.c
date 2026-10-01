@@ -7,7 +7,9 @@ typedef struct WorldObjectPointer {
 
 /* One entry of the chain table value[2] points at; the walk follows next. */
 typedef struct WorldChainNode {
-    u8 pad00[0x20];
+    u8 pad00[8];
+    u8 *name; /* 0x08 */
+    u8 pad0C[0x14];
     struct WorldChainNode *next; /* 0x20 */
 } WorldChainNode;
 
@@ -74,7 +76,38 @@ s32 dds3GetWorldObjectValue(WorldObjectPointer *object) {
     return *object->value;
 }
 
-INCLUDE_ASM(const s32, "game/code_00110FE8", func_001110F8);
+WorldChainNode *func_001110F8(WorldObjectPointer *object, s32 index, const u8 *name) {
+    WorldChainNode *node;
+    u8 *s;
+    s32 i;
+
+    if (object == NULL || name == NULL) {
+        return NULL;
+    }
+    node = ((WorldChainEntry *)object->value[2])[index].node;
+    while (node != NULL) {
+        s = node->name;
+        if (s == NULL) {
+            node = node->next;
+            continue;
+        }
+        if (s[0] == '\0') {
+            node = node->next;
+            continue;
+        }
+        i = 0;
+        if (name[0] == s[0]) {
+            do {
+                if (name[i] == '\0') {
+                    return node;
+                }
+                i++;
+            } while (name[i] == node->name[i]);
+        }
+        node = node->next;
+    }
+    return NULL;
+}
 
 u32 *dds3FindObjectChainNodeByName(WorldObjectPointer *object, const u8 *name) {
     u32 *node;
