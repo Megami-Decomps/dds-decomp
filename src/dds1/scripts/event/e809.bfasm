@@ -40,7 +40,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   000b: PUSHIS 0x0003
   000c: PUSHIS 0x0329
   000d: COMM 0x00ca
-  000e: COMM 0x000d
+  000e: COMM WAIT_FOR_TIMER_START
   000f: COMM 0x0075
   0010: PUSHREG
   0011: POPIX 0x000b
@@ -271,7 +271,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   0108: COMM 0x009b
   0109: PUSHIS 0x000f
   010a: PUSHIS 0x0000
-  010b: COMM 0x0010
+  010b: COMM SCREEN_FADE_B
   010c: PUSHIS 0x000f
   010d: COMM WAIT_FOR_TIMER_LIMIT
   010e: COMM 0x0023
@@ -314,7 +314,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   0133: PUSHIS 0x0000
   0134: POPLIX 0x0002
   0135: GOTO 0x0006  # "_11"
-  0136: COMM 0x000d
+  0136: COMM WAIT_FOR_TIMER_START
   0137: GOTO 0x0007  # "_7"
   0138: END
   0139: PROC 0x0002  # "e809_010_2"
@@ -355,7 +355,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   015c: PUSHIS 0x0000
   015d: POPLIX 0x0004
   015e: GOTO 0x000a  # "_17"
-  015f: COMM 0x000d
+  015f: COMM WAIT_FOR_TIMER_START
   0160: GOTO 0x000b  # "_13"
   0161: END
 end

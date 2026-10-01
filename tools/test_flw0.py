@@ -673,18 +673,24 @@ end
             "MESSAGE_REQUEST_AND_POLL": (0x000, 1, False),
             "ACTIVATE_MESSAGE_PANEL": (0x001, 0, False),
             "FINISH_SCRIPT_MESSAGE_WINDOW": (0x002, 0, False),
+            "TEST_MODEL_FLAG": (0x007, 1, True),
             "SET_MODEL_FLAG": (0x008, 1, False),
             "CLEAR_MODEL_FLAG": (0x009, 1, False),
+            "WAIT_FOR_TIMER_START": (0x00D, 0, False),
             "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
             "SCREEN_FADE_A": (0x00F, 2, False),
+            "SCREEN_FADE_B": (0x010, 2, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
+            "RESTORE_CAMERA_NODE_MODE": (0x060, 0, False),
+            "RELEASE_CURRENT_OBJECT": (0x061, 0, False),
             "CALL_EVENT": (0x066, 1, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
+            "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
@@ -807,7 +813,7 @@ end
                         )
         self.assertEqual(type5_uses, 315)
         self.assertEqual(command_uses, 3881)
-        self.assertEqual(profiled_command_uses, 2231)
+        self.assertEqual(profiled_command_uses, 2351)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -817,12 +823,22 @@ end
             (12 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (0x094 << 16) | flw0.OPCODE_IDS["COMM"],
             flw0.OPCODE_IDS["PUSHREG"],
+            (7 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x007 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (0x00D << 16) | flw0.OPCODE_IDS["COMM"],
+            (0 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (30 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x010 << 16) | flw0.OPCODE_IDS["COMM"],
             flw0.OPCODE_IDS["END"],
         ]
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds2")
         self.assertIn("PREPARE_UNIT_MOTION_STATE(1, 2, 3, 4, 5)", view)
         self.assertIn("result = READ_SECONDARY_WORLD_ID_VALUE(12)", view)
         self.assertIn("push result", view)
+        self.assertIn("result = TEST_MODEL_FLAG(7)", view)
+        self.assertIn("WAIT_FOR_TIMER_START()", view)
+        self.assertIn("SCREEN_FADE_B(0, 30)", view)
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -1006,7 +1022,7 @@ end
         )
         self.assertEqual(
             (totals["profiled_commands"], totals["message_references"]),
-            (14659, 1910),
+            (23630, 1910),
         )
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)

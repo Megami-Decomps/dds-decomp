@@ -239,18 +239,24 @@ tables and both implementations:
 | `MESSAGE_REQUEST_AND_POLL` | `0x000` | 1 | Starts a message entry or waits for its current work |
 | `ACTIVATE_MESSAGE_PANEL` | `0x001` | 0 | Activates the current message panel |
 | `FINISH_SCRIPT_MESSAGE_WINDOW` | `0x002` | 0 | Waits for and finishes the active script message window |
+| `TEST_MODEL_FLAG` | `0x007` | 1 | Tests a model flag and returns the result |
 | `SET_MODEL_FLAG` | `0x008` | 1 | Sets a model flag |
 | `CLEAR_MODEL_FLAG` | `0x009` | 1 | Clears a model flag |
+| `WAIT_FOR_TIMER_START` | `0x00D` | 0 | Waits until the current command timer becomes nonzero |
 | `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
+| `SCREEN_FADE_B` | `0x010` | 2 | Starts the selected screen fade-in when its timer reaches zero |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
+| `RESTORE_CAMERA_NODE_MODE` | `0x060` | 0 | Resets the player scene-object state and restores camera node mode |
+| `RELEASE_CURRENT_OBJECT` | `0x061` | 0 | Releases the current field object and refreshes field state |
 | `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
+| `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
@@ -260,8 +266,8 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 2,231 of 3,881 native calls in the DDS1 event corpus and
-14,659 of 38,850 calls in the complete DDS2 corpus. It also makes the adjacent
+The reviewed set names 2,351 of 3,881 native calls in the DDS1 event corpus and
+23,630 of 38,850 calls in the complete DDS2 corpus. It also makes the adjacent
 message-command pattern safe to recognize, producing 188 symbolic DDS1 message
 references and 1,910 symbolic DDS2 references. Every other command and every
 dynamic or ambiguous message operand remains numeric.
