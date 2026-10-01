@@ -400,11 +400,50 @@ void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u64 style, u64 flags) {
     frFontQueueGlyphInSelectedSlot(glyph);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7F18);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7FB0);
+/* Rotate the y/z components of `v` by `angle` (about the x axis). */
+void func_002C7F18(f32 *v, f32 angle) {
+    f32 r[4];
+    f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    f32 s = sdfSinPoly(angle);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8040);
+    r[1] = v[1] * c + v[2] * s;
+    s = sdfSinPoly(angle);
+    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    r[2] = v[1] * -s + v[2] * c;
+    v[1] = r[1];
+    v[2] = r[2];
+}
+
+/* Rotate the x/z components of `v` by `angle` (about the y axis). */
+void func_002C7FB0(f32 *v, f32 angle) {
+    f32 r[4];
+    f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    f32 s = sdfSinPoly(angle);
+
+    r[0] = v[0] * c - v[2] * s;
+    s = sdfSinPoly(angle);
+    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    r[2] = v[0] * s + v[2] * c;
+    v[0] = r[0];
+    v[2] = r[2];
+}
+
+/* Rotate the x/y components of `v` by `angle` (about the z axis). */
+void func_002C8040(f32 *v, f32 angle) {
+    f32 r[4];
+    f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    f32 s = sdfSinPoly(angle);
+
+    r[0] = v[0] * c + v[1] * s;
+    s = sdfSinPoly(angle);
+    c = sdfEvaluateCosineViaSinePhaseShift(angle);
+    r[1] = v[0] * -s + v[1] * c;
+    v[0] = r[0];
+    v[1] = r[1];
+}
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C80D8);
 
