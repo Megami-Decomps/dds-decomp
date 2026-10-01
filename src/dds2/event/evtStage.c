@@ -49,7 +49,7 @@ void evtSetWorldSlotStatusFlag(void) {
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_00117810(slotData);
+        sdfFreezeFloatCounter(slotData);
         return;
     }
 }
@@ -59,7 +59,7 @@ void evtClearWorldSlotStatusFlag(void) {
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_00117820(slotData);
+        sdfUnfreezeFloatCounter(slotData);
         return;
     }
 }

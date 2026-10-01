@@ -42,7 +42,7 @@ typedef struct TexRecord {
 } TexRecord;
 
 /* Drop one reference; the last one releases the texture and its allocation. */
-void func_00150260(TexRecord *entry) {
+void effReleaseSharedTextureRecord(TexRecord *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
         sdfTexReleaseReferenceViaHandler(entry->texture);

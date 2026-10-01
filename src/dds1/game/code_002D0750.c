@@ -16,7 +16,7 @@ void sdfSkipNextListNode(u8 *node) {
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0918);
 
-void func_002D09B8(void) {
+void sdfReleaseCurrentResourceHandle(void) {
     u64 handle;
 
     handle = func_002D0A80();
@@ -71,7 +71,7 @@ extern s32 func_002D03F8(s32 size);
 extern s32 func_002F4FD8(void *, s32, s32, void *, s32, void *, s32, s32, s32);
 extern u8 D_003E2770[];
 
-s32 func_002D0C68(char *name, s32 dataSize, void *data, s32 *outSize) {
+s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSize) {
     u8 buffer[0x50];
     s32 nameLength = strlen(name);
     s32 total = nameLength + dataSize + 0xC;

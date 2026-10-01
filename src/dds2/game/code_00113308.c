@@ -2,7 +2,7 @@
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
-extern s32 func_00110C70(u64, u64, u64);
+extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 
 extern u32 D_00435DA0;
 
@@ -137,7 +137,7 @@ u32 func_00113F00(EffectObject *object) {
     return object->data->handle;
 }
 
-extern WorldObj *func_00110AA8();
+extern WorldObj *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
@@ -154,7 +154,7 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 
     memset(zero, 0, 0x10);
     zero[3] = 1.0f;
-    obj = func_00110AA8(6);
+    obj = dds3AppendWorldObjectNode(6);
     obj->unk4 = a;
     dds3EnsureSlotData(obj);
     effObjSetInnerSecondVec(obj, second);
@@ -168,7 +168,7 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 }
 
 void func_00113FD0(void) {
-    func_00110B50();
+    dds3RemoveWorldObjectNode();
 }
 
 void func_00113FE8(EffectObject *object, u32 value) {
@@ -184,15 +184,15 @@ u32 func_00114008(u64 id) {
     u64 world;
 
     world = dds3GetWorldSecondaryObject();
-    object = (EffectObject *)func_00110C70(world, id, 6);
+    object = (EffectObject *)dds3FindWorldObjectNodeByKey(world, id, 6);
     return object->data->word04;
 }
 
-void func_00114048(EffectObject *object, u32 value) {
+void evtSetObjectTransitionWork(EffectObject *object, u32 value) {
     object->data->word08 = value;
 }
 
-u32 func_00114058(EffectObject *object) {
+u32 evtGetObjectTransitionWork(EffectObject *object) {
     return object->data->word08;
 }
 

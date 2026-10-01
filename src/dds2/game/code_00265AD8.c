@@ -89,7 +89,7 @@ typedef struct EventDispatchState {
 
 INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
 
-s64 func_00265E78(s32 callback) {
+s64 evtAdvancePopupWithOptionalPreparation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     if (*(s32 *)(context + 0xE0) != 0) {
@@ -119,7 +119,7 @@ u32 func_00265F58(void) {
 
 extern u8 D_003CE690[];
 
-s64 func_00265F60(s32 callback) {
+s64 mnuPollMessageWindowBeforeClosing(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
     s64 state = func_002C4038(context + 0xC, window, 0, callback);
@@ -149,7 +149,7 @@ s64 func_00266038(s32 callback) {
     return evtMenuSetHandler(eventContext, 2, callback);
 }
 
-u32 func_00266080(void) {
+u32 mnuStartReturnFadeAndRestoreDisplay(void) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 1);
     evtSetBoundedDisplayValue(1, 0);
@@ -163,7 +163,7 @@ u32 evtStartFadeOut(void) {
     return 1;
 }
 
-s64 func_00266108(s32 callback) {
+s64 mnuWaitForFadeBeforePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *window = (s32 *)(context + 0x58);
     s64 state = func_002C4038(context + 0xc, window, 0, callback);
@@ -232,7 +232,7 @@ s32 mnuCreateFlagEntries(void) {
     return handle;
 }
 
-void func_00266320(s32 handle) {
+void mnuApplyCampResourceFlagEntries(s32 handle) {
     FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -254,7 +254,7 @@ void func_00266320(s32 handle) {
     }
 }
 
-void func_002663D8(void) {
+void mnuClearCampResourceFlagEntries(void) {
     u32 i;
 
     for (i = 0; i < 4; i++) {

@@ -33,19 +33,19 @@ void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 f
     D_00436424 = (s32)baseId;
 }
 
-u32 func_00169438(void) {
+u32 effBTLFieldColorGetOriginalSelector(void) {
     return D_00436418;
 }
 
-u32 func_00169440(void) {
+u32 effBTLFieldColorGetVariantSelector(void) {
     return D_0043641C;
 }
 
-u32 func_00169448(void) {
+u32 effBTLFieldColorGetOverrideSelector(void) {
     return D_00436420;
 }
 
-u32 func_00169450(void) {
+u32 effBTLFieldColorGetFinalSelector(void) {
     return D_00436424;
 }
 

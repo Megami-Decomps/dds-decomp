@@ -10,7 +10,7 @@ typedef struct CmdPacket {
 
 u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
-void func_003421E8(s32 trackId);
+void sndEnsureMidiBankResident(s32 trackId);
 
 u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
@@ -95,7 +95,7 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_00341AD8);
 void sndStartTrackDefault(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x7F;
@@ -104,7 +104,7 @@ void sndStartTrackDefault(s32 trackId) {
 
 /* Sends a single-word command payload in a 16-byte packet. */
 
-void func_00341C00(u32 value) {
+void sndSendSingleWordControlPacket(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
@@ -116,7 +116,7 @@ void func_00341C00(u32 value) {
 void sndStartTrackAlternate(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.setting = 0x7F;
     func_00341650(0x130, 0, &packet, 0x10);

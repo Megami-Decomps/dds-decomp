@@ -112,7 +112,7 @@ void func_0030E880(void) {
     D_004390A4 = 0;
 }
 
-extern s32 func_0030E010(s32, s32, s32, s32, s32, s32, s32);
+extern s32 sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32);
 
 s64 fldReleaseMapRequestQueues(void) {
     func_0030EF18(D_004390AC);
@@ -120,7 +120,7 @@ s64 fldReleaseMapRequestQueues(void) {
 }
 
 s64 func_0030E910(s32 map, s32 request, s32 value) {
-    return func_0030E010(map, request, 0, value, 0x20, 0, 0x54);
+    return sdfDrawUniformlyScaledSlotImage(map, request, 0, value, 0x20, 0, 0x54);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030E940);
@@ -237,7 +237,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 
 /* Rotate the y/z components of `v` by `angle` (about the x axis). */
-void func_0030F2F8(f32 *v, f32 angle) {
+void fldRotateVectorAroundX(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);
@@ -251,7 +251,7 @@ void func_0030F2F8(f32 *v, f32 angle) {
 }
 
 /* Rotate the x/z components of `v` by `angle` (about the y axis). */
-void func_0030F390(f32 *v, f32 angle) {
+void fldRotateVectorAroundY(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);
@@ -265,7 +265,7 @@ void func_0030F390(f32 *v, f32 angle) {
 }
 
 /* Rotate the x/y components of `v` by `angle` (about the z axis). */
-void func_0030F420(f32 *v, f32 angle) {
+void fldRotateVectorAroundZ(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);

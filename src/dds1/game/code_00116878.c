@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern s32 func_00110880(s32 kind);
+extern s32 dds3AppendWorldObjectNode(s32 kind);
 
 /* Script object header (0x1C). */
 typedef struct ScriptObj {
@@ -22,7 +22,7 @@ typedef struct ObjWork {
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
 s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
-    ScriptObj *object = (ScriptObj *)func_00110880(10);
+    ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
     work->unk8 = c;
@@ -38,7 +38,7 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
    order is what fixes retail's saved-register order: sched1 sorts these independent
    stores by luid, and the saved regs go by live length (store position - copy position). */
 s32 func_001168F0(s32 a, s32 b, s32 c, s32 d, s32 e) {
-    ScriptObj *object = (ScriptObj *)func_00110880(10);
+    ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
     object->unk4 = a;

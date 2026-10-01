@@ -45,7 +45,7 @@ extern void func_00346A80(void *, void *);
 extern void func_00346AE8(void *);
 extern void func_002C7D78(void *, s32, u32, s32, s32);
 
-s32 func_002C7D00(FileCleanup *entry) {
+s32 filePollEntryCleanup(FileCleanup *entry) {
     if (entry->kind == 1) {
         return btlDestroyStageTask(entry);
     }
@@ -212,7 +212,7 @@ extern s32 SignalSema(s32);
 extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
 
 /* Claim the next of four read slots for a pending request and start its device read. */
-void func_002C82E8(FileRequest *request) {
+void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
     FileManWork *work = &D_00457F28;
     u8 slot;
     s32 size;

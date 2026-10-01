@@ -64,7 +64,7 @@ extern void func_00190118(u32 handle);
 extern void func_002D0918(u32 allocation);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
-void func_00168138(EffGroup *group) {
+void effReleaseGroupSlotsAndResources(EffGroup *group) {
     u32 i = 0;
     u32 count = group->count;
     EffGroupSlot *slot = group->slots;

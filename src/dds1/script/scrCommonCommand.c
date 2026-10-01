@@ -60,13 +60,13 @@ s32 scrCommandWaitForTimerLimit(void) {
 
 s32 scrCommandPrintInteger(void)
 {
-    func_0010AC10("PUT -> %d\n", scrReadIntParameter(0));
+    evtPrintDeveloperConsoleMessage("PUT -> %d\n", scrReadIntParameter(0));
     return 1;
 }
 
 s32 scrCommandPrintString(void)
 {
-    func_0010AC10(D_0039F4D8, scrReadStringParameter(0));
+    evtPrintDeveloperConsoleMessage(D_0039F4D8, scrReadStringParameter(0));
     return 1;
 }
 
@@ -183,7 +183,7 @@ s32 scrCommandSetCameraFov(void)
     fovy = bfWaitReadArgFloat(0) * 0.017453293f;
     if (fovy <= 5.0f || fovy >= 180.0f)
     {
-        func_0010AC10(D_0039F4E8, fovy);
+        evtPrintDeveloperConsoleMessage(D_0039F4E8, fovy);
         return 1;
     }
     func_00106488(fovy);
@@ -337,7 +337,7 @@ s32 scrCmdStorePositionVector(void)
     return 1;
 }
 
-s32 func_0010DF90(void)
+s32 scrCmdSetPackedRgbFromFloatArgs(void)
 {
     ScrVecW v;
     v.x = bfWaitReadArgFloat(1);
@@ -629,7 +629,7 @@ s32 func_0010E830(void)
         sel = 0x44;
         break;
     default:
-        func_0010AC10(D_0039F530);
+        evtPrintDeveloperConsoleMessage(D_0039F530);
         sel = 0x44;
         break;
     }
@@ -700,7 +700,7 @@ s32 scrCmdSetIndexedDrawMode(void)
         mode = 6;
         break;
     default:
-        func_0010AC10(D_0039F550);
+        evtPrintDeveloperConsoleMessage(D_0039F550);
         mode = 0x44;
         break;
     }
@@ -761,7 +761,7 @@ s32 func_0010EB90(void)
         mode = 6;
         break;
     default:
-        func_0010AC10(D_0039F570);
+        evtPrintDeveloperConsoleMessage(D_0039F570);
         mode = 0x44;
         break;
     }

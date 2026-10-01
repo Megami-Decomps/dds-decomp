@@ -30,7 +30,7 @@ typedef struct MenuItemCounts {
 
 extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
 extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
-extern void func_00287FA8(s32, f32, f32);
+extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
 
 
@@ -1793,11 +1793,11 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
             slot->flags |= 1;
             break;
         }
-        func_00287FA8(value, start, 15.0f);
+        evtStageTestQueueMotionSegment(value, start, 15.0f);
     }
 }
 
-void func_00287FA8(s32 motionIndex, f32 startFrame, f32 endFrame) {
+void evtStageTestQueueMotionSegment(s32 motionIndex, f32 startFrame, f32 endFrame) {
     StageTestSlot *slot = D_003DC5E8.slot;
 
     slot->state = 1;

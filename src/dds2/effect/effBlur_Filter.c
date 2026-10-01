@@ -57,7 +57,7 @@ void func_0018E8F0(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_0018E908);
+INCLUDE_ASM(const s32, "effect/effBlur_Filter", effDrawBlurPixelRectWithResource);
 
 typedef struct BlurRect {
     s32 extent;     /* 0x00 half-size source */
@@ -72,9 +72,9 @@ typedef struct BlurRect {
 } BlurRect;
 
 extern s32 func_001200E0();
-extern void func_0018E758();
+extern void effDrawBlurSource();
 
-void func_0018E980(BlurRect *rect) {
+void effDrawBlurFixedPointRectangle(BlurRect *rect) {
     s32 x, y, w;
 
     if (func_001200E0(rect) == 0) {
@@ -86,7 +86,7 @@ void func_0018E980(BlurRect *rect) {
         w >>= 1;
         rect->top = y - w;
         rect->bottom = y + w;
-        func_0018E758((u8 *)rect + 4, rect->resource, 1);
+        effDrawBlurSource((u8 *)rect + 4, rect->resource, 1);
     }
 }
 

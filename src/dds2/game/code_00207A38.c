@@ -95,7 +95,7 @@ extern u64 func_001B76F0(void);
 
 extern u64 func_00220958(void);
 
-extern s32 D_004367F4;
+extern s32 btlTrackedTaskHandles;
 
 extern u64 btlCreateCommandSoundUpdateTask(void);
 
@@ -123,7 +123,7 @@ extern void btlCmdSimpleE(s32, u16);
 
 extern void btlCmdSimpleJ(s32, u16);
 
-extern s8 D_00436CAC;
+extern s8 btlHistoryCounter;
 
 extern void btlRunWeightedAiAction(s32, u16);
 
@@ -189,7 +189,7 @@ extern void func_00211108(s32);
 
 extern void func_002110E8(s32, u16);
 
-extern void func_00226558(u8);
+extern void btlSetSpecialBattleEffectActorByte(u8);
 
 extern s32 btlIsLinkedActionSceneStateActive(void);
 
@@ -1347,7 +1347,7 @@ s32 func_0020AB38(void) {
     return 1;
 }
 
-s32 func_0020ABC8(void) {
+s32 btlCmdRememberAllLowerActionBits(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3400000)) {
@@ -1361,7 +1361,7 @@ s32 func_0020ABC8(void) {
     return 1;
 }
 
-s32 func_0020AC58(void) {
+s32 btlCmdRememberLowerUnitMode(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3800000)) {
@@ -1375,7 +1375,7 @@ s32 func_0020AC58(void) {
     return 1;
 }
 
-s32 func_0020ACE8(void) {
+s32 btlCmdRememberOtherUpperUnitMode(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3C00000)) {
@@ -1389,7 +1389,7 @@ s32 func_0020ACE8(void) {
     return 1;
 }
 
-s32 func_0020AD78(void) {
+s32 btlCmdRememberLowerEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4000000)) {
@@ -1403,7 +1403,7 @@ s32 func_0020AD78(void) {
     return 1;
 }
 
-s32 func_0020AE08(void) {
+s32 btlCmdRememberUpperEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4400000)) {
@@ -1441,7 +1441,7 @@ u32 func_0020AF10(void) {
     return 1;
 }
 
-s32 func_0020AF90(void) {
+s32 btlCmdRememberCounterLimit(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5800000)) {
@@ -1505,7 +1505,7 @@ u32 func_0020B150(void) {
     return 1;
 }
 
-s32 func_0020B1A0(void) {
+s32 btlCmdRememberLowerElementAccess(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0A800000)) {
@@ -1519,7 +1519,7 @@ s32 func_0020B1A0(void) {
     return 1;
 }
 
-s32 func_0020B240(void) {
+s32 btlCmdRememberUpperElementAccess(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0AC00000)) {
@@ -1553,7 +1553,7 @@ u32 func_0020B350(void) {
     return 1;
 }
 
-s32 func_0020B3C0(void) {
+s32 btlCmdRememberLowerElementExclusion(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0BC00000)) {
@@ -1567,7 +1567,7 @@ s32 func_0020B3C0(void) {
     return 1;
 }
 
-s32 func_0020B460(void) {
+s32 btlCmdRememberUpperElementExclusion(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C000000)) {
@@ -1581,7 +1581,7 @@ s32 func_0020B460(void) {
     return 1;
 }
 
-s32 func_0020B500(void) {
+s32 btlCmdRememberUpperActionAvailability(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C400000)) {
@@ -1595,7 +1595,7 @@ s32 func_0020B500(void) {
     return 1;
 }
 
-s32 func_0020B5A0(void) {
+s32 btlCmdRememberUpperActorTripleCheck(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C800000)) {
@@ -1679,7 +1679,7 @@ s32 func_0020B890(void) {
     return 1;
 }
 
-s32 func_0020B920(void) {
+s32 btlCmdRememberUpperEntryCodeMatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xE800000)) {
@@ -1693,7 +1693,7 @@ s32 func_0020B920(void) {
     return 1;
 }
 
-s32 func_0020B9B0(void) {
+s32 btlCmdRememberUpperEntryCodeInverse(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xEC00000)) {
@@ -1707,7 +1707,7 @@ s32 func_0020B9B0(void) {
     return 1;
 }
 
-s32 func_0020BA40(void) {
+s32 btlCmdRememberLowerEntryCodeMismatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF400000)) {
@@ -1721,7 +1721,7 @@ s32 func_0020BA40(void) {
     return 1;
 }
 
-s32 func_0020BAD0(void) {
+s32 btlCmdRememberUpperEntryCodeMismatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF800000)) {
@@ -1755,7 +1755,7 @@ s32 func_0020BBD0(void) {
     return 1;
 }
 
-s32 func_0020BC40(void) {
+s32 btlCmdRememberUpperSelectedElement(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
@@ -1769,7 +1769,7 @@ s32 func_0020BC40(void) {
     return 1;
 }
 
-s32 func_0020BCD0(void) {
+s32 btlCmdRememberLowerLeadingElement(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
@@ -1783,7 +1783,7 @@ s32 func_0020BCD0(void) {
     return 1;
 }
 
-s32 func_0020BD60(void) {
+s32 btlCmdRememberLowerMissingStatus(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
@@ -1843,7 +1843,7 @@ u32 func_0020BEF8(void) {
     return 1;
 }
 
-s32 func_0020BF48(void) {
+s32 btlCmdRememberNonLowerStatFlag(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
@@ -1857,7 +1857,7 @@ s32 func_0020BF48(void) {
     return 1;
 }
 
-s32 func_0020BFE0(void) {
+s32 btlCmdRememberContextSecondaryFlag(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
@@ -1940,7 +1940,7 @@ u32 func_0020C290(void) {
     return 1;
 }
 
-s32 func_0020C298(void) {
+s32 btlCmdRememberUpperQueuedQuery(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12000000)) {
@@ -1954,7 +1954,7 @@ s32 func_0020C298(void) {
     return 1;
 }
 
-s32 func_0020C328(void) {
+s32 btlCmdRememberLowerQueuedQuery(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x12400000)) {
@@ -1968,7 +1968,7 @@ s32 func_0020C328(void) {
     return 1;
 }
 
-s32 func_0020C3C0(void) {
+s32 btlCmdRememberLowerElementBlock(void) {
     u8 *context = (u8 *)func_0010D8D0();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0x11C00000)) {
@@ -2082,7 +2082,7 @@ u32 btlScriptReturnContextSignedByte(void) {
 }
 
 u32 btlScriptReturnGlobalDebugValue(void) {
-    scrSetIntegerReturnValue(D_00436CAC);
+    scrSetIntegerReturnValue(btlHistoryCounter);
     return 1;
 }
 
@@ -2103,7 +2103,7 @@ u32 btlScriptSetBattleCommand(void) {
 }
 
 s32 func_0020C6F8(void) {
-    func_00226558(scrReadIntParameter(0));
+    btlSetSpecialBattleEffectActorByte(scrReadIntParameter(0));
     return 1;
 }
 
@@ -2112,14 +2112,14 @@ u32 btlResetCommandContextAndSetStateFlag(void) {
     s32 context;
 
     context = func_0010D8D0();
-    state = D_004367F4;
+    state = btlTrackedTaskHandles;
     ((BtlCommandCtx *)context)->commandMode = 0x10;
     ((BtlCommandCtx *)context)->commandValue = 0;
     *(u8 *)(state + 0x54) = 1;
     return 1;
 }
 
-u32 func_0020C760(void) {
+u32 btlScriptClearSceneTransition(void) {
     fldClearSceneTransition();
     return 1;
 }
@@ -2282,7 +2282,7 @@ u32 func_0020CD30(void) {
     return 1;
 }
 
-u32 func_0020CD50(void) {
+u32 btlScriptReturnOneBasedAiBucket(void) {
     s32 index;
 
     index = btlRollAiBucket();

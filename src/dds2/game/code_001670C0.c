@@ -218,7 +218,7 @@ s32 func_00168478(SoundMixer *mixer, u16 kind) {
     return mixer->banks[bank].value08;
 }
 
-s32 func_001684A8(SoundMixer *mixer, u16 kind) {
+s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     if (kind == 2) {
         return mixer->banks[bank].value08;

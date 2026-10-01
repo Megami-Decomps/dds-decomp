@@ -5,7 +5,7 @@
 
 extern void *dds3GetSlot(void *arg0, s32 index);
 
-void func_001113F0(void *arg0, void *arg1);
+void dds3EnsureWorldNodeInSlot(void *arg0, void *arg1);
 
 void dds3SetSlotValue(void *arg0, void *arg1);
 
@@ -28,7 +28,7 @@ void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
 void func_00111480(void *slot, void *owner);
-void func_00110B50(void *node);
+void dds3RemoveWorldObjectNode(void *node);
 void dds3DestroyWorldIndexNode(u32 node);
 void sdfReleaseChipBlock(void *block);
 void func_00111D68(World *world);
@@ -63,7 +63,7 @@ void func_00111A68(ObjBaseFull *base) {
         if (i < 3) {
             if (i > 0) {
                 if (base->slots[i] != NULL) {
-                    func_00110B50(base->slots[i]);
+                    dds3RemoveWorldObjectNode(base->slots[i]);
                 }
             }
         }
@@ -172,7 +172,7 @@ typedef struct ObjMode {
 } ObjMode;
 
 /* Select the object's mode 0..6; modes 0, 4 and 5 use full weight, the others zero. */
-void func_00112230(void *obj, u32 mode) {
+void dds3SetObjectModeAndDefaultWeight(void *obj, u32 mode) {
     ObjMode *base = (ObjMode *)dds3GetObjectOwnedHandle(obj);
 
     switch (mode) {
@@ -214,7 +214,7 @@ s32 dds3InvokeSlot5Handler(void *object) {
     if (handler == NULL) {
         return 0;
     }
-    func_001113F0(handler, object);
+    dds3EnsureWorldNodeInSlot(handler, object);
     return 1;
 }
 

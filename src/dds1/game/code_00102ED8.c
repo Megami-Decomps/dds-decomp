@@ -13,20 +13,20 @@ typedef struct KwlnResourceNode {
     s32 *ready;
 } KwlnResourceNode;
 
-extern u32 D_003BA904;
+extern u32 kwlnDrawControlFlags;
 
-extern KwlnFadeColor D_003BA920;
+extern KwlnFadeColor kwlnFadeColor;
 
 extern u16 D_003BA918;
 extern s16 D_003BA91A;
 extern s16 D_003BA91C;
 extern u16 D_003BA91E;
 
-extern u32 D_003BA8F0;
+extern u32 kwlnTextureReferenceFlag;
 
 extern u32 D_003BA8F4;
 
-extern s32 D_003BA8F8;
+extern s32 kwlnHeldTextureReference;
 
 extern u32 D_003BA8DC;
 extern s8 D_003BA890;
@@ -38,7 +38,7 @@ extern s8 D_003BA92C;
 extern s16 D_003BA92E;
 
 extern s16 D_003BA930;
-extern u8 D_003BA928[4];
+extern u8 kwlnBackgroundFadeColor[4];
 
 extern s8 D_0032453B[];
 
@@ -55,13 +55,13 @@ extern u8 D_003BD690[2];
 extern s32 D_003BD6A0[2];
 
 extern u8 D_003BD699;
-extern u16 D_003BD6C0;
+extern u16 kwlnFadeCounter;
 
-extern u16 D_003BD6C2;
-extern u16 D_003BD6C4;
-extern u16 D_003BD6C6;
+extern u16 kwlnFadeDuration;
+extern u16 kwlnBackgroundFadeCounter;
+extern u16 kwlnBackgroundFadeDuration;
 
-extern s32 D_003BD308;
+extern s32 sdfResourceListHead;
 extern s32 D_003BA8D8;
 extern u8 D_00324550[];
 extern void func_002E8430(void *data, u32 tag);
@@ -138,7 +138,7 @@ typedef struct KwlnDebugWork {
 extern char D_003BA848[];
 extern void *kwlnTaskGetTaskByName(const char *);
 extern void func_00102CD8(void);
-extern void func_00102E58(void);
+extern void dds3AdminReleaseTaskWork(void);
 extern void *func_002CFEB8(s32);
 
 void kwlnDebugTaskCreate(void) {
@@ -158,7 +158,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->unk1C = 0;
         work->unk20 = 0;
-        kwlnTaskCreate(D_003BA848, 2, 0, 1, func_00102CD8, func_00102E58, work);
+        kwlnTaskCreate(D_003BA848, 2, 0, 1, func_00102CD8, dds3AdminReleaseTaskWork, work);
     }
 }
 
@@ -275,7 +275,7 @@ INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E078);
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 
 s32 kwlnTextureCountIncompleteResources(void) {
-    KwlnResourceNode *node = (KwlnResourceNode *)D_003BD308;
+    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
     KwlnResourceNode *next;
     s32 count = 0;
     while (node != NULL) {
@@ -323,7 +323,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104B88);
 s32 kwlnSwapActiveResource(s32 resource) {
     s32 status;
 
-    if (D_003BD308 == 0) {
+    if (sdfResourceListHead == 0) {
         return 0;
     }
     status = kwlnTextureViewerHandlePad();
@@ -332,7 +332,7 @@ s32 kwlnSwapActiveResource(s32 resource) {
 }
 
 s32 kwlnLoadDefaultResource(void) {
-    if (D_003BD308 == 0) {
+    if (sdfResourceListHead == 0) {
         return 0;
     }
     if (kwlnTextureViewerHandlePad() == 0) {
@@ -343,7 +343,7 @@ s32 kwlnLoadDefaultResource(void) {
 }
 
 s32 (*kwlnTextureFindIncompleteResource(void))(void) {
-    KwlnResourceNode *node = (KwlnResourceNode *)D_003BD308;
+    KwlnResourceNode *node = (KwlnResourceNode *)sdfResourceListHead;
     if (node == NULL) {
         return NULL;
     }
@@ -398,34 +398,34 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001054D0);
 
 /* Release the retained texture and clear its request/pending flags. */
 void kwlnTextureReleaseHeldReference(void) {
-    if (D_003BA8F8 != 0) {
-        sdfTexReleaseReference(D_003BA8F8);
+    if (kwlnHeldTextureReference != 0) {
+        sdfTexReleaseReference(kwlnHeldTextureReference);
     }
-    D_003BA8F8 = 0;
+    kwlnHeldTextureReference = 0;
     D_003BA8F4 = 0;
-    D_003BA8F0 = 0;
+    kwlnTextureReferenceFlag = 0;
 }
 
 s32 kwlnTextureSetReferenceFlagIfPresent(void) {
     s32 result = 0;
 
-    if (D_003BA8F8 == 0) {
+    if (kwlnHeldTextureReference == 0) {
         return result;
     }
-    D_003BA8F0 = 1;
+    kwlnTextureReferenceFlag = 1;
     return 1;
 }
 
-void func_00105618(void) {
-    D_003BA8F0 = 0;
+void kwlnTextureClearReferenceFlag(void) {
+    kwlnTextureReferenceFlag = 0;
 }
 
-u32 func_00105620(void) {
-    return D_003BA8F0;
+u32 kwlnTextureGetReferenceFlag(void) {
+    return kwlnTextureReferenceFlag;
 }
 
-s32 func_00105628(void) {
-    return D_003BA8F8;
+s32 kwlnTextureGetHeldReference(void) {
+    return kwlnHeldTextureReference;
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105630);
@@ -461,112 +461,112 @@ u64 evtBuildFrameStatePacketList(s32 arg0) {
 
 /* The low two bits select the active fade direction; clearing cancels it. */
 void kwlnFadeClear(void) {
-    D_003BA904 &= ~3;
-    D_003BA920.r = 0;
-    D_003BA920.g = 0;
-    D_003BA920.b = 0;
-    D_003BA920.a = 0;
+    kwlnDrawControlFlags &= ~3;
+    kwlnFadeColor.r = 0;
+    kwlnFadeColor.g = 0;
+    kwlnFadeColor.b = 0;
+    kwlnFadeColor.a = 0;
 }
 
 void kwlnFadeSetColor(s8 red, s8 green, s8 blue, s8 alpha) {
-    D_003BA904 &= ~3;
-    D_003BA920.r = red;
-    D_003BA920.g = green;
-    D_003BA920.b = blue;
-    D_003BA920.a = alpha;
+    kwlnDrawControlFlags &= ~3;
+    kwlnFadeColor.r = red;
+    kwlnFadeColor.g = green;
+    kwlnFadeColor.b = blue;
+    kwlnFadeColor.a = alpha;
 }
 
 void kwlnFadeGetColor(KwlnFadeColor **color) {
-    *color = &D_003BA920;
+    *color = &kwlnFadeColor;
 }
 
 void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
-    D_003BA920.r = red;
-    D_003BA920.g = green;
-    D_003BA920.b = blue;
+    kwlnFadeColor.r = red;
+    kwlnFadeColor.g = green;
+    kwlnFadeColor.b = blue;
 }
 
 void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
-    D_003BA920.r = red;
-    D_003BA920.g = green;
-    D_003BA920.b = blue;
-    D_003BA920.a = -0x80;
+    kwlnFadeColor.r = red;
+    kwlnFadeColor.g = green;
+    kwlnFadeColor.b = blue;
+    kwlnFadeColor.a = -0x80;
     if (duration == 0) {
-        D_003BA920.a = 0;
-        D_003BD6C0 = 0;
-        D_003BD6C2 = 0;
+        kwlnFadeColor.a = 0;
+        kwlnFadeCounter = 0;
+        kwlnFadeDuration = 0;
         kwlnFadeClear();
         return;
     }
-    D_003BD6C2 = duration;
-    D_003BD6C0 = duration;
-    D_003BA904 = (D_003BA904 | 1) & ~2;
+    kwlnFadeDuration = duration;
+    kwlnFadeCounter = duration;
+    kwlnDrawControlFlags = (kwlnDrawControlFlags | 1) & ~2;
 }
 
 /* Enter the first fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartIn(s32 duration) {
-    D_003BA920.a = -0x80;
+    kwlnFadeColor.a = -0x80;
     if (duration == 0) {
-        D_003BA920.a = 0;
-        D_003BA904 &= ~3;
-        D_003BD6C0 = 0;
-        D_003BD6C2 = 0;
+        kwlnFadeColor.a = 0;
+        kwlnDrawControlFlags &= ~3;
+        kwlnFadeCounter = 0;
+        kwlnFadeDuration = 0;
     } else {
-        D_003BD6C2 = duration;
-        D_003BD6C0 = duration;
-        D_003BA904 = (D_003BA904 | 1) & ~2;
+        kwlnFadeDuration = duration;
+        kwlnFadeCounter = duration;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags | 1) & ~2;
     }
 }
 
 /* Select the second fade direction using the specified RGB color. */
 void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
-    D_003BA920.r = red;
-    D_003BA920.g = green;
-    D_003BA920.b = blue;
-    D_003BA920.a = 0;
+    kwlnFadeColor.r = red;
+    kwlnFadeColor.g = green;
+    kwlnFadeColor.b = blue;
+    kwlnFadeColor.a = 0;
     if (duration == 0) {
-        D_003BD6C0 = 0;
-        D_003BD6C2 = 0;
-        D_003BA920.a = -0x80;
-        D_003BA904 &= ~3;
+        kwlnFadeCounter = 0;
+        kwlnFadeDuration = 0;
+        kwlnFadeColor.a = -0x80;
+        kwlnDrawControlFlags &= ~3;
         return;
     }
-    D_003BD6C2 = duration;
-    D_003BD6C0 = 0;
-    D_003BA904 = (D_003BA904 & ~1) | 2;
+    kwlnFadeDuration = duration;
+    kwlnFadeCounter = 0;
+    kwlnDrawControlFlags = (kwlnDrawControlFlags & ~1) | 2;
 }
 
 /* Enter the second fade direction; a zero duration finishes immediately. */
 void kwlnFadeStartOut(s32 duration) {
-    D_003BA920.a = 0;
+    kwlnFadeColor.a = 0;
     if (duration == 0) {
-        D_003BD6C0 = 0;
-        D_003BA920.a = -0x80;
-        D_003BA904 &= ~3;
-        D_003BD6C2 = 0;
+        kwlnFadeCounter = 0;
+        kwlnFadeColor.a = -0x80;
+        kwlnDrawControlFlags &= ~3;
+        kwlnFadeDuration = 0;
     } else {
-        D_003BD6C2 = duration;
-        D_003BD6C0 = 0;
-        D_003BA904 = (D_003BA904 & ~1) | 2;
+        kwlnFadeDuration = duration;
+        kwlnFadeCounter = 0;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags & ~1) | 2;
     }
 }
 
 u8 kwlnFadeIsActive(void) {
-    return (D_003BA904 & 3) != 0;
+    return (kwlnDrawControlFlags & 3) != 0;
 }
 
 void kwlnFadeUpdate(void) {
     if (kwlnFadeIsActive() != 0) {
-        if (D_003BA904 & 1) {
-            D_003BD6C0 -= 1;
+        if (kwlnDrawControlFlags & 1) {
+            kwlnFadeCounter -= 1;
         } else {
-            D_003BD6C0 += 1;
+            kwlnFadeCounter += 1;
         }
-        D_003BA920.a = (D_003BD6C0 << 7) / D_003BD6C2;
-        if (((D_003BA904 & 1) && D_003BD6C0 == 0) || ((D_003BA904 & 2) && D_003BD6C0 == D_003BD6C2)) {
-            D_003BD6C0 = 0;
-            D_003BD6C2 = 0;
-            D_003BA904 &= ~3;
+        kwlnFadeColor.a = (kwlnFadeCounter << 7) / kwlnFadeDuration;
+        if (((kwlnDrawControlFlags & 1) && kwlnFadeCounter == 0) || ((kwlnDrawControlFlags & 2) && kwlnFadeCounter == kwlnFadeDuration)) {
+            kwlnFadeCounter = 0;
+            kwlnFadeDuration = 0;
+            kwlnDrawControlFlags &= ~3;
         }
     }
 }
@@ -593,61 +593,61 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105DD8);
 
 /* Reset the background fade's color bytes and its two parameter words. */
 void kwlnFadeResetBackground(void) {
-    D_003BA904 &= 0xF3FFFFFF;
-    D_003BA928[0] = 0;
-    D_003BA928[1] = 0;
-    D_003BA928[2] = 0;
-    D_003BA928[3] = 0;
+    kwlnDrawControlFlags &= 0xF3FFFFFF;
+    kwlnBackgroundFadeColor[0] = 0;
+    kwlnBackgroundFadeColor[1] = 0;
+    kwlnBackgroundFadeColor[2] = 0;
+    kwlnBackgroundFadeColor[3] = 0;
     D_003BA92E = 0x31;
     D_003BA930 = 0x4F;
 }
 
 void kwlnFadeBackgroundStartOut(s32 duration) {
-    D_003BA928[0] = 0;
-    D_003BA928[1] = 0;
-    D_003BA928[2] = 0;
-    D_003BA928[3] = 0x80;
+    kwlnBackgroundFadeColor[0] = 0;
+    kwlnBackgroundFadeColor[1] = 0;
+    kwlnBackgroundFadeColor[2] = 0;
+    kwlnBackgroundFadeColor[3] = 0x80;
     if (duration == 0) {
-        D_003BA928[3] = 0;
-        D_003BD6C4 = 0;
-        D_003BD6C6 = 0;
+        kwlnBackgroundFadeColor[3] = 0;
+        kwlnBackgroundFadeCounter = 0;
+        kwlnBackgroundFadeDuration = 0;
         D_003BA92E = 0x31;
         D_003BA930 = 0x4F;
         kwlnFadeResetBackground();
     } else {
-        D_003BD6C6 = duration;
-        D_003BD6C4 = duration;
-        D_003BA904 = (D_003BA904 | 0x04000000) & 0xF7FFFFFF;
+        kwlnBackgroundFadeDuration = duration;
+        kwlnBackgroundFadeCounter = duration;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags | 0x04000000) & 0xF7FFFFFF;
     }
     D_003245EC[2] = 2048.0f;
 }
 
 void kwlnFadeBackgroundStartIn(s32 duration) {
-    D_003BA928[0] = 0;
-    D_003BA928[1] = 0;
-    D_003BA928[2] = 0;
-    D_003BA928[3] = 0;
+    kwlnBackgroundFadeColor[0] = 0;
+    kwlnBackgroundFadeColor[1] = 0;
+    kwlnBackgroundFadeColor[2] = 0;
+    kwlnBackgroundFadeColor[3] = 0;
     if (duration == 0) {
-        D_003BD6C4 = 0;
-        D_003BD6C6 = 0;
-        D_003BA928[3] = 0x80;
-        D_003BA904 &= 0xF3FFFFFF;
+        kwlnBackgroundFadeCounter = 0;
+        kwlnBackgroundFadeDuration = 0;
+        kwlnBackgroundFadeColor[3] = 0x80;
+        kwlnDrawControlFlags &= 0xF3FFFFFF;
         D_003BA92E = 0;
         D_003BA930 = 0;
     } else {
-        D_003BD6C6 = duration;
-        D_003BD6C4 = 0;
-        D_003BA904 = (D_003BA904 & 0xFBFFFFFF) | 0x08000000;
+        kwlnBackgroundFadeDuration = duration;
+        kwlnBackgroundFadeCounter = 0;
+        kwlnDrawControlFlags = (kwlnDrawControlFlags & 0xFBFFFFFF) | 0x08000000;
     }
     D_003245EC[2] = 2041.0f;
 }
 
 s32 kwlnFadeIsBackgroundOverlayActive(void) {
-    if (D_003BA904 & 0x0C000000) {
+    if (kwlnDrawControlFlags & 0x0C000000) {
         return 1;
     }
     if (D_003BA92C == 0) {
-        if (0x80 - D_003BA928[3] >= 0x80) {
+        if (0x80 - kwlnBackgroundFadeColor[3] >= 0x80) {
             return 0;
         }
     } else if (D_003BA92E == 0x31) {
@@ -662,7 +662,7 @@ void kwlnFadeSetMode(s32 mode) {
         D_003BA92E = 0;
         D_003BA930 = 0;
     } else {
-        D_003BA928[3] = 0x80;
+        kwlnBackgroundFadeColor[3] = 0x80;
     }
 }
 
@@ -732,11 +732,11 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8E8);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8EC);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8F0);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnTextureReferenceFlag);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8F4);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8F8);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnHeldTextureReference);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8FC);
 
@@ -744,7 +744,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8FE);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA900);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA904);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawControlFlags);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA908);
 
@@ -764,7 +764,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA91C);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA91E);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA920);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA921);
 
@@ -772,7 +772,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA922);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA923);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA928);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92B);
 

@@ -10,27 +10,27 @@ extern void effObjSetInnerFloat(s32 object, f32 value);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern void func_001109B8(s32, void *);
+extern void dds3SetWorldCameraObject(s32, void *);
 
 extern u8 D_003DC1C0[];
 
 extern u8 D_003DC1D0[];
 
-extern void *D_003BD8E0;
+extern void *mnuTitleCameraObject;
 
 extern char D_003AFD48[]; /* "---------- AT3 --------\n", followed by 8 zero bytes no C function emits */
 
 extern char D_003AFD80[]; /* "titleProc" */
 
-extern u32 D_003DA180[];
+extern u32 mnuTitleSoundBufferState[];
 
 extern u32 D_003DA1C0[];
 
 extern void sdfQueueNonzeroResourceId(s32);
 
-extern u32 D_003D9140[];
+extern u32 mnuTitleStreamStatus[];
 
-extern u32 D_003BD8D0;
+extern u32 mnuTitleStreamSemaphore;
 
 extern u32 D_003BD8D4;
 
@@ -54,7 +54,7 @@ extern char *strcat(char *, char *);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern s32 D_003BC588;
+extern s32 mnuTitleSoundTask;
 
 extern char D_003771D8[];
 
@@ -102,12 +102,12 @@ void func_00269410(void) {
 void func_00269418(void) {
 }
 
-char *func_00269420(char *arg0, char *arg1) {
+char *mnuBuildSoundResourcePath(char *arg0, char *arg1) {
     *(u64p *)arg0 = *(u64p *)D_003BC590;
     return strcat(arg0, arg1);
 }
 
-char *func_00269450(char *arg0, char *arg1) {
+char *mnuBuildVoiceResourcePath(char *arg0, char *arg1) {
     *(u64p *)arg0 = *(u64p *)D_003BC598;
     return strcat(arg0, arg1);
 }
@@ -128,7 +128,7 @@ extern s32 D_003BC5AC;
 
 extern void func_002E8C30(char *, s32, char *, s32);
 
-extern void func_002E9340(s32);
+extern void sndEnsureMidiBankResident(s32);
 
 extern void func_0026A248(void);
 
@@ -141,7 +141,7 @@ void mnuInitializeTitleAudioAndEffects(void) {
     }
     D_003BC58C = 1;
     func_002E8C30(D_00377318, 4, D_00377338, 4);
-    func_002E9340(D_00370D10[0]);
+    sndEnsureMidiBankResident(D_00370D10[0]);
     D_003BC5A8 = 4;
     D_003BD8B0 = -1;
     D_003BC5AC = 0;
@@ -168,21 +168,21 @@ u32 mnuIncrementTitleEffectFrameCounter(void) {
 
 void mnuDestroyTitleEffectTask(void) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue());
-    D_003BC588 = 0;
+    mnuTitleSoundTask = 0;
 }
 
 void mnuCreateTitleEffectTask(void) {
     TitleEffectState *state = (TitleEffectState *)func_002CFEB8(8);
     u32 task = kwlnTaskCreate(D_003BC5A0, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
-    D_003BC588 = task;
+    mnuTitleSoundTask = task;
     kwlnTaskSetUserValue(task, state);
     state->soundNameIndex = 0;
     state->frameCounter = 0;
 }
 
 void mnuResetTitleEffectState(s32 command) {
-    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(D_003BC588);
+    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         func_002E97E8();
     }
@@ -191,14 +191,14 @@ void mnuResetTitleEffectState(s32 command) {
 }
 
 void mnuSetTitleVoicePrefixIndex(s32 value) {
-    ((TitleEffectState *)kwlnTaskGetUserValue(D_003BC588))->soundNameIndex = value;
+    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = value;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFC80);
 
 void mnuPlayTitleVoiceFile(char *filename) {
     char path[16];
-    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(D_003BC588);
+    TitleEffectState *state = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
 
     if (sdfSoundIsCommandBusy() != 0) {
         func_003003F0("now playeng start...\n");
@@ -222,7 +222,7 @@ void func_00269728(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
-    return ((TitleEffectState *)kwlnTaskGetUserValue(D_003BC588))->frameCounter;
+    return ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->frameCounter;
 }
 
 u32 sndOpStartTrackFromScript(void) {
@@ -376,20 +376,20 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_00269D18);
 void mnuRunTitleStreamThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
-        WaitSema(D_003BD8D0);
+        WaitSema(mnuTitleStreamSemaphore);
         func_00269D18();
-        SignalSema(D_003BD8D0);
+        SignalSema(mnuTitleStreamSemaphore);
     }
 }
 
-extern u32 D_003BD8D0;
+extern u32 mnuTitleStreamSemaphore;
 
 extern s32 D_003BD8C8;
 
 extern u8 D_003DB1C0[];
 
 void mnuCreateTitleStreamThread(void) {
-    D_003BD8D0 = sdfCreateSemaphore(1, 0xff, 0);
+    mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
     sdfStartTrackedThread(&D_003BD8C8, mnuRunTitleStreamThread, D_003DB1C0,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
@@ -407,23 +407,23 @@ extern s32 WaitSema(u32);
 extern s32 SignalSema(u32);
 
 void mnuReadTitleStreamStatusLocked(AtracInfo *out) {
-    WaitSema(D_003BD8D0);
-    out->unk0 = D_003D9140[0];
-    out->unk4 = D_003D9140[1];
-    out->unk8 = D_003D9140[3];
-    SignalSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
+    out->unk0 = mnuTitleStreamStatus[0];
+    out->unk4 = mnuTitleStreamStatus[1];
+    out->unk8 = mnuTitleStreamStatus[3];
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
-extern u32 D_003BD8D0;
+extern u32 mnuTitleStreamSemaphore;
 
-extern u32 D_003D9140[];
+extern u32 mnuTitleStreamStatus[];
 
 void mnuWriteTitleStreamStatusLocked(u32 *values) {
-    WaitSema(D_003BD8D0);
-    D_003D9140[0] = values[0];
-    D_003D9140[1] = values[1];
-    D_003D9140[3] = values[2];
-    SignalSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleStreamStatus[0] = values[0];
+    mnuTitleStreamStatus[1] = values[1];
+    mnuTitleStreamStatus[3] = values[2];
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
@@ -440,7 +440,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *work) {
 
 void mnuStoreTaskResult(void) {
     D_003BD8D4 = func_00288B48();
-    D_003D9140[9] = 1;
+    mnuTitleStreamStatus[9] = 1;
 }
 
 extern u32 D_003D9168[];
@@ -448,14 +448,14 @@ extern s32 fileIsRequestReadyInCurrentMode(u32);
 extern s32 fileGetResourceHandle(u32);
 extern u32 func_00288B90(u32);
 extern s32 fileGetResourceSize(u32);
-extern void func_002887A0(u32);
+extern void filePollEntryCleanup(u32);
 extern s32 func_002D0518(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
 extern void func_002F7628(u32 *);
 
 /* When the pending title-stream file is ready, copy it into a fresh block,
  * record the entry count (size / entry size) and mark the queue as loaded. */
-s32 func_0026A490(u32 *queue) {
+s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
     s32 ready = fileIsRequestReadyInCurrentMode(D_003BD8D4);
 
     if (ready != 0) {
@@ -464,16 +464,16 @@ s32 func_0026A490(u32 *queue) {
         s32 size = fileGetResourceSize(D_003BD8D4);
         s32 block;
 
-        func_002887A0(D_003BD8D4);
+        filePollEntryCleanup(D_003BD8D4);
         block = func_002D0518(size);
-        D_003D9140[5] = sdfMemoryGetBlockAddress(block);
-        D_003D9140[8] = block;
+        mnuTitleStreamStatus[5] = sdfMemoryGetBlockAddress(block);
+        mnuTitleStreamStatus[8] = block;
         memcpy((void *)queue[5], (void *)data, size);
         queue[0] = size / (s32)queue[2];
         queue[1] = 0;
         sdfQueueNonzeroResourceId(handle);
         func_002F7628(D_003D9168);
-        D_003D9140[9] = 2;
+        mnuTitleStreamStatus[9] = 2;
         ready = 1;
     }
     return ready;
@@ -484,19 +484,19 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A588);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A5F0);
 
 u32 mnuUpdateTitleTransition(void) {
-    if (D_003D9140[9] == 1) {
-        func_0026A490(D_003D9140);
+    if (mnuTitleStreamStatus[9] == 1) {
+        mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
     }
-    return D_003D9140[9];
+    return mnuTitleStreamStatus[9];
 }
 
 s32 mnuPollTitleStreamStateLocked(void) {
-    WaitSema(D_003BD8D0);
-    if (D_003D9140[9] == 1) {
-        func_0026A490(D_003D9140);
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuTitleStreamStatus[9] == 1) {
+        mnuCompleteTitleStreamFileLoad(mnuTitleStreamStatus);
     }
-    SignalSema(D_003BD8D0);
-    return D_003D9140[9];
+    SignalSema(mnuTitleStreamSemaphore);
+    return mnuTitleStreamStatus[9];
 }
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
@@ -504,49 +504,49 @@ INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A778);
 
 void mnuMarkTitleStreamResetPending(void) {
-    WaitSema(D_003BD8D0);
-    D_003D9140[1] = 0;
-    D_003D9140[4] = 2;
-    SignalSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleStreamStatus[1] = 0;
+    mnuTitleStreamStatus[4] = 2;
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 void mnuAdvanceTitleStateUnderSemaphore(void) {
-    WaitSema(D_003BD8D0);
-    if (D_003D9140[4] == 1 && D_003D9140[9] == 3) {
-        D_003D9140[9] = 4;
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuTitleStreamStatus[4] == 1 && mnuTitleStreamStatus[9] == 3) {
+        mnuTitleStreamStatus[9] = 4;
         *(u32 *)D_003D9178 = 0;
         D_003BC5C8 = 6;
     }
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 extern u32 D_003BC5C8;
 
 void mnuCommitTitleStreamReadyState(void) {
-    WaitSema(D_003BD8D0);
-    if (D_003D9140[4] == 1 && D_003D9140[9] == 3) {
-        D_003BC5C8 = D_003D9140[9];
-        D_003D9140[9] = 4;
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuTitleStreamStatus[4] == 1 && mnuTitleStreamStatus[9] == 3) {
+        D_003BC5C8 = mnuTitleStreamStatus[9];
+        mnuTitleStreamStatus[9] = 4;
         *(u32 *)D_003D9178 = 0;
     }
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 /* Release the title stream request and reset the playback state. */
 void mnuResetTitleStream(void) {
-    if (D_003D9140[8] != 0) {
-        sdfQueueNonzeroResourceId(D_003D9140[8]);
-        D_003D9140[9] = 0;
-        D_003D9140[8] = 0;
-        D_003D9140[5] = 0;
-        D_003D9140[6] = (u32)D_003DA1C0;
+    if (mnuTitleStreamStatus[8] != 0) {
+        sdfQueueNonzeroResourceId(mnuTitleStreamStatus[8]);
+        mnuTitleStreamStatus[9] = 0;
+        mnuTitleStreamStatus[8] = 0;
+        mnuTitleStreamStatus[5] = 0;
+        mnuTitleStreamStatus[6] = (u32)D_003DA1C0;
     }
 }
 
 void mnuResetTitleStreamLocked(void) {
-    WaitSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
     mnuResetTitleStream();
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A980);
@@ -556,36 +556,36 @@ INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AA28);
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026ABA8);
 
 s32 mnuGetSoundBufferStateLocked(void) {
-    WaitSema(D_003BD8D0);
-    if (D_003DA180[8] == 0) {
-        SignalSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuTitleSoundBufferState[8] == 0) {
+        SignalSema(mnuTitleStreamSemaphore);
         return 0;
     }
-    if (D_003DA180[4] == 2) {
-        SignalSema(D_003BD8D0);
+    if (mnuTitleSoundBufferState[4] == 2) {
+        SignalSema(mnuTitleStreamSemaphore);
         return 2;
     }
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
     return 3;
 }
 
 void mnuPrintTitleDebugBanner(void) {
-    WaitSema(D_003BD8D0);
-    if (D_003DA180[4] != 1) {
-        D_003DA180[4] = 0;
+    WaitSema(mnuTitleStreamSemaphore);
+    if (mnuTitleSoundBufferState[4] != 1) {
+        mnuTitleSoundBufferState[4] = 0;
     }
     func_003003F0(D_003AFD48);
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 void mnuResetSoundBuffer(void) {
-    D_003DA180[1] = 0;
-    D_003DA180[4] = 2;
+    mnuTitleSoundBufferState[1] = 0;
+    mnuTitleSoundBufferState[4] = 2;
     mnuReleaseSoundBuffer();
 }
 
 void mnuReleaseSoundBuffer(void) {
-    u32 *state = D_003DA180;
+    u32 *state = mnuTitleSoundBufferState;
     u32 buffer = state[8];
 
     if (buffer == 0) {
@@ -596,15 +596,15 @@ void mnuReleaseSoundBuffer(void) {
 }
 
 void mnuResetSoundBufferLocked(void) {
-    WaitSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
     mnuResetSoundBuffer();
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 void mnuReleaseSoundBufferLocked(void) {
-    WaitSema(D_003BD8D0);
+    WaitSema(mnuTitleStreamSemaphore);
     mnuReleaseSoundBuffer();
-    SignalSema(D_003BD8D0);
+    SignalSema(mnuTitleStreamSemaphore);
 }
 
 void func_0026AEB0(void) {
@@ -614,19 +614,19 @@ void func_0026AEB0(void) {
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFD48);
 
 void mnuCreateTitleCameraWorldEntry(void) {
-    D_003BD8E0 = func_00112C08(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0);
-    dds3SetWorldEntryCallbackTarget(D_003BD8E0, "title_camera");
-    effObjSetInnerFloat(D_003BD8E0, 2.0f);
-    func_001109B8(dds3GetWorldSecondaryObject(), D_003BD8E0);
+    mnuTitleCameraObject = func_00112C08(dds3AdvanceWorldCounter(), (f32 *)D_003DC1C0, (f32 *)D_003DC1D0);
+    dds3SetWorldEntryCallbackTarget(mnuTitleCameraObject, "title_camera");
+    effObjSetInnerFloat(mnuTitleCameraObject, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), mnuTitleCameraObject);
 }
 
 extern void effObjSetInnerFirstVec(void *, void *);
 extern void effObjSetInnerSecondVec(void *, void *);
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerFirstVec(D_003BD8E0, D_003DC1C0);
-    effObjSetInnerSecondVec(D_003BD8E0, D_003DC1D0);
-    return (*(s32 (**)(void *))(*(s32 *)((u8 *)D_003BD8E0 + 0x10) + 8))(D_003BD8E0);
+    effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
+    effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
+    return (*(s32 (**)(void *))(*(s32 *)((u8 *)mnuTitleCameraObject + 0x10) + 8))(mnuTitleCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026AF78);
@@ -674,7 +674,7 @@ void mnuRestartRuntimeAfterViewer(void) {
     sdfCreateRuntimeTask();
 }
 
-INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC588);
+INCLUDE_SDATA(const s32, "game/code_00268AB8", mnuTitleSoundTask);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC58C);
 

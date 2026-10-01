@@ -46,7 +46,7 @@ typedef struct CampVisualWork {
     u32 titleSlide;        /* 0xB1D8 */
 } CampVisualWork;
 
-u32 func_002AAEA0(void) {
+u32 mnuPrepareCampFieldSkillDisplay(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -61,7 +61,7 @@ u32 func_002AAEA0(void) {
     return 1;
 }
 
-u32 func_002AAF40(void) {
+u32 mnuStartCampTitleFadeOut(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -73,25 +73,25 @@ INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AAF70);
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
 
-s64 func_002AB1B0(s32 arg0) {
+s64 mnuFinishStaffConfigPopup(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
     return menuSetHandler(context, 2, arg0);
 }
 
-u32 func_002AB1E8(void) {
+u32 mnuOpenCampConfigPanelTasks(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    func_002A9460(5, context);
+    mnuSwitchCampVisualCategory(5, context);
     mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->panelResource, 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
 
 /* Switch the staff display to the alternate resource at context + 0x60. */
-u32 func_002AB240(void) {
+u32 mnuConfigureCampDrawContextPanel(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -124,7 +124,7 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
     return menuSetHandler(context, 1, arg0);
 }
 
-s64 func_002AB368(s32 arg0) {
+s64 mnuFinishStaffImagePopup(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
@@ -136,11 +136,11 @@ u32 func_002AB3A0(void) {
 }
 
 u32 func_002AB3A8(void) {
-    func_002AAEA0();
+    mnuPrepareCampFieldSkillDisplay();
     return 1;
 }
 
-s64 func_002AB3C8(s32 arg0) {
+s64 mnuPollCampFieldSkillAndPopup(s32 arg0) {
     s32 context;
     s64 state;
 
@@ -156,7 +156,7 @@ s64 func_002AB3C8(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
 
-s64 func_002AB518(s32 arg0) {
+s64 mnuFinishFieldSkillPopup(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();

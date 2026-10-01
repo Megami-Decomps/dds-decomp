@@ -21,7 +21,7 @@ s64 sdfAllocateBlockBySizeThreshold(s64 size) {
 
 extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
-extern void func_00329868(void *);
+extern void sdfReleaseCurrentResourceHandle(void *);
 extern void func_00328F68(void *);
 extern void *func_00329930(void *);
 extern void sdfQueueNonzeroResourceId(void *);
@@ -32,7 +32,7 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
             sdfReleaseChipBlock(data);
             return;
         }
-        func_00329868(data);
+        sdfReleaseCurrentResourceHandle(data);
     }
 }
 
@@ -54,7 +54,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
             sdfReleaseChipBlock(data);
             return;
         }
-        func_00329868(data);
+        sdfReleaseCurrentResourceHandle(data);
     }
 }
 

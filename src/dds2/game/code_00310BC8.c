@@ -196,10 +196,10 @@ extern s32 sdfTaskWorkRunAll(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
-extern void func_00312DF8(void);
+extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
-extern void func_00312DF8(void);
+extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_00312910();
 
@@ -517,7 +517,7 @@ s32 func_00311DB0(s32 x, s32 y, u64 z, u64 w, u8 flags, u64 style, s32 flag, s32
     return result;
 }
 
-s32 func_00311E60(s32 x, s32 y, u64 first, u64 second, u8 opacity, u16 width, u64 name, u64 extra, s32 flag, s32 option) {
+s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, u64 first, u64 second, u8 opacity, u16 width, u64 name, u64 extra, s32 flag, s32 option) {
     u64 handle = func_0019FC38(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
     frFontSetChainFlag(handle, opacity);
@@ -770,7 +770,7 @@ TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 d
 
     work = func_00312910(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, func_00312DF8, work);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
     return work;
 }
@@ -961,7 +961,7 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void func_00312DF8(void) {
+void sdfReleaseCurrentTaskOwnedResources(void) {
     sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
 }
 

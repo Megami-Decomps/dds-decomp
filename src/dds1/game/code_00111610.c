@@ -26,13 +26,13 @@ typedef struct {
     ObjectResource *resource; /* 0x18 */
 } SlotObjectFull;
 
-extern SlotObjectFull *func_00110880();
+extern SlotObjectFull *dds3AppendWorldObjectNode();
 extern u32 dds3AdvanceWorldCounter();
 extern SlotEntry D_00329A68[];
 extern s32 D_003BA9C0;
 
 SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
-    SlotObjectFull *obj = func_00110880(3);
+    SlotObjectFull *obj = dds3AppendWorldObjectNode(3);
     ObjectResource *resource = obj->resource;
     u32 sequence = dds3AdvanceWorldCounter();
     s32 slot;

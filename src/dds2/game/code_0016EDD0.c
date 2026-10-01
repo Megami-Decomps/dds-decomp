@@ -71,7 +71,7 @@ extern void func_00197D50(u32 handle);
 extern void func_003297C8(u32 allocation);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
-void func_0016FD90(EffGroup *group) {
+void effReleaseGroupSlotsAndResources(EffGroup *group) {
     u32 i = 0;
     u32 count = group->count;
     EffGroupSlot *slot = group->slots;
@@ -92,7 +92,7 @@ void func_0016FD90(EffGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FE18);
 
-void func_00171580(void *dst, void *src) {
+void effCopyResourceGroupVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 

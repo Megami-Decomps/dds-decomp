@@ -1003,12 +1003,12 @@ void func_0017C250(PcpScatterWork5 *work, void *src) {
     PCP_COPY_VECTOR(&work->particleParams, src);
 }
 
-void func_0017C268(PcpScatterWork5 *work, f32 value)
+void effScatterSetInstanceScale(PcpScatterWork5 *work, f32 value)
 {
     work->scale = value;
 }
 
-void func_0017C270(PcpScatterWork5 *work, u32 value) {
+void effScatterSetInstanceColor(PcpScatterWork5 *work, u32 value) {
     work->color = value;
 }
 
@@ -1207,7 +1207,7 @@ void func_0017D078(u64 table) {
     func_0017CE88(shared, local);
 }
 
-PcpScatterWork7 *func_0017D0C0(PcpScatterWork7 *work)
+PcpScatterWork7 *effCloneScatterWithSharedResource(PcpScatterWork7 *work)
 {
     PcpScatterWork7 *child;
 
@@ -1216,7 +1216,7 @@ PcpScatterWork7 *func_0017D0C0(PcpScatterWork7 *work)
     return child;
 }
 
-void func_0017D108(PcpScatterWork7 *work) {
+void effReleaseScatterWorkResources(PcpScatterWork7 *work) {
     effReleaseScatterObject(work->scatterObject);
     func_003297C8(work->ownedBuffer);
 }

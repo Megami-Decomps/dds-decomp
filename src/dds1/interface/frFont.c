@@ -79,7 +79,7 @@ typedef struct FrFontEntry {
     u8 unk20[4];    /* 0x20 */
 } FrFontEntry;
 
-/* Font system at D_003D6C80 (see game/code_00193C08.c). */
+/* Font system at frFontWork (see game/code_00193C08.c). */
 typedef struct FrFontSys {
     FrFontEntry entries[9];   /* 0x0 */
     s32 count;                /* 0x144 */
@@ -109,7 +109,7 @@ extern u8 D_003BB180[];
 
 extern FrFontSave D_003D6DC4;
 
-extern FrFontSys D_003D6C80;
+extern FrFontSys frFontWork;
 
 extern FrFontRec D_003D6C84[];
 
@@ -158,20 +158,20 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
-extern void func_00194190(s32 id, const char *path);
+extern void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 void frFontLoadDefaultFonts(void) {
-    func_00194190(0, "/font/font0.fnt");
-    func_00194190(1, "/font/font1.fnt");
-    func_00194190(2, "/font/font2.fnt");
-    func_00194190(3, "/font/font3.fnt");
+    frFontEnsureSlotLoaded(0, "/font/font0.fnt");
+    frFontEnsureSlotLoaded(1, "/font/font1.fnt");
+    frFontEnsureSlotLoaded(2, "/font/font2.fnt");
+    frFontEnsureSlotLoaded(3, "/font/font3.fnt");
 }
 
 void frFontFreeAllEntries(void) {
     s32 i;
 
     for (i = 0; i < 9; i++) {
-        if (D_003D6C80.entries[i].resource != NULL) {
+        if (frFontWork.entries[i].resource != NULL) {
             frFontFreeEntry((u8)i);
         }
     }
@@ -193,9 +193,9 @@ void frFontReleaseUnreferencedGlyphItem(FrFontGlyph *glyph) {
 
     if (item != NULL) {
         if (item->refs == 0) {
-            D_003D6C80.entries[glyph->u14.b[1]].table[item->index] = 0;
+            frFontWork.entries[glyph->u14.b[1]].table[item->index] = 0;
             frFontListInsert(item->node);
-            D_003D6C80.count--;
+            frFontWork.count--;
         }
     }
 }
@@ -258,7 +258,7 @@ extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
 extern void func_00198088(void *dst, s32 option, void *block, FrFontSegments *segments);
 
 void *frFontCloneEntryResource(u8 index, s32 option) {
-    FrFontEntry *entry = &D_003D6C80.entries[index];
+    FrFontEntry *entry = &frFontWork.entries[index];
     void *dst = func_002CFEB8(0x120);
     FrFontSegments segments;
 
@@ -273,8 +273,8 @@ extern FrFontItem *func_00194D20(s32 first, s32 second, void *resource, s32 coun
 
 /* Return the cached item for `id` in the glyph's font slot (taking a reference),
  * or clone the slot resource and create and cache a new one. */
-FrFontItem *func_00194E80(FrFontGlyph *glyph, s32 id) {
-    FrFontEntry *entry = &D_003D6C80.entries[glyph->u14.b[1]];
+FrFontItem *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 id) {
+    FrFontEntry *entry = &frFontWork.entries[glyph->u14.b[1]];
     FrFontItem *item = ((FrFontItem **)entry->table)[id];
     void *resource;
 
@@ -286,7 +286,7 @@ FrFontItem *func_00194E80(FrFontGlyph *glyph, s32 id) {
     item = func_00194D20(func_001971E0(glyph->u14.b[1]), func_00197200(glyph->u14.b[1]), resource, 1);
     item->index = id;
     ((FrFontItem **)entry->table)[id] = item;
-    D_003D6C80.count++;
+    frFontWork.count++;
     return item;
 }
 
@@ -463,7 +463,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_001958A0);
 /* Advance one of two cached glyph slots, chosen by the current font index. */
 s32 frFontAdvanceSelectedGlyphSlot(void) {
     s32 selection = (func_00100518() & 0xFF) == 0;
-    u8 *base = (u8 *)&D_003D6C80;
+    u8 *base = (u8 *)&frFontWork;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
 
     *slot = func_00194840(*slot);
@@ -555,7 +555,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195CD8);
 
-u32 func_00195DC8(u8 fontIndex) {
+u32 frFontGetGlyphCellWidth(u8 fontIndex) {
     s32 index = fontIndex;
 
     if (index < 2) {
@@ -566,7 +566,7 @@ u32 func_00195DC8(u8 fontIndex) {
     return D_003D6C84[index].val->unk10;
 }
 
-u32 func_00195E08(u8 fontIndex) {
+u32 frFontGetGlyphCellHeight(u8 fontIndex) {
     s32 index = fontIndex;
 
     if (index < 2) {

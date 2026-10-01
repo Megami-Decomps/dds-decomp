@@ -48,7 +48,7 @@ extern void func_002C30F0(void);
 extern s32 func_002C3220(void);
 extern void func_002C3420(void);
 extern s32 func_002E92C0(s32);
-extern void func_002E9340(s32);
+extern void sndEnsureMidiBankResident(s32);
 extern s32 D_003BD248;
 
 /* Ring window over a doubly linked node list (prev at 0x18, next at 0x1C). */
@@ -196,7 +196,7 @@ extern void *sdfFormatSifPacket();
 extern void *func_0011D3E8();
 
 /* Build a one-packet SIF command at (x, y) in GS coordinates and submit it on draw surface `surface`. */
-void func_002C2BF8(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface) {
+void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface) {
     void *list = sdfAllocPacketAligned(0x20);
     LmapDrawSurface *target;
     u8 header[0x10];
@@ -209,7 +209,7 @@ void func_002C2BF8(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface
 }
 
 /* Variant that formats a textured sprite packet (func_0011D3E8) instead of a SIF command. */
-void func_002C2CC0(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s32 e, s32 surface) {
+void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s32 e, s32 surface) {
     void *list = sdfAllocPacketAligned(0x20);
     LmapDrawSurface *target;
 
@@ -300,7 +300,7 @@ void fldShutdownLmapResources(void) {
 s32 fldStartAndPollLocalMapTrack(void) {
     if (D_003BD248 == 1) {
         if (func_002E92C0(0x400000) == 0) {
-            func_002E9340(0x400000);
+            sndEnsureMidiBankResident(0x400000);
             D_003BD248 = 2;
         } else {
             D_003BD248 = 0xFF;

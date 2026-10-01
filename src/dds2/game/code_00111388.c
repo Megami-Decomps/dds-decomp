@@ -13,7 +13,7 @@ typedef struct ActionObj {
     void *unk18;  /* 0x18 */
 } ActionObj;
 
-extern ActionObj *func_00110AA8();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void *func_00328D68(s32 size);
 
@@ -34,7 +34,7 @@ s32 func_00111388(u32 kind) {
 }
 
 ActionObj *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
-    ActionObj *obj = func_00110AA8(2);
+    ActionObj *obj = dds3AppendWorldObjectNode(2);
 
     obj->unk4 = firstValue;
     obj->unk8 = secondValue;
@@ -44,15 +44,15 @@ ActionObj *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
 extern s32 dds3GetWorldSlotValue();
 extern u32 dds3ResetObjectValueCursor();
 extern s32 dds3SeekWorldNode();
-extern void func_001104F0();
+extern void dds3GrowWorldValueChain();
 extern u32 dds3WriteIndexedWorldObjectWord();
 
-void func_001113F0(s32 object, u8 *node) {
+void dds3EnsureWorldNodeInSlot(s32 object, u8 *node) {
     s32 slot = dds3GetWorldSlotValue(object, func_00111388(node[0xF]));
 
     dds3ResetObjectValueCursor(slot);
     if (dds3SeekWorldNode(slot, node) != 1) {
-        func_001104F0(slot, 1);
+        dds3GrowWorldValueChain(slot, 1);
         dds3WriteIndexedWorldObjectWord(slot, node);
     }
 }
@@ -64,19 +64,19 @@ s32 dds3GetWorldSlotValue(u8 *object, s32 index) {
     return *(s32 *)(*(u8 **)(object + 0x18) + (index << 2));
 }
 
-extern u32 func_00110628();
+extern u32 dds3GetWorldValueCount();
 extern void *dds3AppendWorldIndexNode();
 extern u32 dds3ReadIndexedWorldObjectWord();
 extern u32 dds3AdvanceObjectValueCursor();
 extern void dds3DestroyWorldIndexNode();
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-void *func_001114E8(s32 object, s32 index, s32 (*filter)(u32)) {
+void *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     s32 slot = dds3GetWorldSlotValue(object, index);
     void *result;
     u32 word;
 
-    if (func_00110628(slot) == 0) {
+    if (dds3GetWorldValueCount(slot) == 0) {
         return NULL;
     }
     result = dds3AppendWorldIndexNode(0);
@@ -84,11 +84,11 @@ void *func_001114E8(s32 object, s32 index, s32 (*filter)(u32)) {
     do {
         word = dds3ReadIndexedWorldObjectWord(slot);
         if (filter == NULL || filter(word) != 0) {
-            func_001104F0(result, 1);
+            dds3GrowWorldValueChain(result, 1);
             dds3WriteIndexedWorldObjectWord(result, word);
         }
     } while (dds3AdvanceObjectValueCursor(slot) != 0);
-    if (func_00110628(result) == 0) {
+    if (dds3GetWorldValueCount(result) == 0) {
         dds3DestroyWorldIndexNode(result);
         return NULL;
     }

@@ -10,7 +10,7 @@ typedef struct CmdPacket {
 
 u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
-void func_003421E8(s32 trackId);
+void sndEnsureMidiBankResident(s32 trackId);
 
 u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
@@ -61,7 +61,7 @@ typedef struct SndListenerState {
 extern SndListenerState D_004779B0;
 
 /* Scale six world-space values and send them to the sound engine when they changed. */
-void func_00342040(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
+void sndUpdateScaledListenerState(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
     SndListenerState state;
 
     state.value[0] = a * 0.1f;
@@ -110,12 +110,12 @@ s32 func_00342168(s32 packed) {
 }
 
 extern s32 func_0035C860();
-extern void func_002A1040();
+extern void mnuBuildSoundResourcePath();
 extern void sdfSleepWithAlarm();
 extern void (*D_00438B98)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
-void func_003421E8(s32 packed) {
+void sndEnsureMidiBankResident(s32 packed) {
     char name[0x10];
     char path[0x100];
     s32 status = func_00342168(packed);
@@ -125,7 +125,7 @@ void func_003421E8(s32 packed) {
     case 0:
         id = packed >> 16;
         func_0035C860(name, "MIDI%04X.SMG", id);
-        func_002A1040(path, name);
+        mnuBuildSoundResourcePath(path, name);
         func_003417A8(0xA0, 0, path, strlen(path) + 1);
         D_00438B80 = id;
         break;
@@ -149,7 +149,7 @@ u32 sndSendFilenameCommand(char *filename) {
 
 INCLUDE_ASM(const s32, "game/code_00341FE8", func_003422F8);
 
-u32 func_00342358(u32 channel) {
+u32 sndSendChannelControlCommand(u32 channel) {
     return func_003417A8((channel & 0xF) | 0x1C0, 0, NULL, 0);
 }
 
@@ -191,7 +191,7 @@ u8 *func_00342498(void) {
     return D_0047AA50;
 }
 
-FE250Entry *func_003424A8(void) {
+FE250Entry *sndGetTrackSlotTable(void) {
     return D_0047ABD0;
 }
 
@@ -204,7 +204,7 @@ INCLUDE_ASM(const s32, "game/code_00341FE8", func_003424D8);
 void sndStartTrackExtended(s32 trackId) {
     CmdPacket packet;
 
-    func_003421E8(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;

@@ -75,7 +75,7 @@ void func_001687A0(BattleEffect *effect, u32 value) {
     effect->value11C = value;
 }
 
-u32 func_001687A8(BattleEffect *effect) {
+u32 effBattleGetLinkedSourceValue(BattleEffect *effect) {
     return effect->valueSource->value;
 }
 

@@ -686,7 +686,7 @@ typedef struct TaskWork {
 
 extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
-extern void func_002CB990(void);
+extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
 extern TaskWork *func_002CB4B8();
 
@@ -695,7 +695,7 @@ TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 d
 
     work = func_002CB4B8(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, func_002CB990, work);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
     return work;
 }
@@ -931,7 +931,7 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void func_002CB990(void) {
+void sdfReleaseCurrentTaskOwnedResources(void) {
     sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
 }
 

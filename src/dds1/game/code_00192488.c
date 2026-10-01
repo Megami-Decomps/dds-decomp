@@ -41,10 +41,10 @@ typedef struct EffEmit {
     EffPrim *primitive; /* 0x8: target primitive */
 } EffEmit;
 
-/* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
+/* Word at frFontResourceList+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_003D68D8[];
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
-extern u8 D_003D68C0[];
+extern u8 frFontResourceList[];
 extern void func_002D0918(void *arg0);
 extern void *func_002D03F8(s32 arg0);
 extern void *sdfResourceRetainAddress(void *arg0);
@@ -206,7 +206,7 @@ void *effCreateChannel(void *rows, u32 count) {
     return channel;
 }
 
-s64 func_00193720(u32 *p) {
+s64 effReleaseInterpolationChannel(u32 *p) {
     if (p != NULL) {
         func_002D0918((void *)*p);
     }
@@ -246,7 +246,7 @@ void effSetChanStep(EffChan *arg0, f32 arg1) {
 }
 
 void *effGetFontListHead(void) {
-    return D_003D68C0;
+    return frFontResourceList;
 }
 
 s32 effGetFontListCount(void) {

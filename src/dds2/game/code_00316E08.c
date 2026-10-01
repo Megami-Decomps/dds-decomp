@@ -28,9 +28,9 @@ extern void *func_003292A8(s32 size);
 
 extern u32 sdfMemoryGetBlockAddress(void *block);
 
-u32 func_00316FC8(void);
+u32 mdlAdvanceViewerPackageTask(void);
 
-u8 *func_00316F40(void);
+u8 *mdlAllocateViewerPackageWork(void);
 
 /* 0xAARRGGBB color split into RGB and alpha fields. */
 typedef struct RgbAlpha {
@@ -88,15 +88,15 @@ void func_00316E70(void) {
     D_00438918 = 0;
 }
 
-void func_00316E78(void) {
+void mdlCreateViewerPackageTask(void) {
     u32 handle;
 
     D_00435BB0 = 0;
     D_00435BAC = 1;
-    handle = func_00316F40();
+    handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     func_00317AD0(handle);
-    kwlnTaskCreate((s32)D_0042D4D0, 0x2AF8, 0, 0, (s32)func_00316FC8, 0, 0);
+    kwlnTaskCreate((s32)D_0042D4D0, 0x2AF8, 0, 0, (s32)mdlAdvanceViewerPackageTask, 0, 0);
 }
 
 u8 func_00316ED0(void) {
@@ -105,7 +105,7 @@ u8 func_00316ED0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00316EF8);
 
-u8 *func_00316F40(void) {
+u8 *mdlAllocateViewerPackageWork(void) {
     void *block = func_003292A8(0x1E0);
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(block);
 
@@ -124,7 +124,7 @@ void func_00316FA8(u32 sprite) {
     }
 }
 
-u32 func_00316FC8(void) {
+u32 mdlAdvanceViewerPackageTask(void) {
     u32 result;
     s64 status;
 
@@ -146,7 +146,7 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317010);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
-void func_00317958(u8 *work) {
+void mdlLoadViewerPackageFromWork(u8 *work) {
     mdlLoadViewerPackage(5, *(u16 *)(work + 0x12), 0x101, *(s32 *)(work + 0xC), *(s32 *)(work + 0x1C));
 }
 

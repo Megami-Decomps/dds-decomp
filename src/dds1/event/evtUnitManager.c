@@ -92,7 +92,7 @@ typedef struct EvtTransitionWork {
     s8 secondSlot;        /* 0xD1 */
 } EvtTransitionWork;
 
-extern void func_001174C0(s32 path);
+extern void sdfStepWrappingFloatCounter(s32 path);
 extern void func_00116F38(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
@@ -289,7 +289,7 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
 }
 
 s32 evtGetWorldUnitNestedValue(s32 id) {
-    u8 *obj = (u8 *)func_00110A48(dds3GetWorldObject(), id, 5);
+    u8 *obj = (u8 *)dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), id, 5);
 
     if (obj != NULL) {
         return *(s32 *)(*(u8 **)(obj + 0x18) + 8);
@@ -463,7 +463,7 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", func_002227C8);
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
-    func_001174C0(unit->pathId);
+    sdfStepWrappingFloatCounter(unit->pathId);
     func_00116F38(unit->pathId);
     VU0_STORE_VF($vf10, v);
     effObjSetInnerFirstVec(unit->effObj, v);

@@ -72,7 +72,7 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379E8);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379F0);
 
-INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379F8);
+INCLUDE_SDATA(const s32, "game/code_0029BC58", mnuTitleSoundTask);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379FC);
 
@@ -128,7 +128,7 @@ INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AA0);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AA8);
 
-INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AB0);
+INCLUDE_SDATA(const s32, "game/code_0029BC58", mnuMovieWork);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_00437AB4);
 

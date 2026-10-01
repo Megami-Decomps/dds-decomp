@@ -251,5 +251,5 @@ void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
     *(u32 *)(destination + 0xc) = resolved;
     handle = fileGetResourceHandle(resource);
     func_003297C8(handle);
-    func_002C7D00(resource);
+    filePollEntryCleanup(resource);
 }

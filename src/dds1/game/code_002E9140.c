@@ -54,7 +54,7 @@ u32 func_002E8900();
 
 u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
 
-void func_002E9340(s32 trackId);
+void sndEnsureMidiBankResident(s32 trackId);
 
 /* Converts world coordinates to the sound engine's one-tenth scale. */
 void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
@@ -76,7 +76,7 @@ typedef struct SndListenerState {
 extern SndListenerState D_003FB030;
 
 /* Scale six world-space values and send them to the sound engine when they changed. */
-void func_002E9198(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
+void sndUpdateScaledListenerState(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
     SndListenerState state;
 
     state.value[0] = a * 0.1f;
@@ -113,12 +113,12 @@ s32 func_002E92C0(s32 packed) {
 }
 
 extern s32 func_003014F0();
-extern void func_00269420();
+extern void mnuBuildSoundResourcePath();
 extern void sdfSleepWithAlarm();
 extern void (*D_003BD4A8)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
-void func_002E9340(s32 packed) {
+void sndEnsureMidiBankResident(s32 packed) {
     char name[0x10];
     char path[0x100];
     s32 status = func_002E92C0(packed);
@@ -128,7 +128,7 @@ void func_002E9340(s32 packed) {
     case 0:
         id = packed >> 16;
         func_003014F0(name, "MIDI%04X.SMG", id);
-        func_00269420(path, name);
+        mnuBuildSoundResourcePath(path, name);
         func_002E8900(0xA0, 0, path, strlen(path) + 1);
         D_003BD490 = id;
         break;
@@ -152,7 +152,7 @@ u32 sndSendFilenameCommand(char *filename) {
 
 INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9450);
 
-u32 func_002E94B0(u32 channel) {
+u32 sndSendChannelControlCommand(u32 channel) {
     return func_002E8900((channel & 0xF) | 0x1C0, 0, NULL, 0);
 }
 
@@ -211,7 +211,7 @@ INCLUDE_ASM(const s32, "game/code_002E9140", func_002E9630);
 void sndStartTrackExtended(s32 trackId) {
     CmdPacket packet;
 
-    func_002E9340(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x17F;

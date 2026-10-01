@@ -10,13 +10,13 @@ void *func_0010F640(s32 arg);
 
 void *func_00328D68(s32 arg);
 
-void func_001104F0(void *arg, s32 arg1);
+void dds3GrowWorldValueChain(void *arg, s32 arg1);
 
 void func_00110240(IndexObj *arg);
 
 s32 dds3SeekWorldNode(void *arg0, void *arg1);
 
-void *func_00110628(void *arg0, void *arg1, s32 arg2);
+void *dds3GetWorldValueCount(void *arg0, void *arg1, s32 arg2);
 
 void dds3ResetObjectValueCursor(void *arg);
 
@@ -149,7 +149,7 @@ void *dds3AppendWorldIndexNode(s32 index) {
         node->previous = info->lastIndex;
         info->lastIndex = node;
     }
-    func_001104F0(node, index);
+    dds3GrowWorldValueChain(node, index);
     return node;
 }
 
@@ -185,7 +185,7 @@ s32 dds3ProcessMatchingWorldNodes(void *iterator, void *target, s32 repeat) {
     s32 found;
 
     found = 0;
-    if (func_00110628(iterator, target, repeat) != NULL) {
+    if (dds3GetWorldValueCount(iterator, target, repeat) != NULL) {
         dds3ResetObjectValueCursor(iterator);
         do {
             if (dds3SeekWorldNode(iterator, target) != 1) {

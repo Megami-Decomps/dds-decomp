@@ -58,7 +58,7 @@ typedef struct TextStream {
     s8 unk1D;        /* 0x1D */
 } TextStream;
 
-s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
+s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
 extern u32 D_004528C0[];
 
@@ -88,7 +88,7 @@ typedef struct MemRingHeader {
     MemNode first;
 } MemRingHeader;
 
-void func_0019BE20(s32 id, const char *path);
+void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
 
@@ -129,7 +129,7 @@ typedef struct TextStyleNode {
     struct TextStyleNode *nextChild;
 } TextStyleNode;
 
-extern s32 func_00102930(void);
+extern s32 dds3AdminGetActiveMode(void);
 
 extern void dds3AdminSetControlFlag(void);
 
@@ -167,14 +167,14 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
 
 void itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub) {
-    func_0019E848(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
+    itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
 void itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
-    func_0019E848(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
+    itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
     TextStream args;
     args.x = x;
     args.y = y;
@@ -193,11 +193,11 @@ s32 func_0019E848(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 chann
 
 extern s8 D_00436550;
 
-s32 func_0019E8A0(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
+s32 itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
     s8 saved = D_00436550;
     s32 result;
     D_00436550 = 0;
-    result = func_0019E848(x, y, depth, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, 0);
+    result = itfDrawEncodedTextStream(x, y, depth, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, 0);
     D_00436550 = saved;
     return result;
 }
@@ -265,8 +265,8 @@ u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64
 }
 
 void mnuLoadStaffFonts(void) {
-    func_0019BE20(4, "/font/staff1.fnt");
-    func_0019BE20(5, "/font/staff2.fnt");
+    frFontEnsureSlotLoaded(4, "/font/staff1.fnt");
+    frFontEnsureSlotLoaded(5, "/font/staff2.fnt");
 }
 
 void mnuUnloadStaffFonts(void) {
@@ -439,7 +439,7 @@ void func_001A0040(void) {
 void func_001A0048(void) {
 }
 
-s32 func_001A0050(s32 unused0, s32 unused1, s32 value) {
+s32 itfReturnThirdCallbackValue(s32 unused0, s32 unused1, s32 value) {
     return value;
 }
 
@@ -566,7 +566,7 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-void func_001A03D8(void) {
+void itfStartFontTestScene(void) {
     itfLoadBackgroundSprite();
     kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
     D_00436590 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
@@ -967,7 +967,7 @@ u32 func_001A1818(void) {
 }
 
 void mnuReportCampProcessHalted(void) {
-    if (func_00102930() != 5) {
+    if (dds3AdminGetActiveMode() != 5) {
         dds3AdminSetControlFlag();
     }
     func_0035B6E0(D_00414C50);

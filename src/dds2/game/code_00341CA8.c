@@ -10,7 +10,7 @@ typedef struct SequenceVolumePanPacket {
 
 u32 func_00341650(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
-void func_003421E8(s32 arg0);
+void sndEnsureMidiBankResident(s32 arg0);
 
 u32 func_003417A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
@@ -49,7 +49,7 @@ INCLUDE_ASM(const s32, "game/code_00341CA8", func_00341DD8);
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
     SequenceVolumePanPacket packet;
-    func_003421E8(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.volume = volume;
     packet.pan = (u8)pan;

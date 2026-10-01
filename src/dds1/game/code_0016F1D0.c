@@ -77,7 +77,7 @@ typedef struct EffectRingBlock {
 
 extern u32 func_002D03F8(s32);
 extern u32 sdfResourceRetainAddress(u32);
-extern u8 *func_00170558(u32);
+extern u8 *effAllocateIdentityMatrixWork(u32);
 extern s32 effMiscRand(void *);
 extern u8 D_0034DF38[];
 
@@ -110,7 +110,7 @@ EffectRing *source;
         ring->spread = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    ring->matrix = func_00170558(ring->count);
+    ring->matrix = effAllocateIdentityMatrixWork(ring->count);
     *(f32 *)(ring->matrix + 0x5C) = 1.0f;
     *(u32 *)(ring->matrix + 0x50) = ring->unk54;
     step = EFFECT_RING_FULL_TURN / ring->count;
@@ -253,7 +253,7 @@ s32 func_00170548(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x10;
 }
 
-u8 *func_00170558(u32 count) {
+u8 *effAllocateIdentityMatrixWork(u32 count) {
     u8 *matrix = func_0016FB08(count);
 
     EE_MMI_UNIT_MATRIX(matrix);

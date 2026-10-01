@@ -44,12 +44,12 @@ typedef struct ActionObj {
     s32 unk1C;    /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110880();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
 ActionObj *evtSpawnActionObj9(s32 value) {
-    ActionObj *obj = func_00110880(9);
+    ActionObj *obj = dds3AppendWorldObjectNode(9);
 
     obj->unk4 = value;
     dds3EnsureSlotData(obj);
@@ -57,7 +57,7 @@ ActionObj *evtSpawnActionObj9(s32 value) {
 }
 
 void func_001165F0(void) {
-    func_00110928();
+    dds3RemoveWorldObjectNode();
 }
 
 void func_00116608(WorldUnitOwner *object, s32 value) {

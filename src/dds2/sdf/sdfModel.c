@@ -123,7 +123,7 @@ typedef struct {
     SdfObjectEntry *entries;
 } SdfObj;
 
-extern vu8 D_004389DA;
+extern vu8 sdfCurrentBufferIndex;
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelFindDrawNode);
 
@@ -230,7 +230,7 @@ typedef struct SdfSlotBuf {
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
 
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
-void func_00331740(SdfModel *model, s32 count) {
+void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     SdfSlotBuf *buf;
     SdfSlotEntry *entries;
     s32 i;
@@ -412,7 +412,7 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
 
 /* Update the model with the engine's current signed frame index. */
 void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
-    sdfModelUpdateRootTransforms(model, (s8)D_004389DA);
+    sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
 /* Store four message words, then notify the consumer of the second word. */

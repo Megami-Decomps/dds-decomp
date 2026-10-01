@@ -8,9 +8,9 @@ extern s8 D_003BC529;
 
 extern s8 D_003BC52A;
 
-extern s8 D_003BC52B;
+extern s8 brsUpdateBlocked;
 
-extern s8 D_003BC528;
+extern s8 brsTaskState;
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260208);
 
@@ -107,7 +107,7 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00260670);
  * The counter is compared as a float because retail loads 10.0f into $f1 and
  * converts the counter with cvt.s.w (lui at,0x4120 / mtc1 / cvt.s.w / c.lt.s).
  * Phase 8 uses c.le.s, so it fires one frame earlier than 4 and 5. */
-s32 func_002609D8(MenuCommandWork *work) {
+s32 mnuTickExtendedCommandPhase(MenuCommandWork *work) {
     switch (work->mode) {
     case 4:
         work->frames = work->frames + 1;
@@ -144,11 +144,11 @@ INCLUDE_ASM(const s32, "game/code_00260208", func_00261760);
 void brsTaskStart(void) {
     mnuStaffCreateTasks();
     D_003BC52A = 0;
-    D_003BC52B = 1;
+    brsUpdateBlocked = 1;
 }
 
 s8 brsTaskIsUpdateBlocked(void) {
-    return D_003BC52B;
+    return brsUpdateBlocked;
 }
 
 u32 brsTaskAllowUpdate(void) {
@@ -166,9 +166,9 @@ s8 brsTaskHasPendingRows(void) {
 
 s8 brsTaskIsUiUpdateAllowed(s32 context) {
     if (*(s32 *)(context + 0xd44) != 0) {
-        D_003BC52B = 0;
+        brsUpdateBlocked = 0;
     }
-    return D_003BC52B ? 0 : D_003BC52A;
+    return brsUpdateBlocked ? 0 : D_003BC52A;
 }
 
 typedef struct MenuIconRef {
@@ -312,7 +312,7 @@ void brsCloseSkillPackagePanel(s32 work) {
 
 extern char D_003AFA88[];
 extern char D_003AFA98[];
-extern void func_002E9340(s32);
+extern void sndEnsureMidiBankResident(s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuAppendCampSpriteRequests(s32, s32);
 extern void effRequestResourceByMode(char *, char *, s32, s32);
@@ -323,7 +323,7 @@ s32 mnuStaffInitPanel(s32 work) {
     if (*(s32 *)(work + 0x570) != 0) {
         return 0;
     }
-    func_002E9340(0x50000);
+    sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(work + 0x574);
     mnuAppendCampSpriteRequests(*(s32 *)(work + 0x58), work + 0x4F8);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, work + 0x90);
@@ -460,7 +460,7 @@ void brsStaffTaskDestroy(s32 arg0) {
     func_002BC618(*(s32 *)(context + 0x58));
     dspCloseChannel();
     func_002D0918(*(s32 *)context);
-    D_003BC528 = 2;
+    brsTaskState = 2;
 }
 
 extern char D_003BC530[];
@@ -479,7 +479,7 @@ s32 mnuStaffCreateTasks(void) {
     kwlnTaskCreate(D_003BC530, 0x405, 1, 0, brsMessageInputStep, 0, work);
     kwlnTaskCreate(D_003AFAB8, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
     result = kwlnTaskCreate(D_003AFAC8, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
-    D_003BC528 = 1;
+    brsTaskState = 1;
     return result;
 }
 
@@ -489,20 +489,20 @@ extern char D_003AFAC8[];
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 u32 mnuStaffDestroyTasks(void) {
-    s8 state = D_003BC528;
+    s8 state = brsTaskState;
 
     if (state == 1) {
         kwlnTaskDestroyWithHierarchyByName(D_003BC530, 0);
         kwlnTaskDestroyWithHierarchyByName(D_003AFAB8, 0);
         kwlnTaskDestroyWithHierarchyByName(D_003AFAC8, 0);
-        D_003BC52B = state;
+        brsUpdateBlocked = state;
         return 1;
     }
     return 0;
 }
 
 s32 brsTaskConsumeDone(void) {
-    s32 state = D_003BC528;
+    s32 state = brsTaskState;
     if (state == 1) {
         return 1;
     }
@@ -510,13 +510,13 @@ s32 brsTaskConsumeDone(void) {
         return 0;
     }
     if (state == 2) {
-        D_003BC528 = 0;
+        brsTaskState = 0;
     }
     return 0;
 }
 
 u32 brsTaskTryDestroy(void) {
-    if (D_003BC528 == 1) {
+    if (brsTaskState == 1) {
         mnuStaffDestroyTasks();
         return 1;
     }
@@ -588,13 +588,13 @@ INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC518);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC520);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC528);
+INCLUDE_SDATA(const s32, "game/code_00260208", brsTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC529);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC52A);
 
-INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC52B);
+INCLUDE_SDATA(const s32, "game/code_00260208", brsUpdateBlocked);
 
 INCLUDE_SDATA(const s32, "game/code_00260208", D_003BC530);
 

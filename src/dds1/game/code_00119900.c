@@ -93,7 +93,7 @@ typedef struct EvtScriptContext {
 extern TableEntry32 D_0032AEA8[];
 extern Entry4 D_0032AEE8[];
 
-extern u32 D_003BAAB4;
+extern u32 evtWorkScriptTask;
 
 extern s32 D_003C2E70[];
 extern s32 D_003C2E74[];
@@ -226,7 +226,7 @@ void evtUpdateFlaggedStats(void) {
     } while (remaining >= 0);
 }
 
-extern s32 func_001193A0(Entry1A4 *, s32);
+extern s32 datUnitHasSkill(Entry1A4 *, s32);
 
 s32 evtHasMatchingFlaggedEntry(s32 mask) {
     s32 index = 0;
@@ -235,7 +235,7 @@ s32 evtHasMatchingFlaggedEntry(s32 mask) {
         Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xA60);
         offset += 0x1A4;
         if ((entry->flags & 1) && (entry->flags & 2)) {
-            if (func_001193A0(entry, mask)) {
+            if (datUnitHasSkill(entry, mask)) {
                 return 1;
             }
         }
@@ -434,36 +434,36 @@ extern void func_0010BE30(u32, s32);
 extern void bfStepContext(u32);
 
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
-    func_0010BE30(D_003BAAB4, script);
+    func_0010BE30(evtWorkScriptTask, script);
     ((EvtScriptContext *)D_003C2E70)->third = third;
     ((EvtScriptContext *)D_003C2E70)->first = first;
     ((EvtScriptContext *)D_003C2E70)->second = second;
     ((EvtScriptContext *)D_003C2E70)->options = flags;
     ((EvtScriptContext *)D_003C2E70)->stateFlags &= 0xFFFE;
-    bfStepContext(D_003BAAB4);
+    bfStepContext(evtWorkScriptTask);
     return ((EvtScriptContext *)D_003C2E70)->result;
 }
 
 void dds3WorkInit(void) {
-    D_003BAAB4 = scrCreateTaskWithDefaultOption();
+    evtWorkScriptTask = scrCreateTaskWithDefaultOption();
     memset(D_003C2E70, 0, 0x18);
 }
 
 u32 scrGetWorkTaskHandle(void) {
-    return D_003BAAB4;
+    return evtWorkScriptTask;
 }
 
 void scrDestroyWorkTask(void) {
-    scrProcDestroyTask(D_003BAAB4);
-    D_003BAAB4 = 0;
+    scrProcDestroyTask(evtWorkScriptTask);
+    evtWorkScriptTask = 0;
 }
 
-s32 func_0011B968(void) {
+s32 evtPushFirstRosterLevel(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E78[0])->level);
     return 1;
 }
 
-s32 func_0011B990(void) {
+s32 evtPushSecondRosterLevel(void) {
     scrSetIntegerReturnValue(((Entry1A4 *)D_003C2E7C[0])->level);
     return 1;
 }
@@ -605,7 +605,7 @@ s32 evtStoreScriptParameterResult(void) {
     return 1;
 }
 
-s32 func_0011C0F0(void) {
+s32 evtPushScriptContextResult(void) {
     scrSetIntegerReturnValue(D_003C2E80[0]);
     return 1;
 }
@@ -860,7 +860,7 @@ void func_0011CE40(void) {
 void func_0011CE48(void) {
 }
 
-s32 func_0011CE50(void) {
+s32 evtPushRequestedRosterPresence(void) {
     s32 val = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(ptyIsRosterEntryPresent(val) == 1);
@@ -929,7 +929,7 @@ INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAA8);
 
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAAC);
 
-INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAB4);
+INCLUDE_SDATA(const s32, "game/code_00119900", evtWorkScriptTask);
 
 INCLUDE_SDATA(const s32, "game/code_00119900", D_003BAAB8);
 

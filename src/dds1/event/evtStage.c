@@ -14,8 +14,8 @@ extern void dds3ReplaceObjectResource(void *);
 s32 dds3GetWorldSecondaryObject(void);
 void dds3DestroyWorldNode(s32 ctx);
 s32 dds3GetSlot1Data(void);
-void func_001175A8(s32 ctx);
-void func_001175B8(s32 ctx);
+void sdfFreezeFloatCounter(s32 ctx);
+void sdfUnfreezeFloatCounter(s32 ctx);
 extern char D_003AC038[];
 extern void *func_00101218(s32, s32);
 extern void func_003003F0(char *, void *);
@@ -71,7 +71,7 @@ void evtSetWorldSlotStatusFlag(void)
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_001175A8(slotData);
+        sdfFreezeFloatCounter(slotData);
     }
 }
 
@@ -81,7 +81,7 @@ void evtClearWorldSlotStatusFlag(void)
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_001175B8(slotData);
+        sdfUnfreezeFloatCounter(slotData);
     }
 }
 

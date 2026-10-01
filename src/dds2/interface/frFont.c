@@ -115,7 +115,7 @@ void frFontCreateContext();
 
 extern u8 D_00436578[];
 
-/* Font system at D_00452720 (see game/code_0019B840.c); the two glyph slots
+/* Font system at frFontWork (see game/code_0019B840.c); the two glyph slots
  * at +0x194/+0x198 are selected by func_00195B10. */
 typedef struct FrFontSys {
     FrFontEntry entries[9];   /* 0x0 */
@@ -124,7 +124,7 @@ typedef struct FrFontSys {
     FrFontGlyph *slots[2];    /* 0x194 */
 } FrFontSys;
 
-extern FrFontSys D_00452720;
+extern FrFontSys frFontWork;
 
 /* Value record reached through D_00452724 entries. */
 typedef struct FrFontRecVal {
@@ -180,18 +180,18 @@ void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 
 extern s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags);
 
-extern void func_0019BE20();
+extern void frFontEnsureSlotLoaded();
 
 void frFontLoadDefaultFonts(void) {
-    func_0019BE20(0, "/font/font0.fnt");
-    func_0019BE20(1, "/font/font1.fnt");
-    func_0019BE20(2, "/font/font2.fnt");
-    func_0019BE20(3, "/font/font3.fnt");
+    frFontEnsureSlotLoaded(0, "/font/font0.fnt");
+    frFontEnsureSlotLoaded(1, "/font/font1.fnt");
+    frFontEnsureSlotLoaded(2, "/font/font2.fnt");
+    frFontEnsureSlotLoaded(3, "/font/font3.fnt");
 }
 
 
 void frFontFreeAllEntries(void) {
-    FrFontEntry *entries = (FrFontEntry *)&D_00452720;
+    FrFontEntry *entries = (FrFontEntry *)&frFontWork;
     s32 i;
 
     for (i = 0; i < 9; i++) {
@@ -208,9 +208,9 @@ void frFontReleaseUnreferencedGlyphItem(FrFontGlyph *glyph) {
 
     if (item != NULL) {
         if (item->refs == 0) {
-            D_00452720.entries[glyph->u14.b[1]].slots[item->id] = 0;
+            frFontWork.entries[glyph->u14.b[1]].slots[item->id] = 0;
             frFontListInsert(item->list);
-            D_00452720.count--;
+            frFontWork.count--;
         }
     }
 }
@@ -263,7 +263,7 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontGlyph *source, FrFontGlyph *destinati
 INCLUDE_ASM(const s32, "interface/frFont", func_0019C9D0);
 
 void *frFontCloneEntryResource(u8 index, s32 option) {
-    FrFontEntry *entry = &D_00452720.entries[index];
+    FrFontEntry *entry = &frFontWork.entries[index];
     void *dst = func_00328D68(0x120);
     FrFontSegments segments;
 
@@ -278,8 +278,8 @@ extern FrFontRecord *func_0019C9D0(s32 first, s32 second, void *resource, s32 co
 
 /* Return the cached item for `id` in the glyph's font slot (taking a reference),
  * or clone the slot resource and create and cache a new one. */
-FrFontRecord *func_0019CB30(FrFontGlyph *glyph, s32 id) {
-    FrFontEntry *entry = &D_00452720.entries[glyph->u14.b[1]];
+FrFontRecord *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 id) {
+    FrFontEntry *entry = &frFontWork.entries[glyph->u14.b[1]];
     FrFontRecord *item = ((FrFontRecord **)entry->slots)[id];
     void *resource;
 
@@ -291,7 +291,7 @@ FrFontRecord *func_0019CB30(FrFontGlyph *glyph, s32 id) {
     item = func_0019C9D0(func_0019B870(glyph->u14.b[1]), func_0019B890(glyph->u14.b[1]), resource, 1);
     item->id = id;
     ((FrFontRecord **)entry->slots)[id] = item;
-    D_00452720.count++;
+    frFontWork.count++;
     return item;
 }
 
@@ -472,7 +472,7 @@ INCLUDE_ASM(const s32, "interface/frFont", func_0019D550);
 /* Keep byte-base arithmetic: indexing FrFontSys.slots changes ee-gcc codegen. */
 s32 frFontAdvanceSelectedGlyphSlot(void) {
     s32 selection = (func_00100400() & 0xFF) == 0;
-    u8 *base = (u8 *)&D_00452720;
+    u8 *base = (u8 *)&frFontWork;
     FrFontGlyph **slot = (FrFontGlyph **)(base + selection * 4 + 0x194);
 
     *slot = func_0019C4D0(*slot);
@@ -564,7 +564,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019D9A8);
 
-u32 func_0019DA98(u8 fontIndex) {
+u32 frFontGetGlyphCellWidth(u8 fontIndex) {
     s32 index = fontIndex;
 
     if (index < 2) {
@@ -575,7 +575,7 @@ u32 func_0019DA98(u8 fontIndex) {
     return D_00452724[index].val->unk10;
 }
 
-u32 func_0019DAD8(u8 fontIndex) {
+u32 frFontGetGlyphCellHeight(u8 fontIndex) {
     s32 index = fontIndex;
 
     if (index < 2) {

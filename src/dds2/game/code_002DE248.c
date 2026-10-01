@@ -174,13 +174,13 @@ typedef struct EffectSlotOwner {
 
 extern void effBattleMiscQueryPosition(u32, void *, void *);
 
-extern u32 func_00169440(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern u32 func_00169448(void);
+extern u32 effBTLFieldColorGetOverrideSelector(void);
 
-extern u32 func_00169450(void);
+extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern u32 func_00169438(void);
+extern u32 effBTLFieldColorGetOriginalSelector(void);
 
 extern void fileJobInvokeRotationCallback(void *, void *);
 
@@ -458,7 +458,7 @@ extern u32 D_00437E38;
 
 extern u32 D_00437E3C;
 
-extern u32 func_00159A50(u32);
+extern u32 billCloneObjectRetainingSharedData(u32);
 
 extern u32 func_002DDF48(u32);
 
@@ -569,7 +569,7 @@ extern u32 func_00343ED0(const char *, u32 *, s32);
 
 extern FnTbl28 D_003E9E74[];
 
-extern u8 *func_002F3D88();
+extern u8 *effAllocateTexturedStripWork();
 
 extern u32 D_00437E7C;
 
@@ -895,20 +895,20 @@ void effResetSelectionEntryBuffers(s32 work) {
     memset(((EffSelectionWork *)work)->buffer, 0, count << 3);
 }
 
-void func_002DEB80() {
+void effCreateSelectionFlagListFromWork() {
     func_00316528();
 }
 
-void func_002DEB98(void) {
+void effCreateSelectionFlagListFromFile(void) {
     func_00316648();
 }
 
-void func_002DEBB0(void) {
+void effReleaseSelectionFlagList(void) {
     sdfReleaseFlagListResource();
 }
 
 void func_002DEBC8(s32 p) {
-    func_002DEB80(p + 0x14);
+    effCreateSelectionFlagListFromWork(p + 0x14);
 }
 
 void effResetSelectionEntriesAndState(s32 *p) {
@@ -923,13 +923,13 @@ void func_002DEC08() {
     }
 }
 
-void func_002DEC38() {
+void effDrawSelectionEntryVectors() {
     func_00316C88();
 }
 
-void func_002DEC50(s32 p) {
+void effUpdateAndDrawSelectionEntries(s32 p) {
     func_002DEC08(p);
-    func_002DEC38(p);
+    effDrawSelectionEntryVectors(p);
 }
 
 void func_002DEC78(s32 work, u32 value) {
@@ -980,7 +980,7 @@ extern f32 func_002D7770(u8 *, s32, s32);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
-extern void func_0018E0D0(void *);
+extern void effDrawBlurRectangle(void *);
 
 extern void func_0018ECD0(void *);
 
@@ -1104,14 +1104,14 @@ void effUpdateFadeBlendA(EffFadeWork *work) {
     out->rateA = func_002D7770((u8 *)config + 0x34, limit, progress) * 0.01f + 1.0f;
     out->rateB = func_002D7770((u8 *)config + 0x60, limit, progress) * 0.01f;
     out->param = work->param;
-    func_0018E0D0(out);
+    effDrawBlurRectangle(out);
 }
 
-void func_002DEF00(s32 work) {
-    func_0018E850(work + 0xc0);
+void effCreateFadeBlendWorkFromOutput(s32 work) {
+    effCloneBlurTemplate(work + 0xc0);
 }
 
-void func_002DEF18(void) {
+void effReleaseFadeBlendWork(void) {
     func_0018E8F0();
 }
 
@@ -1121,11 +1121,11 @@ void effSetFadeMapParameter(EffKindWork *work, u32 value) {
     ((EffMapOutWide *)work->handle)->target = value;
 }
 
-void func_002DF148(s32 work) {
+void effCreateFixedSlotBlurWorkFromFadeOutput(s32 work) {
     func_0018EBC8(work + 0xc0);
 }
 
-void func_002DF160(void) {
+void effReleaseFixedSlotBlurWork(void) {
     effBlurReleaseFirstResource();
 }
 
@@ -1189,11 +1189,11 @@ void effSetWideFadeMapParameter(EffKindWork *work, u32 value) {
     ((EffMapOutWide *)work->handle)->target = value;
 }
 
-void func_002DF358(s32 work) {
+void effCreateVariableSlotBlurWorkFromFadeOutput(s32 work) {
     effCloneBlurWorkWithSlots(work + 0xc0);
 }
 
-void func_002DF370(void) {
+void effReleaseVariableSlotBlurWork(void) {
     effBlurReleaseSecondResource();
 }
 
@@ -1337,11 +1337,11 @@ void effUpdateFadeBlendC(EffFadeWork *work) {
     func_0018F840(out);
 }
 
-void func_002DFA80(s32 work) {
-    func_0018FBF8(work + 0xc0);
+void effCreateFadeColorWorkFromOutput(s32 work) {
+    effCloneResourceTemplate(work + 0xc0);
 }
 
-void func_002DFA98(void) {
+void effReleaseFadeColorWork(void) {
     func_0018FC88();
 }
 
@@ -1656,7 +1656,7 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
     if (((EffBillboardWork *)dst)->billboard != 0) {
         billDispatchByKind(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = func_00159A50(((EffBillboardWork *)src)->billboard);
+    billboard = billCloneObjectRetainingSharedData(((EffBillboardWork *)src)->billboard);
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
@@ -1814,7 +1814,7 @@ typedef struct EffBillOwnedWork {
 } EffBillOwnedWork;
 
 /* Release the frame node's shared tracks and backing allocation. */
-void func_002E08D0(s32 work) {
+void effReleaseBillFrameNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
@@ -1830,7 +1830,7 @@ typedef struct EffBillOutput {
     u8 mode;            // 0x14
 } EffBillOutput;
 
-void func_002E0F30(BillCellDrawWork *work) {
+void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -1903,14 +1903,14 @@ u8 *billCreateCellNode(u8 *config, u32 handle) {
     return node;
 }
 
-void func_002E11A0(s32 work) {
+void billReleaseCellNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E11D0);
 
-void func_002E1908(BillCellDrawWork *work) {
+void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -1983,14 +1983,14 @@ u8 *billCreateParticleNode(u8 *config, u32 handle) {
     return node;
 }
 
-void func_002E1B80(s32 work) {
+void billReleaseParticleNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
 
-void func_002E22C8(BillCellDrawWork *work) {
+void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -2112,14 +2112,14 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
     return work;
 }
 
-void func_002E2670(s32 work) {
+void billReleaseAlternatingTransformNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
 
-void func_002E2C48(BillCellDrawWork *work) {
+void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -2239,14 +2239,14 @@ u8 *billCloneEmitterTransform(u8 *owner) {
     return work;
 }
 
-void func_002E2FD8(s32 work) {
+void billReleaseEmitterNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E3008);
 
-void func_002E35F0(u8 *work) {
+void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -2366,14 +2366,14 @@ u8 *billCloneStripTransform(u8 *owner) {
     return work;
 }
 
-void func_002E3980(s32 work) {
+void billReleaseStripNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E39B0);
 
-void func_002E4070(u8 *work) {
+void billUpdateStripDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -2445,14 +2445,14 @@ u8 *billCreateTrailNode(u8 *config, u32 handle) {
     return node;
 }
 
-void func_002E42F0(s32 work) {
+void billReleaseTrailNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4320);
 
-void func_002E4AC8(u8 *work) {
+void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -2572,14 +2572,14 @@ u8 *billCloneQuadTransform(u8 *owner) {
     return work;
 }
 
-void func_002E4E50(s32 work) {
+void billReleaseQuadNode(s32 work) {
     effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
     func_003297C8(((EffBillOwnedWork *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4E80);
 
-void func_002E5540(u8 *work) {
+void billUpdateQuadDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -3516,7 +3516,7 @@ typedef struct EffMotionSetup {
 
 extern u32 effCreateSurfaceGridNode(u32, u32);
 
-extern void func_002E9840(u32, u32 *);
+extern void effFillSurfaceGridColorGradient(u32, u32 *);
 
 /* Replace the per-cell grid handles from the copied source header. kind is unused here. */
 void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
@@ -3542,7 +3542,7 @@ void effRebuildSurfaceHandles(s32 nodeAddr, s32 kind, s32 source) {
     for (i = 0; i < node->count; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
         ((u32 *)node->index)[i] = handle;
-        func_002E9840(handle, params + 2);
+        effFillSurfaceGridColorGradient(handle, params + 2);
     }
 }
 
@@ -3753,7 +3753,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     return (u32)node;
 }
 
-void func_002E9840(u32 nodeAddr, u32 *colors) {
+void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
     EffSurfaceGridNode *node = (EffSurfaceGridNode *)nodeAddr;
     u32 count = node->rows / 3;
     u32 *out = (u32 *)node->tail;
@@ -3896,7 +3896,7 @@ void effDuplicateRenderResourceOwner(u32 *dst, u32 *src) {
         if (((EffRenderResourceState *)dst)->billHandle != 0) {
             billDispatchByKind(((EffRenderResourceState *)dst)->billHandle);
         }
-        ((EffRenderResourceState *)dst)->billHandle = func_00159A50(((EffRenderResourceState *)src)->billHandle);
+        ((EffRenderResourceState *)dst)->billHandle = billCloneObjectRetainingSharedData(((EffRenderResourceState *)src)->billHandle);
         billMarkKindOneFlag(((EffRenderResourceState *)dst)->billHandle);
         billSetBillboardMode(((EffRenderResourceState *)dst)->billHandle, ((EffRenderResourceState *)dst)->billMode);
     } else {
@@ -4787,7 +4787,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F0A98);
 
-void func_002F10C0(u8 *work) {
+void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillConfig *)config)->progress;
@@ -5027,7 +5027,7 @@ void effLoadWindTexture(void) {
     D_00437E6C = func_00343ED0("/effect/wind00.tmx", &D_00437E70, 0);
 }
 
-u32 func_002F1CC8(void) {
+u32 effGetWindTextureHandle(void) {
     return D_00437E70;
 }
 
@@ -5101,7 +5101,7 @@ void effFillFadeColorRows(u8 *work, u8 *config) {
 
 u32 *effPrepareTextureAnimation(u8 *src) {
     u32 *buf = (u32 *)effAllocateAnimationBuffer(src);
-    buf[1] = func_002F3ED8(((EffBillConfig *)src)->frames.count, ((EffBillConfig *)src)->resourceId);
+    buf[1] = effCreateTexturedStripWithSharedTexture(((EffBillConfig *)src)->frames.count, ((EffBillConfig *)src)->resourceId);
     effFillFadeColorRows(buf, src);
     return buf;
 }
@@ -5110,7 +5110,7 @@ u32 *effPrepareOwnedTextureAnimation(u8 *p) {
     u8 *dst = ((EffBillFrameWork *)p)->config;
     u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
     u32 *buf = (u32 *)effAllocateAnimationBuffer(dst);
-    buf[1] = func_002F3F40(((EffFrameState *)src)->asset);
+    buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     effFillFadeColorRows(buf, dst);
     return buf;
 }
@@ -5305,7 +5305,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F3258);
 
 u32 *effPrepareQuantizedTexture(u8 *src) {
     u32 *buf = (u32 *)effAllocateQuantizedBuffer(src);
-    buf[1] = func_002F3ED8(buf[0], ((EffQuantizedConfig *)src)->samples.quantizedSamples);
+    buf[1] = effCreateTexturedStripWithSharedTexture(buf[0], ((EffQuantizedConfig *)src)->samples.quantizedSamples);
     func_002F3258(buf, src);
     return buf;
 }
@@ -5314,7 +5314,7 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
     u8 *dst = ((EffBillFrameWork *)p)->config;
     u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
     u32 *buf = (u32 *)effAllocateQuantizedBuffer(dst);
-    buf[1] = func_002F3F40(((EffFrameState *)src)->asset);
+    buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     func_002F3258(buf, dst);
     return buf;
 }
@@ -5369,7 +5369,7 @@ void effOffsetNodeRowsVU(u8 *work) {
 }
 
 /* vu0 routine: fade-blended colour and scaled transform of a mesh draw record */
-void func_002F37F8(BillCellDrawWork *work) {
+void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillConfig *)config)->drawProgress;
@@ -5512,7 +5512,7 @@ void func_002F3D58(u32 unused) {
 }
 
 /* Allocate position/UV/color rows and a draw handle using count and repeat. */
-u8 *func_002F3D88(count, repeat)
+u8 *effAllocateTexturedStripWork(count, repeat)
 u32 count;
 u32 repeat;
 {
@@ -5551,10 +5551,10 @@ u32 repeat;
 }
 
 /* Create a scaly strip and retain its texture; preserve the argument-less allocator call. */
-u64 func_002F3ED8(void) {
+u64 effCreateTexturedStripWithSharedTexture(void) {
     u64 strip;
 
-    strip = func_002F3D88();
+    strip = effAllocateTexturedStripWork();
     func_002F3D18();
     return strip;
 }
@@ -5566,8 +5566,8 @@ void effReleaseScalyStripResources(u8 *work) {
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
-void func_002F3F40(u8 *work) {
-    func_002F3D88(((EffStripWork *)work)->count, ((EffStripWork *)work)->repeat);
+void effAllocateStripFromWorkAndRetainTexture(u8 *work) {
+    effAllocateTexturedStripWork(((EffStripWork *)work)->count, ((EffStripWork *)work)->repeat);
     D_00437E84++;
 }
 
@@ -5787,7 +5787,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F5850);
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;
     u128 result;
-    u32 handle = func_00169438();
+    u32 handle = effBTLFieldColorGetOriginalSelector();
 
     request.kind = 0xB;
     request.count = 1;
@@ -5797,11 +5797,11 @@ void effGetWorldVector(u32 which) {
     case 0:
         break;
     case 1:
-        handle = func_00169438();
+        handle = effBTLFieldColorGetOriginalSelector();
         request.kind = 0;
         break;
     case 2:
-        handle = func_00169440();
+        handle = effBTLFieldColorGetVariantSelector();
         request.kind = 0;
         break;
     case 3:
@@ -5814,11 +5814,11 @@ void effGetWorldVector(u32 which) {
         request.kind = 3;
         break;
     case 6:
-        handle = func_00169448();
+        handle = effBTLFieldColorGetOverrideSelector();
         request.kind = 6;
         break;
     case 7:
-        handle = func_00169450();
+        handle = effBTLFieldColorGetFinalSelector();
         request.kind = 7;
         break;
     }
@@ -5841,29 +5841,29 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
         switch (source->kind) {
         case 0:
         case 1:
-            handle = func_00169438();
+            handle = effBTLFieldColorGetOriginalSelector();
             request.kind = 0;
             break;
         case 2:
-            handle = func_00169440();
+            handle = effBTLFieldColorGetVariantSelector();
             request.kind = 0;
             break;
         case 3:
-            handle = func_00169438();
+            handle = effBTLFieldColorGetOriginalSelector();
             request.kind = 1;
             break;
         case 4:
-            handle = func_00169440();
+            handle = effBTLFieldColorGetVariantSelector();
             request.kind = 2;
             break;
         case 5:
             return 0;
         case 6:
-            handle = func_00169448();
+            handle = effBTLFieldColorGetOverrideSelector();
             request.kind = 6;
             break;
         case 7:
-            handle = func_00169450();
+            handle = effBTLFieldColorGetFinalSelector();
             request.kind = 7;
             break;
         }
@@ -5874,20 +5874,20 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
         switch (source->kind) {
         case 0:
         case 1:
-            handle = func_00169438();
+            handle = effBTLFieldColorGetOriginalSelector();
             break;
         case 2:
-            handle = func_00169440();
+            handle = effBTLFieldColorGetVariantSelector();
             break;
         case 3:
         case 4:
         case 5:
             return 0;
         case 6:
-            handle = func_00169448();
+            handle = effBTLFieldColorGetOverrideSelector();
             break;
         case 7:
-            handle = func_00169450();
+            handle = effBTLFieldColorGetFinalSelector();
             break;
         default:
             return 0;
@@ -5933,8 +5933,8 @@ s32 effCollectModelEffectActors(struct EffActor **out, u32 kind) {
     s32 count = 0;
     u32 mask = 0;
     u8 *state = (u8 *)func_001AA6F8();
-    u8 *actor = (u8 *)func_00169438();
-    u8 *other = (u8 *)func_00169440();
+    u8 *actor = (u8 *)effBTLFieldColorGetOriginalSelector();
+    u8 *other = (u8 *)effBTLFieldColorGetVariantSelector();
 
     switch (kind) {
     case 1:
@@ -5953,14 +5953,14 @@ s32 effCollectModelEffectActors(struct EffActor **out, u32 kind) {
         mask = 0x600;
         break;
     case 6:
-        other = (u8 *)func_00169448();
+        other = (u8 *)effBTLFieldColorGetOverrideSelector();
         if ((((EffActor *)other)->flags & 2) && ((EffActor *)other)->model != 0) {
             out[0] = (struct EffActor *)other;
             count = 1;
         }
         break;
     case 7:
-        other = (u8 *)func_00169450();
+        other = (u8 *)effBTLFieldColorGetFinalSelector();
         if ((((EffActor *)other)->flags & 2) && ((EffActor *)other)->model != 0) {
             out[0] = (struct EffActor *)other;
             count = 1;
@@ -6126,7 +6126,7 @@ s32 *effCloneEffectPayloadFromOwner(s32 owner) {
 
 extern void dds3FreePathObject();
 
-extern void func_00110B50();
+extern void dds3RemoveWorldObjectNode();
 
 void effReleaseTargetSlots(u32 *obj) {
     u32 *tails = ((EffCopiedPayload *)obj)->effects;
@@ -6138,7 +6138,7 @@ void effReleaseTargetSlots(u32 *obj) {
         }
         heads++;
         if (*tails != 0) {
-            func_00110B50(*tails);
+            dds3RemoveWorldObjectNode(*tails);
         }
         tails++;
     }
@@ -6835,7 +6835,7 @@ s32 *effBillboardMotionResourceInitialize(s32 *request) {
     s32 *source = (s32 *)request[0x30 / 4];
     s32 *context = (s32 *)request[0x38 / 4];
     s32 *resource = effCreateMotionResource(context);
-    resource[0] = func_00159A50(*source);
+    resource[0] = billCloneObjectRetainingSharedData(*source);
     billMarkKindOneFlag(resource[0]);
     billSetBillboardMode(resource[0], ((EffMotionResourceConfig *)context)->mode);
     return resource;
@@ -7007,7 +7007,7 @@ void effReplaceSharedResource(u8 *dst, u8 *src) {
         if (((EffParticleShared *)dst)->billHandle != 0) {
             billDispatchByKind(((EffParticleShared *)dst)->billHandle);
         }
-        handle = func_00159A50(((EffParticleShared *)src)->billHandle);
+        handle = billCloneObjectRetainingSharedData(((EffParticleShared *)src)->billHandle);
         ((EffParticleShared *)dst)->billHandle = handle;
         billMarkKindOneFlag(handle);
     } else {
@@ -8260,7 +8260,7 @@ extern char D_0042CEF8[];
 
 extern u8 D_003FE280[];
 
-void func_002FE948(void) {
+void effCreateParticleTask(void) {
     func_002FE5B8(D_0042CEF8, D_003FE280, 0xF);
 }
 
@@ -8282,7 +8282,7 @@ extern char D_00437F30[];
 
 extern u8 D_003FE610[];
 
-void func_002FE9C0(void) {
+void effCreateBlurTask(void) {
     func_002FE5B8(D_00437F30, D_003FE610, 7);
 }
 
@@ -8290,7 +8290,7 @@ extern char D_004386A8[];
 
 extern u8 D_003FE6E0[];
 
-void func_002FE9E8(void) {
+void effCreateFilterTask(void) {
     func_002FE5B8(D_004386A8, D_003FE6E0, 3);
 }
 
@@ -8298,7 +8298,7 @@ extern char D_0042CE48[];
 
 extern u8 D_003FE7C0[];
 
-void func_002FEA10(void) {
+void effCreateEnvironmentTask(void) {
     func_002FE5B8(D_0042CE48, D_003FE7C0, 5);
 }
 
@@ -8306,7 +8306,7 @@ extern char D_0042CEB8[];
 
 extern u8 D_003FE780[];
 
-void func_002FEA38(void) {
+void effCreatePolyTextureTask(void) {
     func_002FE5B8(D_0042CEB8, D_003FE780, 2);
 }
 
@@ -8314,7 +8314,7 @@ extern char D_0042CEA8[];
 
 extern u8 D_003FE850[];
 
-void func_002FEA60(void) {
+void effCreatePolyFlashTask(void) {
     func_002FE5B8(D_0042CEA8, D_003FE850, 0xB);
 }
 
@@ -8322,7 +8322,7 @@ extern char D_0042CE98[]; /* "POLY RING" */
 
 extern u8 D_003FE990[];
 
-void func_002FEA88(void) {
+void effCreatePolyRingTask(void) {
     func_002FE5B8(D_0042CE98, D_003FE990, 6);
 }
 
@@ -8330,7 +8330,7 @@ extern char D_0042CE88[];
 
 extern u8 D_003FEA40[];
 
-void func_002FEAB0(void) {
+void effCreatePolyThunderTask(void) {
     func_002FE5B8(D_0042CE88, D_003FEA40, 5);
 }
 
@@ -8344,7 +8344,7 @@ extern char D_0042CE78[];
 
 extern u8 D_003FEB80[];
 
-void func_002FEB00(void) {
+void effCreatePolyWindTask(void) {
     func_002FE5B8(D_0042CE78, D_003FEB80, 7);
 }
 
@@ -8352,7 +8352,7 @@ extern char D_0042CE68[];
 
 extern u8 D_003FEC50[];
 
-void func_002FEB28(void) {
+void effCreatePolyScalyTask(void) {
     func_002FE5B8(D_0042CE68, D_003FEC50, 5);
 }
 
@@ -8360,7 +8360,7 @@ extern char D_0042CE58[];
 
 extern u8 D_003FED20[];
 
-void func_002FEB50(void) {
+void effCreatePolyCrackTask(void) {
     func_002FE5B8(D_0042CE58, D_003FED20, 2);
 }
 
@@ -8368,7 +8368,7 @@ extern char D_0042CDF8[];
 
 extern u8 D_003FED60[];
 
-void func_002FEB78(void) {
+void effCreateBattleOnlyTask(void) {
     func_002FE5B8(D_0042CDF8, D_003FED60, 0x12);
 }
 
@@ -8376,7 +8376,7 @@ extern char D_00438640[]; /* "2D" */
 
 extern u8 D_003FEFE0[];
 
-void func_002FEBA0(void) {
+void effCreateTwoDimensionalTask(void) {
     func_002FE5B8(D_00438640, D_003FEFE0, 2);
 }
 
@@ -8384,7 +8384,7 @@ extern char D_0042CEE8[];
 
 extern u8 D_003FF020[];
 
-void func_002FEBC8(void) {
+void effCreateObjectParticleTask(void) {
     func_002FE5B8(D_0042CEE8, D_003FF020, 7);
 }
 
@@ -9764,7 +9764,7 @@ void effCompleteTransientResourceJob(u64 job, u32 *result) {
     resource = func_00305148(handle, 0);
     *result = resource;
     func_003297C8(handle);
-    func_002C7D00(job);
+    filePollEntryCleanup(job);
 }
 
 void effCompleteRetainedResourceJob(u64 job, u32 *result) {
@@ -9774,7 +9774,7 @@ void effCompleteRetainedResourceJob(u64 job, u32 *result) {
     handle = fileGetResourceHandle();
     resource = func_00305148(handle, 1);
     *result = resource;
-    func_002C7D00(job);
+    filePollEntryCleanup(job);
 }
 
 void effRequestResourceByMode(s32 category, s32 index, s32 mode, u32 *result) {
@@ -9810,7 +9810,7 @@ void effCompleteMappedResourceJob(u64 job, u32 *result) {
     resource = effCreateMappedResource(buffer);
     *result = resource;
     func_003297C8(handle);
-    func_002C7D00(job);
+    filePollEntryCleanup(job);
 }
 
 void effRequestMappedResource(s32 category, s32 index, u32 *result) {

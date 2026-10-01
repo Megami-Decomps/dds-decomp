@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern void *func_00328D68(s32 size);
-extern s32 func_00110AA8(s32 kind);
+extern s32 dds3AppendWorldObjectNode(s32 kind);
 extern void *sdfModelCreateWithItems(void *data, void *listRef);
 extern s32 func_003340E0(s32 arg0, void *arg1, s32 arg2);
 extern s32 sdfMotionInitializeAtZeroTime(void *arg0, s32 arg1, s32 arg2);
@@ -31,7 +31,7 @@ typedef struct ObjWork {
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
 s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
-    ScriptObj *object = (ScriptObj *)func_00110AA8(10);
+    ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
     work->unk8 = c;
@@ -47,7 +47,7 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
    order is what fixes retail's saved-register order: sched1 sorts these independent
    stores by luid, and the saved regs go by live length (store position - copy position). */
 s32 func_00116B58(s32 a, s32 b, s32 c, s32 d, s32 e) {
-    ScriptObj *object = (ScriptObj *)func_00110AA8(10);
+    ScriptObj *object = (ScriptObj *)dds3AppendWorldObjectNode(10);
     ObjWork *work = (ObjWork *)object->work;
 
     object->unk4 = a;

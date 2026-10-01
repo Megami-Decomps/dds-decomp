@@ -35,7 +35,7 @@ INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CDE8);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031CE60);
 
-s64 func_0031CF68(f32 x) {
+s64 itfDrawUniformlyScaledIndexedImage(f32 x) {
     return func_0031CF88(x, x);
 }
 

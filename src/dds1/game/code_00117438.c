@@ -93,7 +93,7 @@ typedef struct SdfCurveUser {
 extern void func_00116B80(s32 *index, f32 *fraction, void *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 func_00117438(SdfCurveUser *user) {
+f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
     s32 index;
     f32 fraction;
     SdfCurveTable *curve;
@@ -116,7 +116,7 @@ typedef struct SdfCounter {
 } SdfCounter;
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 func_001174C0(SdfCounter *counter) {
+s32 sdfStepWrappingFloatCounter(SdfCounter *counter) {
     s32 result = 1;
 
     if (counter->flags & 8) {
@@ -158,19 +158,19 @@ float evtGetValueScaleFactor(EvtScaledValue *value) {
     return value->scaled / value->base;
 }
 
-void func_001175A8(EvtScaledValue *value) {
+void sdfFreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags | 8;
 }
 
-void func_001175B8(EvtScaledValue *value) {
+void sdfUnfreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags & 0xfffffff7;
 }
 
-void func_001175D0(EvtScaledValue *value) {
+void sdfEnableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags | 0x20;
 }
 
-void func_001175E0(EvtScaledValue *value) {
+void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags & 0xffffffdf;
 }
 
@@ -182,10 +182,10 @@ typedef struct ActionObj {
     void *unk18;  /* 0x18 */
 } ActionObj;
 
-extern ActionObj *func_00110880();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 ActionObj *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
-    ActionObj *obj = func_00110880(0x11);
+    ActionObj *obj = dds3AppendWorldObjectNode(0x11);
 
     obj->unk18 = (void *)b;
     obj->unk4 = a;
@@ -210,7 +210,7 @@ void evtLoadValueVectorIntoVu(EvtScaledValue *value) {
 }
 
 /* Same, from the second quadword at +0x18. */
-void func_00117678(EvtScaledValue *value) {
+void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
     void *vec = (void *)((u8 *)func_00117650(value) + 0x10);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
@@ -445,7 +445,7 @@ void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
 extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void func_00119018(SdfPackedValue *item, u32 value) {
+void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
     s32 channel;
 
     if ((item->flagsAndValue & SDF_PACKED_CHANNEL_MASK) < value) {

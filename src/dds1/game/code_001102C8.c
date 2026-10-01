@@ -73,9 +73,9 @@ typedef struct {
 extern WorldHandle *D_003BA9BC;
 
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_001102C8);
+INCLUDE_ASM(const s32, "game/code_001102C8", dds3GrowWorldValueChain);
 
-u16 func_00110400(s32 object) {
+u16 dds3GetWorldValueCount(s32 object) {
     u16 value;
 
     value = 0;
@@ -120,7 +120,7 @@ u32 dds3AdvanceObjectValueCursor(WorldObject *object) {
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_001104F8);
+INCLUDE_ASM(const s32, "game/code_001102C8", dds3VisitWorldObjectValues);
 
 extern void *func_002CFEB8(s32 size);
 extern u32 func_002D03F8(s32 size);
@@ -128,7 +128,7 @@ extern void sdfReleaseChipBlock(void *block);
 extern WorldList *sdfResourceRetainAddress(u32 resource);
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
-u32 func_00110578(WorldObject *object) {
+u32 dds3CreateWorldObjectData(WorldObject *object) {
     WorldObjectData *data = func_002CFEB8(0x40);
     WorldList *lists;
     s32 listIndex;
@@ -165,17 +165,17 @@ u32 func_00110578(WorldObject *object) {
 extern void dds3ClearSceneObjectState();
 extern void evtReleaseSceneResource();
 extern void func_002D0918(u32 resource);
-void func_00110928(WorldListNode *node);
+void dds3RemoveWorldObjectNode(WorldListNode *node);
 
 /* Destroy every node of every list, then release the data block and scene state. */
-void func_00110638(WorldObject *object) {
+void dds3DestroyWorldObjectData(WorldObject *object) {
     WorldObjectData *data = object->data;
     s32 listIndex;
 
     if (data != NULL) {
         for (listIndex = 0; listIndex <= 0x11; listIndex++) {
             while (data->lists[listIndex].head != NULL) {
-                func_00110928(data->lists[listIndex].head);
+                dds3RemoveWorldObjectNode(data->lists[listIndex].head);
             }
         }
         if (data->resource != 0) {
@@ -188,7 +188,7 @@ void func_00110638(WorldObject *object) {
 }
 
 /* Cache the next link before calling an update that may remove the current node. */
-u32 func_00110710(WorldObject *object) {
+u32 dds3UpdateWorldObjectLists(WorldObject *object) {
     WorldObjectData *data = object->data;
     WorldListNode *node;
     WorldListNode *next;
@@ -215,7 +215,7 @@ u32 func_00110710(WorldObject *object) {
 extern void fldSubmitVisibleWorldBackground(void);
 
 /* Only kind 2 is drawn here; the remaining kinds participate in update traversal. */
-u32 func_001107C8(WorldObject *object) {
+u32 dds3DrawWorldObjectList(WorldObject *object) {
     WorldObjectData *data = object->data;
     WorldListNode *node;
     WorldListNode *next;
@@ -251,12 +251,12 @@ void dds3SetWorldObjectDataValue(WorldObject *object, s8 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110880);
+INCLUDE_ASM(const s32, "game/code_001102C8", dds3AppendWorldObjectNode);
 
 extern void effObjNodeDestroy(void *node);
 
 /* Unlink a world list node from its kind's list in the owner's data and destroy it. */
-void func_00110928(WorldListNode *node) {
+void dds3RemoveWorldObjectNode(WorldListNode *node) {
     WorldList *list;
 
     if (node != NULL && (u32)(node->kind - 2) < 0x10) {
@@ -272,36 +272,36 @@ void func_00110928(WorldListNode *node) {
     }
 }
 
-void func_001109B8(WorldObject *object, u32 value) {
+void dds3SetWorldCameraObject(WorldObject *object, u32 value) {
     WorldObjectData *data;
 
     data = object->data;
-    func_001109F0();
+    dds3GetWorldCameraObject();
     data->cameraObject = value;
 }
 
-u32 func_001109F0(WorldObject *object) {
+u32 dds3GetWorldCameraObject(WorldObject *object) {
     return object->data->cameraObject;
 }
 
-void func_00110A00(WorldObject *object, u32 value) {
+void dds3SetWorldPlayerObject(WorldObject *object, u32 value) {
     WorldObjectData *data;
 
     data = object->data;
-    func_00110A38();
+    dds3GetWorldPlayerObject();
     data->playerObject = value;
 }
 
-u32 func_00110A38(WorldObject *object) {
+u32 dds3GetWorldPlayerObject(WorldObject *object) {
     return object->data->playerObject;
 }
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110A48);
+INCLUDE_ASM(const s32, "game/code_001102C8", dds3FindWorldObjectNodeByKey);
 
 extern void *dds3AppendWorldIndexNode(s32 index);
-extern void func_001102C8();
+extern void dds3GrowWorldValueChain();
 
-void *func_00110AB0(WorldObject *object, s32 kind) {
+void *dds3CopyWorldListToValueChain(WorldObject *object, s32 kind) {
     WorldObjectData *data = object->data;
     void *indexObject;
     WorldListNode *node;
@@ -312,7 +312,7 @@ void *func_00110AB0(WorldObject *object, s32 kind) {
     indexObject = dds3AppendWorldIndexNode(0);
     node = data->lists[kind].head;
     do {
-        func_001102C8(indexObject, 1);
+        dds3GrowWorldValueChain(indexObject, 1);
         dds3WriteIndexedWorldObjectWord(indexObject, node);
         node = node->next;
     } while (node != NULL);

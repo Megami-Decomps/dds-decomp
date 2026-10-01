@@ -390,7 +390,7 @@ void evtEventViewerFreeSlot(s32 index, s32 viewerAddress) {
     slot = (s32 *)(index * 4 + viewerAddress + 0x203c);
     resource = *slot;
     if (resource != 0) {
-        func_00110B50(resource);
+        dds3RemoveWorldObjectNode(resource);
         *slot = 0;
     }
 }
@@ -399,7 +399,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247400);
 
 void evtEventViewerFreeBuffer(s32 bufferAddress) {
     if (*(s32 *)(bufferAddress + 0x2c) != 0) {
-        func_00110B50(*(s32 *)(bufferAddress + 0x2c));
+        dds3RemoveWorldObjectNode(*(s32 *)(bufferAddress + 0x2c));
     }
     *(u32 *)(bufferAddress + 0x2c) = 0;
 }

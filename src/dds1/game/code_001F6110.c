@@ -20,7 +20,7 @@ extern void btlCmdSimpleD(s32, u16);
 extern void btlCmdSimpleJ(s32, u16);
 extern void btlRunWeightedAiAction(s32, u16);
 
-extern s8 D_003BB870;
+extern s8 btlHistoryCounter;
 
 extern s8 D_003A5440[];
 
@@ -170,7 +170,7 @@ extern u64 btlCreateSecondaryCommandSoundTask(void);
 
 extern u64 btlCreateCommandSoundTask(u64, u64);
 
-extern s32 D_003BB3D8;
+extern s32 btlTrackedTaskHandles;
 
 extern u32 btlGetEventEffectValue(void);
 
@@ -943,7 +943,7 @@ u32 btlScriptSelectActionEntry(void) {
     return 1;
 }
 
-u32 func_001F84A8(void) {
+u32 btlScriptSetCommandValueAndParameter(void) {
     s32 context = func_0010D6A8();
     u16 first = scrReadIntParameter(0);
     u32 second = scrReadIntParameter(1);
@@ -1821,7 +1821,7 @@ u32 btlScriptReturnContextSignedByte(void) {
 }
 
 u32 btlScriptReturnGlobalDebugValue(void) {
-    scrSetIntegerReturnValue(D_003BB870);
+    scrSetIntegerReturnValue(btlHistoryCounter);
     return 1;
 }
 
@@ -1850,14 +1850,14 @@ u32 btlResetCommandContextAndSetStateFlag(void) {
     s32 context;
 
     context = func_0010D6A8();
-    state = D_003BB3D8;
+    state = btlTrackedTaskHandles;
     ((BtlCmdCtx *)context)->commandMode = 0x10;
     ((BtlCmdCtx *)context)->commandValue = 0;
     *(u8 *)(state + 0x54) = 1;
     return 1;
 }
 
-u32 func_001FA718(void) {
+u32 btlScriptClearSceneTransition(void) {
     fldClearSceneTransition();
     return 1;
 }

@@ -16,7 +16,7 @@ extern void dds3SetWorldEntryCallbackTarget(s32, char *);
 
 extern void effObjSetInnerFloat(s32, f32);
 
-extern void func_00110BE0(s32, s32);
+extern void dds3SetWorldCameraObject(s32, s32);
 
 extern s32 func_00112E30(s32, SdfQuad *, SdfQuad *);
 
@@ -24,12 +24,12 @@ void fldCreateLocalMapCamera(void) {
     D_004388B4 = func_00112E30(dds3AdvanceWorldCounter(), &D_00400970, &D_00400980);
     dds3SetWorldEntryCallbackTarget(D_004388B4, "Lmap_Cam");
     effObjSetInnerFloat(D_004388B4, 2.0f);
-    func_00110BE0(dds3GetWorldSecondaryObject(), D_004388B4);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), D_004388B4);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388B4);
 
-INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388B8);
+INCLUDE_SDATA(const s32, "game/code_0030B7D0", sdfSelectedCounterIndex);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388BC);
 
@@ -37,7 +37,7 @@ INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388C0);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388C1);
 
-INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388C4);
+INCLUDE_SDATA(const s32, "game/code_0030B7D0", sdfActiveCounterRuntime);
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", D_004388D0);
 

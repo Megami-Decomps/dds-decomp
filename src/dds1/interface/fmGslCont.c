@@ -8,17 +8,17 @@ typedef struct {
     s32 unk1C;
 } FmGslWork;
 
-extern FmGslWork D_003D68C0;
+extern FmGslWork frFontResourceList;
 extern void func_002D0918(void *);
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmGslReleaseActiveResourceBuffers(void) {
-    if (D_003D68C0.unk1C == 0) {
+    if (frFontResourceList.unk1C == 0) {
         return 0;
     }
-    func_002D0918(D_003D68C0.unk0);
-    func_002D0918(D_003D68C0.unk4);
-    D_003D68C0.unk1C = 0;
+    func_002D0918(frFontResourceList.unk0);
+    func_002D0918(frFontResourceList.unk4);
+    frFontResourceList.unk1C = 0;
     return 1;
 }
 

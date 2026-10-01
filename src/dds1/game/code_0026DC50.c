@@ -6,7 +6,7 @@ extern void func_0026FFF8(s32);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void func_0026DC50(void) {
+void mnuDrawFixedSpriteLayerGroup(void) {
     func_00134CD8();
     mnuDrawSprite(0, 0, 0, 0, 0, 8, 0x52);
     mnuDrawSprite(0, 0, 0, 0, 0, 0xC, 0x52);

@@ -57,7 +57,7 @@ extern u8 D_0037F610[];
 
 extern u8 D_0037F660[];
 
-extern void func_00336C10(void *);
+extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 EffResult *effAllocDispatch(s32 kind, s32 input) {
     EffResult *result = func_00328D68(8);
@@ -191,7 +191,7 @@ void func_001949D8(void) {
 }
 
 void func_001949E0(void) {
-    func_001027D8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 u32 func_00194A08(u32 value) {
@@ -231,7 +231,7 @@ void func_00194A58(void) {
 void func_00194A60(void) {
 }
 
-s32 func_00194A68(s32 value) {
+s32 effReturnCallbackValue(s32 value) {
     return value;
 }
 
@@ -375,18 +375,18 @@ void effSetupWorkSound(EffWork *work, u64 resource) {
 INCLUDE_ASM(const s32, "game/code_00194700", func_001956A8);
 
 void func_001957C0(void) {
-    func_001027D8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 void func_001957E8(void) {
-    func_001027D8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(D_003846F0);
     matrix = D_0037F610;
-    func_00336C10(matrix);
+    sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (
         ".set noreorder\n"
         "vmulax.xyzw ACC, vf28, vf10x\n"

@@ -106,7 +106,7 @@ s64 func_00265360(s32 callback) {
     return evtMenuSetHandler(context, 1, callback);
 }
 
-s64 func_002653B8(s32 callback) {
+s64 evtFinishPopupAfterMenuConfiguration(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C7F8(1, 0);
     return evtMenuSetHandler(context, 2, callback);
@@ -192,7 +192,7 @@ u32 evtMenuSetProgressFlag(s32 context) {
     return changed;
 }
 
-void func_002659E0(void) {
+void mnuAwardCampProgressCurrency(void) {
     char text[0x40];
     s32 index = mnuCampResolveProgressTierValue();
     dspSetActive(1);

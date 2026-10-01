@@ -39,7 +39,7 @@ typedef struct ActionObj {
     s32 unk1C;              /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110880();
+extern ActionObj *dds3AppendWorldObjectNode();
 extern void dds3EnsureSlotData();
 extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
@@ -49,7 +49,7 @@ extern void dds3ExchangeSlot();
 extern void dds3InvokeSlot5Handler();
 
 ActionObj *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {
-    ActionObj *obj = func_00110880(5);
+    ActionObj *obj = dds3AppendWorldObjectNode(5);
 
     if (obj != NULL) {
         obj->unk4 = a;

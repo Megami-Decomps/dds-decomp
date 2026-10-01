@@ -169,7 +169,7 @@ void billSetChildScaleComponents(s32, float, float);
 
 s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_00235178(s32, s32, s32, s32, s32);
+s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 extern s32 D_00453610[];
 
@@ -362,7 +362,7 @@ extern char *strcpy(char *, const char *);
 extern MdlViewerHeader *D_00438F98;
 extern char **D_00438F9C;
 
-void func_002337C0(void) {
+void mdlInitializeViewerResourceTable(void) {
     s32 i;
     char *source;
     char *copy;
@@ -412,7 +412,7 @@ void func_002337C0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00233938);
 
-s32 func_00233DD8(s32 table, s32 slot, s32 firstHandle, s32 secondHandle, s32 thirdHandle) {
+s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, s32 firstHandle, s32 secondHandle, s32 thirdHandle) {
     MdlSlotEntry *entries = D_003C6588[table].entries;
 
     if (entries == NULL) {
@@ -513,11 +513,11 @@ typedef struct {
 } MdlResourceOwner;
 
 /* Read the model record's payload word without advancing its relative link. */
-u32 func_00233E30(MdlRecord *record) {
+u32 mdlGetViewerRecordPayloadWord(MdlRecord *record) {
     return record->value08;
 }
 
-u16 func_00233E38(MdlRecord *record) {
+u16 mdlGetViewerRecordListCount(MdlRecord *record) {
     return record->value0C;
 }
 
@@ -531,7 +531,7 @@ s32 *mdlFindViewerRecord(MdlViewerResource *resource, s32 key) {
         return NULL;
     }
     entry = list;
-    remaining = func_00233E38((MdlRecord *)entry);
+    remaining = mdlGetViewerRecordListCount((MdlRecord *)entry);
     while (1) {
         remaining--;
         entry = (s32 *)((u8 *)entry + ((MdlRecord *)entry)->nextOffset);
@@ -763,7 +763,7 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
 }
 
 void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    func_00159A50((u32)entry->object);
+    billCloneObjectRetainingSharedData((u32)entry->object);
     entry->state = entry->state + 1;
 }
 
@@ -1095,7 +1095,7 @@ void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
     }
 }
 
-s32 func_00235178(s32 x, s32 y, s32 depth, s32 width, s32 height) {
+s32 mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return func_0011F250(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
@@ -1103,7 +1103,7 @@ void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 heigh
     s32 packet;
 
     packet = D_00453610[0];
-    sdfAppendPacket(packet, func_00235178(x, y, depth, width, height));
+    sdfAppendPacket(packet, mdlBuildViewerRectanglePacket(x, y, depth, width, height));
 }
 
 extern s8 D_0040B7D8[];
@@ -1459,7 +1459,7 @@ void func_00236B20(void) {
     sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_004370C0, D_00453550.unk54));
 }
 
-u32 func_00236D50(void) {
+u32 mdlUpdateViewerScaleTask(void) {
     mdlAdjustViewerScale();
     func_00236B20();
     return 0;
@@ -1574,7 +1574,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421308);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00237258);
 
-u32 func_00237440(void) {
+u32 mdlUpdateViewerNodeCursorTask(void) {
     mdlHandleViewerNodeCursorInput();
     func_00237258();
     return 0;
@@ -1847,7 +1847,7 @@ extern void fileWaitReady(s32 file);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *func_002C8110(s32 file);
 extern s32 fileGetResourceSize(s32 file);
-extern void func_002C7D00(s32 file);
+extern void filePollEntryCleanup(s32 file);
 extern s32 func_0035C8F8();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -1878,7 +1878,7 @@ void func_002388F8(void) {
     handle = fileGetResourceHandle(file);
     data = func_002C8110(file);
     size = fileGetResourceSize(file);
-    func_002C7D00(file);
+    filePollEntryCleanup(file);
     pos = 0;
     while (pos < size) {
         i = pos;
@@ -1993,7 +1993,7 @@ extern MdlValueEdit D_003C8B08[];
 
 /* Step the number being edited in table slot `index`: coarse steps (A) and fine steps (B),
    held-button repeat, wrapping from one end of [min, max] to the other on a fresh press. */
-void func_002396D0(s32 index) {
+void mdlViewerStepEditedNumericValue(s32 index) {
     MdlValueEdit *edit = &D_003C8B08[index];
     f32 *target = edit->target;
     s32 value = (s32)(*target + 0.5f);
@@ -2149,7 +2149,7 @@ extern s32 func_00112E30(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
-extern void func_00110BE0(s32 world, s32 obj);
+extern void dds3SetWorldCameraObject(s32 world, s32 obj);
 
 s32 mdlSpawnViewerWorldObject(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};
@@ -2161,7 +2161,7 @@ s32 mdlSpawnViewerWorldObject(void) {
     obj = func_00112E30(dds3AdvanceWorldCounter(), pos, rot);
     effObjSetInnerFloat(obj, 10.0f);
     dds3EnsureSlotData(obj);
-    func_00110BE0(dds3GetWorldSecondaryObject(), obj);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), obj);
     func_001129C8(obj, 0);
 }
 
@@ -2187,7 +2187,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-extern s32 func_00110C70(s32 world, s32 a, s32 b);
+extern s32 dds3FindWorldObjectNodeByKey(s32 world, s32 a, s32 b);
 
 extern void dds3SetSlotByKind(s32 obj, s32 slot);
 
@@ -2209,7 +2209,7 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
     mdlAddEntryFlagged(dds3GetUnk0C(obj), 0, 0);
-    dds3SetSlotByKind(obj, func_00110C70(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3SetSlotByKind(obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3InvokeSlot5Handler(obj);
     func_001129C8(obj, 0);
     dds3SetObjectFlags(obj, 0x400);
@@ -2226,7 +2226,7 @@ typedef struct MdlAimObj {
     u8 *inner; /* 0x1C */
 } MdlAimObj;
 
-extern s32 func_00110C70(s32 world, s32 id, s32 kind);
+extern s32 dds3FindWorldObjectNodeByKey(s32 world, s32 id, s32 kind);
 
 extern void effObjSetInnerFirstVec(MdlAimObj *obj, u8 *vec);
 
@@ -2244,9 +2244,9 @@ void mdlAttachWorldObjectToSourceVector(s32 firstId, s32 secondId) {
     MdlAimSrc *src;
     u8 *vec;
 
-    obj = (MdlAimObj *)func_00110C70(dds3GetWorldSecondaryObject(), firstId, 5);
+    obj = (MdlAimObj *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), firstId, 5);
     if (obj != NULL) {
-        src = (MdlAimSrc *)func_00110C70(dds3GetWorldSecondaryObject(), secondId, 0x11);
+        src = (MdlAimSrc *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), secondId, 0x11);
         if (src != NULL) {
             vec = src->vecs;
             effObjSetInnerFirstVec(obj, vec);
@@ -2409,5 +2409,5 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
-INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E8);
+INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
 

@@ -42,7 +42,7 @@ extern f32 D_003D80F0[];
 extern f32 D_003D80E0[];
 extern f32 D_003D80D0[];
 extern s32 D_003BC380;
-extern s32 func_00241A50(s32, s32);
+extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 extern s32 D_0036AA60[];
@@ -581,7 +581,7 @@ void mnuEnterCampSceneMenuState(CampScene *scene) {
     }
 }
 
-extern s32 D_003BA8F8;
+extern s32 kwlnHeldTextureReference;
 extern void func_001054D0(s32, s32, f32);
 extern void func_00243BF0(CampScene *scene);
 extern void mnuShopSubmitDescriptor(CampScene *scene);
@@ -591,7 +591,7 @@ extern void func_00243EC8(CampScene *scene);
 void func_00243B28(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
-        if (D_003BA8F8 == 0) {
+        if (kwlnHeldTextureReference == 0) {
             func_001054D0(0x200, 0xE0, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
@@ -615,7 +615,7 @@ void func_00243B28(CampScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243BF0);
 
-extern s32 D_003BA8F8;
+extern s32 kwlnHeldTextureReference;
 extern s32 sdfAllocatePacketList();
 extern void sdfCreateDescriptorPacket();
 
@@ -631,7 +631,7 @@ void mnuShopSubmitDescriptor(CampScene *scene) {
 
     if (scene->descriptorResource != 0) {
         packet = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(packet, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0x200, 0xE0, scene->descriptorResource, 0);
+        sdfCreateDescriptorPacket(packet, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xE0, scene->descriptorResource, 0);
         D_00325708.open(&D_00325708, packet);
     }
 }
@@ -723,7 +723,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
         do {
             s32 identifier = *entry++;
             count++;
-            func_00241A50(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+            evtQueueValidatedBgmSoundCode(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
         } while (count < scene->registeredCount);
     }
     scene->registeredCount = 0;

@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern s32 func_00161860(void);
+extern s32 effBTLFieldColorGetVariantSelector(void);
 
-extern s32 func_00161858(void);
+extern s32 effBTLFieldColorGetOriginalSelector(void);
 
 /* Flag word read by the two wrappers below. */
 typedef struct {
@@ -26,26 +26,26 @@ void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *ou
     VU0_STORE_VF(vf10, out);
 }
 
-extern u32 func_00161868(void);
-extern u32 func_00161870(void);
+extern u32 effBTLFieldColorGetOverrideSelector(void);
+extern u32 effBTLFieldColorGetFinalSelector(void);
 extern void func_00161BA0();
 
 void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
-    func_00161BA0(func_00161868(), arg);
+    func_00161BA0(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
 void func_00161B10(u32 unused, void *arg) {
-    func_00161BA0(func_00161870(), arg);
+    func_00161BA0(effBTLFieldColorGetFinalSelector(), arg);
 }
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
 void func_00161B40(u32 unused, EffBattleMiscParam *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(func_00161868(), param->value);
+    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetOverrideSelector(), param->value);
 }
 
 void func_00161B70(u32 unused, EffBattleMiscParam *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(func_00161870(), param->value);
+    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetFinalSelector(), param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161BA0);
@@ -53,14 +53,14 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161BA0);
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00161E48);
 
 void func_00162028(u32 unused, u32 value) {
-    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00161858();
+    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
     func_00161E48(ctx->flags & 0xE00, value);
 }
 
 void func_00162058(u32 unused, u32 value) {
-    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00161860();
+    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
     func_00161E48(ctx->flags & 0xE00, value);
@@ -85,7 +85,7 @@ typedef struct {
 } EffBattleMiscTargetParam;
 
 extern void *dds3GetWorldObject(void);
-extern void *func_001109F0(void *object);
+extern void *dds3GetWorldCameraObject(void *object);
 extern void dds3LoadCameraVectorVU(void *object);
 extern void effObjFetchInnerFirstVec(void *object);
 extern f32 D_00352890[];
@@ -107,7 +107,7 @@ void effBattleMiscBuildUnitPartOffsetVU(EffBattleMiscUnit *unit, EffBattleMiscTa
         length = (f32)lengthParam;
     }
     if (sub == 9 || kind == 4) {
-        object = func_001109F0(dds3GetWorldObject());
+        object = dds3GetWorldCameraObject(dds3GetWorldObject());
         dir[0] = dir[1] = dir[2] = 750.0f;
         dds3LoadCameraVectorVU(object);
         VU0_MOVE_VF(vf11, vf10);
@@ -166,22 +166,22 @@ f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param)
         result = unit->fB4 * unit->f80;
         break;
     case 1:
-        other = (EffBattleMiscUnit *)func_00161858();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetOriginalSelector();
         result = func_001F6970(other->flags110 & 0x600, 0, 0);
         break;
     case 2:
-        other = (EffBattleMiscUnit *)func_00161860();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetVariantSelector();
         result = func_001F6970(other->flags110 & 0x600, 0, 0);
         break;
     case 3:
         result = func_001F6970(0x600, 0, 0);
         break;
     case 6:
-        other = (EffBattleMiscUnit *)func_00161868();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetOverrideSelector();
         result = other->fB4 * other->f80;
         break;
     case 7:
-        other = (EffBattleMiscUnit *)func_00161870();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetFinalSelector();
         result = other->fB4 * other->f80;
         break;
     }

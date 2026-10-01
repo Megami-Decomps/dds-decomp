@@ -28,7 +28,7 @@ void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
     }
 }
 
-s32 func_0010FB70(u8 *left, u8 *right) {
+s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
     f32 length;
     f32 leftLimit;
     f32 rightLimit;

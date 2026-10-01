@@ -581,7 +581,7 @@ INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF620);
 
-u8 *func_00249E20(s32 reduced, s32 slot) {
+u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     s32 handle;
     u8 *obj;
     u32 i;
@@ -620,7 +620,7 @@ extern void func_002D0918(s32 handle);
 extern u8 D_003BC3E0;
 
 /* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
-void func_00249F08(s32 arg) {
+void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
     MenuProgressWork *work = (MenuProgressWork *)kwlnTaskGetUserValue();
 
     if (work != NULL) {

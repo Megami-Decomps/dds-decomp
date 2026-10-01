@@ -33,7 +33,7 @@ void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, 
 
 extern s32 D_0043722C;
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00244F00);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
 /* Seed both visual-value tables and cache the current raw solar phase. */
 void evtInitializeVisualData(s32 object) {
@@ -57,13 +57,13 @@ void evtInitializeVisualData(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245590);
 
-INCLUDE_ASM(const s32, "game/code_00244F00", func_00245618);
+INCLUDE_ASM(const s32, "game/code_00244F00", evtAdvanceSolarOverlayFadeAndDraw);
 
-s32 func_002457A8(void) {
+s32 evtHasSolarOverlayTransitionState(void) {
     return D_00438FA4 != 0;
 }
 
-void func_002457B8(s32 value) {
+void evtBeginSolarOverlayFadeIn(s32 value) {
     if (value == 0) {
         D_00438FA4 = 0;
         D_00438FA8 = 0;
@@ -75,7 +75,7 @@ void func_002457B8(s32 value) {
     D_00438FA8 = 0;
 }
 
-void func_002457E0(s32 value) {
+void evtBeginSolarOverlayFadeOut(s32 value) {
     if (value == 0) {
         D_00438FA4 = 5;
         D_00438FAC = 1;

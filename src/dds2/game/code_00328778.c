@@ -5,8 +5,8 @@ extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern void _StartThread(s32, s32);
-extern s32 D_004390F8;
-extern SdfThreadNode *D_004390FC;
+extern s32 sdfTrackedThreadSemaphore;
+extern SdfThreadNode *sdfTrackedThreadHead;
 
 extern s32 CancelWakeupThread(u64);
 
@@ -20,7 +20,7 @@ extern void sdfSleepThreadCount(s32);
 
 extern void sdfPadUpdatePorts(void);
 
-extern void func_0033C878(void);
+extern void sdfPadBuildButtonStates(void);
 
 extern void sdfTickThreadPriorityOverride(void);
 
@@ -52,7 +52,7 @@ void sdfRunTickWorkerThread(void) {
         sdfSleepThreadCount(1);
         sdfPadUpdatePorts();
         if (!D_00438A8C) {
-            func_0033C878();
+            sdfPadBuildButtonStates();
         }
         sdfTickThreadPriorityOverride();
         if (D_004389C4 != NULL) {
@@ -66,10 +66,10 @@ INCLUDE_ASM(const s32, "game/code_00328778", func_00328858);
 /* Register the thread under the list semaphore before starting it. */
 void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
     node->threadId = sdfCreateThread(entry, stack, stackSize, priority);
-    WaitSema(D_004390F8);
-    node->next = D_004390FC;
-    D_004390FC = node;
-    SignalSema(D_004390F8);
+    WaitSema(sdfTrackedThreadSemaphore);
+    node->next = sdfTrackedThreadHead;
+    sdfTrackedThreadHead = node;
+    SignalSema(sdfTrackedThreadSemaphore);
     _StartThread(node->threadId, arg);
 }
 

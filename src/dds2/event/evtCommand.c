@@ -11,7 +11,7 @@ void dds3ResetWorldResourceState(void *unit);
 
 void scrSetIntegerReturnValue(s32 value);
 
-void func_001027D8(s32 command, s32 payload, s32 payloadSize, s32 mode);
+void dds3AdminSubmitModeRequest(s32 command, s32 payload, s32 payloadSize, s32 mode);
 
 void func_0035B6E0(const char *fmt, ...);
 
@@ -23,7 +23,7 @@ void fldPlayCurrentBgmSound(void);
 
 void fldRequestEncounterWithFade(u32 kind, s32 eventId);
 
-extern u32 D_004371E8;
+extern u32 evtPendingEventSelection;
 
 void evtSubmitEventRequestImmediate(s32 eventId);
 
@@ -49,7 +49,7 @@ s32 dds3GetWorldObjectValue(s32 world);
 
 void func_0023AA30(s32 highPart, s32 lowPart);
 
-void func_0010AE38(const char *fmt, ...);
+void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 void func_0023A9E0(void);
 
@@ -57,9 +57,9 @@ s32 sdfCheckPendingWorkWithInterrupts(void);
 
 void evtDestroySecondaryWorldNode(void);
 
-extern u32 D_00435CD4;
+extern u32 kwlnDrawControlFlags;
 
-void func_00110B50(void *unit);
+void dds3RemoveWorldObjectNode(void *unit);
 
 s32 func_001287B8(s32 id);
 
@@ -77,7 +77,7 @@ void evtPolygonMovieClearFlagBits(s32 movieId, u32 bits);
 
 u32 fldGetPlayerSceneState(void);
 
-void func_00110BE0(s32 world, u32 unit);
+void dds3SetWorldCameraObject(s32 world, u32 unit);
 
 f32 bfWaitReadArgFloat(s32 idx);
 
@@ -128,7 +128,7 @@ s32 fldParseRoomNumberFromName(char *name);
 
 s32 func_001235E8(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
-extern u32 D_00389770[];
+extern u32 fldAreaState[];
 
 void func_0023AE70(void *unit, s32 value);
 
@@ -230,12 +230,12 @@ s32 evtCommandAttachLightToUnitPath(void) {
 
     effect = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (effect == NULL) {
-        func_0010AE38("EFFECT_PATH_MOVE not found eff!\n");
+        evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found eff!\n");
         return 1;
     }
     path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
     if (path == NULL) {
-        func_0010AE38("EFFECT_PATH_MOVE not found path!\n", effect);
+        evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found path!\n", effect);
         return 1;
     }
     evtStageRelinkOwnedNodeResource(path, effect);
@@ -257,7 +257,7 @@ s32 evtCommandReadSecondaryWorldIdValue(void) {
     node = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
     if (node == NULL) {
         func_0035B6E0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
-        func_0010AE38("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
+        evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));
         scrSetIntegerReturnValue(0);
     } else {
         scrSetIntegerReturnValue(node->value);
@@ -266,17 +266,17 @@ s32 evtCommandReadSecondaryWorldIdValue(void) {
 }
 
 u32 func_002412B0(void) {
-    func_001027D8(2, 0, 0, 0);
+    dds3AdminSubmitModeRequest(2, 0, 0, 0);
     return 1;
 }
 
 u32 func_002412E0(void) {
-    func_001027D8(0xc, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0xc, 0, 0, 0);
     return 1;
 }
 
 u32 func_00241310(void) {
-    func_001027D8(4, 0, 0, 0);
+    dds3AdminSubmitModeRequest(4, 0, 0, 0);
     return 1;
 }
 
@@ -286,7 +286,7 @@ s32 evtCommandSubmitPairedAdminRequest(void)
 
     args[0] = scrReadIntParameter(0);
     args[1] = scrReadIntParameter(1);
-    func_001027D8(0x15, (s32)args, 8, 0);
+    dds3AdminSubmitModeRequest(0x15, (s32)args, 8, 0);
     scrSetIntegerReturnValue(0);
     return 1;
 }
@@ -312,7 +312,7 @@ s32 evtCommandCallEvent(void)
 
     eventId = scrReadIntParameter(0);
     func_0035B6E0("call_event:%d\n", eventId);
-    func_001027D8(6, (s32)&eventId, 4, 0);
+    dds3AdminSubmitModeRequest(6, (s32)&eventId, 4, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -333,10 +333,10 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
 
     fldPlayCurrentBgmSound();
     fldRequestEncounterWithFade(2, eventId);
-    D_004371E8 = requestMode;
+    evtPendingEventSelection = requestMode;
     args[0] = 0;
     args[1] = eventId;
-    func_001027D8(0xe, (s32)args, 8, requestMode > 0);
+    dds3AdminSubmitModeRequest(0xe, (s32)args, 8, requestMode > 0);
     scrDestroyAllNamedProcesses();
 }
 
@@ -355,10 +355,10 @@ void evtSubmitEventRequestImmediate(s32 eventId)
 
     fldStopCurrentBgm();
     fldRequestEncounterWithFade(2, eventId);
-    D_004371E8 = 0;
+    evtPendingEventSelection = 0;
     args[0] = 0;
     args[1] = eventId;
-    func_001027D8(0xe, (s32)args, 8, 1);
+    dds3AdminSubmitModeRequest(0xe, (s32)args, 8, 1);
     scrDestroyAllNamedProcesses();
 }
 
@@ -395,7 +395,7 @@ s32 evtCommandRequestFieldSequence(void)
     secondArg = scrReadIntParameter(1);
     textArg = scrReadStringParameter(2);
     fldInitializeSequenceAndResetFlags((s32)request, firstArg, secondArg, textArg);
-    func_001027D8(5, (s32)request, 0xa0, 0);
+    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -409,7 +409,7 @@ s32 evtCommandRequestCurrentGroupSequence(void)
     firstArg = scrReadIntParameter(0);
     textArg = scrReadStringParameter(1);
     fldInitializeSequenceAndResetFlags((s32)request, D_00389780[0], firstArg, textArg);
-    func_001027D8(5, (s32)request, 0xa0, 0);
+    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -419,7 +419,7 @@ s32 func_002416D0(void)
     s32 p0;
 
     p0 = scrReadIntParameter(0);
-    func_001027D8(0x1c, (s32)&p0, 4, 0);
+    dds3AdminSubmitModeRequest(0x1c, (s32)&p0, 4, 0);
     return 1;
 }
 
@@ -432,7 +432,7 @@ s32 evtCommandRequestAlternateFieldSequence(void)
     firstArg = scrReadIntParameter(0);
     textArg = scrReadStringParameter(1);
     fldInitializeAlternateSequence((s32)request, D_00389780[0], firstArg, textArg);
-    func_001027D8(5, (s32)request, 0xa0, 0);
+    dds3AdminSubmitModeRequest(5, (s32)request, 0xa0, 0);
     scrDestroyAllNamedProcesses();
     return 1;
 }
@@ -467,7 +467,7 @@ s32 evtCommandHandleChangedSecondaryWorldKey(void)
     return 1;
 }
 
-u32 func_00241838(void) {
+u32 evtCommandSetWorldNodeBaseMode(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
@@ -475,7 +475,7 @@ u32 func_00241838(void) {
     return 1;
 }
 
-u32 func_00241868(void) {
+u32 evtCommandSetWorldNodeUpperMode(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
@@ -491,9 +491,9 @@ s32 evtCommandShutdownStage(void)
     evtDestroySecondaryWorldNode();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
-    D_00435CD4 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
     func_0035B6E0("event stage shutdown !!\n");
-    func_0010AE38("field shutdown.\n");
+    evtPrintDeveloperConsoleMessage("field shutdown.\n");
     return 1;
 }
 
@@ -505,9 +505,9 @@ s32 evtCommandShutdownStageAlternate(void)
     evtDestroySecondaryWorldNode();
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
-    D_00435CD4 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
     func_0035B6E0("event stage shutdown2 !!\n");
-    func_0010AE38("field shutdown2.\n");
+    evtPrintDeveloperConsoleMessage("field shutdown2.\n");
     return 1;
 }
 
@@ -515,7 +515,7 @@ s32 evtCommandClearAllUnits(void)
 {
     func_0023A9E0();
     func_0035B6E0("unit all clear !!\n");
-    func_0010AE38("unit all clear.\n");
+    evtPrintDeveloperConsoleMessage("unit all clear.\n");
     return 1;
 }
 
@@ -525,7 +525,7 @@ s32 evtCommandClearAllUnitsAndWait(void)
     while (sdfCheckPendingWorkWithInterrupts()) {
     }
     func_0035B6E0("unit all clear2 !!\n");
-    func_0010AE38("unit all clear2.\n");
+    evtPrintDeveloperConsoleMessage("unit all clear2.\n");
     return 1;
 }
 
@@ -540,7 +540,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
     if (unit == NULL) {
         return 1;
     }
-    func_00110BE0(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
     return 1;
 }
 
@@ -556,7 +556,7 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     if (unit == NULL) {
         return 1;
     }
-    func_00110BE0(dds3GetWorldObject(), (u32)unit);
+    dds3SetWorldCameraObject(dds3GetWorldObject(), (u32)unit);
     return 1;
 }
 
@@ -583,7 +583,7 @@ s32 evtCommandCreateWorldEffectObject(void) {
     return 1;
 }
 
-s32 func_00241CB0(void)
+s32 evtCommandDestroyEffectUnitById(void)
 {
     s32 id;
     void *unit;
@@ -593,7 +593,7 @@ s32 func_00241CB0(void)
     if (unit == NULL) {
         return 1;
     }
-    func_00110B50(unit);
+    dds3RemoveWorldObjectNode(unit);
     return 1;
 }
 
@@ -691,14 +691,14 @@ s32 evtCommandWaitForCampTask(void) {
     }
     if (evtFindTaskById(id) == 0) {
         msg = "load BE (%d)..\n";
-        func_0010AE38(msg, id);
+        evtPrintDeveloperConsoleMessage(msg, id);
         sdfPrintFormattedDevMessage(msg, id);
         func_00101968((s32)work->campTask, mnuCampCreateTask(id));
         return 0;
     }
     if (evtGetTaskValueWord(id) == 2) {
         msg = D_00421ED8;
-        func_0010AE38(msg, id);
+        evtPrintDeveloperConsoleMessage(msg, id);
         sdfPrintFormattedDevMessage(msg, id);
         return 1;
     }
@@ -718,7 +718,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
     if (evtFindTaskById(id) != 0) {
         return 1;
     }
-    func_0010AE38("read BE (%d)..\n", id);
+    evtPrintDeveloperConsoleMessage("read BE (%d)..\n", id);
     func_00101968((s32)work->campTask, mnuCampCreateTask(id));
     return 1;
 }
@@ -728,7 +728,7 @@ s32 evtCommandTestCampTaskReady(void) {
     s32 ok;
 
     if (func_0010D8C8() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
-        func_0010AE38(D_00421ED8, id);
+        evtPrintDeveloperConsoleMessage(D_00421ED8, id);
         ok = 1;
     } else {
         ok = 0;
@@ -748,7 +748,7 @@ s32 evtCommandDestroyCampTask(void) {
     if (evtFindTaskById(id) == 0) {
         return 1;
     }
-    func_0010AE38("del BE (%d)..\n", id);
+    evtPrintDeveloperConsoleMessage("del BE (%d)..\n", id);
     mnuCampDestroyTaskById(id);
     return 1;
 }
@@ -772,7 +772,7 @@ s32 evtCommandStartPolygonMovie(void) {
     a = scrReadIntParameter(0);
     b = scrReadIntParameter(1);
     result = func_0024FCB8(work->campTask->resource, a, b);
-    func_0010AE38("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
+    evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
     func_00101968((s32)work->campTask, result);
     evtPolygonMovieSetFlagBits(result, 1);
     scrSetIntegerReturnValue(result);
@@ -872,9 +872,9 @@ s32 evtCommandSetUnitRoomFloatState(void) {
     count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
-            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
+            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 1);
         } else {
-            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
+            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 0);
         }
     }
     return 1;
@@ -904,9 +904,9 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
     count = fldParseRoomNumberFromName(owner);
     if (count > 0) {
         if (scrReadIntParameter(1) == 0) {
-            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 1);
+            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 1);
         } else {
-            func_001235E8(D_00389770[4], D_00389770[5] + 1, count, 0);
+            func_001235E8(fldAreaState[4], fldAreaState[5] + 1, count, 0);
         }
     }
     return 1;
@@ -959,7 +959,7 @@ s32 evtCommandMoveLightAlongPathOrWarn(void) {
         return 1;
     }
     func_0035B6E0(D_00421FB0);
-    func_0010AE38(D_00421FC8);
+    evtPrintDeveloperConsoleMessage(D_00421FC8);
     return 1;
 }
 

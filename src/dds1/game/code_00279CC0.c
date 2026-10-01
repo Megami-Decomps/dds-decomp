@@ -59,7 +59,7 @@ extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 
-extern void func_0027C658(s32);
+extern void mnuClearWindowPanelTransitionFlag(s32);
 
 extern void mnuPlayInputSound(s32, s32, s32);
 
@@ -356,12 +356,12 @@ s64 mnuUpdateSkillListInput(s32 callback) {
         }
         list = menu + 1;
         if (buttons & 0x10) {
-            func_0027C770(list[8 + menu[11]]);
+            mnuRetreatWindowListSelection(list[8 + menu[11]]);
         }
         if (buttons & 0x20) {
-            func_0027C758(list[8 + menu[11]]);
+            mnuAdvanceWindowListSelection(list[8 + menu[11]]);
         }
-        func_0027C658(list[8 + menu[11]]);
+        mnuClearWindowPanelTransitionFlag(list[8 + menu[11]]);
         mnuPlayInputSound(0, buttons, ((MenuWindow *)list[8 + menu[11]])->field14);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
@@ -1122,7 +1122,7 @@ void mnuForwardDupArg(s32 panel, s32 x, s32 y, s32 sprite, s32 effect) {
     mnuConfigureWindowSpriteAndGrid(panel, x, y, sprite, effect, effect);
 }
 
-void func_0027C570(s32 value, s32 *entry, s32 x, s32 y, s32 option) {
+void mnuInitializeWindowEntryPlacement(s32 value, s32 *entry, s32 x, s32 y, s32 option) {
     entry[6] = value;
     entry[7] = x;
     entry[9] = y + 3;
@@ -1140,7 +1140,7 @@ void mnuSetWindowPanelBounds(u8 *panel, const void *layout, u32 left, u32 top,
     ((MenuWindowContainer *)panel)->flags |= 4;
 }
 
-void func_0027C620(s32 panel, u32 source, u32 mode, u32 variant,
+void mnuAttachWindowTextureState(s32 panel, u32 source, u32 mode, u32 variant,
                                     u32 option) {
     u32 textures;
 
@@ -1148,12 +1148,12 @@ void func_0027C620(s32 panel, u32 source, u32 mode, u32 variant,
     ((MenuWindowContainer *)panel)->textures = textures;
 }
 
-void func_0027C658(s32 window) {
+void mnuClearWindowPanelTransitionFlag(s32 window) {
     MenuWindowContainer *state = (MenuWindowContainer *)window;
     state->flags = state->flags & 0xfffffffb;
 }
 
-void func_0027C670(s32 window) {
+void mnuAppendWindowListNode(s32 window) {
     mnuListAppendNode(((MenuWindowContainer *)window)->list);
 }
 
@@ -1183,11 +1183,11 @@ s32 mnuReverseListSelection(s32 window, s32 direction) {
     return item;
 }
 
-void func_0027C758(u32 window) {
+void mnuAdvanceWindowListSelection(u32 window) {
     mnuAdvanceListSelection(window, 0);
 }
 
-void func_0027C770(u32 window) {
+void mnuRetreatWindowListSelection(u32 window) {
     mnuReverseListSelection(window, 0);
 }
 
@@ -1394,12 +1394,12 @@ void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, u32 *list, s32 flag, s3
     }
 }
 
-void func_0027DD58(s32 x, s32 y, s32 depth, s32 fade, s32 list, s32 drawArg) {
+void mnuDrawIconPanelDefaultFlag(s32 x, s32 y, s32 depth, s32 fade, s32 list, s32 drawArg) {
     mnuDrawIconPanel(x, y, depth, fade, list, 0, drawArg);
 }
 
-void func_0027DD78(s32 x, s32 y, s32 depth, s32 list, s32 drawArg) {
-    func_0027DD58(x, y, depth, 0x100, list, drawArg);
+void mnuDrawIconPanelFullFade(s32 x, s32 y, s32 depth, s32 list, s32 drawArg) {
+    mnuDrawIconPanelDefaultFlag(x, y, depth, 0x100, list, drawArg);
 }
 
 /* Window panel layout: six grid resource handles start at +0x0c. */
@@ -1988,7 +1988,7 @@ void mnuFreeIconSprites(u32 *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-void func_0027F588(s32 unusedX, s32 unusedY, s32 depth, s32 skip, s32 *menu, s32 param) {
+void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, s32 *menu, s32 param) {
     u32 i;
 
     if (skip == 0) {
@@ -2324,7 +2324,7 @@ void mnuResolveUnselectedPageHandles(MenuWindow *window) {
     }
 }
 
-void func_002805B0(MenuWindow *window) {
+void mnuReleasePageTexturesAndSelectedResources(MenuWindow *window) {
     s32 selected = window->selected;
     u32 i;
     s32 id;
@@ -2378,7 +2378,7 @@ void mnuSelectPage(MenuWindow *window, s32 selected) {
         mnuResolveUnselectedPageHandles(window);
     }
     window->selected = selected;
-    func_002805B0(window);
+    mnuReleasePageTexturesAndSelectedResources(window);
 }
 
 void func_002807E8(window)
@@ -2571,6 +2571,6 @@ INCLUDE_ASM(const s32, "game/code_00279CC0", func_00281688);
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_00281780);
 
-void func_00281898(u32 panel) {
+void mnuClearPanelWorkState(u32 panel) {
     memset(panel, 0, 0x20);
 }

@@ -76,7 +76,7 @@ s64 func_00225778(u32 unit) {
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */
-u32 func_00225798(BattleActionUnit *unit) {
+u32 btlTryTransitionSingleTargetAction(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     BattleActionUnit *owner = actor->owner;
     if (owner->flags & 0x200) {
@@ -97,7 +97,7 @@ u32 func_00225798(BattleActionUnit *unit) {
 extern void btlFaceLinkedTargetAndFlagDirection(s32, s32);
 extern void func_00224F88(u32);
 
-s32 func_00225828(BattleActionUnit *unit) {
+s32 btlHandleTargetDirectionOrAction(BattleActionUnit *unit) {
     BattleActor *actor = unit->actor;
     if (actor->owner->flags & 0x200) {
         if (btlGetIndexListCount(actor->targetIndexList) == 1) {
@@ -137,7 +137,7 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225B48);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225BF8);
 
-s32 func_002260E0(BattleActionUnit *unit) {
+s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
     u16 flags = ((BattleActionTableEntry *)D_00435E30)[unit->type].flags;
 
     if (flags & 0x1000) {
@@ -184,7 +184,7 @@ s32 btlFilterActionByUnitFlags(BattleActionUnit *unit, s32 action) {
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226308);
 
-u32 func_00226398(u32 unit, u32 actor, u32 action) {
+u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     BattleActionContext *battle;
     if (action != 0x109) {
         return 0;
@@ -196,7 +196,7 @@ u32 func_00226398(u32 unit, u32 actor, u32 action) {
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002263D8);
 
-s32 func_002264E8(BattleActionUnit *unit, s32 type) {
+s32 btlCheckActionUnitResourceEligibility(BattleActionUnit *unit, s32 type) {
     s32 offset = type * 0x20;
     u8 resourceType;
     u32 resourceKind;
@@ -223,7 +223,7 @@ s32 func_00226540(u32 unused1, u32 unused2, s32 action) {
     return action == 0x109 ? 0x1194 : 0x64;
 }
 
-void func_00226558(u8 value) {
+void btlSetSpecialBattleEffectActorByte(u8 value) {
     BattleActionContext *battle;
 
     battle = (BattleActionContext *)func_001AA6F8();
@@ -339,7 +339,7 @@ typedef struct BattleEffectUnitMask {
 } BattleEffectUnitMask;
 
 /* Park this unit in the battle effect slot and drop the 0x100 and 0x8 flags. */
-void func_00226A60(BattleActionUnit *unit) {
+void btlBindEffectUnitAndClearStateFlags(BattleActionUnit *unit) {
     BattleEffectUnitMask *view = (BattleEffectUnitMask *)unit;
     BattleActionContext *battle = (BattleActionContext *)func_001AA6F8();
     u32 flags = view->flags & ~0x100;

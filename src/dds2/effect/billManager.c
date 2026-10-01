@@ -70,7 +70,7 @@ void billReleaseChild(BillObj *obj) {
 
     child = (s32)obj->unk30;
     if (child != 0) {
-        func_00157E50(child);
+        effReleaseSharedTextureRecord(child);
     }
     sdfReleaseChipBlock(obj);
 }
@@ -119,7 +119,7 @@ BillObj *billCloneList(BillObj *obj) {
 }
 
 void billReleaseList(BillObj *obj) {
-    func_00159848(obj->unk30);
+    billReleaseSharedEntryBlock(obj->unk30);
     sdfReleaseChipBlock(obj);
 }
 
@@ -176,10 +176,10 @@ typedef struct BillEntryBlock {
     void **entries;   /* 0x18 */
 } BillEntryBlock;
 
-extern void func_00157E50(void *arg);
+extern void effReleaseSharedTextureRecord(void *arg);
 
 /* Drop one reference; the last one releases every entry and the block itself. */
-void func_00159848(void *arg) {
+void billReleaseSharedEntryBlock(void *arg) {
     BillEntryBlock *block = arg;
     s32 i;
 
@@ -187,7 +187,7 @@ void func_00159848(void *arg) {
     if (block->refCount == 0) {
         i = 0;
         while (i < block->entryCount) {
-            func_00157E50(block->entries[i]);
+            effReleaseSharedTextureRecord(block->entries[i]);
             i++;
         }
         func_003297C8(block->allocation);
@@ -222,7 +222,7 @@ u64 billCreateFromResource(u32 owner, u64 resource) {
 }
 
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
-BillObj *func_00159A50(BillObj *source) {
+BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
     BillData *data;
 

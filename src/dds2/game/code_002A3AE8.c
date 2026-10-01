@@ -3,14 +3,14 @@
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
 
-extern s32 func_002A46C8(s32);
+extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 D_003E38A0[];
 
 extern s32 D_00437A40;
 
 extern void mnuReleaseMenuResourceSlots(void);
 
-extern void func_002A3C58(void);
+extern void mnuDestroyMovieMenuSelectionList(void);
 
 extern s16 D_003E3792[];
 
@@ -68,7 +68,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
 }
 
-void func_002A3C58(void) {
+void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(((SpriteMenuState *)D_00437A40)->list);
 }
 
@@ -252,9 +252,9 @@ void mnuPairedSlideBarSetState(u32 *work, s32 state) {
     work[0] = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A46C8);
+INCLUDE_ASM(const s32, "game/code_002A3AE8", mnuGetSlidePathSegmentWeight);
 
-s32 func_002A4728(void) {
+s32 mnuGetSlidePathTotalWeight(void) {
     s32 index;
     s32 next;
     s32 total;
@@ -263,31 +263,31 @@ s32 func_002A4728(void) {
     index = 0;
     do {
         next = index + 1;
-        index = func_002A46C8(index);
+        index = mnuGetSlidePathSegmentWeight(index);
         total = total + index;
         index = next;
     } while (next < 3);
     return total;
 }
 
-s32 func_002A4770(s32 segment) {
+s32 mnuGetSlidePathSegmentStart(s32 segment) {
     s32 i = 0;
     s32 total = 0;
-    s32 duration = func_002A4728();
+    s32 duration = mnuGetSlidePathTotalWeight();
 
     while (i < segment) {
-        total += func_002A46C8(i++);
+        total += mnuGetSlidePathSegmentWeight(i++);
     }
     return (total << 12) / duration;
 }
 
-s32 func_002A47E8(s32 position) {
+s32 mnuFindSlidePathSegmentAtPosition(s32 position) {
     s32 segment = 0;
     s32 total = 0;
-    s32 duration = func_002A4728();
+    s32 duration = mnuGetSlidePathTotalWeight();
 
     while (segment < 3) {
-        total += func_002A46C8(segment);
+        total += mnuGetSlidePathSegmentWeight(segment);
         if (position < (total << 12) / duration) {
             return segment;
         }
@@ -296,21 +296,21 @@ s32 func_002A47E8(s32 position) {
     return 3;
 }
 
-s32 func_002A4870(s32 segment) {
+s32 mnuGetSlidePathSegmentEnd(s32 segment) {
     s32 i = 0;
     s32 total = 0;
-    s32 duration = func_002A4728();
+    s32 duration = mnuGetSlidePathTotalWeight();
 
     while (i < segment + 1) {
-        total += func_002A46C8(i++);
+        total += mnuGetSlidePathSegmentWeight(i++);
     }
     return (total << 12) / duration;
 }
 
 void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
-    s32 segment = func_002A47E8(position);
-    s32 start = func_002A4770(segment);
-    s32 end = func_002A4870(segment);
+    s32 segment = mnuFindSlidePathSegmentAtPosition(position);
+    s32 start = mnuGetSlidePathSegmentStart(segment);
+    s32 end = mnuGetSlidePathSegmentEnd(segment);
     /* Consecutive table words give each segment's start/end X at +8/+9
        and start/end Y at +12/+13; the last X shares the first Y word. */
     s32 x0 = D_003E38A0[segment + 8];

@@ -7,14 +7,14 @@ typedef struct FntNode {
     struct FntNode *next;   /* 0x1C */
 } FntNode;
 
-/* List header at D_003D68C0: entry count plus sentinel node link. */
+/* List header at frFontResourceList: entry count plus sentinel node link. */
 typedef struct FntList {
     u8 unk0[0x18];  /* 0x0 */
     s32 count;      /* 0x18 */
     FntNode *head;  /* 0x1C */
 } FntList;
 
-/* 0x24-byte table entry in the D_003D6C80 font system (one per index & 0xFF). */
+/* 0x24-byte table entry in the frFontWork font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
     void *buffer;  /* 0x0: released by frFontFreeEntry */
     void *unk4;  /* 0x4: value record (u16 pair read via D_003D6C84 view) */
@@ -27,7 +27,7 @@ typedef struct FrFontEntry {
     u32 unk20;   /* 0x20 */
 } FrFontEntry;
 
-/* Font system at D_003D6C80: 9 entries followed by shared control words. */
+/* Font system at frFontWork: 9 entries followed by shared control words. */
 typedef struct FrFontSysLocal {
     FrFontEntry entries[9]; /* 0x0 */
     s32 unk144;             /* 0x144 */
@@ -41,8 +41,8 @@ typedef struct FrFontSysLocal {
     void *glyphSlots[2];     /* 0x194: glyph chain slots */
 } FrFontSysLocal;
 
-extern FntList D_003D68C0;
-extern FrFontSysLocal D_003D6C80;
+extern FntList frFontResourceList;
+extern FrFontSysLocal frFontWork;
 extern u32 D_003565F8[];
 extern void frFontFreeAllEntries(void);
 extern void *func_00194840(void *arg0);
@@ -52,18 +52,18 @@ extern void func_002D0918(void *arg0);
 extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 void frFontListInsert(FntNode *node) {
-    FntNode *head = D_003D68C0.head;
+    FntNode *head = frFontResourceList.head;
     FntNode *next = head->next;
 
     node->prev = head;
     node->next = next;
-    D_003D68C0.count += 1;
+    frFontResourceList.count += 1;
     head->next = node;
     next->prev = node;
 }
 
 void frFontSetEntryFlag(s32 index, s32 value) {
-    FrFontEntry *entry = &D_003D6C80.entries[index & 0xFF];
+    FrFontEntry *entry = &frFontWork.entries[index & 0xFF];
 
     entry->flagBytes[0] = 1;
     entry->flagBytes[1] = value + 1;
@@ -100,7 +100,7 @@ extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void func_00194038(s16 buffer, s32 image) {
+void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
@@ -117,9 +117,9 @@ extern void *func_002EB028();
 extern void func_001944A0(s32, s32, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
-void func_00194190(s32 index, s32 path) {
+void frFontEnsureSlotLoaded(s32 index, s32 path) {
     s32 slot = index & 0xFF;
-    FrFontSysLocal *sys = &D_003D6C80;
+    FrFontSysLocal *sys = &frFontWork;
 
     if (D_003565F8[slot] != 1) {
         if (slot == 1) {
@@ -135,13 +135,13 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00194228);
 
 void frFontReleaseAll(void) {
     frFontFreeAllEntries();
-    func_00194840(D_003D6C80.glyphSlots[0]);
-    func_00194840(D_003D6C80.glyphSlots[1]);
-    itfReleaseMemNodeBuffer(D_003D6C80.unk150);
-    itfReleaseMemNodeBuffer(D_003D6C80.unk154);
+    func_00194840(frFontWork.glyphSlots[0]);
+    func_00194840(frFontWork.glyphSlots[1]);
+    itfReleaseMemNodeBuffer(frFontWork.unk150);
+    itfReleaseMemNodeBuffer(frFontWork.unk154);
     fmGslReleaseActiveResourceBuffers();
-    sdfUpdateTextureHeadsWithInterruptsMasked(D_003D6C80.unk158);
-    sdfUpdateTextureHeadsWithInterruptsMasked(D_003D6C80.unk15C);
+    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk158);
+    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk15C);
 }
 
 INCLUDE_ASM(const s32, "game/code_00193C08", func_001944A0);
@@ -154,7 +154,7 @@ void frFontFreeEntry(s32 index) {
         return;
     }
     D_003565F8[slot] = 0;
-    entry = &D_003D6C80.entries[slot];
+    entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
         func_002D0918(entry->buffer);
         entry->unk1C = NULL;

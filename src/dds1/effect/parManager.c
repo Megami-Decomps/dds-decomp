@@ -137,7 +137,7 @@ void parRestartKind(ParObj *obj) {
 extern void (*D_0034E328[])(ParObj *, f32);
 
 /* Reissue the dispatch callback, scale the kind-specific value for kinds 2..4, then restart. */
-void func_0015A658(ParObj *obj, f32 factor) {
+void parScaleAndRestartKind(ParObj *obj, f32 factor) {
     D_0034E328[obj->dispatchIndex](obj, factor);
     switch (obj->kind) {
     case 2:

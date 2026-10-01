@@ -121,10 +121,10 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
-extern void func_0032E4B8(void *);
+extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 extern void func_0032E5C8(void *);
-extern void func_0032E6D8(void *);
-extern void func_0032E7E8(void *);
+extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
+extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 typedef struct SdfPacketCommand {
     u8 pad00[0x28];
     u32 opcode; /* 0x28: packet header command */
@@ -139,10 +139,10 @@ void sdfInitializeDrawPacketGroups(u8 *ctx) {
     u8 *packet = ctx;
     s32 i;
 
-    func_0032E4B8(ctx + 0x20);
+    sdfBuildPrimaryAlphaBlendDmaPacket(ctx + 0x20);
     func_0032E5C8(ctx + 0x80);
-    func_0032E6D8(ctx + 0xE0);
-    func_0032E7E8(ctx + 0x140);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(ctx + 0xE0);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(ctx + 0x140);
     for (i = 0; i != 4; i++) {
         ((SdfPacketCommand *)packet)->opcode = 0x11000000;
         sdfInitPacketList(packet);
@@ -222,7 +222,7 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
     return 0;
 }
 
-extern void func_00336C10(void *);
+extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 /* vu0 routine: look-at basis rows in vf28-vf31 from the resource vectors (+0x10, +0x20, +0x30), then transform by the matrix */
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     u8 *matrix = sdfModelFindDrawNode(param, *(u32 *)resource);
@@ -241,7 +241,7 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     VU0_MOVE_VF(vf28, vf10);
     VU0_LOAD_VF(vf31, (u8 *)resource + 0x10);
     VU0_SET_W_ONE(vf31);
-    func_00336C10(matrix + 0xC0);
+    sdfPostmultiplyVuMatrixFromMemory(matrix + 0xC0);
 }
 
 extern u8 *sdfModelFindDrawNode(SdfTextParam *, u32);

@@ -939,12 +939,12 @@ void func_001745F8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
 }
 
-void func_00174610(PcpScatterWork5 *work, f32 value)
+void effScatterSetInstanceScale(PcpScatterWork5 *work, f32 value)
 {
     work->scale = value;
 }
 
-void func_00174618(PcpScatterWork5 *work, u32 value)
+void effScatterSetInstanceColor(PcpScatterWork5 *work, u32 value)
 {
     work->color = value;
 }
@@ -1138,7 +1138,7 @@ void func_00175420(void *data)
     func_00175230(effParamTableGetBlock(data, 0), effParamTableGetBlock(data, 1));
 }
 
-PcpScatterWork7 *func_00175468(PcpScatterWork7 *work)
+PcpScatterWork7 *effCloneScatterWithSharedResource(PcpScatterWork7 *work)
 {
     PcpScatterWork7 *child;
 
@@ -1147,7 +1147,7 @@ PcpScatterWork7 *func_00175468(PcpScatterWork7 *work)
     return child;
 }
 
-void func_001754B0(PcpScatterWork7 *work)
+void effReleaseScatterWorkResources(PcpScatterWork7 *work)
 {
     effReleaseScatterObject(work->scatterObject);
     func_002D0918(work->ownedBuffer);

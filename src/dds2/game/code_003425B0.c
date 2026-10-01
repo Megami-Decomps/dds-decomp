@@ -66,7 +66,7 @@ typedef struct SoundNode {
     struct SoundNode *next;
 } SoundNode;
 
-extern SoundNode *D_004391F8;
+extern SoundNode *sdfSoundNodeHead;
 
 typedef struct SdfStreamNode {
     struct SdfStreamNode *prev;
@@ -434,7 +434,7 @@ s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
     return payload;
 }
 
-u64 func_003440D8(u64 source, s32 *out) {
+u64 sdfReadPackedResourceAndRelocateHeader(u64 source, s32 *out) {
     u32 info[4];
     u64 buffer = func_00343ED0(source, info, 0);
     *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
@@ -518,7 +518,7 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
 }
 
 void sdfSoundAppendNode(SoundNode *node) {
-    SoundNode **tail = &D_004391F8;
+    SoundNode **tail = &sdfSoundNodeHead;
     SoundNode *current = *tail;
     if (current != NULL) {
         tail = &current->next;
@@ -531,7 +531,7 @@ void sdfSoundAppendNode(SoundNode *node) {
 }
 
 void sdfSoundRemoveNode(SoundNode *node) {
-    SoundNode **link = &D_004391F8;
+    SoundNode **link = &sdfSoundNodeHead;
     SoundNode *current = *link;
     while (current != NULL) {
         if (current == node) {
@@ -854,7 +854,7 @@ extern void func_00345298();
 void sdfSoundInitIpuStream(void) {
     sceIpuInit();
     *(vu32 *)0x10002000 = 0x90000000;
-    D_004391F8 = 0;
+    sdfSoundNodeHead = 0;
     D_00439204 = 0;
     D_004391FC = sdfAddHandler(1, 3, func_00345268, -1, 0);
     func_003668B8(3);

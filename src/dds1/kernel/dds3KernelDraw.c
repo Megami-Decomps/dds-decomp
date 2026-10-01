@@ -1,7 +1,7 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern u32 D_003BA904;
+extern u32 kwlnDrawControlFlags;
 extern u8 D_003BA908;
 extern u16 D_003BA90A;
 extern u16 D_003BA90C;
@@ -14,7 +14,7 @@ extern u16 D_003BD6BE;
 
 extern u32 D_00324770[4];
 
-/* Draw state blocks (D_003C2xxx) with dirty flags in D_003BA904. Each
+/* Draw state blocks (D_003C2xxx) with dirty flags in kwlnDrawControlFlags. Each
  * setter writes its block, snapshots a flag byte to D_003BD7xx and
  * sets/clears its dirty bit. Overlapping word/byte views are unions;
  * byte symbols (e.g. D_003C2DCB = block+3) are declared separately
@@ -218,13 +218,13 @@ void kwlnDrawSetupDc8(s32 mode) {
     D_003BD74E = blk->u00.b[3];
     D_003BD74A = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x80000;
+        kwlnDrawControlFlags &= ~0x80000;
         kwlnDrawInitRect(&blk->r08);
         func_0018F6F0(blk);
         func_0018F6D8();
     }
     else {
-        D_003BA904 |= 0x80000;
+        kwlnDrawControlFlags |= 0x80000;
     }
 }
 
@@ -234,12 +234,12 @@ void kwlnDrawEnableDc8(s32 enabled) {
     D_003BD748 = 0;
     D_003BD74A = enabled;
     if (enabled == 0) {
-        D_003BA904 &= ~0x80000;
-        D_003BA904 &= ~0x100000;
+        kwlnDrawControlFlags &= ~0x80000;
+        kwlnDrawControlFlags &= ~0x100000;
         func_0018F6E8();
     }
     else {
-        D_003BA904 |= 0x80000;
+        kwlnDrawControlFlags |= 0x80000;
     }
 }
 
@@ -268,12 +268,12 @@ void kwlnDrawSetupE08(s32 mode) {
     D_003BD75A = blk->u0C.b[3];
     D_003BD756 = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x200000;
+        kwlnDrawControlFlags &= ~0x200000;
         effCopyCh75Common(blk);
         func_0018F740();
     }
     else {
-        D_003BA904 |= 0x200000;
+        kwlnDrawControlFlags |= 0x200000;
     }
 }
 
@@ -283,12 +283,12 @@ void kwlnDrawEnableE08(s32 enabled) {
     D_003BD754 = 0;
     D_003BD756 = enabled;
     if (enabled == 0) {
-        D_003BA904 &= ~0x200000;
-        D_003BA904 &= ~0x400000;
+        kwlnDrawControlFlags &= ~0x200000;
+        kwlnDrawControlFlags &= ~0x400000;
         func_0018F750();
     }
     else {
-        D_003BA904 |= 0x200000;
+        kwlnDrawControlFlags |= 0x200000;
     }
 }
 
@@ -303,7 +303,7 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
         else {
             D_003BA908 = 1;
         }
-        D_003BA904 = D_003BA904 & 0xfffff7ff;
+        kwlnDrawControlFlags = kwlnDrawControlFlags & 0xfffff7ff;
         return;
     }
     D_003BD6B8 = D_003BA90A;
@@ -311,7 +311,7 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     D_003BD6BC = (s16)x;
     D_003BD6BE = (s16)y;
     D_003BD6B6 = (s16)transition;
-    D_003BA904 = D_003BA904 | 0x800;
+    kwlnDrawControlFlags = kwlnDrawControlFlags | 0x800;
     D_003BD6B4 = 0;
 }
 
@@ -341,13 +341,13 @@ void kwlnDrawSetupD88(s32 mode) {
     D_003BD742 = blk->u00.b[3];
     D_003BD73E = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x20000;
+        kwlnDrawControlFlags &= ~0x20000;
         kwlnDrawInitRect(&blk->r18);
         func_0018F3B8(blk);
         func_0018F3A0();
     }
     else {
-        D_003BA904 |= 0x20000;
+        kwlnDrawControlFlags |= 0x20000;
     }
 }
 
@@ -357,12 +357,12 @@ void kwlnDrawEnableD88(s32 enabled) {
     D_003BD73C = 0;
     D_003BD73E = enabled;
     if (enabled == 0) {
-        D_003BA904 &= ~0x20000;
-        D_003BA904 &= ~0x40000;
+        kwlnDrawControlFlags &= ~0x20000;
+        kwlnDrawControlFlags &= ~0x40000;
         func_0018F3B0();
     }
     else {
-        D_003BA904 |= 0x20000;
+        kwlnDrawControlFlags |= 0x20000;
     }
 }
 
@@ -393,12 +393,12 @@ void kwlnDrawSetupC70(s32 mode) {
     D_003BD71E = blk->u04.b[3];
     D_003BD71A = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x1000;
+        kwlnDrawControlFlags &= ~0x1000;
         effCopyCh71Common(blk);
         func_0018F428();
     }
     else {
-        D_003BA904 |= 0x1000;
+        kwlnDrawControlFlags |= 0x1000;
     }
 }
 
@@ -411,13 +411,13 @@ void kwlnDrawSetupC70B(s32 mode) {
     D_003BD71C = blk->u04.b[3];
     D_003BD71A = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x1000;
-        D_003BA904 &= ~0x8000;
+        kwlnDrawControlFlags &= ~0x1000;
+        kwlnDrawControlFlags &= ~0x8000;
         effCopyCh71Common(blk);
         func_0018F438();
     }
     else {
-        D_003BA904 |= 0x1000;
+        kwlnDrawControlFlags |= 0x1000;
     }
 }
 
@@ -457,12 +457,12 @@ void kwlnDrawSetupCd0(s32 mode) {
     D_003BD72A = blk->u0C.b[3];
     D_003BD726 = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x2000;
+        kwlnDrawControlFlags &= ~0x2000;
         effCopyCh72Common(blk);
         func_0018F4E0();
     }
     else {
-        D_003BA904 |= 0x2000;
+        kwlnDrawControlFlags |= 0x2000;
         effCopyCh72Common(blk);
         func_0018F4F0();
     }
@@ -474,12 +474,12 @@ void kwlnDrawEnableCd0(s32 enabled) {
     D_003BD724 = 0;
     D_003BD726 = enabled;
     if (enabled == 0) {
-        D_003BA904 &= ~0x2000;
-        D_003BA904 &= ~0x10000;
+        kwlnDrawControlFlags &= ~0x2000;
+        kwlnDrawControlFlags &= ~0x10000;
         func_0018F4F0();
     }
     else {
-        D_003BA904 |= 0x2000;
+        kwlnDrawControlFlags |= 0x2000;
     }
 }
 
@@ -519,12 +519,12 @@ void kwlnDrawSetupD30(s32 mode) {
     D_003BD736 = blk->u0C.b[3];
     D_003BD732 = requestedMode;
     if (requestedMode == 0) {
-        D_003BA904 &= ~0x800000;
+        kwlnDrawControlFlags &= ~0x800000;
         effCopyCh76Common(blk);
         func_0018F598();
     }
     else {
-        D_003BA904 |= 0x800000;
+        kwlnDrawControlFlags |= 0x800000;
         effCopyCh76Common(blk);
         func_0018F5A8();
     }
@@ -536,12 +536,12 @@ void kwlnDrawEnableD30(s32 enabled) {
     D_003BD730 = 0;
     D_003BD732 = enabled;
     if (enabled == 0) {
-        D_003BA904 &= ~0x800000;
-        D_003BA904 &= ~0x1000000;
+        kwlnDrawControlFlags &= ~0x800000;
+        kwlnDrawControlFlags &= ~0x1000000;
         func_0018F5A8();
     }
     else {
-        D_003BA904 |= 0x800000;
+        kwlnDrawControlFlags |= 0x800000;
     }
 }
 

@@ -108,7 +108,7 @@ extern u8 D_00380860[];
 
 extern u8 D_00380870[];
 
-extern s32 D_00435CC8;
+extern s32 kwlnHeldTextureReference;
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
@@ -1290,7 +1290,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     return 1;
 }
 
-u8 func_0022B5E0(void) {
+u8 btlAreModelChangeTasksFinished(void) {
     s64 taskCount;
 
     taskCount = btlCountTasksByKind(0x1a);
@@ -1729,7 +1729,7 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022C308);
 
 /* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
-s32 func_0022C518(void *list, s32 row) {
+s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
     s32 result = 0;
     u32 flags;
     u32 mask;
@@ -1986,7 +1986,7 @@ s32 btlUpdateFadeIn(void) {
     return 1;
 }
 
-void func_0022DDC8(void) {
+void btlFadeSelectionOverlayAlpha(void) {
 }
 
 s32 btlFadeSharedOverlayAlpha(void) {
@@ -2019,7 +2019,7 @@ void btlClearOverlayBuffers(void) {
 }
 
 void func_0022DEB8(void) {
-    func_00105538();
+    kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
 }
 
@@ -2040,7 +2040,7 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &D_00453060;
     void *surface = sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(surface, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
+    sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->resource, 0);
     D_00380608.invoke(&D_00380608, surface);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
@@ -2052,7 +2052,7 @@ void btlInitializeOverlayGraphics(void) {
     void *surface = sdfAllocatePacketList(0);
     void *context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_0032EB80(surface, context, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    func_0032EB80(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode(D_00380860, context);
     D_00380608.invoke(&D_00380608, surface);
     D_00453060.options |= 1;

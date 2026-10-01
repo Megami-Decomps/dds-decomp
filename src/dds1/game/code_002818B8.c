@@ -8,7 +8,7 @@ void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     entry = groupIndex * 0x134 + scene + 0x16c;
     do {
         remaining = remaining - 1;
-        func_00281898(entry);
+        mnuClearPanelWorkState(entry);
         entry = entry + 0x20;
     } while (-1 < remaining);
 }

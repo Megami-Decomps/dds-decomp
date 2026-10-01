@@ -56,7 +56,7 @@ extern void *func_002CFEB8(s32 size);
  * body only ever runs for a present block of at most 0x100 bytes; the inner
  * `if (data != NULL)` is therefore always true and is kept to match the store
  * order retail produces. */
-void func_001028E8(s32 value, void *data, u32 size, s32 flag) {
+void dds3AdminSubmitModeRequest(s32 value, void *data, u32 size, s32 flag) {
     AdminWork *work;
     void *old;
     u32 flags;

@@ -32,7 +32,7 @@ extern void func_002AAF70();
 
 extern void func_002AB0E0();
 
-extern void func_002AB1B0();
+extern void mnuFinishStaffConfigPopup();
 
 extern void func_00101968(s32, s32);
 
@@ -100,7 +100,7 @@ extern void func_002BB510(s32, s32, s32, s32, s32);
 
 extern void mnuDrawPanelListDefault(s32, s32, s32, u8 *, s32);
 
-extern void func_002AA530(s32, s32, s32, s32, u8 *, s32);
+extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, s32, u8 *, s32);
 
 extern s32 mdlFlagTest(u32);
 
@@ -166,7 +166,7 @@ extern void effReleaseTextureHandlesAndResetSlots(u32);
 
 extern void effResolveAndReleaseResource(u32);
 
-void func_002A91A0(u32 *destination) {
+void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 i;
     for (i = 0; i < 2; i++) {
         effResolveAndReleaseResource(D_00438FF8[i]);
@@ -174,7 +174,7 @@ void func_002A91A0(u32 *destination) {
     }
 }
 
-void func_002A9200(u32 *destination) {
+void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 remaining = 1;
     u32 offset = 0;
     do {
@@ -418,7 +418,7 @@ typedef struct CampVisualWork {
 
 /* Switch the active category, releasing its old handles and resolving the
  * next category's models; a repeated category needs no work. */
-void func_002A9460(s32 kind, u8 *work) {
+void mnuSwitchCampVisualCategory(s32 kind, u8 *work) {
     s32 old = ((CampVisualWork *)work)->categoryKind;
     if (kind == old) {
         return;
@@ -460,7 +460,7 @@ void movReleaseTitleEffects(u32 *state) {
     }
 }
 
-void func_002A95B0(u32 container, u32 *resources, u32 unused, u32 mode) {
+void mnuInitializeCampPanelResources(u32 container, u32 *resources, u32 unused, u32 mode) {
     func_002BCD90(container, mode, *resources, 1, resources[1], 0x2d, resources[1], 0x1d);
     func_002BC498(container, resources[1]);
     func_002BC5D0(container, resources + 4);
@@ -474,7 +474,7 @@ void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
     s32 i;
     s32 flag;
 
-    func_002A91A0(state);
+    mnuSnapshotCampTextureHandles(state);
     flag = mnuGetValueRecordOwner(list) == 1;
     for (i = 0; i < 16; i++) {
         effAppendListEntry(list, D_0042A950, D_003E6858[i][flag], 1, state + 0x10 / 4 + i);
@@ -494,7 +494,7 @@ void mnuReleaseTitleEffectSprites(u32 *work) {
     u32 *group1;
     u32 *group2;
 
-    func_002A9200(work);
+    mnuReleaseCampTextureHandlesAndClearOutput(work);
     group0 = work + 0x10 / 4;
     for (i = 0xF; i >= 0; i--) {
         effDestroyResourceSlotSet(*group0++);
@@ -557,7 +557,7 @@ typedef struct TitleEffectHandles {
 } TitleEffectHandles;
 
 /* Release the title screen's effect sprites and resource slot sets. */
-s64 func_002A9A40(u8 *work) {
+s64 mnuReleaseTitleEffectResourceGroups(u8 *work) {
     u32 *handles;
     s32 i;
 
@@ -582,7 +582,7 @@ typedef struct StaffResourceHeader {
     u32 resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
 
-void func_002A9BC8(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
+void mnuDrawCampGridResourceSlot(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
                    u32 layer) {
     itfDrawGridWithResolvedSlot(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
@@ -733,7 +733,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuShutdownContext(work + 0x284);
     dspCloseChannel();
     mnuDestroyEffectResources(work + 0x11c);
-    func_002A9A40(work);
+    mnuReleaseTitleEffectResourceGroups(work);
     movReleaseTitleEffects(work);
     func_00303D58(((CampVisualWork *)work)->menuResource);
     func_003297C8(((CampVisualWork *)work)->allocationHandle);
@@ -799,7 +799,7 @@ void mnuCreateCampTasks(void) {
     work = (s32)mnuCreateStaffMenuWork();
     kwlnTaskCreate(D_00437B78, 0x3F2, 1, 0, func_002AAF70, 0, work);
     draw = kwlnTaskCreate(D_0042AA08, 0x2B07, 1, 0, func_002AB0E0, 0, work);
-    kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, func_002AB1B0, mnuDestroyStaffMenuTask, work);
+    kwlnTaskCreate(D_0042AA18, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, work);
     func_00101968(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, work));
     func_00101968(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
     kwlnFadeOutStart(0, 0, 0, 0xF);
@@ -835,7 +835,7 @@ u8 mnuIsFadeIdle(void) {
 
 /* Draw the camp title using the task's draw context and layer, then ease its
  * horizontal slide toward zero and its opacity toward the fade target. */
-void func_002AA530(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 *work, s32 layer) {
+void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 *work, s32 layer) {
     char buffer[16];
     s32 object;
     s32 offset;
@@ -917,7 +917,7 @@ typedef struct CampDrawContext {
 
 /* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
  * displays the background, and all other kinds reset the highlight alpha. */
-void func_002AACB8(s32 kind, s32 task) {
+void mnuDrawCampIconBackdropByKind(s32 kind, s32 task) {
     u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     CampVisualWork *visual = (CampVisualWork *)work;
     s32 ctx;
@@ -950,12 +950,12 @@ void func_002AACB8(s32 kind, s32 task) {
     if (func_002A9AB8(task) != 0) {
         func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
         mnuDrawPanelListDefault(0, 0, 0, work + 0x284, 0x53);
-        func_002AA530(0, 0, 0, visual->titleContext, work, 0x53);
+        mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);
     }
 }
 
 void func_002AAE80(u32 task) {
-    func_002AACB8(0, task);
+    mnuDrawCampIconBackdropByKind(0, task);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AA48);

@@ -16,7 +16,7 @@ extern u32 D_003BC62C;
 
 extern u16 D_003BA72C;
 
-extern u32 *D_003BC610;
+extern u32 *mnuMovieWork;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -66,8 +66,8 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
 
 s32 mnuStaffImageProc(void) {
-    func_0026E720(-10, -10, 0, 0x80, D_003BC610[1], 0x10, 0, 0x27);
-    func_0026E720(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, D_003BC610[1], D_0037AF70[D_003BC610[5]], 0, 0x53);
+    func_0026E720(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
+    func_0026E720(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
     func_0026F230(0x53);
     func_0026F918();
     return 0;
@@ -83,12 +83,12 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueNonzeroResourceId(*D_003BC610);
-    D_003BC610 = (u32 *)0x0;
+    sdfQueueNonzeroResourceId(*mnuMovieWork);
+    mnuMovieWork = (u32 *)0x0;
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(D_003BC610[1]);
+    effDestroyResourceSlotSet(mnuMovieWork[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
@@ -119,7 +119,7 @@ void mnuMovieCreateTask(void) {
     D_003BA8EC = 0x80000000;
     handle = func_002D03F8(0x20);
     movie = (u32 *)sdfResourceRetainAddress(handle);
-    D_003BC610 = movie;
+    mnuMovieWork = movie;
     movie[0] = handle;
     movie[2] = 0;
     movie[3] = 0;

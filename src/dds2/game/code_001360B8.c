@@ -68,9 +68,9 @@ extern void fldSetSwayMode(u32);
 
 extern void *D_004360EC;
 
-extern s32 D_004360F8;
+extern s32 fldCameraColorEffect;
 
-extern u32 D_004360FC;
+extern u32 fldCameraColorEnabled;
 
 typedef struct FldColorParams {
     s32 enabled;
@@ -101,15 +101,15 @@ typedef struct FldFadeColor {
     f32 unk3C;
 } FldFadeColor;
 
-extern FldFadeColor D_00444990[];
+extern FldFadeColor fldCameraColorParameters[];
 
-extern FldCameraSetting *D_004360F4;
+extern FldCameraSetting *fldCameraSettings;
 
-extern FldCameraSetting D_004449D0[];
+extern FldCameraSetting fldAppliedCameraSettings[];
 
-extern u32 func_002DEB80(const void *);
+extern u32 effCreateSelectionFlagListFromWork(const void *);
 
-extern void func_002DEBB0(s32);
+extern void effReleaseSelectionFlagList(s32);
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
@@ -248,37 +248,37 @@ void fldActivateCameraColorSetting(s32 enable) {
     FldCameraSetting *setting;
     FldColorParams *color;
 
-    if (D_004360FC == 0 && enable != 0) {
-        if (D_004360F8 != 0) {
-            func_002DEBB0(D_004360F8);
+    if (fldCameraColorEnabled == 0 && enable != 0) {
+        if (fldCameraColorEffect != 0) {
+            effReleaseSelectionFlagList(fldCameraColorEffect);
         }
-        setting = D_004360F4;
-        D_004360F8 = 0;
+        setting = fldCameraSettings;
+        fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            D_00444990->colorB = D_00444990->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-            D_00444990->unk24 = color->unk18;
+            fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->unk24 = color->unk18;
             switch (color->mode) {
             case 0:
-                D_00444990->unk28 = 1;
+                fldCameraColorParameters->unk28 = 1;
                 break;
             case 1:
-                D_00444990->unk28 = 2;
+                fldCameraColorParameters->unk28 = 2;
                 break;
             default:
-                D_00444990->unk28 = 3;
+                fldCameraColorParameters->unk28 = 3;
                 break;
             }
-            D_00444990->unk38 = color->unk4;
-            D_00444990->unk3C = color->unk1C;
-            D_004360F8 = func_002DEB80(D_00444990);
-            setting = D_004360F4;
+            fldCameraColorParameters->unk38 = color->unk4;
+            fldCameraColorParameters->unk3C = color->unk1C;
+            fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
+            setting = fldCameraSettings;
         }
     } else {
-        setting = D_004360F4;
+        setting = fldCameraSettings;
     }
-    *D_004449D0 = *setting;
-    D_004360FC = enable;
+    *fldAppliedCameraSettings = *setting;
+    fldCameraColorEnabled = enable;
 }
 
 s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {

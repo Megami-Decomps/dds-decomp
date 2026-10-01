@@ -64,7 +64,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389D8);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389D9);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389DA);
+INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389DC);
 

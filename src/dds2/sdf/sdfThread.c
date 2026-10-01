@@ -1,9 +1,9 @@
 #include "common.h"
 #include "sdf.h"
 
-extern s32 D_004390F8;
+extern s32 sdfTrackedThreadSemaphore;
 
-extern SdfThreadNode *D_004390FC;
+extern SdfThreadNode *sdfTrackedThreadHead;
 
 s32 GetThreadId(void);
 
@@ -20,14 +20,14 @@ SdfThreadNode *sdfFindThreadNode(s32 threadId) {
     if (requestedId < 0) {
         requestedId = GetThreadId();
     }
-    WaitSema(D_004390F8);
-    node = D_004390FC;
+    WaitSema(sdfTrackedThreadSemaphore);
+    node = sdfTrackedThreadHead;
     while (node != NULL) {
         if (node->threadId == requestedId) {
             break;
         }
         node = node->next;
     }
-    SignalSema(D_004390F8);
+    SignalSema(sdfTrackedThreadSemaphore);
     return node;
 }

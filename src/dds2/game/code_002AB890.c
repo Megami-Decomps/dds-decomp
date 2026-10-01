@@ -87,7 +87,7 @@ void func_002ACA98(MenuResourceOwner *object) {
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACAC0);
 
 void func_002ACB18(u32 arg0) {
-    func_002A9460(2, arg0);
+    mnuSwitchCampVisualCategory(2, arg0);
 }
 
 void func_002ACB38(void) {
@@ -101,7 +101,7 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
 
-s64 func_002ACF00(s32 callback) {
+s64 mnuFinishStaffReturnPopup(s32 callback) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 

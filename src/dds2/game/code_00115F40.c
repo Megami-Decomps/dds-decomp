@@ -67,7 +67,7 @@ typedef struct BillOwner {
 } BillOwner;
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
-void func_00115F70(BillOwner *owner, BillConfig *config) {
+void billCopySourceVectorAndSetConfig(BillOwner *owner, BillConfig *config) {
     BillResource *resource = owner->resource;
     BillSource *source = owner->source;
 

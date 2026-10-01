@@ -93,7 +93,7 @@ void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 void kwlnPadResetMotorLevelsAndOutput(void);
 EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
 void func_0022BF00(EvtViewer *viewer);
-void func_00110928(void *ptr);
+void dds3RemoveWorldObjectNode(void *ptr);
 void *func_002CFEB8(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 s32 dds3GetWorldObject(void);
@@ -415,7 +415,7 @@ void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
 
     slot = (void **)(index * 4 + (s32)viewer + 0x203c);
     if (*slot != NULL) {
-        func_00110928(*slot);
+        dds3RemoveWorldObjectNode(*slot);
         *slot = NULL;
     }
 }
@@ -425,7 +425,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022CA88);
 void evtEventViewerFreeBuffer(EvtViewBuf *work)
 {
     if (work->buf != NULL) {
-        func_00110928(work->buf);
+        dds3RemoveWorldObjectNode(work->buf);
     }
     work->buf = NULL;
 }

@@ -209,7 +209,7 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021B828);
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021C0C8);
 
-void func_0021C390(u8 *obj) {
+void btlPrepareDefeatEffectCamera(u8 *obj) {
     btlFlagAllUnitDefeatCandidatesTask(obj);
     btlSetEffectCameraKeys(obj, -176.6f, -137.8f, -1564.9f, -0.01f, -0.038f, -0.012f, 0.99f, -217.8f,
                   -253.6f, -2272.8f, -0.009f, -0.038f, -0.013f, 0.99f, 40.0f, 15.0f);

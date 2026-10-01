@@ -20,9 +20,9 @@ extern s32 frFontMeasureLines(u64);
 
 extern u64 func_0019F448(u64, u64, u64, u64, u64, u64);
 
-extern u32 D_004388B8;
+extern u32 sdfSelectedCounterIndex;
 
-extern s32 D_004388C4;
+extern s32 sdfActiveCounterRuntime;
 
 typedef struct {
     u32 *word;         /* 0x00 */
@@ -74,7 +74,7 @@ typedef struct SdfCounterRuntime {
     SdfCounterTimer *timer;         /* 0x30 */
 } SdfCounterRuntime;
 
-extern u32 D_00439098;
+extern u32 sdfCounterAnimationValue;
 
 extern s32 D_0043909C;
 
@@ -84,7 +84,7 @@ extern s32 sdfCounterGetDisplayValue(void);
 
 extern s32 D_004388BC;
 
-extern void func_0030BBA8(void);
+extern void sdfLatchBaseVectorsForSelection(void);
 
 extern s8 D_004388C0;
 
@@ -92,7 +92,7 @@ extern void sdfCounterTickCountdown(void);
 
 extern void mnuTickMapTimers(void);
 
-extern void func_0030D438(void);
+extern void sdfCounterTickPositionTransition(void);
 
 extern s32 func_0030BD10();
 
@@ -156,7 +156,7 @@ extern void mnuDestroyListState();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
 extern void sdfDrawCounterChannelInfoLabel(s32, s32);
-extern void func_0030D4F8(void);
+extern void sdfUpdateCounterSelectionFade(void);
 extern void mnuCallInitWide();
 
 extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
@@ -226,7 +226,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BA98);
 extern void sdfCommitPendingVectorAndMarkChanged();
 
 /* Latch the base vectors into the pending pair and flag the change. */
-void func_0030BBA8(void) {
+void sdfLatchBaseVectorsForSelection(void) {
     D_004388C0 = 1;
     D_00400990 = D_00400970;
     D_004009A0 = D_00400980;
@@ -235,28 +235,28 @@ void func_0030BBA8(void) {
 
 /* Reset the current selection before installing the requested index. */
 void sdfSetSelectedIndex(u32 index) {
-    func_0030BBA8();
-    D_004388B8 = index;
+    sdfLatchBaseVectorsForSelection();
+    sdfSelectedCounterIndex = index;
 }
 
 void sdfCycleForward(void) {
-    if ((s32)D_004388B8 < D_004388BC - 1) {
-        func_0030BBA8();
-        D_004388B8 = D_004388B8 + 1;
+    if ((s32)sdfSelectedCounterIndex < D_004388BC - 1) {
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = sdfSelectedCounterIndex + 1;
     } else {
-        func_0030BBA8();
-        D_004388B8 = 0;
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = 0;
     }
 }
 
 /* Cycle through the same bounded selection in the opposite direction. */
 void sdfCycleBackward(void) {
-    if (D_004388B8 != 0) {
-        func_0030BBA8();
-        D_004388B8 = D_004388B8 - 1;
+    if (sdfSelectedCounterIndex != 0) {
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = sdfSelectedCounterIndex - 1;
     } else {
-        func_0030BBA8();
-        D_004388B8 = D_004388BC - 1;
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = D_004388BC - 1;
     }
 }
 
@@ -285,14 +285,14 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     s32 i;
 
     count = 0;
-    D_004388C4 = mnuCreateListState(0, 8, 0x16);
-    ((SdfCounterRuntime *)D_004388C4)->timer = func_00328D68(0x24);
-    memset(((SdfCounterRuntime *)D_004388C4)->timer, 0, 0x24);
-    ((SdfCounterRuntime *)D_004388C4)->draw = (SdfCounterDrawFn)func_0030CC68;
+    sdfActiveCounterRuntime = mnuCreateListState(0, 8, 0x16);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = func_00328D68(0x24);
+    memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = (SdfCounterDrawFn)func_0030CC68;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
-            channel = mnuListAppendNode(D_004388C4, 0);
+            channel = mnuListAppendNode(sdfActiveCounterRuntime, 0);
             display = func_00328D68(0x10);
             memset(display, 0, 0x10);
             display->value = i + 1;
@@ -306,22 +306,22 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
         }
     }
     if (count < 6) {
-        ((SdfCounterRuntime *)D_004388C4)->base = count;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->base = count;
     }
     if (count == 3) {
-        ((SdfCounterRuntime *)D_004388C4)->posX = 0x148;
-        ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x8F;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0x148;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x8F;
     } else if (count == 4) {
-        ((SdfCounterRuntime *)D_004388C4)->posX = 0x100;
-        ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x84;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0x100;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x84;
     } else if (count == 5) {
-        ((SdfCounterRuntime *)D_004388C4)->posX = 0xD8;
-        ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x7F;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0xD8;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7F;
     } else {
-        ((SdfCounterRuntime *)D_004388C4)->posX = 0xB0;
-        ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x7E;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX = 0xB0;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y = 0x7E;
     }
-    sdfCounterSelectChannelByIndex(D_004388C4, index);
+    sdfCounterSelectChannelByIndex(sdfActiveCounterRuntime, index);
     func_0030C250(sdfGetCounterChannelValueAtIndex(index) - 1, 0xB);
     return 1;
 }
@@ -353,13 +353,13 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
 }
 
 void sdfDestroyActiveCounterRuntime(void) {
-    sdfCounterDestroyRuntime(D_004388C4);
+    sdfCounterDestroyRuntime(sdfActiveCounterRuntime);
 }
 
 void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickCountdown();
     mnuTickMapTimers();
-    func_0030D438();
+    sdfCounterTickPositionTransition();
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C690);
@@ -367,15 +367,15 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C690);
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C8E8);
 
 u32 sdfCounterGetDisplayWordPointer(void) {
-    return (u32)((SdfCounterRuntime *)D_004388C4)->channel->display->word;
+    return (u32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->word;
 }
 
 s32 sdfCounterGetDisplayValue(void) {
-    return ((SdfCounterRuntime *)D_004388C4)->channel->display->value;
+    return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->value;
 }
 
 s16 sdfGetCounterChannelValueAtIndex(s32 remaining) {
-    SdfCounterChannel *task = ((SdfCounterRuntime *)D_004388C4)->first;
+    SdfCounterChannel *task = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->first;
     if (remaining > 0) {
         do {
             remaining--;
@@ -388,7 +388,7 @@ s16 sdfGetCounterChannelValueAtIndex(s32 remaining) {
 float sdfCounterGetScaledValue(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     return (float)timer->value / 10.0f;
 }
 
@@ -401,25 +401,25 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CEF0);
 void sdfCounterIncrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)D_004388C4)->timer->value;
+    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value;
     if (currentValue < 10) {
-        ((SdfCounterRuntime *)D_004388C4)->timer->value = currentValue + 1;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value = currentValue + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)D_004388C4)->timer->value;
+    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value;
     if (currentValue != 0) {
-        ((SdfCounterRuntime *)D_004388C4)->timer->value = currentValue - 1;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value = currentValue - 1;
     }
 }
 
 void sdfCounterSetMode(s32 mode) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     timer->mode = mode;
     timer->countdown = 8;
 }
@@ -427,7 +427,7 @@ void sdfCounterSetMode(s32 mode) {
 void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if (0 < timer->countdown) {
         timer->countdown = timer->countdown - 1;
     }
@@ -435,7 +435,7 @@ void sdfCounterTickCountdown(void) {
 
 /* Enabling a stopped timer starts it at one; disabling clears it. */
 void mnuSetMapTimerFlags(s32 flags) {
-    SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
+    SdfCounterTimer *timers = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if ((flags & 1) != 0) {
         if (timers->mapTimerPrimary == 0) {
             timers->mapTimerPrimary = 1;
@@ -454,7 +454,7 @@ void mnuSetMapTimerFlags(s32 flags) {
 
 /* Active timers repeat every 60 ticks rather than stopping at zero. */
 void mnuTickMapTimers(void) {
-    SdfCounterTimer *timers = ((SdfCounterRuntime *)D_004388C4)->timer;
+    SdfCounterTimer *timers = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if (timers->mapTimerPrimary > 0) {
         timers->mapTimerPrimary--;
         if (timers->mapTimerPrimary == 0) {
@@ -472,7 +472,7 @@ void mnuTickMapTimers(void) {
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D3A8);
 
 s32 sdfCounterGetSelectionBoundaryFlags(void) {
-    SdfCounterRuntime *rt = (SdfCounterRuntime *)D_004388C4;
+    SdfCounterRuntime *rt = (SdfCounterRuntime *)sdfActiveCounterRuntime;
     s32 count;
     s32 done;
     if (rt->active == 0) {
@@ -484,7 +484,7 @@ s32 sdfCounterGetSelectionBoundaryFlags(void) {
 }
 
 void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     timer->startX = timer->curX;
     timer->startY = timer->curY;
     timer->targetX = x;
@@ -493,8 +493,8 @@ void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
 }
 
 /* Advance the timer's position transition one frame (3-frame lerp start -> target). */
-void func_0030D438(void) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+void sdfCounterTickPositionTransition(void) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     s32 frames = timer->frames;
     f32 t;
 
@@ -511,7 +511,7 @@ void func_0030D438(void) {
     }
 }
 
-void func_0030D4F8(void) {
+void sdfUpdateCounterSelectionFade(void) {
 }
 
 void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
@@ -521,8 +521,8 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     f32 shrink;
 
     grow = fade * 0.5f + (1.0f - fade) * 2.5f;
-    offset = ((SdfCounterRuntime *)D_004388C4)->selected->index * (((SdfCounterRuntime *)D_004388C4)->posX >> 3);
-    timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    offset = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->selected->index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3);
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108BD8(1);
     shrink = (1.0f - grow) * 8.5f;
@@ -624,8 +624,8 @@ void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
     f32 fade;
     s32 width;
 
-    display = ((SdfCounterRuntime *)D_004388C4)->channel->display;
-    fade = 1.0f - (f32)((SdfCounterRuntime *)D_004388C4)->timer->value / 10.0f;
+    display = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display;
+    fade = 1.0f - (f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f;
     width = frMeasureAndQueueCounterText((u64)display->info);
     x = (f32)x - (f32)width * 0.5f;
     if (display->value == 2) {
@@ -672,7 +672,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DBF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DE08);
 
-s64 func_0030E010(f32 x) {
+s64 sdfDrawUniformlyScaledSlotImage(f32 x) {
     return func_0030DE08(x, x);
 }
 
@@ -708,23 +708,23 @@ s32 fldReleaseLocalMapResources(void) {
 void sdfCounterInitializeDisplayAnimation(void) {
     s32 value;
 
-    D_00439098 = 0;
+    sdfCounterAnimationValue = 0;
     value = sdfCounterGetDisplayValue();
     D_0043909C = value - 1;
     D_004390A0 = 0x3c;
 }
 
 void sdfCounterAdvanceBoundedAnimationValue(void) {
-    if ((s32)D_00439098 < 0x3C) {
-        D_00439098++;
+    if ((s32)sdfCounterAnimationValue < 0x3C) {
+        sdfCounterAnimationValue++;
     }
 }
 
 void sdfCounterStepDownAnimationValue(void) {
-    if ((s32)D_00439098 > 0) {
-        D_00439098 -= 2;
+    if ((s32)sdfCounterAnimationValue > 0) {
+        sdfCounterAnimationValue -= 2;
     } else {
-        D_00439098 = 0;
+        sdfCounterAnimationValue = 0;
     }
 }
 

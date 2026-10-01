@@ -53,23 +53,23 @@ extern s32 func_0010D6A0(void);
 
 extern s32 fldFindRoomByTask(u32);
 
-extern u32 D_003BAFC8;
+extern u32 fldDamEffectResource;
 
-extern u32 D_003BAFCC;
+extern u32 fldDamEffectData;
 
-extern u32 D_003BAFD0;
+extern u32 fldDamEffectNode;
 
-extern u32 D_003BAFD4;
+extern u32 fldDamEffectPositioned;
 
-extern u32 D_003BAFD8;
+extern u32 fldYukEffectResource;
 
-extern u32 D_003BAFDC;
+extern u32 fldYukEffectData;
 
-extern u32 D_003BAFE0;
+extern u32 fldYukEffectNode;
 
-extern u32 D_003BAFE4;
+extern u32 fldYukEffectPositioned;
 
-extern s32 D_003BAFF4;
+extern s32 fldWeatherLimitTexture;
 
 extern s32 D_003BAFBC;
 
@@ -83,27 +83,27 @@ extern u32 D_003BAFA8;
 
 extern u32 D_003BAFB0;
 
-extern u32 D_003BAED8;
+extern u32 fldSceneReady;
 
-extern u32 D_003BAEDC;
+extern u32 fldSceneRecords;
 
-extern s32 D_003BAEE0;
+extern s32 fldSceneRecordCount;
 
-extern s32 D_003BAEE4;
+extern s32 fldSceneRecordResource;
 
 extern u32 D_003BAEA8;
 
 extern u32 D_003BAEA4;
 
-extern u32 D_003BAE80;
+extern u32 fldCurrentBgmHandle;
 
-extern s32 D_003BAE8C;
+extern s32 fldPendingSoundCount;
 
 extern s32 D_003BAEB0;
 
 extern s32 D_003BAEB4;
 
-extern s32 D_0032E3B0[];
+extern s32 fldAreaState[];
 
 extern s32 D_003BAF8C;
 
@@ -111,13 +111,13 @@ extern s32 D_003BAF90;
 
 extern s32 dds3GetWorldObject(void);
 
-extern s32 func_00110A38(s32 arg0);
+extern s32 dds3GetWorldPlayerObject(s32 arg0);
 
 extern char D_003BB000[]; /* "BARIA" */
 
 extern char *D_003BAE44;
 
-extern void *func_00110A48(u64, s32, s32);
+extern void *dds3FindWorldObjectNodeByKey(u64, s32, s32);
 
 extern s32 func_0013A720(s32, void *);
 
@@ -141,7 +141,7 @@ extern s32 D_0032E408[];
 
 extern s32 D_0032E3C0[];
 
-extern s32 D_003BAE84;
+extern s32 fldSceneSoundBase;
 
 extern s32 D_0032E570[];
 
@@ -239,7 +239,7 @@ void fldFireRoomEffects(void);
 
 s32 func_0014D110(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = func_00110A38(world);
+    s32 unit = dds3GetWorldPlayerObject(world);
     void *entry;
     s32 result;
 
@@ -247,7 +247,7 @@ s32 func_0014D110(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -273,7 +273,7 @@ s32 func_0014D110(void) {
 
 s32 func_0014D1E8(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = func_00110A38(world);
+    s32 unit = dds3GetWorldPlayerObject(world);
     void *entry;
     s32 result;
 
@@ -281,7 +281,7 @@ s32 func_0014D1E8(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -325,14 +325,14 @@ s32 fldCmdReadSceneStatus(void) {
 
 s32 fldCmdTestActorEntryCondition(void) {
     s32 world = dds3GetWorldObject();
-    s32 unit = func_00110A38(world);
+    s32 unit = dds3GetWorldPlayerObject(world);
     void *entry;
 
     if (unit == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    entry = func_00110A48(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
+    entry = dds3FindWorldObjectNodeByKey(world, fldFindTaskRecordId(((FldScriptTask *)func_0010D6A0())->taskId), 0x11);
     if (entry == 0) {
         scrSetIntegerReturnValue(0);
         return 1;
@@ -349,7 +349,7 @@ s32 fldCmdRestoreCameraNodeMode(void) {
     s32 object;
 
     fldResetPlayerSceneObjectState();
-    object = func_00110A38(dds3GetWorldObject());
+    object = dds3GetWorldPlayerObject(dds3GetWorldObject());
     if (object == 0) {
         return 1;
     }
@@ -360,7 +360,7 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 s32 fldCmdReleaseCurrentObject(void) {
     s32 object;
 
-    object = func_00110A38(dds3GetWorldObject());
+    object = dds3GetWorldPlayerObject(dds3GetWorldObject());
     if (object == 0) {
         return 1;
     }
@@ -397,11 +397,11 @@ s32 fldCmdFocusCameraOnObject(void) {
     FldObj *obj;
     u64 world = dds3GetWorldSecondaryObject();
 
-    obj = func_00110A48(world, scrReadIntParameter(0), 4);
+    obj = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
     if (obj == NULL) {
         return 1;
     }
-    work = (FldCamPose *)D_0032E3B0;
+    work = (FldCamPose *)fldAreaState;
     work->unk50 = 1;
     work->focusPos[0] = obj->model->pos[0];
     work->focusPos[1] = obj->model->pos[1];
@@ -425,7 +425,7 @@ extern void fldClearCameraObjectHighlightFlag();
 extern void func_0012CB48();
 
 s32 fldUpdateLookAtSegment(void) {
-    FldCamPose *cam = (FldCamPose *)D_0032E3B0;
+    FldCamPose *cam = (FldCamPose *)fldAreaState;
     FldVec3 near;
     FldVec3 far;
 
@@ -458,7 +458,7 @@ INCLUDE_ASM(const s32, "game/code_0014D110", func_0014D6D8);
 
 extern s32 fldGetPlayerSceneState(void);
 
-extern s32 func_001109B8(s32, s32);
+extern s32 dds3SetWorldCameraObject(s32, s32);
 
 extern void func_00112EE8(s32, f32 *, f32 *);
 
@@ -484,7 +484,7 @@ s32 fldCmdCaptureObjectPose(void) {
         if (handle == 0) {
             return 1;
         }
-        object = func_001109B8(dds3GetWorldObject(), handle);
+        object = dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
         if (object == 0) {
             return 1;
         }
@@ -501,11 +501,11 @@ s32 fldCmdCaptureObjectPose(void) {
         D_0032E400[0] = 4;
     } else {
         world = dds3GetWorldObject();
-        handle = func_00110A48(world, scrReadIntParameter(0), 4);
+        handle = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
         if (handle == 0) {
             return 1;
         }
-        func_001109B8(dds3GetWorldObject(), handle);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), handle);
     }
     return 1;
 }
@@ -514,8 +514,8 @@ s32 fldCmdSetRequestedSceneName(void) {
     char *name;
 
     name = scrReadStringParameter(0);
-    D_0032E3B0[0x14] = 5;
-    strcpy((char *)D_0032E3B0 + 0x40, name);
+    fldAreaState[0x14] = 5;
+    strcpy((char *)fldAreaState + 0x40, name);
     return 1;
 }
 
@@ -528,27 +528,27 @@ extern void evtEnableSolarOverlayAlpha(void);
 s32 fldCmdSetSolarOverlayMode(void) {
     s32 mode = scrReadIntParameter(0);
 
-    D_0032E3B0[51] = mode;
-    D_0032E3B0[52] = 0;
+    fldAreaState[51] = mode;
+    fldAreaState[52] = 0;
     if (mode < 4) {
-        D_0032E3B0[53] = mode;
+        fldAreaState[53] = mode;
     }
-    switch (D_0032E3B0[51]) {
+    switch (fldAreaState[51]) {
     case 0:
         evtSetSolarOverlayFullyTransparent();
         break;
     case 1:
         evtSetSolarOverlayFullyVisible();
-        D_0032E3B0[78] = 1;
+        fldAreaState[78] = 1;
         break;
     case 2:
         evtDisableSolarOverlayAlpha();
-        D_0032E3B0[52] = 0xF;
+        fldAreaState[52] = 0xF;
         break;
     case 3:
         evtEnableSolarOverlayAlpha();
-        D_0032E3B0[52] = 0;
-        D_0032E3B0[78] = 1;
+        fldAreaState[52] = 0;
+        fldAreaState[78] = 1;
         break;
     case 4:
     case 5:
@@ -630,11 +630,11 @@ s32 fldCmdSetFadeAndSway(void) {
 
 extern void func_00120FA0(s32, s32, s32, s32);
 
-extern s64 func_00110400(u64);
+extern s64 dds3GetWorldValueCount(u64);
 
 extern s64 dds3AdvanceObjectValueCursor(u64);
 
-extern u64 func_00110AB0(u64, u64);
+extern u64 dds3CopyWorldListToValueChain(u64, u64);
 
 extern void dds3DestroyWorldIndexNode(u64);
 
@@ -647,7 +647,7 @@ typedef struct FldWorldItem {
 
 extern FldWorldItem *dds3ReadIndexedWorldObjectWord(u64);
 
-extern void func_00113E20(FldWorldItem *, s32);
+extern void evtSetObjectTransitionWork(FldWorldItem *, s32);
 
 s32 fldCmdApplyRoomModeGroupZero(void) {
     s32 world;
@@ -660,11 +660,11 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     mode = scrReadIntParameter(3);
     name = scrReadStringParameter(2);
@@ -676,22 +676,22 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
         room = fldParseRoomNumberFromName(name);
         func_00120FA0(world, stage, room, 0);
     }
-    if (world == D_0032E3B0[4] && stage == D_0032E3B0[5] + 1) {
-        list = func_00110AB0(dds3GetWorldSecondaryObject(), 6);
-        if (func_00110400(list) != 0) {
+    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
+        list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
+        if (dds3GetWorldValueCount(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
                 item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        func_00113E20(item, 1);
+                        evtSetObjectTransitionWork(item, 1);
                         break;
                     case 1:
-                        func_00113E20(item, 5);
+                        evtSetObjectTransitionWork(item, 5);
                         break;
                     case 2:
-                        func_00113E20(item, 7);
+                        evtSetObjectTransitionWork(item, 7);
                         break;
                     }
                 }
@@ -713,11 +713,11 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     mode = scrReadIntParameter(3);
     name = scrReadStringParameter(2);
@@ -732,22 +732,22 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         room = fldParseRoomNumberFromName(name);
         func_00120FA0(world, stage, room, 1);
     }
-    if (world == D_0032E3B0[4] && stage == D_0032E3B0[5] + 1) {
-        list = func_00110AB0(dds3GetWorldSecondaryObject(), 6);
-        if (func_00110400(list) != 0) {
+    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
+        list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
+        if (dds3GetWorldValueCount(list) != 0) {
             dds3ResetObjectValueCursor(list);
             do {
                 item = dds3ReadIndexedWorldObjectWord(list);
                 if (item->data[1] == room) {
                     switch (mode) {
                     case 0:
-                        func_00113E20(item, 2);
+                        evtSetObjectTransitionWork(item, 2);
                         break;
                     case 1:
-                        func_00113E20(item, 6);
+                        evtSetObjectTransitionWork(item, 6);
                         break;
                     case 2:
-                        func_00113E20(item, 8);
+                        evtSetObjectTransitionWork(item, 8);
                         break;
                     }
                 }
@@ -760,7 +760,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
 
 extern void func_001210A0(s32, s32, s32, s32);
 
-extern void func_00112008(void *, s32);
+extern void dds3SetObjectModeAndDefaultWeight(void *, s32);
 
 s32 fldCmdApplyRoomObjectModeZero(void) {
     s32 world;
@@ -772,11 +772,11 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -786,22 +786,22 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
     } else {
         func_001210A0(world, stage, fldParseRoomNumberFromName(name), 0);
     }
-    if (world == D_0032E3B0[4] && stage == D_0032E3B0[5] + 1) {
+    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         id = fldFindSearchId(name);
         if (id != -1) {
-            object = func_00110A48(dds3GetWorldSecondaryObject(), id, 6);
+            object = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), id, 6);
             switch (scrReadIntParameter(3)) {
             case 0:
-                func_00112008(object, 0);
+                dds3SetObjectModeAndDefaultWeight(object, 0);
                 break;
             case 1:
-                func_00112008(object, 1);
+                dds3SetObjectModeAndDefaultWeight(object, 1);
                 break;
             case 2:
-                func_00112008(object, 2);
+                dds3SetObjectModeAndDefaultWeight(object, 2);
                 break;
             case 3:
-                func_00112008(object, 6);
+                dds3SetObjectModeAndDefaultWeight(object, 6);
                 break;
             }
         }
@@ -819,11 +819,11 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -833,19 +833,19 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
     } else {
         func_001210A0(world, stage, fldParseRoomNumberFromName(name), 1);
     }
-    if (world == D_0032E3B0[4] && stage == D_0032E3B0[5] + 1) {
+    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
         id = fldFindSearchId(name);
         if (id != -1) {
-            object = func_00110A48(dds3GetWorldSecondaryObject(), id, 6);
+            object = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), id, 6);
             switch (scrReadIntParameter(3)) {
             case 0:
-                func_00112008(object, 3);
+                dds3SetObjectModeAndDefaultWeight(object, 3);
                 break;
             case 1:
-                func_00112008(object, 4);
+                dds3SetObjectModeAndDefaultWeight(object, 4);
                 break;
             case 2:
-                func_00112008(object, 5);
+                dds3SetObjectModeAndDefaultWeight(object, 5);
                 break;
             }
         }
@@ -1027,11 +1027,11 @@ s32 fldOpClearRoomStateFlags(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -1041,8 +1041,8 @@ s32 fldOpClearRoomStateFlags(void) {
     } else {
         func_00121550(world, stage, fldParseRoomNumberFromName(name), 0);
     }
-    if (world == D_0032E3B0[4]) {
-        if (stage == D_0032E3B0[5] + 1) {
+    if (world == fldAreaState[4]) {
+        if (stage == fldAreaState[5] + 1) {
             fldFireRoomEffects();
         }
     }
@@ -1057,11 +1057,11 @@ s32 fldOpSetRoomStateFlags(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = D_0032E3B0[4];
+        world = fldAreaState[4];
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = D_0032E3B0[5] + 1;
+        stage = fldAreaState[5] + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -1071,8 +1071,8 @@ s32 fldOpSetRoomStateFlags(void) {
     } else {
         func_00121550(world, stage, fldParseRoomNumberFromName(name), 1);
     }
-    if (world == D_0032E3B0[4]) {
-        if (stage == D_0032E3B0[5] + 1) {
+    if (world == fldAreaState[4]) {
+        if (stage == fldAreaState[5] + 1) {
             fldFireRoomEffects();
         }
     }

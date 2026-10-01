@@ -2,15 +2,15 @@
 
 extern s32 D_003BC410;
 
-extern s32 D_003BC408;
+extern s32 dspWindowHandle;
 
-extern u8 D_003BC40C;
+extern u8 dspWindowControlState;
 
-extern s8 D_003BC40D;
+extern s8 dspWindowStateGate;
 
 extern s8 D_003BC414;
 
-extern s8 D_003BC415;
+extern s8 dspCapturedSoundMode;
 
 extern s32 D_003BAA00;
 
@@ -26,7 +26,7 @@ typedef struct {
     u16 indices[0];
 } ActiveList;
 
-extern EvtActiveFlagTable D_003BD8A0;
+extern EvtActiveFlagTable evtActiveEntryFlags;
 
 extern u32 func_002EB028(u32, u32 *, u32 *);
 
@@ -34,7 +34,7 @@ extern s32 kwlnTaskGetUserValue();
 
 extern u32 effMiscRand(void *);
 
-extern u32 D_003D8100[];
+extern u32 evtDisplayValues[];
 
 extern void func_0024A2D8(s32 arg0);
 
@@ -170,7 +170,7 @@ s64 mnuStartPanelExit(s32 request) {
     return menuRunPanel(state, 2, request);
 }
 
-u32 func_0024D398(void) {
+u32 mnuApplyTerminalExitFadeOrReset(void) {
     s32 state;
 
     state = kwlnTaskGetUserValue();
@@ -368,44 +368,44 @@ void evtReleaseResourcePairHandle(u32 *record) {
 }
 
 s32 evtCreateMessageWindowIfMissing(s32 unused) {
-    if (D_003BC408 < 0) {
-        D_003BC408 = itfMesCreateWindow();
-        func_0019C968(D_003BC408, 2, 0);
+    if (dspWindowHandle < 0) {
+        dspWindowHandle = itfMesCreateWindow();
+        func_0019C968(dspWindowHandle, 2, 0);
         return 1;
     }
     return 0;
 }
 
 s32 func_0024DA20(s32 arg0) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return 0;
     }
-    func_0019C968(D_003BC408, 0, arg0);
+    func_0019C968(dspWindowHandle, 0, arg0);
     return 1;
 }
 
 s32 dspStartEntry(s32 entry) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return 0;
     }
-    itfMesSetWindowHighFlags(D_003BC408, 0x200000);
-    itfMesStartEntry(D_003BC408, entry, 0);
-    itfPanelSetPairFirst(D_003BC408, -1);
-    D_003BC40C = 1;
+    itfMesSetWindowHighFlags(dspWindowHandle, 0x200000);
+    itfMesStartEntry(dspWindowHandle, entry, 0);
+    itfPanelSetPairFirst(dspWindowHandle, -1);
+    dspWindowControlState = 1;
     return 1;
 }
 
 s32 evtCaptureMessageWindowSoundMode(s32 arg0) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return 0;
     }
     D_003BC410 = arg0;
-    D_003BC415 = sndGetActiveMode();
+    dspCapturedSoundMode = sndGetActiveMode();
     return 1;
 }
 
 void evtSetMessageWindowOptionWhenOpen(s32 arg0) {
-    if (D_003BC408 >= 0) {
+    if (dspWindowHandle >= 0) {
         D_003BC414 = arg0;
     }
 }
@@ -415,28 +415,28 @@ s8 func_0024DB00(void) {
 }
 
 s32 sndGetActiveMode(void) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return -1;
     }
-    return itfPanelGetPairSecond(D_003BC408);
+    return itfPanelGetPairSecond(dspWindowHandle);
 }
 
 s8 evtGetCapturedMessageWindowSoundMode(void) {
-    return D_003BC415;
+    return dspCapturedSoundMode;
 }
 
 u32 evtCleanupMessageWindow(s32 notify) {
     u32 result;
 
     result = 0;
-    if (-1 < D_003BC408) {
-        itfPanelSetStatus(D_003BC408, 0);
+    if (-1 < dspWindowHandle) {
+        itfPanelSetStatus(dspWindowHandle, 0);
         if (notify != 0) {
-            itfMesFinishWindowAndClearStatus(D_003BC408);
+            itfMesFinishWindowAndClearStatus(dspWindowHandle);
         }
-        itfMesCleanupWindow(D_003BC408, 0);
+        itfMesCleanupWindow(dspWindowHandle, 0);
         dspSetActive(1);
-        D_003BC40C = 0;
+        dspWindowControlState = 0;
         result = 1;
     }
     return result;
@@ -447,37 +447,37 @@ void evtFinishMessageWindowAndNotify(void) {
 }
 
 s32 dspCloseChannel(void) {
-    s32 channel = D_003BC408;
+    s32 channel = dspWindowHandle;
     if (channel < 0) {
         return 0;
     }
     itfMesDestroyWindowIfPresent(channel);
-    D_003BC408 = -1;
-    D_003BC40C = 0;
-    D_003BC40D = 0;
+    dspWindowHandle = -1;
+    dspWindowControlState = 0;
+    dspWindowStateGate = 0;
     return 1;
 }
 
 s32 evtGetMessageWindowControlState(void) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return 0;
     }
-    if (D_003BC40D != 0) {
-        if ((s8)D_003BC40C == 2) {
+    if (dspWindowStateGate != 0) {
+        if ((s8)dspWindowControlState == 2) {
             return 0;
         }
     }
-    return (s8)D_003BC40C;
+    return (s8)dspWindowControlState;
 }
 
 s32 sndUpdateActiveMode(void) {
-    if (D_003BC408 < 0) {
+    if (dspWindowHandle < 0) {
         return 0;
     }
-    if (itfPanelGetPairFirst(D_003BC408) < 0) {
+    if (itfPanelGetPairFirst(dspWindowHandle) < 0) {
         return 0;
     }
-    D_003BC415 = sndGetActiveMode();
+    dspCapturedSoundMode = sndGetActiveMode();
     return 1;
 }
 
@@ -488,30 +488,30 @@ void func_0024DD78(void) {
 }
 
 void func_0024DD90(s32 arg0, s32 arg1) {
-    func_0019C838(D_003BC408, arg0, arg1);
+    func_0019C838(dspWindowHandle, arg0, arg1);
 }
 
 s8 func_0024DDB8(void) {
-    return D_003BC40D;
+    return dspWindowStateGate;
 }
 
 void dspSetActive(s32 enable) {
     if (enable) {
-        itfMesClearWindowHighFlags(D_003BC408, 0x800000);
-        itfMesClearWindowHighFlags(D_003BC408, 0x100000);
-        D_003BC40D = 0;
-        itfPanelSetStatus(D_003BC408, 1);
-        D_003BC40C = 1;
+        itfMesClearWindowHighFlags(dspWindowHandle, 0x800000);
+        itfMesClearWindowHighFlags(dspWindowHandle, 0x100000);
+        dspWindowStateGate = 0;
+        itfPanelSetStatus(dspWindowHandle, 1);
+        dspWindowControlState = 1;
     } else {
-        itfMesSetWindowHighFlags(D_003BC408, 0x800000);
-        itfMesSetWindowHighFlags(D_003BC408, 0x100000);
-        D_003BC40D = 1;
+        itfMesSetWindowHighFlags(dspWindowHandle, 0x800000);
+        itfMesSetWindowHighFlags(dspWindowHandle, 0x100000);
+        dspWindowStateGate = 1;
     }
 }
 
 void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
-    itfMesBlk24MoveTo(D_003BC408, x << 4, y << 3);
-    itfPanelEmitRecord(D_003BC408, -((0x15F - y) << 3));
+    itfMesBlk24MoveTo(dspWindowHandle, x << 4, y << 3);
+    itfPanelEmitRecord(dspWindowHandle, -((0x15F - y) << 3));
 }
 
 s32 evtIsTaskInActiveStates(s32 task) {
@@ -525,30 +525,30 @@ s32 evtIsTaskInActiveStates(s32 task) {
 }
 
 void evtClearActiveFlag(s32 flagIndex) {
-    D_003BD8A0.flags[flagIndex] = 0;
+    evtActiveEntryFlags.flags[flagIndex] = 0;
 }
 
 s32 evtIsActiveFlagSet(s32 flagIndex) {
-    return D_003BD8A0.flags[flagIndex] != 0;
+    return evtActiveEntryFlags.flags[flagIndex] != 0;
 }
 
 s32 evtSetBoundedDisplayValue(s32 index, s32 value) {
     if (index >= 0x10) {
         return 0;
     }
-    D_003D8100[index] = value;
+    evtDisplayValues[index] = value;
     return 1;
 }
 
 u32 evtGetBoundedDisplayValue(s32 index) {
     index = (index < 0x10) ? index : 0xf;
-    return D_003D8100[index];
+    return evtDisplayValues[index];
 }
 
 s32 evtSetCurrentActiveFlag(void) {
     s32 flagIndex = scrReadIntParameter(0);
 
-    D_003BD8A0.flags[flagIndex] = 1;
+    evtActiveEntryFlags.flags[flagIndex] = 1;
     return 1;
 }
 
@@ -557,7 +557,7 @@ s32 evtActivateCurrentFlag(void) {
     if (index >= 16) {
         index = 15;
     }
-    scrSetIntegerReturnValue(D_003D8100[index]);
+    scrSetIntegerReturnValue(evtDisplayValues[index]);
     return 1;
 }
 
@@ -582,17 +582,17 @@ void evtDrawPlainPanel(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     func_002C0DD8(arg0, arg1, 0, arg2, arg3, 0x30303040, 0x53);
 }
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC408);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowHandle);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC40C);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowControlState);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC40D);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspWindowStateGate);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC410);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC414);
 
-INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC415);
+INCLUDE_SDATA(const s32, "game/code_0024CFB0", dspCapturedSoundMode);
 
 INCLUDE_SDATA(const s32, "game/code_0024CFB0", D_003BC418);
 

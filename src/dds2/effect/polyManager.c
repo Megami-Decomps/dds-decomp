@@ -274,7 +274,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_001667F8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_00166980);
 
-void func_00166AB0(s32 work) {
+void polyReleaseCellBoundNodeResources(s32 work) {
     parReleaseCellSystem(*(u32 *)(work + 0xf4));
     func_003297C8(*(u32 *)(work + 0xfc));
 }

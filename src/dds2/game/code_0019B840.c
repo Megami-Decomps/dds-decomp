@@ -31,7 +31,7 @@ typedef struct FntList {
     FntNode *head;  /* 0x1C */
 } FntList;
 
-extern FntList D_00452360;
+extern FntList frFontResourceList;
 
 /* 0x24-byte table entry in the D_003D6C80 font system (one per index & 0xFF). */
 typedef struct FrFontEntry {
@@ -60,7 +60,7 @@ typedef struct FrFontSysLocal {
     void *glyphSlots[2]; /* 0x194: glyph chain slots */
 } FrFontSysLocal;
 
-extern FrFontSysLocal D_00452720;
+extern FrFontSysLocal frFontWork;
 
 extern void frFontFreeAllEntries(void);
 
@@ -77,12 +77,12 @@ extern u32 D_003B2F30[];
 extern void func_003297C8(void *arg0);
 
 void frFontListInsert(FntNode *node) {
-    FntNode *head = D_00452360.head;
+    FntNode *head = frFontResourceList.head;
     FntNode *next = head->next;
 
     node->prev = head;
     node->next = next;
-    D_00452360.count += 1;
+    frFontResourceList.count += 1;
     head->next = node;
     next->prev = node;
 }
@@ -103,7 +103,7 @@ void itfSetTextDrawLimit(s32 value) {
 }
 
 void frFontSetEntryFlag(s32 index, s32 flag) {
-    FrFontEntry *entry = &D_00452720.entries[index & 0xFF];
+    FrFontEntry *entry = &frFontWork.entries[index & 0xFF];
 
     entry->flagBytes[0] = 1;
     entry->flagBytes[1] = flag + 1;
@@ -140,7 +140,7 @@ extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void func_0019BCC8(s16 buffer, s32 image) {
+void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
@@ -157,9 +157,9 @@ extern void *func_00343ED0();
 extern void func_0019C130(s32, s32, void *);
 
 /* Load font `index` once (index 1 uses the system's first entry buffer, other fonts load `path`) and mark it loaded. */
-void func_0019BE20(s32 index, s32 path) {
+void frFontEnsureSlotLoaded(s32 index, s32 path) {
     s32 slot = index & 0xFF;
-    FrFontSysLocal *sys = &D_00452720;
+    FrFontSysLocal *sys = &frFontWork;
 
     if (D_003B2F30[slot] != 1) {
         if (slot == 1) {
@@ -175,13 +175,13 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BEB8);
 
 void frFontReleaseAll(void) {
     frFontFreeAllEntries();
-    func_0019C4D0(D_00452720.glyphSlots[0]);
-    func_0019C4D0(D_00452720.glyphSlots[1]);
-    itfReleaseMemNodeBuffer(D_00452720.unk150);
-    itfReleaseMemNodeBuffer(D_00452720.unk154);
+    func_0019C4D0(frFontWork.glyphSlots[0]);
+    func_0019C4D0(frFontWork.glyphSlots[1]);
+    itfReleaseMemNodeBuffer(frFontWork.unk150);
+    itfReleaseMemNodeBuffer(frFontWork.unk154);
     fmGslReleaseActiveResourceBuffers();
-    sdfUpdateTextureHeadsWithInterruptsMasked(D_00452720.unk158);
-    sdfUpdateTextureHeadsWithInterruptsMasked(D_00452720.unk15C);
+    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk158);
+    sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.unk15C);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019C130);
@@ -194,7 +194,7 @@ void frFontFreeEntry(s32 index) {
         return;
     }
     D_003B2F30[slot] = 0;
-    entry = &D_00452720.entries[slot];
+    entry = &frFontWork.entries[slot];
     if (entry->buffer != NULL) {
         func_003297C8(entry->buffer);
         entry->unk1C = NULL;

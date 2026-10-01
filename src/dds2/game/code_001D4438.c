@@ -233,7 +233,7 @@ typedef struct BattleSceneWork {
     u32 values[64];
     s32 (*sceneCallback)();
 } BattleSceneWork;
-extern SceneControl *D_004367FC;
+extern SceneControl *btlCommandPanelWork;
 extern s16 *D_00438F48;
 extern SceneDescriptor *D_00435E04;
 extern f32 D_00433724;
@@ -301,7 +301,7 @@ extern s32 fldGetEncounterRuntimeResult();
 extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
 extern void btlSyncModelFlagFromEventThresholds();
-extern void func_00204000();
+extern void btlResetTitleStreamOnBattleFlag();
 extern void func_001E9410();
 extern void btlSpawnBattleWorldAction();
 extern void btlCreateRainEffect();
@@ -356,7 +356,7 @@ typedef struct SceneGlobalState {
     s32 fadeKindB;
 } SceneGlobalState;
 
-extern u8 *D_004367F4;
+extern u8 *btlTrackedTaskHandles;
 extern s32 mdlFlagTest();
 extern s32 btlGetTaskState6();
 
@@ -435,7 +435,7 @@ extern void func_001C16B0(s32);
 
 extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
-extern void func_002457E0();
+extern void evtBeginSolarOverlayFadeOut();
 extern void func_001AA868();
 extern s32 func_0029D000();
 extern void datMoveCursorX();
@@ -844,7 +844,7 @@ typedef struct BtlDeferredStats {
     s32 secondary;     /* 0x24 */
 } BtlDeferredStats;
 
-extern struct SoundTask *func_00205018();
+extern struct SoundTask *btlCreateHookedUnitSoundTask();
 
 extern u32 D_00436AD4;
 
@@ -866,13 +866,13 @@ extern f32 func_001F5780(u32, u8, f32, f32);
 
 extern f32 func_001FDD20(f32 *, f32, f32, s32);
 
-extern struct SoundTask *D_00436A1C;
+extern struct SoundTask *btlDeferredTaskTail;
 
-extern struct SoundTask *D_00436A20;
+extern struct SoundTask *btlDeferredTaskHead;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-extern u32 D_00435CD4;
+extern u32 kwlnDrawControlFlags;
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
@@ -1148,7 +1148,7 @@ extern void btlInitUnitFxDefaults(BtlFx *);
 extern s32 btlCheckSpecialAbility(s32, s32);
 extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
-extern s32 func_002DEB80(void *);
+extern s32 effCreateSelectionFlagListFromWork(void *);
 extern char D_003BDCC8[];
 extern void mnuReleaseSoundBufferLocked(void);
 extern void func_0023CA60(u32, s32, u32);
@@ -1454,7 +1454,7 @@ typedef struct TaskBlock {
     u32 word[11];
 } TaskBlock;
 
-extern u8 *func_001DFB08(SceneActor *, TaskBlock *);
+extern u8 *btlCreateActorParameterDeltaTask(SceneActor *, TaskBlock *);
 extern u8 *btlCreateLinkedEffectTask(SceneActor *, u32, s32);
 
 /* Starts the command sound tasks and the follow-up action for the acting
@@ -1511,7 +1511,7 @@ void func_001D4FE8(u8 *task) {
             block.word[0] = hp / 10;
             mp = unit->statB;
             block.word[1] = mp / 10;
-            effectTask = func_001DFB08(unit, &block);
+            effectTask = btlCreateActorParameterDeltaTask(unit, &block);
             *effectTask = 7;
             *(s64 *)(effectTask + 8) = ownerId;
             btlStartTask(effectTask);
@@ -2049,7 +2049,7 @@ void func_001DC538(void) {
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC540);
 
-void func_001DC7F0(void) {
+void btlSpawnSceneActionAndSwitchState(void) {
 }
 
 void func_001DC7F8(u8 *unit) {
@@ -2068,7 +2068,7 @@ void btlAdvanceStateWhenLinkedTasksFinish(BtlUnit *unit) {
     }
 }
 
-void func_001DC888(void) {
+void btlAdvanceLinkedUnitWhenOwnerIdle(void) {
 }
 
 void func_001DC890(BtlUnit *unit) {
@@ -2079,7 +2079,7 @@ void func_001DC890(BtlUnit *unit) {
     }
 }
 
-void func_001DC8F8(void) {
+void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 }
 
 void btlUnitTurnEndCommit(BtlUnit *unit) {
@@ -2357,5 +2357,5 @@ INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A10);
 
 INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A18);
 
-INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A1C);
+INCLUDE_SDATA(const s32, "game/code_001D4438", btlDeferredTaskTail);
 

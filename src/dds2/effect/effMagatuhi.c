@@ -176,7 +176,7 @@ typedef struct {
 
 extern u32 func_003292A8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern void *func_00190D10(void *block);
+extern void *effCloneMagatuhiWithColorResource(void *block);
 extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
@@ -196,7 +196,7 @@ EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->managedResource = func_00190D10(&work->head.count);
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.spread;
     for (i = 0; i < count; i++) {
@@ -243,7 +243,7 @@ EffMagatuhiWideSecond *effMagatuhiCreateSecond(EffMagatuhiHeadSecond *src) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->managedResource = func_00190D10(&work->head.count);
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
     work->mathResource = effAllocSlotArray(count);
     spread = work->head.spread;
     for (i = 0; i < count; i++) {
@@ -315,7 +315,7 @@ EffMagatuhiWideFourth *effMagatuhiCreateFourth(EffMagatuhiHeadThird *src) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->managedResource = func_00190D10(&work->head.count);
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
     spread = work->head.spread;
     for (i = 0; i < count; i++) {
         particle->unk00 = -(effMiscRand(D_003AA868) % spread);
@@ -404,7 +404,7 @@ EffMagatuhiWideFifth *effMagatuhiCreateFifth(EffMagatuhiHeadFifth *src) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->managedResource = func_00190D10(&work->head.count);
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
     spread = work->head.spread;
     for (i = 0; i < count; i++) {
         particle->delay = -(effMiscRand(D_003AA868) % spread);
@@ -463,7 +463,7 @@ EffMagatuhiWideThird *effMagatuhiCreateThird(EffMagatuhiHeadThird *src) {
     if (work->head.spread <= 0) {
         work->head.spread = 1;
     }
-    work->managedResource = func_00190D10(&work->head.count);
+    work->managedResource = effCloneMagatuhiWithColorResource(&work->head.count);
     spread = work->head.spread;
     for (i = 0; i < count; i++) {
         particle->delay = -(effMiscRand(D_003AA868) % spread);

@@ -268,12 +268,12 @@ u16 *func_003224C8(s32 index) {
     return &D_0040B248[index];
 }
 
-void func_003224E0(u32 records, u32 count) {
+void mnuBindMenuRecordRegistry(u32 records, u32 count) {
     D_004390D0 = records;
     D_004390D4 = count;
 }
 
-u8 *func_003224F0(u32 taggedIndex) {
+u8 *mnuGetMenuRecordRegistryEntry(u32 taggedIndex) {
     u16 index = taggedIndex;
     return (u8 *)D_004390D0 + index * 28;
 }
@@ -324,7 +324,7 @@ u32 mnuResolveTaggedRegistryRecord(u32 record) {
     if ((((MenuTaggedRecord *)record)->tag & 0xffff0000) != 0x2010000) {
         return 0;
     }
-    registry = (u32)func_003224F0(((MenuTaggedRecord *)record)->tag);
+    registry = (u32)mnuGetMenuRecordRegistryEntry(((MenuTaggedRecord *)record)->tag);
     if (registry == 0) {
         return 0;
     }
@@ -393,7 +393,7 @@ u32 mnuGetWorkEntryPool(void) {
 
 /* A flagged registry entry offsets its base value by the running clock. */
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
-    u8 *registry = func_003224F0(entry->tag);
+    u8 *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((((MenuRegistryTable *)((MenuRegistry *)registry)->table)->flags & 1) != 0) {
         u8 *clock = func_00321238();
         u8 *segment = mnuGetResourceRecordByIndex(entry->unk08);

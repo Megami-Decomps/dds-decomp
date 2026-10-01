@@ -4,7 +4,7 @@ extern s32 D_00435E38;
 
 extern s32 dds3FindEntry();
 
-extern u32 D_00435E88;
+extern u32 evtWorkScriptTask;
 
 extern s32 D_00435DEC;
 
@@ -160,7 +160,7 @@ extern s32 D_0043E5C0[];
 
 extern void func_0011A808(Entry1A4 *, s32);
 
-extern s32 func_00119AF8(Entry1A4 *, s32);
+extern s32 datUnitHasSkill(Entry1A4 *, s32);
 
 extern void func_0010C058(u32, s32);
 
@@ -285,7 +285,7 @@ s32 evtHasMatchingFlaggedEntry(s32 mask) {
         Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
         offset += 0x1C4;
         if ((entry->flags & 1) && (entry->flags & 2)) {
-            if (func_00119AF8(entry, mask)) {
+            if (datUnitHasSkill(entry, mask)) {
                 return 1;
             }
         }
@@ -560,36 +560,36 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
 }
 
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 flags) {
-    func_0010C058(D_00435E88, script);
+    func_0010C058(evtWorkScriptTask, script);
     D_0043E5C0[1] = third;
     D_0043E5C0[2] = first;
     D_0043E5C0[3] = second;
     ((EventScriptEntry *)D_0043E5C0)->index14 = flags;
     ((EventScriptEntry *)D_0043E5C0)->flags &= 0xFFFE;
-    bfStepContext(D_00435E88);
+    bfStepContext(evtWorkScriptTask);
     return D_0043E5C0[4];
 }
 
 void dds3WorkInit(void) {
-    D_00435E88 = scrCreateTaskWithDefaultOption();
+    evtWorkScriptTask = scrCreateTaskWithDefaultOption();
     memset(D_0043E5C0, 0, 0x18);
 }
 
 u32 scrGetWorkTaskHandle(void) {
-    return D_00435E88;
+    return evtWorkScriptTask;
 }
 
 void scrDestroyWorkTask(void) {
-    scrProcDestroyTask(D_00435E88);
-    D_00435E88 = 0;
+    scrProcDestroyTask(evtWorkScriptTask);
+    evtWorkScriptTask = 0;
 }
 
-s32 func_0011D5B8(void) {
+s32 evtPushFirstRosterLevel(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5C8[0])->index14);
     return 1;
 }
 
-s32 func_0011D5E0(void) {
+s32 evtPushSecondRosterLevel(void) {
     scrSetIntegerReturnValue(((EventScriptEntry *)D_0043E5CC[0])->index14);
     return 1;
 }
@@ -731,7 +731,7 @@ s32 evtStoreScriptParameterResult(void) {
     return 1;
 }
 
-s32 func_0011DD40(void) {
+s32 evtPushScriptContextResult(void) {
     scrSetIntegerReturnValue(D_0043E5D0[0]);
     return 1;
 }
@@ -1033,7 +1033,7 @@ INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E7C);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E80);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E88);
+INCLUDE_SDATA(const s32, "game/code_0011A118", evtWorkScriptTask);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E8C);
 

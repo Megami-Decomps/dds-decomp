@@ -56,7 +56,7 @@ extern void *sdfResourceRetainAddress(void *arg0);
 extern void func_0019B418(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
-extern u8 D_00452360[];
+extern u8 frFontResourceList[];
 
 /* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_00452378[];
@@ -165,12 +165,12 @@ INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AB08);
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AC38);
 
-void func_0019AD68(EffPrim *primitive) {
+void effResetPrimitiveRecordCursor(EffPrim *primitive) {
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0.0f;
 }
 
-void func_0019AD78(EffPrim *primitive, f32 step) {
+void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
     primitive->cursorStep = step;
 }
 
@@ -217,7 +217,7 @@ void *effCreateChannel(void *rows, u32 count) {
     return channel;
 }
 
-s64 func_0019B358(u32 *p) {
+s64 effReleaseInterpolationChannel(u32 *p) {
     if (p != NULL) {
         func_003297C8((void *)*p);
     }
@@ -257,7 +257,7 @@ void effSetChanStep(EffChan *arg0, f32 arg1) {
 }
 
 void *effGetFontListHead(void) {
-    return D_00452360;
+    return frFontResourceList;
 }
 
 s32 effGetFontListCount(void) {

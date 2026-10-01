@@ -13,7 +13,7 @@ extern LevelStep D_00370D08[];
 
 extern s32 D_003BAA00;
 
-INCLUDE_ASM(const s32, "game/code_002653A0", func_002653A0);
+INCLUDE_ASM(const s32, "game/code_002653A0", mnuTitleDrawFadeMenuEntries);
 
 extern void itfUpdateFadeColor();
 extern void func_00264EF0();
@@ -28,7 +28,7 @@ void mnuRefreshPanelLayer(u8 *work) {
     func_00264B08(work);
     func_00264D90(work);
     func_00266250(0x2C0, 0x3D8, 0, y, work + 0x3E4, 0x53);
-    func_002653A0(work);
+    mnuTitleDrawFadeMenuEntries(work);
 }
 
 typedef struct {

@@ -12,7 +12,7 @@ extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_002D86E0(void *arg0, void *arg1);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_002E1FF8(u32 arg0);
-extern vu8 D_003BD2EA;
+extern vu8 sdfCurrentBufferIndex;
 
 /* 16-byte packet, written at quadword, word, halfword and byte granularity. */
 typedef struct {
@@ -263,7 +263,7 @@ typedef struct SdfSlotBuf {
 } SdfSlotBuf;
 
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
-void func_002D8890(SdfModel *model, s32 count) {
+void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
     SdfSlotBuf *buf;
     SdfSlotEntry *entries;
     s32 i;
@@ -401,7 +401,7 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
 
 /* Update the model with the engine's current signed frame index. */
 void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
-    sdfModelUpdateRootTransforms(model, (s8)D_003BD2EA);
+    sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
 /* Store four message words, then notify the consumer of the second word. */

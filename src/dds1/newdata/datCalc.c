@@ -88,7 +88,7 @@ typedef struct DatPartyMember {
 extern DatPartyMember *D_003BAA1C;
 
 /* Nonzero if `skill` is in the unit's skill list (party members use the party table). */
-s32 func_001193A0(DatSkillOwner *unit, s32 skill) {
+s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
     s32 i;
 
     if (!(unit->flags & 0x20)) {

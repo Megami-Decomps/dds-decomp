@@ -31,7 +31,7 @@ extern s32 fldLmapTaskExists(void);
 
 extern s32 D_00435D30;
 
-extern u32 D_00435CD4;
+extern u32 kwlnDrawControlFlags;
 
 extern f32 D_00438A48;
 
@@ -75,11 +75,11 @@ extern s32 D_00389780[];
 
 extern void fldStartLmapTask(s32 arg0);
 
-extern void *D_00435D64;
+extern void *scrNamedProcessHead;
 
-extern void *D_00435D68;
+extern void *scrNamedProcessTail;
 
-extern u32 D_00435D60;
+extern u32 scrNamedProcessCount;
 
 typedef struct {
     u8 pad00[0xE8];
@@ -181,7 +181,7 @@ extern s32 kwlnTaskCreate(const char *name, s32 arg1, s32 arg2, s32 arg3, s32 up
 
 extern u32 func_00104150(void);
 
-extern s32 D_004371E8;
+extern s32 evtPendingEventSelection;
 
 extern void evtCreateEventScriptProcess(s32 arg0);
 
@@ -220,7 +220,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_001081F8);
 /* Either replace the draw vector immediately or interpolate from its prior value. */
 void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
     if (mode == 0) {
-        D_00435CD4 &= ~0x400;
+        kwlnDrawControlFlags &= ~0x400;
         D_0037F790.x = x;
         D_0037F790.y = y;
         D_0037F790.z = z;
@@ -230,7 +230,7 @@ void evtSetDrawVectorTarget(s32 mode, f32 x, f32 y, f32 z, f32 w) {
         f32 previousY = D_0037F790.y;
         f32 previousZ = D_0037F790.z;
         f32 previousW = D_0037F790.w;
-        D_00435CD4 |= 0x400;
+        kwlnDrawControlFlags |= 0x400;
         D_00438DFA = mode;
         D_0043E3A0.x = previousX;
         D_0043E3A0.y = previousY;
@@ -248,14 +248,14 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108318);
 
 void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
     if (frames == 0) {
-        D_00435CD4 &= ~0x4000;
+        kwlnDrawControlFlags &= ~0x4000;
         D_00438A48 = first;
         D_00438A4C = second;
     }
     else {
         f32 previousFirst = D_00438A48;
         f32 previousSecond = D_00438A4C;
-        D_00435CD4 |= 0x4000;
+        kwlnDrawControlFlags |= 0x4000;
         D_00438E06 = frames;
         D_00438E08 = previousFirst;
         D_00438E0C = first;
@@ -399,7 +399,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     EvtDrawSurface *surface;
     list = (void *)sdfCreateResetPacketList();
     packet = sdfAllocPacketAligned(0x40);
-    func_0032E4B8(packet);
+    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, packet);
     sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfAppendPacket(list, sdfFormatSifPacket(pkt, drawArg));
@@ -628,7 +628,7 @@ void evtDispatchSelectionValue(s32 source, s32 *params) {
         selection = params[0];
         break;
     case 1:
-        selection = D_004371E8;
+        selection = evtPendingEventSelection;
         break;
     }
     if (selection <= 0) {
@@ -819,7 +819,7 @@ u32 func_0010A9B0(void) {
     return 0;
 }
 
-u8 func_0010A9D0(void) {
+u8 mnuCheckCampStateAndAcknowledge(void) {
     s64 state;
 
     state = mnuAcknowledgeCampState();
@@ -906,7 +906,7 @@ u32 func_0010AB78(void) {
 }
 
 void evtLaunchFontTestScene(void) {
-    func_001A03D8();
+    itfStartFontTestScene();
 }
 
 u32 func_0010AB98(void) {
@@ -967,7 +967,7 @@ u8 evtWaitLmapTaskGone(void) {
 }
 
 void func_0010ACD0(void) {
-    func_00316E78();
+    mdlCreateViewerPackageTask();
 }
 
 u32 func_0010ACE8(void) {
@@ -1032,7 +1032,15 @@ extern s32 func_00360E78();
 extern void sdfDevConsPrintf();
 
 /* printf into the dev console node when one exists. */
-void func_0010AE38(const char *fmt, ...) {
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D18);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D30);
+
+void evtPrintDeveloperConsoleMessage(const char *fmt, ...) {
     char buffer[0x200];
     __builtin_va_list args;
 
@@ -1094,11 +1102,11 @@ void func_0010B8D8(s8 mode) {
 
 /* Append to the event-work doubly linked list, maintaining both endpoints. */
 void evtLinkWorkNode(B728Work *node) {
-    B728Work *tail = D_00435D68;
+    B728Work *tail = scrNamedProcessTail;
 
     if (tail == NULL) {
-        D_00435D64 = node;
-        D_00435D68 = node;
+        scrNamedProcessHead = node;
+        scrNamedProcessTail = node;
         node->previous = NULL;
         node->next = NULL;
     }
@@ -1106,28 +1114,28 @@ void evtLinkWorkNode(B728Work *node) {
         node->previous = tail;
         tail->next = node;
         node->next = NULL;
-        D_00435D68 = node;
+        scrNamedProcessTail = node;
     }
-    D_00435D60++;
+    scrNamedProcessCount++;
 }
 
 /* Detach from either end or the middle, and clear the old links. */
 void evtUnlinkWorkNode(B728Work *node) {
-    if ((B728Work *)D_00435D64 == node) {
-        D_00435D64 = node->next;
+    if ((B728Work *)scrNamedProcessHead == node) {
+        scrNamedProcessHead = node->next;
     }
     else {
         ((B728Work *)node->previous)->next = node->next;
     }
-    if ((B728Work *)D_00435D68 == node) {
-        D_00435D68 = node->previous;
+    if ((B728Work *)scrNamedProcessTail == node) {
+        scrNamedProcessTail = node->previous;
     }
     else {
         ((B728Work *)node->next)->previous = node->previous;
     }
     node->previous = NULL;
     node->next = NULL;
-    D_00435D60--;
+    scrNamedProcessCount--;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
@@ -1135,14 +1143,6 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 INCLUDE_ASM(const s32, "game/code_00107EF8", bfContextCreate);
 
 INCLUDE_ASM(const s32, "game/code_00107EF8", bfParseFLW0);
-
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D18);
-
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D20);
-
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D28);
-
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D30);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D40);
 
@@ -1154,9 +1154,9 @@ INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D50);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D58);
 
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D60);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", scrNamedProcessCount);
 
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D64);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", scrNamedProcessHead);
 
-INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D68);
+INCLUDE_SDATA(const s32, "game/code_00107EF8", scrNamedProcessTail);
 

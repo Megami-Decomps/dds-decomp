@@ -148,7 +148,7 @@ typedef struct PacDecoder {
 extern void sdfReleaseChipBlock(void *);
 
 /* Poll the decoder's read callback for the newest buffer: result 1 marks the object done, result 4 drops the tail buffer. */
-void func_00346C40(PacDecoder *decoder) {
+void sdfDecodePacNodeAndAdvanceTail(PacDecoder *decoder) {
     s32 result;
     PacNode *tail;
     PacNode *node;

@@ -14,7 +14,7 @@ u32 fldCmdGetCurrentSceneSelectionResource(void) {
     return 1;
 }
 
-extern s32 D_0032E3B0[];
+extern s32 fldAreaState[];
 
 extern s32 scrReadIntParameter(s32);
 
@@ -23,26 +23,26 @@ s32 fldCommandClearSelectedFlag(void) {
     s32 changed = 0;
     switch (scrReadIntParameter(0)) {
     case 0:
-        if (D_0032E3B0[3] & 1) {
-            D_0032E3B0[3] &= ~1;
+        if (fldAreaState[3] & 1) {
+            fldAreaState[3] &= ~1;
             changed = 1;
         }
         break;
     case 1:
-        if (D_0032E3B0[3] & 2) {
-            D_0032E3B0[3] &= ~2;
+        if (fldAreaState[3] & 2) {
+            fldAreaState[3] &= ~2;
             changed = 1;
         }
         break;
     case 2:
-        if (D_0032E3B0[3] & 4) {
-            D_0032E3B0[3] &= ~4;
+        if (fldAreaState[3] & 4) {
+            fldAreaState[3] &= ~4;
             changed = 1;
         }
         break;
     case 3:
-        if (D_0032E3B0[3] & 8) {
-            D_0032E3B0[3] &= ~8;
+        if (fldAreaState[3] & 8) {
+            fldAreaState[3] &= ~8;
             changed = 1;
         }
         break;
@@ -100,7 +100,7 @@ extern s32 scrReadIntParameter(s32);
 extern void func_00121DE0(s32, s32, s32, s32, s32, s32);
 
 /* Pass five field-script arguments to the underlying handler. */
-s32 func_0014F6F0(void) {
+s32 fldCmdMarkBitmapRegion(void) {
     s32 first = scrReadIntParameter(0);
     s32 second = scrReadIntParameter(1);
     s32 third = scrReadIntParameter(2);

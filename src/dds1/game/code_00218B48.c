@@ -115,7 +115,7 @@ void billSetChildScaleComponents(s32, float, float);
 
 s32 billCreateIndexed(s32, s32);
 
-s32 func_0021A608(s32, s32, s32, s32, s32);
+s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
 
@@ -252,7 +252,7 @@ extern char *strcpy(char *, const char *);
 extern MdlViewerHeader *D_003BD880;
 extern char **D_003BD884;
 
-void func_00218CA8(void) {
+void mdlInitializeViewerResourceTable(void) {
     s32 i;
     char *source;
     char *copy;
@@ -331,11 +331,11 @@ typedef struct MdlViewerSlots {
 } MdlViewerSlots;
 
 /* Read the model record's payload word without advancing its relative link. */
-u32 func_002192C0(MdlRecord *record) {
+u32 mdlGetViewerRecordPayloadWord(MdlRecord *record) {
     return record->value08;
 }
 
-u16 func_002192C8(MdlRecord *record) {
+u16 mdlGetViewerRecordListCount(MdlRecord *record) {
     return record->value0C;
 }
 
@@ -349,7 +349,7 @@ s32 *mdlFindViewerRecord(MdlViewerResource *resource, s32 id) {
         return NULL;
     }
     record = table;
-    remaining = func_002192C8((MdlRecord *)record);
+    remaining = mdlGetViewerRecordListCount((MdlRecord *)record);
     do {
         remaining--;
         record = (s32 *)((s32)record + ((MdlRecord *)record)->nextOffset);
@@ -661,7 +661,7 @@ MdlResourceItem *mdlInsertResourceItem(MdlResourceOwner *object, s32 type, s32 s
 }
 
 void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    func_00151E60((u32)entry->object);
+    billCloneObjectRetainingSharedData((u32)entry->object);
     entry->state = entry->state + 1;
 }
 
@@ -1028,7 +1028,7 @@ void mdlSetResourceAmount(s32 unused, MdlResourceItem *item, float amount) {
     }
 }
 
-s32 func_0021A608(s32 x, s32 y, s32 depth, s32 width, s32 height) {
+s32 mdlBuildViewerRectanglePacket(s32 x, s32 y, s32 depth, s32 width, s32 height) {
     return func_0011D3E8(x, y, depth, width, height, 0x30000000, 0x60404040);
 }
 
@@ -1036,7 +1036,7 @@ void mdlAppendViewerRectToDrawList(s32 x, s32 y, s32 depth, s32 width, s32 heigh
     s32 packet;
 
     packet = D_003D7B10[0];
-    sdfAppendPacket(packet, func_0021A608(x, y, depth, width, height));
+    sdfAppendPacket(packet, mdlBuildViewerRectanglePacket(x, y, depth, width, height));
 }
 
 extern s8 D_00398628[];
@@ -1431,7 +1431,7 @@ void func_0021BFB0(void) {
     sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, D_003D7A50.unk54));
 }
 
-u32 func_0021C1E0(void) {
+u32 mdlUpdateViewerScaleTask(void) {
     mdlAdjustViewerScale();
     func_0021BFB0();
     return 0;
@@ -1563,7 +1563,7 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD98);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C6E8);
 
-u32 func_0021C8D0(void) {
+u32 mdlUpdateViewerNodeCursorTask(void) {
     mdlHandleViewerNodeCursorInput();
     func_0021C6E8();
     return 0;
@@ -1810,7 +1810,7 @@ extern void fileWaitReady(s32 file);
 extern s32 fileGetResourceHandle(s32 file);
 extern char *func_00288B90(s32 file);
 extern s32 fileGetResourceSize(s32 file);
-extern void func_002887A0(s32 file);
+extern void filePollEntryCleanup(s32 file);
 extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -1841,7 +1841,7 @@ void func_0021DD88(void) {
     handle = fileGetResourceHandle(file);
     data = func_00288B90(file);
     size = fileGetResourceSize(file);
-    func_002887A0(file);
+    filePollEntryCleanup(file);
     pos = 0;
     while (pos < size) {
         i = pos;
@@ -1940,7 +1940,7 @@ extern MdlValueEdit D_00367D58[];
 
 /* Step the number being edited in table slot `index`: coarse steps (A) and fine steps (B),
    held-button repeat, wrapping from one end of [min, max] to the other on a fresh press. */
-void func_0021EB60(s32 index) {
+void mdlViewerStepEditedNumericValue(s32 index) {
     MdlValueEdit *edit = &D_00367D58[index];
     f32 *target = edit->target;
     s32 value = (s32)(*target + 0.5f);
@@ -2102,7 +2102,7 @@ extern void dds3EnsureSlotData();
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern void func_001109B8(s32 world, s32 object);
+extern void dds3SetWorldCameraObject(s32 world, s32 object);
 
 extern void func_001127A0(s32 object, s32 arg);
 
@@ -2118,7 +2118,7 @@ void mdlSpawnViewerWorldObject(void) {
     object = func_00112C08(dds3AdvanceWorldCounter(), position, rotation);
     effObjSetInnerFloat(object, 10.0f);
     dds3EnsureSlotData(object);
-    func_001109B8(dds3GetWorldSecondaryObject(), object);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), object);
     func_001127A0(object, 0);
 }
 
@@ -2152,7 +2152,7 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return counter;
 }
 
-extern void *func_00110A48(s32 world, s32 id, s32 kind);
+extern void *dds3FindWorldObjectNodeByKey(s32 world, s32 id, s32 kind);
 
 extern void dds3SetSlotByKind(s32 object, s32 slot);
 
@@ -2174,7 +2174,7 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     effObjSetInnerFloat(object, 10.0f);
     func_00111E30(object, slotKind, resource);
     mdlAddEntryFlagged(dds3GetUnk0C(object), 0, 0);
-    dds3SetSlotByKind(object, (s32)func_00110A48(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3SetSlotByKind(object, (s32)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3InvokeSlot5Handler(object);
     func_001127A0(object, 0);
     dds3SetObjectFlags(object, 0x400);
@@ -2208,9 +2208,9 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     MdlAttachSlot *source;
     u8 *base;
 
-    target = (MdlAttachObj *)func_00110A48(dds3GetWorldSecondaryObject(), targetId, 5);
+    target = (MdlAttachObj *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetId, 5);
     if (target != NULL) {
-        source = (MdlAttachSlot *)func_00110A48(dds3GetWorldSecondaryObject(), sourceId, 0x11);
+        source = (MdlAttachSlot *)dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
             base = source->firstVec;
             effObjSetInnerFirstVec(target, base);
@@ -2373,5 +2373,5 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA8);
+INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
 
