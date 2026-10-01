@@ -453,8 +453,10 @@ extern u8 D_0043875A;
 extern u32 D_004386C0;
 
 extern FnTbl28 D_003E9950[];
+extern FnTbl28 D_003E9960[];
 
 extern FnTbl24Create D_003E9B80[];
+extern EffOp24 D_003E9B88[];
 
 extern FnTbl28 D_003E9DD8[];
 
@@ -3084,9 +3086,14 @@ void effResetActiveInstanceFrame(u8 *work) {
     *(u32 *)(work + 0x28) = 0;
 }
 
-extern FnTbl28 D_003E9960[];
-
-INCLUDE_ASM(const s32, "game/code_002DC138", effAdvanceActiveInstanceFrame);
+void effAdvanceActiveInstanceFrame(work)
+s32 *work;
+{
+    if ((D_00437E08 & 2) == 0) {
+        D_003E9960[work[0x2C / 4]].fn();
+        work[0x28 / 4]++;
+    }
+}
 
 void effDispatchActiveInstanceDraw(s32 work) {
     D_003E9964[*(s32 *)(work + 0x2C)].fn((void *)work);
@@ -3572,9 +3579,10 @@ void effCreateClassWorkFromFile(s32 request) {
     effPayloadPointerSet(*(u16 *)(request + 0xc), source);
 }
 
-extern EffOp24 D_003E9B88[];
-
-INCLUDE_ASM(const s32, "game/code_002DC138", effDestroyClassWork);
+void effDestroyClassWork(u32 *obj) {
+    D_003E9B88[obj[0x2C / 4]].run(obj[0x30 / 4]);
+    sdfReleaseChipBlock(obj);
+}
 
 void effCreateClassWorkFromRequest(s32 work) {
     effPayloadPointerSet(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
