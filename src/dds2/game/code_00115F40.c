@@ -16,17 +16,17 @@ typedef struct WorldResource {
     u8 pad00[4];
     u32 flags;
     u8 pad08[0x18];
-    u32 field_0x20;
-    u16 field_0x24;
-    u16 field_0x26;
+    u32 unk20;
+    u16 unk24;
+    u16 unk26;
 } WorldResource;
 
 void func_00115F40(WorldResourceOwner *owner) {
     WorldResource *resource = (WorldResource *)owner->resource;
 
-    resource->field_0x24 = 0;
-    resource->field_0x20 = 0;
-    resource->field_0x26 = 0;
+    resource->unk24 = 0;
+    resource->unk20 = 0;
+    resource->unk26 = 0;
     resource->flags &= ~4;
     resource->flags &= ~8;
 }
