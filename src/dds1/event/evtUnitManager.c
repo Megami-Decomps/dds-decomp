@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_unit.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -7,10 +8,6 @@ typedef struct EvtUnitMotion {
     u8 mode;           /* 0x30 */
 } EvtUnitMotion;
 
-typedef struct EvtUnitOwner {
-    u8 pad0[0x1C];
-    EvtUnitMotion *motion; /* 0x1c */
-} EvtUnitOwner;
 
 typedef struct EvtTargetInfo {
     u8 pad0[0x64];
@@ -25,75 +22,6 @@ typedef struct EvtTarget {
 extern f32 *D_00324770[];
 extern u8 D_00324780[];
 
-typedef struct EvtEffObj {
-    u8 pad00[0x1C];
-    u8 *data;          /* 0x1c: point/direction records (+0x40, +0x50) */
-} EvtEffObj;
-
-/* Event unit: flag bits at 0xa8 drive status queries below. */
-typedef struct EvtUnit {
-    u32 color;         /* 0x0 */
-    u8 pad4[0xC];      /* 0x4 */
-    f32 vec10[4];      /* 0x10 */
-    f32 vec20[4];      /* 0x20 */
-    f32 vec30[4];      /* 0x30 */
-    u8 pad40[0x10];   /* 0x40 */
-    u32 color50;       /* 0x50 */
-    u8 pad54[0x18];   /* 0x54 */
-    u32 value;         /* 0x6c: changed by evtUnitSetValueAndFlag */
-    f32 vec70[4];      /* 0x70 */
-    EvtEffObj *effObj; /* 0x80: effect object the vectors are written to */
-    s32 currentTransitionValue; /* 0x84 */
-    s32 previousTransitionValue; /* 0x88 */
-    EvtUnitOwner *owner; /* 0x8c */
-    u8 pad90[4];      /* 0x90 */
-    s32 unused94;       /* 0x94: cleared by evtPrepareUnitMotionState, never read */
-    u8 pad98[8];      /* 0x98 */
-    s32 pathId;        /* 0xa0 */
-    u8 padA4[4];      /* 0xa4 */
-    u32 flags;         /* 0xa8 */
-    s16 motionState;    /* 0xac: evtGetUnitMotionState; 0 = idle, 2 = transition */
-    u8 padAE[4];      /* 0xae */
-    s16 motionTicks;    /* 0xb2: >0 keeps a timed motion out of the idle state */
-    s16 directionScale;/* 0xb4: multiplied by 0.1 for the effect direction vector */
-    s16 directionOffset;/* 0xb6: multiplied by 0.01 to offset the plan target */
-    u8 padB8[4];      /* 0xb8 */
-    u16 slotSelect;     /* 0xbc: written by func_00222278 */
-    u8 padBE[6];      /* 0xbe */
-    s16 transitionArg0; /* 0xc4 */
-    s16 transitionArg1; /* 0xc6 */
-    s16 transitionArg2; /* 0xc8 */
-    u8 padCA[0x16];   /* 0xca */
-    u8 slotFlags[12];  /* 0xe0 */
-    u8 padEC[0x1C];   /* 0xec */
-    s16 slotA[12];     /* 0x108 */
-    s16 slotB[12];     /* 0x120 */
-    s16 slotC[12];     /* 0x138 */
-    s16 unused150;      /* 0x150: never read or written */
-    s16 directionMode;  /* 0x152: passed in by evtSetUnitNormalizedDirection */
-    u8 pad154[8];     /* 0x154 */
-    s16 transitionElapsed; /* 0x15c */
-    s16 transitionDuration; /* 0x15e */
-    f32 speedY;        /* 0x160 */
-    s16 stepCount;     /* 0x164 */
-    u8 pad166[10];    /* 0x166 */
-} EvtUnit;
-
-/* Transition task payload; separate from the EvtUnit's overlapping fields. */
-typedef struct EvtTransitionWork {
-    u8 pad00[0x68];
-    s32 allocationHandle; /* 0x68 */
-    u8 pad6C[0x34];
-    s32 pathObject;       /* 0xA0 */
-    u8 padA4[0x14];
-    f32 motionScale;      /* 0xB8 */
-    u8 padBC[2];
-    s16 motionParamA;     /* 0xBE */
-    s16 motionParamB;     /* 0xC0 */
-    u8 padC2[0xE];
-    s8 firstSlot;         /* 0xD0 */
-    s8 secondSlot;        /* 0xD1 */
-} EvtTransitionWork;
 
 extern void sdfStepWrappingFloatCounter(s32 path);
 extern void func_00116F38(s32 path);
@@ -309,21 +237,21 @@ s32 evtUnitGetNestedValue(u8 *obj) {
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", func_002220F0);
 
-s32 evtReleaseUnitTransitionWork(u8 *work) {
+s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
     s32 handle;
 
     if (work == NULL) {
         return 1;
     }
-    handle = ((EvtTransitionWork *)work)->allocationHandle;
-    *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
+    handle = work->endpointWorkAddress;
+    *(s32 *)((u8 *)work->owner->data + 0x80) = 0;
     if (handle != 0) {
         sdfReleaseChipBlock(handle);
-        ((EvtTransitionWork *)work)->allocationHandle = 0;
+        work->endpointWorkAddress = 0;
     }
-    if (((EvtTransitionWork *)work)->pathObject != 0) {
-        dds3FreePathObject(((EvtTransitionWork *)work)->pathObject);
-        ((EvtTransitionWork *)work)->pathObject = 0;
+    if (work->pathHandle != 0) {
+        dds3FreePathObject(work->pathHandle);
+        work->pathHandle = 0;
     }
     sdfReleaseChipBlock(work);
     return 1;
@@ -335,16 +263,16 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
 
 void func_00222278(EvtUnit *unit, u16 value)
 {
-    unit->slotSelect = value;
+    unit->unkBC = value;
 }
 
-void evtSetTransitionMotionScale(u8 *work, f32 value) {
-    ((EvtTransitionWork *)work)->motionScale = value;
+void evtSetTransitionMotionScale(EvtUnit *work, f32 value) {
+    work->unkB8 = value;
 }
 
-void evtStoreUnitMotionShortParameters(u8 *work, s32 a, s32 b) {
-    ((EvtTransitionWork *)work)->motionParamA = a;
-    ((EvtTransitionWork *)work)->motionParamB = b;
+void evtStoreUnitMotionShortParameters(EvtUnit *work, s32 a, s32 b) {
+    work->unkBE = a;
+    work->unkC0 = b;
 }
 
 s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
@@ -359,13 +287,13 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
     return 0;
 }
 
-void evtStoreUnitMotionSlotSelection(u8 *work, s32 a, s32 b) {
-    ((EvtTransitionWork *)work)->firstSlot = a;
-    ((EvtTransitionWork *)work)->secondSlot = b;
+void evtStoreUnitMotionSlotSelection(EvtUnit *work, s32 a, s32 b) {
+    work->firstSlot = a;
+    work->secondSlot = b;
 }
 
-void evtActivateStoredUnitMotionSlot(u8 *work) {
-    evtConfigureUnitMotionSlot(work, ((EvtTransitionWork *)work)->firstSlot, ((EvtTransitionWork *)work)->secondSlot, 0, 0, 2);
+void evtActivateStoredUnitMotionSlot(EvtUnit *work) {
+    evtConfigureUnitMotionSlot(work, work->firstSlot, work->secondSlot, 0, 0, 2);
 }
 
 void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
@@ -393,12 +321,12 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     unit->flags &= ~0x400000;
     unit->flags &= ~0x800000;
     unit->motionState = 2;
-    unit->transitionArg0 = a;
-    unit->transitionArg1 = b;
-    unit->transitionArg2 = c;
+    unit->unkC4 = a;
+    unit->unkC6 = b;
+    unit->unkC8 = c;
     unit->flags |= 0x80;
     unit->motionTicks = 0;
-    unit->unused94 = 0;
+    unit->unk94 = 0;
     switch (mode) {
     case 0:
         unit->flags |= 0x20;
@@ -426,7 +354,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     VU0_SET_AXIS_CLEAR_W(0.0f, y);
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, unit->effObj->data + 0x40);
+    VU0_LOAD_VF(vf11, unit->effObj->data->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
     return func_00222498(unit, v, angle);
@@ -437,18 +365,18 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 scale;
     EvtEffObj *obj;
 
-    func_00222498(unit, unit->vec70, unit->directionOffset * 0.01f);
+    func_00222498(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
         evtComputePlanarTargetDirectionVu(unit);
         obj = unit->effObj;
     } else {
-        VU0_LOAD_VF(vf10, unit->vec70);
+        VU0_LOAD_VF(vf10, unit->targetVector);
         obj = unit->effObj;
-        VU0_LOAD_VF(vf11, obj->data + 0x40);
+        VU0_LOAD_VF(vf11, obj->data->position);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
     }
-    scale = unit->directionScale * 0.1f;
+    scale = unit->motionParameter * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, v);
     effObjAddInnerFirstVec(obj, v);
@@ -461,11 +389,6 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC070);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC080);
 
-typedef struct EvtEffVecs {
-    u8 pad00[0x40];
-    f32 pos[4];
-    f32 dir[4];
-} EvtEffVecs;
 
 extern s32 func_00220678(EvtUnit *unit);
 extern void func_003003F0(const char *fmt, ...);
@@ -479,8 +402,8 @@ s32 func_002227C8(EvtUnit *unit) {
     s32 count = 0;
     s32 i;
     for (i = 0; i < 4; i++) {
-        savedA[i] = ((EvtEffVecs *)unit->effObj->data)->pos[i];
-        savedB[i] = ((EvtEffVecs *)unit->effObj->data)->dir[i];
+        savedA[i] = unit->effObj->data->position[i];
+        savedB[i] = unit->effObj->data->orientation[i];
     }
     copy = *unit;
     while (func_00220678(&copy) == 0) {
@@ -488,8 +411,8 @@ s32 func_002227C8(EvtUnit *unit) {
         evtApplyUnitDirectionOffset(&copy);
     }
     for (i = 0; i < 4; i++) {
-        ((EvtEffVecs *)unit->effObj->data)->pos[i] = savedA[i];
-        ((EvtEffVecs *)unit->effObj->data)->dir[i] = savedB[i];
+        unit->effObj->data->position[i] = savedA[i];
+        unit->effObj->data->orientation[i] = savedB[i];
     }
     if (count == 0) {
         func_003003F0("ymove frameno = 0\n");
@@ -497,8 +420,8 @@ s32 func_002227C8(EvtUnit *unit) {
         unit->speedY = 0;
         return 0;
     }
-    VU0_LOAD_VF(vf10, unit->vec70);
-    VU0_LOAD_VF(vf11, unit->effObj->data + 0x40);
+    VU0_LOAD_VF(vf10, unit->targetVector);
+    VU0_LOAD_VF(vf11, unit->effObj->data->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = count;
@@ -510,12 +433,12 @@ s32 func_002227C8(EvtUnit *unit) {
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
-    sdfStepWrappingFloatCounter(unit->pathId);
-    func_00116F38(unit->pathId);
+    sdfStepWrappingFloatCounter(unit->pathHandle);
+    func_00116F38(unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     effObjSetInnerFirstVec(unit->effObj, v);
     if (unit->flags & 0x10) {
-        dds3PreparePathVectorPair(unit->pathId);
+        dds3PreparePathVectorPair(unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         func_002E7F20(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
@@ -525,6 +448,6 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     return 1;
 }
 
-void evtCopyUnitTargetVector(void *work, void *src) {
-    PCP_COPY_VECTOR((u8 *)work + 0x70, src);
+void evtCopyUnitTargetVector(EvtUnit *work, void *src) {
+    PCP_COPY_VECTOR(work->targetVector, src);
 }
