@@ -529,11 +529,20 @@ float fldVectorLength(float *vector) {
                   vector[2] * vector[2]);
 }
 
+typedef struct Vector4 {
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4;
+
 /* Normalize copies of the input vectors; callers' vectors stay untouched. */
 float fldNormalizedVectorDot(float *left, float *right) {
-    struct Vector4 { float x, y, z, w; } a, b;
-    a = *(struct Vector4 *)left;
-    b = *(struct Vector4 *)right;
+    Vector4 a;
+    Vector4 b;
+
+    a = *(Vector4 *)left;
+    b = *(Vector4 *)right;
     func_002C84F0(&a.x);
     func_002C84F0(&b.x);
     return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -544,10 +553,11 @@ float fldVec3AngleBetween(float *left, float *right) {
 }
 
 void func_002C8648(float *out, float *left, float *right) {
-    struct Vector4 { float x, y, z, w; } a, b;
+    Vector4 a;
+    Vector4 b;
 
-    a = *(struct Vector4 *)left;
-    b = *(struct Vector4 *)right;
+    a = *(Vector4 *)left;
+    b = *(Vector4 *)right;
     func_002C84F0(&a.x);
     func_002C84F0(&b.x);
     out[0] = a.y * b.z - a.z * b.y;
