@@ -62,7 +62,64 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
 
 INCLUDE_ASM(const s32, "file/fileManager", func_002C7D78);
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C7E28);
+/* Work area behind the fileMan task. */
+typedef struct FileManSlot {
+    FileRequest *request; /* 0x24 + 8 * slot */
+    u32 unk4;
+} FileManSlot;
+
+typedef struct FileManWork {
+    s32 sema;    /* 0x00 */
+    u8 pad04;
+    u8 nextSlot; /* 0x05 */
+    u8 pad06;
+    u8 freeSlots; /* 0x07 */
+    FileNode *head; /* 0x08: queued requests, linked through +0x4 */
+    FileNode *tail; /* 0x0C */
+    u8 pad10[8];
+    u32 unk18;   /* 0x18 */
+    u32 buffer;  /* 0x1C */
+    u8 pad20[4];
+    FileManSlot slots[4]; /* 0x24 */
+} FileManWork;
+
+extern FileManWork fileManagerWork;
+
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+
+/* Clear the node from every request slot and unlink it from the queue. */
+void func_002C7E28(FileNode *node) {
+    FileManWork *work = &fileManagerWork;
+    FileNode *prev;
+    FileNode *cur;
+    s32 i;
+
+    WaitSema(work->sema);
+    for (i = 0; i != 4; i++) {
+        if (work->slots[i].request == (FileRequest *)node) {
+            work->slots[i].request = NULL;
+        }
+    }
+    prev = NULL;
+    cur = work->head;
+    while (cur != NULL) {
+        if (cur == node) {
+            if (cur->next == NULL) {
+                work->tail = prev;
+            }
+            if (prev == NULL) {
+                work->head = cur->next;
+            } else {
+                prev->next = cur->next;
+            }
+            break;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+    SignalSema(work->sema);
+}
 
 void filePrependNode(FileWork *list, FileNode *node) {
     node->next = list->head;
@@ -79,28 +136,6 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     }
     *link = node->next;
 }
-
-/* Work area behind the fileMan task. */
-typedef struct FileManSlot {
-    FileRequest *request; /* 0x24 + 8 * slot */
-    u32 unk4;
-} FileManSlot;
-
-typedef struct FileManWork {
-    s32 sema;    /* 0x00 */
-    u8 pad04;
-    u8 nextSlot; /* 0x05 */
-    u8 pad06;
-    u8 freeSlots; /* 0x07 */
-    void *unk8;  /* 0x08 */
-    u8 pad0C[0xC];
-    u32 unk18;   /* 0x18 */
-    u32 buffer;  /* 0x1C */
-    u8 pad20[4];
-    FileManSlot slots[4]; /* 0x24 */
-} FileManWork;
-
-extern FileManWork fileManagerWork;
 
 void *fileCreatePacLoadWork(u32 request, s32 flags, void *dispatch, s32 onComplete, s32 userData) {
     u8 *work;
@@ -192,7 +227,7 @@ void func_002C81D0(u32 id) {
 void fileWaitIdle(void) {
     FileManWork *work = &fileManagerWork;
 
-    while (work->unk8 != 0 || work->unk18 != 0) {
+    while (work->head != 0 || work->unk18 != 0) {
         fileManUpdate();
     }
 }
@@ -226,8 +261,6 @@ s32 c;
     fileWindowSlotCreate(a, b, c, 0, 0);
 }
 
-extern s32 WaitSema(s32);
-extern s32 SignalSema(s32);
 extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
 
 /* Claim the next of four read slots for a pending request and start its device read. */

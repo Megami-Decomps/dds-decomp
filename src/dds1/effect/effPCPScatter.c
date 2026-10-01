@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 
 /* Shared resource handed between scatter effects. effPcpScatterResCreate creates it,
    effPcpScatterResAddRef takes a reference, effPcpScatterResRelease releases it. */
@@ -1517,7 +1518,71 @@ void func_001751D0(PcpScatterInstanceC *work, void *source)
     VU0_STORE_MATRIX(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00175230);
+typedef struct PcpScatterPlainParams {
+    f32 unk00[4];
+    u32 unk10;
+    f32 unk14[2];
+    u32 particleCount;
+    u32 unk20;
+    u32 randomDelayRange;
+    f32 unk28[0x30];
+} PcpScatterPlainParams;
+
+typedef struct PcpScatterPlainParticle {
+    u8 pad00[0x0C];
+    s32 age;
+    u8 pad10[0x18];
+} PcpScatterPlainParticle;
+
+typedef struct PcpScatterPlainInstance {
+    f32 matrix[16];
+    PcpScatterPlainParams params;
+    PcpScatterPlainParticle *particles;
+    f32 scale;
+    u32 color;
+    u32 scatterObject;
+    u32 ownedBuffer;
+} PcpScatterPlainInstance;
+
+/* Allocate particles after the scatter work (identity matrix), then assign randomized start delays. */
+void *func_00175230(src, resource)
+    PcpScatterPlainParams *src;
+    u32 resource;
+{
+    u32 allocation = func_002D03F8(src->particleCount * 0x28 + 0x13C);
+    PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfResourceRetainAddress(allocation);
+    PcpScatterPlainParticle *particle;
+    u32 mod;
+    u32 count;
+    u32 i;
+    void *object;
+    u32 unk50;
+
+    particle = (PcpScatterPlainParticle *)((u8 *)inst + 0x13C);
+    inst->params = *src;
+    inst->color = 0x80808080;
+    inst->scale = 1.0f;
+    inst->ownedBuffer = allocation;
+    inst->particles = particle;
+    EE_MMI_UNIT_MATRIX(inst->matrix);
+    object = func_00175B50(src->particleCount, src->unk20);
+    unk50 = src->unk10;
+    inst->scatterObject = (u32)object;
+    *(u32 *)((u8 *)object + 0x50) = unk50;
+    if (resource != 0) {
+        effCreateScatterResource(object, resource);
+    }
+    mod = inst->params.randomDelayRange;
+    count = inst->params.particleCount;
+    if ((s32)mod <= 0) {
+        mod = 1;
+    }
+    for (i = 0; i < count; i++) {
+        particle->age = -(effMiscRand(D_0034DF38) % mod);
+        particle++;
+    }
+    return inst;
+}
 
 void func_00175420(void *data)
 {
