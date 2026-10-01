@@ -376,7 +376,7 @@ _9:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _37
@@ -679,7 +679,7 @@ _41:
     COMM 0x0203
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _45
@@ -713,7 +713,7 @@ _47:
   while (1) {
     push 1
     push 10
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _53
@@ -770,7 +770,7 @@ _55:
   while (1) {
     push 1
     push 11
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _57
@@ -810,7 +810,7 @@ _59:
   while (1) {
     push 1
     push 3
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _61
@@ -851,7 +851,7 @@ _63:
   if_not (local_int[15] == 0) goto _70
   push 1
   push 6
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _65
@@ -876,7 +876,7 @@ _78:
   if_not (local_int[15] == 0) goto _76
   push 1
   push 7
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _71
@@ -946,7 +946,7 @@ _83:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _85
@@ -968,7 +968,7 @@ _87:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _89
@@ -1000,7 +1000,7 @@ _91:
     if_not (local_int[22] == 1) goto _111
     push 1
     push 1
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _93
@@ -1012,7 +1012,7 @@ _91:
     if_not (local_int[22] == 2) goto _112
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _95
@@ -1024,7 +1024,7 @@ _91:
     if_not (local_int[22] == 100) goto _113
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _97
@@ -1040,7 +1040,7 @@ _91:
       if_not (local_int[22] == 102) goto _115
       push 1
       push 3
-      COMM 0x005e
+      COMM ACTION_WINDOW_REQUEST_AND_POLL
       PUSHREG
       EQ
       IF _99
@@ -1056,7 +1056,7 @@ _91:
         if_not (local_int[22] == 104) goto _117
         push 1
         push 6
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _101
@@ -1068,7 +1068,7 @@ _91:
         if_not (local_int[22] == 105) goto _118
         push 1
         push 7
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _103
@@ -1080,7 +1080,7 @@ _91:
         if_not (local_int[22] == 106) goto _119
         push 1
         push 10
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _105
@@ -1092,7 +1092,7 @@ _91:
         if_not (local_int[22] == 107) goto _120
         push 1
         push 11
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _107
@@ -1406,14 +1406,14 @@ _162:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 0
   push string(str_01path_02)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
   push result
   COMM 0x006c
@@ -1516,10 +1516,8 @@ baria_label:
   IF _184
 _165:
   while (1) {
-    push 9
-    COMM 0x005e
-    PUSHREG
-    IF _182
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _182
     push 0
     push local_int[43]
     COMM TEST_MODEL_FLAG
@@ -1696,7 +1694,7 @@ _186:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _190
@@ -1758,7 +1756,7 @@ _192:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _196
@@ -2062,7 +2060,7 @@ proc_001e:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_2))
   push result
@@ -2078,63 +2076,63 @@ proc_001e:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2166,7 +2164,7 @@ proc_001f:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_3))
   push result
@@ -2182,63 +2180,63 @@ proc_001f:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2270,7 +2268,7 @@ proc_0020:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_4))
   push result
@@ -2286,63 +2284,63 @@ proc_0020:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2374,7 +2372,7 @@ proc_0021:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_5))
   push result
@@ -2390,63 +2388,63 @@ proc_0021:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2478,7 +2476,7 @@ proc_0022:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_6))
   push result
@@ -2494,63 +2492,63 @@ proc_0022:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2582,7 +2580,7 @@ proc_0023:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_7))
   push result
@@ -2598,63 +2596,63 @@ proc_0023:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2686,7 +2684,7 @@ proc_0024:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_8))
   push result
@@ -2702,63 +2700,63 @@ proc_0024:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2790,7 +2788,7 @@ proc_0025:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_9))
   push result
@@ -2806,63 +2804,63 @@ proc_0025:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2894,7 +2892,7 @@ proc_0026:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_10))
   push result
@@ -2910,63 +2908,63 @@ proc_0026:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -2998,7 +2996,7 @@ proc_0027:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_11))
   push result
@@ -3014,63 +3012,63 @@ proc_0027:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -3147,70 +3145,70 @@ proc_0028:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume11), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -3259,70 +3257,70 @@ proc_0029:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   SET_MODEL_FLAG(1633)
   push 140
   COMM 0x020f
@@ -3371,70 +3369,70 @@ proc_002a:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   SET_MODEL_FLAG(1633)
   push 141
   COMM 0x020f
@@ -3483,70 +3481,70 @@ proc_002b:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_06_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_06_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_10_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_10_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_18_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_18_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   SET_MODEL_FLAG(1633)
   push 142
   COMM 0x020f
@@ -3753,7 +3751,7 @@ proc_0030:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_2))
   push result
@@ -3769,21 +3767,21 @@ proc_0030:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -3815,7 +3813,7 @@ proc_0031:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_3))
   push result
@@ -3831,21 +3829,21 @@ proc_0031:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -3877,7 +3875,7 @@ proc_0032:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_4))
   push result
@@ -3893,21 +3891,21 @@ proc_0032:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_13_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -3939,7 +3937,7 @@ proc_0033:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_5))
   push result
@@ -3955,21 +3953,21 @@ proc_0033:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_13_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4042,28 +4040,28 @@ proc_0034:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_13_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4136,28 +4134,28 @@ proc_0035:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_13_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume18), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4204,28 +4202,28 @@ proc_0036:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_13_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_13_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 96
   COMM 0x0215
   SET_MODEL_FLAG(1633)
@@ -4457,7 +4455,7 @@ proc_003c:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_12_2))
   push result
@@ -4473,7 +4471,7 @@ proc_003c:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume12), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4505,7 +4503,7 @@ proc_003d:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_19_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_19_3))
   push result
@@ -4521,7 +4519,7 @@ proc_003d:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_12_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume12), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4572,14 +4570,14 @@ proc_003e:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_12_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_19_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_19_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 143
   COMM 0x020f
   return
@@ -4627,14 +4625,14 @@ proc_003f:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_12_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_19_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_19_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 144
   COMM 0x020f
   return
@@ -4814,7 +4812,7 @@ proc_0043:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_10))
   push result
@@ -4830,49 +4828,49 @@ proc_0043:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4904,7 +4902,7 @@ proc_0044:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_18))
   push result
@@ -4920,49 +4918,49 @@ proc_0044:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -4994,7 +4992,7 @@ proc_0045:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_19))
   push result
@@ -5010,49 +5008,49 @@ proc_0045:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_17)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_17)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5084,7 +5082,7 @@ proc_0046:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_20))
   push result
@@ -5100,49 +5098,49 @@ proc_0046:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5174,7 +5172,7 @@ proc_0047:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_21))
   push result
@@ -5190,49 +5188,49 @@ proc_0047:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5264,7 +5262,7 @@ proc_0048:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_15))
   push result
@@ -5280,49 +5278,49 @@ proc_0048:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5354,7 +5352,7 @@ proc_0049:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_8))
   push result
@@ -5370,49 +5368,49 @@ proc_0049:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5473,49 +5471,49 @@ proc_004a:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5588,56 +5586,56 @@ proc_004b:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5710,56 +5708,56 @@ proc_004c:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_17)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume19), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -5808,56 +5806,56 @@ proc_004d:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_02_26)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_02_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_05_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_17_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_17_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_22_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_22_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 125
   COMM 0x020f
   return
@@ -6086,7 +6084,7 @@ proc_0053:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_29))
   push result
@@ -6102,7 +6100,7 @@ proc_0053:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume13), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6134,7 +6132,7 @@ proc_0054:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_18))
   push result
@@ -6150,7 +6148,7 @@ proc_0054:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_30))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume13), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6199,14 +6197,14 @@ proc_0055:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_31))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_17)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 145
   COMM 0x020f
   return
@@ -6254,14 +6252,14 @@ proc_0056:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_32))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 146
   COMM 0x020f
   return
@@ -6309,14 +6307,14 @@ proc_0057:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_05_33))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_07_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_07_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 147
   COMM 0x020f
   return
@@ -6551,7 +6549,7 @@ proc_005e:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_22))
   push result
@@ -6567,56 +6565,56 @@ proc_005e:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_26)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_26)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6648,7 +6646,7 @@ proc_005f:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_18))
   push result
@@ -6664,56 +6662,56 @@ proc_005f:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_27)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_29))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_27)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_29))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_2))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6745,7 +6743,7 @@ proc_0060:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_19))
   push result
@@ -6761,56 +6759,56 @@ proc_0060:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_28)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_30))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_28)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_30))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_3)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6842,7 +6840,7 @@ proc_0061:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_31))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_32))
   push result
@@ -6858,56 +6856,56 @@ proc_0061:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_29)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_31))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -6939,7 +6937,7 @@ proc_0062:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_32))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_33))
   push result
@@ -6955,56 +6953,56 @@ proc_0062:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_30)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_33))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_5))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7036,7 +7034,7 @@ proc_0063:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_14))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_15))
   push result
@@ -7052,56 +7050,56 @@ proc_0063:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_20)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_22))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_31)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_34))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_31)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_34))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_6)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_6))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7133,7 +7131,7 @@ proc_0064:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_8))
   push result
@@ -7149,56 +7147,56 @@ proc_0064:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_21)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_23))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_32)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_35))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_32)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_35))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_14)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_16))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_7)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_7))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7230,7 +7228,7 @@ proc_0065:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_29))
   push result
@@ -7246,56 +7244,56 @@ proc_0065:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_29))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_22)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_24))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_33)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_36))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_33)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_36))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_15)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_17))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_9)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_8)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_8))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7327,7 +7325,7 @@ proc_0066:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_9))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   PREPARE_UNIT_MOTION_STATE(global_int[0], 25, 0, 0, 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_10))
   push result
@@ -7343,56 +7341,56 @@ proc_0066:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_30))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_23)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_25))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_34)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_37))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_34)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_37))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_16)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_18))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_10))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_27)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_30))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7465,63 +7463,63 @@ proc_0067:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_31))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_24)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_26))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_35)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_38))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_35)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_38))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_17)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_19))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_28)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_31))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_10)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_11))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7594,63 +7592,63 @@ proc_0068:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_32))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_26)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_25)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_27))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_36)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_39))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_36)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_39))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_18)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_20))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_29)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_32))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_11)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_12))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = CREATE_SCRIPT_TASK(procedure(moon_susume20), 0)
   WAIT_FOR_TASK_REMOVAL(result)
   RELEASE_CURRENT_OBJECT()
@@ -7699,63 +7697,63 @@ proc_0069:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_01_33))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_03_27)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_03_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_04_26)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_04_28))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_08_37)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_08_40))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_09_37)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_09_40))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_14_19)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_14_21))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_15_13)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_15_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_16_30)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_16_33))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_20_12)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01move_20_13))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 126
   COMM 0x020f
   return
@@ -7961,7 +7959,7 @@ _232:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _239
@@ -8007,7 +8005,7 @@ _241:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _248

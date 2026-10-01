@@ -629,7 +629,7 @@ _9:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _37
@@ -932,7 +932,7 @@ _41:
     COMM 0x0203
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _45
@@ -966,7 +966,7 @@ _47:
   while (1) {
     push 1
     push 10
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _53
@@ -1023,7 +1023,7 @@ _55:
   while (1) {
     push 1
     push 11
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _57
@@ -1063,7 +1063,7 @@ _59:
   while (1) {
     push 1
     push 3
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _61
@@ -1104,7 +1104,7 @@ _63:
   if_not (local_int[15] == 0) goto _70
   push 1
   push 6
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _65
@@ -1129,7 +1129,7 @@ _78:
   if_not (local_int[15] == 0) goto _76
   push 1
   push 7
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _71
@@ -1199,7 +1199,7 @@ _83:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _85
@@ -1221,7 +1221,7 @@ _87:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _89
@@ -1253,7 +1253,7 @@ _91:
     if_not (local_int[22] == 1) goto _111
     push 1
     push 1
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _93
@@ -1265,7 +1265,7 @@ _91:
     if_not (local_int[22] == 2) goto _112
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _95
@@ -1277,7 +1277,7 @@ _91:
     if_not (local_int[22] == 100) goto _113
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _97
@@ -1293,7 +1293,7 @@ _91:
       if_not (local_int[22] == 102) goto _115
       push 1
       push 3
-      COMM 0x005e
+      COMM ACTION_WINDOW_REQUEST_AND_POLL
       PUSHREG
       EQ
       IF _99
@@ -1309,7 +1309,7 @@ _91:
         if_not (local_int[22] == 104) goto _117
         push 1
         push 6
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _101
@@ -1321,7 +1321,7 @@ _91:
         if_not (local_int[22] == 105) goto _118
         push 1
         push 7
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _103
@@ -1333,7 +1333,7 @@ _91:
         if_not (local_int[22] == 106) goto _119
         push 1
         push 10
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _105
@@ -1345,7 +1345,7 @@ _91:
         if_not (local_int[22] == 107) goto _120
         push 1
         push 11
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _107
@@ -1659,14 +1659,14 @@ _162:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 0
   push string(str_01path_02)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
   push result
   COMM 0x006c
@@ -1769,10 +1769,8 @@ baria_label:
   IF _184
 _165:
   while (1) {
-    push 9
-    COMM 0x005e
-    PUSHREG
-    IF _182
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _182
     push 0
     push local_int[43]
     COMM TEST_MODEL_FLAG
@@ -2178,7 +2176,7 @@ _196:
     IF _216
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _214
@@ -2962,7 +2960,7 @@ _263:
     IF _267
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _265
@@ -3016,7 +3014,7 @@ _269:
     IF _273
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _271
@@ -3070,7 +3068,7 @@ _275:
     IF _279
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _277
@@ -3124,7 +3122,7 @@ _281:
     IF _285
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _283
@@ -3235,7 +3233,7 @@ _291:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _293
@@ -4584,7 +4582,7 @@ _421:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _439
@@ -4680,7 +4678,7 @@ _441:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _459
@@ -4776,7 +4774,7 @@ _461:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _479
@@ -4872,7 +4870,7 @@ _481:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _499
@@ -4968,7 +4966,7 @@ _501:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _519
@@ -5064,7 +5062,7 @@ _521:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _539
@@ -5160,7 +5158,7 @@ _541:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _559
@@ -5689,7 +5687,7 @@ _575:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _577
@@ -5724,7 +5722,7 @@ _579:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _581
@@ -5759,7 +5757,7 @@ _583:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _585
@@ -5794,7 +5792,7 @@ _587:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _589
@@ -5861,7 +5859,7 @@ _591:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _593
@@ -5881,7 +5879,7 @@ _595:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _597
@@ -5901,7 +5899,7 @@ _599:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _601
@@ -5921,7 +5919,7 @@ _603:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _605
@@ -5941,7 +5939,7 @@ _607:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _609
@@ -5961,7 +5959,7 @@ _611:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _613
@@ -5981,7 +5979,7 @@ _615:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _617
@@ -6001,7 +5999,7 @@ _619:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _621
@@ -6021,7 +6019,7 @@ _623:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _625
@@ -6041,7 +6039,7 @@ _627:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _629
@@ -6061,7 +6059,7 @@ _631:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _633
@@ -6081,7 +6079,7 @@ _635:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _637
@@ -6101,7 +6099,7 @@ _639:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _641
@@ -6121,7 +6119,7 @@ _643:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _645
@@ -6141,7 +6139,7 @@ _647:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _649
@@ -6161,7 +6159,7 @@ _651:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _653
@@ -6181,7 +6179,7 @@ _655:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _657
@@ -6201,7 +6199,7 @@ _659:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _661
@@ -6221,7 +6219,7 @@ _663:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _665
@@ -6241,7 +6239,7 @@ _667:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _669
@@ -6261,7 +6259,7 @@ _671:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _673
@@ -6281,7 +6279,7 @@ _675:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _677
@@ -6301,7 +6299,7 @@ _679:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _681
@@ -6321,7 +6319,7 @@ _683:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _685
@@ -6341,7 +6339,7 @@ _687:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _689
@@ -6361,7 +6359,7 @@ _691:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _693
@@ -6381,7 +6379,7 @@ _695:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _697
@@ -6401,7 +6399,7 @@ _699:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _701

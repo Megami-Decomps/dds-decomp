@@ -472,7 +472,7 @@ _9:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _37
@@ -775,7 +775,7 @@ _41:
     COMM 0x0203
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _45
@@ -809,7 +809,7 @@ _47:
   while (1) {
     push 1
     push 10
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _53
@@ -866,7 +866,7 @@ _55:
   while (1) {
     push 1
     push 11
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _57
@@ -906,7 +906,7 @@ _59:
   while (1) {
     push 1
     push 3
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _61
@@ -947,7 +947,7 @@ _63:
   if_not (local_int[15] == 0) goto _70
   push 1
   push 6
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _65
@@ -972,7 +972,7 @@ _78:
   if_not (local_int[15] == 0) goto _76
   push 1
   push 7
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _71
@@ -1042,7 +1042,7 @@ _83:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _85
@@ -1064,7 +1064,7 @@ _87:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _89
@@ -1096,7 +1096,7 @@ _91:
     if_not (local_int[22] == 1) goto _111
     push 1
     push 1
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _93
@@ -1108,7 +1108,7 @@ _91:
     if_not (local_int[22] == 2) goto _112
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _95
@@ -1120,7 +1120,7 @@ _91:
     if_not (local_int[22] == 100) goto _113
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _97
@@ -1136,7 +1136,7 @@ _91:
       if_not (local_int[22] == 102) goto _115
       push 1
       push 3
-      COMM 0x005e
+      COMM ACTION_WINDOW_REQUEST_AND_POLL
       PUSHREG
       EQ
       IF _99
@@ -1152,7 +1152,7 @@ _91:
         if_not (local_int[22] == 104) goto _117
         push 1
         push 6
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _101
@@ -1164,7 +1164,7 @@ _91:
         if_not (local_int[22] == 105) goto _118
         push 1
         push 7
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _103
@@ -1176,7 +1176,7 @@ _91:
         if_not (local_int[22] == 106) goto _119
         push 1
         push 10
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _105
@@ -1188,7 +1188,7 @@ _91:
         if_not (local_int[22] == 107) goto _120
         push 1
         push 11
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _107
@@ -1502,14 +1502,14 @@ _162:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 0
   push string(str_01path_02)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
   push result
   COMM 0x006c
@@ -1612,10 +1612,8 @@ baria_label:
   IF _184
 _165:
   while (1) {
-    push 9
-    COMM 0x005e
-    PUSHREG
-    IF _182
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _182
     push 0
     push local_int[43]
     COMM TEST_MODEL_FLAG
@@ -1772,31 +1770,29 @@ proc_0012:
   PROC proc_0012
 _186:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _188
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_01)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0032
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[50], result)
-    MESSAGE_REQUEST_AND_POLL(message(heat_01a))
-    PREPARE_UNIT_MOTION_STATE(local_int[50], 12, 10, 20, 0)
-    MESSAGE_REQUEST_AND_POLL(message(heat_01b))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[50])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[50], 0, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _188
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_01)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0032
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[50], result)
+      MESSAGE_REQUEST_AND_POLL(message(heat_01a))
+      PREPARE_UNIT_MOTION_STATE(local_int[50], 12, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(heat_01b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[50])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[50], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _188:
     WAIT_FOR_TIMER_START()
   }
@@ -1806,29 +1802,27 @@ proc_0013:
   PROC proc_0013
 _190:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _192
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_02)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0033
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_3))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[51], result)
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(arujila_01))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _192
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_02)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0033
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_3))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[51], result)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(arujila_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _192:
     WAIT_FOR_TIMER_START()
   }
@@ -1838,10 +1832,8 @@ proc_0014:
   PROC proc_0014
 _194:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _198
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _198
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_01_2)
@@ -2040,7 +2032,7 @@ _202:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1091)
     goto _204
   _205:
@@ -2067,7 +2059,7 @@ _202:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1091)
     goto _204
   _204:
@@ -2249,7 +2241,7 @@ proc_001a:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_5))
   push result
   COMM 0x006c
@@ -2332,7 +2324,7 @@ _224:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_6))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1089)
     goto _226
   _227:
@@ -2359,7 +2351,7 @@ _224:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_7))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1089)
     goto _226
   _226:
@@ -3226,14 +3218,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_9))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push string(path_hoji_02)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1090)
     goto _278
   _279:
@@ -3260,14 +3252,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_10))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 1
     push string(path_hoji_02_2)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1090)
     goto _278
   _278:
@@ -3348,14 +3340,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_12))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push string(path_hoji_02_3)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_4))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1090)
     push 0
     push 4
@@ -3370,14 +3362,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_03))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push string(str_01path_02_2)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_03b))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     WAIT_FOR_TIMER_LIMIT(30)
     push 64
     COMM 0x0214
@@ -3387,14 +3379,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_03_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 1
     push string(str_01path_02_3)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_03b_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 98
     COMM 0x0214
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_13))
@@ -3425,14 +3417,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push string(str_01path_04)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02b))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     WAIT_FOR_TIMER_LIMIT(30)
     push 64
     COMM 0x0214
@@ -3442,14 +3434,14 @@ _276:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 1
     push string(str_01path_04_2)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02b_2))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push 4
     COMM 0x01f4
@@ -3594,14 +3586,14 @@ proc_0028:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 0
   push string(str_01path_01_4)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02b_3))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   WAIT_FOR_TIMER_LIMIT(30)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -3618,14 +3610,14 @@ proc_0028:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 1
   push string(str_01path_01_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_01d_02b_4))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 20
   COMM 0x020f
   return
@@ -4148,7 +4140,7 @@ _334:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_14))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1093)
     goto _336
   _337:
@@ -4175,7 +4167,7 @@ _334:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_15))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1093)
     goto _336
   _336:
@@ -4550,14 +4542,14 @@ _362:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_17))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 0
     push string(path_hoji_02_4)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_6))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     SET_MODEL_FLAG(1094)
     goto _364
   _365:
@@ -4584,14 +4576,14 @@ _362:
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_18))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     push 1
     push string(path_hoji_02_5)
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_7))
     push result
-    COMM 0x006b
+    COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1094)
     goto _364
   _364:
