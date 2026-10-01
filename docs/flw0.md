@@ -509,6 +509,31 @@ tables and both implementations:
 | `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
 
+The standard profiles also contain the paired battle-runtime commands used by
+the negotiation script and AICALC programs:
+
+| Source name | ID | Stack values consumed | Verified handler behavior |
+|---|---:|---:|---|
+| `AI_COUNTER_REACHED_LIMIT` | `0x0DF` | 1 | Tests the native battle counter against a limit and returns the result |
+| `AI_SELECT_ACTION_BY_KIND` | `0x0E2` | 2 | Selects an action kind and value in the battle command context |
+| `TRACE_BATTLE_RETREAT` | `0x0E4` | 0 | Emits the retail `BTL_TAIKYO` battle-debug trace |
+| `TRACE_BATTLE_ALL_RETREAT` | `0x0E5` | 0 | Emits the retail `BTL_ALLTAIKYO` battle-debug trace |
+| `AI_RESET_COMMAND_CONTEXT` | `0x0E6` | 0 | Resets the battle command context and sets its state flag |
+| `AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT` | `0x0E7` | 1 | Selects the lowest-HP target that blocks the supplied element |
+| `AI_MOVE_CAMERA` | `0x0F4` | 7 | Starts a seven-value battle camera move and schedules context reset |
+| `TRACE_BATTLE_CAMERA_ORIGINAL` | `0x0F5` | 0 | Emits the retail `BTL_CAM_ORG` battle-debug trace |
+| `AI_ENABLE_COMMAND_STATE_FLAG` | `0x0F6` | 0 | Sets bit one in the battle command-context flags |
+| `AI_QUEUE_ACTOR_COMMAND_SOUND` | `0x0FA` | 0 | Queues the actor command-sound tasks |
+| `TRACE_BATTLE_CAMERA_TWO_SHOT` | `0x0FB` | 0 | Emits the retail `BTL_CAM_2SHOT` battle-debug trace |
+| `TRACE_BATTLE_CAMERA_OBSTRUCTION` | `0x0FC` | 0 | Emits the retail `BTL_CAM_BOUGAI` battle-debug trace |
+
+The four `TRACE_` handlers call only the battle-debug printer. In particular,
+`0x0F5` does not restore camera state. Command `0x0DE` reaches a related
+counter predicate through a different packed-action path, but the distinction
+between the two paths is not established, so it remains numeric. These
+profiles therefore resolve every other native call in both negotiation
+scripts.
+
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
 source has no profile or the selected profile does not define it. Profiles are
@@ -528,8 +553,8 @@ row flag, but its full role is not yet established, so it remains numeric.
 `READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
 both DDS handlers are stubs that return zero.
 
-The reviewed set names 45,765 of 53,389 native calls in the complete DDS1
-corpus and 33,257 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 45,795 of 53,389 native calls in the complete DDS1
+corpus and 33,283 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
