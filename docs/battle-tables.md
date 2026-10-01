@@ -128,4 +128,5 @@ party-affinity 1 values=100,100,0x80000078,50,100,100,100,100,100,100,100,100,10
 Fields whose consumers establish a type but not a stable gameplay name retain
 offset-based names. Unknown byte spans use fixed-length hexadecimal values.
 The assembler validates every row count, list width, integer range, segment
-size, and alignment byte before writing a table.
+size, and alignment byte before writing a table. Corpus tests also join every
+nonzero encounter enemy ID to a populated enemy template in the paired game.

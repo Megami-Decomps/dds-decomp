@@ -845,6 +845,24 @@ def encode_unit(table: UnitTable) -> bytes:
     )
 
 
+def validate_encount_unit(encount: EncountTable, unit: UnitTable) -> None:
+    """Validate encounter enemy IDs against the paired UNIT profile."""
+
+    if encount.profile.name != unit.profile.name:
+        raise BattleTableError(
+            f"cannot join {encount.profile.name} ENCOUNT with {unit.profile.name} UNIT"
+        )
+    for encounter_index, encounter in enumerate(encount.encounters):
+        for slot_index, enemy_id in enumerate(encounter.enemies):
+            if enemy_id == 0:
+                continue
+            context = f"encounter {encounter_index} enemy slot {slot_index}"
+            if enemy_id >= len(unit.enemies):
+                raise BattleTableError(f"{context} references enemy {enemy_id} outside UNIT")
+            if unit.enemies[enemy_id] == EnemyTemplate():
+                raise BattleTableError(f"{context} references empty enemy {enemy_id}")
+
+
 def _tokens(line: str, line_number: int) -> list[str]:
     try:
         return shlex.split(line, comments=True, posix=True)
