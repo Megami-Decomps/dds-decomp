@@ -339,8 +339,8 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
     return value != old;
 }
 
-void fldStepColorChannelByCurrentPad(u32 *arg0, s32 arg1) {
-    fldStepColorChannelByPad(arg0, arg1, D_00324530);
+void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
+    fldStepColorChannelByPad(color, channel, D_00324530);
 }
 
 /* Formats a time in seconds as "d.dd" (digits saturate at 9.99). */
