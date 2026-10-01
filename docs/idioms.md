@@ -713,6 +713,14 @@ Two related mechanisms are known:
   `u32 result = param;` in any placement collapses into one register. A
   retail copy needs the two values' uses separated by a block boundary (a
   label with two predecessors) or the older value used later than the copy.
+- **`addu $5,$3,$2; daddu $3,$5,$0` (one address in two registers) comes from
+  an array embedded in a pointed-to struct.** For `table->entries[i].a` and
+  `table->entries[i].b` the front end adds each field offset to the base
+  first, so cse1 sees two different sums; combine later folds the offsets into
+  the displacements and `reload_cse_regs` turns the duplicate sum into a move.
+  A pointer member (`Rec *records; records[i].a`) gives one register instead.
+  DDS2 `func_00231618` / DDS1 `func_00216B00` (also `btlClearActorEntrySlot`,
+  `btlActorEntryIsExpired`).
 
 ### FP registers: local-alloc before global-alloc
 
