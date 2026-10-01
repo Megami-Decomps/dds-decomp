@@ -72,11 +72,11 @@ extern u8 D_003B2278[];
 
 extern u8 D_003B22A0[];
 
-extern BDWork2C *func_0018E850(void *arg);
+extern BDWork2C *effCloneBlurTemplate(void *arg);
 
 extern BDWork2C *func_0018EBC8(void *arg);
 
-extern BDWork24 *func_0018FBF8(void *arg);
+extern BDWork24 *effCloneResourceTemplate(void *arg);
 
 extern BDWork2C *effCloneBlurWorkWithSlots(void *arg);
 
@@ -118,9 +118,9 @@ extern s8 D_00436461;
 
 extern s8 D_00436460;
 
-extern void func_0018E0D0(Work30 *arg);
+extern void effDrawBlurRectangle(Work30 *arg);
 
-extern void func_0018E908(BDWork2C *arg);
+extern void effDrawBlurPixelRectWithResource(BDWork2C *arg);
 
 extern void func_0018ECD0(BDWork2C *arg);
 
@@ -364,19 +364,19 @@ void effInitCh75Id(void) {
 }
 
 void effInitWorks(void) {
-    D_00438F10 = func_0018E850(D_003B2208);
+    D_00438F10 = effCloneBlurTemplate(D_003B2208);
     D_00438F0C = func_0018EBC8(D_003B21D8);
-    D_00438F14 = func_0018FBF8(D_003B2278);
+    D_00438F14 = effCloneResourceTemplate(D_003B2278);
     D_00438F18 = effCloneBlurWorkWithSlots(D_003B22A0);
     *(s32 *)effGetCh76Work() = 4;
 }
 
 void effDispatchActive(void) {
     if (D_00436460) {
-        func_0018E0D0(&D_003B21B0);
+        effDrawBlurRectangle(&D_003B21B0);
     }
     if (D_00436461) {
-        func_0018E908(D_00438F10);
+        effDrawBlurPixelRectWithResource(D_00438F10);
     }
     if (D_00436462) {
         func_0018ECD0(D_00438F0C);

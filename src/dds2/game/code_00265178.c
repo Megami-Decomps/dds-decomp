@@ -11,7 +11,7 @@ typedef struct EvtSlot {
 extern EvtSlot D_003CE1AC[];
 
 /* Set the model flag owned by the given slot. */
-void func_00265178(s32 index) {
+void mnuSetFlagForMenuEntry(s32 index) {
     s32 flag;
 
     flag = D_003CE1AC[index].flag;

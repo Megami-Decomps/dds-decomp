@@ -12,7 +12,7 @@ u32 func_002E8900(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
-void func_002E9340(s32 arg0);
+void sndEnsureMidiBankResident(s32 arg0);
 
 void func_002E8E00(void) {
     func_002E87A8(0x1a0, 0, 0, 0);
@@ -53,7 +53,7 @@ u32 func_002E8F30(s32 command, char *text) {
 /* Send a 12-byte sequence command; the trailing struct word is not transmitted. */
 void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
     SequenceVolumePanPacket packet;
-    func_002E9340(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.volume = volume;
     packet.pan = (u8)pan;

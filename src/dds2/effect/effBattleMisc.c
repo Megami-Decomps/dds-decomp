@@ -1,9 +1,9 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
-extern s32 func_00169440(void);
+extern s32 effBTLFieldColorGetVariantSelector(void);
 
-extern s32 func_00169438(void);
+extern s32 effBTLFieldColorGetOriginalSelector(void);
 
 /* Flag word read by the two wrappers below. */
 typedef struct {
@@ -26,26 +26,26 @@ void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *ou
     VU0_STORE_VF(vf10, out);
 }
 
-extern u32 func_00169448(void);
-extern u32 func_00169450(void);
+extern u32 effBTLFieldColorGetOverrideSelector(void);
+extern u32 effBTLFieldColorGetFinalSelector(void);
 extern void func_001697D0();
 
 void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
-    func_001697D0(func_00169448(), arg);
+    func_001697D0(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
 void func_00169740(u32 unused, void *arg) {
-    func_001697D0(func_00169450(), arg);
+    func_001697D0(effBTLFieldColorGetFinalSelector(), arg);
 }
 
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
-void func_00169770(u32 unused, EffBattleMiscParam *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(func_00169448(), param->value);
+void effBattleMiscQueryOverrideAttachment(u32 unused, EffBattleMiscParam *param) {
+    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetOverrideSelector(), param->value);
 }
 
-void func_001697A0(u32 unused, EffBattleMiscParam *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(func_00169450(), param->value);
+void effBattleMiscQueryFinalAttachment(u32 unused, EffBattleMiscParam *param) {
+    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetFinalSelector(), param->value);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001697D0);
@@ -53,14 +53,14 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", func_001697D0);
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_00169A78);
 
 void func_00169C58(u32 unused, u32 value) {
-    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00169438();
+    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
     func_00169A78(ctx->flags & 0xE00, value);
 }
 
 void func_00169C88(u32 unused, u32 value) {
-    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)func_00169440();
+    EffBattleMiscCtx *ctx = (EffBattleMiscCtx *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
     func_00169A78(ctx->flags & 0xE00, value);
@@ -85,7 +85,7 @@ typedef struct {
 } EffBattleMiscTargetParam;
 
 extern void *dds3GetWorldObject(void);
-extern void *func_00110C18(void *object);
+extern void *dds3GetWorldCameraObject(void *object);
 extern void dds3LoadCameraVectorVU(void *object);
 extern void effObjFetchInnerFirstVec(void *object);
 extern f32 D_003AF1C0[];
@@ -107,7 +107,7 @@ void effBattleMiscBuildUnitPartOffsetVU(EffBattleMiscUnit *unit, EffBattleMiscTa
         length = (f32)lengthParam;
     }
     if (sub == 9 || kind == 4) {
-        object = func_00110C18(dds3GetWorldObject());
+        object = dds3GetWorldCameraObject(dds3GetWorldObject());
         dir[0] = dir[1] = dir[2] = 750.0f;
         dds3LoadCameraVectorVU(object);
         VU0_MOVE_VF(vf11, vf10);
@@ -166,22 +166,22 @@ f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param)
         result = unit->fB4 * unit->f80;
         break;
     case 1:
-        other = (EffBattleMiscUnit *)func_00169438();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetOriginalSelector();
         result = func_00208298(other->flags110 & 0x600, 0, 0);
         break;
     case 2:
-        other = (EffBattleMiscUnit *)func_00169440();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetVariantSelector();
         result = func_00208298(other->flags110 & 0x600, 0, 0);
         break;
     case 3:
         result = func_00208298(0x600, 0, 0);
         break;
     case 6:
-        other = (EffBattleMiscUnit *)func_00169448();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetOverrideSelector();
         result = other->fB4 * other->f80;
         break;
     case 7:
-        other = (EffBattleMiscUnit *)func_00169450();
+        other = (EffBattleMiscUnit *)effBTLFieldColorGetFinalSelector();
         result = other->fB4 * other->f80;
         break;
     }

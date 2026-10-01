@@ -4,7 +4,7 @@
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
-extern SdfTex *D_003BD308;
+extern SdfTex *sdfResourceListHead;
 extern u8 D_003BD9F0;
 
 void *sdfAllocateBlockBySizeThreshold(s32 arg0);
@@ -60,7 +60,7 @@ void sdfTexRelease(SdfTex *texture) {
     if (next != NULL) {
         next->prev = prev;
     } else {
-        D_003BD308 = prev;
+        sdfResourceListHead = prev;
     }
     sdfFreeMemoryFromEitherHeap(texture->data);
     sdfFreeMemoryFromEitherHeap(texture->unk3C);

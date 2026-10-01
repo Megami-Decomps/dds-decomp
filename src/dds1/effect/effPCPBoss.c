@@ -17,7 +17,7 @@ extern EffParamWork *effParamWorkDuplicate(EffParamWork *param);
 extern void func_001629F0(EffParamWork *handle);
 extern void sdfReleaseChipBlock(void *work);
 extern u32 func_001619E8(void);
-extern u32 func_00161860(void);
+extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
@@ -272,7 +272,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
 
     if (func_001619E8() != 0) {
         if (work->frame == 0) {
-            btlUnitGetMuzzlePosVU(func_00161860());
+            btlUnitGetMuzzlePosVU(effBTLFieldColorGetVariantSelector());
             VU0_STORE_VF(vf10, work->position);
         }
         direction = work->parameterVector;

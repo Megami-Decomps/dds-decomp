@@ -84,7 +84,7 @@ s32 func_0010BF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return bfContextCreate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
 }
 
-extern void func_0010AE38(char *, u32);
+extern void evtPrintDeveloperConsoleMessage(char *, u32);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
 extern void func_003297C8(void *);
@@ -92,7 +92,7 @@ extern void evtUnlinkWorkNode(void *);
 
 /* DDS2 process teardown follows the same layout as DDS1's ScrProcTask. */
 void scrProcDestroyTask(ScrProcTask *process) {
-    func_0010AE38("end <%s>\n", process->nameTableBase + (process->nameIndex << 5));
+    evtPrintDeveloperConsoleMessage("end <%s>\n", process->nameTableBase + (process->nameIndex << 5));
     if (process->workBuffer != 0) {
         sdfReleaseChipBlock((void *)process->workBuffer);
     }
@@ -118,7 +118,7 @@ typedef struct ScriptNameNode {
     struct ScriptNameNode *next;   /* 0xEC */
 } ScriptNameNode;
 
-extern ScriptNameNode *D_00435D64;
+extern ScriptNameNode *scrNamedProcessHead;
 extern s32 strcmp(const char *a, const char *b);
 
 extern s32 scrIsCurrentWorkTask(void *);
@@ -131,7 +131,7 @@ void scrDestroyAllNamedProcesses(void)
     ScriptNameNode *node;
     ScriptNameNode *next;
 
-    node = D_00435D64;
+    node = scrNamedProcessHead;
     if (node == NULL) {
         return;
     }
@@ -155,7 +155,7 @@ INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C058);
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
 ScriptNameNode *scrFindNamedProcessNode(char *name) {
-    ScriptNameNode *node = D_00435D64;
+    ScriptNameNode *node = scrNamedProcessHead;
 
     while (node != NULL) {
         if (strcmp(name, node->name) == 0) {

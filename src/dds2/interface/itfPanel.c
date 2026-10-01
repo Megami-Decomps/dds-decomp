@@ -34,7 +34,7 @@ typedef struct PanelDefinition {
 
 extern void (*D_003B43F8[])(void *);
 
-void func_001A1980(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
+void itfSetPanelLayoutAndNotify(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
     panel->a0C = a0C;
     panel->a10 = a10;
     panel->a14 = a14;
@@ -77,7 +77,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(s32);
 extern void itfAppendGsPanelStatePacket(s32);
 
-s32 func_001A1A98(PanelDefinition *panel, s32 arg1) {
+s32 itfBuildAndSubmitPanelPacket(PanelDefinition *panel, s32 arg1) {
     s32 work = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(work);

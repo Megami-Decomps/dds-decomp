@@ -3,7 +3,7 @@
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
-extern void func_002B96D8();
+extern void mnuClearWindowPanelTransitionFlag();
 extern void func_002BE730();
 extern void func_002BED10();
 extern s32 func_002C6008();
@@ -31,7 +31,7 @@ extern f32 D_0037F5E0[];
 extern s8 D_003E7970[];
 extern u8 D_003E7978[];
 
-extern void func_002C7508(u32, f32, f32);
+extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
@@ -617,7 +617,7 @@ void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selected, u32 fl
     mnuSetPanelItemOption(*entry, flags);
 }
 
-void func_002C0F48(MenuPanelGroup *group, s32 index, u32 value) {
+void mnuSetIndexedPanelGroupValue(MenuPanelGroup *group, s32 index, u32 value) {
     mnuStorePanelItemValue(group->entries[index], value);
 }
 
@@ -1096,7 +1096,7 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
             if (bottom == 0) {
                 *buttons &= ~0x800;
             }
-            func_002B96D8(menu);
+            mnuClearWindowPanelTransitionFlag(menu);
             return;
         }
     }
@@ -1104,7 +1104,7 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
     *buttons &= ~0x800;
 }
 
-void func_002C48C8(u32 item, u32 option) {
+void mnuHandlePanelListPageJumpInput(u32 item, u32 option) {
     mnuHandleListPageJumpInput(*(u32 *)((s32)item + 0x90), item, option);
 }
 
@@ -1590,18 +1590,6 @@ s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B300);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B350);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B370);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B3D0);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
-
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
-
 typedef struct BtlPermanentBonusUnit {
     u8 pad00[6];
     u16 unk06;
@@ -1618,6 +1606,18 @@ typedef struct BtlPermanentBonusUnit {
 
 extern s32 func_001197C0(BtlPermanentBonusUnit *);
 extern s32 func_001198C0(BtlPermanentBonusUnit *);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B300);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B350);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B370);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B3D0);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
 s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
     s32 stat = -1;
@@ -2189,36 +2189,7 @@ extern u8 D_0037F590[];
 extern u8 D_003846F0[];
 extern u8 D_003820F0[];
 
-/* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
-void evtStageTestUpdateCamera(void)
-{
-    s128 eye;
-    s128 at;
-    s32 slot;
-
-    slot = func_00100400();
-    func_002C6790();
-    PCP_COPY_VECTOR(D_0037F690, D_003E7950);
-    PCP_COPY_VECTOR(D_0037F680, D_003E7940);
-    PCP_COPY_VECTOR(D_0037F6A0, D_003E7960);
-    sdfCameraBuildProjection(D_0037F5E0);
-    VU0_LOAD_VF(vf10, D_0037F680);
-    VU0_LOAD_VF(vf11, D_0037F690);
-    VU0_SUB(vf10, vf10, vf11);
-    VU0_NORMALIZE_VF10();
-    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_LOAD_VF(vf11, D_0037F590);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, &eye);
-    VU0_LOAD_VF(vf10, D_0037F690);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF_UNCLOBBERED(vf10, &at);
-    sdfVuBuildLookAtBasis(&eye, &at, D_0037F6A0);
-    VU0_STORE_MATRIX_UNCLOBBERED(D_003846F0);
-    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, D_0037F5E0, D_003846F0);
-    sdfConsCacheTransformedNode(D_0037F5E0, D_003846F0);
-}
+INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestUpdateCamera);
 
 s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002C6CE8();
@@ -2290,11 +2261,11 @@ void evtStageTestQueueMotion(s32 kind, u32 index) {
             slot->flags |= 1;
             break;
         }
-        func_002C7508(value, start, 15.0f);
+        evtStageTestQueueMotionSegment(value, start, 15.0f);
     }
 }
 
-void func_002C7508(u32 motionIndex, f32 startFrame, f32 endFrame) {
+void evtStageTestQueueMotionSegment(u32 motionIndex, f32 startFrame, f32 endFrame) {
     StageTestSlot *slot = D_00457EB0.slot;
 
     slot->state = 1;

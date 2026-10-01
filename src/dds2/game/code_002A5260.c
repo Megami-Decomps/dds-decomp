@@ -22,7 +22,7 @@ extern s32 D_00437A40;
 
 extern u16 D_00435BAC;
 
-extern u32 *D_00437AB0;
+extern u32 *mnuMovieWork;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -38,7 +38,7 @@ extern u32 D_00437ACC;
 
 extern u8 D_00437AC0[];
 
-extern void func_002A5F40(void);
+extern void mnuStopTitleMovieDraw(void);
 
 extern void func_003458E8(u32);
 
@@ -72,7 +72,7 @@ void mnuClearGlobalMenuStateFields(void) {
     state->sequenceTimer = 0;
 }
 
-void func_002A58D8(void) {
+void mnuResetTitlePageAndPhase(void) {
     MenuTitleState *state = (MenuTitleState *)D_00437A40;
 
     state->phase = 0;
@@ -81,7 +81,7 @@ void func_002A58D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A58E8);
 
-void func_002A5A20(void) {
+void mnuUpdateTitlePageByMode(void) {
     s32 *title = (s32 *)D_00437A40;
 
     switch (title[0x28 / 4]) {
@@ -108,7 +108,7 @@ void mnuTitleResetSequenceTimers(void) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
 
-void func_002A5E00(void) {
+void mnuDrawTitleSceneForPhase(void) {
     switch (((MenuTitleState *)D_00437A40)->phase) {
     case 1:
         func_002A5260(2, ((MenuTitleState *)D_00437A40)->selectedPage);
@@ -130,7 +130,7 @@ void func_002A5E00(void) {
     }
 }
 
-void func_002A5EE8(u32 arg0, s32 arg1) {
+void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
     u32 work;
 
     func_002A7AF0();
@@ -147,14 +147,14 @@ void func_002A5EE8(u32 arg0, s32 arg1) {
     }
 }
 
-void func_002A5F40(void) {
+void mnuStopTitleMovieDraw(void) {
     mnuStopMovieDrawTask();
     if (D_00437A40 != 0) {
         ((MenuTitleState *)D_00437A40)->movieDrawActive = 0;
     }
 }
 
-u32 func_002A5F68(void) {
+u32 mnuIsTitleMovieDrawActive(void) {
     u32 state;
 
     state = 0;
@@ -607,7 +607,7 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298D8);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298E8);
 
 void mnuLoadMovieRollSprite(void) {
-    D_00437AB0[1] = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
+    mnuMovieWork[1] = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
 }
 
 void func_002A6000(void) {
@@ -641,7 +641,7 @@ void mnuFadeSetState(u32 *state, u32 mode) {
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
-    u32 sprite = D_00437AB0[1];
+    u32 sprite = mnuMovieWork[1];
 
     if (bar->active == 0 && bar->pos == 0) {
         return;
@@ -714,12 +714,12 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueNonzeroResourceId(*D_00437AB0);
-    D_00437AB0 = (u32 *)0x0;
+    sdfQueueNonzeroResourceId(*mnuMovieWork);
+    mnuMovieWork = (u32 *)0x0;
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(D_00437AB0[1]);
+    effDestroyResourceSlotSet(mnuMovieWork[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);
@@ -753,11 +753,11 @@ void mnuCreateStaffTask(void) {
 
     D_00435CBC = 0x80000000;
     handle = func_003292A8(0xD8);
-    D_00437AB0 = sdfResourceRetainAddress(handle);
-    memset(D_00437AB0, 0, 0xD8);
-    ((StaffTaskState *)D_00437AB0)->handle = handle;
-    ((StaffTaskState *)D_00437AB0)->unk8 = 0;
-    ((StaffTaskState *)D_00437AB0)->unkC = 0;
+    mnuMovieWork = sdfResourceRetainAddress(handle);
+    memset(mnuMovieWork, 0, 0xD8);
+    ((StaffTaskState *)mnuMovieWork)->handle = handle;
+    ((StaffTaskState *)mnuMovieWork)->unk8 = 0;
+    ((StaffTaskState *)mnuMovieWork)->unkC = 0;
     D_00435BAC = 1;
     func_0019BD48();
     kwlnTaskCreate(D_00429968, 0x408, 0, 0, func_002A6580, mnuFinishStaffMovieAndFreeState, 0);

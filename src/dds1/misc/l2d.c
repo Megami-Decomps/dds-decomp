@@ -41,7 +41,7 @@ extern void dds3RegisterOwnedIntrusiveNode(void *node, void *owner);
 extern s32 D_003BAAD8;
 
 /* Allocate a rectangle record and register it with its owner list. */
-L2dRect *func_0011D308(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
+L2dRect *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
     L2dRect *rect = sdfAllocAndClearQuadwords(0x28);
 
     rect->left = left;

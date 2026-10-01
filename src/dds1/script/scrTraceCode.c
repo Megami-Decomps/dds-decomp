@@ -5,7 +5,7 @@
 #define SCR_STACK_TYPE_STRING 5
 
 extern ScrVM *D_003BAA00;
-extern ScrData *D_003BD78C;
+extern ScrData *scrCurrentContext;
 extern ScrCommand D_0039E288[];
 extern u32 (*D_00329930[])(ScrData *scr);
 
@@ -331,7 +331,7 @@ u32 bfContextStep(ScrData *scr)
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
 s32 scrReadIntParameter(s32 idx) {
-    ScrData *scr = D_003BD78C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - idx - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -350,7 +350,7 @@ s32 scrReadIntParameter(s32 idx) {
 
 f32 bfWaitReadArgFloat(s32 idx)
 {
-    ScrData *scr = D_003BD78C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - idx - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -370,7 +370,7 @@ f32 bfWaitReadArgFloat(s32 idx)
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *scrReadStringParameter(s32 paramIdx)
 {
-    ScrData *scr = D_003BD78C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - paramIdx - 1;
     s32 type = (s8)scr->stackTypes[stackIndex];
 
@@ -386,12 +386,12 @@ char *scrReadStringParameter(s32 paramIdx)
 
 void scrSetIntegerReturnValue(s32 retVal)
 {
-    D_003BD78C->stackTypes[SCR_STACK_RET] = 0;
-    D_003BD78C->stackValues[SCR_STACK_RET].i = retVal;
+    scrCurrentContext->stackTypes[SCR_STACK_RET] = 0;
+    scrCurrentContext->stackValues[SCR_STACK_RET].i = retVal;
 }
 
 void scrSetFloatReturnValue(f32 retVal)
 {
-    D_003BD78C->stackTypes[SCR_STACK_RET] = 1;
-    D_003BD78C->stackValues[SCR_STACK_RET].f = retVal;
+    scrCurrentContext->stackTypes[SCR_STACK_RET] = 1;
+    scrCurrentContext->stackValues[SCR_STACK_RET].f = retVal;
 }

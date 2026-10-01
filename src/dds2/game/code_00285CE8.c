@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern void func_0010AE38();
+extern void evtPrintDeveloperConsoleMessage();
 
 extern void mdlFlagClear(s32 flag);
 
@@ -8,7 +8,7 @@ extern void mdlFlagSet(s32 flag);
 
 extern s32 mdlFlagTest(s32 flag);
 
-extern void func_002663D8(void);
+extern void mnuClearCampResourceFlagEntries(void);
 
 extern void func_00290E48(s32 arg);
 
@@ -38,7 +38,7 @@ INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", func_002860D8);
 
-void func_00286270(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
+void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4, s32 arg5, s32 arg6) {
     func_00308808(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
 }
 
@@ -63,8 +63,8 @@ void mtrMantraEventBitReset(void) {
     for (i = 0; i < 6; i++) {
         mdlFlagClear(i + 0x9A0);
     }
-    func_002663D8();
-    func_0010AE38("*****************[mtrMantraEventBitReset()]*****************\n");
+    mnuClearCampResourceFlagEntries();
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitReset()]*****************\n");
 }
 
 void func_00286618(void) {

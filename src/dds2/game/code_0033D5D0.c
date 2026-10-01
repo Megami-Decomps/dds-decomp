@@ -4,17 +4,17 @@ extern u8 D_00438B1F;
 
 extern u32 D_004391A4;
 
-extern s32 D_00438AC8;
+extern s32 sdfDiscRequestPending;
 
-extern u32 D_004391C4;
+extern u32 sdfDiscRequestSemaphore;
 
 extern s32 D_004391A8;
 
-extern u32 D_004391B8;
+extern u32 sdfDiscSemaphore;
 
 extern s32 func_0033E008(u32, u8 *, u32);
 
-extern u32 D_004391C8;
+extern u32 sdfDevControlReplyValue;
 
 extern u32 D_004391CC;
 
@@ -141,7 +141,7 @@ extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
 extern void func_0034D038(u32 arg0);
 
-extern s32 D_00438AE4;
+extern s32 sdfDevReplySemaphore;
 
 s32 sdfDevReactivate(DevState *);
 
@@ -246,7 +246,7 @@ extern s32 sceSifMBindRpc(void *, s32, s32);
 extern void _StartThread(s32, s32);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
-void func_0033D990(void) {
+void sdfStartDevRpcServerAndBindClient(void) {
     s32 start;
 
     _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, 0x1000, 0x4C), 0);
@@ -284,7 +284,7 @@ u32 sdfDevGetLoadedFileAddress(void) {
 void sdfDevWaitForDisc(void) {
     u8 file[0x30];
     s32 status;
-    WaitSema(D_004391B8);
+    WaitSema(sdfDiscSemaphore);
     for (;;) {
         sdfSleepWithAlarm(100);
         func_0034CE40(0);
@@ -300,11 +300,11 @@ void sdfDevWaitForDisc(void) {
             break;
         }
     }
-    SignalSema(D_004391B8);
+    SignalSema(sdfDiscSemaphore);
 }
 
 extern u8 D_004391C0;
-extern s32 D_004391BC;
+extern s32 sdfDiscReadPosition;
 extern s32 func_0034D430(s32 arg, u8 *options);
 extern s32 sceCdStatus(void);
 
@@ -321,9 +321,9 @@ void sdfDevSeekDiscRequest(s32 request) {
     options[2] = 0;
     options[3] = 0;
     for (;;) {
-        WaitSema(D_004391B8);
+        WaitSema(sdfDiscSemaphore);
         ready = func_0034D430(request, options);
-        SignalSema(D_004391B8);
+        SignalSema(sdfDiscSemaphore);
         if (ready != 0) {
             break;
         }
@@ -333,13 +333,13 @@ void sdfDevSeekDiscRequest(s32 request) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_004391BC = request;
+    sdfDiscReadPosition = request;
 }
 
 void sdfDevSignalPendingSemaphore(void) {
-    if (D_00438AC8 != 0) {
-        SignalSema(D_004391C4);
-        D_00438AC8 = 0;
+    if (sdfDiscRequestPending != 0) {
+        SignalSema(sdfDiscRequestSemaphore);
+        sdfDiscRequestPending = 0;
     }
 }
 
@@ -356,11 +356,11 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     options[2] = 0;
     options[3] = 0;
     for (;;) {
-        WaitSema(D_004391B8);
-        D_00438AC8 = 1;
-        WaitSema(D_004391C4);
+        WaitSema(sdfDiscSemaphore);
+        sdfDiscRequestPending = 1;
+        WaitSema(sdfDiscRequestSemaphore);
         ready = func_0034D430(request, options);
-        SignalSema(D_004391B8);
+        SignalSema(sdfDiscSemaphore);
         if (ready != 0) {
             break;
         }
@@ -370,7 +370,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
             sdfSleepWithAlarm(100);
         }
     }
-    D_004391BC = request;
+    sdfDiscReadPosition = request;
 }
 
 extern s32 func_0034D500(s32 size, s32 buffer, s32 count, s32 *status);
@@ -380,23 +380,23 @@ void sdfDevReadDiscUntilComplete(s32 size, s32 buffer) {
     s32 result;
 
     for (;;) {
-        WaitSema(D_004391B8);
+        WaitSema(sdfDiscSemaphore);
         result = func_0034D500(size, buffer, 1, &status);
-        SignalSema(D_004391B8);
+        SignalSema(sdfDiscSemaphore);
         if (status == 0 && result == size) {
             break;
         }
         if (sceCdStatus() == 1) {
             sdfDevWaitForDisc();
-            sdfDevSeekDiscRequest(D_004391BC);
+            sdfDevSeekDiscRequest(sdfDiscReadPosition);
         } else {
-            WaitSema(D_004391B8);
+            WaitSema(sdfDiscSemaphore);
             func_0034D4C8();
-            SignalSema(D_004391B8);
-            sdfDevSeekDiscRequest(D_004391BC);
+            SignalSema(sdfDiscSemaphore);
+            sdfDevSeekDiscRequest(sdfDiscReadPosition);
         }
     }
-    D_004391BC += size;
+    sdfDiscReadPosition += size;
 }
 
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
@@ -431,9 +431,9 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E248);
 
 void sdfServicePendingOperationUnderSemaphore(void) {
     if (D_004391A8 != 0) {
-        WaitSema(D_004391B8);
+        WaitSema(sdfDiscSemaphore);
         func_0034D4C8();
-        SignalSema(D_004391B8);
+        SignalSema(sdfDiscSemaphore);
         D_004391A8 = 0;
     }
 }
@@ -484,9 +484,9 @@ void sdfDevStartLoad(s32 name, s32 mode) {
 }
 
 void sdfInitDeviceSemaphores(void) {
-    D_004391B8 = sdfCreateSemaphore(1, 0xff, 0);
-    D_004391C4 = sdfCreateSemaphore(0, 0xff, 0);
-    D_00438AC8 = 0;
+    sdfDiscSemaphore = sdfCreateSemaphore(1, 0xff, 0);
+    sdfDiscRequestSemaphore = sdfCreateSemaphore(0, 0xff, 0);
+    sdfDiscRequestPending = 0;
     func_0034CB60(0);
     func_0034D038(D_00438AD8);
 }
@@ -552,21 +552,21 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E818);
 void sdfDevCommandReplyCallback(DevState *state, s32 event, s32 unused, s32 value, s32 context) {
     if (event != 3) {
         if (event == 4) {
-            D_004391C8 = value;
+            sdfDevControlReplyValue = value;
         }
     } else {
         D_004391CC = value;
     }
-    SignalSema(D_00438AE4);
+    SignalSema(sdfDevReplySemaphore);
 }
 
 DevState *sdfDevCreateCommandState(s32 command) {
     DevState *state;
-    if (D_00438AE4 < 0) {
-        D_00438AE4 = sdfCreateSemaphore(0, 0x80, 0);
+    if (sdfDevReplySemaphore < 0) {
+        sdfDevReplySemaphore = sdfCreateSemaphore(0, 0x80, 0);
     }
     state = sdfDevCreateCallbackState(command, sdfDevCommandReplyCallback, 0);
-    WaitSema(D_00438AE4);
+    WaitSema(sdfDevReplySemaphore);
     sdfDevReactivate(state);
     return state;
 }
@@ -595,24 +595,24 @@ s32 sdfPathExists(char *path) {
 
 void sdfDevWaitThenReleaseCommandState(DevState *state) {
     sdfDevQueueActiveOperation();
-    WaitSema(D_00438AE4);
+    WaitSema(sdfDevReplySemaphore);
     sdfDevQueueReleaseState(state);
 }
 
 void sdfDevQueueReadAndWait(void) {
     sdfDevQueueRead();
-    WaitSema(D_00438AE4);
+    WaitSema(sdfDevReplySemaphore);
 }
 
 u32 sdfDevQueueControlAndWait(void) {
     sdfDevQueueControlRequest();
-    WaitSema(D_00438AE4);
-    return D_004391C8;
+    WaitSema(sdfDevReplySemaphore);
+    return sdfDevControlReplyValue;
 }
 
 u32 sdfDevQueueOperationAndWait(void) {
     sdfDevQueueOperation();
-    WaitSema(D_00438AE4);
+    WaitSema(sdfDevReplySemaphore);
     return D_004391CC;
 }
 
@@ -899,7 +899,7 @@ extern void D_0033F3E0();
 extern void sdfDevWorkerThread();
 
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
-void func_0033FF98(s32 index) {
+void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
     ThreadEntry *worker = &D_0040BA10[index];
     void (*entry)();
     s32 thread;
@@ -1203,7 +1203,7 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AB8);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AC0);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AC8);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDiscRequestPending);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD0);
 
@@ -1211,7 +1211,7 @@ INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AD8);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE0);
 
-INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE4);
+INCLUDE_SDATA(const s32, "game/code_0033D5D0", sdfDevReplySemaphore);
 
 INCLUDE_SDATA(const s32, "game/code_0033D5D0", D_00438AE8);
 

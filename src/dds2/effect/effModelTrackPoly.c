@@ -84,7 +84,7 @@ extern u8 *sdfResourceRetainAddress(u32 handle);
 extern EffTrackPolyWork *func_0018FD88(EffTrackPolyModel *model);
 
 /* Build a list of `count` track-poly works over one model. */
-EffTrackPolyList *func_00190018(EffTrackPolyModel *model, u32 count) {
+EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyModel *model, u32 count) {
     u32 handle = func_003292A8(count * 4 + 0xC);
     EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
     u32 i;

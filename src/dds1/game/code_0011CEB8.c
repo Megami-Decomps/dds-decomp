@@ -34,7 +34,7 @@ typedef struct GlyphOwner {
 
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
-u32 func_0011CEB8(void) {
+u32 ptyScriptRemoveUnitAndReturnResult(void) {
     scrSetIntegerReturnValue(ptyRemoveUnit(scrReadIntParameter(0)) == 1);
     return 1;
 }
@@ -115,7 +115,7 @@ void dds3DestroyAllOwnedIntrusiveNodes(void) {
     }
 }
 
-void func_0011D0E0(s32 node, u32 value) {
+void dds3SetLinkedNodeValue(s32 node, u32 value) {
     *(u32 *)(node + 8) = value;
 }
 

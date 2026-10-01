@@ -16,7 +16,7 @@ extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
 
 extern void func_0013D650(void);
 
-extern s32 func_0013DB28(void);
+extern s32 fldGetSelectedActorMotionId(void);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 
@@ -191,7 +191,7 @@ s32 fldCmdApplyTaskRecordEntry(void) {
 }
 
 s32 func_0014F440(void) {
-    scrSetIntegerReturnValue(func_0013DB28());
+    scrSetIntegerReturnValue(fldGetSelectedActorMotionId());
     return 1;
 }
 

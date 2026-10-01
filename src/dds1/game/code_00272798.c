@@ -47,7 +47,7 @@ s32 mnuStartStaffDisplay(void) {
 }
 
 /* Switch the staff display to the alternate resource at context + 0x6C. */
-u32 func_00272A58(void) {
+u32 mnuConfigureCampDrawContextPanel(void) {
     s32 context;
 
     context = kwlnTaskGetUserValue();

@@ -6,7 +6,7 @@ extern void sdfQueueNonzeroResourceId(void *);
 
 extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
-extern void func_002D09B8(void *);
+extern void sdfReleaseCurrentResourceHandle(void *);
 
 extern void (*D_003BD2D4)(void);
 
@@ -32,7 +32,7 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
             sdfReleaseChipBlock(data);
             return;
         }
-        func_002D09B8(data);
+        sdfReleaseCurrentResourceHandle(data);
     }
 }
 
@@ -56,7 +56,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
             sdfReleaseChipBlock(data);
             return;
         }
-        func_002D09B8(data);
+        sdfReleaseCurrentResourceHandle(data);
     }
 }
 

@@ -169,13 +169,13 @@ INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA7F8);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA7FC);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA800);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedStartTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA804);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA808);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA80C);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedDestroyTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA810);
 

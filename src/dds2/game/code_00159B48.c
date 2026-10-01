@@ -443,7 +443,7 @@ extern u8 D_0037F610[];
 extern u8 D_0037F650[];
 extern u8 D_0037F660[];
 extern u8 D_003AA9B0[];
-extern void func_00336C10(void *);
+extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 extern f32 sdfAtan2(f32, f32);
 
 /* vu0 routine: computes the projected angle between two vectors */
@@ -453,7 +453,7 @@ f32 func_00159FF8(const void *position, const void *offset) {
     f32 projectedOffset[4];
 
     VU0_LOAD_MATRIX(D_003846F0);
-    func_00336C10(D_0037F610);
+    sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
     VU0_LOAD_VF(vf10, position);
     VU0_MOVE_VF(vf12, vf10);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -501,7 +501,7 @@ u8 *billCreateUnitObject(s32 index) {
 u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = func_00328D68(0x88);
 
-    instance->billboard = (BillObj *)func_00159A50((s32)source->billboard);
+    instance->billboard = (BillObj *)billCloneObjectRetainingSharedData((s32)source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);

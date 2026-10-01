@@ -101,12 +101,12 @@ extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket();
 extern s32 sdfCreateFormattedSifCommand();
 
-extern BDWork2C *func_00186C18(void *arg);
+extern BDWork2C *effCloneBlurTemplate(void *arg);
 extern BDWork2C *func_00186F90(void *arg);
-extern BDWork24 *func_00187FC0(void *arg);
+extern BDWork24 *effCloneResourceTemplate(void *arg);
 extern BDWork2C *effCloneBlurWorkWithSlots(void *arg);
-extern void func_00186498(Work30 *arg);
-extern void func_00186CD0(BDWork2C *arg);
+extern void effDrawBlurRectangle(Work30 *arg);
+extern void effDrawBlurPixelRectWithResource(BDWork2C *arg);
 extern void func_00187098(BDWork2C *arg);
 extern void func_00187598(BDWork2C *arg);
 extern void func_00187988(Work30 *arg);
@@ -339,19 +339,19 @@ void effInitCh75Id(void) {
 }
 
 void effInitWorks(void) {
-    D_003BD808 = func_00186C18(D_003558D8);
+    D_003BD808 = effCloneBlurTemplate(D_003558D8);
     D_003BD804 = func_00186F90(D_003558A8);
-    D_003BD80C = func_00187FC0(D_00355948);
+    D_003BD80C = effCloneResourceTemplate(D_00355948);
     D_003BD810 = effCloneBlurWorkWithSlots(D_00355970);
     *(s32 *)effGetCh76Work() = 4;
 }
 
 void effDispatchActive(void) {
     if (D_003BB070) {
-        func_00186498(&D_00355880);
+        effDrawBlurRectangle(&D_00355880);
     }
     if (D_003BB071) {
-        func_00186CD0(D_003BD808);
+        effDrawBlurPixelRectWithResource(D_003BD808);
     }
     if (D_003BB072) {
         func_00187098(D_003BD804);

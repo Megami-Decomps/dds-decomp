@@ -37,8 +37,8 @@ s32 evtCheckWorldObjectResourceScale(void *obj) {
 }
 
 extern void *dds3GetSlot1Data(void *obj);
-extern void func_001175D0(void *data);
-extern void func_001175E0(void *data);
+extern void sdfEnableFloatCounterWrap(void *data);
+extern void sdfDisableFloatCounterWrap(void *data);
 
 void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
     void *data = dds3GetSlot1Data(obj);
@@ -47,9 +47,9 @@ void evtToggleWorldSlotScaledValueFlag(void *obj, s32 flag) {
         return;
     }
     if (flag != 0) {
-        func_001175D0(data);
+        sdfEnableFloatCounterWrap(data);
     } else {
-        func_001175E0(data);
+        sdfDisableFloatCounterWrap(data);
     }
 }
 
@@ -78,7 +78,7 @@ typedef struct EvtNodeOwner {
     EvtNodeInner *inner; /* 0x18 */
 } EvtNodeOwner;
 
-extern void func_0014FC98();
+extern void effDispatchOptionalNodeFlag();
 
 void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
     EvtNodeInner *inner = owner->inner;
@@ -94,7 +94,7 @@ void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
     }
     node = inner->node;
     if (flag == 0) {
-        func_0014FC98(node, flag);
+        effDispatchOptionalNodeFlag(node, flag);
     }
 }
 
@@ -119,7 +119,7 @@ typedef struct EvtWorldObj {
 } EvtWorldObj;
 
 extern EvtWorldObj *dds3GetWorldObject(void);
-extern void func_00112008(void *node, s32 value);
+extern void dds3SetObjectModeAndDefaultWeight(void *node, s32 value);
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     EvtWorldObj *world = dds3GetWorldObject();
@@ -131,7 +131,7 @@ s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     }
     value = index * 3 + base;
     for (node = world->root->list->head; node != NULL; node = node->next) {
-        func_00112008(node, value);
+        dds3SetObjectModeAndDefaultWeight(node, value);
     }
     return 1;
 }

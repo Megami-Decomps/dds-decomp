@@ -49,7 +49,7 @@ extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(s32);
-extern void func_002887A0(s32);
+extern void filePollEntryCleanup(s32);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void func_002D0918(s32);
 
@@ -94,7 +94,7 @@ void evtReleaseEventPackResources(void) {
             sdfTexReleaseReferenceViaHandler(resources->effect75);
         }
         if (resources->objectHandle != 0) {
-            func_002887A0(resources->objectHandle);
+            filePollEntryCleanup(resources->objectHandle);
         }
         if (resources->resourceHandle != 0) {
             sdfQueueNonzeroResourceId(resources->resourceHandle);

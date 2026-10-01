@@ -30,7 +30,7 @@ typedef struct ConsNode {
     /* 0x1C */ u8 *cells;
 } ConsNode;
 
-/* Per-port pad state, D_003F9B00[2] (0x28 bytes each). */
+/* Per-port pad state, sdfPadPorts[2] (0x28 bytes each). */
 typedef struct F9B00Entry {
     /* 0x00 */ u8 port;
     /* 0x01 */ u8 slot;
@@ -53,7 +53,7 @@ typedef struct F9B00Entry {
 extern ConsNode *D_003BD3C0;
 extern u32 D_003BD3C4;
 extern u8 D_00315BA0[];
-extern F9B00Entry D_003F9B00[];
+extern F9B00Entry sdfPadPorts[];
 extern u32 D_00398660[];
 extern u128 D_003F9890;
 extern f32 D_003BDA30;
@@ -189,13 +189,13 @@ void sdfVuMultiplyScratchByPrimary(void) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDD38(void *matrix) {
+void sdfPremultiplyVuMatrixFromMemory(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void func_002DDD60(void *matrix) {
+void sdfPostmultiplyVuMatrixFromMemory(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
     sdfMultiplyVuMatrixInPlace();
 }
@@ -254,7 +254,7 @@ void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
     sdfInvertRigidVuTransform();
 }
 
-void func_002DDE80(void) {
+void sdfConfigureScratchpadRingTransfer(void) {
 }
 
 void sdfVuConfigureWorkRingDma(VuWork *work, s32 count) {
@@ -851,7 +851,7 @@ void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, u8 *src, void *matrix) {
     packet->reservedWord = 0;
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    func_002DDD60(src + 0x30);
+    sdfPostmultiplyVuMatrixFromMemory(src + 0x30);
     VU0_STORE_MATRIX(packet->matrixB);
     VU0_LOAD_VF_MEMORY(vf10, src + 0x70);
     VU0_STORE_VF(vf10, packet->vecC);
@@ -877,7 +877,7 @@ extern u8 D_003984F0[];
 void sdfConsCacheTransformedNode(u8 *node, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(D_003984B0);
-    func_002DDD60(node + 0x30);
+    sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
     VU0_LOAD_VF_MEMORY(vf10, node + 0x90);
     VU0_STORE_MATRIX(D_00398470);
     VU0_TRANSFORM_POINT(vf10, vf10);
@@ -952,7 +952,7 @@ void sdfCameraBuildProjection(SdfCamera *cam) {
     m[10] = 0;
     m[15] = 0;
     m[14] = m[11] = 1.0f;
-    func_002DDD38(m);
+    sdfPremultiplyVuMatrixFromMemory(m);
     VU0_STORE_MATRIX(cam->matrix);
     cam->halfWidth = halfWidth;
     centerY = (cam->bottom - cam->top) * 0.5f;
@@ -1142,7 +1142,7 @@ void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32)) {
     sdfAppendPacket(list, (u32)packet);
 }
 
-extern vu8 D_003BD2EA;
+extern vu8 sdfCurrentBufferIndex;
 extern void sdfAssetApplyEntryChanges(void *, s32);
 extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 extern void sdfAppendReferencePacket(s32, void *);
@@ -1152,9 +1152,9 @@ void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32)) {
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    sdfAssetApplyEntryChanges(asset, (s8)D_003BD2EA);
+    sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     packet = (u64 *)alloc(0x20);
-    sdfInitNodeHeaderFromWords(asset, packet, (s8)D_003BD2EA);
+    sdfInitNodeHeaderFromWords(asset, packet, (s8)sdfCurrentBufferIndex);
     *(u128 *)&packet[2] = 0;
     sdfAppendReferencePacket(list, packet);
 }
@@ -1369,7 +1369,7 @@ extern void sdfPadUpdatePort(F9B00Entry *entry);
 void sdfPadUpdatePorts(void) {
     s32 i;
     for (i = 0; i != 2; i++) {
-        sdfPadUpdatePort(&D_003F9B00[i]);
+        sdfPadUpdatePort(&sdfPadPorts[i]);
     }
 }
 
@@ -1377,10 +1377,10 @@ void sdfPadUpdatePorts(void) {
 
 extern s32 D_003BD2D8;
 extern u16 D_003BD3A0[4];
-extern u8 D_003BD3A8[8];
+extern u8 sdfPadAnalogSticks[8];
 extern u16 D_00398600[16];
 extern u8 D_00398628[0x20];
-extern u8 D_00398648[0x18];
+extern u8 sdfPadButtonPressure[0x18];
 
 /* Build per-button held/repeat/new-press flags for both controller ports.
  * Repeat starts after 15 ticks, then recurs every four ticks. */
@@ -1389,7 +1389,7 @@ void sdfPadBuildButtonStates(void) {
     s32 i;
     s32 bit;
     for (i = 0; i != 2; i++) {
-        F9B00Entry *entry = &D_003F9B00[i];
+        F9B00Entry *entry = &sdfPadPorts[i];
         s32 buttons = entry->buttons;
         s32 prev = entry->prevButtons;
         s32 pressed;
@@ -1421,28 +1421,28 @@ void sdfPadBuildButtonStates(void) {
             }
             D_00398628[i * 0x10 + bit] = state;
         }
-        memcpy(&D_003BD3A8[i * 4], entry->stick, 4);
-        memcpy(&D_00398648[i * 12], entry->pressure, 12);
+        memcpy(&sdfPadAnalogSticks[i * 4], entry->stick, 4);
+        memcpy(&sdfPadButtonPressure[i * 12], entry->pressure, 12);
     }
 }
 
 
 void sdfPadRequestMode(s32 padIndex, u8 mode) {
-    D_003F9B00[padIndex].requestedMode = mode;
+    sdfPadPorts[padIndex].requestedMode = mode;
 }
 
 void sdfPadSetSmallMotor(s32 padIndex, u16 strength) {
-    D_003F9B00[padIndex].smallMotor = strength;
+    sdfPadPorts[padIndex].smallMotor = strength;
 }
 
 void sdfPadSetLargeMotor(s32 padIndex, u8 strength) {
-    D_003F9B00[padIndex].largeMotor = strength;
+    sdfPadPorts[padIndex].largeMotor = strength;
 }
 
 void sdfDevConsSetEntryPair(s32 index, s32 small, s32 large) {
-    F9B00Entry *entry = &D_003F9B00[index];
+    F9B00Entry *entry = &sdfPadPorts[index];
     entry->smallMotor = small & 0xFF;
-    D_003F9B00[index].largeMotor = large & 0xFF;
+    sdfPadPorts[index].largeMotor = large & 0xFF;
 }
 
 extern u8 D_003BD398[4];
@@ -1461,7 +1461,7 @@ void sdfPadInit(void) {
         F9B00Entry *entry;
 
         scePadPortOpen(port, slot, &D_003F9900[i * 0x100]);
-        entry = &D_003F9B00[i];
+        entry = &sdfPadPorts[i];
         entry->port = port;
         entry->slot = slot;
         entry->state = 0;
@@ -1473,8 +1473,8 @@ void sdfPadInit(void) {
         entry->largeMotor = 0;
     }
     memset(D_00398628, 0, 0x20);
-    memset(D_003BD3A8, 0x80, 8);
-    memset(D_00398648, 0, 0x18);
+    memset(sdfPadAnalogSticks, 0x80, 8);
+    memset(sdfPadButtonPressure, 0, 0x18);
     D_003BD39C = 0;
 }
 
@@ -1592,7 +1592,7 @@ INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD39C);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A0);
 
-INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A8);
+INCLUDE_SDATA(const s32, "game/code_002DDC98", sdfPadAnalogSticks);
 
 INCLUDE_SDATA(const s32, "game/code_002DDC98", D_003BD3A9);
 

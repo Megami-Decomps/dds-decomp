@@ -49,7 +49,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
 }
 
-s64 func_0026BEB0(void) {
+s64 mnuDestroyMovieMenuSelectionList(void) {
     return mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
 }
 
@@ -134,7 +134,7 @@ extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
 extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
 extern s32 func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
 
-s64 func_0026C230(s32 parameter) {
+s64 mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
     sdfSubmitGsTestOneRegisterPacket(0x3000D, 0x3E);
     return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
@@ -195,7 +195,7 @@ void mnuClearGlobalMenuStateFields(void) {
     state->word1C = 0;
 }
 
-void func_0026D150(void) {
+void mnuResetTitlePageAndPhase(void) {
     MenuState *state = (MenuState *)D_003BC5D0;
 
     state->word34 = 0;

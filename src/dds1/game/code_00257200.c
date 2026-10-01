@@ -14,7 +14,7 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_002579B0);
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257BD8);
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257C10);
+INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraPulseFrame);
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257DF0);
 

@@ -20,7 +20,7 @@ extern void *func_002CFEB8(s32 size);
 extern s32 func_00189220(s32, s32, s32, f32, f32);
 extern void effMagatuhiFillColorTable(s32, s32, s32);
 
-void *func_001890D8(MagatuhiEffectData *source) {
+void *effCloneMagatuhiWithColorResource(MagatuhiEffectData *source) {
     MagatuhiEffectData *effect;
 
     effect = (MagatuhiEffectData *)func_002CFEB8(0x20);

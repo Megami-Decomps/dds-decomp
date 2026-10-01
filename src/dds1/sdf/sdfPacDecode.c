@@ -76,7 +76,7 @@ typedef struct PacState {
 } PacState;
 
 void sdfPacStartPacketPayload(PacState *state, PacHead *packet);
-void func_002EDD98(PacState *state);
+void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfReleaseChipBlock(void *allocation);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
@@ -277,7 +277,7 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
 /* Begin a regular payload; completion is the normal packet finalizer. */
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
     sdfPacStartPacketPayload(state, packet);
-    state->onComplete = func_002EDD98;
+    state->onComplete = sdfDecodePacNodeAndAdvanceTail;
 }
 
 /* Apply the relocation record at the front of the queued payload. */
@@ -291,7 +291,7 @@ void sdfPacRelocateQueuedPayload(PacState *state) {
         sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
         record->count = 0;
     }
-    func_002EDD98(state);
+    sdfDecodePacNodeAndAdvanceTail(state);
 }
 
 /* Begin a payload that must be relocated before normal finalization. */
@@ -311,7 +311,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state) {
         sdfRelocatePackedResourceWords(payload, payload, payload + record->offset, count);
         record->count = 0;
     }
-    func_002EDD98(state);
+    sdfDecodePacNodeAndAdvanceTail(state);
 }
 
 /* Begin the second relocation-command variant. */
@@ -423,7 +423,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
         allocation->entryIndex = nextIndex;
         if (nextIndex == allocation->entryCount) {
             sdfReleaseChipBlock(allocation);
-            func_002EDD98(state);
+            sdfDecodePacNodeAndAdvanceTail(state);
         } else {
             sdfPacResetOutputToAllocationEntry(state);
         }

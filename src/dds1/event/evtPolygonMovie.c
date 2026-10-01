@@ -196,8 +196,8 @@ extern ObjectFlagsTarget *func_001130F0(PolyMovieObject *obj);
 extern void dds3SetObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
-extern void func_001175A8(PolyMovieClip *clip);
-extern void func_001175B8(PolyMovieClip *clip);
+extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
+extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *func_002CFEB8(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -217,7 +217,7 @@ extern EvtBlendA D_003686A0;
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
-extern void func_002887A0(s32 arg);
+extern void filePollEntryCleanup(s32 arg);
 extern void func_002D0918(s32 arg);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void func_002696F8(void);
@@ -616,9 +616,9 @@ s32 evtPolygonMovieScaleByProgress(PolyMovieObject *movie, s32 undo, s32 start, 
         }
         evtScaleValueByMultiplier(clip, (f32)frame / (f32)duration);
         if (undo == 0) {
-            func_001175A8(clip);
+            sdfFreezeFloatCounter(clip);
         } else {
-            func_001175B8(clip);
+            sdfUnfreezeFloatCounter(clip);
         }
     }
 }
@@ -876,10 +876,10 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         }
         fileWaitIdle();
         if (work->res04 != 0) {
-            func_002887A0(work->res04);
+            filePollEntryCleanup(work->res04);
         }
         if (work->res5C != 0) {
-            func_002887A0(work->res5C);
+            filePollEntryCleanup(work->res5C);
         }
         if (work->res08 != 0) {
             func_002D0918(work->res08);

@@ -294,7 +294,7 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_00198D00);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00199118);
 
-void func_00199C50(void *dst, void *src) {
+void effEventCopyParameterVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -302,11 +302,11 @@ void effEventSetWorkFlag(EffEventWork *work, u8 flag) {
     work->flag = flag;
 }
 
-void func_00199C68(const EffEventBlock7C *source, EffEventBlock7C *destination) {
+void effEventCopyParameterBlock(const EffEventBlock7C *source, EffEventBlock7C *destination) {
     *destination = *source;
 }
 
-void func_00199D48(EffEventBlock7C *destination, const EffEventBlock7C *source) {
+void effCopyEventBlockAndClampPositiveParameters(EffEventBlock7C *destination, const EffEventBlock7C *source) {
     *destination = *source;
     if (destination->unk2C <= 0) {
         destination->unk2C = 1;

@@ -15,7 +15,7 @@ extern s32 func_001A17F0(void);
 
 extern s32 D_003BAA00;
 
-extern s32 D_003BB2E4;
+extern s32 btlRuntime;
 
 extern s32 kwlnTaskFindByPriority(u32);
 
@@ -74,7 +74,7 @@ void btlClearModelFlagRange(void) {
 }
 
 s32 btlUpdateActiveBattleFrame(void) {
-    s32 state = D_003BB2E4;
+    s32 state = btlRuntime;
     if (state == 0) {
         return 0;
     }
@@ -90,7 +90,7 @@ s32 btlUpdateActiveBattleFrame(void) {
         func_001FB088();
         btlSweepFinishedTasks();
         func_001DBE68();
-        ++*(s32 *)(D_003BB2E4 + 0x1F0);
+        ++*(s32 *)(btlRuntime + 0x1F0);
     } else {
         btlExitWhenAudioAndTasksIdle();
     }
@@ -98,7 +98,7 @@ s32 btlUpdateActiveBattleFrame(void) {
 }
 
 s32 btlUpdateBattleFieldPresentation(void) {
-    s32 state = D_003BB2E4;
+    s32 state = btlRuntime;
     if (state == 0) {
         return 0;
     }
@@ -125,7 +125,7 @@ extern char D_003A1598[]; /* "battle_draw" */
 extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 void btlCreateDrawTasks(void) {
-    s32 state = D_003BB2E4;
+    s32 state = btlRuntime;
     u32 mainTask;
     u32 drawTask;
     mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A0E38, 0);
@@ -139,7 +139,7 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 
     temp_v0 = kwlnTaskFindByPriority(0x3f9);
     if (temp_v0 != 0) {
-        kwlnTaskDestroyWithHierarchy(*(u32 *)(D_003BB2E4 + 0x29c), 1);
+        kwlnTaskDestroyWithHierarchy(*(u32 *)(btlRuntime + 0x29c), 1);
         return;
     }
 }
@@ -201,7 +201,7 @@ INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15A8);
 INCLUDE_RODATA(const s32, "game/code_001A04C0", D_003A15C8);
 
 s32 btlExitWhenAudioAndTasksIdle(void) {
-    if (D_003BB2E4 == 0) {
+    if (btlRuntime == 0) {
         btlBossDebugPrintf(D_003A15A8);
         return 0;
     }
@@ -220,7 +220,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     btlDestroyAllUnits();
     btlClearPendingSoundList();
     btlReleaseEventAssets();
-    func_001C7360();
+    btlGetCurrentSceneRecordValue();
     btlFreeFieldBlocks();
     btlStopRainSoundTransition();
     btlClearTintAndEnableCamera();
@@ -231,9 +231,9 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     brsTaskTryDestroy();
     btlClearSoundAndModelResources();
     btlDestroyDrawTaskAtPriorityWhenPresent();
-    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x4A0));
-    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x49C));
-    itfMesDestroyWindowIfPresent(*(s32 *)(D_003BB2E4 + 0x498));
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x4A0));
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x49C));
+    itfMesDestroyWindowIfPresent(*(s32 *)(btlRuntime + 0x498));
     btlAdvanceTitleStateWithAudioCleanup();
     func_00105888();
     evtDestroySelectionState();
@@ -242,7 +242,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     itfMesClearFlags(1);
     func_002D0918(D_003BB2E0);
     D_003BB2E0 = 0;
-    D_003BB2E4 = 0;
+    btlRuntime = 0;
     btlBossDebugPrintf("** btlExit ***************\n");
     return 0;
 }
@@ -256,14 +256,14 @@ void btlLoadInputIconsAndSystemSounds(void) {
 }
 
 u8 btlIsRuntimeAllocated(void) {
-    return D_003BB2E4 != 0;
+    return btlRuntime != 0;
 }
 
 s32 btlIsCurrentActorFullyMarked(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    return (*(s32 *)(D_003BB2E4 + 0x1f4) & 0x6000000) == 0x6000000;
+    return (*(s32 *)(btlRuntime + 0x1f4) & 0x6000000) == 0x6000000;
 }
 
 s32 btlHasPendingRuntimeActivity(void) {
@@ -271,7 +271,7 @@ s32 btlHasPendingRuntimeActivity(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    state = D_003BB2E4;
+    state = btlRuntime;
     if (*(s32 *)(state + 0x224) != 0) {
         return 1;
     }
@@ -282,7 +282,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 }
 
 void btlResetActorEntryState(void) {
-    s32 context = D_003BB2E4;
+    s32 context = btlRuntime;
     s32 *entries = (s32 *)(D_003BAA00 + 0xBF8);
     u32 i;
     *(s32 *)(context + 0x2C0) = 0;
@@ -294,7 +294,7 @@ void btlResetActorEntryState(void) {
         *entries = 0;
         entries = (s32 *)((u8 *)entries + 0x1A4);
     }
-    memset((void *)(D_003BB2E4 + 0x2B4), 0, 12);
+    memset((void *)(btlRuntime + 0x2B4), 0, 12);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A1530);
@@ -345,7 +345,7 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
 }
 
 s32 func_001A17F0(void) {
-    return D_003BB2E4;
+    return btlRuntime;
 }
 
 u16 func_001A17F8(s32 arg0) {
@@ -405,5 +405,5 @@ u16 func_001A1938(s32 arg0) {
 }
 
 void func_001A1948() {
-    func_00119018();
+    sdfRaisePackedChannelValue();
 }

@@ -2,7 +2,7 @@
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-extern u32 *D_003BC610;
+extern u32 *mnuMovieWork;
 
 extern s32 func_002D03F8(s32);
 
@@ -96,12 +96,12 @@ INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E720);
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E798);
 
 void mnuLoadMovieRollSprite(void) {
-    D_003BC610[1] = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
+    mnuMovieWork[1] = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E8D8);
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026EA70);
 
-INCLUDE_SDATA(const s32, "game/code_0026E160", D_003BC610);
+INCLUDE_SDATA(const s32, "game/code_0026E160", mnuMovieWork);
 

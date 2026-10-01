@@ -15,7 +15,7 @@ extern void *func_00328D68(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
 /* Clone an effect template into a fresh allocation. */
-EffTemplate *func_0018FBF8(EffTemplate *src) {
+EffTemplate *effCloneResourceTemplate(EffTemplate *src) {
     EffTemplate *dst = func_00328D68(sizeof(EffTemplate));
 
     dst->resourceWord = effGetResourceFirstWord(0);

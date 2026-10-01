@@ -24,44 +24,44 @@ typedef struct {
 extern u64 scrReadIntParameter(u64);
 extern u64 mdlFlagTest(u64);
 
-extern ScriptState *D_003BD78C;
+extern ScriptState *scrCurrentContext;
 
 extern s8 D_00398629[];
 
 u32 scrGetProcedureAddress(s32 index) {
-    return D_003BD78C->procedures[index].address;
+    return scrCurrentContext->procedures[index].address;
 }
 
 u32 scrGetLabelAddress(s32 index) {
-    return D_003BD78C->labels[index].address;
+    return scrCurrentContext->labels[index].address;
 }
 
 u32 scrGetProgramCounter(void) {
-    return D_003BD78C->programCounter;
+    return scrCurrentContext->programCounter;
 }
 
 void scrSetProgramCounter(u32 address) {
-    D_003BD78C->programCounter = address;
+    scrCurrentContext->programCounter = address;
 }
 
 u32 scrGetTimer(void) {
-    return D_003BD78C->timer;
+    return scrCurrentContext->timer;
 }
 
 u32 scrGetCommandTimer(void) {
-    return D_003BD78C->commandTimer;
+    return scrCurrentContext->commandTimer;
 }
 
 u32 scrGetWindow(void) {
-    return D_003BD78C->window;
+    return scrCurrentContext->window;
 }
 
 s32 func_0010D6A0(void) {
-    return (s32)D_003BD78C;
+    return (s32)scrCurrentContext;
 }
 
 u32 func_0010D6A8(void) {
-    return D_003BD78C->unkF0;
+    return scrCurrentContext->unkF0;
 }
 
 s32 scrHasNegativeMarkerDuringCommandTimer(void) {

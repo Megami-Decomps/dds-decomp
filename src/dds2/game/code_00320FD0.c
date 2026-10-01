@@ -46,7 +46,7 @@ typedef struct ResourceList {
 u32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
 /* Retain the one-argument call to the old-style lookup declaration: it matches retail. */
-u32 func_00320FD0(u32 list) {
+u32 mnuRemoveResourceNodeById(u32 list) {
     u32 selectedNode = mnuFindResourceNodeById(list);
     if (selectedNode != 0) {
         return dds3RemoveListNodeAndNotify(list, selectedNode);
@@ -116,7 +116,7 @@ u8 *func_003211F8(void) {
     return D_0045C860;
 }
 
-void func_00321208(u8 *src) {
+void mnuCopyResourceProgressParameters(u8 *src) {
     memcpy(D_0045C860, src, 16);
 }
 
@@ -124,18 +124,18 @@ u8 * func_00321238(void) {
     return (u8 *)&D_004390B8;
 }
 
-void func_00321248(u8 arg0, u8 arg1) {
+void mnuSetResourceProgressCadence(u8 arg0, u8 arg1) {
     D_004390B8.limit = arg0;
     D_004390B8.step = arg1;
 }
 
-void func_00321258(u8 arg0, u8 arg1) {
+void mnuResetProgressLimitAndStep(u8 arg0, u8 arg1) {
     memset(&D_004390B8, 0, 8);
     D_004390B8.limit = arg0;
     D_004390B8.step = arg1;
 }
 
-s32 func_003212A8(void) {
+s32 mnuAdvanceCursorStepUntilThreshold(void) {
     if (++D_004390B8.index >= D_004390B8.limit) {
         D_004390B8.index = 0;
         D_004390B8.total += D_004390B8.step;
@@ -146,7 +146,7 @@ s32 func_003212A8(void) {
     return 0;
 }
 
-void func_00321308(void) {
+void mnuResetResourceProgressCounters(void) {
     D_004390B8.index = 0;
     D_004390B8.total = 0;
 }

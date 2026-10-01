@@ -346,16 +346,16 @@ s64 evtBSetupDispatchSyncE(s32 request) {
     return menuSetHandler((s32)state, 2, request);
 }
 
-extern void func_002A9200(s32);
+extern void mnuReleaseCampTextureHandlesAndClearOutput(s32);
 
-extern void func_00268C48(s32, s32);
+extern void mnuConfigureSelectedSceneModeEffect(s32, s32);
 
 extern void dspCloseChannel(void);
 
 s32 evtBReleaseImagesAndQueueMenuTransition(void) {
     s32 state = kwlnTaskGetUserValue();
-    func_002A9200(state + 0xE8);
-    func_00268C48(2, state);
+    mnuReleaseCampTextureHandlesAndClearOutput(state + 0xE8);
+    mnuConfigureSelectedSceneModeEffect(2, state);
     mnuTerminalSelectSlot(3, 4, state);
     func_002690A8(2, state);
     evtRememberDispatchCallback(0, state);
@@ -365,14 +365,14 @@ s32 evtBReleaseImagesAndQueueMenuTransition(void) {
     return 1;
 }
 
-extern void func_002A91A0(s32);
+extern void mnuSnapshotCampTextureHandles(s32);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
 s32 mnuOpenTerminalSelectionMessageWindow(void) {
     s32 state = kwlnTaskGetUserValue();
-    func_002A91A0(state + 0xE8);
-    func_00268C48(1, state);
+    mnuSnapshotCampTextureHandles(state + 0xE8);
+    mnuConfigureSelectedSceneModeEffect(1, state);
     mnuTerminalSelectSlot(3, 0, state);
     func_002690A8(1, state);
     evtRememberDispatchCallback((u32)func_00269230, state);

@@ -10,9 +10,9 @@ typedef struct ItfMesSlot {
     u8 unk4[0x10];
 } ItfMesSlot;
 
-extern ItfMesSlot D_0045296C[];
+extern ItfMesSlot itfWindowSlots[];
 
-/* Node of the pool at D_00452940 + 0x10 (0x14 bytes each). */
+/* Node of the pool at itfMesWork + 0x10 (0x14 bytes each). */
 typedef struct ItfMesPoolNode {
     struct ItfMesPoolNode *previous; /* 0x0 */
     struct ItfMesPoolNode *next;     /* 0x4 */
@@ -39,7 +39,7 @@ typedef struct ItfMesGlobals {
     ItfMesPoolNode nodes[0x40]; /* 0x20 */
 } ItfMesGlobals;
 
-extern ItfMesGlobals D_00452940;
+extern ItfMesGlobals itfMesWork;
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
@@ -289,7 +289,7 @@ extern s32 func_0019DBA8();
 
 extern s32 func_001A1858();
 
-extern void func_001A1980();
+extern void itfSetPanelLayoutAndNotify();
 
 extern void func_001A1A50();
 
@@ -363,7 +363,7 @@ s32 itfMesFinishScriptWindowIfActive(void) {
     if (window < 0) {
         return 1;
     }
-    mes = D_0045296C[window].mes;
+    mes = itfWindowSlots[window].mes;
     state = mes->flags & 0x300;
     if (state == 0x100 || state == 0x200) {
         itfMesFinishWindowAndClearStatus(window);
@@ -373,7 +373,7 @@ s32 itfMesFinishScriptWindowIfActive(void) {
 }
 
 void itfMesFinishWindowAndClearStatus(s32 window, s32 unused1, s32 unused2) {
-    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesState *mes = itfWindowSlots[window].mes;
     u32 flags = mes->flags;
 
     if (flags & 0x300) {
@@ -504,7 +504,7 @@ s32 itfMesScriptSetMessageRange(void) {
 }
 
 u32 itfMesGetGlobalWindowValue(void) {
-    return D_00452940.windowTexture;
+    return itfMesWork.windowTexture;
 }
 
 void itfMesSetFlags(u32 flags) {
@@ -516,7 +516,7 @@ void itfMesClearFlags(u32 flags) {
 }
 
 s32 itfMesCreateWindow(ItfMesSub *sub) {
-    ItfMesPoolNode *node = itfAcquirePoolNode(&D_00452940.pool);
+    ItfMesPoolNode *node = itfAcquirePoolNode(&itfMesWork.pool);
     s32 window = node->index;
     ItfMesState *mes;
     u32 handle;
@@ -538,12 +538,12 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     itfResetWindowResourceBlock(&mes->blkA4);
     itfClearDrawStateWords(mes->tableD0);
     itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
-    D_00452940.activeWindowCount++;
+    itfMesWork.activeWindowCount++;
     return window;
 }
 
 void itfMesDestroyWindowIfPresent(s32 window) {
-    if (window >= 0 && D_0045296C[window].mes != NULL) {
+    if (window >= 0 && itfWindowSlots[window].mes != NULL) {
         itfMesDestroyWindow(window);
     }
 }
@@ -560,7 +560,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     if (window < 0) {
         return;
     }
-    mes = D_0045296C[window].mes;
+    mes = itfWindowSlots[window].mes;
     blk24 = &mes->blk24;
     blk14 = &mes->blk14;
     if (blk24->glyphChain != NULL) {
@@ -603,14 +603,14 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[1] = 0x430;
     rect[2] = 0x1200 + half;
     rect[3] = 0x530 + height;
-    blkA4->unk8 = func_001A1858(9, D_00452940.windowTexture);
-    func_001A1980(blkA4->unk8, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
+    blkA4->unk8 = func_001A1858(9, itfMesWork.windowTexture);
+    itfSetPanelLayoutAndNotify(blkA4->unk8, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
     func_001A1A50(blkA4->unk8, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
 void itfMesBuildOptionList(s32 window, s32 entryIndex) {
-    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlk40 *blk = &mes->blk40;
     ItfMesEntry *entry = itfMesGetEntry(mes, entryIndex);
     ItfMesTable *table;
@@ -638,7 +638,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
 }
 
 void itfMesResetWindow(s32 window) {
-    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlk40 *blk = &mes->blk40;
     if (blk->glyphChain != NULL) {
         frFontQueueGlyphInSelectedSlot(blk->glyphChain);
@@ -653,11 +653,11 @@ void itfMesResetWindow(s32 window) {
 }
 
 void itfMesSetWindowPanelValue(s32 window, u32 value) {
-    D_0045296C[window].mes->blk40.panelValue = value;
+    itfWindowSlots[window].mes->blk40.panelValue = value;
 }
 
 void itfMesCountClearBits(s32 window, s32 count) {
-    ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
+    ItfMesBlk40 *blk = &itfWindowSlots[window].mes->blk40;
     u32 bits = blk->panelValue;
     s32 bit = bits & 1;
     s32 zeros = bit == 0;
@@ -680,7 +680,7 @@ void itfMesCountClearBits(s32 window, s32 count) {
 void itfMesOffsetNodeChain(ItfMesNode *node, s32 dx, s32 dy);
 
 void itfMesBlk14MoveTo(s32 window, s32 x, s32 y) {
-    ItfMesBlk14 *blk = &D_0045296C[window].mes->blk14;
+    ItfMesBlk14 *blk = &itfWindowSlots[window].mes->blk14;
     s32 delta[2];
     delta[0] = x - blk->x;
     delta[1] = y - blk->y;
@@ -692,14 +692,14 @@ void itfMesBlk14MoveTo(s32 window, s32 x, s32 y) {
 }
 
 void itfMesBlk14MoveBy(s32 window, s32 dx, s32 dy) {
-    ItfMesBlk14 *blk = &D_0045296C[window].mes->blk14;
+    ItfMesBlk14 *blk = &itfWindowSlots[window].mes->blk14;
     itfMesOffsetNodeChain((ItfMesNode *)blk->glyphChain, dx, dy);
     blk->x += dx;
     blk->y += dy;
 }
 
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y) {
-    ItfMesBlk24 *blk = &D_0045296C[window].mes->blk24;
+    ItfMesBlk24 *blk = &itfWindowSlots[window].mes->blk24;
     s32 delta[2];
     delta[0] = x - blk->x;
     delta[1] = y - blk->y;
@@ -711,14 +711,14 @@ void itfMesBlk24MoveTo(s32 window, s32 x, s32 y) {
 }
 
 void itfMesBlk24MoveBy(s32 window, s32 dx, s32 dy) {
-    ItfMesBlk24 *blk = &D_0045296C[window].mes->blk24;
+    ItfMesBlk24 *blk = &itfWindowSlots[window].mes->blk24;
     itfMesOffsetNodeChain((ItfMesNode *)blk->glyphChain, dx, dy);
     blk->x += dx;
     blk->y += dy;
 }
 
 void itfMesBlk40MoveTo(s32 window, s32 x, s32 y) {
-    ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
+    ItfMesBlk40 *blk = &itfWindowSlots[window].mes->blk40;
     s32 delta[2];
     delta[0] = x - blk->x;
     delta[1] = y - blk->y;
@@ -730,14 +730,14 @@ void itfMesBlk40MoveTo(s32 window, s32 x, s32 y) {
 }
 
 void itfMesBlk40MoveBy(s32 window, s32 dx, s32 dy) {
-    ItfMesBlk40 *blk = &D_0045296C[window].mes->blk40;
+    ItfMesBlk40 *blk = &itfWindowSlots[window].mes->blk40;
     itfMesOffsetNodeChain((ItfMesNode *)blk->glyphChain, dx, dy);
     blk->x += dx;
     blk->y += dy;
 }
 
-void func_001A4418(s32 window, s32 value) {
-    ItfMesState *mes = D_0045296C[window].mes;
+void itfUpdateMessageWindowRenderValue(s32 window, s32 value) {
+    ItfMesState *mes = itfWindowSlots[window].mes;
     if (mes->renderValue != value) {
         itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk14.glyphChain, value);
         itfMesSetNodeChainRenderValue((ItfMesNode *)mes->blk24.glyphChain, value);
@@ -747,58 +747,58 @@ void func_001A4418(s32 window, s32 value) {
 }
 
 u32 itfMesGetWindowFlags(s32 window) {
-    return D_0045296C[window].mes->flags;
+    return itfWindowSlots[window].mes->flags;
 }
 
 void itfMesReplaceWindowHighFlags(s32 window, u32 value) {
     ItfMesState *mes;
 
-    mes = D_0045296C[window].mes;
+    mes = itfWindowSlots[window].mes;
     mes->flags = (u32)(u16)mes->flags | (value & 0xffff0000);
 }
 
 void itfMesSetWindowHighFlags(s32 window, u32 value) {
     ItfMesState *mes;
 
-    mes = D_0045296C[window].mes;
+    mes = itfWindowSlots[window].mes;
     mes->flags = mes->flags | (value & 0xffff0000);
 }
 
 void itfMesClearWindowHighFlags(s32 window, u32 value) {
     ItfMesState *mes;
 
-    mes = D_0045296C[window].mes;
+    mes = itfWindowSlots[window].mes;
     mes->flags = mes->flags & (~value | 0xffff);
 }
 
 s16 func_001A4538(s32 window) {
-    return D_0045296C[window].mes->blk40.unk12;
+    return itfWindowSlots[window].mes->blk40.unk12;
 }
 
 s16 func_001A4558(s32 window) {
-    return D_0045296C[window].mes->unk3E;
+    return itfWindowSlots[window].mes->unk3E;
 }
 
 s16 func_001A4578(s32 window) {
-    return D_0045296C[window].mes->unk3C;
+    return itfWindowSlots[window].mes->unk3C;
 }
 
 u32 itfMesGetWindowTableValue(s32 window, s32 index) {
-    return D_0045296C[window].mes->tableD0[index];
+    return itfWindowSlots[window].mes->tableD0[index];
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A45C0);
 
 void func_001A4858(s32 window, u32 first, u32 second) {
-    func_001A5480((u32)D_0045296C[window].mes, first, second, 0);
+    func_001A5480((u32)itfWindowSlots[window].mes, first, second, 0);
 }
 
 void func_001A4888(s32 window) {
-    func_001A5480((u32)D_0045296C[window].mes);
+    func_001A5480((u32)itfWindowSlots[window].mes);
 }
 
 ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
-    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesSub *previous = mes->sub;
     ItfMesEntry *entry;
     s32 value;
@@ -814,7 +814,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
 }
 
 u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
-    return itfMesGetTableItem(itfMesGetEntry(D_0045296C[window].mes, entryIndex)->table, itemIndex);
+    return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
@@ -822,7 +822,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4988);
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4A10);
 
 s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
-    ItfMesState *mes = D_0045296C[window].mes;
+    ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table;
     u32 item;
     ItfMesNode *glyph;
@@ -847,22 +847,22 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
 }
 
 void func_001A4B98(s32 window, u8 value) {
-    D_0045296C[window].mes->unk39 = value;
+    itfWindowSlots[window].mes->unk39 = value;
 }
 
 void itfMesSetWindowCallbackAddress(s32 window, u32 value) {
-    D_0045296C[window].mes->callbackAddress = value;
+    itfWindowSlots[window].mes->callbackAddress = value;
 }
 
 void itfMesInit(void) {
     ItfMesPoolNode *node;
 
-    D_00452940.activeWindowCount = 0;
-    D_00452940.unk8 = 0;
-    D_00452940.flags = 0;
-    D_00452940.windowTexture = itfLoadTextureFromAsset("/itf/MESWIN.TMX");
-    itfInitPool(&D_00452940.pool, D_00452940.nodes, 0x40, 0x14);
-    for (node = D_00452940.pool.firstFree; node != NULL; node = node->next) {
+    itfMesWork.activeWindowCount = 0;
+    itfMesWork.unk8 = 0;
+    itfMesWork.flags = 0;
+    itfMesWork.windowTexture = itfLoadTextureFromAsset("/itf/MESWIN.TMX");
+    itfInitPool(&itfMesWork.pool, itfMesWork.nodes, 0x40, 0x14);
+    for (node = itfMesWork.pool.firstFree; node != NULL; node = node->next) {
         node->stateAddress = 0;
     }
     kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))sndVisitQueuedResources, sndFlushMessageQueue, NULL);
@@ -870,15 +870,15 @@ void itfMesInit(void) {
 }
 
 void itfMesSetGlobalFlags(u32 bits) {
-    D_00452940.flags |= bits;
+    itfMesWork.flags |= bits;
 }
 
 void itfMesClearGlobalFlags(u32 bits) {
-    D_00452940.flags &= ~bits;
+    itfMesWork.flags &= ~bits;
 }
 
 u16 itfMesGetGlobalFlags(void) {
-    return D_00452940.flags;
+    return itfMesWork.flags;
 }
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00414CE0);
@@ -920,7 +920,7 @@ void itfMesDestroyWindow(s32 window) {
         func_003297C8(rec->handle);
         rec->mes = NULL;
         itfReleasePoolNode(rec, (u8 *)D_00452960 - 0x10);
-        /* This address is D_00452940.unk0; using the pool-array-relative address preserves the compiled access. */
+        /* This address is itfMesWork.unk0; using the pool-array-relative address preserves the compiled access. */
         *(s32 *)((u8 *)D_00452960 - 0x20) -= 1;
     }
 }
@@ -964,11 +964,11 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub) {
 }
 
 u32 itfMesGetWindowEntryItems(s32 window, s32 index) {
-    return itfMesGetEntry(D_0045296C[window].mes, index)->itemList;
+    return itfMesGetEntry(itfWindowSlots[window].mes, index)->itemList;
 }
 
 u32 itfMesGetEntryCount(s32 window) {
-    return D_0045296C[window].mes->sub->entryCount;
+    return itfWindowSlots[window].mes->sub->entryCount;
 }
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index) {
@@ -1015,7 +1015,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
             func_0019DD48(0x1000, 0xBF8, glyph);
         }
     }
-    if (!(mes->flags & 0x400000) && (D_00452940.flags & 1)) {
+    if (!(mes->flags & 0x400000) && (itfMesWork.flags & 1)) {
         itfMesEnableUnflaggedNodeContexts(glyph);
     }
     itfMesCopyGlyphShade(glyph, blk);

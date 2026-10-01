@@ -403,7 +403,7 @@ void mnuBroadcastNodeModelState(u8 *node) {
 }
 
 
-void func_0031C8A8(void) {
+void mnuSetModelNodeBroadcastAlpha(void) {
 }
 
 void mnuSetNodeModelBroadcastByte(u8 *node, u8 value) {

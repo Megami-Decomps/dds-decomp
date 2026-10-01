@@ -2,7 +2,7 @@
 
 extern u64 sdfFindThreadNode(u64);
 
-void func_002CFC18(void) {
+void sdfUnlinkAndDeleteCurrentThread(void) {
     u64 thread;
 
     thread = sdfFindThreadNode(0xffffffffffffffff);
@@ -33,8 +33,8 @@ typedef struct ThreadWaiter {
 } ThreadWaiter;
 
 extern s32 D_003BD2D8;
-extern s32 D_003BD998;
-extern ThreadWaiter *D_003BD99C;
+extern s32 sdfTrackedThreadSemaphore;
+extern ThreadWaiter *sdfTrackedThreadHead;
 extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
 extern void func_0030B568(s32);
 extern s32 WaitSema(s32);
@@ -42,7 +42,7 @@ extern s32 SignalSema(s32);
 extern s32 WakeupThread(s32);
 
 /* Completion thread: each wake-up wakes every thread registered on the waiter list. */
-void func_002CFC70(void) {
+void sdfWakeQueuedThreadWaiters(void) {
     ThreadWaiter *waiter;
 
     sdfAddHandler(0, 2, sdfWakeThreadOnCompletionEvent, -1, 0);
@@ -50,11 +50,11 @@ void func_002CFC70(void) {
     for (;;) {
         SleepThread();
         D_003BD2D8++;
-        WaitSema(D_003BD998);
-        for (waiter = D_003BD99C; waiter != NULL; waiter = waiter->next) {
+        WaitSema(sdfTrackedThreadSemaphore);
+        for (waiter = sdfTrackedThreadHead; waiter != NULL; waiter = waiter->next) {
             WakeupThread(waiter->thread);
         }
-        SignalSema(D_003BD998);
+        SignalSema(sdfTrackedThreadSemaphore);
     }
 }
 
@@ -69,9 +69,9 @@ s32 func_002CFCF0(void) {
 
     func_0030B7F8();
     D_003BD2D8 = 0;
-    D_003BD99C = NULL;
-    D_003BD998 = sdfCreateSemaphore(1, 1, 0);
-    thread = sdfCreateThread(func_002CFC70, D_003E1EF0, 0x800, 0x3E);
+    sdfTrackedThreadHead = NULL;
+    sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
+    thread = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_003E1EF0, 0x800, 0x3E);
     D_003BD9A0 = thread;
     return _StartThread(thread, 0);
 }

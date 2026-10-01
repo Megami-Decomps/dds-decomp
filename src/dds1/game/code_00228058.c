@@ -31,21 +31,21 @@ void scrSetIntegerReturnValue(s32 value);
 
 extern char D_003ACAE0[];
 
-u32 func_002287C0(s32 task);
+u32 evtUpdateSolarOverlayFade(s32 task);
 extern s32 fileMenuTaskExists(void);
 extern s32 func_0011E278(void);
-extern void func_0022A960(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
+extern void evtAdvanceSolarOverlayFadeAndDraw(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
 extern void fldSelectDisplayBuffer(u32 row);
 extern void func_00129900(s32 arg);
 extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
-extern u32 D_003BA904;
+extern u32 kwlnDrawControlFlags;
 extern s32 scrGetCommandTimer(void);
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
-void func_0022AB00(s32 arg0);
+void evtBeginSolarOverlayFadeIn(s32 arg0);
 
-extern u32 D_003BBDC0;
+extern u32 evtSolarOverlayTask;
 
 extern char D_003BBDC8[];
 
@@ -53,7 +53,7 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 u32 kwlnTaskGetUserValue(s32 task);
 
-extern f32 D_003BBDB8; /* solar overlay alpha, interpolated toward 0 or 1 */
+extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 typedef struct SolarWorldState SolarWorldState;
 extern SolarWorldState *D_003BAA00;
@@ -143,11 +143,11 @@ u32 evtSetSkyAlpha(void) {
 
     alpha = scrReadIntParameter(1);
     if (alpha < -255) {
-        func_0010AC10("warning : SET_SKY_A alpha < -255\n");
+        evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha < -255\n");
         alpha = -255;
     }
     if (alpha > 255) {
-        func_0010AC10("warning : SET_SKY_A alpha > 255\n");
+        evtPrintDeveloperConsoleMessage("warning : SET_SKY_A alpha > 255\n");
         alpha = 255;
     }
     evtBeginSkyParameterTransition(scrReadIntParameter(0), alpha);
@@ -164,7 +164,7 @@ u32 evtHideSky(void) {
     return 1;
 }
 
-u32 func_00228408(void) {
+u32 evtCommandAwaitBgmPreload(void) {
     s32 id;
 
     /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
@@ -205,7 +205,7 @@ u32 func_002284E0(void) {
 
     id = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
-    func_00241A50(id, fade);
+    evtQueueValidatedBgmSoundCode(id, fade);
     return 1;
 }
 
@@ -237,7 +237,7 @@ u32 func_002285B0(void) {
 
     id = scrReadIntParameter(0);
     fade = scrReadIntParameter(1);
-    func_00241AE8(id, fade);
+    evtStartBgmBySoundIdAndFade(id, fade);
     return 1;
 }
 
@@ -258,11 +258,11 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
 
 u32 func_00228650(void) {
     if (scrReadIntParameter(0) <= 0) {
-        D_003BA904 |= 0x2000000;
+        kwlnDrawControlFlags |= 0x2000000;
         return 1;
     }
     if (scrGetCommandTimer() < scrReadIntParameter(0)) {
-        D_003BA904 |= 0x2000000;
+        kwlnDrawControlFlags |= 0x2000000;
         return 0;
     }
     return 1;
@@ -310,13 +310,13 @@ void evtDisableSolarPhaseAdvance(void) {
 
 void evtSetSolarOverlayFullyVisible(void) {
     D_003BAA00->flags = D_003BAA00->flags | SOLAR_ALPHA_ENABLED_FLAG;
-    D_003BBDB8 = 1.0f;
-    func_0022AB00(0);
+    evtSolarOverlayAlpha = 1.0f;
+    evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
-    D_003BBDB8 = 0.0f;
+    evtSolarOverlayAlpha = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
@@ -327,7 +327,7 @@ void evtDisableSolarOverlayAlpha(void) {
     D_003BAA00->flags = D_003BAA00->flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-u32 func_002287C0(s32 task) {
+u32 evtUpdateSolarOverlayFade(s32 task) {
     SolarWorldState *state;
     u32 overlay;
     f32 alpha;
@@ -339,14 +339,14 @@ u32 func_002287C0(s32 task) {
     }
     overlay = kwlnTaskGetUserValue(task);
     state = D_003BAA00;
-    alpha = D_003BBDB8;
+    alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
                 alpha = 1.0f;
             }
-            D_003BBDB8 = alpha;
+            evtSolarOverlayAlpha = alpha;
         }
     } else {
         if (alpha > f) {
@@ -354,16 +354,16 @@ u32 func_002287C0(s32 task) {
             if (alpha < f) {
                 alpha = f;
             }
-            D_003BBDB8 = alpha;
+            evtSolarOverlayAlpha = alpha;
         }
     }
     if ((D_003BAA00->flags & 2) != 0) {
-        func_0022A960(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+        evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
         fldSelectDisplayBuffer(0x53);
         func_00129900(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
     } else if (alpha > 0.0f) {
-        func_0022A960(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
+        evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     }
     return 0;
 }
@@ -377,7 +377,7 @@ void *evtCreateSolarOverlayWork(s32 owner) {
     evtInitializeVisualData((s32)overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     kwlnTaskSetUserValue(owner, overlay);
-    return (void *)func_002287C0;
+    return (void *)evtUpdateSolarOverlayFade;
 }
 
 void evtFreeSolarOverlayWork(s32 task) {
@@ -386,15 +386,15 @@ void evtFreeSolarOverlayWork(s32 task) {
     overlay = kwlnTaskGetUserValue(task);
     evtReleaseSolarNoiseSprite(overlay);
     sdfReleaseChipBlock(overlay);
-    D_003BBDC0 = 0;
+    evtSolarOverlayTask = 0;
 }
 
 /* One scheduler task owns the overlay; a second start leaves its state intact. */
 void evtStartSolarOverlay(void) {
-    if (D_003BBDC0 != 0) {
+    if (evtSolarOverlayTask != 0) {
         return;
     }
-    D_003BBDC0 = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
+    evtSolarOverlayTask = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
@@ -402,16 +402,16 @@ void evtStartSolarOverlay(void) {
 }
 
 void evtStopSolarOverlay(void) {
-    if (D_003BBDC0 != 0) {
-        kwlnTaskDestroyWithHierarchy(D_003BBDC0, 1);
+    if (evtSolarOverlayTask != 0) {
+        kwlnTaskDestroyWithHierarchy(evtSolarOverlayTask, 1);
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDB8);
+INCLUDE_SDATA(const s32, "game/code_00228058", evtSolarOverlayAlpha);
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDBC);
 
-INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDC0);
+INCLUDE_SDATA(const s32, "game/code_00228058", evtSolarOverlayTask);
 
 INCLUDE_SDATA(const s32, "game/code_00228058", D_003BBDC8);
 

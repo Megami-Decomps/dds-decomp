@@ -8,7 +8,7 @@ f32 bfStackPopFloat();
 
 #define SCR_STACK_TYPE_STRING 5
 
-extern ScrData *D_00438E8C;
+extern ScrData *scrCurrentContext;
 
 #define SCR_STACK_RET 27
 
@@ -307,7 +307,7 @@ u32 bfContextStep(ScrData *scr) {
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
 s32 scrReadIntParameter(s32 idx) {
-    ScrData *scr = D_00438E8C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - idx - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -326,7 +326,7 @@ s32 scrReadIntParameter(s32 idx) {
 
 f32 bfWaitReadArgFloat(s32 idx)
 {
-    ScrData *scr = D_00438E8C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - idx - 1;
 
     switch (scr->stackTypes[stackIndex]) {
@@ -346,7 +346,7 @@ f32 bfWaitReadArgFloat(s32 idx)
 /* Return a string parameter only when its VM stack tag is STRING. */
 char *scrReadStringParameter(s32 paramIdx)
 {
-    ScrData *scr = D_00438E8C;
+    ScrData *scr = scrCurrentContext;
     s32 stackIndex = scr->sp - paramIdx - 1;
     s32 type = (s8)scr->stackTypes[stackIndex];
 
@@ -362,12 +362,12 @@ char *scrReadStringParameter(s32 paramIdx)
 
 void scrSetIntegerReturnValue(s32 retVal)
 {
-    D_00438E8C->stackTypes[SCR_STACK_RET] = 0;
-    D_00438E8C->stackValues[SCR_STACK_RET].i = retVal;
+    scrCurrentContext->stackTypes[SCR_STACK_RET] = 0;
+    scrCurrentContext->stackValues[SCR_STACK_RET].i = retVal;
 }
 
 void scrSetFloatReturnValue(f32 retVal)
 {
-    D_00438E8C->stackTypes[SCR_STACK_RET] = 1;
-    D_00438E8C->stackValues[SCR_STACK_RET].f = retVal;
+    scrCurrentContext->stackTypes[SCR_STACK_RET] = 1;
+    scrCurrentContext->stackValues[SCR_STACK_RET].f = retVal;
 }

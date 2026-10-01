@@ -525,7 +525,7 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E170);
 
 extern void btlSelectRandomDefeatCamera(void *);
 
-s32 func_0020E868(BtlUnit *unit) {
+s32 btlHandleLinkedUnitDefeatAction(BtlUnit *unit) {
     BtlTask *entry = ((BtlEventEntry *)unit)->task;
     BtlUnit *other;
     if (entry->unit->flags & 0x200) {
@@ -545,7 +545,7 @@ s32 func_0020E868(BtlUnit *unit) {
     return 0;
 }
 
-s32 func_0020E910(BtlUnit *unit) {
+s32 btlApplyActionDefeatCamera(BtlUnit *unit) {
     u16 flags = ((BtlActionTableRow *)D_003BAA60)[unit->unk_114].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();

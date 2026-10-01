@@ -5,7 +5,7 @@ typedef struct {
     void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
     s32 state;   /* 0x8: checked for states 5 (node update) and 6 (parameter access) */
-    void *bill;   /* 0xC passed to func_00151E60/billSetKind1Entry */
+    void *bill;   /* 0xC passed to billCloneObjectRetainingSharedData/billSetKind1Entry */
     u32 unk10;   /* 0x10 cleared by effObjBindValidatedOwner */
     u32 unk14;   /* 0x14 cleared by effObjBindValidatedOwner */
     void *unk18; /* 0x18 cleared by effObjBindValidatedOwner */
@@ -61,13 +61,13 @@ extern void effCopyVector(void *source, void *destination);
 extern void func_0014FBF0(void *source, void *destination);
 
 extern void *func_00111388(void);
-extern void func_001111C8(void *id, void *owner);
+extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern void *billCreateFromResource(s32 kind, s32 resourceId);
 
 extern void *billCreateIndexed(s32 kind, u32 billId);
 
-extern void *func_00151E60(void *arg);
+extern void *billCloneObjectRetainingSharedData(void *arg);
 
 extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
 
@@ -75,7 +75,7 @@ extern void effEventReleaseNode(void *node);
 
 extern void *func_00190130(void *bill, u32 id, void *vec);
 
-extern EffectObj *func_00110880(s32 kind);
+extern EffectObj *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData(void *obj);
 
@@ -111,7 +111,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     EffectObj *obj;
     EffectData *data;
 
-    obj = func_00110880(7);
+    obj = dds3AppendWorldObjectNode(7);
     if (obj == NULL) {
         return NULL;
     }
@@ -136,7 +136,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114B18);
 void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E60(obj->data->bill);
+    handle = billCloneObjectRetainingSharedData(obj->data->bill);
     func_00114B18(handle, vec, extra);
 }
 
@@ -187,7 +187,7 @@ EffectObj *func_00114CE8(void *bill, void *vec, s32 extra) {
     id = func_00111388();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
-        func_001111C8(id, obj);
+        dds3EnsureWorldNodeInSlot(id, obj);
     }
     return obj;
 }
@@ -195,7 +195,7 @@ EffectObj *func_00114CE8(void *bill, void *vec, s32 extra) {
 void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_00151E60(obj->data->bill);
+    handle = billCloneObjectRetainingSharedData(obj->data->bill);
     func_00114CE8(handle, vec, extra);
 }
 
@@ -240,7 +240,7 @@ EffectObj *func_00114E90(void *bill, void *vec, s32 extra) {
     id = func_00111388();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
-        func_001111C8(id, obj);
+        dds3EnsureWorldNodeInSlot(id, obj);
     }
     return obj;
 }
@@ -286,7 +286,7 @@ EffectObj *func_00114FE0(void *bill, void *vec, s32 extra) {
     id = func_00111388();
     if (id != NULL) {
         *(void **)((u8 *)handle + 0x24) = id;
-        func_001111C8(id, obj);
+        dds3EnsureWorldNodeInSlot(id, obj);
     }
     return obj;
 }

@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern s32 func_002D3288(u32);
-extern s32 func_00102A40(void);
+extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
 extern u64 func_002EB028(const char *, u32 *, u64);
@@ -31,7 +31,7 @@ extern u32 D_003BB170;
 
 extern u32 D_003BB16C;
 extern u32 D_003BD818;
-void func_00194190(s32 id, const char *path);
+void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 D_00356620[];
 extern u32 strlen(const char *str);
 
@@ -132,7 +132,7 @@ extern u32 D_003D6E20[];
 extern Unk6C84Rec D_003D6C84[];
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
-s32 func_00196B30(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
+s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
 u32 itfReadEncodedTextLead(TextStream *stream) {
     s32 *position = &stream->offset;
@@ -162,16 +162,16 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_001964F8);
 INCLUDE_ASM(const s32, "game/code_00196478", func_001968C0);
 
 void itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub) {
-    func_00196B30(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
+    itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
 void itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
-    func_00196B30(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
+    itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
 extern s32 func_001968C0(TextDrawArgs *);
 
-s32 func_00196B30(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
     TextDrawArgs args;
 
     args.x = x;
@@ -191,7 +191,7 @@ s32 func_00196B30(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 chann
 
 void itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
                    s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
-    func_00196B30(x, y, depth, channel0 & 0xff, channel1 & 0xff,
+    itfDrawEncodedTextStream(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
 
@@ -274,8 +274,8 @@ u64 frFontBuildColoredGlyphWithSharedFlags(u64 x, u64 y, s32 depth, s32 alt, u64
 }
 
 void mnuLoadStaffFonts(void) {
-    func_00194190(4, "/font/staff1.fnt");
-    func_00194190(5, "/font/staff2.fnt");
+    frFontEnsureSlotLoaded(4, "/font/staff1.fnt");
+    frFontEnsureSlotLoaded(5, "/font/staff2.fnt");
 }
 
 void mnuUnloadStaffFonts(void) {
@@ -529,7 +529,7 @@ extern s32 scrCreateProcessTaskFromResource(s32, char *, s32);
 extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
 extern void itfReleaseFontTestTaskResources(void);
 
-void func_001983A8(void) {
+void itfStartFontTestScene(void) {
     itfLoadBackgroundSprite();
     kwlnTaskCreate((s32)"test_font", 0x2B06, 0, 0, (s32)itfDrawBackgroundAndGetTaskReadyMask, (s32)itfReleaseFontTestTaskResources, 0);
     D_003BB190 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
@@ -911,7 +911,7 @@ u32 func_001997E8(void) {
 extern char D_003A13F0[]; /* "Camp process halted.\n", followed by padding no C emits */
 
 void mnuReportCampProcessHalted(void) {
-    if (func_00102A40() != 5) {
+    if (dds3AdminGetActiveMode() != 5) {
         dds3AdminSetControlFlag();
     }
     func_003003F0(D_003A13F0);

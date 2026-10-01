@@ -120,7 +120,7 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
     return result;
 }
 
-s64 func_0029B810(s32 request) {
+s64 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0029AA48(context);
@@ -148,7 +148,7 @@ u32 func_0029BBC0(void) {
 
 extern s32 mdlFlagTest(s32);
 
-s32 func_0029BBE0(void) {
+s32 mnuSelectEventFlagCode(void) {
     if (mdlFlagTest(0x31)) return 8;
     if (mdlFlagTest(0x25)) return 1;
     if (mdlFlagTest(0x1C)) return 2;

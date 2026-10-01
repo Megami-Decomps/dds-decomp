@@ -4,7 +4,7 @@ extern s32 func_0028A018(s32);
 extern s32 scrGetEntryRequirementFlags(u16);
 extern s32 func_00314990(s32, u16);
 extern s32 scrGetSelectedScriptEntryId(s32);
-extern s32 func_0026CF70(s16);
+extern s32 mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(s32, s32, s32);
 extern void func_00291118(void);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
@@ -53,13 +53,13 @@ u32 func_002890A8(MenuContainer *object) {
     return *(u32 *)object->list->selected;
 }
 
-u32 func_002890B8(MenuContainer *object) {
+u32 mnuRetreatNodeCursorAndClearListFlags(MenuContainer *object) {
     mnuRetreatListCursorDefault(object->list);
     mnuClearListFlagsOneAndTwo(object->list);
     return 1;
 }
 
-u32 func_002890F0(MenuContainer *object) {
+u32 mnuAdvanceNodeCursorAndClearListFlags(MenuContainer *object) {
     mnuAdvanceListCursorDefault(object->list);
     mnuClearListFlagsOneAndTwo(object->list);
     return 1;
@@ -71,12 +71,12 @@ typedef struct MenuListCursor {
 } MenuListCursor;
 
 /* Steps the list cursor to `target` one entry at a time. */
-s32 func_00289128(MenuContainer *object, s8 target) {
+s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *object, s8 target) {
     s32 diff;
     s32 current;
 
     current = *((MenuListCursor *)object->list)->index;
-    func_0010AE38("Jump!! %d to %d\n", current, target);
+    evtPrintDeveloperConsoleMessage("Jump!! %d to %d\n", current, target);
     diff = current - target;
     while (diff != 0) {
         if (diff > 0) {
@@ -119,10 +119,10 @@ typedef struct MantraMenuWork {
     u32 drawPool; /* 0x9C0 */
 } MantraMenuWork;
 
-void func_00289B40(s32 object) {
+void mnuUpdateSelectedMantraResourceId(s32 object) {
     s32 state = object + 0x240;
     s16 id = scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->selected->value);
-    ((MantraMenuWork *)state)->resourceId = func_0026CF70(id);
+    ((MantraMenuWork *)state)->resourceId = mnuGetMantraNodePositionRecord(id);
     func_0028D070(object, 5, 0);
 }
 
@@ -144,7 +144,7 @@ extern void func_002A2200(s32 a);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
 /* Opens the mantra menu: collects the list's node ids and starts the AT3 load. */
-void func_00289DC8(s32 object) {
+void mnuOpenMantraSelectionAndLoadTitleStream(s32 object) {
     s32 state = object + 0x240;
     MenuNode *node;
     s32 count;
@@ -152,7 +152,7 @@ void func_00289DC8(s32 object) {
 
     ((MantraMenuBits *)(state + 0x554))->flag14 = 0;
     ((MantraMenuBits *)(state + 0x554))->mode = 1;
-    ((MantraMenuWork *)state)->resourceId = func_0026CF70(scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->selected->value));
+    ((MantraMenuWork *)state)->resourceId = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(((MenuContainer *)object)->list->selected->value));
     func_0028E858(object);
     list = ((MenuContainer *)object)->list;
     node = list->head;
@@ -165,7 +165,7 @@ void func_00289DC8(s32 object) {
     func_0028D070(object, 5, 0);
     evtStageTestInit(0);
     kwlnFadeOutStart(0, 0, 0, 0);
-    func_0010AE38("AT3 LOAD!!\n");
+    evtPrintDeveloperConsoleMessage("AT3 LOAD!!\n");
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
     func_002A2200(0x10);
@@ -173,10 +173,10 @@ void func_00289DC8(s32 object) {
 }
 
 extern void mnuDestroyMantraDrawPool(u32 address);
-extern s64 func_0026D148(u32 *p);
+extern s64 evtReleaseMantraSelectionWork(u32 *p);
 extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
 
-void func_00289ED0(s32 object) {
+void mnuReleaseMantraMenuDrawResources(s32 object) {
     s32 state;
     u32 *handle;
     s32 i;
@@ -188,7 +188,7 @@ void func_00289ED0(s32 object) {
     handle = ((MantraMenuWork *)state)->spriteHandles;
     for (i = 5; i >= 0; i--) {
         if (*handle != 0) {
-            func_0026D148((u32 *)*handle);
+            evtReleaseMantraSelectionWork((u32 *)*handle);
         }
         *handle = 0;
         handle++;
@@ -206,7 +206,7 @@ void mnuCleanupMantraVisualsAndResetTitleStream(void) {
     mnuResetTitleStreamLocked();
 }
 
-s32 func_00289FA0(s32 object) {
+s32 mnuCheckRequiredMantraEntries(s32 object) {
     s32 index;
     for (index = 1; index < 0xb0; index++) {
         u16 id = index;
@@ -224,7 +224,7 @@ INCLUDE_RODATA(const s32, "game/code_00289058", D_00426380);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028A018);
 
-s32 func_0028A0F8(s32 object) {
+s32 mnuSetSelectedMantraOptionFlag(s32 object) {
     u16 flagIds[6] = {0x9a0, 0x9a1, 0x9a2, 0x9a3, 0x9a4, 0x9a5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
     mdlFlagSet(flagIds[flagIndices[*(u16 *)(object + 4)]]);
@@ -270,7 +270,7 @@ typedef struct MantraMenuSrcState {
 extern MantraMenuSrc *func_0028FD10(void);
 
 /* Binds the source record (or the default one) and unpacks its two bit fields. */
-s32 func_0028BAF0(s32 object, MantraMenuSrc *src) {
+s32 mnuBindMantraMenuSourceRecord(s32 object, MantraMenuSrc *src) {
     MantraMenuSrcState *state = (MantraMenuSrcState *)(object + 0x240);
 
     if (src != 0) {
@@ -299,19 +299,19 @@ typedef struct MantraMenuTimer {
     u16 timer;
 } MantraMenuTimer;
 
-void func_0028CCA8(s32 object) {
+void mnuStartMantraPanelEntryTransition(s32 object) {
     ((MantraMenuTimer *)(object + 0x240))->timer = 0;
     ((MantraMenuTimer *)(object + 0x240))->mode = 1;
 }
 
-void func_0028CCB8(s32 object) {
+void mnuStartMantraPanelExitTransition(s32 object) {
     ((MantraMenuTimer *)(object + 0x240))->timer = 0;
     ((MantraMenuTimer *)(object + 0x240))->mode = 2;
 }
 
 
 /* Advances the 6-frame countdown of mode 1 (-> 3) or mode 2 (-> 0). */
-void func_0028CCC8(s32 object) {
+void mnuAdvanceMantraPanelTransitionTimer(s32 object) {
     MantraMenuTimer *state = (MantraMenuTimer *)(object + 0x240);
 
     switch (state->mode) {

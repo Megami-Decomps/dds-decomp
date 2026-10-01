@@ -40,7 +40,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
     s32 frame = work->frame;
     s32 fadeIn = work->fadeIn;
     s32 fadeOut = work->fadeOut;
-    u32 actor = func_00161858();
+    u32 actor = effBTLFieldColorGetOriginalSelector();
     s32 remain;
     f32 t;
     u32 blendColor;
@@ -87,21 +87,21 @@ void effUpdatePairedResources(PairedEffectResources *work) {
 }
 
 /* Copy the endpoint vector; the remaining paired-resource state is unchanged. */
-void func_00186030(PairedEffectResources *dst, PairedEffectResources *src) {
+void effCopyPairedResourceEndpoint(PairedEffectResources *dst, PairedEffectResources *src) {
     PCP_COPY_VECTOR(dst->startVec, src->startVec);
 }
 
-void func_00186040(PairedEffectResources *pair, u32 colorWithAlpha) {
+void effSetPairedResourceColor(PairedEffectResources *pair, u32 colorWithAlpha) {
     pair->colorWithAlpha = colorWithAlpha;
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186048);
+INCLUDE_ASM(const s32, "game/code_00185E18", effBuildBlurTransformedQuad);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186398);
+INCLUDE_ASM(const s32, "game/code_00185E18", effBuildBlurUnitTextureQuad);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186498);
+INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurRectangle);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186718);
+INCLUDE_ASM(const s32, "game/code_00185E18", effAppendBlurRenderState);
 
 /* Packet builders read RGBA, a blend control word, and a rotated/scaled rectangle. */
 typedef struct {
@@ -119,19 +119,19 @@ typedef struct {
 
 extern void *effCreateSizedDrawPacket();
 extern void *func_0015F810();
-extern void func_00186398();
-extern void func_00186048();
+extern void effBuildBlurUnitTextureQuad();
+extern void effBuildBlurTransformedQuad();
 extern void sdfAppendPacket();
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void func_001869F0(void *list, BlurSource *source, u8 fixedPointCoordinates) {
+void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPointCoordinates) {
     void *packet;
 
     packet = effCreateSizedDrawPacket(1, 0x200);
-    func_00186398(source, func_0015F810(packet), fixedPointCoordinates);
+    effBuildBlurUnitTextureQuad(source, func_0015F810(packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
     packet = effCreateSizedDrawPacket(1, 0);
-    func_00186048(source, func_0015F810(packet), fixedPointCoordinates);
+    effBuildBlurTransformedQuad(source, func_0015F810(packet), fixedPointCoordinates);
     sdfAppendPacket(list, packet);
 }
 
@@ -154,7 +154,7 @@ extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(void *, void *);
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
-void func_00186A98(void *list) {
+void effDrawBlurListWithFramePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
 
     func_002D4CC8(D_00326ED0[func_00100518()].dmaPacket, packet, 1);
@@ -164,22 +164,22 @@ void func_00186A98(void *list) {
 
 extern s32 func_0011E278();
 extern void sdfInitPacketList();
-extern void func_00186718();
+extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void func_00186B20(BlurSource *source, s32 resource, u8 fixedPointCoordinates) {
+void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinates) {
     void *list;
 
     if (func_0011E278(source) == 0) {
         list = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        func_00186718(list, source->blendControl, resource);
-        func_001869F0(list, source, fixedPointCoordinates);
-        func_00186A98(list);
+        effAppendBlurRenderState(list, source->blendControl, resource);
+        effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
+        effDrawBlurListWithFramePacket(list);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186BC8);
+INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectangle);
 
 typedef struct EffBlurTemplateBody {
     s32 extent;        /* 0x00 */
@@ -195,7 +195,7 @@ extern void *func_002CFEB8(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *func_00186C18(EffBlurTemplate *src) {
+EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {
     EffBlurTemplate *dst = func_002CFEB8(sizeof(EffBlurTemplate));
 
     dst->resourceWord = effGetResourceFirstWord(2);
@@ -207,7 +207,7 @@ void func_00186CB8(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186CD0);
+INCLUDE_ASM(const s32, "game/code_00185E18", effDrawBlurPixelRectWithResource);
 
 typedef struct BlurRect {
     s32 extent;     /* 0x00 half-size source */
@@ -217,7 +217,7 @@ typedef struct BlurRect {
 } BlurRect;
 
 /* GS coordinates use sixteenth-pixel X and half-height Y; extent is halved for Y. */
-void func_00186D48(BlurRect *rect) {
+void effDrawBlurFixedPointRectangle(BlurRect *rect) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(rect) == 0) {
@@ -229,6 +229,6 @@ void func_00186D48(BlurRect *rect) {
         halfExtent >>= 1;
         rect->source.top = centerY - halfExtent;
         rect->source.bottom = centerY + halfExtent;
-        func_00186B20(&rect->source, rect->resource, 1);
+        effDrawBlurSource(&rect->source, rect->resource, 1);
     }
 }

@@ -199,7 +199,7 @@ extern void *sdfFormatSifPacket();
 extern void *func_0011F250();
 
 /* Build a one-packet SIF command at (x, y) in GS coordinates and submit it on draw surface `surface`. */
-void func_0030A700(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface) {
+void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface) {
     void *list = sdfAllocPacketAligned(0x20);
     LmapDrawSurface *target;
     u8 header[0x10];
@@ -212,7 +212,7 @@ void func_0030A700(s32 x, s32 y, s32 width, s32 height, s32 command, s32 surface
 }
 
 /* Variant that formats a textured sprite packet (func_0011F250) instead of a SIF command. */
-void func_0030A7C8(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s32 e, s32 surface) {
+void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s32 e, s32 surface) {
     void *list = sdfAllocPacketAligned(0x20);
     LmapDrawSurface *target;
 

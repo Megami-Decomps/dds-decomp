@@ -101,7 +101,7 @@ typedef struct SoundFormat {
     u8 playbackMode;
 } SoundFormat;
 
-extern SoundNode *D_003BDA98;
+extern SoundNode *sdfSoundNodeHead;
 extern s32 sceIpuSync(s32, s32);
 extern u32 sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfSoundInitNodeFromFormat(SoundNode *, SoundFormat *);
@@ -551,7 +551,7 @@ s32 sdfRelocatePackedResourceWordsFromHeader(s32 resource) {
     return payload;
 }
 
-u64 func_002EB230(u64 name, s32 *out) {
+u64 sdfReadPackedResourceAndRelocateHeader(u64 name, s32 *out) {
     u32 info[4];
     u64 buffer = func_002EB028(name, info, 0);
     *out = sdfRelocatePackedResourceWordsFromHeader(info[0]);
@@ -635,7 +635,7 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
 }
 
 void sdfSoundAppendNode(SoundNode *node) {
-    SoundNode **tail = &D_003BDA98;
+    SoundNode **tail = &sdfSoundNodeHead;
     SoundNode *current = *tail;
     if (current != NULL) {
         tail = &current->next;
@@ -648,7 +648,7 @@ void sdfSoundAppendNode(SoundNode *node) {
 }
 
 void sdfSoundRemoveNode(SoundNode *node) {
-    SoundNode **link = &D_003BDA98;
+    SoundNode **link = &sdfSoundNodeHead;
     SoundNode *current = *link;
     while (current != NULL) {
         if (current == node) {
@@ -934,7 +934,7 @@ void sdfSoundInitIpuStream(void) {
 
     sceIpuInit();
     *(volatile s32 *)0x10002000 = 0x90000000;
-    D_003BDA98 = 0;
+    sdfSoundNodeHead = 0;
     D_003BDAA4 = 0;
     D_003BDA9C = sdfAddHandler(1, 3, func_002EC3C0, -1, 0);
     func_0030B638(3);

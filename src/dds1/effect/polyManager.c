@@ -41,7 +41,7 @@ typedef struct {
     u8 pad[0xF4]; /* 0x0 */
     u32 unkF4;    /* 0xF4 */
     u8 padF8[4];  /* 0xF8 */
-    void *unkFC;  /* 0xFC released by func_0015EEC0 */
+    void *unkFC;  /* 0xFC released by polyReleaseCellBoundNodeResources */
 } PolyNodeF4;
 
 typedef struct {
@@ -320,7 +320,7 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015EC08);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015ED90);
 
-void func_0015EEC0(PolyNodeF4 *obj) {
+void polyReleaseCellBoundNodeResources(PolyNodeF4 *obj) {
     parReleaseCellSystem(obj->unkF4);
     func_002D0918(obj->unkFC);
 }

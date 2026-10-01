@@ -103,13 +103,13 @@ void func_00157800(EffNode *node) {
     D_003AA748[node->type].fn1C(node->instance);
 }
 
-void func_00157838(EffNode *node, u8 flag) {
+void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {
     if (D_003AA748[node->type].fn20 != NULL) {
         D_003AA748[node->type].fn20(node->instance, flag);
     }
 }
 
-s32 func_00157878(EffNode *node) {
+s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     if (D_003AA748[node->type].fn24 == NULL) {
         return 1;
     }

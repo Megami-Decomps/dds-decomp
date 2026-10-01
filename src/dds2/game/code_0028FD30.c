@@ -157,7 +157,7 @@ void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
     if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
         u32 flags;
         u32 option;
-        func_00289128(object, selection);
+        mnuMoveNodeCursorToTargetIndex(object, selection);
         mnuTransitionActivePanelAnimations(state->resource, 0);
         flags = state->flags;
         func_00291590(object, 5, 1, selection, (flags >> 28) & 1, 0);
@@ -169,7 +169,7 @@ void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
 void mnuSetPanelSelection(MenuPanelObject *object, s8 selection) {
     MenuPanelState *state = (MenuPanelState *)((u8 *)object + 0x240);
     if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
-        func_00289128(object, selection);
+        mnuMoveNodeCursorToTargetIndex(object, selection);
         state->flags = (state->flags & 0xf0ffffff)
             | ((selection & 0xf) << 24);
     }
@@ -202,7 +202,7 @@ void func_00292998(MenuPanelObject *object) {
     u64 effectHandle;
 
     resource = object->resource;
-    func_0026D098(0);
+    mnuGetMantraPanelPositionRecord(0);
     record = func_00291400(0, 8);
     effectHandle = mnuFindPanelSlotById(resource, 8, 0);
     mnuQueuePanelAnimationTransition(effectHandle, 7, 0);
@@ -219,24 +219,24 @@ s32 func_00292B90(s32 object) {
 }
 
 
-extern MenuPanelSelector *func_0026D098(s32);
+extern MenuPanelSelector *mnuGetMantraPanelPositionRecord(s32);
 extern void func_00278F60(u32);
 extern void func_002790F0(s32, s32, u32);
 extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
-void func_00292BB0(MenuPanelObject *object) {
+void itfPositionMantraSelectionController(MenuPanelObject *object) {
     s16 *record;
 
-    record = (s16 *)func_0026D098(8);
+    record = (s16 *)mnuGetMantraPanelPositionRecord(8);
     func_00278F60(object->selectionController);
     func_002790F0((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);
 }
 
 /* Install the panel's default selector and position its selection controller. */
-void func_00292C58(MenuPanelObject *object) {
+void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
     u8 *base = (u8 *)object + 0x240;
     s16 *record;
 
-    record = (s16 *)func_0026D098(0x71);
+    record = (s16 *)mnuGetMantraPanelPositionRecord(0x71);
     *(s16 **)(base + 0x560) = record;
     /* Record coordinates are tenths; the two screen axes use different scales. */
     mnuSpawnMantraIconAtPosition((s32)((f32)record[2] / 10.0f * 40.0f), (s32)((f32)record[3] / 10.0f * 39.0f), object->selectionController);

@@ -14,7 +14,7 @@ typedef struct ActionObj {
     s32 unk1C;     /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110AA8();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void effObjSetInnerFirstVec();
 
@@ -23,7 +23,7 @@ extern void effObjSetInnerSecondVec();
 extern void effObjInnerVecBackup();
 
 ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    ActionObj *obj = func_00110AA8(8);
+    ActionObj *obj = dds3AppendWorldObjectNode(8);
 
     obj->initialValue = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);

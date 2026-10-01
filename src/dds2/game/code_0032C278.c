@@ -21,7 +21,7 @@ typedef struct SdfDmaTagHeader {
     u32 address;
 } SdfDmaTagHeader;
 
-extern s32 D_004389FC;
+extern s32 sdfPendingQueueSemaphore;
 
 extern s32 sdfCreateSemaphore(u32, u32, u32);
 
@@ -29,13 +29,13 @@ extern u64 sdfGraphHasPendingWork(void);
 
 extern s64 func_0036DE70(void);
 
-extern s32 D_00438A04;
+extern s32 sdfPacketBufferSize;
 
-extern u32 D_00438A08[2];
+extern u32 sdfPacketBuffers[2];
 
-extern s32 D_00438A10;
+extern s32 sdfPacketCursor;
 
-extern s32 D_00438A14;
+extern s32 sdfPacketBufferEnd;
 
 extern u32 sdfCreateReferenceDmaNode(u32);
 
@@ -49,7 +49,7 @@ extern s32 D_00438A28;
 
 extern u32 D_0040B308[];
 
-extern SdfResource *D_004389F8;
+extern SdfResource *sdfResourceListHead;
 
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
@@ -57,7 +57,7 @@ void func_0032D218();
 
 void func_0032DC80();
 
-extern void *D_00439160;
+extern void *sdfPendingQueueHead;
 
 extern s8 D_00439164;
 
@@ -136,7 +136,7 @@ INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
 /* Walk the resource chain until the requested numeric ID is found. */
 SdfResource *sdfFindResourceById(s32 id) {
-    SdfResource *resource = D_004389F8;
+    SdfResource *resource = sdfResourceListHead;
 
     while (resource != NULL) {
         if (resource->id == id) {
@@ -190,8 +190,8 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 source, s32 a, s32 b, s32 
 
 /* Lazily create the shared semaphore and reset this request's state. */
 void sdfInitializeSynchronizedRequest(SdfSynchronizedRequest *request, u32 value) {
-    if (D_004389FC < 0) {
-        D_004389FC = sdfCreateSemaphore(1, 0x7f, 0);
+    if (sdfPendingQueueSemaphore < 0) {
+        sdfPendingQueueSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
     }
     request->value = value;
     request->state = 0;
@@ -224,16 +224,16 @@ void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
     s32 remaining;
 
     if (entry != 0) {
-        WaitSema(D_004389FC);
+        WaitSema(sdfPendingQueueSemaphore);
         node = owner->pending;
         if (node == NULL) {
             node = (SdfPendingNode *)func_00328D68(0x10);
             node->remaining = 0;
-            node->next = D_00439160;
+            node->next = sdfPendingQueueHead;
             node->buffer = NULL;
             node->owner = owner;
             owner->pending = node;
-            D_00439160 = node;
+            sdfPendingQueueHead = node;
         }
         remaining = node->remaining;
         buffer = node->buffer;
@@ -246,7 +246,7 @@ void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
         }
         buffer->entry[0x3F - remaining] = entry;
         node->remaining = remaining - 1;
-        SignalSema(D_004389FC);
+        SignalSema(sdfPendingQueueSemaphore);
     }
 }
 
@@ -257,10 +257,10 @@ typedef struct SdfLink {
 
 /* Detach the pending chain and clear each node's peer back-reference. */
 SdfLink *sdfDetachQueue(void) {
-    SdfLink *head = D_00439160;
+    SdfLink *head = sdfPendingQueueHead;
     SdfLink *link;
 
-    D_00439160 = NULL;
+    sdfPendingQueueHead = NULL;
     link = head;
     if (head != NULL) {
         do {
@@ -311,13 +311,13 @@ void sdfRotatePendingSlots(void) {
     u32 i;
 
     D_00439164 = 1;
-    WaitSema(D_004389FC);
+    WaitSema(sdfPendingQueueSemaphore);
     sdfPendingQueueFlush(D_00439158[0]);
     for (i = 0; i < 1; i++) {
         D_00439158[i] = D_00439158[i + 1];
     }
     D_00439158[1] = (s32)sdfDetachQueue();
-    SignalSema(D_004389FC);
+    SignalSema(sdfPendingQueueSemaphore);
     D_00439164 = 0;
 }
 
@@ -328,7 +328,7 @@ u64 sdfGraphHasPendingWork(void) {
     if (D_00439164 != 0) {
         return 1;
     }
-    if (D_00439160 != NULL) {
+    if (sdfPendingQueueHead != NULL) {
         return 1;
     }
     i = 0;
@@ -365,38 +365,38 @@ void sdfResizeDoubleBuffer(s32 size) {
         D_00438A00 = 0;
     }
     size = (size + 0x7F) & ~0x7F;
-    D_00438A04 = size;
+    sdfPacketBufferSize = size;
     D_00438A00 = func_003292A8(size * 2);
     memory = sdfResourceRetainAddress(D_00438A00);
-    D_00438A08[0] = memory;
-    D_00438A08[1] = memory + size;
+    sdfPacketBuffers[0] = memory;
+    sdfPacketBuffers[1] = memory + size;
 }
 
 /* Select one half and expose its bounds to the packet allocator. */
 void sdfSelectDoubleBuffer(s32 index) {
-    D_00438A10 = D_00438A08[index];
-    D_00438A14 = D_00438A08[index] + D_00438A04;
+    sdfPacketCursor = sdfPacketBuffers[index];
+    sdfPacketBufferEnd = sdfPacketBuffers[index] + sdfPacketBufferSize;
 }
 
 s32 sdfGetBufferRemaining(void) {
-    return D_00438A14 - D_00438A10;
+    return sdfPacketBufferEnd - sdfPacketCursor;
 }
 
 /* Reserve packet space at a 16-byte boundary, returning the old cursor. */
 s32 sdfAllocPacketAligned(s32 size) {
     s32 address;
 
-    address = D_00438A10;
-    D_00438A10 = D_00438A10 + ((size + 0xfU) & 0xfffffff0);
+    address = sdfPacketCursor;
+    sdfPacketCursor = sdfPacketCursor + ((size + 0xfU) & 0xfffffff0);
     return address;
 }
 
 s32 sdfGetPacketCursor(void) {
-    return D_00438A10;
+    return sdfPacketCursor;
 }
 
 void sdfSetPacketCursorAligned(s32 cursor) {
-    D_00438A10 = (cursor + 0xF) & ~0xF;
+    sdfPacketCursor = (cursor + 0xF) & ~0xF;
 }
 
 /* Clear all links and metadata before building a new packet list. */
@@ -913,30 +913,30 @@ void sdfAppendInitializedPacket(s32 list, void (*initialize)(s32), s32 size, s32
     initialize(packet);
     sdfAppendPacket(list, packet);
 }
-void func_0032E468(SdfPacket *packet) {
+void sdfInitPrimaryAlphaBlendRegisters(SdfPacket *packet) {
     packet->unk0 = 0x717FB;
     packet->unk8 = 0x47;
     packet->unk10 = 0x44;
     packet->unk18 = 0x42;
 }
 
-void func_0032E490(SdfPacket *packet) {
+void sdfInitSecondaryAlphaBlendRegisters(SdfPacket *packet) {
     packet->unk0 = 0x717FB;
     packet->unk8 = 0x48;
     packet->unk10 = 0x44;
     packet->unk18 = 0x43;
 }
 
-void func_0032E4B8(SdfPacket *packet) {
-    func_0032E468(packet + 1);
+void sdfBuildPrimaryAlphaBlendDmaPacket(SdfPacket *packet) {
+    sdfInitPrimaryAlphaBlendRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
     packet->unk18 = 0xE;
 }
 
-void func_0032E518(SdfPacket *packet) {
-    func_0032E490(packet + 1);
+void sdfBuildSecondaryAlphaBlendDmaPacket(SdfPacket *packet) {
+    sdfInitSecondaryAlphaBlendRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -972,60 +972,60 @@ void func_0032E628(SdfPacket *packet) {
     packet->unk18 = 0xE;
 }
 
-void func_0032E688(SdfPacket *packet) {
+void sdfInitPrimaryAlphaAdditiveRegisters(SdfPacket *packet) {
     packet->unk0 = 0x71801;
     packet->unk8 = 0x47;
     packet->unk10 = 0x48;
     packet->unk18 = 0x42;
 }
 
-void func_0032E6B0(SdfPacket *packet) {
+void sdfInitSecondaryAlphaAdditiveRegisters(SdfPacket *packet) {
     packet->unk0 = 0x71801;
     packet->unk8 = 0x48;
     packet->unk10 = 0x48;
     packet->unk18 = 0x43;
 }
 
-void func_0032E6D8(SdfPacket *packet) {
-    func_0032E688(packet + 1);
+void sdfBuildPrimaryAlphaAdditiveDmaPacket(SdfPacket *packet) {
+    sdfInitPrimaryAlphaAdditiveRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
     packet->unk18 = 0xE;
 }
 
-void func_0032E738(SdfPacket *packet) {
-    func_0032E6B0(packet + 1);
+void sdfBuildSecondaryAlphaAdditiveDmaPacket(SdfPacket *packet) {
+    sdfInitSecondaryAlphaAdditiveRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
     packet->unk18 = 0xE;
 }
 
-void func_0032E798(SdfPacket *packet) {
+void sdfInitPrimaryAlphaSubtractiveRegisters(SdfPacket *packet) {
     packet->unk0 = 0x71801;
     packet->unk8 = 0x47;
     packet->unk10 = 0x42;
     packet->unk18 = 0x42;
 }
 
-void func_0032E7C0(SdfPacket *packet) {
+void sdfInitSecondaryAlphaSubtractiveRegisters(SdfPacket *packet) {
     packet->unk0 = 0x71801;
     packet->unk8 = 0x48;
     packet->unk10 = 0x42;
     packet->unk18 = 0x43;
 }
 
-void func_0032E7E8(SdfPacket *packet) {
-    func_0032E798(packet + 1);
+void sdfBuildPrimaryAlphaSubtractiveDmaPacket(SdfPacket *packet) {
+    sdfInitPrimaryAlphaSubtractiveRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
     packet->unk18 = 0xE;
 }
 
-void func_0032E848(SdfPacket *packet) {
-    func_0032E7C0(packet + 1);
+void sdfBuildSecondaryAlphaSubtractiveDmaPacket(SdfPacket *packet) {
+    sdfInitSecondaryAlphaSubtractiveRegisters(packet + 1);
     packet->unk0 = 3;
     packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1668,17 +1668,17 @@ void sdfLinkRouteNode(SdfRouteNode *node, SdfRouteOwner *owner) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_004389FC);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPendingQueueSemaphore);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A00);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A04);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketBufferSize);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A08);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketBuffers);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A10);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketCursor);
 
-INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A14);
+INCLUDE_SDATA(const s32, "game/code_0032C278", sdfPacketBufferEnd);
 
 INCLUDE_SDATA(const s32, "game/code_0032C278", D_00438A1C);
 

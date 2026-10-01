@@ -12,7 +12,7 @@ u32 func_002E8900(u32 command, u32 channel, void *packet, u32 size);
 
 u32 func_002E87A8(u32 command, u32 channel, void *packet, u32 size);
 
-void func_002E9340(s32 trackId);
+void sndEnsureMidiBankResident(s32 trackId);
 
 /* Sound command work block: header, 16 channel records, 13 track slots (see code_002E9140). */
 typedef struct SndChannel {
@@ -94,7 +94,7 @@ INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8C30);
 void sndStartTrackDefault(s32 trackId) {
     CmdPacket packet;
 
-    func_002E9340(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x7F;
@@ -102,7 +102,7 @@ void sndStartTrackDefault(s32 trackId) {
 }
 
 /* Sends a single-word command payload in a 16-byte packet. */
-void func_002E8D58(u32 value) {
+void sndSendSingleWordControlPacket(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
@@ -113,7 +113,7 @@ void func_002E8D58(u32 value) {
 void sndStartTrackAlternate(s32 trackId) {
     CmdPacket packet;
 
-    func_002E9340(trackId);
+    sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.setting = 0x7F;
     func_002E87A8(0x130, 0, &packet, 0x10);

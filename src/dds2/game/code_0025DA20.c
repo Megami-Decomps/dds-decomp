@@ -8,7 +8,7 @@ extern void mnuClearPanelTransitionState(u8 *);
 extern void mnuInitializeShopStatusBatches(u8 *);
 extern void func_002945B8(u8 *);
 extern void func_002C1B58(u8 *, s32);
-extern void func_003421E8(s32);
+extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
 extern s32 func_00261198();
 extern s32 func_002613C8();
@@ -33,7 +33,7 @@ extern void mnuSetPopupEntry(s32 *, void *);
 
 extern u8 D_003CE658[];
 
-extern s32 D_00435CC8;
+extern s32 kwlnHeldTextureReference;
 
 /* Item quantities occupy byte slots in the save-state block. */
 typedef struct SaveItemCounts {
@@ -45,7 +45,7 @@ extern s32 sdfAllocatePacketList();
 
 extern void sdfCreateDescriptorPacket();
 
-extern s32 func_0025CE68(s32, s32);
+extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 
 extern s32 strcmp(const char *a, const char *b);
 
@@ -682,7 +682,7 @@ extern void func_0025F2B0(CampScene *scene);
 void func_0025EF10(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
-        if (D_00435CC8 == 0) {
+        if (kwlnHeldTextureReference == 0) {
             func_001053F0(0x200, 0xE0, 100.75f);
         }
         scene->menuState = scene->menuState + 1;
@@ -718,7 +718,7 @@ void mnuShopSubmitDescriptor(u8 *work) {
 
     if (((CampScene *)work)->descriptorHandle != 0) {
         packet = sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(packet, *(s32 *)(D_00435CC8 + 0x10), 0, 0, 0x200, 0xE0, ((CampScene *)work)->descriptorHandle, 0);
+        sdfCreateDescriptorPacket(packet, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xE0, ((CampScene *)work)->descriptorHandle, 0);
         D_00380708.open(&D_00380708, packet);
     }
 }
@@ -815,7 +815,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
         do {
             s32 identifier = *entry++;
             count++;
-            func_0025CE68(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
+            evtQueueValidatedBgmSoundCode(*(s32 *)(*(u8 **)((u8 *)scene + 8) + 0x10c), identifier);
         } while (count < scene->idCount);
     }
     scene->idCount = 0;
@@ -1144,7 +1144,7 @@ u8 *mnuTerminalCreateContext(void) {
     func_002945B8(obj);
     func_002C1B58(obj + 0x37C, 0x60);
     mnuCampClearListedItemCounts();
-    func_003421E8(0x300000);
+    sndEnsureMidiBankResident(0x300000);
     sndStartTrackExtended(0x300000);
     return obj;
 }
@@ -1213,11 +1213,11 @@ s64 mnuPreparePopupAndDispatchSelection(s32 callback) {
     return campSetHandler(context, 0, callback);
 }
 
-s64 func_002608E0(s32 callback) {
+s64 mnuAdvanceCampPopup(s32 callback) {
     return campSetHandler(kwlnTaskGetUserValue(), 1, callback);
 }
 
-s64 func_00260918(s32 callback) {
+s64 mnuFinishCampPopup(s32 callback) {
     return campSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 

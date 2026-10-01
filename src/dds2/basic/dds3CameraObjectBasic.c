@@ -79,7 +79,7 @@ typedef struct ActionObj {
     s32 unk1C;     /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110AA8();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 extern void effObjSetInnerFirstVec(ActionObj *obj, void *vec);
@@ -87,7 +87,7 @@ extern void effObjInnerVecBackup(s32 inner);
 extern void func_00112D10(ActionObj *obj);
 
 ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
-    ActionObj *obj = func_00110AA8(4);
+    ActionObj *obj = dds3AppendWorldObjectNode(4);
 
     obj->unk4 = value;
     dds3EnsureSlotData(obj);
@@ -128,14 +128,14 @@ ActionObj *func_00112FC0(s32 slotValue, f32 value, void *innerVec, u128 *vec40, 
 }
 
 void func_00113080(void) {
-    func_00110B50();
+    dds3RemoveWorldObjectNode();
 }
 
 void func_00113098(void *obj) {
     VU0_LOAD_MATRIX(*(void **)((u8 *)obj + 0x18));
 }
 
-void func_001130B8(void *obj, void *src) {
+void dds3SetCameraVector(void *obj, void *src) {
     PCP_COPY_VECTOR(*(u8 **)((u8 *)obj + 0x18) + 0x60, src);
 }
 

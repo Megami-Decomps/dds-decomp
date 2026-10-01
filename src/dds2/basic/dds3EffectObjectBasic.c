@@ -11,7 +11,7 @@ extern u64 billCreateFromResource(u64, u64);
 
 extern u64 billCreateIndexed(u64, u64);
 
-extern u64 func_00159A50(u32);
+extern u64 billCloneObjectRetainingSharedData(u32);
 
 extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
 
@@ -19,7 +19,7 @@ extern void effEventReleaseNode(void *node);
 
 extern void *func_00197D68(void *bill, u32 id, void *vec);
 
-extern void *func_00110AA8(s32 kind);
+extern void *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData(void *obj);
 
@@ -92,7 +92,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     EffectObj *obj;
     EffectData *data;
 
-    obj = func_00110AA8(7);
+    obj = dds3AppendWorldObjectNode(7);
     if (obj == NULL) {
         return NULL;
     }
@@ -117,7 +117,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114D80);
 void func_00114E58(EffectObj *obj, u64 vector, u64 extra) {
     u64 bill;
 
-    bill = func_00159A50((u32)obj->data->bill);
+    bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
     func_00114D80(bill, vector, extra);
 }
 /* Create an indexed billboard of kind one and dispatch it. */
@@ -146,7 +146,7 @@ INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114F50);
 void func_00115020(EffectObj *obj, u64 vector, u64 extra) {
     u64 bill;
 
-    bill = func_00159A50((u32)obj->data->bill);
+    bill = billCloneObjectRetainingSharedData((u32)obj->data->bill);
     func_00114F50(bill, vector, extra);
 }
 

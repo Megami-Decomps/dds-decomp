@@ -25,7 +25,7 @@ typedef struct ActionObj {
     s32 unk1C;              /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110AA8();
+extern ActionObj *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 
@@ -56,7 +56,7 @@ u32 func_00113230(ObjectWithSubstate *object) {
 }
 
 ActionObj *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {
-    ActionObj *obj = func_00110AA8(5);
+    ActionObj *obj = dds3AppendWorldObjectNode(5);
 
     if (obj != NULL) {
         obj->unk4 = a;

@@ -477,8 +477,8 @@ extern void effDestroyNode(s32 handle);
 extern void func_00186CB8(u32 handle);
 extern u32 effCloneBlurWorkWithSlots(void *params);
 extern u32 func_00186F90(void *params);
-extern u32 func_00187FC0(void *params);
-extern u32 func_00186C18(void *params);
+extern u32 effCloneResourceTemplate(void *params);
+extern u32 effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, u32 *blocks);
 
 extern void *func_002D03F8(s32 size);
@@ -542,7 +542,7 @@ extern u8 *func_00165638(u32 handle);
 extern void func_00165D80(u32 handle);
 extern void effPCPThunderSetParam58(u32 handle, u32 value);
 extern s32 func_001619E8();
-extern void *func_00161860(void);
+extern void *effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u32 sdfCountMapPositionRecords(void *model);
 extern u32 func_00190130(EffPCPEventOwner *owner, s32 kind, void *place);
@@ -792,7 +792,7 @@ void effPcpSetTwinEffectScale(EffPCPWorkF18 *work, f32 val) {
     work->scale = val;
 }
 
-void func_00177868(EffPCPWork *work, u32 val) {
+void effPcpSetTwinEffectColor(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
@@ -916,7 +916,7 @@ void effPcpSetStaggerEffectScale(EffPCPWorkF14 *work, f32 val) {
     work->scale = val;
 }
 
-void func_00177CE8(EffPCPWork *work, u32 val) {
+void effPcpSetStaggerEffectColor(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
@@ -1073,7 +1073,7 @@ void effPcpSetCrossEffectScale(EffPCPWorkF14 *work, f32 val) {
     work->scale = val;
 }
 
-void func_00178278(EffPCPWork *work, u32 val) {
+void effPcpSetCrossEffectColor(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
@@ -1195,7 +1195,7 @@ void effPcpSetDelayedPairScale(EffPCPWorkF14 *work, f32 val) {
     work->scale = val;
 }
 
-void func_00178600(EffPCPWork *work, u32 val) {
+void effPcpSetDelayedPairColor(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
@@ -1307,7 +1307,7 @@ void effPcpSpawnOnce(EffPCPWork1C *work) {
     effParamWorkInvokeCallback(work->secondaryHandle);
 }
 
-void func_00178CA8(void *dst, void *src) {
+void effPcpCopySpawnOnceVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1482,7 +1482,7 @@ void effPcpCopyRadialParticleVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00179148(EffPCPWorkF14 *work, f32 val) {
+void effPcpSetRadialParticleScale(EffPCPWorkF14 *work, f32 val) {
     work->scale = val;
 }
 
@@ -1690,7 +1690,7 @@ void effPcpCopyVariableHeightVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00179A58(EffPCPWorkF14 *work, f32 val) {
+void effPcpSetVariableHeightParticleScale(EffPCPWorkF14 *work, f32 val) {
     work->scale = val;
 }
 
@@ -1977,7 +1977,7 @@ void effPcpReleaseThunderHandleWork(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void *func_0017A660(void) {
+void *effAllocateThunderHandleWork(void) {
     void *work;
 
     work = func_002CFEB8(0x20);
@@ -2035,7 +2035,7 @@ void func_0017A800(EffPCPWorkF10 *work, f32 val) {
     work->unk10 = val;
 }
 
-void func_0017A808(EffPCPWork *work, u32 val) {
+void effPcpSetExpandingThunderFadeColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -2162,7 +2162,7 @@ void effPcpReleaseGrowingThunderFadeWork(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void *func_0017AD48(void) {
+void *effAllocateGrowingThunderFadeWork(void) {
     void *work;
 
     work = func_002CFEB8(0x20);
@@ -2209,7 +2209,7 @@ void func_0017AEE0(EffPCPWorkF10 *work, f32 val) {
     work->unk10 = val;
 }
 
-void func_0017AEE8(EffPCPWork *work, u32 val) {
+void effPcpSetGrowingThunderFadeColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -2248,7 +2248,7 @@ typedef struct EffPCPTrailWork {
 
 extern s32 func_0018DC58(f32 value);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
-extern void func_00186CD0(EffPCPTrailObj *obj);
+extern void effDrawBlurPixelRectWithResource(EffPCPTrailObj *obj);
 
 /* Shared-work variant of the trail update: every reference counts frames in its
  * own word and only the reference that is in step with the shared frame
@@ -2301,7 +2301,7 @@ void effPcpUpdateSharedTrail(ref)
             obj->size = EFF_SHARED_TRAIL->minSize;
         }
         obj->color = effMultiplyPackedColors(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
-        func_00186CD0(obj);
+        effDrawBlurPixelRectWithResource(obj);
         EFF_SHARED_TRAIL->frame++;
     }
 }
@@ -2356,14 +2356,14 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
     }
     work->frame++;
     obj->color = effMultiplyPackedColors(work->flags, work->color);
-    func_00186CD0(obj);
+    effDrawBlurPixelRectWithResource(obj);
 }
 
 void effPcpCopySharedTrailVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017B338(EffPCPWork *work, u32 val) {
+void effPcpSetTrailFlags(EffPCPWork *work, u32 val) {
     work->unk10 = val;
 }
 
@@ -2375,7 +2375,7 @@ EffPCPCompactWork3C *effPcpCompactEffectCreate(EffPCPCompactParams *params) {
     EffPCPCompactWork3C *work;
 
     work = func_002CFEB8(0x3C);
-    work->resource = func_00187FC0(&params->unk18);
+    work->resource = effCloneResourceTemplate(&params->unk18);
     work->unk1C = 0;
     work->color14 = 0x80808080;
     work->flags = params->flags;
@@ -2492,7 +2492,7 @@ void func_0017B670(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017B680(EffPCPWork *work, u32 val) {
+void effPcpSetCompactColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -2504,7 +2504,7 @@ EffPCPCompactWork3C *func_0017B690(EffPCPCompactParams *params) {
     EffPCPCompactWork3C *work;
 
     work = func_002CFEB8(0x3C);
-    work->resource = func_00186C18(&params->unk18);
+    work->resource = effCloneBlurTemplate(&params->unk18);
     work->unk1C = 0;
     work->color14 = 0x80808080;
     work->flags = params->flags;
@@ -2577,7 +2577,7 @@ void func_0017B9C8(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017B9D8(EffPCPWork *work, u32 val) {
+void effPcpSetLongCompactColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -2620,7 +2620,7 @@ void func_0017BA98(void) {
     effPcpCopyWork();
 }
 
-void func_0017BAB0(EffPCPWork *work) {
+void effPcpReleaseFadeTimerWork(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
@@ -2710,7 +2710,7 @@ void func_0017BCB0(void) {
     effPcpCopyWorkLong();
 }
 
-void func_0017BCC8(EffPCPWork *work) {
+void effPcpReleaseLongFadeTimerWork(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
@@ -2731,7 +2731,7 @@ typedef struct EffPCPFadeTimerLong {
     s32 frame;
 } EffPCPFadeTimerLong;
 
-extern void func_00186498(u32 *color);
+extern void effDrawBlurRectangle(u32 *color);
 
 /* Same timeline as effPcpFadeTimerUpdate on the longer work layout. */
 void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
@@ -2760,7 +2760,7 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         t = 1.0f;
     }
     work->color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    func_00186498(&work->color);
+    effDrawBlurRectangle(&work->color);
     work->frame++;
 }
 
@@ -2968,7 +2968,7 @@ void func_0017C7A8(EffPCPWorkF10 *work, f32 val) {
     work->unk10 = val;
 }
 
-void func_0017C7B0(EffPCPWork *work, u32 val) {
+void effPcpSetScalingThunderFadeColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -2993,7 +2993,7 @@ void effPcpReleaseScalingThunderFadeWork(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void *func_0017C858(void) {
+void *effAllocateScalingThunderFadeWork(void) {
     void *work;
 
     work = func_002CFEB8(0x20);
@@ -3037,7 +3037,7 @@ void func_0017CA50(EffPCPWorkF10 *work, f32 val) {
     work->unk10 = val;
 }
 
-void func_0017CA58(EffPCPWork *work, u32 val) {
+void effPcpSetThunderScaleFadeColor(EffPCPWork *work, u32 val) {
     work->unk14 = val;
 }
 
@@ -3790,7 +3790,7 @@ void effPcpClearGlobalEffectFlag(void) {
     }
 }
 
-EffPCPWorkF1C *func_0017F850(u32 unused) {
+EffPCPWorkF1C *effAllocateThunderFragmentWork(u32 unused) {
     EffPCPWorkF1C *work;
 
     work = func_002CFEB8(0x24);
@@ -3801,10 +3801,10 @@ EffPCPWorkF1C *func_0017F850(u32 unused) {
 }
 
 void func_0017F898(void) {
-    func_0017F850(0);
+    effAllocateThunderFragmentWork(0);
 }
 
-EffPCPBurstWork *func_0017F8B0(u32 unused) {
+EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     EffPCPBurstWork *work;
 
     work = func_002CFEB8(0x24);
@@ -3815,7 +3815,7 @@ EffPCPBurstWork *func_0017F8B0(u32 unused) {
 }
 
 void func_0017F900(void) {
-    func_0017F8B0(0);
+    effAllocateThunderFragmentBurstWork(0);
 }
 
 EffPCPWorkF1C *func_0017F918(u32 unused) {
@@ -3965,7 +3965,7 @@ void effPcpThunderBurstRelease(EffPCPWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017FD30);
 
-void func_0017FE38(void *dst, void *src) {
+void effPcpCopyThunderBurstVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4062,7 +4062,7 @@ extern void effPCPThunderScale(u32 handle, f32 scale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00180080);
 
-void func_001801D8(void *dst, void *src) {
+void effPcpCopyScaledThunderVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4183,7 +4183,7 @@ void effPcpReleaseBeamClone(EffPCPWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001808F8);
 
-void func_00180B20(void *dst, void *src) {
+void effPcpCopyBeamVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4369,7 +4369,7 @@ void effPcpUpdateBeamTimeline(EffPCPBeamTimer *work) {
     work->frame++;
 }
 
-void func_001811B0(void *dst, void *src) {
+void effPcpCopyLinkedBeamVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4697,7 +4697,7 @@ void effPcpCaptureNodeVectors(EffPCPNode *node) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00181F48);
 
-void func_00182170(void *dst, void *src) {
+void effPcpCopyCaptureNodeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4784,7 +4784,7 @@ void effPcpDriftRandomizeSlot(EffPCPDriftWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001827D0);
 
-void func_00182A20(void *dst, void *src) {
+void effPcpCopyDriftVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4876,7 +4876,7 @@ void effPcpRandomizeSlot(EffPCPSlotWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001830F8);
 
-void func_001834C0(void *dst, void *src) {
+void effPcpCopyRandomizedVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -4969,7 +4969,7 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRange *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183B20);
 
-void func_00183DA0(void *dst, void *src) {
+void effPcpCopySpawnRangeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 

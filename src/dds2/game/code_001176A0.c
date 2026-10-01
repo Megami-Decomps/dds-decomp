@@ -12,7 +12,7 @@ extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
 extern void sdfDecrementAllocationReferenceCount(u32 allocation);
 extern s32 func_003297C8(u32 allocation);
-extern struct ActionObj *func_00110AA8();
+extern struct ActionObj *dds3AppendWorldObjectNode();
 
 extern void *func_003292A8(s32 size);
 
@@ -102,7 +102,7 @@ typedef struct SdfCurveUser {
 extern void func_00116DE8(s32 *index, f32 *fraction, void *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 func_001176A0(SdfCurveUser *user) {
+f32 sdfSampleActiveLinearCurve(SdfCurveUser *user) {
     s32 index;
     f32 fraction;
     SdfCurveTable *curve;
@@ -125,7 +125,7 @@ typedef struct SdfCounter {
 } SdfCounter;
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 func_00117728(SdfCounter *counter) {
+s32 sdfStepWrappingFloatCounter(SdfCounter *counter) {
     s32 result = 1;
 
     if (counter->flags & 8) {
@@ -167,24 +167,24 @@ float evtGetValueScaleFactor(EvtScaledValue *value) {
     return value->scaled / value->base;
 }
 
-void func_00117810(EvtScaledValue *value) {
+void sdfFreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags | 8;
 }
 
-void func_00117820(EvtScaledValue *value) {
+void sdfUnfreezeFloatCounter(EvtScaledValue *value) {
     value->flags = value->flags & 0xfffffff7;
 }
 
-void func_00117838(EvtScaledValue *value) {
+void sdfEnableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags | 0x20;
 }
 
-void func_00117848(EvtScaledValue *value) {
+void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags & 0xffffffdf;
 }
 
 ActionObj *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
-    ActionObj *obj = func_00110AA8(0x11);
+    ActionObj *obj = dds3AppendWorldObjectNode(0x11);
 
     obj->unk18 = b;
     obj->unk4 = a;
@@ -208,7 +208,7 @@ void evtLoadValueVectorIntoVu(EvtScaledValue *value) {
 }
 
 /* Same, from the second quadword at +0x18. */
-void func_001178E0(EvtScaledValue *value) {
+void evtLoadValueSecondaryVectorIntoVu(EvtScaledValue *value) {
     void *vec = (void *)((u8 *)func_001178B8(value) + 0x10);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
@@ -387,7 +387,7 @@ void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
 extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void func_00119728(SdfPackedValue *item, u32 value) {
+void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
     s32 channel;
 
     if ((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < value) {

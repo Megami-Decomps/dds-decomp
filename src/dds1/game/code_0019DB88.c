@@ -13,7 +13,7 @@ typedef struct SoundQueue {
     u32 unk14;
 } SoundQueue;
 
-extern SoundQueue D_003D6EA0;
+extern SoundQueue itfMesWork;
 
 typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 unk24; } UiSprite;
 
@@ -69,7 +69,7 @@ extern s32 func_00195ED8();
 
 extern UiSprite *func_00199828();
 
-extern void func_00199950();
+extern void itfSetPanelLayoutAndNotify();
 
 extern void func_00199A20();
 
@@ -108,7 +108,7 @@ extern UiOwnerRef *D_00357D88[];
 
 extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 
-extern void func_00199A68(UiSprite *sprite, UiSurface *surface);
+extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, UiSurface *surface);
 
 extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
@@ -151,13 +151,13 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPanelPlacement *place = &panel->place;
     s32 spriteTop;
     if (place->sprite == 0) {
-        place->sprite = func_00199828(6, D_003D6EA0.allocation);
+        place->sprite = func_00199828(6, itfMesWork.allocation);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->origin.tex->unk4 + func_00195ED8(0, panel->origin.tex);
         }
     }
     spriteTop = pos->y + place->offsetY;
-    func_00199950(place->sprite, pos->x + place->offsetX, spriteTop, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
+    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->offsetX, spriteTop, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
     place->sprite->unk24 = spriteTop;
     func_00199A20(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
@@ -169,8 +169,8 @@ void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     if (origin->tex != 0 && !(panel->flags & 0x10000)) {
         if (place->frame == 0) {
             s32 width = origin->tex->unkC * 16;
-            place->frame = func_00199828(7, D_003D6EA0.allocation);
-            func_00199950(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->unkC);
+            place->frame = func_00199828(7, itfMesWork.allocation);
+            itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->unkC);
             func_00199A20(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
         panel->flags = (panel->flags & ~0x3000) | 0x1000;
@@ -503,11 +503,11 @@ void itfMesRenderActivePanelSprites(UiPanel *panel) {
     place = &panel->place;
     if ((panel->flags & 0x300) >= 0x100) {
         if (panel->state != 3) {
-            func_00199A68(place->sprite, &D_00324B48[panel->index]);
+            itfBuildAndSubmitPanelPacket(place->sprite, &D_00324B48[panel->index]);
         }
-        D_003D6EA0.drawFlags |= 2;
+        itfMesWork.drawFlags |= 2;
         if (place->overlay != 0) {
-            func_00199A68(place->overlay, &D_00324B48[panel->index]);
+            itfBuildAndSubmitPanelPacket(place->overlay, &D_00324B48[panel->index]);
         }
     }
     if (D_00357D88[0] != 0 && D_00357D88[0]->owner == panel && place != 0) {
@@ -544,15 +544,15 @@ extern void sdfTexReleaseReferenceViaHandler(s32 texture);
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F6A0);
 
 void sndFlushMessageQueue(void) {
-    SoundQueueNode *node = D_003D6EA0.head;
+    SoundQueueNode *node = itfMesWork.head;
     s32 window;
     while (node != 0) {
         window = node->window;
         node = node->next;
         itfMesDestroyWindow(window);
     }
-    sdfTexReleaseReferenceViaHandler(D_003D6EA0.allocation);
-    D_003D6EA0.allocation = 0;
+    sdfTexReleaseReferenceViaHandler(itfMesWork.allocation);
+    itfMesWork.allocation = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F770);
@@ -721,7 +721,7 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2D8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2E0);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2E4);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlRuntime);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2E8);
 
@@ -797,11 +797,11 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3D0);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3D4);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3D8);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlTrackedTaskHandles);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3DC);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3E0);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlCommandPanelWork);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB3E4);
 
@@ -939,9 +939,9 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB5E0);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB5E8);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB5EC);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlDeferredTaskTail);
 
-INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB5F0);
+INCLUDE_SDATA(const s32, "game/code_0019DB88", btlDeferredTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB5F8);
 

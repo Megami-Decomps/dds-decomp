@@ -171,9 +171,9 @@ extern void func_00276898();
 extern void mnuSetPopupEntry();
 extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
-extern void func_0027C770(s32);
-extern void func_0027C758(s32);
-extern void func_0027C658(s32);
+extern void mnuRetreatWindowListSelection(s32);
+extern void mnuAdvanceWindowListSelection(s32);
+extern void mnuClearWindowPanelTransitionFlag(s32);
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
@@ -412,7 +412,7 @@ void func_002762B0(u32 context) {
     mnuSetStaffDisplayMode(3, context);
 }
 
-void func_002762D0() {
+void mnuReleaseMenuWindowHandles() {
 }
 
 void mnuReleaseStaffMenuResources(s32 *menu) {
@@ -435,7 +435,7 @@ s32 mnuStaffCloseSelectionState(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
-    func_002762D0(context);
+    mnuReleaseMenuWindowHandles(context);
     func_002D0918(*(s32 *)menu);
     return 1;
 }
@@ -999,12 +999,12 @@ void mnuCampMenuHandleInput(void) {
             func_0027C788(node);
         }
         if (input & 0x10) {
-            func_0027C770(node);
+            mnuRetreatWindowListSelection(node);
         }
         if (input & 0x20) {
-            func_0027C758(node);
+            mnuAdvanceWindowListSelection(node);
         }
-        func_0027C658(node);
+        mnuClearWindowPanelTransitionFlag(node);
         mnuPlayInputSound(0, input, (s32)((MenuInputNode *)node)->flags);
     }
 }

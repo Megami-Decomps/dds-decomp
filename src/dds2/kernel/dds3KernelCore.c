@@ -14,7 +14,7 @@ extern void kwlnTaskActivate(KwlnTask* task);
 
 extern void kwlnTaskAdvanceStartDelays(void);
 
-extern KwlnTask* D_00435BD0;
+extern KwlnTask* kwlnDelayedStartTaskHead;
 
 extern void kwlnTaskFinalizeDestroy(KwlnTask* task);
 
@@ -22,7 +22,7 @@ extern void kwlnTaskRequestDestroy(KwlnTask* task);
 
 extern void kwlnTaskAdvanceDestroyDelays(void);
 
-extern KwlnTask* D_00435BDC;
+extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
 extern void* D_00435BD8;
 
@@ -68,7 +68,7 @@ void kwlnTaskAdvanceStartDelays(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = D_00435BD0;
+    node = kwlnDelayedStartTaskHead;
     while (node != 0) {
         if (node->unk2C > 0) {
             node->unk2C--;
@@ -129,7 +129,7 @@ void kwlnTaskAdvanceDestroyDelays(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = D_00435BDC;
+    node = kwlnDelayedDestroyTaskHead;
     while (node != 0) {
         if (node->unk2E > 0) {
             node->unk2E--;
@@ -176,12 +176,12 @@ void func_001011D0(void)
 {
     u8* tmp;
 
-    func_00101198(D_00435BD0, D_00411008);
+    func_00101198(kwlnDelayedStartTaskHead, D_00411008);
     tmp = D_00411038;
     func_0035B6E0(tmp, D_00435BD8);
     func_00101198(D_00435BE8, D_00411048);
     func_0035B6E0(tmp, D_00435BF0);
-    func_00101198(D_00435BDC, D_00411078);
+    func_00101198(kwlnDelayedDestroyTaskHead, D_00411078);
     func_0035B6E0(tmp, D_00435BE4);
     func_0035B6E0(D_00435BF8);
 }
@@ -200,7 +200,7 @@ void func_00101328(void)
     for (i = 0; i < 0x40; i++) {
         D_004393C8[i] = 0x20;
     }
-    for (task = D_00435BD0; task != NULL; task = task->listNext) {
+    for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
             func_00101250(task, 0);
@@ -212,7 +212,7 @@ void func_00101328(void)
             func_00101250(task, 0);
         }
     }
-    for (task = D_00435BDC; task != NULL; task = task->listNext) {
+    for (task = kwlnDelayedDestroyTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
             func_00101250(task, 0);
@@ -293,13 +293,13 @@ s32 kwlnTaskIsRegistered(KwlnTask* target)
         switch (idx)
         {
         case 0:
-            node = D_00435BD0;
+            node = kwlnDelayedStartTaskHead;
             break;
         case 1:
             node = D_00435BE8;
             break;
         case 2:
-            node = D_00435BDC;
+            node = kwlnDelayedDestroyTaskHead;
             break;
         }
         while (node != 0)

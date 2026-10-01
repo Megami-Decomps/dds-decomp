@@ -16,8 +16,8 @@ extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 
 extern s32 func_001A17F0();
-extern s8 D_003BB870;
-extern s32 D_003BB87C;
+extern s8 btlHistoryCounter;
+extern s32 btlActionScratchWork;
 extern s32 btlIsLowHpActionReady(s32, s32);
 extern s32 sdfAllocAndClearQuadwords(s32);
 extern void sdfReleaseChipBlock(s32);
@@ -28,7 +28,7 @@ extern void func_00202668(s32, s32);
 extern void func_00202F90(s32, s32);
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void func_00203098();
-extern void func_00203A80(s32, s32);
+extern void btlSelectLowestRankTarget(s32, s32);
 extern void func_00203BA8(s32, s32);
 extern void btlSelectTargetsPassingCheck();
 extern void btlSelectTargetsByActionMask();
@@ -552,13 +552,13 @@ s32 btlAllocAndCheck(s32 object) {
     s32 allocation = sdfAllocAndClearQuadwords(0x10);
     s32 actor = (s32)((BtlTask *)object)->unit;
 
-    D_003BB87C = allocation;
+    btlActionScratchWork = allocation;
     *(s32 *)allocation = object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        sdfReleaseChipBlock(D_003BB87C);
+        sdfReleaseChipBlock(btlActionScratchWork);
         return 1;
     }
-    sdfReleaseChipBlock(D_003BB87C);
+    sdfReleaseChipBlock(btlActionScratchWork);
     return 0;
 }
 
@@ -579,8 +579,8 @@ void btlAdvanceHistoryCounter(BtlHistObj *obj) {
     obj->counter++;
     obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
     btlShiftActorStateHistory((u8 *)obj, 0);
-    D_003BB870++;
-    D_003BB870 = D_003BB870 <= 0 ? 0 : D_003BB870 >= 0x21 ? 0x20 : D_003BB870;
+    btlHistoryCounter++;
+    btlHistoryCounter = btlHistoryCounter <= 0 ? 0 : btlHistoryCounter >= 0x21 ? 0x20 : btlHistoryCounter;
 }
 
 void btlClearNodeFlags(void) {
@@ -594,7 +594,7 @@ void btlClearNodeFlags(void) {
             node = (s32)((BtlTask *)node)->next;
         } while (node != NULL);
     }
-    D_003BB870 = 0;
+    btlHistoryCounter = 0;
 }
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
@@ -603,11 +603,11 @@ s32 btlDispatchPackedActionWithScratch(s32 context, BtlJyokyoOwner *owner, s32 m
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
-    D_003BB87C = (s32)work;
+    btlActionScratchWork = (s32)work;
     work[1] = owner->unk124;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    sdfReleaseChipBlock(D_003BB87C);
+    sdfReleaseChipBlock(btlActionScratchWork);
     return result;
 }
 
@@ -656,7 +656,7 @@ void btlCmdSimpleA(void) {
 }
 
 void btlCmdWithArgD(s32 context) {
-    func_00203A80(context, 0);
+    btlSelectLowestRankTarget(context, 0);
 }
 
 void btlCmdWithArgE(s32 context) {
@@ -715,11 +715,11 @@ INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB860);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB868);
 
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB870);
+INCLUDE_SDATA(const s32, "game/code_001FC7D8", btlHistoryCounter);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB874);
 
 INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB878);
 
-INCLUDE_SDATA(const s32, "game/code_001FC7D8", D_003BB87C);
+INCLUDE_SDATA(const s32, "game/code_001FC7D8", btlActionScratchWork);
 

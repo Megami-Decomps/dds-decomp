@@ -22,7 +22,7 @@ extern s32 func_001ABB10(void);
 
 extern u32 func_001AC360(u64, u64, u64);
 
-extern s8 D_00436CAC;
+extern s8 btlHistoryCounter;
 
 extern void func_00211EA8();
 
@@ -214,7 +214,7 @@ extern void fldAppendSceneGroupHandle(s32);
 
 extern void btlAppendIndexListEntry();
 
-extern BattleCtx **D_00436CB8;
+extern BattleCtx **btlActionScratchWork;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 typedef struct AiSlot {
@@ -402,11 +402,11 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 row) {
     u16 species;
     s32 index;
 
-    D_00436CB8 = sdfAllocAndClearQuadwords(0x10);
+    btlActionScratchWork = sdfAllocAndClearQuadwords(0x10);
     species = ((BattleUnit *)task->owner)->mode;
     index = btlPickWeightedAiSlot(task->owner, species, row);
     func_00211EA8(task, D_00435DF4[species].slot[row * 5 + index].actionId, D_00435DF4[species].slot[row * 5 + index].actionArg);
-    sdfReleaseChipBlock(D_00436CB8);
+    sdfReleaseChipBlock(btlActionScratchWork);
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00211360);
@@ -518,7 +518,7 @@ s32 btlHasUnitAtOrAboveHealthRate(s32 unused, s32 multiplier) {
 
 s32 btlResetAiCounterAtLimit() {
     if (btlAiCounterReachedLimit()) {
-        (*D_00436CB8)->turns = 0;
+        (*btlActionScratchWork)->turns = 0;
         return 1;
     }
     return 0;
@@ -892,7 +892,7 @@ s32 func_00213438(s32 battler) {
 }
 
 s32 btlHasContextFlagTwo(void) {
-    return (((*D_00436CB8)->flags & 2) > 0);
+    return (((*btlActionScratchWork)->flags & 2) > 0);
 }
 
 s64 btlCheckCounterLimit(s32 unused, u32 limit) {
@@ -907,11 +907,11 @@ s32 btlCounterReachedLimit(s32 unused, u32 limit) {
 }
 
 s32 btlAiCounterReachedLimit(s32 unused, u32 limit) {
-    BattleCtx *ctx = *D_00436CB8;
+    BattleCtx *ctx = *btlActionScratchWork;
 
     ctx->turns = ctx->turns + 1;
     ctx->turns = ctx->turns == 0 ? 0 : ctx->turns >= 0x100 ? 0xFF : ctx->turns;
-    if ((*D_00436CB8)->turns < limit) {
+    if ((*btlActionScratchWork)->turns < limit) {
         return 0;
     }
     return 1;
@@ -996,7 +996,7 @@ s32 btlAnyIndexedUnitPassesQuery(u8 *unit) {
     if (((BattleUnit *)unit)->flags & 0x400) {
         return 0;
     }
-    battle = (s32)*D_00436CB8;
+    battle = (s32)*btlActionScratchWork;
     list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 2, 0, 0);
     count = btlGetIndexListCount(list);
@@ -1013,7 +1013,7 @@ s32 btlAnyIndexedUnitPassesQuery(u8 *unit) {
 s32 btlIsLowHpActionReady(BattleUnit *unit) {
     s32 roll = 0;
     s16 pick;
-    BattleCtx *ctx = *D_00436CB8;
+    BattleCtx *ctx = *btlActionScratchWork;
     u16 rank = ((BattleUnitRank *)unit)->rank;
     s32 late = func_001B39E8(4) < (u32)(rank + 0xF);
 
@@ -1367,7 +1367,7 @@ s32 btlAreUnitsHoldingStatusFlag(void) {
 }
 
 s32 func_002145E0(void) {
-    return D_00436CAC < 1;
+    return btlHistoryCounter < 1;
 }
 
 s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
@@ -1532,7 +1532,7 @@ s32 btlUnitHasEitherSpecialAction(void *unit) {
 }
 
 s32 btlActionMatchesUnit(s32 unit, s32 action) {
-    if ((*D_00436CB8)->action == action) {
+    if ((*btlActionScratchWork)->action == action) {
         if (((BattleUnit *)unit)->stateFlags & 0x1000) {
             return 1;
         }
@@ -2254,7 +2254,7 @@ void btlStartPrevUnitScriptAction(BattleActorHandle *handle) {
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00218520);
 
-s32 func_00218630(BattleUnit *unit, s32 kind, s32 fallback) {
+s32 btlOverrideSpecialModeCheckResult(BattleUnit *unit, s32 kind, s32 fallback) {
     if (kind == 0xB) {
         if (unit->flags & 0x400) {
             switch (unit->mode) {
@@ -2695,7 +2695,7 @@ s32 btlGetSubtaskActorMotionClass(void) {
 extern char D_0041A378[]; /* "md_01all_02" */
 extern u64 dds3GetWorldSecondaryObject(void);
 extern s32 func_001110F8(u64, s32, char *);
-extern void func_00114048(s32, s32);
+extern void evtSetObjectTransitionWork(s32, s32);
 
 s32 func_002198D8(u8 *unit) {
     s32 handle;
@@ -2709,7 +2709,7 @@ s32 func_002198D8(u8 *unit) {
     if (handle == 0) {
         return 1;
     }
-    func_00114048(handle, 1);
+    evtSetObjectTransitionWork(handle, 1);
     return 1;
 }
 
@@ -2725,7 +2725,7 @@ s32 func_00219950(u8 *unit) {
     if (handle == 0) {
         return 1;
     }
-    func_00114048(handle, 2);
+    evtSetObjectTransitionWork(handle, 2);
     return 1;
 }
 

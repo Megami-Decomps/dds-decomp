@@ -6,7 +6,7 @@ extern void func_0035C860();
 extern void func_00259AE8();
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
-extern void func_00110BE0(void *, s32);
+extern void dds3SetWorldCameraObject(void *, s32);
 extern f32 dds3GetCameraValue(s32);
 extern void func_001063A8(f32);
 
@@ -30,7 +30,7 @@ s32 evtCreateFrameVariableTask(void);
 
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 
-extern u32 D_00435CD4;
+extern u32 kwlnDrawControlFlags;
 
 void fldInitializeCameraColorResource(void);
 
@@ -200,7 +200,7 @@ void evtViewerApplySelectedEntry(EventViewerState *viewer) {
         unit = viewer->fallbackEntry;
     }
     if (unit != 0) {
-        func_00110BE0(dds3GetWorldObject(), unit);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
         func_001063A8(dds3GetCameraValue(unit));
     }
 }
@@ -807,7 +807,7 @@ s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EventViewerState *viewer) {
     return 0;
 }
 
-u32 func_0024CC08(u32 unused0, u32 unused1, u32 viewerAddr) {
+u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
     evtViewerPopHistory((EventViewerState *)viewerAddr);
     return 0;
 }
@@ -876,7 +876,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
     viewer = kwlnTaskGetUserValue();
     func_00249088(((EventViewerState *)viewer)->glyphAdvancePosition, viewer);
     func_00101968(task, evtCreateFrameVariableTask());
-    D_00435CD4 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
     return (void *)func_0024D430;
 }
 
@@ -887,7 +887,7 @@ void *evtViewerInitializeUpdateSequence(void) {
     viewer = kwlnTaskGetUserValue();
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
-    D_00435CD4 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerScheduleFrameVariableTask;
 }
 
@@ -910,11 +910,11 @@ void *evtViewerAdvanceUpdate(void) {
     window = (EvtWindowContext *)viewer->windowContext;
     flags = window->flags;
     if ((flags & 8) == 0) {
-        D_00435CD4 |= 0x2000000;
+        kwlnDrawControlFlags |= 0x2000000;
         return 0;
     } else {
         if ((flags & 1) != 0) {
-            D_00435CD4 |= 0x2000000;
+            kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
         if (func_0024D760((u8 *)window) == 0) {
@@ -923,12 +923,12 @@ void *evtViewerAdvanceUpdate(void) {
                     mnuMarkTitleStreamResetPending();
                 }
                 viewer->unk2440++;
-                D_00435CD4 |= 0x2000000;
+                kwlnDrawControlFlags |= 0x2000000;
                 return 0;
             }
         }
         func_0025A280(viewer->windowContext, viewer);
-        D_00435CD4 |= 0x2000000;
+        kwlnDrawControlFlags |= 0x2000000;
         return (void *)evtViewerScheduleFrameVariableTask;
     }
 }
@@ -998,7 +998,7 @@ void evtViewerRelease(viewer)
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     kwlnFadeSetMode(0);
-    D_00435CD4 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
 }
 
 void func_0024DAA0(void) {

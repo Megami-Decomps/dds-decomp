@@ -20,7 +20,7 @@ typedef struct MnuMovieTransfer {
     u8 block[0x40];      /* 0x10 */
 } MnuMovieTransfer;
 
-extern MnuMovieTransfer D_00457E60;
+extern MnuMovieTransfer mnuMovieDrawSources;
 
 extern char D_0042A418[];
 
@@ -40,7 +40,7 @@ typedef struct MovieList {
     s32 packets;
 } MovieList;
 
-extern MovieList D_00457E48;
+extern MovieList mnuMovieList;
 
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
@@ -147,25 +147,25 @@ s32 func_002A81C8(void) {
 }
 
 void mnuClearMovieList(void) {
-    MovieListNode *node = D_00457E48.head;
+    MovieListNode *node = mnuMovieList.head;
     if (node != NULL) {
         do {
             MovieListNode *next = node->next;
             sdfReleaseChipBlock(node);
             node = next;
         } while (node != NULL);
-        D_00457E48.head = NULL;
-        D_00457E48.top = 0;
-        D_00457E48.cursor = 0;
-        D_00457E48.total = 0;
+        mnuMovieList.head = NULL;
+        mnuMovieList.top = 0;
+        mnuMovieList.cursor = 0;
+        mnuMovieList.total = 0;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002A8048", func_002A8268);
 
 u32 mnuGetMovieListNodeAtOffset(void) {
-    MovieListNode *entry = D_00457E48.head;
-    s32 remaining = D_00457E48.cursor;
+    MovieListNode *entry = mnuMovieList.head;
+    s32 remaining = mnuMovieList.cursor;
     if (entry != 0 && remaining > 0) {
         do {
             entry = entry->next;
@@ -187,14 +187,14 @@ void mnuDrawMovieList(void) {
     s32 selected;
     s32 i;
 
-    if (D_00457E48.head == NULL || D_00457E48.playing != 0) {
+    if (mnuMovieList.head == NULL || mnuMovieList.playing != 0) {
         return;
     }
-    packets = D_00457E48.packets;
+    packets = mnuMovieList.packets;
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
-    selected = D_00457E48.cursor;
-    i = D_00457E48.top;
-    node = D_00457E48.head;
+    selected = mnuMovieList.cursor;
+    i = mnuMovieList.top;
+    node = mnuMovieList.head;
     selected -= i;
     for (; i > 0; i--) {
         node = node->next;
@@ -202,7 +202,7 @@ void mnuDrawMovieList(void) {
     for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
         sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
     }
-    if (D_00457E48.top != 0) {
+    if (mnuMovieList.top != 0) {
         func_0032EF30(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
     }
     if (node != NULL) {
@@ -232,37 +232,37 @@ INCLUDE_ASM(const s32, "game/code_002A8048", mnuMovieViewer);
 
 void mnuCreateMovieViewerTask(void) {
     func_002A8268();
-    D_00457E48.task = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
+    mnuMovieList.task = kwlnTaskCreate(D_0042A418, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {
     s32 movieTask = func_00101740(D_0042A418);
     if (movieTask != 0) {
         kwlnTaskDestroyWithHierarchy(movieTask, 0);
-        D_00457E48.task = 0;
+        mnuMovieList.task = 0;
         mnuStopMovieDrawTask();
     }
     mnuClearMovieList();
 }
 
 void mnuMarkMovieDrawValuesPending(void) {
-    D_00457E60.wordPending = 1;
-    D_00457E60.blockPending = 1;
+    mnuMovieDrawSources.wordPending = 1;
+    mnuMovieDrawSources.blockPending = 1;
 }
 
 void mnuBindMovieDrawValueSources(void) {
-    D_00457E60.wordSource = 0x10002010;
-    D_00457E60.blockSource = (u32)D_003E5608;
+    mnuMovieDrawSources.wordSource = 0x10002010;
+    mnuMovieDrawSources.blockSource = (u32)D_003E5608;
     mnuMarkMovieDrawValuesPending();
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
 void mnuCommitPendingMovieDrawValues(void) {
-    if (D_00457E60.wordPending != 0) {
-        D_00457E60.word = *(s32 *)D_00457E60.wordSource;
+    if (mnuMovieDrawSources.wordPending != 0) {
+        mnuMovieDrawSources.word = *(s32 *)mnuMovieDrawSources.wordSource;
     }
-    if (D_00457E60.blockPending != 0) {
-        memcpy(D_00457E60.block, (void *)D_00457E60.blockSource, sizeof(D_00457E60.block));
+    if (mnuMovieDrawSources.blockPending != 0) {
+        memcpy(mnuMovieDrawSources.block, (void *)mnuMovieDrawSources.blockSource, sizeof(mnuMovieDrawSources.block));
     }
 }
 
@@ -274,8 +274,8 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     s32 y;
     s32 col;
 
-    if (D_00457E60.started == 0) {
-        D_00457E60.started = 1;
+    if (mnuMovieDrawSources.started == 0) {
+        mnuMovieDrawSources.started = 1;
         mnuBindMovieDrawValueSources();
     }
     if (D_0040B7D8.reset != 0) {
@@ -283,56 +283,56 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     } else if (D_0040B7D8.init != 0) {
         mnuBindMovieDrawValueSources();
     } else if (D_0040B7D8.next & 2) {
-        D_00457E60.cursor++;
-        if (D_00457E60.cursor == 0x10) {
-            D_00457E60.cursor = 0;
+        mnuMovieDrawSources.cursor++;
+        if (mnuMovieDrawSources.cursor == 0x10) {
+            mnuMovieDrawSources.cursor = 0;
         }
     } else if (D_0040B7D8.prev & 2) {
-        if (D_00457E60.cursor != 0) {
-            D_00457E60.cursor--;
+        if (mnuMovieDrawSources.cursor != 0) {
+            mnuMovieDrawSources.cursor--;
         } else {
-            D_00457E60.cursor = 0xF;
+            mnuMovieDrawSources.cursor = 0xF;
         }
     } else {
-        n = 1 << ((~D_00457E60.cursor & 7) * 4);
-        i = D_00457E60.cursor >> 3;
+        n = 1 << ((~mnuMovieDrawSources.cursor & 7) * 4);
+        i = mnuMovieDrawSources.cursor >> 3;
         if (D_0040B7D8.right & 2) {
             if (i == 0) {
-                D_00457E60.wordPending = 0;
-                D_00457E60.wordSource += n;
+                mnuMovieDrawSources.wordPending = 0;
+                mnuMovieDrawSources.wordSource += n;
             } else {
-                D_00457E60.blockPending = 0;
-                D_00457E60.blockSource += n;
+                mnuMovieDrawSources.blockPending = 0;
+                mnuMovieDrawSources.blockSource += n;
             }
         }
         if (D_0040B7D8.left & 2) {
             if (i == 0) {
-                D_00457E60.wordPending = 0;
-                D_00457E60.wordSource -= n;
+                mnuMovieDrawSources.wordPending = 0;
+                mnuMovieDrawSources.wordSource -= n;
             } else {
-                D_00457E60.blockPending = 0;
-                D_00457E60.blockSource -= n;
+                mnuMovieDrawSources.blockPending = 0;
+                mnuMovieDrawSources.blockSource -= n;
             }
         }
     }
     mnuCommitPendingMovieDrawValues();
     packets = sdfCreateResetPacketList();
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
-    sdfCreatePacketA(packets, 0x80A03000, 0, (D_00457E60.cursor & 7) * 0xC0 + 0x7180, (D_00457E60.cursor >> 3) * 0xC0 + 0x79C0, (D_00457E60.cursor & 7) * 0xC0 + 0x7240, (D_00457E60.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.wordSource));
-    if (D_00457E60.wordPending != 0) {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.word));
+    sdfCreatePacketA(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
+    if (mnuMovieDrawSources.wordPending != 0) {
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.word));
     } else {
         sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", D_00457E60.blockSource + n));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", mnuMovieDrawSources.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
-            if (D_00457E60.blockPending != 0) {
-                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", D_00457E60.block[n]));
+            if (mnuMovieDrawSources.blockPending != 0) {
+                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", mnuMovieDrawSources.block[n]));
             } else {
                 sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "**"));
             }

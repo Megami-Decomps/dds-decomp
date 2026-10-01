@@ -76,7 +76,7 @@ extern u32 func_003292A8(s32);
 
 extern u32 sdfResourceRetainAddress(u32);
 
-extern u8 *func_001781B0(u32);
+extern u8 *effAllocateIdentityMatrixWork(u32);
 
 extern s32 effMiscRand(void *);
 
@@ -114,7 +114,7 @@ EffectRing *source;
         ring->spread = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    ring->matrix = func_001781B0(ring->count);
+    ring->matrix = effAllocateIdentityMatrixWork(ring->count);
     *(f32 *)(ring->matrix + 0x5C) = 1.0f;
     *(u32 *)(ring->matrix + 0x50) = ring->unk54;
     step = EFFECT_RING_FULL_TURN / ring->count;
@@ -258,7 +258,7 @@ s32 func_001781A0(EffRecordPool *pool, s32 index) {
     return pool->auxRecordBase + index * 0x10;
 }
 
-u8 *func_001781B0(u32 count) {
+u8 *effAllocateIdentityMatrixWork(u32 count) {
     u8 *matrix;
 
     matrix = (u8 *)func_00177760(count);

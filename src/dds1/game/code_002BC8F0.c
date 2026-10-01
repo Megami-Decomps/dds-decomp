@@ -267,7 +267,7 @@ void effCompleteTransientResourceJob(u64 job, u32 *out) {
     instance = func_002BD9C0(resource, 0);
     *out = instance;
     func_002D0918(resource);
-    func_002887A0(job);
+    filePollEntryCleanup(job);
 }
 
 void effCompleteRetainedResourceJob(u64 job, u32 *out) {
@@ -277,7 +277,7 @@ void effCompleteRetainedResourceJob(u64 job, u32 *out) {
     resource = fileGetResourceHandle();
     instance = func_002BD9C0(resource, 1);
     *out = instance;
-    func_002887A0(job);
+    filePollEntryCleanup(job);
 }
 
 extern s32 func_003014F0(char *, const char *, ...);
@@ -319,7 +319,7 @@ void effCompleteMappedResourceJob(u64 job, u32 *out) {
     mapped = effCreateMappedResource(address);
     *out = mapped;
     func_002D0918(resource);
-    func_002887A0(job);
+    filePollEntryCleanup(job);
 }
 
 void effRequestMappedResource(const char *base, const char *name, u32 *out) {

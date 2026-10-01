@@ -219,7 +219,7 @@ extern void btlSelectRandomDefeatCamera(u8 *);
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 extern s32 kwlnTaskIsRegistered(s32);
 extern void effReleaseSharedReference(void *);
-extern void func_00105618(void);
+extern void kwlnTextureClearReferenceFlag(void);
 extern void kwlnTextureReleaseHeldReference(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
@@ -593,7 +593,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     return 1;
 }
 
-u8 func_00210520(void) {
+u8 btlAreModelChangeTasksFinished(void) {
     s32 taskCount;
 
     taskCount = btlCountTasksByKind(0x1a);
@@ -907,7 +907,7 @@ s32 btlGetCommandBlockReason(BtlTask *task, s32 command) {
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_00210EB0);
 
 /* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
-s32 func_002110B8(void *list, s32 row) {
+s32 btlCheckCommandRequiredEntryMatches(void *list, s32 row) {
     s32 result = 0;
     u32 flags;
     u32 mask;
@@ -1137,7 +1137,7 @@ u32 btlMulColor(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-void func_00211A28(s32 *colors) {
+void btlCopyPaletteLowByteToAlpha(s32 *colors) {
     s32 *current = colors;
     s32 color;
     s32 i = 0xff;
@@ -1281,7 +1281,7 @@ void btlReleaseRuntimeResource(void) {
         effReleaseSharedReference(resource);
         D_003D7580.resource = 0;
     }
-    func_00105618();
+    kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
 }
 
@@ -1319,12 +1319,12 @@ extern void sdfCreateDescriptorPacket(void *, s32, s32, s32, s32, s32, void *, s
 
 extern void sdfQueueNonzeroResourceId(void *);
 
-extern u8 *D_003BA8F8;
+extern u8 *kwlnHeldTextureReference;
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &D_003D7580;
     void *surface = sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(surface, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
+    sdfCreateDescriptorPacket(surface, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0x200, 0xe0, runtime->request, 0);
     D_00325708.invoke(&D_00325708, surface);
     sdfQueueNonzeroResourceId(runtime->handle);
     runtime->handle = 0;
@@ -1338,7 +1338,7 @@ void btlInitializeOverlayGraphics(void) {
     void *surface = sdfAllocatePacketList(0);
     void *context = sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    func_002D5CD0(surface, context, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    func_002D5CD0(surface, context, *(s32 *)(kwlnHeldTextureReference + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode(D_00325860, context);
     D_00325708.invoke(&D_00325708, surface);
     D_003D7580.options |= 1;

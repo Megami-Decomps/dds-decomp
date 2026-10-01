@@ -30,7 +30,7 @@ extern void *sdfCreateConfiguredBufferedResourceList();
 extern void sdfPacSkipAllocationEntryBytes();
 
 /* Read the entry count word, size the list for it and arm the skip handler. */
-void func_002EEA18(SdfPacRead *state) {
+void sdfPacReadListAllocationCount(SdfPacRead *state) {
     u32 count;
     SdfPacList *dest;
 
@@ -55,12 +55,12 @@ typedef struct SdfAllocWork {
 
 extern void sdfPacEnqueuePacket(SdfAllocWork *);
 extern void *func_002CFEB8(s32 size);
-extern void func_002EEA18();
+extern void sdfPacReadListAllocationCount();
 
 void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     sdfPacEnqueuePacket(work);
     work->buffer = func_002CFEB8(0x30);
-    work->handler = func_002EEA18;
+    work->handler = sdfPacReadListAllocationCount;
 }
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEAE0);
@@ -79,7 +79,7 @@ void sdfStoreWordAndSetState(SdfWordState *work, u32 value) {
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EEEA8);
 
 extern u8 D_00398470[];
-extern void func_002DDD60();
+extern void sdfPostmultiplyVuMatrixFromMemory();
 extern void func_002EEEA8();
 
 void func_002EF2B0(void) {
@@ -88,7 +88,7 @@ void func_002EF2B0(void) {
 }
 
 void func_002EF2E0(s32 a, s32 b, s32 c, s32 d) {
-    func_002DDD60(D_00398470);
+    sdfPostmultiplyVuMatrixFromMemory(D_00398470);
     func_002EEEA8(a, b, c, d);
 }
 
@@ -105,7 +105,7 @@ typedef struct SdfTmxHeader {
     u8 pad17[0x29];
 } SdfTmxHeader;
 
-void func_002EF340(SdfTmxHeader *hdr, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
+void sdfInitializeTmxImageHeader(SdfTmxHeader *hdr, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
     memset(hdr, 0, sizeof(SdfTmxHeader));
     hdr->flagB = flagB;
     hdr->width = width;
@@ -163,7 +163,7 @@ extern char *strcat(char *, const char *);
 extern void func_002F5E30(void);
 
 /* Load the pair of IOP modules of `group` from the directory `prefix`. */
-void func_002EF7C8(const char *prefix, s32 group) {
+void sdfLoadIopModulePair(const char *prefix, s32 group) {
     char path[0x100];
     char **names = &D_00398C80[group * 2];
     s32 i;
@@ -188,7 +188,7 @@ typedef struct SdfTreeNode {
 } SdfTreeNode;
 
 /* Balance-flag rotation: `node` takes the place under `a`'s first link; returns the new subtree root. */
-SdfTreeNode *func_002EF8D8(SdfTreeNode *a, SdfTreeNode *node) {
+SdfTreeNode *sdfRotateBalancedTreeFirstLink(SdfTreeNode *a, SdfTreeNode *node) {
     SdfTreeNode *root = a;
     SdfTreeNode *pivot;
 
@@ -228,7 +228,7 @@ extern void *sdfAllocPacketAligned();
 extern void func_002EF958();
 
 /* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void func_002EFA58(SdfTreeNode **tree, SdfTreeItem *item) {
+void sdfInsertFloatKeyTreeItem(SdfTreeNode **tree, SdfTreeItem *item) {
     SdfTreeNode *path[32];
     s32 depth = 0;
     SdfTreeNode **link = tree;
@@ -279,7 +279,7 @@ typedef struct SdfPool {
     u8 sub[1];
 } SdfPool;
 
-extern void func_002EFA58();
+extern void sdfInsertFloatKeyTreeItem();
 extern void func_002EFC68();
 
 void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
@@ -288,7 +288,7 @@ void sdfReleasePoolNode(SdfPool *pool, SdfPoolNode *node) {
             node->next = pool->free;
             pool->free = node;
         } else {
-            func_002EFA58(pool->sub, node);
+            sdfInsertFloatKeyTreeItem(pool->sub, node);
         }
     }
 }

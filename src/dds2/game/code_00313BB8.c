@@ -8,7 +8,7 @@ extern void func_003154A0();
 
 extern s32 fileResolvePrimaryBuffer();
 
-extern void func_002DEB80();
+extern void effCreateSelectionFlagListFromWork();
 
 extern s32 D_00435E50;
 
@@ -96,7 +96,7 @@ extern u16 D_00401326[];
 
 extern u8 D_0045C828[];
 
-extern u32 *func_0026CF70(s16);
+extern u32 *mnuGetMantraNodePositionRecord(s16);
 
 extern u8 D_00401320[][36];
 
@@ -693,8 +693,8 @@ INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315950);
 
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315A50);
 
-s32 func_00315BF8(s16 id) {
-    u32 *info = func_0026CF70(id);
+s32 mnuIsResourceCategoryAvailable(s16 id) {
+    u32 *info = mnuGetMantraNodePositionRecord(id);
     if (info == 0) {
         return 0;
     }
@@ -793,7 +793,7 @@ void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-u8 *func_003164C0(void) {
+u8 *frFontGetColoredGlyphResource(void) {
     return D_00405CA8;
 }
 
@@ -828,7 +828,7 @@ void sdfResetFlagListEntries(s32 list) {
 INCLUDE_ASM(const s32, "game/code_00313BB8", func_00316528);
 
 void func_00316648(void) {
-    func_002DEB80(fileResolvePrimaryBuffer());
+    effCreateSelectionFlagListFromWork(fileResolvePrimaryBuffer());
 }
 
 void sdfReleaseFlagListResource(s32 work) {

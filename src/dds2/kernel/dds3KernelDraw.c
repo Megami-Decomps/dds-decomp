@@ -3,7 +3,7 @@
 
 extern u32 D_0037F770[4];
 
-extern u32 D_00435CD4;
+extern u32 kwlnDrawControlFlags;
 
 extern u8 D_00435CD8;
 
@@ -261,13 +261,13 @@ void kwlnDrawSetupDc8(s32 mode) {
     D_00438E4E = blk->u00.b[3];
     D_00438E4A = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x80000;
+        kwlnDrawControlFlags &= ~0x80000;
         kwlnDrawInitRect(&blk->r08);
         func_00197328(blk);
         func_00197310();
     }
     else {
-        D_00435CD4 |= 0x80000;
+        kwlnDrawControlFlags |= 0x80000;
     }
 }
 
@@ -277,12 +277,12 @@ void kwlnDrawEnableDc8(s32 enabled) {
     D_00438E48 = 0;
     D_00438E4A = enabled;
     if (enabled == 0) {
-        D_00435CD4 &= ~0x80000;
-        D_00435CD4 &= ~0x100000;
+        kwlnDrawControlFlags &= ~0x80000;
+        kwlnDrawControlFlags &= ~0x100000;
         func_00197320();
     }
     else {
-        D_00435CD4 |= 0x80000;
+        kwlnDrawControlFlags |= 0x80000;
     }
 }
 
@@ -311,12 +311,12 @@ void kwlnDrawSetupE08(s32 mode) {
     D_00438E5A = blk->u0C.b[3];
     D_00438E56 = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x200000;
+        kwlnDrawControlFlags &= ~0x200000;
         effCopyCh75Common(blk);
         func_00197378();
     }
     else {
-        D_00435CD4 |= 0x200000;
+        kwlnDrawControlFlags |= 0x200000;
     }
 }
 
@@ -326,12 +326,12 @@ void kwlnDrawEnableE08(s32 mode) {
     D_00438E54 = 0;
     D_00438E56 = mode;
     if (mode == 0) {
-        D_00435CD4 &= ~0x200000;
-        D_00435CD4 &= ~0x400000;
+        kwlnDrawControlFlags &= ~0x200000;
+        kwlnDrawControlFlags &= ~0x400000;
         func_00197388();
     }
     else {
-        D_00435CD4 |= 0x200000;
+        kwlnDrawControlFlags |= 0x200000;
     }
 }
 
@@ -346,7 +346,7 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
         else {
             D_00435CD8 = 1;
         }
-        D_00435CD4 = D_00435CD4 & 0xfffff7ff;
+        kwlnDrawControlFlags = kwlnDrawControlFlags & 0xfffff7ff;
         return;
     }
     D_00438DB8 = D_00435CDA;
@@ -354,7 +354,7 @@ void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     D_00438DBC = (s16)x;
     D_00438DBE = (s16)y;
     D_00438DB6 = (s16)transition;
-    D_00435CD4 = D_00435CD4 | 0x800;
+    kwlnDrawControlFlags = kwlnDrawControlFlags | 0x800;
     D_00438DB4 = 0;
 }
 
@@ -384,13 +384,13 @@ void kwlnDrawSetupD88(s32 mode) {
     D_00438E42 = blk->u00.b[3];
     D_00438E3E = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x20000;
+        kwlnDrawControlFlags &= ~0x20000;
         kwlnDrawInitRect(&blk->r18);
         func_00196FF0(blk);
         func_00196FD8();
     }
     else {
-        D_00435CD4 |= 0x20000;
+        kwlnDrawControlFlags |= 0x20000;
     }
 }
 
@@ -400,12 +400,12 @@ void kwlnDrawEnableD88(s32 enabled) {
     D_00438E3C = 0;
     D_00438E3E = enabled;
     if (enabled == 0) {
-        D_00435CD4 &= ~0x20000;
-        D_00435CD4 &= ~0x40000;
+        kwlnDrawControlFlags &= ~0x20000;
+        kwlnDrawControlFlags &= ~0x40000;
         func_00196FE8();
     }
     else {
-        D_00435CD4 |= 0x20000;
+        kwlnDrawControlFlags |= 0x20000;
     }
 }
 
@@ -436,12 +436,12 @@ void kwlnDrawSetupC70(s32 mode) {
     D_00438E1E = blk->u04.b[3];
     D_00438E1A = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x1000;
+        kwlnDrawControlFlags &= ~0x1000;
         effCopyCh71Common(blk);
         func_00197060();
     }
     else {
-        D_00435CD4 |= 0x1000;
+        kwlnDrawControlFlags |= 0x1000;
     }
 }
 
@@ -454,13 +454,13 @@ void kwlnDrawSetupC70B(s32 mode) {
     D_00438E1C = blk->u04.b[3];
     D_00438E1A = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x1000;
-        D_00435CD4 &= ~0x8000;
+        kwlnDrawControlFlags &= ~0x1000;
+        kwlnDrawControlFlags &= ~0x8000;
         effCopyCh71Common(blk);
         func_00197070();
     }
     else {
-        D_00435CD4 |= 0x1000;
+        kwlnDrawControlFlags |= 0x1000;
     }
 }
 
@@ -500,12 +500,12 @@ void kwlnDrawSetupCd0(s32 mode) {
     D_00438E2A = blk->u0C.b[3];
     D_00438E26 = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x2000;
+        kwlnDrawControlFlags &= ~0x2000;
         effCopyCh72Common(blk);
         func_00197118();
     }
     else {
-        D_00435CD4 |= 0x2000;
+        kwlnDrawControlFlags |= 0x2000;
         effCopyCh72Common(blk);
         func_00197128();
     }
@@ -517,12 +517,12 @@ void kwlnDrawEnableCd0(s32 mode) {
     D_00438E24 = 0;
     D_00438E26 = mode;
     if (mode == 0) {
-        D_00435CD4 &= ~0x2000;
-        D_00435CD4 &= ~0x10000;
+        kwlnDrawControlFlags &= ~0x2000;
+        kwlnDrawControlFlags &= ~0x10000;
         func_00197128();
     }
     else {
-        D_00435CD4 |= 0x2000;
+        kwlnDrawControlFlags |= 0x2000;
     }
 }
 
@@ -562,12 +562,12 @@ void kwlnDrawSetupD30(s32 mode) {
     D_00438E36 = blk->u0C.b[3];
     D_00438E32 = requestedMode;
     if (requestedMode == 0) {
-        D_00435CD4 &= ~0x800000;
+        kwlnDrawControlFlags &= ~0x800000;
         effCopyCh76Common(blk);
         func_001971D0();
     }
     else {
-        D_00435CD4 |= 0x800000;
+        kwlnDrawControlFlags |= 0x800000;
         effCopyCh76Common(blk);
         func_001971E0();
     }
@@ -579,12 +579,12 @@ void kwlnDrawEnableD30(s32 mode) {
     D_00438E30 = 0;
     D_00438E32 = mode;
     if (mode == 0) {
-        D_00435CD4 &= ~0x800000;
-        D_00435CD4 &= ~0x1000000;
+        kwlnDrawControlFlags &= ~0x800000;
+        kwlnDrawControlFlags &= ~0x1000000;
         func_001971E0();
     }
     else {
-        D_00435CD4 |= 0x800000;
+        kwlnDrawControlFlags |= 0x800000;
     }
 }
 

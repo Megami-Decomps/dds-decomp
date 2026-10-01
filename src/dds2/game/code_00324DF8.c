@@ -75,7 +75,7 @@ void mnuRemoveMatchedNodesFromLinkedResourceLists(u32 *pair, u32 key) {
 
 extern s32 func_00321018(u32);
 
-s64 func_00324EF0(u32 *pair) {
+s64 mnuClearOwnedResourceListPair(u32 *pair) {
     func_00321018(pair[0]);
     return func_00321018(pair[1]);
 }
@@ -96,7 +96,7 @@ u64 func_00324F50(s32 owner, u64 resource) {
     return handle;
 }
 
-s64 func_00324F98(u32 *pair) {
+s64 mnuRemoveLinkedResourceByHandle(u32 *pair) {
     return dds3RemoveListNodeAndNotify(pair[1], mnuFindResourceNodeByHandle(pair[1]));
 }
 
@@ -238,7 +238,7 @@ INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328018);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00328160);
 
-void func_003282E8(void) {
+void sdfCreateSemaphoreFromOptions(void) {
 }
 
 s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {

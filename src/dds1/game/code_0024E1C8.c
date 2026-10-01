@@ -110,7 +110,7 @@ typedef struct {
     u8 pad10[4];
 } MnuSourceSlot;
 
-/* Mantra source entry behind func_002CE9E0 (0x54 bytes). */
+/* Mantra source entry behind prfReqGetEntryRecord (0x54 bytes). */
 typedef struct {
     u8 pad00[0x2C];
     u32 unk2C;             /* 0x2C */
@@ -118,12 +118,12 @@ typedef struct {
     MnuSourceSlot slot[2]; /* 0x34 */
 } MnuSourceEntry;
 
-extern MnuSourceEntry *func_002CE9E0(u16 index);
+extern MnuSourceEntry *prfReqGetEntryRecord(u16 index);
 
 /* Pick the value of the first active slot, preferring slot 0. */
 s32 mnuGetMantraSourceValue(u16 index) {
     s32 result = 0;
-    MnuSourceEntry *entry = func_002CE9E0(index);
+    MnuSourceEntry *entry = prfReqGetEntryRecord(index);
     s32 slot = 0;
 
     if (entry->unk2C & 0x20) {

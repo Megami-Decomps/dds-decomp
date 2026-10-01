@@ -62,7 +62,7 @@ extern char D_00380788[];
 
 extern void evtStageTestUpdate();
 
-extern void func_002B96D8();
+extern void mnuClearWindowPanelTransitionFlag();
 
 extern void mnuClearActionFlags();
 
@@ -74,7 +74,7 @@ extern char D_003E7774[];
 
 extern char D_003E773C[];
 
-extern void func_002C48C8();
+extern void mnuHandlePanelListPageJumpInput();
 
 extern void func_002BD480();
 
@@ -128,7 +128,7 @@ extern void func_002AAC70();
 
 extern s32 D_00435E6C;
 
-extern void func_002AACB8();
+extern void mnuDrawCampIconBackdropByKind();
 
 extern s32 effHasFirstTextureHandle();
 
@@ -363,13 +363,13 @@ extern void func_002B0278(s32);
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0278);
 
-s64 func_002B0578(s32 callback) {
+s64 mnuAdvanceStaffValuePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_002B0278(callback);
     return menuSetHandler(context, 1, callback);
 }
 
-s64 func_002B05C8(s32 callback) {
+s64 mnuFinishStaffValuePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return menuSetHandler(context, 2, callback);
@@ -492,13 +492,13 @@ s64 mnuPartySlotConfirmClearUpdate(s32 callback) {
     return 0;
 }
 
-s64 func_002B0CB0(s32 callback) {
+s64 mnuAdvancePartyClearPopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_002B0278(callback);
     return menuSetHandler(context, 1, callback);
 }
 
-s64 func_002B0D00(s32 callback) {
+s64 mnuFinishPartyClearPopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
     return menuSetHandler(context, 2, callback);
@@ -509,7 +509,7 @@ u32 func_002B0D48(void) {
 }
 
 void func_002B0D50(u32 context) {
-    func_002A9460(4, context);
+    mnuSwitchCampVisualCategory(4, context);
 }
 
 void func_002B0D70(u32 callback) {
@@ -712,10 +712,10 @@ u8 mnuIsStateNotOne(void) {
 }
 
 void func_002B27F0(u32 context) {
-    func_002A9460(3, context);
+    mnuSwitchCampVisualCategory(3, context);
 }
 
-void func_002B2810(s32 context) {
+void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 void mnuReleaseStaffMenuResources(s32 menu) {
@@ -759,7 +759,7 @@ s32 mnuStaffCloseSelectionState(void) {
     s32 party = ((MenuContext *)context)->party;
 
     mnuResetWorkFloats();
-    func_002B2810(context);
+    mnuReleaseMenuWindowHandles(context);
     func_003297C8(*(s32 *)party);
     return 1;
 }
@@ -813,9 +813,9 @@ s64 mnuDrawStaffCampPageWithImage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *menu = (s32 *)((MenuContext *)context)->party;
     if (effHasFirstTextureHandle(((MenuContext *)context)->resourceHandle)) {
-        func_002AACB8(0, callback);
+        mnuDrawCampIconBackdropByKind(0, callback);
     } else {
-        func_002AACB8(1, callback);
+        mnuDrawCampIconBackdropByKind(1, callback);
     }
     if (menu[5] == 0) {
         mnuCreateStaffImageSprite(0x16);
@@ -1075,7 +1075,7 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback
 }
 
 void func_002B4270(u32 context) {
-    func_002A9460(1, context);
+    mnuSwitchCampVisualCategory(1, context);
 }
 
 void func_002B4290(s32 context) {
@@ -1278,12 +1278,12 @@ void mnuCampMenuHandleInput(s32 callback) {
             func_002B9808((s32)window);
         }
         if (input & 0x10) {
-            func_002B97F0((s32)window);
+            mnuRetreatWindowListSelection((s32)window);
         }
         if (input & 0x20) {
-            func_002B97D8((s32)window);
+            mnuAdvanceWindowListSelection((s32)window);
         }
-        func_002B96D8((s32)window);
+        mnuClearWindowPanelTransitionFlag((s32)window);
         mnuPlayInputSound(0, input, (s32)window->list);
     }
 }
@@ -1336,12 +1336,12 @@ void ptySkillMenuHandleSlotReorder(s32 callback) {
             func_002B9808((s32)window);
         }
         if (input & 0x10) {
-            func_002B97F0((s32)window);
+            mnuRetreatWindowListSelection((s32)window);
         }
         if (input & 0x20) {
-            func_002B97D8((s32)window);
+            mnuAdvanceWindowListSelection((s32)window);
         }
-        func_002B96D8((s32)window);
+        mnuClearWindowPanelTransitionFlag((s32)window);
         mnuPlayInputSound(0, input, (s32)window->list);
     }
 }
@@ -1520,7 +1520,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
     return 0;
 }
 
-s64 func_002B60E8(s32 callback) {
+s64 ptySkillMenuOpenSelectedSkillPage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     u8 *menu = (u8 *)((MenuContext *)context)->party;
     func_002AAE80(callback);
@@ -1639,12 +1639,12 @@ s64 ptySkillMenuBrowseCandidatePages(s32 callback) {
         func_002B9808((s32)window);
     }
     if (input & 0x10) {
-        func_002B97F0((s32)window);
+        mnuRetreatWindowListSelection((s32)window);
     }
     if (input & 0x20) {
-        func_002B97D8((s32)window);
+        mnuAdvanceWindowListSelection((s32)window);
     }
-    func_002C48C8(window, &input);
+    mnuHandlePanelListPageJumpInput(window, &input);
     if (!(buttons & 0xC00000)) {
         mnuClearListFlagsOneAndTwo(menu[3]);
     }
@@ -1811,13 +1811,13 @@ s64 mnuUpdateSkillListInput(s32 callback) {
     }
     list = menu + 1;
     if (buttons & 0x10) {
-        func_002B97F0(list[8 + menu[11]]);
+        mnuRetreatWindowListSelection(list[8 + menu[11]]);
     }
     if (buttons & 0x20) {
-        func_002B97D8(list[8 + menu[11]]);
+        mnuAdvanceWindowListSelection(list[8 + menu[11]]);
     }
-    func_002C48C8(list[8 + menu[11]], &buttons);
-    func_002B96D8(list[8 + menu[11]]);
+    mnuHandlePanelListPageJumpInput(list[8 + menu[11]], &buttons);
+    mnuClearWindowPanelTransitionFlag(list[8 + menu[11]]);
     mnuPlayInputSound(0, buttons, (s32)((MenuWindowContainer *)list[8 + menu[11]])->list);
     if (buttons & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E7720);
@@ -1884,7 +1884,7 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
     *entryFlags = *entryFlags | flags;
 }
 
-void func_002B7740(s32 sourceBase, s32 destinationBase) {
+void mnuCopyCampEffectRowData(s32 sourceBase, s32 destinationBase) {
     u32 *source;
     s32 offset;
     u32 *destination;
@@ -1911,7 +1911,7 @@ void func_002B7740(s32 sourceBase, s32 destinationBase) {
     } while (row < 2);
 }
 
-void func_002B7790(u32 first, u32 second, u32 *menu) {
+void mnuSetCampEffectResourceHandles(u32 first, u32 second, u32 *menu) {
     menu[2] = first;
     menu[15] = second;
 }
@@ -1959,7 +1959,7 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 
 void mnuLoadEffectResources(u8 *effect) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, (MapPacket *)effect);
-    func_002B7740((s32)D_003E7858, (s32)effect);
+    mnuCopyCampEffectRowData((s32)D_003E7858, (s32)effect);
     ((MenuEffectResources *)effect)->packet.unk_08 = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
     ((MenuEffectResources *)effect)->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation((s32)effect);
@@ -1967,7 +1967,7 @@ void mnuLoadEffectResources(u8 *effect) {
 
 void mnuRequestEffectResources(u8 *effect) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, (MapPacket *)effect);
-    func_002B7740((s32)D_003E7858, (s32)effect);
+    mnuCopyCampEffectRowData((s32)D_003E7858, (s32)effect);
     effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, (u32 *)(effect + 8));
     effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)(effect + 0x3c));
 }
@@ -2638,11 +2638,11 @@ void mnuSetWindowContainerLayout(s32 menu, u32 layout2C, u32 layout30, u32 layou
     ((MenuWindowContainer *)menu)->layout44 = 0;
 }
 
-void func_002B95A0(s32 menu, u32 first, u32 second) {
+void mnuInitializeBasicWindowLayout(s32 menu, u32 first, u32 second) {
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
-void func_002B95D0(u32 first, u32 *menu, u32 second, u32 third, u32 fourth) {
+void mnuSetWindowEntryParameters(u32 first, u32 *menu, u32 second, u32 third, u32 fourth) {
     menu[7] = first;
     menu[8] = second;
     menu[9] = third;
@@ -2675,11 +2675,11 @@ void mnuCreateListWithDefaults(u8 *menu, u32 first, u32 second, u32 third, u32 f
         func_002B9918(first, second, third, fourth, (u32)&defaults, 3);
 }
 
-void func_002B96D8(s32 list) {
+void mnuClearWindowPanelTransitionFlag(s32 list) {
     ((MenuList *)list)->flags = ((MenuList *)list)->flags & 0xfffffffb;
 }
 
-void func_002B96F0(s32 menu) {
+void mnuAppendWindowListNode(s32 menu) {
     mnuListAppendNode((u32)((MenuWindowContainer *)menu)->list);
 }
 
@@ -2709,11 +2709,11 @@ u8 *mnuReverseListSelection(u8 *menu, s32 step) {
     return item;
 }
 
-void func_002B97D8(u32 menu) {
+void mnuAdvanceWindowListSelection(u32 menu) {
     mnuAdvanceListSelection(menu, 0);
 }
 
-void func_002B97F0(u32 menu) {
+void mnuRetreatWindowListSelection(u32 menu) {
     mnuReverseListSelection(menu, 0);
 }
 
@@ -2766,7 +2766,7 @@ void func_002B9A38(void) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B9A40);
 
-void func_002B9BB0(s32 x, s32 y, u32 flags, s32 window, u32 option) {
+void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, s32 window, u32 option) {
     func_002B9A40(x - 0xf0, y - 8, flags, ((MenuWindowContainer *)window)->state,
                                 (u32)((MenuWindowContainer *)window)->list, (u32)((MenuWindowContainer *)window)->resource, option);
 }
@@ -2837,7 +2837,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
     func_002B9218(x, y, depth, ((MenuWindowContainer *)menu)->width, ((MenuWindowContainer *)menu)->height,
                   texture, ((MenuWindowContainer *)menu)->flags, (s32)((MenuWindowContainer *)menu)->list, param);
     if (((MenuWindowContainer *)menu)->resource != 0) {
-        func_002B9BB0(x, y, depth, menu, param);
+        mnuDrawWindowResourceSpriteRows(x, y, depth, menu, param);
     }
     count = ((MenuWindowContainer *)menu)->state;
     if (count < 0x100) {
@@ -3028,7 +3028,7 @@ void func_002BA7A8(u32 a0, u32 a1, u32 a2, u32 a3, u32 a4, u32 a5, u32 a6) {
     mnuDrawIconPanel(a0, a1, a2, a3, a4, a5, a6);
 }
 
-void func_002BA7C0(u32 a0, u32 a1, u32 a2, s32 state, s32 option) {
+void mnuDrawIconPanelFullFade(u32 a0, u32 a1, u32 a2, s32 state, s32 option) {
     func_002BA7A8(a0, a1, a2, 0x100, state, 0, option);
 }
 
@@ -3615,7 +3615,7 @@ void mnuSetWindowResource(s32 index, MenuWindows *menu, s32 a2, s32 a3, s32 a4, 
     menu->flags |= 0x80;
 }
 
-void func_002BC078(s32 index, u8 *menu, u32 first, u32 second) {
+void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second) {
     u8 **slot = (u8 **)(menu + index * 0x2138 + 0x154);
     if (*slot != NULL) {
         (*slot)[0x74] = first;

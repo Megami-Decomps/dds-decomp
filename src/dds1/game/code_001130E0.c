@@ -21,7 +21,7 @@ extern u32 D_003BA9D0;
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
-extern s32 func_00110A48(u64, u64, u64);
+extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
 
 u32 func_001130E0(EffectObject *obj) {
     return obj->data->handle;
@@ -131,7 +131,7 @@ typedef struct WorldObj {
     f32 *source;           /* 0x1C */
 } WorldObj;
 
-extern WorldObj *func_00110880();
+extern WorldObj *dds3AppendWorldObjectNode();
 extern void dds3EnsureSlotData();
 extern void effObjSetInnerFirstVec();
 extern void effObjSetInnerSecondVec();
@@ -143,7 +143,7 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 
     memset(zero, 0, 0x10);
     zero[3] = 1.0f;
-    obj = func_00110880(6);
+    obj = dds3AppendWorldObjectNode(6);
     obj->unk4 = a;
     dds3EnsureSlotData(obj);
     effObjSetInnerSecondVec(obj, second);
@@ -157,7 +157,7 @@ WorldObj *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 }
 
 void func_00113DA8(void) {
-    func_00110928();
+    dds3RemoveWorldObjectNode();
 }
 
 void func_00113DC0(EffectObject *obj, u32 value) {
@@ -173,15 +173,15 @@ u32 func_00113DE0(u64 id) {
     u64 world;
 
     world = dds3GetWorldSecondaryObject();
-    obj = (EffectObject *)func_00110A48(world, id, 6);
+    obj = (EffectObject *)dds3FindWorldObjectNodeByKey(world, id, 6);
     return obj->data->word04;
 }
 
-void func_00113E20(EffectObject *obj, u32 value) {
+void evtSetObjectTransitionWork(EffectObject *obj, u32 value) {
     obj->data->word08 = value;
 }
 
-u32 func_00113E30(EffectObject *obj) {
+u32 evtGetObjectTransitionWork(EffectObject *obj) {
     return obj->data->word08;
 }
 

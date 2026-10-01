@@ -206,7 +206,7 @@ typedef struct BattleSceneWork {
     s32 (*sceneCallback)();
 } BattleSceneWork;
 
-extern SceneControl *D_004367FC;
+extern SceneControl *btlCommandPanelWork;
 
 extern s16 *D_00438F48;
 
@@ -297,7 +297,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(-1);
 }
 
-void func_001C81F8(s32 x, s32 y, s32 z, s32 w, u16 index) {
+void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
@@ -421,7 +421,7 @@ extern void func_001C98E8(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
 void fldDispatchSceneKindHandler(s32 sceneContext) {
-    switch (func_001C82D8(sceneContext, D_004367FC->kind)) {
+    switch (func_001C82D8(sceneContext, btlCommandPanelWork->kind)) {
     case 0:
         func_001C92A0(sceneContext, 0, 2, 3);
         return;
@@ -606,7 +606,7 @@ typedef struct SceneGlobalState {
     s32 fadeKindB;
 } SceneGlobalState;
 
-extern u8 *D_004367F4;
+extern u8 *btlTrackedTaskHandles;
 
 extern s32 mdlFlagTest();
 
@@ -617,7 +617,7 @@ s32 fldSelectSceneMode(void) {
     if (mdlFlagTest(0x801) != 0) {
         return 1;
     }
-    if (mdlFlagTest(0x81D) == 0 && mdlFlagTest(0x801) == 0 && !(((SceneGlobalState *)D_004367F4)->flags & 0x200)) {
+    if (mdlFlagTest(0x81D) == 0 && mdlFlagTest(0x801) == 0 && !(((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x200)) {
         if (btlHasSpecialActiveSceneActor() != 0) {
             return 2;
         }
@@ -632,7 +632,7 @@ s32 fldSelectSceneMode(void) {
             return 5;
         }
     }
-    if (mdlFlagTest(0x805) == 0 && !(((SceneGlobalState *)D_004367F4)->flags & 0x200)) {
+    if (mdlFlagTest(0x805) == 0 && !(((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x200)) {
         if (func_001CA8D8() != 0 && btlHaveActiveSceneActorEntriesCleared() != 0) {
             return 3;
         }
@@ -653,7 +653,7 @@ void fldSetSceneObjectAndGroupStates(void) {
     SceneObject *object = fldGetSceneObjectTaskUserData();
     if (object != 0) {
         object->state = 5;
-        D_004367FC->mode = 3;
+        btlCommandPanelWork->mode = 3;
     }
 }
 
@@ -1047,7 +1047,7 @@ s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
         }
         fadeCount++;
     }
-    global = (SceneGlobalState *)D_004367F4;
+    global = (SceneGlobalState *)btlTrackedTaskHandles;
     if (global->fadeLatched == 0) {
         if (countA != 0 || countB != 0) {
             global->fadeKindA = countA;
@@ -1073,8 +1073,8 @@ s32 fldUpdateConditionalSceneCleanup(void) {
     if ((scene->flags & 0x200) == 0) {
         return 0;
     }
-    if (((SceneGlobalState *)D_004367F4)->stage == 1 &&
-        (((SceneGlobalState *)D_004367F4)->flags & 0x100) == 0) {
+    if (((SceneGlobalState *)btlTrackedTaskHandles)->stage == 1 &&
+        (((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x100) == 0) {
         return 0;
     }
     func_001CF800();

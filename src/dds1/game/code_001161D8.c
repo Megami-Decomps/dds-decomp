@@ -8,7 +8,7 @@ typedef struct ActionObj {
     s32 unk1C;     /* 0x1C */
 } ActionObj;
 
-extern ActionObj *func_00110880();
+extern ActionObj *dds3AppendWorldObjectNode();
 extern void dds3EnsureSlotData();
 
 extern void effObjSetInnerFirstVec();
@@ -17,7 +17,7 @@ extern void effObjInnerVecBackup();
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 ActionObj *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    ActionObj *obj = func_00110880(8);
+    ActionObj *obj = dds3AppendWorldObjectNode(8);
 
     obj->initialValue = initialValue;
     effObjSetInnerFirstVec(obj, firstVector);

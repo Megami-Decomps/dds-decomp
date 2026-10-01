@@ -126,7 +126,7 @@ u32 func_0029A1E0(void) {
     return 0;
 }
 
-s32 func_0029A1E8(MenuDspState *state)
+s32 mnuRequestContextLatchedSceneDsp(MenuDspState *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
         if (state->flags & 1) {
@@ -143,7 +143,7 @@ s32 func_0029A1E8(MenuDspState *state)
     return 0;
 }
 
-s32 func_0029A270(MenuDspState *state)
+s32 mnuRequestContextClearSceneDsp(MenuDspState *state)
 {
     if (mdlFlagTest(0xB8F) == 0) {
         if (mdlFlagTest(0x290) != 0) {

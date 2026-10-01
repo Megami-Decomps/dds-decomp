@@ -36,7 +36,7 @@ typedef struct BtlEffectSlots {
 extern s32 btlDispatchPackedActionWithScratch(s32 context, BtlJyokyoOwner *owner, s32 mask);
 
 
-extern s32 D_00436CB8;
+extern s32 btlActionScratchWork;
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
@@ -148,7 +148,7 @@ typedef struct BtlHistObj {
 } BtlHistObj;
 
 extern void btlShiftActorStateHistory(BtlHistObj *obj, s8 flag);
-extern s8 D_00436CAC;
+extern s8 btlHistoryCounter;
 
 typedef struct BtlPackedCtx {
     s32 context;
@@ -174,11 +174,11 @@ extern s32 D_003BEB58[];
 extern s32 D_003BEB60[];
 extern void *btlGetIndexedUiResource();
 extern u32 btlRollAiBucket(void);
-extern s32 func_00210258();
-extern s32 func_0020FFB8();
+extern s32 btlPollCategoryLabelTask();
+extern s32 btlPollActorOrEntryLabelTask();
 extern void func_0020FA98();
 extern s32 btlPollTimedTaskLink(BtlEffLink *link);
-extern s32 func_002103F8();
+extern s32 btlPollActorDialogTask();
 extern s32 func_00210530();
 extern s32 btlPollTimedPresentationTask();
 extern s32 btlPollEffectWaitTask(BtlEffLink *link);
@@ -309,7 +309,7 @@ BtlEffTask *btlCreateEffectCounterTask(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-s32 func_0020FFB8(BtlEffLink *link) {
+s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
     s32 work = func_001AA6F8();
     s32 actor = link->actor;
 
@@ -348,7 +348,7 @@ BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 arg) {
     obj->flags |= 2;
     obj->id = 0x43;
     obj->unk40 = owner->ownerData;
-    obj->callback = func_0020FFB8;
+    obj->callback = btlPollActorOrEntryLabelTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
@@ -385,7 +385,7 @@ BtlEffTask *btlCreateOwnerLinkedTimedTask(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-s32 func_00210258(BtlEffLink *link) {
+s32 btlPollCategoryLabelTask(BtlEffLink *link) {
     s32 actor;
 
     func_001AA6F8();
@@ -447,7 +447,7 @@ BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
     if (owner != NULL) {
         obj->unk40 = owner->ownerData;
     }
-    obj->callback = func_00210258;
+    obj->callback = btlPollCategoryLabelTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
@@ -455,7 +455,7 @@ BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 arg) {
     return obj;
 }
 
-s32 func_002103F8(BtlEffLink *link) {
+s32 btlPollActorDialogTask(BtlEffLink *link) {
     s32 work = func_001AA6F8();
     s32 actor = link->actor;
 
@@ -483,7 +483,7 @@ BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 arg) {
     if (owner != NULL) {
         obj->unk40 = owner->ownerData;
     }
-    obj->callback = func_002103F8;
+    obj->callback = btlPollActorDialogTask;
     link = btlGetTaskArguments(obj);
     link->actor = (s32)owner;
     link->arg = arg;
@@ -748,13 +748,13 @@ s32 btlAllocAndCheck(s32 object) {
     s32 allocation = sdfAllocAndClearQuadwords(0x10);
     s32 actor = (s32)((BtlTask *)object)->unit;
 
-    D_00436CB8 = allocation;
+    btlActionScratchWork = allocation;
     *(s32 *)allocation = object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        sdfReleaseChipBlock(D_00436CB8);
+        sdfReleaseChipBlock(btlActionScratchWork);
         return 1;
     }
-    sdfReleaseChipBlock(D_00436CB8);
+    sdfReleaseChipBlock(btlActionScratchWork);
     return 0;
 }
 
@@ -768,8 +768,8 @@ void btlAdvanceHistoryCounter(BtlHistObj *obj) {
     obj->counter++;
     obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
     btlShiftActorStateHistory(obj, 0);
-    D_00436CAC++;
-    D_00436CAC = D_00436CAC <= 0 ? 0 : D_00436CAC >= 0x21 ? 0x20 : D_00436CAC;
+    btlHistoryCounter++;
+    btlHistoryCounter = btlHistoryCounter <= 0 ? 0 : btlHistoryCounter >= 0x21 ? 0x20 : btlHistoryCounter;
 }
 
 
@@ -784,18 +784,18 @@ void btlResetBattleHistoryCounters(void) {
             node = node->next;
         } while (node != 0);
     }
-    D_00436CAC = 0;
+    btlHistoryCounter = 0;
 }
 
 s32 btlDispatchPackedActionWithScratch(s32 context, BtlJyokyoOwner *owner, s32 mask) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
-    D_00436CB8 = (s32)work;
+    btlActionScratchWork = (s32)work;
     work[1] = owner->unk124;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    sdfReleaseChipBlock(D_00436CB8);
+    sdfReleaseChipBlock(btlActionScratchWork);
     return result;
 }
 
@@ -928,11 +928,11 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CA0);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CA8);
 
-INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CAC);
+INCLUDE_SDATA(const s32, "game/code_0020E850", btlHistoryCounter);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB0);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB4);
 
-INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB8);
+INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
 

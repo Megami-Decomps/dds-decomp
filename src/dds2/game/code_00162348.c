@@ -232,7 +232,7 @@ s32 parObjGetMode(ParObj *object) {
 
 extern BillDispatch D_003AAB80[];
 
-extern s32 func_00159A50(s32 id);
+extern s32 billCloneObjectRetainingSharedData(s32 id);
 
 extern void billSetChildScaleComponents(s32 id, f32 a, f32 b);
 
@@ -249,7 +249,7 @@ ParObj *parInstantiateKind(ParObj *src) {
     obj = D_003AAB80[src->dispatchIndex].func();
     obj->dispatchIndex = src->dispatchIndex;
     if (src->unk28 == -1) {
-        bill = func_00159A50(src->billId);
+        bill = billCloneObjectRetainingSharedData(src->billId);
         billSetChildScaleComponents(bill, obj->unk10, obj->unk14);
         billSetBillboardMode(bill, obj->unk2C);
         billMarkKindOneFlag(bill);
@@ -269,7 +269,7 @@ void func_001628E0(void) {
 }
 
 void effParScaleComponent(float scale, ParObj *work) {
-    func_00162248();
+    parScaleAndRestartKind();
     work->scale8C = work->scale8C * scale;
 }
 

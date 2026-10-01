@@ -129,7 +129,7 @@ extern void frFontSetChildColors(u32, u32);
 extern void func_001958A0(u32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(u32);
 extern u32 fileResolvePrimaryBuffer(void);
-extern void func_0029CE50(u32);
+extern void effCreateSelectionFlagListFromWork(u32);
 extern s32 ptyTestProfileFlag0(s32, u16);
 extern u16 D_003907BC[];
 u32 ptyGetCurrentProfileRecord(ScrVmOperand *);
@@ -716,7 +716,7 @@ void sdfSetAllFlagsFromTable(void) {
     } while (index++ >= 0);
 }
 
-Entry84W *func_002CE9E0(u16 index) {
+Entry84W *prfReqGetEntryRecord(u16 index) {
     return &D_00391230[index];
 }
 
@@ -727,7 +727,7 @@ void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-u8 *func_002CEA80(void) {
+u8 *frFontGetColoredGlyphResource(void) {
     return D_00394680;
 }
 
@@ -764,7 +764,7 @@ void sdfResetFlagListEntries(s32 context) {
 INCLUDE_ASM(const s32, "game/code_002CC750", func_002CEAE8);
 
 void func_002CEC08(void) {
-    func_0029CE50(fileResolvePrimaryBuffer());
+    effCreateSelectionFlagListFromWork(fileResolvePrimaryBuffer());
 }
 
 void sdfReleaseFlagListResource(s32 context) {
@@ -815,7 +815,7 @@ void func_002CF430(void) {
     D_003BD2C8 = 0;
 }
 
-void func_002CF438(void) {
+void sdfCreateSemaphoreFromOptions(void) {
 }
 
 s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {

@@ -2,7 +2,7 @@
 #include "dds3Admin.h"
 
 extern AdminWork* dds3GetAdminTaskWork(void);
-extern void func_001028E8(s32 a0, s32 a1, s32 a2, s32 a3);
+extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
 extern void* kwlnTaskGetUserValue(void* task);
 extern void kwlnTaskSetUserValue(void* task, u32 value);
 extern void* func_002CFEB8(s32 a0);
@@ -24,7 +24,7 @@ void dds3AdminSubmitMarkedRequest(s32 a0, s32 a1, s32 a2)
 {
     AdminWork* work;
 
-    func_001028E8(a0, a1, a2, 0);
+    dds3AdminSubmitModeRequest(a0, a1, a2, 0);
     work = dds3GetAdminTaskWork();
     work->flags |= 8;
 }
@@ -38,12 +38,12 @@ void dds3AdminSetControlFlag(void)
     work->flags |= 2;
 }
 
-s8 func_00102A40(void)
+s8 dds3AdminGetActiveMode(void)
 {
     return dds3GetAdminTaskWork()->unk08;
 }
 
-s8 func_00102A60(void)
+s8 dds3AdminGetRequestedMode(void)
 {
     return dds3GetAdminTaskWork()->unk09;
 }
@@ -74,7 +74,7 @@ extern void func_00102AE0(void);
 
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
    cleared. Returns the next step function, or NULL if the callback failed. */
-AdminStep func_00102C58(void *task) {
+AdminStep dds3AdminPollModeDestruction(void *task) {
     AdminWork *work = kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
     s32 (*destroy)(void);
@@ -98,7 +98,7 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102CD8);
 
 /* Run the mode's destroy callback (the row's second pointer), then free the
  * attached data block and the task itself. */
-void func_00102E58(void* task) {
+void dds3AdminReleaseTaskWork(void* task) {
     AdminWork* work = kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
 

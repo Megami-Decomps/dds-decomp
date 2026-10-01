@@ -4,7 +4,7 @@
 
 extern u64 func_00197760(s32, s32, u64, u64, u64, u64);
 
-extern u32 D_003BD978;
+extern u32 sdfCounterAnimationValue;
 
 extern s32 D_003BD97C;
 
@@ -280,23 +280,23 @@ s32 fldReleaseLocalMapResources(void) {
 void sdfCounterInitializeDisplayAnimation(void) {
     s32 count;
 
-    D_003BD978 = 0;
+    sdfCounterAnimationValue = 0;
     count = sdfCounterGetDisplayValue();
     D_003BD97C = count - 1;
     D_003BD980 = 0x3c;
 }
 
 void sdfCounterAdvanceBoundedAnimationValue(void) {
-    if ((s32)D_003BD978 < 0x3C) {
-        D_003BD978++;
+    if ((s32)sdfCounterAnimationValue < 0x3C) {
+        sdfCounterAnimationValue++;
     }
 }
 
 void sdfCounterStepDownAnimationValue(void) {
-    if ((s32)D_003BD978 > 0) {
-        D_003BD978 -= 2;
+    if ((s32)sdfCounterAnimationValue > 0) {
+        sdfCounterAnimationValue -= 2;
     } else {
-        D_003BD978 = 0;
+        sdfCounterAnimationValue = 0;
     }
 }
 
@@ -449,7 +449,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 
 /* Rotate the y/z components of `v` by `angle` (about the x axis). */
-void func_002C7F18(f32 *v, f32 angle) {
+void fldRotateVectorAroundX(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);
@@ -463,7 +463,7 @@ void func_002C7F18(f32 *v, f32 angle) {
 }
 
 /* Rotate the x/z components of `v` by `angle` (about the y axis). */
-void func_002C7FB0(f32 *v, f32 angle) {
+void fldRotateVectorAroundY(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);
@@ -477,7 +477,7 @@ void func_002C7FB0(f32 *v, f32 angle) {
 }
 
 /* Rotate the x/y components of `v` by `angle` (about the z axis). */
-void func_002C8040(f32 *v, f32 angle) {
+void fldRotateVectorAroundZ(f32 *v, f32 angle) {
     f32 r[4];
     f32 c = sdfEvaluateCosineViaSinePhaseShift(angle);
     f32 s = sdfSinPoly(angle);

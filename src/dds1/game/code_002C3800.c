@@ -15,7 +15,7 @@ extern void dds3SetWorldEntryCallbackTarget(s32, char *);
 
 extern void effObjSetInnerFloat(s32, f32);
 
-extern void func_001109B8(s32, s32);
+extern void dds3SetWorldCameraObject(s32, s32);
 
 extern s32 func_00112C08(s32, SdfQuad *, SdfQuad *);
 
@@ -23,7 +23,7 @@ void fldCreateLocalMapCamera(void) {
     D_003BD264 = func_00112C08(dds3AdvanceWorldCounter(), &D_003900A0, &D_003900B0);
     dds3SetWorldEntryCallbackTarget(D_003BD264, "Lmap_Cam");
     effObjSetInnerFloat(D_003BD264, 2.0f);
-    func_001109B8(dds3GetWorldSecondaryObject(), D_003BD264);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), D_003BD264);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C3800", D_003B3D48);

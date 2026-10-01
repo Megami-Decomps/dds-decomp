@@ -66,7 +66,7 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00255010);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255118);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_002551B8);
+INCLUDE_ASM(const s32, "game/code_00254B30", mnuDrawMantraCostCounter);
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255368);
 
@@ -197,7 +197,7 @@ typedef struct {
     DspParticle particles[8];
 } DspParticleState;
 
-void func_002559F8(DspParticleState *state) {
+void mnuTickMantraSparkParticles(DspParticleState *state) {
     DspParticle *particle;
     s32 duration;
     s32 i;

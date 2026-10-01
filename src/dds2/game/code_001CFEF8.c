@@ -257,7 +257,7 @@ extern void evtSetSolarOverlayFullyVisible();
 
 extern void btlSyncModelFlagFromEventThresholds();
 
-extern void func_00204000();
+extern void btlResetTitleStreamOnBattleFlag();
 
 extern void func_001E9410();
 
@@ -343,7 +343,7 @@ s32 fldSceneStateStartTileEffect(BattleSceneWork *scene) {
     BattleEffectParams params;
     f32 *origin;
     if (btlCountTasksForOwner(0x8000000000000001LL) == 0) {
-        func_00204000();
+        btlResetTitleStreamOnBattleFlag();
         func_001E9410();
         btlSpawnBattleWorldAction();
         btlCreateRainEffect(scene->tileX, scene->tileY);
@@ -417,7 +417,7 @@ INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D08A8);
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D0FE0);
 
-void func_001D1120(void) {
+void btlConsumeSceneAdvanceFlags(void) {
 }
 
 s32 fldConsumeSceneInputFlags(BattleSceneWork *scene) {
@@ -517,7 +517,7 @@ extern void itfMesClearFlags();
 
 extern void brsTaskAllowUpdate();
 
-extern void func_002457E0();
+extern void evtBeginSolarOverlayFadeOut();
 
 extern void func_001AA868();
 
@@ -534,7 +534,7 @@ void func_001D2798(BattleSceneWork *scene) {
     itfMesClearFlags(1);
     scale = 0.05f;
     brsTaskAllowUpdate();
-    func_002457E0(8);
+    evtBeginSolarOverlayFadeOut(8);
     do {
         func_001AA868(&D_00435DD0->entry[i], -0x45D1);
         if (!(scene->subFlags & 0x40)) {
@@ -685,7 +685,7 @@ void btlResetToInitialScene(void) {
     work->queuedScene = 0;
 }
 
-void func_001D2DB0(void) {
+void btlGetCurrentSceneRecordValue(void) {
 }
 
 s32 fldGetSceneDescriptorProperty(void) {

@@ -38,11 +38,11 @@ extern void sdfReleaseChipBlock(void* ptr);
 
 extern void func_003003F0();
 
-extern KwlnTask* D_003BA800;
+extern KwlnTask* kwlnDelayedStartTaskHead;
 
 extern void* D_003BA808;
 
-extern KwlnTask* D_003BA80C;
+extern KwlnTask* kwlnDelayedDestroyTaskHead;
 
 extern void* D_003BA814;
 
@@ -84,7 +84,7 @@ void kwlnTaskAdvanceStartDelays(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = D_003BA800;
+    node = kwlnDelayedStartTaskHead;
     while (node != 0) {
         if (node->unk2C > 0) {
             node->unk2C--;
@@ -145,7 +145,7 @@ void kwlnTaskAdvanceDestroyDelays(void)
     KwlnTask* node;
     KwlnTask* curr;
 
-    node = D_003BA80C;
+    node = kwlnDelayedDestroyTaskHead;
     while (node != 0) {
         if (node->unk2E > 0) {
             node->unk2E--;
@@ -192,12 +192,12 @@ void func_001012E8(void)
 {
     u8* tmp;
 
-    func_001012B0(D_003BA800, D_0039DE88);
+    func_001012B0(kwlnDelayedStartTaskHead, D_0039DE88);
     tmp = D_0039DEB8;
     func_003003F0(tmp, D_003BA808);
     func_001012B0(D_003BA818, D_0039DEC8);
     func_003003F0(tmp, D_003BA820);
-    func_001012B0(D_003BA80C, D_0039DEF8);
+    func_001012B0(kwlnDelayedDestroyTaskHead, D_0039DEF8);
     func_003003F0(tmp, D_003BA814);
     func_003003F0(D_003BA828);
 }
@@ -213,7 +213,7 @@ void func_00101440(void)
     for (i = 0; i < 0x40; i++) {
         D_003BDC48[i] = 0x20;
     }
-    for (task = D_003BA800; task != NULL; task = task->listNext) {
+    for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_003BDC48[0] = 0;
             func_00101368(task, 0);
@@ -225,7 +225,7 @@ void func_00101440(void)
             func_00101368(task, 0);
         }
     }
-    for (task = D_003BA80C; task != NULL; task = task->listNext) {
+    for (task = kwlnDelayedDestroyTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_003BDC48[0] = 0;
             func_00101368(task, 0);
@@ -303,13 +303,13 @@ KwlnTask* kwlnTaskFindByPriority(u32 prio)
         switch (idx)
         {
         case 0:
-            node = D_003BA800;
+            node = kwlnDelayedStartTaskHead;
             break;
         case 1:
             node = D_003BA818;
             break;
         case 2:
-            node = D_003BA80C;
+            node = kwlnDelayedDestroyTaskHead;
             break;
         }
         while (node != 0)
@@ -336,13 +336,13 @@ s32 kwlnTaskIsRegistered(KwlnTask* target)
         switch (idx)
         {
         case 0:
-            node = D_003BA800;
+            node = kwlnDelayedStartTaskHead;
             break;
         case 1:
             node = D_003BA818;
             break;
         case 2:
-            node = D_003BA80C;
+            node = kwlnDelayedDestroyTaskHead;
             break;
         }
         while (node != 0)

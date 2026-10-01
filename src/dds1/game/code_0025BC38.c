@@ -19,7 +19,7 @@ typedef struct {
     s32 tasks[10];
 } MovieResourceGroup;
 
-void func_0025BC38(MovieResourceGroup *resources) {
+void mnuDestroyMantraDrawPool(MovieResourceGroup *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources->tasks[i] != 0) {
@@ -236,9 +236,9 @@ void mnuReleaseListNodes(MenuListHead *head) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025DBB0);
+INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraSineFade);
 
-extern s32 func_0025DBB0(s32);
+extern s32 mnuDrawMantraSineFade(s32);
 extern s32 func_0025D7F8(MenuListNode *, s32, s32);
 
 s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
@@ -247,7 +247,7 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
     MenuListNode *node = head->first;
     s32 index = 0;
 
-    if (func_0025DBB0(*counter) != 0) {
+    if (mnuDrawMantraSineFade(*counter) != 0) {
         *counter = 0;
     } else {
         *counter = *counter + 1;

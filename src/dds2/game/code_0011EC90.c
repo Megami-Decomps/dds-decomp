@@ -49,7 +49,7 @@ extern u32 D_00438EB0;
 
 extern Dds3NodeOps D_00435EA8;
 
-s32 func_0011EC90(void) {
+s32 ptyScriptRemoveUnitAndReturnResult(void) {
     s32 unitId = scrReadIntParameter(0);
 
     scrSetIntegerReturnValue(func_0011C680(unitId) == 1);
@@ -78,7 +78,7 @@ s32 func_0011ED60(void) {
     return 1;
 }
 
-s32 func_0011ED88(void) {
+s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 a = scrReadIntParameter(0);
     u16 b = scrReadIntParameter(1);
     s32 index = dds3FindEntryIndex(a);
@@ -149,7 +149,7 @@ void dds3DestroyAllOwnedIntrusiveNodes(void) {
     }
 }
 
-void func_0011EF48(s32 object, u32 value) {
+void dds3SetLinkedNodeValue(s32 object, u32 value) {
     *(u32 *)(object + 8) = value;
 }
 

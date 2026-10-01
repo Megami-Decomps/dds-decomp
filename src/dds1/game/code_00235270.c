@@ -5,7 +5,7 @@ extern void func_0023D5B0(s32 output, void *data, s32 size);
 extern void *kwlnTaskGetUserValue();
 extern s32 func_0018FDA8(void);
 extern s32 func_002E92C0(s32 sequence);
-extern void func_002E9340(s32 sequence);
+extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(s32 *task);
 extern s32 evtAllocateContext(void);
 extern void evtSetConvertedContextValue(s32 context, s32 value);
@@ -160,11 +160,11 @@ typedef struct {
 extern EvtTblEntry D_00368950[];
 extern s8 D_00368952[];
 
-extern u16 D_003BBF88;
+extern u16 evtSkyTransitionActive;
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 
-extern u32 D_003BBF8C;
+extern u32 evtSkyOverlayEnabled;
 
 extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
 
@@ -195,7 +195,7 @@ void evtCreateTaskWithValue(s32 taskId, s32 value) {
 }
 
 void evtSetSkyOverlayEnabled(u32 enabled) {
-    D_003BBF8C = enabled;
+    evtSkyOverlayEnabled = enabled;
 }
 
 /* Either set the sky parameter immediately or interpolate from its current value. */
@@ -206,27 +206,27 @@ void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     if (current != target) {
         if (duration == 0) {
             func_00132B80(target);
-            D_003BBF88 = 0;
+            evtSkyTransitionActive = 0;
         } else {
             D_003BD89A = duration;
             D_003BD89C = current;
             D_003BD89E = target;
-            D_003BBF88 = 1;
+            evtSkyTransitionActive = 1;
             D_003BD898 = 0;
         }
     }
 }
 
 u16 evtIsSkyTransitionActive(void) {
-    return D_003BBF88;
+    return evtSkyTransitionActive;
 }
 
 void evtAdvanceSkyTransition(void) {
-    if (D_003BBF88 != 0) {
+    if (evtSkyTransitionActive != 0) {
         D_003BD898 += 1;
         func_00132B80(D_003BD89C + (s32)((f32)(D_003BD89E - D_003BD89C) * ((f32)D_003BD898 / (f32)D_003BD89A)));
         if (D_003BD898 >= D_003BD89A) {
-            D_003BBF88 = 0;
+            evtSkyTransitionActive = 0;
         }
     }
 }
@@ -234,7 +234,7 @@ void evtAdvanceSkyTransition(void) {
 s32 evtUpdateSkyTask(void) {
     evtAdvanceSkyTransition();
     func_00132010();
-    if (D_003BBF8C != 0) {
+    if (evtSkyOverlayEnabled != 0) {
         fldSelectDisplayBuffer(0x53);
         func_0012AEB0();
     }
@@ -242,8 +242,8 @@ s32 evtUpdateSkyTask(void) {
 }
 
 void evtResetSkyTaskFlags(void) {
-    D_003BBF88 = 0;
-    D_003BBF8C = 0;
+    evtSkyTransitionActive = 0;
+    evtSkyOverlayEnabled = 0;
 }
 
 void evtDestroySkyTask(void) {
@@ -273,7 +273,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_00235598);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
-s32 func_00235768(s32 list, s32 x, s32 y) {
+s32 evtAppendValueChangeDebugLabel(s32 list, s32 x, s32 y) {
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
@@ -295,7 +295,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     f32 step;
 
     list = sdfCreateResetPacketList();
-    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, func_00235768, func_002357B8);
+    func_00235598(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, func_002357B8);
     D_00325748.invoke(&D_00325748, (void *)list);
     if (ctx->actionMode != 8) {
         return 0;
@@ -1024,7 +1024,7 @@ typedef struct EvtSelectionCache {
 } EvtSelectionCache;
 
 extern EvtSelectionCache *D_003BB128;
-extern s32 D_003BD8A0;
+extern s32 evtActiveEntryFlags;
 
 s32 evtSynchronizeSelectedEntry(s32 task) {
     EvtRuntime *runtime = kwlnTaskGetUserValue();
@@ -1034,7 +1034,7 @@ s32 evtSynchronizeSelectedEntry(s32 task) {
     }
     if (kwlnTaskGetTimer(task) == 0) {
         s32 selected = runtime->selectedEntry;
-        D_003BD8A0 = selected;
+        evtActiveEntryFlags = selected;
         if (selected != 0) {
             D_003BB128->selectedEntry = selected;
         }
@@ -1522,7 +1522,7 @@ extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern void sdfQueueNonzeroResourceId(s32 resource);
 extern void kwlnTextureReleaseHeldReference(void);
-extern u32 D_003BA904;
+extern u32 kwlnDrawControlFlags;
 extern void func_00234CA8(u16 a, u16 b, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
 extern void evtEventViewerShutdown(EvtRuntime *runtime);
@@ -1555,7 +1555,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     kwlnTextureReleaseHeldReference();
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    D_003BA904 |= 0x2000000;
+    kwlnDrawControlFlags |= 0x2000000;
     func_00234CA8(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (mode == 1) {
         if (sdfPathExists(path0) != 1) {
@@ -1601,7 +1601,7 @@ s32 evtPreloadBgm(s32 id) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, 0);
-    func_002E9340(sound);
+    sndEnsureMidiBankResident(sound);
     return sound;
 }
 
@@ -1647,7 +1647,7 @@ s32 evtFadeInBgm(s32 id, s32 fade) {
     return sound;
 }
 
-s32 func_00241A50(s32 id, s32 fade) {
+s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -1667,7 +1667,7 @@ s32 evtSetBgmVolumePan(s32 id, s32 fade) {
     return sound;
 }
 
-s32 func_00241AE8(s32 id, s32 fade) {
+s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
     s32 sound;
     if ((u32)(id - 0x258) >= 0x100) {
         return 0;
@@ -1818,9 +1818,9 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF80);
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF88);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyTransitionActive);
 
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF8C);
+INCLUDE_SDATA(const s32, "game/code_00235270", evtSkyOverlayEnabled);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BBF90);
 

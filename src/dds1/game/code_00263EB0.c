@@ -116,7 +116,7 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
     return result;
 }
 
-s64 func_002646A0(s32 request) {
+s64 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuDrawItemPanelBackdrop(context);

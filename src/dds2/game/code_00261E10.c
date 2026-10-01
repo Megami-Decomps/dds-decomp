@@ -42,7 +42,7 @@ extern void func_002B86E8();
 extern s32 D_003CE14C[];
 extern u8 D_003CE620[];
 extern u8 D_003CE400[];
-extern s32 func_00297898();
+extern s32 mnuTickExtendedCommandPhase();
 extern s32 mdlFlagTest();
 extern void mdlFlagSet();
 extern void dspStartEntry();
@@ -359,7 +359,7 @@ s32 evtEnableStateFlag(void) {
     return 1;
 }
 
-s32 func_00262EF0(void) {
+s32 evtEnterProgressCommandPhase(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 sceneNode;
     if (((EvtStateTableContext *)context)->stateCode == 5) {
@@ -583,7 +583,7 @@ s32 evtUpdateSlotItemCompletionState(void) {
 s32 evtPollStageSelectionAndAdvance(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 sceneNode;
-    switch (func_00297898(context)) {
+    switch (mnuTickExtendedCommandPhase(context)) {
     case 6:
         return 1;
     case 0:

@@ -76,7 +76,7 @@ struct ParCellNode {
 
 extern ParDispatch D_0034E250[];
 
-extern s32 func_00151E60(s32);
+extern s32 billCloneObjectRetainingSharedData(s32);
 
 extern void billSetChildScaleComponents(s32, f32, f32);
 
@@ -217,7 +217,7 @@ ParObj *parInstantiateKind(ParObj *work) {
     ParObj *particle = D_0034E250[work->dispatchIndex].func();
     particle->dispatchIndex = work->dispatchIndex;
     if (work->unk28 == -1) {
-        s32 transform = func_00151E60(work->billId);
+        s32 transform = billCloneObjectRetainingSharedData(work->billId);
         billSetChildScaleComponents(transform, particle->unk10, particle->unk14);
         billSetBillboardMode(transform, particle->unk2C);
         billMarkKindOneFlag(transform);
@@ -237,7 +237,7 @@ void func_0015ACF0(void) {
 }
 
 void effParScaleComponent(float scale, ParObj *work) {
-    func_0015A658();
+    parScaleAndRestartKind();
     work->scale8C *= scale;
 }
 

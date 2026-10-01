@@ -58,7 +58,7 @@ extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
 extern u32 fileGetResourceHandle(u32);
 extern u32 func_00288B90(u32);
 extern u32 fileGetResourceSize(u32);
-extern void func_002887A0(u32);
+extern void filePollEntryCleanup(u32);
 extern s32 fileDrawMenuFrame(s32);
 
 typedef struct FileRecordSlot {
@@ -109,7 +109,7 @@ extern u64 sdfDevQueueControlAndWait(s64);
 
 extern u32 D_003BC8F8;
 
-extern s32 D_003BD938;
+extern s32 fileConfigTaskWork;
 
 extern u32 D_003BC888;
 
@@ -165,7 +165,7 @@ extern void *fileWriteWaitOpen(void);
 
 extern void *mcHandleLoadResult(void);
 
-extern void *func_0028C8F8(void);
+extern void *fileBeginLabeledSlotWrite(void);
 
 extern void *fileBuildMainBlobAfterDelete(void);
 
@@ -369,7 +369,7 @@ extern void mnuRecordSetVector(void *record, const u128 *vector);
 
 extern void fileSetRecordSecondVector(void *record, const u128 *vector);
 
-extern void func_001028E8(s32 kind, void *data, s32 size, s32 flags);
+extern void dds3AdminSubmitModeRequest(s32 kind, void *data, s32 size, s32 flags);
 
 extern s32 D_003BC848;
 
@@ -449,7 +449,7 @@ extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
-extern void *func_00151E60(void *handle);
+extern void *billCloneObjectRetainingSharedData(void *handle);
 
 extern void *effReferenceObjectRetain(void *holder);
 
@@ -598,7 +598,7 @@ s8 fileMenuTaskIsAlive(void) {
     return D_003BC7EC;
 }
 
-void func_0028A188(void) {
+void mnuFormatSaveSlotHeaderName(void) {
 }
 
 void mcFormatSaveFilename(void *dst, s32 number) {
@@ -903,7 +903,7 @@ u32 mcdEnterDefaultFileFlow(void) {
     u32 mode[4];
 
     mode[0] = 0;
-    func_001028E8(2, mode, 4, 0);
+    dds3AdminSubmitModeRequest(2, mode, 4, 0);
     return 0;
 }
 
@@ -915,7 +915,7 @@ s32 mcdEnterSelectedFileFlow(void) {
     u32 v = 2;
 
     D_003BC84C = 1;
-    func_001028E8(2, &v, 4, 0);
+    dds3AdminSubmitModeRequest(2, &v, 4, 0);
     return 0;
 }
 
@@ -1458,7 +1458,7 @@ extern u8 D_0037D0C0[];
 extern u32 D_003BC890;
 extern u32 D_003BC894;
 
-void *func_0028C8F8(void) {
+void *fileBeginLabeledSlotWrite(void) {
     s32 slot = D_003BC844 + 1;
     u8 tens = 0x4F + slot / 10;
     u8 ones = 0x4F + slot % 10;
@@ -1472,7 +1472,7 @@ void *func_0028C8F8(void) {
 
 void *fileRequestBaseIcon(void) {
     return fileBeginRequest(D_003B2688, &D_003BD914, &D_003BD918,
-                          func_0028C8F8, &D_003BC7F8);
+                          fileBeginLabeledSlotWrite, &D_003BC7F8);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileBuildMainBlobAndWrite);
@@ -1712,7 +1712,7 @@ void *fileRunMenuState(s32 arg) {
         D_003BD910 = fileGetResourceHandle(job);
         D_003BD914 = func_00288B90(job);
         D_003BD918 = fileGetResourceSize(job);
-        func_002887A0(job);
+        filePollEntryCleanup(job);
     }
     return NULL;
 }
@@ -1805,7 +1805,7 @@ void fileReleaseMenuResources(void) {
         if (D_003BC7F8 != 0) {
             fileWaitReady(D_003BC7F8);
             D_003BD910 = fileGetResourceHandle(D_003BC7F8);
-            func_002887A0(D_003BC7F8);
+            filePollEntryCleanup(D_003BC7F8);
             D_003BC7F8 = 0;
         }
         sdfReleaseMemorySlot(&D_003BD910);
@@ -2128,28 +2128,28 @@ void fileConfigTaskDestroy(void) {
     FileConfigListNode *node;
     s32 i;
 
-    if (D_003BD938 != 0) {
+    if (fileConfigTaskWork != 0) {
         D_003BC8DC = ((FileSaveState *)D_003BAA00)->slotFlags;
-        if (*(u32 *)(D_003BD938 + 4) == 1) {
-            func_001028E8(2, &request, 4, 0);
-            mnuReleaseEffectResource(((FileConfigTask *)D_003BD938)->effect);
+        if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
+            dds3AdminSubmitModeRequest(2, &request, 4, 0);
+            mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
-        node = ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->head;
-        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)D_003BD938)->frame)->count; i++) {
+        node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
+        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->count; i++) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
-        mnuDestroyListState(((FileConfigTask *)D_003BD938)->frame);
-        ((FileConfigTask *)D_003BD938)->frame = 0;
+        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
+        ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 4; i++) {
-            if (((FileConfigTask *)D_003BD938)->slots[i] != 0) {
-                effDestroyResourceSlotSet(((FileConfigTask *)D_003BD938)->slots[i]);
-                ((FileConfigTask *)D_003BD938)->slots[i] = 0;
+            if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
+                effDestroyResourceSlotSet(((FileConfigTask *)fileConfigTaskWork)->slots[i]);
+                ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
-        func_002D0918(((FileConfigTask *)D_003BD938)->memory);
-        D_003BD938 = 0;
+        func_002D0918(((FileConfigTask *)fileConfigTaskWork)->memory);
+        fileConfigTaskWork = 0;
         D_003BC8D5 = 0;
     }
 }
@@ -2162,11 +2162,11 @@ extern u32 fileGetConfigTaskFailure(void);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, void *update, void *destroy, s32 data);
 
 void mnuCreateConfigTasks(void) {
-    if (D_003BD938 == 0) {
-        D_003BD938 = func_00290FE0();
-        kwlnTaskCreate(D_003BC8E8, 0x3F2, 1, 1, func_00291418, NULL, D_003BD938);
-        kwlnTaskCreate(D_003B29D8, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, D_003BD938);
-        kwlnTaskCreate(D_003B29E8, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, D_003BD938);
+    if (fileConfigTaskWork == 0) {
+        fileConfigTaskWork = func_00290FE0();
+        kwlnTaskCreate(D_003BC8E8, 0x3F2, 1, 1, func_00291418, NULL, fileConfigTaskWork);
+        kwlnTaskCreate(D_003B29D8, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, fileConfigTaskWork);
+        kwlnTaskCreate(D_003B29E8, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, fileConfigTaskWork);
         D_003BC8D5 = 1;
     }
 }
@@ -2195,7 +2195,7 @@ s32 fileConsumeConfigTaskReady(void) {
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
-        return ((FileConfigTask *)D_003BD938)->slots[slot];
+        return ((FileConfigTask *)fileConfigTaskWork)->slots[slot];
     }
     return 0;
 }
@@ -2207,14 +2207,14 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B29E8);
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00291418);
 
 s32 fileStartQueuedLoad(void) {
-    if (((FileConfigTask *)D_003BD938)->pending == 0) {
+    if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
         return 0;
     }
-    if (((FileConfigTask *)D_003BD938)->result < 0) {
+    if (((FileConfigTask *)fileConfigTaskWork)->result < 0) {
         return -1;
     }
-    func_00292720((void *)D_003BD938);
-    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)D_003BD938)->frame, 0x53);
+    func_00292720((void *)fileConfigTaskWork);
+    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
 
@@ -2222,7 +2222,7 @@ u32 fileGetConfigTaskFailure(void) {
     u32 result;
 
     result = 0xffffffff;
-    if ((((FileConfigTask *)D_003BD938)->result & 0x80000000) == 0) {
+    if ((((FileConfigTask *)fileConfigTaskWork)->result & 0x80000000) == 0) {
         result = 0;
     }
     return result;
@@ -2263,7 +2263,7 @@ u32 func_00292C48(s32 index) {
 extern u8 D_003296F0[];
 extern u8 D_00324610[];
 extern u8 D_00324660[];
-extern void func_002DDD60(void *);
+extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 void mnuProjectViewPoint(void) {
     u8 *matrix;
@@ -2276,7 +2276,7 @@ void mnuProjectViewPoint(void) {
         ".set reorder"
         : : "r"(D_003296F0) : "memory");
     matrix = D_00324610;
-    func_002DDD60(matrix);
+    sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (
         ".set noreorder\n"
         "vmulax.xyzw ACC, vf28, vf10x\n"
@@ -2796,7 +2796,7 @@ FileJob *fileJobCreate(void) {
     return job;
 }
 
-void func_002940B8(FileJob *job) {
+void fileDestroyJob(FileJob *job) {
     sdfReleaseChipBlock(job);
 }
 
@@ -2865,7 +2865,7 @@ void fileQueueDestroy(FileQueue *queue) {
         if ((job->flags & 1) == 0) {
             fileJobDestroy(*(FileJob **)((u8 *)job + 0x90));
         }
-        func_002940B8(job);
+        fileDestroyJob(job);
         job = next;
     }
     sdfReleaseChipBlock(queue);
@@ -3126,7 +3126,7 @@ void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job) {
             fileJobDestroy((FileJob *)job->id);
         }
     }
-    func_002940B8(job);
+    fileDestroyJob(job);
 }
 
 void fileJobCopyHeader(FileJob *dst, FileJob *src) {
@@ -3379,7 +3379,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (dst->deviceHandle != NULL) {
             billDispatchByKind(dst->deviceHandle);
         }
-        dst->deviceHandle = func_00151E60(src->deviceHandle);
+        dst->deviceHandle = billCloneObjectRetainingSharedData(src->deviceHandle);
         billMarkKindOneFlag(dst->deviceHandle);
         if (dst->recordWork != NULL) {
             FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)dst->recordWork)->data0;
@@ -3597,7 +3597,7 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     VU0_MOVE_VF(vf22, vf30);
     VU0_MOVE_VF(vf23, vf31);
     VU0_LOAD_MATRIX(D_003296F0);
-    func_002DDD60(D_00324610);
+    sdfPostmultiplyVuMatrixFromMemory(D_00324610);
     VU0_LOAD_VF(vf10, out->pos);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_PERSPECTIVE_DIVIDE_VF10();

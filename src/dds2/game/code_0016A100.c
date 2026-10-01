@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A438);
 
 void func_0016A578(void) {
-    func_001027D8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 u32 effParamWorkGetData(EffParamWork *work) {
@@ -307,7 +307,7 @@ extern void **D_003AFFD0[];
 extern u32 func_0016AEA0(u32 *word);
 extern u32 func_0016AEA8(s32 address);
 
-EffParamWorkEx *func_0016AB48(u32 *source) {
+EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
     work = func_00328D68(0xC);
@@ -330,7 +330,7 @@ void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B4[work->id].func)(work->data);
 }
 
-EffParamWorkEx *func_0016AC78(EffParamWorkEx *src) {
+EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *src) {
     EffParamWorkEx *work;
 
     work = func_00328D68(0xC);

@@ -83,13 +83,13 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, void *);
 
-extern void func_002D5608(void *);
+extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
 extern void func_002D5718(void *);
 
-extern void func_002D5828(void *);
+extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
-extern void func_002D5938(void *);
+extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void *sdfChunkFindById(SdfChunk *chunk, s32 id);
 void *func_002CFEB8(s32 size);
@@ -110,7 +110,7 @@ void func_002DA358(SdfResourceList *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
 u8 *sdfModelFindDrawNode(void *chunk, s32 id);
-void func_002DDD60(void *);
+void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern void func_002DAB80(u8 *, void *);
 extern u16 D_00398198[];
@@ -138,10 +138,10 @@ void sdfInitializeDrawPacketGroups(u8 *ctx) {
     u8 *packet = ctx;
     s32 i;
 
-    func_002D5608(ctx + 0x20);
+    sdfBuildPrimaryAlphaBlendDmaPacket(ctx + 0x20);
     func_002D5718(ctx + 0x80);
-    func_002D5828(ctx + 0xE0);
-    func_002D5938(ctx + 0x140);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(ctx + 0xE0);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(ctx + 0x140);
     for (i = 0; i != 4; i++) {
         ((SdfPacketCommand *)packet)->opcode = 0x11000000;
         sdfInitPacketList(packet);
@@ -235,7 +235,7 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     record += 0x10;
     VU0_LOAD_VF(vf31, record);
     VU0_SET_W_ONE(vf31);
-    func_002DDD60(base + 0xC0);
+    sdfPostmultiplyVuMatrixFromMemory(base + 0xC0);
 }
 
 /* vu0 routine: transform the vector at resource+0x10 by the chunk matrix at +0xC0 (result in vf10) */

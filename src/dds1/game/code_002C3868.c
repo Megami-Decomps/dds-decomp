@@ -5,7 +5,7 @@ extern void sdfCounterTickCountdown(void);
 
 extern void mnuTickMapTimers(void);
 
-extern void func_002C5C70(void);
+extern void sdfCounterTickPositionTransition(void);
 
 extern void func_002C3DB0(void);
 
@@ -60,15 +60,15 @@ extern void sdfReleaseChipBlock(void *);
 
 extern void mnuDestroyListState(SdfCounterRuntime *);
 
-extern s32 D_003BD274;
+extern s32 sdfActiveCounterRuntime;
 
-extern u32 D_003BD268;
+extern u32 sdfSelectedCounterIndex;
 
 extern s8 D_003BD270;
 
 extern s32 D_003BD26C;
 
-extern void func_002C3C48(void);
+extern void sdfLatchBaseVectorsForSelection(void);
 
 extern s32 D_003BD264;
 
@@ -122,7 +122,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C3AC8);
 extern void sdfCommitPendingVectorAndMarkChanged();
 
 /* Latch the base vectors into the pending pair and flag the change. */
-void func_002C3C48(void) {
+void sdfLatchBaseVectorsForSelection(void) {
     D_003BD270 = 1;
     D_003900C0 = D_003900A0;
     D_003900D0 = D_003900B0;
@@ -131,28 +131,28 @@ void func_002C3C48(void) {
 
 /* Reset the current selection before installing the requested index. */
 void sdfSetSelectedIndex(u32 index) {
-    func_002C3C48();
-    D_003BD268 = index;
+    sdfLatchBaseVectorsForSelection();
+    sdfSelectedCounterIndex = index;
 }
 
 void sdfCycleForward(void) {
-    if ((s32)D_003BD268 < D_003BD26C - 1) {
-        func_002C3C48();
-        D_003BD268 = D_003BD268 + 1;
+    if ((s32)sdfSelectedCounterIndex < D_003BD26C - 1) {
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = sdfSelectedCounterIndex + 1;
     } else {
-        func_002C3C48();
-        D_003BD268 = 0;
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = 0;
     }
 }
 
 /* Cycle through the same bounded selection in the opposite direction. */
 void sdfCycleBackward(void) {
-    if (D_003BD268 != 0) {
-        func_002C3C48();
-        D_003BD268 = D_003BD268 - 1;
+    if (sdfSelectedCounterIndex != 0) {
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = sdfSelectedCounterIndex - 1;
     } else {
-        func_002C3C48();
-        D_003BD268 = D_003BD26C - 1;
+        sdfLatchBaseVectorsForSelection();
+        sdfSelectedCounterIndex = D_003BD26C - 1;
     }
 }
 
@@ -189,13 +189,13 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
 }
 
 void sdfDestroyActiveCounterRuntime(void) {
-    sdfCounterDestroyRuntime(D_003BD274);
+    sdfCounterDestroyRuntime(sdfActiveCounterRuntime);
 }
 
 void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickCountdown();
     mnuTickMapTimers();
-    func_002C5C70();
+    sdfCounterTickPositionTransition();
 }
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
@@ -203,17 +203,17 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4680);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4850);
 
 u32 sdfCounterGetDisplayWordPointer(void) {
-    return (u32)((SdfCounterRuntime *)D_003BD274)->channel->display->word;
+    return (u32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->word;
 }
 
 s32 sdfCounterGetDisplayValue(void) {
-    return ((SdfCounterRuntime *)D_003BD274)->channel->display->value;
+    return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->value;
 }
 
 float sdfCounterGetScaledValue(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     return (float)timer->value / 10.0f;
 }
 
@@ -227,25 +227,25 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
 void sdfCounterIncrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)D_003BD274)->timer->value;
+    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value;
     if (currentValue < 10) {
-        ((SdfCounterRuntime *)D_003BD274)->timer->value = currentValue + 1;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value = currentValue + 1;
     }
 }
 
 void sdfCounterDecrease(void) {
     s32 currentValue;
 
-    currentValue = ((SdfCounterRuntime *)D_003BD274)->timer->value;
+    currentValue = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value;
     if (currentValue != 0) {
-        ((SdfCounterRuntime *)D_003BD274)->timer->value = currentValue - 1;
+        ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value = currentValue - 1;
     }
 }
 
 void sdfCounterSetMode(s32 mode) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     timer->mode = mode;
     timer->countdown = 8;
 }
@@ -253,7 +253,7 @@ void sdfCounterSetMode(s32 mode) {
 void sdfCounterTickCountdown(void) {
     SdfCounterTimer *timer;
 
-    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if (0 < timer->countdown) {
         timer->countdown = timer->countdown - 1;
     }
@@ -261,7 +261,7 @@ void sdfCounterTickCountdown(void) {
 
 /* Enabling a stopped timer starts it at one; disabling clears it. */
 void mnuSetMapTimerFlags(s32 flags) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if ((flags & 1) != 0) {
         if (timer->mapTimerPrimary == 0) {
             timer->mapTimerPrimary = 1;
@@ -280,7 +280,7 @@ void mnuSetMapTimerFlags(s32 flags) {
 
 /* Active timers repeat every 60 ticks rather than stopping at zero. */
 void mnuTickMapTimers(void) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     if (timer->mapTimerPrimary > 0) {
         timer->mapTimerPrimary--;
         if (timer->mapTimerPrimary == 0) {
@@ -298,7 +298,7 @@ void mnuTickMapTimers(void) {
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
 
 s32 sdfCounterGetSelectionBoundaryFlags(void) {
-    SdfCounterRuntime *rt = (SdfCounterRuntime *)D_003BD274;
+    SdfCounterRuntime *rt = (SdfCounterRuntime *)sdfActiveCounterRuntime;
     s32 count;
     s32 done;
     if (rt->active == 0) {
@@ -310,7 +310,7 @@ s32 sdfCounterGetSelectionBoundaryFlags(void) {
 }
 
 void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
 
     timer->startX = timer->curX;
     timer->startY = timer->curY;
@@ -320,8 +320,8 @@ void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
 }
 
 /* Advance the timer's position transition one frame (3-frame lerp start -> target). */
-void func_002C5C70(void) {
-    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+void sdfCounterTickPositionTransition(void) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     s32 frames = timer->frames;
     f32 t;
 
@@ -338,7 +338,7 @@ void func_002C5C70(void) {
     }
 }
 
-void func_002C5D30(void) {
+void sdfUpdateCounterSelectionFade(void) {
 }
 
 void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
@@ -348,8 +348,8 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     f32 shrink;
 
     grow = fade * 0.5f + (1.0f - fade) * 2.5f;
-    offset = ((SdfCounterRuntime *)D_003BD274)->selected->index * (((SdfCounterRuntime *)D_003BD274)->posX >> 3);
-    timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    offset = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->selected->index * (((SdfCounterRuntime *)sdfActiveCounterRuntime)->posX >> 3);
+    timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108CB8(1);
     shrink = (1.0f - grow) * 8.5f;
@@ -363,7 +363,7 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     func_00108CB8(0);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD268);
+INCLUDE_SDATA(const s32, "game/code_002C3868", sdfSelectedCounterIndex);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD26C);
 
@@ -371,5 +371,5 @@ INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD270);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD271);
 
-INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD274);
+INCLUDE_SDATA(const s32, "game/code_002C3868", sdfActiveCounterRuntime);
 

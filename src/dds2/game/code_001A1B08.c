@@ -68,7 +68,7 @@ typedef struct PanelHold {
 
 extern PanelHold D_003B4780;
 
-extern PanelEntry D_0045296C[];
+extern PanelEntry itfWindowSlots[];
 
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
@@ -209,7 +209,7 @@ void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32
     itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, D_003B44E8, 6);
 }
 
-void func_001A2010(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
+void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *vec = (u32 *)(base + 0x100);
 
     panelSetVec4(vec, red, green, blue, 1);
@@ -272,7 +272,7 @@ extern u8 D_003B45C8[];
 extern u8 D_003B45D8[];
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void func_001A2180(PanelObj *panel, u64 command) {
+void itfDrawIndexedPanelFlatQuads(PanelObj *panel, u64 command) {
     PktRec *buf = panel->buf;
     PktRec *colors = buf + 4;
     s32 i;
@@ -344,7 +344,7 @@ s32 itfPanelStartEntry(void) {
     if (window < 0) {
         return 1;
     }
-    rec = D_0045296C[window].ptr;
+    rec = itfWindowSlots[window].ptr;
     value = scrReadIntParameter(0);
     sub = &rec->sub24;
     status = sub->status;
@@ -360,15 +360,15 @@ s32 itfPanelStartEntry(void) {
 }
 
 void itfPanelEmitRecord(s32 index, s32 value) {
-    itfAdvancePanelLayoutAndNotify(D_0045296C[index].ptr->unkA8, 0, value, 0, 0, 0);
+    itfAdvancePanelLayoutAndNotify(itfWindowSlots[index].ptr->unkA8, 0, value, 0, 0, 0);
 }
 
 s8 itfPanelGetStatus(s32 index) {
-    return D_0045296C[index].ptr->sub24.status;
+    return itfWindowSlots[index].ptr->sub24.status;
 }
 
 void itfPanelSetStatus(s32 index, s8 value) {
-    D_0045296C[index].ptr->sub24.status = value;
+    itfWindowSlots[index].ptr->sub24.status = value;
 }
 
 s32 itfPanelAcquireHold(void) {
@@ -403,7 +403,7 @@ s32 itfPanelReleaseHold(void) {
 }
 
 /* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
-s32 func_001A2F60(void) {
+s32 itfCommandQueueHeldPanelEntry(void) {
     PanelHold *cursor = &D_003B4780;
     s32 first;
     s32 second;
@@ -432,15 +432,15 @@ INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A3138);
 INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A31E0);
 
 s16 itfPanelGetPairFirst(s32 index) {
-    return D_0045296C[index].ptr->pairFirst;
+    return itfWindowSlots[index].ptr->pairFirst;
 }
 
 void itfPanelSetPairFirst(s32 index, s16 value) {
-    D_0045296C[index].ptr->pairFirst = value;
+    itfWindowSlots[index].ptr->pairFirst = value;
 }
 
 s16 itfPanelGetPairSecond(s32 index) {
-    return D_0045296C[index].ptr->pairSecond;
+    return itfWindowSlots[index].ptr->pairSecond;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001A1B08", D_004365A8);

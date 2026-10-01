@@ -50,7 +50,7 @@ u32 dds3GetAdminTaskValue(void) {
 extern void *func_00328D68(s32 size);
 
 /* Replace the admin task's attached data block (copied, max 0x100 bytes) and set its mode byte and flags. */
-void func_001027D8(s32 value, void *data, u32 size, s32 flag) {
+void dds3AdminSubmitModeRequest(s32 value, void *data, u32 size, s32 flag) {
     AdminWork *work;
     void *old;
     u32 flags;

@@ -26,7 +26,7 @@ typedef struct MenuSlotState {
 extern void evtLoadResourcePair(const char *, u8 *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void func_002680E0(s32);
-extern void func_002A91A0(u8 *);
+extern void mnuSnapshotCampTextureHandles(u8 *);
 extern void func_002673B8();
 extern void mnuClearPanelTransitionState(u8 *);
 extern void func_002C1B58(u8 *, s32);
@@ -198,7 +198,7 @@ extern u8 D_003CE944[];
 
 extern void mnuDestroyListState(u32);
 
-extern void func_002A9200(u8 *);
+extern void mnuReleaseCampTextureHandlesAndClearOutput(u8 *);
 
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
@@ -236,7 +236,7 @@ void mnuReleaseResourceGroup(s32 address) {
     effResolveAndReleaseResource(group->secondary);
 }
 
-void func_00266928(s32 address, u32 value) {
+void mnuReleaseMenuResourceGroup(s32 address, u32 value) {
     MenuResourceGroup *group = (MenuResourceGroup *)address;
     if (group->reducedMode == 0) {
         effReleaseSlotTextureReferencesAndResetWork(group->primary);
@@ -250,7 +250,7 @@ void func_00266928(s32 address, u32 value) {
 }
 
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
-    func_00266928(address, 0);
+    mnuReleaseMenuResourceGroup(address, 0);
 }
 
 extern s32 func_0019F460(s32, s32, s32, s32, s32, s32);
@@ -259,7 +259,7 @@ extern void frFontQueueGlyphInSelectedSlot(s32);
 extern u8 D_003A41A8[];
 extern u8 D_003A47E8[];
 
-void func_002669C8(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
+void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
     u8 *entry;
     s32 handle;
 
@@ -522,7 +522,7 @@ void mnuTerminalBuildMenus(MenuProgressHost *host) {
     }
     host->menuList = mnuBuildThresholdNodeList(table[row], count, excluded, (s32)host);
     mnuBuildTerminalNodeList(host);
-    func_002A91A0((u8 *)host + 0xE8);
+    mnuSnapshotCampTextureHandles((u8 *)host + 0xE8);
     mnuCreateThresholdNodePanels(host);
     func_002673B8(host);
     mnuHighlightProgressNodeFromOwnerSelection(host);
@@ -537,7 +537,7 @@ void mnuReleaseWorkResources(u8 *work) {
         mnuDestroyListState(((s32 *)&host->menuList)[i]);
     }
     mnuDestroyThresholdNodePanels((s32)work);
-    func_002A9200(work + 0xE8);
+    mnuReleaseCampTextureHandlesAndClearOutput(work + 0xE8);
     mnuReleaseProgressWorkList((s32)work);
     mnuDestroyListState((s32)host->secondaryList);
 }
@@ -620,7 +620,7 @@ void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
     }
 }
 
-void func_00267DA0(MenuProgressHost *host) {
+void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
     func_002C3390(host->currentEffect);
     host->currentEffect = 0;
 }
@@ -669,7 +669,7 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
             func_00342580(work->fadeColor);
         }
         D_00437859 = 0;
-        func_00266928(address, 1);
+        mnuReleaseMenuResourceGroup(address, 1);
     }
 }
 
@@ -786,7 +786,7 @@ extern void func_001285E8(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
 
 /* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
-void func_00268278(s32 arg) {
+void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
     MenuProgressHost *work = (MenuProgressHost *)kwlnTaskGetUserValue();
 
     if (work != NULL) {
@@ -806,7 +806,7 @@ void func_00268278(s32 arg) {
     fldProcessDeferredSceneCommand();
 }
 
-s32 func_00268318(void) {
+s32 mnuUpdateTerminalMessageWindowIndicator(void) {
     s32 context = kwlnTaskGetUserValue() + 0x3e8;
     func_002C1B70(context, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
@@ -997,7 +997,7 @@ typedef struct MenuEffHost {
 
 extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 
-void func_00268C48(s32 mode, MenuEffHost *host) {
+void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuEffHost *host) {
     switch (mode) {
     case 1:
         effConfigureWithDefaultSetting(host->batch, 6, host->effectA, 0, 0, 2);

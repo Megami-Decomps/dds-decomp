@@ -27,7 +27,7 @@ extern u64 func_002EB028(u64, u32 *, u64);
 extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(s32 arg0);
 extern void func_002D0918(u64 arg0);
-extern void func_001028E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_003101B8(void);
 extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
@@ -47,7 +47,7 @@ extern u8 D_00324610[];
 
 extern u8 D_00324660[];
 
-extern void func_002DDD60(void *);
+extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 
 EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
@@ -186,7 +186,7 @@ void func_0018CDA0(void) {
 }
 
 void func_0018CDA8(void) {
-    func_001028E8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 u32 func_0018CDD0(u32 arg0) {
@@ -374,18 +374,18 @@ void effSetupWorkSound(EffWork *work, u64 soundResource) {
 INCLUDE_ASM(const s32, "game/code_0018CAC8", func_0018DA70);
 
 void func_0018DB88(void) {
-    func_001028E8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 void func_0018DBB0(void) {
-    func_001028E8(0, 0, 0, 0);
+    dds3AdminSubmitModeRequest(0, 0, 0, 0);
 }
 
 void sdfProjectVuVectorToScreen(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(D_003296F0);
     matrix = D_00324610;
-    func_002DDD60(matrix);
+    sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (
         ".set noreorder\n"
         "vmulax.xyzw ACC, vf28, vf10x\n"
