@@ -1,26 +1,26 @@
 wap 1 profile=dds1
 
-entry 0 kind=1 area=1 name="01d_01"
-  scene args=1,2,0 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 0 kind=door area=1 name="01d_01"
+  scene motion=1 secondary_motion=2 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 1 kind=1 area=1 name="01d_02"
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=1,1,0
+entry 1 kind=door area=1 name="01d_02"
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 2 kind=1 area=1 name="01d_03"
-  scene args=1,2,0 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=1,1,0
+entry 2 kind=door area=1 name="01d_03"
+  scene motion=1 secondary_motion=2 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 4 kind=9
-  scene args=10,0,0
-  warp args=0,1,0
+entry 4 kind=special_warp
+  scene id=10
+  warp area=1
   camera mode=1 table=50
   after flag=2 script=@001_hungry
 end

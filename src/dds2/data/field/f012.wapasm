@@ -1,28 +1,28 @@
 wap 1 profile=dds2
 
-entry 0 kind=1 area=1 name="01d_01"
-  scene args=5,6,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,2,0
+entry 0 kind=door area=1 name="01d_01"
+  scene motion=5 secondary_motion=6 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=2
   camera mode=1 table=61
   after script="" script_padding=6172707363725f73746172740000
 end
 
-entry 1 kind=1 area=1 name=@01d_02
-  scene args=1,2,0 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=1,1,0
+entry 1 kind=door area=1 name=@01d_02
+  scene motion=1 secondary_motion=2 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=1 area=1
   after script="" script_padding=6172707363725f65763631390000
 end
 
-entry 3 kind=1 area=2 name="01d_01"
-  scene args=6,5,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,1,0
+entry 3 kind=door area=2 name="01d_01"
+  scene motion=6 secondary_motion=5 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=1
   camera mode=1 table=60
   after script="" script_padding=667465725f30303262746c000000
 end
 
-entry 4 kind=1 area=2 name=@01d_02
-  scene args=8,7,64 primary="md_02d_01" secondary="md_02d_01b"
-  warp args=27,1,0
+entry 4 kind=door area=2 name=@01d_02
+  scene motion=8 secondary_motion=7 sound=64 primary="md_02d_01" secondary="md_02d_01b"
+  warp field=27 area=1
   after script="" script_padding=667465725f30303762746c000000
 end
 

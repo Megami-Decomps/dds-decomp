@@ -2,52 +2,52 @@ wap 1 profile=dds2
 
 elevator 0 area=16 floor_count=4 floors=-1,1,2,1003,0,0 blocks=1,8,3,0,0,0
 
-entry 0 kind=8
-  scene args=649,0,0
-  warp args=0,1,0 position="01pos_04"
+entry 0 kind=battle_exit
+  scene event=649
+  warp area=1 position="01pos_04"
   camera mode=1 table=15
   after flag=2 script=@warpscr_ev649
 end
 
-entry 2 kind=9
-  scene args=100,0,0
-  warp args=0,2,0 position="01pos_12"
+entry 2 kind=special_warp
+  scene id=100
+  warp area=2 position="01pos_12"
   camera mode=1 table=15
   after flag=2 script=@warpscr_100
 end
 
-entry 4 kind=9
-  scene args=101,0,0
-  warp args=0,1,0 position="01pos_07"
+entry 4 kind=special_warp
+  scene id=101
+  warp area=1 position="01pos_07"
   camera mode=1 table=15
   after flag=2 script=@warpscr_101
 end
 
-entry 5 kind=9
-  scene args=102,0,0
-  warp args=29,1,0 position="01pos_03"
+entry 5 kind=special_warp
+  scene id=102
+  warp field=29 area=1 position="01pos_03"
   camera mode=1
 end
 
-entry 7 kind=9
-  scene args=104,0,0
+entry 7 kind=special_warp
+  scene id=104
   warp type=facility args=3,11,0
 end
 
-entry 8 kind=7 area=2
-  scene args=3,11,0
-  warp args=15,2,0 position="01pos_07"
+entry 8 kind=side_exit area=2
+  scene exit_mode=3 selector=11
+  warp field=15 area=2 position="01pos_07"
   camera mode=1 table=15
   after flag=8
 end
 
-entry 10 kind=9
-  scene args=103,0,0
+entry 10 kind=special_warp
+  scene id=103
   warp type=facility args=0,8,0
 end
 
-entry 11 kind=7 area=2
-  scene args=0,8,0
-  warp args=15,2,0 position="01pos_13"
+entry 11 kind=side_exit area=2
+  scene selector=8
+  warp field=15 area=2 position="01pos_13"
   camera mode=1 table=15
 end

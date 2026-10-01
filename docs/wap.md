@@ -79,16 +79,48 @@ Each of the 256 repeated rows has the following common `0x64`-byte layout:
 | `0x54` | `u8` | `after flag` | Post-transition action flags |
 | `0x55` | `char[15]` | `after script` | Post-transition procedure name |
 
+Six actor/door kinds have matching dispatch behavior in both games and use
+symbolic names:
+
+| Value | Source name | Runtime selection |
+|---:|---|---|
+| `1` | `door` | Named door actor and ordinary transfer |
+| `6` | `elevator_exit` | Elevator return selected by elevator and floor |
+| `7` | `side_exit` | Return selected by cached exit mode and selector |
+| `8` | `battle_exit` | Post-battle return selected by event number |
+| `9` | `special_warp` | Explicit warp selected by numeric ID |
+| `10` | `ladder` | Ladder actor/return context |
+
+The other observed kind values (`2..5`, `11`, and DDS1-only `12`) remain
+numeric. Their runtime branches are real, but the available names do not yet
+establish one stable gameplay role for each value.
+
+The `scene` group names arguments according to the selected kind. Door rows
+use `motion`, `secondary_motion`, and `sound`; elevator exits use `elevator`
+and `floor`; side exits use `exit_mode` and `selector`; battle exits use
+`event`; special warps use `id`; and ladder rows expose `selector` and
+`floor_flag`. A generic `args=A,B,C` triple remains available for unknown
+kinds or noncanonical payloads.
+
 Warp types `field`, `elevator`, `facility`, and `event` encode the verified
-values `0..3`. Other warp types and all actor/door kinds remain numeric because
-their argument meanings vary by dispatch path. The grouped source keeps that
-overloading visible instead of assigning one speculative name to each value:
+values `0..3`. Field transfers name their destination `field` and `area`,
+elevator transfers name their `table` and `floor`, and event transfers name
+their `event` and optional `alternate_field`. Facility arguments and unknown
+warp types remain numeric because their values are still overloaded. The
+grouped source therefore reads according to the native dispatch while keeping
+unresolved values visible:
 
 ```text
-entry 5 kind=1 area=1 name=@01d_03
-  scene args=1,2,65 primary="md_01d_03" secondary="md_01d_03b"
-  warp args=23,1,0
+entry 5 kind=door area=1 name=@01d_03
+  scene motion=1 secondary_motion=2 sound=65 primary="md_01d_03" secondary="md_01d_03b"
+  warp field=23 area=1
   camera table=81
+end
+
+entry 18 kind=battle_exit
+  scene event=606
+  warp area=2 position="02pos_03"
+  after flag=2 script=@battle_return
 end
 ```
 

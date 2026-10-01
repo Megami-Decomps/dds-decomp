@@ -1,60 +1,60 @@
 wap 1 profile=dds1
 
-entry 0 kind=8
-  scene args=606,0,0
-  warp args=0,1,0 position="01pos_04"
+entry 0 kind=battle_exit
+  scene event=606
+  warp area=1 position="01pos_04"
   camera mode=1 table=15
 end
 
-entry 1 kind=8
-  scene args=609,0,0
-  warp args=0,1,0 position="01pos_05"
+entry 1 kind=battle_exit
+  scene event=609
+  warp area=1 position="01pos_05"
   camera mode=1 table=15
 end
 
-entry 3 kind=1 area=1 name="01d_01"
-  scene args=2,1,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=1,1,0
+entry 3 kind=door area=1 name="01d_01"
+  scene motion=2 secondary_motion=1 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=1 area=1
   after flag=8
 end
 
-entry 4 kind=1 area=1 name="01d_02"
-  scene args=2,1,64 primary="md_01d_03" secondary="md_01d_03b"
+entry 4 kind=door area=1 name="01d_02"
+  scene motion=2 secondary_motion=1 sound=64 primary="md_01d_03" secondary="md_01d_03b"
   warp type=facility args=0,2,0
   camera mode=1
   after script="md_01d_03c"
 end
 
-entry 5 kind=7 area=1
-  scene args=0,2,0
-  warp args=0,1,0 position="01pos_02"
+entry 5 kind=side_exit area=1
+  scene selector=2
+  warp area=1 position="01pos_02"
   camera mode=1 table=15
 end
 
-entry 6 kind=1 area=1 name="01d_03"
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=22,1,0
+entry 6 kind=door area=1 name="01d_03"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=22 area=1
   tail control=2 args=22,3,0,1,7,1,2
 end
 
-entry 8 kind=1 area=2 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=0,1,0 position="01pos_02"
+entry 8 kind=door area=2 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp area=1 position="01pos_02"
   camera mode=1 table=15
 end
 
-entry 10 kind=1 area=3 name="01d_01"
-  scene args=1,2,64 primary="md_01d_01" secondary="md_01d_01b"
-  warp args=22,25,0
+entry 10 kind=door area=3 name="01d_01"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_01" secondary="md_01d_01b"
+  warp field=22 area=25
 end
 
-entry 11 kind=1 area=3 name="01d_02"
-  scene args=1,2,64 primary="md_01d_02" secondary="md_01d_02b"
-  warp args=22,26,0
+entry 11 kind=door area=3 name="01d_02"
+  scene motion=1 secondary_motion=2 sound=64 primary="md_01d_02" secondary="md_01d_02b"
+  warp field=22 area=26
 end
 
 entry 12 kind=5 flag=42 area=3 name="01d_03"
   scene args=1,0,0 primary="01pos_04" secondary="01cam_03"
-  warp args=27,1,0 position="01pos_03"
+  warp field=27 area=1 position="01pos_03"
   camera table=96
 end

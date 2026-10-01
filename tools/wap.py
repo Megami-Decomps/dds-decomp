@@ -415,13 +415,75 @@ def _fixed_from_fields(
     return FixedString(value, padding)
 
 
+_ENTRY_KINDS = {
+    "door": 1,
+    "elevator_exit": 6,
+    "side_exit": 7,
+    "battle_exit": 8,
+    "special_warp": 9,
+    "ladder": 10,
+}
+
+_SCENE_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
+    1: ("motion", "secondary_motion", "sound"),
+    6: ("elevator", "floor", None),
+    7: ("exit_mode", "selector", None),
+    8: ("event", None, None),
+    9: ("id", None, None),
+    10: ("selector", "floor_flag", None),
+}
+_SCENE_NAMED_FIELDS = frozenset(
+    name for names in _SCENE_ARG_NAMES.values() for name in names if name is not None
+)
+
 _WARP_TYPES = {"field": 0, "elevator": 1, "facility": 2, "event": 3}
+
+_WARP_ARG_NAMES: dict[int, tuple[str | None, str | None, str | None]] = {
+    0: ("field", "area", None),
+    1: ("table", "floor", None),
+    3: ("event", None, "alternate_field"),
+}
+_WARP_NAMED_FIELDS = frozenset(
+    name for names in _WARP_ARG_NAMES.values() for name in names if name is not None
+)
+
+
+def _kind(text: str, line_number: int) -> int:
+    if text in _ENTRY_KINDS:
+        return _ENTRY_KINDS[text]
+    return _integer(text, line_number, "kind")
 
 
 def _warp_type(text: str, line_number: int) -> int:
     if text in _WARP_TYPES:
         return _WARP_TYPES[text]
     return _integer(text, line_number, "warp type")
+
+
+def _named_args(
+    fields: dict[str, str],
+    names: tuple[str | None, str | None, str | None] | None,
+    base: tuple[int, int, int],
+    line_number: int,
+    context: str,
+) -> tuple[int, int, int]:
+    """Read either a generic argument triple or its dispatch-specific names."""
+
+    named = {name for name in names or () if name is not None}
+    present = named.intersection(fields)
+    if "args" in fields and present:
+        raise WapError(
+            f"line {line_number}: {context} args cannot be combined with named arguments"
+        )
+    if "args" in fields:
+        values = _int_list(fields["args"], line_number, 3, f"{context} args")
+        return values[0], values[1], values[2]
+    values = list(base)
+    if names is not None:
+        for index, name in enumerate(names):
+            if name is not None and name in fields:
+                values[index] = _integer(fields[name], line_number, f"{context} {name}")
+    return values[0], values[1], values[2]
 
 
 def parse_source(text: str, references: References | None = None) -> WapFile:
@@ -503,7 +565,7 @@ def parse_source(text: str, references: References | None = None) -> WapFile:
             entry = default_entry(profile)
             entry = replace(
                 entry,
-                kind=_integer(fields["kind"], line_number, "kind")
+                kind=_kind(fields["kind"], line_number)
                 if "kind" in fields
                 else entry.kind,
                 flag_mode=_integer(fields["flag_mode"], line_number, "flag mode")
@@ -536,6 +598,7 @@ def parse_source(text: str, references: References | None = None) -> WapFile:
                     raise WapError(f"line {child_number}: duplicate {child_kind} row")
                 child_seen.add(child_kind)
                 if child_kind == "scene":
+                    scene_names = _SCENE_ARG_NAMES.get(entry.kind)
                     child_fields = _fields(
                         child[1:],
                         child_number,
@@ -545,14 +608,31 @@ def parse_source(text: str, references: References | None = None) -> WapFile:
                             "primary_padding",
                             "secondary",
                             "secondary_padding",
+                            *_SCENE_NAMED_FIELDS,
                         },
                         child_kind,
                     )
+                    present_scene_fields = _SCENE_NAMED_FIELDS.intersection(child_fields)
+                    valid_scene_fields = {
+                        name for name in scene_names or () if name is not None
+                    }
+                    invalid_scene_fields = present_scene_fields - valid_scene_fields
+                    if invalid_scene_fields:
+                        names = ", ".join(sorted(invalid_scene_fields))
+                        verb = "does" if len(invalid_scene_fields) == 1 else "do"
+                        raise WapError(
+                            f"line {child_number}: {names} {verb} not apply to kind "
+                            f"{_format_kind(entry.kind)}"
+                        )
                     entry = replace(
                         entry,
-                        scene_args=_int_list(child_fields["args"], child_number, 3, "scene args")
-                        if "args" in child_fields
-                        else entry.scene_args,
+                        scene_args=_named_args(
+                            child_fields,
+                            scene_names,
+                            entry.scene_args,
+                            child_number,
+                            "scene",
+                        ),
                         scene_primary=_fixed_from_fields(
                             child_fields,
                             "primary",
@@ -572,20 +652,47 @@ def parse_source(text: str, references: References | None = None) -> WapFile:
                     child_fields = _fields(
                         child[1:],
                         child_number,
-                        {"type", "attributes", "args", "position", "position_padding"},
+                        {
+                            "type",
+                            "attributes",
+                            "args",
+                            "position",
+                            "position_padding",
+                            *_WARP_NAMED_FIELDS,
+                        },
                         child_kind,
                     )
+                    warp_type = (
+                        _warp_type(child_fields["type"], child_number)
+                        if "type" in child_fields
+                        else entry.warp_type
+                    )
+                    warp_names = _WARP_ARG_NAMES.get(warp_type)
+                    present_warp_fields = _WARP_NAMED_FIELDS.intersection(child_fields)
+                    valid_warp_fields = {
+                        name for name in warp_names or () if name is not None
+                    }
+                    invalid_warp_fields = present_warp_fields - valid_warp_fields
+                    if invalid_warp_fields:
+                        names = ", ".join(sorted(invalid_warp_fields))
+                        verb = "does" if len(invalid_warp_fields) == 1 else "do"
+                        raise WapError(
+                            f"line {child_number}: {names} {verb} not apply to warp type "
+                            f"{_format_warp_type(warp_type)}"
+                        )
                     entry = replace(
                         entry,
-                        warp_type=_warp_type(child_fields["type"], child_number)
-                        if "type" in child_fields
-                        else entry.warp_type,
+                        warp_type=warp_type,
                         attributes=_integer(child_fields["attributes"], child_number, "attributes")
                         if "attributes" in child_fields
                         else entry.attributes,
-                        warp_args=_int_list(child_fields["args"], child_number, 3, "warp args")
-                        if "args" in child_fields
-                        else entry.warp_args,
+                        warp_args=_named_args(
+                            child_fields,
+                            warp_names,
+                            entry.warp_args,
+                            child_number,
+                            "warp",
+                        ),
                         position=_fixed_from_fields(
                             child_fields,
                             "position",
@@ -701,8 +808,29 @@ def _format_list(values: tuple[int, ...]) -> str:
     return ",".join(str(value) for value in values)
 
 
+def _format_kind(value: int) -> str:
+    return {number: name for name, number in _ENTRY_KINDS.items()}.get(value, str(value))
+
+
 def _format_warp_type(value: int) -> str:
     return {number: name for name, number in _WARP_TYPES.items()}.get(value, str(value))
+
+
+def _format_named_args(
+    fields: list[str],
+    values: tuple[int, ...],
+    names: tuple[str | None, str | None, str | None] | None,
+) -> None:
+    """Prefer dispatch-specific scalar names when they describe the whole triple."""
+
+    if names is not None and all(
+        name is not None or values[index] == 0 for index, name in enumerate(names)
+    ):
+        for name, value in zip(names, values):
+            if name is not None and value != 0:
+                fields.append(f"{name}={value}")
+    elif any(values):
+        fields.append(f"args={_format_list(values)}")
 
 
 def render_source(wap: WapFile, references: References | None = None) -> str:
@@ -733,7 +861,8 @@ def render_source(wap: WapFile, references: References | None = None) -> str:
         if entry == base:
             continue
         fields = []
-        _append_scalar(fields, "kind", entry.kind, base.kind)
+        if entry.kind != base.kind:
+            fields.append(f"kind={_format_kind(entry.kind)}")
         _append_scalar(fields, "flag_mode", entry.flag_mode, base.flag_mode)
         _append_scalar(fields, "flag", entry.flag, base.flag)
         _append_scalar(fields, "area", entry.area, base.area)
@@ -742,8 +871,7 @@ def render_source(wap: WapFile, references: References | None = None) -> str:
         lines.append(f"entry {index}{suffix}")
 
         child = []
-        if entry.scene_args != base.scene_args:
-            child.append(f"args={_format_list(entry.scene_args)}")
+        _format_named_args(child, entry.scene_args, _SCENE_ARG_NAMES.get(entry.kind))
         _format_fixed(child, "primary", entry.scene_primary, base.scene_primary)
         _format_fixed(child, "secondary", entry.scene_secondary, base.scene_secondary)
         if child:
@@ -753,8 +881,7 @@ def render_source(wap: WapFile, references: References | None = None) -> str:
         if entry.warp_type != base.warp_type:
             child.append(f"type={_format_warp_type(entry.warp_type)}")
         _append_scalar(child, "attributes", entry.attributes, base.attributes)
-        if entry.warp_args != base.warp_args:
-            child.append(f"args={_format_list(entry.warp_args)}")
+        _format_named_args(child, entry.warp_args, _WARP_ARG_NAMES.get(entry.warp_type))
         _format_fixed(child, "position", entry.position, base.position)
         if child:
             lines.append(f"  warp {' '.join(child)}")
