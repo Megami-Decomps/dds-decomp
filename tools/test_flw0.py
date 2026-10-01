@@ -454,6 +454,43 @@ end
             [word.operand_u16 for word in grown.code_words()[1:3]], [0, 9]
         )
 
+    def test_symbolic_strings_preserve_short_descriptor_count(self) -> None:
+        source = """\
+flw0 2
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  PROC main
+  PUSHTYPE5 tail
+  END
+end
+messages
+end
+strings count=0
+  string tail "text past the logical end"
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(script.sections[4].element_count, 0)
+        self.assertEqual(script.sections[4].logical_size, 0)
+        self.assertEqual(
+            flw0._type5_extent(script, script.sections[4]),
+            b"text past the logical end\0",
+        )
+        rendered = flw0_symbolic.render(script)
+        self.assertIn("\nstrings count=0\n", rendered)
+        self.assertIn(
+            'string text_past_the_logical_end "text past the logical end"', rendered
+        )
+        self.assertEqual(flw0.parse_source(rendered).to_bytes(), script.to_bytes())
+
+        with self.assertRaisesRegex(flw0.Flw0Error, "string count exceeds payload"):
+            flw0.parse_source(source.replace("strings count=0", "strings count=99"))
+        with self.assertRaisesRegex(flw0.Flw0Error, "trailing or uncovered bytes"):
+            flw0.parse_source(source.replace("  PUSHTYPE5 tail\n", ""))
+
     def test_symbolic_string_falls_back_for_opaque_reference(self) -> None:
         source = """\
 flw0 2
@@ -847,6 +884,99 @@ end
         )
         self.assertEqual((font_directives, glyph_directives), (606, 2))
         self.assertEqual(message_references, 188)
+
+    def test_tracked_dds2_script_corpus_assembles_exact_hashes(self) -> None:
+        root = TOOLS.parent
+        source_dir = root / "src/dds2/scripts"
+        manifest = root / "config/dds2/scripts.sha1"
+        records = []
+        for line in manifest.read_text(encoding="ascii").splitlines():
+            expected, output = line.split()
+            output_path = Path(output)
+            relative = output_path.relative_to("build/dds2/scripts")
+            records.append((expected, source_dir / relative.with_suffix(".bfasm")))
+
+        tracked = sorted(source_dir.rglob("*.bfasm"))
+        self.assertEqual(sorted(source for _, source in records), tracked)
+        self.assertEqual(len(records), 140)
+
+        totals = {
+            "versions": {1: 0, 2: 0},
+            "message_banks": 0,
+            "decoded_banks": 0,
+            "dialogs": 0,
+            "pages": 0,
+            "options": 0,
+            "speakers": 0,
+            "code_words": 0,
+            "commands": 0,
+            "font": 0,
+            "glyphs": 0,
+            "short_string_counts": 0,
+        }
+        for expected, source in records:
+            with self.subTest(source=source.relative_to(source_dir)):
+                text = source.read_text(encoding="utf-8")
+                version = int(text.split(None, 2)[1])
+                totals["versions"][version] += 1
+                totals["font"] += len(re.findall(r"^\s+font ", text, re.MULTILINE))
+                totals["glyphs"] += len(re.findall(r"^\s+glyphs ", text, re.MULTILINE))
+                totals["short_string_counts"] += "\nstrings count=" in text
+                self.assertIn("\nprofile dds2\n", text)
+
+                script = flw0.parse_source(text)
+                rebuilt = script.to_bytes()
+                self.assertEqual(sha1(rebuilt).hexdigest(), expected)
+                totals["code_words"] += len(script.code_words())
+                totals["commands"] += sum(
+                    word.opcode == flw0.OPCODE_IDS["COMM"]
+                    for word in script.code_words()
+                )
+                message_sections = script.sections_of_type(3)
+                if message_sections and (
+                    message_data := script.section_bytes(message_sections[0])
+                ):
+                    totals["message_banks"] += 1
+                    try:
+                        bank = msg1.decode(message_data)
+                    except msg1.Msg1Error:
+                        pass
+                    else:
+                        totals["decoded_banks"] += 1
+                        totals["dialogs"] += len(bank.dialogs)
+                        totals["speakers"] += len(bank.speakers)
+                        totals["pages"] += sum(
+                            len(dialog.pages)
+                            for dialog in bank.dialogs
+                            if isinstance(dialog, msg1.Message)
+                        )
+                        totals["options"] += sum(
+                            len(dialog.options)
+                            for dialog in bank.dialogs
+                            if isinstance(dialog, msg1.Selection)
+                        )
+                if version == 1:
+                    self.assertEqual(flw0.render_source(script, "dds2"), text)
+                else:
+                    self.assertEqual(flw0_symbolic.render(script, "dds2"), text)
+
+        self.assertEqual(totals["versions"], {1: 14, 2: 126})
+        self.assertEqual(
+            (
+                totals["message_banks"],
+                totals["decoded_banks"],
+                totals["dialogs"],
+                totals["pages"],
+                totals["options"],
+                totals["speakers"],
+            ),
+            (66, 59, 2437, 2673, 1149, 177),
+        )
+        self.assertEqual(
+            (totals["code_words"], totals["commands"]), (123441, 38850)
+        )
+        self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
+        self.assertEqual(totals["short_string_counts"], 22)
 
 
 if __name__ == "__main__":

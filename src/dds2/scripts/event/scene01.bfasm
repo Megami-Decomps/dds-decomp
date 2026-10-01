@@ -1,0 +1,334 @@
+flw0 1
+profile dds2
+
+header word00=0x00000000 declared_size=0x000007a4 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0x7a4
+
+section 0 type=0 stride=0x20 count=1 offset=0x60
+  proc "sc01" pc=0 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=0 offset=0x80
+end
+
+section 2 type=2 stride=0x4 count=175 offset=0x80
+  0000: PROC 0x0000  # "sc01"
+  0001: PUSHIS 0x000a
+  0002: COMM 0x004d
+  0003: PUSHIS 0x0000
+  0004: PUSHIS 0x0003
+  0005: COMM 0x0015
+  0006: PUSHREG
+  0007: POPIX 0x0000
+  0008: PUSHI 0x0003000b
+  000a: PUSHIX 0x0000
+  000b: COMM 0x004a
+  000c: PUSHIX 0x0000
+  000d: COMM 0x006a
+  000e: PUSHIS 0x0004
+  000f: PUSHIS 0x0003
+  0010: COMM 0x0015
+  0011: PUSHREG
+  0012: POPIX 0x0001
+  0013: PUSHI 0x0003000c
+  0015: PUSHIX 0x0001
+  0016: COMM 0x004a
+  0017: PUSHIX 0x0001
+  0018: COMM 0x006a
+  0019: PUSHIS 0x000a
+  001a: PUSHIS 0x0003
+  001b: COMM 0x0015
+  001c: PUSHREG
+  001d: POPIX 0x0002
+  001e: PUSHI 0x0003000e
+  0020: PUSHIX 0x0002
+  0021: COMM 0x004a
+  0022: PUSHI 0x00020001
+  0024: COMM 0x0012
+  0025: PUSHIS 0x0005
+  0026: PUSHIX 0x0000
+  0027: COMM 0x004b
+  0028: PUSHIX 0x0000
+  0029: COMM 0x0069
+  002a: PUSHIS 0x003c
+  002b: PUSHIS 0x0001
+  002c: COMM 0x000f
+  002d: PUSHIS 0x00b4
+  002e: COMM 0x000e
+  002f: COMM 0x0001
+  0030: PUSHIS 0x0000
+  0031: COMM 0x0000
+  0032: COMM 0x0002
+  0033: PUSHIS 0x001e
+  0034: COMM 0x000e
+  0035: PUSHI 0x00020002
+  0037: COMM 0x0012
+  0038: PUSHI 0x0003000a
+  003a: PUSHI 0x00020002
+  003c: COMM 0x0013
+  003d: PUSHI 0x00020002
+  003f: COMM 0x0055
+  0040: PUSHIX 0x0001
+  0041: COMM 0x0069
+  0042: PUSHIS 0x0001
+  0043: PUSHIX 0x0000
+  0044: COMM 0x004b
+  0045: PUSHIS 0x005a
+  0046: COMM 0x000e
+  0047: PUSHI 0x00020003
+  0049: COMM 0x0012
+  004a: COMM 0x0001
+  004b: PUSHIS 0x0001
+  004c: COMM 0x0000
+  004d: COMM 0x0002
+  004e: PUSHIS 0x001e
+  004f: COMM 0x000e
+  0050: PUSHI 0x00020004
+  0052: COMM 0x0012
+  0053: PUSHIS 0x0000
+  0054: PUSHIS 0x0000
+  0055: PUSHIS 0x0000
+  0056: PUSHIX 0x0000
+  0057: COMM 0x0018
+  0058: PUSHIS 0x0000
+  0059: PUSHIX 0x0000
+  005a: COMM 0x004b
+  005b: COMM 0x0001
+  005c: PUSHIS 0x0002
+  005d: COMM 0x0000
+  005e: COMM 0x0002
+  005f: PUSHIS 0x001e
+  0060: COMM 0x000e
+  0061: PUSHI 0x00020001
+  0063: COMM 0x0012
+  0064: COMM 0x0001
+  0065: PUSHIS 0x0003
+  0066: COMM 0x0000
+  0067: COMM 0x0002
+  0068: PUSHIS 0x000f
+  0069: PUSHIS 0x000f
+  006a: PUSHIS 0x0002
+  006b: PUSHIX 0x0001
+  006c: COMM 0x0018
+  006d: PUSHIS 0x0003
+  006e: PUSHIX 0x0001
+  006f: COMM 0x004b
+  0070: COMM 0x0001
+  0071: PUSHIS 0x0004
+  0072: COMM 0x0000
+  0073: COMM 0x0002
+  0074: PUSHIS 0x001e
+  0075: COMM 0x000e
+  0076: PUSHI 0x00020005
+  0078: COMM 0x0012
+  0079: COMM 0x0001
+  007a: PUSHIS 0x0005
+  007b: COMM 0x0000
+  007c: COMM 0x0002
+  007d: PUSHIS 0x0001
+  007e: PUSHIX 0x0001
+  007f: COMM 0x004c
+  0080: PUSHIS 0x0008
+  0081: PUSHIS 0x0008
+  0082: PUSHIS 0x0000
+  0083: PUSHI 0x0003000d
+  0085: PUSHIX 0x0001
+  0086: COMM 0x0017
+  0087: PUSHIX 0x0001
+  0088: COMM 0x0049
+  0089: PUSHIS 0x001e
+  008a: COMM 0x000e
+  008b: PUSHI 0x00020006
+  008d: COMM 0x0012
+  008e: PUSHIS 0x0000
+  008f: PUSHIX 0x0001
+  0090: COMM 0x004b
+  0091: PUSHI 0x0003000c
+  0093: PUSHIX 0x0001
+  0094: COMM 0x004a
+  0095: COMM 0x0001
+  0096: PUSHIS 0x0006
+  0097: COMM 0x0000
+  0098: COMM 0x0002
+  0099: PUSHIS 0x001e
+  009a: COMM 0x000e
+  009b: PUSHI 0x00020001
+  009d: COMM 0x0012
+  009e: COMM 0x0001
+  009f: PUSHIS 0x0007
+  00a0: COMM 0x0000
+  00a1: PUSHIS 0x0008
+  00a2: COMM 0x0000
+  00a3: COMM 0x0002
+  00a4: PUSHIS 0x003c
+  00a5: PUSHIS 0x0001
+  00a6: COMM 0x0010
+  00a7: PUSHIS 0x003c
+  00a8: COMM 0x000e
+  00a9: COMM 0x004e
+  00aa: PUSHI 0x00030035
+  00ac: PUSHIS 0x0001
+  00ad: COMM 0x005d
+  00ae: END
+end
+
+section 3 type=3 stride=0x1 count=1128 offset=0x33c
+  msg1
+  message M01_01 speaker=none
+    page
+      control f2 08 ff ff
+      font "エーイチ、エーイチ…"
+      newline
+      font "目を覚ますのだ…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "デビルハーツを持つ者とし"
+      font "て"
+      newline
+      font "再びこの"
+      glyphs 85a5 84c8 85a6
+      font "に覚"
+      glyphs 85a7
+      font "するのだ…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "おお、気付いたか…"
+      newline
+      font "我が名はアナト。"
+      newline
+      glyphs 85a8
+      font "えあるオリエントの地"
+      glyphs 85a9
+      font "神だ。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_03 speaker=0
+    page
+      control f2 08 ff ff
+      font "お前の"
+      glyphs 85aa
+      font "は"
+      glyphs 85ab
+      font "いておる。"
+      newline
+      font "なかなか"
+      glyphs 85ac
+      font "が立つそうじゃないか…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "その"
+      glyphs 85ac
+      font "を見込んで、一つ"
+      glyphs 85b0
+      font "みがある。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_04_01 speaker=0
+    page
+      control f2 08 ff ff
+      font "日本の主神、アマテラスの"
+      font "ことだ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "最"
+      glyphs 85bf
+      font "、アマテラスの"
+      glyphs 85c0 85c1
+      font "に"
+      newline
+      font "不穏な動きがあると"
+      glyphs 85ab
+      font "く。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_04_02 speaker=0
+    page
+      control f2 08 ff ff
+      font "なんでも…"
+      newline
+      font "神"
+      glyphs 85c3 82a8 85c4 85c5
+      font "の"
+      glyphs 85c6 82a9
+      font "を"
+      glyphs 85d7
+      font "し出し"
+      newline
+      glyphs 85a5 84c8 85a6
+      font "を我が物にせんと"
+      glyphs 8ad9
+      font "んでいるらしい"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_05 speaker=0
+    page
+      control f2 08 ff ff
+      font "そこで、だ。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_06 speaker=0
+    page
+      control f2 08 ff ff
+      font "上野動物園にいるアマテラ"
+      font "スを"
+      glyphs 85b6
+      font "し出し…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_07 speaker=0
+    page
+      control f2 08 ff ff
+      font "その息の"
+      glyphs 85b8
+      font "を止めて欲しい!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "お前には易い"
+      glyphs 85bc
+      font "事だろう。"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message M01_08 speaker=0
+    page
+      control f2 08 ff ff
+      font "では、"
+      glyphs 85b0
+      font "んだぞ…"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    font "アナト"
+  endspeaker
+end

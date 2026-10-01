@@ -1,0 +1,69 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=1 float=0
+
+procedure e905_main reserved=0x00000000
+procedure e905_dead reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+
+code
+e905_main:
+  PROC e905_main
+  PUSHIS 0
+  COMM 0x0000
+  END
+e905_dead:
+  PROC e905_dead
+  COMM 0x0161
+  PUSHREG
+  POPLIX 0x0000
+  COMM 0x003e
+  PUSHIS 99
+  PUSHLIX 0x0000
+  EQ
+  IF _2
+  PUSHIS 0
+  COMM 0x01ce
+  PUSHIS 99
+  PUSHIS 266
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 24
+  MINUS
+  PUSHIS 99
+  COMM 0x0198
+  GOTO _1
+_2:
+  PUSHIS 0
+  COMM 0x01ce
+  PUSHIS 100
+  PUSHIS 265
+  PUSHIS 1
+  COMM 0x0197
+  PUSHIS 24
+  MINUS
+  PUSHIS 100
+  COMM 0x0198
+  GOTO _1
+_1:
+  END
+end
+
+messages msg1
+  message MSG_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "テスト中..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+end
+
+strings
+  zero 240
+end

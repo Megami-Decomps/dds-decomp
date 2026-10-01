@@ -1,0 +1,203 @@
+flw0 1
+profile dds2
+
+header word00=0x00000000 declared_size=0x00000481 word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0x481
+
+section 0 type=0 stride=0x20 count=4 offset=0x60
+  proc "gameover" pc=0 reserved=0x00000000
+  proc "gameover_take" pc=6 reserved=0x00000000
+  proc "gameover_anato" pc=33 reserved=0x00000000
+  proc "status_clear" pc=80 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=0 offset=0xe0
+end
+
+section 2 type=2 stride=0x4 count=89 offset=0xe0
+  0000: PROC 0x0000  # "gameover"
+  0001: PUSHIS 0x000a
+  0002: COMM 0x004d
+  0003: CALL 0x0002  # "gameover_anato"
+  0004: JUMP 0x0003  # "status_clear"
+  0005: END
+  0006: PROC 0x0001  # "gameover_take"
+  0007: PUSHIS 0x003c
+  0008: PUSHIS 0x0001
+  0009: COMM 0x000f
+  000a: PUSHIS 0x001e
+  000b: COMM 0x000e
+  000c: PUSHIS 0x000a
+  000d: PUSHIS 0x0003
+  000e: COMM 0x0015
+  000f: PUSHREG
+  0010: POPIX 0x0001
+  0011: PUSHI 0x0003000e
+  0013: PUSHIX 0x0001
+  0014: COMM 0x004a
+  0015: COMM 0x0001
+  0016: PUSHIS 0x0001
+  0017: COMM 0x0000
+  0018: COMM 0x0002
+  0019: PUSHIS 0x001e
+  001a: COMM 0x000e
+  001b: PUSHIS 0x003c
+  001c: PUSHIS 0x0001
+  001d: COMM 0x0010
+  001e: PUSHIS 0x001e
+  001f: COMM 0x000e
+  0020: END
+  0021: PROC 0x0002  # "gameover_anato"
+  0022: PUSHIS 0x000a
+  0023: PUSHIS 0x0003
+  0024: COMM 0x0015
+  0025: PUSHREG
+  0026: POPIX 0x0001
+  0027: PUSHI 0x0003000e
+  0029: PUSHIX 0x0001
+  002a: COMM 0x004a
+  002b: PUSHIS 0x0004
+  002c: PUSHIS 0x0003
+  002d: COMM 0x0015
+  002e: PUSHREG
+  002f: POPIX 0x0003
+  0030: PUSHI 0x0003000c
+  0032: PUSHIX 0x0003
+  0033: COMM 0x004a
+  0034: PUSHIS 0x000a
+  0035: PUSHIS 0x000a
+  0036: PUSHIS 0x0002
+  0037: PUSHIX 0x0003
+  0038: COMM 0x0018
+  0039: PUSHIS 0x0003
+  003a: PUSHIX 0x0003
+  003b: COMM 0x004b
+  003c: PUSHI 0x00020001
+  003e: COMM 0x0012
+  003f: PUSHIS 0x003c
+  0040: PUSHIS 0x0001
+  0041: COMM 0x000f
+  0042: PUSHIS 0x001e
+  0043: COMM 0x000e
+  0044: COMM 0x0001
+  0045: PUSHIS 0x0000
+  0046: COMM 0x0000
+  0047: COMM 0x0002
+  0048: PUSHIS 0x001e
+  0049: COMM 0x000e
+  004a: PUSHIS 0x003c
+  004b: PUSHIS 0x0001
+  004c: COMM 0x0010
+  004d: PUSHIS 0x001e
+  004e: COMM 0x000e
+  004f: END
+  0050: PROC 0x0003  # "status_clear"
+  0051: PUSHIS 0x0001
+  0052: POPIX 0x0000
+  0053: COMM 0x004e
+  0054: PUSHI 0x00030035
+  0056: PUSHIS 0x0001
+  0057: COMM 0x005d
+  0058: END
+end
+
+section 3 type=3 stride=0x1 count=573 offset=0x244
+  msg1
+  message ANA_01 speaker=0
+    page
+      control f2 08 ff ff
+      font "死んでしまうとは何事だ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "………………………………"
+      font "…。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "お前にもう一"
+      glyphs 84c7
+      font "だけ"
+      newline
+      font "機会を与えよう。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "デビルハーツを持つ者とし"
+      font "て"
+      newline
+      font "再びこの"
+      glyphs 85a5 84c8 85a6
+      font "に覚"
+      glyphs 85a7
+      font "し…"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "アマテラスの"
+      glyphs 88ac 8bb6
+      font "を打ち"
+      glyphs 8bb7
+      font "くのだ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKE_01 speaker=1
+    page
+      control f2 08 ff ff
+      font "おやおや!"
+      newline
+      font "どうしましたかな、エーイ"
+      font "チ"
+      glyphs 87f3
+      font "!"
+      newline
+      glyphs 89ee
+      font "断は"
+      glyphs 86b3
+      font "物ですぞ!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "我らが日本コミュ"
+      glyphs 81dc
+      font "テ"
+      glyphs 81b4
+      font "の力により"
+      newline
+      font "貴"
+      glyphs 87f3
+      font "を"
+      glyphs 8bb8
+      font "生いたしましょう!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "さあ、お目覚めくだされ!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    font "アナト"
+  endspeaker
+  speaker 1
+    font "タ"
+    glyphs 81c2
+    font "ミカ"
+    glyphs 81d6
+    font "チ"
+  endspeaker
+end

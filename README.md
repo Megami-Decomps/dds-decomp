@@ -57,7 +57,7 @@ python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objd
 python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
-ninja dds1-scripts               # assemble and verify all tracked DDS1 event scripts
+ninja dds1-scripts dds2-scripts  # assemble and verify the tracked script corpora
 python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
 ```
 
@@ -103,7 +103,7 @@ config/<v>/symbol_addrs.txt names and addresses (curated on top, generated below
 config/<v>/name_sources.txt provenance of every curated name (evidence / inferred)
 config/<v>/cflags.txt       per-file compiler options, with evidence
 src/<v>/<dir>/<unit>.c      C units; INCLUDE_ASM marks functions not decompiled yet
-src/<v>/scripts/            symbolic source for decompiled game scripts
+src/<v>/scripts/            exact, editable source for decompiled game scripts
 include/                    common.h, include_asm.h, fpu.h, macro.inc
 docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
 docs/idioms.md              source shapes confirmed against retail codegen

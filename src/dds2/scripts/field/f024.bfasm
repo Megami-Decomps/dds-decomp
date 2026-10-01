@@ -1,0 +1,7572 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=84 float=0
+
+procedure hirakenai_label reserved=0x00000000
+procedure badkaifuku_label reserved=0x00000000
+procedure kireta_label reserved=0x00000000
+procedure itembox_label reserved=0x00000000
+procedure warp_label reserved=0x00000000
+procedure doorwarp_label reserved=0x00000000
+procedure dexitwarp_label reserved=0x00000000
+procedure fldhunt_dexitwarp_label reserved=0x00000000
+procedure dinwarp_label reserved=0x00000000
+procedure runwarp_label reserved=0x00000000
+procedure anawarp_label reserved=0x00000000
+procedure tobiwarp_label reserved=0x00000000
+procedure hasigo_label reserved=0x00000000
+procedure heal_label reserved=0x00000000
+procedure save_label reserved=0x00000000
+procedure npctalk_label reserved=0x00000000
+procedure elvstart_label reserved=0x00000000
+procedure suikomi_label reserved=0x00000000
+procedure baria_label reserved=0x00000000
+procedure proc_0013 name="024_026_k_01npc_01" reserved=0x00000000
+procedure proc_0014 name="024_026_k_01npc_02" reserved=0x00000000
+procedure proc_0015 name="024_026_k_01npc_03" reserved=0x00000000
+procedure proc_0016 name="024_026_k_01npc_04" reserved=0x00000000
+procedure proc_0017 name="024_037_k_01npc_01" reserved=0x00000000
+procedure proc_0018 name="024_037_k_01npc_02" reserved=0x00000000
+procedure proc_0019 name="024_037_k_01npc_03" reserved=0x00000000
+procedure proc_001a name="024_037_k_01npc_04" reserved=0x00000000
+procedure proc_001b name="024_049_k_01npc_01" reserved=0x00000000
+procedure proc_001c name="024_049_k_01npc_02" reserved=0x00000000
+procedure proc_001d name="024_049_k_01npc_03" reserved=0x00000000
+procedure proc_001e name="024_049_k_01npc_04" reserved=0x00000000
+procedure proc_001f name="001_start" reserved=0x00000000
+procedure proc_0020 name="001_01eve_01" reserved=0x00000000
+procedure proc_0021 name="003_DOOR" reserved=0x00000000
+procedure proc_0022 name="002_01npc_01" reserved=0x00000000
+procedure proc_0023 name="007_01eve_01" reserved=0x00000000
+procedure proc_0024 name="007_battle_fin" reserved=0x00000000
+procedure proc_0025 name="005_battle_fin" reserved=0x00000000
+procedure proc_0026 name="003_battle_fin" reserved=0x00000000
+procedure proc_0027 name="007_01npc_01" reserved=0x00000000
+procedure proc_0028 name="010_01eve_01" reserved=0x00000000
+procedure proc_0029 name="010_01eve_02" reserved=0x00000000
+procedure proc_002a name="010_01npc_01" reserved=0x00000000
+procedure proc_002b name="019_01eve_01" reserved=0x00000000
+procedure proc_002c name="019_BATTLE_AFT" reserved=0x00000000
+procedure proc_002d name="019_01npc_01" reserved=0x00000000
+procedure proc_002e name="020_start" reserved=0x00000000
+procedure proc_002f name="027_start" reserved=0x00000000
+procedure battle_micael reserved=0x00000000
+procedure battle_micael_02 reserved=0x00000000
+procedure battle_g_fin reserved=0x00000000
+procedure proc_0033 name="026_start" reserved=0x00000000
+procedure proc_0034 name="049_start" reserved=0x00000000
+procedure proc_0035 name="032_start" reserved=0x00000000
+procedure proc_0036 name="036_start" reserved=0x00000000
+procedure proc_0037 name="054_01eve_01" reserved=0x00000000
+procedure proc_0038 name="054_start" reserved=0x00000000
+procedure proc_0039 name="052_01npc_01" reserved=0x00000000
+procedure proc_003a name="052_01npc_02" reserved=0x00000000
+procedure proc_003b name="052_BATTLE" reserved=0x00000000
+procedure proc_003c name="054_BATTLE" reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _12 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _16 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _21 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _33 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _36 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _38 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _40 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _42 reserved=0x00000000
+jump_label _41 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _10 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _48 reserved=0x00000000
+jump_label _56 reserved=0x00000000
+jump_label _55 reserved=0x00000000
+jump_label _57 reserved=0x00000000
+jump_label _59 reserved=0x00000000
+jump_label _53 reserved=0x00000000
+jump_label _54 reserved=0x00000000
+jump_label _64 reserved=0x00000000
+jump_label _63 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _61 reserved=0x00000000
+jump_label _62 reserved=0x00000000
+jump_label _71 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _70 reserved=0x00000000
+jump_label _75 reserved=0x00000000
+jump_label _73 reserved=0x00000000
+jump_label _74 reserved=0x00000000
+jump_label _79 reserved=0x00000000
+jump_label _81 reserved=0x00000000
+jump_label _84 reserved=0x00000000
+jump_label _83 reserved=0x00000000
+jump_label _85 reserved=0x00000000
+jump_label _87 reserved=0x00000000
+jump_label _90 reserved=0x00000000
+jump_label _89 reserved=0x00000000
+jump_label _92 reserved=0x00000000
+jump_label _91 reserved=0x00000000
+jump_label _93 reserved=0x00000000
+jump_label _77 reserved=0x00000000
+jump_label _78 reserved=0x00000000
+jump_label _96 reserved=0x00000000
+jump_label _95 reserved=0x00000000
+jump_label _99 reserved=0x00000000
+jump_label _97 reserved=0x00000000
+jump_label _98 reserved=0x00000000
+jump_label _103 reserved=0x00000000
+jump_label _101 reserved=0x00000000
+jump_label _102 reserved=0x00000000
+jump_label _107 reserved=0x00000000
+jump_label _109 reserved=0x00000000
+jump_label _111 reserved=0x00000000
+jump_label _113 reserved=0x00000000
+jump_label _115 reserved=0x00000000
+jump_label _117 reserved=0x00000000
+jump_label _119 reserved=0x00000000
+jump_label _121 reserved=0x00000000
+jump_label _124 reserved=0x00000000
+jump_label _125 reserved=0x00000000
+jump_label _126 reserved=0x00000000
+jump_label _127 reserved=0x00000000
+jump_label _128 reserved=0x00000000
+jump_label _129 reserved=0x00000000
+jump_label _130 reserved=0x00000000
+jump_label _131 reserved=0x00000000
+jump_label _132 reserved=0x00000000
+jump_label _133 reserved=0x00000000
+jump_label _134 reserved=0x00000000
+jump_label _123 reserved=0x00000000
+jump_label _136 reserved=0x00000000
+jump_label _105 reserved=0x00000000
+jump_label _106 reserved=0x00000000
+jump_label _140 reserved=0x00000000
+jump_label _142 reserved=0x00000000
+jump_label _144 reserved=0x00000000
+jump_label _146 reserved=0x00000000
+jump_label _149 reserved=0x00000000
+jump_label _148 reserved=0x00000000
+jump_label _152 reserved=0x00000000
+jump_label _151 reserved=0x00000000
+jump_label _154 reserved=0x00000000
+jump_label _153 reserved=0x00000000
+jump_label _155 reserved=0x00000000
+jump_label _157 reserved=0x00000000
+jump_label _159 reserved=0x00000000
+jump_label _161 reserved=0x00000000
+jump_label _163 reserved=0x00000000
+jump_label _138 reserved=0x00000000
+jump_label _139 reserved=0x00000000
+jump_label _166 reserved=0x00000000
+jump_label _167 reserved=0x00000000
+jump_label _168 reserved=0x00000000
+jump_label _169 reserved=0x00000000
+jump_label _170 reserved=0x00000000
+jump_label _165 reserved=0x00000000
+jump_label _174 reserved=0x00000000
+jump_label _172 reserved=0x00000000
+jump_label _173 reserved=0x00000000
+jump_label _177 reserved=0x00000000
+jump_label _178 reserved=0x00000000
+jump_label _176 reserved=0x00000000
+jump_label _179 reserved=0x00000000
+jump_label _183 reserved=0x00000000
+jump_label _185 reserved=0x00000000
+jump_label _181 reserved=0x00000000
+jump_label _182 reserved=0x00000000
+jump_label _187 reserved=0x00000000
+jump_label _191 reserved=0x00000000
+jump_label _189 reserved=0x00000000
+jump_label _190 reserved=0x00000000
+jump_label _193 reserved=0x00000000
+jump_label _197 reserved=0x00000000
+jump_label _199 reserved=0x00000000
+jump_label _202 reserved=0x00000000
+jump_label _201 reserved=0x00000000
+jump_label _203 reserved=0x00000000
+jump_label _195 reserved=0x00000000
+jump_label _196 reserved=0x00000000
+jump_label _205 reserved=0x00000000
+jump_label _209 reserved=0x00000000
+jump_label _207 reserved=0x00000000
+jump_label _208 reserved=0x00000000
+jump_label _213 reserved=0x00000000
+jump_label _211 reserved=0x00000000
+jump_label _212 reserved=0x00000000
+jump_label _217 reserved=0x00000000
+jump_label _215 reserved=0x00000000
+jump_label _216 reserved=0x00000000
+jump_label _221 reserved=0x00000000
+jump_label _219 reserved=0x00000000
+jump_label _220 reserved=0x00000000
+jump_label _225 reserved=0x00000000
+jump_label _223 reserved=0x00000000
+jump_label _224 reserved=0x00000000
+jump_label _229 reserved=0x00000000
+jump_label _227 reserved=0x00000000
+jump_label _228 reserved=0x00000000
+jump_label _233 reserved=0x00000000
+jump_label _231 reserved=0x00000000
+jump_label _232 reserved=0x00000000
+jump_label _237 reserved=0x00000000
+jump_label _235 reserved=0x00000000
+jump_label _236 reserved=0x00000000
+jump_label _241 reserved=0x00000000
+jump_label _239 reserved=0x00000000
+jump_label _240 reserved=0x00000000
+jump_label _245 reserved=0x00000000
+jump_label _243 reserved=0x00000000
+jump_label _244 reserved=0x00000000
+jump_label _249 reserved=0x00000000
+jump_label _247 reserved=0x00000000
+jump_label _248 reserved=0x00000000
+jump_label _253 reserved=0x00000000
+jump_label _251 reserved=0x00000000
+jump_label _252 reserved=0x00000000
+jump_label _255 reserved=0x00000000
+jump_label _257 reserved=0x00000000
+jump_label _259 reserved=0x00000000
+jump_label _261 reserved=0x00000000
+jump_label _263 reserved=0x00000000
+jump_label _265 reserved=0x00000000
+jump_label _269 reserved=0x00000000
+jump_label _267 reserved=0x00000000
+jump_label _268 reserved=0x00000000
+jump_label _271 reserved=0x00000000
+jump_label _275 reserved=0x00000000
+jump_label _273 reserved=0x00000000
+jump_label _274 reserved=0x00000000
+jump_label _278 reserved=0x00000000
+jump_label _277 reserved=0x00000000
+jump_label _279 reserved=0x00000000
+jump_label _281 reserved=0x00000000
+jump_label _285 reserved=0x00000000
+jump_label _288 reserved=0x00000000
+jump_label _287 reserved=0x00000000
+jump_label _292 reserved=0x00000000
+jump_label _293 reserved=0x00000000
+jump_label _294 reserved=0x00000000
+jump_label _291 reserved=0x00000000
+jump_label _289 reserved=0x00000000
+jump_label _290 reserved=0x00000000
+jump_label _296 reserved=0x00000000
+jump_label _283 reserved=0x00000000
+jump_label _284 reserved=0x00000000
+jump_label _298 reserved=0x00000000
+jump_label _301 reserved=0x00000000
+jump_label _302 reserved=0x00000000
+jump_label _300 reserved=0x00000000
+jump_label _304 reserved=0x00000000
+jump_label _308 reserved=0x00000000
+jump_label _306 reserved=0x00000000
+jump_label _307 reserved=0x00000000
+jump_label _310 reserved=0x00000000
+jump_label _312 reserved=0x00000000
+jump_label _317 reserved=0x00000000
+jump_label _316 reserved=0x00000000
+jump_label _318 reserved=0x00000000
+jump_label _314 reserved=0x00000000
+jump_label _315 reserved=0x00000000
+jump_label _320 reserved=0x00000000
+jump_label _322 reserved=0x00000000
+jump_label _324 reserved=0x00000000
+jump_label _326 reserved=0x00000000
+jump_label _329 reserved=0x00000000
+jump_label _328 reserved=0x00000000
+jump_label _330 reserved=0x00000000
+jump_label _332 reserved=0x00000000
+jump_label _334 reserved=0x00000000
+jump_label _337 reserved=0x00000000
+jump_label _336 reserved=0x00000000
+jump_label _338 reserved=0x00000000
+jump_label _340 reserved=0x00000000
+jump_label _343 reserved=0x00000000
+jump_label _342 reserved=0x00000000
+jump_label _344 reserved=0x00000000
+jump_label _346 reserved=0x00000000
+jump_label _348 reserved=0x00000000
+jump_label _351 reserved=0x00000000
+jump_label _350 reserved=0x00000000
+jump_label _354 reserved=0x00000000
+jump_label _352 reserved=0x00000000
+jump_label _353 reserved=0x00000000
+jump_label _358 reserved=0x00000000
+jump_label _356 reserved=0x00000000
+jump_label _357 reserved=0x00000000
+jump_label _360 reserved=0x00000000
+jump_label _362 reserved=0x00000000
+
+code
+hirakenai_label:
+  PROC hirakenai_label
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 95
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+badkaifuku_label:
+  PROC badkaifuku_label
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 96
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+kireta_label:
+  PROC kireta_label
+  COMM 0x0060
+  COMM 0x0218
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _1
+  PUSHIS 97
+  COMM 0x0000
+  GOTO _1
+_1:
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _3
+  PUSHIS 100
+  COMM 0x0000
+  GOTO _3
+_3:
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _5
+  PUSHIS 99
+  COMM 0x0000
+  GOTO _5
+_5:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _7
+  PUSHIS 98
+  COMM 0x0000
+  GOTO _7
+_7:
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+itembox_label:
+  PROC itembox_label
+_9:
+  PUSHIS 1
+  IF _10
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _43
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  COMM 0x0116
+  PUSHREG
+  IF _42
+  PUSHIS 83
+  COMM 0x0000
+  GOTO _41
+_42:
+  PUSHIS 0
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0001
+  PUSHIS 2
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0002
+  PUSHIS 3
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0003
+  PUSHIS 4
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0004
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _14
+  PUSHIS 76
+  COMM 0x0000
+  GOTO _13
+_14:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _12
+  PUSHIS 86
+  COMM 0x0000
+  GOTO _11
+_12:
+  PUSHIS 80
+  COMM 0x0000
+  GOTO _11
+_11:
+  GOTO _13
+_13:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _16
+  PUSHIS 77
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _15
+_16:
+  PUSHIS 81
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _15
+_15:
+  PUSHIS 0
+  PUSHLIX 0x0005
+  EQ
+  IF _40
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _29
+  COMM 0x0115
+  PUSHLIX 0x0004
+  COMM 0x0166
+  END
+  GOTO _28
+_29:
+  PUSHIS 2
+  PUSHLIX 0x0003
+  EQ
+  IF _30
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 100
+  PUSHIS 15
+  COMM 0x00ab
+  PUSHIS 15
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 15
+  PUSHIS 100
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 1
+  COMM 0x013a
+  PUSHIS 89
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_30:
+  PUSHIS 3
+  PUSHLIX 0x0003
+  EQ
+  IF _31
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 2
+  COMM 0x013a
+  PUSHIS 89
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_31:
+  PUSHIS 4
+  PUSHLIX 0x0003
+  EQ
+  IF _32
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 4
+  COMM 0x013a
+  PUSHIS 90
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_32:
+  PUSHIS 5
+  PUSHLIX 0x0003
+  EQ
+  IF _33
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 5
+  COMM 0x013a
+  PUSHIS 91
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_33:
+  PUSHIS 6
+  PUSHLIX 0x0003
+  EQ
+  IF _34
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 6
+  COMM 0x013a
+  PUSHIS 92
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_34:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  LE
+  IF _26
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _20
+  PUSHIS 34
+  COMM 0x011b
+  GOTO _19
+_20:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _18
+  PUSHIS 43
+  COMM 0x011b
+  GOTO _17
+_18:
+  PUSHIS 33
+  COMM 0x011b
+  GOTO _17
+_17:
+  GOTO _19
+_19:
+  COMM 0x011c
+  COMM 0x0115
+  COMM 0x0002
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHLIX 0x0001
+  EQ
+  IF _24
+  PUSHIS 93
+  COMM 0x0000
+  GOTO _23
+_24:
+  PUSHIS 3
+  PUSHLIX 0x0001
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 0
+  PUSHLIX 0x0002
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 108
+  PUSHLIX 0x0001
+  LE
+  PUSHIS 96
+  PUSHLIX 0x0001
+  GE
+  AND
+  IF _22
+  PUSHIS 85
+  COMM 0x0000
+  GOTO _21
+_22:
+  PUSHIS 84
+  COMM 0x0000
+  GOTO _21
+_21:
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x0070
+  GOTO _23
+_23:
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _25
+_26:
+  PUSHIS 3
+  PUSHLIX 0x0000
+  EQ
+  IF _25
+  COMM 0x0115
+  PUSHIS 32
+  COMM 0x0214
+  PUSHIS 0
+  PUSHLIX 0x0004
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 88
+  COMM 0x0000
+  PUSHLIX 0x0004
+  COMM 0x0139
+  GOTO _25
+_25:
+  GOTO _28
+_28:
+  GOTO _39
+_40:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _38
+  PUSHIS 78
+  COMM 0x0000
+  GOTO _37
+_38:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _36
+  PUSHIS 87
+  COMM 0x0000
+  GOTO _35
+_36:
+  PUSHIS 82
+  COMM 0x0000
+  GOTO _35
+_35:
+  GOTO _37
+_37:
+  GOTO _39
+_39:
+  GOTO _41
+_41:
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+  GOTO _43
+_43:
+  COMM 0x000d
+  GOTO _9
+_10:
+  END
+warp_label:
+  PROC warp_label
+  COMM 0x0060
+  COMM 0x0219
+  PUSHREG
+  POPLIX 0x0006
+  PUSHIS 1
+  PUSHLIX 0x0006
+  EQ
+  IF _45
+  COMM 0x0204
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 0
+  PUSHF 0x3e051eb8
+  PUSHF 0x00000000
+  PUSHF 0x3dcccccd
+  PUSHIS 2
+  PUSHIS 175
+  PUSHIS 60
+  COMM 0x00ef
+  PUSHIS 101
+  PUSHIS 132
+  PUSHIS 132
+  PUSHIS 132
+  COMM 0x00f0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 256
+  COMM 0x00f1
+  PUSHIS 1
+  COMM 0x00f2
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 30
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 0
+  COMM 0x00f3
+  GOTO _45
+_45:
+  COMM 0x0202
+  END
+  END
+doorwarp_label:
+  PROC doorwarp_label
+_47:
+  PUSHIS 1
+  IF _48
+  COMM 0x0203
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _51
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0007
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0008
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0007
+  EQ
+  IF _49
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _49
+_49:
+  PUSHIS 20
+  PUSHLIX 0x0008
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _51
+_51:
+  COMM 0x000d
+  GOTO _47
+_48:
+  END
+dexitwarp_label:
+  PROC dexitwarp_label
+_53:
+  PUSHIS 1
+  IF _54
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _59
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  COMM 0x020d
+  COMM 0x0001
+  PUSHIS 72
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 73
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _56
+  COMM 0x0002
+  GOTO _55
+_56:
+  COMM 0x0002
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+  GOTO _55
+_55:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0009
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000a
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0009
+  EQ
+  IF _57
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _57
+_57:
+  PUSHIS 45
+  PUSHLIX 0x000a
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _59
+_59:
+  COMM 0x000d
+  GOTO _53
+_54:
+  END
+fldhunt_dexitwarp_label:
+  PROC fldhunt_dexitwarp_label
+_61:
+  PUSHIS 1
+  IF _62
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _67
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 74
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 75
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _64
+  COMM 0x0002
+  GOTO _63
+_64:
+  COMM 0x0002
+  COMM 0x0061
+  END
+  GOTO _63
+_63:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000b
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000c
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x000b
+  EQ
+  IF _65
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _65
+_65:
+  PUSHIS 45
+  PUSHLIX 0x000c
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x021a
+  COMM 0x0202
+  END
+  GOTO _67
+_67:
+  COMM 0x000d
+  GOTO _61
+_62:
+  END
+dinwarp_label:
+  PROC dinwarp_label
+_69:
+  PUSHIS 1
+  IF _70
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _71
+  COMM 0x0060
+  COMM 0x0204
+  PUSHIS 45
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _71
+_71:
+  COMM 0x000d
+  GOTO _69
+_70:
+  END
+runwarp_label:
+  PROC runwarp_label
+  COMM 0x0203
+  COMM 0x0060
+  COMM 0x0204
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0202
+  END
+anawarp_label:
+  PROC anawarp_label
+  COMM 0x0060
+  COMM 0x0203
+  COMM 0x0204
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  COMM 0x0202
+  END
+tobiwarp_label:
+  PROC tobiwarp_label
+_73:
+  PUSHIS 1
+  IF _74
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _75
+  COMM 0x0060
+  PUSHIS 37
+  COMM 0x011b
+  COMM 0x0204
+  PUSHIS 4
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 5
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x011c
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+  GOTO _75
+_75:
+  COMM 0x000d
+  GOTO _73
+_74:
+  END
+hasigo_label:
+  PROC hasigo_label
+  PUSHIS 0
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000e
+  PUSHIS 3
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0011
+  PUSHIS 1
+  POPLIX 0x000d
+_77:
+  PUSHLIX 0x000d
+  IF _78
+  PUSHIS 0
+  PUSHLIX 0x000e
+  EQ
+  IF _92
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _84
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _79
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _79
+_79:
+  GOTO _83
+_84:
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _81
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _81
+_81:
+  GOTO _83
+_83:
+  GOTO _91
+_92:
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _90
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _85
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _85
+_85:
+  GOTO _89
+_90:
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _87
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _87
+_87:
+  GOTO _89
+_89:
+  GOTO _91
+_91:
+  PUSHIS 1
+  PUSHLIX 0x000d
+  EQ
+  IF _93
+  COMM 0x000d
+  GOTO _93
+_93:
+  GOTO _77
+_78:
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 36
+  COMM 0x011b
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 1
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000f
+  PUSHIS 2
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0010
+  PUSHLIX 0x0010
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x000f
+  PUSHIX 0x0000
+  COMM 0x004a
+  COMM 0x0204
+  PUSHIS 0
+  PUSHLIX 0x000e
+  EQ
+  IF _96
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 8
+  PUSHIX 0x0000
+  COMM 0x0073
+  GOTO _95
+_96:
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 9
+  PUSHIX 0x0000
+  COMM 0x0073
+  GOTO _95
+_95:
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 11
+  COMM 0x000e
+  COMM 0x011c
+  PUSHIS 49
+  COMM 0x000e
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+heal_label:
+  PROC heal_label
+_97:
+  PUSHIS 1
+  IF _98
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _99
+  COMM 0x0060
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 900
+  COMM 0x020f
+  END
+  GOTO _99
+_99:
+  COMM 0x000d
+  GOTO _97
+_98:
+  END
+save_label:
+  PROC save_label
+_101:
+  PUSHIS 1
+  IF _102
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _103
+  COMM 0x0060
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 901
+  COMM 0x020f
+  END
+  GOTO _103
+_103:
+  COMM 0x000d
+  GOTO _101
+_102:
+  END
+npctalk_label:
+  PROC npctalk_label
+  COMM 0x0207
+  PUSHREG
+  POPLIX 0x0018
+  PUSHIS 1
+  POPLIX 0x0019
+_105:
+  PUSHLIX 0x0019
+  IF _106
+  PUSHIS 0
+  PUSHLIX 0x0018
+  EQ
+  IF _124
+  PUSHIS 0
+  POPLIX 0x0019
+  END
+  GOTO _123
+_124:
+  PUSHIS 1
+  PUSHLIX 0x0018
+  EQ
+  IF _125
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _107
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _107
+_107:
+  GOTO _123
+_125:
+  PUSHIS 2
+  PUSHLIX 0x0018
+  EQ
+  IF _126
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _109
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _109
+_109:
+  GOTO _123
+_126:
+  PUSHIS 100
+  PUSHLIX 0x0018
+  EQ
+  IF _127
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _111
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _111
+_111:
+  GOTO _123
+_127:
+  PUSHIS 101
+  PUSHLIX 0x0018
+  EQ
+  IF _128
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_128:
+  PUSHIS 102
+  PUSHLIX 0x0018
+  EQ
+  IF _129
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _113
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _113
+_113:
+  GOTO _123
+_129:
+  PUSHIS 103
+  PUSHLIX 0x0018
+  EQ
+  IF _130
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_130:
+  PUSHIS 104
+  PUSHLIX 0x0018
+  EQ
+  IF _131
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _115
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _115
+_115:
+  GOTO _123
+_131:
+  PUSHIS 105
+  PUSHLIX 0x0018
+  EQ
+  IF _132
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _117
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _117
+_117:
+  GOTO _123
+_132:
+  PUSHIS 106
+  PUSHLIX 0x0018
+  EQ
+  IF _133
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _119
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _119
+_119:
+  GOTO _123
+_133:
+  PUSHIS 107
+  PUSHLIX 0x0018
+  EQ
+  IF _134
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _121
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _121
+_121:
+  GOTO _123
+_134:
+  PUSHIS 199
+  PUSHLIX 0x0018
+  EQ
+  IF _123
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_123:
+  PUSHIS 1
+  PUSHLIX 0x0019
+  EQ
+  IF _136
+  COMM 0x000d
+  GOTO _136
+_136:
+  GOTO _105
+_106:
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 1
+  POPLIX 0x0013
+  PUSHIS 0
+  POPLIX 0x0017
+  COMM 0x01fe
+  PUSHREG
+  POPLIX 0x001a
+_138:
+  PUSHIS 1
+  IF _139
+  PUSHIS 10
+  PUSHLIX 0x0013
+  LT
+  IF _154
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  GOTO _153
+_154:
+  PUSHIS 0
+  POPLIX 0x0012
+  PUSHIS 0
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0014
+  PUSHIS 2
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x001b
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0014
+  EQ
+  IF _152
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _142
+  COMM 0x0002
+  PUSHIS 0
+  PUSHLIX 0x001b
+  EQ
+  IF _140
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  GOTO _140
+_140:
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _142
+_142:
+  GOTO _151
+_152:
+  PUSHIS 1
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0015
+  PUSHIS 0
+  PUSHLIX 0x0017
+  EQ
+  IF _146
+  PUSHIS 1
+  POPLIX 0x0017
+  COMM 0x0001
+  PUSHIS 0
+  PUSHLIX 0x001b
+  EQ
+  IF _144
+  PUSHTYPE5 ppos01
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x001a
+  COMM 0x01e0
+  GOTO _144
+_144:
+  GOTO _146
+_146:
+  PUSHIS 0
+  PUSHLIX 0x0014
+  EQ
+  IF _149
+  PUSHLIX 0x0015
+  COMM 0x0000
+  GOTO _148
+_149:
+  PUSHIS 1
+  PUSHLIX 0x0014
+  EQ
+  IF _148
+  PUSHLIX 0x0015
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0012
+  GOTO _148
+_148:
+  GOTO _151
+_151:
+  PUSHLIX 0x0012
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  COMM 0x000d
+  GOTO _153
+_153:
+  PUSHIS 200
+  PUSHLIX 0x0013
+  GE
+  IF _155
+  END
+  GOTO _155
+_155:
+  PUSHIS 100
+  PUSHLIX 0x0013
+  EQ
+  IF _159
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _157
+  COMM 0x0002
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _157
+_157:
+  COMM 0x020e
+  END
+  GOTO _159
+_159:
+  PUSHIS 0
+  PUSHLIX 0x0013
+  EQ
+  IF _163
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _161
+  COMM 0x0002
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _161
+_161:
+  PUSHIS 7
+  COMM 0x00c3
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM 0x0061
+  END
+  GOTO _163
+_163:
+  GOTO _138
+_139:
+  COMM 0x0061
+  END
+  END
+elvstart_label:
+  PROC elvstart_label
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01cam_01
+  COMM 0x0094
+  PUSHREG
+  POPLIX 0x001d
+  PUSHIS 0
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001e
+  PUSHIS 14
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0025
+  PUSHIS 2
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001f
+  PUSHIS 3
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0020
+  PUSHIS 4
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0021
+  PUSHIS 5
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0022
+  PUSHIS 6
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0023
+  PUSHIS 7
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0024
+  COMM 0x0060
+  PUSHIS 4
+  COMM 0x00c3
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x004b
+  PUSHLIX 0x001d
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHLIX 0x0025
+  PUSHLIX 0x0025
+  COMM 0x0209
+  COMM 0x0001
+  PUSHIS 101
+  COMM 0x0000
+  PUSHIS 1
+  PUSHLIX 0x001e
+  EQ
+  IF _166
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 102
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_166:
+  PUSHIS 2
+  PUSHLIX 0x001e
+  EQ
+  IF _167
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 2
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 103
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_167:
+  PUSHIS 3
+  PUSHLIX 0x001e
+  EQ
+  IF _168
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 3
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 104
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_168:
+  PUSHIS 4
+  PUSHLIX 0x001e
+  EQ
+  IF _169
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 105
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_169:
+  PUSHIS 5
+  PUSHLIX 0x001e
+  EQ
+  IF _170
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0023
+  PUSHIS 4
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 106
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_170:
+  PUSHIS 6
+  PUSHLIX 0x001e
+  EQ
+  IF _165
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0023
+  PUSHIS 4
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0024
+  PUSHIS 5
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 6
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 107
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_165:
+  COMM 0x0002
+  PUSHLIX 0x001e
+  PUSHLIX 0x001c
+  EQ
+  IF _177
+  PUSHIS 4
+  COMM 0x000e
+  GOTO _176
+_177:
+  PUSHLIX 0x0025
+  PUSHLIX 0x001c
+  EQ
+  IF _178
+  PUSHIS 4
+  COMM 0x000e
+  GOTO _176
+_178:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 4
+  PUSHIS 10
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 4
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0214
+  PUSHLIX 0x001c
+  PUSHLIX 0x0025
+  COMM 0x0209
+  PUSHIS 4
+  COMM 0x000e
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0026
+_172:
+  PUSHIS 1
+  PUSHLIX 0x0026
+  NEQ
+  IF _173
+  PUSHIS 2
+  PUSHLIX 0x0026
+  EQ
+  IF _174
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0215
+  COMM 0x020a
+  PUSHLIX 0x001c
+  COMM 0x0201
+  END
+  GOTO _174
+_174:
+  COMM 0x000d
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0026
+  GOTO _172
+_173:
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0215
+  PUSHIS 47
+  COMM 0x0214
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _176
+_176:
+  PUSHIS 48
+  COMM 0x0214
+  PUSHIS 0
+  PUSHTYPE5 str_01path_01
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01all_d01
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 0
+  PUSHTYPE5 str_01path_02
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01all_d02
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHTYPE5 str_01all_d01_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006c
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x020a
+  PUSHLIX 0x001c
+  COMM 0x0201
+  END
+suikomi_label:
+  PROC suikomi_label
+  PUSHIS 0
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x002b
+  PUSHIS 1
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0028
+  PUSHIS 2
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0027
+  PUSHIS 3
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0029
+  PUSHIS 4
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x002a
+  PUSHIS 12
+  PUSHLIX 0x002b
+  EQ
+  IF _179
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHLIX 0x0027
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 1
+  PUSHLIX 0x002a
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x01fd
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 97
+  COMM 0x0214
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 1
+  PUSHLIX 0x002a
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x01fc
+  COMM 0x0202
+  END
+  GOTO _179
+_179:
+  PUSHIS 13
+  PUSHLIX 0x002b
+  EQ
+  IF _187
+_181:
+  PUSHIS 1
+  IF _182
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  IF _185
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 5
+  COMM 0x01fa
+  PUSHREG
+  IF _183
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  GOTO _183
+_183:
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 25
+  COMM 0x000e
+  COMM 0x0204
+  PUSHIS 65
+  COMM 0x0214
+  PUSHIS 40
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 17
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _185
+_185:
+  COMM 0x000d
+  GOTO _181
+_182:
+  GOTO _187
+_187:
+  PUSHIS 14
+  PUSHLIX 0x002b
+  EQ
+  IF _193
+_189:
+  PUSHIS 1
+  IF _190
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  IF _191
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHLIX 0x0027
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 66
+  COMM 0x0214
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 18
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _191
+_191:
+  COMM 0x000d
+  GOTO _189
+_190:
+  GOTO _193
+_193:
+  END
+baria_label:
+  PROC baria_label
+  PUSHIS 0
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002d
+  PUSHIS 1
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002e
+  PUSHIS 2
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002f
+  PUSHIS 3
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0030
+  PUSHIS 4
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0030
+  PUSHIS 5
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0031
+  PUSHIS 6
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0033
+  PUSHIS 0
+  PUSHLIX 0x0031
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _205
+_195:
+  PUSHIS 1
+  IF _196
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  IF _203
+  PUSHIS 0
+  PUSHLIX 0x002d
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _202
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 111
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  END
+  GOTO _201
+_202:
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  PUSHTYPE5 fld_f_bin_ICE_b_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0032
+  PUSHLIX 0x002f
+  PUSHLIX 0x0032
+  COMM 0x009d
+  PUSHLIX 0x002e
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x002f
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 108
+  COMM 0x0000
+  PUSHIS 114
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 115
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _199
+  COMM 0x0002
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 32
+  COMM 0x011b
+  PUSHIS 3
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 24
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 60
+  COMM 0x000e
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM 0x00ce
+  COMM 0x011c
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 30
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 0
+  PUSHTYPE5 BARIA
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHTYPE5 BARIA_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 15
+  PUSHIS 1
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHLIX 0x0032
+  COMM 0x009b
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHLIX 0x0031
+  COMM 0x0008
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0033
+  NEQ
+  IF _197
+  PUSHLIX 0x0033
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0111
+  GOTO _197
+_197:
+  COMM 0x0061
+  PUSHIS 3
+  COMM 0x00c3
+  END
+  GOTO _199
+_199:
+  COMM 0x0002
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0061
+  PUSHIS 3
+  COMM 0x00c3
+  GOTO _201
+_201:
+  GOTO _203
+_203:
+  COMM 0x000d
+  GOTO _195
+_196:
+  GOTO _205
+_205:
+  END
+  END
+proc_0013:
+  PROC proc_0013
+_207:
+  PUSHIS 1
+  IF _208
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _209
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0034
+  PUSHTYPE5 ppos01_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0034
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 52
+  COMM 0x0000
+  PUSHLIX 0x0034
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _209
+_209:
+  COMM 0x000d
+  GOTO _207
+_208:
+  END
+proc_0014:
+  PROC proc_0014
+_211:
+  PUSHIS 1
+  IF _212
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _213
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0035
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 53
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHTYPE5 ppos01_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0035
+  COMM 0x01e0
+  PUSHIS 54
+  COMM 0x0000
+  PUSHLIX 0x0035
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _213
+_213:
+  COMM 0x000d
+  GOTO _211
+_212:
+  END
+proc_0015:
+  PROC proc_0015
+_215:
+  PUSHIS 1
+  IF _216
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _217
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0036
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 55
+  COMM 0x0000
+  PUSHTYPE5 ppos01_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0036
+  COMM 0x0073
+  PUSHIS 56
+  COMM 0x0000
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _217
+_217:
+  COMM 0x000d
+  GOTO _215
+_216:
+  END
+proc_0016:
+  PROC proc_0016
+_219:
+  PUSHIS 1
+  IF _220
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _221
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0037
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 57
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 58
+  COMM 0x0000
+  PUSHLIX 0x0037
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _221
+_221:
+  COMM 0x000d
+  GOTO _219
+_220:
+  END
+proc_0017:
+  PROC proc_0017
+_223:
+  PUSHIS 1
+  IF _224
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _225
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0038
+  PUSHTYPE5 ppos01_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 59
+  COMM 0x0000
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _225
+_225:
+  COMM 0x000d
+  GOTO _223
+_224:
+  END
+proc_0018:
+  PROC proc_0018
+_227:
+  PUSHIS 1
+  IF _228
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _229
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0039
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 ppos01_6
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0039
+  COMM 0x01e0
+  PUSHIS 60
+  COMM 0x0000
+  PUSHLIX 0x0039
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0039
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _229
+_229:
+  COMM 0x000d
+  GOTO _227
+_228:
+  END
+proc_0019:
+  PROC proc_0019
+_231:
+  PUSHIS 1
+  IF _232
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _233
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003a
+  PUSHTYPE5 ppos01_7
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003a
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x003a
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 61
+  COMM 0x0000
+  PUSHLIX 0x003a
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003a
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _233
+_233:
+  COMM 0x000d
+  GOTO _231
+_232:
+  END
+proc_001a:
+  PROC proc_001a
+_235:
+  PUSHIS 1
+  IF _236
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _237
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 62
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x003b
+  COMM 0x0073
+  PUSHIS 63
+  COMM 0x0000
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _237
+_237:
+  COMM 0x000d
+  GOTO _235
+_236:
+  END
+proc_001b:
+  PROC proc_001b
+_239:
+  PUSHIS 1
+  IF _240
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _241
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003c
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 64
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x003c
+  COMM 0x0073
+  PUSHIS 65
+  COMM 0x0000
+  PUSHLIX 0x003c
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003c
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _241
+_241:
+  COMM 0x000d
+  GOTO _239
+_240:
+  END
+proc_001c:
+  PROC proc_001c
+_243:
+  PUSHIS 1
+  IF _244
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _245
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003d
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 66
+  COMM 0x0000
+  PUSHTYPE5 ppos01_8
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 67
+  COMM 0x0000
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _245
+_245:
+  COMM 0x000d
+  GOTO _243
+_244:
+  END
+proc_001d:
+  PROC proc_001d
+_247:
+  PUSHIS 1
+  IF _248
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _249
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003e
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 68
+  COMM 0x0000
+  PUSHTYPE5 ppos01_9
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x003e
+  COMM 0x0073
+  PUSHIS 69
+  COMM 0x0000
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _249
+_249:
+  COMM 0x000d
+  GOTO _247
+_248:
+  END
+proc_001e:
+  PROC proc_001e
+_251:
+  PUSHIS 1
+  IF _252
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _253
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 70
+  COMM 0x0000
+  PUSHTYPE5 ppos01_10
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003f
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x003f
+  COMM 0x0073
+  PUSHIS 71
+  COMM 0x0000
+  PUSHLIX 0x003f
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003f
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _253
+_253:
+  COMM 0x000d
+  GOTO _251
+_252:
+  END
+proc_001f:
+  PROC proc_001f
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_03
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_04
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_05
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_06
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_07
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_08
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 1
+  PUSHIS 19
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _255
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_03_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_04_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_05_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_06_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_07_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_08_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _255
+_255:
+  PUSHIS 1
+  PUSHIS 27
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _257
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_03_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_04_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_05_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_06_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_07_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_08_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _257
+_257:
+  PUSHIS 1
+  PUSHIS 13
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _259
+  PUSHIS 3
+  PUSHIS 15
+  PUSHIS 24
+  COMM 0x0112
+  PUSHIS 1
+  PUSHIS 56
+  PUSHIS 24
+  COMM 0x0111
+  PUSHIS 7
+  PUSHIS 7
+  PUSHIS 21
+  PUSHIS 5
+  PUSHIS 10
+  COMM 0x01f6
+  GOTO _259
+_259:
+  PUSHIS 0
+  PUSHIS 1280
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _261
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 0
+  COMM 0x001f
+  PUSHIS 1280
+  COMM 0x0008
+  PUSHIS 2063
+  COMM 0x0008
+  PUSHIS 1289
+  COMM 0x0008
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_08
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_01_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 15
+  PUSHIS 24
+  COMM 0x01f0
+  PUSHTYPE5 str_01cam_01_MOTION
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_01_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 199
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_07
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_03
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHTYPE5 str_01cam_03_MOTION
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_03_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 30
+  COMM 0x000e
+  PUSHTYPE5 str_01pos_01
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 23
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 8
+  PUSHIS 35
+  PUSHIS 0
+  PUSHTYPE5 str_01pos_03
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x0017
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 3
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 60
+  COMM 0x000e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 0
+  COMM 0x001e
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 1
+  COMM 0x00c3
+  COMM 0x0061
+  GOTO _261
+_261:
+  PUSHIS 1
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _263
+  PUSHIS 2063
+  COMM 0x0009
+  GOTO _263
+_263:
+  END
+proc_0020:
+  PROC proc_0020
+  PUSHIS 0
+  PUSHIS 1284
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _265
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 1284
+  COMM 0x0008
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHTYPE5 str_01cam_02
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_05
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0001
+  PUSHTYPE5 str_01pos_04
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0001
+  COMM 0x004a
+  PUSHIX 0x0001
+  COMM 0x021e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHTYPE5 str_01pos_06
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIX 0x0001
+  COMM 0x0016
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  GOTO _265
+_265:
+  END
+proc_0021:
+  PROC proc_0021
+  PUSHIS 0
+  PUSHIS 1285
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _271
+_267:
+  PUSHIS 1
+  IF _268
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _269
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 1285
+  COMM 0x0008
+  PUSHIS 64
+  COMM 0x0214
+  PUSHIS 0
+  PUSHTYPE5 str_01path_01_2
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 md_01d_02
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 0
+  PUSHTYPE5 str_01path_02_2
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 md_01d_02b
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 1
+  PUSHTYPE5 str_01path_01_3
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 md_01d_02_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 1
+  PUSHTYPE5 str_01path_02_3
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 md_01d_02b_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 64
+  COMM 0x0214
+  PUSHIS 2
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_06_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_01_4
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHTYPE5 str_01pos_04_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 29
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 20
+  COMM 0x000e
+  PUSHTYPE5 str_01cam_01_MOTION_2
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_01_5
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 1
+  COMM 0x0000
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 30
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 2
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIX 0x0004
+  COMM 0x0016
+  PUSHIS 401
+  COMM 0x020f
+  END
+  GOTO _269
+_269:
+  COMM 0x000d
+  GOTO _267
+_268:
+  GOTO _271
+_271:
+  END
+proc_0022:
+  PROC proc_0022
+_273:
+  PUSHIS 1
+  IF _274
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _275
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 51
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 15
+  COMM 0x020f
+  END
+  GOTO _275
+_275:
+  COMM 0x000d
+  GOTO _273
+_274:
+  END
+proc_0023:
+  PROC proc_0023
+  PUSHIS 0
+  PUSHIS 1281
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _279
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 1281
+  COMM 0x0008
+  PUSHIS 2063
+  COMM 0x0009
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_11
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0005
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIX 0x0005
+  COMM 0x021e
+  PUSHTYPE5 str_01pos_08_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_09
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0005
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_02_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0005
+  COMM 0x0073
+  COMM 0x0216
+  PUSHIS 128
+  COMM 0x0210
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 3
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_03_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 4
+  COMM 0x0000
+  PUSHIS 5
+  COMM 0x0000
+  PUSHIS 6
+  COMM 0x0000
+  PUSHIS 7
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_04
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 8
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 9
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _278
+  PUSHIS 10
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 2
+  COMM 0x000e
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIS 6
+  COMM 0x000e
+  COMM 0x0002
+  PUSHIS 500
+  PUSHIS 24
+  PUSHIS 7
+  COMM 0x0097
+  PUSHIS 851
+  COMM 0x0067
+  GOTO _277
+_278:
+  COMM 0x0002
+  PUSHIS 500
+  PUSHIS 24
+  PUSHIS 7
+  COMM 0x0097
+  PUSHIS 848
+  COMM 0x0067
+  GOTO _277
+_277:
+  END
+  GOTO _279
+_279:
+  END
+proc_0024:
+  PROC proc_0024
+  PUSHIS 2099
+  COMM 0x0008
+  END
+proc_0025:
+  PROC proc_0025
+  PUSHIS 1
+  PUSHIS 2905
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _281
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 11
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 240
+  COMM 0x0070
+  COMM 0x0002
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  GOTO _281
+_281:
+  END
+proc_0026:
+  PROC proc_0026
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 30
+  PUSHIS 0
+  COMM 0x000f
+  PUSHTYPE5 str_01cam_02_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0001
+  PUSHTYPE5 str_01pos_11_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0001
+  COMM 0x004a
+  PUSHIX 0x0001
+  COMM 0x021e
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 39
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIX 0x0001
+  COMM 0x0016
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_06_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0019
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  END
+proc_0027:
+  PROC proc_0027
+_283:
+  PUSHIS 1
+  IF _284
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _296
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_03_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_01_6
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 0
+  PUSHIS 1290
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _285
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0008
+  PUSHTYPE5 str_01pos_04_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0008
+  COMM 0x004a
+  PUSHIX 0x0008
+  COMM 0x021e
+  GOTO _285
+_285:
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHIS 1290
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _288
+  PUSHIS 12
+  COMM 0x0000
+  PUSHIS 1290
+  COMM 0x0008
+  PUSHIS 19
+  COMM 0x0000
+  GOTO _287
+_288:
+  PUSHIS 17
+  COMM 0x0000
+  GOTO _287
+_287:
+  PUSHIS 0
+  POPLIX 0x0041
+_289:
+  PUSHIS 0
+  PUSHLIX 0x0041
+  EQ
+  IF _290
+  PUSHIS 13
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0040
+  PUSHIS 0
+  PUSHLIX 0x0040
+  EQ
+  IF _292
+  PUSHIS 14
+  COMM 0x0000
+  GOTO _289
+  GOTO _291
+_292:
+  PUSHIS 1
+  PUSHLIX 0x0040
+  EQ
+  IF _293
+  PUSHIS 15
+  COMM 0x0000
+  GOTO _289
+  GOTO _291
+_293:
+  PUSHIS 2
+  PUSHLIX 0x0040
+  EQ
+  IF _294
+  PUSHIS 16
+  COMM 0x0000
+  GOTO _289
+  GOTO _291
+_294:
+  PUSHIS 3
+  PUSHLIX 0x0040
+  EQ
+  IF _291
+  PUSHIS 18
+  COMM 0x0000
+  GOTO _291
+_291:
+  GOTO _290
+  GOTO _289
+_290:
+  COMM 0x0002
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0019
+  PUSHIX 0x0008
+  COMM 0x0016
+  PUSHIS 3
+  COMM 0x00c3
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0061
+  END
+  GOTO _296
+_296:
+  COMM 0x000d
+  GOTO _283
+_284:
+  END
+proc_0028:
+  PROC proc_0028
+  PUSHIS 0
+  PUSHIS 1286
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _298
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 1286
+  COMM 0x0008
+  PUSHIS 41
+  COMM 0x0217
+  COMM 0x0001
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 10
+  PUSHIS 2
+  PUSHIS 4
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 0
+  PUSHIS 41
+  COMM 0x01f3
+  PUSHIS 4
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 60
+  PUSHIS 10
+  COMM 0x00ab
+  PUSHIS 3
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 3
+  PUSHIS 1
+  COMM 0x000f
+  PUSHIS 3
+  PUSHIX 0x0000
+  COMM 0x004b
+  PUSHIS 21
+  COMM 0x0000
+  PUSHIS 20
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 41
+  COMM 0x01f4
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 1
+  COMM 0x013a
+  PUSHIS 32
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0005
+  PUSHTYPE5 str_01pos_09_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_11_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0005
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIX 0x0005
+  COMM 0x021e
+  PUSHTYPE5 fld_f_bin_DVILIZE1_B_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0042
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0043
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_2
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0044
+  PUSHTYPE5 str_01pos_08_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 11
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHTYPE5 str_01cam_01_7
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 40
+  COMM 0x011b
+  COMM 0x0001
+  PUSHIS 22
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 3
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 2
+  PUSHIX 0x0005
+  COMM 0x0073
+  COMM 0x011c
+  PUSHTYPE5 str_01pos_09_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0042
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_09_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0043
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_11_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0044
+  COMM 0x009d
+  PUSHIS 0
+  PUSHLIX 0x0042
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0043
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0044
+  COMM 0x00ce
+  PUSHIS 23
+  COMM 0x000e
+  COMM 0x011f
+  PUSHIS 502
+  PUSHIS 24
+  PUSHIS 10
+  COMM 0x0097
+  PUSHIS 817
+  COMM 0x0067
+  END
+  GOTO _298
+_298:
+  END
+proc_0029:
+  PROC proc_0029
+  PUSHIS 0
+  PUSHIS 1287
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _304
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHTYPE5 str_01cam_02_4
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 41
+  COMM 0x0217
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_14
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0001
+  PUSHTYPE5 str_01pos_13
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0001
+  COMM 0x004a
+  PUSHIX 0x0001
+  COMM 0x021e
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0005
+  PUSHTYPE5 str_01pos_10
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_07_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0005
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIX 0x0005
+  COMM 0x021e
+  PUSHTYPE5 fld_f_bin_DVILIZE1_B_BED_2
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0046
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_3
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0047
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_4
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0048
+  PUSHIS 40
+  COMM 0x011b
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHTYPE5 str_01npc_01
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0045
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 23
+  COMM 0x0000
+  PUSHTYPE5 str_01pos_13_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0045
+  COMM 0x01e0
+  PUSHIS 30
+  COMM 0x0000
+  PUSHIS 28
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0049
+  PUSHIS 0
+  PUSHLIX 0x0049
+  EQ
+  IF _301
+  PUSHIS 24
+  COMM 0x0000
+  GOTO _300
+_301:
+  PUSHIS 1
+  PUSHLIX 0x0049
+  EQ
+  IF _302
+  PUSHIS 25
+  COMM 0x0000
+  GOTO _300
+_302:
+  PUSHIS 2
+  PUSHLIX 0x0049
+  EQ
+  IF _300
+  PUSHIS 27
+  COMM 0x0000
+  GOTO _300
+_300:
+  PUSHTYPE5 str_01pos_16
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0045
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 41
+  COMM 0x01f3
+  PUSHIS 60
+  PUSHIS 10
+  COMM 0x00ab
+  PUSHIS 3
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 3
+  PUSHIS 1
+  COMM 0x000f
+  PUSHIS 26
+  COMM 0x0000
+  PUSHIS 29
+  COMM 0x0000
+  COMM 0x0002
+  PUSHTYPE5 str_01cam_02_MOTION
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_02_5
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 41
+  COMM 0x01f4
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 2
+  PUSHIX 0x0005
+  COMM 0x0073
+  COMM 0x011c
+  PUSHTYPE5 str_01pos_07_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0046
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_07_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0047
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_10_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0048
+  COMM 0x009d
+  PUSHIS 0
+  PUSHLIX 0x0046
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0047
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0048
+  COMM 0x00ce
+  PUSHIS 23
+  COMM 0x000e
+  COMM 0x011f
+  PUSHIS 1287
+  COMM 0x0008
+  PUSHIS 503
+  PUSHIS 24
+  PUSHIS 10
+  COMM 0x0097
+  PUSHIS 849
+  COMM 0x0067
+  END
+  GOTO _304
+_304:
+  END
+proc_002a:
+  PROC proc_002a
+  PUSHIS 1
+  PUSHIS 1287
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _310
+_306:
+  PUSHIS 1
+  IF _307
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _308
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 40
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  END
+  GOTO _308
+_308:
+  COMM 0x000d
+  GOTO _306
+_307:
+  GOTO _310
+_310:
+  END
+proc_002b:
+  PROC proc_002b
+  PUSHIS 0
+  PUSHIS 1288
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _312
+  COMM 0x0060
+  PUSHTYPE5 str_01cam_02_6
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 1288
+  COMM 0x0008
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0005
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0006
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0007
+  PUSHTYPE5 str_01pos_05_2
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_06_4
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0005
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_07_5
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0006
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_08_4
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0007
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0006
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIX 0x0007
+  COMM 0x0073
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIX 0x0005
+  COMM 0x021e
+  PUSHIX 0x0006
+  COMM 0x021e
+  PUSHIX 0x0007
+  COMM 0x021e
+  PUSHTYPE5 fld_f_bin_DVILIZE1_B_BED_3
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x004a
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_5
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x004b
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_6
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x004c
+  PUSHTYPE5 fld_f_bin_DVILIZE2_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x004d
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_7
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x004e
+  PUSHTYPE5 str_01cam_02_MOTION_2
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_02_7
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 40
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 1
+  PUSHIS 5
+  PUSHIS 1
+  PUSHIS 2
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 5
+  PUSHIS 2
+  PUSHIS 2
+  PUSHIX 0x0006
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 5
+  PUSHIS 3
+  PUSHIS 2
+  PUSHIX 0x0007
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIS 2
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHTYPE5 str_01pos_05_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004a
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_05_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004b
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_06_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004c
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_07_6
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004d
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_08_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004e
+  COMM 0x009d
+  PUSHIS 0
+  PUSHLIX 0x004a
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x004c
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM 0x00ce
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x011f
+  PUSHIS 504
+  PUSHIS 24
+  PUSHIS 18
+  COMM 0x0097
+  PUSHIS 850
+  COMM 0x0067
+  END
+  GOTO _312
+_312:
+  END
+proc_002c:
+  PROC proc_002c
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHTYPE5 str_01cam_01_8
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0008
+  PUSHTYPE5 str_01pos_09_5
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0008
+  COMM 0x004a
+  PUSHIX 0x0008
+  COMM 0x021e
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0001
+  PUSHTYPE5 str_01pos_10_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0001
+  COMM 0x004a
+  PUSHIX 0x0001
+  COMM 0x021e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 2
+  PUSHIX 0x0008
+  COMM 0x0073
+  PUSHIS 34
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 2
+  PUSHIX 0x0001
+  COMM 0x0073
+  PUSHIS 35
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0019
+  PUSHIX 0x0008
+  COMM 0x0016
+  PUSHIX 0x0001
+  COMM 0x0016
+  PUSHIS 3
+  COMM 0x00c3
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0061
+  END
+proc_002d:
+  PROC proc_002d
+_314:
+  PUSHIS 1
+  IF _315
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _318
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 0
+  PUSHIS 10
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 0
+  PUSHIS 1293
+  COMM 0x0007
+  PUSHREG
+  EQ
+  AND
+  IF _317
+  PUSHIS 36
+  COMM 0x0000
+  PUSHIS 37
+  COMM 0x0000
+  PUSHIS 38
+  COMM 0x0000
+  PUSHIS 1293
+  COMM 0x0008
+  GOTO _316
+_317:
+  PUSHIS 40
+  COMM 0x0000
+  COMM 0x0002
+  GOTO _316
+_316:
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  END
+  GOTO _318
+_318:
+  COMM 0x000d
+  GOTO _314
+_315:
+  END
+proc_002e:
+  PROC proc_002e
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_4
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _320
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_5
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _320
+_320:
+  PUSHIS 1
+  PUSHIS 19
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _322
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_6
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _322
+_322:
+  END
+proc_002f:
+  PROC proc_002f
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_7
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 1
+  PUSHIS 19
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _324
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_8
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _324
+_324:
+  END
+battle_micael:
+  PROC battle_micael
+  PUSHIS 1
+  PUSHIS 721
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _332
+  PUSHIS 0
+  PUSHIS 1730
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _330
+  COMM 0x0060
+  COMM 0x021f
+  PUSHTYPE5 str_01cam_02_8
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 243
+  COMM 0x0009
+  PUSHIS 39
+  COMM 0x0217
+  PUSHIS 1
+  PUSHIS 1729
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 1
+  PUSHIS 1728
+  COMM 0x0007
+  PUSHREG
+  EQ
+  AND
+  IF _326
+  PUSHIS 722
+  COMM 0x0008
+  PUSHIS 253
+  COMM 0x0008
+  GOTO _326
+_326:
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_07_7
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 291
+  PUSHIS 6
+  COMM 0x0015
+  PUSHREG
+  POPLIX 0x004f
+  PUSHTYPE5 str_01pos_05_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x004a
+  PUSHLIX 0x004f
+  COMM 0x021e
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x000f
+  COMM 0x0216
+  PUSHIS 128
+  COMM 0x0210
+  PUSHTYPE5 str_01cam_02_MOTION_3
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_02_9
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHTYPE5 str_01path_01_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x008b
+  PUSHIS 70
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 47
+  COMM 0x0000
+  PUSHTYPE5 str_01pos_06_6
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_03_4
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 48
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_04_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 49
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  PUSHIS 3
+  PUSHIS 8
+  PUSHIS 12
+  PUSHIS 5
+  COMM 0x01f6
+  PUSHIS 0
+  PUSHIS 39
+  COMM 0x01f3
+  PUSHIS 23
+  COMM 0x000e
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 3
+  PUSHLIX 0x004f
+  COMM 0x0073
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 39
+  COMM 0x01f4
+  PUSHIS 0
+  PUSHIS 1294
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _329
+  PUSHIS 510
+  PUSHIS 24
+  PUSHIS 57
+  COMM 0x0097
+  GOTO _328
+_329:
+  PUSHIS 521
+  PUSHIS 24
+  PUSHIS 58
+  COMM 0x0097
+  GOTO _328
+_328:
+  PUSHIS 792
+  COMM 0x0067
+  END
+  GOTO _330
+_330:
+  GOTO _332
+_332:
+  END
+battle_micael_02:
+  PROC battle_micael_02
+  PUSHIS 1
+  PUSHIS 721
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _340
+  PUSHIS 0
+  PUSHIS 1730
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _338
+  COMM 0x0060
+  PUSHTYPE5 str_01cam_02_10
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  COMM 0x021f
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 243
+  COMM 0x0009
+  PUSHIS 39
+  COMM 0x0217
+  PUSHIS 1
+  PUSHIS 1729
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 1
+  PUSHIS 1728
+  COMM 0x0007
+  PUSHREG
+  EQ
+  AND
+  IF _334
+  PUSHIS 722
+  COMM 0x0008
+  PUSHIS 253
+  COMM 0x0008
+  GOTO _334
+_334:
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01pos_07_8
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 291
+  PUSHIS 6
+  COMM 0x0015
+  PUSHREG
+  POPLIX 0x0050
+  PUSHTYPE5 str_01pos_05_6
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x004a
+  PUSHLIX 0x0050
+  COMM 0x021e
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x000f
+  COMM 0x0216
+  PUSHIS 128
+  COMM 0x0210
+  PUSHTYPE5 str_01cam_02_MOTION_4
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_02_11
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 1
+  PUSHTYPE5 str_01path_01_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x008b
+  PUSHIS 70
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 47
+  COMM 0x0000
+  PUSHTYPE5 str_01pos_06_7
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x004a
+  PUSHTYPE5 str_01cam_03_5
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 48
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_04_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 49
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  PUSHIS 3
+  PUSHIS 8
+  PUSHIS 12
+  PUSHIS 5
+  COMM 0x01f6
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 3
+  PUSHLIX 0x0050
+  COMM 0x0073
+  PUSHIS 23
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 39
+  COMM 0x01f3
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 39
+  COMM 0x01f4
+  PUSHIS 0
+  PUSHIS 1294
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _337
+  PUSHIS 520
+  PUSHIS 24
+  PUSHIS 58
+  COMM 0x0097
+  GOTO _336
+_337:
+  PUSHIS 522
+  PUSHIS 24
+  PUSHIS 58
+  COMM 0x0097
+  GOTO _336
+_336:
+  PUSHIS 792
+  COMM 0x0067
+  END
+  GOTO _338
+_338:
+  GOTO _340
+_340:
+  END
+battle_g_fin:
+  PROC battle_g_fin
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 1730
+  COMM 0x0008
+  COMM 0x0001
+  PUSHIS 50
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  END
+proc_0033:
+  PROC proc_0033
+  PUSHIS 3
+  PUSHIS 3
+  PUSHIS 8
+  PUSHIS 12
+  PUSHIS 5
+  COMM 0x01f6
+  END
+proc_0034:
+  PROC proc_0034
+  PUSHIS 1
+  PUSHIS 13
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _343
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_9
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_4
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _342
+_343:
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_10
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_5
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _342
+_342:
+  END
+proc_0035:
+  PROC proc_0035
+  PUSHIS 1
+  PUSHIS 27
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _344
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_11
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _344
+_344:
+  END
+proc_0036:
+  PROC proc_0036
+  PUSHIS 1
+  PUSHIS 27
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _346
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_12
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _346
+_346:
+  END
+proc_0037:
+  PROC proc_0037
+  PUSHIS 0
+  PUSHIS 1283
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _348
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x00c3
+  PUSHIS 1283
+  COMM 0x0008
+  PUSHIS 193
+  COMM 0x0009
+  PUSHTYPE5 str_01cam_01_9
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 34
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0004
+  PUSHIS 33
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0005
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0006
+  PUSHIS 24
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPIX 0x0007
+  PUSHTYPE5 str_01pos_03_3
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0004
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_04_4
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0005
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_05_7
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0006
+  COMM 0x004a
+  PUSHTYPE5 str_01pos_06_8
+  COMM 0x0094
+  PUSHREG
+  PUSHIX 0x0007
+  COMM 0x004a
+  PUSHIX 0x0004
+  COMM 0x021e
+  PUSHIX 0x0005
+  COMM 0x021e
+  PUSHIX 0x0006
+  COMM 0x021e
+  PUSHIX 0x0007
+  COMM 0x021e
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIX 0x0004
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0005
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 29
+  PUSHIX 0x0006
+  COMM 0x0073
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 26
+  PUSHIX 0x0007
+  COMM 0x0073
+  PUSHIS 30
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 30
+  COMM 0x000e
+  PUSHTYPE5 fld_f_bin_DVILIZE1_B_BED_4
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0051
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_8
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0052
+  PUSHTYPE5 fld_f_bin_DVILIZE1_BED_9
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0053
+  PUSHIS 40
+  COMM 0x011b
+  COMM 0x0001
+  PUSHTYPE5 str_01cam_01_MOTION_3
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_01_10
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 43
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_01_11
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0055
+  PUSHIS 44
+  COMM 0x0000
+  PUSHTYPE5 str_01cam_02_12
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 45
+  COMM 0x0000
+  PUSHIS 64
+  COMM 0x0214
+  PUSHIS 40
+  COMM 0x000e
+  PUSHTYPE5 str_01cam_03_6
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 30
+  PUSHIX 0x0006
+  COMM 0x0073
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 27
+  PUSHIX 0x0007
+  COMM 0x0073
+  PUSHIS 46
+  COMM 0x0000
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x011c
+  PUSHTYPE5 str_01pos_05_8
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0051
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_05_9
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0052
+  COMM 0x009d
+  PUSHTYPE5 str_01pos_06_9
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0053
+  COMM 0x009d
+  PUSHIS 0
+  PUSHLIX 0x0051
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0052
+  COMM 0x00ce
+  PUSHIS 0
+  PUSHLIX 0x0053
+  COMM 0x00ce
+  PUSHIS 25
+  COMM 0x000e
+  COMM 0x011f
+  PUSHIS 501
+  PUSHIS 24
+  PUSHIS 1
+  COMM 0x0097
+  PUSHIS 818
+  COMM 0x0067
+  END
+  GOTO _348
+_348:
+  END
+proc_0038:
+  PROC proc_0038
+  PUSHIS 1
+  PUSHIS 1289
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _351
+  PUSHTYPE5 atari_hoji_01
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0107
+  GOTO _350
+_351:
+  PUSHTYPE5 atari_hoji_01_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  GOTO _350
+_350:
+  END
+proc_0039:
+  PROC proc_0039
+_352:
+  PUSHIS 1
+  IF _353
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _354
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _354
+_354:
+  COMM 0x000d
+  GOTO _352
+_353:
+  END
+proc_003a:
+  PROC proc_003a
+_356:
+  PUSHIS 1
+  IF _357
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _358
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  COMM 0x0001
+  PUSHIS 42
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _358
+_358:
+  COMM 0x000d
+  GOTO _356
+_357:
+  END
+proc_003b:
+  PROC proc_003b
+  PUSHIS 0
+  PUSHIS 1291
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _360
+  COMM 0x0060
+  PUSHIS 1291
+  COMM 0x0008
+  PUSHIS 515
+  PUSHIS 24
+  PUSHIS 52
+  COMM 0x0097
+  PUSHIS 843
+  COMM 0x0067
+  END
+  GOTO _360
+_360:
+  END
+proc_003c:
+  PROC proc_003c
+  PUSHIS 0
+  PUSHIS 1292
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _362
+  COMM 0x0060
+  PUSHIS 1292
+  COMM 0x0008
+  PUSHIS 516
+  PUSHIS 24
+  PUSHIS 52
+  COMM 0x0097
+  PUSHIS 844
+  COMM 0x0067
+  END
+  GOTO _362
+_362:
+  END
+end
+
+messages msg1
+  message GEIRU_AYAAHIMU speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hm... No reception."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Thinking back to the Jailer's reaction,"
+      newline
+      text "it seems that the head of the Karma"
+      newline
+      text "Society wishes to speak with us."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Either way, we must continue."
+      newline
+      text "Be careful, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TRP_HOUKOKU_01 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Alpha 1, this is Bravo 2..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "The Asuras just passed my position,"
+      newline
+      text "right on schedule. I'll continue"
+      newline
+      text "observation..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TRP_HOUKOKU_02 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What? Capture them?"
+      newline
+      text "But, my orders were to..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Ah, I see."
+      newline
+      text "Understood."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Bravo 2, over and out."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I'll show 'em they don't belong"
+      newline
+      text "in our world..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN01 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Freeze!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN02 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hands on your head, and get down"
+      newline
+      text "on your knees! Now!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN03 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hmph..."
+      newline
+      text "They don't look so tough."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN04 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They're just the dregs of a failed"
+      newline
+      text "experiment..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN05 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Heh, that's true."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_EN05_01 speaker=2
+    page
+      control f2 08 ff ff
+      text "...And they wanted to put these"
+      newline
+      text "in our heads? Ha! No thanks."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Hurry up, you freaks. You've got"
+      newline
+      text "valuable programs in your brains,"
+      newline
+      text "right?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Well, bow down to us humans, or I'll"
+      newline
+      text "blow 'em all to AI heaven."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select BAT_SEL
+    option
+      control f2 08 ff ff
+      text "And, if we refuse?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "(Attack them while they talk)"
+    endoption
+  endselect
+  message START_EN06 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I see..."
+      newline
+      text "I'll blow you to hell and back, you"
+      newline
+      text "machine-headed freak!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message METATRON_BATT speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      text "Divine Ring"
+      control f2 02 01 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_SYOKUIN_01 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Uh... Well, er..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I-I'm just a government official"
+      newline
+      text "who got left behind! I don't have"
+      newline
+      text "anything to do with this!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "G-G-Go fight somewhere else!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select SITUMON
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where is Sera?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Why are you running?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Who were those soldiers?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "That's enough from you."
+    endoption
+  endselect
+  message KARUMA_SYOKUIN_03 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Th-The Cyber Shaman!?"
+      newline
+      text "She's in a medical room l-located"
+      newline
+      text "above this b-building..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "That's all I know! I swear!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_SYOKUIN_04 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Madame ordered an immediate evacuation!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I h-heard it's because the prisoners"
+      newline
+      text "have r-risen to action... The soldiers"
+      newline
+      text "moved to th-the upper floors..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "That's why the lower fl-floors were"
+      newline
+      text "so empty... Okay?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_SYOKUIN_05 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Oh... th-them?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "They're a t-top-notch special forces"
+      newline
+      text "unit. They're s-sort of considered"
+      newline
+      text "outcasts among the other soldiers."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I th-think they're downstairs,"
+      newline
+      text "b-but I have no idea why."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "They t-tend to do their own thing,"
+      newline
+      text "so it's probably s-something like"
+      newline
+      text "that."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_SYOKUIN_06 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'll tell you anything..."
+      newline
+      text "Just don't kill me!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_SYOKUIN_07 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Y-You're going to spare my life?"
+      newline
+      text "Th-Thanks..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message SYOKUIN_SIE_01 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Maybe we can get some info from"
+      newline
+      text "dis guy, ja?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message YOKOKARA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph was shot in the side!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message bingo speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "BULLSEYE!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN01_01 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Alpha 1, this is Delta 3."
+      newline
+      text "We made contact, just as planned."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Roger, leave these ass-hats to me."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AFBASTSYOKUIN_GI_01 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We desire information more than"
+      newline
+      text "battle."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "You may choose... Satisfy our minds,"
+      newline
+      text "or satisfy our hunger."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_03_01AFT speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Cy-Cyber Shaman is..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_03_02AFT speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Chief and... and--"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_03_02AFT_01 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...Yeargh!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_03_03AFT speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "W-We were told to follow that red--"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select SITUMON_FEIKU
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where is Sera?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Who gives your orders?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "Why were you ordered to capture us?"
+    endoption
+  endselect
+  message KARUMA_AFT speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The Karma Soldier was shot!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message AFBAST_ATAMA_01 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "M-Minds, minds! Please!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN02_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Wow, talk about persistent..."
+      newline
+      text "You weren't devoured yet?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN02_02 speaker=7
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We're the renegade TPV special unit."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN02_03 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Seeing blood and hearing flesh"
+      newline
+      text "tear apart is more important to us"
+      newline
+      text "than that old woman's orders!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TRIEN03_01_SIERO speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Whoa... Dey switched de doors!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN03_01_GEIRU_ODO speaker=0
+    page
+      control f2 08 ff ff
+      text "It seems we walked right into"
+      newline
+      text "their trap..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "An impressive effort on their part."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN03_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Something can be heard from"
+      newline
+      text "the dead soldier's transceiver."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN03_01_MUSE speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Echo 5, this is Alpha 1."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "What happened? Did you get them?"
+      newline
+      text "Answer me, Echo 5!"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "...Useless--"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EN03_01MUSEKIRE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The transmission was cut off."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message START_GEIRU speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It sounds like Sera is on a higher"
+      newline
+      text "level of this building."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Let's head to the top, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message KARUMA_MAKE_DEAD speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> He's already dead."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANG_KARMA_DEAD_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's the corpse of a soldier"
+      newline
+      text "wearing a blue arm band."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANG_KARMA_DEAD_02 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's the corpse of a soldier"
+      newline
+      text "wearing a blue arm band. It's riddled"
+      newline
+      text "with bullet wounds."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MADAMU_KARMA_01 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...We're currently engaged with"
+      newline
+      text "the rebellion forces."
+      newline
+      text "We need backup! I repeat, send backup!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MADAMU_KARMA_01_01 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Dammit..."
+      newline
+      text "Why don't they send the Tribhvana?"
+      newline
+      text "They're the elite freaking squad...!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MADAMU_KARMA_02 speaker=9
+    page
+      control f2 08 ff ff
+      text "There's no point in complaining..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "The unit and that red Asura guy"
+      newline
+      text "were sent to capture the remaining"
+      newline
+      text "Asuras."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MADAMU_KARMA_03 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Wh-What!?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "You're the wanted Asura!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message GABURI_01 speaker=10
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This city isn't my city..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message GABURI_02 speaker=10
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where is the savior?"
+      newline
+      text "Where is the millenium?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message GABURI_03 speaker=10
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I thirst..."
+      newline
+      text "I must quench this thirst!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message GABURI_FIN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Gabriel disappeared."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gyousyounin speaker=11
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This is the shop. If I set up the shop,"
+      newline
+      text "then that's where the shop is."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "This is serious business, my friend."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_024_026_01 speaker=12
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Who do you think they were talking"
+      newline
+      text "about?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_024_026_01a speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What reason would they want us"
+      newline
+      text "captured alive?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_024_026_01b speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Does the Society need us for"
+      newline
+      text "something...?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_024_026_01a speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "'ere we go again..."
+      newline
+      text "Just another set of freaks."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_024_026_01b speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Dey better not be as persistent"
+      newline
+      text "as Bat, ja?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_026_01a speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I hope our informants are safe..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_026_01b speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I still haven't figured out their"
+      newline
+      text "motives--but we need their help."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_024_037_01 speaker=12
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Forget about them."
+      newline
+      text "We need to find Sera."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_024_037_01 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Who are they comparing us to?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_024_037_01 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hey bro, I don't have de greatest"
+      newline
+      text "feeling about dis..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_037_01a speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can't believe you defeated those"
+      newline
+      text "three... not just once, but twice."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_037_01b speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Asura AI's really are killing"
+      newline
+      text "machines, if you can take down"
+      newline
+      text "the Society's elite that easily."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_024_049_01a speaker=12
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Did Heat really betray us?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_024_049_01b speaker=12
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Comrades shouldn't have to fight"
+      newline
+      text "one another..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_024_049_01a speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They ran off..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_024_049_01b speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We need to keep moving."
+      newline
+      text "They won't let us escape that"
+      newline
+      text "easily."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_024_049_01a speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Ohhh, Heat looked serious, ja?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_024_049_01b speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What happened to him, bro?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_049_01a speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's driven by anger..."
+      newline
+      text "...and sadness."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message roald_024_049_01b speaker=13
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What did they tell him...?"
+      newline
+      text "We need to find out the truth behind"
+      newline
+      text "all this as soon as possible."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EXITWARP speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Leave the area?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select EXITWARP_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message FLDHUNTEXITWARP speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Will you stop the Field Hunt and"
+      newline
+      text "leave the area?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select FLDHUNTEXITWARP_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message HOSEKI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A strange object hovers in midair."
+      newline
+      text "Touch it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select HOSEKI_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message HOSEKI_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> You decided not to touch it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HOSEKI_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> There is a box emitting light from"
+      newline
+      text "its panel. Open it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select TAKARA_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message TAKARA_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> You decided not to open it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_STILLGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's empty."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "> Plants are very rare in this world."
+      newline
+      text "They can be traded in at MAD MART for"
+      newline
+      text "money."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message SUN_TAKARA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> There is a strange, flower-like"
+      newline
+      text "object. Touch it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message SUN_TAKARA_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> You decided not to touch it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_MAKA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      text "$"
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The entire party took damage."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_POISON speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The entire party took damage,"
+      newline
+      text "and was poisoned."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_ACHE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The entire party took damage,"
+      newline
+      text "and had stomach aches."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_CLOSE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The entire party took damage,"
+      newline
+      text "and had magic sealed."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_KARAGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It was empty."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARASAGASI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> "
+      control f2 03 03 ff
+      text " found something."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "........."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_OPENERROR speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Cannot be used here."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message BAD_KAIFUKUSITAYO speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Due to the decline in"
+      newline
+      text "Solar Noise, the party was"
+      newline
+      text "relieved of abnormal status."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_LIGHTMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Light Ball's effect ended."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_ESTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The anti-demon field faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REBERAMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The demon attraction faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REFUTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Core Shield's effect ended."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message WARP_ELV_MSG speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Select a floor."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select WARP_ELV_SEL1
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL2
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL3
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL4
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL5
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL6
+    option
+      control f2 08 ff ff
+      control f2 03 06 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  message FLD_BLUEICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A blue wall stands in the way."
+      newline
+      text "The Blue Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_REDICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A red wall stands in the way."
+      newline
+      text "The Red Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_YERWICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A yellow wall stands in the way."
+      newline
+      text "The Yellow Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_BLUEICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A blue wall stands in the way."
+      newline
+      text "You cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_REDICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A red wall stands in the way."
+      newline
+      text "You cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_YERWICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A yellow wall stands in the way."
+      newline
+      text "You cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_ICE_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Destroy it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select FLD_ICE_BREAK_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message INF_TOBIRA_SENTOU speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Something suspicious can be sensed"
+      newline
+      text "beyond the door."
+      newline
+      text "Enter the room?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INF_TOBIRA_M_SEN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Something suspicious can be sensed"
+      newline
+      text "beyond the door."
+      newline
+      text "Enter the room?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INF_TOBIRA_HEAT speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It appears to be a medical room."
+      newline
+      text "Go inside?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INF_TOBIRA_JYU speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Gun shots can be heard behind"
+      newline
+      text "the door."
+      newline
+      text "Enter?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select INF_SEL
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message ITOBIRA_TOJI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The door is shut tightly."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TOBIRA_AKANN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The door won't open."
+      newline
+      text "It seems the path has been"
+      newline
+      text "obstructed."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MADA_KARMA_TOBI speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This door's sealed!"
+      newline
+      text "Now we'll be able to catch them"
+      newline
+      text "off guard..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANG_KARMA_SP speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Don't shoot!"
+      newline
+      text "We're not enemies!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANG_KARMA_02 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "You need to hurry..."
+      newline
+      text "Our Chief Tech Officer is waiting"
+      newline
+      text "for you."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ANG_KARMA_03 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Don't shoot!"
+      newline
+      text "We're not enemies."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_01 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Proclamation Records]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_02 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Settlement Processing Inventory]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_03 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Settlement Processing Inventory]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_04 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[World Relation Proposal]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_05 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[General Affairs - Minutes]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_06 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Budget Demand Reallocation]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_07 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Public Safety Commission Conference]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_08 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Security Unit Operating Procedure]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_09 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Command Operation Regulations]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_10 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Economy Finance Projections]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_11 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Safety Guarantee Regulations]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_12 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Food Supply Management Regulations]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_13 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's an official document."
+      newline
+      text "[Karma Society Proposal for Peace]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_14 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's a document."
+      newline
+      text "[Top Secret: Tech Unit Research]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HONTANA_15 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It's a document."
+      newline
+      text "[Top Secret: Sun Observation Records]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message IMUSITU_KANBAN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Something's written on the sign."
+      newline
+      text "[Right Turn: Medical Room."
+      newline
+      text "Unauthorized entry is prohibited.]"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Gale"
+  endspeaker
+  speaker 1
+    text "Karma Special Ops"
+  endspeaker
+  speaker 2
+    text "Karma Special Ops 1"
+  endspeaker
+  speaker 3
+    text "Karma Special Ops 2"
+  endspeaker
+  speaker 4
+    text "Karma Society Worker"
+  endspeaker
+  speaker 5
+    text "Cielo"
+  endspeaker
+  speaker 6
+    text "Karma Soldier 1"
+  endspeaker
+  speaker 7
+    text "Karma Soldier 2"
+  endspeaker
+  speaker 8
+    text "Transceiver"
+  endspeaker
+  speaker 9
+    text "Karma Soldier"
+  endspeaker
+  speaker 10
+    text "Gabriel"
+  endspeaker
+  speaker 11
+    text "Johnny"
+  endspeaker
+  speaker 12
+    text "Argilla"
+  endspeaker
+  speaker 13
+    text "Roland"
+  endspeaker
+end
+
+strings count=240
+  string ppos01 "ppos01"
+  string str_01cam_01 "01cam_01"
+  string str_01all_d01 "01all_d01"
+  string str_01path_01 "01path_01"
+  string str_01all_d02 "01all_d02"
+  string str_01path_02 "01path_02"
+  string str_01all_d01_2 "01all_d01"
+  string fld_f_bin_ICE_b_BED "/fld/f/bin/ICE_b.BED"
+  string BARIA "BARIA"
+  string BARIA_2 "BARIA"
+  string k_01npc_01 "k_01npc_01"
+  string ppos01_2 "ppos01"
+  string k_01npc_02 "k_01npc_02"
+  string ppos01_3 "ppos01"
+  string k_01npc_03 "k_01npc_03"
+  string ppos01_4 "ppos01"
+  string k_01npc_04 "k_01npc_04"
+  string k_01npc_01_2 "k_01npc_01"
+  string ppos01_5 "ppos01"
+  string k_01npc_02_2 "k_01npc_02"
+  string ppos01_6 "ppos01"
+  string k_01npc_03_2 "k_01npc_03"
+  string ppos01_7 "ppos01"
+  string k_01npc_04_2 "k_01npc_04"
+  string k_01npc_01_3 "k_01npc_01"
+  string k_01npc_02_3 "k_01npc_02"
+  string ppos01_8 "ppos01"
+  string k_01npc_03_3 "k_01npc_03"
+  string ppos01_9 "ppos01"
+  string k_01npc_04_3 "k_01npc_04"
+  string ppos01_10 "ppos01"
+  string md_hoji_01 "md_hoji_01"
+  string md_hoji_02 "md_hoji_02"
+  string md_hoji_03 "md_hoji_03"
+  string md_hoji_04 "md_hoji_04"
+  string md_hoji_05 "md_hoji_05"
+  string md_hoji_06 "md_hoji_06"
+  string md_hoji_07 "md_hoji_07"
+  string md_hoji_08 "md_hoji_08"
+  string md_hoji_01_2 "md_hoji_01"
+  string md_hoji_02_2 "md_hoji_02"
+  string md_hoji_03_2 "md_hoji_03"
+  string md_hoji_04_2 "md_hoji_04"
+  string md_hoji_05_2 "md_hoji_05"
+  string md_hoji_06_2 "md_hoji_06"
+  string md_hoji_07_2 "md_hoji_07"
+  string md_hoji_08_2 "md_hoji_08"
+  string md_hoji_01_3 "md_hoji_01"
+  string md_hoji_02_3 "md_hoji_02"
+  string md_hoji_03_3 "md_hoji_03"
+  string md_hoji_04_3 "md_hoji_04"
+  string md_hoji_05_3 "md_hoji_05"
+  string md_hoji_06_3 "md_hoji_06"
+  string md_hoji_07_3 "md_hoji_07"
+  string md_hoji_08_3 "md_hoji_08"
+  string str_01pos_08 "01pos_08"
+  string str_01cam_01_2 "01cam_01"
+  string str_01cam_01_3 "01cam_01"
+  string str_01cam_01_MOTION "01cam_01_MOTION"
+  string str_01pos_07 "01pos_07"
+  string str_01cam_03 "01cam_03"
+  string str_01cam_03_2 "01cam_03"
+  string str_01cam_03_MOTION "01cam_03_MOTION"
+  string str_01pos_01 "01pos_01"
+  string str_01pos_03 "01pos_03"
+  string str_01cam_02 "01cam_02"
+  string str_01pos_05 "01pos_05"
+  string str_01pos_04 "01pos_04"
+  string str_01pos_06 "01pos_06"
+  string md_01d_02 "md_01d_02"
+  string str_01path_01_2 "01path_01"
+  string md_01d_02b "md_01d_02b"
+  string str_01path_02_2 "01path_02"
+  string md_01d_02_2 "md_01d_02"
+  string str_01path_01_3 "01path_01"
+  string md_01d_02b_2 "md_01d_02b"
+  string str_01path_02_3 "01path_02"
+  string str_01pos_06_2 "01pos_06"
+  string str_01cam_01_4 "01cam_01"
+  string str_01pos_04_2 "01pos_04"
+  string str_01cam_01_5 "01cam_01"
+  string str_01cam_01_MOTION_2 "01cam_01_MOTION"
+  string str_01pos_11 "01pos_11"
+  string str_01pos_08_2 "01pos_08"
+  string str_01pos_09 "01pos_09"
+  string str_01cam_02_2 "01cam_02"
+  string str_01cam_03_3 "01cam_03"
+  string str_01cam_04 "01cam_04"
+  string str_01cam_02_3 "01cam_02"
+  string str_01pos_11_2 "01pos_11"
+  string str_01pos_06_3 "01pos_06"
+  string str_01pos_03_2 "01pos_03"
+  string str_01cam_01_6 "01cam_01"
+  string str_01pos_04_3 "01pos_04"
+  string str_01pos_09_2 "01pos_09"
+  string str_01pos_11_3 "01pos_11"
+  string fld_f_bin_DVILIZE1_B_BED "/fld/f/bin/DVILIZE1_B.BED"
+  string fld_f_bin_DVILIZE1_BED "/fld/f/bin/DVILIZE1.BED"
+  string fld_f_bin_DVILIZE1_BED_2 "/fld/f/bin/DVILIZE1.BED"
+  string str_01pos_08_3 "01pos_08"
+  string str_01cam_01_7 "01cam_01"
+  string str_01pos_09_3 "01pos_09"
+  string str_01pos_09_4 "01pos_09"
+  string str_01pos_11_4 "01pos_11"
+  string str_01cam_02_4 "01cam_02"
+  string str_01pos_14 "01pos_14"
+  string str_01pos_13 "01pos_13"
+  string str_01pos_10 "01pos_10"
+  string str_01pos_07_2 "01pos_07"
+  string fld_f_bin_DVILIZE1_B_BED_2 "/fld/f/bin/DVILIZE1_B.BED"
+  string fld_f_bin_DVILIZE1_BED_3 "/fld/f/bin/DVILIZE1.BED"
+  string fld_f_bin_DVILIZE1_BED_4 "/fld/f/bin/DVILIZE1.BED"
+  string str_01npc_01 "01npc_01"
+  string str_01pos_13_2 "01pos_13"
+  string str_01pos_16 "01pos_16"
+  string str_01cam_02_5 "01cam_02"
+  string str_01cam_02_MOTION "01cam_02_MOTION"
+  string str_01pos_07_3 "01pos_07"
+  string str_01pos_07_4 "01pos_07"
+  string str_01pos_10_2 "01pos_10"
+  string str_01cam_02_6 "01cam_02"
+  string str_01pos_05_2 "01pos_05"
+  string str_01pos_06_4 "01pos_06"
+  string str_01pos_07_5 "01pos_07"
+  string str_01pos_08_4 "01pos_08"
+  string fld_f_bin_DVILIZE1_B_BED_3 "/fld/f/bin/DVILIZE1_B.BED"
+  string fld_f_bin_DVILIZE1_BED_5 "/fld/f/bin/DVILIZE1.BED"
+  string fld_f_bin_DVILIZE1_BED_6 "/fld/f/bin/DVILIZE1.BED"
+  string fld_f_bin_DVILIZE2_BED "/fld/f/bin/DVILIZE2.BED"
+  string fld_f_bin_DVILIZE1_BED_7 "/fld/f/bin/DVILIZE1.BED"
+  string str_01cam_02_7 "01cam_02"
+  string str_01cam_02_MOTION_2 "01cam_02_MOTION"
+  string str_01pos_05_3 "01pos_05"
+  string str_01pos_05_4 "01pos_05"
+  string str_01pos_06_5 "01pos_06"
+  string str_01pos_07_6 "01pos_07"
+  string str_01pos_08_5 "01pos_08"
+  string str_01cam_01_8 "01cam_01"
+  string str_01pos_09_5 "01pos_09"
+  string str_01pos_10_3 "01pos_10"
+  string md_hoji_01_4 "md_hoji_01"
+  string md_hoji_01_5 "md_hoji_01"
+  string md_hoji_01_6 "md_hoji_01"
+  string md_hoji_01_7 "md_hoji_01"
+  string md_hoji_01_8 "md_hoji_01"
+  string str_01cam_02_8 "01cam_02"
+  string str_01pos_07_7 "01pos_07"
+  string str_01pos_05_5 "01pos_05"
+  string str_01cam_02_9 "01cam_02"
+  string str_01cam_02_MOTION_3 "01cam_02_MOTION"
+  string str_01path_01_4 "01path_01"
+  string str_01pos_06_6 "01pos_06"
+  string str_01cam_03_4 "01cam_03"
+  string str_01cam_04_2 "01cam_04"
+  string str_01cam_02_10 "01cam_02"
+  string str_01pos_07_8 "01pos_07"
+  string str_01pos_05_6 "01pos_05"
+  string str_01cam_02_11 "01cam_02"
+  string str_01cam_02_MOTION_4 "01cam_02_MOTION"
+  string str_01path_01_5 "01path_01"
+  string str_01pos_06_7 "01pos_06"
+  string str_01cam_03_5 "01cam_03"
+  string str_01cam_04_3 "01cam_04"
+  string md_hoji_01_9 "md_hoji_01"
+  string md_hoji_02_4 "md_hoji_02"
+  string md_hoji_01_10 "md_hoji_01"
+  string md_hoji_02_5 "md_hoji_02"
+  string md_hoji_01_11 "md_hoji_01"
+  string md_hoji_01_12 "md_hoji_01"
+  string str_01cam_01_9 "01cam_01"
+  string str_01pos_03_3 "01pos_03"
+  string str_01pos_04_4 "01pos_04"
+  string str_01pos_05_7 "01pos_05"
+  string str_01pos_06_8 "01pos_06"
+  string fld_f_bin_DVILIZE1_B_BED_4 "/fld/f/bin/DVILIZE1_B.BED"
+  string fld_f_bin_DVILIZE1_BED_8 "/fld/f/bin/DVILIZE1.BED"
+  string fld_f_bin_DVILIZE1_BED_9 "/fld/f/bin/DVILIZE1.BED"
+  string str_01cam_01_10 "01cam_01"
+  string str_01cam_01_MOTION_3 "01cam_01_MOTION"
+  string str_01cam_01_11 "01cam_01"
+  string str_01cam_02_12 "01cam_02"
+  string str_01cam_03_6 "01cam_03"
+  string str_01pos_05_8 "01pos_05"
+  string str_01pos_05_9 "01pos_05"
+  string str_01pos_06_9 "01pos_06"
+  string atari_hoji_01 "atari_hoji_01"
+  string atari_hoji_01_2 "atari_hoji_01"
+end
