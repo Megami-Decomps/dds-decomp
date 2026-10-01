@@ -79,11 +79,52 @@ later addresses and offsets without hand-editing bookkeeping.
 
 The symbolic disassembler accepts the standard DDS five-section layout and
 canonical 32-byte name rows. It rejects irregular layouts rather than hiding
-bytes; use version 1 for those files. Message and string payloads remain raw
-until their internal formats are understood. The tracked DDS1 event corpus has
-97 symbolic sources and seven lossless physical sources whose nonzero trailing
-bytes lie outside the five declared sections (`e503`, `e510`, `e697`, `e705`,
-`e802`, `e807`, and `e809`).
+bytes; use version 1 for those files. Message payloads remain raw until their
+internal format is understood. The tracked DDS1 event corpus has 97 symbolic
+sources and seven lossless physical sources whose nonzero trailing bytes lie
+outside the five declared sections (`e503`, `e510`, `e697`, `e705`, `e802`,
+`e807`, and `e809`).
+
+### String symbols
+
+Section 4 is an ordered byte pool. A `string` declaration emits its ASCII text
+and terminating NUL, and binds its symbol to the first emitted byte:
+
+```text
+code
+main:
+  PUSHTYPE5 camera
+  PUSHTYPE5 camera_motion
+  END
+end
+
+strings
+  string camera "cam01"
+  string camera_motion "cam01_MOTION"
+  zero 32
+end
+```
+
+Changing an earlier string moves later symbols and updates their encoded
+`PUSHTYPE5` operands automatically. Equal text at different offsets remains as
+separate declarations; the assembler never interns it. The disassembler only
+creates a declaration when a referenced offset begins a printable,
+NUL-terminated ASCII string. Other operands remain numeric and the bytes stay
+in local `bytes` or `zero` directives.
+
+The DDS1 event corpus has 315 such instructions in 13 files. Every operand
+lands at the start of a distinct valid string, so all 315 are symbolic. Five
+physical version-1 files address records beyond the type-4 descriptor's logical
+length. Their section line carries an explicit physical `extent`, for example:
+
+```text
+section 4 type=4 stride=0x1 count=48 offset=0x1243 extent=0x174
+```
+
+`count` remains the exact retail descriptor value; `extent` says how many
+physical bytes the following source directives own. This exposes the
+descriptor/physical-length mismatch without splitting the readable pool into
+unrelated top-level preservation records.
 
 ### Native command profiles
 
@@ -233,11 +274,12 @@ as a 16-bit two's-complement value. Procedure and jump target names after `#`
 are explanatory comments in this first format; the numeric table index remains
 the assembled operand.
 
-Raw message, string, and unknown sections use `bytes HEX`. An all-zero region
-uses the shorter `zero SIZE`. Unusual procedure or label rows fall back to
-`row HEX`, and bytes outside declared section extents use `preserve` with an
-absolute offset. These escapes are local: understood code and table rows stay
-readable even when another part of the file is opaque.
+Raw message and unknown sections use `bytes HEX`; string pools use it locally
+for data that cannot be represented by a `string` declaration. An all-zero
+region uses the shorter `zero SIZE`. Unusual procedure or label rows fall back
+to `row HEX`, and other bytes outside declared section extents use `preserve`
+with an absolute offset. These escapes are local: understood code and table
+rows stay readable even when another part of the file is opaque.
 
 The header exposes the signed integer and float local counts used by the DDS
 VM. Other fields retain offset-based names when their purpose is not established.
@@ -245,9 +287,9 @@ VM. Other fields retain offset-based names when their purpose is not established
 ## Physical editing boundary
 
 The current writer preserves the existing physical layout. It supports edits
-whose encoded data still matches the descriptor sizes and offsets. It rejects
-missing bytes, changed section lengths, inconsistent overlaps, invalid code
-addresses, and out-of-range operands.
+whose encoded data still matches the descriptor sizes, offsets, and any
+explicit physical string extent. It rejects missing bytes, changed extents,
+inconsistent overlaps, invalid code addresses, and out-of-range operands.
 
 Use symbolic version 2 when an edit changes section size. Archive insertion is
 outside this tool; the assembler produces the rebuilt BF file.
