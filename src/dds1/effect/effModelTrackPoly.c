@@ -74,7 +74,30 @@ void func_00188300(EffTrackPolyWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188318);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_001883E0);
+typedef struct EffTrackPolyList {
+    EffTrackPolyWork **items; /* 0x00 */
+    u32 count;                /* 0x04 */
+    u32 handle;               /* 0x08 */
+} EffTrackPolyList;
+
+extern u32 func_002D03F8(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern EffTrackPolyWork *func_00188150(EffTrackPolyModel *model);
+
+/* Build a list of `count` track-poly works over one model. */
+EffTrackPolyList *func_001883E0(EffTrackPolyModel *model, u32 count) {
+    u32 handle = func_002D03F8(count * 4 + 0xC);
+    EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
+    u32 i;
+
+    list->handle = handle;
+    list->items = (EffTrackPolyWork **)(list + 1);
+    list->count = count;
+    for (i = 0; i < count; i++) {
+        list->items[i] = func_00188150(model);
+    }
+    return list;
+}
 
 void func_00188480(EffTrackPolyWork ***list) {
     u32 count = list[1];
