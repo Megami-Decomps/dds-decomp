@@ -557,9 +557,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1408,9 +1406,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1746,9 +1742,7 @@ _237:
               PREPARE_UNIT_MOTION_STATE(local_int[58], 1, 10, 20, 0)
               SET_MESSAGE_WINDOW_GEOMETRY(0, 125, 3)
               MESSAGE_REQUEST_AND_POLL(message(npc07_010_001_01_ans0b))
-              push 1
-              push 125
-              COMM 0x0070
+              CHANGE_ITEM_COUNT(125, 1)
               SET_MODEL_FLAG(560)
               CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[58])
               FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1764,9 +1758,7 @@ _237:
                 PREPARE_UNIT_MOTION_STATE(local_int[58], 1, 10, 20, 0)
                 SET_MESSAGE_WINDOW_GEOMETRY(0, 110, 3)
                 MESSAGE_REQUEST_AND_POLL(message(npc07_010_001_01_ans1b))
-                push 1
-                push 110
-                COMM 0x0070
+                CHANGE_ITEM_COUNT(110, 1)
                 SET_MODEL_FLAG(561)
                 CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[58])
                 FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1782,9 +1774,7 @@ _237:
                   PREPARE_UNIT_MOTION_STATE(local_int[58], 1, 10, 20, 0)
                   SET_MESSAGE_WINDOW_GEOMETRY(0, 116, 3)
                   MESSAGE_REQUEST_AND_POLL(message(npc07_010_001_01_ans2b))
-                  push 1
-                  push 116
-                  COMM 0x0070
+                  CHANGE_ITEM_COUNT(116, 1)
                   SET_MODEL_FLAG(562)
                   CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[58])
                   FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1800,9 +1790,7 @@ _237:
                     PREPARE_UNIT_MOTION_STATE(local_int[58], 1, 10, 20, 0)
                     SET_MESSAGE_WINDOW_GEOMETRY(0, 119, 3)
                     MESSAGE_REQUEST_AND_POLL(message(npc07_010_001_01_ans3b))
-                    push 1
-                    push 119
-                    COMM 0x0070
+                    CHANGE_ITEM_COUNT(119, 1)
                     SET_MODEL_FLAG(563)
                     CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[58])
                     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2394,8 +2382,7 @@ proc_002c:
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_12)))
     SCREEN_FADE_A(1, 1)
     WAIT_FOR_TIMER_LIMIT(1)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 15
     push 10
     COMM 0x01f0

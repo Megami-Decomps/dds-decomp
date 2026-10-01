@@ -33,8 +33,7 @@ e803_main:
   COMM 0x001e
   goto _1
 _1:
-  push 803
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(803)
   push 0
   COMM 0x011d
   SCREEN_FADE_B(0, 1)
@@ -258,11 +257,7 @@ _1:
   push READ_SECONDARY_WORLD_ID_VALUE(string(pos15))
   push local_int[23]
   COMM 0x009d
-  push 4
-  push 803
-  COMM 0x00c9
-  PUSHREG
-  POPLIX 0x0000
+  local_int[0] = BIND_MODEL_MOTION_SOUND(803, 4)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
   ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01)))
   push local_int[0]

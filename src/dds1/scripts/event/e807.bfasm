@@ -81,8 +81,7 @@ _2:
   PUSHREG
   COMM WAIT_FOR_TASK_REMOVAL
   COMM 0x0023
-  push 807
-  COMM 0x00f7
+  START_CAMP_TASK_IF_ABSENT(807)
   push 3
   COMM 0x011d
   push global_int[11]
@@ -129,8 +128,7 @@ _4:
   PUSHREG
   COMM WAIT_FOR_TASK_REMOVAL
   COMM 0x0023
-  push 807
-  COMM 0x00f7
+  START_CAMP_TASK_IF_ABSENT(807)
   push 3
   COMM 0x011d
   push global_int[11]
@@ -143,14 +141,9 @@ _3:
   goto _5
 _5:
 _7:
-  push 0
-  push 807
-  COMM 0x00f8
-  PUSHREG
-  EQ
-  IF _8
-  WAIT_FOR_TIMER_LIMIT(1)
-  goto _7
+  while (CAMP_TASK_READY(807) == 0) {
+    WAIT_FOR_TIMER_LIMIT(1)
+  }
 _8:
   push 3
   push 807
@@ -203,11 +196,7 @@ _12:
   COMM 0x0013
   goto _9
 _9:
-  push 15
-  push 807
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x000f
+  global_int[15] = BIND_MODEL_MOTION_SOUND(807, 15)
   SET_UNIT_LOW_FLAG(global_int[15])
   push 0
   COMM 0x00ee
@@ -220,11 +209,7 @@ _9:
   push -(100)
   push 0
   COMM 0x0048
-  push 13
-  push 807
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x000c
+  global_int[12] = BIND_MODEL_MOTION_SOUND(807, 13)
   push 0
   push -(17)
   push 0
@@ -341,26 +326,16 @@ _15:
   return
 e807_010_1:
   PROC e807_010_1
-  push 807
-  COMM 0x00f7
+  START_CAMP_TASK_IF_ABSENT(807)
 _16:
-  push 0
-  push 807
-  COMM 0x00f8
-  PUSHREG
-  EQ
-  IF _17
-  WAIT_FOR_TIMER_LIMIT(1)
-  goto _16
+  while (CAMP_TASK_READY(807) == 0) {
+    WAIT_FOR_TIMER_LIMIT(1)
+  }
 _17:
   return
 e807_010_2:
   PROC e807_010_2
-  push 4
-  push 807
-  COMM 0x00d0
-  PUSHREG
-  POPIX 0x0006
+  global_int[6] = CREATE_EVENT_BED_EFFECT(807, 4)
   local_int[1] = 0
 _18:
   while (1) {

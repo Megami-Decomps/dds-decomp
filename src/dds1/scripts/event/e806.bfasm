@@ -11,17 +11,12 @@ jump_label _2 reserved=0x00000000
 code
 e806_main:
   PROC e806_main
-  push 806
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(806)
   push 3
   push 806
   COMM 0x00ca
   SCREEN_FADE_B(0, 1)
-  push 4
-  push 806
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0001
+  global_int[1] = BIND_MODEL_MOTION_SOUND(806, 4)
   push 0
   push 1
   push 98

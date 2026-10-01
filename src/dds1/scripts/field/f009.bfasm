@@ -174,9 +174,7 @@ takarasagasi_label:
   push 43
   COMM 0x0214
   MESSAGE_REQUEST_AND_POLL(message(TAKARASAGASI))
-  push local_int[1]
-  push local_int[0]
-  COMM 0x0070
+  CHANGE_ITEM_COUNT(local_int[0], local_int[1])
   FINISH_SCRIPT_MESSAGE_WINDOW()
   RELEASE_CURRENT_OBJECT()
   SET_SOLAR_OVERLAY_MODE(7)
@@ -381,9 +379,7 @@ _9:
                         goto _15
                       }
                     _15:
-                      push local_int[5]
-                      push local_int[4]
-                      COMM 0x0070
+                      CHANGE_ITEM_COUNT(local_int[4], local_int[5])
                       goto _17
                     }
                   _17:
@@ -1087,9 +1083,7 @@ _151:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         WAIT_FOR_TIMER_LIMIT(30)
         PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 10, 10, 0)
-        push 0
-        push local_int[49]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[49], 0)
         WAIT_FOR_UNIT_MOTION(global_int[0])
         WAIT_FOR_TIMER_LIMIT(30)
         DISABLE_FIELD_MODELS(0, 0, string(BARIA), 1)

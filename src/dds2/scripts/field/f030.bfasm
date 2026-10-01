@@ -690,9 +690,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1541,9 +1539,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1624,9 +1620,7 @@ _207:
       MESSAGE_REQUEST_AND_POLL(message(JOJI_030_001_01))
       SET_MESSAGE_WINDOW_GEOMETRY(0, 14, 3)
       MESSAGE_REQUEST_AND_POLL(message(JOJI_030_001_02))
-      push 1
-      push 14
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(14, 1)
       SET_MODEL_FLAG(449)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[52])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2795,9 +2789,7 @@ seto_after_btl:
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(MANTRA_ON))
   SET_MESSAGE_WINDOW_GEOMETRY(0, 220, 3)
-  push 1
-  push 220
-  COMM 0x0070
+  CHANGE_ITEM_COUNT(220, 1)
   MESSAGE_REQUEST_AND_POLL(message(KARMA_GET))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SET_SOLAR_OVERLAY_MODE(1)

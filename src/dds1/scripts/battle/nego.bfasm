@@ -114,45 +114,42 @@ FailNegoStart:
   PROC FailNegoStart
   call NegoInit
   local_int[0] = 100
-  COMM 0x00fb
+  TRACE_BATTLE_CAMERA_TWO_SHOT()
   local_int[13] = 0
-  push 0
-  push 1
-  push local_int[2]
-  COMM 0x00d7
+  SET_MG1_EFFECT_POINTS(local_int[2], 1, 0)
   push 0
   push -(1)
-  COMM 0x00db
+  COMM SET_WORLD_NODE_BASE_MODE
   push 1
   push local_int[2]
-  COMM 0x00db
-  COMM 0x00d5
+  COMM SET_WORLD_NODE_BASE_MODE
+  COMM CREATE_MG2_EFFECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_ERROR))
   call NegoExit
   push 0
-  COMM 0x00fc
+  COMM TRACE_BATTLE_CAMERA_OBSTRUCTION
   return
 NegoInit:
   PROC NegoInit
   local_int[0] = 0
-  COMM 0x00c8
+  COMM WAIT_FOR_CAMP_TASK
   PUSHREG
   POPLIX 0x0001
-  COMM 0x00c9
+  COMM BIND_MODEL_MOTION_SOUND
   PUSHREG
   POPLIX 0x0002
   push local_int[1]
-  COMM 0x00d4
+  COMM CREATE_EVENT_MG1_EFFECT
   PUSHREG
   POPLIX 0x0003
   push local_int[2]
-  COMM 0x00d4
+  COMM CREATE_EVENT_MG1_EFFECT
   PUSHREG
   POPLIX 0x0004
-  COMM 0x00d2
+  COMM WAIT_FOR_EFFECT_PATH
   PUSHREG
   POPLIX 0x0005
-  COMM 0x00d3
+  COMM CREATE_MG1_EFFECT
   PUSHREG
   POPLIX 0x0006
   local_int[7] = (local_int[5] - 1) / 4
@@ -163,23 +160,18 @@ NegoInit:
   return
 NegoMain:
   PROC NegoMain
-  COMM 0x00f4
+  COMM AI_MOVE_CAMERA
   PUSHREG
   POPLIX 0x000e
   local_int[15] = 0
 _1:
   while (local_int[15] < local_int[14]) {
     push local_int[15]
-    COMM 0x00f5
+    COMM TRACE_BATTLE_CAMERA_ORIGINAL
     PUSHREG
     POPLIX 0x0008
     if_not (local_int[2] != local_int[8]) goto _5
-    push 1
-    push local_int[14]
-    COMM 0x000a
-    PUSHREG
-    SUB
-    POPLIX 0x0010
+    local_int[16] = RANDOM_ONE_TO(local_int[14]) - 1
     if (local_int[16] == 0) {
       jump NegoFailIntr
     }
@@ -189,48 +181,43 @@ _1:
     local_int[15] = local_int[15] + 1
   }
 _2:
-  push 0
-  push local_int[2]
-  COMM 0x00cc
-  push 0
-  push local_int[1]
-  COMM 0x00cc
+  result = CREATE_EVENT_TEXTURE_TASK(local_int[2], 0)
+  result = CREATE_EVENT_TEXTURE_TASK(local_int[1], 0)
   push 16
   push local_int[1]
   push local_int[2]
-  COMM 0x00e4
+  COMM TRACE_BATTLE_RETREAT
   push 16
   push local_int[2]
   push local_int[1]
-  COMM 0x00e4
+  COMM TRACE_BATTLE_RETREAT
   push 16
   push local_int[2]
   push local_int[1]
-  COMM 0x00e2
-  push local_int[1]
-  COMM 0x00e3
+  COMM AI_SELECT_ACTION_BY_KIND
+  DESTROY_EFFECT_OBJECT(local_int[1])
   push 0
   push -(1)
-  COMM 0x00db
+  COMM SET_WORLD_NODE_BASE_MODE
   push 1
   push local_int[1]
-  COMM 0x00db
+  COMM SET_WORLD_NODE_BASE_MODE
   push 1
   push local_int[2]
-  COMM 0x00db
+  COMM SET_WORLD_NODE_BASE_MODE
   push 0
   push 0
   push local_int[2]
   push local_int[1]
-  COMM 0x00d8
+  COMM SET_MG2_EFFECT_POINTS
   push local_int[5]
-  COMM 0x00e5
+  COMM TRACE_BATTLE_ALL_RETREAT
   push 0
   push 11
   push local_int[1]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
   WAIT_FOR_TIMER_LIMIT(1 * 30)
-  COMM 0x00d5
+  COMM CREATE_MG2_EFFECT
   if (1) {
     call NegoStartTest
   } else {
@@ -246,55 +233,44 @@ NegoExit:
   PROC NegoExit
   push 1
   push -(1)
-  COMM 0x00db
+  COMM SET_WORLD_NODE_BASE_MODE
   if (local_int[13] != 0) {
-    push 0
-    push 0
-    COMM 0x00d9
+    START_EVENT_BGM(0, 0)
   }
 _9:
-  COMM 0x00d6
-  COMM 0x00e6
+  COMM CREATE_EVENT_MG2_EFFECT
+  AI_RESET_COMMAND_CONTEXT()
   push 1
   push local_int[1]
-  COMM 0x00db
-  push 0
-  push local_int[1]
-  COMM 0x00cc
+  COMM SET_WORLD_NODE_BASE_MODE
+  result = CREATE_EVENT_TEXTURE_TASK(local_int[1], 0)
   push 16
   push -(1)
   push local_int[1]
-  COMM 0x00e4
+  COMM TRACE_BATTLE_RETREAT
   push 16
   push -(1)
   push local_int[1]
-  COMM 0x00e2
+  COMM AI_SELECT_ACTION_BY_KIND
   if (local_int[2] >= 0) {
     push 1
     push local_int[2]
-    COMM 0x00db
-    push 0
-    push local_int[2]
-    COMM 0x00cc
+    COMM SET_WORLD_NODE_BASE_MODE
+    result = CREATE_EVENT_TEXTURE_TASK(local_int[2], 0)
     push 16
     push -(1)
     push local_int[2]
-    COMM 0x00e4
+    COMM TRACE_BATTLE_RETREAT
   }
 _11:
   push local_int[2]
-  COMM 0x00f6
+  COMM AI_ENABLE_COMMAND_STATE_FLAG
   push local_int[0]
-  COMM 0x00d1
+  COMM ATTACH_EFFECT_TO_PATH
   return
 NegoFail:
   PROC NegoFail
-  push 1
-  push 3
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0011
+  local_int[17] = RANDOM_ONE_TO(3) - 1
   if (local_int[17] == 0) {
     jump NegoFailEscape
   } else {
@@ -307,44 +283,36 @@ _13:
 NegoFailIntr:
   PROC NegoFailIntr
   push local_int[8]
-  COMM 0x00d4
+  COMM CREATE_EVENT_MG1_EFFECT
   PUSHREG
   POPLIX 0x0012
   SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[18], 1)
   push 8
   push 5
   push local_int[8]
-  COMM 0x00f8
+  COMM CAMP_TASK_READY
   WAIT_FOR_TIMER_LIMIT(8)
   push 0
   push 12
   push local_int[8]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
-  push 8
-  push 1
-  push local_int[8]
-  COMM 0x00d7
-  COMM 0x00d5
+  SET_MG1_EFFECT_POINTS(local_int[8], 1, 8)
+  COMM CREATE_MG2_EFFECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_FAIL))
-  push 0
-  push local_int[8]
-  COMM 0x00cc
-  COMM 0x00d6
+  result = CREATE_EVENT_TEXTURE_TASK(local_int[8], 0)
+  COMM CREATE_EVENT_MG2_EFFECT
   local_int[0] = 0
   push local_int[0]
-  COMM 0x00d1
+  COMM ATTACH_EFFECT_TO_PATH
   return
 NegoFailAttack:
   PROC NegoFailAttack
   local_int[0] = 0
-  COMM 0x00e6
+  AI_RESET_COMMAND_CONTEXT()
   push 0
   push local_int[1]
-  COMM 0x00db
-  push 0
-  push 1
-  push local_int[2]
-  COMM 0x00d7
+  COMM SET_WORLD_NODE_BASE_MODE
+  SET_MG1_EFFECT_POINTS(local_int[2], 1, 0)
   push 0
   push 12
   push local_int[2]
@@ -354,14 +322,11 @@ NegoFailAttack:
 NegoFailEscape:
   PROC NegoFailEscape
   local_int[0] = 3
-  COMM 0x00e6
+  AI_RESET_COMMAND_CONTEXT()
   push 0
   push local_int[1]
-  COMM 0x00db
-  push 0
-  push 1
-  push local_int[2]
-  COMM 0x00d7
+  COMM SET_WORLD_NODE_BASE_MODE
+  SET_MG1_EFFECT_POINTS(local_int[2], 1, 0)
   push 0
   push 12
   push local_int[2]
@@ -378,11 +343,10 @@ _15:
   push 30
   push 0
   push local_int[2]
-  COMM 0x00ce
+  COMM SET_EFFECT_MODEL_CUT
   push local_int[2]
-  COMM 0x00cf
-  push local_int[2]
-  COMM 0x00f7
+  COMM SET_EFFECT_MODEL_ROTATION
+  START_CAMP_TASK_IF_ABSENT(local_int[2])
   local_int[2] = -(1)
   return
 NegoStart:
@@ -420,7 +384,7 @@ NegoStartTest:
   push local_int[7]
   push local_int[2]
   push local_int[1]
-  COMM 0x00fa
+  COMM AI_QUEUE_ACTOR_COMMAND_SOUND
   PUSHREG
   POPLIX 0x0015
   if (local_int[21] == 0) {
@@ -476,12 +440,7 @@ AftyPerfect:
   return
 DealMain:
   PROC DealMain
-  push 1
-  push 3
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0018
+  local_int[24] = RANDOM_ONE_TO(3) - 1
   local_int[12] = 0
   if (local_int[24] == 0) {
     call DealMoney
@@ -497,10 +456,7 @@ DealMain:
   }
 _32:
   if_not (local_int[12] == 0) goto _38
-  push 10000
-  COMM 0x000a
-  PUSHREG
-  POPLIX 0x0017
+  local_int[23] = RANDOM_ONE_TO(10000)
   if (local_int[23] < 5000) {
     MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_CONTINUE))
     jump DealMain
@@ -519,13 +475,13 @@ _37:
 DealMoney:
   PROC DealMoney
   push local_int[4]
-  COMM 0x0028
+  COMM SUBMIT_EVENT_WITH_MODE
   PUSHREG
   POPLIX 0x000b
   local_int[11] = local_int[11] * 1000
   push 1
   push local_int[1]
-  COMM 0x00e7
+  COMM AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT
   PUSHREG
   POPLIX 0x001a
   local_int[27] = 0
@@ -539,13 +495,10 @@ _39:
   MESSAGE_REQUEST_AND_POLL(18 + local_int[27])
   local_int[25] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
   if (local_int[25] == 0) {
-    push 0
-    COMM 0x001f
-    PUSHREG
-    POPLIX 0x001c
+    FADE_BACKGROUND_IN(0)
+    local_int[28] = result
     if (local_int[28] >= local_int[11]) {
-      push -local_int[11]
-      COMM 0x001f
+      FADE_BACKGROUND_IN(-local_int[11])
       local_int[12] = 0
     } else {
     _42:
@@ -567,10 +520,7 @@ _39:
       COMM 0x00de
       PUSHREG
       POPLIX 0x0008
-      push local_int[27]
-      COMM 0x00df
-      PUSHREG
-      POPLIX 0x0009
+      local_int[9] = AI_COUNTER_REACHED_LIMIT(local_int[27])
       call DealMoneyIntr
       local_int[27] = local_int[27] + 1
       goto _43
@@ -584,50 +534,45 @@ _40:
   return
 DealMoneyIntr:
   PROC DealMoneyIntr
-  COMM 0x00d6
+  COMM CREATE_EVENT_MG2_EFFECT
   if (local_int[8] != local_int[1]) {
     local_int[29] = local_int[1]
-    COMM 0x00e6
-    push 0
-    push local_int[1]
-    COMM 0x00cc
+    AI_RESET_COMMAND_CONTEXT()
+    result = CREATE_EVENT_TEXTURE_TASK(local_int[1], 0)
     push 16
     push -(1)
     push local_int[1]
-    COMM 0x00e4
+    COMM TRACE_BATTLE_RETREAT
     push 16
     push -(1)
     push local_int[1]
-    COMM 0x00e2
+    COMM AI_SELECT_ACTION_BY_KIND
     local_int[1] = local_int[8]
     push 16
     push local_int[1]
     push local_int[2]
-    COMM 0x00e4
+    COMM TRACE_BATTLE_RETREAT
     push 1
     push local_int[1]
-    COMM 0x00db
-    push 0
-    push local_int[1]
-    COMM 0x00cc
+    COMM SET_WORLD_NODE_BASE_MODE
+    result = CREATE_EVENT_TEXTURE_TASK(local_int[1], 0)
     push 16
     push local_int[2]
     push local_int[1]
-    COMM 0x00e4
+    COMM TRACE_BATTLE_RETREAT
     push 16
     push local_int[2]
     push local_int[1]
-    COMM 0x00e2
-    push local_int[1]
-    COMM 0x00e3
+    COMM AI_SELECT_ACTION_BY_KIND
+    DESTROY_EFFECT_OBJECT(local_int[1])
     push 0
     push local_int[29]
-    COMM 0x00db
+    COMM SET_WORLD_NODE_BASE_MODE
   }
 _47:
   local_int[5] = local_int[9]
   push local_int[5]
-  COMM 0x00e5
+  COMM TRACE_BATTLE_ALL_RETREAT
   push 0
   push 11
   push local_int[1]
@@ -637,7 +582,7 @@ _47:
   push 11
   push local_int[2]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
-  COMM 0x00d5
+  COMM CREATE_MG2_EFFECT
   if (local_int[9] == 4113) {
     local_int[11] = local_int[11] / 2
   }
@@ -650,20 +595,17 @@ DealMag:
   push local_int[2]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
   push local_int[4]
-  COMM 0x0028
+  COMM SUBMIT_EVENT_WITH_MODE
   PUSHREG
   POPLIX 0x000b
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 0)
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_MAG))
   local_int[31] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
   if_not (local_int[31] == 0) goto _54
-  push 0
-  COMM 0x001f
-  PUSHREG
-  POPLIX 0x001e
+  FADE_BACKGROUND_IN(0)
+  local_int[30] = result
   if (local_int[30] >= local_int[11]) {
-    push -local_int[11]
-    COMM 0x001f
+    FADE_BACKGROUND_IN(-local_int[11])
     local_int[12] = 0
   } else {
   _52:
@@ -685,23 +627,15 @@ DealItem:
   push 11
   push local_int[2]
   COMM CREATE_FLAGGED_EFFECT_OBJECT
-  push 4
-  COMM 0x000a
-  PUSHREG
-  POPLIX 0x000b
+  local_int[11] = RANDOM_ONE_TO(4)
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 3)
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_ITEM))
   local_int[33] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
   if_not (local_int[33] == 0) goto _58
-  push 0
-  push local_int[11]
-  COMM 0x0070
-  PUSHREG
-  POPLIX 0x0020
+  CHANGE_ITEM_COUNT(local_int[11], 0)
+  local_int[32] = result
   if (local_int[32] > 0) {
-    push -(1)
-    push local_int[11]
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(local_int[11], -(1))
     local_int[12] = 0
   } else {
   _56:
@@ -719,12 +653,7 @@ _57:
   return
 DealSuccess:
   PROC DealSuccess
-  push 1
-  push 3
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0022
+  local_int[34] = RANDOM_ONE_TO(3) - 1
   if (local_int[34] == 0) {
     jump NegoFailEscape
   }
@@ -755,14 +684,11 @@ _61:
   return
 RemunareJoin:
   PROC RemunareJoin
-  COMM 0x00e6
+  AI_RESET_COMMAND_CONTEXT()
   push 0
   push local_int[1]
-  COMM 0x00db
-  push 0
-  push 1
-  push local_int[2]
-  COMM 0x00d7
+  COMM SET_WORLD_NODE_BASE_MODE
+  SET_MG1_EFFECT_POINTS(local_int[2], 1, 0)
   push 0
   push 11
   push local_int[2]
@@ -771,21 +697,16 @@ RemunareJoin:
   push 30
   push 0
   push local_int[2]
-  COMM 0x00ce
+  COMM SET_EFFECT_MODEL_CUT
   push local_int[2]
-  COMM 0x00cf
+  COMM SET_EFFECT_MODEL_ROTATION
   push local_int[2]
-  COMM 0x00d0
+  COMM CREATE_EVENT_BED_EFFECT
   local_int[2] = -(1)
   return
 RemunareMoneyAndGoods:
   PROC RemunareMoneyAndGoods
-  push 1
-  push 3
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0024
+  local_int[36] = RANDOM_ONE_TO(3) - 1
   if (local_int[36] == 0) {
     jump RemunareMoney
   } else {
@@ -803,7 +724,7 @@ _64:
 RemunareMoney:
   PROC RemunareMoney
   push local_int[4]
-  COMM 0x0028
+  COMM SUBMIT_EVENT_WITH_MODE
   PUSHREG
   POPLIX 0x0025
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[37], 0)
@@ -816,7 +737,7 @@ RemunareMoney:
 RemunareMag:
   PROC RemunareMag
   push local_int[4]
-  COMM 0x0028
+  COMM SUBMIT_EVENT_WITH_MODE
   PUSHREG
   POPLIX 0x0026
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[38], 0)
@@ -830,8 +751,7 @@ RemunareItem:
   PROC RemunareItem
   push 0
   push local_int[4]
-  COMM 0x0027
-  PUSHREG
+  push READ_SOLAR_PHASE()
   POPLIX 0x0027
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[39], 3)
   push 0
@@ -873,12 +793,7 @@ RaptureJoin:
   return
 RaptureMoneyAndGoods:
   PROC RaptureMoneyAndGoods
-  push 1
-  push 3
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0029
+  local_int[41] = RANDOM_ONE_TO(3) - 1
   if (local_int[41] == 0) {
     jump RaptureMoney
   } else {

@@ -16,8 +16,7 @@ jump_label _1 reserved=0x00000000
 code
 e697_main:
   PROC e697_main
-  push 697
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(697)
   push 9
   push 697
   COMM 0x00ca
@@ -50,26 +49,10 @@ e697_main:
   push 7
   push 0
   COMM 0x0047
-  push 5
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0001
-  push 8
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0002
-  push 3
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x001b
-  push 4
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x001c
+  global_int[1] = BIND_MODEL_MOTION_SOUND(697, 5)
+  global_int[2] = BIND_MODEL_MOTION_SOUND(697, 8)
+  global_int[27] = BIND_MODEL_MOTION_SOUND(697, 3)
+  global_int[28] = BIND_MODEL_MOTION_SOUND(697, 4)
   push float32(0.0, bits=0x00000000)
   push float32(159.0, bits=0x431f0000)
   push float32(0.0, bits=0x00000000)
@@ -712,18 +695,10 @@ e697_050:
   COMM 0x012b
   push 1
   COMM 0x0041
-  push 7
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0005
+  global_int[5] = BIND_MODEL_MOTION_SOUND(697, 7)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(p01)))
   PREPARE_UNIT_MOTION_STATE(global_int[5], 3, 0, 0, 2)
-  push 7
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0005
+  global_int[5] = BIND_MODEL_MOTION_SOUND(697, 7)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(p01_2)))
   PREPARE_UNIT_MOTION_STATE(global_int[5], 3, 0, 0, 2)
   WAIT_FOR_TIMER_LIMIT(50)
@@ -732,241 +707,53 @@ e697_050:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   WAIT_FOR_UNIT_MOTION(global_int[5])
   PREPARE_UNIT_MOTION_STATE(global_int[5], 1, 0, 0, 2)
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0006
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0028
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0029
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002a
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002b
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002c
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002d
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002e
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x002f
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0030
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0031
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0032
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0033
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0034
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0035
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0036
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0037
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0038
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0039
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003a
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003b
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003c
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003d
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003e
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x003f
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0040
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0041
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0042
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0043
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0044
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0045
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0046
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0047
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0048
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0049
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004a
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004b
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004c
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004d
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004e
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x004f
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0050
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0051
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0052
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0053
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0054
-  push 6
-  push 697
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0055
+  global_int[6] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[40] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[41] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[42] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[43] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[44] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[45] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[46] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[47] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[48] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[49] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[50] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[51] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[52] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[53] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[54] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[55] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[56] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[57] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[58] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[59] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[60] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[61] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[62] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[63] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[64] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[65] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[66] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[67] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[68] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[69] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[70] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[71] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[72] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[73] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[74] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[75] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[76] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[77] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[78] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[79] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[80] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[81] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[82] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[83] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[84] = BIND_MODEL_MOTION_SOUND(697, 6)
+  global_int[85] = BIND_MODEL_MOTION_SOUND(697, 6)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(p12)))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[40], READ_SECONDARY_WORLD_ID_VALUE(string(p13)))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[41], READ_SECONDARY_WORLD_ID_VALUE(string(p14)))

@@ -896,9 +896,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1747,9 +1745,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -2687,8 +2683,7 @@ proc_0016:
     ENABLE_FIELD_MAP_ENTRY(26, 1, 3)
     ENABLE_FIELD_MODELS(26, 54, string(md_hoji_01), 0)
     DISABLE_FIELD_MODELS(26, 54, string(md_hoji_02), 0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
@@ -2893,9 +2888,7 @@ after_024btl:
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(6)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 1
-    push 239
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(239, 1)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(GET_RING))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -3933,10 +3926,7 @@ _422:
 buriedman_reaction:
   PROC buriedman_reaction
   SET_SOLAR_OVERLAY_MODE(6)
-  push 6
-  COMM 0x000a
-  PUSHREG
-  POPLIX 0x0042
+  local_int[66] = RANDOM_ONE_TO(6)
   ACTIVATE_MESSAGE_PANEL()
   if (local_int[66] == 1) {
     MESSAGE_REQUEST_AND_POLL(message(BURIEDMAN_RE_01))

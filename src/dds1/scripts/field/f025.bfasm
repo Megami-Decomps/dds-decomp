@@ -1723,9 +1723,7 @@ _9:
                           goto _17
                         }
                       _17:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _19
                       }
                     _19:
@@ -2495,9 +2493,7 @@ _165:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[48]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[48], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -2585,8 +2581,7 @@ _188:
   if (TEST_MODEL_FLAG(1280) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     push 25
@@ -2986,8 +2981,7 @@ proc_0017:
     DISABLE_FIELD_MODEL_GROUP(0, 0, 1)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(READ_CURRENT_WORLD_OBJECT_ID(), READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10_2)))
@@ -4180,9 +4174,7 @@ _359:
       SET_SOLAR_OVERLAY_MODE(2)
       SET_MODEL_FLAG(1365)
       SET_MODEL_FLAG(1309)
-      push 1
-      push 141
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(141, 1)
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -4387,9 +4379,7 @@ _385:
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
       DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_21))
-      push 1
-      push 140
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(140, 1)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_8)))
@@ -4827,9 +4817,7 @@ proc_004e:
     SET_SOLAR_OVERLAY_MODE(2)
     SET_MODEL_FLAG(1362)
     SET_MODEL_FLAG(2430)
-    push 1
-    push 108
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(108, 1)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_9)))
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_53)))
@@ -4985,21 +4973,15 @@ _439:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_65))
     push local_int[55]
     COMM 0x009d
-    push 0
-    push local_int[55]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[55], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_66))
     push local_int[56]
     COMM 0x009d
-    push 0
-    push local_int[56]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[56], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_66_2))
     push local_int[57]
     COMM 0x009d
-    push 0
-    push local_int[57]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[57], 0)
     push 0
     push 38
     COMM 0x01f3
@@ -5316,8 +5298,7 @@ proc_0055:
     SET_SOLAR_OVERLAY_MODE(2)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(READ_CURRENT_WORLD_OBJECT_ID(), READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_6)))
@@ -5624,9 +5605,7 @@ _516:
           push 107
           COMM 0x0215
           MESSAGE_REQUEST_AND_POLL(160)
-          push 1
-          push 101
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(101, 1)
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SET_SOLAR_OVERLAY_MODE(3)
           RELEASE_CURRENT_OBJECT()
@@ -5692,9 +5671,7 @@ _527:
           push 107
           COMM 0x0215
           MESSAGE_REQUEST_AND_POLL(161)
-          push 1
-          push 85
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(85, 1)
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SET_SOLAR_OVERLAY_MODE(3)
           RELEASE_CURRENT_OBJECT()
@@ -6739,9 +6716,7 @@ _719:
           push 107
           COMM 0x0215
           MESSAGE_REQUEST_AND_POLL(162)
-          push 1
-          push 12
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(12, 1)
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SET_SOLAR_OVERLAY_MODE(3)
           RELEASE_CURRENT_OBJECT()
@@ -6807,9 +6782,7 @@ _730:
             push 107
             COMM 0x0215
             MESSAGE_REQUEST_AND_POLL(163)
-            push 1
-            push 82
-            COMM 0x0070
+            CHANGE_ITEM_COUNT(82, 1)
             FINISH_SCRIPT_MESSAGE_WINDOW()
             SET_SOLAR_OVERLAY_MODE(3)
             RELEASE_CURRENT_OBJECT()
@@ -9326,9 +9299,7 @@ _1229:
           push 107
           COMM 0x0215
           MESSAGE_REQUEST_AND_POLL(158)
-          push 1
-          push 15
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(15, 1)
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SET_SOLAR_OVERLAY_MODE(3)
           RELEASE_CURRENT_OBJECT()
@@ -9394,9 +9365,7 @@ _1240:
           push 107
           COMM 0x0215
           MESSAGE_REQUEST_AND_POLL(159)
-          push 1
-          push 102
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(102, 1)
           FINISH_SCRIPT_MESSAGE_WINDOW()
           SET_SOLAR_OVERLAY_MODE(3)
           RELEASE_CURRENT_OBJECT()
@@ -9755,8 +9724,7 @@ _1306:
     RESTORE_CAMERA_NODE_MODE()
     SET_MODEL_FLAG(1316)
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(READ_CURRENT_WORLD_OBJECT_ID(), READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_25_3)))
@@ -11023,8 +10991,7 @@ _1428:
     RESTORE_CAMERA_NODE_MODE()
     SET_MODEL_FLAG(1314)
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(READ_CURRENT_WORLD_OBJECT_ID(), READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_40)))
@@ -12248,9 +12215,7 @@ proc_00f5:
     COMM 0x021e
     SET_SOLAR_OVERLAY_MODE(2)
     SET_MODEL_FLAG(1737)
-    push 1
-    push 147
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(147, 1)
     SET_MODEL_FLAG(2310)
     COMM 0x0216
     push 128
@@ -12350,8 +12315,7 @@ proc_00f7:
     SET_SOLAR_OVERLAY_MODE(2)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 3
     COMM 0x013b
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(READ_CURRENT_WORLD_OBJECT_ID(), READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_13)))
@@ -12475,9 +12439,7 @@ _1614:
     SET_MODEL_FLAG(1309)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 1
-    push 145
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(145, 1)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_6)))
@@ -12624,9 +12586,7 @@ _1636:
       SET_MODEL_FLAG(1309)
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
-      push 1
-      push 144
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(144, 1)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_19)))
@@ -12707,9 +12667,7 @@ _1652:
       SET_MODEL_FLAG(1309)
       SCREEN_FADE_B(0, 15)
       WAIT_FOR_TIMER_LIMIT(15)
-      push 1
-      push 146
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(146, 1)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 0, 0, 1)
       ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_39)))
