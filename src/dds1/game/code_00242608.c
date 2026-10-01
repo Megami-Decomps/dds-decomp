@@ -52,7 +52,7 @@ extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 typedef struct CampTaskData {
     s32 taskId;
-    s32 unk4;
+    s32 unused4;             /* 0x4: zeroed at creation, never read */
     u8 pad08[0x40];
 } CampTaskData;
 
@@ -66,7 +66,7 @@ void mnuCampCreateTask(s32 taskId) {
         data = func_002CFEB8(0x48);
         memset(data, 0, 0x48);
         data->taskId = taskId;
-        data->unk4 = 0;
+        data->unused4 = 0;
         kwlnTaskCreate(name, CAMP_TASK_PRIORITY, 1, 1, func_002424B0, evtReleaseEventPackResources, data);
     }
 }
@@ -92,21 +92,21 @@ void mnuCampDestroyAllTasks(void) {
 
 typedef struct ScrollNode {
     u16 pos;                  /* 0x0 */
-    u8 unk2[0x2E];            /* 0x2 */
+    u8 pad02[0x2E];           /* 0x2 */
     struct ScrollNode *next;  /* 0x30 */
 } ScrollNode;
 
 typedef struct ScrollList {
-    u8 unk0[0x1C];
+    u8 pad00[0x1C];
     s16 base;                 /* 0x1C */
-    u8 unk1E[0x36];
+    u8 pad1E[0x36];
     ScrollNode *nodes;        /* 0x54 */
 } ScrollList;
 
 typedef struct ScrollOwner {
-    u8 unk0[0xC];
+    u8 pad00[0xC];
     s32 limit;                /* 0xC */
-    u8 unk10[0x22F8];
+    u8 pad10[0x22F8];
     ScrollList *list;         /* 0x2308 */
 } ScrollOwner;
 
@@ -156,9 +156,9 @@ typedef struct FxWorld {
         u16 low;
     } limitv;             /* 0x0C */
     u8 pad10[4];
-    s32 unk14;            /* 0x14 */
-    s32 unk18;            /* 0x18 */
-    s32 unk1C;            /* 0x1C */
+    s32 scrollOffset;     /* 0x14: shifted by delta, wraps to 10 below zero */
+    s32 clampedOffset;    /* 0x18: cannot exceed the current limit */
+    s32 unk1C;            /* 0x1C: decremented on each scroll; other uses unknown */
     u8 pad20[0x2010];
     s32 count;            /* 0x2030 */
     FxNode *nodes;        /* 0x2034 */
@@ -172,18 +172,18 @@ void mnuFxWorldScrollDelta(FxWorld *world, s32 delta, s32 threshold, s32 base, s
     if (world->count <= 0) {
         return;
     }
-    if (world->unk14 + delta < 0) {
-        world->unk14 = 10;
+    if (world->scrollOffset + delta < 0) {
+        world->scrollOffset = 10;
     } else {
-        world->unk14 += delta;
+        world->scrollOffset += delta;
     }
     if (world->limitv.whole + delta < 0) {
         world->limitv.whole = 10;
     } else {
         world->limitv.whole += delta;
     }
-    if (world->unk18 > world->limitv.whole) {
-        world->unk18 = world->limitv.whole;
+    if (world->clampedOffset > world->limitv.whole) {
+        world->clampedOffset = world->limitv.whole;
     }
     node = world->nodes;
     while (node != NULL) {
@@ -326,35 +326,35 @@ typedef struct CampKeyTrack {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
 
-typedef struct CampWindowDefaults {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
+typedef struct CampListLayout {
+    s32 width0;
+    s32 width1;
+    s32 width2;
+    s32 unkC;               /* 0xC: layout default, no reader in this unit */
+    s32 unk10;              /* 0x10: layout default, no reader in this unit */
+    s32 unk14;              /* 0x14: layout default, no reader in this unit */
     u8 pad18[8];
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-} CampWindowDefaults;
+    s32 unk20;              /* 0x20: layout default, no reader in this unit */
+    s32 unk24;              /* 0x24: layout default, no reader in this unit */
+    s32 unk28;              /* 0x28: layout default, no reader in this unit */
+    s32 unk2C;              /* 0x2C: layout default, no reader in this unit */
+    s32 unk30;              /* 0x30: layout default, no reader in this unit */
+    s32 unk34;              /* 0x34: layout default, no reader in this unit */
+} CampListLayout;
 
-void mnuInitializeCampListLayoutDefaults(CampWindowDefaults *w) {
-    w->unk0 = 0x96;
-    w->unk4 = 0x96;
-    w->unk10 = 0x50;
-    w->unk8 = 0x96;
-    w->unkC = 0x1E;
-    w->unk14 = 1;
-    w->unk20 = 7;
-    w->unk24 = 4;
-    w->unk28 = 0xA;
-    w->unk2C = 0x20;
-    w->unk30 = 0x10;
-    w->unk34 = 0x10;
+void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
+    layout->width0 = 0x96;
+    layout->width1 = 0x96;
+    layout->unk10 = 0x50;
+    layout->width2 = 0x96;
+    layout->unkC = 0x1E;
+    layout->unk14 = 1;
+    layout->unk20 = 7;
+    layout->unk24 = 4;
+    layout->unk28 = 0xA;
+    layout->unk2C = 0x20;
+    layout->unk30 = 0x10;
+    layout->unk34 = 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
@@ -640,7 +640,7 @@ extern s32 sdfAllocatePacketList();
 extern void sdfCreateDescriptorPacket();
 
 typedef struct BufferDescriptor {
-    u8 unk0[0x10];
+    u8 pad00[0x10];
     void (*open)(struct BufferDescriptor *, s32);
 } BufferDescriptor;
 
@@ -887,12 +887,12 @@ s32 mnuCampFindActiveSlot(void) {
 INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
 
 typedef struct ShopBuf {
-    u8 unk0[0x30];
+    u8 pad00[0x30];
     void *buffer;    /* 0x30 */
 } ShopBuf;
 
 typedef struct ShopSprite {
-    u8 unk0[0x14];
+    u8 pad00[0x14];
     ShopBuf *data;   /* 0x14 */
 } ShopSprite;
 
