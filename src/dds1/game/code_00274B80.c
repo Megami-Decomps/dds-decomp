@@ -911,6 +911,7 @@ s64 mnuCampMenuDrawSlotLabel(s32 param) {
         mnuCreateStaffImageSprite(0xA);
     }
     func_00272668(1, *((MenuSelectionState *)((CampMenuContext *)context)->panel)->list->selectedSlot, D_0037C3A8, context, 1, 0x53);
+    /* Both arms are identical in retail; kept as written. */
     if (*((MenuSelectionState *)((CampMenuContext *)context)->panel)->list->selectedSlot == 0) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     } else {

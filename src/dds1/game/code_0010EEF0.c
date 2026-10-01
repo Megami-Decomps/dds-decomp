@@ -50,31 +50,6 @@ struct EffTransformNode {
     u32 unkC8;        /* 0xC8 */
 };
 
-/* 128-bit vector copy for the inner vectors. The scratch register is named
- * explicitly: a plain-C u128 copy lets gcc 2.96 fold the destination into
- * an sq offset and hoist the lq above the flag update, while the retail
- * code computes both addresses with addiu and keeps each copy together.
- * The destination is the first operand so its address is computed first.
- */
-#define EEF0_COPY128(dst, src) __asm__ volatile ( \
-    ".set noreorder \n" \
-    "lq $2, 0(%1)   \n" \
-    "sq $2, 0(%0)   \n" \
-    ".set reorder" \
-    : : "r" (dst), "r" (src) : "memory", "$2")
-
-/* Store vf10 to base+off, recomputing the address. The tied output (no
- * early clobber) lets gcc reuse the base register for the address. The
- * `addiu` is part of the asm because the C form (`dst = base + off;` then a
- * bare sqc2) was tried and picks other registers (retail addiu's into the
- * base's register, effObjAddInnerFirstVec and effObjMulInnerThirdVec differ).
- */
-#define EEF0_STORE_V10(dst, base, off) __asm__ volatile ( \
-    ".set noreorder    \n" \
-    "addiu %0, %1, %2  \n" \
-    "sqc2 vf10, 0(%0)  \n" \
-    ".set reorder" \
-    : "=r" (dst) : "r" (base), "i" (off) : "memory")
 
 u32 func_0010EEF0(void) {
     u64 context;
@@ -256,9 +231,9 @@ void effObjInnerVecInit(EffTransformNode *node) {
 }
 
 void effObjInnerVecBackup(EffTransformNode *node) {
-    EEF0_COPY128(&node->vecA0, &node->vec60);
-    EEF0_COPY128(&node->vec90, &node->vec50);
-    EEF0_COPY128(&node->vec80, &node->vec40);
+    PCP_COPY_VECTOR(&node->vecA0, &node->vec60);
+    PCP_COPY_VECTOR(&node->vec90, &node->vec50);
+    PCP_COPY_VECTOR(&node->vec80, &node->vec40);
 }
 
 void effObjSetInnerFloat(EffTransformNode *node, f32 value) {
@@ -274,7 +249,7 @@ void effObjSetInnerFirstVec(EffTransformNode *node, u128 *vector) {
     u128 *dst = &inner->vec40;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, vector);
+    PCP_COPY_VECTOR(dst, vector);
 }
 
 void effObjSetInnerSecondVec(EffTransformNode *node, u128 *vector) {
@@ -282,7 +257,7 @@ void effObjSetInnerSecondVec(EffTransformNode *node, u128 *vector) {
     u128 *dst = &inner->vec50;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, vector);
+    PCP_COPY_VECTOR(dst, vector);
 }
 
 void effObjSetInnerThirdVec(EffTransformNode *node, u128 *vector) {
@@ -290,7 +265,7 @@ void effObjSetInnerThirdVec(EffTransformNode *node, u128 *vector) {
     u128 *dst = &inner->vec60;
 
     inner->flags = (inner->flags | 1) & ~2;
-    EEF0_COPY128(dst, vector);
+    PCP_COPY_VECTOR(dst, vector);
 }
 
 void effObjFetchInnerFirstVec(EffTransformNode *node) {
@@ -322,7 +297,7 @@ void effObjAddInnerFirstVec(EffTransformNode *node, void *vector) {
     VU0_LOAD_VF(vf10, src);
     VU0_LOAD_VF_MEMORY(vf11, vector);
     VU0_ADD(vf10, vf10, vf11);
-    EEF0_STORE_V10(dst, inner, 0x40);
+    VU0_STORE_VF10_BASE_OFF(dst, inner, 0x40);
 }
 
 void effObjQuatMulInnerSecondVec(EffTransformNode *node, u128 *vector) {
@@ -344,7 +319,7 @@ void effObjMulInnerThirdVec(EffTransformNode *node, void *vector) {
     VU0_LOAD_VF(vf10, src);
     VU0_LOAD_VF_MEMORY(vf11, vector);
     VU0_MUL(vf10, vf10, vf11);
-    EEF0_STORE_V10(dst, inner, 0x60);
+    VU0_STORE_VF10_BASE_OFF(dst, inner, 0x60);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0010EEF0", D_003BA9A0);

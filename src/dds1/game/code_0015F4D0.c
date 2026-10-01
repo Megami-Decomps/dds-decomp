@@ -98,12 +98,12 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
     return result;
 }
 
-void billDispatchIndexedObjectCallback(BillObj *obj) {
-    D_0034E658[*(u16 *)((u8 *)obj + 0xB0)].func();
+void billDispatchIndexedObjectCallback(EffectDispatchState *effect) {
+    D_0034E658[effect->handler].func();
 }
 
-void func_0015F5B0(BillObj *obj) {
-    D_0034E654[*(u16 *)((u8 *)obj + 0xB0)].func();
+void func_0015F5B0(EffectDispatchState *effect) {
+    D_0034E654[effect->handler].func();
 }
 
 void effInvokeHandlerAndMarkActive(EffectDispatchState *effect) {

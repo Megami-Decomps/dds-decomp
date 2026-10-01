@@ -26,7 +26,15 @@ typedef struct {
 } StaffWindowResources;
 
 typedef struct {
-    u8 pad00[0x90C];
+    u8 pad00[0x74];
+    s32 unk74;  /* 0x74 */
+    u8 pad78[0x60];
+    s32 unkD8;  /* 0xD8 */
+    u8 padDC[0x4C];
+    s32 unk128; /* 0x128 */
+    u8 pad12C[0xC];
+    s32 unk138; /* 0x138 */
+    u8 pad13C[0x7D0];
     StaffWindowResources *resources; /* 0x90C */
 } StaffDisplayContext;
 
@@ -92,13 +100,9 @@ s32 func_002733B8(void) {
     resources->allocation = handle;
     func_00273390((u32)context);
     func_00272D50((s32)context);
-    mnuForwardDupArg(*(s32 *)((u8 *)context + 0x128),
-                     *(s32 *)((u8 *)context + 0x74), 0, 0, 0);
-    mnuActivatePanelAndConfigureGridResources(
-        *(s32 *)((u8 *)context + 0x138),
-        *(s32 *)((u8 *)context + 0xD8), 0, 1);
-    mnuSeekListNode(0,
-                    *(s32 *)(*(s32 *)((u8 *)context + 0x128) + 0x14));
+    mnuForwardDupArg(context->unk128, context->unk74, 0, 0, 0);
+    mnuActivatePanelAndConfigureGridResources(context->unk138, context->unkD8, 0, 1);
+    mnuSeekListNode(0, *(s32 *)(context->unk128 + 0x14));
     return 1;
 }
 
@@ -113,7 +117,43 @@ s32 mnuStaffFreeDisplayResources(void) {
 
 INCLUDE_ASM(const s32, "game/code_00272D50", func_002734C0);
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273670);
+extern void func_00272778(s32);
+extern void mnuCreateStaffImageSprite(s32);
+extern void func_00272668(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
+extern void func_002723B0(s32, s32);
+extern u8 D_0037C860[];
+
+typedef struct StaffImageNode {
+    s32 label;
+} StaffImageNode;
+
+typedef struct StaffImageWindow {
+    u8 pad00[0x1C];
+    StaffImageNode *selectedNode; /* 0x1C */
+} StaffImageWindow;
+
+typedef struct StaffImageList {
+    u8 pad00[0x14];
+    StaffImageWindow *window; /* 0x14 */
+} StaffImageList;
+
+typedef struct StaffImageContext {
+    u8 pad00[0x78];
+    s32 group; /* 0x78 */
+    u8 pad7C[0xAC];
+    StaffImageList *activeWindow; /* 0x128 */
+} StaffImageContext;
+
+s64 func_00273670(s32 callback) {
+    s32 context = kwlnTaskGetUserValue();
+    func_00272778(callback);
+    mnuCreateStaffImageSprite(4);
+    func_00272668(1, ((StaffImageContext *)context)->activeWindow->window->selectedNode->label, (s32)D_0037C860, context, 1, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)((StaffImageContext *)context)->activeWindow, 0x53);
+    func_002723B0(0, ((StaffImageContext *)context)->group);
+    return menuRunPanel(context, 1, callback);
+}
 
 s64 mnuStaffRunPanel2b(u64 request) {
     s32 state = kwlnTaskGetUserValue();

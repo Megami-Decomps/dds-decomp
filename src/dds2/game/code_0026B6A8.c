@@ -136,7 +136,7 @@ u32 func_0026BA68(void) {
     s32 state;
 
     state = kwlnTaskGetUserValue();
-    /* Keep both branches: this control-flow shape is required to match. */
+    /* Both arms are identical in retail; kept as written. */
     if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
     }

@@ -1293,14 +1293,14 @@ void btlBindActorTaskAndSelectActionNumber(s32 task, s32 actor) {
     if ((flags & 0x400) != 0) {
         if (0x17f < ((SceneActor *)actor)->kind) {
             flags = ((SceneTask *)task)->flags;
-            goto LAB_001c8880;
+            goto store;
         }
         ((SceneTask *)task)->actionNumber =
                   (u16)*(u8 *)(((u32)((SceneActor *)actor)->kind * 0x14 -
                                                       (u32)((SceneActor *)actor)->kind) * 4 + D_00435DEC + 0x15);
     }
     flags = ((SceneTask *)task)->flags;
-LAB_001c8880:
+store:
     ((SceneTask *)task)->flags = flags | 8;
 }
 
