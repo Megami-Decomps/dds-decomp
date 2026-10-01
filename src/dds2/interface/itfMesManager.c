@@ -123,7 +123,7 @@ typedef struct ItfMesBlk40 {
 typedef struct ItfMesBlkA4 {
     u8 unk0[4];          /* +0x0 */
     void *unk4;          /* +0x4 */
-    u32 unk8;            /* +0x8: handle */
+    u32 panelHandle;      /* +0x8: panel handle */
     u8 unkC[0x1C];       /* +0xC */
     u32 unk28;           /* +0x28 */
 } ItfMesBlkA4;
@@ -603,9 +603,9 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[1] = 0x430;
     rect[2] = 0x1200 + half;
     rect[3] = 0x530 + height;
-    blkA4->unk8 = func_001A1858(9, itfMesWork.windowTexture);
-    itfSetPanelLayoutAndNotify(blkA4->unk8, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
-    func_001A1A50(blkA4->unk8, 0, 0, 0, 0);
+    blkA4->panelHandle = func_001A1858(9, itfMesWork.windowTexture);
+    itfSetPanelLayoutAndNotify(blkA4->panelHandle, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
+    func_001A1A50(blkA4->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
