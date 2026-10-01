@@ -2652,14 +2652,7 @@ u32 func_002D2CB0(s32 index) {
 
 void mnuProjectViewPoint(void) {
     u8 *matrix;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003846F0) : "memory");
+    VU0_LOAD_MATRIX(D_003846F0);
     matrix = D_0037F610;
     func_00336C10(matrix);
     __asm__ volatile (
@@ -2732,7 +2725,6 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     return fsqrtf(dx * dx + dy * dy);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
 void vuCatmullRomPoint(f32 (*p)[4], f32 t)
@@ -2787,7 +2779,6 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-#undef VEC3_SPLAT
 
 extern u8 D_0037F690[];
 extern u8 D_0037F680[];
@@ -3286,11 +3277,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
         fileJobCopyHeader(job, src);
         fileQueueAppend(queue, job);
     }
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(&vec) : "memory");
+    VU0_STORE_VF(vf0, &vec);
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
@@ -3416,11 +3403,7 @@ u32 func_002D4AD0(FileQueue *queue) {
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
     func_002D31C0(src);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(&vec) : "memory");
+    VU0_STORE_VF(vf10, &vec);
     fileQueueSetRotation(dst, &vec);
 }
 
@@ -3628,7 +3611,6 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
     return count;
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 typedef struct CamFollow {
     u8 pad00[0x40];
@@ -3668,7 +3650,6 @@ void camFollowOffsetVec(CamFollow *obj, void *dst)
     }
     VU0_STORE_VF(vf10, dst);
 }
-#undef VEC3_SPLAT
 
 typedef struct CamAim {
     u8 pad00[0x50];
@@ -4421,8 +4402,8 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     memcpy(rec->data0, src, dataBytes);
     memcpy(rec->data1, src, dataBytes);
     vec = rec->data0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(vec + 0x10) : "memory");
+    VU0_STORE_VF(vf0, vec);
+    VU0_STORE_VF(vf0, vec + 0x10);
     if (vec[0xBC] != 0) {
         rec->flags |= 1;
     }

@@ -2347,8 +2347,6 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     return fsqrtf(dx * dx + dy * dy);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: point at t between p[1] and p[2] of a Catmull-Rom (Hermite, 0.5 tangents) spline, left in vf10 */
 void vuCatmullRomPoint(f32 (*p)[4], f32 t)
 {
@@ -2402,8 +2400,6 @@ void vuCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_MUL(vf10, vf10, vf11);
     VU0_ADD(vf10, vf10, vf12);
 }
-#undef VEC3_SPLAT
-
 /* vu0 routine: camera basis rows vf28-vf31 from eye D_00324690, target D_00324680 and up D_003246A0 */
 void vuBuildLookAtBasis(void)
 {
@@ -2899,11 +2895,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
         fileJobCopyHeader(job, src);
         fileQueueAppend(queue, job);
     }
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(&vec) : "memory");
+    VU0_STORE_VF(vf0, &vec);
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
@@ -3014,11 +3006,7 @@ INCLUDE_ASM(const s32, "game/code_0028A0E0", func_00294938);
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
     func_00293158(src);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(&vec) : "memory");
+    VU0_STORE_VF(vf10, &vec);
     fileQueueSetRotation(dst, &vec);
 }
 
@@ -3219,8 +3207,6 @@ s32 fileQueueCountLinkedJobs(FileQueue *queue) {
     return count;
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 typedef struct CamFollow {
     u8 pad00[0x40];
     f32 pos[4];
@@ -3259,8 +3245,6 @@ void camFollowOffsetVec(CamFollow *obj, void *dst)
     }
     VU0_STORE_VF(vf10, dst);
 }
-#undef VEC3_SPLAT
-
 typedef struct CamAim {
     u8 pad00[0x50];
     f32 quat[4];
