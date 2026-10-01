@@ -46,7 +46,49 @@ void effApplyParamBlockPair(u64 table) {
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FB18);
 
-INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FD90);
+typedef struct EffGroupSlot {
+    u8 pad00[0x18];
+    EffectResourceWork *resources; /* 0x18 */
+    u8 pad1C[0x60];
+    void *node;      /* 0x7C: passed to effEventReleaseNode */
+} EffGroupSlot; /* 0x80 */
+
+typedef struct EffGroup {
+    u8 pad00[0x20];
+    u32 count;          /* 0x20 */
+    u8 pad24[0x2C];
+    EffGroupSlot *slots; /* 0x50 */
+    u8 pad54[4];
+    u32 handle58;       /* 0x58 */
+    u8 hasHandle58;     /* 0x5C */
+    u8 pad5D[3];
+    u32 allocation;     /* 0x60 */
+} EffGroup;
+
+extern void effReleaseEffectResources(EffectResourceWork *work);
+extern void effEventReleaseNode(void *node);
+extern void func_00197D50(u32 handle);
+extern void func_003297C8(u32 allocation);
+
+/* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
+void func_0016FD90(EffGroup *group) {
+    u32 i = 0;
+    u32 count = group->count;
+    EffGroupSlot *slot = group->slots;
+
+    if (count != 0) {
+        do {
+            i++;
+            effReleaseEffectResources(slot->resources);
+            effEventReleaseNode(slot->node);
+            slot++;
+        } while (i < count);
+    }
+    if (group->hasHandle58 != 0) {
+        func_00197D50(group->handle58);
+    }
+    func_003297C8(group->allocation);
+}
 
 INCLUDE_ASM(const s32, "game/code_0016EDD0", func_0016FE18);
 

@@ -91,7 +91,26 @@ INCLUDE_ASM(const s32, "game/code_00185E18", func_00186718);
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_001869F0);
 
-INCLUDE_ASM(const s32, "game/code_00185E18", func_00186A98);
+typedef struct BlurFilterOps {
+    u8 pad00[0x10];
+    void (*draw)(struct BlurFilterOps *self, void *list); /* 0x10 */
+} BlurFilterOps;
+
+extern BlurFilterOps D_003253E8;
+extern u8 D_00326ED0[];
+extern void *sdfAllocPacketAligned(s32);
+extern u32 func_00100518(void);
+extern void func_002D4CC8(const void *, void *, s32);
+extern void sdfAppendDmaTagToList(void *, void *);
+
+/* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
+void func_00186A98(void *list) {
+    void *packet = sdfAllocPacketAligned(0x40);
+
+    func_002D4CC8(D_00326ED0 + func_00100518() * 0x1F40, packet, 1);
+    sdfAppendDmaTagToList(list, packet);
+    D_003253E8.draw(&D_003253E8, list);
+}
 
 INCLUDE_ASM(const s32, "game/code_00185E18", func_00186B20);
 
