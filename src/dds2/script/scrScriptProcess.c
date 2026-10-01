@@ -10,7 +10,7 @@ s32 bfTaskUpdate();
 
 s32 scrReplaceCurrentTask();
 
-extern ScrProcGlobals *D_00435DD0;
+extern ScrProcGlobals *datGameState;
 
 s32 bfParseFLW0(s32 arg0, s32 arg1);
 
@@ -51,8 +51,8 @@ void scrClearProcessGlobals(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (i = 255; i >= 0; i--)
     {
-        D_00435DD0->integers[255 - i] = 0;
-        D_00435DD0->floatBits[255 - i] = 0;
+        datGameState->integers[255 - i] = 0;
+        datGameState->floatBits[255 - i] = 0;
     }
 }
 

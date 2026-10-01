@@ -66,7 +66,7 @@ extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
 extern void fldSetSwayMode(u32);
 
-extern void *D_004360EC;
+extern void *fldSkyLightSetBuffer;
 
 extern s32 fldCameraColorEffect;
 
@@ -186,7 +186,7 @@ void fldApplyLightSetCurrent(void) {
 }
 
 void fldApplyLightSetIndex(s32 index) {
-    FldLightSet *light = &((FldLightSet *)D_004360EC)[index];
+    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
     f32 vec[4];
     f32 dir[4];
     s32 area;

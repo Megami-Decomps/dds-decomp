@@ -14,7 +14,7 @@ extern char D_0042AA18[]; /* "camp_update" */
 
 extern s8 D_00437B72;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 /* Item quantities are byte-indexed in the shared save-state block. */
 typedef struct SaveItemCounts {
@@ -60,7 +60,7 @@ extern void func_002C1B58(u8 *, s32);
 
 extern void func_003425B0(void);
 
-/* One of five 0x1C4-byte party records at D_00435DD0 + 0xA60. */
+/* One of five 0x1C4-byte party records at datGameState + 0xA60. */
 typedef struct PartyRecord {
     u16 flags;
     u16 pad02;
@@ -127,7 +127,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     s32 i = 4;
 
     do {
-        PartyRecord *rec = (PartyRecord *)(D_00435DD0 + offset + 0xA60);
+        PartyRecord *rec = (PartyRecord *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if (rec->flags & 1) {
             scrClearPackedScriptFlags(rec);
@@ -136,7 +136,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         i--;
     } while (i >= 0);
     for (i = 0xC0; i < 0x100; i++) {
-        ((SaveItemCounts *)D_00435DD0)->counts[i] = 0;
+        ((SaveItemCounts *)datGameState)->counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
     mdlFlagClear(0x901);
@@ -147,7 +147,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     ptyRebuildAllProfiles();
 }
 
-extern u32 D_00438FF8[2];
+extern u32 mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
@@ -158,7 +158,7 @@ extern u32 effLoadIndexedResource(char *, u32, u32);
 void mnuLoadCampResources(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        D_00438FF8[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
+        mnuCampResourceHandles[i] = effLoadIndexedResource(D_0042A950, D_003E6848[i * 2], 1);
     }
 }
 
@@ -169,8 +169,8 @@ extern void effResolveAndReleaseResource(u32);
 void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 i;
     for (i = 0; i < 2; i++) {
-        effResolveAndReleaseResource(D_00438FF8[i]);
-        destination[i] = D_00438FF8[i];
+        effResolveAndReleaseResource(mnuCampResourceHandles[i]);
+        destination[i] = mnuCampResourceHandles[i];
     }
 }
 
@@ -178,7 +178,7 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 remaining = 1;
     u32 offset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)D_00438FF8 + offset));
+        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)mnuCampResourceHandles + offset));
         *(u32 *)((u8 *)destination + offset) = 0;
         offset += 4;
     } while (--remaining >= 0);
@@ -352,7 +352,7 @@ void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        PartyRecord *slot = (PartyRecord *)(D_00435DD0 + 0xA60 + i * 0x1C4);
+        PartyRecord *slot = (PartyRecord *)(datGameState + 0xA60 + i * 0x1C4);
 
         if ((slot->flags & 1) != 0) {
             s32 index = slot->slotIndex + D_00437B73;
@@ -463,8 +463,8 @@ void movReleaseTitleEffects(u32 *state) {
 void mnuInitializeCampPanelResources(u32 container, u32 *resources, u32 unused, u32 mode) {
     func_002BCD90(container, mode, *resources, 1, resources[1], 0x2d, resources[1], 0x1d);
     func_002BC498(container, resources[1]);
-    func_002BC5D0(container, resources + 4);
-    func_002BC600(container, resources + 0xc);
+    mnuCopyPrimaryWindowHandles(container, resources + 4);
+    mnuCopySecondaryWindowHandles(container, resources + 0xc);
     mnuRegisterResourceHandles(container, resources + 0x14);
     func_002BCA98(container);
     mnuSetPanelSlotValues(container, resources[1]);
@@ -737,7 +737,7 @@ u32 func_002AA278(void) {
     return 0;
 }
 
-extern u32 func_002C44E8(s32);
+extern u32 mnuMapPadMaskToFlags(s32);
 
 extern s32 func_002A9AB8(s32);
 
@@ -754,7 +754,7 @@ extern void mnuPlayInputSound();
 /* On button 8, exit the camp only when both nested guards permit it;
  * otherwise play the alternate sound without destroying its tasks. */
 s32 mnuStaffCampCancelCheck(s32 menu) {
-    u32 buttons = func_002C44E8(8);
+    u32 buttons = mnuMapPadMaskToFlags(8);
     s32 result;
 
     if (func_002A9AB8(menu) == 0) {
@@ -834,7 +834,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
         return;
     }
     func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
-    func_0035C860(buffer, D_00437B80, ((CampCurrency *)D_00435DD0)->currency);
+    func_0035C860(buffer, D_00437B80, ((CampCurrency *)datGameState)->currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);

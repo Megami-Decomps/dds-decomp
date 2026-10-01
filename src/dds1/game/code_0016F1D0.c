@@ -200,7 +200,7 @@ typedef struct {
 } EffectArcQuadWork;
 
 /* vu0 routine: billboard corner offsets for an arc particle */
-void func_0016F5C8(EffectArcQuadWork *work, s32 index) {
+void effBuildOrbitingArcQuadPoints(EffectArcQuadWork *work, s32 index) {
     EffectArcQuadPart *part = &work->parts[index];
     f32 *quad = (f32 *)func_00170858(work->resourceHandle, index);
     f32 offset[4];
@@ -318,7 +318,7 @@ extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 asset, f32 value);
 extern u8 D_003D6550[];
 
-EffectPool *func_0016FF50(s32 groups) {
+EffectPool *effRecordPoolCreateTriad(s32 groups) {
     EffectPool *pool;
     u32 handle;
     u32 *block;
@@ -364,7 +364,7 @@ s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0xc;
 }
 
-EffectPool *func_00170250(s32 groups) {
+EffectPool *effRecordPoolCreate(s32 groups) {
     EffectPool *pool;
     u32 handle;
     u32 *block;

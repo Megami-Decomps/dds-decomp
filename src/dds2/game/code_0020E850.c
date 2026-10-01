@@ -1,7 +1,7 @@
 #include "common.h"
 #include "btl.h"
 
-extern u32 D_00436CB0;
+extern u32 btlRandomState;
 
 extern void btlCmdSimpleB(s32, s32);
 
@@ -88,7 +88,7 @@ typedef struct BtlWaitTask {
     u32 ticks;
 } BtlWaitTask;
 
-extern s32 (*D_003BF4A0[])(s32, u32);
+extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 
 typedef struct BtlEffLink {
     s32 owner;  /* 0x00: effect owner address */
@@ -179,7 +179,7 @@ extern s32 btlPollActorOrEntryLabelTask();
 extern void func_0020FA98();
 extern s32 btlPollTimedTaskLink(BtlEffLink *link);
 extern s32 btlPollActorDialogTask();
-extern s32 func_00210530();
+extern s32 btlUpdateLinkedDialogueEffect();
 extern s32 btlPollTimedPresentationTask();
 extern s32 btlPollEffectWaitTask(BtlEffLink *link);
 extern s32 btlAdvanceActorEffectLabelTask();
@@ -210,7 +210,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
 /* Accepts a task's unit only when status bit 5 is set and task bit 6 is clear.
  * If bit 5 is the sole low status bit, the final check uses an external value. */
-s32 func_0020EBD0(BtlTask *task) {
+s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
     s32 result = 0;
     BtlJyokyoOwner *unit = (BtlJyokyoOwner *)task->unit;
     u16 flags;
@@ -310,7 +310,7 @@ BtlEffTask *btlCreateEffectCounterTask(BtlEffActor *owner, s32 arg) {
 }
 
 s32 btlPollActorOrEntryLabelTask(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+    s32 battleState = btlGetRuntime();
     s32 owner = link->owner;
 
     if (link->elapsedTicks == 0) {
@@ -357,7 +357,7 @@ BtlEffTask *btlCreateEffObjD(BtlEffActor *owner, s32 resourceIndex) {
 }
 
 s32 btlPollTimedTaskLink(BtlEffLink *link) {
-    func_001AA6F8();
+    btlGetRuntime();
     if (link->elapsedTicks == 0) {
         func_001B8580(D_00435E5C + link->arg * 25);
     }
@@ -388,7 +388,7 @@ BtlEffTask *btlCreateOwnerLinkedTimedTask(BtlEffActor *owner, s32 arg) {
 s32 btlPollCategoryLabelTask(BtlEffLink *link) {
     s32 owner;
 
-    func_001AA6F8();
+    btlGetRuntime();
     owner = link->owner;
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
@@ -457,7 +457,7 @@ BtlEffTask *btlCreateEffObjA(BtlEffActor *owner, s32 category) {
 }
 
 s32 btlPollActorDialogTask(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+    s32 battleState = btlGetRuntime();
     s32 owner = link->owner;
 
     if (link->elapsedTicks == 0) {
@@ -492,8 +492,8 @@ BtlEffTask *btlCreateEffObjB(BtlEffActor *owner, s32 messageId) {
     return obj;
 }
 
-s32 func_00210530(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+s32 btlUpdateLinkedDialogueEffect(BtlEffLink *link) {
+    s32 battleState = btlGetRuntime();
     s32 owner = link->owner;
 
     if (owner != 0 && !(((BtlJyokyoOwner *)owner)->statusFlags & 1)) {
@@ -523,7 +523,7 @@ BtlEffTask *btlCreateEffObjC(BtlEffActor *owner, s32 messageId) {
     if (owner != NULL) {
         obj->ownerData = owner->ownerData;
     }
-    obj->callback = func_00210530;
+    obj->callback = btlUpdateLinkedDialogueEffect;
     link = btlGetTaskArguments(obj);
     link->owner = (s32)owner;
     link->arg = messageId;
@@ -553,7 +553,7 @@ BtlEffTask *btlCreateEffectTask3E(BtlEffActor *owner, u16 arg) {
 }
 
 s32 btlPollTimedPresentationTask(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+    s32 battleState = btlGetRuntime();
     s32 owner = link->owner;
 
     if (link->elapsedTicks == 0) {
@@ -587,7 +587,7 @@ BtlEffTask *btlCreateOwnerLinkedTimedPresentation(BtlEffActor *owner, s32 messag
 }
 
 s32 btlPollEffectWaitTask(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+    s32 battleState = btlGetRuntime();
 
     if (link->elapsedTicks == 0) {
         if (link->owner != 0) {
@@ -658,7 +658,7 @@ BtlEffTask *btlCreateEffectTask44(BtlEffActor *owner) {
 }
 
 s32 btlAdvanceActorEffectLabelTask(BtlEffLink *link) {
-    s32 battleState = func_001AA6F8();
+    s32 battleState = btlGetRuntime();
     s32 owner = link->owner;
     char text[0x100];
 
@@ -728,8 +728,8 @@ s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
 }
 
 u32 btlNextScaledRandom(u32 limit) {
-    D_00436CB0 = D_00436CB0 * 0x41c64e6d + 0x3039;
-    return (D_00436CB0 >> 0x10) * (limit & 0xffff) >> 0x10;
+    btlRandomState = btlRandomState * 0x41c64e6d + 0x3039;
+    return (btlRandomState >> 0x10) * (limit & 0xffff) >> 0x10;
 }
 
 /* Inclusive random selection between either ordering of the endpoints. */
@@ -775,7 +775,7 @@ void btlAdvanceHistoryCounter(BtlHistObj *obj) {
 
 
 void btlResetBattleHistoryCounters(void) {
-    BtlHistObj *node = *(BtlHistObj **)(func_001AA6F8() + 0x248);
+    BtlHistObj *node = *(BtlHistObj **)(btlGetRuntime() + 0x248);
     if (node != 0) {
         do {
             if (node->actor != NULL) {
@@ -807,7 +807,7 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
 
     packedAction &= 0x3FFFFF;
     if (type != 0) {
-        result = D_003BF4A0[type](context, packedAction) != 0;
+        result = btlPackedEffectHandlers[type](context, packedAction) != 0;
     }
     return result;
 }
@@ -826,13 +826,13 @@ typedef struct AiSpecies {
     u8 pad108[0x54];
 } AiSpecies;
 
-extern AiSpecies *D_00435DF4;
+extern AiSpecies *datEnemyAiRecords;
 extern void func_00211658(BtlJyokyoOwner *unit, u16 species, s32 *row, s32 arg);
 extern u32 btlPickWeightedAiSlot();
 extern s32 func_00211EA8();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
-s32 func_00210F58(BtlTask *task) {
+s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     BtlJyokyoOwner *unit;
     u16 species;
@@ -846,8 +846,8 @@ s32 func_00210F58(BtlTask *task) {
     work[1] = species;
     func_00211658(unit, species, &row, 0);
     index = btlPickWeightedAiSlot(unit, species, row);
-    func_00211EA8(task, D_00435DF4[species].slot[row * 5 + index].actionId,
-                  D_00435DF4[species].slot[row * 5 + index].actionArg);
+    func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
+                  datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
     sdfReleaseChipBlock(btlActionScratchWork);
     return 1;
 }
@@ -969,9 +969,9 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CA8);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlHistoryCounter);
 
-INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB0);
+INCLUDE_SDATA(const s32, "game/code_0020E850", btlRandomState);
 
-INCLUDE_SDATA(const s32, "game/code_0020E850", D_00436CB4);
+INCLUDE_SDATA(const s32, "game/code_0020E850", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
 

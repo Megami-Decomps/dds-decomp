@@ -11,9 +11,9 @@ extern void btlUpdateScene(void);
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 func_001A17F0(void);
+extern s32 btlGetRuntime(void);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern s32 btlRuntime;
 
@@ -154,7 +154,7 @@ extern s32 D_0032A520;
 
 extern s32 D_0032A210;
 
-extern s8 D_00324550[];
+extern s8 effSharedRandomState[];
 
 extern s32 func_002D03F8(s32);
 
@@ -283,7 +283,7 @@ s32 btlHasPendingRuntimeActivity(void) {
 
 void btlResetActorEntryState(void) {
     s32 context = btlRuntime;
-    s32 *entries = (s32 *)(D_003BAA00 + 0xBF8);
+    s32 *entries = (s32 *)(datGameState + 0xBF8);
     u32 i;
     *(s32 *)(context + 0x2C0) = 0;
     *(s32 *)(context + 0x2C4) = 0;
@@ -344,7 +344,7 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 func_001A17F0(void) {
+s32 btlGetRuntime(void) {
     return btlRuntime;
 }
 

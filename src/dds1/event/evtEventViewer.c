@@ -97,7 +97,7 @@ void dds3RemoveWorldObjectNode(void *ptr);
 void *func_002CFEB8(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 s32 dds3GetWorldObject(void);
-s32 func_00110ED0(s32 world, s32 type, const char *name);
+s32 dds3FindIndexedObjectChainNodeByName(s32 world, s32 type, const char *name);
 s32 strcmp(const char *a, const char *b);
 char *strcpy(char *dst, const char *src);
 
@@ -402,7 +402,7 @@ s32 evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
     if (index < 0) {
         return 0;
     }
-    return func_00110ED0(dds3GetWorldObject(), 7, viewer->names[index]);
+    return dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 7, viewer->names[index]);
 }
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022C6B0);
@@ -439,7 +439,7 @@ extern s32 func_001159E8(s32 obj, s32 a, s32 b, s32 c, s32 d);
 extern void func_0022C6B0(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
-s32 func_0022C7F0(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
+s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
     f32 vec0[4];
     f32 vec1[4];
     s32 handle = 0;

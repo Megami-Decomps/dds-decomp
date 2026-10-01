@@ -210,9 +210,9 @@ typedef struct {
     u8 sub;               /* 0x02 */
 } EffBattleMiscBasisParam;
 
-extern u8 D_0037F680[];
-extern u8 D_0037F690[];
-extern u8 D_0037F6A0[];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern void func_003364B8(f32 value);
@@ -225,7 +225,7 @@ void effBattleMiscBuildBasis(EffBattleMiscBasisParam *param, u128 *out) {
     f32 tilt = 0;
 
     if (param->kind == 4 || param->sub == 9) {
-        sdfVuBuildLookAtBasis(D_0037F680, D_0037F690, D_0037F6A0);
+        sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
         VU0_MOVE_VF(vf31, vf0);
     } else {

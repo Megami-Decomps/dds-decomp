@@ -6,12 +6,12 @@ extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
 extern u64 func_002EB028(const char *, u32 *, u64);
 
-extern u32 D_003BB190;
+extern u32 itfFontTestScriptTask;
 extern s64 kwlnTaskGetRegisteredState(u32);
 
 extern u32 D_003BB18C;
 
-extern u32 D_003BD81C;
+extern u32 itfBackgroundSpriteTexture;
 
 extern u64 func_001951C8(u64, u64, u64, u64, u64);
 
@@ -32,7 +32,7 @@ extern u32 D_003BB170;
 extern u32 D_003BB16C;
 extern u32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
-extern u16 D_00356620[];
+extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
 
 /* Byte stream read by itfReadEncodedTextLead/itfReadEncodedCode: base at +0x10, position at +0x18. */
@@ -129,7 +129,7 @@ typedef struct TextDrawArgs {
 
 extern u32 D_003BB15C;
 extern u32 D_003D6E20[];
-extern Unk6C84Rec D_003D6C84[];
+extern Unk6C84Rec frFontResourceRecords[];
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
 s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
@@ -236,11 +236,11 @@ void itfInitTextDrawArgs(s32 encodedText, s32 sub) {
 }
 
 u16 func_001971E0(s32 index) {
-    return D_003D6C84[index].unk0->unk10;
+    return frFontResourceRecords[index].unk0->unk10;
 }
 
 u16 func_00197200(s32 index) {
-    return D_003D6C84[index].unk0->unk12;
+    return frFontResourceRecords[index].unk0->unk12;
 }
 
 void itfSetTextDrawLimit(s32 limit) {
@@ -289,7 +289,7 @@ u32 itfDecodeGlyph(u32 value) {
     s32 index = ((adjusted & 0xff00) >> 1) + (adjusted & 0x7f);
 
     if ((u32)index < 0x9b0) {
-        return D_00356620[index];
+        return itfGlyphDecodeTable[index];
     }
     return 0xffff;
 }
@@ -333,7 +333,7 @@ void itfAttachGlyph16x18(u64 x, u64 y, s32 depth, u64 colors,
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197580);
 
-s32 func_00197708(x, y, depth, colors, text, parent)
+s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
 s32 x;
 s32 y;
 s32 depth;
@@ -348,7 +348,7 @@ s32 parent;
 }
 
 void func_00197748(void) {
-    func_00197708();
+    frFontCreateMeasuredFlaggedGlyph();
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197760);
@@ -489,12 +489,12 @@ void itfLoadBackgroundSprite(void) {
     u32 resource;
     u64 buffer = func_002EB028("/sprite/bg00.tmx", &resource, 0);
 
-    D_003BD81C = func_002D3288(resource);
+    itfBackgroundSpriteTexture = func_002D3288(resource);
     func_002D0918(buffer);
 }
 
 void itfReleaseBackgroundSpriteTexture(void) {
-    sdfTexReleaseReference(D_003BD81C);
+    sdfTexReleaseReference(itfBackgroundSpriteTexture);
 }
 
 typedef struct TextBackgroundSprite {
@@ -506,7 +506,7 @@ typedef struct TextBackgroundSprite {
 void itfDrawBackgroundSprite(void) {
     s32 origin[4];
     s32 color[4];
-    TextBackgroundSprite *panel = (TextBackgroundSprite *)D_003BD81C;
+    TextBackgroundSprite *panel = (TextBackgroundSprite *)itfBackgroundSpriteTexture;
 
     if (panel != NULL) {
         s32 x = panel->width;
@@ -532,7 +532,7 @@ extern void itfReleaseFontTestTaskResources(void);
 void itfStartFontTestScene(void) {
     itfLoadBackgroundSprite();
     kwlnTaskCreate((s32)"test_font", 0x2B06, 0, 0, (s32)itfDrawBackgroundAndGetTaskReadyMask, (s32)itfReleaseFontTestTaskResources, 0);
-    D_003BB190 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
+    itfFontTestScriptTask = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
 }
 
 void itfReleaseFontTestTaskResources(void) {
@@ -546,7 +546,7 @@ u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = kwlnTaskGetRegisteredState(D_003BB190);
+    taskState = kwlnTaskGetRegisteredState(itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != 3) {
         readyMask = 0;
@@ -946,7 +946,7 @@ INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB188);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB18C);
 
-INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB190);
+INCLUDE_SDATA(const s32, "game/code_00196478", itfFontTestScriptTask);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
 

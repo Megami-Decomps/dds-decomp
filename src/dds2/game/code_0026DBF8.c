@@ -1,6 +1,6 @@
 #include "common.h"
 extern char D_00425118[];
-extern char D_004378A8[]; /* "%d" */
+extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
 extern s32 mnuGetMantraSourceValue(u16);
 extern f32 sdfSinPoly(f32);
@@ -22,7 +22,7 @@ void mnuReleaseMantraPanelBurstPool(u32 *obj);
 u32 mnuAllocateMantraBackgroundBurstPool(void);
 extern void mnuDrawCellScaledGrid();
 u32 mnuQueueNextMantraSelection(u32);
-u32 func_0026F778(u32);
+u32 mnuQueueMantraSelectionStep(u32);
 extern u32 mnuRegisterMantraDrawItem(u32, u32, void (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
@@ -90,8 +90,8 @@ extern s32 func_00274EA8();
 extern void func_00274FF8();
 extern u32 mnuCreateTypeOneRecord(void);
 extern void mnuReleaseMantraRecordPanelData();
-extern u32 D_00453D00[12];
-extern u8 *D_00435DD0;
+extern u32 mnuMantraSpriteSlots[12];
+extern u8 *datGameState;
 
 typedef struct MantraMenuValues {
     u8 pad00[0x3C];
@@ -277,7 +277,7 @@ extern void *kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(void),
 s32 mnuLoadMantraSpriteTask(void);
 extern void func_0026E788(u32, u32, u32, u32, u32, u32, u32);
 void func_00284508(u32, u32, u32, u32, u32, u32);
-extern char D_004250D8[];
+extern char mnuMantraSpriteTaskName[];
 extern s32 func_002748D0();
 extern void func_00274A70();
 extern u32 mnuInitMantraUnitPanelDraw();
@@ -304,7 +304,7 @@ s32 mnuGetActiveMantraModelFlagState(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026DC48);
 
-extern char D_004378A0[]; /* "%7d" */
+extern char mnuMantraValueFormat[]; /* "%7d" */
 
 /* Interpolate the panel's numeric value over 20 updates, playing a sound on each changed step. */
 void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountState *state, u32 drawArg) {
@@ -312,18 +312,18 @@ void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     func_0026E788(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)D_00435DD0)->panelValue != state->shown) {
+    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, D_004378A0, state->shown + (((MantraMenuValues *)D_00435DD0)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)D_00435DD0)->panelValue;
+            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, D_004378A0, ((MantraMenuValues *)D_00435DD0)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
     }
     func_00311D00(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }
@@ -372,7 +372,7 @@ void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 d
     if (entryId != 0) {
         count = func_003151D0(entryId);
         if (count != 0) {
-            func_0035C860(text, D_004378A8, count);
+            func_0035C860(text, mnuMantraNumberFormat, count);
             func_00311DB0(x + 0x82, y + 0x17C, depth, flags, 4, text, 0, drawArg);
             for (i = 0; i < count; i++) {
                 func_0026E788(x, y, depth, fade, 0x51, 0, drawArg);
@@ -392,7 +392,7 @@ void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u3
     if (entryId != 0) {
         func_0026E788(x, y, depth, fade, 0x53, 0, drawArg);
         if (showCost != 0) {
-            func_0035C860(text, D_004378A8, mnuGetMantraSourceValue(entryId));
+            func_0035C860(text, mnuMantraNumberFormat, mnuGetMantraSourceValue(entryId));
             func_00311DB0(x + 0x9A, y + 0x190, depth, flags, 4, text, 0, drawArg);
         } else {
             func_0035C860(text, D_004378B0);
@@ -425,14 +425,14 @@ void mnuMergeMantraSpriteSlots(u32 *values) {
     s32 i;
     for (i = 0; i < 12; i++) {
         if (values[i] != 0) {
-            D_00453D00[i] = values[i];
+            mnuMantraSpriteSlots[i] = values[i];
         }
     }
 }
 
 void mnuReleaseFirstMantraSpriteSlots(void) {
     s32 i;
-    u32 *slot = D_00453D00;
+    u32 *slot = mnuMantraSpriteSlots;
     for (i = 1; i >= 0; i--, slot++) {
         if (*slot != 0) {
             effDestroyResourceSlotSet(*slot);
@@ -441,9 +441,9 @@ void mnuReleaseFirstMantraSpriteSlots(void) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378A0);
+INCLUDE_SDATA(const s32, "game/code_0026DBF8", mnuMantraValueFormat);
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378A8);
+INCLUDE_SDATA(const s32, "game/code_0026DBF8", mnuMantraNumberFormat);
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378B0);
 
@@ -452,31 +452,25 @@ void mnuReleaseMiddleMantraSpriteSlots(void) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
-        if (D_00453D00[slots[i]] != 0) {
-            effDestroyResourceSlotSet(D_00453D00[slots[i]]);
+        if (mnuMantraSpriteSlots[slots[i]] != 0) {
+            effDestroyResourceSlotSet(mnuMantraSpriteSlots[slots[i]]);
         }
-        D_00453D00[slots[i]] = 0;
+        mnuMantraSpriteSlots[slots[i]] = 0;
     }
 }
 
-void mnuStartMantraSpriteLoad(void) {
-    if (D_00453D00[4] == 0) {
-        u32 resource = func_002C7FF0("/facility/spr/mantra/sprite_a.lb");
-        kwlnTaskCreate(D_004250D8, 0x402, 1, 1, mnuLoadMantraSpriteTask, 0,
-                       (void *)resource);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuStartMantraSpriteLoad);
 
 s32 mnuHasMantraSpriteTaskFinished(void) {
-    if (D_00453D00[4] != 0) {
+    if (mnuMantraSpriteSlots[4] != 0) {
         return 1;
     }
-    return func_00101740(D_004250D8) == 0;
+    return func_00101740(mnuMantraSpriteTaskName) == 0;
 }
 
 void mnuReleaseMantraSpriteSlots(void) {
     s32 i;
-    u32 *slot = D_00453D00;
+    u32 *slot = mnuMantraSpriteSlots;
     for (i = 11; i >= 0; i--, slot++) {
         if (*slot != 0) {
             effDestroyResourceSlotSet(*slot);
@@ -493,7 +487,7 @@ s32 mnuLoadMantraSpriteTask(void) {
         s32 i;
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (entry->kind == 1) {
-                D_00453D00[i] = func_00305148(entry->handle, 0);
+                mnuMantraSpriteSlots[i] = func_00305148(entry->handle, 0);
                 func_003297C8((u32)entry->handle);
             }
         }
@@ -535,7 +529,7 @@ typedef struct MantraCostRecord {
 } MantraCostRecord;
 
 /* Draw a button marker and a variable-width cost, shifting one-digit values right. */
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004250D8);
+INCLUDE_RODATA(const s32, "game/code_0026DBF8", mnuMantraSpriteTaskName);
 
 void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 fade, s32 drawArg) {
     char buttons[9] = {0, 'n', 's', 'o', 'q', 'p', 'r', 't', 'u'};
@@ -545,7 +539,7 @@ void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 fade, s32 d
     func_0026E788(x, y, depth, fade, buttons[((MantraCostRecord *)record)->iconIndex], 0, drawArg);
     func_0026E788(x, y, depth, fade, 0x76, 0, drawArg);
     memset(text, 0, sizeof(text));
-    func_0035C860(text, D_004378A8, ((MantraCostRecord *)record)->cost);
+    func_0035C860(text, mnuMantraNumberFormat, ((MantraCostRecord *)record)->cost);
     if (strlen(text) > 1) {
         func_00311DB0(x + 0x1E0, y + 0x173, depth, drawFlags, 0, text, 0, drawArg);
     } else {
@@ -648,7 +642,7 @@ u32 mnuQueueNextMantraSelection(u32 state) {
 }
 
 /* Queue the previous selection, wrapping to the last list entry at the start. */
-u32 func_0026F778(u32 state) {
+u32 mnuQueueMantraSelectionStep(u32 state) {
     u32 item = mnuAppendDisplayListNode(state);
     u32 *entries = ((MantraListState *)state)->entries;
     if (item != 0) {
@@ -1789,7 +1783,7 @@ void mnuShowMantraUnitPanel(u32 ctx) {
 
 void mnuAdvanceMantraUnitPanelListState(u32 pool) {
     s32 obj = mnuFindMantraDrawItemByKind(pool, 9);
-    func_0026F778((u32)((MantraDrawItem *)obj)->data + 0xc);
+    mnuQueueMantraSelectionStep((u32)((MantraDrawItem *)obj)->data + 0xc);
 }
 
 void mnuQueueNextUnitPanelSelection(u32 pool) {
@@ -1908,7 +1902,7 @@ u32 mnuCreateTypeOneRecord(void) {
     memset(record, 0, sizeof(MenuRecord));
     record->type = 1;
     record->flags = 0;
-    record->unk_10 = ((MantraMenuValues *)D_00435DD0)->panelValue;
+    record->unk_10 = ((MantraMenuValues *)datGameState)->panelValue;
     return (u32)record;
 }
 
@@ -1968,18 +1962,18 @@ void mnuDrawMantraCounterTweenB(u32 x, u32 y, u32 depth, u32 fade, MantraCountSt
     u32 flags = fade | 0xA09DC300;
 
     func_0026E788(x, y, depth, fade, 0x2E, 0, drawArg);
-    if (((MantraMenuValues *)D_00435DD0)->panelValue != state->shown) {
+    if (((MantraMenuValues *)datGameState)->panelValue != state->shown) {
         s32 steps = 20;
 
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);
         state->step++;
-        func_0035C860(text, D_004378A0, state->shown + (((MantraMenuValues *)D_00435DD0)->panelValue - state->shown) * state->step / steps);
+        func_0035C860(text, mnuMantraValueFormat, state->shown + (((MantraMenuValues *)datGameState)->panelValue - state->shown) * state->step / steps);
         if (state->step == steps) {
-            state->shown = ((MantraMenuValues *)D_00435DD0)->panelValue;
+            state->shown = ((MantraMenuValues *)datGameState)->panelValue;
             state->step = 0;
         }
     } else {
-        func_0035C860(text, D_004378A0, ((MantraMenuValues *)D_00435DD0)->panelValue);
+        func_0035C860(text, mnuMantraValueFormat, ((MantraMenuValues *)datGameState)->panelValue);
     }
     func_00311D00(x + 0x193, y + 0x26, depth, flags, 0, text, 0, drawArg);
 }

@@ -11,7 +11,7 @@ typedef struct LevelStep {
 
 extern LevelStep D_00370D08[];
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 typedef struct TitleMenuWork {
     u8 pad00[0x1574];
@@ -154,14 +154,14 @@ INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 s32 mnuCountAdvancingTitleAnimations(void) {
     s32 offset = 0;
     s32 count = 0;
     s32 remaining = 4;
     do {
-        s32 step = ptyCalcLevelUps(D_003BAA00 + 0xa60 + offset);
+        s32 step = ptyCalcLevelUps(datGameState + 0xa60 + offset);
         count += step > 0;
         offset += 0x1a4;
     } while (--remaining >= 0);
@@ -254,7 +254,7 @@ void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-u32 func_00266168(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
+u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, u8 *resource) {
     ptyGetCurrentProfileId(*(u32 *)(resource + 8));
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }

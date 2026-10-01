@@ -22,7 +22,7 @@ void func_00111258(void *slot, void *owner);
 void dds3RemoveWorldObjectNode(void *node);
 void dds3DestroyWorldIndexNode(u32 node);
 void sdfReleaseChipBlock(void *block);
-void func_00111B40(World *world);
+void dds3ReleaseObjectBaseResources(World *world);
 
 /* ObjBase plus the runtime fields past 0x38. */
 typedef struct ObjBaseFull {
@@ -40,7 +40,7 @@ typedef struct ObjBaseFull {
 } ObjBaseFull;
 
 /* Free an object base: owner, the slot nodes, its devices and finally the block itself. */
-void func_00111840(ObjBaseFull *base) {
+void dds3DestroyObjectBase(ObjBaseFull *base) {
     void *owner;
     void *slot;
     s32 i;
@@ -59,7 +59,7 @@ void func_00111840(ObjBaseFull *base) {
             }
         }
     }
-    func_00111B40(owner);
+    dds3ReleaseObjectBaseResources(owner);
     if (base->devSlot != 0) {
         sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
@@ -88,7 +88,7 @@ u8 dds3TestObjectFlags(void *obj, s32 flags) {
     return (base->flags & flags) != 0;
 }
 
-void func_001119A0(void *obj, void *data) {
+void dds3SetExtData(void *obj, void *data) {
     ObjBase *base;
 
     base = dds3GetObjectOwnedHandle(obj);
@@ -128,7 +128,7 @@ u32 dds3GetUnk0C(void *obj) {
 }
 
 /* Tear down the model/context behind an object's primary handle and mark it released (state 3). */
-void func_00111B40(World *world) {
+void dds3ReleaseObjectBaseResources(World *world) {
     ObjBaseFull *base;
     WorldInfo *info;
 

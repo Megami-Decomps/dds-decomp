@@ -12,7 +12,7 @@ extern char D_003B1168[]; /* "staffProc" */
 
 extern u8 D_0037B168[];
 
-extern u32 D_003BC62C;
+extern u32 mnuMovieDrawTask;
 
 extern u16 D_003BA72C;
 
@@ -66,8 +66,8 @@ INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
 
 s32 mnuStaffImageProc(void) {
-    func_0026E720(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
-    func_0026E720(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
+    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork[1], 0x10, 0, 0x27);
+    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork[1], D_0037AF70[mnuMovieWork[5]], 0, 0x53);
     func_0026F230(0x53);
     func_0026F918();
     return 0;
@@ -145,9 +145,9 @@ s32 mnuMovieDraw(void) {
 }
 
 void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
-    if (D_003BC62C == 0) {
+    if (mnuMovieDrawTask == 0) {
         func_002ED8D0(D_0037B888, data, resource);
-        D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
+        mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
 
@@ -158,12 +158,12 @@ void func_0026FFF8(s32 index) {
 }
 
 void mnuStopMovieDrawTask(void) {
-    if (D_003BC62C == 0) {
+    if (mnuMovieDrawTask == 0) {
         return;
     }
     func_002EDAE0(D_0037B888);
-    kwlnTaskDestroyWithHierarchy(D_003BC62C, 0);
-    D_003BC62C = 0;
+    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    mnuMovieDrawTask = 0;
 }
 
 s32 func_00270068(void) {
@@ -336,5 +336,5 @@ INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC620);
 
 INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC628);
 
-INCLUDE_SDATA(const s32, "game/code_0026EC90", D_003BC62C);
+INCLUDE_SDATA(const s32, "game/code_0026EC90", mnuMovieDrawTask);
 

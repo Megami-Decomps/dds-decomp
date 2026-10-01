@@ -8,7 +8,7 @@ extern u64 func_00320AE8(u64, u64, u32 *);
 
 extern u64 func_00325790(u64, u32);
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
 extern u32 func_0035A828(s32 bytes);
@@ -325,7 +325,7 @@ u32 mnuCreateCallbackNode(u32 userData) {
 void dds3DestroyCallbackNodeAfterLastNotification(u32 node) {
     if (node != 0) {
         void (*callback)(s32, u32);
-        func_00321018(node);
+        mnuClearResourceList(node);
         callback = (void (*)(s32, u32))((DdsCallbackNode *)node)->onLast;
         callback(-1, ((DdsCallbackNode *)node)->userData);
         func_0035A880(node);

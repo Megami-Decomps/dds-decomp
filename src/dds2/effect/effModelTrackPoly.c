@@ -68,7 +68,7 @@ void effTrackPolySetColor(EffTrackPolyWork *track, u32 color) {
 }
 
 void func_0018FF38(EffTrackPolyWork *track) {
-    func_00190A48(track->data);
+    effTrackPolyDrawStrips(track->data);
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_0018FF50);
@@ -81,7 +81,7 @@ typedef struct EffTrackPolyList {
 
 extern u32 func_003292A8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern EffTrackPolyWork *func_0018FD88(EffTrackPolyModel *model);
+extern EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyModel *model);
 
 /* Build a list of `count` track-poly works over one model. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyModel *model, u32 count) {
@@ -93,7 +93,7 @@ EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyModel *model, u32 
     list->items = (EffTrackPolyWork **)(list + 1);
     list->count = count;
     for (i = 0; i < count; i++) {
-        list->items[i] = func_0018FD88(model);
+        list->items[i] = effTrackPolyCreateWork(model);
     }
     return list;
 }
@@ -281,7 +281,7 @@ extern void sdfAppendPacket(s32, s32);
 extern s32 func_00167A10(EffTrackPolyDraw *);
 
 /* Draw the track as strips of 16 point pairs: the ring buffer is walked as at most two runs (the recent end, then the wrapped start). */
-void func_00190A48(EffTrackPolyData *data) {
+void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     s32 list = sdfAllocPacketAligned(0x20);
     s32 start[4];
     s32 len[2];

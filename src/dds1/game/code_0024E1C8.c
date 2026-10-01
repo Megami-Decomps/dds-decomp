@@ -6,7 +6,7 @@ extern void func_0024F6F0(s32, s32);
 
 extern u8 D_003AF7A8[];
 
-extern u32 D_003BC4CC;
+extern u32 mnuSceneResourceContext;
 extern s32 D_0036C698[];
 extern u8 D_0036C648[];
 
@@ -86,20 +86,20 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024F6F0);
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
     s32 data = func_0024F608();
-    D_003BC4CC = sdfCreateTaskWorker(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
+    mnuSceneResourceContext = sdfCreateTaskWorker(D_003AF7A8, 0x402, 0x2B12, D_0036C648, func_0024F6F0, data);
 }
 
 s32 mnuCheckResourceTask(void) {
     if (kwlnTaskExists(D_003AF7A8) != 0) {
         return 1;
     }
-    D_003BC4CC = 0;
+    mnuSceneResourceContext = 0;
     return 0;
 }
 
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks(D_003BC4CC);
-    D_003BC4CC = 0;
+    sdfDestroyTaskWorkerTasks(mnuSceneResourceContext);
+    mnuSceneResourceContext = 0;
 }
 
 /* One of the two 0x14-byte slots of a mantra source entry. */
@@ -160,18 +160,18 @@ typedef struct MnuResourceTask {
 u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *taskObject;
 
-    taskObject = (MnuResourceTask *)func_002CB3B8(D_003BC4CC, 0);
+    taskObject = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
     return taskObject->menuList->selectionNode->selectionAddress;
 }
 
 void mnuStopResourceAnimation(void) {
-    s32 object = func_002CB3B8(D_003BC4CC, 0);
+    s32 object = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
     mnuRetreatListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
 
 void mnuResetResourceAnimation(void) {
-    s32 object = func_002CB3B8(D_003BC4CC, 0);
+    s32 object = func_002CB3B8(mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)object)->menuList);
     mnuAdvanceListCursorDefault(((MnuResourceTask *)object)->menuList);
 }
@@ -216,7 +216,7 @@ typedef struct MenuCleanupOwner {
 void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     MenuCleanupOwner *owner = (MenuCleanupOwner *)taskData[3];
     MenuCleanupNode *node = owner->first;
-    u8 *record = (u8 *)func_002CB3B8(D_003BC4CC, -1);
+    u8 *record = (u8 *)func_002CB3B8(mnuSceneResourceContext, -1);
 
     while (node != NULL) {
         sdfReleaseChipBlock(node->resource);
@@ -253,7 +253,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     f32 shade;
     f32 elapsed;
     f32 ratio;
-    s32 sel = func_002CB3B8(D_003BC4CC, -1);
+    s32 sel = func_002CB3B8(mnuSceneResourceContext, -1);
     s32 amount;
     s32 limit;
 
@@ -386,7 +386,7 @@ extern void func_00253208(s32, s32, s32 *, s32 *);
 extern void *sdfGridSelectFilledCell(MnuSceneGridWork *, s32, s32);
 extern void func_002512F0(s32, s32);
 
-void func_00250978(s32 context) {
+void mnuInitializeMantraSelectionGrid(s32 context) {
     MnuSceneContext *scene = (MnuSceneContext *)context;
     s32 coordinates[2];
     s32 record;
@@ -397,7 +397,7 @@ void func_00250978(s32 context) {
     sdfSetShortPairValues(scene->grid, 1, 1);
     scene->grid->freeTaskData = mnuFreeTaskData;
     scene->grid->callback = func_0025A680;
-    record = func_002CB3B8(D_003BC4CC, 0);
+    record = func_002CB3B8(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(record + 0xC) + 0x1C);
     func_00253208(context, *(s32 *)(field + 0x70),
                   &coordinates[0], &coordinates[1]);

@@ -3,9 +3,9 @@
 #include "pcp_vu0.h"
 
 extern u32 kwlnDrawControlFlags;
-extern u8 D_003BA908;
-extern u16 D_003BA90A;
-extern u16 D_003BA90C;
+extern u8 kwlnDrawOverlayEnabled;
+extern u16 kwlnDrawOverlayAlpha;
+extern u16 kwlnDrawOverlayScale;
 extern u16 D_003BD6B4;
 extern u16 D_003BD6B6;
 extern u16 D_003BD6B8;
@@ -133,8 +133,8 @@ extern u8 D_003C2E17;
 extern u8 D_003C2D8B;
 extern u8 D_003C2CDF;
 extern u8 D_003C2D3F;
-extern u128 D_00324780;
-extern DrawWord20 D_00324790;
+extern u128 kwlnDefaultColorVector;
+extern DrawWord20 kwlnDrawVector;
 extern u16 D_003BD74C;
 extern u16 D_003BD748;
 extern u16 D_003BD74E;
@@ -163,8 +163,8 @@ extern u16 D_003BD75A;
 extern u16 D_003BD758;
 extern u16 D_003BD754;
 extern u16 D_003BD756;
-extern u32 D_003BA934;
-extern u32 D_003BA938;
+extern u32 kwlnDistanceBlurErrorCount;
+extern u32 kwlnRippleBlurErrorCount;
 extern void func_0018F6F0(void *);
 extern void func_0018F6D8(void);
 extern void func_0018F3B8(void *);
@@ -187,11 +187,11 @@ extern u32 effGetCh76Work(void);
 extern void func_0018F598(void);
 
 void kwlnDrawCopyRow128(void *src) {
-    PCP_COPY_VECTOR(&D_00324780, src);
+    PCP_COPY_VECTOR(&kwlnDefaultColorVector, src);
 }
 
 void kwlnDrawCopyWords20(DrawWord20 *src) {
-    memcpy(&D_00324790, src, 0x14);
+    memcpy(&kwlnDrawVector, src, 0x14);
 }
 
 void dds3DrawSetIndexedWord(u32 value, s32 index) {
@@ -273,7 +273,7 @@ extern u16 D_003BD75C;
 extern u16 D_003BD75E;
 extern u32 effGetCh75Work(void);
 
-void func_00106738(s32 mode) {
+void kwlnDrawApplyEffectWord(s32 mode) {
     D_003C2DE0 = *(DrawWord36 *)effGetCh75Work();
     D_003BD75C = 0;
     D_003BD75E = mode;
@@ -321,19 +321,19 @@ void kwlnDrawEnableE08(s32 enabled) {
 /* Apply an offset immediately, or stage an interpolated move from the old offset. */
 void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     if (transition == 0) {
-        D_003BA90A = (s16)x;
-        D_003BA90C = (s16)y;
+        kwlnDrawOverlayAlpha = (s16)x;
+        kwlnDrawOverlayScale = (s16)y;
         if ((x == 0) && (y == 0)) {
-            D_003BA908 = 0;
+            kwlnDrawOverlayEnabled = 0;
         }
         else {
-            D_003BA908 = 1;
+            kwlnDrawOverlayEnabled = 1;
         }
         kwlnDrawControlFlags = kwlnDrawControlFlags & 0xfffff7ff;
         return;
     }
-    D_003BD6B8 = D_003BA90A;
-    D_003BD6BA = D_003BA90C;
+    D_003BD6B8 = kwlnDrawOverlayAlpha;
+    D_003BD6BA = kwlnDrawOverlayScale;
     D_003BD6BC = (s16)x;
     D_003BD6BE = (s16)y;
     D_003BD6B6 = (s16)transition;
@@ -433,7 +433,7 @@ extern u16 D_003BD720;
 extern u16 D_003BD722;
 extern u32 effGetCh71Work(void);
 
-void func_00106BC8(s32 mode) {
+void kwlnDrawApplyEffectBlock(s32 mode) {
     D_003C2C40 = *(DrawBlkD30 *)effGetCh71Work();
     D_003BD720 = 0;
     D_003BD722 = mode;
@@ -485,7 +485,7 @@ void kwlnDrawSetupC70B(s32 mode) {
 void kwlnDrawSetCd0Clamped(s32 boundedValue, s32 lastWord, s32 secondWord, s32 fourthWord,
                            f32 firstFloat, f32 secondFloat, f32 thirdFloat) {
     if (boundedValue >= 0x65) {
-        D_003BA934++;
+        kwlnDistanceBlurErrorCount++;
         boundedValue = 0x64;
     }
     D_003C2CD0.unk00 = boundedValue;
@@ -557,7 +557,7 @@ void kwlnDrawEnableCd0(s32 enabled) {
 void kwlnDrawSetD30Clamped(s32 boundedValue, s32 fourthWord, f32 firstFloat, f32 secondFloat,
                            f32 thirdFloat, f32 fourthFloat, f32 fifthFloat) {
     if (boundedValue >= 0x29) {
-        D_003BA938++;
+        kwlnRippleBlurErrorCount++;
         boundedValue = 0x28;
     }
     D_003C2D30.unk00 = boundedValue;

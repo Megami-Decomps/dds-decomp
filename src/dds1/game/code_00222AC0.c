@@ -100,7 +100,7 @@ extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 extern void evtResetObjectPendingValue(void *arg0);
 extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
-extern s32 func_0010D6A0(void);
+extern s32 scrGetCurrentContext(void);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 func_00241E18(s32 arg0, s32 arg1);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
@@ -511,7 +511,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     s32 model;
     s32 ret;
 
-    if (func_0010D6A0() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     param0 = scrReadIntParameter(0);
@@ -926,7 +926,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
     return 1;
 }
 
-extern void func_002227C8(EvtUnit *unit);
+extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     EvtUnit *unit;
@@ -944,7 +944,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
         evtBeginUnitTransitionTowardWorldObject(unit, mode, objectId, -1, frames, valueB6, 0, 0);
     }
     if (scrReadIntParameter(2) == 1) {
-        func_002227C8(unit);
+        evtUnitPrepareVerticalMoveSteps(unit);
     }
     return 1;
 }

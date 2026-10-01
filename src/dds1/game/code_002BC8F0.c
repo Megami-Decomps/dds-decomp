@@ -26,27 +26,27 @@ extern u32 D_003BD160;
 
 extern u32 D_003BD124;
 
-extern s32 D_003BD118;
+extern s32 effQueuedResourceNameRecord;
 
-extern s32 D_003BD10C;
+extern s32 effResourceBankEntries;
 
-extern s32 D_003BD110;
+extern s32 effResourceBankDescriptor;
 
 extern s32 D_003BD098;
 
-extern s32 D_003BD09C;
+extern s32 effQueuedFileObject;
 
-extern s32 D_003BD06C;
+extern s32 effTemporaryFileJob;
 
-extern s32 D_003BD05C;
+extern s32 effAuxiliaryFileQueue;
 
-extern u32 D_003BC998;
+extern u32 effScalyTextureHandle;
 
-extern s32 D_003BC99C;
+extern s32 effSharedStripReferenceCount;
 
-extern u32 D_003BC9A0;
+extern u32 effSharedScalyStripResource;
 
-extern u32 D_003BC988;
+extern u32 effWindTextureHandle;
 
 extern u32 D_003BC984;
 
@@ -54,15 +54,15 @@ extern u32 D_003BC994;
 
 extern u32 func_002EB028(const char *, u32 *, s32);
 
-extern u32 D_003BD068;
+extern u32 effQueuedFileHandle;
 
-extern u32 D_003BC980;
+extern u32 effCurrentRenderPacket;
 
-extern s32 D_003BC98C;
+extern s32 effSharedRibbonReferenceCount;
 
 extern u32 D_003BC990;
 
-extern u32 D_003BC968;
+extern u32 effFlashTextureHandles;
 
 extern u32 D_003BC96C;
 
@@ -81,7 +81,7 @@ typedef struct EffectObjectNode {
     struct EffectObjectNode *next;
 } EffectObjectNode;
 
-extern EffectObjectNode *D_003BC948;
+extern EffectObjectNode *effFloorModelListHead;
 
 extern u32 D_003BD058;
 
@@ -151,7 +151,7 @@ typedef struct EffectSlotDescription {
     u8 pad1C[0x64];
 } EffectSlotDescription;
 
-extern u32 D_003BC94C;
+extern u32 effSharedTextureReferenceCount;
 
 extern void func_002BD3D8(void *, s32, void *);
 
@@ -216,9 +216,9 @@ extern s8 D_003BC9AC;
 
 extern f32 D_003BC9A8;
 
-extern s32 D_003BD060;
+extern s32 effFileQueue;
 
-extern s32 D_003BD060;
+extern s32 effFileQueue;
 
 extern char D_003BD080[];
 
@@ -226,11 +226,11 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u8 D_003BD078[];
 
-extern s32 D_003BD060;
+extern s32 effFileQueue;
 
-extern s32 D_003BD070;
+extern s32 effCurrentFileQueueEntry;
 
-extern u32 D_003BD114;
+extern u32 effFileQueueNameRecord;
 
 extern u8 D_003BCF30[];
 

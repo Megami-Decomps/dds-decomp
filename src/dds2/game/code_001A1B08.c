@@ -27,7 +27,7 @@ typedef struct PanelObj {
     u8 handlerIndex; /* 0x3C: index into the panel handler table */
 } PanelObj;
 
-extern void (*D_003B4448[])(PanelObj *);
+extern void (*itfPanelHandlers[])(PanelObj *);
 
 /* Flag byte reached as rec+0x24+0x10 (i.e. byte 0x34 of the record). */
 typedef struct PanelRecSub {
@@ -66,7 +66,7 @@ typedef struct PanelHold {
     PanelHoldItem items[0x40]; /* 0xC: queued entries, unk6 counts them */
 } PanelHold;
 
-extern PanelHold D_003B4780;
+extern PanelHold itfHeldPanelCursor;
 
 extern PanelEntry itfWindowSlots[];
 
@@ -75,10 +75,10 @@ extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern void func_001A4988(s32 window, s32 arg1, s32 arg2);
 extern s32 scrGetWindow(void);
 extern void itfScaleVectors(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
-extern s32 D_003B44E8[];
+extern s32 itfPanelColorTemplates[];
 extern s32 D_003B4548[];
-extern s32 D_003B4588[];
-extern s32 D_003B4598[];
+extern s32 itfPanelGradientColorTemplate[];
+extern s32 itfPanelGradientColorPair[];
 extern void itfDrawQuadFlat4(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, u64 command);
 extern u8 D_004365C8[8];
 extern u8 D_004365D0[8];
@@ -100,7 +100,7 @@ typedef struct PanelVert {
 } PanelVert;
 
 void itfPanelDispatchHandler(PanelObj *panel) {
-    D_003B4448[panel->handlerIndex](panel);
+    itfPanelHandlers[panel->handlerIndex](panel);
 }
 
 void itfPanelSetFourColumnVertices(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
@@ -206,7 +206,7 @@ void itfSetPanelColorAndAlphaVectors(u8 *base, u32 red, u32 green, u32 blue, u32
     panelSetVec4(vec, red, green, blue, 1);
     vec = (u32 *)(base + 0x150);
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, D_003B44E8, 6);
+    itfScaleVectors((s32 *)(base + 0x160), red, green, blue, alpha, itfPanelColorTemplates, 6);
 }
 
 void itfSetPanelColorVectors(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
@@ -222,8 +222,8 @@ void itfSetPanelGradientColor(u8 *base, u32 red, u32 green, u32 blue, u32 alpha)
     u32 *vec = (u32 *)(base + 0x20);
 
     panelSetVec4(vec, red, green, blue, alpha);
-    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, D_003B4588, 1);
-    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, D_003B4598, 2);
+    itfScaleVectors((s32 *)(base + 0x30), red, green, blue, alpha, itfPanelGradientColorTemplate, 1);
+    itfScaleVectors((s32 *)(base + 0x40), red, green, blue, 0x80, itfPanelGradientColorPair, 2);
 }
 
 void itfPanelSetRectSpan(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {
@@ -379,7 +379,7 @@ s32 itfPanelAcquireHold(void) {
     if (window < 0) {
         return 1;
     }
-    hold = &D_003B4780;
+    hold = &itfHeldPanelCursor;
     hold->window = window;
     hold->unk4 = -1;
     hold->unk8 = -1;
@@ -389,7 +389,7 @@ s32 itfPanelAcquireHold(void) {
 }
 
 s32 itfPanelReleaseHold(void) {
-    PanelHold *hold = &D_003B4780;
+    PanelHold *hold = &itfHeldPanelCursor;
 
     if (hold->window < 0) {
         return 1;
@@ -404,7 +404,7 @@ s32 itfPanelReleaseHold(void) {
 
 /* Queue one (first, second, third) entry from the script parameters; ignored when no hold is active or the queue is full. */
 s32 itfCommandQueueHeldPanelEntry(void) {
-    PanelHold *cursor = &D_003B4780;
+    PanelHold *cursor = &itfHeldPanelCursor;
     s32 first;
     s32 second;
     s32 third;

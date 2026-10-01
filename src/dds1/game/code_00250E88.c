@@ -6,7 +6,7 @@ extern void func_002512F0(s32, s32);
 
 extern void mnuReleaseListNodes(s32);
 
-extern void func_00250978(s32);
+extern void mnuInitializeMantraSelectionGrid(s32);
 
 extern void mnuCopySceneCoordinates(s32);
 
@@ -20,7 +20,7 @@ extern void mnuResetWorkFloats(void);
 
 extern s32 func_002CB3B8(u32, u32);
 
-extern u32 D_003BC4CC;
+extern u32 mnuSceneResourceContext;
 
 typedef struct {
     u32 unk0;
@@ -74,7 +74,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002517C0);
 extern s32 func_002D03F8(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
-extern u8 *D_003BAA00;
+extern u8 *datGameState;
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
@@ -83,16 +83,16 @@ s32 mnuCreateSceneWork(void) {
 
     memset(work, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)work)->allocationHandle = handle;
-    func_00250978((s32)work);
+    mnuInitializeMantraSelectionGrid((s32)work);
     ((MenuSceneWork *)work)->coordinateA = 0;
     ((MenuSceneWork *)work)->coordinateB = 0;
-    ((MenuSceneMetadata *)func_002CB3B8(D_003BC4CC, -1))->displayedCurrency = ((DatGameCounters *)D_003BAA00)->currency;
+    ((MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1))->displayedCurrency = ((DatGameCounters *)datGameState)->currency;
     mnuCopySceneCoordinates((s32)work);
     return (s32)work;
 }
 
 void mnuReleaseSceneContext(s32 unused, s32 context) {
-    func_002CB3B8(D_003BC4CC, -1);
+    func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
     mnuReleaseDisplayListNodes(context + 0x584);
     func_002D0918(((MenuSceneWork *)context)->allocationHandle);
@@ -125,14 +125,14 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
 void mnuReinitializeSceneGrid(s32 context) {
     sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
-    func_00250978(context);
+    mnuInitializeMantraSelectionGrid(context);
     mnuCopySceneCoordinates(context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253558);
 
 s32 fldGetSceneMetadataNode(void) {
-    s32 context = func_002CB3B8(D_003BC4CC, 1);
+    s32 context = func_002CB3B8(mnuSceneResourceContext, 1);
 
     if (context == 0) {
         return 0;
@@ -181,12 +181,12 @@ void fldUpdateSceneEntryMetadata(s32 context) {
 }
 
 s32 fldResetSceneState(void) {
-    fldUpdateSceneEntryMetadata(func_002CB3B8(D_003BC4CC, 1));
+    fldUpdateSceneEntryMetadata(func_002CB3B8(mnuSceneResourceContext, 1));
     return 0;
 }
 
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
-    s32 context = func_002CB3B8(D_003BC4CC, 1);
+    s32 context = func_002CB3B8(mnuSceneResourceContext, 1);
     func_002512F0(context, 1);
     mnuCopySceneCoordinates(context);
     mnuReleaseListNodes(context + 0x590);

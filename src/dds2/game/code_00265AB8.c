@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_00265AB8(void) {
+void dspStartActivePresetEntry(void) {
     dspSetActive(1);
     dspStartEntry(0xe);
 }

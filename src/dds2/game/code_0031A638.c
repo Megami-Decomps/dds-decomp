@@ -41,7 +41,7 @@ void func_0031A830(u8 *work) {
     } else {
         timer->step = 0x14;
         timer->completed = 0x258;
-        func_0031B2E0(0x1E00005, 0);
+        sndClaimFreeSoundSlot(0x1E00005, 0);
     }
 }
 

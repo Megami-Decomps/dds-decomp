@@ -2,7 +2,7 @@
 #include "pcp_vu0.h"
 
 typedef struct {
-    void *objectHandle; /* 0x0 passed to func_00111840, returned by effObjGetObjectHandle */
+    void *objectHandle; /* 0x0 passed to dds3DestroyObjectBase, returned by effObjGetObjectHandle */
     u32 flags;   /* 0x4 effect flag bits */
     s32 state;   /* 0x8: checked for states 5 (node update) and 6 (parameter access) */
     void *bill;   /* 0xC passed to billCloneObjectRetainingSharedData/billSetKind1Entry */
@@ -34,14 +34,14 @@ typedef struct {
 
 void func_001143D8(void *arg);
 void effObjFreeInner(void *arg);
-void func_00111840(void *arg);
+void dds3DestroyObjectBase(void *arg);
 void sdfReleaseChipBlock(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
-EffectObj *func_00114B18(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
-EffectObj *func_00114CE8(void *bill, void *vec, s32 extra);
-EffectObj *func_00114E90(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra);
 EffectObj *func_00114FE0(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
@@ -53,12 +53,12 @@ void *func_002EB028(void *resource, u32 *resolvedId, s32 options);
 
 extern void *func_0014FE28(void);
 
-extern void *func_0014FE48(void);
+extern void *effLoadResourceNode(void);
 
 extern void *func_0014FD20(void);
 extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
-extern void func_0014FBF0(void *source, void *destination);
+extern void effCopyVectorToNodeInstance(void *source, void *destination);
 
 extern void *func_00111388(void);
 extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
@@ -94,7 +94,7 @@ void effObjReleaseObjectData(EffectObj *obj) {
     data = obj->data;
     func_001143D8(data);
     effObjFreeInner(obj);
-    func_00111840(data->objectHandle);
+    dds3DestroyObjectBase(data->objectHandle);
     sdfReleaseChipBlock(obj->data);
     obj->data = NULL;
 }
@@ -130,7 +130,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     return obj;
 }
 
-EffectObj *func_00114B18(void *bill, void *vec, s32 extra) {
+EffectObj *effObjCreateWithBill(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffectObj *obj;
     EffectData *data;
@@ -167,7 +167,7 @@ void func_00114BF0(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
     handle = billCloneObjectRetainingSharedData(obj->data->bill);
-    func_00114B18(handle, vec, extra);
+    effObjCreateWithBill(handle, vec, extra);
 }
 
 /* Create an indexed billboard of kind one and dispatch it. */
@@ -175,7 +175,7 @@ void effObjCreateIndexedKindOne(u32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateIndexed(1, billId);
-    func_00114B18(handle, vec, extra);
+    effObjCreateWithBill(handle, vec, extra);
 }
 
 /* Create a resource-backed billboard of kind one and dispatch it. */
@@ -183,14 +183,14 @@ void effObjCreateResourceKindOne(s32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateFromResource(1, billId);
-    func_00114B18(handle, vec, extra);
+    effObjCreateWithBill(handle, vec, extra);
 }
 
 void func_00114CC8(EffectObj *obj) {
     billSetKind1Entry(obj->data->bill);
 }
 
-EffectObj *func_00114CE8(void *bill, void *vec, s32 extra) {
+EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffectObj *obj;
     EffectData *data;
@@ -226,24 +226,24 @@ void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
 
     handle = billCloneObjectRetainingSharedData(obj->data->bill);
-    func_00114CE8(handle, vec, extra);
+    effObjCreateBillNode(handle, vec, extra);
 }
 
 void effObjCreateIndexedKindZero(u32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateIndexed(0, billId);
-    func_00114CE8(handle, vec, extra);
+    effObjCreateBillNode(handle, vec, extra);
 }
 
 void effObjCreateResourceKindZero(s32 billId, void *vec, s32 extra) {
     void *handle;
 
     handle = billCreateFromResource(0, billId);
-    func_00114CE8(handle, vec, extra);
+    effObjCreateBillNode(handle, vec, extra);
 }
 
-EffectObj *func_00114E90(void *bill, void *vec, s32 extra) {
+EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra) {
     u8 vector[0x10];
     EffectObj *obj;
     EffectData *data;
@@ -257,7 +257,7 @@ EffectObj *func_00114E90(void *bill, void *vec, s32 extra) {
     }
     VU0_LOAD_VF(vf10, vec);
     VU0_STORE_VF(vf10, vector);
-    func_0014FBF0(bill, vector);
+    effCopyVectorToNodeInstance(bill, vector);
     data = obj->data;
     data->state = 1;
     data->bill = bill;
@@ -279,14 +279,14 @@ void func_00114F60(u32 unused, void *vec, s32 extra) {
     void *handle;
 
     handle = func_0014FD20();
-    func_00114E90(handle, vec, extra);
+    effObjCreateWithBoundBill(handle, vec, extra);
 }
 
 void func_00114FA0(u32 unused, void *vec, s32 extra) {
     void *handle;
 
-    handle = func_0014FE48();
-    func_00114E90(handle, vec, extra);
+    handle = effLoadResourceNode();
+    effObjCreateWithBoundBill(handle, vec, extra);
 }
 
 EffectObj *func_00114FE0(void *bill, void *vec, s32 extra) {
@@ -303,7 +303,7 @@ EffectObj *func_00114FE0(void *bill, void *vec, s32 extra) {
     }
     VU0_LOAD_VF(vf10, vec);
     VU0_STORE_VF(vf10, vector);
-    func_0014FBF0(bill, vector);
+    effCopyVectorToNodeInstance(bill, vector);
     data = obj->data;
     data->state = 1;
     data->bill = bill;

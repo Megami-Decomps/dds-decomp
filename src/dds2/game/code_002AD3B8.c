@@ -35,7 +35,7 @@ extern void frFontSetChainFlag(s32, s32);
 extern s32 func_0019D550(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 D_00435E20;
+extern s32 datCommandRecords;
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
 extern s32 mnuGetPartyEntryMenuValue();
@@ -49,7 +49,7 @@ extern char D_003E74F8[];
 extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
-extern u32 func_002C44E8();
+extern u32 mnuMapPadMaskToFlags();
 extern void func_002BD480();
 extern void mnuSetPopupEntryFlagged();
 extern void mnuClearActionFlags();
@@ -153,7 +153,7 @@ s64 mnuStaffImageInputA(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -205,7 +205,7 @@ s64 mnuPollStaffSlotSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -257,7 +257,7 @@ s64 mnuPollStaffValueSelectionConfirmation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     u8 *window;
 
@@ -316,7 +316,7 @@ s64 mnuHandleSecondaryStaffObjectInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_002C44E8(0xc33);
+    u32 buttons = mnuMapPadMaskToFlags(0xc33);
     s64 state;
     u8 *window;
 
@@ -470,7 +470,7 @@ s32 mnuStaffListInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->firstList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
@@ -520,7 +520,7 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
 
     itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (id != 0) {
-        func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + D_00435E20 + 0x18));
+        func_0035C860(buf, D_00437BD0, *(s16 *)(evtGetIndexedEventRecordId(id) * 0x38 + datCommandRecords + 0x18));
         handle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)buf, 0);
         frFontSetChainFlag(handle, 4);
         func_0019D550(handle, 1, 0x53);
@@ -628,7 +628,7 @@ s32 mnuHandleStaffSelectionListNavigation(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->secondList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;
@@ -764,7 +764,7 @@ s32 mnuHandleStaffValuePageInput(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 changed = 0;
-    u32 buttons = func_002C44E8(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
     u8 *window = ((MenuStaffList *)menu->thirdList)->window;
     s32 *node = ((MenuStaffWindow *)window)->cursor;
     s32 first;

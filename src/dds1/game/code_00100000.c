@@ -19,13 +19,13 @@ extern u8 D_003BA708;
 
 extern KwlnTask *kwlnDelayedStartTaskHead;
 extern KwlnTask *D_003BA804;
-extern s32 D_003BA808;
+extern s32 kwlnDelayedStartTaskCount;
 extern KwlnTask *kwlnDelayedDestroyTaskHead;
 extern KwlnTask *D_003BA810;
-extern s32 D_003BA814;
-extern KwlnTask *D_003BA818;
+extern s32 kwlnDelayedDestroyTaskCount;
+extern KwlnTask *kwlnActiveTaskHead;
 extern KwlnTask *D_003BA81C;
-extern s32 D_003BA820;
+extern s32 kwlnActiveTaskCount;
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_00100000);
 
@@ -105,7 +105,7 @@ INCLUDE_ASM(const s32, "game/code_00100000", func_001005C8);
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_001006E0);
 
-void func_00100858(KwlnTask *task) {
+void kwlnTaskInsertIntoOrderedStateQueue(KwlnTask *task) {
     KwlnTask *cur;
     KwlnTask *prev;
 
@@ -116,7 +116,7 @@ void func_00100858(KwlnTask *task) {
     case 0:
         return;
     case 2:
-        cur = D_003BA818;
+        cur = kwlnActiveTaskHead;
         break;
     case 3:
         cur = kwlnDelayedDestroyTaskHead;
@@ -131,7 +131,7 @@ void func_00100858(KwlnTask *task) {
             D_003BA804 = task;
             break;
         case 2:
-            D_003BA818 = task;
+            kwlnActiveTaskHead = task;
             D_003BA81C = task;
             break;
         case 3:
@@ -155,7 +155,7 @@ void func_00100858(KwlnTask *task) {
                         kwlnDelayedStartTaskHead = task;
                         break;
                     case 2:
-                        D_003BA818 = task;
+                        kwlnActiveTaskHead = task;
                         break;
                     case 3:
                         kwlnDelayedDestroyTaskHead = task;
@@ -195,13 +195,13 @@ void func_00100858(KwlnTask *task) {
     }
     switch (task->flags & 0xF) {
     case 1:
-        D_003BA808++;
+        kwlnDelayedStartTaskCount++;
         break;
     case 2:
-        D_003BA820++;
+        kwlnActiveTaskCount++;
         break;
     case 3:
-        D_003BA814++;
+        kwlnDelayedDestroyTaskCount++;
         break;
     }
 }
@@ -294,17 +294,17 @@ INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedStartTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA804);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA808);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedStartTaskCount);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedDestroyTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA810);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA814);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnDelayedDestroyTaskCount);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA818);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnActiveTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA81C);
 
-INCLUDE_SDATA(const s32, "game/code_00100000", D_003BA820);
+INCLUDE_SDATA(const s32, "game/code_00100000", kwlnActiveTaskCount);
 

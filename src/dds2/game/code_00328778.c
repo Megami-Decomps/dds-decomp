@@ -14,7 +14,7 @@ extern u64 GetThreadId(void);
 
 extern u8 D_00438A8C;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void sdfSleepThreadCount(s32);
 
@@ -55,8 +55,8 @@ void sdfRunTickWorkerThread(void) {
             sdfPadBuildButtonStates();
         }
         sdfTickThreadPriorityOverride();
-        if (D_004389C4 != NULL) {
-            D_004389C4();
+        if (sdfTickCallback != NULL) {
+            sdfTickCallback();
         }
     }
 }

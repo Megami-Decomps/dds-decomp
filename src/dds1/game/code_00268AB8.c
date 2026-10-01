@@ -282,7 +282,7 @@ s32 movCheckStartupSoundState(void) {
 }
 
 u32 func_002698C0(void) {
-    func_0026A778();
+    mnuRunTitleStreamTransitionAndLogBgm();
     return 1;
 }
 
@@ -385,13 +385,13 @@ void mnuRunTitleStreamThread(void) {
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 D_003BD8C8;
+extern s32 mnuTitleStreamThread;
 
-extern u8 D_003DB1C0[];
+extern u8 mnuTitleStreamThreadStack[];
 
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
-    sdfStartTrackedThread(&D_003BD8C8, mnuRunTitleStreamThread, D_003DB1C0,
+    sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
 }
@@ -447,7 +447,7 @@ void mnuStoreTaskResult(void) {
 extern u32 D_003D9168[];
 extern s32 fileIsRequestReadyInCurrentMode(u32);
 extern s32 fileGetResourceHandle(u32);
-extern u32 func_00288B90(u32);
+extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 func_002D0518(s32);
@@ -461,7 +461,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
 
     if (ready != 0) {
         s32 handle = fileGetResourceHandle(D_003BD8D4);
-        u32 data = func_00288B90(D_003BD8D4);
+        u32 data = fileGetLoadedDataAddress(D_003BD8D4);
         s32 size = fileGetResourceSize(D_003BD8D4);
         s32 block;
 
@@ -504,7 +504,7 @@ extern void fileWaitIdle(void);
 
 INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
-void func_0026A778(void) {
+void mnuRunTitleStreamTransitionAndLogBgm(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuUpdateTitleTransition() == 1) {
         fileWaitIdle();
@@ -718,5 +718,5 @@ INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5C8);
 
 INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5CC);
 
-INCLUDE_SDATA(const s32, "game/code_00268AB8", D_003BC5D0);
+INCLUDE_SDATA(const s32, "game/code_00268AB8", mnuMovieMenuState);
 

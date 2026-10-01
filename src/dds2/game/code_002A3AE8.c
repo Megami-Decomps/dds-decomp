@@ -6,7 +6,7 @@ typedef struct { s32 active; s32 pos; } SlideBar;
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 D_003E38A0[];
 
-extern s32 D_00437A40;
+extern s32 mnuMovieMenuState;
 
 extern void mnuReleaseMenuResourceSlots(void);
 
@@ -36,7 +36,7 @@ typedef struct SpriteMenuList {
 extern SprEntry D_003E3790[];
 
 s32 mnuSpriteGraphicHandle(u32 index) {
-    SprWork *work = (SprWork *)D_00437A40;
+    SprWork *work = (SprWork *)mnuMovieMenuState;
     return work->gfx[D_003E3790[index].gfx];
 }
 
@@ -57,31 +57,31 @@ extern void func_002A5A78();
 void mnuRecreateMenuSelectionList(void) {
     s32 i;
     s32 node;
-    if (((SpriteMenuState *)D_00437A40)->list != 0) {
-        mnuDestroyListState(((SpriteMenuState *)D_00437A40)->list);
+    if (((SpriteMenuState *)mnuMovieMenuState)->list != 0) {
+        mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
     }
     node = mnuCreateListState(0, 3, 0);
-    ((SpriteMenuState *)D_00437A40)->list = node;
+    ((SpriteMenuState *)mnuMovieMenuState)->list = node;
     ((SpriteMenuList *)node)->callback = func_002A5A78;
     for (i = 0; i < 3; i++) {
-        mnuListAppendNode(((SpriteMenuState *)D_00437A40)->list, 0);
+        mnuListAppendNode(((SpriteMenuState *)mnuMovieMenuState)->list, 0);
     }
 }
 
 void mnuDestroyMovieMenuSelectionList(void) {
-    mnuDestroyListState(((SpriteMenuState *)D_00437A40)->list);
+    mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
 }
 
 u32 func_002A3C78(void) {
-    return *((SpriteMenuList *)((SpriteMenuState *)D_00437A40)->list)->selected;
+    return *((SpriteMenuList *)((SpriteMenuState *)mnuMovieMenuState)->list)->selected;
 }
 
 void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
-    mnuSelectFirstListNode(((SpriteMenuState *)D_00437A40)->list);
+    mnuSelectFirstListNode(((SpriteMenuState *)mnuMovieMenuState)->list);
     if (0 < advanceCount) {
         do {
             advanceCount = advanceCount - 1;
-            mnuAdvanceListCursorDefault(((SpriteMenuState *)D_00437A40)->list);
+            mnuAdvanceListCursorDefault(((SpriteMenuState *)mnuMovieMenuState)->list);
         } while (advanceCount != 0);
     }
 }
@@ -106,15 +106,15 @@ extern u8 D_003E3760[];
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3D70);
 
 void mnuReleaseMenuResourceSlots(void) {
-    u32 *state = (u32 *)D_00437A40;
+    u32 *state = (u32 *)mnuMovieMenuState;
     if (state[1] != 0) {
         effDestroyResourceSlotSet(state[1]);
-        state = (u32 *)D_00437A40;
+        state = (u32 *)mnuMovieMenuState;
         state[1] = 0;
     }
     if (state[3] != 0) {
         effDestroyResourceSlotSet(state[3]);
-        state = (u32 *)D_00437A40;
+        state = (u32 *)mnuMovieMenuState;
         state[3] = 0;
     }
 }
@@ -122,13 +122,13 @@ void mnuReleaseMenuResourceSlots(void) {
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A3E38);
 
 u8 mnuHasSpriteHandle(void) {
-    return ((SpriteMenuState *)D_00437A40)->spriteHandle != 0;
+    return ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0;
 }
 
 void mnuReleaseSpriteHandle(void) {
-    if (((SpriteMenuState *)D_00437A40)->spriteHandle != 0) {
-        effDestroyResourceSlotSet(((SpriteMenuState *)D_00437A40)->spriteHandle);
-        ((SpriteMenuState *)D_00437A40)->spriteHandle = 0;
+    if (((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0) {
+        effDestroyResourceSlotSet(((SpriteMenuState *)mnuMovieMenuState)->spriteHandle);
+        ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle = 0;
     }
 }
 
@@ -172,7 +172,7 @@ void mnuSlideBarSetStateB(u32 *state, u32 mode) {
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
-void func_002A4110(SlideBar *bar, s32 value) {
+void mnuDrawSlideBarAtOffset(SlideBar *bar, s32 value) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }

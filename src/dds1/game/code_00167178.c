@@ -15,7 +15,7 @@ typedef struct EffThunderGroup {
 extern void effPCPThunderFree3(u32 handle);
 extern void sdfReleaseChipBlock(void *block);
 
-void func_00167350(EffThunderGroup *group) {
+void effThunderGroupRelease(EffThunderGroup *group) {
     s32 i;
 
     for (i = 0; i < group->count - 1; i++) {
@@ -165,10 +165,10 @@ typedef struct EffFlashRecordWork {
 extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 func_0016FF50();
+extern s32 effRecordPoolCreateTriad();
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-EffFlashRecordWork *func_0016A088(src)
+EffFlashRecordWork *effFlashRecordCreate(src)
     EffFlashRecordWork *src;
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(EffFlashRecordPart) + sizeof(EffFlashRecordWork));
@@ -182,7 +182,7 @@ EffFlashRecordWork *func_0016A088(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = (EffFlashRecordHandle *)func_0016FF50(work->particleCount);
+    record = (EffFlashRecordHandle *)effRecordPoolCreateTriad(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk2C;
     for (i = 0; i < work->particleCount; i++) {

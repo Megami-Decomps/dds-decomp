@@ -25,7 +25,7 @@ typedef struct SdfTexReleaseEntry {
     u8 pad0D[0x93];
 } SdfTexReleaseEntry; /* 0xA0 */
 
-extern SdfTexHead *D_003BD9E4;
+extern SdfTexHead *sdfTextureBlockListHead;
 extern SdfTexHead *sdfTextureListHead;
 extern s8 D_003BD300[2];
 
@@ -33,7 +33,7 @@ extern s8 D_003BD300[2];
  * volatile prevents the wait loop from reusing an earlier read. */
 extern volatile s8 sdfBusyBufferIndex;
 extern SdfTex *sdfResourceListHead;
-extern u8 D_003BD9E8;
+extern u8 sdfTextureUpdateQueue;
 extern SdfSemaObj sdfTextureQueueWork;
 extern u8 D_003BD2F0;
 extern u32 D_003BD2F4;
@@ -202,7 +202,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *node) {
     if ((node->prev = next->prev) != NULL) {
         next->prev->next = node;
     } else {
-        D_003BD9E4 = node;
+        sdfTextureBlockListHead = node;
     }
     sdfReleaseChipBlock((SdfTex *)next);
     return 1;
@@ -231,7 +231,7 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
 }
 
 void sdfTexQueuePendingWork(s32 value) {
-    sdfPendingQueuePush(&D_003BD9E8, value);
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, value);
 }
 
 void sdfTexInitializeLists(void) {
@@ -244,8 +244,8 @@ void sdfTexInitializeLists(void) {
     head->unk8 = NULL;
     head->unkC = NULL;
     sdfTextureListHead = head;
-    D_003BD9E4 = head;
-    sdfInitializeSynchronizedRequest(&D_003BD9E8, sdfUpdateTextureHeadsWithInterruptsMasked);
+    sdfTextureBlockListHead = head;
+    sdfInitializeSynchronizedRequest(&sdfTextureUpdateQueue, sdfUpdateTextureHeadsWithInterruptsMasked);
 }
 
 SdfTexHead *sdfAllocImageBuffer(s32 width, s32 height, s32 format) {
@@ -278,7 +278,7 @@ SdfTexHead *sdfGetTextureListHead(void) {
 }
 
 SdfTexHead *sdfGetTextureBlockListHead(void) {
-    return D_003BD9E4;
+    return sdfTextureBlockListHead;
 }
 
 s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {

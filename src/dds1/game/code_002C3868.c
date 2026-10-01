@@ -72,11 +72,11 @@ extern u32 sdfSelectedCounterIndex;
 
 extern s8 D_003BD270;
 
-extern s32 D_003BD26C;
+extern s32 sdfCounterSelectionCount;
 
 extern void sdfLatchBaseVectorsForSelection(void);
 
-extern s32 D_003BD264;
+extern s32 fldLocalMapCameraObject;
 
 extern SdfQuad D_003900A0;
 
@@ -119,12 +119,12 @@ typedef struct MapResource {
     u32 unkC;
 } MapResource;
 
-extern MapResource D_00390700;
+extern MapResource fldLocalMapTextureResource;
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(D_003BD264, &D_003900A0);
-    effObjSetInnerSecondVec(D_003BD264, &D_003900B0);
-    ((EffObjHeader *)D_003BD264)->vtbl->refresh(D_003BD264);
+    effObjSetInnerFirstVec(fldLocalMapCameraObject, &D_003900A0);
+    effObjSetInnerSecondVec(fldLocalMapCameraObject, &D_003900B0);
+    ((EffObjHeader *)fldLocalMapCameraObject)->vtbl->refresh(fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C38B0);
@@ -148,7 +148,7 @@ void sdfSetSelectedIndex(u32 index) {
 }
 
 void sdfCycleForward(void) {
-    if ((s32)sdfSelectedCounterIndex < D_003BD26C - 1) {
+    if ((s32)sdfSelectedCounterIndex < sdfCounterSelectionCount - 1) {
         sdfLatchBaseVectorsForSelection();
         sdfSelectedCounterIndex = sdfSelectedCounterIndex + 1;
     } else {
@@ -164,7 +164,7 @@ void sdfCycleBackward(void) {
         sdfSelectedCounterIndex = sdfSelectedCounterIndex - 1;
     } else {
         sdfLatchBaseVectorsForSelection();
-        sdfSelectedCounterIndex = D_003BD26C - 1;
+        sdfSelectedCounterIndex = sdfCounterSelectionCount - 1;
     }
 }
 
@@ -192,7 +192,7 @@ extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern void func_002C4C88();
 extern u8 D_00390220[];
 
-s32 func_002C42F0(s32 mask, s32 index) {
+s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     SdfCounterDisplay *display;
     SdfCounterChannel *channel;
     s32 completedMask;
@@ -290,7 +290,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4A58);
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
-void func_002C5338(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
     f32 fade = (f32)rt->timer->value / 10.0f;
     s32 base = 0;
     s32 width;
@@ -446,13 +446,13 @@ void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  D_00390700.image);
+                  fldLocalMapTextureResource.image);
     func_00108CB8(0);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", sdfSelectedCounterIndex);
 
-INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD26C);
+INCLUDE_SDATA(const s32, "game/code_002C3868", sdfCounterSelectionCount);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD270);
 

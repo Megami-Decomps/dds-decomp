@@ -26,7 +26,7 @@ extern char D_003BC658[];
 
 extern char D_003BC660[];
 
-extern u32 D_003BC62C;
+extern u32 mnuMovieDrawTask;
 
 extern s32 D_003BC630;
 
@@ -121,7 +121,7 @@ void *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *data) {
     }
 }
 
-extern u8 *D_003BAA00;
+extern u8 *datGameState;
 
 extern s8 D_003BC6B5;
 
@@ -130,7 +130,7 @@ void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
 
     effResolveAndReleaseResource(*(u32 *)list);
     for (i = 0; i < 5; i++) {
-        u8 *slot = D_003BAA00 + 0xA60 + i * 0x1A4;
+        u8 *slot = datGameState + 0xA60 + i * 0x1A4;
 
         if ((*(u16 *)slot & 1) != 0) {
             s32 index = *(u16 *)(slot + 4) + D_003BC6B5;
@@ -216,8 +216,8 @@ void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
 void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u32 mode) {
     mnuInitPageWindow(container, mode, resources[3], 7, resources[4], 0, *resources, 0x11);
     func_0027FAA8(container, *resources);
-    func_0027FBE0(container, resources + 9);
-    func_0027FC10(container, resources + 0x11);
+    mnuCopyPrimaryWindowHandles(container, resources + 9);
+    mnuCopySecondaryWindowHandles(container, resources + 0x11);
     mnuRegisterResourceHandles(container, resources + 0x19);
     mnuUpdateHandleStates(container);
 }
@@ -372,7 +372,7 @@ u32 func_00271FC8(void) {
 }
 
 s32 mnuStaffCampCancelCheck(s32 menu) {
-    u32 buttons = func_00285B20(8);
+    u32 buttons = mnuMapPadMaskToFlags(8);
     s32 result;
 
     if (func_002719F0(menu) == 0) {
@@ -451,18 +451,18 @@ extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
 extern void func_001958A0(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
-extern u8 *D_003BAA00;
+extern u8 *datGameState;
 extern char D_003BC6C0[];
 
 
-void func_00272280(s32 unused0, s32 unused1, s32 z, s32 firstSlot,
+void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 firstSlot,
                    s32 secondSlot, s32 drawFlags, s32 unused6, s32 unused7) {
     char text[0x10];
     s32 glyph;
 
     itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, firstSlot, 0, drawFlags);
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, secondSlot, 3, drawFlags);
-    func_003014F0(text, D_003BC6C0, *(s32 *)(D_003BAA00 + 0x3C));
+    func_003014F0(text, D_003BC6C0, *(s32 *)(datGameState + 0x3C));
     glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
     func_001958A0(glyph, 1, drawFlags);
     frFontQueueGlyphInSelectedSlot(glyph);

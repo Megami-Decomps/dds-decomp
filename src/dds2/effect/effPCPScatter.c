@@ -330,7 +330,7 @@ typedef struct PcpScatterParticles {
     u32 itemBuffer;
 } PcpScatterParticles;
 
-extern void func_0016A620(u32 particle);
+extern void effDispatchParameterDataAndFreeWork(u32 particle);
 
 typedef struct PcpScatterGroupWork {
     u8 pad00[0x80];
@@ -343,7 +343,7 @@ void effPcpScatterReleaseParticleGroup(PcpScatterGroupWork *work) {
         u32 i;
 
         for (i = 0; i < count; i++) {
-            func_0016A620(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
         }
         func_003297C8(work->particles.itemBuffer);
     }
@@ -447,7 +447,7 @@ void effPcpScatterReleaseSharedParticles(PcpScatterSharedWork *work) {
         u32 i;
 
         for (i = 0; i < count; i++) {
-            func_0016A620(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
         }
         func_003297C8(work->particles.itemBuffer);
     }
@@ -577,7 +577,7 @@ void effPcpScatterReleaseLinkedParticles(PcpScatterLinkedWork *work) {
         u32 i;
 
         for (i = 0; i < count; i++) {
-            func_0016A620(work->particles.items[i]);
+            effDispatchParameterDataAndFreeWork(work->particles.items[i]);
         }
         func_003297C8(work->particles.itemBuffer);
     }
@@ -850,7 +850,7 @@ typedef struct PcpScatterWork11 {
 } PcpScatterWork11;
 
 /* Initialise ring `index`: randomised radius/angle/rise parameters, then the first set of vertex pairs. */
-void func_0017B000(PcpScatterWork11 *work, s32 index)
+void effScatterRingInit(PcpScatterWork11 *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
@@ -1062,7 +1062,7 @@ void effScatterReleaseInstanceResources(PcpScatterInstanceB *work) {
 
 
 /* Initialise ring `index`: randomised radius/angle/rise parameters, then the first set of vertex pairs. */
-void func_0017BA90(PcpScatterInstanceB *work, s32 index)
+void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
@@ -1195,7 +1195,7 @@ extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
 extern void func_0017DA28(void *draw);
 
 /* Per-frame update of a fading, optionally looping scatter instance. */
-void func_0017BFA8(PcpScatterInstanceB *work) {
+void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
     s32 loop;
     s32 duration = work->params.duration;
     PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
@@ -1233,7 +1233,7 @@ void func_0017BFA8(PcpScatterInstanceB *work) {
             draw->colors[i] = 0;
         } else {
             if (particleAge == 0) {
-                func_0017BA90(work, i);
+                effScatterRingInitScaled(work, i);
             } else if (particleAge > 0) {
                 if (particleAge < fadeIn && fadeIn != 0) {
                     t = (f32)particleAge / (f32)fadeIn;
@@ -1330,7 +1330,7 @@ void *effScatterInstanceCreateC(src, resource)
     return inst;
 }
 
-void func_0017C4D8(u64 table) {
+void effScatterCreateFromParameterTable(u64 table) {
     u64 particleParams;
     u64 resource;
 
@@ -1355,7 +1355,7 @@ void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work) {
 
 
 /* Initialise ring `index`, staggering its rise and radius by index over the lifetime, then its first vertex pairs. */
-void func_0017C598(PcpScatterInstanceC *work, s32 index)
+void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
 {
     f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
     f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
@@ -1474,7 +1474,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
 
 
 /* Per-frame update of a fading, optionally looping scatter instance whose colour blends between two keys over its lifetime. */
-void func_0017CB28(PcpScatterInstanceC *work) {
+void effScatterUpdateDualColor(PcpScatterInstanceC *work) {
     s32 loop;
     s32 duration = work->params.duration;
     PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
@@ -1518,7 +1518,7 @@ void func_0017CB28(PcpScatterInstanceC *work) {
             draw->colors[i] = 0;
         } else {
             if (particleAge == 0) {
-                func_0017C598(work, i);
+                effScatterInitStaggeredRing(work, i);
             } else if (particleAge > 0) {
                 u = (f32)particleAge;
                 color = effBlendColor(colorA, colorB, u / (f32)duration);

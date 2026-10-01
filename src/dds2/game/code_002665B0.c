@@ -36,7 +36,7 @@ extern void func_002C1B58(u8 *, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 uiBlendColors(u32, u32, s32);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
-extern char D_00437860[];
+extern char mnuNumberSpriteFormat[];
 
 typedef struct EffectPair {
     s32 a;
@@ -81,7 +81,7 @@ extern s32 movAreTitleEffectsReady(s32, s32);
 
 extern void mnuReleaseStaffMenuResources(s32);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s32 func_003292A8(s32);
 
@@ -312,7 +312,7 @@ s32 mnuTerminalScoreBox(BoxRecord *box) {
 void mnuRefreshThresholdNodeFlags(MenuProgressList *list) {
     MenuProgressNode *node = list->head;
     if (node != 0) {
-        s32 base = D_00435DD0;
+        s32 base = datGameState;
         do {
             u32 amount = *(u32 *)(base + 0x3c);
             if (amount < node->requiredAmount) {
@@ -329,7 +329,7 @@ void mnuCreateNumberSprite(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, u32 color, s3
     char buf[16];
     s32 handle;
 
-    func_0035C860(buf, D_00437860, a4);
+    func_0035C860(buf, mnuNumberSpriteFormat, a4);
     handle = func_0019F5E8(a0, a1, a2, uiBlendColors(color, color & ~0xFF, a3), (s32)buf, 0);
     func_0019D550(handle, 1, priority);
     frFontQueueGlyphInSelectedSlot(handle);
@@ -365,7 +365,7 @@ void mnuCreateThresholdNodePanels(MenuProgressHost *host) {
     while (node != 0) {
         s32 id = node->entryId;
         node->childPanel =
-            mnuCreateDualPercentPanel((MenuTitleResource *)(D_00435DD0 + id * 0x1c4 + 0xa60), host);
+            mnuCreateDualPercentPanel((MenuTitleResource *)(datGameState + id * 0x1c4 + 0xa60), host);
         node = node->next;
     }
 }
@@ -393,7 +393,7 @@ void mnuBuildTerminalNodeList(MenuProgressHost *host) {
     list->updateCallback = (s32)func_00266C08;
     list->visible = 0;
     for (i = 0; i < 5; i++) {
-        BoxRecord *box = (BoxRecord *)(D_00435DD0 + i * 0x1C4 + 0xA60);
+        BoxRecord *box = (BoxRecord *)(datGameState + i * 0x1C4 + 0xA60);
 
         if ((u16)(box->status & 1)) {
             s32 score = mnuTerminalScoreBox(box);
@@ -430,7 +430,7 @@ typedef struct MenuSlotKind {
 extern MenuSlotKind D_0038A3B8[];
 
 /* Same slot kind, or both kinds in the 0xF/0x1D/0x1E group. */
-s32 func_00267358(s32 index, s32 kind) {
+s32 mnuSlotKindMatchesGroupOrSpecial(s32 index, s32 kind) {
     s16 current = D_0038A3B8[index].kind;
 
     if (kind == current) {
@@ -753,7 +753,7 @@ extern s32 fldGetCurrentBgmHandle(void);
 extern void sndEnsureMidiBankResident(u32);
 
 /* Pick the scene's music bank (default bank when the scene is not reduced) and make it resident. */
-void func_002680E0(MenuSlotState *host) {
+void mnuSelectTerminalResourceBank(MenuSlotState *host) {
     if (host->reduced == 0) {
         host->fadeColor = 0x20000;
     } else {
@@ -801,7 +801,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
         (&((MenuSlotState *)obj)->cur)[i] = -1;
     }
     *(s32 *)(obj + 0x150) = 0xF;
-    func_002680E0((MenuSlotState *)obj);
+    mnuSelectTerminalResourceBank((MenuSlotState *)obj);
     mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
     func_002C1B58(obj + 0x3E8, 0x60);
     return obj;
@@ -1078,7 +1078,7 @@ typedef struct GridPanelHost {
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 /* Reset grid entry 0x1A, then configure it from the panel's setting slot chosen by `kind`. */
-void func_002698A0(u32 kind, GridPanelHost *host) {
+void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
     s32 flags = 0;
     s32 value = 0;
     s32 slot = 0;
@@ -1239,7 +1239,7 @@ u32 func_00269C48(void) {
     return 1;
 }
 
-extern u32 func_002C44E8(s32 mask);
+extern u32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_002685F0(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuSetPopupEntryFlagged(s32 *state, char *entry);
@@ -1254,9 +1254,9 @@ extern char D_003CE8B8[];
 extern char D_003CE8F0[];
 
 /* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
-s64 func_00269C50(u64 input) {
+s64 evtBHandleSelectionPanelInput(u64 input) {
     EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
-    u32 buttons = func_002C44E8(0x33);
+    u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchStatus;
     s32 kind = context->visualState->selection->kind;
     s32 frames;
@@ -1442,7 +1442,7 @@ u32 evtEnterThresholdSelectionList(void) {
     mnuRefreshThresholdNodeFlags((s32)context->thresholdOwner);
     mnuSelectFirstListNode((s32)context->thresholdOwner);
     mnuTerminalSelectSlot(3, 2, (s32)context);
-    func_002698A0(3, (s32)context);
+    mnuApplyGridPanelHostSetting(3, (s32)context);
     func_002690A8(4, (s32)context);
     evtRememberDispatchCallback((s32)func_00269978, (s32)context);
     return 1;
@@ -1452,7 +1452,7 @@ u32 evtBEnterStateA(void) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuTerminalSelectSlot(3, 0, context);
-    func_002698A0(4, context);
+    mnuApplyGridPanelHostSetting(4, context);
     func_002690A8(3, context);
     evtRememberDispatchCallback((s32)func_00269230, context);
     mnuHighlightProgressNodeByMode(context);
@@ -1573,7 +1573,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
                 if (sdfCheckPendingWorkWithInterrupts() != 0) return 0;
-                func_002680E0((MenuSlotState *)state);
+                mnuSelectTerminalResourceBank((MenuSlotState *)state);
                 state->fadeStarted = 0;
                 mnuSetPopupEntryFlagged(dispatch, D_003CE848);
             }
@@ -1680,7 +1680,7 @@ s64 evtBContinueDispatchOrRestoreTable(u64 request) {
     return result;
 }
 
-s64 func_0026B068(s32 request) {
+s64 mnuPrepareDispatchStateAndBindHandler(s32 request) {
     s32 state = kwlnTaskGetUserValue();
     EventDispatchState *dispatchState = (EventDispatchState *)state;
     func_002686F0(state);
@@ -1732,7 +1732,7 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(void) {
 }
 
 /* Selection chain startup: fade in once the field frames are drained, then open the popup when the fade finishes. */
-s64 func_0026B260(u64 request) {
+s64 evtBStartSelectionChainAfterFade(u64 request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     s32 *dispatch = &state->dispatchStatus;
     s64 result = func_002C4038((s32)state + 8, dispatch, 0, request);
@@ -1748,7 +1748,7 @@ s64 func_0026B260(u64 request) {
         case 1:
             kwlnFadeInStart(0, 0, 0, 15);
             if (state->savedMenuMode != 0) {
-                func_002680E0((MenuSlotState *)state);
+                mnuSelectTerminalResourceBank((MenuSlotState *)state);
             }
             state->stage = 2;
             break;
@@ -1838,7 +1838,7 @@ INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437859);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_0043785C);
 
-INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437860);
+INCLUDE_SDATA(const s32, "game/code_002665B0", mnuNumberSpriteFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002665B0", D_00437868);
 

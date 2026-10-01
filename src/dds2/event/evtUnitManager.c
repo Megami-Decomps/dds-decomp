@@ -25,7 +25,7 @@ typedef struct EvtTarget {
 } EvtTarget;
 
 extern f32 *D_0037F770[];
-extern u8 D_0037F780[];
+extern u8 kwlnDefaultColorVector[];
 
 /* World-list node, not EvtUnit work: the nested address is in its data record.
  * In particular, this +0x18 pointer is not the work's float vector at +0x10. */
@@ -135,7 +135,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     } else if (ownVector) {
         VU0_LOAD_VF(vf10, (u8 *)info + 0x40);
     } else {
-        VU0_LOAD_VF(vf10, D_0037F780);
+        VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
     }
 }
 
@@ -282,7 +282,7 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
     return unit->motionState;
 }
 
-void func_0023CE10(EvtUnit *unit, u16 value) {
+void evtUnitSetStoredParameter(EvtUnit *unit, u16 value) {
     unit->unkBC = value;
 }
 
@@ -414,7 +414,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
-s32 func_0023D360(EvtUnit *unit) {
+s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     EvtUnit copy;
     f32 delta[4];
     f32 savedA[4];

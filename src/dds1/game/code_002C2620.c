@@ -47,9 +47,9 @@ extern s32 fldStartAndPollLocalMapTrack(void);
 extern void func_002C30F0(void);
 extern s32 func_002C3220(void);
 extern void func_002C3420(void);
-extern s32 func_002E92C0(s32);
+extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
-extern s32 D_003BD248;
+extern s32 fldLocalMapTrackState;
 
 /* Ring window over a doubly linked node list (prev at 0x18, next at 0x1C). */
 typedef struct LmapNode {
@@ -73,7 +73,7 @@ typedef struct LmapList {
 extern LmapNode *sdfGridSeekFirstNode(LmapList *);
 extern LmapNode *sdfGridSeekLastNode(LmapList *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
-extern LmapNode *func_002C2658(LmapList *);
+extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 
 LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     LmapNode *cur = list->cur;
@@ -91,7 +91,7 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-LmapNode *func_002C2658(LmapList *list) {
+LmapNode *fldLmapExpandWindowBackward(LmapList *list) {
     LmapNode *cur = list->cur;
     LmapNode *head = list->first;
     LmapNode *node;
@@ -162,7 +162,7 @@ LmapNode *fldLmapRewindCursor(LmapList *list) {
     list->cur = cur;
     list->count--;
     if (list->count <= 0) {
-        cur = func_002C2658(list);
+        cur = fldLmapExpandWindowBackward(list);
     }
     return cur;
 }
@@ -207,7 +207,7 @@ typedef struct LmapDrawSurface {
     u8 pad14[0xC];
 } LmapDrawSurface; /* 0x20 */
 
-extern LmapDrawSurface D_00324B48[];
+extern LmapDrawSurface kwlnDrawSurfaces[];
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
@@ -224,7 +224,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 width, s32 height, s
     sdfInitPacketList(list);
     sdfPktInit(header, x + 0x7000, y + 0x7900, width, height);
     sdfAppendPacket(list, sdfFormatSifPacket(header, command));
-    target = &D_00324B48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -235,7 +235,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d, s
 
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011D3E8(x + 0x7000, y + 0x7900, a, b * 16, c * 8, d, e));
-    target = &D_00324B48[surface];
+    target = &kwlnDrawSurfaces[surface];
     target->submit(target, list);
 }
 
@@ -356,20 +356,20 @@ void fldShutdownLmapResources(void) {
 }
 
 s32 fldStartAndPollLocalMapTrack(void) {
-    if (D_003BD248 == 1) {
-        if (func_002E92C0(0x400000) == 0) {
+    if (fldLocalMapTrackState == 1) {
+        if (sndFindPackedTrackLoadStatus(0x400000) == 0) {
             sndEnsureMidiBankResident(0x400000);
-            D_003BD248 = 2;
+            fldLocalMapTrackState = 2;
         } else {
-            D_003BD248 = 0xFF;
+            fldLocalMapTrackState = 0xFF;
         }
-    } else if (D_003BD248 == 2) {
-        if (func_002E92C0(0x400000) == 1) {
-            D_003BD248 = 0xFF;
+    } else if (fldLocalMapTrackState == 2) {
+        if (sndFindPackedTrackLoadStatus(0x400000) == 1) {
+            fldLocalMapTrackState = 0xFF;
         }
     }
-    if (D_003BD248 == 0xFF) {
-        D_003BD248 = 1;
+    if (fldLocalMapTrackState == 0xFF) {
+        fldLocalMapTrackState = 1;
         return 1;
     }
     return 0;
@@ -440,7 +440,7 @@ extern s32 sdfCounterGetDisplayValue(void);
 extern void mdlFlagClear(s32 flag);
 extern void mdlFlagSet(s32 flag);
 
-void func_002C3738(void) {
+void sdfClearCounterDisplayFlags(void) {
     u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
 
     if (flags & 8) {
@@ -473,7 +473,7 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD23C);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD240);
 
-INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD248);
+INCLUDE_SDATA(const s32, "game/code_002C2620", fldLocalMapTrackState);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD250);
 

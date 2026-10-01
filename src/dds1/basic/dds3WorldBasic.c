@@ -1,11 +1,11 @@
 #include "common.h"
 #include "dds3obj.h"
 
-extern World *D_003BA9BC;
+extern World *dds3ActiveWorld;
 
 void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(void *arg);
-void *func_0010F418(s32 arg);
+void *dds3CreateWorldNodeForKind(s32 arg);
 void *func_002CFEB8(s32 arg);
 void dds3GrowWorldValueChain(void *arg, s32 arg1);
 void func_00110120(IndexObj *arg);
@@ -19,23 +19,23 @@ s32 dds3AdvanceObjectValueCursor(void *arg);
 void dds3DestroyWorld(void) {
     World *world;
 
-    world = D_003BA9BC;
+    world = dds3ActiveWorld;
     if (world != NULL) {
         effObjNodeDestroy(world);
-        D_003BA9BC = NULL;
+        dds3ActiveWorld = NULL;
     }
 }
 
 void dds3SetWorldObject(void *object) {
-    if (D_003BA9BC != NULL) {
-        D_003BA9BC->info->primaryObject = object;
+    if (dds3ActiveWorld != NULL) {
+        dds3ActiveWorld->info->primaryObject = object;
     }
 }
 
 void *dds3GetWorldObject(void) {
     World *world;
 
-    world = D_003BA9BC;
+    world = dds3ActiveWorld;
     if (world == NULL) {
         return NULL;
     }
@@ -43,15 +43,15 @@ void *dds3GetWorldObject(void) {
 }
 
 void dds3SetWorldSecondaryObject(void *object) {
-    if (D_003BA9BC != NULL) {
-        D_003BA9BC->info->secondaryObject = object;
+    if (dds3ActiveWorld != NULL) {
+        dds3ActiveWorld->info->secondaryObject = object;
     }
 }
 
 void *dds3GetWorldSecondaryObject(void) {
     World *world;
 
-    world = D_003BA9BC;
+    world = dds3ActiveWorld;
     if (world == NULL) {
         return NULL;
     }
@@ -62,11 +62,11 @@ void *dds3AppendWorldNode(void) {
     WorldInfo *info;
     NodeA *node;
 
-    if (D_003BA9BC == NULL) {
+    if (dds3ActiveWorld == NULL) {
         return NULL;
     }
-    info = D_003BA9BC->info;
-    node = func_0010F418(1);
+    info = dds3ActiveWorld->info;
+    node = dds3CreateWorldNodeForKind(1);
     if (node == NULL) {
         return NULL;
     }
@@ -88,10 +88,10 @@ void dds3DestroyWorldNode(NodeA *node) {
     if (node == NULL) {
         return;
     }
-    if (D_003BA9BC == NULL) {
+    if (dds3ActiveWorld == NULL) {
         return;
     }
-    info = D_003BA9BC->info;
+    info = dds3ActiveWorld->info;
     if (info->firstNode == node) {
         info->firstNode = node->next;
     }
@@ -111,10 +111,10 @@ void *dds3AppendWorldIndexNode(s32 index) {
     WorldInfo *info;
     NodeB *node;
 
-    if (D_003BA9BC == NULL) {
+    if (dds3ActiveWorld == NULL) {
         return NULL;
     }
-    info = D_003BA9BC->info;
+    info = dds3ActiveWorld->info;
     if (info->unk1E < index) {
         return NULL;
     }
@@ -146,10 +146,10 @@ void dds3DestroyWorldIndexNode(NodeB *node) {
     if (node == NULL) {
         return;
     }
-    if (D_003BA9BC == NULL) {
+    if (dds3ActiveWorld == NULL) {
         return;
     }
-    info = D_003BA9BC->info;
+    info = dds3ActiveWorld->info;
     func_00110120(node);
     if (node->previous == NULL) {
         info->firstIndex = node->next;

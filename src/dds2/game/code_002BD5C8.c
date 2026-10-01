@@ -19,12 +19,12 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
     }
 }
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 u8 func_002BDA50(s32 index) {
     if (index == 0) {
         return 0;
     }
-    return *(u8 *)(index + D_00435DD0 + 0x20000 - 0x1910);
+    return *(u8 *)(index + datGameState + 0x20000 - 0x1910);
 }
 
 extern s32 D_00435E3C;
@@ -54,7 +54,7 @@ extern void frFontQueueGlyphInSelectedSlot(s32);
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = func_00314C10(D_00435DD0 + partyIndex * 0x1C4 + 0xA60);
+    s32 cost = func_00314C10(datGameState + partyIndex * 0x1C4 + 0xA60);
     s32 code;
     s32 texture;
     s32 item;

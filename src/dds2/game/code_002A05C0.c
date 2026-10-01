@@ -10,7 +10,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 D_00437A2C;
 
-extern s32 D_00437A40;
+extern s32 mnuMovieMenuState;
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -356,13 +356,13 @@ void mnuRunTitleStreamThread(void) {
     }
 }
 
-extern s32 D_00438FE0;
+extern s32 mnuTitleStreamThread;
 
-extern u8 D_00456DB0[];
+extern u8 mnuTitleStreamThreadStack[];
 
 void mnuCreateTitleStreamThread(void) {
     mnuTitleStreamSemaphore = sdfCreateSemaphore(1, 0xff, 0);
-    sdfStartTrackedThread(&D_00438FE0, mnuRunTitleStreamThread, D_00456DB0,
+    sdfStartTrackedThread(&mnuTitleStreamThread, mnuRunTitleStreamThread, mnuTitleStreamThreadStack,
                   0x1000, 0x45, 0);
     sdfThreadSleepSelf();
 }
@@ -405,7 +405,7 @@ void mnuStoreTaskResult(char *audioPath) {
 extern u32 D_00454D58[];
 extern s32 fileIsRequestReadyInCurrentMode(u32);
 extern s32 fileGetResourceHandle(u32);
-extern u32 func_002C8110(u32);
+extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 func_003293C8(s32);
@@ -419,7 +419,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *queue) {
 
     if (ready != 0) {
         s32 handle = fileGetResourceHandle(D_00438FEC);
-        u32 data = func_002C8110(D_00438FEC);
+        u32 data = fileGetLoadedDataAddress(D_00438FEC);
         s32 size = fileGetResourceSize(D_00438FEC);
         s32 block;
 
@@ -617,8 +617,8 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    func_003297C8(*(u32 *)D_00437A40);
-    D_00437A40 = 0;
+    func_003297C8(*(u32 *)mnuMovieMenuState);
+    mnuMovieMenuState = 0;
     D_00435BB0 = 1;
 }
 

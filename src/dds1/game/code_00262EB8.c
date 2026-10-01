@@ -3,7 +3,7 @@
 extern void mnuRefreshPanelLayer(s32);
 
 extern s32 kwlnTaskGetUserValue();
-extern void func_00285B20(s32);
+extern void mnuMapPadMaskToFlags(s32);
 INCLUDE_ASM(const s32, "game/code_00262EB8", brsMessageInputStep);
 
 extern s32 brsTaskIsUiUpdateAllowed(s32);
@@ -38,11 +38,11 @@ u32 func_00263058(void) {
 
 s64 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    func_00285B20(0x33);
+    mnuMapPadMaskToFlags(0x33);
     return menuRunPanel(context, 0, input);
 }
 
-s64 func_002630B0(s32 input) {
+s64 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, input);

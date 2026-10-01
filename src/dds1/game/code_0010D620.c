@@ -56,7 +56,7 @@ u32 scrGetWindow(void) {
     return scrCurrentContext->window;
 }
 
-s32 func_0010D6A0(void) {
+s32 scrGetCurrentContext(void) {
     return (s32)scrCurrentContext;
 }
 

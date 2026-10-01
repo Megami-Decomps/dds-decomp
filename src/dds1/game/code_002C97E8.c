@@ -36,13 +36,13 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
-extern void func_002C94A8(f32 *, f32 *);
+extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 
 extern void func_002C84F0(f32 *);
 
-extern void func_002C8648(f32 *, f32 *, f32 *);
+extern void sdfCrossNormalizedVectors(f32 *, f32 *, f32 *);
 
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
@@ -125,7 +125,7 @@ void sdfQuatFromVectors(f32 *out, f32 *from, f32 *to) {
 
     func_002C84F0(from);
     func_002C84F0(to);
-    func_002C8648(cross, from, to);
+    sdfCrossNormalizedVectors(cross, from, to);
     scale = fsqrtf(2.0f * (fldNormalizedVectorDot(from, to) + 1.0f));
     out[0] = cross[0] / scale;
     out[1] = cross[1] / scale;
@@ -273,7 +273,7 @@ void sdfQuatForwardVector(f32 *rotation, f32 *out) {
     f32 vector[4];
     memset(vector, 0, sizeof(vector));
     vector[2] = 1.0f;
-    func_002C94A8(matrix, rotation);
+    sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(vector, matrix);
     func_002C84F0(vector);
     memcpy(out, vector, sizeof(vector));
@@ -309,7 +309,7 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
     f32 dot;
     f32 dist;
 
-    func_002C94A8(matrix, rotation);
+    sdfConvertQuaternionRotationMatrix(matrix, rotation);
     sdfTransformDirectionByMatrix(forward, matrix);
     dot = fldNormalizedVectorDot(up, forward);
     func_002C84F0(forward);
@@ -368,7 +368,7 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, u
 
 extern u32 func_00197A98(s32, s32, s32, u32, u32, s32);
 
-s32 func_002CA8F0(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
+s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
     u32 handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
@@ -385,7 +385,7 @@ s32 func_002CA8F0(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u3
 
 extern u32 func_001978E8(s32, s32, s32, u32, u32, s32);
 
-s32 func_002CA988(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
+s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, u32 style, s32 width, u32 color) {
     u32 handle = func_001978E8(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
@@ -688,12 +688,12 @@ extern s32 sdfTaskWorkRunAllEntries(void);
 extern s32 sdfTaskWorkRunAll(void);
 extern void sdfReleaseCurrentTaskOwnedResources(void);
 extern void kwlnTaskCreate();
-extern TaskWork *func_002CB4B8();
+extern TaskWork *sdfCreateNamedTaskWork();
 
 TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, u32 item, s32 destroyCallback, u32 userData) {
     TaskWork *work;
 
-    work = func_002CB4B8(name, destroyCallback, userData);
+    work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
     kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, work);
     kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
@@ -779,7 +779,7 @@ extern s32 func_003014F0(char *buffer, const char *fmt, ...);
 extern void func_002CB6F8();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
-TaskWork *func_002CB4B8(char *name, s32 destroyCallback, u32 userData) {
+TaskWork *sdfCreateNamedTaskWork(char *name, s32 destroyCallback, u32 userData) {
     s32 allocation = func_002D03F8(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 

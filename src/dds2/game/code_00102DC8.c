@@ -74,9 +74,9 @@ extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
 extern s32 D_00435BA4;
 
-extern s32 D_00435D04;
+extern s32 kwlnDistanceBlurErrorCount;
 
-extern s32 D_00435D08;
+extern s32 kwlnRippleBlurErrorCount;
 
 typedef struct {
     u8 unknown[0x10];
@@ -91,7 +91,7 @@ extern f32 D_0037F5EC[];
 
 extern s32 sdfResourceListHead;
 
-extern s32 D_00435CA8;
+extern s32 kwlnCurrentIncompleteResource;
 
 extern s32 kwlnTextureViewerHandlePad(void);
 
@@ -108,13 +108,13 @@ typedef struct {
     u8 unk1B;
 } KwlnViewerPadState;
 
-extern KwlnViewerPadState D_0040B7D8;
+extern KwlnViewerPadState sdfPadButtonStates;
 
 extern s32 func_00104908(s32);
 
 extern void func_00104AA8(void *data, s32 handle);
 
-extern u8 D_00380748[];
+extern u8 kwlnPositionedTextSurface[];
 
 extern s8 D_0037F53B[];
 
@@ -126,9 +126,9 @@ extern s16 D_00435D00;
 
 extern u8 kwlnBackgroundFadeColor[4];
 
-extern s8 D_00435CFC;
+extern s8 kwlnBackgroundFadeMode;
 
-extern u8 D_00438D99;
+extern u8 kwlnLargeMotorTarget;
 
 extern u8 D_00438D90[2];
 
@@ -143,7 +143,7 @@ extern u8 D_0043DDA0[];
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
-extern u8 D_0037F550[];
+extern u8 effSharedRandomState[];
 
 extern void func_003412D8(void *data, u32 tag);
 
@@ -223,7 +223,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_001038D0);
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103A00);
 
 void kwlnPadStepLargeMotorLevel(void) {
-    u8 target = D_00438D99;
+    u8 target = kwlnLargeMotorTarget;
 
     if (D_00438D90[1] < target) {
         if (target - D_00438D90[1] > 0x20) {
@@ -263,7 +263,7 @@ u32 func_00104150(void) {
 }
 
 void kwlnInitMagicState(void) {
-    func_003412D8(D_0037F550, 0x12345678);
+    func_003412D8(effSharedRandomState, 0x12345678);
 }
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104180);
@@ -318,20 +318,20 @@ u32 kwlnTextureGetPageIndex(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104908);
 
 s32 kwlnTextureViewerHandlePad(void) {
-    if (D_0040B7D8.unk13 < 0) {
+    if (sdfPadButtonStates.unk13 < 0) {
         return 0;
     }
-    if (D_0040B7D8.unk14 & 2) {
+    if (sdfPadButtonStates.unk14 & 2) {
         D_00435CAC -= 1;
-    } else if (D_0040B7D8.unk15 & 2) {
+    } else if (sdfPadButtonStates.unk15 & 2) {
         D_00435CAC += 1;
-    } else if ((D_0040B7D8.unk18 & 2) || (D_0040B7D8.unk19 & 2)) {
+    } else if ((sdfPadButtonStates.unk18 & 2) || (sdfPadButtonStates.unk19 & 2)) {
         D_00435CAC -= 10;
-    } else if ((D_0040B7D8.unk1A & 2) || (D_0040B7D8.unk1B & 2)) {
+    } else if ((sdfPadButtonStates.unk1A & 2) || (sdfPadButtonStates.unk1B & 2)) {
         D_00435CAC += 10;
     }
     D_00435CAC = func_00104908(D_00435CAC);
-    if (D_0040B7D8.unk12 < 0) {
+    if (sdfPadButtonStates.unk12 < 0) {
         D_00435C60 ^= 1;
     }
     return 1;
@@ -346,7 +346,7 @@ s32 kwlnSwapActiveResource(s32 resource) {
         return 0;
     }
     status = kwlnTextureViewerHandlePad();
-    func_00104AA8((void *)resource, D_00435CA8);
+    func_00104AA8((void *)resource, kwlnCurrentIncompleteResource);
     return status;
 }
 
@@ -357,7 +357,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104AA8(D_00380748, D_00435CA8);
+    func_00104AA8(kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 
@@ -366,15 +366,15 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     if (node == NULL) {
         return NULL;
     }
-    D_00435CA8 = (s32)node;
+    kwlnCurrentIncompleteResource = (s32)node;
     D_00435C60 = 1;
     D_00435CAC = 0;
     while (node->ready != NULL && *node->ready != 0) {
-        node = ((KwlnResourceNode *)D_00435CA8)->next;
+        node = ((KwlnResourceNode *)kwlnCurrentIncompleteResource)->next;
         if (node == NULL) {
             return NULL;
         }
-        D_00435CA8 = (s32)node;
+        kwlnCurrentIncompleteResource = (s32)node;
     }
     return kwlnLoadDefaultResource;
 }
@@ -394,7 +394,7 @@ s32 kwlnEnsureDefaultResource(void) {
     if (D_0037F53B[0] != 0) {
         return 0;
     }
-    kwlnTextureAttachTask(D_00380748);
+    kwlnTextureAttachTask(kwlnPositionedTextSurface);
     return 0;
 }
 
@@ -603,14 +603,14 @@ void kwlnDrawBlurErrorCounters(void) {
     void *task;
 
     if (D_00435BA4 != 0) {
-        if (D_00435D04 != 0 || D_00435D08 != 0) {
+        if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
             task = sdfAllocPacketAligned(0x20);
             sdfInitPacketList(task);
-            if (D_00435D04 > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_00435D04));
+            if (kwlnDistanceBlurErrorCount > 0) {
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
             }
-            if (D_00435D08 > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_00435D08));
+            if (kwlnRippleBlurErrorCount > 0) {
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
             D_00380708.submit(&D_00380708, task);
         }
@@ -674,7 +674,7 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
     if (kwlnDrawControlFlags & 0x0C000000) {
         return 1;
     }
-    if (D_00435CFC == 0) {
+    if (kwlnBackgroundFadeMode == 0) {
         if (0x80 - kwlnBackgroundFadeColor[3] >= 0x80) {
             return 0;
         }
@@ -685,8 +685,8 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
 }
 
 void kwlnFadeSetMode(s32 mode) {
-    D_00435CFC = mode;
-    if (D_00435CFC == 0) {
+    kwlnBackgroundFadeMode = mode;
+    if (kwlnBackgroundFadeMode == 0) {
         D_00435CFE = 0;
         D_00435D00 = 0;
     } else {
@@ -750,13 +750,13 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C98);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CA0);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CA8);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnCurrentIncompleteResource);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CAC);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CB0);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CB8);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawSurfaceIndex);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CBC);
 
@@ -774,11 +774,11 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CD0);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawControlFlags);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CD8);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayEnabled);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CDA);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayAlpha);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CDC);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDrawOverlayScale);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CE0);
 
@@ -804,15 +804,15 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFB);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFC);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnBackgroundFadeMode);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435CFE);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D00);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D04);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDistanceBlurErrorCount);
 
-INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D08);
+INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnRippleBlurErrorCount);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
 

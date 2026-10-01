@@ -395,7 +395,7 @@ void sdfMotionBlendDrawVectorWithCurrent(u8 *motion, f32 t1, f32 t2) {
     VU0_STORE_VF_UNCLOBBERED(vf10, *(u8 **)(motion + 0xC) + 0x60);
 }
 
-void *func_00334B10(void *a0, s32 a1, s32 a2) {
+void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
     void *r;
 
     r = func_00328D68(0x20);

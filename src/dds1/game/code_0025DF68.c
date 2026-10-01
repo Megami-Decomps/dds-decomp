@@ -37,7 +37,7 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025ECD0);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F138);
 
-extern void func_0025F408(s32, s32, s32, u8 *, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void func_0025F4E0(s32, s32, s32, s32, u8 *, s32);
 
 typedef struct MenuDrawInner {
@@ -57,7 +57,7 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
     MenuDrawInner *inner = object->inner;
 
     if (inner->active != 0) {
-        func_0025F408(x, y, z, (u8 *)inner, drawArg);
+        mnuDrawListChildrenWithCountdown(x, y, z, (u8 *)inner, drawArg);
         func_0025F4E0(x, y, z, 0, (u8 *)object, drawArg);
         object->flags |= 4;
     }
@@ -79,7 +79,7 @@ typedef struct MenuDrawList {
 } MenuDrawList;
 
 /* Tick the list's countdown, then run its draw callback on up to `count` linked children. */
-void func_0025F408(s32 x, s32 y, s32 z, u8 *object, s32 drawArg) {
+void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawArg) {
     MenuDrawList *list = (MenuDrawList *)object;
     MenuChild *child;
     s32 i;
@@ -123,7 +123,7 @@ extern void func_001958A0(s32, s32, s32);
 extern void frFontQueueGlyphInSelectedSlot(s32);
 extern char D_003BC508[];
 
-void func_0025FEB8(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
+void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
     s32 glyph;

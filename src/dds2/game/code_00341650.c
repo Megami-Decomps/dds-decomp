@@ -12,7 +12,7 @@ u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
-u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
+u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
 /* Sound command work block: header, 16 channel records, 13 track slots. */
 typedef struct SndChannel {
@@ -42,7 +42,7 @@ typedef struct SndWork {
     u32 unk204;                /* 0x204 */
 } SndWork;
 
-extern SndWork D_0047AA40;
+extern SndWork sndMidiTrackState;
 extern u32 func_003414D0(s32 size);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341650);
@@ -50,7 +50,7 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_00341650);
 void func_003417A0(u32 unused) {
 }
 
-u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size) {
+u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
     u32 result = func_00341650(command, channel, packet, size);
 
     func_003417A0(result);
@@ -61,12 +61,12 @@ INCLUDE_ASM(const s32, "game/code_00341650", func_003417E0);
 
 INCLUDE_ASM(const s32, "game/code_00341650", func_00341878);
 
-void func_00341958(s32 unused, s32 header) {
+void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     SndChannel *channel;
     s32 i;
 
-    D_0047AA40.header = header;
-    channel = D_0047AA40.channels;
+    sndMidiTrackState.header = header;
+    channel = sndMidiTrackState.channels;
     for (i = 0; i < 16; i++) {
         channel->index = i;
         channel->unk1 = 0x20;
@@ -76,13 +76,13 @@ void func_00341958(s32 unused, s32 header) {
         channel->unkC = 0;
         channel++;
     }
-    D_0047AA40.channels[0].unk8 = func_003414D0(0x3B600);
-    D_0047AA40.unk200 = 0;
-    D_0047AA40.unk204 = 0;
+    sndMidiTrackState.channels[0].unk8 = func_003414D0(0x3B600);
+    sndMidiTrackState.unk200 = 0;
+    sndMidiTrackState.unk204 = 0;
     for (i = 0; i < 13; i++) {
-        D_0047AA40.slots[i].id = -1;
-        D_0047AA40.slots[i].flagA = 0;
-        D_0047AA40.slots[i].flagB = 0;
+        sndMidiTrackState.slots[i].id = -1;
+        sndMidiTrackState.slots[i].flagA = 0;
+        sndMidiTrackState.slots[i].flagB = 0;
     }
 }
 

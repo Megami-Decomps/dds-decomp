@@ -14,7 +14,7 @@ typedef struct FileReqEntry {
     u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by D_003DC6AC */
 } FileReqEntry;
 
-extern FileReqEntry D_00457F68[];
+extern FileReqEntry fileRequestEntries[];
 
 extern s32 D_00439000;
 
@@ -49,7 +49,7 @@ typedef struct FileJob {
     u32 transferAddress; /* 0x28: forwarded to backend request at +0x20 */
 } FileJob;
 
-extern FileManWork D_00457F28;
+extern FileManWork fileManagerWork;
 
 void WaitSema(s32 sema);
 
@@ -81,26 +81,26 @@ extern u32 D_00457F7C[];
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C83F0);
 
 void fileStartChunkedReadWhenReady(FileJob *job) {
-    WaitSema(D_00457F28.sema);
+    WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
-        SignalSema(D_00457F28.sema);
+        SignalSema(fileManagerWork.sema);
         return;
     }
     job->state = FILE_JOB_TRANSFERRING;
-    SignalSema(D_00457F28.sema);
+    SignalSema(fileManagerWork.sema);
     sdfDevQueueRead(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", func_002C8638);
 
 void fileStartChunkedWriteWhenReady(FileJob *job) {
-    WaitSema(D_00457F28.sema);
+    WaitSema(fileManagerWork.sema);
     if (job->state != FILE_JOB_READY) {
-        SignalSema(D_00457F28.sema);
+        SignalSema(fileManagerWork.sema);
         return;
     }
     job->state = FILE_JOB_TRANSFERRING;
-    SignalSema(D_00457F28.sema);
+    SignalSema(fileManagerWork.sema);
     sdfDevQueueWrite(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
@@ -119,10 +119,10 @@ u32 fileMan(void) {
 }
 
 void fileManInit(void) {
-    memset(&D_00457F28, 0, 0x40);
-    D_00457F28.unk7 = 4;
-    D_00457F28.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    D_00457F28.unk1C = sdfResourceRetainAddress(func_003292A8(0x40000));
+    memset(&fileManagerWork, 0, 0x40);
+    fileManagerWork.unk7 = 4;
+    fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
+    fileManagerWork.unk1C = sdfResourceRetainAddress(func_003292A8(0x40000));
     kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     D_00438B98 = fileManUpdate;
 }
@@ -133,29 +133,29 @@ INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
 void fileReqBegin(s32 request) {
     D_00439000 = request;
     fileReqInit(request);
-    D_00457F68[request].unk10 = 0;
+    fileRequestEntries[request].unk10 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqPoll);
 
 u8 fileReqGetStatus(s32 request) {
-    return D_00457F68[request].status;
+    return fileRequestEntries[request].status;
 }
 
 s32 fileReqGetSize(s32 request) {
-    return D_00457F68[request].sizeKiB << 10;
+    return fileRequestEntries[request].sizeKiB << 10;
 }
 
 u8 fileReqIsSlotMetadataDirty(s32 request) {
-    return D_00457F68[request].slotMetadataDirty;
+    return fileRequestEntries[request].slotMetadataDirty;
 }
 
 void fileReqClearSlotMetadataDirty(s32 request) {
-    D_00457F68[request].slotMetadataDirty = 0;
+    fileRequestEntries[request].slotMetadataDirty = 0;
 }
 
 void fileReqMarkSlotMetadataDirty(s32 request) {
-    D_00457F68[request].slotMetadataDirty = 1;
+    fileRequestEntries[request].slotMetadataDirty = 1;
 }
 
 void fileReqClearSlotFlags(s32 request, s32 slot) {
@@ -174,11 +174,11 @@ u32 fileReqGetSlotFlags(s32 request, s32 slot) {
 }
 
 s8 fileReqGetSelectedSlot(s32 request) {
-    return D_00457F68[request].selectedSlot;
+    return fileRequestEntries[request].selectedSlot;
 }
 
 void fileReqSetSelectedSlot(s32 request, s8 selectedSlot) {
-    D_00457F68[request].selectedSlot = selectedSlot;
+    fileRequestEntries[request].selectedSlot = selectedSlot;
 }
 
 void func_002C92D0(u32 arg0) {

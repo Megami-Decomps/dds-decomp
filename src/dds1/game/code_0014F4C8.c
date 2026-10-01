@@ -55,11 +55,11 @@ extern s32 effMiscRandMod(s32, s32);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
-extern s32 D_0034DDF0[];
+extern s32 fldMirroredSolarThresholds[];
 
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
-    s32 solarPhaseThreshold = D_0034DDF0[evtGetMirroredSolarPhase()];
+    s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
     if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
         scrSetIntegerReturnValue(1);
     } else {

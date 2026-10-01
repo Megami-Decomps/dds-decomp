@@ -89,7 +89,7 @@ void dds3PreparePathVectorPair(PathObj *arg) {
 }
 
 /* vu0 routine: lerp the three key vectors (xyzw, xyz, xyz) of path entries `index` and `index + 1` at the sampled fraction into out, or clear out */
-void func_00117340(PathObj *path, PathOut *out) {
+void dds3InterpolatePathOutput(PathObj *path, PathOut *out) {
     s32 index;
     f32 fraction;
     PathData20 *data;

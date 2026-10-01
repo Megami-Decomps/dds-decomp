@@ -87,11 +87,12 @@ def place(version):
                 refs[f.group(1)] = set(re.findall(r"%(?:lo|gp_rel)\((\w+)\)", f.group(2)))
         asm_funcs = set(re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);', text, re.M))
         still_asm = set().union(*(refs.get(f, set()) for f in asm_funcs)) if asm_funcs else set()
+        addr_of = {s: a for a, s in syms}
         for m in DEF.finditer(text):
             code = function_text(text, m.start())
             for sym in refs.get(m.group(1), ()):
                 if sym in mine and sym not in still_asm and not re.search(rf"\b{sym}\b", code):
-                    anchors.append((int(sym[-8:], 16), m.start(), sym))
+                    anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
         following, placed = len(text), []

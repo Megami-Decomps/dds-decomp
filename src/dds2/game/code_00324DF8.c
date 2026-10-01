@@ -26,7 +26,7 @@ extern u64 func_00325790(u64, u32);
 
 extern s32 CreateSema(void *);
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern f32 sdfVec3DotNormalized(void *, void *);
 
@@ -73,11 +73,11 @@ void mnuRemoveMatchedNodesFromLinkedResourceLists(u32 *pair, u32 key) {
     dds3RemoveListNodeAndNotify(pair[0], node);
 }
 
-extern s32 func_00321018(u32);
+extern s32 mnuClearResourceList(u32);
 
 s64 mnuClearOwnedResourceListPair(u32 *pair) {
-    func_00321018(pair[0]);
-    return func_00321018(pair[1]);
+    mnuClearResourceList(pair[0]);
+    return mnuClearResourceList(pair[1]);
 }
 
 void func_00324F20(ResourceList **list) {
@@ -185,7 +185,7 @@ f32 func_00326AE0(void *a, void *b) {
     return func_003532B8(sdfVec3DotNormalized(a, b));
 }
 
-void func_00326B00(float *out, float *left, float *right) {
+void sdfCrossNormalizedVectors(float *out, float *left, float *right) {
     SdfVec4 a, b;
 
     a = *(SdfVec4 *)left;
@@ -277,5 +277,5 @@ INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
 
-INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C4);
+INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
 

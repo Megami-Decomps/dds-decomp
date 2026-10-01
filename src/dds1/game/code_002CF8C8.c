@@ -3,7 +3,7 @@
 
 extern u8 D_003BD39C;
 
-extern void (*D_003BD2D4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void sdfSleepThreadCount(s32);
 
@@ -60,8 +60,8 @@ void sdfRunTickWorkerThread(void) {
             sdfPadBuildButtonStates();
         }
         sdfTickThreadPriorityOverride();
-        if (D_003BD2D4 != NULL) {
-            D_003BD2D4();
+        if (sdfTickCallback != NULL) {
+            sdfTickCallback();
         }
     }
 }
@@ -95,5 +95,5 @@ void sdfSleepThreadCount(s32 count) {
 INCLUDE_ASM(const s32, "game/code_002CF8C8", func_002CFB18);
 INCLUDE_SDATA(const s32, "game/code_002CF8C8", D_003BD2D0);
 
-INCLUDE_SDATA(const s32, "game/code_002CF8C8", D_003BD2D4);
+INCLUDE_SDATA(const s32, "game/code_002CF8C8", sdfTickCallback);
 

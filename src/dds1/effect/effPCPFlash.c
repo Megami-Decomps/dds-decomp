@@ -30,7 +30,7 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 /* Effect initializers implemented in assembly below. Each is entered both with
    and without spawn arguments, so they are declared unchecked. */
-extern void func_0016A088();
+extern void effFlashRecordCreate();
 extern void func_0016A6C0();
 extern void *func_0016C0E8();
 
@@ -426,9 +426,9 @@ typedef struct PcpFlashHandle {
 } PcpFlashHandle;
 
 
-extern u8 D_00324680[];
+extern u8 sdfViewEyeVector[];
 
-extern u8 D_00324690[];
+extern u8 sdfViewTargetVector[];
 
 extern s32 effBlendColor(s32, s32, f32);
 
@@ -452,12 +452,12 @@ extern void effFlashRotatedTriangleB(PcpFlashWork10 *, s32, void *);
 
 void effFlashTrianglePulseSpawnFromTable(void *data)
 {
-    func_0016A088(effParamTableGetBlock(data, 0));
+    effFlashRecordCreate(effParamTableGetBlock(data, 0));
 }
 
 void func_0016A1C8(void)
 {
-    func_0016A088();
+    effFlashRecordCreate();
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashWork1 *work)
@@ -548,8 +548,8 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
     PcpFlashParticle10 *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
         VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, axis);
@@ -794,8 +794,8 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
     PcpFlashRotatingParticle *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     lifetime = work->lifetime;
@@ -1100,7 +1100,7 @@ void effFlashUpdateWork3(PcpFlashWork3 *work) {
     func_0016FC58(handle);
 }
 
-extern s32 func_00170250();
+extern s32 effRecordPoolCreate();
 
 /* Clone the 0x50-byte parameter block, then spread the particles evenly around the orbit from -pi/2 with random negative start ages (two handle slots per particle). */
 PcpFlashWork4 *func_0016B800(src)
@@ -1124,7 +1124,7 @@ PcpFlashWork4 *func_0016B800(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = (PcpFlashHandle *)func_00170250(work->particleCount * 2);
+    record = (PcpFlashHandle *)effRecordPoolCreate(work->particleCount * 2);
     record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
     work->resourceHandle = (u32)record;
@@ -1185,7 +1185,7 @@ void effFlashAccumulatingParticleAdvance(PcpFlashWork4 *work, s32 index)
 extern void func_0016BAC0(PcpFlashWork4 *, s32, s32);
 extern void func_0016BBB0(PcpFlashWork4 *, s32);
 
-void func_0016BE48(PcpFlashWork4 *work)
+void effFlashAccumulatingParticleUpdate(PcpFlashWork4 *work)
 {
     s32 index;
     s32 count;
@@ -1607,8 +1607,8 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     PcpFlashPtc20A *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
@@ -1682,7 +1682,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     func_0016FC58(handle);
 }
 
-extern PcpFlashHandle *func_0016FF50(s32 count);
+extern PcpFlashHandle *effRecordPoolCreateTriad(s32 count);
 
 PcpFlashWork7 *func_0016D2A8(src)
     PcpFlashWork7 *src;
@@ -1698,7 +1698,7 @@ PcpFlashWork7 *func_0016D2A8(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = func_0016FF50(work->particleCount);
+    record = effRecordPoolCreateTriad(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk38;
     for (i = 0; i < work->particleCount; i++) {
@@ -1808,8 +1808,8 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     PcpFlashMotionParticle *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
         VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, &axis);
@@ -1876,7 +1876,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
 }
 
 /* Clone the 0xD0-byte parameter block, then give every particle a random negative start age (two handle slots per particle). */
-PcpFlashWork8 *func_0016D940(src)
+PcpFlashWork8 *effFlashRadialStripCreate(src)
     PcpFlashWork8 *src;
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc20B) + sizeof(PcpFlashWork8));
@@ -1894,7 +1894,7 @@ PcpFlashWork8 *func_0016D940(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = (PcpFlashHandle *)func_00170250(work->particleCount * 2);
+    record = (PcpFlashHandle *)effRecordPoolCreate(work->particleCount * 2);
     record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
     work->resourceHandle = (u32)record;
@@ -1907,12 +1907,12 @@ PcpFlashWork8 *func_0016D940(src)
 
 void effFlashRadialStripSpawnFromTable(void *data)
 {
-    func_0016D940(effParamTableGetBlock(data, 0));
+    effFlashRadialStripCreate(effParamTableGetBlock(data, 0));
 }
 
 void func_0016DB38(void)
 {
-    func_0016D940();
+    effFlashRadialStripCreate();
 }
 
 void effFlashRadialStripDestroy(PcpFlashWork8 *work)
@@ -1937,7 +1937,7 @@ void effFlashRadialStripSetRenderScale(PcpFlashWork8 *work, f32 value)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DBA0);
 
-void func_0016DC90(PcpFlashWork8 *work, s32 index, void *orientation) {
+void effFlashSpawnStripParticle(PcpFlashWork8 *work, s32 index, void *orientation) {
     PcpFlashPtc20B *part = work->parts + index;
     f32 factor;
 
@@ -2050,8 +2050,8 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
     PcpFlashPtc20B *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
@@ -2073,7 +2073,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
             func_0016DBA0(work, index, 0);
         } else {
             if (age == 0) {
-                func_0016DC90(work, index, &axis);
+                effFlashSpawnStripParticle(work, index, &axis);
                 effFlashRotatedStripPair(work, index, &axis);
                 func_0016DBA0(work, index, 0);
                 part->thickness = maxScale;
@@ -2382,7 +2382,7 @@ PcpFlashWork10 *func_0016EB00(src)
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
     work->updateCount = 0;
-    record = func_0016FF50(work->particleCount);
+    record = effRecordPoolCreateTriad(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk3C;
     for (i = 0; i < work->particleCount; i++) {
@@ -2493,8 +2493,8 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
     PcpFlashMotionParticle *part;
     PcpFlashHandle *handle;
 
-    VU0_LOAD_VF($vf10, D_00324680);
-    VU0_LOAD_VF($vf11, D_00324690);
+    VU0_LOAD_VF($vf10, sdfViewEyeVector);
+    VU0_LOAD_VF($vf11, sdfViewTargetVector);
         VU0_SUB(vf10, vf10, vf11);;
         VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, axis);

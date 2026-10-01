@@ -30,9 +30,9 @@ extern SlotObjectFull *dds3AppendWorldObjectNode();
 
 extern u32 dds3AdvanceWorldCounter();
 
-extern SlotEntry D_00384A80[];
+extern SlotEntry dds3SlotRingEntries[];
 
-extern s32 D_00435D90;
+extern s32 dds3SlotRingCursor;
 
 SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     SlotObjectFull *obj = dds3AppendWorldObjectNode(3);
@@ -41,11 +41,11 @@ SlotObjectFull *dds3SpawnSlotRingObj3(u32 owner) {
     s32 slot;
 
     resource->owner = owner;
-    slot = D_00435D90;
+    slot = dds3SlotRingCursor;
     obj->unk4 = sequence;
-    obj->entry = &D_00384A80[slot];
-    D_00435D90 = slot + 1;
-    D_00435D90 = D_00435D90 % 10;
+    obj->entry = &dds3SlotRingEntries[slot];
+    dds3SlotRingCursor = slot + 1;
+    dds3SlotRingCursor = dds3SlotRingCursor % 10;
     return obj;
 }
 
@@ -128,5 +128,5 @@ s32 dds3GetObjectSlotRingOccupancy(u32 kind)
 
 INCLUDE_ASM(const s32, "game/code_00111838", func_001119D0);
 
-INCLUDE_SDATA(const s32, "game/code_00111838", D_00435D90);
+INCLUDE_SDATA(const s32, "game/code_00111838", dds3SlotRingCursor);
 

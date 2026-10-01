@@ -57,9 +57,9 @@ typedef struct BtlCommandCtx {
 
 extern s32 btlRollAiBucket(void);
 
-extern s32 func_001AA6F8(void);
+extern s32 btlGetRuntime(void);
 
-extern u32 D_00438F70;
+extern u32 btlButtonIconTexture;
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
@@ -125,7 +125,7 @@ extern s32 D_003BEA48[];
 
 extern s32 D_003BE6E0[];
 
-extern u8 D_00438B66;
+extern u8 sdfPfsDebugMode;
 
 extern s32 sceDopen(char *);
 
@@ -149,7 +149,7 @@ extern void scrSetIntegerReturnValue();
 
 extern u8 *btlAllocTask(s32);
 
-extern void func_00207A10(void);
+extern void btlCommandRecenterParty(void);
 
 extern void btlFlagUnitDefeatCandidate(s32 actor);
 
@@ -289,7 +289,7 @@ BattleScriptTask *btlCreateControlObject(void) {
     BattleScriptTask *task;
     task = (BattleScriptTask *)btlAllocTask(0);
     task->active = 1;
-    task->callback = func_00207A10;
+    task->callback = btlCommandRecenterParty;
     task->kind = 0x66;
     task->work = 0;
     task->startFlag = 0;
@@ -377,7 +377,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208298);
 
 f32 btlGetMaxUnitTop(u32 mask) {
-    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     f32 best = 0.0f;
     s32 first = 1;
     while (unit != NULL) {
@@ -396,7 +396,7 @@ f32 btlGetMaxUnitTop(u32 mask) {
 }
 
 f32 btlGetMaxUnitReach(u32 mask) {
-    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     f32 best = 0.0f;
     s32 first = 1;
     while (unit != NULL) {
@@ -415,7 +415,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
 }
 
 f32 btlGetExtremeUnitY(u32 mask) {
-    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     f32 best = 0.0f;
     s32 first = 1;
     f32 pos[4];
@@ -450,7 +450,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208750);
 
 BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
-    BtlState *state = (BtlState *)func_001AA6F8();
+    BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlUnit *nearest;
     s32 first;
@@ -491,7 +491,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
 }
 
 BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
-    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *farthest = NULL;
     f32 best = 0.0f;
     f32 dist;
@@ -520,7 +520,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
-    BtlState *work = (BtlState *)func_001AA6F8();
+    BtlState *work = (BtlState *)btlGetRuntime();
     for (unit = work->units; unit != NULL; unit = unit->nextActor) {
         btlFlagUnitDefeatCandidate((s32)unit);
     }
@@ -528,7 +528,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
 
 void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
-    BtlState *work = (BtlState *)func_001AA6F8();
+    BtlState *work = (BtlState *)btlGetRuntime();
     for (unit = work->units; unit != NULL; unit = unit->nextActor) {
         btlClearUnitDefeatCandidate((s32)unit);
     }
@@ -537,7 +537,7 @@ void btlClearAllUnitDefeatCandidates(void) {
 void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     BtlUnit *unit;
 
-    unit = ((BtlState *)func_001AA6F8())->units;
+    unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
@@ -551,7 +551,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
 void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     BtlUnit *unit;
 
-    unit = ((BtlState *)func_001AA6F8())->units;
+    unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
             if (unit->flags & mask) {
@@ -587,7 +587,7 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
 extern void func_001E22D8(u8 *, s32, s32, f32);
 
 void func_00208F78(void) {
-    BtlState *state = (BtlState *)func_001AA6F8();
+    BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *actor = state->units;
 
     while (actor != NULL) {
@@ -620,7 +620,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     s32 count = 0;
     s32 flags;
 
-    unit = ((BtlState *)func_001AA6F8())->units;
+    unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
             flags = unit->flags;
@@ -848,7 +848,7 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
         case 0x4000: uv = D_003BE1A0; break;
         default: uv = 0; break;
         }
-        texture = func_002DDD60(surface, ((BtlState *)func_001AA6F8())->buttonTextureHandle);
+        texture = func_002DDD60(surface, ((BtlState *)btlGetRuntime())->buttonTextureHandle);
         packet = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(packet);
         sdfConsCreateDrawPacket(packet, texture, 0);
@@ -866,22 +866,22 @@ void btlDrawButtonIcon(BtnSurface *surface, s32 x, s32 y, s32 topLeftColor, s32 
 
 void btlOpenButtonIconResource(void) {
     btlBossDebugPrintf((s32)"btl:[%s]\n", D_00436AF0);
-    D_00438F6C = func_00343ED0(D_00436AF0, &D_00438F70, 0);
+    D_00438F6C = func_00343ED0(D_00436AF0, &btlButtonIconTexture, 0);
 }
 
 void btlRetainButtonTexture(void) {
     BtlState *state;
     u32 handle;
 
-    state = (BtlState *)func_001AA6F8();
-    handle = effCloneSharedReferenceWithValue(D_00438F70, 0x10000);
+    state = (BtlState *)btlGetRuntime();
+    handle = effCloneSharedReferenceWithValue(btlButtonIconTexture, 0x10000);
     state->buttonTextureHandle = handle;
 }
 
 void btlReleaseButtonTexture(void) {
     BtlState *state;
 
-    state = (BtlState *)func_001AA6F8();
+    state = (BtlState *)btlGetRuntime();
     effReleaseSharedReference(state->buttonTextureHandle);
     state->buttonTextureHandle = 0;
 }
@@ -938,7 +938,7 @@ typedef struct BtlActionProbe {
     void *actionProbeSecond;   // 0x08
 } BtlActionProbe;
 
-extern s8 *D_00435E1C;
+extern s8 *datCommandSelectors;
 extern s32 func_001B2F50(void *, s32);
 extern s32 func_001ACD10(void *, s32, BtlActionProbe *);
 
@@ -949,7 +949,7 @@ u32 btlScriptSelectActionEntry(void) {
 
     context = (BtlCommandCtx *)func_0010D8D0();
     index = scrReadIntParameter(0);
-    if (D_00435E1C[index * 2 + 1] == 1) {
+    if (datCommandSelectors[index * 2 + 1] == 1) {
         if (func_001B2F50((void *)context->actor, index) != 0 &&
             func_001ACD10((void *)context->actor, index, &probe) != 0) {
             context->actionProbeFirst = probe.actionProbeFirst;
@@ -1039,7 +1039,7 @@ u32 btlScriptSetBattleWorkParameter(void) {
     s32 battle;
     s16 value;
 
-    battle = func_001AA6F8();
+    battle = btlGetRuntime();
     func_0010D8D0();
     value = scrReadIntParameter(0);
     ((BtlState *)battle)->requestMode = 4;
@@ -1865,7 +1865,7 @@ u32 btlCmdTestEffectActor(void) {
     return 1;
 }
 
-u32 func_0020C0C0(void) {
+u32 btlCommandReportSpecialEnemyLink(void) {
     if (btlIsSpecialEnemyEffectLinkSatisfied() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1874,7 +1874,7 @@ u32 func_0020C0C0(void) {
     return 1;
 }
 
-u32 func_0020C100(void) {
+u32 btlScriptReturnActiveSubtaskPresence(void) {
     if (btlHasActiveSubtask() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1883,7 +1883,7 @@ u32 func_0020C100(void) {
     return 1;
 }
 
-u32 func_0020C140(void) {
+u32 btlScriptReturnMarkedActionSceneActive(void) {
     if (btlIsMarkedActionSceneStateActive() != 0) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1892,8 +1892,8 @@ u32 func_0020C140(void) {
     return 1;
 }
 
-u32 func_0020C180(void) {
-    BtlUnit *unit = ((BtlState *)func_001AA6F8())->units;
+u32 btlScriptReturnUnitHpRatioPercent(void) {
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     s32 side = scrReadIntParameter(0);
     s32 id = scrReadIntParameter(1);
     s32 percent = scrReadIntParameter(2);
@@ -1973,7 +1973,7 @@ s32 func_0020C450(void) {
     return 1;
 }
 
-s32 func_0020C4A0(void) {
+s32 btlCommandReportLinkedActionScene(void) {
     if (btlIsLinkedActionSceneStateActive()) {
         scrSetIntegerReturnValue(1);
     } else {
@@ -1993,7 +1993,7 @@ u32 btlScriptReturnBattleValue(void) {
 u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
-    battle = func_001AA6F8();
+    battle = btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->turnCount);
     return 1;
 }
@@ -2022,7 +2022,7 @@ u32 btlScriptReturnEffectActive(void) {
     return 1;
 }
 
-u32 func_0020C598(void) {
+u32 btlCommandReportSpecialModeValue(void) {
     u64 result;
 
     result = func_00220958();
@@ -2033,7 +2033,7 @@ u32 func_0020C598(void) {
 u32 func_0020C5C0(void) {
     s32 battle;
 
-    battle = func_001AA6F8();
+    battle = btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->phase);
     return 1;
 }
@@ -2072,7 +2072,7 @@ u32 func_0020C688(void) {
 }
 
 u32 func_0020C690(void) {
-    func_00210F58(func_0010D8D0());
+    btlRunRandomWeightedAiTableAction(func_0010D8D0());
     return 1;
 }
 
@@ -2202,13 +2202,13 @@ u32 btlCmdCameraMoveBlend(void) {
     return 1;
 }
 
-u32 func_0020CB80(void) {
+u32 btlAiCheckBa(void) {
     btlBossDebugPrintf(D_00419570);
     scrSetIntegerReturnValue(0);
     return 1;
 }
 
-u32 func_0020CBB0(void) {
+u32 btlAiGetAllKoudo(void) {
     btlBossDebugPrintf(D_00419590);
     scrSetIntegerReturnValue(0x14);
     return 1;
@@ -2222,7 +2222,7 @@ u32 btlScriptReturnActorUnitParameter(void) {
     return 1;
 }
 
-u32 func_0020CC10(void) {
+u32 btlAiGetFurea(void) {
     btlBossDebugPrintf(D_004195B8);
     scrSetIntegerReturnValue(0);
     return 1;
@@ -2278,7 +2278,7 @@ extern void func_00101968(s32, s32);
 extern void func_001A45C0(s32, s32, s32, s32);
 
 void btlBindActorSlot(s32 actor, s32 option) {
-    s32 battle = func_001AA6F8();
+    s32 battle = btlGetRuntime();
     s32 task;
     s32 window;
 
@@ -2326,7 +2326,7 @@ void func_0020CE70(void) {
 }
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
-    s32 state = func_001AA6F8();
+    s32 state = btlGetRuntime();
     if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {
@@ -2580,7 +2580,7 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 s32 btlOpenPfsDebugDirectory(s32 path) {
     char buf[0x70];
 
-    if (D_00438B66 != 0) {
+    if (sdfPfsDebugMode != 0) {
         func_0035C860(buf, "pfs0:/%s", path);
         return sceDopen(buf);
     }
@@ -2589,14 +2589,14 @@ s32 btlOpenPfsDebugDirectory(s32 path) {
 }
 
 void func_0020D370(s32 dir) {
-    if (D_00438B66 == 0) {
+    if (sdfPfsDebugMode == 0) {
         return;
     }
     func_0036B420();
 }
 
 s32 btlReadBattleResourceDirectoryEntry(s32 unused, BtlReader *reader) {
-    if (D_00438B66 != 0) {
+    if (sdfPfsDebugMode != 0) {
         return func_0036B588();
     }
     if ((u32)D_00438F80 >= 8) {

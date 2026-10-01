@@ -186,7 +186,7 @@ typedef struct SdfTreeNode {
     struct SdfTreeItem *item;    /* 0x8 */
     s32 balance;                 /* 0xC */
 } SdfTreeNode;
-SdfTreeNode *func_002EF858(SdfTreeNode *a, SdfTreeNode *node) {
+SdfTreeNode *sdfRotateBalancedTreeSecondLink(SdfTreeNode *a, SdfTreeNode *node) {
     SdfTreeNode *root = a;
     SdfTreeNode *pivot;
 
@@ -329,12 +329,12 @@ typedef struct SdfKeyTreeNode {
 extern void func_002EFB88(void *item, s32 first, s32 second);
 
 /* Walk a key tree depth first, applying func_002EFB88 to every node's item. */
-void func_002EFBF8(SdfKeyTreeNode *node, s32 first, s32 second) {
+void sdfKeyTreeApply(SdfKeyTreeNode *node, s32 first, s32 second) {
     SdfKeyTreeNode *next;
 
     do {
         if (node->child != NULL) {
-            func_002EFBF8(node->child, first, second);
+            sdfKeyTreeApply(node->child, first, second);
         }
         func_002EFB88(node->item, first, second);
         next = node->next;

@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern s32 D_0043789C;
+extern s32 mnuMantraPanelPositionTable;
 
-extern s32 D_00437898;
+extern s32 mnuMantraNodePositionTable;
 
 extern s32 func_0026CD50(u32);
 
@@ -33,7 +33,7 @@ typedef struct EvtResourcePair {
     u32 input;
 } EvtResourcePair;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 typedef struct {
     u8 pad0[0x1340];
@@ -111,7 +111,7 @@ void evtCollectActiveGameIndices(ActiveList *list) {
     s32 index;
     list->count = 0;
     for (index = 1; index < 0x100; index++) {
-        if (((EvtGameEntries *)D_00435DD0)->active[index] != 0) {
+        if (((EvtGameEntries *)datGameState)->active[index] != 0) {
             s32 count = list->count++;
             list->indices[count] = index;
         }
@@ -219,7 +219,7 @@ void evtSetMessageWindowOptionWhenOpen(s32 value) {
     }
 }
 
-s8 func_0026C660(void) {
+s8 evtGetMessageWindowOption(void) {
     return D_0043788C;
 }
 
@@ -302,7 +302,7 @@ void func_0026C918(s32 first, s32 second) {
     func_001A4858(dspWindowHandle, first, second);
 }
 
-s8 func_0026C940(void) {
+s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
 
@@ -423,41 +423,41 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CD50);
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CE90);
 
 void mnuLoadMantraNodePositionTable(u32 resource) {
-    if (D_00437898 != 0) {
+    if (mnuMantraNodePositionTable != 0) {
         mnuReleaseMantraNodePositionTable();
     }
-    D_00437898 = func_0026CD50(resource);
+    mnuMantraNodePositionTable = func_0026CD50(resource);
 }
 
 void mnuReleaseMantraNodePositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)D_00437898)->handle);
-    D_00437898 = 0;
+    func_003297C8(((EvtLoadedRecord *)mnuMantraNodePositionTable)->handle);
+    mnuMantraNodePositionTable = 0;
 }
 
 s32 mnuGetMantraNodePositionRecord(s32 index) {
-    return ((EvtLoadedRecord *)D_00437898)->base + ((index << 0x10) >> 0xb);
+    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026CF88);
 
 u32 func_0026D020(void) {
-    return ((EvtLoadedRecord *)D_00437898)->unk8;
+    return ((EvtLoadedRecord *)mnuMantraNodePositionTable)->unk8;
 }
 
 void mnuLoadMantraPanelPositionTable(u32 resource) {
-    if (D_0043789C != 0) {
+    if (mnuMantraPanelPositionTable != 0) {
         mnuReleaseMantraPanelPositionTable();
     }
-    D_0043789C = func_0026CD50(resource);
+    mnuMantraPanelPositionTable = func_0026CD50(resource);
 }
 
 void mnuReleaseMantraPanelPositionTable(void) {
-    func_003297C8(((EvtLoadedRecord *)D_0043789C)->handle);
-    D_0043789C = 0;
+    func_003297C8(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle);
+    mnuMantraPanelPositionTable = 0;
 }
 
 s32 mnuGetMantraPanelPositionRecord(s32 index) {
-    return ((EvtLoadedRecord *)D_0043789C)->base + ((index << 0x10) >> 0xb);
+    return ((EvtLoadedRecord *)mnuMantraPanelPositionTable)->base + ((index << 0x10) >> 0xb);
 }
 
 extern u32 func_003292A8(u32);
@@ -559,7 +559,7 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", dspCapturedSoundMode);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437898);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
-INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_0043789C);
+INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
 

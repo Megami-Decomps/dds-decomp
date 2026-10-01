@@ -97,7 +97,7 @@ u32 fldGetPlayerSceneState(void);
 
 void dds3SetWorldCameraObject(s32 world, u32 unit);
 
-s32 func_0010D6A0(void);
+s32 scrGetCurrentContext(void);
 
 s32 evtFindTaskById(s32 id);
 
@@ -710,7 +710,7 @@ s32 evtCommandSetSolarPhase(void)
 
 s32 evtCommandWaitForCampTask(void) {
     s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     char *msg;
 
     if (work == NULL) {
@@ -734,7 +734,7 @@ s32 evtCommandWaitForCampTask(void) {
 
 s32 evtCommandStartCampTaskIfAbsent(void) {
     s32 id = scrReadIntParameter(0);
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
 
     if (work == NULL) {
         return 1;
@@ -751,7 +751,7 @@ s32 evtCommandTestCampTaskReady(void) {
     s32 id = scrReadIntParameter(0);
     s32 ok;
 
-    if (func_0010D6A0() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
+    if (scrGetCurrentContext() != 0 && evtFindTaskById(id) != 0 && evtGetTaskValueWord(id) == 2) {
         evtPrintDeveloperConsoleMessage(D_003AC968, id);
         ok = 1;
     } else {
@@ -764,7 +764,7 @@ s32 evtCommandTestCampTaskReady(void) {
 s32 evtCommandDestroyCampTask(void) {
     s32 id = scrReadIntParameter(0);
 
-    if (func_0010D6A0() == 0) {
+    if (scrGetCurrentContext() == 0) {
         return 1;
     }
     if (evtFindTaskById(id) == 0) {
@@ -776,7 +776,7 @@ s32 evtCommandDestroyCampTask(void) {
 }
 
 s32 evtCommandStartPolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     s32 a;
     s32 b;
     s32 result;
@@ -809,7 +809,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 }
 
 s32 evtCommandCreatePolygonMovie(void) {
-    EvtCommandWork *work = (EvtCommandWork *)func_0010D6A0();
+    EvtCommandWork *work = (EvtCommandWork *)scrGetCurrentContext();
     s32 a;
     s32 b;
     s32 result;

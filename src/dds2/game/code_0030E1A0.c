@@ -34,7 +34,7 @@ extern u32 func_00343ED0(const char *, void *, s32);
 extern u32 func_0032C138(u32);
 
 struct SdfRing;
-extern struct SdfRing *func_0030EE40(s16, s16);
+extern struct SdfRing *sdfCreateLinkedRequestRing(s16, s16);
 
 extern void fldSetMapRequestInterval(s32, u16);
 
@@ -102,11 +102,11 @@ void func_0030E878(void) {
 
 void func_0030E880(void) {
     s32 handler;
-    handler = (s32)func_0030EE40(0x14, 0xC);
+    handler = (s32)sdfCreateLinkedRequestRing(0x14, 0xC);
     D_004390AC = handler;
     ((MapRequestQueue *)D_004390AC)->callback = (s32)func_0030E940;
     fldSetMapRequestInterval(handler, 0);
-    D_004390B0 = (s32)func_0030EE40(0x14, 0x18);
+    D_004390B0 = (s32)sdfCreateLinkedRequestRing(0x14, 0x18);
     ((MapRequestQueue *)D_004390B0)->callback = (s32)func_0030E958;
     D_004390A8 = 5;
     D_004390A4 = 0;
@@ -134,7 +134,7 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EAA8);
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030ECC0);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
-SdfRing *func_0030EE40(s16 count, s16 limit) {
+SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     s32 allocation = func_003292A8(size);
     SdfRingBlock *block = (SdfRingBlock *)sdfMemoryGetBlockAddress(allocation);
@@ -274,7 +274,7 @@ typedef struct Vector4 {
 } Vector4;
 
 /* Rotate `v` about `axis` (normalized first) by `angle`, using the axis-angle rotation matrix. */
-void func_0030F4B8(float *v, float *axis, float angle) {
+void fldRotateVectorAroundAxis(float *v, float *axis, float angle) {
     Vector4 a;
     Vector4 u;
     Vector4 w;
@@ -369,7 +369,7 @@ void func_0030FA28(float *out, float *left, float *right) {
 }
 
 /* Rotate rows 1 and 2 of the matrix about the X axis by `angle`. */
-void func_0030FAF0(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutX(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0];
@@ -392,7 +392,7 @@ void func_0030FAF0(SdfMat4 *mat, f32 angle) {
 }
 
 /* Rotate rows 0 and 2 of the matrix about the Y axis by `angle`. */
-void func_0030FD50(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutY(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[8] * -sdfSinPoly(angle);
@@ -415,7 +415,7 @@ void func_0030FD50(SdfMat4 *mat, f32 angle) {
 }
 
 /* Rotate rows 0 and 1 of the matrix about the Z axis by `angle`. */
-void func_0030FFB0(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutZ(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[4] * sdfSinPoly(angle);
@@ -501,7 +501,7 @@ typedef struct Mat4F {
 } Mat4F;
 
 /* Convert a unit quaternion into a 4x4 rotation matrix (translation zero). */
-void func_00310888(Mat4F *out, QuatF *q) {
+void sdfConvertQuaternionRotationMatrix(Mat4F *out, QuatF *q) {
     f32 xx = q->x * q->x;
     f32 yy = q->y * q->y;
     f32 zz = q->z * q->z;

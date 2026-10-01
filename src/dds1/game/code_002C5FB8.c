@@ -29,11 +29,11 @@ typedef struct MapResource {
     u32 unkC;
 } MapResource;
 
-extern MapResource D_00390710[10];
+extern MapResource fldLocalMapNameTextures[10];
 
 extern MapResource D_003906F0;
 
-extern MapResource D_00390700;
+extern MapResource fldLocalMapTextureResource;
 
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
@@ -252,7 +252,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6130);
 s32 fldLoadLocalMapResources(void) {
     char name[32];
     s32 i;
-    MapResource *item = D_00390710;
+    MapResource *item = fldLocalMapNameTextures;
 
     for (i = 0; i < 10; i++) {
         func_003014F0(name, "/lmap/sname_%02d.tmx", i + 1);
@@ -260,20 +260,20 @@ s32 fldLoadLocalMapResources(void) {
         item++;
     }
     fldLoadMapResource("/lmap/1006.tmx", &D_003906F0);
-    fldLoadMapResource("/lmap/l_map00.tmx", &D_00390700);
+    fldLoadMapResource("/lmap/l_map00.tmx", &fldLocalMapTextureResource);
     return 1;
 }
 
 s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
-    MapResource *item = D_00390710;
+    MapResource *item = fldLocalMapNameTextures;
     do {
         fldReleaseMapResource((s32 *)item);
         item++;
         --i;
     } while (i >= 0);
     fldReleaseMapResource((s32 *)&D_003906F0);
-    fldReleaseMapResource((s32 *)&D_00390700);
+    fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
     return 1;
 }
 
@@ -306,7 +306,7 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6948);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C6EC8);
 
-extern MapRequestState *func_002C7A60(s16, s16);
+extern MapRequestState *sdfCreateLinkedRequestRing(s16, s16);
 
 extern void func_002C7180(void);
 
@@ -316,10 +316,10 @@ void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
 
 /* Allocate the two map request queues and install their dispatch callbacks. */
 void fldCreateMapRequestQueues(void) {
-    D_003BD988 = func_002C7A60(0x14, 0xC);
+    D_003BD988 = sdfCreateLinkedRequestRing(0x14, 0xC);
     D_003BD988->callback = func_002C7180;
     fldSetMapRequestInterval(D_003BD988, 0);
-    D_003BD98C = func_002C7A60(0x14, 0x18);
+    D_003BD98C = sdfCreateLinkedRequestRing(0x14, 0x18);
     D_003BD98C->callback = func_002C7430;
 }
 
@@ -350,7 +350,7 @@ extern u32 func_002D03F8(s32 size);
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
-MapRequestState *func_002C7A60(s16 count, s16 arg) {
+MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     s32 size = count * 0x20 + 0x44;
     u32 handle = func_002D03F8(size);
     MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(handle);
@@ -498,7 +498,7 @@ typedef struct Vector4 {
 } Vector4;
 
 /* Rotate `v` about `axis` (normalized first) by `angle`, using the axis-angle rotation matrix. */
-void func_002C80D8(float *v, float *axis, float angle) {
+void fldRotateVectorAroundAxis(float *v, float *axis, float angle) {
     Vector4 a;
     Vector4 u;
     Vector4 w;
@@ -582,7 +582,7 @@ float fldVec3AngleBetween(float *left, float *right) {
     return func_002FA1C0(fldNormalizedVectorDot(left, right));
 }
 
-void func_002C8648(float *out, float *left, float *right) {
+void sdfCrossNormalizedVectors(float *out, float *left, float *right) {
     Vector4 a;
     Vector4 b;
 
@@ -600,7 +600,7 @@ typedef struct SdfMat4 {
 } SdfMat4;
 
 /* Rotate rows 1 and 2 of the matrix about the X axis by `angle`. */
-void func_002C8710(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutX(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0];
@@ -623,7 +623,7 @@ void func_002C8710(SdfMat4 *mat, f32 angle) {
 }
 
 /* Rotate rows 0 and 2 of the matrix about the Y axis by `angle`. */
-void func_002C8970(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutY(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[8] * -sdfSinPoly(angle);
@@ -646,7 +646,7 @@ void func_002C8970(SdfMat4 *mat, f32 angle) {
 }
 
 /* Rotate rows 0 and 1 of the matrix about the Z axis by `angle`. */
-void func_002C8BD0(SdfMat4 *mat, f32 angle) {
+void sdfRotateMatrixBasisAboutZ(SdfMat4 *mat, f32 angle) {
     SdfMat4 r;
 
     r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[4] * sdfSinPoly(angle);
@@ -734,7 +734,7 @@ typedef struct Mat4F {
 } Mat4F;
 
 /* Convert a unit quaternion into a 4x4 rotation matrix (translation zero). */
-void func_002C94A8(Mat4F *out, QuatF *q) {
+void sdfConvertQuaternionRotationMatrix(Mat4F *out, QuatF *q) {
     f32 xx = q->x * q->x;
     f32 yy = q->y * q->y;
     f32 zz = q->z * q->z;

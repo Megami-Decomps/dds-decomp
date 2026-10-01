@@ -6,11 +6,11 @@ extern u32 D_0037F770[4];
 
 extern u32 kwlnDrawControlFlags;
 
-extern u8 D_00435CD8;
+extern u8 kwlnDrawOverlayEnabled;
 
-extern u16 D_00435CDA;
+extern u16 kwlnDrawOverlayAlpha;
 
-extern u16 D_00435CDC;
+extern u16 kwlnDrawOverlayScale;
 
 extern u16 D_00438DB4;
 
@@ -71,7 +71,7 @@ typedef struct {
 
 extern DrawBlkCD0 D_0043E450;
 
-extern u32 D_00435D04;
+extern u32 kwlnDistanceBlurErrorCount;
 
 typedef struct {
     u32 unk00;
@@ -92,7 +92,7 @@ typedef struct {
 
 extern DrawBlkD30 D_0043E4B0;
 
-extern u32 D_00435D08;
+extern u32 kwlnRippleBlurErrorCount;
 
 extern u16 D_00438E5A;
 
@@ -211,20 +211,20 @@ extern void func_00196FD8(void);
 
 extern void func_00196FE8(void);
 
-extern u128 D_0037F780;
+extern u128 kwlnDefaultColorVector;
 
 typedef struct {
     u32 w[5];
 } DrawWord20;
 
-extern DrawWord20 D_0037F790;
+extern DrawWord20 kwlnDrawVector;
 
 void kwlnDrawCopyRow128(u128 *row) {
-    PCP_COPY_VECTOR(&D_0037F780, row);
+    PCP_COPY_VECTOR(&kwlnDefaultColorVector, row);
 }
 
 void kwlnDrawCopyWords20(DrawWord20 *src) {
-    memcpy(&D_0037F790, src, 0x14);
+    memcpy(&kwlnDrawVector, src, 0x14);
 }
 
 void dds3DrawSetIndexedWord(u32 value, s32 index) {
@@ -306,7 +306,7 @@ extern u16 D_00438E5C;
 extern u16 D_00438E5E;
 extern u32 effGetCh75Work(void);
 
-void func_00106658(s32 mode) {
+void kwlnDrawApplyEffectWord(s32 mode) {
     D_0043E560 = *(DrawWord36 *)effGetCh75Work();
     D_00438E5C = 0;
     D_00438E5E = mode;
@@ -354,19 +354,19 @@ void kwlnDrawEnableE08(s32 mode) {
 /* Apply an offset immediately, or stage an interpolated move from the old offset. */
 void kwlnDrawSetOffsetTransition(s32 transition, s32 x, s32 y) {
     if (transition == 0) {
-        D_00435CDA = (s16)x;
-        D_00435CDC = (s16)y;
+        kwlnDrawOverlayAlpha = (s16)x;
+        kwlnDrawOverlayScale = (s16)y;
         if ((x == 0) && (y == 0)) {
-            D_00435CD8 = 0;
+            kwlnDrawOverlayEnabled = 0;
         }
         else {
-            D_00435CD8 = 1;
+            kwlnDrawOverlayEnabled = 1;
         }
         kwlnDrawControlFlags = kwlnDrawControlFlags & 0xfffff7ff;
         return;
     }
-    D_00438DB8 = D_00435CDA;
-    D_00438DBA = D_00435CDC;
+    D_00438DB8 = kwlnDrawOverlayAlpha;
+    D_00438DBA = kwlnDrawOverlayScale;
     D_00438DBC = (s16)x;
     D_00438DBE = (s16)y;
     D_00438DB6 = (s16)transition;
@@ -466,7 +466,7 @@ extern u16 D_00438E20;
 extern u16 D_00438E22;
 extern u32 effGetCh71Work(void);
 
-void func_00106AE8(s32 mode) {
+void kwlnDrawApplyEffectBlock(s32 mode) {
     D_0043E3C0 = *(DrawBlkD30 *)effGetCh71Work();
     D_00438E20 = 0;
     D_00438E22 = mode;
@@ -518,7 +518,7 @@ void kwlnDrawSetupC70B(s32 mode) {
 void kwlnDrawSetCd0Clamped(s32 boundedValue, s32 lastWord, s32 secondWord, s32 fourthWord,
                            f32 firstFloat, f32 secondFloat, f32 thirdFloat) {
     if (boundedValue >= 0x65) {
-        D_00435D04++;
+        kwlnDistanceBlurErrorCount++;
         boundedValue = 0x64;
     }
     D_0043E450.unk00 = boundedValue;
@@ -595,7 +595,7 @@ void kwlnDrawEnableCd0(s32 mode) {
 void kwlnDrawSetD30Clamped(s32 boundedValue, s32 fourthWord, f32 firstFloat, f32 secondFloat,
                            f32 thirdFloat, f32 fourthFloat, f32 fifthFloat) {
     if (boundedValue >= 0x29) {
-        D_00435D08++;
+        kwlnRippleBlurErrorCount++;
         boundedValue = 0x28;
     }
     D_0043E4B0.unk00 = boundedValue;

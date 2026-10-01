@@ -99,7 +99,7 @@ void func_00243EE8(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t
     func_002438F0(t2);
 }
 
-void func_00243FD8(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
     s32 n;
     s32 tmp;
     s32 *p;

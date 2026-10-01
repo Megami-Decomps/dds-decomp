@@ -12,7 +12,7 @@ extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 
 extern s8 D_003BC39C;
 
@@ -606,7 +606,7 @@ extern void mnuShopSubmitDescriptor(CampScene *scene);
 extern void func_00243EC8(CampScene *scene);
 
 /* Camp scene opening steps 1..5, each falling into the next; stages 0 and 2 do nothing, other values advance by one. */
-void func_00243B28(CampScene *scene) {
+void mnuAdvanceShopMenuState(CampScene *scene) {
     switch (scene->menuState) {
     case 1:
         if (kwlnHeldTextureReference == 0) {
@@ -814,14 +814,14 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00244360);
+INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources);
 
-extern s32 D_003BAA00;
-extern u8 *D_003BAA68;
+extern s32 datGameState;
+extern u8 *datItemSkillRecords;
 
 s32 mnuShopHasPendingFlag(void) {
-    u8 *flags = (u8 *)(D_003BAA00 + 0x12A0);
-    u8 *entry = D_003BAA68;
+    u8 *flags = (u8 *)(datGameState + 0x12A0);
+    u8 *entry = datItemSkillRecords;
     s32 found = 0;
     s32 i;
 
@@ -945,7 +945,7 @@ s32 mnuCountActivePartyEntries(void) {
 
     count = 0;
     remaining = 4;
-    entry = (u16 *)(D_003BAA00 + 0xa60);
+    entry = (u16 *)(datGameState + 0xa60);
     do {
         flags = *entry;
         entry += 0xd2;
@@ -985,7 +985,7 @@ void mnuShopDestroyScene(s32 arg) {
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
-        func_00244360(scene);
+        mnuReleaseShopSceneSpriteResources(scene);
         mnuShopReleaseSceneObjects(scene);
         mnuDrainPanelTransitions((u8 *)scene + 8, arg);
         dspCloseChannel();

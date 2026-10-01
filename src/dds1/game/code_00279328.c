@@ -15,16 +15,16 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
-extern s32 D_003BAA00;
+extern s32 datGameState;
 extern s32 mnuIsEntryCostUnaffordable(u16, s32);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern void mnuConsumeEntryCost(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
-extern u32 func_00285B20(u32);
+extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityByteCategory(u16);
-extern void func_00280978();
+extern void mnuUpdateWindowListFromInput();
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
 extern void mnuClearListFlags();
@@ -142,8 +142,8 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     s32 context;
 {
     s32 window = context + 0x15C;
-    s32 slotA = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
-    s32 slotB = D_003BAA00 + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
+    s32 slotA = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    s32 slotB = datGameState + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
     if (mnuIsEntryCostUnaffordable(id, slotA) != 0) {
         return 0;
     }
@@ -168,7 +168,7 @@ typedef struct SkillLink {
 } SkillLink;
 
 void mnuFlagMatchingEntries(s32 context) {
-    s32 slot = D_003BAA00 + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    s32 slot = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
         do {
@@ -184,7 +184,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
-    u32 buttons = func_00285B20(3);
+    u32 buttons = mnuMapPadMaskToFlags(3);
     s64 state;
     s32 label;
     u16 code;
@@ -202,7 +202,7 @@ s64 ptySkillMenuHandleFieldUse(s32 callback) {
         ((SkillMenuContext *)context)->actionFlags |= 0x20;
     }
     window = context + 0x15C;
-    func_00280978(8, window);
+    mnuUpdateWindowListFromInput(8, window);
     if (buttons & 1) {
         buttons = ptySkillMenuUseSelectedInField(label, context) == 0 ? 0x8000 : 0;
         mnuFlagMatchingEntries(context);
@@ -251,7 +251,7 @@ s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     mnuDestroySelectedPartyWindow(selection);
     mnuDestroySkillMenuWindows(context);
-    func_002807E8(context + 0x15c);
+    mnuReleasePageHandlesAndClearSelection(context + 0x15c);
     return 1;
 }
 
@@ -263,7 +263,7 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 s32 ptySkillMenuHandlePageSwitch(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 changed = 0;
-    u32 buttons = func_00285B20(0x300);
+    u32 buttons = mnuMapPadMaskToFlags(0x300);
 
     if (buttons & 0x100) {
         mnuCloseSelectionAndReleasePartyPanel(callback);

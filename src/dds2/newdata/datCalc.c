@@ -9,7 +9,7 @@ typedef struct DatCalcCursor {
     u16 yMax;
 } DatCalcCursor;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 typedef struct UiObject {
     u8 unk_00[0x110];
@@ -79,7 +79,7 @@ typedef struct DatPartyMember {
     u8 unk28[0x24];
 } DatPartyMember; /* 0x4C */
 
-extern DatPartyMember *D_00435DEC;
+extern DatPartyMember *datEnemyRecords;
 
 /* Nonzero if `skill` is in the unit's skill list (party members use the party table). */
 s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
@@ -93,7 +93,7 @@ s32 datUnitHasSkill(DatSkillOwner *unit, s32 skill) {
         }
     } else {
         for (i = 0; i < 8; i++) {
-            if (D_00435DEC[unit->partyIndex].skills[i] == skill) {
+            if (datEnemyRecords[unit->partyIndex].skills[i] == skill) {
                 return 1;
             }
         }
@@ -121,19 +121,19 @@ s32 datIsValueBelowQuarterMax(UiObject *object) {
 
 /* Add to the party's currency counter, saturating at either bound. */
 s32 datAddCurrencyClamped(s32 delta) {
-    s32 value = ((DatGameCounters *)D_00435DD0)->currency + delta;
+    s32 value = ((DatGameCounters *)datGameState)->currency + delta;
     if (value < 0) {
         value = 0;
     }
     if (value > 0x98967F) {
         value = 0x98967F;
     }
-    ((DatGameCounters *)D_00435DD0)->currency = value;
+    ((DatGameCounters *)datGameState)->currency = value;
     return value;
 }
 
 s32 datHasEnoughCurrency(s32 value) {
-    if (*(s32 *)(D_00435DD0 + 0x3C) < value) {
+    if (*(s32 *)(datGameState + 0x3C) < value) {
         return 0;
     }
     return 1;
@@ -147,13 +147,13 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DE0);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DE4);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DE8);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datRosterDetails);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DEC);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datEnemyRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF0);
 
-INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF4);
+INCLUDE_SDATA(const s32, "newdata/datCalc", datEnemyAiRecords);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_00435DF8);
 

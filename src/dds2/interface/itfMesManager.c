@@ -2,7 +2,7 @@
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
-extern u32 D_004365E8;
+extern u32 itfMessageFlags;
 
 /* One 0x14-byte slot per message window; the first field points at its state. */
 typedef struct ItfMesSlot {
@@ -291,7 +291,7 @@ extern s32 func_001A1858();
 
 extern void itfSetPanelLayoutAndNotify();
 
-extern void func_001A1A50();
+extern void itfPanelUpdateValuesAndNotify();
 
 /* Glyph/record chain walked by func_001958A0/frFontLinkGlyph. */
 typedef struct FrFontGlyph {
@@ -508,11 +508,11 @@ u32 itfMesGetGlobalWindowValue(void) {
 }
 
 void itfMesSetFlags(u32 flags) {
-    D_004365E8 = D_004365E8 | flags;
+    itfMessageFlags = itfMessageFlags | flags;
 }
 
 void itfMesClearFlags(u32 flags) {
-    D_004365E8 = D_004365E8 & ~flags;
+    itfMessageFlags = itfMessageFlags & ~flags;
 }
 
 s32 itfMesCreateWindow(ItfMesSub *sub) {
@@ -605,7 +605,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     rect[3] = 0x530 + height;
     blkA4->panelHandle = func_001A1858(9, itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(blkA4->panelHandle, rect[0], rect[1], rect[2], rect[3], mes->renderValue);
-    func_001A1A50(blkA4->panelHandle, 0, 0, 0, 0);
+    itfPanelUpdateValuesAndNotify(blkA4->panelHandle, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
 }
 
@@ -1230,7 +1230,7 @@ void itfMesEnableUnflaggedNodeContexts(ItfMesNode *node) {
     }
 }
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365E8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMessageFlags);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_004365F0);
 

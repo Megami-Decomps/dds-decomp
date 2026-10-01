@@ -20,7 +20,7 @@ extern void func_0026C900(void);
 
 extern s32 kwlnTaskGetUserValue();
 
-extern void func_002C44E8(s32);
+extern void mnuMapPadMaskToFlags(s32);
 
 extern void mnuTitleRenderFadeAndPanels(s32);
 
@@ -80,11 +80,11 @@ u32 func_00299EF8(void) {
 
 s64 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    func_002C44E8(0x33);
+    mnuMapPadMaskToFlags(0x33);
     return menuSetHandler(context, 0, input);
 }
 
-s64 func_00299F50(s32 input) {
+s64 mnuRefreshAndDispatchCurrentPanel(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, input);

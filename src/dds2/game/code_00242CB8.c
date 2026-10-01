@@ -27,7 +27,7 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 void func_00101968(s32 arg0, s32 arg1);
 
-s32 func_0010D8C8(void);
+s32 scrGetCurrentContext(void);
 
 char *scrReadStringParameter(s32 idx);
 
@@ -66,7 +66,7 @@ u32 func_00242D10(void) {
     s32 entry;
     s32 task;
 
-    work = (EvtCommandWork *)func_0010D8C8();
+    work = (EvtCommandWork *)scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
@@ -90,7 +90,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
     EvtCommandWork *work;
     s32 childTask;
 
-    work = (EvtCommandWork *)func_0010D8C8();
+    work = (EvtCommandWork *)scrGetCurrentContext();
     if (work == NULL) {
         return 1;
     }
@@ -221,7 +221,7 @@ u32 evtOpcodeTransitionBgm(void) {
     return 1;
 }
 
-u32 func_00243140(void) {
+u32 evtCommandQueueBgmWithFade(void) {
     u64 first;
     u64 second;
 
@@ -251,7 +251,7 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     return 1;
 }
 
-u32 func_00243200(void) {
+u32 evtCommandStartBgmWithFade(void) {
     u64 first;
     u64 second;
 
@@ -276,7 +276,7 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
     return 1;
 }
 
-u32 func_002432A0(void) {
+u32 evtCommandSetDrawFlagWhileWaiting(void) {
     if (scrReadIntParameter(0) <= 0) {
         kwlnDrawControlFlags |= 0x2000000;
         return 1;
@@ -302,21 +302,21 @@ typedef struct {
     u32 extFlags;      /* 0xA58 */
 } SolarWorldState;
 
-extern SolarWorldState *D_00435DD0;
+extern SolarWorldState *datGameState;
 
 void evtClearSolarOverlayControl(void) {
-    D_00435DD0->overlayFlag = 0;
+    datGameState->overlayFlag = 0;
 }
 
 void func_00243320(void) {
-    D_00435DD0->unkA4C = 0;
+    datGameState->unkA4C = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = D_00435DD0->phase;
+    phase = datGameState->phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -324,39 +324,39 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return D_00435DD0->phase;
+    return datGameState->phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    D_00435DD0->phase = phase & 0xf;
-    D_00435DD0->phaseTimer = 0;
+    datGameState->phase = phase & 0xf;
+    datGameState->phaseTimer = 0;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
-    D_00435DD0->flags = D_00435DD0->flags | 1;
+    datGameState->flags = datGameState->flags | 1;
 }
 
 void evtDisableSolarPhaseAdvance(void) {
-    D_00435DD0->flags = D_00435DD0->flags & 0xfe;
+    datGameState->flags = datGameState->flags & 0xfe;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    D_00435DD0->flags = D_00435DD0->flags | 2;
+    datGameState->flags = datGameState->flags | 2;
     evtSolarOverlayAlpha = 1.0f;
     evtBeginSolarOverlayFadeIn(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
-    D_00435DD0->flags = D_00435DD0->flags & 0xfd;
+    datGameState->flags = datGameState->flags & 0xfd;
     evtSolarOverlayAlpha = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
-    D_00435DD0->flags = D_00435DD0->flags | 2;
+    datGameState->flags = datGameState->flags | 2;
 }
 
 void evtDisableSolarOverlayAlpha(void) {
-    D_00435DD0->flags = D_00435DD0->flags & 0xfd;
+    datGameState->flags = datGameState->flags & 0xfd;
 }
 
 u32 evtUpdateSolarOverlayFade(s32 task) {
@@ -370,7 +370,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         return 0;
     }
     overlay = kwlnTaskGetUserValue(task);
-    state = D_00435DD0;
+    state = datGameState;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
@@ -390,7 +390,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
         }
     }
     /* Two jal sites in retail: the DDS1 twin issues extra draw calls in the first arm, removed here. The flags are re-read from the global; the cached state copy does not match. */
-    if ((D_00435DD0->flags & 2) != 0) {
+    if ((datGameState->flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
@@ -434,9 +434,9 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
-    D_00435DD0->padA42 = 0;
-    D_00435DD0->overlayFlag = 0;
-    D_00435DD0->unkA4C = 0;
+    datGameState->padA42 = 0;
+    datGameState->overlayFlag = 0;
+    datGameState->unkA4C = 0;
 }
 
 void evtStopSolarOverlay(void) {

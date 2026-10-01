@@ -3,7 +3,7 @@
 
 extern void *kwlnTaskGetUserValue(void);
 
-extern s32 D_003BAA00;
+extern s32 datGameState;
 extern char D_003ADB20[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(s32 viewerAddr);
@@ -543,7 +543,7 @@ s32 evtViewerTestIndexedCondition(u32 condition) {
     if (index == 0) {
         return 1;
     }
-    return (*(s32 *)(D_003BAA00 + index * 4 + 0x35c) ^ lowBits) == 0;
+    return (*(s32 *)(datGameState + index * 4 + 0x35c) ^ lowBits) == 0;
 }
 
 u32 func_00230470(void) {

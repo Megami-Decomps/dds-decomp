@@ -2,7 +2,7 @@
 
 extern s32 D_00439204;
 
-extern u32 D_00438B88;
+extern u32 sdfSoundCommandBusy;
 
 extern u32 D_00438B8C;
 
@@ -26,7 +26,7 @@ extern u32 D_00438D20;
 
 u32 func_00341650(u32, u32, void *, u32);
 
-u32 func_003417A8(u32, u32, void *, u32);
+u32 sndSendCommandPacket(u32, u32, void *, u32);
 
 extern u32 D_00438B84;
 
@@ -45,7 +45,7 @@ typedef struct MidiChannel {
 
 extern char D_0040BAF8[];
 
-extern s32 D_004391F0;
+extern s32 sdfSoundRpcSemaphore;
 
 extern s32 sdfCreateSemaphore(s32, s32, s32);
 
@@ -92,8 +92,8 @@ typedef struct SdfStreamNode {
     u8 queued;
 } SdfStreamNode;
 
-extern SdfStreamNode *D_0043920C;
-extern SdfStreamNode *D_00439210;
+extern SdfStreamNode *sdfStreamNodeListHead;
+extern SdfStreamNode *sdfStreamNodeListTail;
 
 extern s32 sceIpuSync(s32, s32);
 
@@ -183,20 +183,20 @@ void func_00342600(s32 channel) {
 }
 
 s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {
-    if (D_00438B88 != 0) {
+    if (sdfSoundCommandBusy != 0) {
         return 1;
     }
     strcpy(D_0040BAF8, name);
-    func_003417A8((channel >> 3) | 0xF0, 0, 0, 0);
+    sndSendCommandPacket((channel >> 3) | 0xF0, 0, 0, 0);
     return 0;
 }
 
 u32 sdfSoundIsCommandBusy(void) {
-    return D_00438B88;
+    return sdfSoundCommandBusy;
 }
 
 void func_00342690(void) {
-    func_003417A8(0x100, 0, 0, 0);
+    sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003426B8);
@@ -208,7 +208,7 @@ void sdfSoundSetChannelCount(u32 channels) {
     if (channels == 0) {
         channels = 1;
     }
-    func_003417A8((channels - 1) | 0x1d0, 0, 0, 0);
+    sndSendCommandPacket((channels - 1) | 0x1d0, 0, 0, 0);
 }
 
 u32 sdfSoundTryQueueCommand(u32 command) {
@@ -226,7 +226,7 @@ u32 sdfSoundGetCommandStatus(void) {
 }
 
 void func_00342798(void) {
-    func_003417A8(0x100, 0, 0, 0);
+    sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_003427C0);
@@ -240,12 +240,12 @@ s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     case 5:
         FlushCache(0);
     case 4:
-        SignalSema(D_004391F0);
+        SignalSema(sdfSoundRpcSemaphore);
         break;
     case 0:
     case 2:
     case 7:
-        SignalSema(D_004391F0);
+        SignalSema(sdfSoundRpcSemaphore);
         break;
     }
     return 0;
@@ -257,7 +257,7 @@ void sdfSoundStartRpcServer(void) {
     u8 queue[0x20];
     u8 server[0x50];
     s32 semaphore = sdfCreateSemaphore(0, 1, 0);
-    D_004391F0 = semaphore;
+    sdfSoundRpcSemaphore = semaphore;
     if (semaphore <= 0) {
         for (;;) {
         }
@@ -269,108 +269,108 @@ void sdfSoundStartRpcServer(void) {
 
 extern s32 D_004391EC;
 extern void func_003417E0(s32, void *, s32);
-extern u8 D_0047AA40[];
+extern u8 sndMidiTrackState[];
 
-void func_00342B28(u32 kind, u8 *src) {
+void sdfSoundSetTableEntry(u32 kind, u8 *src) {
     u8 *table;
     u8 *dst;
     s32 i;
 
     switch (kind) {
     case 0:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x210;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 1:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x290;
         for (i = 0; i < 0x80; i++) {
             *dst++ = src[i];
         }
         break;
     case 2:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x310;
         for (i = 0; i < 0x80; i++) {
             *dst++ = src[i];
         }
         break;
     case 3:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x390;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 4:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x410;
         for (i = 0; i < 0x20; i++) {
             *dst++ = src[i];
         }
         break;
     case 5:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x490;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 6:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x510;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 7:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x590;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 8:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x610;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 9:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x690;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 10:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x710;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 11:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x790;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     case 12:
-        table = D_0047AA40;
+        table = sndMidiTrackState;
         dst = table + 0x810;
         for (i = 0; i < 2; i++) {
             *dst++ = src[i];
         }
         break;
     }
-    func_003417E0(D_004391EC, D_0047AA40, 0x8D0);
-    func_003417A8(0x1F0, 0, 0, 0);
+    func_003417E0(D_004391EC, sndMidiTrackState, 0x8D0);
+    sndSendCommandPacket(0x1F0, 0, 0, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342E58);
@@ -466,7 +466,7 @@ extern void sdfDecrementAllocationReferenceCount(s32 handle);
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
-u64 func_00343E18(u64 name, u32 *outData, u32 *outSize, s32 extra) {
+u64 sdfDevReadResourceWithExtraSpace(u64 name, u32 *outData, u32 *outSize, s32 extra) {
     s32 state = sdfDevCreateCommandState(name);
     s32 size = sdfDevQueueControlAndWait(state);
     s32 handle = func_003292A8(size + extra);
@@ -486,7 +486,7 @@ u64 func_00343E18(u64 name, u32 *outData, u32 *outSize, s32 extra) {
 }
 
 u64 func_00343ED0(u64 source, u32 *info, u32 *options) {
-    return func_00343E18(source, info, options, 0);
+    return sdfDevReadResourceWithExtraSpace(source, info, options, 0);
 }
 
 u64 sdfLoadNamedResourceAndReleaseLookupHandle(u64 source) {
@@ -600,12 +600,12 @@ void sdfStreamNodeUnlink(SdfStreamNode *node, s32 inInterrupt) {
         prev = node->prev;
         next = node->next;
         if (prev == 0) {
-            D_0043920C = next;
+            sdfStreamNodeListHead = next;
         } else {
             prev->next = next;
         }
         if (next == 0) {
-            D_00439210 = prev;
+            sdfStreamNodeListTail = prev;
         } else {
             next->prev = prev;
         }
@@ -625,14 +625,14 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
         sdfStreamNodeUnlink(node, 1);
     }
     node->queued = 1;
-    if (D_00439210 == 0) {
-        D_0043920C = node;
+    if (sdfStreamNodeListTail == 0) {
+        sdfStreamNodeListHead = node;
     } else {
-        D_00439210->next = node;
+        sdfStreamNodeListTail->next = node;
     }
-    node->prev = D_00439210;
+    node->prev = sdfStreamNodeListTail;
     node->next = 0;
-    D_00439210 = node;
+    sdfStreamNodeListTail = node;
     if (inInterrupt == 0 && interruptsEnabled != 0) {
         EIntr();
     }
@@ -756,7 +756,7 @@ typedef struct SoundFeed {
     u32 source;    /* 0x60 */
 } SoundFeed;
 
-void func_00344B40(SoundFeed *feed) {
+void sndFillStreamFeedRing(SoundFeed *feed) {
     s32 slot;
     s32 count;
     s32 got;
@@ -866,7 +866,7 @@ typedef struct IpuWorker {
     u32 unk70;
 } IpuWorker;
 
-void func_00345198(void) {
+void sdfIpuDmaCompletionWorker(void) {
     IpuWorker *work;
     s32 interruptsEnabled;
 
@@ -1002,13 +1002,13 @@ void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format, s32 first, s32 se
 extern s32 D_004391FC;
 extern s32 D_00439200;
 extern s32 D_00439214;
-extern u8 D_0047B480[];
+extern u8 sdfIpuStreamThreadStack[];
 extern s32 sdfAddHandler();
 extern s32 sdfCreateThread();
 extern void func_003668B8();
 extern void sceIpuInit();
 extern void _StartThread();
-extern void func_00345198();
+extern void sdfIpuDmaCompletionWorker();
 extern void func_00345268();
 extern void func_00345298();
 
@@ -1021,7 +1021,7 @@ void sdfSoundInitIpuStream(void) {
     func_003668B8(3);
     D_00439200 = sdfAddHandler(1, 4, func_00345298, -1, 0);
     func_003668B8(4);
-    D_00439214 = sdfCreateThread(func_00345198, D_0047B480, 0x800, 0x46);
+    D_00439214 = sdfCreateThread(sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);
 }
 
@@ -1067,7 +1067,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00345BA0);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B84);
 
-INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B88);
+INCLUDE_SDATA(const s32, "game/code_003425B0", sdfSoundCommandBusy);
 
 INCLUDE_SDATA(const s32, "game/code_003425B0", D_00438B8C);
 

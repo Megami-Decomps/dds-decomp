@@ -1,6 +1,6 @@
 #include "common.h"
 #include "scr.h"
-extern ScrProcGlobals *D_003BAA00;
+extern ScrProcGlobals *datGameState;
 
 void *func_002EB028(s32 arg0, u32 *arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -43,8 +43,8 @@ void scrClearProcessGlobals(void)
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */
     for (i = 255; i >= 0; i--)
     {
-        D_003BAA00->integers[255 - i] = 0;
-        D_003BAA00->floatBits[255 - i] = 0;
+        datGameState->integers[255 - i] = 0;
+        datGameState->floatBits[255 - i] = 0;
     }
 }
 

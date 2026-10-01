@@ -1,14 +1,14 @@
 #include "common.h"
 
-extern s32 D_00435E38;
+extern s32 datItemSkillRecords;
 
 extern s32 dds3FindEntry();
 
 extern u32 evtWorkScriptTask;
 
-extern s32 D_00435DEC;
+extern s32 datEnemyRecords;
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 /* Item quantities occupy byte slots in the save-state block. */
 typedef struct SaveItemCounts {
@@ -114,11 +114,11 @@ extern s32 scrReadIntParameter(s32 idx);
 
 extern s32 func_00119A78(s32 arg0, s32 arg1);
 
-extern s32 D_00435E20;
+extern s32 datCommandRecords;
 
-extern s32 D_00435E1C;
+extern s32 datCommandSelectors;
 
-extern s32 D_00435DE8;
+extern s32 datRosterDetails;
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -166,9 +166,9 @@ extern void func_0010C058(u32, s32);
 
 extern void bfStepContext(u32);
 
-extern s32 func_001B3918(u32 arg0);
+extern s32 btlAverageAllCurrentForMask(u32 arg0);
 
-extern s32 func_001B3830(u32 arg0);
+extern s32 btlAverageAllMaximumForMask(u32 arg0);
 
 extern s32 func_001B3A00(u32 arg0);
 
@@ -182,7 +182,7 @@ s32 evtCheckValueThreshold(s32 index, s32 limit) {
     if ((u32)(index - 0x80) < 0x20) {
         return mdlFlagTest(index + 0x980) != 0;
     }
-    if (((SaveItemCounts *)D_00435DD0)->counts[index] < limit) {
+    if (((SaveItemCounts *)datGameState)->counts[index] < limit) {
         return 0;
     }
     return 1;
@@ -194,14 +194,14 @@ u8 evtGetFlaggedRosterValue(Entry1A4 *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return ((EventRosterRecord *)D_00435DEC)[entry->rosterIndex].flaggedValue;
+    return ((EventRosterRecord *)datEnemyRecords)[entry->rosterIndex].flaggedValue;
 }
 
 s32 dds3FindEntryIndex(rosterIndex)
     s32 rosterIndex;
 {
     s32 index = 0;
-    s32 entry = D_00435DD0 + 0xA60;
+    s32 entry = datGameState + 0xA60;
     do {
         if (((Entry1A4 *)entry)->flags & 1) {
             if (((Entry1A4 *)entry)->rosterIndex == rosterIndex) {
@@ -215,7 +215,7 @@ s32 dds3FindEntryIndex(rosterIndex)
 }
 
 s8 func_0011A318(s32 index) {
-    return *(s8 *)(index + D_00435DD0 + 0xa76);
+    return *(s8 *)(index + datGameState + 0xa76);
 }
 
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011A328);
@@ -226,7 +226,7 @@ void ptyRecoverAllUnits(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if (entry->flags & 1) {
             datMoveCursorX(entry, 9999);
@@ -239,7 +239,7 @@ void ptyRecoverAllUnits(void) {
 
 s32 ptyAnyUnitFlagMatch(u32 mask, s32 mode) {
     s32 index = 0;
-    s32 entry = D_00435DD0 + 0xA60;
+    s32 entry = datGameState + 0xA60;
     do {
         if (((Entry1A4 *)entry)->flags & 1) {
             if (((Entry1A4 *)entry)->unk6 != 0) {
@@ -266,7 +266,7 @@ void evtUpdateFlaggedStats(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if (entry->flags & 1) {
             if (entry->flags & 2) {
@@ -282,7 +282,7 @@ s32 evtHasMatchingFlaggedEntry(s32 mask) {
     s32 index = 0;
     s32 offset = 0;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         offset += 0x1C4;
         if ((entry->flags & 1) && (entry->flags & 2)) {
             if (datUnitHasSkill(entry, mask)) {
@@ -299,7 +299,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AA58);
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AB38);
 
 u16 evtGetIndexedEventRecordId(s32 tableIndex) {
-    return ((EventIndexRecord *)D_00435E38)[tableIndex].index;
+    return ((EventIndexRecord *)datItemSkillRecords)[tableIndex].index;
 }
 
 u16 dds3Clamp99(s32 unit) {
@@ -312,7 +312,7 @@ s32 dds3FindEntry(rosterIndex)
     s32 rosterIndex;
 {
     s32 index = 0;
-    s32 entry = D_00435DD0 + 0xA60;
+    s32 entry = datGameState + 0xA60;
     do {
         if (((Entry1A4 *)entry)->rosterIndex == rosterIndex && (((Entry1A4 *)entry)->flags & 1)) {
             return entry;
@@ -335,7 +335,7 @@ u8 ptyIsRosterEntryPresent(void) {
 s32 dds3EntryMax(void) {
     s32 max = 0;
     s32 remaining = 4;
-    s32 entry = D_00435DD0 + 0xA60;
+    s32 entry = datGameState + 0xA60;
     do {
         remaining--;
         if (((Entry1A4 *)entry)->flags & 1) {
@@ -353,7 +353,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     s32 sum = 0;
     s32 count = 0;
     s32 remaining = 4;
-    s32 entry = D_00435DD0 + 0xA60;
+    s32 entry = datGameState + 0xA60;
     do {
         remaining--;
         if ((((Entry1A4 *)entry)->flags & 1) != 0) {
@@ -410,7 +410,7 @@ void evtUpdateFlaggedEntries(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         if (entry->flags & 1) {
             s32 index = 0;
             do {
@@ -448,7 +448,7 @@ void dds3ForEachFlagged(void) {
     s32 n = 4;
 
     do {
-        Entry1A4 *p = (Entry1A4 *)(D_00435DD0 + off + 0xa60);
+        Entry1A4 *p = (Entry1A4 *)(datGameState + off + 0xa60);
 
         if (p->flags & 1) {
             func_0011CA88(p);
@@ -462,7 +462,7 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        s32 entry = D_00435DD0 + offset + 0xA60;
+        s32 entry = datGameState + offset + 0xA60;
         offset += 0x1C4;
         if ((((Entry1A4 *)entry)->flags & 1) != 0) {
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5B);
@@ -494,7 +494,7 @@ s32 evtClearRandomStatusFlags(void) {
         return 0;
     }
     remaining = 4;
-    entry = D_00435DD0 + 0xA60;
+    entry = datGameState + 0xA60;
     do {
         if ((((Entry1A4 *)entry)->flags & 1) != 0 && ((Entry1A4 *)entry)->unk6 != 0) {
             u16 flags = ((Entry1A4 *)entry)->unkE;
@@ -517,7 +517,7 @@ s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot) {
         return 0;
     }
     return *(s8 *)(tableOffset + D_00435E3C + slot) +
-           *(u8 *)(flagOffset + D_00435DD0 + 0x1E670);
+           *(u8 *)(flagOffset + datGameState + 0x1E670);
 }
 
 void ptyAddClampedEntryValue(s32 base, s32 offset, s32 amount) {
@@ -536,7 +536,7 @@ void ptyAssignRosterItemAndMarkOwned(Entry1A4 *entry) {
     s32 value = D_00386288[entry->rosterIndex];
     mnuSetPartyEntryCurrentId(entry, value);
     if (value != 0) {
-        ((SaveItemCounts *)D_00435DD0)->counts[value] = 1;
+        ((SaveItemCounts *)datGameState)->counts[value] = 1;
     }
 }
 
@@ -544,7 +544,7 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
     s32 offset = 0;
     s32 remaining = 4;
     do {
-        Entry1A4 *entry = (Entry1A4 *)(D_00435DD0 + offset + 0xA60);
+        Entry1A4 *entry = (Entry1A4 *)(datGameState + offset + 0xA60);
         if (entry->flags & 1) {
             s32 index = 0;
             do {
@@ -639,11 +639,11 @@ s32 func_0011D990(void) {
 s32 func_0011D9C8(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
         u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = ((EventRosterStat *)D_00435DE8)[id].alternateA;
+        value = ((EventRosterStat *)datRosterDetails)[id].alternateA;
     } else {
-        value = ((EventStatRecord *)D_00435E20)[index].stat11;
+        value = ((EventStatRecord *)datCommandRecords)[index].stat11;
     }
     scrSetIntegerReturnValue(value);
     return 1;
@@ -652,17 +652,17 @@ s32 func_0011D9C8(void) {
 s32 evtPushSelectedScaledStat(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    value = ((EventStatRecord *)D_00435E20)[index].stat25;
-    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+    value = ((EventStatRecord *)datCommandRecords)[index].stat25;
+    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
         u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = (s32)((f32)value * ((EventRosterStat *)D_00435DE8)[id].multiplier);
+        value = (s32)((f32)value * ((EventRosterStat *)datRosterDetails)[id].multiplier);
     }
     scrSetIntegerReturnValue(value);
     return 1;
 }
 
 s32 evtPushSelectedStatGrade(void) {
-    scrSetIntegerReturnValue(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat2D);
+    scrSetIntegerReturnValue(((EventStatRecord *)datCommandRecords)[D_0043E5C4[0]].stat2D);
     return 1;
 }
 
@@ -672,10 +672,10 @@ s32 evtSelectScriptStatValue(void) {
     u16 mode = ((EventScriptEntry *)work)->index14;
     switch (mode) {
     case 1:
-        value = ((EventStatRecord *)D_00435E20)[work[1]].stat18;
+        value = ((EventStatRecord *)datCommandRecords)[work[1]].stat18;
         break;
     case 2:
-        value = ((EventStatRecord *)D_00435E20)[work[1]].stat1C;
+        value = ((EventStatRecord *)datCommandRecords)[work[1]].stat1C;
         break;
     default:
         value = 0;
@@ -689,13 +689,13 @@ s32 evtPushEntryIndexedStatOption(void) {
     s32 *work = D_0043E5C0;
     s32 value;
     u16 mode = ((EventScriptEntry *)work)->index14;
-    u16 index = ((EventIndexRecord *)D_00435E38)[((Entry1A4 *)work[2])->tableValue].index;
+    u16 index = ((EventIndexRecord *)datItemSkillRecords)[((Entry1A4 *)work[2])->tableValue].index;
     switch (mode) {
     case 1:
-        value = ((EventStatRecord *)D_00435E20)[index].stat18;
+        value = ((EventStatRecord *)datCommandRecords)[index].stat18;
         break;
     case 2:
-        value = ((EventStatRecord *)D_00435E20)[index].stat1C;
+        value = ((EventStatRecord *)datCommandRecords)[index].stat1C;
         break;
     default:
         value = 0;
@@ -708,18 +708,18 @@ s32 evtPushEntryIndexedStatOption(void) {
 s32 func_0011DC38(void) {
     s32 value;
     s32 index = D_0043E5C0[1];
-    if (((EventModeSlot *)D_00435E1C)[index].kind == 5) {
+    if (((EventModeSlot *)datCommandSelectors)[index].kind == 5) {
         u16 id = ((EventScriptEntry *)D_0043E5C0[2])->rosterIndex;
-        value = ((EventRosterStat *)D_00435DE8)[id].alternateB;
+        value = ((EventRosterStat *)datRosterDetails)[id].alternateB;
     } else {
-        value = ((EventStatRecord *)D_00435E20)[index].stat34;
+        value = ((EventStatRecord *)datCommandRecords)[index].stat34;
     }
     scrSetIntegerReturnValue(value);
     return 1;
 }
 
 s32 evtPushSelectedStatMaximum(void) {
-    scrSetIntegerReturnValue(((EventStatRecord *)D_00435E20)[D_0043E5C4[0]].stat36);
+    scrSetIntegerReturnValue(((EventStatRecord *)datCommandRecords)[D_0043E5C4[0]].stat36);
     return 1;
 }
 
@@ -755,7 +755,7 @@ s32 scrGetBattleAverageCurrentValueForGroup(void) {
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
-        value = func_001B3918(choice ? 0x20 : 4);
+        value = btlAverageAllCurrentForMask(choice ? 0x20 : 4);
     }
     else {
         value = 0;
@@ -769,7 +769,7 @@ s32 scrGetBattleAverageMaximumValueForGroup(void) {
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
-        value = func_001B3830(choice ? 0x20 : 4);
+        value = btlAverageAllMaximumForMask(choice ? 0x20 : 4);
     }
     else {
         value = 0;
@@ -830,25 +830,25 @@ s32 evtPushAvailableIntegerValue(void) {
     return 1;
 }
 
-extern s32 D_00435E44;
+extern s32 datBattleParameters;
 
 s32 func_0011DFE0(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)((D_00435E44 - 4) + index * 4));
+    scrSetFloatReturnValue(*(f32 *)((datBattleParameters - 4) + index * 4));
     return 1;
 }
 
 s32 func_0011E018(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x188));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x188));
     return 1;
 }
 
 extern s32 func_001197C0(s32);
 
-s32 func_0011E050(void) {
+s32 evtSelectStatGrade(void) {
     s32 total = func_001197C0(D_0043E5C0[3]);
     s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
@@ -872,35 +872,35 @@ s32 func_0011E050(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + grade * 4 + 0x318));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + grade * 4 + 0x318));
     return 1;
 }
 
 s32 func_0011E128(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x360));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x360));
     return 1;
 }
 
 s32 func_0011E160(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x4EC));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x4EC));
     return 1;
 }
 
 s32 func_0011E198(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x678));
     return 1;
 }
 
 s32 func_0011E1D0(void) {
     s32 entry = D_0043E5C8[0];
     u32 index = ((EventScriptEntry *)entry)->index14;
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + index * 4 + 0x678));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + index * 4 + 0x678));
     return 1;
 }
 
@@ -917,11 +917,11 @@ s32 evtRollFlagDependentResultCode(void) {
 
 s32 evtPushRosterBaseValue(void) {
     u16 index = ((EventScriptEntry *)D_0043E5C8[0])->rosterIndex;
-    scrSetIntegerReturnValue(((EventRosterStat *)D_00435DE8)[index].base);
+    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[index].base);
     return 1;
 }
 
-s32 func_0011E2A8(void) {
+s32 evtSelectFineStatGrade(void) {
     s32 total = func_001197C0(D_0043E5C0[3]);
     s32 current = ((Entry1A4 *)D_0043E5C0[3])->unk6;
     s32 percent = (s32)((f32)current / (f32)total * 100.0f);
@@ -954,7 +954,7 @@ s32 func_0011E2A8(void) {
             }
         }
     }
-    scrSetFloatReturnValue(*(f32 *)(D_00435E44 + grade * 4 + 0x338));
+    scrSetFloatReturnValue(*(f32 *)(datBattleParameters + grade * 4 + 0x338));
     return 1;
 }
 
@@ -964,10 +964,10 @@ s32 evtPushRosterOrGlobalCounterValue(void) {
     s32 entry = D_0043E5C8[0];
     s32 result;
     if (!(((EventScriptEntry *)entry)->flags & 0x20)) {
-        result = *(s32 *)(D_00435DD0 + 0x3C);
+        result = *(s32 *)(datGameState + 0x3C);
     } else {
         s32 index = ((EventScriptEntry *)entry)->rosterIndex;
-        result = ((EventRosterRecord *)D_00435DEC)[index].panelValue;
+        result = ((EventRosterRecord *)datEnemyRecords)[index].panelValue;
     }
     scrSetIntegerReturnValue(result);
     return 1;
@@ -1001,7 +1001,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E848);
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011E930);
 
 void dds3WorkClear(void) {
-    s32 base = D_00435DD0;
+    s32 base = datGameState;
 
     *(s32 *)(base + 0x1440) = 0;
     *(s16 *)(base + 0x1444) = 0;
@@ -1032,39 +1032,39 @@ s32 func_0011EC00(void) {
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E04);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datBattleSceneRecords);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E08);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E0C);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E10);
+INCLUDE_SDATA(const s32, "game/code_0011A118", fldEncounterRollTable);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E14);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E18);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E1C);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datCommandSelectors);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E20);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datCommandRecords);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E24);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datAffinityRecords);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E28);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E2C);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datAbilityParameters);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E30);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datActionAnimationRecords);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E34);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E38);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datItemSkillRecords);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E3C);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E40);
 
-INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E44);
+INCLUDE_SDATA(const s32, "game/code_0011A118", datBattleParameters);
 
 INCLUDE_SDATA(const s32, "game/code_0011A118", D_00435E48);
 

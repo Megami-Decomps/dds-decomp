@@ -20,7 +20,7 @@ typedef struct EvtTarget {
 } EvtTarget;
 
 extern f32 *D_00324770[];
-extern u8 D_00324780[];
+extern u8 kwlnDefaultColorVector[];
 
 
 extern void sdfStepWrappingFloatCounter(s32 path);
@@ -111,7 +111,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     } else if (ownVector) {
                 VU0_LOAD_VF(vf10, (u8 *)info + 0x40);
     } else {
-                VU0_LOAD_VF(vf10, D_00324780);
+                VU0_LOAD_VF(vf10, kwlnDefaultColorVector);
     }
 }
 
@@ -261,7 +261,7 @@ s32 evtGetUnitMotionState(EvtUnit *unit) {
     return unit->motionState;
 }
 
-void func_00222278(EvtUnit *unit, u16 value)
+void evtUnitSetStoredParameter(EvtUnit *unit, u16 value)
 {
     unit->unkBC = value;
 }
@@ -394,7 +394,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC070);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC080);
 
-s32 func_002227C8(EvtUnit *unit) {
+s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     EvtUnit copy;
     f32 delta[4];
     f32 savedA[4];

@@ -25,8 +25,8 @@ extern void func_0016F6D0(u32 handle);
 extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
-    func_0016EFA8(pair->resource[1]);
-    func_0016EFA8(pair->resource[0]);
+    effThunderGroupRelease(pair->resource[1]);
+    effThunderGroupRelease(pair->resource[0]);
     sdfReleaseChipBlock(pair);
 }
 
@@ -138,7 +138,7 @@ typedef struct {
 } BlurFramePacketRecord;
 
 extern BlurFilterOps D_003803E8;
-extern BlurFramePacketRecord D_00381ED0[];
+extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern void *sdfAllocPacketAligned(s32);
 extern u32 func_00100400(void);
 extern void func_0032DB78(const void *, void *, s32);
@@ -148,7 +148,7 @@ extern void sdfAppendDmaTagToList(void *, void *);
 void effDrawBlurListWithFramePacket(void *list) {
     void *packet = sdfAllocPacketAligned(0x40);
 
-    func_0032DB78(D_00381ED0[func_00100400()].dmaPacket, packet, 1);
+    func_0032DB78(kwlnFrameDrawPacketRecords[func_00100400()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, packet);
     D_003803E8.draw(&D_003803E8, list);
 }

@@ -16,7 +16,7 @@ extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void func_00257150();
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
 
-void func_00257200(s32 arg0, s32 arg1, s32 arg2) {
+void mnuDrawMantraPulseStripAndKind(s32 arg0, s32 arg1, s32 arg2) {
     itfDspDrawStrip(0, 0, 0, arg1, arg2);
     func_00257150(arg0, arg1, arg2);
     mnuChooseDisplaySpriteKindFromEntryFlags(arg0, arg1, arg2);
@@ -28,14 +28,14 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_002573E8);
 
 extern void *func_002CB3B8(s32, s32);
 extern void func_002593E0(s32, MantraPulseGrid *, MantraPulseEntry *);
-extern s32 D_003BC4CC;
+extern s32 mnuSceneResourceContext;
 
-void func_00257670(s32 argument, MantraPulseGrid *grid) {
+void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
     MantraPulseEntry *entry;
     s32 row;
     s32 col;
 
-    func_002CB3B8(D_003BC4CC, 1);
+    func_002CB3B8(mnuSceneResourceContext, 1);
     for (row = 0; row < 0x11; row++) {
         entry = grid->entries + row * grid->stride;
         for (col = 0; col < 15; col++) {
@@ -57,7 +57,7 @@ extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void func_00259890(s32, s32, s32, s32, s32, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
 extern void func_00259B40(s32, s32, s32, s32, s32, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
-extern s32 D_003BC4CC;
+extern s32 mnuSceneResourceContext;
 
 /* One local `n` serves as both the per-row column countdown in the two entry
  * loops and the final-row bound in the band loop: one declared type, one
@@ -70,7 +70,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     s32 row;
     s32 n;
 
-    display = func_002CB3B8(D_003BC4CC, 1);
+    display = func_002CB3B8(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
     }
@@ -110,7 +110,7 @@ typedef struct {
 } DisplayGridWork;
 
 void func_00257BD8(DisplayGridWork *work, s32 argument) {
-    func_00257670(argument, work->grid);
+    mnuAdvanceMantraPulseGridEntries(argument, work->grid);
     mnuAdvanceWrappingFrame(&work->field_0x490);
 }
 

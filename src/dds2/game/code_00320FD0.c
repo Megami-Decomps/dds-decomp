@@ -1,10 +1,10 @@
 #include "common.h"
 
-extern u32 D_004390C0;
+extern u32 mnuResourceRecords;
 
 extern u32 D_004390C4;
 
-extern void (*D_004389C4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern u8 D_0045C860[];
 
@@ -16,7 +16,7 @@ extern void *memcpy(void *, const void *, u32);
 
 extern void *memset(void *, s32, u32);
 
-/* Byte cursor state at D_004390B8 (8 bytes). */
+/* Byte cursor state at mnuStepCounterState (8 bytes). */
 typedef struct CursorState {
     u8 unk0[2];
     u16 total;
@@ -26,9 +26,9 @@ typedef struct CursorState {
     u8 unk7;
 } CursorState;
 
-extern CursorState D_004390B8;
+extern CursorState mnuStepCounterState;
 
-extern u16 D_0045C866[];
+extern u16 mnuStepCounterThreshold[];
 
 typedef struct ResourceNode {
     u32 id;
@@ -60,7 +60,7 @@ u32 mnuRemoveResourceNodeById(u32 list) {
 }
 
 /* Notify and free every node, then reset the list. */
-void func_00321018(ResourceList *list) {
+void mnuClearResourceList(ResourceList *list) {
     ResourceNode *node;
 
     if (list != NULL) {
@@ -91,7 +91,7 @@ typedef struct SdfLinkList {
     SdfLink *next;
 } SdfLinkList;
 
-void func_00321090(SdfLinkList *list, SdfLink *a, SdfLink *b) {
+void sdfLinkListExchangeNodes(SdfLinkList *list, SdfLink *a, SdfLink *b) {
     SdfLink *tmpNext;
     SdfLink *tmpPrev;
 
@@ -192,25 +192,25 @@ void mnuCopyResourceProgressParameters(u8 *src) {
 }
 
 u8 * func_00321238(void) {
-    return (u8 *)&D_004390B8;
+    return (u8 *)&mnuStepCounterState;
 }
 
 void mnuSetResourceProgressCadence(u8 arg0, u8 arg1) {
-    D_004390B8.limit = arg0;
-    D_004390B8.step = arg1;
+    mnuStepCounterState.limit = arg0;
+    mnuStepCounterState.step = arg1;
 }
 
 void mnuResetProgressLimitAndStep(u8 arg0, u8 arg1) {
-    memset(&D_004390B8, 0, 8);
-    D_004390B8.limit = arg0;
-    D_004390B8.step = arg1;
+    memset(&mnuStepCounterState, 0, 8);
+    mnuStepCounterState.limit = arg0;
+    mnuStepCounterState.step = arg1;
 }
 
 s32 mnuAdvanceCursorStepUntilThreshold(void) {
-    if (++D_004390B8.index >= D_004390B8.limit) {
-        D_004390B8.index = 0;
-        D_004390B8.total += D_004390B8.step;
-        if (D_004390B8.total >= D_0045C866[0]) {
+    if (++mnuStepCounterState.index >= mnuStepCounterState.limit) {
+        mnuStepCounterState.index = 0;
+        mnuStepCounterState.total += mnuStepCounterState.step;
+        if (mnuStepCounterState.total >= mnuStepCounterThreshold[0]) {
             return 1;
         }
     }
@@ -218,18 +218,18 @@ s32 mnuAdvanceCursorStepUntilThreshold(void) {
 }
 
 void mnuResetResourceProgressCounters(void) {
-    D_004390B8.index = 0;
-    D_004390B8.total = 0;
+    mnuStepCounterState.index = 0;
+    mnuStepCounterState.total = 0;
 }
 
 void func_00321318(u32 arg0, u32 arg1) {
-    D_004390C0 = arg0;
+    mnuResourceRecords = arg0;
     D_004390C4 = arg1;
 }
 
 /* The externally owned table stores 28-byte records. */
 u8 *mnuGetResourceRecordByIndex(s32 recordIndex) {
-    return (u8 *)D_004390C0 + recordIndex * 28;
+    return (u8 *)mnuResourceRecords + recordIndex * 28;
 }
 
 INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);

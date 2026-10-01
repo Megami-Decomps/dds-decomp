@@ -8,7 +8,7 @@ extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
-extern void (*D_003BD2D4)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *sdfResourceRetainAddress(void *);
 
@@ -60,7 +60,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
 }
 
 
-void func_002CF670(const char *format, ...) {
+void sdfPanicHaltPrintf(const char *format, ...) {
     for (;;) {
     }
 }

@@ -33,7 +33,7 @@ extern s8 D_003BA890;
 
 extern s8 D_003BA7FC;
 
-extern s8 D_003BA92C;
+extern s8 kwlnBackgroundFadeMode;
 
 extern s16 D_003BA92E;
 
@@ -48,13 +48,13 @@ extern f32 D_003245E0[];
 
 extern f32 D_00324980[];
 
-extern u8 D_00325748[];
+extern u8 kwlnPositionedTextSurface[];
 
 extern u8 D_003BD690[2];
 
 extern s32 D_003BD6A0[2];
 
-extern u8 D_003BD699;
+extern u8 kwlnLargeMotorTarget;
 extern u16 kwlnFadeCounter;
 
 extern u16 kwlnFadeDuration;
@@ -62,8 +62,8 @@ extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
 extern s32 sdfResourceListHead;
-extern s32 D_003BA8D8;
-extern u8 D_00324550[];
+extern s32 kwlnCurrentIncompleteResource;
+extern u8 effSharedRandomState[];
 extern void func_002E8430(void *data, u32 tag);
 extern s32 kwlnTextureViewerHandlePad(void);
 extern void func_00104B88(void *data, s32 handle);
@@ -96,8 +96,8 @@ extern u64 sdfCreateResetPacketList(void);
 extern u32 func_00100518(void);
 extern u8 D_003C2620[];
 extern s32 D_003BA724;
-extern s32 D_003BA934;
-extern s32 D_003BA938;
+extern s32 kwlnDistanceBlurErrorCount;
+extern s32 kwlnRippleBlurErrorCount;
 typedef struct KwlnPadState {
     u8 unk0[0x12];
     s8 unk12;
@@ -110,7 +110,7 @@ typedef struct KwlnPadState {
     u8 unk1A;
     u8 unk1B;
 } KwlnPadState;
-extern KwlnPadState D_00398628;
+extern KwlnPadState sdfPadButtonStates;
 extern s32 func_00104A18(s32);
 typedef struct KwlnGraphicsSink {
     u8 unknown[0x10];
@@ -208,7 +208,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001039E0);
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103B10);
 
 void kwlnPadStepLargeMotorLevel(void) {
-    u8 target = D_003BD699;
+    u8 target = kwlnLargeMotorTarget;
 
     if (D_003BD690[1] < target) {
         if (target - D_003BD690[1] > 0x20) {
@@ -244,7 +244,7 @@ u32 func_00104260(void) {
 }
 
 void kwlnInitMagicState(void) {
-    func_002E8430(D_00324550, 0x12345678);
+    func_002E8430(effSharedRandomState, 0x12345678);
 }
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104290);
@@ -299,20 +299,20 @@ u32 kwlnTextureGetPageIndex(void) {
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104A18);
 
 s32 kwlnTextureViewerHandlePad(void) {
-    if (D_00398628.unk13 < 0) {
+    if (sdfPadButtonStates.unk13 < 0) {
         return 0;
     }
-    if (D_00398628.unk14 & 2) {
+    if (sdfPadButtonStates.unk14 & 2) {
         D_003BA8DC -= 1;
-    } else if (D_00398628.unk15 & 2) {
+    } else if (sdfPadButtonStates.unk15 & 2) {
         D_003BA8DC += 1;
-    } else if ((D_00398628.unk18 & 2) || (D_00398628.unk19 & 2)) {
+    } else if ((sdfPadButtonStates.unk18 & 2) || (sdfPadButtonStates.unk19 & 2)) {
         D_003BA8DC -= 10;
-    } else if ((D_00398628.unk1A & 2) || (D_00398628.unk1B & 2)) {
+    } else if ((sdfPadButtonStates.unk1A & 2) || (sdfPadButtonStates.unk1B & 2)) {
         D_003BA8DC += 10;
     }
     D_003BA8DC = func_00104A18(D_003BA8DC);
-    if (D_00398628.unk12 < 0) {
+    if (sdfPadButtonStates.unk12 < 0) {
         D_003BA890 ^= 1;
     }
     return 1;
@@ -327,7 +327,7 @@ s32 kwlnSwapActiveResource(s32 resource) {
         return 0;
     }
     status = kwlnTextureViewerHandlePad();
-    func_00104B88((void *)resource, D_003BA8D8);
+    func_00104B88((void *)resource, kwlnCurrentIncompleteResource);
     return status;
 }
 
@@ -338,7 +338,7 @@ s32 kwlnLoadDefaultResource(void) {
     if (kwlnTextureViewerHandlePad() == 0) {
         return -1;
     }
-    func_00104B88(D_00325748, D_003BA8D8);
+    func_00104B88(kwlnPositionedTextSurface, kwlnCurrentIncompleteResource);
     return 0;
 }
 
@@ -347,15 +347,15 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     if (node == NULL) {
         return NULL;
     }
-    D_003BA8D8 = (s32)node;
+    kwlnCurrentIncompleteResource = (s32)node;
     D_003BA890 = 1;
     D_003BA8DC = 0;
     while (node->ready != NULL && *node->ready != 0) {
-        node = ((KwlnResourceNode *)D_003BA8D8)->next;
+        node = ((KwlnResourceNode *)kwlnCurrentIncompleteResource)->next;
         if (node == NULL) {
             return NULL;
         }
-        D_003BA8D8 = (s32)node;
+        kwlnCurrentIncompleteResource = (s32)node;
     }
     return kwlnLoadDefaultResource;
 }
@@ -375,7 +375,7 @@ s32 kwlnEnsureDefaultResource(void) {
     if (D_0032453B[0] != 0) {
         return 0;
     }
-    kwlnTextureAttachTask(D_00325748);
+    kwlnTextureAttachTask(kwlnPositionedTextSurface);
     return 0;
 }
 
@@ -575,14 +575,14 @@ void kwlnDrawBlurErrorCounters(void) {
     void *task;
 
     if (D_003BA724 != 0) {
-        if (D_003BA934 != 0 || D_003BA938 != 0) {
+        if (kwlnDistanceBlurErrorCount != 0 || kwlnRippleBlurErrorCount != 0) {
             task = sdfAllocPacketAligned(0x20);
             sdfInitPacketList(task);
-            if (D_003BA934 > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", D_003BA934));
+            if (kwlnDistanceBlurErrorCount > 0) {
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
             }
-            if (D_003BA938 > 0) {
-                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", D_003BA938));
+            if (kwlnRippleBlurErrorCount > 0) {
+                sdfAppendPacket(task, sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
             D_00325708.submit(&D_00325708, task);
         }
@@ -646,7 +646,7 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
     if (kwlnDrawControlFlags & 0x0C000000) {
         return 1;
     }
-    if (D_003BA92C == 0) {
+    if (kwlnBackgroundFadeMode == 0) {
         if (0x80 - kwlnBackgroundFadeColor[3] >= 0x80) {
             return 0;
         }
@@ -657,8 +657,8 @@ s32 kwlnFadeIsBackgroundOverlayActive(void) {
 }
 
 void kwlnFadeSetMode(s32 mode) {
-    D_003BA92C = mode;
-    if (D_003BA92C == 0) {
+    kwlnBackgroundFadeMode = mode;
+    if (kwlnBackgroundFadeMode == 0) {
         D_003BA92E = 0;
         D_003BA930 = 0;
     } else {
@@ -722,13 +722,13 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8C8);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8D0);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8D8);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnCurrentIncompleteResource);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8DC);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8E0);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8E8);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawSurfaceIndex);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8EC);
 
@@ -746,11 +746,11 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA900);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawControlFlags);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA908);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawOverlayEnabled);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA90A);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawOverlayAlpha);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA90C);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDrawOverlayScale);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA910);
 
@@ -776,15 +776,15 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeColor);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92B);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92C);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeMode);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92E);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA930);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA934);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnDistanceBlurErrorCount);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA938);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnRippleBlurErrorCount);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA940);
 

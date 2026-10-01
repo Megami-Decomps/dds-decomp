@@ -16,7 +16,7 @@ extern void scrClearAllSecondaryScriptFlags(u8 *work);
 
 extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
 
-extern s32 D_00435DD0;
+extern s32 datGameState;
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
@@ -45,9 +45,9 @@ typedef struct Dds3Node {
     Dds3NodeOps *ops;
 } Dds3Node;
 
-extern u32 D_00438EB0;
+extern u32 dds3OwnedNodeListHead;
 
-extern Dds3NodeOps D_00435EA8;
+extern Dds3NodeOps dds3FontNodeVTable;
 
 s32 ptyScriptRemoveUnitAndReturnResult(void) {
     s32 unitId = scrReadIntParameter(0);
@@ -85,7 +85,7 @@ s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 result = 0;
 
     if (index >= 0) {
-        u8 *entry = (u8 *)(D_00435DD0 + index * 0x1C4 + 0xA60);
+        u8 *entry = (u8 *)(datGameState + index * 0x1C4 + 0xA60);
 
         scrSetFlag(entry, b);
         scrClearAllSecondaryScriptFlags(entry);
@@ -133,18 +133,18 @@ void dds3UnlinkNodeFromList(s32 *list, s32 node, s32 linkOffset) {
 }
 
 void dds3RegisterOwnedIntrusiveNode(Dds3Node *node, Dds3NodeOps *ops) {
-    dds3AppendIntrusiveNode((s32 *)&D_00438EB0, (s32)node, 0);
+    dds3AppendIntrusiveNode((s32 *)&dds3OwnedNodeListHead, (s32)node, 0);
     node->ops = ops;
 }
 
 void dds3DestroyLinkedNode(Dds3Node *node) {
-    dds3UnlinkNodeFromList((s32 *)&D_00438EB0, (s32)node, 0);
+    dds3UnlinkNodeFromList((s32 *)&dds3OwnedNodeListHead, (s32)node, 0);
     node->ops->destroy((s32)node);
 }
 
 void dds3DestroyAllOwnedIntrusiveNodes(void) {
     Dds3Node *current;
-    while ((current = (Dds3Node *)D_00438EB0) != 0) {
+    while ((current = (Dds3Node *)dds3OwnedNodeListHead) != 0) {
         dds3DestroyLinkedNode(current);
     }
 }
@@ -154,7 +154,7 @@ void dds3SetLinkedNodeValue(s32 object, u32 value) {
 }
 
 void dds3DestroyNodesWithValue(s32 key) {
-    Dds3Node *node = (Dds3Node *)D_00438EB0;
+    Dds3Node *node = (Dds3Node *)dds3OwnedNodeListHead;
 
     while (node != 0) {
         Dds3Node *next = node->next;
@@ -167,7 +167,7 @@ void dds3DestroyNodesWithValue(s32 key) {
 }
 
 void dds3UpdateLinkedNodes(void) {
-    Dds3Node *node = (Dds3Node *)D_00438EB0;
+    Dds3Node *node = (Dds3Node *)dds3OwnedNodeListHead;
 
     while (node != 0) {
         node->ops->update((s32)node);
@@ -194,11 +194,11 @@ s32 dds3CreateFontNode(s32 size, s32 a1, s32 a2) {
     frFontSetContextPair((void *)obj, size, a1);
     node = (Dds3Node *)sdfAllocAndClearQuadwords(0x14);
     *(s32 *)((u8 *)node + 0x10) = obj;
-    dds3RegisterOwnedIntrusiveNode(node, &D_00435EA8);
+    dds3RegisterOwnedIntrusiveNode(node, &dds3FontNodeVTable);
     return (s32)node;
 }
 
-void func_0011F0C0(GlyphOwner *owner, u8 flag) {
+void itfConfigureOwnedGlyphChainFlag(GlyphOwner *owner, u8 flag) {
     frFontSetChainFlag(owner->glyph, flag);
 }
 
@@ -206,5 +206,5 @@ void func_0011F0E0(void) {
     sdfReleaseChipBlock();
 }
 
-INCLUDE_SDATA(const s32, "game/code_0011EC90", D_00435EA8);
+INCLUDE_SDATA(const s32, "game/code_0011EC90", dds3FontNodeVTable);
 

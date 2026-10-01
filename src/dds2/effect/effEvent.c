@@ -23,7 +23,7 @@ typedef struct Work30 {
     u8 data[0x30];
 } Work30;
 
-extern Work30 D_003B21B0;
+extern Work30 effBlurRectangleParameters;
 
 /* Per-channel work copies this 0x2C-byte prefix before its separate ID word.
  * The prefix's final word is copied with lw/sw rather than as part of the blob. */
@@ -37,7 +37,7 @@ typedef struct BDWork2C {
     u32 id;
 } BDWork2C;
 
-extern BDWork2C *D_00438F10;
+extern BDWork2C *effBlurPixelWork;
 
 extern u32 effGetResourceFirstWord(s32 arg);
 
@@ -193,7 +193,7 @@ typedef struct GsSurface {
     void (*submit)(struct GsSurface *, void *);
 } GsSurface;
 
-extern GsSurface D_00380748;
+extern GsSurface kwlnPositionedTextSurface;
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, s32);
@@ -203,7 +203,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfAppendPacket(list, sdfCreateFormattedSifCommand(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, arg2, arg3));
-    D_00380748.submit(&D_00380748, list);
+    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00196740);
@@ -218,7 +218,7 @@ void effSubmitSizedDrawPacket(s32 x, s32 y, s32 w, s32 h, s32 arg4, s32 arg5) {
     void *list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfAppendPacket(list, func_0011F250(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, w * 0x10, h * 8, arg4, arg5));
-    D_00380748.submit(&D_00380748, list);
+    kwlnPositionedTextSurface.submit(&kwlnPositionedTextSurface, list);
 }
 
 void func_00196FD8(void) {
@@ -230,11 +230,11 @@ void func_00196FE8(void) {
 }
 
 void func_00196FF0(void *src) {
-    memcpy(&D_003B21B0, src, 0x28);
+    memcpy(&effBlurRectangleParameters, src, 0x28);
 }
 
 Work30 *effGetCh70Params(void) {
-    return &D_003B21B0;
+    return &effBlurRectangleParameters;
 }
 
 void func_00197060(void) {
@@ -246,19 +246,19 @@ void func_00197070(void) {
 }
 
 void effCopyCh71Common(BDCommon2C *src) {
-    D_00438F10->common = *src;
+    effBlurPixelWork->common = *src;
 }
 
 u32 effGetCh71Work(void) {
-    return D_00438F10;
+    return effBlurPixelWork;
 }
 
 void effSetCh71Id(u32 id) {
-    D_00438F10->id = id;
+    effBlurPixelWork->id = id;
 }
 
 void effInitCh71Id(void) {
-    D_00438F10->id = effGetResourceFirstWord(2);
+    effBlurPixelWork->id = effGetResourceFirstWord(2);
 }
 
 void func_00197118(void) {
@@ -366,7 +366,7 @@ void effInitCh75Id(void) {
 }
 
 void effInitWorks(void) {
-    D_00438F10 = effCloneBlurTemplate(D_003B2208);
+    effBlurPixelWork = effCloneBlurTemplate(D_003B2208);
     D_00438F0C = func_0018EBC8(D_003B21D8);
     D_00438F14 = effCloneResourceTemplate(D_003B2278);
     D_00438F18 = effCloneBlurWorkWithSlots(D_003B22A0);
@@ -375,10 +375,10 @@ void effInitWorks(void) {
 
 void effDispatchActive(void) {
     if (D_00436460) {
-        effDrawBlurRectangle(&D_003B21B0);
+        effDrawBlurRectangle(&effBlurRectangleParameters);
     }
     if (D_00436461) {
-        effDrawBlurPixelRectWithResource(D_00438F10);
+        effDrawBlurPixelRectWithResource(effBlurPixelWork);
     }
     if (D_00436462) {
         func_0018ECD0(D_00438F0C);
@@ -645,7 +645,7 @@ void func_00197CD0(Work2C *src) {
 }
 
 u32 func_00197D38() {
-    return func_001682B0();
+    return sndMixerClone();
 }
 
 void func_00197D50() {
@@ -685,7 +685,7 @@ extern u8 D_003B2D20[];
 
 /* Release the attached effect before freeing the event work. */
 void effEventReleaseNode(EffEventWork *work) {
-    func_001686F0(work->effect);
+    effReleaseBattleVoiceOwner(work->effect);
     sdfReleaseChipBlock(work);
 }
 
@@ -804,8 +804,8 @@ typedef struct EffAimParams {
 
 extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];
-extern u8 D_0037F690[];
-extern u8 D_0037F6A0[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
@@ -813,7 +813,7 @@ extern void func_00336818(f32 angle);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: vf10 = the aimed offset point computed from the source and parameters */
-void func_001984D8(EffAimSource *src, EffAimParams *param) {
+void effEventLoadSelectedAimPositionVu(EffAimSource *src, EffAimParams *param) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];
@@ -852,7 +852,7 @@ void func_001984D8(EffAimSource *src, EffAimParams *param) {
         dir[2] = half < radius ? -radius : -half;
         dir[0] = dir[1] = 0.0f;
         pos[1] = y;
-        sdfVuBuildLookAtBasis(pos, D_0037F690, D_0037F6A0);
+        sdfVuBuildLookAtBasis(pos, sdfViewTargetVector, sdfViewUpVector);
         sdfInvertRigidVuTransform();
         VU0_LOAD_VF(vf10, dir);
         VU0_CLEAR_W(vf10);

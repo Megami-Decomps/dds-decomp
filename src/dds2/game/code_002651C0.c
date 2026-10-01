@@ -31,7 +31,7 @@ extern void kwlnFadeOutStart();
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];
-extern s32 D_00435DD0;
+extern s32 datGameState;
 extern char D_00437840[];
 extern void mdlFlagSet();
 extern void mdlFlagClear();
@@ -200,7 +200,7 @@ void mnuAwardCampProgressCurrency(void) {
     func_0026C918(0, text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
-    func_0011A118(0x81, -*(u8 *)(D_00435DD0 + 0x13c1));
+    func_0011A118(0x81, -*(u8 *)(datGameState + 0x13c1));
     mdlFlagClear(0xa01);
 }
 

@@ -117,9 +117,9 @@ struct BtlUnitNode {
 };
 typedef struct BtlUnitNode BtlUnitNode;
 
-extern BtlParams *D_00435E44;
-extern BtlEntry *D_00435E30;
-extern BtlWork *func_001AA6F8(void);
+extern BtlParams *datBattleParameters;
+extern BtlEntry *datActionAnimationRecords;
+extern BtlWork *btlGetRuntime(void);
 extern s32 btlBossDebugPrintf(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
 extern void btlStartTask(BtlTask *);
@@ -133,7 +133,7 @@ extern void btlCopyMotionTransform(void *, f32 *);
 extern void func_00336538(f32);
 extern void btlFlagAllUnitDefeatCandidatesTask();
 extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
-extern BtlUnitNode *func_002172B8(BtlEffect *);
+extern BtlUnitNode *btlGetTargetUnitForLink(BtlEffect *);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
@@ -144,7 +144,7 @@ void btlCancelCurrentSubtask(void) {
     BtlSub718 *sub;
     s32 task;
 
-    sub = func_001AA6F8()->sub;
+    sub = btlGetRuntime()->sub;
     task = sub->task;
     if (task != 0) {
         btlDestroyUnit(task);
@@ -154,7 +154,7 @@ void btlCancelCurrentSubtask(void) {
 
 /* Allocate and launch a subtask from the active battle task slot. */
 u64 btlStartSubtaskWithInput(u64 input) {
-    BtlTask *task = func_001E5FF8(func_001AA6F8()->sub->task, 0xC);
+    BtlTask *task = func_001E5FF8(btlGetRuntime()->sub->task, 0xC);
     if (input != 0) {
         task->arg = input;
         task->kind = 4;
@@ -179,7 +179,7 @@ f32 btlGetBossPresenceActionScale(BtlUnitNode *unit, BtlUnitNode *target) {
     f32 scale = 1.0f;
     if (unit->flags & 0x200) {
         if (target->mode == 0x110) {
-            for (other = func_001AA6F8()->actorList; other != 0; other = other->next) {
+            for (other = btlGetRuntime()->actorList; other != 0; other = other->next) {
                 if (other->flags & 1) {
                     if (other->flags & BTL_UNIT_BOSS_FLAG) {
                         if (!(other->flags & 0xE0)) {
@@ -264,13 +264,13 @@ s32 btlMapBossEntryKindToIndex(BtlUnitNode *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (D_00435E30[index].kind == 0) {
+    if (datActionAnimationRecords[index].kind == 0) {
         return -1;
     }
-    if (D_00435E30[index].kind >= 11 && D_00435E30[index].kind < 26) {
+    if (datActionAnimationRecords[index].kind >= 11 && datActionAnimationRecords[index].kind < 26) {
         return -1;
     }
-    switch (D_00435E30[index].kind) {
+    switch (datActionAnimationRecords[index].kind) {
     case 1: return 0xC;
     case 2: return 0xD;
     case 3: return 0xE;
@@ -289,10 +289,10 @@ s32 btlGetBossEntryKind(BtlUnitNode *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
-    if (D_00435E30[index].kind == 0) {
+    if (datActionAnimationRecords[index].kind == 0) {
         return -1;
     }
-    return D_00435E30[index].kind;
+    return datActionAnimationRecords[index].kind;
 }
 
 s32 btlRemapBossResponseForActionPhase(BtlUnitNode *unit, s32 value) {
@@ -321,7 +321,7 @@ void btlPlayStationedSoundForActiveBossAction(BtlUnitNode *unit) {
             mode = unit->mode;
             if (mode < 0x113) {
                 if (mode >= 0x111) {
-                    btlStartTask(sndCreateStationedSeTask(func_001AA6F8()->unk208 + 1));
+                    btlStartTask(sndCreateStationedSeTask(btlGetRuntime()->unk208 + 1));
                 }
             }
         }
@@ -329,7 +329,7 @@ void btlPlayStationedSoundForActiveBossAction(BtlUnitNode *unit) {
 }
 
 s32 btlGetBossSceneStateWhenActive(void) {
-    BtlWork *work = func_001AA6F8();
+    BtlWork *work = btlGetRuntime();
     if (work->mode != 0x30B) {
         return 0;
     }
@@ -340,7 +340,7 @@ s32 btlGetBossSceneStateWhenActive(void) {
 }
 
 void btlResetBossRatioScale(void) {
-    func_001AA6F8()->sub->scale = 1.0f;
+    btlGetRuntime()->sub->scale = 1.0f;
 }
 
 void btlAccumulateBossRatioScale(BtlSkillTask *task) {
@@ -348,9 +348,9 @@ void btlAccumulateBossRatioScale(BtlSkillTask *task) {
     BtlParams *params;
     if (task->flags & 8) {
         if (task->unit->flags & BTL_UNIT_BOSS_FLAG) {
-            ratio = &func_001AA6F8()->sub->scale;
+            ratio = &btlGetRuntime()->sub->scale;
             if (task->kind == BTL_SKILL_HEKATO) {
-                params = D_00435E44;
+                params = datBattleParameters;
                 *ratio *= params->ratioScale;
                 if (*ratio > params->ratioMax) {
                     *ratio = params->ratioMax;
@@ -365,14 +365,14 @@ f32 btlGetBossRatioScale(BtlUnitNode *unit, s32 unused, s32 kind, s32 flag) {
     f32 scale = 1.0f;
     if (kind == BTL_SKILL_HEKATO && flag == 1) {
         if (unit->flags & BTL_UNIT_BOSS_FLAG) {
-            scale = func_001AA6F8()->sub->scale;
+            scale = btlGetRuntime()->sub->scale;
         }
     }
     return scale;
 }
 
 BtlUnitNode *btlFindUnitByMode(void) {
-    BtlWork *work = func_001AA6F8();
+    BtlWork *work = btlGetRuntime();
     BtlSub718 *sub = work->sub;
     struct BtlUnitNode *unit;
     if (sub->b.active == 0) {
@@ -394,7 +394,7 @@ u64 btlMaskValueWhenSubtaskInactive(u64 value) {
     BtlWork *work;
     u64 result;
 
-    work = func_001AA6F8();
+    work = btlGetRuntime();
     result = 0;
     if (work->sub->b.active != '\0') {
         result = value;
