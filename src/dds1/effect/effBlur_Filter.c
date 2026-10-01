@@ -2,25 +2,14 @@
 
 extern u32 effGetResourceFirstWord(u32);
 
-/* Work area shared by both blur-filter variants in this TU. */
-typedef struct {
-    u8   pad_0x00[0x2C]; /* 0x00 */
-    u32  setting;        /* 0x2C: source handle/setting used by both variants */
-    void *resource;      /* 0x30: object released by the free helpers */
-} EffBlurWork; /* 0x34 */
 
-/* Parameter block at the start of a blur work (0x2C bytes). */
+/* Draw payload shared by both slot families: two words, two floats,
+ * the centre position and four rectangle edges. */
 typedef struct {
-    u32 word[11];
-} EffBlurParams;
-
-/* Quad written into each slot at +0x8: two words copied from the work, a float,
-   the on-screen position and the four edges around it. */
-typedef struct {
-    s32 unk0;   /* 0x00 */
+    u32 color;  /* 0x00 packed color; alpha is updated before drawing */
     s32 unk4;   /* 0x04 */
     f32 unk8;   /* 0x08 */
-    s32 unkC;   /* 0x0C */
+    f32 unkC;   /* 0x0C */
     s32 x;      /* 0x10 */
     s32 y;      /* 0x14 */
     s32 left;   /* 0x18 */
@@ -29,42 +18,77 @@ typedef struct {
     s32 bottom; /* 0x24 */
 } EffBlurQuad; /* 0x28 */
 
+/* Random-position variant parameters copied into its work (0x2C). */
+typedef struct {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 x;
+    s32 y;
+    s32 positionSpread;
+    s32 size;
+} EffBlurScatterParams;
+
+typedef struct {
+    s32 delay;
+    f32 angle;
+    EffBlurQuad quad;
+} EffBlurScatterSlot; /* 0x30 */
+
+/* The first factory allocates this header followed by 100 scatter slots. */
+typedef struct {
+    EffBlurScatterParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScatterSlot *slots;
+} EffBlurScatterWork; /* 0x38 */
+
 /* Second blur variant: one 0x30-byte slot per step, led by a float phase. */
 typedef struct {
     f32 phase;
-    s32 unk4;
+    f32 angle;
     EffBlurQuad quad;
-} EffBlurSlot2; /* 0x30 */
+} EffBlurScaleSlot; /* 0x30 */
 
 typedef struct {
     s32 count;           /* 0x00: number of slots */
-    s32 unk4;            /* 0x04 */
+    f32 phaseStep;        /* 0x04: advances the size factor toward 1 */
     f32 spacing;         /* 0x08: phase step between slots */
-    s32 unkC;            /* 0x0C */
+    u32 color;           /* 0x0C */
     s32 unk10;           /* 0x10 */
     f32 unk14;           /* 0x14 */
-    s32 unk18;           /* 0x18 */
-    s32 unk1C;           /* 0x1C */
+    f32 unk18;           /* 0x18 */
+    f32 angleStep;       /* 0x1C */
     s32 x;               /* 0x20 */
     s32 y;               /* 0x24 */
     s32 size;            /* 0x28 */
-    u32 setting;         /* 0x2C */
-    void *resource;      /* 0x30 */
-    EffBlurSlot2 *slots; /* 0x34 */
-} EffBlurWork2; /* 0x38 */
+} EffBlurScaleParams; /* 0x2C */
 
-void effBlurCopyParams(EffBlurParams *dst, EffBlurParams *src) {
-    *dst = *src;
+/* The second factory allocates this header followed by count scale slots. */
+typedef struct {
+    EffBlurScaleParams params;
+    u32 sourceHandle;
+    u32 allocation;
+    EffBlurScaleSlot *slots;
+} EffBlurScaleWork; /* 0x38 */
+
+/* Copy only the serialized parameters, leaving the owned work tail intact. */
+void effBlurCopyParams(EffBlurScatterWork *dst, EffBlurScatterParams *src) {
+    dst->params = *src;
 }
 
 /* Supply a source handle for the first blur variant. */
-void effBlurSetHandle(EffBlurWork *work, u32 setting) {
-    work->setting = setting;
+void effBlurSetHandle(EffBlurScatterWork *work, u32 sourceHandle) {
+    work->sourceHandle = sourceHandle;
 }
 
 /* Acquire the first variant's source handle from the effect manager. */
-void effBlurAcquireHandle(EffBlurWork *work) {
-    work->setting = effGetResourceFirstWord(2);
+void effBlurAcquireHandle(EffBlurScatterWork *work) {
+    work->sourceHandle = effGetResourceFirstWord(2);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186E60);
@@ -72,33 +96,36 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186E60);
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00186F90);
 
 /* Release the first variant's owned effect resource. */
-void effBlurReleaseFirstResource(EffBlurWork *work) {
-    func_002D0918(work->resource);
+void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
+    func_002D0918(work->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", func_00187098);
 
-/* Copy the parameter block but keep the destination's own first word. */
-void effBlurCopyParamsKeepHeader(EffBlurParams *dst, EffBlurParams *src) {
-    u32 first = dst->word[0];
+/* Update scale parameters but preserve the allocated destination slot count. */
+void effBlurCopyParamsKeepHeader(EffBlurScaleWork *dst, EffBlurScaleParams *src) {
+    u32 count = dst->params.count;
 
-    *dst = *src;
-    dst->word[0] = first;
+    dst->params = *src;
+    dst->params.count = count;
 }
 
-/* The second variant uses the same work layout but separate callbacks. */
-void effBlurSetSecondSetting(EffBlurWork *work, u32 setting) {
-    work->setting = setting;
+/* The scale variant has its own source-handle setter. */
+void effBlurSetSecondSetting(EffBlurScaleWork *work, u32 sourceHandle) {
+    work->sourceHandle = sourceHandle;
 }
 
-void effBlurAcquireSecondHandle(EffBlurWork *work) {
-    work->setting = effGetResourceFirstWord(2);
+/* Both acquisition callbacks request selector 2; the second factory uses 3. */
+void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
+    work->sourceHandle = effGetResourceFirstWord(2);
 }
 
-void effBlurSecondUpdateSlotRect(EffBlurWork2 *work, EffBlurSlot2 *slot) {
-    f32 size = (f32)work->size * slot->phase * 16.0f;
-    s32 cx = (work->x + 0x100) << 4;
-    s32 cy = (work->y + 0xE0) << 3;
+/* Fixed-point edges: 16 units per x pixel and 8 per y pixel.
+ * Truncate size before the existing signed half-height shift. */
+void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
+    f32 size = (f32)work->params.size * slot->phase * 16.0f;
+    s32 cx = (work->params.x + 0x100) << 4;
+    s32 cy = (work->params.y + 0xE0) << 3;
     s32 s = (s32)size;
 
     slot->quad.left = cx - s;
