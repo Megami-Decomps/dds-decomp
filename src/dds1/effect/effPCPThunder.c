@@ -161,7 +161,7 @@ typedef struct {
     f32 dirB[3];        /* 0x14 */
     f32 f20;            /* 0x20 */
     f32 f24;            /* 0x24 */
-    u32 unk28;
+    u32 color;         /* 0x28 */
 } EffThunderCell2C; /* 0x2C */
 
 typedef struct {
@@ -216,7 +216,7 @@ void effThunderCellRestart(EffThunderWork4C *work, s32 index) {
     cell->dirB[2] = dir[2];
     cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
     cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
-    cell->unk28 = 0x80808080;
+    cell->color = 0x80808080;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00163780);
@@ -241,7 +241,7 @@ EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
     for (i = 0; i < work->head.count; i++) {
         work->cells[i].unk00 = 0;
         work->cells[i].unk04 = 0;
-        work->cells[i].unk28 = 0;
+        work->cells[i].color = 0;
     }
     work->color = 0x80808080;
     return work;
@@ -308,7 +308,7 @@ void effThunderRestartIndexedCell(EffThunderWork4C *work, s32 index) {
     cell->dirB[2] = dir[2];
     cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
     cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
-    cell->unk28 = 0x80808080;
+    cell->color = 0x80808080;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001642B0);
@@ -319,26 +319,34 @@ INCLUDE_ASM(const s32, "effect/effPCPThunder", func_001646F8);
 
 /* Parameter head (0xA4 bytes) of the spark effect, copied verbatim into the work. */
 typedef struct {
-    u8 pad00[0x30];
+    u8 pad00[0x10];
+    f32 lowPos[3];      /* 0x10 spark position with the height offset removed */
+    u8 pad1C[4];
+    f32 pos[3];         /* 0x20 spark position */
+    u8 pad2C[4];
     u16 systemParam;    /* 0x30 */
     u8 pad32[0x16];
     u16 halfLife;       /* 0x48 */
     u8 pad4A[6];
     void *dispatchArg;  /* 0x50 */
-    u8 pad54[0x14];
+    u8 pad54[0x10];
+    f32 heightOffset;   /* 0x64 */
     u32 sparkCount;     /* 0x68 */
-    u8 pad6C[8];
+    u8 loop;            /* 0x6C restart finished sparks */
+    u8 pad6D[3];
+    s32 duration;       /* 0x70 */
     s32 spread;         /* 0x74 modulus of the spark delay */
-    u8 pad78[8];
+    s32 fadeIn;         /* 0x78 */
+    s32 fadeRange;      /* 0x7C */
     f32 f80;            /* 0x80 */
     f32 blend84;        /* 0x84 */
     f32 f88;            /* 0x88 */
     f32 f8C;            /* 0x8C */
     f32 blend90;        /* 0x90 */
-    u8 pad94[4];
+    f32 decay94;        /* 0x94 */
     f32 f98;            /* 0x98 */
     f32 blend9C;        /* 0x9C */
-    u8 padA0[4];
+    f32 decayA0;        /* 0xA0 */
 } EffThunderHeadA4;
 
 typedef struct {

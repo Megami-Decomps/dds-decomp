@@ -53,7 +53,7 @@ typedef struct ItfMesBlk40 {
     FrFontGlyph *glyphChain; /* +0x8: option-list glyphs */
     u32 panelValue;      /* +0xC: bit mask set by itfMesScriptSetPanelValue */
     u16 unk10;           /* +0x10 */
-    s16 unk12;           /* +0x12 */
+    s16 clearBitCount;   /* +0x12: cached by itfMesCountClearBits */
     u16 unk14;           /* +0x14 */
     s16 rowCount;        /* +0x16: number of displayed option rows */
     u8 unk18[0xA];       /* +0x18 */
@@ -77,7 +77,7 @@ typedef struct ItfMesBlkA4 {
 typedef struct ItfMesState {
     u32 flags;          /* 0x0: low half status, high half mask */
     ItfMesSub *sub;     /* 0x4 */
-    u8 unk8[4];         /* 0x8 */
+    s32 temporaryFontEntry; /* 0x8: optional entry passed to frFontLoadTemporaryEntry */
     s32 renderValue;    /* 0xC: propagated to glyph nodes and option frame */
     s16 unk10;          /* 0x10 */
     s16 unk12;          /* 0x12 */
@@ -631,8 +631,8 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     count = itfMesCountZeroBits(table->bitCount, blk->panelValue);
     y = blk->y - ((count - 1) * 21 << 3);
     itfMesInitCharTable((s32 *)mes->tableD0);
-    if (*(s32 *)&mes->unk8[0] != 0) {
-        frFontLoadTemporaryEntry(*(s32 *)&mes->unk8[0]);
+    if (mes->temporaryFontEntry != 0) {
+        frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
     blk->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows(&table->items[1], table->bitCount, blk->panelValue, blk->x, y, mes->renderValue);
     blk->rowCount = count;
@@ -654,7 +654,7 @@ void itfMesResetWindow(s32 window) {
     blk->panelValue = 0;
     blk->unk10 = 0;
     blk->rowCount = 0;
-    blk->unk12 = -1;
+    blk->clearBitCount = -1;
     mes->flags &= ~0x38;
     mes->flags &= 0xFFFBFFFF;
 }
@@ -682,7 +682,7 @@ void itfMesCountClearBits(s32 window, s32 value) {
         } while (i < value);
     }
     zeros = bit == 0 ? zeros - 1 : 0;
-    blk->unk12 = zeros;
+    blk->clearBitCount = zeros;
     blk->unk14 = zeros;
 }
 
@@ -789,7 +789,7 @@ void itfMesClearWindowHighFlags(s32 window, u32 flags) {
 }
 
 s16 func_0019C508(s32 window) {
-    return itfWindowSlots[window].mes->blk40.unk12;
+    return itfWindowSlots[window].mes->blk40.clearBitCount;
 }
 
 s16 func_0019C528(s32 window) {
@@ -828,7 +828,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     if (*(s32 *)((u8 *)sub + 8) == 0x3147534D) {
         value = *(s32 *)((u8 *)entry + 8);
     }
-    *(s32 *)&mes->unk8[0] = value;
+    mes->temporaryFontEntry = value;
     return previous;
 }
 
@@ -852,8 +852,8 @@ s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
         return 0;
     }
     itfMesInitCharTable((s32 *)mes->tableD0);
-    if (*(s32 *)&mes->unk8[0] != 0) {
-        frFontLoadTemporaryEntry(*(s32 *)&mes->unk8[0]);
+    if (mes->temporaryFontEntry != 0) {
+        frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
     item = itfMesGetTableItem(table, arg2);
     if (item == 0) {

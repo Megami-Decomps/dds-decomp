@@ -161,7 +161,7 @@ typedef struct {
     f32 dirB[3];        /* 0x14 */
     f32 f20;            /* 0x20 */
     f32 f24;            /* 0x24 */
-    u32 unk28;
+    u32 color;         /* 0x28 */
 } EffThunderCell2C; /* 0x2C */
 
 typedef struct {
@@ -216,7 +216,7 @@ void effThunderCellRestart(EffThunderWork4C *work, s32 index) {
     cell->dirB[2] = dir[2];
     cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.4f + 1.0f);
     cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.3f + 1.0f);
-    cell->unk28 = 0x80808080;
+    cell->color = 0x80808080;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016B3D8);
@@ -241,7 +241,7 @@ EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
     for (i = 0; i < work->head.count; i++) {
         work->cells[i].unk00 = 0;
         work->cells[i].unk04 = 0;
-        work->cells[i].unk28 = 0;
+        work->cells[i].color = 0;
     }
     work->color = 0x80808080;
     return work;
@@ -308,7 +308,7 @@ void effThunderRestartIndexedCell(EffThunderWork4C *work, s32 index) {
     cell->dirB[2] = dir[2];
     cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.4f + 1.0f);
     cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.3f + 1.0f);
-    cell->unk28 = 0x80808080;
+    cell->color = 0x80808080;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_0016BF08);
