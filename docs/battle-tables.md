@@ -2,7 +2,7 @@
 
 `tools/battle_tbl.py` converts the core battle data tables used by both games
 to editable `.tblasm` source. It currently supports `ENCOUNT.TBL`, `UNIT.TBL`,
-`SKILL.TBL`, and `AICALC.TBL`:
+`SKILL.TBL`, `AICALC.TBL`, and `MSG.TBL`:
 
 ```sh
 python3 tools/battle_tbl.py disassemble ENCOUNT.TBL encount.tblasm
@@ -13,6 +13,8 @@ python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
 python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
 python3 tools/battle_tbl.py disassemble AICALC.TBL aicalc.tblasm
 python3 tools/battle_tbl.py assemble aicalc.tblasm AICALC.TBL
+python3 tools/battle_tbl.py disassemble MSG.TBL msg.tblasm
+python3 tools/battle_tbl.py assemble msg.tblasm MSG.TBL
 ninja dds1-battle-data dds2-battle-data
 ```
 
@@ -179,6 +181,55 @@ checks validate group references and every skill ID stored by party and enemy
 unit records, including passive IDs that have an attribute row but no
 executable action row.
 
+## Battle text and message banks
+
+`MSG.TBL` connects battle IDs to the text shown by battle and menu code. Its
+fixed-width tables contain affinity summaries, tribe names, enemy descriptions,
+enemy names, item names, actor names, race names, and skill names. DDS1 has
+two additional label tables whose placeholder-only contents remain neutral in
+source. DDS2 instead has a 48-row skill-family name table used by an affinity
+menu path.
+
+| Table | DDS1 | DDS2 | Row width |
+|---|---:|---:|---:|
+| Affinity descriptions | 256 | 256 | `0x2d` |
+| Tribe names | 98 | 176 | `0x13` |
+| Enemy descriptions | 384 | 384 | `0xbd` |
+| Enemy names | 384 | 384 | `0x11` |
+| Item names | 192 | 256 | `0x19` |
+| Actor names | 32 | 32 | `0x11` |
+| Race names | 16 | 32 | `0x07` |
+| Skill names | 624 | 672 | `0x11` |
+| DDS1 token labels / DDS2 skill-family names | 64 | 48 | `0x11` / `0x21` |
+| DDS1 reserved labels | 256 | — | `0x11` |
+
+Every fixed row appears explicitly, including retail placeholders and empty
+strings. Quoted text makes spaces and punctuation editable while the assembler
+enforces ASCII, row capacity, NUL termination, and zero padding:
+
+```text
+enemy-name 1 "Laksmi"
+item-name 1 "Ration"
+skill-name 1 "Agi"
+```
+
+The final four segments are complete MSG1 banks for item help, skill help,
+status help, and default-command help. They live beside the table as ordinary
+`.msgasm` sources and use the same exact message language as other MSG1 data:
+
+```text
+message-bank items file=msg-items.msgasm
+message-bank skills file=msg-skills.msgasm
+message-bank status-help file=msg-status-help.msgasm
+message-bank command-help file=msg-command-help.msgasm
+```
+
+DDS1 contains 192, 607, 210, and 9 dialogs in those banks; DDS2 contains 256,
+672, 254, and 9. The table codec validates each complete MSG1 layout and
+reassembles every bank canonically. Corpus checks also join the 384 enemy name
+and description rows to `UNIT.TBL`, the item-name rows to the SKILL item domain,
+and the skill-name rows to the full SKILL ID domain.
+
 ## Battle AI and formulas
 
 `AICALC.TBL` holds the enemy decision tables, shared calculation words, and
@@ -244,3 +295,13 @@ refer directly to `CALC_SOURCE_LEVEL()`, `CALC_TARGET_STAT(3)`, and
 `CALC_ACTION_HIT_LEVEL()`, then return through `CALC_SET_RESULT(...)`.
 Lookup curves whose exact gameplay role remains uncertain retain neutral
 `CALC_LEVEL_FACTOR_*` names.
+
+The AI programs use a separate battle-command vocabulary derived from each
+game's native dispatch table and handlers. It covers action and target
+selection, HP and party-state queries, history counters, scene transitions,
+and camera operations. This names 2,909 of 3,434 calls in DDS1 and 3,414 of
+3,801 calls in DDS2, allowing common code to read as conditions such as
+`AI_UNIT_HP_AT_OR_BELOW_RATE(25)` and actions such as
+`AI_SELECT_SKILL(1)`. Calls whose handler role is still ambiguous remain as
+numeric `COMM` instructions; the profile does not infer names from usage
+alone.
