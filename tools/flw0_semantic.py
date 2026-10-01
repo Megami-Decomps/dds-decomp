@@ -1202,37 +1202,40 @@ def render_code(
 
         if opcode == flw0.OPCODE_IDS["COMM"]:
             command = profile.by_id.get(operand) if profile is not None else None
-            if command is None or len(stack) != command.stack_pop:
+            if command is None:
                 pc = raw(pc)
                 continue
-            arguments = tuple(
-                _symbolize_argument(pending.expression, command, index)
-                for index, pending in enumerate(reversed(stack))
-            )
-            call_start = min((pending.start for pending in stack), default=pc)
-            stack = []
-            call = NativeCall(command.name, arguments, command.writes_result)
-
-            store_pc = pc + 2
-            if (
-                command.writes_result
+            captures_result = (
+                command.writes_result is True
                 and pc + 1 < len(words)
                 and words[pc + 1].opcode == flw0.OPCODE_IDS["PUSHREG"]
-                and store_pc < len(words)
-                and words[store_pc].opcode in _OPCODE_TO_STORE
                 and pc + 1 not in symbols_at_pc
-                and store_pc not in symbols_at_pc
+            )
+            if (
+                len(stack) < command.stack_pop
+                or (len(stack) != command.stack_pop and not captures_result)
             ):
-                store = words[store_pc]
-                text = (
-                    f"{_OPCODE_TO_STORE[store.opcode]}"
-                    f"[{_signed(store.operand_u16, 16)}] = {call.render()}"
-                )
-                emit(text, call_start, pc + 3)
+                pc = raw(pc)
+                continue
+            argument_start = len(stack) - command.stack_pop
+            argument_values = stack[argument_start:]
+            arguments = tuple(
+                _symbolize_argument(pending.expression, command, index)
+                for index, pending in enumerate(reversed(argument_values))
+            )
+            call_start = min(
+                (pending.start for pending in argument_values), default=pc
+            )
+            stack = stack[:argument_start]
+            call = NativeCall(command.name, arguments, command.writes_result)
+
+            if captures_result:
+                stack.append(_Pending(call, call_start, pc + 2))
                 result_known = True
-                pc += 3
+                pc += 2
                 continue
 
+            assert not stack
             text = ("result = " if command.writes_result else "") + call.render()
             emit(text, call_start, pc + 1)
             result_known = bool(command.writes_result) or (
