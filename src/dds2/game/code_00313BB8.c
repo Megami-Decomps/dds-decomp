@@ -387,14 +387,14 @@ void func_00314CE8(u8 *work, u16 id) {
 }
 
 void func_00314D90(void) {
-    u32 temp_v0;
-    s32 temp_v1;
+    u32 first;
+    s32 last;
 
     memset(D_00435DD0 + 0x16ef0, 0, 0x10);
-    temp_v0 = mnuPickPairedTableValue(0x10, 0);
-    temp_v1 = mnuPickPairedTableValue(0x10, 1);
-    for (; (s32)temp_v0 < temp_v1; temp_v0 = temp_v0 + 1) {
-        func_001B7940(temp_v0 & 0xffff, 1);
+    first = mnuPickPairedTableValue(0x10, 0);
+    last = mnuPickPairedTableValue(0x10, 1);
+    for (; (s32)first < last; first = first + 1) {
+        func_001B7940(first & 0xffff, 1);
     }
 }
 

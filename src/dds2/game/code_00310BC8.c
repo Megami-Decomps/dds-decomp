@@ -440,11 +440,11 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 }
 
 s64 sdfFontRegisterShort(s32 arg0, s32 arg1, u64 arg2, u64 arg3) {
-    u64 temp_v0;
+    u64 handle;
 
-    temp_v0 = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
-    frFontDrawGlyphWithSharedFlags(temp_v0, 1);
-    return frFontQueueGlyphInSelectedSlot(temp_v0);
+    handle = func_0019F460(arg0 << 4, arg1 << 3, 0, arg2, arg3, 0);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    return frFontQueueGlyphInSelectedSlot(handle);
 }
 
 s32 func_00311AE8(s32 x, s32 y, u64 first, u64 second, u64 third, s32 option) {
@@ -1014,11 +1014,11 @@ u32 sdfGridGetCellValue(SdfGrid *grid, s32 column, s32 row) {
 }
 
 void sdfGridSetCellValue(s32 arg0, s32 arg1, s32 arg2, u32 arg3) {
-    u32 temp_v0;
+    u32 cell;
 
-    temp_v0 = arg2 * *(s32 *)(arg0 + 0x14) + arg1;
-    if (temp_v0 < *(u32 *)(arg0 + 0x10)) {
-        *(u32 *)(temp_v0 * 8 + *(s32 *)(arg0 + 4) + 4) = arg3;
+    cell = arg2 * *(s32 *)(arg0 + 0x14) + arg1;
+    if (cell < *(u32 *)(arg0 + 0x10)) {
+        *(u32 *)(cell * 8 + *(s32 *)(arg0 + 4) + 4) = arg3;
     }
 }
 

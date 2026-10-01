@@ -535,14 +535,14 @@ void mnuResetSoundBuffer(void) {
 }
 
 void mnuReleaseSoundBuffer(void) {
-    u32 *temp_v0 = D_00455D70;
-    u32 temp_v1 = temp_v0[8];
+    u32 *state = D_00455D70;
+    u32 buffer = state[8];
 
-    if (temp_v1 == 0) {
+    if (buffer == 0) {
         return;
     }
-    func_003298C0(temp_v1);
-    temp_v0[8] = 0;
+    func_003298C0(buffer);
+    state[8] = 0;
 }
 
 void func_002A2A40(void) {

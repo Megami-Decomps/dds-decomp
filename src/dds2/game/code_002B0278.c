@@ -3116,63 +3116,63 @@ void mnuLinkItemList(MenuListNode **items, s32 count) {
 }
 
 s32 mnuComparePrimaryKeyDescending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeyPrimary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeyPrimary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeyPrimary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeyPrimary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return aKey < bKey;
 }
 
 s32 mnuComparePrimaryKeyAscending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeyPrimary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeyPrimary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeyPrimary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeyPrimary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (aKey < bKey) ? -1 : 0;
 }
 
 s32 mnuCompareSecondaryKeyDescending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeySecondary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeySecondary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeySecondary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeySecondary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return aKey < bKey;
 }
 
 s32 mnuCompareSecondaryKeyAscending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeySecondary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeySecondary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeySecondary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeySecondary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (aKey < bKey) ? -1 : 0;
 }
 
 s32 mnuCompareTertiaryKeyDescending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeyTertiary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeyTertiary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeyTertiary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeyTertiary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return -1;
     }
-    return temp_A < temp_B;
+    return aKey < bKey;
 }
 
 s32 mnuCompareTertiaryKeyAscending(s32 *left, s32 *right) {
-    u32 temp_A = ((MenuListNode *)*left)->sortKeyTertiary;
-    u32 temp_B = ((MenuListNode *)*right)->sortKeyTertiary;
+    u32 aKey = ((MenuListNode *)*left)->sortKeyTertiary;
+    u32 bKey = ((MenuListNode *)*right)->sortKeyTertiary;
 
-    if (temp_B < temp_A) {
+    if (bKey < aKey) {
         return 1;
     }
-    return (temp_A < temp_B) ? -1 : 0;
+    return (aKey < bKey) ? -1 : 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AF48);

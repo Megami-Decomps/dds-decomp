@@ -255,19 +255,19 @@ void mnuPairedSlideBarSetState(u32 *work, s32 state) {
 INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A46C8);
 
 s32 func_002A4728(void) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_v2;
+    s32 index;
+    s32 next;
+    s32 total;
 
-    temp_v2 = 0;
-    temp_v0 = 0;
+    total = 0;
+    index = 0;
     do {
-        temp_v1 = temp_v0 + 1;
-        temp_v0 = func_002A46C8(temp_v0);
-        temp_v2 = temp_v2 + temp_v0;
-        temp_v0 = temp_v1;
-    } while (temp_v1 < 3);
-    return temp_v2;
+        next = index + 1;
+        index = func_002A46C8(index);
+        total = total + index;
+        index = next;
+    } while (next < 3);
+    return total;
 }
 
 s32 func_002A4770(s32 segment) {

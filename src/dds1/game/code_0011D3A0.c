@@ -1547,9 +1547,9 @@ void fldSetFieldTransitionFlag(void) {
 }
 
 u8 fldTestFieldTransitionFlag(void) {
-    s32 temp_v0 = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
-    temp_v0 &= 4;
-    return temp_v0 != 0;
+    s32 flags = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
+    flags &= 4;
+    return flags != 0;
 }
 
 void func_00124740(void) {
@@ -1570,9 +1570,9 @@ void func_001247B8(void) {
 }
 
 u8 func_001247F0(void) {
-    s32 temp_v0 = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
-    temp_v0 &= 2;
-    return temp_v0 != 0;
+    s32 flags = ((FldWorkFlags *)D_003BAA00)->fieldFlags;
+    flags &= 2;
+    return flags != 0;
 }
 
 void func_00124808(void) {
