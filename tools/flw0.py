@@ -1501,6 +1501,11 @@ def main() -> int:
         metavar="NAME",
         help="native-command profile used to lift known calls",
     )
+    view_parser.add_argument(
+        "--semantic",
+        action="store_true",
+        help="fold consumed stack operations into semantic statements",
+    )
 
     args = parser.parse_args()
     try:
@@ -1535,7 +1540,9 @@ def main() -> int:
 
             source = args.input.read_text(encoding="utf-8")
             profile_name = args.profile or flw0_view.source_profile_name(source)
-            rendered = flw0_view.render(parse_source(source), profile_name)
+            rendered = flw0_view.render(
+                parse_source(source), profile_name, semantic=args.semantic
+            )
             if args.output is None:
                 print(rendered, end="")
             else:
