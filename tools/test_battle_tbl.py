@@ -37,6 +37,161 @@ class BattleTableTests(unittest.TestCase):
                 self.assertEqual(len(data), size)
                 self.assertEqual(battle_tbl.decode_unit(data), model)
 
+    def test_skill_profiles_and_templates(self) -> None:
+        expected_sizes = {"dds1": 0x86C0, "dds2": 0x9BD0}
+        for name, size in expected_sizes.items():
+            with self.subTest(profile=name):
+                profile = battle_tbl.SKILL_PROFILES[name]
+                model = battle_tbl.default_skill(profile)
+                data = battle_tbl.encode_skill(model)
+                self.assertEqual(len(data), size)
+                self.assertEqual(battle_tbl.decode_skill(data), model)
+
+    def test_every_skill_record_family_round_trips(self) -> None:
+        profile = battle_tbl.SKILL_PROFILES["dds2"]
+        model = battle_tbl.default_skill(profile)
+        attributes = list(model.action_attributes)
+        attributes[1] = battle_tbl.SkillActionAttribute(-1, 18)
+        actions = list(model.actions)
+        actions[1] = battle_tbl.SkillAction(
+            flags=1,
+            use=2,
+            effect_type=2,
+            cost_type=1,
+            cost=12,
+            cost_base=3,
+            target_type=1,
+            target_area=9,
+            target_rule=2,
+            target_random=1,
+            untargetable_status=0x228,
+            target_program=4,
+            hit_type=1,
+            hit_level=99,
+            hit_program=5,
+            hits_min=2,
+            hits_max=4,
+            hp_type=8,
+            hp_power=75,
+            mp_type=5,
+            mp_power=50,
+            hp_base=10,
+            mp_base=-4,
+            effect_percent=100,
+            ailment_type=2,
+            ailment_level=100,
+            base_status=0x4000,
+            support_type=0x2AA,
+            support_points=-3,
+            death_type=25,
+            lookup_id=7,
+            program=3,
+            magic_base=-20,
+            magic_limit=30000,
+        )
+        requirements = list(model.requirements)
+        requirements[0] = battle_tbl.SkillRequirement(
+            (4, 0x20000002, 0x40000001), 3, 2
+        )
+        coefficients = list(model.coefficient_bits)
+        coefficients[12] = 0x3FC00000
+        coefficients[13] = 0x00050005
+        party_defaults = list(model.party_defaults)
+        party_defaults[3] = battle_tbl.PartySkillDefaults(
+            9, 1375, 0x3E4CCCCD, 0x201, 0x100, 6, 1, 4, 264, 1
+        )
+        items = list(model.items)
+        items[4] = battle_tbl.SkillItemEntry(0x402, 160, 25000, 1)
+        bonuses = list(model.profile_bonuses)
+        bonuses[5] = battle_tbl.ProfileBonus((1, 2, 3, 4, 5), 9)
+        groups = list(model.groups)
+        groups[1] = battle_tbl.SkillGroup((10, 11, 12))
+        model = battle_tbl.SkillTable(
+            profile,
+            tuple(attributes),
+            tuple(actions),
+            tuple(requirements),
+            tuple(coefficients),
+            tuple(party_defaults),
+            tuple(items),
+            tuple(bonuses),
+            tuple(groups),
+        )
+        battle_tbl.validate_skill_references(model)
+        data = battle_tbl.encode_skill(model)
+        self.assertEqual(battle_tbl.decode_skill(data), model)
+        source = battle_tbl.render_skill_source(model)
+        self.assertIn("action-attribute 1 attribute=-1 auxiliary=18", source)
+        self.assertIn(
+            "action 1 flags=0x1 use=2 effect_type=2 cost_type=1 cost=12 ",
+            source,
+        )
+        self.assertIn("hit_type=1 hit_level=99 hit_program=5", source)
+        self.assertIn("support_points=-3 death_type=25", source)
+        self.assertIn(
+            "requirement 0x1ab conditions=skill:4,unit-mask:0x2,group:1", source
+        )
+        self.assertIn("coefficient 0x30 value=1.5", source)
+        self.assertIn("coefficient 0x34 bits=0x50005", source)
+        self.assertIn("profile-bonus 0xc5 stats=1,2,3,4,5 tier=9", source)
+        self.assertIn("group 1 skills=10,11,12", source)
+        self.assertEqual(battle_tbl.encode_skill(battle_tbl.parse_skill_source(source)), data)
+
+    def test_invalid_skill_references_are_rejected(self) -> None:
+        skill = battle_tbl.default_skill(battle_tbl.SKILL_PROFILES["dds2"])
+        requirements = list(skill.requirements)
+        requirements[0] = battle_tbl.SkillRequirement(
+            (0x40000030, 0xFFFFFFFF, 0xFFFFFFFF), 1
+        )
+        invalid_group = battle_tbl.SkillTable(
+            skill.profile,
+            skill.action_attributes,
+            skill.actions,
+            tuple(requirements),
+            skill.coefficient_bits,
+            skill.party_defaults,
+            skill.items,
+            skill.profile_bonuses,
+            skill.groups,
+        )
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "group 48 outside"):
+            battle_tbl.encode_skill(invalid_group)
+
+        groups = list(skill.groups)
+        groups[0] = battle_tbl.SkillGroup((skill.profile.action_attr_count,))
+        invalid_member = battle_tbl.SkillTable(
+            skill.profile,
+            skill.action_attributes,
+            skill.actions,
+            skill.requirements,
+            skill.coefficient_bits,
+            skill.party_defaults,
+            skill.items,
+            skill.profile_bonuses,
+            tuple(groups),
+        )
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "skill 672 outside"):
+            battle_tbl.encode_skill(invalid_member)
+
+    def test_unit_skill_reference_validation(self) -> None:
+        unit = battle_tbl.default_unit(battle_tbl.UNIT_PROFILES["dds2"])
+        enemies = list(unit.enemies)
+        enemies[7] = battle_tbl.EnemyTemplate(
+            level=1,
+            skills=(battle_tbl.SKILL_PROFILES["dds2"].action_attr_count,) + (0,) * 7,
+        )
+        unit = battle_tbl.UnitTable(
+            unit.profile,
+            unit.party,
+            unit.party_affinities,
+            unit.alternate_affinities,
+            tuple(enemies),
+            unit.enemy_affinities,
+        )
+        skill = battle_tbl.default_skill(battle_tbl.SKILL_PROFILES["dds2"])
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "skill 672 outside"):
+            battle_tbl.validate_unit_skill(unit, skill)
+
     def test_every_unit_record_family_round_trips(self) -> None:
         profile = battle_tbl.UNIT_PROFILES["dds2"]
         model = battle_tbl.default_unit(profile)
@@ -254,6 +409,10 @@ end
                     model = battle_tbl.parse_unit_source(source_text)
                     data = battle_tbl.encode_unit(model)
                     rendered = battle_tbl.render_unit_source(battle_tbl.decode_unit(data))
+                elif name == "skill":
+                    model = battle_tbl.parse_skill_source(source_text)
+                    data = battle_tbl.encode_skill(model)
+                    rendered = battle_tbl.render_skill_source(battle_tbl.decode_skill(data))
                 else:
                     self.fail(f"unhandled tracked battle table {name}")
                 self.assertEqual(hashlib.sha1(data).hexdigest(), digest)
@@ -266,6 +425,11 @@ end
                 (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
             )
             battle_tbl.validate_encount_unit(encount, unit)
+            skill = battle_tbl.parse_skill_source(
+                (ROOT / f"src/{game}/data/battle/skill.tblasm").read_text()
+            )
+            battle_tbl.validate_skill_references(skill)
+            battle_tbl.validate_unit_skill(unit, skill)
 
 
 if __name__ == "__main__":
