@@ -281,11 +281,17 @@ def render(
                 profile,
                 message_symbols,
             )
-            expression = (
-                f"message({message_symbol})"
-                if message_symbol is not None
-                else str(_signed(operand, 16))
+            event_symbol = flw0._event_push_symbol(
+                raw,
+                words[pc + 1].raw if pc + 1 < len(words) else None,
+                profile,
             )
+            if message_symbol is not None:
+                expression = f"message({message_symbol})"
+            elif event_symbol is not None:
+                expression = f"event({event_symbol})"
+            else:
+                expression = str(_signed(operand, 16))
             stack.push(expression)
             statement = f"push {expression}"
         elif opcode == flw0.OPCODE_IDS["PUSHLIX"]:
