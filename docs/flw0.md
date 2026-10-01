@@ -134,6 +134,22 @@ and pointer automatically. A selection may declare `ext`, `pattern`,
 `trailing=00`, for example, retains one extra byte after the final option
 terminator.
 
+Code that immediately passes a message-bank index to the profiled message
+command uses the message declaration name instead of a numeric index:
+
+```text
+  PUSHMSG MSG_START_00
+  COMM MESSAGE_REQUEST_AND_POLL
+```
+
+`PUSHMSG` assembles to the VM's ordinary `PUSHIS` instruction. Its operand is
+the named dialog's current declaration-order index, so moving a dialog within
+the bank also updates direct code references to it. The disassembler emits the
+pseudo-instruction only for the adjacent `PUSHIS` and
+`MESSAGE_REQUEST_AND_POLL` pattern, with a unique source-safe dialog name.
+Other integer pushes remain numeric, including computed or ambiguous message
+references.
+
 Physical version-1 sources use the same records after an `msg1` marker inside
 their type-3 section. Their section size remains fixed. Across the tracked
 corpus, this form covers all 36 nonempty banks: 179 dialogs, 257 message pages,

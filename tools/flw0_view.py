@@ -146,6 +146,16 @@ def render(
     procedures, labels, entries = _symbol_maps(script)
     strings = type5_strings(script)
     words = script.code_words()
+    message_sections = [
+        section
+        for section in script.sections_of_type(3)
+        if section.element_size == 1
+    ]
+    message_symbols = (
+        flw0._message_symbols(script.section_bytes(message_sections[0]))[0]
+        if len(message_sections) == 1
+        else ()
+    )
     stack = _Stack([])
     result_known = False
 
@@ -265,7 +275,17 @@ def render(
             condition = stack.pop()
             statement = f"if !({condition}) goto {_target(labels, operand, 'jump_label')}"
         elif opcode == flw0.OPCODE_IDS["PUSHIS"]:
-            expression = str(_signed(operand, 16))
+            message_symbol = flw0._message_push_symbol(
+                raw,
+                words[pc + 1].raw if pc + 1 < len(words) else None,
+                profile,
+                message_symbols,
+            )
+            expression = (
+                f"message({message_symbol})"
+                if message_symbol is not None
+                else str(_signed(operand, 16))
+            )
             stack.push(expression)
             statement = f"push {expression}"
         elif opcode == flw0.OPCODE_IDS["PUSHLIX"]:

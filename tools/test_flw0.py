@@ -32,7 +32,10 @@ def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
     return bytes(row)
 
 
-def _fixture(code_words: list[int] | None = None) -> bytes:
+def _fixture(
+    code_words: list[int] | None = None,
+    message_data: bytes = b"",
+) -> bytes:
     """Build the significant shape of a small DDS event script."""
 
     if code_words is None:
@@ -41,7 +44,7 @@ def _fixture(code_words: list[int] | None = None) -> bytes:
         (0, 0x20, 1),
         (1, 0x20, 0),
         (2, 4, len(code_words)),
-        (3, 1, 0),
+        (3, 1, len(message_data)),
         (4, 1, 0xF0),
     ]
     table_end = 0x20 + len(sections) * 0x10
@@ -53,9 +56,11 @@ def _fixture(code_words: list[int] | None = None) -> bytes:
         table_end + len(proc),
         table_end + len(proc),
         table_end + len(proc) + len(code),
-        table_end + len(proc) + len(code),
+        table_end + len(proc) + len(code) + len(message_data),
     ]
-    physical_size = table_end + len(proc) + len(code) + len(string_padding)
+    physical_size = (
+        table_end + len(proc) + len(code) + len(message_data) + len(string_padding)
+    )
     declared_size = physical_size - len(string_padding)
 
     header = struct.pack(
@@ -73,7 +78,7 @@ def _fixture(code_words: list[int] | None = None) -> bytes:
         struct.pack("<IIII", type_id, size, count, offset)
         for (type_id, size, count), offset in zip(sections, offsets)
     )
-    return header + table + proc + code + string_padding
+    return header + table + proc + code + message_data + string_padding
 
 
 class Flw0Tests(unittest.TestCase):
@@ -143,6 +148,85 @@ class Flw0Tests(unittest.TestCase):
             flw0.Flw0Error, "named COMM operand requires a profile"
         ):
             flw0.parse_source(without_profile)
+
+    def test_message_references_use_names_in_both_source_formats(self) -> None:
+        message_data = msg1.encode(
+            msg1.Bank(
+                (
+                    msg1.Message("MSG_A", 0xFFFF, (b"First",)),
+                    msg1.Message("MSG_B", 0xFFFF, (b"Second",)),
+                ),
+                (),
+            )
+        )
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ],
+            message_data,
+        )
+        script = flw0.parse(original)
+
+        physical = flw0.render_source(script, "dds1")
+        symbolic = flw0_symbolic.render(script, "dds1")
+        self.assertIn("0001: PUSHMSG MSG_B", physical)
+        self.assertIn("  PUSHMSG MSG_B", symbolic)
+        self.assertEqual(flw0.parse_source(physical).to_bytes(), original)
+        self.assertEqual(flw0.parse_source(symbolic).to_bytes(), original)
+
+        message_a = """\
+  message MSG_A speaker=none
+    page
+      text "First"
+    endpage
+  endmessage
+"""
+        message_b = """\
+  message MSG_B speaker=none
+    page
+      text "Second"
+    endpage
+  endmessage
+"""
+        reordered = flw0.parse_source(
+            symbolic.replace(message_a + message_b, message_b + message_a)
+        )
+        self.assertEqual(reordered.code_words()[1].operand_u16, 0)
+        reordered_bank = msg1.decode(
+            reordered.section_bytes(reordered.sections[3])
+        )
+        self.assertEqual(reordered_bank.dialogs[0].name, "MSG_B")
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown message 'MISSING'"):
+            flw0.parse_source(symbolic.replace("PUSHMSG MSG_B", "PUSHMSG MISSING"))
+
+        view = flw0_view.render(script, "dds1")
+        self.assertIn("MESSAGE_REQUEST_AND_POLL(message(MSG_B))", view)
+
+    def test_duplicate_message_names_keep_numeric_operands(self) -> None:
+        message_data = msg1.encode(
+            msg1.Bank(
+                (
+                    msg1.Message("SAME", 0xFFFF, (b"First",)),
+                    msg1.Message("SAME", 0xFFFF, (b"Second",)),
+                ),
+                (),
+            )
+        )
+        original = _fixture(
+            [
+                flw0.OPCODE_IDS["PROC"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ],
+            message_data,
+        )
+        script = flw0.parse(original)
+        self.assertIn("0001: PUSHIS 0x0001", flw0.render_source(script, "dds1"))
+        self.assertIn("  PUSHIS 1", flw0_symbolic.render(script, "dds1"))
 
     def test_source_preserves_gap_unknown_section_and_raw_row(self) -> None:
         original = bytearray(_fixture())
@@ -721,6 +805,7 @@ end
         speakers = 0
         font_directives = 0
         glyph_directives = 0
+        message_references = 0
         for expected, source in records:
             with self.subTest(source=source.name):
                 text = source.read_text(encoding="utf-8")
@@ -729,6 +814,7 @@ end
                 version = int(text.split(None, 2)[1])
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
+                message_references += text.count("PUSHMSG ")
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
@@ -760,6 +846,7 @@ end
             (36, 179, 257, 16, 27),
         )
         self.assertEqual((font_directives, glyph_directives), (606, 2))
+        self.assertEqual(message_references, 188)
 
 
 if __name__ == "__main__":
