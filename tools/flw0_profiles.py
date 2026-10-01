@@ -66,6 +66,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x007, "TEST_MODEL_FLAG", 1, writes_result=True),
     NativeCommand(0x008, "SET_MODEL_FLAG", 1, writes_result=False),
     NativeCommand(0x009, "CLEAR_MODEL_FLAG", 1, writes_result=False),
+    NativeCommand(0x00A, "RANDOM_ONE_TO", 1, writes_result=True),
     NativeCommand(0x00D, "WAIT_FOR_TIMER_START", 0, writes_result=False),
     NativeCommand(0x00E, "WAIT_FOR_TIMER_LIMIT", 1, writes_result=False),
     NativeCommand(0x00F, "SCREEN_FADE_A", 2, writes_result=False),
@@ -75,6 +76,9 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(
         0x019, "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD", 1, writes_result=False
     ),
+    NativeCommand(0x01F, "FADE_BACKGROUND_IN", 1, writes_result=False),
+    NativeCommand(0x027, "READ_SOLAR_PHASE", 0, writes_result=True),
+    NativeCommand(0x028, "SUBMIT_EVENT_WITH_MODE", 2, writes_result=False),
     NativeCommand(0x043, "RESET_DRAW_EFFECTS", 0, writes_result=False),
     NativeCommand(0x046, "RETURN_TO_TITLE", 0, writes_result=False),
     NativeCommand(0x049, "WAIT_FOR_UNIT_MOTION", 1, writes_result=False),
@@ -92,6 +96,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06B, "MOVE_OBJECT_ALONG_PATH", 3, writes_result=False),
+    NativeCommand(0x070, "CHANGE_ITEM_COUNT", 2, writes_result=False),
     NativeCommand(0x071, "SET_MESSAGE_WINDOW_GEOMETRY", 3, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
@@ -101,7 +106,26 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1, writes_result=False),
     NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2, writes_result=True),
     NativeCommand(0x0C3, "SET_SOLAR_OVERLAY_MODE", 1, writes_result=False),
+    NativeCommand(0x0C8, "WAIT_FOR_CAMP_TASK", 1, writes_result=False),
+    NativeCommand(0x0C9, "BIND_MODEL_MOTION_SOUND", 2, writes_result=True),
+    NativeCommand(0x0CC, "CREATE_EVENT_TEXTURE_TASK", 2, writes_result=True),
     NativeCommand(0x0CD, "CREATE_FLAGGED_EFFECT_OBJECT", 1, writes_result=True),
+    NativeCommand(0x0CE, "SET_EFFECT_MODEL_CUT", 2, writes_result=False),
+    NativeCommand(0x0CF, "SET_EFFECT_MODEL_ROTATION", 4, writes_result=False),
+    NativeCommand(0x0D0, "CREATE_EVENT_BED_EFFECT", 2, writes_result=True),
+    NativeCommand(0x0D1, "ATTACH_EFFECT_TO_PATH", 2, writes_result=False),
+    NativeCommand(0x0D2, "WAIT_FOR_EFFECT_PATH", 1, writes_result=False),
+    NativeCommand(0x0D3, "CREATE_MG1_EFFECT", 1, writes_result=True),
+    NativeCommand(0x0D4, "CREATE_EVENT_MG1_EFFECT", 2, writes_result=True),
+    NativeCommand(0x0D5, "CREATE_MG2_EFFECT", 1, writes_result=True),
+    NativeCommand(0x0D6, "CREATE_EVENT_MG2_EFFECT", 2, writes_result=True),
+    NativeCommand(0x0D7, "SET_MG1_EFFECT_POINTS", 3, writes_result=False),
+    NativeCommand(0x0D8, "SET_MG2_EFFECT_POINTS", 5, writes_result=False),
+    NativeCommand(0x0D9, "START_EVENT_BGM", 2, writes_result=False),
+    NativeCommand(0x0DB, "SET_WORLD_NODE_BASE_MODE", 1, writes_result=False),
+    NativeCommand(0x0E3, "DESTROY_EFFECT_OBJECT", 1, writes_result=False),
+    NativeCommand(0x0F7, "START_CAMP_TASK_IF_ABSENT", 1, writes_result=False),
+    NativeCommand(0x0F8, "CAMP_TASK_READY", 1, writes_result=True),
     NativeCommand(
         0x100, "REQUEST_ALTERNATE_FIELD_SEQUENCE", 2, writes_result=False
     ),
@@ -337,7 +361,6 @@ DDS2_BATTLE_CALC_COMMANDS = (
 # Commands whose gameplay role is still ambiguous deliberately remain numeric
 # in source.
 BATTLE_AI_COMMANDS = (
-    NativeCommand(0x00A, "RANDOM_ONE_TO", 1, writes_result=True),
     NativeCommand(0x030, "AI_SELECT_BASIC_ATTACK", 0, writes_result=False),
     NativeCommand(0x031, "AI_SELECT_ESCAPE", 0, writes_result=False),
     NativeCommand(0x032, "AI_SELECT_WAIT", 0, writes_result=False),
