@@ -186,13 +186,13 @@ void func_0015A758(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
-void parObjSetMode(ParObj *work, s32 value) {
-    value &= 0xFF;
-    switch (work->dispatchIndex) {
+void parObjSetMode(ParObj *object, s32 mode) {
+    mode &= 0xFF;
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        work->mode150 = value;
+        object->mode150 = mode;
         break;
     case 0:
     case 2:
@@ -203,20 +203,20 @@ void parObjSetMode(ParObj *work, s32 value) {
     case 8:
     case 10:
     case 12:
-        work->mode151 = value;
+        object->mode151 = mode;
         break;
     case 9:
         break;
     }
-    work->restartFlag = 1;
+    object->restartFlag = 1;
 }
 
-s32 parObjGetMode(ParObj *work) {
-    switch (work->dispatchIndex) {
+s32 parObjGetMode(ParObj *object) {
+    switch (object->dispatchIndex) {
     case 1:
     case 5:
     case 11:
-        return work->mode150;
+        return object->mode150;
     case 0:
     case 2:
     case 3:
@@ -226,7 +226,7 @@ s32 parObjGetMode(ParObj *work) {
     case 8:
     case 10:
     case 12:
-        return work->mode151;
+        return object->mode151;
     default:
         return 0;
     }
@@ -234,21 +234,21 @@ s32 parObjGetMode(ParObj *work) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A7E0);
 
-ParObj *parInstantiateKind(ParObj *work) {
-    ParObj *particle = D_0034E250[work->dispatchIndex].func();
-    particle->dispatchIndex = work->dispatchIndex;
-    if (work->unk28 == -1) {
-        s32 transform = billCloneObjectRetainingSharedData(work->billId);
-        billSetChildScaleComponents(transform, particle->scaleX, particle->scaleY);
-        billSetBillboardMode(transform, particle->billboardMode);
-        billMarkKindOneFlag(transform);
-        particle->billId = transform;
+ParObj *parInstantiateKind(ParObj *source) {
+    ParObj *particle = D_0034E250[source->dispatchIndex].func();
+    particle->dispatchIndex = source->dispatchIndex;
+    if (source->unk28 == -1) {
+        s32 billboard = billCloneObjectRetainingSharedData(source->billId);
+        billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
+        billSetBillboardMode(billboard, particle->billboardMode);
+        billMarkKindOneFlag(billboard);
+        particle->billId = billboard;
     }
     return particle;
 }
 
-void parObjDispatch(ParObj *work) {
-    D_0034E258[work->dispatchIndex].func(work);
+void parObjDispatch(ParObj *object) {
+    D_0034E258[object->dispatchIndex].func(object);
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015A9A0);

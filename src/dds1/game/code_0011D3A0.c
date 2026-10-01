@@ -800,11 +800,11 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 /* Coordinate tables have 28-byte records; the first record is reserved. */
 s32 func_00121818(s32 x, s32 y) {
     u8 *records = D_0033F068;
-    u8 *second = records + 2;
+    u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)second)) {
+        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
@@ -815,11 +815,11 @@ s32 func_00121818(s32 x, s32 y) {
 
 s32 func_00121870(s32 x, s32 y) {
     u8 *records = D_00342868;
-    u8 *second = records + 2;
+    u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)second)) {
+        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
@@ -830,11 +830,11 @@ s32 func_00121870(s32 x, s32 y) {
 
 s32 fldFindMapCoordinateIndex(s32 x, s32 y) {
     u8 *records = D_00346068;
-    u8 *second = records + 2;
+    u8 *yColumn = records + 2;
     s32 index = 1;
     s32 offset = 28;
     do {
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)second)) {
+        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return index;
         }
         index++;
@@ -845,12 +845,12 @@ s32 fldFindMapCoordinateIndex(s32 x, s32 y) {
 
 s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
     u8 *records = (u8 *)D_0032C9B0;
-    u8 *second = records + 2;
+    u8 *yColumn = records + 2;
     s32 index = 1;
     do {
         s32 offset = index * 8;
         index++;
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)second)) {
+        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
             return (s16 *)(offset + (s32)records);
         }
     } while (index < 640);
@@ -859,46 +859,46 @@ s16 *fldFindLocationCoordinateRecord(s32 x, s32 y) {
 
 s32 fldGetLocationCoordinateValue(s32 x, s32 y) {
     u8 *records = (u8 *)D_0032C9B0;
-    u8 *second = records + 2;
-    u8 *result = records + 6;
+    u8 *yColumn = records + 2;
+    u8 *valueColumn = records + 6;
     s32 index = 1;
     do {
         s32 offset = index * 8;
         index++;
-        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)second)) {
-            return *(s16 *)(offset + (s32)result);
+        if (x == *(s16 *)(offset + (s32)records) && y == *(s16 *)(offset + (s32)yColumn)) {
+            return *(s16 *)(offset + (s32)valueColumn);
         }
     } while (index < 640);
     return 0;
 }
 
 u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
-    s16 *entry = D_0032DDB0;
+    s16 *record = D_0032DDB0;
     s32 index = 0;
-    s32 checked = 0;
+    s32 visited = 0;
 
     do {
-        if (entry[0] == x && entry[1] == y) {
+        if (record[0] == x && record[1] == y) {
             return index;
         }
         index++;
-        checked++;
-        entry += 8;
-    } while (checked < 0x280);
+        visited++;
+        record += 8;
+    } while (visited < 0x280);
     return index;
 }
 
 s16 * fldFindStageCoordinateRecord(s32 x, s32 y) {
-    s16 *entry = D_0032DDB0;
-    s32 checked = 0;
+    s16 *record = D_0032DDB0;
+    s32 index = 0;
 
     do {
-        if (entry[0] == x && entry[1] == y) {
-            return entry;
+        if (record[0] == x && record[1] == y) {
+            return record;
         }
-        checked++;
-        entry += 8;
-    } while (checked < 0x60);
+        index++;
+        record += 8;
+    } while (index < 0x60);
     return NULL;
 }
 

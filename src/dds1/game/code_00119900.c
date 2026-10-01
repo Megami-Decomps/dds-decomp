@@ -142,18 +142,18 @@ u8 evtGetFlaggedRosterValue(s32 entryAddress) {
 }
 
 s32 dds3FindEntryIndex(s32 rosterIndex) {
-    Entry1A4 *p = (Entry1A4 *)(D_003BAA00 + 0xa60);
-    s32 n = 0;
+    Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
+    s32 index = 0;
 
     do {
-        if (p->flags & 1) {
-            if (p->rosterIndex == rosterIndex) {
-                return n;
+        if (entry->flags & 1) {
+            if (entry->rosterIndex == rosterIndex) {
+                return index;
             }
         }
-        n++;
-        p++;
-    } while (n < 5);
+        index++;
+        entry++;
+    } while (index < 5);
     return -1;
 }
 
@@ -284,36 +284,36 @@ u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
 
 s32 dds3EntryMax(void) {
     Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
-    s32 maximum = 0;
+    s32 max = 0;
     s32 remaining = 4;
 
     do {
         if (entry->flags & 1) {
-            if (maximum < entry->level) {
-                maximum = entry->level;
+            if (max < entry->level) {
+                max = entry->level;
             }
         }
         entry++;
         remaining--;
     } while (remaining >= 0);
-    return maximum;
+    return max;
 }
 
 s32 ptyGetAverageLevel(void) {
     Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + 0xa60);
-    s32 total = 0;
+    s32 sum = 0;
     s32 count = 0;
     s32 remaining = 4;
 
     do {
         if (entry->flags & 1) {
             count++;
-            total += entry->level;
+            sum += entry->level;
         }
         entry++;
         remaining--;
     } while (remaining >= 0);
-    return (total + count - 1) / count;
+    return (sum + count - 1) / count;
 }
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyAddUnit);
@@ -346,13 +346,13 @@ void evtUpdateFlaggedEntries(void) {
     do {
         Entry1A4 *entry = (Entry1A4 *)(D_003BAA00 + offset + 0xA60);
         if (entry->flags & 1) {
-            s32 id = 0;
+            s32 index = 0;
             do {
-                if (entry->rosterIndex == id) {
+                if (entry->rosterIndex == index) {
                     evtCopyRosterTableValue((s32)entry);
                 }
-                id++;
-            } while (id < 16);
+                index++;
+            } while (index < 16);
         }
         remaining--;
         offset += 0x1A4;

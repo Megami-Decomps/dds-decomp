@@ -242,20 +242,20 @@ extern void billMarkKindOneFlag(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001623D0);
 
-ParObj *parInstantiateKind(ParObj *src) {
-    ParObj *obj;
-    s32 bill;
+ParObj *parInstantiateKind(ParObj *source) {
+    ParObj *particle;
+    s32 billboard;
 
-    obj = D_003AAB80[src->dispatchIndex].func();
-    obj->dispatchIndex = src->dispatchIndex;
-    if (src->unk28 == -1) {
-        bill = billCloneObjectRetainingSharedData(src->billId);
-        billSetChildScaleComponents(bill, obj->scaleX, obj->scaleY);
-        billSetBillboardMode(bill, obj->billboardMode);
-        billMarkKindOneFlag(bill);
-        obj->billId = bill;
+    particle = D_003AAB80[source->dispatchIndex].func();
+    particle->dispatchIndex = source->dispatchIndex;
+    if (source->unk28 == -1) {
+        billboard = billCloneObjectRetainingSharedData(source->billId);
+        billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
+        billSetBillboardMode(billboard, particle->billboardMode);
+        billMarkKindOneFlag(billboard);
+        particle->billId = billboard;
     }
-    return obj;
+    return particle;
 }
 
 void parObjDispatch(ParObj *object) {
