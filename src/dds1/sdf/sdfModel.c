@@ -301,49 +301,20 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     u32 address;
     SdfDrawNode *child;
 
-    __asm__ volatile ("lqc2 vf28, 0(%0)" :: "r" (xAxis) : "memory");
+        VU0_LOAD_VF_MEMORY(vf28, xAxis);
     yAxis = drawNode->vectors[3];
-    __asm__ volatile ("lqc2 vf29, 0(%0)" :: "r" (yAxis) : "memory");
+        VU0_LOAD_VF_MEMORY(vf29, yAxis);
     zAxis = drawNode->vectors[4];
-    __asm__ volatile ("lqc2 vf30, 0(%0)" :: "r" (zAxis) : "memory");
+        VU0_LOAD_VF_MEMORY(vf30, zAxis);
     scale = drawNode->vectors[1];
-    __asm__ volatile ("lqc2 vf10, 0(%0)" :: "r" (scale) : "memory");
-    __asm__ volatile (
-        ".set noreorder                   \n"
-        "vmulx.xyzw vf28, vf28, vf10x     \n"
-        "vmuly.xyzw vf29, vf29, vf10y     \n"
-        "vmulz.xyzw vf30, vf30, vf10z     \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+        VU0_LOAD_VF_MEMORY(vf10, scale);
+    VU0_SCALE_MATRIX_ROWS(vf10);
     translation = drawNode->vectors[0];
-    __asm__ volatile ("lqc2 vf31, 0(%0)" :: "r" (translation) : "memory");
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "lqc2 vf24, 0(%0)        \n"
-        "lqc2 vf25, 16(%0)       \n"
-        "lqc2 vf26, 32(%0)       \n"
-        "lqc2 vf27, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (parentMatrix)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf31, translation);
+    VU0_LOAD_MATRIX_B(parentMatrix);
     func_002DDC50();
     transformed = drawNode->transformed;
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "sqc2 vf28, 0(%0)        \n"
-        "sqc2 vf29, 16(%0)       \n"
-        "sqc2 vf30, 32(%0)       \n"
-        "sqc2 vf31, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (transformed)
-        : "memory"
-    );
+    VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
         func_002E1FF8(address + (frame << 7));
@@ -365,24 +336,9 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     u8 *scale;
     SdfList *list;
 
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "lqc2 vf28, 0(%0)        \n"
-        "lqc2 vf29, 16(%0)       \n"
-        "lqc2 vf30, 32(%0)       \n"
-        "lqc2 vf31, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (transform)
-        : "memory"
-    );
+    VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
-    __asm__ volatile (
-        "lqc2 vf10, 0(%0)"
-        :
-        : "r" (scale)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, scale);
     __asm__ volatile (
         ".set noreorder               \n"
         "vmul.xyz vf28, vf28, vf10    \n"

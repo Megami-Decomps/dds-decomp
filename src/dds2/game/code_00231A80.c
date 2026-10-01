@@ -336,35 +336,19 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
 /* These shims transfer vectors between model state and VU0 registers. */
 void mdlLoadPrimaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector50;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 void mdlStorePrimaryVectorVU(MdlCtx *ctx) {
     void *vec;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.w vf10, vf0\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_SET_W_ONE(vf10);
     vec = &ctx->inner->vector50;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
+    VU0_STORE_VF(vf10, vec);
 }
 
 void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector60;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
@@ -377,48 +361,24 @@ void func_00232AD0(MdlCtx *ctx) {
     void *row2;
 
     secondary = &ctx->inner->vector60;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(secondary) : "memory");
+    VU0_STORE_VF(vf10, secondary);
     effMiscQuaternionToMatrixVU();
     row0 = &ctx->inner->vector20;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        ".set reorder"
-        : : "r"(row0) : "memory");
+    VU0_STORE_VF(vf28, row0);
     row1 = &ctx->inner->vector30;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf29, 0(%0)\n"
-        ".set reorder"
-        : : "r"(row1) : "memory");
+    VU0_STORE_VF(vf29, row1);
     row2 = &ctx->inner->vector40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf30, 0(%0)\n"
-        ".set reorder"
-        : : "r"(row2) : "memory");
+    VU0_STORE_VF(vf30, row2);
 }
 
 void mdlLoadTertiaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector70;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 void mdlStoreTertiaryVectorVU(MdlCtx *ctx) {
     void *vec = &ctx->inner->vector70;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
+    VU0_STORE_VF(vf10, vec);
 }
 
 u32 mdlGetBroadcastValue(MdlCtx *ctx) {

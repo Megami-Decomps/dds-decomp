@@ -959,14 +959,14 @@ void func_0033A388(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     func_00336C10(node + 0x30);
     VU0_STORE_MATRIX(packet->matrixB);
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x70));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecA));
+        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecA);
     __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x80));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecB));
+        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecB);
     VU0_LOAD_MATRIX(matrix);
     func_003363D0();
     VU0_MOVE_VF(vf10, vf31);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(packet->vecC));
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
+        VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecC);
+        VU0_STORE_VF_UNCLOBBERED(vf10, node + 0x90);
     packet->mscalCommand = 0x14000000;
     packet->stmodCommand = 0x04000002;
     packet->reservedA = 0;
@@ -986,16 +986,10 @@ void func_0033A480(u8 *node, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     VU0_STORE_MATRIX(D_0040B660);
     func_00336C10(node + 0x30);
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x90));
+        VU0_LOAD_VF(vf10, node + 0x90);
     VU0_STORE_MATRIX(D_0040B620);
-    __asm__ volatile(
-        ".set noreorder\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(D_0040B6A0));
+    VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, D_0040B6A0);
     *(SdfNodeBlock *)D_0040B580 = *(SdfNodeBlock *)node;
 }
 

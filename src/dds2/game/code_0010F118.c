@@ -188,28 +188,14 @@ void effObjFetchInnerFirstVec(EffTransformNode *node) {
 void effObjFetchInnerSecondVecNorm(EffTransformNode *node) {
     u8 *p = (u8 *)&node->inner->vec50;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "lqc2 vf10, 0(%0)    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
     effMiscNormalizeVU();
 }
 
 void effObjFetchInnerThirdVec(EffTransformNode *node) {
     u8 *p = (u8 *)&node->inner->vec60;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "lqc2 vf10, 0(%0)    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
 void effObjAddInnerFirstVec(EffTransformNode *node, u128 *vector) {
@@ -218,11 +204,7 @@ void effObjAddInnerFirstVec(EffTransformNode *node, u128 *vector) {
     inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
     VU0_LOAD_VF($vf10, &inner->vec40);
     VU0_LOAD_VF($vf11, vector);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vadd.xyzw $vf10, $vf10, $vf11\n"
-        ".set reorder\n"
-        : : : "memory");
+    VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, &inner->vec40);
 }
 
@@ -242,11 +224,7 @@ void effObjMulInnerThirdVec(EffTransformNode *node, u128 *vector) {
     inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
     VU0_LOAD_VF($vf10, &inner->vec60);
     VU0_LOAD_VF($vf11, vector);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmul.xyzw $vf10, $vf10, $vf11\n"
-        ".set reorder\n"
-        : : : "memory");
+    VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, &inner->vec60);
 }
 

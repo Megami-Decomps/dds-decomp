@@ -677,7 +677,7 @@ f32 btlTriangleNormalDotEdge(f32 *a, f32 *b, f32 *c) {
     VU0_LOAD_VF($vf11, c);
     __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\tvmove.xyzw $vf11, $vf10\n\t.set reorder");
     VU0_LOAD_VF($vf10, normal);
-    __asm__ volatile(".set noreorder\n\tvmul.xyz $vf2, $vf10, $vf11\n\tvaddy.x $vf2, $vf2, $vf2y\n\tvaddz.x $vf2, $vf2, $vf2z\n\tqmfc2.ni $2, $vf2\n\tmtc1 $2, %0\n\t.set reorder" : "=f"(dot) : : "$2");
+        VU0_DOT_XYZ(dot, vf10, vf11);
     return dot;
 }
 
