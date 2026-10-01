@@ -105,8 +105,8 @@ typedef struct BdWork {
     u32 materialFlags;  // 0x30
     u32 materialColor;  // 0x34
     u8 pad_0x38[0x28];  // 0x38
-    void *owner;         // 0x60
-    s32 slotIndex;       // 0x64
+    void *owner;         // 0x60: passed to the work initializer
+    s32 slotIndex;       // 0x64: slot index passed to the work initializer
     u8 pad_0x68[0x34];  // 0x68
     s32 alternate;      // 0x9C: alternate work entry when nonzero
 } BdWork; // 0xA0
