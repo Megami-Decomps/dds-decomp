@@ -1604,7 +1604,37 @@ void fldCreatePlayerObject(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00123FB8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001242B8);
+typedef struct FieldVec4 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} FieldVec4;
+
+extern FieldVec4 D_0039FC80;
+extern FieldVec4 D_0039FC90;
+extern char D_003BABC0[];
+extern u32 func_00112D00(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern void dds3SetCameraVector(u32, FieldVec4 *);
+extern void effObjSetInnerFloat(u32, f32);
+extern void dds3SetWorldCameraObject(u64, u32);
+
+void func_001242B8(void) {
+    FieldVec4 a = D_0039FC80;
+    FieldVec4 b;
+    FieldVec4 c;
+    u32 *world = &D_003BABD0;
+    u32 object;
+    memset(&b, 0, sizeof(b));
+    b.w = 1.0f;
+    c = D_0039FC90;
+    object = func_00112D00(dds3AdvanceWorldCounter(), &b, &c, &a);
+    *world = object;
+    dds3SetWorldEntryCallbackTarget((void *)object, D_003BABC0);
+    dds3SetCameraVector(*world, &c);
+    effObjSetInnerFloat(*world, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *world);
+}
 
 u32 func_001243C0(void) {
     return 0;
