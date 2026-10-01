@@ -230,20 +230,24 @@ profile dds1
   COMM WAIT_FOR_TASK_REMOVAL
 ```
 
-The DDS1 profile contains a reviewed cutscene cluster. Its IDs, handlers, and
-stack consumption were checked against the DDS1 PS2 command table and runtime
-code:
+The DDS1 and DDS2 profiles contain a reviewed shared command set. Each ID,
+handler, stack read, and result write was checked against both PS2 command
+tables and both implementations:
 
-| Source name | ID | Stack values consumed | DDS1 handler behavior |
+| Source name | ID | Stack values consumed | Verified handler behavior |
 |---|---:|---:|---|
 | `MESSAGE_REQUEST_AND_POLL` | `0x000` | 1 | Starts a message entry or waits for its current work |
 | `ACTIVATE_MESSAGE_PANEL` | `0x001` | 0 | Activates the current message panel |
 | `FINISH_SCRIPT_MESSAGE_WINDOW` | `0x002` | 0 | Waits for and finishes the active script message window |
+| `SET_MODEL_FLAG` | `0x008` | 1 | Sets a model flag |
+| `CLEAR_MODEL_FLAG` | `0x009` | 1 | Clears a model flag |
 | `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
 | `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
+| `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
+| `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
@@ -256,9 +260,11 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-DDS2 sources declare `profile dds2`, but that profile currently contains no
-named commands. Its `COMM` operands remain numeric until their DDS2 handlers
-and stack behavior have been checked directly.
+The reviewed set names 2,231 of 3,881 native calls in the DDS1 event corpus and
+14,659 of 38,850 calls in the complete DDS2 corpus. It also makes the adjacent
+message-command pattern safe to recognize, producing 188 symbolic DDS1 message
+references and 1,910 symbolic DDS2 references. Every other command and every
+dynamic or ambiguous message operand remains numeric.
 
 ## Tracked corpora
 

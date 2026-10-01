@@ -10,8 +10,8 @@ procedure e917_dead reserved=0x00000000
 code
 e917_main:
   PROC e917_main
-  PUSHIS 0
-  COMM 0x0000
+  PUSHMSG MSG_000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 e917_dead:
   PROC e917_dead
