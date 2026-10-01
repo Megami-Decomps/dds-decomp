@@ -1,0 +1,961 @@
+#!/usr/bin/env python3
+"""Inspect, disassemble, and assemble DDS BF/FLW0 script containers.
+
+Version-1 source preserves descriptor order, offsets, gaps, padding, and bytes
+outside typed fields exactly. Version-2 source resolves symbols and derives a
+canonical physical layout, so code and data can change size.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import shlex
+import struct
+import sys
+from dataclasses import dataclass, replace
+from pathlib import Path
+from typing import Iterable
+
+
+HEADER_SIZE = 0x20
+SECTION_SIZE = 0x10
+_HEADER = struct.Struct("<II4sIIIII")
+_SECTION = struct.Struct("<IIII")
+
+OPCODE_NAMES = (
+    "PUSHI",
+    "PUSHF",
+    "PUSHIX",
+    "PUSHIF",
+    "PUSHREG",
+    "POPIX",
+    "POPFX",
+    "PROC",
+    "COMM",
+    "END",
+    "JUMP",
+    "CALL",
+    "RUN",
+    "GOTO",
+    "ADD",
+    "SUB",
+    "MUL",
+    "DIV",
+    "MINUS",
+    "NOT",
+    "OR",
+    "AND",
+    "EQ",
+    "NEQ",
+    "LT",
+    "GT",
+    "LE",
+    "GE",
+    "IF",
+    "PUSHIS",
+    "PUSHLIX",
+    "PUSHLFX",
+    "POPLIX",
+    "POPLFX",
+    "PUSHTYPE5",
+)
+OPCODE_IDS = {name: opcode for opcode, name in enumerate(OPCODE_NAMES)}
+_EXTENDED_OPCODES = {0, 1}
+_NO_OPERAND_OPCODES = {4, 9, *range(14, 28)}
+
+
+class Flw0Error(ValueError):
+    """The input is not a structurally valid FLW0 container."""
+
+
+@dataclass(frozen=True)
+class Header:
+    word_00: int
+    declared_size: int
+    magic: bytes
+    word_0c: int
+    section_count: int
+    locals_word: int
+    word_18: int
+    word_1c: int
+
+    @property
+    def int_local_count(self) -> int:
+        value = self.locals_word & 0xFFFF
+        return value - 0x10000 if value & 0x8000 else value
+
+    @property
+    def float_local_count(self) -> int:
+        value = self.locals_word >> 16
+        return value - 0x10000 if value & 0x8000 else value
+
+    def to_bytes(self) -> bytes:
+        try:
+            return _HEADER.pack(
+                self.word_00,
+                self.declared_size,
+                self.magic,
+                self.word_0c,
+                self.section_count,
+                self.locals_word,
+                self.word_18,
+                self.word_1c,
+            )
+        except struct.error as exc:
+            raise Flw0Error(f"header field is outside its encoded range: {exc}") from exc
+
+
+@dataclass(frozen=True)
+class Section:
+    index: int
+    type_id: int
+    element_size: int
+    element_count: int
+    offset: int
+
+    @property
+    def logical_size(self) -> int:
+        return self.element_size * self.element_count
+
+    @property
+    def logical_end(self) -> int:
+        return self.offset + self.logical_size
+
+    def to_bytes(self) -> bytes:
+        try:
+            return _SECTION.pack(
+                self.type_id,
+                self.element_size,
+                self.element_count,
+                self.offset,
+            )
+        except struct.error as exc:
+            raise Flw0Error(
+                f"section {self.index} field is outside its encoded range: {exc}"
+            ) from exc
+
+
+@dataclass(frozen=True)
+class NamedRow:
+    section_index: int
+    row_index: int
+    raw: bytes
+    name: str
+    start_pc: int
+    reserved: int | None
+
+
+@dataclass(frozen=True)
+class InstructionWord:
+    pc: int
+    raw: int
+
+    @property
+    def opcode(self) -> int:
+        return self.raw & 0xFFFF
+
+    @property
+    def operand_u16(self) -> int:
+        return self.raw >> 16
+
+    @property
+    def operand_s16(self) -> int:
+        value = self.operand_u16
+        return value - 0x10000 if value & 0x8000 else value
+
+
+@dataclass(frozen=True)
+class Flw0File:
+    """A parsed container with enough information for an exact rewrite."""
+
+    header: Header
+    sections: tuple[Section, ...]
+    body: bytes
+
+    @property
+    def table_end(self) -> int:
+        return HEADER_SIZE + len(self.sections) * SECTION_SIZE
+
+    @property
+    def physical_size(self) -> int:
+        return self.table_end + len(self.body)
+
+    def to_bytes(self) -> bytes:
+        if self.header.section_count != len(self.sections):
+            raise Flw0Error(
+                "header section count does not match the descriptor list"
+            )
+        return b"".join(
+            (
+                self.header.to_bytes(),
+                *(section.to_bytes() for section in self.sections),
+                self.body,
+            )
+        )
+
+    def sections_of_type(self, type_id: int) -> tuple[Section, ...]:
+        return tuple(section for section in self.sections if section.type_id == type_id)
+
+    def section_bytes(self, section: Section) -> bytes:
+        if not section.logical_size:
+            return b""
+        start = section.offset - self.table_end
+        end = start + section.logical_size
+        if start < 0 or end > len(self.body):
+            raise Flw0Error(f"section {section.index} is outside the physical file")
+        return self.body[start:end]
+
+    def named_rows(self, type_id: int) -> tuple[NamedRow, ...]:
+        rows: list[NamedRow] = []
+        for section in self.sections_of_type(type_id):
+            if not section.element_count:
+                continue
+            if section.element_size < 0x1C:
+                raise Flw0Error(
+                    f"named section {section.index} has element size "
+                    f"0x{section.element_size:x}, expected at least 0x1c"
+                )
+            payload = self.section_bytes(section)
+            for row_index in range(section.element_count):
+                start = row_index * section.element_size
+                raw = payload[start : start + section.element_size]
+                name = raw.split(b"\0", 1)[0].decode("ascii", errors="replace")
+                start_pc = struct.unpack_from("<I", raw, 0x18)[0]
+                reserved = (
+                    struct.unpack_from("<I", raw, 0x1C)[0]
+                    if len(raw) >= 0x20
+                    else None
+                )
+                rows.append(
+                    NamedRow(
+                        section_index=section.index,
+                        row_index=row_index,
+                        raw=raw,
+                        name=name,
+                        start_pc=start_pc,
+                        reserved=reserved,
+                    )
+                )
+        return tuple(rows)
+
+    def code_words(self) -> tuple[InstructionWord, ...]:
+        sections = self.sections_of_type(2)
+        if len(sections) != 1:
+            raise Flw0Error(f"expected one code section, found {len(sections)}")
+        section = sections[0]
+        if section.element_size != 4:
+            raise Flw0Error(
+                f"code section element size is {section.element_size}, expected 4"
+            )
+        payload = self.section_bytes(section)
+        return tuple(
+            InstructionWord(pc, struct.unpack_from("<I", payload, pc * 4)[0])
+            for pc in range(section.element_count)
+        )
+
+    def with_code_word(self, pc: int, value: int) -> "Flw0File":
+        """Return a same-layout copy with one code word replaced."""
+
+        if not 0 <= value <= 0xFFFFFFFF:
+            raise Flw0Error("code word must fit in an unsigned 32-bit value")
+        sections = self.sections_of_type(2)
+        if len(sections) != 1:
+            raise Flw0Error(f"expected one code section, found {len(sections)}")
+        section = sections[0]
+        if section.element_size != 4:
+            raise Flw0Error(
+                f"code section element size is {section.element_size}, expected 4"
+            )
+        if not 0 <= pc < section.element_count:
+            raise Flw0Error(
+                f"code word index {pc} is outside 0..{section.element_count - 1}"
+            )
+        body_offset = section.offset - self.table_end + pc * 4
+        body = bytearray(self.body)
+        struct.pack_into("<I", body, body_offset, value)
+        return replace(self, body=bytes(body))
+
+
+def parse(data: bytes) -> Flw0File:
+    """Parse a structurally valid FLW0 container without normalizing it."""
+
+    if len(data) < HEADER_SIZE:
+        raise Flw0Error(
+            f"file is 0x{len(data):x} bytes, smaller than the 0x20-byte header"
+        )
+
+    header = Header(*_HEADER.unpack_from(data))
+    if header.magic != b"FLW0":
+        raise Flw0Error(f"invalid magic {header.magic!r}, expected b'FLW0'")
+
+    table_end = HEADER_SIZE + header.section_count * SECTION_SIZE
+    if table_end > len(data):
+        raise Flw0Error(
+            f"section table ends at 0x{table_end:x}, past file size 0x{len(data):x}"
+        )
+
+    sections: list[Section] = []
+    for index in range(header.section_count):
+        row_offset = HEADER_SIZE + index * SECTION_SIZE
+        type_id, element_size, element_count, offset = _SECTION.unpack_from(
+            data, row_offset
+        )
+        section = Section(index, type_id, element_size, element_count, offset)
+        if section.logical_size and offset < table_end:
+            raise Flw0Error(
+                f"section {index} starts at 0x{offset:x}, inside the header/table"
+            )
+        if section.logical_end > len(data):
+            raise Flw0Error(
+                f"section {index} ends at 0x{section.logical_end:x}, "
+                f"past file size 0x{len(data):x}"
+            )
+        sections.append(section)
+
+    return Flw0File(header, tuple(sections), data[table_end:])
+
+
+def _canonical_named_row(raw: bytes) -> tuple[str, int, int, bytes] | None:
+    if len(raw) < 0x20:
+        return None
+    name_field = raw[:0x18]
+    name_bytes, separator, padding = name_field.partition(b"\0")
+    if separator and any(padding):
+        return None
+    if not separator and len(name_bytes) != 0x18:
+        return None
+    if any(byte < 0x20 or byte > 0x7E for byte in name_bytes):
+        return None
+    name = name_bytes.decode("ascii")
+    canonical = name_bytes + bytes(0x18 - len(name_bytes))
+    if canonical != name_field:
+        return None
+    start_pc, reserved = struct.unpack_from("<II", raw, 0x18)
+    return name, start_pc, reserved, raw[0x20:]
+
+
+def _render_raw_payload(payload: bytes, indent: str = "  ") -> list[str]:
+    if not payload:
+        return []
+    if not any(payload):
+        return [f"{indent}zero {len(payload)}"]
+    return [
+        f"{indent}bytes {payload[start:start + 32].hex()}"
+        for start in range(0, len(payload), 32)
+    ]
+
+
+def _render_code(flw0: Flw0File, section: Section) -> list[str]:
+    payload = flw0.section_bytes(section)
+    words = [
+        struct.unpack_from("<I", payload, pc * 4)[0]
+        for pc in range(section.element_count)
+    ]
+    procedure_names = {row.row_index: row.name for row in flw0.named_rows(0)}
+    label_names = {row.row_index: row.name for row in flw0.named_rows(1)}
+    lines: list[str] = []
+    pc = 0
+    while pc < len(words):
+        raw = words[pc]
+        opcode = raw & 0xFFFF
+        operand = raw >> 16
+        if opcode >= len(OPCODE_NAMES):
+            lines.append(f"  {pc:04x}: WORD 0x{raw:08x}")
+            pc += 1
+            continue
+        name = OPCODE_NAMES[opcode]
+        if opcode in _EXTENDED_OPCODES:
+            if pc + 1 >= len(words) or operand:
+                lines.append(f"  {pc:04x}: WORD 0x{raw:08x}")
+                pc += 1
+                continue
+            lines.append(f"  {pc:04x}: {name} 0x{words[pc + 1]:08x}")
+            pc += 2
+            continue
+        if opcode in _NO_OPERAND_OPCODES:
+            if operand:
+                lines.append(f"  {pc:04x}: WORD 0x{raw:08x}")
+            else:
+                lines.append(f"  {pc:04x}: {name}")
+        else:
+            target_name = None
+            if opcode in (7, 10, 11):
+                target_name = procedure_names.get(operand)
+            elif opcode in (13, 28):
+                target_name = label_names.get(operand)
+            comment = f"  # {json.dumps(target_name)}" if target_name else ""
+            lines.append(f"  {pc:04x}: {name} 0x{operand:04x}{comment}")
+        pc += 1
+    return lines
+
+
+def render_source(flw0: Flw0File) -> str:
+    """Render a self-contained, byte-exact low-level source file."""
+
+    header = flw0.header
+    lines = [
+        "flw0 1",
+        "",
+        (
+            "header "
+            f"word00=0x{header.word_00:08x} "
+            f"declared_size=0x{header.declared_size:08x} "
+            f"word0c=0x{header.word_0c:08x} "
+            f"int_locals={header.int_local_count} "
+            f"float_locals={header.float_local_count} "
+            f"word18=0x{header.word_18:08x} "
+            f"word1c=0x{header.word_1c:08x} "
+            f"physical_size=0x{flw0.physical_size:x}"
+        ),
+        "",
+    ]
+
+    covered = bytearray(flw0.physical_size)
+    covered[: flw0.table_end] = b"\x01" * flw0.table_end
+    for section in flw0.sections:
+        lines.append(
+            f"section {section.index} type={section.type_id} "
+            f"stride=0x{section.element_size:x} count={section.element_count} "
+            f"offset=0x{section.offset:x}"
+        )
+        payload = flw0.section_bytes(section)
+        if section.type_id in (0, 1):
+            noun = "proc" if section.type_id == 0 else "label"
+            for row_index in range(section.element_count):
+                start = row_index * section.element_size
+                row = payload[start : start + section.element_size]
+                decoded = _canonical_named_row(row)
+                if decoded is None:
+                    lines.append(f"  row {row.hex()}")
+                    continue
+                name, start_pc, reserved, tail = decoded
+                suffix = f" tail={tail.hex()}" if tail else ""
+                lines.append(
+                    f"  {noun} {json.dumps(name)} pc={start_pc} "
+                    f"reserved=0x{reserved:08x}{suffix}"
+                )
+        elif section.type_id == 2 and section.element_size == 4:
+            lines.extend(_render_code(flw0, section))
+        else:
+            lines.extend(_render_raw_payload(payload))
+        lines.append("end")
+        lines.append("")
+        covered[section.offset : section.logical_end] = b"\x01" * section.logical_size
+
+    raw = flw0.to_bytes()
+    cursor = flw0.table_end
+    while cursor < flw0.physical_size:
+        if covered[cursor]:
+            cursor += 1
+            continue
+        end = cursor + 1
+        while end < flw0.physical_size and not covered[end]:
+            end += 1
+        payload = raw[cursor:end]
+        if not any(payload):
+            lines.append(f"preserve offset=0x{cursor:x} zero={len(payload)}")
+        else:
+            for start in range(0, len(payload), 32):
+                chunk = payload[start : start + 32]
+                lines.append(
+                    f"preserve offset=0x{cursor + start:x} bytes={chunk.hex()}"
+                )
+        cursor = end
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _key_values(tokens: list[str], line_number: int) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for token in tokens:
+        if "=" not in token:
+            raise Flw0Error(f"line {line_number}: expected key=value, found {token!r}")
+        key, value = token.split("=", 1)
+        if not key or key in values:
+            raise Flw0Error(f"line {line_number}: invalid or duplicate key {key!r}")
+        values[key] = value
+    return values
+
+
+def _tokens(line: str, line_number: int) -> list[str]:
+    try:
+        return shlex.split(line, comments=True)
+    except ValueError as exc:
+        raise Flw0Error(f"line {line_number}: {exc}") from exc
+
+
+def _integer(text: str, line_number: int) -> int:
+    try:
+        return int(text, 0)
+    except ValueError as exc:
+        raise Flw0Error(f"line {line_number}: invalid integer {text!r}") from exc
+
+
+def _unsigned(text: str, line_number: int, bits: int = 32) -> int:
+    value = _integer(text, line_number)
+    if not 0 <= value < 1 << bits:
+        raise Flw0Error(
+            f"line {line_number}: value {text!r} does not fit in {bits} bits"
+        )
+    return value
+
+
+def _signed_halfword(text: str, line_number: int) -> int:
+    value = _integer(text, line_number)
+    if not -0x8000 <= value <= 0x7FFF:
+        raise Flw0Error(
+            f"line {line_number}: value {text!r} does not fit in a signed 16-bit field"
+        )
+    return value & 0xFFFF
+
+
+def _parse_named_payload(
+    content: list[tuple[int, str]], section: Section
+) -> bytes:
+    expected_noun = "proc" if section.type_id == 0 else "label"
+    rows: list[bytes] = []
+    for line_number, line in content:
+        tokens = _tokens(line, line_number)
+        if not tokens:
+            continue
+        if tokens[0] == "row":
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: row takes one hex value")
+            try:
+                row = bytes.fromhex(tokens[1])
+            except ValueError as exc:
+                raise Flw0Error(f"line {line_number}: invalid row hex") from exc
+        elif tokens[0] == expected_noun:
+            if len(tokens) < 4:
+                raise Flw0Error(
+                    f"line {line_number}: {expected_noun} requires name, pc, and reserved"
+                )
+            try:
+                name = tokens[1].encode("ascii")
+            except UnicodeEncodeError as exc:
+                raise Flw0Error(f"line {line_number}: name is not ASCII") from exc
+            if len(name) > 0x18:
+                raise Flw0Error(f"line {line_number}: name is longer than 24 bytes")
+            values = _key_values(tokens[2:], line_number)
+            required = {"pc", "reserved"}
+            if not required <= values.keys() or values.keys() - {
+                "pc",
+                "reserved",
+                "tail",
+            }:
+                raise Flw0Error(f"line {line_number}: invalid named-row fields")
+            try:
+                tail = bytes.fromhex(values.get("tail", ""))
+            except ValueError as exc:
+                raise Flw0Error(f"line {line_number}: invalid tail hex") from exc
+            row = (
+                name
+                + bytes(0x18 - len(name))
+                + struct.pack(
+                    "<II",
+                    _unsigned(values["pc"], line_number),
+                    _unsigned(values["reserved"], line_number),
+                )
+                + tail
+            )
+        else:
+            raise Flw0Error(
+                f"line {line_number}: expected {expected_noun!r} or 'row'"
+            )
+        if len(row) != section.element_size:
+            raise Flw0Error(
+                f"line {line_number}: row has {len(row)} bytes, "
+                f"expected {section.element_size}"
+            )
+        rows.append(row)
+    if len(rows) != section.element_count:
+        raise Flw0Error(
+            f"section {section.index}: found {len(rows)} rows, "
+            f"expected {section.element_count}"
+        )
+    return b"".join(rows)
+
+
+def _parse_raw_payload(content: list[tuple[int, str]], section: Section) -> bytes:
+    chunks: list[bytes] = []
+    size = 0
+    for line_number, line in content:
+        tokens = _tokens(line, line_number)
+        if not tokens:
+            continue
+        if len(tokens) != 2 or tokens[0] not in ("bytes", "zero"):
+            raise Flw0Error(f"line {line_number}: expected 'bytes HEX' or 'zero SIZE'")
+        if tokens[0] == "zero":
+            count = _unsigned(tokens[1], line_number)
+            if size + count > section.logical_size:
+                raise Flw0Error(f"line {line_number}: zero fill exceeds section size")
+            chunk = bytes(count)
+        else:
+            try:
+                chunk = bytes.fromhex(tokens[1])
+            except ValueError as exc:
+                raise Flw0Error(f"line {line_number}: invalid byte string") from exc
+            if size + len(chunk) > section.logical_size:
+                raise Flw0Error(f"line {line_number}: byte string exceeds section size")
+        chunks.append(chunk)
+        size += len(chunk)
+    payload = b"".join(chunks)
+    if len(payload) != section.logical_size:
+        raise Flw0Error(
+            f"section {section.index}: payload has {len(payload)} bytes, "
+            f"expected {section.logical_size}"
+        )
+    return payload
+
+
+def _parse_code_payload(content: list[tuple[int, str]], section: Section) -> bytes:
+    words: list[int] = []
+    for line_number, line in content:
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        prefix, separator, instruction = line.partition(":")
+        if not separator:
+            raise Flw0Error(f"line {line_number}: expected 'PC: INSTRUCTION'")
+        try:
+            pc = int(prefix.strip(), 16)
+        except ValueError as exc:
+            raise Flw0Error(f"line {line_number}: invalid code address") from exc
+        if pc != len(words):
+            raise Flw0Error(
+                f"line {line_number}: address is {pc:04x}, expected {len(words):04x}"
+            )
+        tokens = instruction.split()
+        if not tokens:
+            raise Flw0Error(f"line {line_number}: missing instruction")
+        mnemonic = tokens[0].upper()
+        if mnemonic == "WORD":
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: WORD takes one value")
+            words.append(_unsigned(tokens[1], line_number))
+            continue
+        if mnemonic not in OPCODE_IDS:
+            raise Flw0Error(f"line {line_number}: unknown mnemonic {mnemonic!r}")
+        opcode = OPCODE_IDS[mnemonic]
+        if opcode in _EXTENDED_OPCODES:
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: {mnemonic} takes one value")
+            words.extend((opcode, _unsigned(tokens[1], line_number)))
+        elif opcode in _NO_OPERAND_OPCODES:
+            if len(tokens) != 1:
+                raise Flw0Error(f"line {line_number}: {mnemonic} takes no value")
+            words.append(opcode)
+        else:
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: {mnemonic} takes one value")
+            if opcode == 29 and tokens[1].startswith("-"):
+                operand = _signed_halfword(tokens[1], line_number)
+            else:
+                operand = _unsigned(tokens[1], line_number, bits=16)
+            words.append((operand << 16) | opcode)
+    if len(words) != section.element_count:
+        raise Flw0Error(
+            f"section {section.index}: code has {len(words)} words, "
+            f"expected {section.element_count}"
+        )
+    try:
+        return b"".join(struct.pack("<I", word) for word in words)
+    except struct.error as exc:
+        raise Flw0Error(f"section {section.index}: code word is outside u32") from exc
+
+
+def parse_source(text: str) -> Flw0File:
+    """Assemble physical version-1 or symbolic version-2 source."""
+
+    numbered = enumerate(text.splitlines(), 1)
+    meaningful = [
+        (number, line.strip())
+        for number, line in numbered
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if meaningful and meaningful[0][1] == "flw0 2":
+        import flw0_symbolic
+
+        return flw0_symbolic.parse(text)
+    if not meaningful or meaningful[0][1] != "flw0 1":
+        raise Flw0Error("source must begin with 'flw0 1' or 'flw0 2'")
+
+    header_values: dict[str, str] | None = None
+    section_records: list[tuple[Section, list[tuple[int, str]]]] = []
+    preserves: list[tuple[int, bytes, int]] = []
+    index = 1
+    while index < len(meaningful):
+        line_number, line = meaningful[index]
+        tokens = _tokens(line, line_number)
+        if not tokens:
+            index += 1
+            continue
+        if tokens[0] == "header":
+            if header_values is not None:
+                raise Flw0Error(f"line {line_number}: duplicate header")
+            header_values = _key_values(tokens[1:], line_number)
+            index += 1
+            continue
+        if tokens[0] == "section":
+            if len(tokens) < 6:
+                raise Flw0Error(f"line {line_number}: incomplete section")
+            section_index = _unsigned(tokens[1], line_number)
+            values = _key_values(tokens[2:], line_number)
+            if values.keys() != {"type", "stride", "count", "offset"}:
+                raise Flw0Error(f"line {line_number}: invalid section fields")
+            section = Section(
+                section_index,
+                _unsigned(values["type"], line_number),
+                _unsigned(values["stride"], line_number),
+                _unsigned(values["count"], line_number),
+                _unsigned(values["offset"], line_number),
+            )
+            content: list[tuple[int, str]] = []
+            index += 1
+            while index < len(meaningful) and meaningful[index][1] != "end":
+                content.append(meaningful[index])
+                index += 1
+            if index == len(meaningful):
+                raise Flw0Error(f"line {line_number}: section has no 'end'")
+            section_records.append((section, content))
+            index += 1
+            continue
+        if tokens[0] == "preserve":
+            values = _key_values(tokens[1:], line_number)
+            if "offset" not in values or len(values) != 2:
+                raise Flw0Error(f"line {line_number}: invalid preserve fields")
+            offset = _unsigned(values["offset"], line_number)
+            if "zero" in values:
+                count = _unsigned(values["zero"], line_number)
+                if header_values is not None and "physical_size" in header_values:
+                    physical_size = _unsigned(header_values["physical_size"], line_number)
+                    if count > physical_size:
+                        raise Flw0Error(
+                            f"line {line_number}: zero fill exceeds physical size"
+                        )
+                payload = bytes(count)
+            elif "bytes" in values:
+                try:
+                    payload = bytes.fromhex(values["bytes"])
+                except ValueError as exc:
+                    raise Flw0Error(f"line {line_number}: invalid preserve bytes") from exc
+            else:
+                raise Flw0Error(f"line {line_number}: preserve needs zero or bytes")
+            preserves.append((offset, payload, line_number))
+            index += 1
+            continue
+        raise Flw0Error(f"line {line_number}: unexpected directive {tokens[0]!r}")
+
+    if header_values is None:
+        raise Flw0Error("source has no header")
+    expected_header = {
+        "word00",
+        "declared_size",
+        "word0c",
+        "int_locals",
+        "float_locals",
+        "word18",
+        "word1c",
+        "physical_size",
+    }
+    if header_values.keys() != expected_header:
+        raise Flw0Error("header fields are incomplete or unknown")
+    if [section.index for section, _ in section_records] != list(
+        range(len(section_records))
+    ):
+        raise Flw0Error("section indices must be contiguous and ordered from zero")
+
+    physical_size = _unsigned(header_values["physical_size"], 0)
+    table_end = HEADER_SIZE + len(section_records) * SECTION_SIZE
+    if physical_size < table_end:
+        raise Flw0Error("physical size is smaller than the header and section table")
+    body = bytearray(physical_size - table_end)
+    written = bytearray(physical_size - table_end)
+
+    def place(offset: int, payload: bytes, context: str) -> None:
+        if not payload:
+            return
+        start = offset - table_end
+        end = start + len(payload)
+        if start < 0 or end > len(body):
+            raise Flw0Error(f"{context}: data lies outside the physical file")
+        for relative, byte in enumerate(payload, start):
+            if written[relative] and body[relative] != byte:
+                absolute = relative + table_end
+                raise Flw0Error(
+                    f"{context}: overlapping data disagrees at 0x{absolute:x}"
+                )
+            body[relative] = byte
+            written[relative] = 1
+
+    sections = tuple(section for section, _ in section_records)
+    for section, content in section_records:
+        if section.type_id in (0, 1):
+            payload = _parse_named_payload(content, section)
+        elif section.type_id == 2 and section.element_size == 4:
+            payload = _parse_code_payload(content, section)
+        else:
+            payload = _parse_raw_payload(content, section)
+        place(section.offset, payload, f"section {section.index}")
+    for offset, payload, line_number in preserves:
+        place(offset, payload, f"line {line_number}")
+    if not all(written):
+        first = written.index(0) + table_end
+        raise Flw0Error(f"source does not define byte at 0x{first:x}")
+
+    int_locals = _signed_halfword(header_values["int_locals"], 0)
+    float_locals = _signed_halfword(header_values["float_locals"], 0)
+    header = Header(
+        _unsigned(header_values["word00"], 0),
+        _unsigned(header_values["declared_size"], 0),
+        b"FLW0",
+        _unsigned(header_values["word0c"], 0),
+        len(sections),
+        int_locals | (float_locals << 16),
+        _unsigned(header_values["word18"], 0),
+        _unsigned(header_values["word1c"], 0),
+    )
+    return parse(Flw0File(header, sections, bytes(body)).to_bytes())
+
+
+def inspect_record(flw0: Flw0File) -> dict[str, object]:
+    """Return a JSON-friendly structural summary."""
+
+    return {
+        "physical_size": flw0.physical_size,
+        "declared_size": flw0.header.declared_size,
+        "int_local_count": flw0.header.int_local_count,
+        "float_local_count": flw0.header.float_local_count,
+        "sections": [
+            {
+                "index": section.index,
+                "type": section.type_id,
+                "element_size": section.element_size,
+                "element_count": section.element_count,
+                "offset": section.offset,
+                "logical_size": section.logical_size,
+            }
+            for section in flw0.sections
+        ],
+        "procedures": [
+            {
+                "index": row.row_index,
+                "name": row.name,
+                "start_pc": row.start_pc,
+                "reserved": row.reserved,
+            }
+            for row in flw0.named_rows(0)
+        ],
+        "labels": [
+            {
+                "index": row.row_index,
+                "name": row.name,
+                "start_pc": row.start_pc,
+                "reserved": row.reserved,
+            }
+            for row in flw0.named_rows(1)
+        ],
+        "code_word_count": sum(
+            section.element_count
+            for section in flw0.sections_of_type(2)
+            if section.element_size == 4
+        ),
+    }
+
+
+def _parse_paths(paths: Iterable[Path]) -> int:
+    failed = False
+    for path in paths:
+        try:
+            original = path.read_bytes()
+            rebuilt = parse(original).to_bytes()
+            if rebuilt != original:
+                raise Flw0Error("internal error: preserve-layout rewrite differed")
+            print(f"{path}: exact ({len(original)} bytes)")
+        except (OSError, Flw0Error) as exc:
+            failed = True
+            print(f"{path}: {exc}")
+    return 1 if failed else 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    inspect_parser = commands.add_parser("inspect", help="print container metadata")
+    inspect_parser.add_argument("path", type=Path)
+
+    verify_parser = commands.add_parser(
+        "verify", help="verify an exact preserve-layout rewrite"
+    )
+    verify_parser.add_argument("paths", nargs="+", type=Path)
+
+    rewrite_parser = commands.add_parser(
+        "rewrite", help="write an exact preserve-layout copy"
+    )
+    rewrite_parser.add_argument("input", type=Path)
+    rewrite_parser.add_argument("output", type=Path)
+
+    disassemble_parser = commands.add_parser(
+        "disassemble", help="write physical or symbolic FLW0 source"
+    )
+    disassemble_parser.add_argument("input", type=Path)
+    disassemble_parser.add_argument("output", nargs="?", type=Path)
+    disassemble_parser.add_argument(
+        "--symbolic",
+        action="store_true",
+        help="derive symbolic, relayout-capable version-2 source",
+    )
+    disassemble_parser.add_argument(
+        "--profile",
+        metavar="NAME",
+        help="name native commands using a version-2 command profile",
+    )
+
+    assemble_parser = commands.add_parser(
+        "assemble", help="assemble physical or symbolic FLW0 source"
+    )
+    assemble_parser.add_argument("input", type=Path)
+    assemble_parser.add_argument("output", type=Path)
+
+    args = parser.parse_args()
+    try:
+        if args.command == "inspect":
+            flw0 = parse(args.path.read_bytes())
+            print(json.dumps(inspect_record(flw0), indent=2))
+            return 0
+        if args.command == "verify":
+            return _parse_paths(args.paths)
+        if args.command == "rewrite":
+            args.output.write_bytes(parse(args.input.read_bytes()).to_bytes())
+            return 0
+        if args.command == "disassemble":
+            script = parse(args.input.read_bytes())
+            if args.profile is not None and not args.symbolic:
+                raise Flw0Error("--profile requires --symbolic")
+            if args.symbolic:
+                import flw0_symbolic
+
+                source = flw0_symbolic.render(script, args.profile)
+            else:
+                source = render_source(script)
+            if args.output is None:
+                print(source, end="")
+            else:
+                args.output.write_text(source, encoding="utf-8")
+            return 0
+        if args.command == "assemble":
+            source = args.input.read_text(encoding="utf-8")
+            args.output.write_bytes(parse_source(source).to_bytes())
+            return 0
+    except (OSError, Flw0Error) as exc:
+        parser.error(str(exc))
+    raise AssertionError("unreachable")
+
+
+if __name__ == "__main__":
+    # Keep the error and data types shared when the companion symbolic module
+    # imports this file by its module name.
+    sys.modules["flw0"] = sys.modules[__name__]
+    raise SystemExit(main())
