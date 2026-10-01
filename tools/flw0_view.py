@@ -295,12 +295,22 @@ def render(
                 words[pc + 1].raw if pc + 1 < len(words) else None,
                 profile,
             )
+            procedure_symbol = flw0._procedure_push_symbol(
+                raw,
+                words[pc + 1].raw if pc + 1 < len(words) else None,
+                profile,
+                tuple(
+                    procedures.get(index, "") for index in range(len(procedures))
+                ),
+            )
             if message_symbol is not None:
                 expression = f"message({message_symbol})"
             elif selection_symbol is not None:
                 expression = f"selection({selection_symbol})"
             elif event_symbol is not None:
                 expression = f"event({event_symbol})"
+            elif procedure_symbol:
+                expression = f"procedure({procedure_symbol})"
             else:
                 expression = str(_signed(operand, 16))
             stack.push(expression)
