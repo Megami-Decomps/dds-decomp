@@ -138,10 +138,27 @@ class BattleTableTests(unittest.TestCase):
         source = battle_tbl.render_skill_source(model)
         self.assertIn("action-attribute 1 attribute=-1 auxiliary=18", source)
         self.assertIn(
-            "action 1 flags=0x1 use=2 effect_type=2 cost_type=1 cost=12 ",
+            "action 1 flags=0x1 use=BATTLE effect_type=HUNT "
+            "cost_type=HP cost=12 ",
+            source,
+        )
+        self.assertIn(
+            "target_area=ALLIES target_rule=DEFEATED_ALLY "
+            "target_random=RANDOM_TARGETS",
             source,
         )
         self.assertIn("hit_type=1 hit_level=99 hit_program=5", source)
+        self.assertIn(
+            "hp_type=CURRENT_HP_PERCENT_DAMAGE hp_power=75 "
+            "mp_type=FIXED_HEAL",
+            source,
+        )
+        self.assertIn(
+            "ailment_type=CURE ailment_level=100 base_status=DEATH "
+            "support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|"
+            "DEFENSE_DOWN|EVASION_DOWN",
+            source,
+        )
         self.assertIn("support_points=-3 death_type=25", source)
         self.assertIn(
             "requirement 0x1ab conditions=skill:4,unit-mask:0x2,group:1", source
@@ -150,7 +167,50 @@ class BattleTableTests(unittest.TestCase):
         self.assertIn("coefficient 0x34 bits=0x50005", source)
         self.assertIn("profile-bonus 0xc5 stats=1,2,3,4,5 tier=9", source)
         self.assertIn("group 1 skills=10,11,12", source)
-        self.assertEqual(battle_tbl.encode_skill(battle_tbl.parse_skill_source(source)), data)
+        self.assertEqual(
+            battle_tbl.encode_skill(battle_tbl.parse_skill_source(source)), data
+        )
+
+    def test_skill_action_symbols_retain_numeric_fallbacks(self) -> None:
+        source = (
+            "battle-table 1 kind=skill profile=dds2\n\n"
+            "action 1 use=FIELD|BATTLE effect_type=MAGIC target_type=3 "
+            "target_area=5 hp_type=16 "
+            "ailment_type=INFLICT_ONE_RANDOM base_status=SHOCK|0x8000 "
+            "support_type=ATTACK_UP|DEFENSE_UP\n"
+        )
+        action = battle_tbl.parse_skill_source(source).actions[1]
+        self.assertEqual(action.use, 3)
+        self.assertEqual(action.effect_type, 1)
+        self.assertEqual(action.target_type, 3)
+        self.assertEqual(action.target_area, 5)
+        self.assertEqual(action.hp_type, 16)
+        self.assertEqual(action.ailment_type, 3)
+        self.assertEqual(action.base_status, 0x8002)
+        self.assertEqual(action.support_type, 0x41)
+
+        rendered = battle_tbl.render_skill_source(
+            replace(
+                battle_tbl.default_skill(battle_tbl.SKILL_PROFILES["dds2"]),
+                actions=(battle_tbl.SkillAction(), action)
+                + (battle_tbl.SkillAction(),) * 542,
+            )
+        )
+        self.assertIn(
+            "use=FIELD|BATTLE effect_type=MAGIC target_type=3 "
+            "target_area=5",
+            rendered,
+        )
+        self.assertIn("hp_type=16 ailment_type=INFLICT_ONE_RANDOM", rendered)
+        self.assertIn("base_status=SHOCK|0x8000", rendered)
+
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError, "invalid effect_type 'UNKNOWN'"
+        ):
+            battle_tbl.parse_skill_source(
+                "battle-table 1 kind=skill profile=dds2\n"
+                "action 1 effect_type=UNKNOWN\n"
+            )
 
     def test_invalid_skill_references_are_rejected(self) -> None:
         skill = battle_tbl.default_skill(battle_tbl.SKILL_PROFILES["dds2"])
