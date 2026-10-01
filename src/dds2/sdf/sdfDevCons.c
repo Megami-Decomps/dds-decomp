@@ -9,7 +9,7 @@ typedef struct DevConsState {
     s16 rows; /* 0xE */
     u16 cursorColumn; /* 0x10 */
     s16 cursorRow; /* 0x12 */
-    u8 unk14; /* 0x14 */
+    u8 controlByte; /* 0x14 */
     u8 pad15; /* 0x15 */
     u8 textAttribute; /* 0x16: passed with each printed character */
     u8 unk17; /* 0x17 */
@@ -79,13 +79,13 @@ void sdfDevConsSetTextAttribute(DevConsState *console, u8 attribute) {
     console->textAttribute = attribute;
 }
 
-/* Read or write the console's unidentified byte at offset 0x14. */
+/* Read or write the console control byte at offset 0x14. */
 u8 sdfDevConsGetControlByte(DevConsState *console) {
-    return console->unk14;
+    return console->controlByte;
 }
 
 void sdfDevConsSetControlByte(DevConsState *console, u8 value) {
-    console->unk14 = value;
+    console->controlByte = value;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);
