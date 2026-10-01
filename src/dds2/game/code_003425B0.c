@@ -250,7 +250,111 @@ void sdfSoundStartRpcServer(void) {
     sceSifRpcLoop(queue);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00342B28);
+extern s32 D_004391EC;
+extern void func_003417E0(s32, void *, s32);
+extern u8 D_0047AA40[];
+
+void func_00342B28(u32 kind, u8 *src) {
+    u8 *table;
+    u8 *dst;
+    s32 i;
+
+    switch (kind) {
+    case 0:
+        table = D_0047AA40;
+        dst = table + 0x210;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 1:
+        table = D_0047AA40;
+        dst = table + 0x290;
+        for (i = 0; i < 0x80; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 2:
+        table = D_0047AA40;
+        dst = table + 0x310;
+        for (i = 0; i < 0x80; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 3:
+        table = D_0047AA40;
+        dst = table + 0x390;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 4:
+        table = D_0047AA40;
+        dst = table + 0x410;
+        for (i = 0; i < 0x20; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 5:
+        table = D_0047AA40;
+        dst = table + 0x490;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 6:
+        table = D_0047AA40;
+        dst = table + 0x510;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 7:
+        table = D_0047AA40;
+        dst = table + 0x590;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 8:
+        table = D_0047AA40;
+        dst = table + 0x610;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 9:
+        table = D_0047AA40;
+        dst = table + 0x690;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 10:
+        table = D_0047AA40;
+        dst = table + 0x710;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 11:
+        table = D_0047AA40;
+        dst = table + 0x790;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    case 12:
+        table = D_0047AA40;
+        dst = table + 0x810;
+        for (i = 0; i < 2; i++) {
+            *dst++ = src[i];
+        }
+        break;
+    }
+    func_003417E0(D_004391EC, D_0047AA40, 0x8D0);
+    func_003417A8(0x1F0, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00342E58);
 

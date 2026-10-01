@@ -1169,74 +1169,7 @@ void effFlashAccumulatingParticleAdvance(PcpFlashWork4 *work, s32 index) {
     part->accumulator += work->increment;
 }
 
-extern void func_00173718(PcpFlashWork4 *, s32, s32);
-extern void func_00173808(PcpFlashWork4 *, s32);
-
-void func_00173AA0(PcpFlashWork4 *work)
-{
-    s32 index;
-    s32 count;
-    PcpFlashPtc1C *part;
-    s32 lifetime;
-    s32 fadeIn;
-    s32 fadeOut;
-    u32 randomRange;
-    s32 restart;
-    s32 fadeParam;
-    PcpFlashHandle *handle;
-
-    count = work->particleCount;
-    part = work->parts;
-    lifetime = work->lifetime;
-    fadeIn = work->fadeInTime;
-    fadeOut = work->fadeOutTime;
-    restart = work->restartRandomly;
-    randomRange = work->randomRange;
-    fadeParam = work->colorParam;
-    for (index = 0; index < count; index++, part++) {
-        s32 age = part->age;
-        s32 color;
-        f32 blend;
-
-        if (age == 0) {
-            func_00173808(work, index);
-            func_00173718(work, index, 0);
-            part->color = 0x80808080;
-            blend = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
-            part->unk08 = work->unk3C * blend;
-            blend = effMiscRandUnitFloat(D_003AA868) * 0.7f + 0.3f;
-            part->unk0C = work->unk30 * blend;
-            part->unk10 = work->unk34 * blend;
-            part->unk14 = 0;
-        } else if (age >= lifetime) {
-            if (restart != 0) {
-                part->age = ~(effMiscRand(D_003AA868) % randomRange);
-            }
-            color = 0;
-            func_00173718(work, index, color);
-        } else if (age > 0) {
-            effFlashAccumulatingParticleAdvance(work, index);
-            func_00173808(work, index);
-            if (part->age < fadeIn && fadeIn != 0) {
-                blend = (f32)part->age / (f32)fadeIn;
-            } else if (fadeOut >= lifetime - part->age && fadeOut != 0) {
-                blend = (f32)(lifetime - part->age) / (f32)fadeOut;
-            } else {
-                blend = 1.0f;
-            }
-            color = effMultiplyPackedColors(effBlendColor(0, part->color, blend), fadeParam);
-            func_00173718(work, index, color);
-        }
-        part->age = part->age + 1;
-    }
-    handle = (PcpFlashHandle *)work->resourceHandle;
-    handle->origin[0] = work->origin[0];
-    work->unk54 = work->unk54 + 1;
-    handle->origin[1] = work->origin[1];
-    handle->origin[2] = work->origin[2];
-    handle->renderScale = work->renderScale;
-    func_00177FD8(handle);
-}
+INCLUDE_ASM(const s32, "effect/effPCPFlash", func_00173AA0);
 
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
