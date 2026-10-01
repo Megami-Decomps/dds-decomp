@@ -2847,6 +2847,8 @@
 0x00229410	evtDrawSolarLayerPair	inferred	Draws the requested solar layer and its companion layer for non-base cases.
 0x002294C0	evtAdvanceSolarShortLayerTimer	inferred	Increments a solar layer timer and disables it after 60 frames, shorter than the companion 80-frame timer.
 0x00229500	evtAdvanceSolarLongLayerTimer	inferred	Increments the companion solar layer timer and disables it after 80 frames.
+0x00229CD0	evtSetFirstUnflaggedSolarEntry	inferred	sets entry-0 flag if clear else scans 7-entry solar table upward for first flag==0 and sets it
+0x00229D28	evtConsumeFlaggedSolarEntry	inferred	clears guard byte then scans 7-entry solar table downward for first flag==1 and clears it
 0x00229E28	evtUpdateSolarPointTimers	inferred	Updates ages and randomized durations of eight solar points.
 0x0022A850	evtInitializeVisualData	inferred	Initializes two visual lookup tables in a newly allocated event overlay object.
 0x0022AED0	evtStartTestTask	inferred	evt event state and dispatch in game/code_0022A248.c
