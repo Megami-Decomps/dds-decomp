@@ -347,6 +347,7 @@ extern u32 func_00157A50(u32 handle);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void func_00336538(f32 scale);
+extern void func_00336818(f32 angle);
 
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -493,7 +494,7 @@ typedef struct {
 
 extern void func_00336798(f32 angle);
 
-extern void func_00188828(f32 angle);
+extern void func_00188828(void *work, f32 radius);
 
 typedef struct {
     u8 pad00[0x10];
@@ -958,8 +959,6 @@ extern void *func_00189DE8();
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
    another unit). Each is entered with and without spawn arguments, so they
    are declared unchecked. */
-extern void *func_0018A698();
-
 extern void *func_0018B130();
 
 /* Effect initializers implemented in assembly below (func_001708A0 lives in
@@ -3255,7 +3254,99 @@ void effPcpReleaseOptionalHandle(EffPCPWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001848B8);
+typedef struct EffPCPAimParams {
+    u8 vec[0x10];          /* 0x00: anchor position */
+    u32 holdFrames;        /* 0x10 */
+    u32 rampOut;           /* 0x14 */
+    s32 rampIn;            /* 0x18 */
+    f32 aimOffset;         /* 0x1C: degrees subtracted from the aim angle */
+    f32 radius;            /* 0x20 */
+} EffPCPAimParams;
+
+typedef struct EffPCPAimWork {
+    u8 mtx[0x40];          /* 0x00 */
+    EffPCPAimParams params; /* 0x40 */
+    u32 color;             /* 0x64 */
+    u32 frame;             /* 0x68 */
+    f32 angle;             /* 0x6C */
+    f32 spin;              /* 0x70 */
+    s32 node;              /* 0x74 */
+} EffPCPAimWork;
+
+typedef struct EffPCPAimBattle {
+    u8 pad00[0x110];
+    u32 flags;             /* 0x110 */
+} EffPCPAimBattle;
+
+extern void *effBTLFieldColorGetVariantSelector(void);
+extern s32 func_001695C8();
+extern f32 func_00208000(u32 mask, f32 *maxTop, f32 *minTop);
+extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern void btlUnitGetMuzzlePosVU(void *unit);
+extern f32 sdfAtan2(f32 y, f32 x);
+extern void func_00157790(s32 node, f32 *pos);
+extern void func_001577C8(s32 node, void *mtx);
+extern void func_00157800(s32 node, u32 color);
+extern void effUpdateNode(s32 node);
+
+/* Per-frame update of the aimed beam: on its first frame, turn toward the battle group's centre; then place the node at a radius around the anchor, rotate it and fade by the ramp-in. */
+void func_001848B8(EffPCPAimWork *work) {
+    EffPCPAimParams *params = &work->params;
+    s32 node = work->node;
+    s32 rampIn = params->rampIn;
+    u32 end = rampIn + params->rampOut;
+    u32 frame = work->frame;
+    s32 remaining = end - frame;
+    f32 mtx[16];
+    f32 muzzle[4];
+    f32 aim[4];
+    f32 center[4];
+    f32 look[4];
+    f32 t;
+
+    if (end < frame) {
+        return;
+    }
+    if (func_001695C8() && work->frame == 0) {
+        func_00208000(((EffPCPAimBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x600, NULL, NULL);
+        VU0_STORE_VF(vf10, center);
+        btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        VU0_STORE_VF(vf10, muzzle);
+        look[0] = center[0] - muzzle[0];
+        look[2] = center[2] - muzzle[2];
+        work->angle = sdfAtan2(look[0], look[2]) - params->aimOffset * EFF_DEG2RAD * 0.5f;
+    }
+    if (node != 0) {
+        VU0_LOAD_MATRIX(work);
+        func_00336818(work->angle);
+        sdfComposeVuMatrixFromRegisters();
+        aim[0] = aim[1] = 0.0f;
+        aim[2] = 1.0f;
+        VU0_LOAD_VF(vf10, aim);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VEC3_SPLAT(muzzle, params->radius);
+        VU0_LOAD_VF(vf11, muzzle);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, params->vec);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
+        func_00157790(node, muzzle);
+        if (work->frame > params->holdFrames) {
+            work->angle += work->spin;
+        }
+        func_00336538(work->angle);
+        VU0_STORE_MATRIX(mtx);
+        func_001577C8(node, mtx);
+        if (rampIn >= remaining && rampIn != 0) {
+            t = (f32)remaining / (f32)rampIn;
+        } else {
+            t = 1.0f;
+        }
+        func_00157800(node, effBlendColor(work->color & 0xFFFFFF, work->color, t));
+        effUpdateNode(node);
+    }
+    work->frame++;
+}
 
 void func_00184B10(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
@@ -4238,7 +4329,103 @@ void effRotateNested(EffPCPWork *work, void *src) {
     VU0_STORE_MATRIX((void *)work->nestedWork);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00188828);
+typedef struct EffPCPRingGeoNode {
+    u8 pad00[0x9C];
+    s32 size;            /* 0x9C: four words per segment */
+    f32 *points;         /* 0xA0 */
+} EffPCPRingGeoNode;
+
+typedef struct EffPCPRingGeoWork {
+    u8 pad00[0x1C];
+    f32 decay;           /* 0x1C */
+    u8 mode;             /* 0x20: 0 = camera-facing ring, else rotated about the work's own axes */
+    u8 pad21[0x1B];
+    u32 segments;        /* 0x3C */
+    u8 pad40[4];
+    f32 radiusStepA;     /* 0x44 */
+    u8 pad48[4];
+    f32 radiusStepB;     /* 0x4C */
+    u8 pad50[4];
+    f32 radiusStepC;     /* 0x54 */
+    u8 pad58[0xC];
+    f32 rotY;            /* 0x64 */
+    f32 rotX;            /* 0x68 */
+    f32 spin;            /* 0x6C */
+    u8 pad70[0xC];
+    EffPCPRingGeoNode *node; /* 0x7C */
+} EffPCPRingGeoWork;
+
+extern u8 D_0037F6A0[];
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern void sdfInvertRigidVuTransform(void);
+
+/* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
+void func_00188828(void *obj, f32 radius) {
+    EffPCPRingGeoWork *work = obj;
+    f32 dir[4];
+    f32 rowA[4];
+    f32 rowB[4];
+    f32 rowC[4];
+    f32 rowD[4];
+    f32 *points;
+    f32 angle = 0.0f;
+    f32 step;
+    f32 r1;
+    f32 r2;
+    f32 r3;
+    s32 n;
+    u32 i;
+
+    VEC3_SPLAT(rowA, radius);
+    r1 = radius + work->radiusStepA;
+    VEC3_SPLAT(rowB, r1);
+    r2 = r1 + work->radiusStepB;
+    VEC3_SPLAT(rowC, r2);
+    r3 = r2 + work->radiusStepC;
+    VEC3_SPLAT(rowD, r3);
+    n = work->node->size >> 2;
+    points = work->node->points;
+    step = 6.2831851f / (f32)work->segments;
+    if (work->mode == 0) {
+        sdfVuBuildLookAtBasis(D_0037F680, D_0037F690, D_0037F6A0);
+        sdfInvertRigidVuTransform();
+    } else {
+        func_003365B8(work->rotY);
+        func_00336818(work->rotX);
+        sdfMultiplyVuMatrixInPlace();
+        work->rotX += work->spin;
+        work->spin *= work->decay;
+    }
+    for (i = 0; i < n; i++) {
+        if (work->mode == 0) {
+            dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            dir[1] = sdfSinPoly(angle);
+            dir[2] = 0;
+        } else {
+            dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+            dir[1] = 0;
+            dir[2] = sdfSinPoly(angle);
+        }
+        dir[3] = 0;
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, rowA);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, points);
+        VU0_LOAD_VF(vf10, rowB);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, points + 4);
+        VU0_LOAD_VF(vf10, rowC);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, points + 8);
+        VU0_LOAD_VF(vf10, rowD);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, points + 12);
+        angle += step;
+        points += 16;
+    }
+}
 
 void effPrepareAngles(EffPCPAngleWork *work) {
     work->radiansX = work->degreesX * 0.017453291f;
@@ -4246,7 +4433,7 @@ void effPrepareAngles(EffPCPAngleWork *work) {
     work->radiansZ = work->degreesZ * 0.017453291f;
     work->childAngle = work->angle;
     work->childAngle2 = work->angle2;
-    func_00188828(work->angle);
+    func_00188828(work, work->angle);
     work->child = 0;
 }
 
@@ -4344,7 +4531,7 @@ void effPcpUpdateBeamTimeline(EffPCPBeamTimer *work) {
         return;
     }
     work->angle += work->speed;
-    func_00188828(work->angle);
+    func_00188828(work, work->angle);
     work->speed *= work->decay;
     t = 1.0f;
     if (frame < fadeIn && fadeIn != 0) {
@@ -4661,7 +4848,105 @@ void effPcpCaptureNodeVectors(EffPCPNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189BA0);
+typedef struct EffPCPPulseWork {
+    u128 pos;               /* 0x00 */
+    f32 scale;              /* 0x10 */
+    u32 mask;               /* 0x14 */
+    u32 count;              /* 0x18 */
+    s32 frame;              /* 0x1C */
+    s32 startFrame[10];     /* 0x20 */
+    f32 rotY[10];           /* 0x48 */
+    u32 handle[10];         /* 0x70 */
+} EffPCPPulseWork;
+
+typedef struct EffPCPPulseHead {
+    u8 pad00[0xC];
+    EffPCPNode **roots;     /* 0x0C */
+} EffPCPPulseHead;
+
+typedef struct EffPCPPulseModel {
+    EffPCPPulseHead *head;  /* 0x00 */
+} EffPCPPulseModel;
+
+typedef struct EffPCPPulseChild {
+    u8 pad00[0x30];
+    u8 active;              /* 0x30 */
+} EffPCPPulseChild;
+
+typedef struct EffPCPPulseData {
+    u32 flags;              /* 0x00 */
+    u8 pad04[0x14];
+    EffPCPPulseModel *model; /* 0x18 */
+    u8 pad1C[4];
+    EffPCPPulseChild *child[4]; /* 0x20 */
+} EffPCPPulseData;
+
+typedef struct EffPCPPulseBattle {
+    u8 pad00[0x110];
+    u32 flags;              /* 0x110 */
+} EffPCPPulseBattle;
+
+extern u8 D_00414610[];
+extern void func_00340DC8(f32 x, f32 y, f32 z);
+extern void effMiscQuatMultiplyVU(void);
+extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
+extern void mdlStoreTertiaryVectorVU(void *work);
+extern void sdfModelUpdateCurrentFrameTransforms(void *model);
+extern void func_003320E8(void *table, void *model);
+extern void func_00334510(void *obj);
+
+/* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
+void func_00189BA0(EffPCPPulseWork *work) {
+    u32 i = 0;
+    u32 count;
+    EffPCPPulseData *data;
+    EffPCPPulseModel *model;
+    EffPCPPulseChild *child;
+    EffPCPNode *root;
+    f32 vec[4];
+    s32 j;
+
+    effBTLFieldColorGetVariantSelector();
+    count = work->count;
+    for (; i < count; i++) {
+        if (work->startFrame[i] == work->frame && work->handle[i] == 0) {
+            work->handle[i] = effParamWorkDuplicate(work->handle[0]);
+        }
+        if (work->handle[i] == 0) {
+            continue;
+        }
+        data = effParamWorkGetData(work->handle[i]);
+        func_00340DC8(0.0f, work->rotY[i], 0.0f);
+        if (func_001695C8() && (((EffPCPPulseBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x400)) {
+            VU0_LOAD_VF(vf11, D_00414610);
+            effMiscQuatMultiplyVU();
+        }
+        mdlUpdateContextRotationBasisFromQuaternion(data);
+        vec[3] = 0;
+        VEC3_SPLAT(vec, work->scale * work->scale);
+        VU0_LOAD_VF(vf10, vec);
+        mdlStoreTertiaryVectorVU(data);
+        mdlBroadcastMasked(data, work->mask);
+        VU0_LOAD_VF(vf10, work);
+        mdlStorePrimaryVectorVU(data);
+        for (j = 0; j != 4; j++) {
+            child = data->child[j];
+            if (child != NULL && child->active) {
+                func_00334510(child);
+            }
+        }
+        if (!(data->flags & 1)) {
+            model = data->model;
+            root = model->head->roots[0];
+            VEC3_SPLAT(vec, 1.0f / work->scale);
+            VU0_LOAD_VF(vf10, vec);
+            effPcpCaptureNodeVectors(root);
+            sdfModelUpdateCurrentFrameTransforms(model);
+            func_003320E8(D_00380828, model);
+        }
+    }
+    work->frame++;
+}
 
 void effPcpCopyCaptureNodeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
@@ -4762,7 +5047,93 @@ void func_0018A690(EffPCPWork *work, u32 value) {
     work->unk114 = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A698);
+/* Placement block handed to every spawned event entry. */
+typedef struct EffPCPEventPlace {
+    f32 pos[7];
+    f32 scaleA;
+    f32 scaleB;
+    f32 scaleC;
+    f32 scaleD;
+    u32 color;
+} EffPCPEventPlace;
+
+extern EffPCPEventOwner *func_00197D38(void *params);
+
+typedef struct EffPCPDriftSrc {
+    u8 pad00[0x18];
+    u32 count;            /* 0x18 */
+    u8 pad1C[0x1C];
+    u8 params[0x54];      /* 0x38: effThunderFragCreate parameter block */
+} EffPCPDriftSrc;
+
+typedef struct EffPCPDriftBlock {
+    u32 word[35];
+} EffPCPDriftBlock;      /* 0x8C-byte header copied from the source */
+
+typedef struct EffPCPDriftEntry {
+    u32 frag;             /* 0x00 */
+    void *eventA;         /* 0x04 */
+    void *eventB;         /* 0x08 */
+    u8 pad0C[0x10];
+    s32 delay;            /* 0x1C */
+} EffPCPDriftEntry;
+
+typedef struct EffPCPDriftSpawn {
+    u8 pad00[0x1C];
+    s32 life;             /* 0x1C */
+    u8 pad20[0x6C];
+    EffPCPDriftEntry *entries; /* 0x8C */
+    EffPCPEventOwner *ownerA;  /* 0x90 */
+    EffPCPEventOwner *ownerB;  /* 0x94 */
+    u8 flag;              /* 0x98 */
+    u8 pad99[3];
+    u32 color;            /* 0x9C */
+    u32 handle;           /* 0xA0 */
+} EffPCPDriftSpawn;
+
+/* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start delay. */
+EffPCPDriftSpawn *func_0018A698(EffPCPDriftSrc *src, void *paramsA, void *paramsB) {
+    u32 count = src->count;
+    u32 handle = (u32)func_003292A8(count * 32 + 0xA4);
+    EffPCPDriftSpawn *work = sdfResourceRetainAddress((void *)handle);
+    EffPCPEventPlace place;
+    EffPCPDriftEntry *entry;
+    s32 life;
+    u32 i;
+
+    *(EffPCPDriftBlock *)work = *(EffPCPDriftBlock *)src;
+    entry = (EffPCPDriftEntry *)((u8 *)work + 0xA4);
+    work->handle = handle;
+    work->entries = entry;
+    work->color = 0x80808080;
+    if (work->life <= 0) {
+        work->life = 1;
+    }
+    work->flag = 1;
+    work->ownerA = func_00197D38(paramsA);
+    work->ownerB = func_00197D38(paramsB);
+    place.pos[0] = 0;
+    place.pos[1] = 0;
+    place.pos[2] = 0;
+    place.pos[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    place.color = 0x80808080;
+    life = work->life;
+    for (i = 0; i < count; i++) {
+        entry->frag = effThunderFragCreate(src->params);
+        entry->eventA = (void *)func_00197D68(work->ownerA, 2, &place);
+        entry->eventB = (void *)func_00197D68(work->ownerB, 2, &place);
+        entry->delay = -(effMiscRand(D_003AA868) % life);
+        entry++;
+    }
+    return work;
+}
 
 void effPcpDriftCreateFromTable(void *data) {
     void *work0;
@@ -4850,7 +5221,76 @@ void func_0018B128(EffPCPWork *work, u32 value) {
     work->unk9C = value;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B130);
+typedef struct EffPCPFramedSrc {
+    u8 pad00[0x58];
+    u32 count; /* 0x58 */
+} EffPCPFramedSrc;
+
+typedef struct EffPCPFramedBlock {
+    u32 word[37];
+} EffPCPFramedBlock; /* 0x94-byte header copied from the source */
+
+typedef struct EffPCPFramedEntry {
+    void *event; /* 0x00 */
+    s32 delay;   /* 0x04 */
+    u8 pad08[0x18];
+} EffPCPFramedEntry;
+
+typedef struct EffPCPFramedWork {
+    u8 pad00[0x5C];
+    s32 life; /* 0x5C */
+    u8 pad60[0x34];
+    EffPCPFramedEntry *entries; /* 0x94 */
+    EffPCPEventOwner *owner;    /* 0x98 */
+    u8 flag;                    /* 0x9C */
+    u8 pad9D[3];
+    f32 scale;                  /* 0xA0 */
+    u32 color;                  /* 0xA4 */
+    u32 handle;                 /* 0xA8 */
+} EffPCPFramedWork;
+
+/* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start delay. */
+void *func_0018B130(EffPCPFramedSrc *src, void *params) {
+    u32 count = src->count;
+    u32 handle = (u32)func_003292A8(count * 32 + 0xAC);
+    EffPCPFramedWork *work = sdfResourceRetainAddress((void *)handle);
+    EffPCPEventPlace place;
+    EffPCPFramedEntry *entry;
+    s32 life;
+    u32 i;
+
+    *(EffPCPFramedBlock *)work = *(EffPCPFramedBlock *)src;
+    entry = (EffPCPFramedEntry *)((u8 *)work + 0xAC);
+    work->handle = handle;
+    work->color = 0x80808080;
+    work->flag = 1;
+    work->entries = entry;
+    work->scale = 1.0f;
+    work->owner = func_00197D38(params);
+    place.pos[0] = 0;
+    place.pos[1] = 0;
+    place.pos[2] = 0;
+    place.pos[3] = 0;
+    place.pos[4] = 0;
+    place.pos[5] = 0;
+    place.pos[6] = 0;
+    place.scaleA = 1.0f;
+    place.scaleB = 100.0f;
+    place.scaleC = 100.0f;
+    place.scaleD = 1.0f;
+    place.color = 0x80808080;
+    life = work->life;
+    for (i = 0; i < count; i++) {
+        entry->event = (void *)func_00197D68(work->owner, 2, &place);
+        if (life > 0) {
+            entry->delay = -(effMiscRand(D_003AA868) % life);
+        } else {
+            entry->delay = 0;
+        }
+        entry++;
+    }
+    return work;
+}
 
 void effPcpSlotEffectCreateFromTable(void *data) {
     void *work0;
@@ -4997,16 +5437,6 @@ typedef struct EffPCPEventModel {
     void *unk18;
     EffPCPEventModelInfo *info;
 } EffPCPEventModel;
-
-/* Placement block handed to every spawned event entry. */
-typedef struct EffPCPEventPlace {
-    f32 pos[7];
-    f32 scaleA;
-    f32 scaleB;
-    f32 scaleC;
-    f32 scaleD;
-    u32 color;
-} EffPCPEventPlace;
 
 void effPcpEventWorkInitEntries(EffPCPEventInitWork *work) {
     EffPCPEventPlace place;
