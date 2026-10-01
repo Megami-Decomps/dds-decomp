@@ -541,7 +541,20 @@ s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9A40);
+/* Release the title screen's effect sprites and resource slot sets. */
+s64 func_002A9A40(u8 *work) {
+    u32 *handles;
+    s32 i;
+
+    mnuReleaseTitleEffectSprites((u32 *)(work + 0x60));
+    effDestroyResourceSlotSet(*(u32 *)(work + 0xC4));
+    effDestroyResourceSlotSet(*(u32 *)(work + 0xC8));
+    handles = (u32 *)(work + 0xCC);
+    for (i = 8; i >= 0; i--) {
+        effDestroyResourceSlotSet(*handles++);
+    }
+    return effDestroyResourceSlotSet(*(u32 *)(work + 0xF0));
+}
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9AB8);
 
