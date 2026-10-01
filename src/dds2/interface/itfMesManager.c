@@ -628,7 +628,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     if (*(s32 *)&mes->unk8[0] != 0) {
         frFontLoadTemporaryEntry(*(s32 *)&mes->unk8[0]);
     }
-    blk->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows((u32 *)((u8 *)table + 0x20), table->bitCount, blk->panelValue, blk->x, y, mes->renderValue);
+    blk->glyphChain = (FrFontGlyph *)itfMesBuildNodeRows(&table->items[1], table->bitCount, blk->panelValue, blk->x, y, mes->renderValue);
     blk->rowCount = count;
     mes->flags = (mes->flags & ~0x38) | 0x10;
     if (mes->unk12 == 3) {

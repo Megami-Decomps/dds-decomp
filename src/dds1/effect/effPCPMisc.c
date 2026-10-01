@@ -818,9 +818,14 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     work->delay[index] = effMiscRand(D_0034DF38) % 10;
 }
 
+typedef struct {
+    u8 pad00[0x3C];
+    u32 handle[6];
+} EffPCPHandleBlock;
+
 EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
     EffPCPWorkF14 *work = func_002CFEB8(0x98);
-    u32 *handle = (u32 *)((u8 *)work + 0x3C);
+    u32 *handle = ((EffPCPHandleBlock *)work)->handle;
     s32 i = 0;
 
     do {
@@ -843,7 +848,7 @@ EffPCPWorkF14 *effPcpStaggerCreate(void *args) {
 }
 
 void effPcpStaggerRelease(EffPCPWork *work) {
-    u32 *handle = (u32 *)((u8 *)work + 0x3C);
+    u32 *handle = ((EffPCPHandleBlock *)work)->handle;
     s32 i;
 
     for (i = 7; i >= 0; i--) {
@@ -856,7 +861,7 @@ void effPcpStaggerRelease(EffPCPWork *work) {
 
 EffPCPWorkF14 *effCreatePairedResourceWork(EffPCPWork *source) {
     EffPCPWorkF14 *work = func_002CFEB8(0x98);
-    u32 *handle = (u32 *)((u8 *)work + 0x3C);
+    u32 *handle = ((EffPCPHandleBlock *)work)->handle;
     s32 i = 0;
 
     do {
@@ -1089,9 +1094,14 @@ void effPcpDelayedPairsRerollSlot(void *work, s32 index) {
     block->counter[index] = effMiscRand(D_0034DF38) % 10;
 }
 
+typedef struct {
+    u8 pad00[0x1C];
+    u32 handle[12];
+} EffPCPDelayedPairBlock;
+
 EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
     EffPCPWorkF14 *work = func_002CFEB8(0x60);
-    u32 *handle = (u32 *)((u8 *)work + 0x1C);
+    u32 *handle = ((EffPCPDelayedPairBlock *)work)->handle;
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -1112,7 +1122,7 @@ EffPCPWorkF14 *effCreateIndexedResourceWork(void *source) {
 }
 
 void effPcpDelayedPairsRelease(EffPCPWork *work) {
-    u32 *handle = (u32 *)((u8 *)work + 0x1C);
+    u32 *handle = ((EffPCPDelayedPairBlock *)work)->handle;
     s32 i;
 
     for (i = 5; i >= 0; i--) {
@@ -1128,8 +1138,8 @@ EffPCPWorkF14 *effCopyIndexedResourceWork(EffPCPWork *source) {
     u32 *workHandle;
     s32 i;
     EffPCPWorkF14 *work = func_002CFEB8(0x60);
-    sourceHandle = (u32 *)((u8 *)source + 0x1C);
-    workHandle = (u32 *)((u8 *)work + 0x1C);
+    sourceHandle = ((EffPCPDelayedPairBlock *)source)->handle;
+    workHandle = ((EffPCPDelayedPairBlock *)work)->handle;
 
     for (i = 0; i < 6; i++) {
         workHandle[-1] = effParamWorkDuplicate(sourceHandle[-1]);
@@ -4647,11 +4657,16 @@ EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     return work;
 }
 
+typedef struct {
+    u8 pad00[0x70];
+    u32 handle[1];
+} EffPCPSprayHandleBlock;
+
 void effDestroyIndexedResources(EffPCPWork *work) {
     u32 i = 0;
 
     if (work->unk18 != 0) {
-        u32 *handle = (u32 *)((u8 *)work + 0x70);
+        u32 *handle = ((EffPCPSprayHandleBlock *)work)->handle;
         do {
             if (*handle != 0) {
                 func_001629F0(*handle);
