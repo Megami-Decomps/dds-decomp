@@ -278,7 +278,41 @@ void fldRotateVectorAroundZ(f32 *v, f32 angle) {
     v[1] = r[1];
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F4B8);
+typedef struct Vector4 {
+    float x, y, z, w;
+} Vector4;
+
+/* Rotate `v` about `axis` (normalized first) by `angle`, using the axis-angle rotation matrix. */
+void func_0030F4B8(float *v, float *axis, float angle) {
+    Vector4 a;
+    Vector4 u;
+    Vector4 w;
+    float m[9];
+
+    memset(&u, 0, sizeof(u));
+    u.x = axis[0];
+    u.y = axis[1];
+    u.z = axis[2];
+    a = u;
+    memset(&w, 0, sizeof(w));
+    w.x = v[0];
+    w.y = v[1];
+    w.z = v[2];
+    u = w;
+    func_0030F8D0(&a.x);
+    m[0] = a.x * a.x * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + sdfEvaluateCosineViaSinePhaseShift(angle);
+    m[1] = a.x * a.y * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) - a.z * sdfSinPoly(angle);
+    m[2] = a.x * a.z * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + a.y * sdfSinPoly(angle);
+    m[3] = a.y * a.x * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + a.z * sdfSinPoly(angle);
+    m[4] = a.y * a.y * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + sdfEvaluateCosineViaSinePhaseShift(angle);
+    m[5] = a.y * a.z * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) - a.x * sdfSinPoly(angle);
+    m[6] = a.z * a.x * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) - a.y * sdfSinPoly(angle);
+    m[7] = a.z * a.y * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + a.x * sdfSinPoly(angle);
+    m[8] = a.z * a.z * (1.0f - sdfEvaluateCosineViaSinePhaseShift(angle)) + sdfEvaluateCosineViaSinePhaseShift(angle);
+    v[0] = u.x * m[0] + u.y * m[3] + u.z * m[6];
+    v[1] = u.x * m[1] + u.y * m[4] + u.z * m[7];
+    v[2] = u.x * m[2] + u.y * m[5] + u.z * m[8];
+}
 
 void sdfVec3AddInPlace(float *vector, float *delta) {
     *vector = *vector + *delta;
@@ -311,10 +345,6 @@ void sdfVec3ScaleInPlace(float factor, float *vector) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F8D0);
-
-typedef struct Vector4 {
-    float x, y, z, w;
-} Vector4;
 
 float fldVectorLength(float *v) {
     return fsqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);

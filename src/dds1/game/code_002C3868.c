@@ -100,6 +100,12 @@ extern void func_00108CB8(s32);
 
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
+extern void func_001093B8(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern s32 func_002C5FB8(u32);
+
+extern void evtPrepareSizedDrawResource();
+
 typedef struct MapResource {
     u32 image;
     u32 handle;
@@ -221,7 +227,29 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4A58);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5338);
+/* Packs four 8-bit channels into an RGBA word. */
+#define PACK(r, g, b, a) ((u8)(r) | ((a) << 24) | (((u8)(b) << 16) | ((u8)(g) << 8)))
+
+/* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
+void func_002C5338(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+    f32 fade = (f32)rt->timer->value / 10.0f;
+    s32 base = 0;
+    s32 width;
+
+    if (channel->index == rt->channel->index) {
+        base = 0x40;
+    }
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_001093B8(x + 1, y + 1, 0x80, 0x16,
+                  PACK(base + 0x40, base + 0x40, base + 0x40, (u32)(fade * 32.0f)),
+                  PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
+                  PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
+                  PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
+    width = func_002C5FB8((u32)channel->display->word);
+    evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
+                                PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
+                                channel->display->word);
+}
 
 /* The display counter saturates at ten rather than wrapping. */
 void sdfCounterIncrease(void) {

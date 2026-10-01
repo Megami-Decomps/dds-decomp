@@ -5,7 +5,6 @@
 extern s32 D_004388B4;
 
 extern SdfQuad D_00400970;
-
 extern SdfQuad D_00400980;
 
 extern void effObjSetInnerFirstVec(s32, void *);
@@ -160,6 +159,10 @@ extern void sdfUpdateCounterSelectionFade(void);
 extern void mnuCallInitWide();
 
 extern void func_001094F8(s32, s32, s32, s32, u32, u32, u32, u32);
+
+extern s32 frMeasureAndQueueCounterText();
+
+extern void evtPrepareSizedDrawResource();
 
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
@@ -396,7 +399,29 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CA38);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CC68);
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CEF0);
+/* Packs four 8-bit channels into an RGBA word. */
+#define PACK(r, g, b, a) ((u8)(r) | ((a) << 24) | (((u8)(b) << 16) | ((u8)(g) << 8)))
+
+/* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
+void func_0030CEF0(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+    f32 fade = (f32)rt->timer->value / 10.0f;
+    s32 base = 0;
+    s32 width;
+
+    if (channel->index == rt->channel->index) {
+        base = 0x40;
+    }
+    evtSubmitGsRegister47(1, 0, 0x80, 3, 0, 0, 1, 1);
+    func_001094F8(x + 1, y + 1, 0x80, 0x16,
+                  PACK(base + 0x40, base + 0x40, base + 0x40, (u32)(fade * 32.0f)),
+                  PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
+                  PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
+                  PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
+    width = frMeasureAndQueueCounterText(channel->display->word);
+    evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
+                                PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
+                                channel->display->word);
+}
 
 void sdfCounterIncrease(void) {
     s32 currentValue;

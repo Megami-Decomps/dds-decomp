@@ -68,8 +68,12 @@ typedef struct SdfPackedValue {
 typedef struct SdfChannelState {
     u8 scriptFlags; /* 0x00: 0x40/0x80 select alternate dispatch scripts */
     u8 pad01[0x23];
-    u8 mode; /* 0x24 */
-    u8 pad25[0x13];
+    u8 mode; /* 0x24: 1/3 = skill-scaled hit roll, 2 = bit query */
+    u8 chance; /* 0x25: hit chance in percent, >= 100 always hits */
+    u16 mask; /* 0x26: candidate channel bits */
+    u8 pad28[8];
+    s32 mode30; /* 0x30 */
+    u8 pad34[4];
 } SdfChannelState;
 
 /* Byte 0 supplies an entry/resource code; byte 1 selects the script kind. */
@@ -349,7 +353,109 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001190B0);
+extern s32 D_00435E2C;
+
+/* The 0x20 flag selects base enemy vitals instead of the party script path. */
+#define SDF_UNIT_ENEMY 0x20
+
+/* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
+typedef struct SdfPartyUnit {
+    u16 flags;          /* 0x00 */
+    u8 pad02[2];
+    u16 unitId;         /* 0x04 */
+    u16 hp;             /* 0x06 */
+    u16 maxHp;          /* 0x08 */
+} SdfPartyUnit;
+
+typedef struct SdfEnemyVitals {
+    u32 flags;          /* 0x00 */
+} SdfEnemyVitals;
+
+extern s32 D_00435DEC;
+extern s32 func_00119F68(u32);
+extern u32 func_00119C78(SdfPackedValue *, s32);
+extern s32 datUnitHasSkill(SdfPackedValue *, s32);
+extern s32 effMiscRandMod(s32, s32);
+extern void func_0035B6E0(const char *, ...);
+extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
+
+/* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
+u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
+    u16 list[16];
+    u16 count;
+    u16 bit;
+    u16 mask;
+    s32 ratio = 100;
+    u32 kind;
+    s32 scaled;
+    s32 hit;
+    u16 flag;
+
+    mask = D_00435E20[index].mask;
+    if (D_00435E20[index].mode == 3) {
+        count = 0;
+        for (bit = 0; bit < 16; bit++) {
+            if ((mask >> bit) & 1) {
+                list[count] = bit;
+                count++;
+            }
+        }
+        mask = 1 << list[effMiscRandMod(0, count)];
+    }
+    if (mask != 0 && (D_00435E20[index].mode == 1 || D_00435E20[index].mode == 3)) {
+        kind = func_00119F68(mask);
+        if (!(D_00435E20[index].mode30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
+            if (func_00119C78(packed, kind) & 0x170000) {
+                return 0;
+            }
+        }
+        switch (kind) {
+        case 3:
+            if (datUnitHasSkill(packed, 0x25E)) {
+                ratio = (u32)(*(f32 *)(D_00435E2C + 0x1F0) * (f32)ratio);
+            }
+            break;
+        case 4:
+            if (datUnitHasSkill(packed, 0x25F)) {
+                ratio = (u32)(*(f32 *)(D_00435E2C + 0x1F8) * (f32)ratio);
+            }
+            break;
+        case 9:
+            if (datUnitHasSkill(packed, 0x263)) {
+                ratio = (u32)(*(f32 *)(D_00435E2C + 0x218) * (f32)ratio);
+            }
+            break;
+        }
+    }
+    flag = mask & 1;
+    if (flag) {
+        SdfPartyUnit *actor = (SdfPartyUnit *)packed;
+
+        if (actor->hp * 100 / actor->maxHp >= 25) {
+            mask &= 0xFFFE;
+        } else if (!(*(u16 *)queryArg & 4)) {
+            mask &= 0xFFFE;
+        } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
+                   (((SdfEnemyVitals *)(D_00435DEC + actor->unitId * 76))->flags & 0x440) != 0) {
+            mask &= 0xFFFE;
+        }
+    }
+    if (mask & 0x8000) {
+        if (packed->flagsAndValue & 0x1804) {
+            mask &= 0x7FFF;
+        }
+    }
+    if (mask == 0) {
+        return 0;
+    }
+    hit = 1;
+    if (D_00435E20[index].chance < 100) {
+        scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
+        func_0035B6E0(D_00412B08, scaled, ratio, mask);
+        hit = effMiscRandMod(0, 100) < scaled;
+    }
+    return hit ? mask : 0;
+}
 
 u32 sdfQueryChannelValue(s32 channel, s32 arg1, SdfPackedValue *item) {
     u32 result;

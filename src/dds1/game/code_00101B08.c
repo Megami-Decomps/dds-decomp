@@ -21,7 +21,153 @@ INCLUDE_ASM(const s32, "game/code_00101B08", func_00101D60);
 
 INCLUDE_ASM(const s32, "game/code_00101B08", func_00101E40);
 
-INCLUDE_ASM(const s32, "game/code_00101B08", func_001024D8);
+/* Sprite vertex record of a column packet: colour, then two corners of the quad. */
+typedef struct KwlnSpriteCorner {
+    s32 u, v;
+    u8 pad08[8];
+    s32 x, y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} KwlnSpriteCorner;
+
+typedef struct KwlnSpriteVertex {
+    s32 r, g, b, a;
+    KwlnSpriteCorner corner[2];
+} KwlnSpriteVertex;
+
+extern u64 *sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(void *);
+extern void sdfAppendPacket(void *, void *);
+extern void sdfAppendDmaPrimary(void *, u8 *, void *);
+extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
+extern s32 *sdfConsAllocateColumnPacket(s32);
+extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
+extern s32 *sdfFlushPoolNodes(void *);
+extern s32 func_00100518(void);
+extern void kwlnDrawBlurErrorCounters(void);
+extern void func_00106268(void);
+extern void func_00106368(void);
+extern void kwlnFadeUpdate(void);
+extern void func_00105DD8(void);
+extern void func_001071E8(void);
+extern s32 func_0011E278(void);
+extern void func_002EA5C0(s32);
+extern void func_002D4EE8(s32 *, void *);
+extern u8 D_00325788[];
+extern u8 D_003258B0[];
+extern u8 D_00326ED0[];
+extern u8 D_00324B48[];
+extern u8 D_00325860[];
+extern u8 D_00325708[];
+extern u8 D_003BA908;
+extern s16 D_003BA90A;
+extern s16 D_003BA90C;
+extern s32 D_003BA910[2];
+extern u8 D_003BA7FC;
+extern s32 *D_003BA844;
+extern u32 kwlnDrawControlFlags;
+extern s8 D_003BD330;
+
+typedef struct KwlnDrawSink {
+    u8 pad00[0x10];
+    void (*invoke)(void *, void *); /* 0x10 */
+} KwlnDrawSink;
+
+/* Per-frame render task: update the HUD pieces, submit the thirteen draw-packet groups of the current buffer, optionally draw the
+ * screen-edge vignette, then flush the packet pools. */
+s32 func_001024D8(void) {
+    s32 buf = func_00100518();
+    u8 *target;
+    u8 *block;
+    u64 *list;
+    u64 *packet;
+    u64 *packet2;
+    KwlnSpriteVertex *vtx;
+    s32 *column;
+    s32 *pool;
+    s32 rect[4];
+    s32 i;
+
+    kwlnDrawBlurErrorCounters();
+    func_00106268();
+    func_00106368();
+    kwlnFadeUpdate();
+    func_00105DD8();
+    func_001071E8();
+    target = D_00325788;
+    block = D_003258B0 + buf * 0x1F40;
+    for (i = 12; i >= 0; i--) {
+        sdfSubmitDrawPacketGroups(target, block);
+        target += 0x10;
+        block += 0x1B0;
+    }
+    if (D_003BA908 != 0 && func_0011E278() == 0) {
+        list = sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        sdfAppendDmaPrimary(list, D_00326ED0 + buf * 0x1F40, sdfAllocPacketAligned(0x20));
+        packet = sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        packet[2] = ((u64)0x10000000 << 32) | 0x8002;
+        packet[3] = 0xE;
+        packet[4] = ((u64)0x80 << 32) | 0x80;
+        packet[5] = 0x3B;
+        packet[6] = 0;
+        packet[7] = 0x3F;
+        sdfAppendPacket(list, packet);
+        packet2 = sdfAllocPacketAligned(0x40);
+        packet2[0] = 3;
+        packet2[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        packet2[2] = ((u64)0x10000000 << 32) | 0x8002;
+        packet2[3] = 0xE;
+        packet2[4] = 0x31001;
+        packet2[5] = 0x47;
+        packet2[6] = 0x44;
+        packet2[7] = 0x42;
+        sdfAppendPacket(list, packet2);
+        rect[0] = D_003BA910[0] + 0x100;
+        rect[1] = D_003BA910[1] + 0xE0;
+        rect[2] = 0x100 - D_003BA910[0];
+        rect[3] = 0xE0 - D_003BA910[1];
+        for (i = 0; i != 4; i++) {
+            rect[i] = rect[i] * D_003BA90C >> 12;
+        }
+        column = sdfConsAllocateColumnPacket(1);
+        vtx = sdfConsMeasurePacketWithHeader(column);
+        vtx->r = 0x80;
+        vtx->g = 0x80;
+        vtx->b = 0x80;
+        vtx->a = D_003BA90A;
+        vtx->corner[0].u = 0;
+        vtx->corner[0].v = 0;
+        vtx->corner[0].x = 0x7000 - rect[0] * 16;
+        vtx->corner[0].y = 0x7900 - rect[1] * 8;
+        vtx->corner[0].mask = 0;
+        vtx->corner[0].flag = 0;
+        vtx->corner[1].u = 0x2000;
+        vtx->corner[1].v = 0xE00;
+        vtx->corner[1].x = 0x9000 + rect[2] * 16;
+        vtx->corner[1].y = 0x8700 + rect[3] * 8;
+        vtx->corner[1].mask = 0;
+        vtx->corner[1].flag = 0;
+        sdfAppendPacket(list, column);
+        ((KwlnDrawSink *)D_00325708)->invoke(D_00325708, list);
+    }
+    pool = sdfFlushPoolNodes(D_00324B48);
+    D_003BA844 = pool;
+    if (D_003BA7FC != 0) {
+        func_002EA5C0(pool[1]);
+        D_003BA7FC = 0;
+    }
+    if (!(kwlnDrawControlFlags & 0x2000000)) {
+        func_002D4EE8(pool, D_00325860);
+    } else {
+        kwlnDrawControlFlags &= 0xFDFFFFFF;
+    }
+    D_003BD330 = 0;
+    return 0;
+}
 
 u32 func_00102850(void) {
     func_0010FA00(D_003BA9BC);
