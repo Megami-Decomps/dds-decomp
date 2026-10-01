@@ -680,7 +680,7 @@ void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
 
 extern u64 sdfAllocPacketAligned(u32);
 extern u32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void sdfConsInitPacketHeader(u64, s32, s32, s32, s32);
+extern void sdfConsInitPacketHeader(u64, s32, s32, s64, s32);
 extern u64 *sdfConsMeasurePacketWithHeader(u64);
 extern void sdfAppendPacket(u64, u64);
 extern u64 *sdfConsFinalizePacketHeader(u64, s32);
@@ -784,7 +784,28 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00198C70);
 
-INCLUDE_ASM(const s32, "game/code_00196478", itfQueueColoredTexturedQuadPacket);
+void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, s32 command) {
+    u64 packet;
+    u64 *dst;
+    s32 x0, y0, x1, y1;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | 0x15E, 5, 0x53531, 1);
+    x0 = vertices[0].x + 0x7000;
+    y0 = vertices[0].y + 0x7900;
+    x1 = vertices[1].x + 0x7000;
+    y1 = vertices[1].y + 0x7900;
+    dst = sdfConsMeasurePacketWithHeader(packet);
+    dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
+    dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
+    dst[2] = (u64)uv->word[0] | ((u64)uv->word[1] << 32);
+    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
+    dst[5] = (u64)tail;
+    dst[6] = (u64)uv->word[2] | ((u64)uv->word[3] << 32);
+    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
+    dst[9] = (u64)tail;
+    sdfAppendPacket(command, packet);
+}
 
 void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, u64 command) {
     u64 packet;
