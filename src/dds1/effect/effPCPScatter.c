@@ -933,7 +933,110 @@ void effScatterRingUpdateScaled(PcpScatterWork12 *work, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_00174350);
+/* Draw record behind the instance's scatterObject: colour per particle at +0x70, scale at +0x60. */
+typedef struct PcpScatterDraw {
+    u8 pad00[0x60];
+    f32 scale;           /* 0x60 */
+    u8 pad64[0xC];
+    u32 *colors;         /* 0x70 */
+} PcpScatterDraw;
+
+/* Instance B as the update pass sees it (see PcpScatterInstanceB / effScatterInstanceCreateB). */
+typedef struct PcpScatterUpdateB {
+    u8 pad00[0x40];
+    f32 vec[4];          /* 0x40 */
+    u8 pad50[0x44];
+    u8 loop;             /* 0x94 */
+    u8 pad95[3];
+    s32 duration;        /* 0x98 */
+    u32 particleCount;   /* 0x9C */
+    u8 padA0[4];
+    u32 delayRange;      /* 0xA4 */
+    s32 fadeIn;          /* 0xA8 */
+    s32 fadeRange;       /* 0xAC */
+    u8 padB0[0x40];
+    s32 colorParam;      /* 0xF0 */
+    u8 padF4[0x88];
+    PcpScatterParticle *particles; /* 0x17C */
+    f32 scale;           /* 0x180 */
+    s32 color;           /* 0x184 */
+    s32 age;             /* 0x188 */
+    PcpScatterDraw *draw; /* 0x18C */
+} PcpScatterUpdateB;
+
+extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+extern void func_00173E38(void *work, u32 index);
+extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
+extern void func_00175DD0(void *draw);
+
+/* Per-frame update of a fading, optionally looping scatter instance. */
+void func_00174350(PcpScatterUpdateB *work) {
+    s32 loop;
+    s32 duration = work->duration;
+    PcpScatterDraw *draw = work->draw;
+    PcpScatterParticle *particle = work->particles;
+    u32 count = work->particleCount;
+    s32 fadeIn;
+    s32 fadeRange;
+    u32 delay;
+    s32 age;
+    s32 color;
+    s32 remaining;
+    f32 total;
+    f32 t;
+    u32 i;
+
+    loop = work->loop;
+    fadeIn = work->fadeIn;
+    fadeRange = work->fadeRange;
+    delay = work->delayRange;
+    color = effMultiplyPackedColors(work->color, work->colorParam);
+    age = work->age;
+    if (duration < age) {
+        return;
+    }
+    remaining = duration - age;
+    if (fadeRange >= remaining && fadeRange != 0) {
+        total = (f32)remaining / (f32)fadeRange;
+    } else {
+        total = 1.0f;
+    }
+    for (i = 0; i < count; i++) {
+        s32 particleAge = particle->age;
+
+        if (duration < particleAge) {
+            draw->colors[i] = 0;
+        } else {
+            if (particleAge == 0) {
+                func_00173E38(work, i);
+            } else if (particleAge > 0) {
+                if (particleAge < fadeIn && fadeIn != 0) {
+                    t = (f32)particleAge / (f32)fadeIn;
+                } else {
+                    t = 1.0f;
+                }
+                draw->colors[i] = effBlendColor(color & 0xFFFFFF, color, t * total);
+                effScatterRingUpdateScaled((PcpScatterWork12 *)work, i);
+            }
+            if (loop != 0 && !(age < duration)) {
+                particle->age = -(effMiscRand(D_0034DF38) % delay);
+            } else {
+                particle->age++;
+            }
+        }
+        particle++;
+    }
+    if (loop != 0 && age >= duration) {
+        work->age = 0;
+    } else {
+        work->age++;
+    }
+    draw->scale = work->scale;
+    PCP_COPY_VECTOR(draw, work->vec);
+    effScatterStoreSourceTransformMatrix(draw, work);
+    func_00175DD0(draw);
+}
 
 void func_001745F8(void *work, void *src) {
     PCP_COPY_VECTOR((u8 *)work + 0x40, src);
