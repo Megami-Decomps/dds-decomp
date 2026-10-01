@@ -30,6 +30,12 @@ instruction sequence has one exact lowering:
 python3 tools/flw0.py disassemble --symbolic --semantic --profile dds1 event.bf event.bfasm
 ```
 
+Use `--structured` to additionally recover exact canonical branches and loops:
+
+```sh
+python3 tools/flw0.py disassemble --symbolic --structured --profile dds1 event.bf event.bfasm
+```
+
 Assemble it again:
 
 ```sh
@@ -156,6 +162,13 @@ disassembler lifts only linear instruction runs with a complete, verified
 stack contract. It flushes pending values before labels and leaves unknown
 commands, malformed words, and ambiguous stack state as instructions. This is
 the escape hatch that keeps partial decompilation exact.
+
+The structured disassembler additionally replaces canonical branch and
+back-edge sequences with the blocks above. It retains the linear semantic form
+when a region has an external entry, crossing control flow, an unknown
+condition, or a jump-table alias whose exact operand cannot be expressed by
+the block boundary. Structured output is therefore subject to the same exact
+assemble check as linear semantic output.
 
 ### Embedded messages
 

@@ -505,6 +505,25 @@ class Flw0Tests(unittest.TestCase):
         )
 
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
+        self.assertEqual(
+            flw0_semantic.lower_code(
+                [
+                    (1, "if (1) {"),
+                    (2, "WAIT_FOR_TIMER_LIMIT(1)"),
+                    (3, "}"),
+                    (4, "done:"),
+                ],
+                flw0_profiles.DDS1,
+            ),
+            [
+                (1, "PUSHIS 1"),
+                (1, "IF done"),
+                (2, "PUSHIS 1"),
+                (2, "COMM WAIT_FOR_TIMER_LIMIT"),
+                (1, "GOTO done"),
+                (4, "done:"),
+            ],
+        )
         source = """\
 flw0 2
 profile dds1
@@ -588,6 +607,31 @@ end
                     )
                 files += 1
             self.assertEqual(files, expected)
+
+    def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
+        root = TOOLS.parent
+        expected = {
+            "dds1": (129, 2218, 736),
+            "dds2": (126, 1509, 1190),
+        }
+        for game, expected_counts in expected.items():
+            files = ifs = loops = 0
+            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+                text = path.read_text(encoding="utf-8")
+                if not text.startswith("flw0 2\n"):
+                    continue
+                script = flw0.parse_source(text)
+                structured = flw0_symbolic.render(script, game, structured=True)
+                with self.subTest(source=path.relative_to(root)):
+                    self.assertEqual(
+                        flw0.parse_source(structured).to_bytes(), script.to_bytes()
+                    )
+                for line in structured.splitlines():
+                    statement = line.lstrip()
+                    ifs += statement.startswith("if (")
+                    loops += statement.startswith("while (")
+                files += 1
+            self.assertEqual((files, ifs, loops), expected_counts)
 
     def test_msg1_source_round_trip_relayouts_dialogs_and_relocations(self) -> None:
         bank = msg1.Bank(
