@@ -609,21 +609,12 @@ void btlProjectOnPlaneVU(f32 *a, f32 *b, f32 *c) {
     f32 dot;
     btlTriangleNormalVU(a, b, c);
     VU0_STORE_VF(vf10, normal);
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%1)\n\t"
-        "lqc2 vf11, 0(%2)\n\t"
-        "vsub.xyzw vf10, vf10, vf11\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        "lqc2 vf10, 0(%3)\n\t"
-        "vmul.xyz vf2, vf10, vf11\n\t"
-        "vaddy.x vf2, vf2, vf2y\n\t"
-        "vaddz.x vf2, vf2, vf2z\n\t"
-        "qmfc2.ni $2, vf2\n\t"
-        "mtc1 $2, %0\n\t"
-        ".set reorder"
-        : "=f"(dot)
-        : "r"(a), "r"(c), "r"(normal));
+    VU0_LOAD_VF(vf10, a);
+    VU0_LOAD_VF(vf11, c);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, normal);
+    VU0_DOT_XYZ(dot, vf10, vf11);
     VU0_SCALAR_OP(dot, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_LOAD_VF(vf11, c);
     VU0_ADD(vf10, vf10, vf11);

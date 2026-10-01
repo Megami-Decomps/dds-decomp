@@ -7212,19 +7212,7 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
         vector[1] = (effMiscRandUnitFloat(D_0037F550) - 0.5f) * 2.0f;
         vector[2] = (effMiscRandUnitFloat(D_0037F550) - 0.5f) * 2.0f;
     }
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "lqc2 $vf10, %0\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        "sqc2 $vf10, %0\n\t"
-        ".set reorder"
-        : "+m"(vector) :: "memory");
+    VU0_NORMALIZE_PACKED_VECTOR(vector);
     entry[0] = vector[0];
     entry[2] = vector[2];
     entry[1] = vector[1];
