@@ -547,29 +547,17 @@ s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
 
-/* Final title-effect handles follow the four packet groups and sprite list. */
+/* Title-effect work: sprite handle list at 0x60, then the resource slot sets. */
 typedef struct TitleEffectHandles {
-    u8 pad00[0xC4];
-    u32 groupA;
-    u32 groupB;
-    u32 additional[9];
-    u32 finalGroup;
+    u8 pad00[0x60];
+    u32 sprites[25]; /* 0x60: released through mnuReleaseTitleEffectSprites */
+    u32 groupA;      /* 0xC4 */
+    u32 groupB;      /* 0xC8 */
+    u32 additional[9]; /* 0xCC */
+    u32 finalGroup;  /* 0xF0 */
 } TitleEffectHandles;
 
-/* Release the title screen's effect sprites and resource slot sets. */
-s64 mnuReleaseTitleEffectResourceGroups(u8 *work) {
-    u32 *handles;
-    s32 i;
-
-    mnuReleaseTitleEffectSprites((u32 *)(work + 0x60));
-    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupA);
-    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupB);
-    handles = ((TitleEffectHandles *)work)->additional;
-    for (i = 8; i >= 0; i--) {
-        effDestroyResourceSlotSet(*handles++);
-    }
-    return effDestroyResourceSlotSet(((TitleEffectHandles *)work)->finalGroup);
-}
+INCLUDE_ASM(const s32, "game/code_002A9068", mnuReleaseTitleEffectResourceGroups);
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9AB8);
 
