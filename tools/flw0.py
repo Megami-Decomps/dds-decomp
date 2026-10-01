@@ -1150,7 +1150,9 @@ def _parse_code_payload(
         raise Flw0Error(f"section {section.index}: code word is outside u32") from exc
 
 
-def parse_source(text: str) -> Flw0File:
+def parse_source(
+    text: str, profile: flw0_profiles.CommandProfile | None = None
+) -> Flw0File:
     """Assemble physical version-1 or symbolic version-2 source."""
 
     numbered = enumerate(text.splitlines(), 1)
@@ -1162,7 +1164,7 @@ def parse_source(text: str) -> Flw0File:
     if meaningful and meaningful[0][1] == "flw0 2":
         import flw0_symbolic
 
-        return flw0_symbolic.parse(text)
+        return flw0_symbolic.parse(text, profile=profile)
     if not meaningful or meaningful[0][1] != "flw0 1":
         raise Flw0Error("source must begin with 'flw0 1' or 'flw0 2'")
 
@@ -1259,8 +1261,13 @@ def parse_source(text: str) -> Flw0File:
 
     if header_values is None:
         raise Flw0Error("source has no header")
-    command_profile = None
-    if profile_name is not None:
+    command_profile = profile
+    if command_profile is not None and profile_name not in (None, command_profile.name):
+        raise Flw0Error(
+            f"line {profile_line}: source profile {profile_name!r} does not match "
+            f"provided profile {command_profile.name!r}"
+        )
+    if command_profile is None and profile_name is not None:
         try:
             command_profile = flw0_profiles.get(profile_name)
         except KeyError as exc:

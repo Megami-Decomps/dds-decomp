@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class IntegerSymbols:
     values: tuple[tuple[int, str], ...]
+    complete: bool = False
 
     @property
     def by_value(self) -> dict[int, str]:

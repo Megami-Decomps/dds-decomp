@@ -259,6 +259,17 @@ def _resolve_argument_symbols(
     line_number: int,
 ) -> Expr:
     symbols = command.symbols_for_argument(argument_index)
+    if (
+        isinstance(expression, Integer)
+        and not expression.wide
+        and symbols is not None
+        and symbols.complete
+        and expression.value not in symbols.by_value
+    ):
+        raise flw0.Flw0Error(
+            f"line {line_number}: {expression.value} is outside the integer domain "
+            f"for argument {argument_index} of {command.name}"
+        )
     if isinstance(expression, _UnresolvedSymbol):
         value = symbols.by_name.get(expression.name) if symbols is not None else None
         if value is None:

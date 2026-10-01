@@ -2406,7 +2406,7 @@ ai_test_attack:
   return
 ai_test_skill:
   PROC ai_test_skill
-  AI_SELECT_SKILL(1)
+  AI_SELECT_SKILL(AGI)
   AI_SELECT_LOWEST_HP_TARGET()
   return
 ai_test_aiuse:
@@ -2920,7 +2920,7 @@ _104:
   if (TEST_MODEL_FLAG(3062) == 1) {
     CLEAR_MODEL_FLAG(3062)
     SET_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(193)
+    AI_SELECT_SKILL(MIND_CHARGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -2929,13 +2929,13 @@ _104:
       CLEAR_MODEL_FLAG(3056)
       CLEAR_MODEL_FLAG(3057)
       CLEAR_MODEL_FLAG(3058)
-      AI_SELECT_SKILL(370)
+      AI_SELECT_SKILL(TERRA_BURST)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _108:
       if (local_int[6] < 35) {
-        AI_SELECT_SKILL(112)
+        AI_SELECT_SKILL(BODY_RUSH)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -2964,13 +2964,13 @@ AI_ANDRAS:
       }
     }
   _110:
-    AI_SELECT_SKILL(160)
+    AI_SELECT_SKILL(DIA)
     AI_SELECT_LOWEST_HP_RATE_TARGET()
     return
   } else {
   _114:
     if (local_int[8] < 10 + 60 && AI_ALL_ENEMIES_PASS_QUERY(5) == 1) {
-      AI_SELECT_SKILL(340)
+      AI_SELECT_SKILL(VOID_FORCE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -2994,13 +2994,13 @@ _123:
       }
     }
   _116:
-    AI_SELECT_SKILL(160)
+    AI_SELECT_SKILL(DIA)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _120:
     if (local_int[8] < 5 + 20) {
-      AI_SELECT_SKILL(28)
+      AI_SELECT_SKILL(ZAN)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -3125,7 +3125,7 @@ _141:
   } else {
   _144:
     CLEAR_MODEL_FLAG(3062)
-    AI_SELECT_SKILL(425)
+    AI_SELECT_SKILL(HUNDRED_FIST)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _143
@@ -3134,7 +3134,7 @@ _143:
   goto _145
 _146:
   if (local_int[9] < 25 + 40) {
-    AI_SELECT_SKILL(271)
+    AI_SELECT_SKILL(EXECUTIONER_10F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -3169,7 +3169,7 @@ _148:
   _165:
     if (TEST_MODEL_FLAG(3041) == 0) {
       SET_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(371)
+      AI_SELECT_SKILL(BLACK_BIND_173)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -3182,7 +3182,7 @@ _148:
       } else {
       _151:
         SET_MODEL_FLAG(3043)
-        AI_SELECT_SKILL(31)
+        AI_SELECT_SKILL(MAZAN_01F)
         goto _150
       }
     _150:
@@ -3210,7 +3210,7 @@ _148:
       if_not (TEST_MODEL_FLAG(2094) == 1) goto _162
       if (TEST_MODEL_FLAG(3042) == 0) {
         SET_MODEL_FLAG(3042)
-        AI_SELECT_SKILL(31)
+        AI_SELECT_SKILL(MAZAN_01F)
       } else {
       _156:
         AI_SELECT_WAIT()
@@ -3404,7 +3404,7 @@ _190:
 _192:
   if_not (TEST_MODEL_FLAG(3048) == 1) goto _196
   if (local_int[11] < 40) {
-    AI_SELECT_SKILL(126)
+    AI_SELECT_SKILL(POWER_WAVE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -3418,20 +3418,20 @@ _194:
   goto _196
 _196:
   if (local_int[10] < 15) {
-    AI_SELECT_SKILL(29)
+    AI_SELECT_SKILL(ZANMA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _207:
     if (local_int[10] < 15 + 15) {
-      AI_SELECT_SKILL(32)
+      AI_SELECT_SKILL(MAZANMA_020)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _208:
       if_not (local_int[10] < 15 + 15 + 30) goto _209
       if (TEST_MODEL_FLAG(3042) == 1) {
-        AI_SELECT_SKILL(29)
+        AI_SELECT_SKILL(ZANMA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -3447,7 +3447,7 @@ _196:
             }
           }
         _198:
-          AI_SELECT_SKILL(372)
+          AI_SELECT_SKILL(BLACK_BIND_174)
           AI_SELECT_ACTION_TARGETS()
           return
         }
@@ -3456,7 +3456,7 @@ _196:
       goto _206
     _209:
       if (local_int[10] < 15 + 15 + 30 + 20) {
-        AI_SELECT_SKILL(403)
+        AI_SELECT_SKILL(GORGE)
         if (TEST_MODEL_FLAG(3067) == 1) {
           AI_SELECT_TARGETS_WITH_ACTION_MASK(8192)
         } else {
@@ -3469,7 +3469,7 @@ _196:
       } else {
       _210:
         if (local_int[10] < 15 + 15 + 30 + 20 + 10) {
-          AI_SELECT_SKILL(79)
+          AI_SELECT_SKILL(STUN_WAVE_04F)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -3603,11 +3603,11 @@ _244:
   if (TEST_MODEL_FLAG(3066) == 0 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3043) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
     SET_MODEL_FLAG(3066)
     if (TEST_MODEL_FLAG(3070) == 1) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
     } else {
     _247:
       if (TEST_MODEL_FLAG(3071) == 1) {
-        AI_SELECT_SKILL(180)
+        AI_SELECT_SKILL(DEKUNDA_0B4)
       }
     }
   _246:
@@ -3618,11 +3618,11 @@ _244:
     if (TEST_MODEL_FLAG(3068) == 0 && (TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3043) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
       SET_MODEL_FLAG(3068)
       if (TEST_MODEL_FLAG(3071) == 1) {
-        AI_SELECT_SKILL(180)
+        AI_SELECT_SKILL(DEKUNDA_0B4)
       } else {
       _250:
         if (TEST_MODEL_FLAG(3070) == 1) {
-          AI_SELECT_SKILL(185)
+          AI_SELECT_SKILL(DEKAJA_0B9)
         }
       }
     _249:
@@ -3638,19 +3638,19 @@ _244:
       _272:
         if_not (TEST_MODEL_FLAG(3041) == 0) goto _273
         if (local_int[12] < 10) {
-          AI_SELECT_SKILL(160)
+          AI_SELECT_SKILL(DIA)
           AI_SELECT_LOWEST_HP_RATE_TARGET()
           return
         } else {
         _261:
           if (local_int[12] < 10 + 25 && AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0) {
-            AI_SELECT_SKILL(181)
+            AI_SELECT_SKILL(TARUKAJA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _262:
             if (local_int[12] < 10 + 25 + 25 && AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0) {
-              AI_SELECT_SKILL(184)
+              AI_SELECT_SKILL(MAKAKAJA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -3658,23 +3658,23 @@ _244:
               if (TEST_MODEL_FLAG(3050) == 0) {
                 SET_MODEL_FLAG(3050)
                 if (TEST_MODEL_FLAG(3047) == 1) {
-                  AI_SELECT_SKILL(340)
+                  AI_SELECT_SKILL(VOID_FORCE)
                 } else {
                 _253:
                   if (TEST_MODEL_FLAG(3044) == 1) {
-                    AI_SELECT_SKILL(337)
+                    AI_SELECT_SKILL(VOID_FIRE)
                   } else {
                   _254:
                     if (TEST_MODEL_FLAG(3048) == 1) {
-                      AI_SELECT_SKILL(341)
+                      AI_SELECT_SKILL(VOID_EARTH)
                     } else {
                     _255:
                       if (TEST_MODEL_FLAG(3046) == 1) {
-                        AI_SELECT_SKILL(339)
+                        AI_SELECT_SKILL(VOID_ELEC)
                       } else {
                       _256:
                         if (TEST_MODEL_FLAG(3045) == 1) {
-                          AI_SELECT_SKILL(338)
+                          AI_SELECT_SKILL(VOID_ICE)
                         } else {
                         _257:
                           AI_SELECT_BASIC_ATTACK()
@@ -3703,25 +3703,25 @@ _244:
         goto _269
       _273:
         if (local_int[12] < 5) {
-          AI_SELECT_SKILL(160)
+          AI_SELECT_SKILL(DIA)
           AI_SELECT_LOWEST_HP_RATE_TARGET()
           return
         } else {
         _265:
           if (local_int[12] < 5 + 25 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-            AI_SELECT_SKILL(178)
+            AI_SELECT_SKILL(RAKUNDA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _266:
             if (local_int[12] < 5 + 25 + 45) {
-              AI_SELECT_SKILL(30)
+              AI_SELECT_SKILL(ZANDYNE)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _267:
               if (local_int[12] < 5 + 25 + 45 + 20 && AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-                AI_SELECT_SKILL(177)
+                AI_SELECT_SKILL(SUKUNDA)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
@@ -3923,11 +3923,11 @@ _320:
   if (TEST_MODEL_FLAG(3067) == 0 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
     SET_MODEL_FLAG(3067)
     if (TEST_MODEL_FLAG(3071) == 1) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
     } else {
     _324:
       if (TEST_MODEL_FLAG(3070) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       }
     }
   _323:
@@ -3938,11 +3938,11 @@ _320:
     if (TEST_MODEL_FLAG(3069) == 0 && (TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3042) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
       SET_MODEL_FLAG(3069)
       if (TEST_MODEL_FLAG(3070) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       } else {
       _327:
         if (TEST_MODEL_FLAG(3071) == 1) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         }
       }
     _326:
@@ -3960,19 +3960,19 @@ _320:
           local_int[14] = RANDOM_ONE_TO(100)
           result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[14])
           if (local_int[14] < local_int[15]) {
-            AI_SELECT_SKILL(42)
+            AI_SELECT_SKILL(MATERADYNE_02A)
           } else {
           _330:
             if (local_int[14] < local_int[15] + local_int[16]) {
-              AI_SELECT_SKILL(6)
+              AI_SELECT_SKILL(MARAGIDYNE_006)
             } else {
             _331:
               if (local_int[14] < local_int[15] + local_int[16] + local_int[17]) {
-                AI_SELECT_SKILL(33)
+                AI_SELECT_SKILL(MAZANDYNE_021)
               } else {
               _332:
                 if (local_int[14] < local_int[15] + local_int[16] + local_int[17] + local_int[18] + local_int[19]) {
-                  AI_SELECT_SKILL(24)
+                  AI_SELECT_SKILL(MAZIODYNE_018)
                 } else {
                 _333:
                   AI_SELECT_BASIC_ATTACK()
@@ -3990,19 +3990,19 @@ _320:
             local_int[14] = RANDOM_ONE_TO(100)
             result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[14])
             if (local_int[14] < local_int[15]) {
-              AI_SELECT_SKILL(39)
+              AI_SELECT_SKILL(TERADYNE)
             } else {
             _335:
               if (local_int[14] < local_int[15] + local_int[16]) {
-                AI_SELECT_SKILL(3)
+                AI_SELECT_SKILL(AGIDYNE)
               } else {
               _336:
                 if (local_int[14] < local_int[15] + local_int[16] + local_int[17]) {
-                  AI_SELECT_SKILL(30)
+                  AI_SELECT_SKILL(ZANDYNE)
                 } else {
                 _337:
                   if (local_int[14] < local_int[15] + local_int[16] + local_int[17] + local_int[18] + local_int[19]) {
-                    AI_SELECT_SKILL(21)
+                    AI_SELECT_SKILL(ZIODYNE)
                   } else {
                   _338:
                     AI_SELECT_BASIC_ATTACK()
@@ -4055,15 +4055,15 @@ _353:
   local_int[20] = RANDOM_ONE_TO(100)
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[20])
   if (local_int[20] < 30 && TEST_MODEL_FLAG(3055) == 0) {
-    AI_SELECT_SKILL(119)
+    AI_SELECT_SKILL(MAD_RUSH)
   } else {
   _356:
     if (local_int[20] < 30 + 30) {
-      AI_SELECT_SKILL(112)
+      AI_SELECT_SKILL(BODY_RUSH)
     } else {
     _357:
       if (local_int[20] < 30 + 30 + 35) {
-        AI_SELECT_SKILL(121)
+        AI_SELECT_SKILL(HELL_THRUST)
       } else {
       _358:
         AI_SELECT_BASIC_ATTACK()
@@ -4223,7 +4223,7 @@ _394:
   }
 _396:
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[21])
-  if (AI_ACTOR_CAN_USE_ACTION(529) == 1 && (TEST_MODEL_FLAG(3052) == 1 || local_int[22] < 35)) {
+  if (AI_ACTOR_CAN_USE_ACTION(BOLT_RAIN) == 1 && (TEST_MODEL_FLAG(3052) == 1 || local_int[22] < 35)) {
     if (TEST_MODEL_FLAG(3053) == 0) {
       CLEAR_MODEL_FLAG(3052)
       SET_MODEL_FLAG(3053)
@@ -4246,7 +4246,7 @@ _396:
     }
   _398:
     SET_MODEL_FLAG(3054)
-    AI_SELECT_SKILL(529)
+    AI_SELECT_SKILL(BOLT_RAIN)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -4254,11 +4254,11 @@ _396:
     if (TEST_MODEL_FLAG(3066) == 0 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3043) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
       SET_MODEL_FLAG(3066)
       if (TEST_MODEL_FLAG(3070) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       } else {
       _401:
         if (TEST_MODEL_FLAG(3071) == 1) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         }
       }
     _400:
@@ -4269,11 +4269,11 @@ _396:
       if (TEST_MODEL_FLAG(3068) == 0 && (TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3043) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
         SET_MODEL_FLAG(3068)
         if (TEST_MODEL_FLAG(3071) == 1) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         } else {
         _404:
           if (TEST_MODEL_FLAG(3070) == 1) {
-            AI_SELECT_SKILL(185)
+            AI_SELECT_SKILL(DEKAJA_0B9)
           }
         }
       _403:
@@ -4289,19 +4289,19 @@ _396:
         _427:
           if_not (TEST_MODEL_FLAG(3041) == 0) goto _428
           if (local_int[21] < 10) {
-            AI_SELECT_SKILL(160)
+            AI_SELECT_SKILL(DIA)
             AI_SELECT_LOWEST_HP_RATE_TARGET()
             return
           } else {
           _415:
             if (local_int[21] < 10 + 25 && AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0) {
-              AI_SELECT_SKILL(181)
+              AI_SELECT_SKILL(TARUKAJA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _416:
               if (local_int[21] < 10 + 25 + 25 && AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0) {
-                AI_SELECT_SKILL(184)
+                AI_SELECT_SKILL(MAKAKAJA)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
@@ -4309,23 +4309,23 @@ _396:
                 if (TEST_MODEL_FLAG(3050) == 0) {
                   SET_MODEL_FLAG(3050)
                   if (TEST_MODEL_FLAG(3047) == 1) {
-                    AI_SELECT_SKILL(340)
+                    AI_SELECT_SKILL(VOID_FORCE)
                   } else {
                   _407:
                     if (TEST_MODEL_FLAG(3044) == 1) {
-                      AI_SELECT_SKILL(337)
+                      AI_SELECT_SKILL(VOID_FIRE)
                     } else {
                     _408:
                       if (TEST_MODEL_FLAG(3048) == 1) {
-                        AI_SELECT_SKILL(341)
+                        AI_SELECT_SKILL(VOID_EARTH)
                       } else {
                       _409:
                         if (TEST_MODEL_FLAG(3046) == 1) {
-                          AI_SELECT_SKILL(339)
+                          AI_SELECT_SKILL(VOID_ELEC)
                         } else {
                         _410:
                           if (TEST_MODEL_FLAG(3045) == 1) {
-                            AI_SELECT_SKILL(338)
+                            AI_SELECT_SKILL(VOID_ICE)
                           } else {
                           _411:
                             AI_SELECT_BASIC_ATTACK()
@@ -4354,25 +4354,25 @@ _396:
           goto _423
         _428:
           if (local_int[21] < 5) {
-            AI_SELECT_SKILL(160)
+            AI_SELECT_SKILL(DIA)
             AI_SELECT_LOWEST_HP_RATE_TARGET()
             return
           } else {
           _419:
             if (local_int[21] < 5 + 20 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-              AI_SELECT_SKILL(178)
+              AI_SELECT_SKILL(RAKUNDA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _420:
               if (local_int[21] < 5 + 20 + 50) {
-                AI_SELECT_SKILL(30)
+                AI_SELECT_SKILL(ZANDYNE)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _421:
                 if (local_int[21] < 5 + 20 + 50 + 20 && AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-                  AI_SELECT_SKILL(177)
+                  AI_SELECT_SKILL(SUKUNDA)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
@@ -4605,11 +4605,11 @@ _480:
   if (TEST_MODEL_FLAG(3067) == 0 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
     SET_MODEL_FLAG(3067)
     if (TEST_MODEL_FLAG(3071) == 1) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
     } else {
     _484:
       if (TEST_MODEL_FLAG(3070) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       }
     }
   _483:
@@ -4620,11 +4620,11 @@ _480:
     if (TEST_MODEL_FLAG(3069) == 0 && (TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3042) == 1) && (TEST_MODEL_FLAG(3070) == 1 || TEST_MODEL_FLAG(3071) == 1)) {
       SET_MODEL_FLAG(3069)
       if (TEST_MODEL_FLAG(3070) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       } else {
       _487:
         if (TEST_MODEL_FLAG(3071) == 1) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         }
       }
     _486:
@@ -4643,19 +4643,19 @@ _480:
           local_int[24] = RANDOM_ONE_TO(100)
           result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[24])
           if (local_int[24] < local_int[25]) {
-            AI_SELECT_SKILL(42)
+            AI_SELECT_SKILL(MATERADYNE_02A)
           } else {
           _490:
             if (local_int[24] < local_int[25] + local_int[26]) {
-              AI_SELECT_SKILL(6)
+              AI_SELECT_SKILL(MARAGIDYNE_006)
             } else {
             _491:
               if (local_int[24] < local_int[25] + local_int[26] + local_int[27]) {
-                AI_SELECT_SKILL(33)
+                AI_SELECT_SKILL(MAZANDYNE_021)
               } else {
               _492:
                 if (local_int[24] < local_int[25] + local_int[26] + local_int[27] + local_int[28] + local_int[29]) {
-                  AI_SELECT_SKILL(24)
+                  AI_SELECT_SKILL(MAZIODYNE_018)
                 } else {
                 _493:
                   AI_SELECT_BASIC_ATTACK()
@@ -4673,19 +4673,19 @@ _480:
             local_int[24] = RANDOM_ONE_TO(100)
             result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[24])
             if (local_int[24] < local_int[25]) {
-              AI_SELECT_SKILL(39)
+              AI_SELECT_SKILL(TERADYNE)
             } else {
             _495:
               if (local_int[24] < local_int[25] + local_int[26]) {
-                AI_SELECT_SKILL(3)
+                AI_SELECT_SKILL(AGIDYNE)
               } else {
               _496:
                 if (local_int[24] < local_int[25] + local_int[26] + local_int[27]) {
-                  AI_SELECT_SKILL(30)
+                  AI_SELECT_SKILL(ZANDYNE)
                 } else {
                 _497:
                   if (local_int[24] < local_int[25] + local_int[26] + local_int[27] + local_int[28] + local_int[29]) {
-                    AI_SELECT_SKILL(21)
+                    AI_SELECT_SKILL(ZIODYNE)
                   } else {
                   _498:
                     AI_SELECT_BASIC_ATTACK()
@@ -4755,19 +4755,19 @@ _517:
   local_int[30] = RANDOM_ONE_TO(100)
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[30])
   if (local_int[30] < 20) {
-    AI_SELECT_SKILL(119)
+    AI_SELECT_SKILL(MAD_RUSH)
   } else {
   _520:
     if (local_int[30] < 20 + 15) {
-      AI_SELECT_SKILL(112)
+      AI_SELECT_SKILL(BODY_RUSH)
     } else {
     _521:
       if (local_int[30] < 20 + 15 + 30) {
-        AI_SELECT_SKILL(121)
+        AI_SELECT_SKILL(HELL_THRUST)
       } else {
       _522:
         if (local_int[30] < 20 + 15 + 30 + 30 && TEST_MODEL_FLAG(3064) == 0 && TEST_MODEL_FLAG(3054) == 0) {
-          AI_SELECT_SKILL(126)
+          AI_SELECT_SKILL(POWER_WAVE)
         } else {
         _523:
           AI_SELECT_BASIC_ATTACK()
@@ -4958,27 +4958,27 @@ _555:
   local_int[31] = RANDOM_ONE_TO(100)
   if_not (TEST_MODEL_FLAG(3061) == 1) goto _569
   if (TEST_MODEL_FLAG(3040) == 0 && local_int[31] < 20) {
-    AI_SELECT_SKILL(122)
+    AI_SELECT_SKILL(HELL_FANG)
     AI_SELECT_TARGETS_BY_UNIT_MODE(1)
     return
   } else {
   _558:
     if (TEST_MODEL_FLAG(3040) == 0 && local_int[31] < 20 + 20 && AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
       SET_MODEL_FLAG(3040)
-      AI_SELECT_SKILL(193)
+      AI_SELECT_SKILL(MIND_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _559:
       if (TEST_MODEL_FLAG(3040) == 1 || TEST_MODEL_FLAG(3040) == 0 && local_int[31] < 20 + 20 + 30) {
         CLEAR_MODEL_FLAG(3040)
-        AI_SELECT_SKILL(3)
+        AI_SELECT_SKILL(AGIDYNE)
         AI_SELECT_TARGETS_BY_UNIT_MODE(1)
         return
       } else {
       _560:
         if (TEST_MODEL_FLAG(3040) == 0 && local_int[31] < 20 + 20 + 30 + 25) {
-          AI_SELECT_SKILL(120)
+          AI_SELECT_SKILL(DOUBLE_SLASH)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -4994,7 +4994,7 @@ _555:
 _557:
   goto _568
 _569:
-  if (TEST_MODEL_FLAG(3065) == 1 && AI_ACTOR_CAN_USE_ACTION(434) == 1) {
+  if (TEST_MODEL_FLAG(3065) == 1 && AI_ACTOR_CAN_USE_ACTION(MARAGIDYNE_1B2) == 1) {
     CLEAR_MODEL_FLAG(3065)
     AI_CLEAR_SCENE_TRANSITION()
     AI_QUEUE_UNBOUND_COMMAND_SOUND()
@@ -5002,25 +5002,25 @@ _569:
     MESSAGE_REQUEST_AND_POLL(message(MSG_AGUNI009))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_SKILL(434)
+    AI_SELECT_SKILL(MARAGIDYNE_1B2)
   } else {
   _563:
     if (local_int[31] < 25 && AI_UNIT_PASSES_ACTION_TEN_CHECK() == 0) {
       SET_MODEL_FLAG(3042)
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
     } else {
     _564:
       if (TEST_MODEL_FLAG(3042) == 1 || local_int[31] < 25 + 20) {
         CLEAR_MODEL_FLAG(3042)
-        AI_SELECT_SKILL(131)
+        AI_SELECT_SKILL(SKULL_CLEAVE)
       } else {
       _565:
         if (local_int[31] < 25 + 20 + 30) {
-          AI_SELECT_SKILL(129)
+          AI_SELECT_SKILL(CHI_BLAST)
         } else {
         _566:
           if (local_int[31] < 25 + 20 + 30 + 20 && AI_ANY_PLAYER_ACTION_MODE_ZERO(0) == 0) {
-            AI_SELECT_SKILL(189)
+            AI_SELECT_SKILL(TAUNT)
           } else {
           _567:
             AI_SELECT_BASIC_ATTACK()
@@ -5243,7 +5243,7 @@ _599:
       goto _611
     _611:
       CLEAR_MODEL_FLAG(3049)
-      AI_SELECT_SKILL(377)
+      AI_SELECT_SKILL(BELLOW)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -5284,7 +5284,7 @@ _599:
         CLEAR_MODEL_FLAG(3055)
         CLEAR_MODEL_FLAG(3060)
         SET_MODEL_FLAG(3053)
-        AI_SELECT_SKILL(380)
+        AI_SELECT_SKILL(REGURGITATE)
         AI_APPEND_CURRENT_UNIT_TO_TARGETS()
         return
       } else {
@@ -5304,7 +5304,7 @@ _599:
         _619:
           CLEAR_MODEL_FLAG(3055)
           SET_MODEL_FLAG(3048)
-          AI_SELECT_SKILL(378)
+          AI_SELECT_SKILL(NOXIOUS_CLOUD)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -5339,7 +5339,7 @@ _599:
             CLEAR_MODEL_FLAG(3040)
             SET_MODEL_FLAG(3049)
             SET_MODEL_FLAG(3050)
-            AI_SELECT_SKILL(379)
+            AI_SELECT_SKILL(GATE_TO_ABYSS)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -5370,7 +5370,7 @@ _599:
             }
           _631:
             if (local_int[33] < 10) {
-              AI_SELECT_SKILL(161)
+              AI_SELECT_SKILL(DIARAMA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -5379,10 +5379,10 @@ _599:
                 local_int[34] = RANDOM_ONE_TO(100)
                 result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[34])
                 if (TEST_MODEL_FLAG(3062) == 0 && (TEST_MODEL_FLAG(3063) == 1 || local_int[34] < 50)) {
-                  AI_SELECT_SKILL(181)
+                  AI_SELECT_SKILL(TARUKAJA)
                 } else {
                 _634:
-                  AI_SELECT_SKILL(183)
+                  AI_SELECT_SKILL(RAKUKAJA)
                   goto _633
                 }
               _633:
@@ -5392,7 +5392,7 @@ _599:
               _639:
                 if (local_int[33] < 10 + 20 + 25 && TEST_MODEL_FLAG(3054) == 0) {
                   SET_MODEL_FLAG(3054)
-                  AI_SELECT_SKILL(97)
+                  AI_SELECT_SKILL(SILENT_HOWL)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
@@ -5401,10 +5401,10 @@ _599:
                     local_int[34] = RANDOM_ONE_TO(100)
                     result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[34])
                     if (TEST_MODEL_FLAG(3064) == 0 && (AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 1 || local_int[34] < 50)) {
-                      AI_SELECT_SKILL(177)
+                      AI_SELECT_SKILL(SUKUNDA)
                     } else {
                     _636:
-                      AI_SELECT_SKILL(179)
+                      AI_SELECT_SKILL(MAKANDA)
                       goto _635
                     }
                   _635:
@@ -5412,7 +5412,7 @@ _599:
                     return
                   } else {
                   _641:
-                    AI_SELECT_SKILL(30)
+                    AI_SELECT_SKILL(ZANDYNE)
                     AI_SELECT_ACTION_TARGETS()
                     return
                     goto _637
@@ -5557,19 +5557,19 @@ _599:
               local_int[41] = RANDOM_ONE_TO(100)
               result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[41])
               if (local_int[41] < local_int[36]) {
-                AI_SELECT_SKILL(42)
+                AI_SELECT_SKILL(MATERADYNE_02A)
               } else {
               _676:
                 if (local_int[41] < local_int[36] + local_int[37]) {
-                  AI_SELECT_SKILL(6)
+                  AI_SELECT_SKILL(MARAGIDYNE_006)
                 } else {
                 _677:
                   if (local_int[41] < local_int[36] + local_int[37] + local_int[38]) {
-                    AI_SELECT_SKILL(33)
+                    AI_SELECT_SKILL(MAZANDYNE_021)
                   } else {
                   _678:
                     if (local_int[41] < local_int[36] + local_int[37] + local_int[38] + local_int[39] + local_int[40]) {
-                      AI_SELECT_SKILL(24)
+                      AI_SELECT_SKILL(MAZIODYNE_018)
                     } else {
                     _679:
                       AI_SELECT_BASIC_ATTACK()
@@ -5587,19 +5587,19 @@ _599:
                 local_int[41] = RANDOM_ONE_TO(100)
                 result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[41])
                 if (local_int[41] < local_int[36]) {
-                  AI_SELECT_SKILL(39)
+                  AI_SELECT_SKILL(TERADYNE)
                 } else {
                 _681:
                   if (local_int[41] < local_int[36] + local_int[37]) {
-                    AI_SELECT_SKILL(3)
+                    AI_SELECT_SKILL(AGIDYNE)
                   } else {
                   _682:
                     if (local_int[41] < local_int[36] + local_int[37] + local_int[38]) {
-                      AI_SELECT_SKILL(30)
+                      AI_SELECT_SKILL(ZANDYNE)
                     } else {
                     _683:
                       if (local_int[41] < local_int[36] + local_int[37] + local_int[38] + local_int[39] + local_int[40]) {
-                        AI_SELECT_SKILL(21)
+                        AI_SELECT_SKILL(ZIODYNE)
                       } else {
                       _684:
                         AI_SELECT_BASIC_ATTACK()
@@ -5624,20 +5624,20 @@ _599:
           _700:
             if (TEST_MODEL_FLAG(3043) == 1) {
               if (local_int[33] < 20) {
-                AI_SELECT_SKILL(119)
+                AI_SELECT_SKILL(MAD_RUSH)
               } else {
               _689:
                 if (local_int[33] < 20 + 30 && TEST_MODEL_FLAG(3054) == 0) {
                   SET_MODEL_FLAG(3054)
-                  AI_SELECT_SKILL(126)
+                  AI_SELECT_SKILL(POWER_WAVE)
                 } else {
                 _690:
                   if (local_int[33] < 20 + 30 + 15) {
-                    AI_SELECT_SKILL(112)
+                    AI_SELECT_SKILL(BODY_RUSH)
                   } else {
                   _691:
                     if (local_int[33] < 20 + 30 + 15 + 30) {
-                      AI_SELECT_SKILL(121)
+                      AI_SELECT_SKILL(HELL_THRUST)
                     } else {
                     _692:
                       AI_SELECT_BASIC_ATTACK()
@@ -5711,25 +5711,25 @@ _712:
   }
 _714:
   if (TEST_MODEL_FLAG(3045) == 1) {
-    AI_SELECT_SKILL(404)
+    AI_SELECT_SKILL(BARRAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _725:
     if (TEST_MODEL_FLAG(3041) == 1) {
-      AI_SELECT_SKILL(383)
+      AI_SELECT_SKILL(FIRE_17F)
       AI_SELECT_TARGETS_WITH_ACTION_MASK(2)
       return
     } else {
     _726:
       if (TEST_MODEL_FLAG(3042) == 1) {
-        AI_SELECT_SKILL(383)
+        AI_SELECT_SKILL(FIRE_17F)
         AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
         return
       } else {
       _727:
         if (local_int[42] < 35 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-          AI_SELECT_SKILL(394)
+          AI_SELECT_SKILL(FIRE_18A)
           if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
             AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
           } else {
@@ -5747,7 +5747,7 @@ _714:
         } else {
         _728:
           if (local_int[42] < 35 + 35 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-            AI_SELECT_SKILL(386)
+            AI_SELECT_SKILL(FIRE_182)
             if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
               AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
             } else {
@@ -5765,7 +5765,7 @@ _714:
           } else {
           _729:
             if (local_int[42] < 35 + 35 + 5 && TEST_MODEL_FLAG(3044) == 0) {
-              AI_SELECT_SKILL(395)
+              AI_SELECT_SKILL(FIRE_18B)
               if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
                 AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
               } else {
@@ -5778,18 +5778,18 @@ _714:
             } else {
             _730:
               if (local_int[42] < 35 + 35 + 5 + 5) {
-                AI_SELECT_SKILL(387)
+                AI_SELECT_SKILL(FIRE_183)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _731:
                 if (local_int[42] < 35 + 35 + 5 + 5 + 15) {
-                  AI_SELECT_SKILL(405)
+                  AI_SELECT_SKILL(SHARPSHOT)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _732:
-                  AI_SELECT_SKILL(383)
+                  AI_SELECT_SKILL(FIRE_17F)
                   AI_SELECT_ACTION_TARGETS()
                   return
                   goto _724
@@ -5857,25 +5857,25 @@ _743:
   }
 _745:
   if (TEST_MODEL_FLAG(3045) == 1) {
-    AI_SELECT_SKILL(404)
+    AI_SELECT_SKILL(BARRAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _756:
     if (TEST_MODEL_FLAG(3041) == 1) {
-      AI_SELECT_SKILL(383)
+      AI_SELECT_SKILL(FIRE_17F)
       AI_SELECT_TARGETS_WITH_ACTION_MASK(2)
       return
     } else {
     _757:
       if (TEST_MODEL_FLAG(3042) == 1) {
-        AI_SELECT_SKILL(383)
+        AI_SELECT_SKILL(FIRE_17F)
         AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
         return
       } else {
       _758:
         if (local_int[43] < 5 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-          AI_SELECT_SKILL(394)
+          AI_SELECT_SKILL(FIRE_18A)
           if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
             AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
           } else {
@@ -5893,7 +5893,7 @@ _745:
         } else {
         _759:
           if (local_int[43] < 5 + 5 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-            AI_SELECT_SKILL(386)
+            AI_SELECT_SKILL(FIRE_182)
             if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
               AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
             } else {
@@ -5911,7 +5911,7 @@ _745:
           } else {
           _760:
             if (local_int[43] < 5 + 5 + 30 && TEST_MODEL_FLAG(3044) == 0) {
-              AI_SELECT_SKILL(395)
+              AI_SELECT_SKILL(FIRE_18B)
               if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
                 AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
               } else {
@@ -5924,18 +5924,18 @@ _745:
             } else {
             _761:
               if (local_int[43] < 5 + 5 + 30 + 30) {
-                AI_SELECT_SKILL(387)
+                AI_SELECT_SKILL(FIRE_183)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _762:
                 if (local_int[43] < 5 + 5 + 30 + 30 + 25) {
-                  AI_SELECT_SKILL(405)
+                  AI_SELECT_SKILL(SHARPSHOT)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _763:
-                  AI_SELECT_SKILL(383)
+                  AI_SELECT_SKILL(FIRE_17F)
                   AI_SELECT_ACTION_TARGETS()
                   return
                   goto _755
@@ -5977,24 +5977,24 @@ _766:
 _769:
   if (TEST_MODEL_FLAG(3048) == 0 && (local_int[44] < 10 || TEST_MODEL_FLAG(3047) == 1)) {
     CLEAR_MODEL_FLAG(3047)
-    AI_SELECT_SKILL(382)
+    AI_SELECT_SKILL(REVERT_PULSE)
     AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
     return
   } else {
   _772:
     if (local_int[44] < 10 + 30) {
-      AI_SELECT_SKILL(400)
+      AI_SELECT_SKILL(FREEZE_RAY)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _773:
       if (local_int[44] < 10 + 30 + 30) {
-        AI_SELECT_SKILL(401)
+        AI_SELECT_SKILL(SONIC_BLAST_191)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _774:
-        AI_SELECT_SKILL(417)
+        AI_SELECT_SKILL(MAGNA_RAY)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _771
@@ -6031,24 +6031,24 @@ _777:
 _780:
   if (TEST_MODEL_FLAG(3048) == 0 && (local_int[45] < 10 || TEST_MODEL_FLAG(3047) == 1)) {
     CLEAR_MODEL_FLAG(3047)
-    AI_SELECT_SKILL(382)
+    AI_SELECT_SKILL(REVERT_PULSE)
     AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
     return
   } else {
   _783:
     if (local_int[45] < 10 + 30) {
-      AI_SELECT_SKILL(402)
+      AI_SELECT_SKILL(PLASMA_RAY)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _784:
       if (local_int[45] < 10 + 30 + 30) {
-        AI_SELECT_SKILL(399)
+        AI_SELECT_SKILL(FLARE_RAY)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _785:
-        AI_SELECT_SKILL(417)
+        AI_SELECT_SKILL(MAGNA_RAY)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _782
@@ -6111,25 +6111,25 @@ _796:
   }
 _798:
   if (TEST_MODEL_FLAG(3045) == 1) {
-    AI_SELECT_SKILL(404)
+    AI_SELECT_SKILL(BARRAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _809:
     if (TEST_MODEL_FLAG(3041) == 1) {
-      AI_SELECT_SKILL(383)
+      AI_SELECT_SKILL(FIRE_17F)
       AI_SELECT_TARGETS_WITH_ACTION_MASK(2)
       return
     } else {
     _810:
       if (TEST_MODEL_FLAG(3042) == 1) {
-        AI_SELECT_SKILL(383)
+        AI_SELECT_SKILL(FIRE_17F)
         AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
         return
       } else {
       _811:
         if (local_int[46] < 25 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-          AI_SELECT_SKILL(394)
+          AI_SELECT_SKILL(FIRE_18A)
           if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
             AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
           } else {
@@ -6147,7 +6147,7 @@ _798:
         } else {
         _812:
           if (local_int[46] < 25 + 25 && TEST_MODEL_FLAG(3043) == 0 && TEST_MODEL_FLAG(3044) == 0) {
-            AI_SELECT_SKILL(386)
+            AI_SELECT_SKILL(FIRE_182)
             if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
               AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
             } else {
@@ -6165,7 +6165,7 @@ _798:
           } else {
           _813:
             if (local_int[46] < 25 + 25 + 5 && TEST_MODEL_FLAG(3044) == 0) {
-              AI_SELECT_SKILL(395)
+              AI_SELECT_SKILL(FIRE_18B)
               if (AI_ANY_PLAYER_HAS_ACTION_MASK(256) == 1) {
                 AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(256)
               } else {
@@ -6178,18 +6178,18 @@ _798:
             } else {
             _814:
               if (local_int[46] < 25 + 25 + 5 + 5) {
-                AI_SELECT_SKILL(387)
+                AI_SELECT_SKILL(FIRE_183)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _815:
                 if (local_int[46] < 25 + 25 + 5 + 5 + 35) {
-                  AI_SELECT_SKILL(405)
+                  AI_SELECT_SKILL(SHARPSHOT)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _816:
-                  AI_SELECT_SKILL(383)
+                  AI_SELECT_SKILL(FIRE_17F)
                   AI_SELECT_ACTION_TARGETS()
                   return
                   goto _808
@@ -6241,36 +6241,36 @@ _821:
 _825:
   if (TEST_MODEL_FLAG(3048) == 0 && (local_int[47] < 30 || TEST_MODEL_FLAG(3047) == 1)) {
     CLEAR_MODEL_FLAG(3047)
-    AI_SELECT_SKILL(382)
+    AI_SELECT_SKILL(REVERT_PULSE)
     AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
     return
   } else {
   _828:
     if (local_int[47] < 30 + 20) {
-      AI_SELECT_SKILL(400)
+      AI_SELECT_SKILL(FREEZE_RAY)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _829:
       if (local_int[47] < 30 + 20 + 10) {
-        AI_SELECT_SKILL(401)
+        AI_SELECT_SKILL(SONIC_BLAST_191)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _830:
         if (local_int[47] < 30 + 20 + 10 + 20) {
-          AI_SELECT_SKILL(402)
+          AI_SELECT_SKILL(PLASMA_RAY)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _831:
           if (local_int[47] < 30 + 20 + 10 + 20 + 10) {
-            AI_SELECT_SKILL(399)
+            AI_SELECT_SKILL(FLARE_RAY)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _832:
-            AI_SELECT_SKILL(417)
+            AI_SELECT_SKILL(MAGNA_RAY)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _827
@@ -6463,7 +6463,7 @@ _865:
     if (TEST_MODEL_FLAG(3061) == 1) {
       CLEAR_MODEL_FLAG(3061)
       SET_MODEL_FLAG(3062)
-      AI_SELECT_SKILL(296)
+      AI_SELECT_SKILL(LOAD)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -6472,7 +6472,7 @@ _865:
         CLEAR_MODEL_FLAG(3062)
         SET_MODEL_FLAG(3063)
         AI_SET_ACTOR_UNIT_PARAMETER(375)
-        AI_SELECT_SKILL(297)
+        AI_SELECT_SKILL(OPEN)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -6480,7 +6480,7 @@ _865:
         if (TEST_MODEL_FLAG(3063) == 1) {
           CLEAR_MODEL_FLAG(3063)
           SET_MODEL_FLAG(3064)
-          AI_SELECT_SKILL(268)
+          AI_SELECT_SKILL(FLARE_CANNON)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -6490,7 +6490,7 @@ _865:
             SET_MODEL_FLAG(3057)
             SET_MODEL_FLAG(3069)
             AI_SET_ACTOR_UNIT_PARAMETER(310)
-            AI_SELECT_SKILL(298)
+            AI_SELECT_SKILL(CLOSE)
             AI_SELECT_ACTION_TARGETS()
             return
           }
@@ -6519,7 +6519,7 @@ AI_NAGARA:
   if_not (AI_ACTOR_HISTORY_COUNTER() == 0) goto _895
   local_int[49] = RANDOM_ONE_TO(100)
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[49])
-  if (AI_ACTOR_CAN_USE_ACTION(530) == 1 && (local_int[49] < 30 || TEST_MODEL_FLAG(3071) == 1)) {
+  if (AI_ACTOR_CAN_USE_ACTION(CONVICTION) == 1 && (local_int[49] < 30 || TEST_MODEL_FLAG(3071) == 1)) {
     CLEAR_MODEL_FLAG(3071)
     SET_MODEL_FLAG(3056)
   } else {
@@ -6607,7 +6607,7 @@ _891:
 _895:
   if (TEST_MODEL_FLAG(3056) == 1) {
     CLEAR_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(530)
+    AI_SELECT_SKILL(CONVICTION)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -6627,13 +6627,13 @@ _895:
     } else {
     _903:
       if (local_int[48] < 40 + 5) {
-        AI_SELECT_SKILL(24)
+        AI_SELECT_SKILL(MAZIODYNE_018)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _904:
         if (local_int[48] < 40 + 5 + 20) {
-          AI_SELECT_SKILL(57)
+          AI_SELECT_SKILL(VANITY_039)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -6641,7 +6641,7 @@ _895:
           if (local_int[48] < 40 + 5 + 20 + 30) {
             local_int[50] = RANDOM_ONE_TO(100)
             result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[50])
-            AI_SELECT_SKILL(130)
+            AI_SELECT_SKILL(MUTE_BLOW)
             if (AI_ANY_PLAYER_HAS_ACTION_MASK(16) == 1 && AI_ALL_PLAYERS_HAVE_ACTION_MASK(16) == 0 && local_int[50] < 50) {
               AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
             } else {
@@ -6909,7 +6909,7 @@ _907:
 _939:
   if (TEST_MODEL_FLAG(3056) == 1) {
     CLEAR_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(409)
+    AI_SELECT_SKILL(REGENERATE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -6930,7 +6930,7 @@ _939:
         AI_BEGIN_SCENE_TRANSITION()
       }
     _941:
-      AI_SELECT_SKILL(408)
+      AI_SELECT_SKILL(INFERNO_ROAR)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -6938,10 +6938,10 @@ _939:
       if (TEST_MODEL_FLAG(3053) == 1) {
         CLEAR_MODEL_FLAG(3053)
         if (AI_ANY_PLAYER_HAS_ACTION_MASK(32) == 0) {
-          AI_SELECT_SKILL(85)
+          AI_SELECT_SKILL(SONIC_WAVE)
         } else {
         _944:
-          AI_SELECT_SKILL(3)
+          AI_SELECT_SKILL(AGIDYNE)
           goto _943
         }
       _943:
@@ -6950,24 +6950,24 @@ _939:
       } else {
       _947:
         if (local_int[51] < 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 0) {
-          AI_SELECT_SKILL(179)
+          AI_SELECT_SKILL(MAKANDA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _948:
           if (local_int[51] < 15 + 35) {
-            AI_SELECT_SKILL(3)
+            AI_SELECT_SKILL(AGIDYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _949:
             if (local_int[51] < 15 + 35 + 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-              AI_SELECT_SKILL(177)
+              AI_SELECT_SKILL(SUKUNDA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _950:
-              AI_SELECT_SKILL(3)
+              AI_SELECT_SKILL(AGIDYNE)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _945
@@ -6994,37 +6994,37 @@ _939:
         AI_BEGIN_SCENE_TRANSITION()
       }
     _951:
-      AI_SELECT_SKILL(407)
+      AI_SELECT_SKILL(GELID_TORRENT)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _954:
       if (TEST_MODEL_FLAG(3054) == 1) {
         CLEAR_MODEL_FLAG(3054)
-        AI_SELECT_SKILL(126)
+        AI_SELECT_SKILL(POWER_WAVE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _955:
         if (local_int[51] < 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-          AI_SELECT_SKILL(178)
+          AI_SELECT_SKILL(RAKUNDA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _956:
           if (local_int[51] < 15 + 30) {
-            AI_SELECT_SKILL(97)
+            AI_SELECT_SKILL(SILENT_HOWL)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _957:
             if (local_int[51] < 15 + 30 + 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(1) == 0) {
-              AI_SELECT_SKILL(176)
+              AI_SELECT_SKILL(TARUNDA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _958:
-              AI_SELECT_SKILL(3)
+              AI_SELECT_SKILL(AGIDYNE)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _953
@@ -7115,7 +7115,7 @@ _965:
 _970:
   if (TEST_MODEL_FLAG(3040) == 1) {
     CLEAR_MODEL_FLAG(3040)
-    AI_SELECT_SKILL(411)
+    AI_SELECT_SKILL(WHITE_IMPULSE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7216,7 +7216,7 @@ _979:
 _984:
   if (TEST_MODEL_FLAG(3056) == 1) {
     CLEAR_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(410)
+    AI_SELECT_SKILL(BLACK_IMPULSE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7285,12 +7285,12 @@ _996:
   }
 _999:
   if (AI_UNIT_HP_AT_OR_BELOW_RATE(40)) {
-    AI_SELECT_SKILL(68)
+    AI_SELECT_SKILL(MAMUDOON_044)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1002:
-    AI_SELECT_SKILL(66)
+    AI_SELECT_SKILL(MUDOON)
     AI_SELECT_TARGETS_WITH_ACTION_MASK(1024)
     return
     goto _1001
@@ -7318,18 +7318,18 @@ _1014:
     if_not (AI_UNIT_HP_AT_OR_BELOW_RATE(40)) goto _1012
     local_int[53] = RANDOM_ONE_TO(100)
     if (local_int[53] <= 30) {
-      AI_SELECT_SKILL(129)
+      AI_SELECT_SKILL(CHI_BLAST)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1006:
       if (local_int[53] < 60) {
-        AI_SELECT_SKILL(137)
+        AI_SELECT_SKILL(GATE_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1007:
-        AI_SELECT_SKILL(70)
+        AI_SELECT_SKILL(BLOOD_CURSE_046)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1005
@@ -7340,7 +7340,7 @@ _1014:
   _1012:
     local_int[53] = RANDOM_ONE_TO(100)
     if (local_int[53] <= 50) {
-      AI_SELECT_SKILL(129)
+      AI_SELECT_SKILL(CHI_BLAST)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -7351,7 +7351,7 @@ _1014:
         return
       } else {
       _1010:
-        AI_SELECT_SKILL(137)
+        AI_SELECT_SKILL(GATE_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1008
@@ -7372,31 +7372,31 @@ AI_DAKINI:
   local_int[54] = RANDOM_ONE_TO(100)
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[54])
   if (local_int[54] < 50 && AI_BOSS_HP_AT_OR_BELOW_RATE(99) == 1) {
-    AI_SELECT_SKILL(161)
+    AI_SELECT_SKILL(DIARAMA)
     AI_SELECT_TARGET_BY_ID(275)
     return
   } else {
   _1017:
     if (local_int[54] > 0 && local_int[54] <= 25 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(0)) {
-      AI_SELECT_SKILL(181)
+      AI_SELECT_SKILL(TARUKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1018:
       if (local_int[54] > 26 && local_int[54] <= 50 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(6)) {
-        AI_SELECT_SKILL(183)
+        AI_SELECT_SKILL(RAKUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1019:
         if (local_int[54] > 51 && local_int[54] <= 75 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(8)) {
-          AI_SELECT_SKILL(182)
+          AI_SELECT_SKILL(SUKUKAJA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1020:
           if (local_int[54] > 76 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(2)) {
-            AI_SELECT_SKILL(184)
+            AI_SELECT_SKILL(MAKAKAJA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -7414,7 +7414,7 @@ _1016:
   goto _1024
 _1025:
   if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(1024) == 0) {
-    AI_SELECT_SKILL(70)
+    AI_SELECT_SKILL(BLOOD_CURSE_046)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7432,42 +7432,42 @@ _1037:
   if_not (AI_ACTOR_HISTORY_COUNTER() == 0) goto _1034
   local_int[54] = RANDOM_ONE_TO(100)
   if (AI_ANY_ENEMY_ACTION_MODE_ZERO(1)) {
-    AI_SELECT_SKILL(181)
+    AI_SELECT_SKILL(TARUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1027:
     if (AI_ANY_ENEMY_ACTION_MODE_ZERO(7)) {
-      AI_SELECT_SKILL(183)
+      AI_SELECT_SKILL(RAKUKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1028:
       if (AI_ANY_ENEMY_ACTION_MODE_ZERO(5)) {
-        AI_SELECT_SKILL(182)
+        AI_SELECT_SKILL(SUKUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1029:
         if (AI_ANY_ENEMY_ACTION_MODE_ZERO(3)) {
-          AI_SELECT_SKILL(184)
+          AI_SELECT_SKILL(MAKAKAJA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1030:
           if (local_int[54] <= 10) {
-            AI_SELECT_SKILL(161)
+            AI_SELECT_SKILL(DIARAMA)
             AI_SELECT_TARGET_BY_ID(275)
             return
           } else {
           _1031:
             if (AI_ANY_ENEMY_PASSES_QUERY(0) == 0) {
-              AI_SELECT_SKILL(364)
+              AI_SELECT_SKILL(PHYS_REPEL_16C)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _1032:
-              AI_SELECT_SKILL(70)
+              AI_SELECT_SKILL(BLOOD_CURSE_046)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _1026
@@ -7481,7 +7481,7 @@ _1026:
   goto _1033
 _1034:
   if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(1024) == 0) {
-    AI_SELECT_SKILL(70)
+    AI_SELECT_SKILL(BLOOD_CURSE_046)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7565,7 +7565,7 @@ _1053:
     SET_MODEL_FLAG(3056)
     SET_MODEL_FLAG(3057)
     SET_MODEL_FLAG(3058)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7614,7 +7614,7 @@ _1053:
           AI_BEGIN_SCENE_TRANSITION()
         }
       _1060:
-        AI_SELECT_SKILL(110)
+        AI_SELECT_SKILL(DARK_SLUMBER)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -7629,7 +7629,7 @@ _1053:
             CLEAR_MODEL_FLAG(3063)
             SET_MODEL_FLAG(3059)
             SET_MODEL_FLAG(3068)
-            AI_SELECT_SKILL(111)
+            AI_SELECT_SKILL(DARK_AWAKENING)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -7637,7 +7637,7 @@ _1053:
             if (TEST_MODEL_FLAG(3068) == 1) {
               CLEAR_MODEL_FLAG(3068)
               if (AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-                AI_SELECT_SKILL(192)
+                AI_SELECT_SKILL(POWER_CHARGE)
               } else {
               _1063:
                 AI_SELECT_BASIC_ATTACK()
@@ -7656,44 +7656,44 @@ _1053:
               _1071:
                 if (TEST_MODEL_FLAG(3069) == 0 && AI_ANY_PLAYER_HAS_ACTION_MASK(1024) == 1) {
                   SET_MODEL_FLAG(3069)
-                  AI_SELECT_SKILL(65)
+                  AI_SELECT_SKILL(MUDO)
                   AI_SELECT_TARGETS_WITH_ACTION_MASK(1024)
                   return
                 } else {
                 _1072:
                   if (local_int[55] < 20) {
-                    AI_SELECT_SKILL(135)
+                    AI_SELECT_SKILL(VENOM_FANG)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   } else {
                   _1073:
                     if (local_int[55] < 20 + 10 && AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
-                      AI_SELECT_SKILL(181)
+                      AI_SELECT_SKILL(TARUKAJA)
                       AI_SELECT_ACTION_TARGETS()
                       return
                     } else {
                     _1074:
                       if (local_int[55] < 20 + 10 && AI_UNIT_ACTION_MODE_ZERO(2) == 0) {
-                        AI_SELECT_SKILL(184)
+                        AI_SELECT_SKILL(MAKAKAJA)
                         AI_SELECT_ACTION_TARGETS()
                         return
                       } else {
                       _1075:
                         if (local_int[55] < 20 + 10 + 20) {
-                          AI_SELECT_SKILL(128)
+                          AI_SELECT_SKILL(DEATH_BLOW)
                           AI_SELECT_ACTION_TARGETS()
                           return
                         } else {
                         _1076:
                           if (local_int[55] < 20 + 10 + 20 + 25 && TEST_MODEL_FLAG(3055) == 0) {
                             SET_MODEL_FLAG(3055)
-                            AI_SELECT_SKILL(137)
+                            AI_SELECT_SKILL(GATE_OF_HELL)
                             AI_SELECT_ACTION_TARGETS()
                             return
                           } else {
                           _1077:
                             if (local_int[55] < 20 + 10 + 20 + 25 + 20) {
-                              AI_SELECT_SKILL(98)
+                              AI_SELECT_SKILL(WICKED_CURSE)
                               AI_SELECT_ACTION_TARGETS()
                               return
                             } else {
@@ -7773,12 +7773,12 @@ _1081:
   if_not (TEST_MODEL_FLAG(3066) == 1) goto _1111
   if_not (AI_UNIT_HP_AT_OR_BELOW_RATE(45)) goto _1089
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(10) == 1) {
-    AI_SELECT_SKILL(129)
+    AI_SELECT_SKILL(CHI_BLAST)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1087:
-    AI_SELECT_SKILL(420)
+    AI_SELECT_SKILL(MYRIAD_SPEARS_1A4)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1086
@@ -7787,7 +7787,7 @@ _1086:
   goto _1088
 _1089:
   if (AI_UNIT_HP_AT_OR_BELOW_RATE(70)) {
-    AI_SELECT_SKILL(129)
+    AI_SELECT_SKILL(CHI_BLAST)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -7802,18 +7802,18 @@ _1088:
 _1111:
   if_not (TEST_MODEL_FLAG(3067) == 1) goto _1112
   if (AI_UNIT_HP_AT_OR_BELOW_RATE(25)) {
-    AI_SELECT_SKILL(33)
+    AI_SELECT_SKILL(MAZANDYNE_021)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1092:
     if (AI_UNIT_HP_AT_OR_BELOW_RATE(60)) {
-      AI_SELECT_SKILL(35)
+      AI_SELECT_SKILL(TEMPEST_023)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1093:
-      AI_SELECT_SKILL(32)
+      AI_SELECT_SKILL(MAZANMA_020)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1091
@@ -7824,18 +7824,18 @@ _1091:
 _1112:
   if_not (TEST_MODEL_FLAG(3068) == 1) goto _1113
   if (AI_UNIT_HP_AT_OR_BELOW_RATE(25)) {
-    AI_SELECT_SKILL(24)
+    AI_SELECT_SKILL(MAZIODYNE_018)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1095:
     if (AI_UNIT_HP_AT_OR_BELOW_RATE(60)) {
-      AI_SELECT_SKILL(26)
+      AI_SELECT_SKILL(JUPITER_S_FURY_01A)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1096:
-      AI_SELECT_SKILL(23)
+      AI_SELECT_SKILL(MAZIONGA_017)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1094
@@ -7849,13 +7849,13 @@ _1113:
   SET_MODEL_FLAG(3070)
   if_not (AI_LINKED_ACTION_SCENE_ACTIVE()) goto _1103
   if (AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(0)) {
-    AI_SELECT_SKILL(181)
+    AI_SELECT_SKILL(TARUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1098:
     if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(13) == 0) {
-      AI_SELECT_SKILL(193)
+      AI_SELECT_SKILL(MIND_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -7883,7 +7883,7 @@ _1103:
     AI_BEGIN_SCENE_TRANSITION()
   }
 _1100:
-  AI_SELECT_SKILL(421)
+  AI_SELECT_SKILL(VIVID_GUST)
   AI_SELECT_ACTION_TARGETS()
   return
   goto _1102
@@ -7892,19 +7892,19 @@ _1102:
 _1109:
   CLEAR_MODEL_FLAG(3070)
   if (AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(7) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(0)) {
-    AI_SELECT_SKILL(189)
+    AI_SELECT_SKILL(TAUNT)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1105:
     if (AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(2)) {
-      AI_SELECT_SKILL(184)
+      AI_SELECT_SKILL(MAKAKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1106:
       if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(10) == 0) {
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8059,7 +8059,7 @@ _1132:
   if (TEST_MODEL_FLAG(3060) == 1) {
     CLEAR_MODEL_FLAG(3060)
     SET_MODEL_FLAG(3061)
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -8068,7 +8068,7 @@ _1132:
       CLEAR_MODEL_FLAG(3061)
       SET_MODEL_FLAG(3062)
       SET_MODEL_FLAG(3063)
-      AI_SELECT_SKILL(351)
+      AI_SELECT_SKILL(ICE_DRAIN)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -8083,7 +8083,7 @@ _1132:
           }
         }
       _1134:
-        AI_SELECT_SKILL(385)
+        AI_SELECT_SKILL(FIRE_STORM)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8100,7 +8100,7 @@ _1137:
 _1146:
   if (TEST_MODEL_FLAG(3058) == 1) {
     CLEAR_MODEL_FLAG(3058)
-    AI_SELECT_SKILL(385)
+    AI_SELECT_SKILL(FIRE_STORM)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -8108,14 +8108,14 @@ _1146:
     if (local_int[57] < 30 || TEST_MODEL_FLAG(3057) == 1) {
       SET_MODEL_FLAG(3056)
       CLEAR_MODEL_FLAG(3057)
-      AI_SELECT_SKILL(384)
+      AI_SELECT_SKILL(SKEWER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1143:
       if (local_int[57] < 30 + 50) {
         SET_MODEL_FLAG(3058)
-        AI_SELECT_SKILL(351)
+        AI_SELECT_SKILL(ICE_DRAIN)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8140,7 +8140,7 @@ AI_KAMAS:
   CLEAR_MODEL_FLAG(3045)
   CLEAR_MODEL_FLAG(3046)
   CLEAR_MODEL_FLAG(3047)
-  if (AI_ANY_PLAYER_HAS_QUEUED_ACTION(92) && TEST_MODEL_FLAG(3059) == 0) {
+  if (AI_ANY_PLAYER_HAS_QUEUED_ACTION(SERAPH_LORE_05C) && TEST_MODEL_FLAG(3059) == 0) {
     SET_MODEL_FLAG(3059)
     AI_CLEAR_SCENE_TRANSITION()
     AI_QUEUE_ACTOR_COMMAND_SOUND()
@@ -8188,20 +8188,20 @@ _1154:
   }
 _1156:
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1162:
     if (AI_SCENE_FADE_COUNT() == 1) {
-      AI_SELECT_SKILL(422)
+      AI_SELECT_SKILL(GUARD)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1163:
       if (TEST_MODEL_FLAG(3040) == 0) {
         SET_MODEL_FLAG(3040)
-        AI_SELECT_SKILL(388)
+        AI_SELECT_SKILL(WINDS_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8214,12 +8214,12 @@ _1156:
         } else {
         _1159:
           if (local_int[59] <= 60) {
-            AI_SELECT_SKILL(391)
+            AI_SELECT_SKILL(SPIRAL_EDGE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1160:
-            AI_SELECT_SKILL(388)
+            AI_SELECT_SKILL(WINDS_OF_HELL)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1158
@@ -8235,31 +8235,31 @@ _1161:
 _1218:
   if_not (TEST_MODEL_FLAG(3047)) goto _1219
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1170:
     local_int[59] = RANDOM_ONE_TO(100)
     if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7)) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1166:
       if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6)) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1167:
         if (local_int[59] <= 50) {
-          AI_SELECT_SKILL(391)
+          AI_SELECT_SKILL(SPIRAL_EDGE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1168:
-          AI_SELECT_SKILL(388)
+          AI_SELECT_SKILL(WINDS_OF_HELL)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1165
@@ -8290,12 +8290,12 @@ _1171:
   if_not (AI_ACTOR_HISTORY_COUNTER() == 0) goto _1181
   local_int[59] = RANDOM_ONE_TO(100)
   if (local_int[59] <= 30) {
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1174:
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1173
@@ -8305,7 +8305,7 @@ _1173:
 _1181:
   local_int[59] = RANDOM_ONE_TO(100)
   if (local_int[59] <= 30 && AI_ANY_PLAYER_HAS_ACTION_MASK(4096) == 0) {
-    AI_SELECT_SKILL(390)
+    AI_SELECT_SKILL(ZOTZILAHA_BANE)
     AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(4096)
     return
   } else {
@@ -8318,12 +8318,12 @@ _1181:
     } else {
     _1176:
       if (local_int[59] <= 60) {
-        AI_SELECT_SKILL(391)
+        AI_SELECT_SKILL(SPIRAL_EDGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1177:
-        AI_SELECT_SKILL(388)
+        AI_SELECT_SKILL(WINDS_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1175
@@ -8419,13 +8419,13 @@ _1197:
       AI_BEGIN_SCENE_TRANSITION()
     }
   _1199:
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1204:
     if (AI_SCENE_FADE_COUNT() == 1) {
-      AI_SELECT_SKILL(422)
+      AI_SELECT_SKILL(GUARD)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -8447,7 +8447,7 @@ _1197:
           AI_BEGIN_SCENE_TRANSITION()
         }
       _1201:
-        AI_SELECT_SKILL(390)
+        AI_SELECT_SKILL(ZOTZILAHA_BANE)
         AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(4096)
         return
         goto _1203
@@ -8469,14 +8469,14 @@ _1212:
       AI_BEGIN_SCENE_TRANSITION()
     }
   _1207:
-    AI_SELECT_SKILL(388)
+    AI_SELECT_SKILL(WINDS_OF_HELL)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1213:
     if_not (TEST_MODEL_FLAG(3043)) goto _1214
     if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-      AI_SELECT_SKILL(55)
+      AI_SELECT_SKILL(RAGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -8489,7 +8489,7 @@ _1212:
   _1209:
     goto _1211
   _1214:
-    AI_SELECT_SKILL(391)
+    AI_SELECT_SKILL(SPIRAL_EDGE)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1211
@@ -8504,7 +8504,7 @@ _1221:
     return
   } else {
   _1216:
-    AI_SELECT_SKILL(391)
+    AI_SELECT_SKILL(SPIRAL_EDGE)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1215
@@ -8582,11 +8582,11 @@ _1231:
   if (TEST_MODEL_FLAG(3052) == 0 && (TEST_MODEL_FLAG(3054) == 1 || TEST_MODEL_FLAG(3055) == 1)) {
     SET_MODEL_FLAG(3052)
     if (TEST_MODEL_FLAG(3054) == 1) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
     } else {
     _1234:
       if (TEST_MODEL_FLAG(3055) == 1) {
-        AI_SELECT_SKILL(180)
+        AI_SELECT_SKILL(DEKUNDA_0B4)
       }
     }
   _1233:
@@ -8613,27 +8613,27 @@ _1231:
   _1238:
     if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3050) == 1) {
       SET_MODEL_FLAG(3058)
-      AI_SELECT_SKILL(161)
+      AI_SELECT_SKILL(DIARAMA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1243:
       if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3050) == 0 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
         SET_MODEL_FLAG(3058)
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1244:
         if (TEST_MODEL_FLAG(3058) == 0) {
           SET_MODEL_FLAG(3058)
-          AI_SELECT_SKILL(24)
+          AI_SELECT_SKILL(MAZIODYNE_018)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1245:
           if (TEST_MODEL_FLAG(3059) == 0) {
-            AI_SELECT_SKILL(21)
+            AI_SELECT_SKILL(ZIODYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -8658,25 +8658,25 @@ _1231:
   _1254:
     if (local_int[60] < 20 && AI_ACTOR_HISTORY_COUNTER() == 0) {
       SET_MODEL_FLAG(3053)
-      AI_SELECT_SKILL(55)
+      AI_SELECT_SKILL(RAGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1248:
       if (local_int[60] < 20 + 25) {
-        AI_SELECT_SKILL(21)
+        AI_SELECT_SKILL(ZIODYNE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1249:
         if (local_int[60] < 20 + 25 + 25 && AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1250:
           if (local_int[60] < 20 + 25 + 25 + 25) {
-            AI_SELECT_SKILL(24)
+            AI_SELECT_SKILL(MAZIODYNE_018)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -8710,13 +8710,13 @@ _1273:
     }
   _1255:
     CLEAR_MODEL_FLAG(3042)
-    AI_SELECT_SKILL(368)
+    AI_SELECT_SKILL(REUNITE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1258:
     SET_MODEL_FLAG(3051)
-    AI_SELECT_SKILL(369)
+    AI_SELECT_SKILL(ABSORB)
     AI_APPEND_EFFECT_ACTOR_TO_TARGETS()
     return
     goto _1257
@@ -8727,14 +8727,14 @@ _1274:
   if_not (TEST_MODEL_FLAG(3044) == 1) goto _1271
   if (TEST_MODEL_FLAG(3046) == 0 && AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
     SET_MODEL_FLAG(3046)
-    AI_SELECT_SKILL(181)
+    AI_SELECT_SKILL(TARUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1260:
     if (TEST_MODEL_FLAG(3048) == 0) {
       SET_MODEL_FLAG(3048)
-      AI_SELECT_SKILL(392)
+      AI_SELECT_SKILL(DRAGON_QUAKE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -8758,7 +8758,7 @@ _1271:
       goto _1262
     }
   _1262:
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -8777,13 +8777,13 @@ _1271:
         AI_BEGIN_SCENE_TRANSITION()
       }
     _1264:
-      AI_SELECT_SKILL(393)
+      AI_SELECT_SKILL(DRAGON_THRASH)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1268:
       if (local_int[60] < 20 + 35 + 25 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-        AI_SELECT_SKILL(137)
+        AI_SELECT_SKILL(GATE_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8855,11 +8855,11 @@ _1282:
   if (TEST_MODEL_FLAG(3052) == 0 && (TEST_MODEL_FLAG(3054) == 1 || TEST_MODEL_FLAG(3055) == 1)) {
     SET_MODEL_FLAG(3052)
     if (TEST_MODEL_FLAG(3055) == 1) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
     } else {
     _1285:
       if (TEST_MODEL_FLAG(3054) == 1) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
       }
     }
   _1284:
@@ -8869,12 +8869,12 @@ _1282:
   _1295:
     if_not (TEST_MODEL_FLAG(3053) == 1) goto _1296
     if (AI_SCENE_FADE_COUNT() == 1 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1288:
-      AI_SELECT_SKILL(392)
+      AI_SELECT_SKILL(DRAGON_QUAKE)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1287
@@ -8884,25 +8884,25 @@ _1282:
   _1296:
     if (local_int[61] < 20 && AI_ACTOR_HISTORY_COUNTER() == 0) {
       SET_MODEL_FLAG(3053)
-      AI_SELECT_SKILL(55)
+      AI_SELECT_SKILL(RAGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1290:
       if (local_int[61] < 20 + 25 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1291:
         if (local_int[61] < 20 + 25 + 30) {
-          AI_SELECT_SKILL(392)
+          AI_SELECT_SKILL(DRAGON_QUAKE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1292:
           if (local_int[61] < 20 + 25 + 30 + 20 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-            AI_SELECT_SKILL(137)
+            AI_SELECT_SKILL(GATE_OF_HELL)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -8923,19 +8923,19 @@ _1294:
 _1313:
   if_not (AI_EFFECT_ACTIVE() == 0) goto _1314
   if (local_int[61] < 10 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-    AI_SELECT_SKILL(178)
+    AI_SELECT_SKILL(RAKUNDA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1298:
     if (local_int[61] < 10 + 10 && AI_UNIT_ACTION_MODE_ZERO(6) == 0) {
-      AI_SELECT_SKILL(183)
+      AI_SELECT_SKILL(RAKUKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1299:
       if (local_int[61] < 10 + 10 + 10 && AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
-        AI_SELECT_SKILL(181)
+        AI_SELECT_SKILL(TARUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8946,7 +8946,7 @@ _1313:
           return
         } else {
         _1301:
-          AI_SELECT_SKILL(392)
+          AI_SELECT_SKILL(DRAGON_QUAKE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1297
@@ -8960,21 +8960,21 @@ _1314:
   if_not (TEST_MODEL_FLAG(3044) == 1) goto _1311
   if (TEST_MODEL_FLAG(3045) == 0 && TEST_MODEL_FLAG(3050) == 1) {
     SET_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(161)
+    AI_SELECT_SKILL(DIARAMA)
     AI_SELECT_TARGET_BY_ID(303)
     return
   } else {
   _1303:
     if (TEST_MODEL_FLAG(3047) == 0 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
       SET_MODEL_FLAG(3047)
-      AI_SELECT_SKILL(178)
+      AI_SELECT_SKILL(RAKUNDA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1304:
       if (TEST_MODEL_FLAG(3049) == 0) {
         SET_MODEL_FLAG(3049)
-        AI_SELECT_SKILL(392)
+        AI_SELECT_SKILL(DRAGON_QUAKE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -8990,13 +8990,13 @@ _1302:
   goto _1310
 _1311:
   if (local_int[61] < 10 && AI_UNIT_ACTION_MODE_ZERO(6) == 0) {
-    AI_SELECT_SKILL(183)
+    AI_SELECT_SKILL(RAKUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1307:
     if (local_int[61] < 10 + 20 && AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -9007,7 +9007,7 @@ _1311:
         return
       } else {
       _1309:
-        AI_SELECT_SKILL(392)
+        AI_SELECT_SKILL(DRAGON_QUAKE)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1306
@@ -9113,11 +9113,11 @@ _1325:
     if_not (TEST_MODEL_FLAG(3046) == 0) goto _1339
     if (TEST_MODEL_FLAG(3045) == 0) {
       SET_MODEL_FLAG(3045)
-      AI_SELECT_SKILL(138)
+      AI_SELECT_SKILL(EXECUTIONER_08A)
     } else {
     _1335:
       CLEAR_MODEL_FLAG(3045)
-      AI_SELECT_SKILL(397)
+      AI_SELECT_SKILL(INFINITE_WIND)
       goto _1334
     }
   _1334:
@@ -9125,11 +9125,11 @@ _1325:
   _1339:
     if (TEST_MODEL_FLAG(3064) == 0) {
       SET_MODEL_FLAG(3064)
-      AI_SELECT_SKILL(397)
+      AI_SELECT_SKILL(INFINITE_WIND)
     } else {
     _1337:
       CLEAR_MODEL_FLAG(3064)
-      AI_SELECT_SKILL(138)
+      AI_SELECT_SKILL(EXECUTIONER_08A)
       goto _1336
     }
   _1336:
@@ -9138,27 +9138,27 @@ _1325:
     goto _1340
   _1341:
     if (local_int[62] <= 20) {
-      AI_SELECT_SKILL(131)
+      AI_SELECT_SKILL(SKULL_CLEAVE)
     } else {
     _1342:
       if (local_int[62] <= 40) {
-        AI_SELECT_SKILL(138)
+        AI_SELECT_SKILL(EXECUTIONER_08A)
       } else {
       _1343:
         if (local_int[62] <= 50 && (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7))) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         } else {
         _1344:
           if (local_int[62] <= 70 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(0)) {
-            AI_SELECT_SKILL(181)
+            AI_SELECT_SKILL(TARUKAJA)
           } else {
           _1345:
             if (local_int[62] <= 80 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(2)) {
-              AI_SELECT_SKILL(184)
+              AI_SELECT_SKILL(MAKAKAJA)
             } else {
             _1346:
               if (local_int[62] <= 90 && (AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(1) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(3) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(5) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(7) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(9))) {
-                AI_SELECT_SKILL(190)
+                AI_SELECT_SKILL(DEBILITATE_0BE)
               } else {
               _1347:
                 AI_SELECT_BASIC_ATTACK()
@@ -9200,12 +9200,12 @@ _1325:
       local_int[62] = RANDOM_ONE_TO(100)
       if_not (AI_ACTOR_HISTORY_COUNTER() == 0) goto _1361
       if (TEST_MODEL_FLAG(3057)) {
-        AI_SELECT_SKILL(56)
+        AI_SELECT_SKILL(PSYCHO_RAGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1354:
-        AI_SELECT_SKILL(55)
+        AI_SELECT_SKILL(RAGE)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1353
@@ -9216,14 +9216,14 @@ _1325:
       if_not (AI_SCENE_FADE_COUNT() == 1) goto _1362
       if (TEST_MODEL_FLAG(3042) == 0) {
         SET_MODEL_FLAG(3042)
-        AI_SELECT_SKILL(365)
+        AI_SELECT_SKILL(MAGIC_REPEL_16D)
       } else {
       _1356:
         if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(13) == 0) {
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
         } else {
         _1357:
-          AI_SELECT_SKILL(365)
+          AI_SELECT_SKILL(MAGIC_REPEL_16D)
           goto _1355
         }
       }
@@ -9232,10 +9232,10 @@ _1325:
     _1362:
       if (AI_ANY_PLAYER_HAS_ACTION_MASK(2) == 1) {
         if (local_int[62] <= 50) {
-          AI_SELECT_SKILL(131)
+          AI_SELECT_SKILL(SKULL_CLEAVE)
         } else {
         _1359:
-          AI_SELECT_SKILL(138)
+          AI_SELECT_SKILL(EXECUTIONER_08A)
           goto _1358
         }
       _1358:
@@ -9244,10 +9244,10 @@ _1325:
       } else {
       _1363:
         if (local_int[62] <= 60) {
-          AI_SELECT_SKILL(24)
+          AI_SELECT_SKILL(MAZIODYNE_018)
         } else {
         _1364:
-          AI_SELECT_SKILL(26)
+          AI_SELECT_SKILL(JUPITER_S_FURY_01A)
           goto _1360
         }
       }
@@ -9261,12 +9261,12 @@ _1325:
         CLEAR_MODEL_FLAG(3058)
         CLEAR_MODEL_FLAG(3059)
         if (TEST_MODEL_FLAG(3057)) {
-          AI_SELECT_SKILL(56)
+          AI_SELECT_SKILL(PSYCHO_RAGE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1366:
-          AI_SELECT_SKILL(55)
+          AI_SELECT_SKILL(RAGE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1365
@@ -9277,10 +9277,10 @@ _1325:
         if_not (AI_SCENE_FADE_COUNT() == 1) goto _1384
         local_int[62] = RANDOM_ONE_TO(100)
         if (local_int[62] <= 40 && (AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(1) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(3) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(5) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(7) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(9))) {
-          AI_SELECT_SKILL(190)
+          AI_SELECT_SKILL(DEBILITATE_0BE)
         } else {
         _1370:
-          AI_SELECT_SKILL(365)
+          AI_SELECT_SKILL(MAGIC_REPEL_16D)
           goto _1369
         }
       _1369:
@@ -9288,14 +9288,14 @@ _1325:
       _1384:
         if (TEST_MODEL_FLAG(3057) && TEST_MODEL_FLAG(3058) == 0) {
           SET_MODEL_FLAG(3058)
-          AI_SELECT_SKILL(84)
+          AI_SELECT_SKILL(TENTARAFOO_054)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1385:
           if (TEST_MODEL_FLAG(3057) && TEST_MODEL_FLAG(3059) == 0) {
             SET_MODEL_FLAG(3059)
-            AI_SELECT_SKILL(76)
+            AI_SELECT_SKILL(DORMINA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -9304,10 +9304,10 @@ _1325:
             SET_MODEL_FLAG(3040)
             local_int[62] = RANDOM_ONE_TO(100)
             if (local_int[62] <= 50) {
-              AI_SELECT_SKILL(131)
+              AI_SELECT_SKILL(SKULL_CLEAVE)
             } else {
             _1372:
-              AI_SELECT_SKILL(138)
+              AI_SELECT_SKILL(EXECUTIONER_08A)
               goto _1371
             }
           _1371:
@@ -9317,14 +9317,14 @@ _1325:
             SET_MODEL_FLAG(3071)
             local_int[62] = RANDOM_ONE_TO(100)
             if (local_int[62] <= 40) {
-              AI_SELECT_SKILL(126)
+              AI_SELECT_SKILL(POWER_WAVE)
             } else {
             _1374:
               if (local_int[62] <= 70) {
-                AI_SELECT_SKILL(136)
+                AI_SELECT_SKILL(GENOCIDE_088)
               } else {
               _1375:
-                AI_SELECT_SKILL(140)
+                AI_SELECT_SKILL(REVELATION)
                 goto _1373
               }
             }
@@ -9333,27 +9333,27 @@ _1325:
           _1388:
             local_int[62] = RANDOM_ONE_TO(100)
             if (local_int[62] <= 20) {
-              AI_SELECT_SKILL(131)
+              AI_SELECT_SKILL(SKULL_CLEAVE)
             } else {
             _1377:
               if (local_int[62] <= 40) {
-                AI_SELECT_SKILL(138)
+                AI_SELECT_SKILL(EXECUTIONER_08A)
               } else {
               _1378:
                 if (local_int[62] <= 50 && (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7))) {
-                  AI_SELECT_SKILL(180)
+                  AI_SELECT_SKILL(DEKUNDA_0B4)
                 } else {
                 _1379:
                   if (local_int[62] <= 60 && (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6))) {
-                    AI_SELECT_SKILL(185)
+                    AI_SELECT_SKILL(DEKAJA_0B9)
                   } else {
                   _1380:
                     if (local_int[62] <= 70 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(0)) {
-                      AI_SELECT_SKILL(181)
+                      AI_SELECT_SKILL(TARUKAJA)
                     } else {
                     _1381:
                       if (local_int[62] <= 80 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(2)) {
-                        AI_SELECT_SKILL(184)
+                        AI_SELECT_SKILL(MAKAKAJA)
                       } else {
                       _1382:
                         AI_SELECT_BASIC_ATTACK()
@@ -9374,44 +9374,44 @@ _1325:
       } else {
       _1402:
         if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-          AI_SELECT_SKILL(55)
+          AI_SELECT_SKILL(RAGE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1396:
           if (AI_SCENE_FADE_COUNT() == 1) {
-            AI_SELECT_SKILL(365)
+            AI_SELECT_SKILL(MAGIC_REPEL_16D)
           } else {
           _1397:
             if (TEST_MODEL_FLAG(3040) == 0) {
               SET_MODEL_FLAG(3040)
-              AI_SELECT_SKILL(184)
+              AI_SELECT_SKILL(MAKAKAJA)
             } else {
             _1398:
               if (TEST_MODEL_FLAG(3071) == 0) {
                 SET_MODEL_FLAG(3071)
-                AI_SELECT_SKILL(397)
+                AI_SELECT_SKILL(INFINITE_WIND)
               } else {
               _1399:
                 local_int[62] = RANDOM_ONE_TO(100)
                 if (local_int[62] <= 15 && (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7))) {
-                  AI_SELECT_SKILL(180)
+                  AI_SELECT_SKILL(DEKUNDA_0B4)
                 } else {
                 _1390:
                   if (local_int[62] <= 15 && (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6))) {
-                    AI_SELECT_SKILL(185)
+                    AI_SELECT_SKILL(DEKAJA_0B9)
                   } else {
                   _1391:
                     if (local_int[62] <= 40 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(0)) {
-                      AI_SELECT_SKILL(181)
+                      AI_SELECT_SKILL(TARUKAJA)
                     } else {
                     _1392:
                       if (local_int[62] <= 80 && AI_ANY_ENEMY_NOT_ACTION_MODE_ZERO(2)) {
-                        AI_SELECT_SKILL(184)
+                        AI_SELECT_SKILL(MAKAKAJA)
                       } else {
                       _1393:
                         if (local_int[62] <= 90 && (AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(1) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(3) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(5) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(7) || AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(9))) {
-                          AI_SELECT_SKILL(190)
+                          AI_SELECT_SKILL(DEBILITATE_0BE)
                         } else {
                         _1394:
                           AI_SELECT_BASIC_ATTACK()
@@ -9438,15 +9438,15 @@ _1325:
   _1409:
     local_int[62] = RANDOM_ONE_TO(100)
     if (local_int[62] <= 20 && AI_ACTOR_HISTORY_COUNTER() == 0) {
-      AI_SELECT_SKILL(140)
+      AI_SELECT_SKILL(REVELATION)
     } else {
     _1404:
       if (local_int[62] <= 50) {
-        AI_SELECT_SKILL(138)
+        AI_SELECT_SKILL(EXECUTIONER_08A)
       } else {
       _1405:
         if (local_int[62] <= 80) {
-          AI_SELECT_SKILL(131)
+          AI_SELECT_SKILL(SKULL_CLEAVE)
         } else {
         _1406:
           AI_SELECT_BASIC_ATTACK()
@@ -9586,14 +9586,14 @@ _1435:
   if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE()) goto _1442
   if (TEST_MODEL_FLAG(3044)) {
     CLEAR_MODEL_FLAG(3044)
-    AI_SELECT_SKILL(259)
+    AI_SELECT_SKILL(MERU_THUNDER)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1438:
     AI_SET_ACTOR_UNIT_PARAMETER(283)
     CLEAR_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(154)
+    AI_SELECT_SKILL(MOKSHA_09A)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1437
@@ -9603,7 +9603,7 @@ _1437:
 _1442:
   if (TEST_MODEL_FLAG(3041)) {
     CLEAR_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(260)
+    AI_SELECT_SKILL(VIRAJ_BLADE)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -9612,7 +9612,7 @@ _1439:
 _1441:
   local_int[63] = RANDOM_ONE_TO(100)
   if (local_int[63] <= 40) {
-    AI_SELECT_SKILL(119)
+    AI_SELECT_SKILL(MAD_RUSH)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -9629,14 +9629,14 @@ _1717:
   if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE()) goto _1447
   if (TEST_MODEL_FLAG(3044)) {
     CLEAR_MODEL_FLAG(3044)
-    AI_SELECT_SKILL(259)
+    AI_SELECT_SKILL(MERU_THUNDER)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1446:
     AI_SET_ACTOR_UNIT_PARAMETER(283)
     CLEAR_MODEL_FLAG(3056)
-    AI_SELECT_SKILL(154)
+    AI_SELECT_SKILL(MOKSHA_09A)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1445
@@ -9646,7 +9646,7 @@ _1445:
 _1447:
   if (TEST_MODEL_FLAG(3041) && AI_ACTOR_HISTORY_COUNTER() == 0) {
     CLEAR_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(260)
+    AI_SELECT_SKILL(VIRAJ_BLADE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -9687,14 +9687,14 @@ _1452:
       goto _1456
     }
   _1456:
-    AI_SELECT_SKILL(412)
+    AI_SELECT_SKILL(BLACK_BHAKTI)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1461:
     local_int[63] = RANDOM_ONE_TO(100)
     if (local_int[63] <= 50) {
-      AI_SELECT_SKILL(119)
+      AI_SELECT_SKILL(MAD_RUSH)
     } else {
     _1459:
       AI_SELECT_BASIC_ATTACK()
@@ -9713,41 +9713,41 @@ _1718:
     AI_SET_ACTOR_UNIT_PARAMETER(284)
     SET_MODEL_FLAG(3056)
     SET_MODEL_FLAG(3071)
-    AI_SELECT_SKILL(153)
+    AI_SELECT_SKILL(MOKSHA_099)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1468:
     if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7)) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1469:
       if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6)) {
-        AI_SELECT_SKILL(185)
+        AI_SELECT_SKILL(DEKAJA_0B9)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1470:
         local_int[63] = RANDOM_ONE_TO(100)
         if (local_int[63] <= 20) {
-          AI_SELECT_SKILL(6)
+          AI_SELECT_SKILL(MARAGIDYNE_006)
         } else {
         _1463:
           if (local_int[63] <= 40) {
-            AI_SELECT_SKILL(15)
+            AI_SELECT_SKILL(MABUFUDYNE_00F)
           } else {
           _1464:
             if (local_int[63] <= 60) {
-              AI_SELECT_SKILL(24)
+              AI_SELECT_SKILL(MAZIODYNE_018)
             } else {
             _1465:
               if (local_int[63] <= 80) {
-                AI_SELECT_SKILL(33)
+                AI_SELECT_SKILL(MAZANDYNE_021)
               } else {
               _1466:
-                AI_SELECT_SKILL(42)
+                AI_SELECT_SKILL(MATERADYNE_02A)
                 goto _1462
               }
             }
@@ -9766,22 +9766,22 @@ _1719:
   if (TEST_MODEL_FLAG(2104) == 1) {
     local_int[63] = RANDOM_ONE_TO(100)
     if (local_int[63] <= 20) {
-      AI_SELECT_SKILL(6)
+      AI_SELECT_SKILL(MARAGIDYNE_006)
     } else {
     _1472:
       if (local_int[63] <= 40) {
-        AI_SELECT_SKILL(15)
+        AI_SELECT_SKILL(MABUFUDYNE_00F)
       } else {
       _1473:
         if (local_int[63] <= 60) {
-          AI_SELECT_SKILL(24)
+          AI_SELECT_SKILL(MAZIODYNE_018)
         } else {
         _1474:
           if (local_int[63] <= 80) {
-            AI_SELECT_SKILL(33)
+            AI_SELECT_SKILL(MAZANDYNE_021)
           } else {
           _1475:
-            AI_SELECT_SKILL(42)
+            AI_SELECT_SKILL(MATERADYNE_02A)
             goto _1471
           }
         }
@@ -9796,14 +9796,14 @@ _1719:
     if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE() == 0) goto _1478
     if (TEST_MODEL_FLAG(3041)) {
       CLEAR_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(260)
+      AI_SELECT_SKILL(VIRAJ_BLADE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1477:
       SET_MODEL_FLAG(3056)
       AI_SET_ACTOR_UNIT_PARAMETER(284)
-      AI_SELECT_SKILL(153)
+      AI_SELECT_SKILL(MOKSHA_099)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1476
@@ -9813,7 +9813,7 @@ _1719:
   _1478:
     if (TEST_MODEL_FLAG(3044) && AI_ACTOR_HISTORY_COUNTER() == 0) {
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -9821,32 +9821,32 @@ _1719:
       if (TEST_MODEL_FLAG(3044)) {
         if (TEST_MODEL_FLAG(3047) == 0) {
           SET_MODEL_FLAG(3047)
-          AI_SELECT_SKILL(84)
+          AI_SELECT_SKILL(TENTARAFOO_054)
         } else {
         _1486:
           if (TEST_MODEL_FLAG(3048) == 0) {
             SET_MODEL_FLAG(3048)
-            AI_SELECT_SKILL(88)
+            AI_SELECT_SKILL(FATAL_CHARM)
           } else {
           _1487:
             local_int[63] = RANDOM_ONE_TO(100)
             if (local_int[63] <= 20) {
-              AI_SELECT_SKILL(6)
+              AI_SELECT_SKILL(MARAGIDYNE_006)
             } else {
             _1481:
               if (local_int[63] <= 40) {
-                AI_SELECT_SKILL(15)
+                AI_SELECT_SKILL(MABUFUDYNE_00F)
               } else {
               _1482:
                 if (local_int[63] <= 60) {
-                  AI_SELECT_SKILL(24)
+                  AI_SELECT_SKILL(MAZIODYNE_018)
                 } else {
                 _1483:
                   if (local_int[63] <= 80) {
-                    AI_SELECT_SKILL(33)
+                    AI_SELECT_SKILL(MAZANDYNE_021)
                   } else {
                   _1484:
-                    AI_SELECT_SKILL(42)
+                    AI_SELECT_SKILL(MATERADYNE_02A)
                     goto _1480
                   }
                 }
@@ -9865,7 +9865,7 @@ _1719:
     if ((TEST_MODEL_FLAG(3056) == 0 || AI_SPECIAL_BATTLE_OBJECT_VALUE() == 0) && TEST_MODEL_FLAG(3041) == 0) {
       SET_MODEL_FLAG(3056)
       AI_SET_ACTOR_UNIT_PARAMETER(284)
-      AI_SELECT_SKILL(153)
+      AI_SELECT_SKILL(MOKSHA_099)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -9887,29 +9887,29 @@ _1719:
         goto _1495
       }
     _1495:
-      AI_SELECT_SKILL(412)
+      AI_SELECT_SKILL(BLACK_BHAKTI)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1503:
       local_int[63] = RANDOM_ONE_TO(100)
       if (local_int[63] <= 20) {
-        AI_SELECT_SKILL(6)
+        AI_SELECT_SKILL(MARAGIDYNE_006)
       } else {
       _1498:
         if (local_int[63] <= 40) {
-          AI_SELECT_SKILL(15)
+          AI_SELECT_SKILL(MABUFUDYNE_00F)
         } else {
         _1499:
           if (local_int[63] <= 60) {
-            AI_SELECT_SKILL(24)
+            AI_SELECT_SKILL(MAZIODYNE_018)
           } else {
           _1500:
             if (local_int[63] <= 80) {
-              AI_SELECT_SKILL(33)
+              AI_SELECT_SKILL(MAZANDYNE_021)
             } else {
             _1501:
-              AI_SELECT_SKILL(42)
+              AI_SELECT_SKILL(MATERADYNE_02A)
               goto _1497
             }
           }
@@ -9929,11 +9929,11 @@ _1719:
         AI_SET_ACTOR_UNIT_PARAMETER(283)
         SET_MODEL_FLAG(3070)
         CLEAR_MODEL_FLAG(3056)
-        AI_SELECT_SKILL(154)
+        AI_SELECT_SKILL(MOKSHA_09A)
       } else {
       _1505:
         CLEAR_MODEL_FLAG(3044)
-        AI_SELECT_SKILL(259)
+        AI_SELECT_SKILL(MERU_THUNDER)
         goto _1504
       }
     _1504:
@@ -9965,20 +9965,20 @@ _1719:
     CLEAR_MODEL_FLAG(3059)
     if (TEST_MODEL_FLAG(3044)) {
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1512:
       if ((TEST_MODEL_FLAG(3056) || AI_SPECIAL_BATTLE_OBJECT_VALUE() == 1) && TEST_MODEL_FLAG(3044) == 0) {
         if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7)) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1509:
           if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6)) {
-            AI_SELECT_SKILL(185)
+            AI_SELECT_SKILL(DEKAJA_0B9)
             AI_SELECT_ACTION_TARGETS()
             return
           }
@@ -9986,14 +9986,14 @@ _1719:
       _1508:
         AI_SET_ACTOR_UNIT_PARAMETER(283)
         CLEAR_MODEL_FLAG(3056)
-        AI_SELECT_SKILL(154)
+        AI_SELECT_SKILL(MOKSHA_09A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1513:
         if (TEST_MODEL_FLAG(3041)) {
           CLEAR_MODEL_FLAG(3041)
-          AI_SELECT_SKILL(260)
+          AI_SELECT_SKILL(VIRAJ_BLADE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10106,7 +10106,7 @@ _1719:
     if (TEST_MODEL_FLAG(3060) == 0) {
       SET_MODEL_FLAG(3060)
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -10115,7 +10115,7 @@ _1719:
         SET_MODEL_FLAG(3061)
         AI_SET_ACTOR_UNIT_PARAMETER(283)
         CLEAR_MODEL_FLAG(3056)
-        AI_SELECT_SKILL(154)
+        AI_SELECT_SKILL(MOKSHA_09A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10132,7 +10132,7 @@ _1719:
             goto _1537
           }
         _1537:
-          AI_SELECT_SKILL(412)
+          AI_SELECT_SKILL(BLACK_BHAKTI)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10151,21 +10151,21 @@ _1719:
     if (TEST_MODEL_FLAG(3060) == 0) {
       SET_MODEL_FLAG(3060)
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1547:
       local_int[63] = RANDOM_ONE_TO(100)
       if (local_int[63] <= 30) {
-        AI_SELECT_SKILL(66)
+        AI_SELECT_SKILL(MUDOON)
       } else {
       _1544:
         if (local_int[63] <= 70) {
-          AI_SELECT_SKILL(84)
+          AI_SELECT_SKILL(TENTARAFOO_054)
         } else {
         _1545:
-          AI_SELECT_SKILL(88)
+          AI_SELECT_SKILL(FATAL_CHARM)
           goto _1543
         }
       }
@@ -10181,7 +10181,7 @@ _1719:
     if (TEST_MODEL_FLAG(3060) == 0) {
       SET_MODEL_FLAG(3060)
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -10198,21 +10198,21 @@ _1719:
           goto _1548
         }
       _1548:
-        AI_SELECT_SKILL(412)
+        AI_SELECT_SKILL(BLACK_BHAKTI)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1555:
         local_int[63] = RANDOM_ONE_TO(100)
         if (local_int[63] <= 20) {
-          AI_SELECT_SKILL(66)
+          AI_SELECT_SKILL(MUDOON)
         } else {
         _1551:
           if (local_int[63] <= 60) {
-            AI_SELECT_SKILL(84)
+            AI_SELECT_SKILL(TENTARAFOO_054)
           } else {
           _1552:
-            AI_SELECT_SKILL(88)
+            AI_SELECT_SKILL(FATAL_CHARM)
             goto _1550
           }
         }
@@ -10228,14 +10228,14 @@ _1719:
     if_not (TEST_MODEL_FLAG(3050)) goto _1613
     if (TEST_MODEL_FLAG(3060) == 0) {
       SET_MODEL_FLAG(3060)
-      AI_SELECT_SKILL(84)
+      AI_SELECT_SKILL(TENTARAFOO_054)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1559:
       if (TEST_MODEL_FLAG(3061) == 0) {
         SET_MODEL_FLAG(3061)
-        AI_SELECT_SKILL(88)
+        AI_SELECT_SKILL(FATAL_CHARM)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10244,7 +10244,7 @@ _1719:
           SET_MODEL_FLAG(3062)
           AI_SET_ACTOR_UNIT_PARAMETER(283)
           CLEAR_MODEL_FLAG(3056)
-          AI_SELECT_SKILL(154)
+          AI_SELECT_SKILL(MOKSHA_09A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10261,7 +10261,7 @@ _1719:
               goto _1556
             }
           _1556:
-            AI_SELECT_SKILL(412)
+            AI_SELECT_SKILL(BLACK_BHAKTI)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -10291,50 +10291,50 @@ _1719:
           goto _1563
         }
       _1563:
-        AI_SELECT_SKILL(412)
+        AI_SELECT_SKILL(BLACK_BHAKTI)
       } else {
       _1571:
         if (local_int[63] <= 30 && (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7))) {
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
         } else {
         _1572:
           if (local_int[63] <= 30 && (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6))) {
-            AI_SELECT_SKILL(185)
+            AI_SELECT_SKILL(DEKAJA_0B9)
           } else {
           _1573:
             if (local_int[63] <= 30 && TEST_MODEL_FLAG(3061) == 0) {
               SET_MODEL_FLAG(3061)
-              AI_SELECT_SKILL(66)
+              AI_SELECT_SKILL(MUDOON)
             } else {
             _1574:
               if (local_int[63] <= 60 && TEST_MODEL_FLAG(3062) == 0) {
                 SET_MODEL_FLAG(3062)
-                AI_SELECT_SKILL(84)
+                AI_SELECT_SKILL(TENTARAFOO_054)
               } else {
               _1575:
                 if (TEST_MODEL_FLAG(3063) == 0) {
                   SET_MODEL_FLAG(3063)
-                  AI_SELECT_SKILL(88)
+                  AI_SELECT_SKILL(FATAL_CHARM)
                 } else {
                 _1576:
                   local_int[63] = RANDOM_ONE_TO(100)
                   if (local_int[63] <= 20) {
-                    AI_SELECT_SKILL(6)
+                    AI_SELECT_SKILL(MARAGIDYNE_006)
                   } else {
                   _1566:
                     if (local_int[63] <= 40) {
-                      AI_SELECT_SKILL(15)
+                      AI_SELECT_SKILL(MABUFUDYNE_00F)
                     } else {
                     _1567:
                       if (local_int[63] <= 60) {
-                        AI_SELECT_SKILL(24)
+                        AI_SELECT_SKILL(MAZIODYNE_018)
                       } else {
                       _1568:
                         if (local_int[63] <= 80) {
-                          AI_SELECT_SKILL(33)
+                          AI_SELECT_SKILL(MAZANDYNE_021)
                         } else {
                         _1569:
-                          AI_SELECT_SKILL(42)
+                          AI_SELECT_SKILL(MATERADYNE_02A)
                           goto _1565
                         }
                       }
@@ -10356,7 +10356,7 @@ _1719:
       if_not (TEST_MODEL_FLAG(3052)) goto _1615
       if (TEST_MODEL_FLAG(3060) == 0) {
         SET_MODEL_FLAG(3060)
-        AI_SELECT_SKILL(55)
+        AI_SELECT_SKILL(RAGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10365,14 +10365,14 @@ _1719:
           SET_MODEL_FLAG(3061)
           AI_SET_ACTOR_UNIT_PARAMETER(283)
           CLEAR_MODEL_FLAG(3056)
-          AI_SELECT_SKILL(154)
+          AI_SELECT_SKILL(MOKSHA_09A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1581:
           local_int[63] = RANDOM_ONE_TO(100)
           if (local_int[63] <= 40) {
-            AI_SELECT_SKILL(119)
+            AI_SELECT_SKILL(MAD_RUSH)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -10393,7 +10393,7 @@ _1719:
       if (TEST_MODEL_FLAG(3060) == 0) {
         SET_MODEL_FLAG(3060)
         CLEAR_MODEL_FLAG(3041)
-        AI_SELECT_SKILL(260)
+        AI_SELECT_SKILL(VIRAJ_BLADE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10410,7 +10410,7 @@ _1719:
             goto _1582
           }
         _1582:
-          AI_SELECT_SKILL(412)
+          AI_SELECT_SKILL(BLACK_BHAKTI)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10428,7 +10428,7 @@ _1719:
       if (TEST_MODEL_FLAG(3060) == 0) {
         SET_MODEL_FLAG(3060)
         CLEAR_MODEL_FLAG(3041)
-        AI_SELECT_SKILL(260)
+        AI_SELECT_SKILL(VIRAJ_BLADE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10437,21 +10437,21 @@ _1719:
           SET_MODEL_FLAG(3061)
           AI_SET_ACTOR_UNIT_PARAMETER(284)
           SET_MODEL_FLAG(3056)
-          AI_SELECT_SKILL(153)
+          AI_SELECT_SKILL(MOKSHA_099)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1592:
           local_int[63] = RANDOM_ONE_TO(100)
           if (local_int[63] <= 30) {
-            AI_SELECT_SKILL(66)
+            AI_SELECT_SKILL(MUDOON)
           } else {
           _1588:
             if (local_int[63] <= 70) {
-              AI_SELECT_SKILL(84)
+              AI_SELECT_SKILL(TENTARAFOO_054)
             } else {
             _1589:
-              AI_SELECT_SKILL(88)
+              AI_SELECT_SKILL(FATAL_CHARM)
               goto _1587
             }
           }
@@ -10468,7 +10468,7 @@ _1719:
       if (TEST_MODEL_FLAG(3060) == 0) {
         SET_MODEL_FLAG(3060)
         CLEAR_MODEL_FLAG(3041)
-        AI_SELECT_SKILL(260)
+        AI_SELECT_SKILL(VIRAJ_BLADE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10484,7 +10484,7 @@ _1719:
       if_not (TEST_MODEL_FLAG(3057)) goto _1619
       local_int[63] = RANDOM_ONE_TO(100)
       if (local_int[63] <= 40) {
-        AI_SELECT_SKILL(119)
+        AI_SELECT_SKILL(MAD_RUSH)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10500,7 +10500,7 @@ _1719:
       if_not (TEST_MODEL_FLAG(3058)) goto _1620
       local_int[63] = RANDOM_ONE_TO(100)
       if (local_int[63] <= 40) {
-        AI_SELECT_SKILL(119)
+        AI_SELECT_SKILL(MAD_RUSH)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10518,7 +10518,7 @@ _1719:
         SET_MODEL_FLAG(3060)
         AI_SET_ACTOR_UNIT_PARAMETER(284)
         SET_MODEL_FLAG(3056)
-        AI_SELECT_SKILL(153)
+        AI_SELECT_SKILL(MOKSHA_099)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10535,21 +10535,21 @@ _1719:
             goto _1599
           }
         _1599:
-          AI_SELECT_SKILL(412)
+          AI_SELECT_SKILL(BLACK_BHAKTI)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1606:
           local_int[63] = RANDOM_ONE_TO(100)
           if (local_int[63] <= 30) {
-            AI_SELECT_SKILL(66)
+            AI_SELECT_SKILL(MUDOON)
           } else {
           _1602:
             if (local_int[63] <= 70) {
-              AI_SELECT_SKILL(84)
+              AI_SELECT_SKILL(TENTARAFOO_054)
             } else {
             _1603:
-              AI_SELECT_SKILL(88)
+              AI_SELECT_SKILL(FATAL_CHARM)
               goto _1601
             }
           }
@@ -10563,7 +10563,7 @@ _1719:
       goto _1609
     _1621:
       if (TEST_MODEL_FLAG(3056) || AI_SPECIAL_BATTLE_OBJECT_VALUE() == 1) {
-        AI_SELECT_SKILL(24)
+        AI_SELECT_SKILL(MAZIODYNE_018)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10583,7 +10583,7 @@ _1719:
     if_not (TEST_MODEL_FLAG(3064) == 0) goto _1634
     if (TEST_MODEL_FLAG(3041)) {
       CLEAR_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(260)
+      AI_SELECT_SKILL(VIRAJ_BLADE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -10597,20 +10597,20 @@ _1719:
         if (TEST_MODEL_FLAG(3056) == 0 && AI_SPECIAL_BATTLE_OBJECT_VALUE() == 0 && TEST_MODEL_FLAG(3041) == 0) {
           AI_SET_ACTOR_UNIT_PARAMETER(284)
           SET_MODEL_FLAG(3056)
-          AI_SELECT_SKILL(153)
+          AI_SELECT_SKILL(MOKSHA_099)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1630:
           if (TEST_MODEL_FLAG(3044)) {
             CLEAR_MODEL_FLAG(3044)
-            AI_SELECT_SKILL(259)
+            AI_SELECT_SKILL(MERU_THUNDER)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1631:
             if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(13)) {
-              AI_SELECT_SKILL(42)
+              AI_SELECT_SKILL(MATERADYNE_02A)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -10621,22 +10621,22 @@ _1719:
               _1633:
                 local_int[63] = RANDOM_ONE_TO(100)
                 if (local_int[63] <= 20) {
-                  AI_SELECT_SKILL(6)
+                  AI_SELECT_SKILL(MARAGIDYNE_006)
                 } else {
                 _1623:
                   if (local_int[63] <= 40) {
-                    AI_SELECT_SKILL(15)
+                    AI_SELECT_SKILL(MABUFUDYNE_00F)
                   } else {
                   _1624:
                     if (local_int[63] <= 60) {
-                      AI_SELECT_SKILL(24)
+                      AI_SELECT_SKILL(MAZIODYNE_018)
                     } else {
                     _1625:
                       if (local_int[63] <= 80) {
-                        AI_SELECT_SKILL(33)
+                        AI_SELECT_SKILL(MAZANDYNE_021)
                       } else {
                       _1626:
-                        AI_SELECT_SKILL(42)
+                        AI_SELECT_SKILL(MATERADYNE_02A)
                         goto _1622
                       }
                     }
@@ -10742,7 +10742,7 @@ _1719:
     if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE()) goto _1659
     if (TEST_MODEL_FLAG(3044)) {
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -10751,14 +10751,14 @@ _1719:
   _1659:
     if (TEST_MODEL_FLAG(3041)) {
       CLEAR_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(260)
+      AI_SELECT_SKILL(VIRAJ_BLADE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1657:
       SET_MODEL_FLAG(3056)
       AI_SET_ACTOR_UNIT_PARAMETER(284)
-      AI_SELECT_SKILL(153)
+      AI_SELECT_SKILL(MOKSHA_099)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1656
@@ -10775,13 +10775,13 @@ _1719:
       if ((TEST_MODEL_FLAG(3056) == 0 || AI_SPECIAL_BATTLE_OBJECT_VALUE() == 0) && TEST_MODEL_FLAG(3041) == 0) {
         AI_SET_ACTOR_UNIT_PARAMETER(284)
         SET_MODEL_FLAG(3056)
-        AI_SELECT_SKILL(153)
+        AI_SELECT_SKILL(MOKSHA_099)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1669:
         if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(13)) {
-          AI_SELECT_SKILL(42)
+          AI_SELECT_SKILL(MATERADYNE_02A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10789,14 +10789,14 @@ _1719:
           if (TEST_MODEL_FLAG(3065)) {
             local_int[63] = RANDOM_ONE_TO(100)
             if (local_int[63] <= 30) {
-              AI_SELECT_SKILL(66)
+              AI_SELECT_SKILL(MUDOON)
             } else {
             _1661:
               if (local_int[63] <= 70) {
-                AI_SELECT_SKILL(84)
+                AI_SELECT_SKILL(TENTARAFOO_054)
               } else {
               _1662:
-                AI_SELECT_SKILL(88)
+                AI_SELECT_SKILL(FATAL_CHARM)
                 goto _1660
               }
             }
@@ -10808,19 +10808,19 @@ _1719:
             SET_MODEL_FLAG(3065)
             if (TEST_MODEL_FLAG(2120) == 0) {
               SET_MODEL_FLAG(2120)
-              AI_SELECT_SKILL(180)
+              AI_SELECT_SKILL(DEKUNDA_0B4)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _1666:
               local_int[63] = RANDOM_ONE_TO(100)
               if (local_int[63] <= 50) {
-                AI_SELECT_SKILL(190)
+                AI_SELECT_SKILL(DEBILITATE_0BE)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _1664:
-                AI_SELECT_SKILL(180)
+                AI_SELECT_SKILL(DEKUNDA_0B4)
                 AI_SELECT_ACTION_TARGETS()
                 return
                 goto _1663
@@ -10842,7 +10842,7 @@ _1719:
     if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE()) goto _1677
     if (TEST_MODEL_FLAG(3044)) {
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -10851,14 +10851,14 @@ _1719:
   _1677:
     if (TEST_MODEL_FLAG(3041)) {
       CLEAR_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(260)
+      AI_SELECT_SKILL(VIRAJ_BLADE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1675:
       SET_MODEL_FLAG(3056)
       AI_SET_ACTOR_UNIT_PARAMETER(284)
-      AI_SELECT_SKILL(153)
+      AI_SELECT_SKILL(MOKSHA_099)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1674
@@ -10871,13 +10871,13 @@ _1719:
     if_not (TEST_MODEL_FLAG(3060) == 0) goto _1685
     if (AI_UNIT_ACTION_MODE_ZERO(1) && TEST_MODEL_FLAG(2117) == 0) {
       SET_MODEL_FLAG(2117)
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1681:
       SET_MODEL_FLAG(3060)
-      AI_SELECT_SKILL(181)
+      AI_SELECT_SKILL(TARUKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1680
@@ -10889,7 +10889,7 @@ _1719:
       SET_MODEL_FLAG(3061)
       AI_SET_ACTOR_UNIT_PARAMETER(283)
       CLEAR_MODEL_FLAG(3056)
-      AI_SELECT_SKILL(154)
+      AI_SELECT_SKILL(MOKSHA_09A)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -10906,7 +10906,7 @@ _1719:
           goto _1682
         }
       _1682:
-        AI_SELECT_SKILL(412)
+        AI_SELECT_SKILL(BLACK_BHAKTI)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -10914,7 +10914,7 @@ _1719:
         if (TEST_MODEL_FLAG(3063) == 0 && TEST_MODEL_FLAG(3041)) {
           SET_MODEL_FLAG(2119)
           CLEAR_MODEL_FLAG(3041)
-          AI_SELECT_SKILL(260)
+          AI_SELECT_SKILL(VIRAJ_BLADE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -10934,7 +10934,7 @@ _1719:
     if_not (AI_SPECIAL_BATTLE_OBJECT_VALUE()) goto _1694
     if (TEST_MODEL_FLAG(3044)) {
       CLEAR_MODEL_FLAG(3044)
-      AI_SELECT_SKILL(259)
+      AI_SELECT_SKILL(MERU_THUNDER)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -10943,14 +10943,14 @@ _1719:
   _1694:
     if (TEST_MODEL_FLAG(3041)) {
       CLEAR_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(260)
+      AI_SELECT_SKILL(VIRAJ_BLADE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1692:
       SET_MODEL_FLAG(3056)
       AI_SET_ACTOR_UNIT_PARAMETER(284)
-      AI_SELECT_SKILL(153)
+      AI_SELECT_SKILL(MOKSHA_099)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1691
@@ -10963,13 +10963,13 @@ _1719:
     if_not (TEST_MODEL_FLAG(3060) == 0) goto _1707
     if (AI_UNIT_ACTION_MODE_ZERO(3) && TEST_MODEL_FLAG(2118) == 0) {
       SET_MODEL_FLAG(2118)
-      AI_SELECT_SKILL(193)
+      AI_SELECT_SKILL(MIND_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1698:
       SET_MODEL_FLAG(3060)
-      AI_SELECT_SKILL(184)
+      AI_SELECT_SKILL(MAKAKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1697
@@ -10979,7 +10979,7 @@ _1719:
   _1707:
     if (TEST_MODEL_FLAG(3061) == 0) {
       SET_MODEL_FLAG(3061)
-      AI_SELECT_SKILL(184)
+      AI_SELECT_SKILL(MAKAKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -10996,7 +10996,7 @@ _1719:
           goto _1699
         }
       _1699:
-        AI_SELECT_SKILL(412)
+        AI_SELECT_SKILL(BLACK_BHAKTI)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -11005,7 +11005,7 @@ _1719:
           SET_MODEL_FLAG(3062)
           CLEAR_MODEL_FLAG(3044)
           SET_MODEL_FLAG(2119)
-          AI_SELECT_SKILL(259)
+          AI_SELECT_SKILL(MERU_THUNDER)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -11013,30 +11013,30 @@ _1719:
           SET_MODEL_FLAG(2119)
           local_int[63] = RANDOM_ONE_TO(100)
           if (local_int[63] <= 20) {
-            AI_SELECT_SKILL(3)
+            AI_SELECT_SKILL(AGIDYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1702:
             if (local_int[63] <= 40) {
-              AI_SELECT_SKILL(12)
+              AI_SELECT_SKILL(BUFUDYNE)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _1703:
               if (local_int[63] <= 60) {
-                AI_SELECT_SKILL(21)
+                AI_SELECT_SKILL(ZIODYNE)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _1704:
                 if (local_int[63] <= 80) {
-                  AI_SELECT_SKILL(30)
+                  AI_SELECT_SKILL(ZANDYNE)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _1705:
-                  AI_SELECT_SKILL(39)
+                  AI_SELECT_SKILL(TERADYNE)
                   AI_SELECT_ACTION_TARGETS()
                   return
                   goto _1701
@@ -11055,7 +11055,7 @@ _1719:
     goto _1716
   _1724:
     if (TEST_MODEL_FLAG(3056) || AI_SPECIAL_BATTLE_OBJECT_VALUE() == 1) {
-      AI_SELECT_SKILL(24)
+      AI_SELECT_SKILL(MAZIODYNE_018)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -11107,7 +11107,7 @@ _1733:
   if_not (TEST_MODEL_FLAG(3043) == 1) goto _1756
   SET_MODEL_FLAG(3040)
   if (AI_SCENE_FADE_COUNT() == 1) {
-    AI_SELECT_SKILL(3)
+    AI_SELECT_SKILL(AGIDYNE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -11115,7 +11115,7 @@ _1733:
     if (TEST_MODEL_FLAG(3045) == 1) {
       CLEAR_MODEL_FLAG(3045)
       SET_MODEL_FLAG(3046)
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -11131,10 +11131,10 @@ _1733:
         }
       _1735:
         if (AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
         } else {
         _1738:
-          AI_SELECT_SKILL(414)
+          AI_SELECT_SKILL(LIGHT_19E)
           goto _1737
         }
       _1737:
@@ -11145,12 +11145,12 @@ _1733:
         if (TEST_MODEL_FLAG(3047) == 1) {
           CLEAR_MODEL_FLAG(3047)
           SET_MODEL_FLAG(3048)
-          AI_SELECT_SKILL(155)
+          AI_SELECT_SKILL(TRISAGION_09B)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1743:
-          AI_SELECT_SKILL(414)
+          AI_SELECT_SKILL(LIGHT_19E)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1739
@@ -11164,25 +11164,25 @@ _1756:
   if (TEST_MODEL_FLAG(3041) == 0 && (TEST_MODEL_FLAG(3040) == 1 || AI_SCENE_FADE_COUNT() == 1)) {
     CLEAR_MODEL_FLAG(3040)
     SET_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(155)
+    AI_SELECT_SKILL(TRISAGION_09B)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1749:
     if (local_int[64] < 10 && AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 0) {
-      AI_SELECT_SKILL(179)
+      AI_SELECT_SKILL(MAKANDA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1750:
       if (local_int[64] < 10 && AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-        AI_SELECT_SKILL(177)
+        AI_SELECT_SKILL(SUKUNDA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1751:
         if (local_int[64] < 10 + 30) {
-          AI_SELECT_SKILL(3)
+          AI_SELECT_SKILL(AGIDYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -11194,7 +11194,7 @@ _1756:
               SET_MODEL_FLAG(3042)
             }
           _1744:
-            AI_SELECT_SKILL(64)
+            AI_SELECT_SKILL(XANADU_040)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -11208,12 +11208,12 @@ _1756:
                 goto _1746
               }
             _1746:
-              AI_SELECT_SKILL(61)
+              AI_SELECT_SKILL(HAMAON)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _1754:
-              AI_SELECT_SKILL(414)
+              AI_SELECT_SKILL(LIGHT_19E)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _1748
@@ -11275,10 +11275,10 @@ _1765:
     CLEAR_MODEL_FLAG(3045)
     SET_MODEL_FLAG(3046)
     if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(8) == 0) {
-      AI_SELECT_SKILL(76)
+      AI_SELECT_SKILL(DORMINA)
     } else {
     _1768:
-      AI_SELECT_SKILL(373)
+      AI_SELECT_SKILL(LIGHT_175)
       goto _1767
     }
   _1767:
@@ -11290,10 +11290,10 @@ _1765:
       CLEAR_MODEL_FLAG(3046)
       SET_MODEL_FLAG(3047)
       if (AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
       } else {
       _1770:
-        AI_SELECT_SKILL(373)
+        AI_SELECT_SKILL(LIGHT_175)
         goto _1769
       }
     _1769:
@@ -11304,7 +11304,7 @@ _1765:
       if (TEST_MODEL_FLAG(3047) == 1) {
         CLEAR_MODEL_FLAG(3047)
         SET_MODEL_FLAG(3048)
-        AI_SELECT_SKILL(373)
+        AI_SELECT_SKILL(LIGHT_175)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -11312,10 +11312,10 @@ _1765:
         if (TEST_MODEL_FLAG(3048) == 1) {
           CLEAR_MODEL_FLAG(3048)
           if (AI_ANY_PLAYER_HAS_ACTION_MASK(8) == 1) {
-            AI_SELECT_SKILL(77)
+            AI_SELECT_SKILL(CALM_DEATH)
           } else {
           _1772:
-            AI_SELECT_SKILL(156)
+            AI_SELECT_SKILL(VAYAVIYA_09C)
             goto _1771
           }
         _1771:
@@ -11323,7 +11323,7 @@ _1765:
           return
         } else {
         _1777:
-          AI_SELECT_SKILL(30)
+          AI_SELECT_SKILL(ZANDYNE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1773
@@ -11337,25 +11337,25 @@ _1787:
   if (TEST_MODEL_FLAG(3041) == 0 && (TEST_MODEL_FLAG(3040) == 1 || AI_SCENE_FADE_COUNT() == 1)) {
     CLEAR_MODEL_FLAG(3040)
     SET_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(156)
+    AI_SELECT_SKILL(VAYAVIYA_09C)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1781:
     if (local_int[66] < 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-      AI_SELECT_SKILL(178)
+      AI_SELECT_SKILL(RAKUNDA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1782:
       if (local_int[66] < 15 && AI_ANY_PLAYER_ACTION_MODE_ZERO(1) == 0) {
-        AI_SELECT_SKILL(176)
+        AI_SELECT_SKILL(TARUNDA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1783:
         if (local_int[66] < 15 + 30) {
-          AI_SELECT_SKILL(30)
+          AI_SELECT_SKILL(ZANDYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -11367,12 +11367,12 @@ _1787:
               SET_MODEL_FLAG(3042)
             }
           _1778:
-            AI_SELECT_SKILL(137)
+            AI_SELECT_SKILL(GATE_OF_HELL)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1785:
-            AI_SELECT_SKILL(373)
+            AI_SELECT_SKILL(LIGHT_175)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1780
@@ -11434,10 +11434,10 @@ _1798:
   SET_MODEL_FLAG(3040)
   if (AI_SCENE_FADE_COUNT() == 1) {
     if (AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-      AI_SELECT_SKILL(193)
+      AI_SELECT_SKILL(MIND_CHARGE)
     } else {
     _1801:
-      AI_SELECT_SKILL(374)
+      AI_SELECT_SKILL(LIGHT_176)
       goto _1800
     }
   _1800:
@@ -11456,7 +11456,7 @@ _1798:
         goto _1802
       }
     _1802:
-      AI_SELECT_SKILL(66)
+      AI_SELECT_SKILL(MUDOON)
       if (AI_ANY_PLAYER_HAS_ACTION_MASK(1024) == 1) {
         AI_SELECT_TARGETS_WITH_ACTION_MASK(1024)
       } else {
@@ -11472,10 +11472,10 @@ _1798:
         CLEAR_MODEL_FLAG(3047)
         SET_MODEL_FLAG(3048)
         if (AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
         } else {
         _1807:
-          AI_SELECT_SKILL(374)
+          AI_SELECT_SKILL(LIGHT_176)
           goto _1806
         }
       _1806:
@@ -11485,12 +11485,12 @@ _1798:
       _1811:
         if (TEST_MODEL_FLAG(3048) == 1) {
           CLEAR_MODEL_FLAG(3048)
-          AI_SELECT_SKILL(157)
+          AI_SELECT_SKILL(TITANOMACHIA_09D)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1812:
-          AI_SELECT_SKILL(39)
+          AI_SELECT_SKILL(TERADYNE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1808
@@ -11504,7 +11504,7 @@ _1821:
   if (TEST_MODEL_FLAG(3041) == 0 && AI_SCENE_FADE_COUNT() == 1 && TEST_MODEL_FLAG(3044) == 1) {
     CLEAR_MODEL_FLAG(3044)
     SET_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(413)
+    AI_SELECT_SKILL(ETERNAL_ZERO_19D)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -11512,7 +11512,7 @@ _1821:
     if (TEST_MODEL_FLAG(3041) == 0 && (TEST_MODEL_FLAG(3040) == 1 || AI_SCENE_FADE_COUNT() == 1)) {
       CLEAR_MODEL_FLAG(3040)
       SET_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(157)
+      AI_SELECT_SKILL(TITANOMACHIA_09D)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -11524,18 +11524,18 @@ _1821:
           SET_MODEL_FLAG(3042)
         }
       _1813:
-        AI_SELECT_SKILL(98)
+        AI_SELECT_SKILL(WICKED_CURSE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1818:
         if (local_int[68] < 30 + 40) {
-          AI_SELECT_SKILL(39)
+          AI_SELECT_SKILL(TERADYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1819:
-          AI_SELECT_SKILL(374)
+          AI_SELECT_SKILL(LIGHT_176)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1815
@@ -11597,7 +11597,7 @@ _1832:
   if_not (TEST_MODEL_FLAG(3043) == 1) goto _1852
   SET_MODEL_FLAG(3040)
   if (AI_SCENE_FADE_COUNT() == 1) {
-    AI_SELECT_SKILL(21)
+    AI_SELECT_SKILL(ZIODYNE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -11606,10 +11606,10 @@ _1832:
       CLEAR_MODEL_FLAG(3045)
       SET_MODEL_FLAG(3046)
       if (AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
       } else {
       _1835:
-        AI_SELECT_SKILL(375)
+        AI_SELECT_SKILL(LIGHT_177)
         goto _1834
       }
     _1834:
@@ -11621,10 +11621,10 @@ _1832:
         CLEAR_MODEL_FLAG(3046)
         SET_MODEL_FLAG(3047)
         if (AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
         } else {
         _1837:
-          AI_SELECT_SKILL(375)
+          AI_SELECT_SKILL(LIGHT_177)
           goto _1836
         }
       _1836:
@@ -11635,19 +11635,19 @@ _1832:
         if (TEST_MODEL_FLAG(3047) == 1) {
           CLEAR_MODEL_FLAG(3047)
           SET_MODEL_FLAG(3048)
-          AI_SELECT_SKILL(375)
+          AI_SELECT_SKILL(LIGHT_177)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1842:
           if (TEST_MODEL_FLAG(3048) == 1) {
             CLEAR_MODEL_FLAG(3048)
-            AI_SELECT_SKILL(158)
+            AI_SELECT_SKILL(NARUKAMI_09E)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1843:
-            AI_SELECT_SKILL(375)
+            AI_SELECT_SKILL(LIGHT_177)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1838
@@ -11661,7 +11661,7 @@ _1838:
 _1852:
   if (TEST_MODEL_FLAG(3044) == 1) {
     CLEAR_MODEL_FLAG(3044)
-    AI_SELECT_SKILL(376)
+    AI_SELECT_SKILL(ETERNAL_ZERO_178)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -11669,7 +11669,7 @@ _1852:
     if (TEST_MODEL_FLAG(3041) == 0 && (TEST_MODEL_FLAG(3040) == 1 || AI_SCENE_FADE_COUNT() == 1)) {
       CLEAR_MODEL_FLAG(3040)
       SET_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(158)
+      AI_SELECT_SKILL(NARUKAMI_09E)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -11681,18 +11681,18 @@ _1852:
           SET_MODEL_FLAG(3042)
         }
       _1844:
-        AI_SELECT_SKILL(96)
+        AI_SELECT_SKILL(NEURAL_SHOCK)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1849:
         if (local_int[70] < 30 + 45) {
-          AI_SELECT_SKILL(21)
+          AI_SELECT_SKILL(ZIODYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1850:
-          AI_SELECT_SKILL(375)
+          AI_SELECT_SKILL(LIGHT_177)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1846
@@ -11793,18 +11793,18 @@ _1872:
   SET_MODEL_FLAG(3040)
   CLEAR_MODEL_FLAG(3071)
   if (TEST_MODEL_FLAG(3056) == 1) {
-    AI_SELECT_SKILL(381)
+    AI_SELECT_SKILL(ETERNAL_ZERO_17D)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1877:
     if (AI_ALL_PLAYERS_LACK_FLAG_1000() == 0) {
       if (AI_ANY_PLAYER_LACKS_FLAG_1000() == 1) {
-        AI_SELECT_SKILL(58)
+        AI_SELECT_SKILL(REVERT)
         AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
       } else {
       _1875:
-        AI_SELECT_SKILL(59)
+        AI_SELECT_SKILL(MAREVERT)
         AI_SELECT_ACTION_TARGETS()
         goto _1874
       }
@@ -11812,7 +11812,7 @@ _1872:
       return
     } else {
     _1878:
-      AI_SELECT_SKILL(12)
+      AI_SELECT_SKILL(BUFUDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1876
@@ -11825,7 +11825,7 @@ _1886:
     SET_MODEL_FLAG(3041)
     CLEAR_MODEL_FLAG(3044)
     CLEAR_MODEL_FLAG(3071)
-    AI_SELECT_SKILL(415)
+    AI_SELECT_SKILL(BRAHMA_SUTRA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -11833,7 +11833,7 @@ _1886:
     if (TEST_MODEL_FLAG(3070) == 1) {
       CLEAR_MODEL_FLAG(3070)
       CLEAR_MODEL_FLAG(3071)
-      AI_SELECT_SKILL(381)
+      AI_SELECT_SKILL(ETERNAL_ZERO_17D)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -11841,24 +11841,24 @@ _1886:
       if (TEST_MODEL_FLAG(3041) == 0 && (TEST_MODEL_FLAG(3040) == 1 || AI_SCENE_FADE_COUNT() == 1)) {
         CLEAR_MODEL_FLAG(3040)
         SET_MODEL_FLAG(3041)
-        AI_SELECT_SKILL(159)
+        AI_SELECT_SKILL(NIFLHEIM_09F)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1882:
         if (local_int[72] < 30) {
-          AI_SELECT_SKILL(97)
+          AI_SELECT_SKILL(SILENT_HOWL)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1883:
           if (local_int[72] < 30 + 25 && AI_UNIT_ACTION_MODE_ZERO(13) == 0 && TEST_MODEL_FLAG(3068) == 0) {
-            AI_SELECT_SKILL(193)
+            AI_SELECT_SKILL(MIND_CHARGE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1884:
-            AI_SELECT_SKILL(12)
+            AI_SELECT_SKILL(BUFUDYNE)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1879
@@ -11949,25 +11949,25 @@ _1893:
     MESSAGE_REQUEST_AND_POLL(message(MSG_URIEL004))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_SKILL(108)
+    AI_SELECT_SKILL(JUDGEMENT)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _1896:
   if_not (AI_UNIT_ACTION_MODE_ZERO(13) == 1) goto _1901
   if (local_int[74] == 1) {
-    AI_SELECT_SKILL(3)
+    AI_SELECT_SKILL(AGIDYNE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1899:
     if (local_int[74] == 2) {
-      AI_SELECT_SKILL(26)
+      AI_SELECT_SKILL(JUPITER_S_FURY_01A)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1900:
-      AI_SELECT_SKILL(108)
+      AI_SELECT_SKILL(JUDGEMENT)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _1898
@@ -11980,12 +11980,12 @@ _1901:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(2) == 0) goto _1920
   if_not (local_int[73] < 10) goto _1906
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1904:
-    AI_SELECT_SKILL(47)
+    AI_SELECT_SKILL(MEGIDOLA_02F)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1903
@@ -11994,30 +11994,30 @@ _1903:
   goto _1905
 _1906:
   if (local_int[73] < 10 + 10) {
-    AI_SELECT_SKILL(132)
+    AI_SELECT_SKILL(DEMON_RAGE)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _1907:
     if (local_int[73] < 10 + 10 + 20) {
-      AI_SELECT_SKILL(8)
+      AI_SELECT_SKILL(EXPLODE_008)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1908:
       if (local_int[73] < 10 + 10 + 20 + 20) {
-        AI_SELECT_SKILL(26)
+        AI_SELECT_SKILL(JUPITER_S_FURY_01A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1909:
         if (local_int[73] < 10 + 10 + 20 + 20 + 10) {
-          AI_SELECT_SKILL(108)
+          AI_SELECT_SKILL(JUDGEMENT)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1910:
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1905
@@ -12031,12 +12031,12 @@ _1920:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(2) == 1) goto _1919
   if_not (local_int[73] < 20) goto _1914
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1912:
-    AI_SELECT_SKILL(46)
+    AI_SELECT_SKILL(MEGIDO_02E)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1911
@@ -12045,30 +12045,30 @@ _1911:
   goto _1913
 _1914:
   if (local_int[73] < 20 + 20) {
-    AI_SELECT_SKILL(131)
+    AI_SELECT_SKILL(SKULL_CLEAVE)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _1915:
     if (local_int[73] < 20 + 20 + 10) {
-      AI_SELECT_SKILL(8)
+      AI_SELECT_SKILL(EXPLODE_008)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1916:
       if (local_int[73] < 20 + 20 + 10 + 10) {
-        AI_SELECT_SKILL(108)
+        AI_SELECT_SKILL(JUDGEMENT)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1917:
         if (local_int[73] < 20 + 20 + 10 + 10 + 20) {
-          AI_SELECT_SKILL(26)
+          AI_SELECT_SKILL(JUPITER_S_FURY_01A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1918:
-          AI_SELECT_SKILL(193)
+          AI_SELECT_SKILL(MIND_CHARGE)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1913
@@ -12085,12 +12085,12 @@ _1950:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(2) == 0) goto _1941
   if_not (local_int[73] < 15) goto _1925
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1923:
-    AI_SELECT_SKILL(46)
+    AI_SELECT_SKILL(MEGIDO_02E)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1922
@@ -12099,36 +12099,36 @@ _1922:
   goto _1924
 _1925:
   if (local_int[73] < 15 + 15) {
-    AI_SELECT_SKILL(131)
+    AI_SELECT_SKILL(SKULL_CLEAVE)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _1926:
     if (local_int[73] < 15 + 15 + 15) {
-      AI_SELECT_SKILL(3)
+      AI_SELECT_SKILL(AGIDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1927:
       if (local_int[73] < 15 + 15 + 15 + 15) {
-        AI_SELECT_SKILL(8)
+        AI_SELECT_SKILL(EXPLODE_008)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1928:
         if (local_int[73] < 15 + 15 + 15 + 15 + 20) {
-          AI_SELECT_SKILL(108)
+          AI_SELECT_SKILL(JUDGEMENT)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1929:
           if (local_int[73] < 15 + 15 + 15 + 15 + 20 + 10) {
-            AI_SELECT_SKILL(21)
+            AI_SELECT_SKILL(ZIODYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1930:
-            AI_SELECT_SKILL(26)
+            AI_SELECT_SKILL(JUPITER_S_FURY_01A)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1924
@@ -12143,12 +12143,12 @@ _1941:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(2) == 1) goto _1940
   if_not (local_int[73] < 15) goto _1934
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1932:
-    AI_SELECT_SKILL(46)
+    AI_SELECT_SKILL(MEGIDO_02E)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1931
@@ -12157,36 +12157,36 @@ _1931:
   goto _1933
 _1934:
   if (local_int[73] < 15 + 15) {
-    AI_SELECT_SKILL(131)
+    AI_SELECT_SKILL(SKULL_CLEAVE)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _1935:
     if (local_int[73] < 15 + 15 + 10) {
-      AI_SELECT_SKILL(3)
+      AI_SELECT_SKILL(AGIDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1936:
       if (local_int[73] < 15 + 15 + 10 + 10) {
-        AI_SELECT_SKILL(8)
+        AI_SELECT_SKILL(EXPLODE_008)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1937:
         if (local_int[73] < 15 + 15 + 10 + 10 + 10) {
-          AI_SELECT_SKILL(108)
+          AI_SELECT_SKILL(JUDGEMENT)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1938:
           if (local_int[73] < 15 + 15 + 10 + 10 + 10 + 20) {
-            AI_SELECT_SKILL(21)
+            AI_SELECT_SKILL(ZIODYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _1939:
-            AI_SELECT_SKILL(26)
+            AI_SELECT_SKILL(JUPITER_S_FURY_01A)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _1933
@@ -12203,12 +12203,12 @@ _1951:
   if_not (TEST_MODEL_FLAG(3067) == 0 && TEST_MODEL_FLAG(3068) == 0) goto _1949
   if_not (local_int[73] < 30) goto _1946
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1944:
-    AI_SELECT_SKILL(46)
+    AI_SELECT_SKILL(MEGIDO_02E)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1943
@@ -12217,18 +12217,18 @@ _1943:
   goto _1945
 _1946:
   if (local_int[73] < 30 + 30) {
-    AI_SELECT_SKILL(131)
+    AI_SELECT_SKILL(SKULL_CLEAVE)
     AI_SELECT_LOWEST_HP_TARGET()
     return
   } else {
   _1947:
     if (local_int[73] < 30 + 30 + 20) {
-      AI_SELECT_SKILL(21)
+      AI_SELECT_SKILL(ZIODYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1948:
-      AI_SELECT_SKILL(21)
+      AI_SELECT_SKILL(ZIODYNE)
       AI_SELECT_TARGET_PASSING_QUERY(2)
       return
       goto _1945
@@ -12319,7 +12319,7 @@ _1959:
     MESSAGE_REQUEST_AND_POLL(message(MSG_RAFAEL004))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_SKILL(107)
+    AI_SELECT_SKILL(WINGED_FURY)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -12327,12 +12327,12 @@ _1962:
   if_not (TEST_MODEL_FLAG(3068) == 1) goto _1988
   if_not (local_int[75] < 20) goto _1967
   if (AI_ANY_PLAYER_ACTION_MODE_ZERO(1) == 1 && AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 1 && AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 1 && AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 1 && AI_ANY_PLAYER_ACTION_MODE_ZERO(9) == 1) {
-    AI_SELECT_SKILL(48)
+    AI_SELECT_SKILL(MEGIDOLAON_030)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1965:
-    AI_SELECT_SKILL(190)
+    AI_SELECT_SKILL(DEBILITATE_0BE)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1964
@@ -12341,24 +12341,24 @@ _1964:
   goto _1966
 _1967:
   if (local_int[75] < 10 + 20) {
-    AI_SELECT_SKILL(140)
+    AI_SELECT_SKILL(REVELATION)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1968:
     if (local_int[75] < 10 + 10 + 20) {
-      AI_SELECT_SKILL(24)
+      AI_SELECT_SKILL(MAZIODYNE_018)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1969:
       if (local_int[75] < 10 + 10 + 20 + 20) {
-        AI_SELECT_SKILL(33)
+        AI_SELECT_SKILL(MAZANDYNE_021)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1970:
-        AI_SELECT_SKILL(107)
+        AI_SELECT_SKILL(WINGED_FURY)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1966
@@ -12371,12 +12371,12 @@ _1988:
   if_not (TEST_MODEL_FLAG(3067) == 1 && TEST_MODEL_FLAG(3068) == 0) goto _1989
   if_not (local_int[75] < 15) goto _1976
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1972:
-    AI_SELECT_SKILL(139)
+    AI_SELECT_SKILL(BLOODBATH_08B)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1971
@@ -12385,31 +12385,31 @@ _1971:
   goto _1975
 _1976:
   if (local_int[75] < 15 + 15) {
-    AI_SELECT_SKILL(139)
+    AI_SELECT_SKILL(BLOODBATH_08B)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1977:
     if (local_int[75] < 15 + 15 + 15) {
-      AI_SELECT_SKILL(26)
+      AI_SELECT_SKILL(JUPITER_S_FURY_01A)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _1978:
       if (local_int[75] < 15 + 15 + 15 + 15) {
-        AI_SELECT_SKILL(35)
+        AI_SELECT_SKILL(TEMPEST_023)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _1979:
         if_not (local_int[75] < 15 + 15 + 15 + 15 + 20) goto _1980
         if (AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-          AI_SELECT_SKILL(178)
+          AI_SELECT_SKILL(RAKUNDA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _1974:
-          AI_SELECT_SKILL(47)
+          AI_SELECT_SKILL(MEGIDOLA_02F)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _1973
@@ -12417,7 +12417,7 @@ _1976:
       _1973:
         goto _1975
       _1980:
-        AI_SELECT_SKILL(107)
+        AI_SELECT_SKILL(WINGED_FURY)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _1975
@@ -12430,12 +12430,12 @@ _1989:
   if_not (TEST_MODEL_FLAG(3067) == 0 && TEST_MODEL_FLAG(3068) == 0) goto _1987
   if_not (local_int[75] < 20) goto _1984
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(63)
+    AI_SELECT_SKILL(MAHAMAON_03F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1982:
-    AI_SELECT_SKILL(135)
+    AI_SELECT_SKILL(VENOM_FANG)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _1981
@@ -12444,18 +12444,18 @@ _1981:
   goto _1983
 _1984:
   if (local_int[75] < 30 + 20) {
-    AI_SELECT_SKILL(135)
+    AI_SELECT_SKILL(VENOM_FANG)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _1985:
     if (local_int[75] < 30 + 30 + 30) {
-      AI_SELECT_SKILL(21)
+      AI_SELECT_SKILL(ZIODYNE)
       AI_SELECT_TARGET_PASSING_QUERY(6)
       return
     } else {
     _1986:
-      AI_SELECT_SKILL(30)
+      AI_SELECT_SKILL(ZANDYNE)
       AI_SELECT_TARGET_PASSING_QUERY(5)
       return
       goto _1983
@@ -12546,19 +12546,19 @@ _1997:
     MESSAGE_REQUEST_AND_POLL(message(MSG_GABRIE004))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_SKILL(109)
+    AI_SELECT_SKILL(HEAVENLY_SMILE)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2000:
-  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(365) == 1) goto _2004
+  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D) == 1) goto _2004
   if (AI_UNIT_ACTION_MODE_ZERO(13) == 0) {
-    AI_SELECT_SKILL(193)
+    AI_SELECT_SKILL(MIND_CHARGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2003:
-    AI_SELECT_SKILL(48)
+    AI_SELECT_SKILL(MEGIDOLAON_030)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _2002
@@ -12567,55 +12567,55 @@ _2002:
   goto _2004
 _2004:
   if (AI_ANY_PLAYER_HAS_ACTION_MASK(1024) == 1 && AI_ANY_PLAYER_PASSES_QUERY(9) == 0) {
-    AI_SELECT_SKILL(68)
+    AI_SELECT_SKILL(MAMUDOON_044)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2006:
-  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(367) == 1) goto _2040
+  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(VOID_AILMENT) == 1) goto _2040
   if (local_int[76] < 20) {
-    AI_SELECT_SKILL(109)
+    AI_SELECT_SKILL(HEAVENLY_SMILE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2009:
     if (local_int[76] < 20 + 20) {
-      AI_SELECT_SKILL(132)
+      AI_SELECT_SKILL(DEMON_RAGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2010:
       if (local_int[76] < 20 + 20 + 5) {
-        AI_SELECT_SKILL(84)
+        AI_SELECT_SKILL(TENTARAFOO_054)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2011:
         if (local_int[76] < 20 + 20 + 5 + 5) {
-          AI_SELECT_SKILL(97)
+          AI_SELECT_SKILL(SILENT_HOWL)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2012:
           if (local_int[76] < 20 + 20 + 5 + 5 + 5) {
-            AI_SELECT_SKILL(96)
+            AI_SELECT_SKILL(NEURAL_SHOCK)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2013:
             if (local_int[76] < 20 + 20 + 5 + 5 + 5 + 5) {
-              AI_SELECT_SKILL(88)
+              AI_SELECT_SKILL(FATAL_CHARM)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2014:
               if (local_int[76] < 20 + 20 + 5 + 5 + 5 + 5 + 20) {
-                AI_SELECT_SKILL(98)
+                AI_SELECT_SKILL(WICKED_CURSE)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _2015:
-                AI_SELECT_SKILL(68)
+                AI_SELECT_SKILL(MAMUDOON_044)
                 AI_SELECT_ACTION_TARGETS()
                 return
                 goto _2008
@@ -12630,50 +12630,50 @@ _2008:
   goto _2039
 _2040:
   if_not (TEST_MODEL_FLAG(3071) == 1) goto _2041
-  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(367) == 0) goto _2024
+  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(VOID_AILMENT) == 0) goto _2024
   if (local_int[76] < 20) {
-    AI_SELECT_SKILL(109)
+    AI_SELECT_SKILL(HEAVENLY_SMILE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2017:
     if (local_int[76] < 20 + 10) {
-      AI_SELECT_SKILL(132)
+      AI_SELECT_SKILL(DEMON_RAGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2018:
       if (local_int[76] < 20 + 10 + 10) {
-        AI_SELECT_SKILL(84)
+        AI_SELECT_SKILL(TENTARAFOO_054)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2019:
         if (local_int[76] < 20 + 10 + 10 + 10) {
-          AI_SELECT_SKILL(97)
+          AI_SELECT_SKILL(SILENT_HOWL)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2020:
           if (local_int[76] < 20 + 10 + 10 + 10 + 10) {
-            AI_SELECT_SKILL(96)
+            AI_SELECT_SKILL(NEURAL_SHOCK)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2021:
             if (local_int[76] < 20 + 10 + 10 + 10 + 10 + 10) {
-              AI_SELECT_SKILL(88)
+              AI_SELECT_SKILL(FATAL_CHARM)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2022:
               if (local_int[76] < 20 + 10 + 10 + 10 + 10 + 10 + 10) {
-                AI_SELECT_SKILL(98)
+                AI_SELECT_SKILL(WICKED_CURSE)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _2023:
-                AI_SELECT_SKILL(68)
+                AI_SELECT_SKILL(MAMUDOON_044)
                 AI_SELECT_ACTION_TARGETS()
                 return
                 goto _2016
@@ -12692,35 +12692,35 @@ _2041:
   if_not (TEST_MODEL_FLAG(3070) == 1 && TEST_MODEL_FLAG(3071) == 0) goto _2042
   if (TEST_MODEL_FLAG(3050) == 0) {
     SET_MODEL_FLAG(3050)
-    AI_SELECT_SKILL(84)
+    AI_SELECT_SKILL(TENTARAFOO_054)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2027:
     if (TEST_MODEL_FLAG(3051) == 0) {
       SET_MODEL_FLAG(3051)
-      AI_SELECT_SKILL(97)
+      AI_SELECT_SKILL(SILENT_HOWL)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2028:
       if (TEST_MODEL_FLAG(3052) == 0) {
         SET_MODEL_FLAG(3052)
-        AI_SELECT_SKILL(96)
+        AI_SELECT_SKILL(NEURAL_SHOCK)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2029:
         if (TEST_MODEL_FLAG(3053) == 0) {
           SET_MODEL_FLAG(3053)
-          AI_SELECT_SKILL(88)
+          AI_SELECT_SKILL(FATAL_CHARM)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2030:
           if (TEST_MODEL_FLAG(3054) == 0) {
             SET_MODEL_FLAG(3054)
-            AI_SELECT_SKILL(98)
+            AI_SELECT_SKILL(WICKED_CURSE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -12732,7 +12732,7 @@ _2041:
               CLEAR_MODEL_FLAG(3053)
               CLEAR_MODEL_FLAG(3054)
               CLEAR_MODEL_FLAG(3055)
-              AI_SELECT_SKILL(68)
+              AI_SELECT_SKILL(MAMUDOON_044)
               AI_SELECT_ACTION_TARGETS()
               return
             }
@@ -12747,28 +12747,28 @@ _2042:
   if_not (TEST_MODEL_FLAG(3070) == 0 && TEST_MODEL_FLAG(3040) == 0 && TEST_MODEL_FLAG(3071) == 0) goto _2039
   if (TEST_MODEL_FLAG(3045) == 0) {
     SET_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(84)
+    AI_SELECT_SKILL(TENTARAFOO_054)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2034:
     if (TEST_MODEL_FLAG(3046) == 0) {
       SET_MODEL_FLAG(3046)
-      AI_SELECT_SKILL(97)
+      AI_SELECT_SKILL(SILENT_HOWL)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2035:
       if (TEST_MODEL_FLAG(3047) == 0) {
         SET_MODEL_FLAG(3047)
-        AI_SELECT_SKILL(96)
+        AI_SELECT_SKILL(NEURAL_SHOCK)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2036:
         if (TEST_MODEL_FLAG(3048) == 0) {
           SET_MODEL_FLAG(3048)
-          AI_SELECT_SKILL(88)
+          AI_SELECT_SKILL(FATAL_CHARM)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -12778,7 +12778,7 @@ _2042:
             CLEAR_MODEL_FLAG(3046)
             CLEAR_MODEL_FLAG(3047)
             CLEAR_MODEL_FLAG(3048)
-            AI_SELECT_SKILL(98)
+            AI_SELECT_SKILL(WICKED_CURSE)
             AI_SELECT_ACTION_TARGETS()
             return
           }
@@ -12849,7 +12849,7 @@ _2049:
   if (TEST_MODEL_FLAG(3043) == 1) {
     CLEAR_MODEL_FLAG(3043)
     SET_MODEL_FLAG(3044)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -12857,7 +12857,7 @@ _2049:
     if (TEST_MODEL_FLAG(3044) == 1) {
       CLEAR_MODEL_FLAG(3044)
       SET_MODEL_FLAG(3045)
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -12865,7 +12865,7 @@ _2049:
       if (TEST_MODEL_FLAG(3045) == 1) {
         CLEAR_MODEL_FLAG(3045)
         SET_MODEL_FLAG(3046)
-        AI_SELECT_SKILL(193)
+        AI_SELECT_SKILL(MIND_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -12873,7 +12873,7 @@ _2049:
         if (TEST_MODEL_FLAG(3046) == 1) {
           CLEAR_MODEL_FLAG(3046)
           CLEAR_MODEL_FLAG(3042)
-          AI_SELECT_SKILL(48)
+          AI_SELECT_SKILL(MEGIDOLAON_030)
           AI_SELECT_ACTION_TARGETS()
           return
         }
@@ -12889,7 +12889,7 @@ _2056:
   if (TEST_MODEL_FLAG(3048) == 1) {
     CLEAR_MODEL_FLAG(3048)
     SET_MODEL_FLAG(3049)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -12897,7 +12897,7 @@ _2056:
     if (TEST_MODEL_FLAG(3049) == 1) {
       CLEAR_MODEL_FLAG(3049)
       SET_MODEL_FLAG(3050)
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -12905,7 +12905,7 @@ _2056:
       if (TEST_MODEL_FLAG(3050) == 1) {
         CLEAR_MODEL_FLAG(3050)
         SET_MODEL_FLAG(3051)
-        AI_SELECT_SKILL(192)
+        AI_SELECT_SKILL(POWER_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -12913,7 +12913,7 @@ _2056:
         if (TEST_MODEL_FLAG(3051) == 1) {
           CLEAR_MODEL_FLAG(3051)
           CLEAR_MODEL_FLAG(3047)
-          AI_SELECT_SKILL(141)
+          AI_SELECT_SKILL(RAGNAROK)
           AI_SELECT_ACTION_TARGETS()
           return
         }
@@ -12932,30 +12932,30 @@ _2058:
     MESSAGE_REQUEST_AND_POLL(message(MSG_MIKAEL004))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_SKILL(426)
+    AI_SELECT_SKILL(OMNIPOTENCE)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2063:
   if (local_int[77] < 25) {
-    AI_SELECT_SKILL(139)
+    AI_SELECT_SKILL(BLOODBATH_08B)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2066:
     if (local_int[77] < 25 + 30) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2067:
       if (local_int[77] < 25 + 15 + 30) {
-        AI_SELECT_SKILL(426)
+        AI_SELECT_SKILL(OMNIPOTENCE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2068:
-        AI_SELECT_SKILL(57)
+        AI_SELECT_SKILL(VANITY_039)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _2065
@@ -12967,42 +12967,42 @@ _2065:
 _2083:
   if_not (TEST_MODEL_FLAG(3070) == 1 && TEST_MODEL_FLAG(3071) == 0) goto _2084
   if (local_int[77] < 25) {
-    AI_SELECT_SKILL(132)
+    AI_SELECT_SKILL(DEMON_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2070:
     if (local_int[77] < 25 + 15) {
-      AI_SELECT_SKILL(8)
+      AI_SELECT_SKILL(EXPLODE_008)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2071:
       if (local_int[77] < 25 + 15 + 15) {
-        AI_SELECT_SKILL(17)
+        AI_SELECT_SKILL(COLD_WAVE_011)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2072:
         if (local_int[77] < 25 + 15 + 15 + 15) {
-          AI_SELECT_SKILL(26)
+          AI_SELECT_SKILL(JUPITER_S_FURY_01A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2073:
           if (local_int[77] < 25 + 15 + 15 + 15 + 15) {
-            AI_SELECT_SKILL(35)
+            AI_SELECT_SKILL(TEMPEST_023)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2074:
             if (local_int[77] < 25 + 15 + 15 + 15 + 15) {
-              AI_SELECT_SKILL(44)
+              AI_SELECT_SKILL(HEAVY_ROCK_02C)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2075:
-              AI_SELECT_SKILL(57)
+              AI_SELECT_SKILL(VANITY_039)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _2069
@@ -13017,36 +13017,36 @@ _2069:
 _2084:
   if_not (TEST_MODEL_FLAG(3070) == 0 && TEST_MODEL_FLAG(3071) == 0) goto _2082
   if (local_int[77] < 25) {
-    AI_SELECT_SKILL(132)
+    AI_SELECT_SKILL(DEMON_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2077:
     if (local_int[77] < 25 + 15) {
-      AI_SELECT_SKILL(3)
+      AI_SELECT_SKILL(AGIDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2078:
       if (local_int[77] < 25 + 15 + 15) {
-        AI_SELECT_SKILL(12)
+        AI_SELECT_SKILL(BUFUDYNE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2079:
         if (local_int[77] < 25 + 15 + 15 + 15) {
-          AI_SELECT_SKILL(30)
+          AI_SELECT_SKILL(ZANDYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2080:
           if (local_int[77] < 25 + 15 + 15 + 15 + 15) {
-            AI_SELECT_SKILL(39)
+            AI_SELECT_SKILL(TERADYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2081:
-            AI_SELECT_SKILL(21)
+            AI_SELECT_SKILL(ZIODYNE)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _2076
@@ -13065,30 +13065,30 @@ AI_SETO_MIDDLE_BASIC:
   local_int[79] = RANDOM_ONE_TO(100)
   if_not (local_int[79] <= 20) goto _2095
   if (AI_ANY_PLAYER_PASSES_QUERY(0) == 0) {
-    AI_SELECT_SKILL(140)
+    AI_SELECT_SKILL(REVELATION)
   } else {
   _2087:
-    AI_SELECT_SKILL(97)
+    AI_SELECT_SKILL(SILENT_HOWL)
     goto _2086
   }
 _2086:
   goto _2094
 _2095:
   if (local_int[79] <= 55) {
-    AI_SELECT_SKILL(300)
+    AI_SELECT_SKILL(PAIN)
   } else {
   _2096:
     if_not (local_int[79] <= 90) goto _2097
     if (TEST_MODEL_FLAG(3056) == 0) {
-      AI_SELECT_SKILL(261)
+      AI_SELECT_SKILL(SPITEFUL_FORCE_105)
       SET_MODEL_FLAG(3056)
     } else {
     _2091:
       if (AI_ANY_PLAYER_PASSES_QUERY(0) == 0) {
-        AI_SELECT_SKILL(140)
+        AI_SELECT_SKILL(REVELATION)
       } else {
       _2089:
-        AI_SELECT_SKILL(97)
+        AI_SELECT_SKILL(SILENT_HOWL)
         goto _2088
       }
     _2088:
@@ -13098,10 +13098,10 @@ _2095:
     goto _2094
   _2097:
     if (AI_ANY_PLAYER_LACKS_FLAG_1000() == 0) {
-      AI_SELECT_SKILL(59)
+      AI_SELECT_SKILL(MAREVERT)
     } else {
     _2093:
-      AI_SELECT_SKILL(97)
+      AI_SELECT_SKILL(SILENT_HOWL)
       goto _2092
     }
   _2092:
@@ -13133,13 +13133,13 @@ _2098:
 _2100:
   if_not (TEST_MODEL_FLAG(3045) == 1) goto _2120
   if (AI_ANY_PLAYER_ACTION_MODE_ZERO(11) == 1) {
-    AI_SELECT_SKILL(185)
+    AI_SELECT_SKILL(DEKAJA_0B9)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2103:
   if (AI_ANY_ENEMY_ACTION_MODE_ZERO(12) == 1) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -13148,13 +13148,13 @@ _2105:
   local_int[81] = RANDOM_ONE_TO(100)
   if_not (local_int[81] <= 8) goto _2111
   if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(11) == 1) {
-    AI_SELECT_SKILL(185)
+    AI_SELECT_SKILL(DEKAJA_0B9)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2107:
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(12) == 1) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -13165,16 +13165,16 @@ _2111:
 _2113:
   if (AI_ANY_PLAYER_HAS_ACTION_MASK(2048) == 1) {
     if (AI_ANY_PLAYER_PASSES_QUERY(5) == 0) {
-      AI_SELECT_SKILL(33)
+      AI_SELECT_SKILL(MAZANDYNE_021)
       AI_SELECT_ACTION_TARGETS()
     } else {
     _2116:
       if (AI_ANY_PLAYER_PASSES_QUERY(6) == 0) {
-        AI_SELECT_SKILL(42)
+        AI_SELECT_SKILL(MATERADYNE_02A)
         AI_SELECT_ACTION_TARGETS()
       } else {
       _2117:
-        AI_SELECT_SKILL(300)
+        AI_SELECT_SKILL(PAIN)
         AI_SELECT_TARGETS_WITH_ACTION_MASK(2048)
         goto _2115
       }
@@ -13201,50 +13201,50 @@ _2120:
     local_int[81] = RANDOM_ONE_TO(100)
     if_not (local_int[81] <= 20) goto _2136
     if (TEST_MODEL_FLAG(3056) == 0) {
-      AI_SELECT_SKILL(261)
+      AI_SELECT_SKILL(SPITEFUL_FORCE_105)
       SET_MODEL_FLAG(3056)
     } else {
     _2125:
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       goto _2124
     }
   _2124:
     goto _2135
   _2136:
     if (local_int[81] <= 50) {
-      AI_SELECT_SKILL(300)
+      AI_SELECT_SKILL(PAIN)
     } else {
     _2137:
       if (local_int[81] <= 75) {
-        AI_SELECT_SKILL(137)
+        AI_SELECT_SKILL(GATE_OF_HELL)
       } else {
       _2138:
         if_not (local_int[81] <= 90) goto _2139
         if (AI_HAS_PLAYER_UNIT_MODE(1) == 1 && AI_ANY_PLAYER_PASSES_QUERY(2) == 0) {
-          AI_SELECT_SKILL(6)
+          AI_SELECT_SKILL(MARAGIDYNE_006)
         } else {
         _2127:
           if (AI_HAS_PLAYER_UNIT_MODE(3) == 1 && AI_ANY_PLAYER_PASSES_QUERY(3) == 0) {
-            AI_SELECT_SKILL(15)
+            AI_SELECT_SKILL(MABUFUDYNE_00F)
           } else {
           _2128:
             if (AI_HAS_PLAYER_UNIT_MODE(5) == 1 && AI_ANY_PLAYER_PASSES_QUERY(4) == 0) {
-              AI_SELECT_SKILL(24)
+              AI_SELECT_SKILL(MAZIODYNE_018)
             } else {
             _2129:
               if (AI_HAS_PLAYER_UNIT_MODE(4) == 1 && AI_ANY_PLAYER_PASSES_QUERY(5) == 0) {
-                AI_SELECT_SKILL(33)
+                AI_SELECT_SKILL(MAZANDYNE_021)
               } else {
               _2130:
                 if (AI_HAS_PLAYER_UNIT_MODE(7) == 1 && AI_ANY_PLAYER_PASSES_QUERY(6) == 0) {
-                  AI_SELECT_SKILL(42)
+                  AI_SELECT_SKILL(MATERADYNE_02A)
                 } else {
                 _2131:
                   if (AI_HAS_PLAYER_UNIT_MODE(6) == 1 && AI_ANY_PLAYER_PASSES_QUERY(10) == 0) {
-                    AI_SELECT_SKILL(88)
+                    AI_SELECT_SKILL(FATAL_CHARM)
                   } else {
                   _2132:
-                    AI_SELECT_SKILL(48)
+                    AI_SELECT_SKILL(MEGIDOLAON_030)
                     goto _2126
                   }
                 }
@@ -13256,10 +13256,10 @@ _2120:
         goto _2135
       _2139:
         if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(1024) == 0) {
-          AI_SELECT_SKILL(70)
+          AI_SELECT_SKILL(BLOOD_CURSE_046)
         } else {
         _2134:
-          AI_SELECT_SKILL(137)
+          AI_SELECT_SKILL(GATE_OF_HELL)
           goto _2133
         }
       _2133:
@@ -13278,7 +13278,7 @@ _2120:
     }
   _2140:
     if (TEST_MODEL_FLAG(3042) == 1 && TEST_MODEL_FLAG(3049) == 0) {
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       SET_MODEL_FLAG(3049)
       return
@@ -13287,11 +13287,11 @@ _2120:
     if (AI_UNIT_ACTION_MODE_ZERO(10) == 1) {
       local_int[81] = RANDOM_ONE_TO(100)
       if (local_int[81] <= 80) {
-        AI_SELECT_SKILL(300)
+        AI_SELECT_SKILL(PAIN)
         AI_SELECT_LOWEST_HP_TARGET()
       } else {
       _2145:
-        AI_SELECT_SKILL(137)
+        AI_SELECT_SKILL(GATE_OF_HELL)
         AI_SELECT_ACTION_TARGETS()
         goto _2144
       }
@@ -13321,7 +13321,7 @@ _2120:
           SET_MODEL_FLAG(3046)
         }
       _2148:
-        AI_SELECT_SKILL(301)
+        AI_SELECT_SKILL(DESERT_WIND)
         AI_SELECT_ACTION_TARGETS()
         SET_MODEL_FLAG(3042)
         return
@@ -13344,14 +13344,14 @@ _2120:
     if (TEST_MODEL_FLAG(3044) == 0 && local_int[81] <= 55) {
       local_int[81] = RANDOM_ONE_TO(100)
       if (local_int[81] <= 40) {
-        AI_SELECT_SKILL(190)
+        AI_SELECT_SKILL(DEBILITATE_0BE)
       } else {
       _2159:
         if (AI_PLAYER_COUNT_AT_MOST(1) == 0 && AI_ANY_PLAYER_HAS_ACTION_MASK(2048) == 0 && AI_ANY_PLAYER_HAS_ACTION_MASK(2) == 0 && AI_ANY_PLAYER_HAS_ACTION_MASK(4) == 0) {
-          AI_SELECT_SKILL(301)
+          AI_SELECT_SKILL(DESERT_WIND)
         } else {
         _2157:
-          AI_SELECT_SKILL(190)
+          AI_SELECT_SKILL(DEBILITATE_0BE)
           goto _2156
         }
       _2156:
@@ -13382,7 +13382,7 @@ _2120:
       SET_MODEL_FLAG(3047)
     }
   _2162:
-    AI_SELECT_SKILL(261)
+    AI_SELECT_SKILL(SPITEFUL_FORCE_105)
     AI_SELECT_ACTION_TARGETS()
     CLEAR_MODEL_FLAG(3048)
     SET_MODEL_FLAG(3058)
@@ -13393,10 +13393,10 @@ _2120:
   _2166:
     if (TEST_MODEL_FLAG(3058) == 1) {
       if (AI_SCENE_FADE_COUNT() == 2) {
-        AI_SELECT_SKILL(190)
+        AI_SELECT_SKILL(DEBILITATE_0BE)
       } else {
       _2169:
-        AI_SELECT_SKILL(300)
+        AI_SELECT_SKILL(PAIN)
         goto _2168
       }
     _2168:
@@ -13406,26 +13406,26 @@ _2120:
     _2178:
       local_int[81] = RANDOM_ONE_TO(100)
       if (local_int[81] <= 30) {
-        AI_SELECT_SKILL(141)
+        AI_SELECT_SKILL(RAGNAROK)
       } else {
       _2173:
         if (local_int[81] <= 65) {
-          AI_SELECT_SKILL(300)
+          AI_SELECT_SKILL(PAIN)
         } else {
         _2174:
           if (local_int[81] <= 70) {
-            AI_SELECT_SKILL(48)
+            AI_SELECT_SKILL(MEGIDOLAON_030)
           } else {
           _2175:
             if (local_int[81] <= 95) {
-              AI_SELECT_SKILL(57)
+              AI_SELECT_SKILL(VANITY_039)
             } else {
             _2176:
               if (AI_ANY_PLAYER_LACKS_FLAG_1000() == 0) {
-                AI_SELECT_SKILL(59)
+                AI_SELECT_SKILL(MAREVERT)
               } else {
               _2171:
-                AI_SELECT_SKILL(97)
+                AI_SELECT_SKILL(SILENT_HOWL)
                 goto _2170
               }
             _2170:
@@ -13535,7 +13535,7 @@ _2187:
 _2193:
   if (TEST_MODEL_FLAG(3062) == 1) {
     CLEAR_MODEL_FLAG(3062)
-    AI_SELECT_SKILL(266)
+    AI_SELECT_SKILL(THIRD_EYE_10A)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -13553,7 +13553,7 @@ _2199:
   if (TEST_MODEL_FLAG(3046) == 1) {
     CLEAR_MODEL_FLAG(3046)
     SET_MODEL_FLAG(3047)
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -13562,12 +13562,12 @@ _2199:
     CLEAR_MODEL_FLAG(3047)
     SET_MODEL_FLAG(3048)
     if (AI_ANY_PLAYER_ACTION_MODE_ZERO(11) == 1) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2202:
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _2201
@@ -13578,7 +13578,7 @@ _2199:
     if (TEST_MODEL_FLAG(3048) == 1) {
       CLEAR_MODEL_FLAG(3048)
       SET_MODEL_FLAG(3049)
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -13586,7 +13586,7 @@ _2199:
       if (TEST_MODEL_FLAG(3049) == 1) {
         CLEAR_MODEL_FLAG(3049)
         SET_MODEL_FLAG(3050)
-        AI_SELECT_SKILL(193)
+        AI_SELECT_SKILL(MIND_CHARGE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -13594,7 +13594,7 @@ _2199:
         if (TEST_MODEL_FLAG(3050) == 1) {
           CLEAR_MODEL_FLAG(3050)
           SET_MODEL_FLAG(3051)
-          AI_SELECT_SKILL(266)
+          AI_SELECT_SKILL(THIRD_EYE_10A)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -13602,7 +13602,7 @@ _2199:
           if (TEST_MODEL_FLAG(3051) == 1) {
             CLEAR_MODEL_FLAG(3051)
             CLEAR_MODEL_FLAG(3045)
-            AI_SELECT_SKILL(141)
+            AI_SELECT_SKILL(RAGNAROK)
             AI_SELECT_ACTION_TARGETS()
             return
           }
@@ -13612,31 +13612,31 @@ _2199:
   }
 _2203:
   if (AI_ANY_PLAYER_HAS_ACTION(7) == 1 && AI_ACTOR_HISTORY_COUNTER() == 0) {
-    AI_SELECT_SKILL(266)
+    AI_SELECT_SKILL(THIRD_EYE_10A)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2210:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1) goto _2216
   if (local_int[83] < 25) {
-    AI_SELECT_SKILL(52)
+    AI_SELECT_SKILL(LAST_WORD)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2213:
     if (local_int[83] < 50) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2214:
       if (local_int[83] < 75) {
-        AI_SELECT_SKILL(266)
+        AI_SELECT_SKILL(THIRD_EYE_10A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2215:
-        AI_SELECT_SKILL(141)
+        AI_SELECT_SKILL(RAGNAROK)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _2212
@@ -13647,13 +13647,13 @@ _2212:
   goto _2216
 _2216:
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(12) == 1 && local_int[84] < 25) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2219:
     if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(11) == 1 && local_int[84] < 25) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -13661,32 +13661,32 @@ _2216:
 _2218:
   if_not (TEST_MODEL_FLAG(3071) == 1) goto _2250
   if (local_int[82] < 10) {
-    AI_SELECT_SKILL(137)
+    AI_SELECT_SKILL(GATE_OF_HELL)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2227:
     if (local_int[82] < 10 + 10) {
-      AI_SELECT_SKILL(141)
+      AI_SELECT_SKILL(RAGNAROK)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2228:
       if (local_int[82] < 10 + 10 + 20) {
-        AI_SELECT_SKILL(136)
+        AI_SELECT_SKILL(GENOCIDE_088)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2229:
         if_not (local_int[82] < 10 + 10 + 20 + 15) goto _2230
         if (AI_UNIT_ACTION_MODE_ZERO(10) == 1) {
-          AI_SELECT_SKILL(141)
+          AI_SELECT_SKILL(RAGNAROK)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2222:
           if (AI_UNIT_ACTION_MODE_ZERO(10) == 0) {
-            AI_SELECT_SKILL(192)
+            AI_SELECT_SKILL(POWER_CHARGE)
             AI_SELECT_TARGET_PASSING_QUERY(0)
             return
           }
@@ -13696,12 +13696,12 @@ _2218:
       _2230:
         if_not (local_int[82] < 10 + 10 + 20 + 15 + 15) goto _2231
         if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) {
-          AI_SELECT_SKILL(190)
+          AI_SELECT_SKILL(DEBILITATE_0BE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2225:
-          AI_SELECT_SKILL(48)
+          AI_SELECT_SKILL(MEGIDOLAON_030)
           AI_SELECT_ACTION_TARGETS()
           return
           goto _2224
@@ -13709,7 +13709,7 @@ _2218:
       _2224:
         goto _2226
       _2231:
-        AI_SELECT_SKILL(57)
+        AI_SELECT_SKILL(VANITY_039)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _2226
@@ -13721,43 +13721,43 @@ _2226:
 _2250:
   if_not (TEST_MODEL_FLAG(3070) == 1 && TEST_MODEL_FLAG(3071) == 0) goto _2251
   if (local_int[82] < 15) {
-    AI_SELECT_SKILL(137)
+    AI_SELECT_SKILL(GATE_OF_HELL)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2235:
     if (local_int[82] < 15 + 15) {
-      AI_SELECT_SKILL(140)
+      AI_SELECT_SKILL(REVELATION)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2236:
       if (local_int[82] < 15 + 15 + 15) {
-        AI_SELECT_SKILL(136)
+        AI_SELECT_SKILL(GENOCIDE_088)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2237:
         if (local_int[82] < 15 + 15 + 15 + 10) {
-          AI_SELECT_SKILL(141)
+          AI_SELECT_SKILL(RAGNAROK)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2238:
           if (local_int[82] < 15 + 15 + 15 + 10 + 10) {
-            AI_SELECT_SKILL(68)
+            AI_SELECT_SKILL(MAMUDOON_044)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2239:
             if_not (local_int[82] < 15 + 15 + 15 + 10 + 10 + 20) goto _2240
             if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) {
-              AI_SELECT_SKILL(190)
+              AI_SELECT_SKILL(DEBILITATE_0BE)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2233:
-              AI_SELECT_SKILL(48)
+              AI_SELECT_SKILL(MEGIDOLAON_030)
               AI_SELECT_ACTION_TARGETS()
               return
               goto _2232
@@ -13765,7 +13765,7 @@ _2250:
           _2232:
             goto _2234
           _2240:
-            AI_SELECT_SKILL(57)
+            AI_SELECT_SKILL(VANITY_039)
             AI_SELECT_ACTION_TARGETS()
             return
             goto _2234
@@ -13779,32 +13779,32 @@ _2234:
 _2251:
   if_not (TEST_MODEL_FLAG(3070) == 0 && TEST_MODEL_FLAG(3071) == 0) goto _2249
   if (local_int[82] < 20) {
-    AI_SELECT_SKILL(137)
+    AI_SELECT_SKILL(GATE_OF_HELL)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2245:
     if (local_int[82] < 20 + 20) {
-      AI_SELECT_SKILL(140)
+      AI_SELECT_SKILL(REVELATION)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2246:
       if (local_int[82] < 20 + 20 + 20) {
-        AI_SELECT_SKILL(136)
+        AI_SELECT_SKILL(GENOCIDE_088)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2247:
         if_not (local_int[82] < 20 + 20 + 20 + 20) goto _2248
         if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) {
-          AI_SELECT_SKILL(190)
+          AI_SELECT_SKILL(DEBILITATE_0BE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2242:
           if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 1) {
-            AI_SELECT_SKILL(47)
+            AI_SELECT_SKILL(MEGIDOLA_02F)
             AI_SELECT_ACTION_TARGETS()
             return
           }
@@ -13812,7 +13812,7 @@ _2251:
       _2241:
         goto _2244
       _2248:
-        AI_SELECT_SKILL(68)
+        AI_SELECT_SKILL(MAMUDOON_044)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _2244
@@ -13840,7 +13840,7 @@ AI_VISUNU:
     }
   _2253:
     AI_SET_ACTOR_UNIT_PARAMETER(297)
-    AI_SELECT_SKILL(267)
+    AI_SELECT_SKILL(CHATURBHUJA_10B)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -13883,13 +13883,13 @@ _2283:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   AI_BEGIN_SCENE_TRANSITION()
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(9) == 1) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2260:
     if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(8) == 1) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -13927,13 +13927,13 @@ _2279:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   AI_BEGIN_SCENE_TRANSITION()
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(1) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(3) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(5) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(7) == 1 || AI_ANY_ENEMY_PASSES_ACTION_CHECK(9) == 1) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2268:
     if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(0) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(2) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(4) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(6) == 1 || AI_ANY_PLAYER_PASSES_ACTION_CHECK(8) == 1) {
-      AI_SELECT_SKILL(185)
+      AI_SELECT_SKILL(DEKAJA_0B9)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -13984,7 +13984,7 @@ _2278:
 _2284:
   if (TEST_MODEL_FLAG(3043) == 1) {
     CLEAR_MODEL_FLAG(3043)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -13992,13 +13992,13 @@ _2282:
   if_not (TEST_MODEL_FLAG(3040) == 1) goto _2353
   local_int[91] = RANDOM_ONE_TO(100)
   if (local_int[91] <= 40 && (AI_ANY_PLAYER_ACTION_MODE_ZERO(2) || AI_ANY_PLAYER_ACTION_MODE_ZERO(4) || AI_ANY_PLAYER_ACTION_MODE_ZERO(6) || AI_ANY_PLAYER_ACTION_MODE_ZERO(8))) {
-    AI_SELECT_SKILL(185)
+    AI_SELECT_SKILL(DEKAJA_0B9)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2287:
     if (local_int[91] <= 40 && (AI_ANY_ENEMY_ACTION_MODE_ZERO(1) || AI_ANY_ENEMY_ACTION_MODE_ZERO(3) || AI_ANY_ENEMY_ACTION_MODE_ZERO(9))) {
-      AI_SELECT_SKILL(180)
+      AI_SELECT_SKILL(DEKUNDA_0B4)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -14007,37 +14007,37 @@ _2286:
   local_int[92] = RANDOM_ONE_TO(100)
   if_not (local_int[92] <= 50) goto _2304
   if (AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0) {
-    AI_SELECT_SKILL(184)
+    AI_SELECT_SKILL(MAKAKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2290:
     if (AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-      AI_SELECT_SKILL(178)
+      AI_SELECT_SKILL(RAKUNDA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2291:
       if (AI_ANY_ENEMY_ACTION_MODE_ZERO(4) == 0) {
-        AI_SELECT_SKILL(182)
+        AI_SELECT_SKILL(SUKUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2292:
         if (AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-          AI_SELECT_SKILL(177)
+          AI_SELECT_SKILL(SUKUNDA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2293:
           if (AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 0) {
-            AI_SELECT_SKILL(179)
+            AI_SELECT_SKILL(MAKANDA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2294:
             if (AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0) {
-              AI_SELECT_SKILL(181)
+              AI_SELECT_SKILL(TARUKAJA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -14056,37 +14056,37 @@ _2289:
   goto _2303
 _2304:
   if (AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-    AI_SELECT_SKILL(178)
+    AI_SELECT_SKILL(RAKUNDA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2297:
     if (AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0) {
-      AI_SELECT_SKILL(184)
+      AI_SELECT_SKILL(MAKAKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2298:
       if (AI_ANY_ENEMY_ACTION_MODE_ZERO(4) == 0) {
-        AI_SELECT_SKILL(182)
+        AI_SELECT_SKILL(SUKUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2299:
         if (AI_ANY_PLAYER_ACTION_MODE_ZERO(5) == 0) {
-          AI_SELECT_SKILL(177)
+          AI_SELECT_SKILL(SUKUNDA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2300:
           if (AI_ANY_PLAYER_ACTION_MODE_ZERO(3) == 0) {
-            AI_SELECT_SKILL(179)
+            AI_SELECT_SKILL(MAKANDA)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2301:
             if (AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0) {
-              AI_SELECT_SKILL(181)
+              AI_SELECT_SKILL(TARUKAJA)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -14270,35 +14270,35 @@ _2329:
 _2335:
   if (TEST_MODEL_FLAG(3056) == 1) {
     AI_SET_ACTOR_UNIT_PARAMETER(370)
-    AI_SELECT_SKILL(15)
+    AI_SELECT_SKILL(MABUFUDYNE_00F)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2345:
     if (TEST_MODEL_FLAG(3057) == 1) {
       AI_SET_ACTOR_UNIT_PARAMETER(369)
-      AI_SELECT_SKILL(6)
+      AI_SELECT_SKILL(MARAGIDYNE_006)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2346:
       if (TEST_MODEL_FLAG(3058) == 1) {
         AI_SET_ACTOR_UNIT_PARAMETER(373)
-        AI_SELECT_SKILL(42)
+        AI_SELECT_SKILL(MATERADYNE_02A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2347:
         if (TEST_MODEL_FLAG(3059) == 1) {
           AI_SET_ACTOR_UNIT_PARAMETER(371)
-          AI_SELECT_SKILL(24)
+          AI_SELECT_SKILL(MAZIODYNE_018)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2348:
           if (TEST_MODEL_FLAG(3060) == 1) {
             AI_SET_ACTOR_UNIT_PARAMETER(372)
-            AI_SELECT_SKILL(33)
+            AI_SELECT_SKILL(MAZANDYNE_021)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -14306,19 +14306,19 @@ _2335:
             AI_SET_ACTOR_UNIT_PARAMETER(368)
             local_int[86] = RANDOM_ONE_TO(100)
             if (local_int[86] <= 30) {
-              AI_SELECT_SKILL(140)
+              AI_SELECT_SKILL(REVELATION)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2341:
               if (local_int[86] <= 60) {
-                AI_SELECT_SKILL(130)
+                AI_SELECT_SKILL(MUTE_BLOW)
                 AI_SELECT_TARGET_PASSING_QUERY(0)
                 return
               } else {
               _2342:
                 if (local_int[86] <= 80) {
-                  AI_SELECT_SKILL(145)
+                  AI_SELECT_SKILL(GODSLAYER)
                   AI_SELECT_TARGET_PASSING_QUERY(0)
                   return
                 } else {
@@ -14344,12 +14344,12 @@ _2354:
   if (TEST_MODEL_FLAG(3055) == 0) {
     SET_MODEL_FLAG(3055)
     AI_SET_ACTOR_UNIT_PARAMETER(297)
-    AI_SELECT_SKILL(267)
+    AI_SELECT_SKILL(CHATURBHUJA_10B)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2351:
-    AI_SELECT_SKILL(57)
+    AI_SELECT_SKILL(VANITY_039)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _2350
@@ -14358,7 +14358,7 @@ _2350:
   goto _2352
 _2355:
   AI_SET_ACTOR_UNIT_PARAMETER(297)
-  AI_SELECT_SKILL(57)
+  AI_SELECT_SKILL(VANITY_039)
   AI_SELECT_ACTION_TARGETS()
   return
   goto _2352
@@ -14468,7 +14468,7 @@ _2378:
 _2380:
   if (TEST_MODEL_FLAG(3071) == 0) {
     SET_MODEL_FLAG(3071)
-    AI_SELECT_SKILL(265)
+    AI_SELECT_SKILL(FUTILITY)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -14477,13 +14477,13 @@ _2382:
   CLEAR_MODEL_FLAG(3046)
   if (TEST_MODEL_FLAG(3069) == 1 && AI_ANY_PLAYER_ACTION_MODE_ZERO(11) == 1) {
     CLEAR_MODEL_FLAG(3069)
-    AI_SELECT_SKILL(185)
+    AI_SELECT_SKILL(DEKAJA_0B9)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2385:
     SET_MODEL_FLAG(3052)
-    AI_SELECT_SKILL(262)
+    AI_SELECT_SKILL(GOD_S_BREATH)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _2384
@@ -14492,34 +14492,34 @@ _2384:
   goto _2386
 _2386:
   if (AI_UNIT_HP_AT_OR_BELOW_RATE(5) == 1) {
-    AI_SELECT_SKILL(162)
+    AI_SELECT_SKILL(DIARAHAN)
     AI_APPEND_SELF_TO_TARGETS()
     return
   }
 _2388:
   if (TEST_MODEL_FLAG(3045) == 1 && TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3042) == 0) {
     CLEAR_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(263)
+    AI_SELECT_SKILL(TEMPTATION)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2390:
   if (TEST_MODEL_FLAG(3045) == 1 && TEST_MODEL_FLAG(3041) == 1 && TEST_MODEL_FLAG(3042) == 1) {
     CLEAR_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(263)
+    AI_SELECT_SKILL(TEMPTATION)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2392:
   if (AI_ANY_PLAYER_PASSES_QUERY(2) == 1 && AI_ANY_PLAYER_PASSES_QUERY(3) == 1 && AI_ANY_PLAYER_PASSES_QUERY(5) == 1 && AI_ANY_PLAYER_PASSES_QUERY(6) == 1 && AI_ANY_PLAYER_PASSES_QUERY(4) == 1) {
     AI_SET_SPECIAL_EFFECT_ACTOR_BYTE(2)
-    AI_SELECT_SKILL(264)
+    AI_SELECT_SKILL(RETRIBUTION)
     AI_SELECT_ACTION_TARGETS()
     return
   }
 _2394:
   if (AI_UNIT_ACTION_MODE_ZERO(12) == 1 && local_int[94] < 25) {
-    AI_SELECT_SKILL(180)
+    AI_SELECT_SKILL(DEKUNDA_0B4)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -14527,13 +14527,13 @@ _2396:
   if_not (AI_ACTOR_HISTORY_COUNTER() > 4) goto _2414
   if_not (local_int[95] < 25) goto _2411
   if (AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
-    AI_SELECT_SKILL(181)
+    AI_SELECT_SKILL(TARUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2399:
     if (AI_UNIT_ACTION_MODE_ZERO(0) == 1) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -14543,13 +14543,13 @@ _2398:
 _2411:
   if_not (local_int[95] < 50) goto _2412
   if (AI_UNIT_ACTION_MODE_ZERO(2) == 0) {
-    AI_SELECT_SKILL(184)
+    AI_SELECT_SKILL(MAKAKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2402:
     if (AI_UNIT_ACTION_MODE_ZERO(2) == 1) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -14559,13 +14559,13 @@ _2401:
 _2412:
   if_not (local_int[95] < 75) goto _2413
   if (AI_UNIT_ACTION_MODE_ZERO(4) == 0) {
-    AI_SELECT_SKILL(182)
+    AI_SELECT_SKILL(SUKUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2405:
     if (AI_UNIT_ACTION_MODE_ZERO(4) == 1) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -14574,13 +14574,13 @@ _2404:
   goto _2410
 _2413:
   if (AI_UNIT_ACTION_MODE_ZERO(6) == 0) {
-    AI_SELECT_SKILL(183)
+    AI_SELECT_SKILL(RAKUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2408:
     if (AI_UNIT_ACTION_MODE_ZERO(6) == 1) {
-      AI_SELECT_SKILL(48)
+      AI_SELECT_SKILL(MEGIDOLAON_030)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -14593,50 +14593,50 @@ _2414:
   if_not (TEST_MODEL_FLAG(3042) == 1) goto _2471
   if (AI_ACTOR_HISTORY_COUNTER() == 0) {
     AI_SET_SPECIAL_EFFECT_ACTOR_BYTE(2)
-    AI_SELECT_SKILL(264)
+    AI_SELECT_SKILL(RETRIBUTION)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2426:
     if (local_int[93] < 10) {
-      AI_SELECT_SKILL(6)
+      AI_SELECT_SKILL(MARAGIDYNE_006)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2427:
       if (local_int[93] < 10 + 10) {
-        AI_SELECT_SKILL(15)
+        AI_SELECT_SKILL(MABUFUDYNE_00F)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2428:
         if (local_int[93] < 10 + 10 + 10) {
-          AI_SELECT_SKILL(24)
+          AI_SELECT_SKILL(MAZIODYNE_018)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2429:
           if (local_int[93] < 10 + 10 + 10 + 10) {
-            AI_SELECT_SKILL(33)
+            AI_SELECT_SKILL(MAZANDYNE_021)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2430:
             if (local_int[93] < 10 + 10 + 10 + 10 + 10) {
-              AI_SELECT_SKILL(42)
+              AI_SELECT_SKILL(MATERADYNE_02A)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2431:
               if_not (local_int[93] < 10 + 10 + 10 + 10 + 10 + 5) goto _2432
               if (TEST_MODEL_FLAG(3043) == 0) {
-                AI_SELECT_SKILL(57)
+                AI_SELECT_SKILL(VANITY_039)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _2417:
                 if (TEST_MODEL_FLAG(3043) == 1) {
-                  AI_SELECT_SKILL(68)
+                  AI_SELECT_SKILL(MAMUDOON_044)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 }
@@ -14645,13 +14645,13 @@ _2414:
               goto _2425
             _2432:
               if (local_int[93] < 10 + 10 + 10 + 10 + 10 + 5 + 10) {
-                AI_SELECT_SKILL(68)
+                AI_SELECT_SKILL(MAMUDOON_044)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _2433:
                 if (local_int[93] < 10 + 10 + 10 + 10 + 10 + 5 + 10 + 5) {
-                  AI_SELECT_SKILL(63)
+                  AI_SELECT_SKILL(MAHAMAON_03F)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
@@ -14659,13 +14659,13 @@ _2414:
                   if_not (local_int[93] < 10 + 10 + 10 + 10 + 10 + 5 + 10 + 10) goto _2435
                   if_not (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) goto _2423
                   if (TEST_MODEL_FLAG(3044) == 0) {
-                    AI_SELECT_SKILL(190)
+                    AI_SELECT_SKILL(DEBILITATE_0BE)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   } else {
                   _2420:
                     if (TEST_MODEL_FLAG(3044) == 1) {
-                      AI_SELECT_SKILL(48)
+                      AI_SELECT_SKILL(MEGIDOLAON_030)
                       AI_SELECT_ACTION_TARGETS()
                       return
                     }
@@ -14674,14 +14674,14 @@ _2414:
                   goto _2422
                 _2423:
                   if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 1) {
-                    AI_SELECT_SKILL(48)
+                    AI_SELECT_SKILL(MEGIDOLAON_030)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   }
                 _2422:
                   goto _2425
                 _2435:
-                  AI_SELECT_SKILL(48)
+                  AI_SELECT_SKILL(MEGIDOLAON_030)
                   AI_SELECT_ACTION_TARGETS()
                   return
                   goto _2425
@@ -14698,56 +14698,56 @@ _2425:
 _2471:
   if_not (TEST_MODEL_FLAG(3041) == 1) goto _2472
   if (local_int[93] < 12) {
-    AI_SELECT_SKILL(8)
+    AI_SELECT_SKILL(EXPLODE_008)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2446:
     if (local_int[93] < 12 + 12) {
-      AI_SELECT_SKILL(17)
+      AI_SELECT_SKILL(COLD_WAVE_011)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2447:
       if (local_int[93] < 12 + 12 + 12) {
-        AI_SELECT_SKILL(26)
+        AI_SELECT_SKILL(JUPITER_S_FURY_01A)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2448:
         if (local_int[93] < 12 + 12 + 12 + 12) {
-          AI_SELECT_SKILL(35)
+          AI_SELECT_SKILL(TEMPEST_023)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2449:
           if (local_int[93] < 12 + 12 + 12 + 12 + 12) {
-            AI_SELECT_SKILL(44)
+            AI_SELECT_SKILL(HEAVY_ROCK_02C)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2450:
             if (local_int[93] < 12 + 12 + 12 + 12 + 12 + 5) {
-              AI_SELECT_SKILL(63)
+              AI_SELECT_SKILL(MAHAMAON_03F)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2451:
               if (local_int[93] < 12 + 12 + 12 + 12 + 12 + 5 + 5) {
-                AI_SELECT_SKILL(68)
+                AI_SELECT_SKILL(MAMUDOON_044)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
               _2452:
                 if_not (local_int[93] < 12 + 12 + 12 + 12 + 12 + 5 + 5 + 10) goto _2453
                 if (TEST_MODEL_FLAG(3043) == 0) {
-                  AI_SELECT_SKILL(57)
+                  AI_SELECT_SKILL(VANITY_039)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _2437:
                   if (TEST_MODEL_FLAG(3043) == 1) {
-                    AI_SELECT_SKILL(68)
+                    AI_SELECT_SKILL(MAMUDOON_044)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   }
@@ -14758,13 +14758,13 @@ _2471:
                 if_not (local_int[93] < 12 + 12 + 12 + 12 + 12 + 5 + 5 + 10 + 10) goto _2454
                 if_not (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) goto _2443
                 if (TEST_MODEL_FLAG(3044) == 0) {
-                  AI_SELECT_SKILL(190)
+                  AI_SELECT_SKILL(DEBILITATE_0BE)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _2440:
                   if (TEST_MODEL_FLAG(3044) == 1) {
-                    AI_SELECT_SKILL(48)
+                    AI_SELECT_SKILL(MEGIDOLAON_030)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   }
@@ -14773,14 +14773,14 @@ _2471:
                 goto _2442
               _2443:
                 if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 1) {
-                  AI_SELECT_SKILL(48)
+                  AI_SELECT_SKILL(MEGIDOLAON_030)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 }
               _2442:
                 goto _2445
               _2454:
-                AI_SELECT_SKILL(48)
+                AI_SELECT_SKILL(MEGIDOLAON_030)
                 AI_SELECT_ACTION_TARGETS()
                 return
                 goto _2445
@@ -14795,43 +14795,43 @@ _2445:
   goto _2470
 _2472:
   if (local_int[93] < 12) {
-    AI_SELECT_SKILL(3)
+    AI_SELECT_SKILL(AGIDYNE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2462:
     if (local_int[93] < 12 + 12) {
-      AI_SELECT_SKILL(12)
+      AI_SELECT_SKILL(BUFUDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2463:
       if (local_int[93] < 12 + 12 + 12) {
-        AI_SELECT_SKILL(21)
+        AI_SELECT_SKILL(ZIODYNE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2464:
         if (local_int[93] < 12 + 12 + 12 + 12) {
-          AI_SELECT_SKILL(30)
+          AI_SELECT_SKILL(ZANDYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2465:
           if (local_int[93] < 12 + 12 + 12 + 12 + 12) {
-            AI_SELECT_SKILL(39)
+            AI_SELECT_SKILL(TERADYNE)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2466:
             if (local_int[93] < 12 + 12 + 12 + 12 + 12 + 10) {
-              AI_SELECT_SKILL(63)
+              AI_SELECT_SKILL(MAHAMAON_03F)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
             _2467:
               if (local_int[93] < 12 + 12 + 12 + 12 + 12 + 10 + 10) {
-                AI_SELECT_SKILL(68)
+                AI_SELECT_SKILL(MAMUDOON_044)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
@@ -14839,13 +14839,13 @@ _2472:
                 if_not (local_int[93] < 12 + 12 + 12 + 12 + 12 + 10 + 10 + 10) goto _2469
                 if_not (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 0) goto _2459
                 if (TEST_MODEL_FLAG(3044) == 0) {
-                  AI_SELECT_SKILL(190)
+                  AI_SELECT_SKILL(DEBILITATE_0BE)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
                 _2456:
                   if (TEST_MODEL_FLAG(3044) == 1) {
-                    AI_SELECT_SKILL(48)
+                    AI_SELECT_SKILL(MEGIDOLAON_030)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   }
@@ -14854,14 +14854,14 @@ _2472:
                 goto _2458
               _2459:
                 if (AI_ANY_PLAYER_ACTION_MODE_ZERO(12) == 1) {
-                  AI_SELECT_SKILL(68)
+                  AI_SELECT_SKILL(MAMUDOON_044)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 }
               _2458:
                 goto _2461
               _2469:
-                AI_SELECT_SKILL(57)
+                AI_SELECT_SKILL(VANITY_039)
                 AI_SELECT_ACTION_TARGETS()
                 return
                 goto _2461
@@ -14896,7 +14896,7 @@ _2473:
 AI_KARMA:
   PROC AI_KARMA
   if (AI_TURN_COUNT() < 1) {
-    AI_SELECT_SKILL(105)
+    AI_SELECT_SKILL(RIFLE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -14907,7 +14907,7 @@ AI_KARMA:
     MESSAGE_REQUEST_AND_POLL(message(MSG_KARMA001))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_DIRECT_ACTION(329)
+    AI_SELECT_DIRECT_ACTION(SKILL_149)
     AI_APPEND_SELF_TO_TARGETS()
     return
     goto _2475
@@ -15195,7 +15195,7 @@ _2482:
                   AI_BEGIN_SCENE_TRANSITION()
                 }
               _2522:
-                AI_SELECT_SKILL(54)
+                AI_SELECT_SKILL(OVERLOAD)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
@@ -15239,7 +15239,7 @@ _2537:
   if (TEST_MODEL_FLAG(3041) == 1) {
     CLEAR_MODEL_FLAG(3041)
     SET_MODEL_FLAG(3042)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -15248,7 +15248,7 @@ _2537:
       CLEAR_MODEL_FLAG(3042)
       SET_MODEL_FLAG(3043)
       if (AI_ANY_PLAYER_ACTION_MODE_ZERO(0) == 0 || AI_ANY_PLAYER_ACTION_MODE_ZERO(7) == 0) {
-        AI_SELECT_SKILL(189)
+        AI_SELECT_SKILL(TAUNT)
       } else {
       _2540:
         AI_SELECT_BASIC_ATTACK()
@@ -15263,7 +15263,7 @@ _2537:
         CLEAR_MODEL_FLAG(3043)
         SET_MODEL_FLAG(3044)
         if (AI_UNIT_PASSES_ACTION_TEN_CHECK() == 0) {
-          AI_SELECT_SKILL(192)
+          AI_SELECT_SKILL(POWER_CHARGE)
         } else {
         _2542:
           AI_SELECT_BASIC_ATTACK()
@@ -15276,7 +15276,7 @@ _2537:
       _2546:
         if (TEST_MODEL_FLAG(3044) == 1) {
           CLEAR_MODEL_FLAG(3044)
-          AI_SELECT_SKILL(120)
+          AI_SELECT_SKILL(DOUBLE_SLASH)
           AI_SELECT_ACTION_TARGETS()
           return
         }
@@ -15310,7 +15310,7 @@ AI_KARMA_1:
     call AI_KARMA_M
   } else {
   _2551:
-    AI_SELECT_SKILL(105)
+    AI_SELECT_SKILL(RIFLE)
     AI_SELECT_ACTION_TARGETS()
     return
     goto _2550
@@ -15526,13 +15526,13 @@ _2602:
   result = AI_HAS_OTHER_ENEMY_UNIT_MODE(local_int[103])
   if (AI_NO_PLAYER_BLOCKS_QUERY(3) == 0 && TEST_MODEL_FLAG(3064) == 0) {
     SET_MODEL_FLAG(3064)
-    AI_SELECT_SKILL(299)
+    AI_SELECT_SKILL(BREATH)
     AI_SELECT_TARGET_PASSING_QUERY(3)
     return
   } else {
   _2611:
     if (AI_SCENE_FADE_COUNT() == 1 && TEST_MODEL_FLAG(3046) == 1) {
-      AI_SELECT_SKILL(299)
+      AI_SELECT_SKILL(BREATH)
       AI_SELECT_TARGETS_BLOCKING_ELEMENT(3)
       return
     } else {
@@ -15557,7 +15557,7 @@ _2602:
       } else {
       _2607:
         SET_MODEL_FLAG(3048)
-        AI_SELECT_SKILL(56)
+        AI_SELECT_SKILL(PSYCHO_RAGE)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _2606
@@ -15567,39 +15567,39 @@ _2602:
     _2613:
       if (TEST_MODEL_FLAG(3049) == 1 && AI_SCENE_FADE_COUNT() == 1) {
         CLEAR_MODEL_FLAG(3049)
-        AI_SELECT_SKILL(84)
+        AI_SELECT_SKILL(TENTARAFOO_054)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2614:
         if (TEST_MODEL_FLAG(3054) == 1) {
           CLEAR_MODEL_FLAG(3054)
-          AI_SELECT_SKILL(180)
+          AI_SELECT_SKILL(DEKUNDA_0B4)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2615:
           if (TEST_MODEL_FLAG(3055) == 1) {
             CLEAR_MODEL_FLAG(3055)
-            AI_SELECT_SKILL(185)
+            AI_SELECT_SKILL(DEKAJA_0B9)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
           _2616:
             if (local_int[99] < local_int[100]) {
-              AI_SELECT_SKILL(39)
+              AI_SELECT_SKILL(TERADYNE)
               AI_SELECT_TARGET_PASSING_QUERY(6)
               return
             } else {
             _2617:
               if (local_int[99] < local_int[100] + local_int[101]) {
-                AI_SELECT_SKILL(30)
+                AI_SELECT_SKILL(ZANDYNE)
                 AI_SELECT_TARGET_PASSING_QUERY(5)
                 return
               } else {
               _2618:
                 if (local_int[99] < local_int[100] + local_int[101] + local_int[102]) {
-                  AI_SELECT_SKILL(21)
+                  AI_SELECT_SKILL(ZIODYNE)
                   AI_SELECT_TARGET_PASSING_QUERY(4)
                   return
                 } else {
@@ -15607,11 +15607,11 @@ _2602:
                   if (AI_NO_PLAYER_BLOCKS_QUERY(3) == 0 && TEST_MODEL_FLAG(3065) == 0) {
                     SET_MODEL_FLAG(3065)
                     SET_MODEL_FLAG(3066)
-                    AI_SELECT_SKILL(299)
+                    AI_SELECT_SKILL(BREATH)
                     AI_SELECT_TARGET_PASSING_QUERY(3)
                   } else {
                   _2609:
-                    AI_SELECT_SKILL(48)
+                    AI_SELECT_SKILL(MEGIDOLAON_030)
                     AI_SELECT_ACTION_TARGETS()
                     goto _2608
                   }
@@ -15663,7 +15663,7 @@ AI_GUURU_RING:
         AI_BEGIN_SCENE_TRANSITION()
       }
     _2622:
-      AI_SELECT_SKILL(49)
+      AI_SELECT_SKILL(HP_THIEF)
       AI_SELECT_ACTION_TARGETS()
       return
     }
@@ -15709,7 +15709,7 @@ _2629:
   if (TEST_MODEL_FLAG(3041) == 1) {
     CLEAR_MODEL_FLAG(3041)
     SET_MODEL_FLAG(3042)
-    AI_SELECT_SKILL(55)
+    AI_SELECT_SKILL(RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -15717,7 +15717,7 @@ _2629:
     if (TEST_MODEL_FLAG(3042) == 1) {
       CLEAR_MODEL_FLAG(3042)
       SET_MODEL_FLAG(3043)
-      AI_SELECT_SKILL(192)
+      AI_SELECT_SKILL(POWER_CHARGE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -15725,7 +15725,7 @@ _2629:
       if (TEST_MODEL_FLAG(3043) == 1) {
         CLEAR_MODEL_FLAG(3043)
         CLEAR_MODEL_FLAG(3040)
-        AI_SELECT_SKILL(134)
+        AI_SELECT_SKILL(VILE_BLADE_086)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
@@ -15840,35 +15840,35 @@ AI_ARIRAT:
   PROC AI_ARIRAT
   if (TEST_MODEL_FLAG(3040) == 0) {
     SET_MODEL_FLAG(3040)
-    AI_SELECT_SKILL(3)
+    AI_SELECT_SKILL(AGIDYNE)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2647:
     if (TEST_MODEL_FLAG(3041) == 0) {
       SET_MODEL_FLAG(3041)
-      AI_SELECT_SKILL(12)
+      AI_SELECT_SKILL(BUFUDYNE)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2648:
       if (TEST_MODEL_FLAG(3042) == 0) {
         SET_MODEL_FLAG(3042)
-        AI_SELECT_SKILL(30)
+        AI_SELECT_SKILL(ZANDYNE)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2649:
         if (TEST_MODEL_FLAG(3043) == 0) {
           SET_MODEL_FLAG(3043)
-          AI_SELECT_SKILL(21)
+          AI_SELECT_SKILL(ZIODYNE)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
         _2650:
           if (TEST_MODEL_FLAG(3044) == 0) {
             SET_MODEL_FLAG(3044)
-            AI_SELECT_SKILL(39)
+            AI_SELECT_SKILL(TERADYNE)
             AI_SELECT_ACTION_TARGETS()
             CLEAR_MODEL_FLAG(3040)
             CLEAR_MODEL_FLAG(3041)
@@ -15909,7 +15909,7 @@ AI_3_OKAM:
     MESSAGE_REQUEST_AND_POLL(message(MSG_UBERUR002))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_DIRECT_ACTION(261)
+    AI_SELECT_DIRECT_ACTION(SPITEFUL_FORCE_105)
     AI_APPEND_SELF_TO_TARGETS()
     return
   }
@@ -15921,7 +15921,7 @@ _2654:
 AI_3_ONNA:
   PROC AI_3_ONNA
   if (TEST_MODEL_FLAG(3060) == 1) {
-    AI_SELECT_DIRECT_ACTION(260)
+    AI_SELECT_DIRECT_ACTION(VIRAJ_BLADE)
     AI_APPEND_SELF_TO_TARGETS()
     return
   }
@@ -15939,13 +15939,13 @@ AI_3_OTOK:
     MESSAGE_REQUEST_AND_POLL(message(MSG_3_OTOKO001))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    AI_SELECT_DIRECT_ACTION(264)
+    AI_SELECT_DIRECT_ACTION(RETRIBUTION)
     AI_APPEND_SELF_TO_TARGETS()
     return
   } else {
   _2661:
     if (TEST_MODEL_FLAG(3060) == 1) {
-      AI_SELECT_DIRECT_ACTION(262)
+      AI_SELECT_DIRECT_ACTION(GOD_S_BREATH)
       AI_APPEND_SELF_TO_TARGETS()
       return
     }
@@ -16139,25 +16139,25 @@ _2681:
   }
 _2683:
   if (local_int[108] < 25) {
-    AI_SELECT_SKILL(181)
+    AI_SELECT_SKILL(TARUKAJA)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
   _2686:
     if (local_int[108] < 25 + 25) {
-      AI_SELECT_SKILL(184)
+      AI_SELECT_SKILL(MAKAKAJA)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
     _2687:
       if (local_int[108] < 25 + 25 + 25) {
-        AI_SELECT_SKILL(182)
+        AI_SELECT_SKILL(SUKUKAJA)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _2688:
         if (local_int[108] < 25 + 25 + 25 + 25) {
-          AI_SELECT_SKILL(183)
+          AI_SELECT_SKILL(RAKUKAJA)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
@@ -16185,7 +16185,7 @@ _2690:
 _2692:
   if (TEST_MODEL_FLAG(3041) == 1) {
     CLEAR_MODEL_FLAG(3041)
-    AI_SELECT_SKILL(56)
+    AI_SELECT_SKILL(PSYCHO_RAGE)
     AI_SELECT_ACTION_TARGETS()
     return
   }
