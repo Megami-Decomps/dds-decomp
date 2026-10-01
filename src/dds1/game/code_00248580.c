@@ -607,7 +607,38 @@ u8 *func_00249E20(s32 reduced, s32 slot) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249F08);
+extern s32 kwlnTaskGetUserValue();
+extern void mnuReleaseResourceHandles(u32 *work);
+extern void mnuDrainPanelTransitions(u8 *state, s32 arg);
+extern void dspCloseChannel(void);
+extern void evtReleaseResourcePairHandle(u32 *record);
+extern s32 mnuCheckResourceTask(void);
+extern void mnuStopResourceTask(void);
+extern void func_00126038(s32 a, s32 b);
+extern void fldProcessDeferredSceneCommand(void);
+extern void func_002D0918(s32 handle);
+extern u8 D_003BC3E0;
+
+/* Tear down the terminal menu task: release its resources and effect batches, then hand the saved mode/slot to the field scene. */
+void func_00249F08(s32 arg) {
+    MenuProgressWork *work = (MenuProgressWork *)kwlnTaskGetUserValue();
+
+    if (work != NULL) {
+        mnuReleaseWorkResources((u8 *)work);
+        mnuReleaseResourceHandles((u32 *)work);
+        mnuDestroyAllMenuSlotEffectBatches((s32)work);
+        mnuDrainPanelTransitions((u8 *)work + 8, arg);
+        dspCloseChannel();
+        evtReleaseResourcePairHandle((u32 *)work->messageResources);
+        func_002D0918(work->allocation);
+        D_003BC3E0 = 2;
+    }
+    if (mnuCheckResourceTask() != 0) {
+        mnuStopResourceTask();
+    }
+    func_00126038(work->mode, work->initState);
+    fldProcessDeferredSceneCommand();
+}
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E0);
 

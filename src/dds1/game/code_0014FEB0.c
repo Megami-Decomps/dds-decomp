@@ -1,6 +1,28 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FEB0);
+typedef struct EffectSource {
+    u32 type;
+    u32 field4;
+    u32 argument;
+} EffectSource;
+
+typedef struct EffectHandler {
+    u32 (*handler)(u32);
+    u8 pad04[0x2C];
+} EffectHandler;
+
+extern EffectHandler D_0034DE40[];
+extern void *func_002CFEB8(s32);
+
+void *func_0014FEB0(EffectSource *source) {
+    EffectSource *copy = (EffectSource *)func_002CFEB8(0x10);
+    u32 argument = source->argument;
+
+    copy->type = source->type;
+    copy->field4 = source->field4;
+    copy->argument = D_0034DE40[source->type].handler(argument);
+    return copy;
+}
 
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 
