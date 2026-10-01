@@ -94,7 +94,27 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A160);
+LmapNode *func_0030A160(LmapList *list) {
+    LmapNode *cur = list->cur;
+    LmapNode *head = list->first;
+    LmapNode *node;
+    s32 i;
+
+    if (cur == list->lo) {
+        return cur;
+    }
+    node = head;
+    for (i = 0; i < list->capacity; i++) {
+        if (node == NULL) {
+            return cur;
+        }
+        node = node->next;
+    }
+    head = head->prev;
+    list->first = head;
+    list->count++;
+    return cur;
+}
 
 LmapNode *fldLmapAdvanceCursor(LmapList *list) {
     LmapNode *cur = list->cur;
@@ -252,8 +272,8 @@ void func_0030AA68(const char *fmt, ...) {
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
 
-/* Counter kind -> timer preset. Values 4 and 5 have no arm of their own, so
- * they fall through to the default of 1. */
+/* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
+ * so they fall through to the default of 1. */
 s32 func_0030AAB0(s32 kind) {
     s32 preset = 1;
 
