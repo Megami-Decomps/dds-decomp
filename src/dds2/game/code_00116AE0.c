@@ -43,9 +43,20 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
     return (s32)object;
 }
 
-/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10; stays
-   asm: a $18/$19 saved-register priority swap no declaration order produces. */
-INCLUDE_ASM(const s32, "game/code_00116AE0", func_00116B58);
+/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10. The store
+   order is what fixes retail's saved-register order: sched1 sorts these independent
+   stores by luid, and the saved regs go by live length (store position - copy position). */
+s32 func_00116B58(s32 a, s32 b, s32 c, s32 d, s32 e) {
+    ScriptObj *object = (ScriptObj *)func_00110AA8(10);
+    ObjWork *work = (ObjWork *)object->work;
+
+    object->unk4 = a;
+    work->unkC = d;
+    work->unk4 = b;
+    work->unk8 = c;
+    object->unk8 = e;
+    return (s32)object;
+}
 
 /* Create the model from the loaded resource, or from the fallback. */
 s32 evtCreateModelFromObject(ObjWithWork *object) {
