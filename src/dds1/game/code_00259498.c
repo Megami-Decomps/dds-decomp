@@ -11,6 +11,10 @@ extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
 
+extern f32 sdfSinPoly(f32);
+
+extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_00259498", func_00259498);
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_00259890);
@@ -19,13 +23,57 @@ INCLUDE_ASM(const s32, "game/code_00259498", func_00259B40);
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025A680);
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025AA20);
+void func_0025AA20(s32 frame, s32 size, s32 param) {
+    f32 x = frame;
+    f32 scale = size;
+    f32 t;
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025AB38);
+    t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    func_0024E260(0, -10, 0, (s32)(scale * t), 0, param);
+    t = x < 35.0f ? x / 35.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    func_0024E260(0, 0, 0, (s32)(scale * t), 0, param);
+}
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025AC50);
+void func_0025AB38(s32 frame, s32 size, s32 param) {
+    f32 x = frame;
+    f32 scale = size;
+    f32 t;
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025AD68);
+    t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    func_0024E260(10, 0, 0, (s32)(scale * t), 1, param);
+    t = x < 35.0f ? x / 35.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    func_0024E260(0, 0, 0, (s32)(scale * t), 1, param);
+}
+
+void func_0025AC50(s32 frame, s32 size, s32 param) {
+    f32 x = frame;
+    f32 scale = size;
+    f32 t;
+
+    t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    func_0024E260(0, 10, 0, (s32)(scale * t), 2, param);
+    t = x < 35.0f ? x / 35.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    func_0024E260(0, 0, 0, (s32)(scale * t), 2, param);
+}
+
+void func_0025AD68(s32 frame, s32 size, s32 param) {
+    f32 x = frame;
+    f32 scale = size;
+    f32 t;
+
+    t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
+    func_0024E260(-10, 0, 0, (s32)(scale * t), 3, param);
+    t = x < 35.0f ? x / 35.0f : 0.0f;
+    t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
+    func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
+}
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025AE80);
 
