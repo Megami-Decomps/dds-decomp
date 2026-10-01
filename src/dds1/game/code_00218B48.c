@@ -16,7 +16,7 @@ typedef struct MdlViewState {
     s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
     u8 unk0E;
-    u8 unk0F;
+    s8 unk0F;
     s8 unk10;
     u8 pad11[3];
     s16 unk14;
@@ -306,6 +306,26 @@ void mdlInitializeViewerResourceTable(void) {
     D_00365858[5].entries = (MdlSlotEntry *)D_003BD884;
     D_00365858[5].count = 1;
 }
+
+typedef struct MdlFileEntry {
+    struct MdlFileEntry *next;
+    char name[0x2F];
+    u8 found[3];
+    char ext[3][2];
+} MdlFileEntry;
+
+extern u8 D_003B7991[];
+extern char D_003BBB78[];
+extern u8 D_003BD476;
+extern MdlFileEntry *D_003BD87C;
+extern char D_003ABA68[];
+extern s32 sceDopen();
+extern s32 func_00310320();
+extern void func_003101B8();
+extern void mdlReleaseViewerSlotResources();
+extern void mdlInitializeViewerResourceTable();
+extern void func_00218BE8();
+extern void *memcpy(void *dst, const void *src, u32 n);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
@@ -1326,6 +1346,24 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCD8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AE00);
 
+extern char D_003ABCC8[]; /* "%02d/%02d" */
+extern char D_003ABCD8[]; /* "%02x/%02x" */
+extern char D_003BBC28[]; /* "--/--" */
+extern char D_003BBC30[]; /* "%c" */
+extern char D_003BBC38[]; /* "-" */
+extern char D_003BBC40[]; /* "%03d" */
+extern char D_003BBC48[]; /* "%03x" */
+extern char D_003BBC50[]; /* ",%02d" */
+extern char D_003BBC58[]; /* "--" */
+extern char D_003BBC60[]; /* "%02d" */
+extern char D_003BBC68[]; /* "%02x" */
+extern void func_00218460(s32 a, s32 b, char *buf, s32 size);
+extern s32 mdlGetNodeField2C(s32 model, s32 index);
+extern s32 mdlGetNodeRefHalf();
+extern void sdfPktInit(void *packet, s32 source, s32 end, s32 argument, s32 index);
+extern void sdfPktSetCmd(void *packet, s32 index);
+extern s32 sdfFormatSifPacket();
+
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B0B0);
 
 u32 func_0021B4E8(void) {
@@ -2037,8 +2075,9 @@ void mdlViewerStepEditedNumericValue(s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ECF0);
-
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F098);
+
+
 
 void mdlResetViewerFlagsAndSolarOverlay(void) {
     mdlFlagClearAll();
