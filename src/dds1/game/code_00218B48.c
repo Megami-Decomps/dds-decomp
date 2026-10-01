@@ -2,6 +2,10 @@
 
 #include "pcp_vu0.h"
 
+/* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
+ * DDS2 game/code_00233660 share this layout field for field). Fields that are
+ * only written by a defaults initialiser and never read in either game are
+ * left as unkNN on purpose: there is no read to earn a role from. */
 typedef struct MdlViewState {
     s32 unk00;
     s32 viewerTask;
@@ -9,32 +13,34 @@ typedef struct MdlViewState {
     s8 unk09;
     s8 unk0A;
     s8 unk0B;
-    s8 unk0C;
-    s8 unk0D;
+    s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
+    s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
     u8 unk0E;
     u8 unk0F;
     s8 unk10;
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
-    s16 unk18;
-    s16 unk1A;
+    s16 fileIndex;        /* 0x18: first arg of func_00217680, the resource loader */
+    s16 fileSlot;         /* 0x1A: second arg of func_00217680 */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
+    s16 activeEntryId;    /* 0x22: assigned from selectedEntryId when adding */
+    s16 selectedEntryId;  /* 0x24: key passed to the mdlAddEntry* family. DDS2
+                           declares this u16; kept s16 here to match retail's
+                           sign-extension into mdlAddEntryFlaggedEx. */
+    s16 selectedNodeId;   /* 0x26: checked by mdlHasNode before adding */
     s16 unk28;
     s16 unk2A;
     s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
+    s16 entryHeight;      /* 0x2E: low bound offered to mdlAddEntry* */
+    s16 entryWidth;       /* 0x30: high bound, limited to entryHeight when drawing */
     u8 pad32[2];
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 nodeCursor; /* 0x3A: selection within the loaded node count */
+    s16 labelIndexA;      /* 0x34: indexes D_00367B10 */
+    s16 labelIndexB;      /* 0x36: indexes D_00367B18 */
+    s16 scrollPage;  /* 0x38: page stepped by mdlUpdateViewerCursorWithPageStep */
+    s16 nodeCursor;  /* 0x3A: selection within the loaded node count */
     s16 unk3C;
     s16 unk3E;
     s16 unk40;
@@ -47,7 +53,7 @@ typedef struct MdlViewState {
     s16 unk4E;
     s16 unk50;
     s16 unk52;
-    f32 unk54;
+    f32 viewerScale;      /* 0x54: viewer zoom, in hundredths */
     u8 pad58[0x34];
     s32 slotBeforeResources[1]; /* One element before resources[] for rightward rotation. */
     s32 resources[1];
@@ -1173,13 +1179,13 @@ extern MdlResource *func_00217680(s16, s16);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
-    MdlResource *resource = func_00217680(D_003D7A50.unk18, D_003D7A50.unk1A);
+    MdlResource *resource = func_00217680(D_003D7A50.fileIndex, D_003D7A50.fileSlot);
 
     /* Required to match: storing through a typed pointer preserves the load/store order. */
     *(MdlResource **)&D_003D7A50.resources[0] = resource;
-    D_003D7A50.unk22 = 0;
-    D_003D7A50.unk24 = 0;
-    D_003D7A50.unk26 = 0;
+    D_003D7A50.activeEntryId = 0;
+    D_003D7A50.selectedEntryId = 0;
+    D_003D7A50.selectedNodeId = 0;
     D_003D7A50.unk28 = 0;
     D_003D7A50.unk2A = 0;
     D_003D7A50.unk2C = 0;
@@ -1284,15 +1290,15 @@ void mdlAddViewEntryFlagged(void) {
     f32 high;
     f32 first;
 
-    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.unk26)) {
-        low = D_003D7A50.unk2E;
-        high = D_003D7A50.unk30;
+    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.selectedNodeId)) {
+        low = D_003D7A50.entryHeight;
+        high = D_003D7A50.entryWidth;
         first = high;
         if (low < high) {
             first = low;
         }
-        D_003D7A50.unk22 = D_003D7A50.unk24;
-        mdlAddEntryFlaggedEx(D_003D7A50.resources[0], D_003D7A50.unk26, D_003D7A50.unk24, first, low);
+        D_003D7A50.activeEntryId = D_003D7A50.selectedEntryId;
+        mdlAddEntryFlaggedEx(D_003D7A50.resources[0], D_003D7A50.selectedNodeId, D_003D7A50.selectedEntryId, first, low);
     }
 }
 
@@ -1301,15 +1307,15 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     f32 high;
     f32 first;
 
-    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.unk26)) {
-        low = D_003D7A50.unk2E;
-        high = D_003D7A50.unk30;
+    if (mdlHasNode(D_003D7A50.resources[0], D_003D7A50.selectedNodeId)) {
+        low = D_003D7A50.entryHeight;
+        high = D_003D7A50.entryWidth;
         first = high;
         if (low < high) {
             first = low;
         }
-        D_003D7A50.unk22 = D_003D7A50.unk24;
-        mdlAddEntryPlainEx(D_003D7A50.resources[0], D_003D7A50.unk26, D_003D7A50.unk24, first, low);
+        D_003D7A50.activeEntryId = D_003D7A50.selectedEntryId;
+        mdlAddEntryPlainEx(D_003D7A50.resources[0], D_003D7A50.selectedNodeId, D_003D7A50.selectedEntryId, first, low);
     }
 }
 
@@ -1335,7 +1341,7 @@ extern s32 sdfCreateFormattedSifCommand();
 
 void mdlDrawViewerIndexedLabelOverlay(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[D_003D7A50.unk34]));
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[D_003D7A50.labelIndexA]));
 }
 
 u32 func_0021B9D0(void) {
@@ -1350,7 +1356,7 @@ extern s32 D_00367B18[];
 
 void mdlDrawViewerSelectionLabel(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
-    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[D_003D7A50.unk36]));
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8A40, 0x7960, 0xFF0080, 0, D_00367B18[D_003D7A50.labelIndexB]));
 }
 
 s32 func_0021BE50(void) {
@@ -1363,7 +1369,7 @@ s32 func_0021BE50(void) {
 
 /* Change the viewer scale in hundredths, with larger steps at larger values. */
 void mdlAdjustViewerScale(void) {
-    s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
+    s32 value = (s32)(D_003D7A50.viewerScale * 100.0f + 0.5f);
 
     if (D_00324510[0x27] & 2) {
         if (value < 0x32) {
@@ -1376,7 +1382,7 @@ void mdlAdjustViewerScale(void) {
                 value = 0x7D0;
             }
         }
-        D_003D7A50.unk54 = value * 0.01f;
+        D_003D7A50.viewerScale = value * 0.01f;
     } else if (D_00324510[0x26] & 2) {
         if (value < 0x33) {
             value -= 1;
@@ -1388,17 +1394,17 @@ void mdlAdjustViewerScale(void) {
         } else {
             value -= 100;
         }
-        D_003D7A50.unk54 = value * 0.01f;
+        D_003D7A50.viewerScale = value * 0.01f;
     }
     if (D_00324510[0x23] < 0) {
-        D_003D7A50.unk0C ^= 1;
+        D_003D7A50.unitStepMode ^= 1;
     }
-    D_003D7A50.unk0D = 0;
-    if (D_003D7A50.unk0C != 0) {
+    D_003D7A50.unitStepSign = 0;
+    if (D_003D7A50.unitStepMode != 0) {
         if (D_00324510[0x25] != 0) {
-            D_003D7A50.unk0D = 1;
+            D_003D7A50.unitStepSign = 1;
         } else if (D_00324510[0x24] != 0) {
-            D_003D7A50.unk0D = -1;
+            D_003D7A50.unitStepSign = -1;
         }
     }
 }
@@ -1431,8 +1437,8 @@ void func_0021BFB0(void) {
     } else {
         sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
-    step = D_003D7A50.unk0C != 0 ? 2 : 0;
-    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, D_003D7A50.unk54));
+    step = D_003D7A50.unitStepMode != 0 ? 2 : 0;
+    sdfAppendPacket(D_003D7A50.resources[12], sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_003BBC80, D_003D7A50.viewerScale));
 }
 
 u32 mdlUpdateViewerScaleTask(void) {
@@ -1462,13 +1468,13 @@ void func_0021C310(void) {
     s32 item; /* resource handle, then its frame id */
     MdlMotionState *motion;
 
-    if (mdlUpdateViewerCursorWithPageStep(&D_003D7A50.unk38, 5, 1) != 0) {
+    if (mdlUpdateViewerCursorWithPageStep(&D_003D7A50.scrollPage, 5, 1) != 0) {
         return;
     }
     if (D_00398628[1] >= 0) {
         return;
     }
-    switch (D_003D7A50.unk38) {
+    switch (D_003D7A50.scrollPage) {
     case 0:
         if (D_003D7A50.resourceCount != 12) {
             D_003D7A50.resources[D_003D7A50.resourceCount] = 0;
@@ -1510,13 +1516,13 @@ void func_0021C310(void) {
         }
         break;
     }
-    D_003D7A50.unk1C = D_003D7A50.unk18 = func_002183D0(D_003D7A50.resources[0]);
-    D_003D7A50.unk1E = D_003D7A50.unk1A = func_002183E0(D_003D7A50.resources[0]);
+    D_003D7A50.unk1C = D_003D7A50.fileIndex = func_002183D0(D_003D7A50.resources[0]);
+    D_003D7A50.unk1E = D_003D7A50.fileSlot = func_002183E0(D_003D7A50.resources[0]);
     i = ((MdlResource *)D_003D7A50.resources[0])->unk12;
     if (i < 0) {
         i = 0;
     }
-    D_003D7A50.unk24 = D_003D7A50.unk22 = i;
+    D_003D7A50.selectedEntryId = D_003D7A50.activeEntryId = i;
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C518);
@@ -1667,7 +1673,7 @@ u32 func_0021CE70(void) {
 s32 mdlCountActiveRecords(void) {
     MdlViewerResource *resource = (MdlViewerResource *)D_003D7A50.resources[0];
     s32 first = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
-    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_003D7A50.unk22));
+    s32 second = mdlCountRecords((s32)mdlFindViewerRecord(resource, D_003D7A50.activeEntryId));
 
     return first + second;
 }

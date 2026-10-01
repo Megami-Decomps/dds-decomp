@@ -106,18 +106,19 @@ typedef struct EffArrHdr {
 typedef struct BillObj {
     f32 unk0;
     f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
+    f32 unk08;
+    f32 unk0C;
+    f32 childScaleX;  /* 0x10: set by billSetChildScaleComponents */
+    f32 childScaleY;  /* 0x14 */
     f32 unk18;
     f32 unk1C;
-    f32 unk20;
-    u32 unk24;
-    void (*unk28)();
-    u16 unk2C;          /* Kind: child (0) or entry list (1). */
+    f32 lengthScale;  /* 0x20: set by billSetLengthExtent */
+    u32 childParam;   /* 0x24: set by billSetChildParameter */
+    void (*callback)(); /* 0x28: called by billInvokeCallback; set from the
+                          per-index table by billCreateIndexed */
+    u16 kind;         /* 0x2C: Kind: child (0) or entry list (1). */
     u16 unk2E;
-    void *unk30;
+    void *entryList;  /* 0x30 */
     u8 pad34[8];
     u16 unk3C;
     u8 pad3E[10];
@@ -156,7 +157,7 @@ typedef struct EffectConfig {
 /* Per-resource effect buffer entry (0x40); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferRecord {
     u8 pad00[0x20];
-    s32 unk20;
+    s32 unk20;       /* 0x20: per-record tag, decays by decayStep */
     s32 unk24;
     u8 pad28[0x18];
 } EffectBufferRecord;

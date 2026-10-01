@@ -4,13 +4,13 @@
 
 typedef struct FldColorParams {
     s32 enabled;
-    s32 unk4;
+    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
     s32 mode;
     s32 red;
     s32 green;
     s32 blue;
-    s32 unk18;
-    s32 unk1C;
+    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
+    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
 } FldColorParams;
 typedef struct FldCameraSetting {
     s32 unk0;
@@ -410,7 +410,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     if (color->enabled != 0) {
         fldCameraColorParameters->colorB = fldCameraColorParameters->colorA =
             (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-        fldCameraColorParameters->unk24 = color->unk18;
+        fldCameraColorParameters->unk24 = color->vectorY;
         switch (color->mode) {
         case 0:
             fldCameraColorParameters->unk28 = 1;
@@ -422,8 +422,8 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
             fldCameraColorParameters->unk28 = 3;
             break;
         }
-        fldCameraColorParameters->unk38 = color->unk4;
-        fldCameraColorParameters->unk3C = color->unk1C;
+        fldCameraColorParameters->unk38 = color->slotIndex;
+        fldCameraColorParameters->unk3C = color->vectorZ;
         itfCopyColorFields(fldCameraColorEffect, fldCameraColorParameters);
     }
     *fldAppliedCameraSettings = *setting;

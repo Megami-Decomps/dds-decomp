@@ -2562,14 +2562,14 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00133960);
 typedef struct {
     u8 type;
     u8 pad1[3];
-    s32 unk4;
+    s32 blendWeight; /* 0x04: exported to the display state as slot 14 */
     s32 fadeValue;
     s32 swayMode;
     u8 pad10[0xC];
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
+    s32 baseVectorX; /* 0x1C: first component of the vector handed to */
+    s32 baseVectorY; /* 0x20: evtSetDrawVectorTarget, alongside baseVectorZ/W */
+    s32 baseVectorZ; /* 0x24 */
+    s32 baseVectorW; /* 0x28 */
     s32 fixedVectorX;
     s32 fixedVectorY;
     s32 fixedVectorZ;
@@ -2612,7 +2612,7 @@ void fldApplyLightSetCurrent(void) {
 
     area = light->type;
     D_0032E570[13] = area;
-    D_0032E570[14] = light->unk4;
+    D_0032E570[14] = light->blendWeight;
     value = light->fadeValue;
     D_0032E570[15] = value;
     D_0032E570[16] = light->swayMode;
@@ -2623,7 +2623,7 @@ void fldApplyLightSetCurrent(void) {
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->baseVectorX, light->baseVectorZ, light->baseVectorY, light->baseVectorW);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
@@ -2671,7 +2671,7 @@ void fldApplyLightSetIndex(s32 index) {
     D_003BAD98 = index;
     area = light->type;
     D_0032E570[13] = area;
-    D_0032E570[14] = light->unk4;
+    D_0032E570[14] = light->blendWeight;
     value = light->fadeValue;
     D_0032E570[15] = value;
     D_0032E570[16] = light->swayMode;
@@ -2682,7 +2682,7 @@ void fldApplyLightSetIndex(s32 index) {
     vec[2] = light->fixedVectorZ * 0.00390625f;
     vec[3] = 0;
     func_001082D8(0, vec);
-    evtSetDrawVectorTarget(0, light->unk1C, light->unk24, light->unk20, light->unk28);
+    evtSetDrawVectorTarget(0, light->baseVectorX, light->baseVectorZ, light->baseVectorY, light->baseVectorW);
     dir[0] = light->lightDirectionAX;
     dir[1] = light->lightDirectionAY;
     dir[2] = light->lightDirectionAZ;
@@ -2722,13 +2722,13 @@ void fldApplyLightSetIndex(s32 index) {
 
 typedef struct FldColorParams {
     s32 enabled;
-    s32 unk4;
+    s32 slotIndex;  /* 0x04: stored to the effect work at +0x38 */
     s32 mode;
     s32 red;
     s32 green;
     s32 blue;
-    s32 unk18;
-    s32 unk1C;
+    s32 vectorY;    /* 0x18: copied to the effect work at +0x24 */
+    s32 vectorZ;    /* 0x1C: copied to the effect work at +0x3C */
 } FldColorParams;
 typedef struct FldCameraSetting {
     s32 unk0;
@@ -2764,7 +2764,7 @@ void fldActivateCameraColorSetting(s32 enable) {
         color = &setting->color;
         if (color->enabled != 0) {
             fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-            fldCameraColorParameters->unk24 = color->unk18;
+            fldCameraColorParameters->unk24 = color->vectorY;
             switch (color->mode) {
             case 0:
                 fldCameraColorParameters->unk28 = 1;
@@ -2776,8 +2776,8 @@ void fldActivateCameraColorSetting(s32 enable) {
                 fldCameraColorParameters->unk28 = 3;
                 break;
             }
-            fldCameraColorParameters->unk38 = color->unk4;
-            fldCameraColorParameters->unk3C = color->unk1C;
+            fldCameraColorParameters->unk38 = color->slotIndex;
+            fldCameraColorParameters->unk3C = color->vectorZ;
             fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
             setting = fldCameraSettings;
         }
@@ -2854,7 +2854,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 
     if (color->enabled != 0) {
         fldCameraColorParameters->colorB = fldCameraColorParameters->colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
-        fldCameraColorParameters->unk24 = color->unk18;
+        fldCameraColorParameters->unk24 = color->vectorY;
         switch (color->mode) {
         case 0:
             fldCameraColorParameters->unk28 = 1;
@@ -2866,8 +2866,8 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
             fldCameraColorParameters->unk28 = 3;
             break;
         }
-        fldCameraColorParameters->unk38 = color->unk4;
-        fldCameraColorParameters->unk3C = color->unk1C;
+        fldCameraColorParameters->unk38 = color->slotIndex;
+        fldCameraColorParameters->unk3C = color->vectorZ;
         itfCopyColorFields(fldCameraColorEffect, fldCameraColorParameters);
     }
     *fldAppliedCameraSettings = *setting;
