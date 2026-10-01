@@ -177,14 +177,12 @@ void func_00151C58(void *arg) {
     BillEntryBlock *block = arg;
     s32 i;
 
-    block->refCount = block->refCount - 1;
+    block->refCount--;
     if (block->refCount == 0) {
         i = 0;
-        if (block->entryCount > 0) {
-            do {
-                func_00150260(block->entries[i]);
-                i++;
-            } while (i < block->entryCount);
+        while (i < block->entryCount) {
+            func_00150260(block->entries[i]);
+            i++;
         }
         func_002D0918(block->allocation);
     }

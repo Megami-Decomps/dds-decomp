@@ -258,18 +258,16 @@ extern void effObjNodeDestroy(void *node);
 void func_00110B50(WorldListNode *node) {
     WorldList *list;
 
-    if (node != NULL) {
-        if ((u32)(node->kind - 2) < 0x10) {
-            list = &node->owner->data->lists[node->kind];
-            if (list->head == node) {
-                list->head = node->next;
-            }
-            if (list->tail == node) {
-                list->tail = node->prev;
-            }
-            effObjNodeDestroy(node);
-            list->count--;
+    if (node != NULL && (u32)(node->kind - 2) < 0x10) {
+        list = &node->owner->data->lists[node->kind];
+        if (list->head == node) {
+            list->head = node->next;
         }
+        if (list->tail == node) {
+            list->tail = node->prev;
+        }
+        effObjNodeDestroy(node);
+        list->count--;
     }
 }
 
