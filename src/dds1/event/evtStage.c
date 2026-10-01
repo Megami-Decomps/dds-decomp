@@ -17,6 +17,10 @@ s32 dds3GetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
 extern f32 evtScaleValueByMultiplier(s32, f32);
+extern char D_003AC038[];
+extern void *func_00101218(s32, s32);
+extern void func_003003F0(char *, void *);
+extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern void func_00110928(s32);
 
 /* Owner whose +0x18 head is a chain of records; each record's +0x40 entry
@@ -32,6 +36,23 @@ typedef struct StageOwner {
     u8 pad00[0x18];
     StageRecord *first; /* 0x18 */
 } StageOwner;
+
+extern void *dds3AppendWorldNode(s32, s32);
+extern void dds3SetWorldSecondaryObject(void *);
+extern void dds3SetWorldObject(void *);
+extern void dds3SetWorldObjectValue(void *, s32, s32);
+extern void fldFormatAreaDirectory(char *, s32, s32);
+extern void dds3AttachResourceHandleToWorldObject(void *, char *);
+extern void mdlSpawnViewerWorldObject(void *);
+extern void func_00106488(void *, s32, f32);
+extern void dds3DrawSetIndexedWord(void *, s32);
+extern void kwlnDrawCopyWords20(void *);
+extern void kwlnDrawCopyRow128(void *);
+extern char D_003AC008[];
+extern char D_00367DF0[];
+extern char D_00367EB0[];
+extern char D_00367ED0[];
+extern void func_003014F0(char *, char *, s32, s32, s32);
 
 void evtDestroySecondaryWorldNode(void)
 {
