@@ -230,7 +230,7 @@ void effApplyModelPrimaryVector(s32 owner, void *vec) {
 }
 
 void effApplyModelVecB(s32 owner, void *vec) {
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (vec));
+    VU0_LOAD_VF(vf10, vec);
     mdlUpdateContextRotationBasisFromQuaternion((void *)((EffModelOwner *)owner)->model);
 }
 
@@ -244,7 +244,7 @@ void effApplyScaledModelTertiaryVector(s32 model, float scale) {
 
     t = *(float *)model * scale;
     v[0] = v[1] = v[2] = t;
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (v));
+    VU0_LOAD_VF(vf10, v);
     mdlStoreTertiaryVectorVU((void *)((EffModelOwner *)model)->model);
 }
 

@@ -55,19 +55,7 @@ void sdfRotateVuMatrixAboutX(f32 angle)
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $3, %0\n"
-        "mfc1 $2, %1\n"
-        "qmtc2.ni $3, $vf3\n"
-        "qmtc2.ni $2, $vf2\n"
-        "vmove.xyzw $vf4, $vf29\n"
-        "vmulax.xyzw ACC, $vf29, $vf3x\n"
-        "vmaddx.xyzw $vf29, $vf30, $vf2x\n"
-        "vmulax.xyzw ACC, $vf30, $vf3x\n"
-        "vmsubx.xyzw $vf30, $vf4, $vf2x\n"
-        ".set reorder\n"
-        : : "f"(c), "f"(s) : "$2", "$3");
+    VU0_ROTATE_BASIS_X(c, s);
 }
 
 /* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
@@ -76,19 +64,7 @@ void sdfRotateVuMatrixAboutY(f32 angle)
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $3, %0\n"
-        "mfc1 $2, %1\n"
-        "qmtc2.ni $3, $vf3\n"
-        "qmtc2.ni $2, $vf2\n"
-        "vmove.xyzw $vf4, $vf28\n"
-        "vmulax.xyzw ACC, $vf28, $vf3x\n"
-        "vmsubx.xyzw $vf28, $vf30, $vf2x\n"
-        "vmulax.xyzw ACC, $vf4, $vf2x\n"
-        "vmaddx.xyzw $vf30, $vf30, $vf3x\n"
-        ".set reorder\n"
-        : : "f"(c), "f"(s) : "$2", "$3");
+    VU0_ROTATE_BASIS_Y(c, s);
 }
 
 /* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
@@ -97,19 +73,7 @@ void sdfRotateVuMatrixAboutZ(f32 angle)
     f32 c = func_002F9F60(angle);
     f32 s = func_002FA060(angle);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $3, %0\n"
-        "mfc1 $2, %1\n"
-        "qmtc2.ni $3, $vf3\n"
-        "qmtc2.ni $2, $vf2\n"
-        "vmove.xyzw $vf4, $vf28\n"
-        "vmulax.xyzw ACC, $vf28, $vf3x\n"
-        "vmaddx.xyzw $vf28, $vf29, $vf2x\n"
-        "vmulax.xyzw ACC, $vf29, $vf3x\n"
-        "vmsubx.xyzw $vf29, $vf4, $vf2x\n"
-        ".set reorder\n"
-        : : "f"(c), "f"(s) : "$2", "$3");
+    VU0_ROTATE_BASIS_Z(c, s);
 }
 
 extern void func_002DD608(f32 angle);

@@ -207,11 +207,11 @@ void effParamDispatchFloat(f32 value) {
 }
 
 void effParamInitWork(EffInitWork *work) {
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0180));
+    VU0_LOAD_VF(vf10, &D_003B0180);
     mdlStorePrimaryVectorVU(work);
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B0190));
+    VU0_LOAD_VF(vf10, &D_003B0190);
     mdlUpdateContextRotationBasisFromQuaternion(work);
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_003B01A0));
+    VU0_LOAD_VF(vf10, &D_003B01A0);
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
     if (work->param != NULL) {

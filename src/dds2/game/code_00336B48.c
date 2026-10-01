@@ -262,17 +262,9 @@ void sdfVuTransformVector(void *dst, void *src) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 f32 sdfVuDot3(void *left, void *right) {
     f32 dot;
-    __asm__ volatile (
-        ".set noreorder           \n"
-        "lqc2 vf10, 0x0(%1)       \n"
-        "lqc2 vf11, 0x0(%2)       \n"
-        "vmul.xyz vf2, vf10, vf11 \n"
-        "vaddy.x vf2, vf2, vf2y   \n"
-        "vaddz.x vf2, vf2, vf2z   \n"
-        "qmfc2.ni $2, vf2        \n"
-        "mtc1 $2, %0 \n"
-        ".set reorder"
-        : "=f"(dot) : "r"(left), "r"(right) : "memory");
+    VU0_LOAD_VF(vf10, left);
+    VU0_LOAD_VF(vf11, right);
+    VU0_DOT_XYZ(dot, vf10, vf11);
     return dot;
 }
 

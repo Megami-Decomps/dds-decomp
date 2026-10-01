@@ -16,22 +16,7 @@ extern f32 D_00398380[4];
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
 void effMiscQuatMultiplyVU(void)
 {
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmul.xyzw vf2, vf10, vf11    \n"
-        "vopmula.xyz ACC, vf10, vf11  \n"
-        "vmaddaw.xyz ACC, vf11, vf10  \n"
-        "vmaddaw.xyz ACC, vf10, vf11  \n"
-        "vopmsub.xyz vf10, vf11, vf10 \n"
-        "vmulaw.w ACC, vf10, vf11     \n"
-        "vmsubax.w ACC, vf0, vf2      \n"
-        "vmsubay.w ACC, vf0, vf2      \n"
-        "vmsubz.w vf10, vf0, vf2      \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_QUAT_MUL_VF10_VF11();
 }
 
 /* VU-register calling convention: vf10 is the quaternion input and result. */
@@ -151,7 +136,34 @@ INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E7F20);
 
 INCLUDE_ASM(const s32, "game/code_002E7C20", func_002E8038);
 
-INCLUDE_ASM(const s32, "game/code_002E7C20", effMiscSlerpQuaternionVu);
+extern f32 sdfAcosTable(f32 dot);
+
+void effMiscSlerpQuaternionVu(f32 amount) {
+    f32 dot;
+    f32 w0;
+    f32 w1;
+    f32 sinTheta;
+    f32 theta;
+
+    VU0_DOT_XYZW(dot, vf10, vf11);
+    if (dot < 0.0f) {
+        dot = -dot;
+        VU0_NEGATE_VF(vf12, vf11);
+    } else {
+        VU0_MOVE_VF(vf12, vf11);
+    }
+    w0 = 1.0f - amount;
+    w1 = amount;
+    if (dot < 0.99899996f) {
+        theta = sdfAcosTable(dot);
+        sinTheta = sdfSinPoly(theta);
+        w0 = sdfSinPoly(w0 * theta) / sinTheta;
+        w1 = sdfSinPoly(w1 * theta) / sinTheta;
+    }
+    VU0_SET_SCALARS_VF2_VF3(w0, w1);
+    VU0_WEIGHTED_SUM_VF2X_VF3X(vf10, vf10, vf12);
+    effMiscNormalizeVU();
+}
 
 /* vu0 routine: normalized lerp of quaternions vf10 and vf11 by amount (shorter arc), result in vf10 */
 void effMiscQuaternionNlerpVU(f32 amount)
