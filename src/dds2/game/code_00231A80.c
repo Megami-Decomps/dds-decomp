@@ -42,7 +42,9 @@ typedef struct MdlInner {
     u32 resourceHandle; /* 0x8: released by mdlReleaseInnerResourceHandle */
     u8 unkC[8];  /* 0xC */
     struct MdlNode *list; /* 0x14: intrusive node list */
-    u8 unk18[4]; /* 0x18 */
+    u8 unk18;    /* 0x18 */
+    u8 flags19;  /* 0x19: bit 0x10 enables anchor dispatch */
+    u8 unk1A[2]; /* 0x1A */
     u32 broadcastValue; /* 0x1C: last value passed to mdlBroadcastValue/Masked */
     u128 vector20; /* 0x20: matrix row 0 (vf28) */
     u128 vector30; /* 0x30: matrix row 1 (vf29) */
@@ -54,7 +56,8 @@ typedef struct MdlInner {
 
 /* Context shared by the matched mdlManager helpers. */
 typedef struct MdlCtx {
-    u8 unk0[0xC];      /* 0x0 */
+    u32 flags;         /* 0x0: 1 = skip update, 2 = skip anchors, 4 = needs inner flag 0x10 */
+    u8 unk4[8];        /* 0x4 */
     MdlSub *sub;       /* 0xC */
     union {
         u32 word;      /* 0x10: low byte read by mdlIsInnerSentinel */
@@ -250,7 +253,49 @@ void mdlDestroyContext(MdlCtx *ctx) {
     sdfReleaseChipBlock(ctx);
 }
 
-INCLUDE_ASM(const s32, "game/code_00231A80", func_00232390);
+extern void func_00231FD8();
+extern void func_00334510();
+extern void sdfModelUpdateCurrentFrameTransforms();
+extern void func_003320E8();
+extern void mdlDispatchViewerAnchorRecord();
+
+/* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
+void func_00232390(MdlCtx *ctx, s32 arg) {
+    MdlNode **slot = ctx->slots;
+    MdlInner *inner;
+    u32 *rec;
+    s32 i;
+
+    for (i = 0; i != 4; i++) {
+        if (*slot != NULL) {
+            if ((*slot)->unk30 != 0) {
+                func_00334510(*slot);
+            }
+        }
+        slot++;
+    }
+    if (ctx->flags & 1) {
+        return;
+    }
+    inner = ctx->inner;
+    sdfModelUpdateCurrentFrameTransforms(inner);
+    func_003320E8(arg, inner);
+    if (ctx->flags & 2) {
+        return;
+    }
+    if (ctx->flags & 4) {
+        if ((inner->flags19 & 0x10) == 0) {
+            return;
+        }
+    }
+    for (rec = ctx->list14; rec != NULL; rec = (u32 *)*rec) {
+        mdlDispatchViewerAnchorRecord(ctx, rec);
+    }
+    if (ctx->devList == NULL) {
+        return;
+    }
+    func_00231FD8(ctx, arg);
+}
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_002324C0);
 
