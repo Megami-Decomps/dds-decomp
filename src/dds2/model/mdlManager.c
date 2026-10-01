@@ -78,7 +78,7 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by func_00218410 */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by func_00217EB0 */
-    f32 unk20;            /* 0x20: float slot of func_00217F18/F40 */
+    f32 floatValue;       /* 0x20: float slot of mdlGet/SetNodeFloat20 */
     u8 pad24[4];          /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by func_00216B78 */

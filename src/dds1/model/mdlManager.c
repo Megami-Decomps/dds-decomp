@@ -114,7 +114,7 @@ typedef struct MdlNode {
     void *unk8;           /* 0x8: dereferenced by mdlGetNodeRefHalf */
     u8 padC[0x10];        /* 0xC */
     f32 unk1C;            /* 0x1C: read as int by mdlGetNodeInt1C */
-    f32 value;             /* 0x20: float slot of mdlGetNodeFloat20/F40 */
+    f32 floatValue;       /* 0x20: accessed as a float by mdlGet/SetNodeFloat20 */
     u8 pad24[4];           /* 0x24 */
     s16 searchId;          /* 0x28: identifies a node in list lookups */
     s16 slotIndex;         /* 0x2A: slot index used by mdlClearSlotAndRelease */
@@ -658,7 +658,7 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 id) {
     f32 r = 0.0f;
 
     if (node != NULL) {
-        r = node->value;
+        r = node->floatValue;
     }
     return r;
 }
@@ -667,7 +667,7 @@ void mdlSetNodeFloat20(MdlCtx *ctx, s32 id, f32 value) {
     MdlNode *node = mdlFindNodeById(ctx, id);
 
     if (node != NULL) {
-        node->value = value;
+        node->floatValue = value;
     }
 }
 

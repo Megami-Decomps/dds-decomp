@@ -544,23 +544,23 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-void func_0015A3F0(EffInstance *instance, s32 *result) {
+void func_0015A3F0(EffInstance *instance, s32 *values) {
     BillObj *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
-        u32 flags = *(u32 *)((u8 *)billboard + 0x54);
+        u32 modeFlags = *(u32 *)((u8 *)billboard + 0x54);
 
-        if (flags & 0x40) {
-            result[0] = 2;
-            result[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            result[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
-        } else if (flags & 0x80) {
-            result[0] = 3;
-            result[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
-            result[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+        if (modeFlags & 0x40) {
+            values[0] = 2;
+            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
+        } else if (modeFlags & 0x80) {
+            values[0] = 3;
+            values[2] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60 + 0x14);
         } else {
-            result[0] = 0;
-            result[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
+            values[0] = 0;
+            values[1] = func_00158F88((s32)billboard, (s32)billboard->unk60);
         }
     }
 }
