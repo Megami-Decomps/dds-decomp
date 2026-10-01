@@ -10,7 +10,7 @@ extern void func_00118AB0();
 extern char D_00435DB0[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
-extern void func_00329910(u32 allocation);
+extern void sdfDecrementAllocationReferenceCount(u32 allocation);
 extern s32 func_003297C8(u32 allocation);
 extern struct ActionObj *func_00110AA8();
 
@@ -22,7 +22,7 @@ extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *
 
 s32 sdfBumpTickCounters(void);
 
-void func_00117A10(void);
+void evtResetWorldAndProfileRuntime(void);
 
 typedef struct SdfChannel {
     u8 pad00[0xA4];
@@ -163,7 +163,7 @@ void sdfCreateRuntimeTask(void) {
     ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_00435DB0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
     D_00435DD0 = (s32)state;
-    func_00117A10();
+    evtResetWorldAndProfileRuntime();
 }
 
 void sdfDestroyRuntimeTask(void) {
@@ -172,7 +172,7 @@ void sdfDestroyRuntimeTask(void) {
     kwlnTaskDestroyWithHierarchyByName(D_00435DB0, 0);
     func_00117A80();
     allocation = ((SdfRuntime *)D_00435DD0)->allocation;
-    func_00329910(allocation);
+    sdfDecrementAllocationReferenceCount(allocation);
     func_003297C8(allocation);
     D_00435DD0 = 0;
 }
@@ -186,7 +186,7 @@ s32 sdfBumpTickCounters(void) {
     return 0;
 }
 
-void func_00117A10(void) {
+void evtResetWorldAndProfileRuntime(void) {
     scrClearProcessGlobals();
     mdlResetViewerFlagsAndSolarOverlay();
     ((SdfRuntime *)D_00435DD0)->updateMode = 8;

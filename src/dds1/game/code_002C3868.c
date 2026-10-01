@@ -89,7 +89,7 @@ typedef struct EffObjHeader {
     EffObjVtbl *vtbl;           /* 0x10 */
 } EffObjHeader;
 
-extern void func_002C45C8(SdfCounterRuntime *);
+extern void sdfCounterDestroyRuntime(SdfCounterRuntime *);
 
 extern void evtSubmitGsRegister47(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -163,7 +163,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C42F0);
 
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C44D0);
 
-void func_002C45C8(SdfCounterRuntime *rt) {
+void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
     SdfCounterChannel *channel;
 
     if (rt != NULL) {
@@ -178,7 +178,7 @@ void func_002C45C8(SdfCounterRuntime *rt) {
 }
 
 void func_002C4630(void) {
-    func_002C45C8(D_003BD274);
+    sdfCounterDestroyRuntime(D_003BD274);
 }
 
 void func_002C4650(void) {
@@ -313,7 +313,7 @@ INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5C70);
 void func_002C5D30(void) {
 }
 
-void func_002C5D38(s32 arg0, s32 x, f32 fade) {
+void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     SdfCounterTimer *timer;
     s32 offset;
     f32 grow;

@@ -37,7 +37,7 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
 }
 
 
-void func_002CF5C0(void *data) {
+void sdfReleaseChipOrRetainedResource(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
             func_002D00B8(data);

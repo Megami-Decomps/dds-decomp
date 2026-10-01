@@ -107,7 +107,7 @@ extern u8 D_00381ED0[];
 
 extern void func_0032DB30(const void *, void *, s32);
 
-extern void func_0032CF98(void *, void *);
+extern void sdfAppendDmaTagToList(void *, void *);
 
 typedef struct GridAngleTable {
     s32 divisor;  /* 0x00 */
@@ -126,7 +126,7 @@ typedef struct GridAngleOwner {
     GridAngleSlot *slot; /* 0x10 */
 } GridAngleOwner;
 
-void func_00306F80(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
+void itfDrawGridWithResolvedSlot(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 context) {
     u32 record = effGetSlotWorkOrOverride(e, f);
     func_00306BF0(a, b, c, d, e, f, record, context);
 }
@@ -150,7 +150,7 @@ s32 itfGridLookupValueOrDefault(s32 object, s32 key) {
 extern void func_00304B18();
 
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
-void func_003071D0(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
+void itfSetGridEntryQuantizedAndRefresh(GridEntryStorage *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     GridQuantizedEntry *entry = (GridQuantizedEntry *)(object->entries + index * 0x80);
     s32 record = effGetSlotWorkOrOverride(object, index);
 
@@ -278,7 +278,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_003078A8);
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00307A68);
 
 /* Convert the owner's fixed-point angle to degrees and return its angular step. */
-s32 func_00307BA8(s32 unused, u8 *out, GridAngleOwner *owner) {
+s32 itfUpdateAngleAndGetCycleStep(s32 unused, u8 *out, GridAngleOwner *owner) {
     GridAngleTable *table = owner->slot->table;
     s32 repetitions = 3;
 
@@ -316,7 +316,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     RenderCallbackEntry *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = normalized;
     if (!alternate) {
         descriptor[1] = 0x4A;
@@ -334,14 +334,14 @@ void func_00308288(u8 value, u32 kind) {
     itfGridDrawBooleanDescriptor(value, 0, kind);
 }
 
-void func_003082A8(s32 data, s32 alternate, s32 kind) {
+void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x47;
@@ -359,17 +359,17 @@ void func_00308380(data, kind)
     u32 data;
     u32 kind;
 {
-    func_003082A8(data, 0, kind);
+    itfSubmitToggledGridWord(data, 0, kind);
 }
 
-void func_003083A0(s32 data, s32 alternate, s32 kind) {
+void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
         descriptor[1] = 0x42;
@@ -384,17 +384,17 @@ void func_003083A0(s32 data, s32 alternate, s32 kind) {
 }
 
 void func_00308478(u32 data, u32 kind) {
-    func_003083A0(data, 0, kind);
+    sdfSubmitGsAlphaRegisterPacket(data, 0, kind);
 }
 
-void func_00308498(s32 data, s32 kind) {
+void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
     context = sdfAllocPacketAligned(0x20);
@@ -404,14 +404,14 @@ void func_00308498(s32 data, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308550(s32 data, s32 kind) {
+void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     s32 packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     s32 context;
     RenderCallbackEntry *entry;
 
     sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
-    descriptor = (u64 *)func_0033A2D0(packet);
+    descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
     context = sdfAllocPacketAligned(0x20);
@@ -421,27 +421,27 @@ void func_00308550(s32 data, s32 kind) {
     entry->draw(entry, context);
 }
 
-void func_00308608(QuadU32 *q, u32 value) {
+void uiFillQuadColorWords(QuadU32 *q, u32 value) {
     q->x = value;
     q->y = value;
     q->z = value;
     q->w = value;
 }
 
-void func_00308620(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
+void uiDrawUniformRgbRange(u32 a, u32 b, u32 c, u32 value, u32 e, u32 f, u32 g, u32 h) {
     u32 rgb[3] = {value, value, value};
     func_00308650(a, b, c, rgb, e, f, g, h);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308650);
 
-void func_003087D8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
+void uiDrawUniformRgbaRange(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 g, u32 h) {
     u32 rgba[4] = {value, value, value, value};
     func_00308828(a, b, c, d, e, rgba, g, h);
 }
 
 void func_00308808(u32 a, u32 b, u32 c, u32 d, u32 e, u32 value, u32 h) {
-    func_003087D8(a, b, c, d, e, value, 0, h);
+    uiDrawUniformRgbaRange(a, b, c, d, e, value, 0, h);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308828);
@@ -452,13 +452,13 @@ void func_003089B8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 colors, u32 h) {
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
 void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 context) {
-    func_00308AC8(x, y, z, x + width, y, z, color, context);
-    func_00308AC8(x, y, z, x, y + height, z, color, context);
-    func_00308AC8(x + width, y, z, x + width, y + height, z, color, context);
-    func_00308AC8(x, y + height, z, x + width + 0x10, y + height, z, color, context);
+    uiDrawUniformColorLine(x, y, z, x + width, y, z, color, context);
+    uiDrawUniformColorLine(x, y, z, x, y + height, z, color, context);
+    uiDrawUniformColorLine(x + width, y, z, x + width, y + height, z, color, context);
+    uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-void func_00308AC8(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value, u32 context) {
+void uiDrawUniformColorLine(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 value, u32 context) {
     u32 range[2] = {value, value};
     func_00308AF0(a, b, c, d, e, f, range, context);
 }
@@ -467,13 +467,13 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308AF0);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
 
-void func_00308DB0(s32 surfaceIndex) {
+void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     void *list = sdfAllocPacketAligned(0x20);
     void *texture;
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
-    func_0032CF98(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
@@ -490,18 +490,18 @@ void func_00308E60(surfaceIndex)
     sdfInitPacketList((s32)list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
-    func_0032CF98(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         u8 *surface = (u8 *)D_0037FB48 + (surfaceIndex << 5);
         (*(void (**)(u8 *, void *))(surface + 0x10))(surface, list);
     }
 }
 
-void func_00308F10(u32 context) {
+void uiDrawTexturedSurfaceAtFarDepth(u32 context) {
     func_00308380(0x30000, context);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
     func_00308380(0x3000DL, context);
-    func_00308DB0(context);
+    uiDrawActiveSurfaceRegion(context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308F78);
@@ -510,7 +510,7 @@ void func_00308FE8(u32 context) {
     func_00308380(0x30000, context);
     func_00308808(0, 0, 0xFFFFFF, 0x2000, 0xE00, 0, context);
     func_00308380(0x3001BL, context);
-    func_00308DB0(context);
+    uiDrawActiveSurfaceRegion(context);
 }
 
 void func_00309050(s32 context) {
@@ -519,7 +519,7 @@ void func_00309050(s32 context) {
     func_00308478(0x44, context);
 }
 
-void func_00309090(u32 context) {
+void uiDrawSurfaceAtNearDepth(u32 context) {
     func_00308380(0x30000, context);
     func_00308478(0x44, context);
     func_00308808(0, 0, 0, 0x2000, 0xe00, 0, context);
@@ -569,7 +569,7 @@ u32 func_003091F8(void) {
     return 0;
 }
 
-s32 func_00309200(s32 widget) {
+s32 itfActivateGridTextWidget(s32 widget) {
     if (widget == 0) {
         return 0;
     }
@@ -678,7 +678,7 @@ void itfExpandWidgetColumnWidth(s32 columns, GridTextWidget *work) {
     }
 }
 
-u32 func_003094C8(GridListOwner *owner) {
+u32 itfGetGridListLinkFlags(GridListOwner *owner) {
     GridListNode *node = owner->list;
     u32 flags;
     s32 i;
@@ -702,7 +702,7 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00309538);
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00309638);
 
-void func_003097D0(GridTextWidget *widget, u8 *node, const char *text) {
+void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, u8 *node, const char *text) {
     s32 length;
     s32 allocation;
     char *copy;
@@ -756,7 +756,7 @@ typedef struct GridScrollKey {
     u16 key;
 } GridScrollKey;
 
-void func_00309A90(u32 owner, u32 steps) {
+void itfAdvanceSelectedGridScroll(u32 owner, u32 steps) {
     s32 widgetAddr;
 
     widgetAddr = (s32)owner;
@@ -788,7 +788,7 @@ void itfReverseGridScrollPosition(u32 owner, u32 key, s32 steps) {
     }
 }
 
-void func_00309B48(u32 owner, u32 steps) {
+void itfReverseSelectedGridScroll(u32 owner, u32 steps) {
     s32 widgetAddr;
 
     widgetAddr = (s32)owner;
@@ -799,7 +799,7 @@ void func_00309B48(u32 owner, u32 steps) {
     }
 }
 
-s32 func_00309B90(u8 *widget, u32 target) {
+s32 itfGetGridChildLayoutMode(u8 *widget, u32 target) {
     u32 flags = ((GridTextWidget *)widget)->flags;
 
     if (flags & 2) {

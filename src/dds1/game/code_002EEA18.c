@@ -14,7 +14,7 @@ extern void sdfPacEnqueuePacket(SdfAllocWork *);
 extern void *func_002CFEB8(s32 size);
 extern void func_002EEA18();
 
-void func_002EEAA0(SdfAllocWork *work) {
+void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
     sdfPacEnqueuePacket(work);
     work->buffer = func_002CFEB8(0x30);
     work->handler = func_002EEA18;
@@ -83,7 +83,7 @@ extern s32 GetThreadId(void);
 extern void SleepThread(void);
 extern s32 D_003BDAC4;
 
-void func_002EF788(void) {
+void sdfStartAndSuspendWorkerThread(void) {
     s32 stack = func_002CF4E0(func_002EF698, 0x1000, 0x4C);
 
     _StartThread(stack, 0);

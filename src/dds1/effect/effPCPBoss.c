@@ -128,7 +128,7 @@ typedef struct {
 extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern u32 sdfCountMapPositionRecords(void *chunk);
-extern u32 func_0015B6A0(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(u32 system, u32 value);
 extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
@@ -137,23 +137,23 @@ extern u32 func_0016FF08(EffBossRecords *records, s32 index);
 extern EffBossIndex *func_0016FF20(EffBossRecords *records, s32 index);
 extern void effSetVectorIncrementBits(EffBossRecords *records, u32 bits);
 extern u32 effMiscRand(void *state);
-extern f32 func_002E8398(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 extern f32 D_003B9308;
 extern void func_00184630(EffBossWork *work);
 extern EffBossWork *func_00184A08(EffBossWork *src);
 extern void func_0016FC28(EffBossRecords *records);
 extern void func_002D0918(u32 handle);
-extern void func_0015B8B8(u32 system);
+extern void parReleaseCellSystem(u32 system);
 
 void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     f32 blend = work->head.xBlend;
     f32 scale = work->head.scale;
     f32 t;
 
-    cell->x = work->head.xRange * (func_002E8398(D_0034DF38) * blend + (1.0f - blend)) * scale;
+    cell->x = work->head.xRange * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend)) * scale;
     blend = work->head.yBlend;
-    t = func_002E8398(D_0034DF38) * blend + (1.0f - blend);
+    t = effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend);
     cell->y = work->head.yRange * t * scale;
     cell->z = work->head.zRange * t * scale;
     cell->flip = effMiscRand(D_0034DF38) & 1;
@@ -195,7 +195,7 @@ void effBossDestroy(EffBossWork *work) {
         }
         func_002D0918(work->groupsHandle);
     }
-    func_0015B8B8(work->system);
+    parReleaseCellSystem(work->system);
     func_001629F0(work->paramWork);
     sdfReleaseChipBlock(work);
 }

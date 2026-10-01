@@ -11,7 +11,7 @@ extern s64 func_00110628(u64);
 
 extern u64 func_00110680(u64);
 
-extern s64 func_001106D8(u64);
+extern s64 dds3AdvanceObjectValueCursor(u64);
 
 extern u64 func_00110CD8(u64, u64);
 
@@ -175,7 +175,7 @@ extern s32 fldTestDrawUpdate(void);
 
 extern s32 fldGetEncounterRuntimeResult(void);
 
-extern u8 func_00127398(void);
+extern u8 fldGetCampSceneControlMode(void);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -221,7 +221,7 @@ extern void fldSetCameraMoveMode(s32 mode);
 
 extern void fldClearCameraMoveMode(void);
 
-extern u32 func_001106B8(u64);
+extern u32 dds3ResetObjectValueCursor(u64);
 
 extern s32 dds3TestObjectFlags(u64, s32);
 
@@ -587,7 +587,7 @@ s32 fldTestDrawUpdate(void) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
-    if (func_00127398() == 1) {
+    if (fldGetCampSceneControlMode() == 1) {
         return 0;
     }
     fldSelectDisplayBuffer(0x53);
@@ -663,7 +663,7 @@ void fldSubmitVisibleWorldBackground(void) {
 
     list = func_00110CD8(dds3GetWorldSecondaryObject(), 5);
     if (list != 0) {
-        if (func_001106B8(list) != 0) {
+        if (dds3ResetObjectValueCursor(list) != 0) {
             do {
                 item = func_00110680(list);
                 if (dds3TestObjectFlags(item, 0x200) != 0) {
@@ -671,7 +671,7 @@ void fldSubmitVisibleWorldBackground(void) {
                         found = 1;
                     }
                 }
-            } while (func_001106D8(list) != 0);
+            } while (dds3AdvanceObjectValueCursor(list) != 0);
         }
         dds3DestroyWorldIndexNode(list);
     }
@@ -1101,7 +1101,7 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_001244A8);
 
 extern f32 fldAngleDifference(f32, f32);
 
-f32 func_00124720(f32 angle) {
+f32 fldSnapAngleToCardinalDirection(f32 angle) {
     f32 best;
     s32 index;
     f32 diff;
@@ -1177,7 +1177,7 @@ void fldToggleWorldNodeState(s64 mode) {
     if (hasEntry == 0) {
         return;
     }
-    func_001106B8(iterator);
+    dds3ResetObjectValueCursor(iterator);
     do {
         node = func_00110680(iterator);
         hasEntry = func_00114058(node);
@@ -1189,7 +1189,7 @@ void fldToggleWorldNodeState(s64 mode) {
                 func_00114048(node, 0);
             }
         }
-        hasEntry = func_001106D8(iterator);
+        hasEntry = dds3AdvanceObjectValueCursor(iterator);
     } while (hasEntry != 0);
     dds3DestroyWorldIndexNode(iterator);
 }
@@ -1305,7 +1305,7 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->unk_90 = 0;
 }
 
-void func_00125080(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
+void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
                    s32 code, s32 link, const char *subname) {
     if (func_00101740(D_00412D50) != NULL) {
         if (D_00389770[4] == stage) {
@@ -1753,7 +1753,7 @@ u8 func_00127370(void) {
     return scrFindNamedProcessNode(D_00412F40) != 0;
 }
 
-u8 func_00127398(void) {
+u8 fldGetCampSceneControlMode(void) {
     if (D_00435F7C > 0) {
         return 2;
     }

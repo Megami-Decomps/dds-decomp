@@ -56,7 +56,7 @@ extern u8 *func_001ABFD8(s32, s32);
 
 extern s32 func_001EA598(void *);
 
-extern u32 func_00216CA0();
+extern u32 btlAppendSelfAfterTargetScan();
 
 extern void btlSelectLinkedTargets(s32, s32, s8);
 
@@ -298,7 +298,7 @@ extern s8 D_00419C30[];
 
 extern s8 D_00419C58[];
 
-extern s32 func_001B24F8(s32, s32);
+extern s32 btlWouldUiValueFallBelowQuarter(s32, s32);
 
 extern u8 D_00438B66;
 
@@ -310,11 +310,11 @@ extern s32 func_00213F58(s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQuery(s32, s32, s32);
 
-extern s32 func_001B2900(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 extern s32 btlElementToBitIndex(s32, s32);
 
-extern s32 func_001B2900(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 extern s32 func_001AE8C0(void *, s32);
 
@@ -733,7 +733,7 @@ s32 func_00212B38(actor, kind)
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00212CB8);
 
-extern s32 func_001B2900(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(void *, s32);
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_00419B38);
 
@@ -745,7 +745,7 @@ s32 btlUnitHasAllTenActions(s32 battler) {
     u32 ids[10] = {2, 3, 4, 5, 6, 10, 11, 12, 13, 14};
     s32 i;
     for (i = 0; i < 10; i++) {
-        if (func_001B2900((void *)battler, ids[i]) == 0) {
+        if (btlTestSelectedItemCategoryMask((void *)battler, ids[i]) == 0) {
             return 0;
         }
     }
@@ -1177,7 +1177,7 @@ s32 func_00213E80(s32 unused, s32 action) {
 }
 
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
-    if (func_001B24F8(actor, 0) != 0) {
+    if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
         if (D_00438B66 == 0) {
             btlBossDebugPrintf(D_00419C30);
         }
@@ -1442,7 +1442,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                         }
                         value = func_001ABF50((void *)unit, index);
                         if (func_001AEB20((void *)unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && func_001B2900((void *)unit, index) != 0)) {
+                            (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, index) != 0)) {
                             return 1;
                         }
                     }
@@ -1450,7 +1450,7 @@ s32 btlUnitBlocksElementQuery(s32 unit, s32 action, s32 mask) {
                 }
                 value = func_001ABF50((void *)unit, action);
                 if (func_001AEB20((void *)unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && func_001B2900((void *)unit, action) != 0)) {
+                    (stat == 0x20000 && btlTestSelectedItemCategoryMask((void *)unit, action) != 0)) {
                     return 1;
                 }
             }
@@ -1475,7 +1475,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                         if (index == 0x80) {
                             continue;
                         }
-                        if (func_001B2900(unit, index) != 0 ||
+                        if (btlTestSelectedItemCategoryMask(unit, index) != 0 ||
                             func_001AE8C0(unit, index) != 0 ||
                             btlHasSpecialAbility274(unit, index) != 0 ||
                             func_001AEB20(unit, index) != 0) {
@@ -1484,7 +1484,7 @@ s32 btlUnitBlocksElementQueryForGroup(u8 *unit, s32 action, u32 mask) {
                     }
                     return 1;
                 }
-                if (func_001B2900(unit, action) != 0 ||
+                if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
                     func_001AE8C0(unit, action) != 0 ||
                     btlHasSpecialAbility274(unit, action) != 0) {
                     return 0;
@@ -1734,7 +1734,7 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00216988);
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00216B40);
 
-u32 func_00216CA0(s32 battle) {
+u32 btlAppendSelfAfterTargetScan(s32 battle) {
     void *list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
@@ -1920,7 +1920,7 @@ typedef struct BtlLinkedCommand {
     u32 targetList;  /* 0x138 */
 } BtlLinkedCommand;
 
-void func_00217378(u8 *command, u8 *unused) {
+void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -2668,7 +2668,7 @@ s32 btlTriggerLinkedActionMotionAlternate(s32 object) {
             if (((BattleUnit *)owner)->mode != 0x136) {
                 return 0;
             }
-            func_00217378(object, object);
+            btlFaceLinkedTargetAndFlagDirection(object, object);
             return 1;
         }
     }

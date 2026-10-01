@@ -96,22 +96,22 @@ void *func_002CFEB8(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
 void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
-void func_002D9D80(SdfTextParam *param, void *resource);
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(SdfResourceList *list);
-void func_002DB048(SdfAsset *, SdfAsset *);
+void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
 void sdfDestroyDevRequest(void *);
 void sdfTexReleaseReferenceViaHandler(u32);
-SdfAsset *func_002DA730(void);
-u8 *func_002DA830(SdfAsset *, SdfTextParam *, u8 *);
+SdfAsset *sdfCreateAssetWithDrawEntries(void);
+u8 *sdfParseAssetParameterFlags(SdfAsset *, SdfTextParam *, u8 *);
 void func_002DA358(SdfResourceList *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
-void func_002DAC88(SdfAsset *, void *);
+void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
 u8 *sdfModelFindDrawNode(void *chunk, s32 id);
 void func_002DDD60(void *);
-void func_002DAE00(SdfAsset *, s32);
+void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern void func_002DAB80(u8 *, void *);
 extern u16 D_00398198[];
 extern u32 func_002D2800(u32);
@@ -124,7 +124,7 @@ typedef struct SdfPacketOwner {
 } SdfPacketOwner;
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9748);
 
-void func_002D99B0(u8 *ctx) {
+void sdfInitializeDrawPacketGroups(u8 *ctx) {
     u8 *packet = ctx;
     s32 i;
 
@@ -144,7 +144,7 @@ void func_002D99B0(u8 *ctx) {
     sdfAppendPacket(ctx + 0x180, ctx + 0x1A0);
 }
 
-void func_002D9A70(SdfPacketOwner **owners, u8 *packets) {
+void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *packets) {
     s32 i;
 
     for (i = 0; i != 4; i++) {
@@ -212,57 +212,31 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
     u8 *record = resource;
     u8 *vec = record + 0x20;
 
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "vmove.xyzw vf30, vf10\n\t"
-        "vmove.xyzw vf11, vf10\n\t"
-        ".set reorder"
-        : : "r"(vec));
+    VU0_LOAD_VF(vf10, vec);
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_MOVE_VF(vf11, vf10);
     vec = record + 0x30;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "vsub.xyz vf10, vf0, vf10\n\t"
-        "vmove.xyzw vf29, vf10\n\t"
-        "vopmula.xyz ACC, vf10, vf11\n\t"
-        "vopmsub.xyz vf10, vf11, vf10\n\t"
-        "vmul.xyz vf2, vf10, vf10\n\t"
-        "vmulax.w ACC, vf0, vf2x\n\t"
-        "vmadday.w ACC, vf0, vf2y\n\t"
-        "vmaddz.w vf2, vf0, vf2z\n\t"
-        "vrsqrt Q, vf0w, vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz vf10, vf10, Q\n\t"
-        "vmove.xyzw vf28, vf10\n\t"
-        ".set reorder"
-        : : "r"(vec));
+    VU0_LOAD_VF(vf10, vec);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_MOVE_VF(vf29, vf10);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf28, vf10);
     record += 0x10;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf31, 0(%0)\n\t"
-        "vmove.w vf31, vf0\n\t"
-        ".set reorder"
-        : : "r"(record));
+    VU0_LOAD_VF(vf31, record);
+    VU0_SET_W_ONE(vf31);
     func_002DDD60(base + 0xC0);
 }
 
 /* vu0 routine: transform the vector at resource+0x10 by the chunk matrix at +0xC0 (result in vf10) */
-void func_002D9D80(SdfTextParam *param, void *resource) {
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource) {
     u8 *matrix = sdfModelFindDrawNode(param, *(s32 *)resource) + 0xC0;
     u8 *vector;
 
     VU0_LOAD_MATRIX(matrix);
     vector = (u8 *)resource + 0x10;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        "vmulax.xyzw ACC, vf28, vf10x\n\t"
-        "vmadday.xyzw ACC, vf29, vf10y\n\t"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n\t"
-        "vmaddw.xyzw vf10, vf31, vf0w\n\t"
-        ".set reorder"
-        : : "r"(vector));
+    VU0_LOAD_VF(vf10, vector);
+    VU0_TRANSFORM_POINT(vf10, vf10);
 }
 
 void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
@@ -283,7 +257,7 @@ void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
     return NULL;
 }
 
-s32 func_002D9E58(SdfTextParam *param, s32 id) {
+s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *param, s32 id) {
     void *resource = sdfChunkFindRecordById(param, id);
     if (resource != NULL) {
         sdfSetLookAtBasisFromRecord(param, resource);
@@ -292,10 +266,10 @@ s32 func_002D9E58(SdfTextParam *param, s32 id) {
     return 0;
 }
 
-s32 func_002D9E98(SdfTextParam *param, s32 id) {
+s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id) {
     void *resource = sdfChunkFindRecordById(param, id);
     if (resource != NULL) {
-        func_002D9D80(param, resource);
+        sdfVuTransformMapRecordPosition(param, resource);
         return 1;
     }
     return 0;
@@ -377,7 +351,7 @@ void sdfReduceResourceListCount(SdfResourceList *list, s32 count, s32 enabled) {
         } while ((s64)cursor != (s64)list->count);
         list->count = (s16)count;
     }
-    func_002E7730();
+    sdfDevResizeBufferedRequest();
 }
 
 SdfResourceList *sdfResourceListClone(SdfResourceList *list) {
@@ -397,7 +371,7 @@ SdfResourceList *sdfResourceListClone(SdfResourceList *list) {
     return copy;
 }
 
-void func_002DA1B0(SdfResourceList *list, s32 arg, f32 value) {
+void sdfUpdateActiveResourceListScalars(SdfResourceList *list, s32 arg, f32 value) {
     s32 i;
     s32 count;
 
@@ -498,7 +472,7 @@ SdfSubParam *sdfEnsurePrimaryTextSubParam(SdfTextParam *param) {
     return sub;
 }
 
-void func_002DA4C8(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
+void sdfSetPrimaryTextScalars(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
     values[0] = a;
     values[1] = b;
@@ -508,7 +482,7 @@ void func_002DA4C8(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     param->dirtyFlags |= 0xc;
 }
 
-void func_002DA548(SdfTextParam *param, const f32 *input) {
+void sdfCopyPrimaryTextScalars(SdfTextParam *param, const f32 *input) {
     f32 *values = sdfEnsurePrimaryTextSubParam(param)->scalar.values;
     values[0] = input[0];
     values[1] = input[1];
@@ -542,7 +516,7 @@ SdfSubParam *sdfEnsureSecondaryTextSubParam(SdfTextParam *param) {
     return sub;
 }
 
-void func_002DA630(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
+void sdfSetSecondaryTextScalars(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
     values[0] = a;
     values[1] = b;
@@ -552,7 +526,7 @@ void func_002DA630(SdfTextParam *param, f32 a, f32 b, f32 c, f32 d, f32 e) {
     param->dirtyFlags |= 0x30;
 }
 
-void func_002DA6B0(SdfTextParam *param, const f32 *input) {
+void sdfCopySecondaryTextScalars(SdfTextParam *param, const f32 *input) {
     f32 *values = sdfEnsureSecondaryTextSubParam(param)->scalar.values;
     values[0] = input[0];
     values[1] = input[1];
@@ -562,13 +536,13 @@ void func_002DA6B0(SdfTextParam *param, const f32 *input) {
     param->dirtyFlags |= 0x30;
 }
 
-void func_002DA718(SdfTextParam *param, f32 first, f32 second) {
+void sdfSetTextScalarPair(SdfTextParam *param, f32 first, f32 second) {
     param->unk40 = first;
     param->unk44 = second;
     param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
-SdfAsset *func_002DA730(void) {
+SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     SdfAsset *asset;
     u32 *entry;
     s32 i;
@@ -594,7 +568,7 @@ SdfAsset *func_002DA730(void) {
     return asset;
 }
 
-u8 *func_002DA830(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
+u8 *sdfParseAssetParameterFlags(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
     SdfTextParam *param = (SdfTextParam *)asset;
     u32 flags;
     u8 *cursor;
@@ -617,7 +591,7 @@ u8 *func_002DA830(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
         cursor += 4;
     }
     if (flags & 0x8) {
-        func_002DA4C8(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        sdfSetPrimaryTextScalars(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
         cursor += 0x14;
     }
     if (flags & 0x10) {
@@ -631,7 +605,7 @@ u8 *func_002DA830(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
         func_002DA5C8(param, packed >> 16);
     }
     if (flags & 0x40) {
-        func_002DA630(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
+        sdfSetSecondaryTextScalars(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1], ((f32 *)cursor)[2], ((f32 *)cursor)[3], ((f32 *)cursor)[4]);
         cursor += 0x14;
     }
     if (flags & 0x80) {
@@ -647,7 +621,7 @@ u8 *func_002DA830(SdfAsset *asset, SdfTextParam *lookup, u8 *data) {
         cursor += 4;
     }
     if (flags & 0x400) {
-        func_002DA718(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1]);
+        sdfSetTextScalarPair(param, ((f32 *)cursor)[0], ((f32 *)cursor)[1]);
         cursor += 8;
     }
     return cursor;
@@ -705,11 +679,11 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002DAB80);
 
-void func_002DAC68(SdfAsset *asset, u8 *entry) {
+void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, u8 *entry) {
     func_002DAB80(entry + 0x68, asset->third);
 }
 
-void func_002DAC88(SdfAsset *asset, void *entryArg) {
+void sdfApplyAssetSecondaryEntry(SdfAsset *asset, void *entryArg) {
     u8 *entry = entryArg;
     SdfTex *tex = *(SdfTex **)((u8 *)asset + 0x30);
     u32 mode;
@@ -738,10 +712,10 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
         sdfAssetCopyTextureState(asset, entry);
     }
     if (flags & (4 << index)) {
-        func_002DAC68(asset, (u8 *)entry);
+        sdfCopyAssetPrimarySubParameter(asset, (u8 *)entry);
     }
     if (flags & (16 << index)) {
-        func_002DAC88(asset, entry);
+        sdfApplyAssetSecondaryEntry(asset, entry);
     }
     if (flags & (64 << index)) {
         sdfAssetCopyPairToTextParam(asset, entry);
@@ -749,7 +723,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 index) {
     asset->pad00[6] = flags & (0x55 << (index ^ 1));
 }
 
-void func_002DAE00(SdfAsset *asset, s32 index) {
+void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 index) {
     u8 flags = asset->pad00[6];
     SdfAssetEntry *entry = asset->entries[index];
 
@@ -759,10 +733,10 @@ void func_002DAE00(SdfAsset *asset, s32 index) {
         sdfAssetCopyTextureState(asset, entry);
     }
     if (flags & (4 << index)) {
-        func_002DAC68(asset, (u8 *)entry);
+        sdfCopyAssetPrimarySubParameter(asset, (u8 *)entry);
     }
     if (flags & (16 << index)) {
-        func_002DAC88(asset, entry);
+        sdfApplyAssetSecondaryEntry(asset, entry);
     }
     if (flags & (64 << index)) {
         sdfAssetCopyPairToTextParam(asset, entry);
@@ -775,8 +749,8 @@ SdfResourceList *sdfAssetListParse(SdfTextParam *param, u32 *data) {
     u8 *cursor = (u8 *)(data + 1);
     SdfResourceList *list = sdfCreateResourceList(count >= 0x20 ? count : 0x20);
     while (count != 0) {
-        SdfAsset *asset = func_002DA730();
-        cursor = func_002DA830(asset, param, cursor);
+        SdfAsset *asset = sdfCreateAssetWithDrawEntries();
+        cursor = sdfParseAssetParameterFlags(asset, param, cursor);
         func_002DA358(list, asset);
         count--;
     }
@@ -793,13 +767,13 @@ void sdfResourceListApplyEntryChanges(SdfResourceList *list, s32 index) {
     }
 }
 
-void func_002DAFE8(SdfResourceList *list, s32 index) {
+void sdfApplyResourceListEntriesWithForcedTexture(SdfResourceList *list, s32 index) {
     s32 i;
     s32 count = list->count;
     u32 *items = list->items;
 
     for (i = 0; i < count; i++) {
-        func_002DAE00((SdfAsset *)items[i], index);
+        sdfApplyAssetEntryChangesWithForcedTexture((SdfAsset *)items[i], index);
     }
 }
 
@@ -807,7 +781,7 @@ typedef struct SdfSubParamWords {
     u32 word[6];
 } SdfSubParamWords;
 
-void func_002DB048(SdfAsset *dst, SdfAsset *src) {
+void sdfCopyAssetParameterState(SdfAsset *dst, SdfAsset *src) {
     SdfSubParamWords *sub;
 
     dst->pad00[6] = 0xFF;
@@ -831,20 +805,20 @@ void func_002DB048(SdfAsset *dst, SdfAsset *src) {
     dst->unk44 = src->unk44;
 }
 
-void func_002DB158(SdfResourceList *first, SdfResourceList *second) {
+void sdfCopyAssetListParameterState(SdfResourceList *first, SdfResourceList *second) {
     s32 i;
     s32 count = first->count;
     u32 *secondItems = second->items;
     u32 *firstItems = first->items;
 
     for (i = 0; i < count; i++) {
-        func_002DB048(firstItems[i], secondItems[i]);
+        sdfCopyAssetParameterState(firstItems[i], secondItems[i]);
     }
 }
 
 extern s32 (*D_003981A8[])(u32, u32);
 
-s32 func_002DB1C8(u32 context, u32 command) {
+s32 sdfDispatchAssetCommandWord(u32 context, u32 command) {
     D_003981A8[command >> 16](context, command);
 }
 

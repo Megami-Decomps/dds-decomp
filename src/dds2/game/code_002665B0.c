@@ -28,7 +28,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 extern void func_002680E0(s32);
 extern void func_002A91A0(u8 *);
 extern void func_002673B8();
-extern void func_002C3E58(u8 *);
+extern void mnuClearPanelTransitionState(u8 *);
 extern void func_002C1B58(u8 *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -337,7 +337,7 @@ INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
-s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
+s32 mnuCreateDualPercentPanel(MenuTitleResource *resource, MenuProgressHost *host) {
     s32 panel = func_00328D68(0xa0);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(resource->firstA, resource->firstB),
@@ -348,7 +348,7 @@ s32 func_00266F70(MenuTitleResource *resource, MenuProgressHost *host) {
     return panel;
 }
 
-void func_00267008(s32 panel) {
+void mnuReleaseDualPercentPanel(s32 panel) {
     if (panel != 0) {
         mnuReleaseSpriteTextures();
         mnuReleaseSpriteTextures(panel + 0x50);
@@ -362,7 +362,7 @@ void mnuCreateThresholdNodePanels(MenuProgressHost *host) {
     while (node != 0) {
         s32 id = node->entryId;
         node->childPanel =
-            func_00266F70((MenuTitleResource *)(D_00435DD0 + id * 0x1c4 + 0xa60), host);
+            mnuCreateDualPercentPanel((MenuTitleResource *)(D_00435DD0 + id * 0x1c4 + 0xa60), host);
         node = node->next;
     }
 }
@@ -371,7 +371,7 @@ void mnuDestroyThresholdNodePanels(MenuProgressHost *host) {
     MenuProgressNode *node;
 
     for (node = host->progressList->head; node != 0; node = node->next) {
-        func_00267008(node->childPanel);
+        mnuReleaseDualPercentPanel(node->childPanel);
     }
 }
 
@@ -413,7 +413,7 @@ void func_002671E8(MenuProgressHost *host) {
 }
 
 void func_00267200(MenuProgressHost *host) {
-    func_00267008(host->progressList->selected->childPanel);
+    mnuReleaseDualPercentPanel(host->progressList->selected->childPanel);
     func_002B86E8((u32)host->progressList);
 }
 
@@ -733,7 +733,7 @@ extern void func_003425B0(void);
 extern void func_00342580(s32);
 extern void func_003425D8(void);
 
-void func_00268128(s32 mode, MenuFadeHost *host) {
+void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
             sndStartTrackExtended(host->fadeColor);
@@ -756,7 +756,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     obj = (u8 *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x3F8);
     *(s32 *)obj = handle;
-    func_002C3E58(obj + 8);
+    mnuClearPanelTransitionState(obj + 8);
     mnuTerminalCreateEffects((MenuSlotState *)obj);
     ((MenuSlotState *)obj)->reduced = reduced;
     ((MenuSlotState *)obj)->mode = reduced;
@@ -770,7 +770,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     }
     *(s32 *)(obj + 0x150) = 0xF;
     func_002680E0((s32)obj);
-    func_00268128(0, (MenuFadeHost *)obj);
+    mnuApplyFadeTrackMode(0, (MenuFadeHost *)obj);
     func_002C1B58(obj + 0x3E8, 0x60);
     return obj;
 }

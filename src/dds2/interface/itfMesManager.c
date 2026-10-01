@@ -247,7 +247,7 @@ void frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
 
 void func_001A5E00(void *, s32);
 
-void func_001A5DD8(void *, s32);
+void itfResetCursorPositionAndState(void *, s32);
 
 void itfMesInitCharTable(s32 *table);
 
@@ -255,7 +255,7 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node);
 
 extern void frFontLoadTemporaryEntry(u32);
 
-extern ItfMesNode *func_0019E7C8(s32 x, s32 y, s32 encodedText, s32 sub);
+extern ItfMesNode *itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub);
 
 extern u32 itfLoadTextureFromAsset(const char *path);
 
@@ -279,9 +279,9 @@ extern void func_001A5E48();
 
 extern void func_001A5E88();
 
-extern void func_001A5EB8();
+extern void itfClearDrawStateWords();
 
-extern void func_001A5EE8();
+extern void itfResetBattleFadeState();
 
 extern void func_0019DD48();
 
@@ -532,12 +532,12 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->renderValue = 0xFFFFF0;
     mes->unk12 = 0;
     mes->callbackAddress = 0;
-    func_001A5DD8(&mes->blk14, 1);
+    itfResetCursorPositionAndState(&mes->blk14, 1);
     func_001A5E00(&mes->blk24, 1);
     func_001A5E48(&mes->blk40);
     func_001A5E88(&mes->blkA4);
-    func_001A5EB8(mes->tableD0);
-    func_001A5EE8((u8 *)mes + 0x1D0, 0);
+    itfClearDrawStateWords(mes->tableD0);
+    itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
     D_00452940.activeWindowCount++;
     return window;
 }
@@ -577,7 +577,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
         frFontQueueGlyphInSelectedSlot(blk14->glyphChain);
         blk14->glyphChain = NULL;
     }
-    func_001A5DD8(blk14, 0);
+    itfResetCursorPositionAndState(blk14, 0);
 }
 
 void itfMesBuildOptionFrame(ItfMesState *mes) {
@@ -840,7 +840,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     if (item == 0) {
         return item;
     }
-    glyph = func_0019E7C8(0, 0, item, 0);
+    glyph = itfDrawDefaultColorText(0, 0, item, 0);
     extent = itfMesMaxGroupedExtent(glyph);
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
     return extent;
@@ -982,8 +982,8 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 index) {
 
 extern s32 func_0019DB30();
 extern void func_0019DD48();
-extern s32 func_0019E800();
-extern s8 func_0019E8E0();
+extern s32 itfDrawCustomColorText();
+extern s8 itfTestTextInterfaceMask();
 extern s32 func_0019E908();
 extern s32 func_0019E910();
 extern void evtLipsExecFunction();
@@ -1006,7 +1006,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
         *(s32 *)(blk + 0xC) = 0;
     }
-    glyph = func_0019E800(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
+    glyph = itfDrawCustomColorText(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
                           itfMesGetTableItem(*(ItfMesTable **)(blk + 8), *(s16 *)(blk + 0x18)), 0);
     if (mes->unk12 == 3) {
         if (func_0019DB30(glyph) == 1) {
@@ -1019,20 +1019,20 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         itfMesEnableUnflaggedNodeContexts(glyph);
     }
     itfMesCopyGlyphShade(glyph, blk);
-    flags = func_0019E8E0(3);
+    flags = itfTestTextInterfaceMask(3);
     blk[0x11] = flags;
     if (flags & 2) {
         mes->flags |= 0x10000;
     } else {
         mes->flags &= 0xFFFEFFFF;
     }
-    if (func_0019E8E0(4) != 0) {
+    if (itfTestTextInterfaceMask(4) != 0) {
         hook = (void (*)())mes->callbackAddress;
         if (hook != NULL) {
             hook();
         }
     }
-    if (func_0019E8E0(8) != 0) {
+    if (itfTestTextInterfaceMask(8) != 0) {
         helper = func_0019E908();
         evtLipsExecFunction(helper, func_0019E910());
     }
@@ -1084,7 +1084,7 @@ ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s
         if (mask & 1) {
             mask >>= 1;
         } else {
-            node = (ItfMesNode *)func_0019E800(x, y, 0, 0, 0, 0x80, *items, node);
+            node = (ItfMesNode *)itfDrawCustomColorText(x, y, 0, 0, 0, 0x80, *items, node);
             mask >>= 1;
             y += node->rowHeightUnits << 3;
         }

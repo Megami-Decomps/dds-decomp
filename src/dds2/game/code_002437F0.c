@@ -10,7 +10,7 @@ void func_00308380(s32 property, s32 object);
 
 void func_00308808(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 
-void func_00308DB0(s32 object);
+void uiDrawActiveSurfaceRegion(s32 object);
 
 void func_00308E60(s32 object);
 
@@ -39,7 +39,7 @@ typedef struct SolarOverlayWork {
     SolarPoint points[8];
 } SolarOverlayWork;
 
-f32 func_00341240(s32 seed);
+f32 effMiscRandUnitFloat(s32 seed);
 
 void evtLoadSolarNoiseSprite(u32 *sprite) {
     *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
@@ -52,7 +52,7 @@ void evtReleaseSolarNoiseSprite(u32 *sprite) {
 void evtInitializeSolarOverlay(s32 object) {
     func_00308380(0x30000, object);
     func_00308808(0, 0, 0, 0x2000, 0xE00, 0, object);
-    func_00308DB0(object);
+    uiDrawActiveSurfaceRegion(object);
     func_00308380(0x30000, object);
 }
 
@@ -133,7 +133,7 @@ void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
             point->age = age;
             if ((s16)age > point->duration) {
                 point->age = 0;
-                point->duration = (s16)(func_00341240(0) * 30.0f + 120.0f);
+                point->duration = (s16)(effMiscRandUnitFloat(0) * 30.0f + 120.0f);
             }
         } else {
             point->age = 0;

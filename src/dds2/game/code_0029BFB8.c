@@ -79,7 +79,7 @@ typedef struct { BurstSprite sprite[8]; } BurstTable;
 
 extern BurstTable D_00428420;
 
-extern void func_00308620(BurstSprite *, u32 *, s32, s32, s32);
+extern void uiDrawUniformRgbRange(BurstSprite *, u32 *, s32, s32, s32);
 
 void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
     BurstTable table = D_00428420;
@@ -87,7 +87,7 @@ void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
     u32 i;
 
     for (i = 0; i < 8; i++) {
-        func_00308620(&table.sprite[i], &table.sprite[i].word[3], 0, scaled, arg1);
+        uiDrawUniformRgbRange(&table.sprite[i], &table.sprite[i].word[3], 0, scaled, arg1);
     }
 }
 

@@ -95,7 +95,7 @@ u16 func_0019B890(s32 index) {
     return D_00452724[index].unk0->unk12;
 }
 
-void func_0019B8B0(s32 value) {
+void itfSetTextDrawLimit(s32 value) {
     if (value < 1) {
         value = 0x14;
     }

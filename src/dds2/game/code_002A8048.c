@@ -44,7 +44,7 @@ extern MovieList D_00457E48;
 
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 func_0033D810(s32, s32, s32, s32, char *, ...);
+extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, char *, ...);
 
 extern void sdfAppendPacket(s32, s32);
 
@@ -76,7 +76,7 @@ extern s32 mnuMovieViewer();
 
 void func_002A7AF0();
 
-void func_002A7FD0(void);
+void mnuStopMovieDrawTask(void);
 
 s32 func_002A8008(void);
 
@@ -90,7 +90,7 @@ void mnuCreateMovieManagerTask(void) {
     kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
 }
 
-u32 func_002A80C0(void) {
+u32 mnuScriptRequestMovieByIndex(void) {
     u64 value;
 
     value = scrReadIntParameter(0);
@@ -99,8 +99,8 @@ u32 func_002A80C0(void) {
     return 1;
 }
 
-u32 func_002A80F0(void) {
-    func_002A7FD0();
+u32 mnuScriptStopMovieAndResetDraw(void) {
+    mnuStopMovieDrawTask();
     D_00437AE8 = 0;
     kwlnDrawEnableDc8(0);
     return 1;
@@ -124,7 +124,7 @@ s32 func_002A8120(void) {
     }
     if (D_00437AE8 > 0) {
         if (D_00437AE8 == 0x1E) {
-            func_002A7FD0();
+            mnuStopMovieDrawTask();
             scrSetIntegerReturnValue(0);
             return 1;
         }
@@ -200,7 +200,7 @@ void mnuDrawMovieList(void) {
         node = node->next;
     }
     for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
-        sdfAppendPacket(packets, func_0033D810(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, "%c%s", (i == selected) ? '>' : ' ', node->path));
     }
     if (D_00457E48.top != 0) {
         func_0032EF30(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
@@ -219,12 +219,12 @@ typedef struct MovieStatus {
 
 extern s32 D_00457E58[];
 
-void func_002A87F0(void) {
+void mnuDrawMovieProgressCounter(void) {
     s32 list;
     if (func_002A8008() == 0) {
         list = D_00457E58[0];
         sdfAppendPacket(list, func_0011F250(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, func_0033D810(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_003E5608)->current, ((MovieStatus *)D_003E5608)->total));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_003E5608)->current, ((MovieStatus *)D_003E5608)->total));
     }
 }
 
@@ -240,7 +240,7 @@ void mnuDestroyMovieViewerTask(void) {
     if (movieTask != 0) {
         kwlnTaskDestroyWithHierarchy(movieTask, 0);
         D_00457E48.task = 0;
-        func_002A7FD0();
+        mnuStopMovieDrawTask();
     }
     mnuClearMovieList();
 }
@@ -257,7 +257,7 @@ void func_002A8B90(void) {
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
-void func_002A8BC8(void) {
+void mnuCommitPendingMovieDrawValues(void) {
     if (D_00457E60.wordPending != 0) {
         D_00457E60.word = *(s32 *)D_00457E60.wordSource;
     }
@@ -315,26 +315,26 @@ s32 mnuUpdateIpuRegisterViewer(void) {
             }
         }
     }
-    func_002A8BC8();
+    mnuCommitPendingMovieDrawValues();
     packets = sdfCreateResetPacketList();
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
     sdfCreatePacketA(packets, 0x80A03000, 0, (D_00457E60.cursor & 7) * 0xC0 + 0x7180, (D_00457E60.cursor >> 3) * 0xC0 + 0x79C0, (D_00457E60.cursor & 7) * 0xC0 + 0x7240, (D_00457E60.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfAppendPacket(packets, func_0033D810(0x7180, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.wordSource));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.wordSource));
     if (D_00457E60.wordPending != 0) {
-        sdfAppendPacket(packets, func_0033D810(0x7840, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.word));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, "%08X", D_00457E60.word));
     } else {
-        sdfAppendPacket(packets, func_0033D810(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_0042A428));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfAppendPacket(packets, func_0033D810(0x7180, y, 0xFF0080, 0, "%08X", D_00457E60.blockSource + n));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, "%08X", D_00457E60.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
             if (D_00457E60.blockPending != 0) {
-                sdfAppendPacket(packets, func_0033D810(x, y, 0xFF0080, 0, "%02X", D_00457E60.block[n]));
+                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "%02X", D_00457E60.block[n]));
             } else {
-                sdfAppendPacket(packets, func_0033D810(x, y, 0xFF0080, 0, "**"));
+                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, "**"));
             }
         }
     }

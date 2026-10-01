@@ -6,9 +6,9 @@ extern void func_0026C7E0();
 
 typedef struct {
     s32 pad00;
-    u32 firstResource;    /* 0x04: released by func_0026C048 */
+    u32 firstResource;    /* 0x04: released by mnuReleaseMenuResourceSlots */
     s32 spriteHandle;     /* 0x08: released through effDestroyResourceSlotSet */
-    u32 secondResource;   /* 0x0C: released by func_0026C048 */
+    u32 secondResource;   /* 0x0C: released by mnuReleaseMenuResourceSlots */
     s32 pad10;
     s32 word14;
     s32 pad18;
@@ -24,7 +24,7 @@ typedef struct {
 
 extern s8 D_00324510[];
 
-extern void func_0026C048(void);
+extern void mnuReleaseMenuResourceSlots(void);
 
 extern s32 mnuCreateListState(s32, s32, s32);
 
@@ -34,7 +34,7 @@ extern void func_0026D480();
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", mnuDrawSprite);
 
-void func_0026BE38(void) {
+void mnuRecreateMenuSelectionList(void) {
     s32 i;
     s32 node;
 
@@ -57,7 +57,7 @@ u32 func_0026BED0(void) {
     return **(u32 **)(((MenuState *)D_003BC5D0)->linkedState + 0x1c);
 }
 
-void func_0026BEE8(s32 advanceCount) {
+void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
     mnuSelectFirstListNode(((MenuState *)D_003BC5D0)->linkedState);
     if (0 < advanceCount) {
         do {
@@ -67,7 +67,7 @@ void func_0026BEE8(s32 advanceCount) {
     }
 }
 
-s32 func_0026BF38(void) {
+s32 mnuIsAnyMenuInputPressed(void) {
     if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0 ||
         D_00324510[0x22] < 0 || D_00324510[0x20] < 0 ||
         D_00324510[0x2a] < 0 || D_00324510[0x2b] < 0 ||
@@ -84,7 +84,7 @@ u32 func_0026C040(void) {
     return 1;
 }
 
-void func_0026C048(void) {
+void mnuReleaseMenuResourceSlots(void) {
     MenuState *state = (MenuState *)D_003BC5D0;
     if (state->firstResource != 0) {
         effDestroyResourceSlotSet(state->firstResource);

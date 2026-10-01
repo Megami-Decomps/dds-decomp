@@ -5,7 +5,7 @@ extern void func_00333270(void *, u32);
 extern void func_003332A0(void *, u32);
 #include "ee_mmi.h"
 
-extern void *func_003335E0();
+extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
 extern void func_001594C8();
 extern s32 D_00451F20[];
@@ -26,7 +26,7 @@ typedef struct EffResourceOwner {
 } EffResourceOwner;
 
 extern void effParReleaseNodeResource(s32);
-extern void func_001634A8(s32);
+extern void parReleaseCellSystem(s32);
 extern void func_001900B8(s32);
 
 extern void effDestroyResources(EffResourceOwner *owner);
@@ -446,7 +446,7 @@ u8 *billCreateUnitObject(s32 index) {
     EffInstance *instance = func_00328D68(0x88);
 
     instance->billboard = (BillObj *)billCreateIndexed(1, index);
-    instance->renderState = func_003335E0();
+    instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
@@ -456,7 +456,7 @@ u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = func_00328D68(0x88);
 
     instance->billboard = (BillObj *)func_00159A50((s32)source->billboard);
-    instance->renderState = func_003335E0();
+    instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);
     func_00333270(instance->renderState, 0x80808080);
@@ -567,10 +567,10 @@ void effDestroyResources(EffResourceOwner *owner) {
         effParReleaseNodeResource(owner->unk38);
         break;
     case 2:
-        func_001634A8(owner->unk40);
+        parReleaseCellSystem(owner->unk40);
         break;
     case 3:
-        func_001634A8(owner->unk44);
+        parReleaseCellSystem(owner->unk44);
         break;
     case 4:
         func_001900B8(owner->unk44);
@@ -672,12 +672,12 @@ typedef struct EffPacket {
 
 extern f32 sdfSinPoly(f32);
 extern f32 func_003407A0(f32);
-extern f32 func_00341240(void *);
+extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 extern u32 effMiscRand(void *state);
 void parDispatchKindInit(void *work, s32 index);
 void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
-extern void func_001629C0(void *sub);
+extern void parUpdateSharedScaleAndDelta(void *sub);
 extern u32 func_001616A8(void *fade, u32 color, s32 age);
 
 typedef struct EffEmitterA {
@@ -711,9 +711,9 @@ void effEmitterRingSpawn(EffEmitterA *effect, u32 index) {
     }
     packet->f30 = phase;
     jitter = effect->radiusRange;
-    packet->f34 = effect->radius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->f34 = effect->radius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->speedRange;
-    packet->vel[0] = effect->f168 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->vel[0] = effect->f168 * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     packet->f38 = effect->f160;
     packet->pos[0] = func_003407A0(phase) * effect->radius;
     packet->pos[1] = 0;
@@ -727,10 +727,10 @@ void effEmitterRingSpawn(EffEmitterA *effect, u32 index) {
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -752,7 +752,7 @@ void effEmitterRingUpdate(EffEmitterA *effect) {
     s32 frames;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     spin = effect->f164 * (3.14159265f / 180.0f);
     decay = effect->f16C / 100.0f + 1.0f;
@@ -879,10 +879,10 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     f32 jitter;
 
     packet += index;
-    scale = effect->radius * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    scale = effect->radius * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     tmp[1] = 0;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, tmp);
@@ -896,23 +896,23 @@ void effEmitterDiscSpawn(EffEmitterB *effect, u32 index) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     tmp[1] = 0;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (func_00341240(D_003AA868) * effect->jitterB + (1.0f - effect->jitterB));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_003AA868) * effect->jitterB + (1.0f - effect->jitterB));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (func_00341240(D_003AA868) * effect->jitterA + (1.0f - effect->jitterA));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->jitterA + (1.0f - effect->jitterA));
     packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -932,7 +932,7 @@ void effEmitterDiscUpdate(EffEmitterB *effect) {
     s32 i;
     u32 loop;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     spin = effect->f160 * (3.14159265f / 180.0f);
     decay = effect->f16C / 100.0f + 1.0f;
@@ -1068,7 +1068,7 @@ void effEmitterBallisticUpdate(EffEmitterC *effect) {
     s32 loop;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     mode = effect->mode;
     if (mode == 0) {
         VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1231,10 +1231,10 @@ void effEmitterLookAtRingSpawn(EffEmitterD *effect, u32 index) {
         packet->color = 0;
     }
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1252,7 +1252,7 @@ void effEmitterLookAtRingUpdate(EffEmitterD *effect) {
     s32 frames;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     sdfVuBuildLookAtBasis(D_0037F680, D_0037F690, D_0037F6A0);
     func_003363D0();
     frames = effect->head.frameCount;
@@ -1368,15 +1368,15 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
     packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    tmp[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    tmp[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, tmp);
-    packet->vel[0] = speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[0];
-    packet->vel[1] = speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[1];
-    packet->vel[2] = speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[2];
+    packet->vel[0] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[0];
+    packet->vel[1] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[1];
+    packet->vel[2] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[2];
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_LENGTH_VF10(length);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1387,9 +1387,9 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
     packet->pos[1] = packet->vel[1] + effect->head.origin[1];
     packet->pos[2] = packet->vel[2] + effect->head.origin[2];
     if (effect->mode == 1) {
-        tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-        tmp[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-        tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+        tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        tmp[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, tmp);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, tmp);
@@ -1402,12 +1402,12 @@ void effEmitterBurstSpawn(EffEmitterE *effect, u32 index) {
         packet->f38 = 0;
     }
     jitter = effect->jitterB;
-    packet->f3C = (effect->f160 * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) - length) / effect->head.frameCount;
+    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - length) / effect->head.frameCount;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1430,7 +1430,7 @@ void effEmitterBurstUpdate(EffEmitterE *effect) {
     s32 count;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX_B(effect->head.matrix);
     count = effect->head.packetCount;
     frames = effect->head.frameCount;
@@ -1566,15 +1566,15 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     packet += index;
     radius = effect->radius;
     jitter = effect->f178;
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    tmp[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    tmp[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, tmp);
-    packet->pos[0] = radius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[0];
-    packet->pos[1] = radius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[1];
-    packet->pos[2] = radius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * tmp[2];
+    packet->pos[0] = radius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[0];
+    packet->pos[1] = radius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[1];
+    packet->pos[2] = radius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[2];
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->pos);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -1582,23 +1582,23 @@ void effEmitterSphereSpawn(EffEmitterF *effect, u32 index) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    packet->vel[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    packet->vel[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     packet->vel[1] = 0;
-    packet->vel[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    packet->vel[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (func_00341240(D_003AA868) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_003AA868) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (func_00341240(D_003AA868) * effect->f170 + (1.0f - effect->f170));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->f170 + (1.0f - effect->f170));
     packet->age = ~(effMiscRand(D_00451F20) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1618,7 +1618,7 @@ void effEmitterSphereUpdate(EffEmitterF *effect) {
     s32 i;
     u32 loop;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     spin = effect->f160 * (3.14159265f / 180.0f);
     decay = effect->f16C / 100.0f + 1.0f;
@@ -1750,7 +1750,7 @@ void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
     packet->age = -1;
     packet->color = 0;
     jitter = effect->jitter;
-    radius = effect->radius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    radius = effect->radius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     packet->f30 = radius;
     angle = (3.14159265f * 2.0f) / effect->period * (index % effect->period);
     packet->vel[0] = func_003407A0(angle);
@@ -1766,10 +1766,10 @@ void effEmitterExpandRingSpawn(EffEmitterG *effect, u32 index) {
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, packet);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1790,7 +1790,7 @@ void effEmitterExpandRingUpdate(EffEmitterG *effect) {
     s32 frames;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     spin = effect->spinRate * (3.14159265f / 180.0f);
     cycles = 0;
@@ -1952,10 +1952,10 @@ void effEmitterConeSpawn(EffEmitterH *effect, s32 index) {
     packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1973,7 +1973,7 @@ void effEmitterConeUpdate(EffEmitterH *effect) {
     s32 loop;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     decay = effect->decayPct / 100.0f + 1.0f;
     cycles = 0;
@@ -2095,7 +2095,7 @@ void effFreeSingleParticleTemplate(u32 effect) {
 }
 
 extern u8 D_003AA868[];
-extern f32 func_00341240(void *);
+extern f32 effMiscRandUnitFloat(void *);
 
 /* Initialize a particle record, applying random speed and angle jitter. */
 void effInitParticleRecord(effect)
@@ -2115,10 +2115,10 @@ void effInitParticleRecord(effect)
     particle->angle = 0;
     effect->lastSpeed = effect->speed;
     jitter = effect->speedJitter;
-    particle->speed = effect->speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    particle->speed = effect->speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->angleJitter;
     if (jitter != 0) {
-        particle->angle = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        particle->angle = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         particle->angle = 0;
     }
@@ -2206,7 +2206,7 @@ void effEmitterOffsetGravityUpdate(EffEmitterJ *effect) {
     s32 loop;
     s32 i;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     mode = effect->mode;
     if (mode == 0) {
         VU0_LOAD_MATRIX(effect->head.matrix);
@@ -2338,10 +2338,10 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
 
     packet += index;
     aux += index;
-    radius = effect->radius * ((func_00341240(D_003AA868) - 0.5f) * 2.0f);
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    radius = effect->radius * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     tmp[1] = 0;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, tmp);
@@ -2352,24 +2352,24 @@ void effEmitterDiscAuxSpawn(EffEmitterK *effect, u32 index) {
     VU0_LOAD_VF(vf10, *aux);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, *aux);
-    tmp[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     tmp[1] = 0;
-    tmp[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, tmp);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (func_00341240(D_003AA868) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_003AA868) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (func_00341240(D_003AA868) * effect->f170 + (1.0f - effect->f170));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_003AA868) * effect->f170 + (1.0f - effect->f170));
     packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2391,7 +2391,7 @@ void effEmitterDiscAuxUpdate(EffEmitterK *effect) {
     s32 i;
     u32 loop;
 
-    func_001629C0(&effect->head.sub);
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX(effect->head.matrix);
     spin = effect->f160 * (3.14159265f / 180.0f);
     decay = effect->f16C / 100.0f + 1.0f;

@@ -234,7 +234,7 @@ segments:
       - [0x1C8D00, c, file/fileManager]  # Nocturne __FILE__
       - [0x1C93F0, c, game/code_002C83F0]
       - [0x1CA2E8, c, mc/mcManager]  # Nocturne __FILE__
-      - [0x1CA660, c, game/code_002C9660]
+      - [0x1CA6D0, c, game/code_002C96D0]
       - [0x1DD108, c, game/code_002DC108]  # mirrors dds1 game/code_0029A810 (tools/shared_funcs.py)
       - [0x1DD138, c, game/code_002DC138]
       - [0x2075A0, c, game/code_003065A0]
@@ -404,7 +404,7 @@ segments:
       - [0x32C0D0, .rodata, game/code_002BE628]
       - [0x32C628, .rodata, file/fileManager]
       - [0x32C648, .rodata, game/code_002C83F0]
-      - [0x32C660, .rodata, game/code_002C9660]
+      - [0x32C660, .rodata, game/code_002C96D0]
       - [0x32CBB0, .rodata, game/code_002DC138]
       - [0x32E200, .rodata, game/code_00306F80]
       - [0x32E240, .rodata, game/code_0030A128]
@@ -509,7 +509,7 @@ segments:
       - [0x33681C, .lit4, game/code_002A3AE8]
       - [0x336820, .lit4, game/code_002A5260]
       - [0x336838, .lit4, game/code_002BE628]
-      - [0x336848, .lit4, game/code_002C9660]
+      - [0x336848, .lit4, game/code_002C96D0]
       - [0x3368E4, .lit4, game/code_002DC138]
       - [0x336A0C, .lit4, game/code_0030E1A0]
       - [0x336A34, .lit4, game/code_00310BC8]
@@ -606,7 +606,7 @@ segments:
       - [0x338C38, .sdata, game/code_002BD5C8]
       - [0x338C58, .sdata, game/code_002BE628]
       - [0x338CC0, .sdata, game/code_002C83F0]
-      - [0x338CD0, .sdata, game/code_002C9660]
+      - [0x338CD0, .sdata, game/code_002C96D0]
       - [0x338E2C, .sdata, game/code_002DC138]
       - [0x339868, .sdata, game/code_00306F80]
       - [0x339888, .sdata, game/code_0030A128]

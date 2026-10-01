@@ -5,13 +5,13 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void func_001632E0(void *work);
 
-extern void func_0015B8B8(u32 handle);
-extern void func_0015CC58(u32 param0, u32 param1, void *cells, u32 param3);
+extern void parReleaseCellSystem(u32 handle);
+extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_0015CCD0(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_0015CDF0(u32 param0, u32 param1, void *cells, u32 param3);
 extern void func_002D0918(u32 handle);
 extern u32 effMiscRand(void *state);
-extern f32 func_002E8398(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 
 /*
@@ -28,7 +28,7 @@ typedef struct {
     u32 unk50;      /* 0x50 settable param */
     f32 baseFirst;   /* 0x54 */
     f32 baseSecond;  /* 0x58 */
-    u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
+    u32 unk5C;      /* 0x5C handle released by parReleaseCellSystem */
     u32 unk60;      /* 0x60 handle released by func_002D0918 */
 } EffPCPThunderWork;
 
@@ -51,7 +51,7 @@ typedef struct {
     u32 cnt10;    /* 0x10 random modulus + 1, then decremented */
 } EffThunderCell; /* 0x14 */
 
-/* 0x20-byte sub-element holding a handle released by func_0015B8B8. */
+/* 0x20-byte sub-element holding a handle released by parReleaseCellSystem. */
 typedef struct {
     s32 delay;      /* 0x00 */
     f32 f04;        /* 0x04 */
@@ -60,7 +60,7 @@ typedef struct {
     f32 f10;        /* 0x10 */
     f32 f14;        /* 0x14 */
     f32 f18;        /* 0x18 */
-    u32 handle1C;   /* 0x1C released by func_0015B8B8 */
+    u32 handle1C;   /* 0x1C released by parReleaseCellSystem */
 } EffThunderSub; /* 0x20 */
 
 /* Work for the remaining thunder effects (u32 params and handles only). */
@@ -85,8 +85,8 @@ typedef struct {
         EffThunderFrag *fragments;
     } fragmentData; /* 0x54: fragment array / released handle */
     u32 unk58;      /* 0x58 settable param */
-    u32 unk5C;      /* 0x5C handle released by func_0015B8B8 */
-    u32 unk60;      /* 0x60 handle released by func_0015B8B8/func_002D0918 */
+    u32 unk5C;      /* 0x5C handle released by parReleaseCellSystem */
+    u32 unk60;      /* 0x60 handle released by parReleaseCellSystem/func_002D0918 */
     u32 unk64;      /* 0x64 handle released by func_002D0918 */
     s32 subCount;    /* 0x68 */
     u8 pad6C[0x38]; /* 0x6C */
@@ -106,7 +106,7 @@ void func_001634C0(void *work) {
 }
 
 void effPCPThunderFree(EffPCPThunderWork *work) {
-    func_0015B8B8(work->unk5C);
+    parReleaseCellSystem(work->unk5C);
     func_002D0918(work->unk60);
 }
 
@@ -129,12 +129,12 @@ u32 func_00163540(u32 arg0) {
 
 extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern void *func_0015B6A0(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void func_0015B918(void *system);
+extern void parPrependCellNode(void *system);
 extern void parCellInit(void *system, s32 index);
-extern s32 func_0018DDF8(s32 color, s32 param);
+extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 typedef struct {
@@ -195,27 +195,27 @@ void effThunderCellRestart(EffThunderWork4C *work, s32 index) {
 
     cell->unk00 = effMiscRand(D_0034DF38) % work->head.spreadA;
     cell->unk04 = effMiscRand(D_0034DF38) % work->head.spreadB + 1;
-    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     dir[1] = 0;
-    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
-    dir[1] = work->head.scaledSecond * 0.5f * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
+    dir[1] = work->head.scaledSecond * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
     cell->dirA[0] = dir[0];
     cell->dirA[1] = dir[1];
     cell->dirA[2] = dir[2];
-    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
+    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
     dir[1] = 1.0f;
-    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
+    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
     cell->dirB[0] = dir[0];
     cell->dirB[1] = dir[1];
     cell->dirB[2] = dir[2];
-    cell->f20 = work->head.rangeF24 * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
-    cell->f24 = work->head.scaledFirst * 0.5f * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
+    cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
+    cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
     cell->unk28 = 0x80808080;
 }
 
@@ -235,7 +235,7 @@ EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
     work->baseFirst = src->scaledFirst;
     work->baseSecond = src->scaledSecond;
     work->handle = handle;
-    work->system = func_0015B6A0(work->head.count, work->head.perCell, 0, 0);
+    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, 0);
     parDispatchSub(work->system, 2, work->head.dispatchArg, work->head.dispatchArg);
     func_0015D078(work->system, work->head.systemParam);
     for (i = 0; i < work->head.count; i++) {
@@ -248,7 +248,7 @@ EffThunderWork4C *effThunderWorkCreate(EffThunderHead4C *src) {
 }
 
 void effPCPThunderFree2(EffPCPThunderWork *work) {
-    func_0015B8B8(work->unk5C);
+    parReleaseCellSystem(work->unk5C);
     func_002D0918(work->unk60);
 }
 
@@ -287,27 +287,27 @@ void effThunderRestartIndexedCell(EffThunderWork4C *work, s32 index) {
 
     cell->unk00 = effMiscRand(D_0034DF38) % work->head.spreadA;
     cell->unk04 = effMiscRand(D_0034DF38) % work->head.spreadB + 1;
-    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     dir[1] = 0;
-    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f;
+    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
-    dir[1] = work->head.scaledSecond * 0.5f * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
+    dir[1] = work->head.scaledSecond * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
     cell->dirA[0] = dir[0];
     cell->dirA[1] = dir[1];
     cell->dirA[2] = dir[2];
-    dir[0] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
+    dir[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
     dir[1] = 1.0f;
-    dir[2] = (func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
+    dir[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.5f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
     cell->dirB[0] = dir[0];
     cell->dirB[1] = dir[1];
     cell->dirB[2] = dir[2];
-    cell->f20 = work->head.rangeF24 * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
-    cell->f24 = work->head.scaledFirst * 0.5f * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
+    cell->f20 = work->head.rangeF24 * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.4f + 1.0f);
+    cell->f24 = work->head.scaledFirst * 0.5f * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f);
     cell->unk28 = 0x80808080;
 }
 
@@ -365,7 +365,7 @@ EffThunderWorkA4 *effThunderSparkCreate(EffThunderHeadA4 *src) {
     }
     spread = work->head.spread;
     for (i = 0; i < work->head.sparkCount; i++) {
-        work->subs[i].handle1C = (u32)func_0015B6A0(1, work->head.halfLife * 2 - 1, 0, 0);
+        work->subs[i].handle1C = (u32)parAllocateCellSystem(1, work->head.halfLife * 2 - 1, 0, 0);
         parDispatchSub((void *)work->subs[i].handle1C, 2, work->head.dispatchArg, work->head.dispatchArg);
         func_0015D078((void *)work->subs[i].handle1C, work->head.systemParam);
         effThunderSparkInit(work, i);
@@ -380,7 +380,7 @@ void effThunderDestroySubs(EffPCPThunderWorkB *work) {
 
     if (count > 0) {
         do {
-            func_0015B8B8(work->subs[i].handle1C);
+            parReleaseCellSystem(work->subs[i].handle1C);
             i++;
         } while (i < count);
     }
@@ -401,13 +401,13 @@ void effThunderSparkInit(EffThunderWorkA4 *work, s32 index) {
 
     spark->f04 = 0;
     blend = work->head.blend9C;
-    spark->f08 = work->head.f98 * (func_002E8398(D_0034DF38) * blend + (1.0f - blend));
-    spark->f18 = work->head.f88 * func_002E8398(D_0034DF38);
-    spark->f0C = func_002E8398(D_0034DF38) * (3.14159265f * 2.0f);
+    spark->f08 = work->head.f98 * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend));
+    spark->f18 = work->head.f88 * effMiscRandUnitFloat(D_0034DF38);
+    spark->f0C = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
     blend = work->head.blend90;
-    spark->f10 = work->head.f8C * (func_002E8398(D_0034DF38) * blend + (1.0f - blend));
+    spark->f10 = work->head.f8C * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend));
     blend = work->head.blend84;
-    spark->f14 = work->head.f80 * (func_002E8398(D_0034DF38) * blend + (1.0f - blend));
+    spark->f14 = work->head.f80 * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00164BA8);
@@ -453,7 +453,7 @@ EffThunderWork54 *effThunderFragCreate(EffThunderHead54 *src) {
     work->head = *src;
     work->fragments = (EffThunderFrag *)(work + 1);
     work->handle = handle;
-    work->system = func_0015B6A0(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 4);
+    work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 4);
     func_0015CEF8(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
     func_0015D078(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
@@ -465,7 +465,7 @@ EffThunderWork54 *effThunderFragCreate(EffThunderHead54 *src) {
 }
 
 void effPCPThunderFree3(EffPCPThunderWorkB *work) {
-    func_0015B8B8(work->unk60);
+    parReleaseCellSystem(work->unk60);
     func_002D0918(work->unk64);
 }
 
@@ -496,7 +496,7 @@ void func_00165668(EffPCPThunderWorkB *work) {
 }
 
 void func_00165690(EffPCPThunderWorkB *work) {
-    func_0015CC58(work->unk60, work->unk40, work->cells, work->unk50);
+    parFillSymmetricCellColors(work->unk60, work->unk40, work->cells, work->unk50);
 }
 
 /* Sample per-fragment timing values; the color is a fixed neutral grey. */
@@ -532,10 +532,10 @@ EffThunderWork54B *func_00165ED0(EffThunderHead54 *src) {
     work->head = *src;
     work->fragments = (EffThunderFrag *)(work + 1);
     work->handle = handle;
-    work->systemA = func_0015B6A0(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 1);
+    work->systemA = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 1);
     parDispatchSub(work->systemA, 2, work->head.arg48, work->head.arg50);
     func_0015D078(work->systemA, work->head.systemParam);
-    work->systemB = func_0015B6A0(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 0);
+    work->systemB = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 0);
     parDispatchSub(work->systemB, 2, work->head.arg40, work->head.arg40);
     func_0015D078(work->systemB, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
@@ -546,8 +546,8 @@ EffThunderWork54B *func_00165ED0(EffThunderHead54 *src) {
 }
 
 void effPCPThunderFree4(EffPCPThunderWorkB *work) {
-    func_0015B8B8(work->unk5C);
-    func_0015B8B8(work->unk60);
+    parReleaseCellSystem(work->unk5C);
+    parReleaseCellSystem(work->unk60);
     func_002D0918(work->unk64);
 }
 
@@ -615,7 +615,7 @@ EffThunderWork48 *effThunderCellCreate(EffThunderHead48 *src) {
     work->head = *src;
     work->cells = (EffThunderCell *)(work + 1);
     work->handle = handle;
-    work->system = func_0015B6A0(work->head.cellCount, work->head.halfLife * 2 - 1, 0, 2);
+    work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, 2);
     func_0015C7A0(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
     func_0015D078(work->system, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
@@ -625,7 +625,7 @@ EffThunderWork48 *effThunderCellCreate(EffThunderHead48 *src) {
 }
 
 void effPCPThunderFree5(EffPCPThunderWorkB *work) {
-    func_0015B8B8(work->unk50);
+    parReleaseCellSystem(work->unk50);
     func_002D0918(work->fragmentData.resource);
 }
 
@@ -642,11 +642,11 @@ void effThunderRandomizeCell(EffThunderWork48 *work, s32 index) {
     EffThunderCell *cell = work->cells + index;
     f32 v;
 
-    v = func_002E8398(&D_0034DF38) - 0.5f;
+    v = effMiscRandUnitFloat(&D_0034DF38) - 0.5f;
     cell->directionX = v + v;
-    v = func_002E8398(&D_0034DF38) - 0.5f;
+    v = effMiscRandUnitFloat(&D_0034DF38) - 0.5f;
     cell->directionY = v + v;
-    v = func_002E8398(&D_0034DF38) - 0.5f;
+    v = effMiscRandUnitFloat(&D_0034DF38) - 0.5f;
     cell->directionZ = v + v;
     cell->cnt0C = effMiscRand(&D_0034DF38) % work->head.cellFirstRange;
     cell->cnt10 = effMiscRand(&D_0034DF38) % work->head.cellSecondRange + 1;
@@ -682,5 +682,5 @@ void effThunderCellUpdate(EffThunderWork48 *work) {
             i++;
         } while (i < count);
     }
-    func_0015B918(work->system);
+    parPrependCellNode(work->system);
 }

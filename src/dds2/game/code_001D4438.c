@@ -293,7 +293,7 @@ extern void kwlnDrawEnableE08();
 extern void kwlnDrawSetupC70B();
 extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
-extern void func_0022E4C0();
+extern void btlMarkRuntimeUpdatePending();
 extern void kwlnFadeStartIn();
 extern s32 fldGetEncounterRuntimeResult();
 extern void fldSetEncounterPendingValue();
@@ -427,7 +427,7 @@ typedef struct SceneCoordinateWork {
 
 extern char *D_004368B0;
 extern void btlLoadResourceBlock(void);
-extern void func_001BB9E8(void);
+extern void btlStartRegisteredChildTask(void);
 extern void func_001C1520(void);
 extern void func_001C16B0(s32);
 
@@ -455,7 +455,7 @@ extern s64 mnuGetSoundBufferStateLocked(void);
 extern void func_00336538(f32);
 extern void func_003364B8(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 D_0037F550[];
@@ -698,7 +698,7 @@ struct BtlUnit {
 };
 
 extern void btlResetIndexWork();
-extern void func_00210DC8(BtlUnit *);
+extern void btlAdvanceHistoryCounter(BtlUnit *);
 
 /* Command actor and its linked action/index state; distinct from BtlUnit. */
 typedef struct BattleActionLinkState {
@@ -879,7 +879,7 @@ typedef struct XformData {
     f32 f24;
 } XformData;
 
-/* Two camera vectors are written at work+0x50 and work+0x60 by func_002001F0. */
+/* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
     u8 pad00[0x50];
     f32 eye[3];
@@ -970,7 +970,7 @@ extern u32 D_00435CD4;
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void func_002A2550(void);
+extern void mnuResetTitleStreamLocked(void);
 
 extern void func_002A2200(s32);
 
@@ -1085,7 +1085,7 @@ typedef struct SoundTransition {
     u16 queuedId;
 } SoundTransition;
 
-extern s32 func_00201578(u32 *);
+extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern u32 D_00436AD8;
 
@@ -1244,7 +1244,7 @@ extern void func_001F5868(s32, s32, s32, s32);
 extern void func_001F5320(s32, s32, s32, s32);
 extern s32 func_002DEB80(void *);
 extern char D_003BDCC8[];
-extern void func_002A2A70(void);
+extern void mnuReleaseSoundBufferLocked(void);
 extern void func_0023CA60(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(s32, s32);
@@ -1426,7 +1426,7 @@ void func_001D48F0(s32 task) {
 extern void func_001AA850();
 extern void btlFlagUnitDefeatCandidate();
 extern void func_001E2758();
-extern s32 func_001E44E0(u8 *, s32, s32, f32);
+extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 /* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change
  * instruction scheduling in this otherwise matching callback. */
@@ -1455,7 +1455,7 @@ s64 func_001D4908(u8 *task) {
         *(s32 *)(unit + 0x110) = *(s32 *)(unit + 0x110) & ~0x20 & 0xF7FFFFFF;
         btlFlagUnitDefeatCandidate(unit);
         func_001E2758(unit);
-        btlStartTask(func_001E44E0(unit, 0xE, 0, 1.0f));
+        btlStartTask(btlAllocateIndexedUnitEffectTask(unit, 0xE, 0, 1.0f));
         fldAppendTaskToGroup(task);
         btlDispatchStateHandler(task, 2);
     }
@@ -1549,7 +1549,7 @@ typedef struct TaskBlock {
 } TaskBlock;
 
 extern u8 *func_001DFB08(SceneActor *, TaskBlock *);
-extern u8 *func_0020F9D0(SceneActor *, u32, s32);
+extern u8 *btlCreateLinkedEffectTask(SceneActor *, u32, s32);
 
 /* Starts the command sound tasks and the follow-up action for the acting
  * unit, chosen by its selection flags. */
@@ -1610,13 +1610,13 @@ void func_001D4FE8(u8 *task) {
             *(s64 *)(effectTask + 8) = ownerId;
             btlStartTask(effectTask);
             if ((s32)block.word[0] > 0) {
-                object = func_0020F9D0(unit, block.word[0], 0);
+                object = btlCreateLinkedEffectTask(unit, block.word[0], 0);
                 *object = 4;
                 *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
                 btlStartTask(object);
             }
             if ((s32)block.word[1] > 0) {
-                object = func_0020F9D0(unit, block.word[1], 1);
+                object = btlCreateLinkedEffectTask(unit, block.word[1], 1);
                 *object = 4;
                 *(s64 *)(object + 8) = *(s64 *)(effectTask + 0x38);
                 btlStartTask(object);
@@ -1662,7 +1662,7 @@ void btlCommandResultEffectSelect(u8 *task) {
     case 7:
     case 8:
         if (((SceneTask *)task)->command == 4) {
-            selection = func_001AC098(((SceneTask *)task)->commandReference);
+            selection = btlGetLoggedIndexedCommandItem(((SceneTask *)task)->commandReference);
         } else {
             selection = ((SceneTask *)task)->commandValue;
         }
@@ -1819,7 +1819,7 @@ s32 btlCommandStateSelectC(u8 *task) {
     }
 }
 
-void func_001D5CE8(s32 task) {
+void btlResetCommandIndexWork(s32 task) {
     func_001B7830();
     btlResetIndexWork(task + 0x20);
     ((SceneTask *)task)->actor->actionResource = 0xffffffff;
@@ -2182,7 +2182,7 @@ void btlUnitTurnEndCommit(BtlUnit *unit) {
     if (hook != 0) {
         hook(unit);
     }
-    func_00210DC8(unit);
+    btlAdvanceHistoryCounter(unit);
     btlResetIndexWork((u8 *)unit + 0x20);
     owner->unk314 = -1;
     unit->unkC &= ~1;

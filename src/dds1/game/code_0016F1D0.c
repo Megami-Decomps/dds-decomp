@@ -26,7 +26,7 @@ extern u64 effParamTableGetBlock(u64, u64);
 
 extern void func_001705A0();
 
-extern s32 func_0018DDF8(s32 color, s32 param);
+extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
@@ -131,7 +131,7 @@ void effReleaseRingResources(EffectRecordGroup *group) {
     func_002D0918(group->handle78);
 }
 
-void func_0016F488(void *dst, void *src) {
+void effCopyRingVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -144,7 +144,7 @@ void func_0016F4A0(u8 *work, f32 value) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void func_0016F4A8(void *work, void *src) {
+void effCopyRingTransformMatrix(void *work, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(*(void **)((u8 *)work + 0x7C));
 }
@@ -157,16 +157,16 @@ void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
     slot = func_00170870(*(void **)(work + 0x7C), index);
     rgb1 = *(u32 *)(work + 0x28) & 0xFFFFFF;
     rgb2 = *(u32 *)(work + 0x2C) & 0xFFFFFF;
-    *(s32 *)(slot + 0) = func_0018DDF8(rgb2, param);
-    *(s32 *)(slot + 4) = func_0018DDF8(rgb2, param);
+    *(s32 *)(slot + 0) = effMultiplyPackedColors(rgb2, param);
+    *(s32 *)(slot + 4) = effMultiplyPackedColors(rgb2, param);
     if (index & 1) {
-        *(s32 *)(slot + 8) = func_0018DDF8(0x80000000, param);
-        *(s32 *)(slot + 0xC) = func_0018DDF8(rgb1 | 0xFF000000, param);
-        *(s32 *)(slot + 0x10) = func_0018DDF8(0x80000000, param);
+        *(s32 *)(slot + 8) = effMultiplyPackedColors(0x80000000, param);
+        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0xFF000000, param);
+        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0x80000000, param);
     } else {
-        *(s32 *)(slot + 8) = func_0018DDF8(0xFF000000, param);
-        *(s32 *)(slot + 0xC) = func_0018DDF8(rgb1 | 0x40000000, param);
-        *(s32 *)(slot + 0x10) = func_0018DDF8(0xFF000000, param);
+        *(s32 *)(slot + 8) = effMultiplyPackedColors(0xFF000000, param);
+        *(s32 *)(slot + 0xC) = effMultiplyPackedColors(rgb1 | 0x40000000, param);
+        *(s32 *)(slot + 0x10) = effMultiplyPackedColors(0xFF000000, param);
     }
 }
 
@@ -219,11 +219,11 @@ void func_00170048(EffectRecordGroup *group) {
 
 INCLUDE_ASM(const s32, "game/code_0016F1D0", func_00170078);
 
-s32 func_00170220(EffectRecordGroup *group, s32 index) {
+s32 effGetGroupRecordByIndex(EffectRecordGroup *group, s32 index) {
     return (s32)group->records + index * 0x30;
 }
 
-s32 func_00170238(EffectRecordGroup *group, s32 index) {
+s32 effGetGroupIndexRecord(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0xc;
 }
 

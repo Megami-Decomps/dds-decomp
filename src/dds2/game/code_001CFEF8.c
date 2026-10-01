@@ -242,7 +242,7 @@ extern void kwlnDrawEnableCd0();
 
 extern void kwlnDrawEnableD30();
 
-extern void func_0022E4C0();
+extern void btlMarkRuntimeUpdatePending();
 
 extern void kwlnFadeStartIn();
 
@@ -317,7 +317,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     VU0_STORE_VF($vf0, scene);
 }
 
-s32 func_001CFFC8(void) {
+s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
         func_0022B108() != 0 &&
         func_0022E460() != 0) {
@@ -385,7 +385,7 @@ s32 fldSceneStateRestoreDisplay(BattleSceneWork *scene) {
             kwlnDrawEnableCd0(0);
             kwlnDrawEnableD30(0);
             if (!(scene->subFlags & 0x100000)) {
-                func_0022E4C0();
+                btlMarkRuntimeUpdatePending();
             }
             if (!(scene->subFlags & 8)) {
                 kwlnFadeStartIn(0);

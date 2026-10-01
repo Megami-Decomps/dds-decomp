@@ -672,7 +672,7 @@ void sdfMotionApplyFiveFloatKeys(SdfMotionOutput *output, f32 t1) {
 
     func_00334678(output, keys, t1);
     sdfMotionBlendFiveKeyValues(keys, interpolated);
-    func_003333F8(output->target, interpolated);
+    sdfCopyPrimaryTextScalars(output->target, interpolated);
 }
 
 void sdfMotionBlendFiveFloatKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
@@ -683,7 +683,7 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
     func_00334678(output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b2);
     sdfMotionBlendFiveFloats(b1, (f32 *)&output->sampledValue, b2, t2);
-    func_003333F8(output->target, b1);
+    sdfCopyPrimaryTextScalars(output->target, b1);
 }
 
 void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
@@ -707,7 +707,7 @@ void sdfMotionApplySecondaryTextKeys(SdfMotionOutput *output, f32 t1) {
 
     func_00334678(output, keys, t1);
     sdfMotionBlendFiveKeyValues(keys, interpolated);
-    func_00333560(output->target, interpolated);
+    sdfCopySecondaryTextScalars(output->target, interpolated);
 }
 
 void sdfMotionBlendSecondaryTextKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
@@ -718,7 +718,7 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
     func_00334678(output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfMotionBlendFiveFloats(b2, (f32 *)&output->sampledValue, b1, t2);
-    func_00333560(output->target, b2);
+    sdfCopySecondaryTextScalars(output->target, b2);
 }
 
 void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
@@ -762,14 +762,14 @@ void sdfMotionApplySelectedTextKey(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
     func_00334678(output, sample, t1);
-    func_003333F8(output->target, sample[0]);
+    sdfCopyPrimaryTextScalars(output->target, sample[0]);
 }
 
 void sdfMotionApplySampleToTarget(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
     func_00334678(output, sample, t1);
-    func_003333F8(output->target, sample[0]);
+    sdfCopyPrimaryTextScalars(output->target, sample[0]);
 }
 
 void func_00335E10(void) {
@@ -787,12 +787,12 @@ void sdfMotionApplySampledSecondaryTextValue(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
     func_00334678(output, sample, t1);
-    func_00333560(output->target, sample[0]);
+    sdfCopySecondaryTextScalars(output->target, sample[0]);
 }
 
 void func_00335EB0(SdfMotionOutput *output, f32 t1) {
     u32 sample[4];
 
     func_00334678(output, sample, t1);
-    func_00333560(output->target, sample[0]);
+    sdfCopySecondaryTextScalars(output->target, sample[0]);
 }

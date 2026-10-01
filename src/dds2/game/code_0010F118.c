@@ -174,15 +174,8 @@ void effObjSetInnerThirdVec(EffTransformNode *node, u128 *vector) {
 void effObjFetchInnerFirstVec(EffTransformNode *node) {
     u8 *p = (u8 *)&node->inner->vec40;
 
-    __asm__ volatile (
-        ".set noreorder       \n"
-        "lqc2 vf10, 0(%0)     \n"
-        "vmove.w vf10, vf0    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
+    VU0_SET_W_ONE(vf10);
 }
 
 void effObjFetchInnerSecondVecNorm(EffTransformNode *node) {

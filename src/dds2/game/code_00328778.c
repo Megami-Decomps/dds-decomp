@@ -64,7 +64,7 @@ void sdfRunTickWorkerThread(void) {
 INCLUDE_ASM(const s32, "game/code_00328778", func_00328858);
 
 /* Register the thread under the list semaphore before starting it. */
-void func_00328918(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
+void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
     node->threadId = sdfCreateThread(entry, stack, stackSize, priority);
     WaitSema(D_004390F8);
     node->next = D_004390FC;

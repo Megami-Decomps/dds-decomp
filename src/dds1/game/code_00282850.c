@@ -49,15 +49,15 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 
 
 extern void evtStageTestCreateModelEffect(s32);
-extern void func_001F3188(s32);
+extern void btlUpdateJobPositionFromModel(s32);
 extern void func_00217878(s32, s32);
 extern void mnuApplyModelCamera(s32);
 extern void evtStageTestApplyEntryRotation(s32);
 extern void evtStageTestUpdateCamera(void);
 extern s32 func_00100518(void);
 extern void sdfCameraBuildProjection(void *);
-extern void func_002E14D8(void *packet, void *node, void *matrix);
-extern void func_002E15D0(void *node, void *matrix);
+extern void sdfConsBuildMatrixPacket(void *packet, void *node, void *matrix);
+extern void sdfConsCacheTransformedNode(void *node, void *matrix);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 D_00324690[];
 extern u8 D_00324680[];
@@ -94,7 +94,7 @@ typedef struct StageCameraTarget {
     u8 pad[8];
     void *unk8;
 } StageCameraTarget;
-extern StageCameraTarget *func_002204A8(f32 *, f32 *);
+extern StageCameraTarget *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern u8 D_003BC7C8[];
 
 extern s32 mdlGetNodeRefHalf(u32 node, s32 index);
@@ -284,7 +284,7 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestS
     mnuAdvancePanelTransition((s32)menu);
 }
 
-void func_00282BE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void mnuDrawPanelListDefault(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     mnuDrawStageTestList(arg0, arg1, arg2, 0, arg3, arg4);
 }
 
@@ -465,7 +465,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002833B0);
 
-u32 *func_00283788(u32 x, u32 y, u32 z, u32 color, u32 texture) {
+u32 *mnuAllocateSimpleSprite(u32 x, u32 y, u32 z, u32 color, u32 texture) {
     u32 *sprite = func_002CFEB8(0x28);
     memset(sprite, 0, 0x28);
     sprite[4] = x;
@@ -665,18 +665,18 @@ void mnuPositionPanelItemPoints(s32 obj, s32 param, s32 index) {
     MenuPanelItem *item = (MenuPanelItem *)obj;
 
     itfGridStorePosition(&item->points[0], param, 7);
-    func_002BF9E0(item->points[0].x, item->points[0].y, 0, 0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(item->points[0].x, item->points[0].y, 0, 0, 0, 0);
     itfGridStorePosition(&item->points[1], param, 5);
-    func_002BF9E0(item->points[1].x, item->points[1].y, 0x440, 0x58, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(item->points[1].x, item->points[1].y, 0x440, 0x58, 0, 0);
     itfGridStorePosition(&item->points[2], param, 6);
-    func_002BF9E0(item->points[2].x, item->points[2].y, 0x440, 0x58, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(item->points[2].x, item->points[2].y, 0x440, 0x58, 0, 0);
     itfGridStorePosition(&item->points[3], param, 9);
-    func_002BF9E0(item->points[3].x, item->points[3].y, 0x620, 0x50, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(item->points[3].x, item->points[3].y, 0x620, 0x50, 0, 0);
     itfGridStorePosition(&item->points[4], param, table[index]);
-    func_002BF9E0(item->points[4].x, item->points[4].y, 0x100, -0x48, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(item->points[4].x, item->points[4].y, 0x100, -0x48, 0, 0);
 }
 
-void func_00284BF8(MenuPanelItem *item, u32 value) {
+void mnuStorePanelItemValue(MenuPanelItem *item, u32 value) {
     item->value10 = value;
 }
 
@@ -728,7 +728,7 @@ void func_00285160(void) {
 void func_00285178(s32 item, u32 grid, u32 unused, u32 firstIndex,
                                     u32 secondIndex) {
     itfGridStorePosition((u32 *)(item + 0x18));
-    func_002BF9E0(*(u32 *)(item + 0x18), *(u32 *)(item + 0x1c), 0, 0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(*(u32 *)(item + 0x18), *(u32 *)(item + 0x1c), 0, 0, 0, 0);
     itfGridStorePosition(item + 0x20, grid, firstIndex);
     itfGridStorePosition(item + 0x28, grid, secondIndex);
 }
@@ -751,7 +751,7 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *item, s32 option) {
     item[13] = previous - 0x200;
 }
 
-void func_00285490(u32 item) {
+void mnuClearPanelTransitionState(u32 item) {
     memset(item, 0, 0x4c);
 }
 
@@ -767,7 +767,7 @@ void mnuDrainPanelTransitions(u32 item, u32 option) {
     }
 }
 
-s32 func_00285658(s32 *flags) {
+s32 mnuHasPopupSelectionFlag(s32 *flags) {
     return (*flags & 0x200000) > 0;
 }
 
@@ -1608,8 +1608,8 @@ void evtStageTestUpdateCamera(void)
     VU0_STORE_VF_UNCLOBBERED(vf10, &at);
     sdfVuBuildLookAtBasis(&eye, &at, D_003246A0);
     VU0_STORE_MATRIX_UNCLOBBERED(D_003296F0);
-    func_002E14D8(D_003270F0 + slot * 8000, D_003245E0, D_003296F0);
-    func_002E15D0(D_003245E0, D_003296F0);
+    sdfConsBuildMatrixPacket(D_003270F0 + slot * 8000, D_003245E0, D_003296F0);
+    sdfConsCacheTransformedNode(D_003245E0, D_003296F0);
 }
 
 s8 evtStageTestUpdate(s32 frame) {
@@ -1628,7 +1628,7 @@ s8 evtStageTestUpdate(s32 frame) {
                 D_003DC5E8.pendingEffect = -1;
             }
             if (D_003DC5E8.effect != 0) {
-                func_001F3188(D_003DC5E8.effect);
+                btlUpdateJobPositionFromModel(D_003DC5E8.effect);
             }
             func_00217878(D_003DC5E8.model, frame);
             evtStageTestAdvanceMotionQueue();
@@ -1774,7 +1774,7 @@ u32 func_00288458(void) {
 void *evtCreateBattleStageTestCamera(void) {
     f32 position[4] = {401.0f, -593.0f, -1208.25f, 0.0f};
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
-    StageCameraTarget *target = func_002204A8(position, orientation);
+    StageCameraTarget *target = evtCreateWorldObjectAtTransform(position, orientation);
 
     target->unk8 = D_003BC7C8;
     return func_00288458;
@@ -1792,7 +1792,7 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, s32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
-extern s32 func_002E4960();
+extern s32 sdfCreateFormattedSifCommand();
 extern void func_0021FEC0(s32, s32);
 
 void *evtBattleStageTestScreen(void) {
@@ -1800,10 +1800,10 @@ void *evtBattleStageTestScreen(void) {
 
     sdfInitPacketList(packets);
     kwlnDrawSpriteCell(packets, 0x84, 0x46, 0x14, 9);
-    sdfAppendPacket(packets, func_002E4960(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
-    sdfAppendPacket(packets, func_002E4960(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
-    sdfAppendPacket(packets, func_002E4960(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
-    sdfAppendPacket(packets, func_002E4960(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, "BATTLE STAGE"));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
     D_00325708.invoke(&D_00325708, packets);
     if (D_00324510[0x21] < 0) {
         func_0021FEC0(D_003BC7D0, D_003BC7D4);

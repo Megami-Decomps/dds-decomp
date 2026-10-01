@@ -82,7 +82,7 @@ void dds3AppendIntrusiveNode(s32 *list, s32 node, s32 linkOffset) {
     list[1] = node;
 }
 
-void func_0011CFF0(s32 *list, s32 node, s32 linkOffset) {
+void dds3UnlinkNodeFromList(s32 *list, s32 node, s32 linkOffset) {
     s32 prev = *(s32 *)(node + linkOffset);
     s32 next = *(s32 *)(node + linkOffset + 4);
 
@@ -103,15 +103,15 @@ void func_0011D030(Dds3Node *node, Dds3NodeVTable *vtable) {
     node->vtable = vtable;
 }
 
-void func_0011D070(Dds3Node *node) {
-    func_0011CFF0((s32 *)&D_003BD7A8, (s32)node, 0);
+void dds3DestroyLinkedNode(Dds3Node *node) {
+    dds3UnlinkNodeFromList((s32 *)&D_003BD7A8, (s32)node, 0);
     node->vtable->destroy((s32)node);
 }
 
 void func_0011D0B0(void) {
     u32 current;
     while ((current = D_003BD7A8) != 0) {
-        func_0011D070(current);
+        dds3DestroyLinkedNode(current);
     }
 }
 
@@ -119,19 +119,19 @@ void func_0011D0E0(s32 node, u32 value) {
     *(u32 *)(node + 8) = value;
 }
 
-void func_0011D0E8(s32 value) {
+void dds3DestroyNodesWithValue(s32 value) {
     Dds3Node *node = (Dds3Node *)D_003BD7A8;
 
     while (node != NULL) {
         Dds3Node *next = node->next;
         if (node->value == value) {
-            func_0011D070(node);
+            dds3DestroyLinkedNode(node);
         }
         node = next;
     }
 }
 
-void func_0011D138(void) {
+void dds3UpdateLinkedNodes(void) {
     Dds3Node *node = (Dds3Node *)D_003BD7A8;
 
     while (node != NULL) {
@@ -149,7 +149,7 @@ void func_0011D1A8(GlyphOwner *owner) {
     func_00195868(owner->glyph);
 }
 
-Dds3Node *func_0011D1C0(u32 arg0, u32 arg1, u32 arg2) {
+Dds3Node *dds3CreateFontNode(u32 arg0, u32 arg1, u32 arg2) {
     s32 obj;
     Dds3Node *node;
 

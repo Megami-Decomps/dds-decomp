@@ -12,7 +12,7 @@ extern u32 D_003BD630;
 
 extern u32 D_003BD61C;
 
-extern u64 func_002EB090(u32);
+extern u64 sndBuildResourceHandleListFromOffsets(u32);
 extern u64 func_002D3288(u32);
 
 extern u64 func_002EB028(u64, u32 *, u64);
@@ -34,7 +34,7 @@ extern s32 func_002E99A0();
 
 extern void func_002D0B50(void *out);
 
-extern void func_002E4C28(char *fmt, ...);
+extern void sdfPrintFormattedDevMessage(char *fmt, ...);
 
 typedef struct MidiChannel {
     u8 pad00[0x19];
@@ -130,7 +130,7 @@ extern SdfStreamNode *D_003BDAAC;
 
 extern SdfStreamNode *D_003BDAB0;
 
-extern void func_002D1FF0(s32, s32);
+extern void sdfTexEnqueuePacketWithSemaphore(s32, s32);
 
 extern void func_002EB650();
 
@@ -387,17 +387,17 @@ void sdfDumpGsMemoryForward(void) {
     GsMemBlock *walk;
     char *name;
 
-    func_002E4C28(D_003B4DB8);
+    sdfPrintFormattedDevMessage(D_003B4DB8);
     head = func_002D1D10();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
             name = D_00398A28[node->type];
         } else {
-            func_002E4C28(buf, D_003BD610, node->type);
+            sdfPrintFormattedDevMessage(buf, D_003BD610, node->type);
             name = buf;
         }
-        func_002E4C28(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
         walk = head;
         while (walk != node) {
             walk = walk->link4;
@@ -413,17 +413,17 @@ void sdfDumpGsMemoryBackward(void) {
     GsMemBlock *walk;
     char *name;
 
-    func_002E4C28(D_003B4DB8);
+    sdfPrintFormattedDevMessage(D_003B4DB8);
     head = func_002D1D18();
     node = head;
     while (node != 0) {
         if (node->type < 4) {
             name = D_00398A38[node->type];
         } else {
-            func_002E4C28(buf, D_003BD610, node->type);
+            sdfPrintFormattedDevMessage(buf, D_003BD610, node->type);
             name = buf;
         }
-        func_002E4C28(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
+        sdfPrintFormattedDevMessage(D_003B4E30, node, node->link0, node->link4, name, node->unkC, node->unk10);
         walk = head;
         while (walk != node) {
             walk = walk->link0;
@@ -439,7 +439,7 @@ INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4E30);
 void sndPrintMemoryInfo(void) {
     s32 info[6];
     func_002D0B50(info);
-    func_002E4C28(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
+    sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
                     info[0], info[1], info[2], info[3], info[4], info[5]);
 }
 
@@ -469,7 +469,7 @@ typedef struct SoundResourceList {
     s32 relativeOffsets[1];
 } SoundResourceList;
 
-u64 func_002EB090(u32 resource) {
+u64 sndBuildResourceHandleListFromOffsets(u32 resource) {
     s32 i = 0;
     s32 count = ((SoundResourceList *)resource)->count;
     s32 handle = func_002D9FA8(count);
@@ -491,7 +491,7 @@ u64 func_002EB118(u64 name) {
     u32 info[4];
 
     handle = func_002EB028(name, info, 0);
-    resource = func_002EB090(info[0]);
+    resource = sndBuildResourceHandleListFromOffsets(info[0]);
     func_002D0918(handle);
     return resource;
 }
@@ -793,7 +793,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     if (*selectedBuffer == 0) {
         func_002EB650();
     }
-    func_002D1FF0(*selectedBuffer, *selectedBuffer + state->bufferSize - 0x10);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - 0x10);
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }

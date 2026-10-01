@@ -460,7 +460,7 @@ typedef struct {
 
 extern u32 func_0018EBC8(void *params);
 
-extern u32 func_0018F098(void *params);
+extern u32 effCloneBlurWorkWithSlots(void *params);
 
 /* Compact burst variant with a floating-point word at 0x18. */
 typedef struct {
@@ -536,51 +536,51 @@ extern void *sdfResourceRetainAddress(void *resource);
 
 extern void effPcpViewAlignedRingSetPosition();
 
-extern void func_0017F4A8();
+extern void effPcpCopyTwinVector();
 
-extern void func_0017F928();
+extern void effPcpCopyStaggerVector();
 
-extern void func_0017FEB8();
+extern void effPcpCopyCrossVector();
 
-extern void func_00180240();
+extern void effPcpCopyDelayedPairVector();
 
 extern void func_00180900();
 
-extern void func_00180D90();
+extern void effPcpCopyRadialParticleVector();
 
-extern void func_00181208();
+extern void effPcpCopyNarrowConeVector();
 
-extern void func_001816A0();
+extern void effPcpCopyDenseConeVector();
 
-extern void func_00181B18();
+extern void effPcpCopyWideConeVector();
 
-extern void func_00181E88();
+extern void effPcpCopyFixedOriginVector();
 
-extern void func_001821F8();
+extern void effPcpCopySideBurstVector();
 
-extern void func_00182448();
+extern void effPcpCopyThunderHandleVector();
 
-extern void func_001828E0();
+extern void effPcpCopyVariableHeightVector();
 
-extern void func_00182B28();
+extern void effPcpCopyGrowingThunderFadeVector();
 
-extern void func_00182F80();
+extern void effPcpCopySharedTrailVector();
 
 extern void func_001832C8();
 
 extern void func_00183620();
 
-extern void func_00183DB0();
+extern void effPcpCopyCompactBlurVector();
 
-extern void func_00184148();
+extern void effPcpCopyShortThunderFadeVector();
 
-extern void func_001843F0();
+extern void effPcpCopyScalingThunderFadeVector();
 
-extern void func_00184698();
+extern void effPcpCopyThunderScaleFadeVector();
 
-extern void func_00185100();
+extern void effPcpCopySpanVector();
 
-extern void func_00186E18();
+extern void effPcpCopySpinSingleVector();
 
 extern void func_00187118();
 
@@ -848,11 +848,11 @@ typedef struct EffPCPBeamLargeWork {
     EffPCPBeamColorNode *node; /* 0x7C */
 } EffPCPBeamLargeWork;
 
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 D_003AA868[];
 
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 D_003AA868[];
 
@@ -871,7 +871,7 @@ extern void func_00232390(void *obj, void *table);
 
 extern void mdlStorePrimaryVectorVU(void *obj);
 
-extern void func_00332D48(u32 handle, s32 value);
+extern void sdfLoadMapRecordPositionVector(u32 handle, s32 value);
 
 extern u8 D_00380828[];
 
@@ -978,7 +978,7 @@ extern void effCopyVector(s32 handle, f32 *src);
 extern void billInvokeCallback(s32 handle);
 extern void billSetChildScaleComponents(s32 handle, f32 sx, f32 sy);
 extern void billSetChildParameter(s32 handle, u32 color);
-extern u32 func_00195A30(u32 flags, u32 color);
+extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 
 typedef struct EffPCPRingWork {
     f32 pos[4];
@@ -1020,7 +1020,7 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     for (i = 0; i < 10; i++) {
         billSetChildScaleComponents(handle, scale, scale);
         scale *= 0.975f;
-        billSetChildParameter(handle, func_00195A30(func_00195A30(color, work->color14), work->color10));
+        billSetChildParameter(handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
         color += 0x05000000;
         billInvokeCallback(handle);
     }
@@ -1043,7 +1043,7 @@ void effPcpViewAlignedRingSetScale(EffPCPWorkF18 *work, f32 val) {
 void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
     u128 mtx[4];
 
-    func_00336538((func_00341240(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
+    func_00336538((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
@@ -1143,7 +1143,7 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
         func_00232390(obj[0], D_00380828);
-        func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
+        sdfLoadMapRecordPositionVector(((EffPCPWork *)obj[0])->unk18, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
@@ -1156,7 +1156,7 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
     work->frame++;
 }
 
-void func_0017F4A8(void *dst, void *src) {
+void effPcpCopyTwinVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1173,7 +1173,7 @@ void func_0017F4C0(EffPCPWorkF18 *work, u32 value) {
 void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
-    func_00336538((func_00341240(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
+    func_00336538((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 6.283185f);
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
@@ -1181,7 +1181,7 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
-    work->offset[index] = func_00341240(D_003AA868) * 150.0f;
+    work->offset[index] = effMiscRandUnitFloat(D_003AA868) * 150.0f;
     work->delay[index] = effMiscRand(D_003AA868) % 10;
 }
 
@@ -1261,14 +1261,14 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
             func_00232390(obj[0], D_00380828);
-            func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
+            sdfLoadMapRecordPositionVector(((EffPCPWork *)obj[0])->unk18, 1);
             mdlStorePrimaryVectorVU(obj[1]);
             func_00232390(obj[1], D_00380828);
         }
     }
 }
 
-void func_0017F928(void *dst, void *src) {
+void effPcpCopyStaggerVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1394,14 +1394,14 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             }
             obj = effParamWorkGetData(work->handle[i][j]);
             mdlBroadcastMasked(obj, work->color);
-            func_00332D48(anchor->unk18, i * 4 + j + 1);
+            sdfLoadMapRecordPositionVector(anchor->unk18, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
             func_00232390(obj, D_00380828);
         }
     }
 }
 
-void func_0017FEB8(void *dst, void *src) {
+void effPcpCopyCrossVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1502,7 +1502,7 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
             func_00232390(obj[0], D_00380828);
-            func_00332D48(((EffPCPWork *)obj[0])->unk18, 1);
+            sdfLoadMapRecordPositionVector(((EffPCPWork *)obj[0])->unk18, 1);
                         VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
             func_00232390(obj[1], D_00380828);
@@ -1510,7 +1510,7 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
     }
 }
 
-void func_00180240(void *dst, void *src) {
+void effPcpCopyDelayedPairVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1624,12 +1624,8 @@ void effPcpSpawnOnce(EffPCPWork1C *work) {
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color10);
     func_00232390(obj, D_00380828);
-    func_00332D48(((EffPCPWork *)obj)->unk18, 1);
-        __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, %0\n"
-        ".set reorder"
-        : "=m"(vec) : : "memory");
+    sdfLoadMapRecordPositionVector(((EffPCPWork *)obj)->unk18, 1);
+        VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
     effParamWorkInvokeCallback(work->secondaryHandle);
 }
@@ -1696,20 +1692,20 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
         D_003B1670->unk44 = spread * 1.25f;
         D_003B1670->unk4C = spread * 12.5f;
-        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 100.0f;
         D_003B1670->vel[1] = 0;
         D_003B1670->vel[0] = sinv * radius;
         D_003B1670->vel[2] = cosv * radius;
         dir[0] = sinv;
-        dir[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f + 2.0f;
+        dir[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
         VU0_LOAD_VF($vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF($vf10, dir);
-        reach = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 350.0f;
+        reach = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
         scale[0] = reach;
         scale[1] = -reach;
@@ -1720,10 +1716,10 @@ void effPcpInitTwelveRadialParticles(EffSpawnGroup *group) {
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, D_003B1670);
         if (scale[0] < 250.0f) {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
         } else {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
         D_003B1670->lifetime = life;
@@ -1798,7 +1794,7 @@ void effPcpThunderShiftUpdateA(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void func_00180D90(void *dst, void *src) {
+void effPcpCopyRadialParticleVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1833,18 +1829,18 @@ void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
         D_003B16D0->unk44 = spread * 1.25f;
         D_003B16D0->unk4C = spread * 12.5f;
-        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         D_003B16D0->vel[1] = 0;
         D_003B16D0->vel[0] = sinv * radius;
         D_003B16D0->vel[2] = cosv * radius;
-        func_00336768(axis, -(func_00341240(D_003AA868) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B16D0->pos[0] = 0;
         D_003B16D0->pos[2] = 0;
         D_003B16D0->pos[1] = -height;
@@ -1854,10 +1850,10 @@ void effPcpSpawnConeTwelve(EffSpawnGroup *group) {
         D_003B16D0->pos[0] += D_003B16D0->vel[0];
         D_003B16D0->pos[2] += D_003B16D0->vel[2];
         if (height < 300.0f) {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
         } else {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
         D_003B16D0->lifetime = life;
@@ -1883,7 +1879,7 @@ void effPcpNarrowConeGroupRelease(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_001810E0(void) {
+void *effPcpCreateNarrowConeParticles(void) {
     void *work;
 
     work = func_00328D68(0x4c);
@@ -1895,7 +1891,7 @@ void effPcpThunderShiftUpdateB(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void func_00181208(void *dst, void *src) {
+void effPcpCopyNarrowConeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -1929,17 +1925,17 @@ void effPcpSpawnConeThirty(EffSpawnGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
-        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
         D_003B1730->unk44 = spread * 1.25f;
         D_003B1730->unk4C = spread * 12.5f;
         D_003B1730->vel[1] = 0;
-        D_003B1730->vel[0] = sinv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 500.0f);
-        D_003B1730->vel[2] = cosv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 250.0f);
+        D_003B1730->vel[0] = sinv * ((effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 500.0f);
+        D_003B1730->vel[2] = cosv * ((effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1730->pos[0] = 0;
         D_003B1730->pos[2] = 0;
         D_003B1730->pos[1] = -height;
@@ -1949,10 +1945,10 @@ void effPcpSpawnConeThirty(EffSpawnGroup *group) {
         D_003B1730->pos[0] += D_003B1730->vel[0];
         D_003B1730->pos[2] += D_003B1730->vel[2];
         if (height < 300.0f) {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
         } else {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
         D_003B1730->lifetime = life;
@@ -1978,7 +1974,7 @@ void effPcpWideConeGroupRelease(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_00181578(void) {
+void *effPcpCreateDenseConeParticles(void) {
     void *work;
 
     work = func_00328D68(0x94);
@@ -1990,7 +1986,7 @@ void effPcpThunderShiftUpdateC(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-void func_001816A0(void *dst, void *src) {
+void effPcpCopyDenseConeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2024,18 +2020,18 @@ void effPcpSpawnWideConeTwelve(EffSpawnGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
         D_003B1790->unk44 = spread * 1.25f;
         D_003B1790->unk4C = spread * 12.5f;
-        radius = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         D_003B1790->vel[1] = 0;
         D_003B1790->vel[0] = sinv * radius;
         D_003B1790->vel[2] = cosv * radius;
-        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1790->pos[0] = 0;
         D_003B1790->pos[2] = 0;
         D_003B1790->pos[1] = -height;
@@ -2045,10 +2041,10 @@ void effPcpSpawnWideConeTwelve(EffSpawnGroup *group) {
         D_003B1790->pos[0] += D_003B1790->vel[0];
         D_003B1790->pos[2] += D_003B1790->vel[2];
         if (height < 300.0f) {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
         } else {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
         D_003B1790->lifetime = life;
@@ -2074,7 +2070,7 @@ void effPcpReleaseWideConeParticles(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_001819F0(void) {
+void *effPcpCreateWideConeParticles(void) {
     void *work;
 
     work = func_00328D68(0x4c);
@@ -2086,7 +2082,7 @@ void effPcpThunderShiftUpdateD(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void func_00181B18(void *dst, void *src) {
+void effPcpCopyWideConeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2111,14 +2107,14 @@ void effPcpSpawnFixedOriginTwelve(EffSpawnGroup *group) {
 
     for (i = 0; i < 12; i++) {
         params = &D_003B17E8[effMiscRand(D_003AA868) & 1];
-        params->speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 20.0f;
+        params->speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 20.0f;
         life = effMiscRand(D_003AA868) % 6 + 15;
         params->pos[0] = -150.0f;
         params->pos[1] = -500.0f;
         params->pos[2] = 0;
         params->lifetime = life;
-        angle = func_00341240(D_003AA868) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
-        dist = (func_00341240(D_003AA868) * 0.25f + 0.75f) * 600.0f;
+        angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
+        dist = (effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 600.0f;
         params->vel[0] = params->pos[0] + func_003407A0(angle) * dist;
         params->vel[1] = params->pos[1] + sdfSinPoly(angle) * dist;
         params->vel[2] = 0;
@@ -2142,7 +2138,7 @@ void effPcpAngledBurstGroupRelease(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_00181D60(void) {
+void *effPcpCreateFixedOriginParticles(void) {
     void *work;
 
     work = func_00328D68(0x4c);
@@ -2154,7 +2150,7 @@ void effPcpThunderShiftUpdateE(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void func_00181E88(void *dst, void *src) {
+void effPcpCopyFixedOriginVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2180,17 +2176,17 @@ void effPcpSpawnSidewaysEight(EffSpawnGroup *group) {
     for (i = 0; i < 8; i++) {
         params = &D_003B1890[effMiscRand(D_003AA868) & 1];
         if (i & 1) {
-            params->vel[0] = func_00341240(D_003AA868) * 500.0f;
+            params->vel[0] = effMiscRandUnitFloat(D_003AA868) * 500.0f;
         } else {
-            params->vel[0] = func_00341240(D_003AA868) * -500.0f;
+            params->vel[0] = effMiscRandUnitFloat(D_003AA868) * -500.0f;
         }
         params->vel[1] = 0;
-        params->vel[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 250.0f;
+        params->vel[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 250.0f;
         params->pos[0] = 0;
         params->pos[1] = -600.0f;
         params->pos[2] = 0;
-        func_003364B8((func_00341240(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
-        func_00336898((func_00341240(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        func_003364B8((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        func_00336898((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         func_00336B00();
         VU0_LOAD_VF($vf10, params->pos);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -2217,7 +2213,7 @@ void effPcpSideBurstGroupRelease(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_001820D0(void) {
+void *effPcpCreateSideBurstParticles(void) {
     void *work;
 
     work = func_00328D68(0x3c);
@@ -2229,7 +2225,7 @@ void effPcpThunderShiftUpdateF(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 8);
 }
 
-void func_001821F8(void *dst, void *src) {
+void effPcpCopySideBurstVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2313,7 +2309,7 @@ void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void func_00182448(void *dst, void *src) {
+void effPcpCopyThunderHandleVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2346,17 +2342,17 @@ void effPcpSpawnVariableHeightParticles(EffSpawnGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
-        spread = func_00341240(D_003AA868) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(D_003AA868) * 0.5f + 0.5f;
         D_003B1990->unk44 = spread * 1.25f;
         D_003B1990->unk4C = spread * 12.5f;
         D_003B1990->vel[1] = 0;
-        D_003B1990->vel[0] = sinv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 500.0f);
-        D_003B1990->vel[2] = cosv * ((func_00341240(D_003AA868) * 0.25f + 0.75f) * 250.0f);
+        D_003B1990->vel[0] = sinv * ((effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 500.0f);
+        D_003B1990->vel[2] = cosv * ((effMiscRandUnitFloat(D_003AA868) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        func_00336768(axis, -(func_00341240(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (func_00341240(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        func_00336768(axis, -(effMiscRandUnitFloat(D_003AA868) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(D_003AA868) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_003B1990->pos[0] = 0;
         D_003B1990->pos[2] = 0;
         D_003B1990->pos[1] = -height;
@@ -2366,10 +2362,10 @@ void effPcpSpawnVariableHeightParticles(EffSpawnGroup *group) {
         D_003B1990->pos[0] += D_003B1990->vel[0];
         D_003B1990->pos[2] += D_003B1990->vel[2];
         if (height < 300.0f) {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = effMiscRand(D_003AA868) % 5 + 5;
         } else {
-            speed = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            speed = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 5.0f + 10.0f;
             life = effMiscRand(D_003AA868) % 6 + 15;
         }
         D_003B1990->lifetime = life;
@@ -2395,7 +2391,7 @@ void effPcpReleaseConeParticleGroup(MenuPanelChildren1C *group) {
     sdfReleaseChipBlock(group);
 }
 
-void *func_001827B8(void) {
+void *effPcpCreateVariableHeightParticles(void) {
     void *work;
 
     work = func_00328D68(0x94);
@@ -2407,7 +2403,7 @@ void effPcpThunderShiftUpdateG(EffPCPThunderShift *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-void func_001828E0(void *dst, void *src) {
+void effPcpCopyVariableHeightVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2427,7 +2423,7 @@ void effPcpInitGrowingThunderFadeWork(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-void *func_00182938(void) {
+void *effPcpCreateGrowingThunderFadeWork(void) {
     void *work;
 
     work = func_00328D68(0x20);
@@ -2435,7 +2431,7 @@ void *func_00182938(void) {
     return work;
 }
 
-void func_00182970(u32 work) {
+void effPcpReleaseGrowingThunderFadeWork(u32 work) {
     effPCPThunderFree(((EffPCPWork *)work)->unk1C);
     sdfReleaseChipBlock(work);
 }
@@ -2479,7 +2475,7 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void func_00182B28(void *dst, void *src) {
+void effPcpCopyGrowingThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2528,7 +2524,7 @@ typedef struct EffPCPTrailWork {
 } EffPCPTrailWork;
 
 extern s32 func_00195890(f32 value);
-extern u32 func_00195A30(u32 flags, u32 color);
+extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 extern void func_0018E908(EffPCPTrailObj *obj);
 
 /* Shared-work variant of the trail update: every reference counts frames in its
@@ -2581,7 +2577,7 @@ void effPcpUpdateSharedTrail(ref)
         if (obj->size < EFF_SHARED_TRAIL->minSize) {
             obj->size = EFF_SHARED_TRAIL->minSize;
         }
-        obj->color = func_00195A30(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
+        obj->color = effMultiplyPackedColors(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
         func_0018E908(obj);
         EFF_SHARED_TRAIL->frame++;
     }
@@ -2627,11 +2623,11 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
         work->color = work->colors[0];
     }
     work->frame++;
-    obj->color = func_00195A30(work->flags, work->color);
+    obj->color = effMultiplyPackedColors(work->flags, work->color);
     func_0018E908(obj);
 }
 
-void func_00182F80(void *dst, void *src) {
+void effPcpCopySharedTrailVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2768,7 +2764,7 @@ void *effPcpCopyWork(src)
     return dst;
 }
 
-void func_001836D0(void *args) {
+void effPcpCreateFadeTimerFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
@@ -2825,7 +2821,7 @@ void effPcpFadeTimerUpdate(EffPCPFadeTimer *work) {
     } else {
         t = 1.0f;
     }
-    work->color = func_00195A30(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    work->color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
     func_0018F840(&work->color);
     work->frame++;
 }
@@ -2847,7 +2843,7 @@ void *effPcpCopyWorkLong(src)
     return dst;
 }
 
-void func_001838E8(void *args) {
+void effPcpCreateLongFadeTimerFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
@@ -2907,7 +2903,7 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     } else {
         t = 1.0f;
     }
-    work->color = func_00195A30(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    work->color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
     func_0018E0D0(&work->color);
     work->frame++;
 }
@@ -2933,7 +2929,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactParams *params
     return work;
 }
 
-void func_00183AE8(void *args) {
+void effPcpCreateChargeWorkFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
@@ -2974,7 +2970,7 @@ void effPcpReleaseCompactBlurWork(u32 work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183BE8);
 
-void func_00183DB0(void *dst, void *src) {
+void effPcpCopyCompactBlurVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -2986,7 +2982,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactParams *params) 
     EffPCPCompactWork *work;
 
     work = func_00328D68(0x38);
-    work->resource = func_0018F098(&params->unk18);
+    work->resource = effCloneBlurWorkWithSlots(&params->unk18);
     work->flags = params->flags;
     work->unk14 = params->unk04;
     work->unk18 = params->unk08;
@@ -2999,7 +2995,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactParams *params) 
     return work;
 }
 
-void func_00183E58(void *args) {
+void effPcpCreateChargeResourceWorkFromTable(void *args) {
     void *param0;
 
     param0 = effParamTableGetBlock(args, 0);
@@ -3026,7 +3022,7 @@ void effPcpReleaseSecondaryBlurWork(u32 work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183F58);
 
-void func_00184148(void *dst, void *src) {
+void effPcpCopyShortThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -3042,7 +3038,7 @@ void effPcpInitShortThunderFadeWork(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-void *func_00184198(void) {
+void *effPcpCreateShortThunderFadeWork(void) {
     void *work;
 
     work = func_00328D68(0x20);
@@ -3050,7 +3046,7 @@ void *func_00184198(void) {
     return work;
 }
 
-void func_001841D0(u32 work) {
+void effPcpReleaseShortThunderFadeWork(u32 work) {
     effPCPThunderFree(((EffPCPWork *)work)->unk1C);
     sdfReleaseChipBlock(work);
 }
@@ -3094,7 +3090,7 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void func_001843F0(void *dst, void *src) {
+void effPcpCopyScalingThunderFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -3114,7 +3110,7 @@ void effPcpInitScalingThunderFadeWork(EffPCPWork *work) {
     work->unk1C = handle;
 }
 
-void *func_00184448(void) {
+void *effPcpCreateScalingThunderFadeWork(void) {
     void *work;
 
     work = func_00328D68(0x20);
@@ -3122,7 +3118,7 @@ void *func_00184448(void) {
     return work;
 }
 
-void func_00184480(u32 work) {
+void effPcpReleaseScalingThunderFadeWork(u32 work) {
     effPCPThunderFree(((EffPCPWork *)work)->unk1C);
     sdfReleaseChipBlock(work);
 }
@@ -3163,7 +3159,7 @@ void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void func_00184698(void *dst, void *src) {
+void effPcpCopyThunderScaleFadeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -3341,7 +3337,7 @@ void effPcpTripleHandleRelease(s32 *obj) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00184F50);
 
-void func_00185100(void *dst, void *src) {
+void effPcpCopySpanVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -3644,7 +3640,7 @@ EffPCPSpinWork *effSpinSingleCreateFromTable(void *src) {
     work->color = 0x80808080;
     work->handle0 = (void *)effParamCreateFromTable(src, 0);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
     if (effMiscRand(D_003AA868) & 1) {
         work->angle += 3.14159265f;
     }
@@ -3659,7 +3655,7 @@ EffPCPSpinWork *effSpinSingleClone(EffPCPSpinWork *src) {
     work->scale = 1.0f;
     work->color = 0x80808080;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
     if (effMiscRand(D_003AA868) & 1) {
         work->angle += 3.14159265f;
     }
@@ -3690,7 +3686,7 @@ void effSpinEffectUpdate(EffPCPSpinWork *work) {
     work->frame++;
 }
 
-void func_00186E18(void *dst, void *src) {
+void effPcpCopySpinSingleVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
@@ -3717,7 +3713,7 @@ EffPCPSpinWork *effSpinEffectCreateFromTable(void *table) {
     work->handle0 = (void *)effParamCreateFromTable(table, 0);
     work->handle1 = (void *)effParamCreateFromTable(table, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
@@ -3730,7 +3726,7 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
     work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
@@ -3797,7 +3793,7 @@ EffPCPSpinWork *effPcpCreateSpinningPair(void *table) {
     work->handle0 = (void *)effParamCreateFromTable(table, 0);
     work->handle1 = (void *)effParamCreateFromTable(table, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
@@ -3810,7 +3806,7 @@ EffPCPSpinWork *effPcpCloneSpinningPair(EffPCPSpinWork *src) {
     work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
     work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = 2.0f * (func_00341240(D_003AA868) - 0.5f) * 0.87266457f;
+    work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
@@ -4575,12 +4571,12 @@ void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
         entry->frame = -(effMiscRand(D_003AA868) % spread);
     }
     ratio = work->head.startJitter;
-    entry->position = work->head.startPosition * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale;
+    entry->position = work->head.startPosition * (effMiscRandUnitFloat(D_003AA868) * ratio + (1.0f - ratio)) * scale;
     ratio = work->head.endJitter;
-    entry->positionStep = (work->head.endPosition * (func_00341240(D_003AA868) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
+    entry->positionStep = (work->head.endPosition * (effMiscRandUnitFloat(D_003AA868) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
     entry->angle = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
     ratio = work->head.unk80;
-    entry->unk14 = work->head.unk78 * (func_00341240(D_003AA868) * ratio + (1.0f - ratio));
+    entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(D_003AA868) * ratio + (1.0f - ratio));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189500);
@@ -4608,7 +4604,7 @@ EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
         work->id[i] = i;
-        work->angle[i] = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->angle[i] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamCreateFromTable(src, 0);
     return work;
@@ -4625,7 +4621,7 @@ EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
         work->id[i] = i;
-        work->angle[i] = (func_00341240(D_003AA868) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->angle[i] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamWorkDuplicate(src->handle[0]);
     return work;
@@ -4734,12 +4730,12 @@ void effPcpDriftRandomizeSlot(EffPCPDriftWork *work, s32 index) {
     slot = &work->slots[index];
     scale = work->scale;
     spread = work->startJitter;
-    slot->position = work->startPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
+    slot->position = work->startPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale;
     spread = work->endJitter;
-    slot->positionStep = (work->endPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
+    slot->positionStep = (work->endPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
     slot->angle = 6.2831852f / (f32)work->steps * (f32)index;
     spread = work->unk80;
-    slot->unk14 = work->unk78 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    slot->unk14 = work->unk78 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018A428);
@@ -4824,13 +4820,13 @@ void effPcpRandomizeSlot(EffPCPSlotWork *work, s32 index) {
     slot = &work->slots[index];
     slot->phase = (3.14159265f * 2.0f) / work->count * index;
     spread = work->spreadA;
-    slot->speed = work->baseSpeed * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    slot->speed = work->baseSpeed * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     spread = work->spreadB;
     slot->unk14 = 0;
     if (effMiscRand(D_003AA868) & 1) {
-        slot->spin = work->baseSpin * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+        slot->spin = work->baseSpin * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     } else {
-        slot->spin = -work->baseSpin * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+        slot->spin = -work->baseSpin * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     }
 }
 
@@ -4930,16 +4926,16 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRange *work, s32 index) {
     slot = &work->slots[index];
     scale = work->scale;
     slot->unk04 = 0;
-    slot->unk08 = -work->unk90 * func_00341240(D_003AA868);
+    slot->unk08 = -work->unk90 * effMiscRandUnitFloat(D_003AA868);
     spread = work->unk78;
-    slot->unk0C = work->unk74 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
-    slot->angle = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
+    slot->unk0C = work->unk74 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
+    slot->angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
     spread = work->unk6C;
-    slot->unk14 = work->unk68 * (func_00341240(D_003AA868) * spread + (1.0f - spread));
+    slot->unk14 = work->unk68 * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread));
     spread = work->startJitter;
-    slot->position = work->startPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale;
+    slot->position = work->startPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale;
     spread = work->endJitter;
-    slot->positionStep = (work->endPosition * (func_00341240(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
+    slot->positionStep = (work->endPosition * (effMiscRandUnitFloat(D_003AA868) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->count;
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0018B778);

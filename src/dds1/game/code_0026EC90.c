@@ -102,7 +102,7 @@ extern MovieListState D_003DC560;
 
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 func_002E4960(s32, s32, s32, s32, char *, ...);
+extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, char *, ...);
 
 extern void sdfAppendPacket(s32, s32);
 
@@ -169,12 +169,12 @@ s32 mnuStaffImageProc(void) {
     return 0;
 }
 
-void func_0026FD88(void) {
+void mnuFinishStaffMovieAndFreeState(void) {
     s64 pendingWork;
 
     D_003BA72C = 2;
-    func_0026A808();
-    func_0026A950();
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
     func_0026F518();
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
@@ -183,7 +183,7 @@ void func_0026FD88(void) {
     D_003BC610 = (u32 *)0x0;
 }
 
-void func_0026FDD8(void) {
+void mnuReleaseMovieResourceAfterPendingWork(void) {
     effDestroyResourceSlotSet(D_003BC610[1]);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
@@ -199,7 +199,7 @@ extern s32 func_002D03F8(s32);
 extern s32 sdfResourceRetainAddress(s32);
 extern void func_0026A5F0(s32);
 extern void func_0026F5E8(void);
-extern void func_0026FD88(void);
+extern void mnuFinishStaffMovieAndFreeState(void);
 
 void mnuMovieCreateTask(void) {
     s32 handle;
@@ -214,7 +214,7 @@ void mnuMovieCreateTask(void) {
     movie[3] = 0;
     func_0026A5F0(0x13);
     D_003BA72C = 1;
-    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, func_0026FD88, 0);
+    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
@@ -233,7 +233,7 @@ s32 mnuMovieDraw(void) {
     return 0;
 }
 
-void func_0026FFA0(u32 resource, void *data) {
+void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
     if (D_003BC62C == 0) {
         func_002ED8D0(D_0037B888, data, resource);
         D_003BC62C = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
@@ -243,10 +243,10 @@ void func_0026FFA0(u32 resource, void *data) {
 void func_0026FFF8(s32 index) {
     u8 *entry = D_0037B168 + index * 24;
 
-    func_0026FFA0(*(s32 *)entry, (s32)(entry + 4));
+    mnuStartMovieDrawTaskForResource(*(s32 *)entry, (s32)(entry + 4));
 }
 
-void func_00270030(void) {
+void mnuStopMovieDrawTask(void) {
     if (D_003BC62C == 0) {
         return;
     }
@@ -427,7 +427,7 @@ void mnuCreateMovieManagerTask(void) {
     kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
 }
 
-u32 func_00270110(void) {
+u32 mnuScriptRequestMovieByIndex(void) {
     s32 movieIndex;
 
     movieIndex = scrReadIntParameter(0);
@@ -436,8 +436,8 @@ u32 func_00270110(void) {
     return 1;
 }
 
-u32 func_00270140(void) {
-    func_00270030();
+u32 mnuScriptStopMovieAndResetDraw(void) {
+    mnuStopMovieDrawTask();
     D_003BC630 = 0;
     kwlnDrawEnableDc8(0);
     return 1;
@@ -502,7 +502,7 @@ void mnuDrawMovieList(void) {
         node = node->next;
     }
     for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
-        sdfAppendPacket(packets, func_002E4960(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_003BC648, (i == selected) ? '>' : ' ', node->path));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_003BC648, (i == selected) ? '>' : ' ', node->path));
     }
     if (D_003DC560.top != 0) {
         func_002D6080(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
@@ -520,12 +520,12 @@ typedef struct MovieStatus {
 } MovieStatus;
 extern s32 D_003DC570[];
 
-void func_00270738(void) {
+void mnuDrawMovieProgressCounter(void) {
     s32 list;
     if (func_00270068() == 0) {
         list = D_003DC570[0];
         sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, func_002E4960(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_0037B888)->current, ((MovieStatus *)D_0037B888)->total));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)D_0037B888)->current, ((MovieStatus *)D_0037B888)->total));
     }
 }
 
@@ -541,7 +541,7 @@ void mnuDestroyMovieViewerTask(void) {
     if (task != 0) {
         kwlnTaskDestroyWithHierarchy(task, 0);
         D_003DC560.task = 0;
-        func_00270030();
+        mnuStopMovieDrawTask();
     }
     mnuClearMovieList();
 }
@@ -558,7 +558,7 @@ void func_00270AD8(void) {
 }
 
 /* Copy a source word and a 0x40-byte block when their pending flags are set. */
-void func_00270B10(void) {
+void mnuCommitPendingMovieDrawValues(void) {
     if (D_003DC578.wordPending != 0) {
         D_003DC578.word = *(s32 *)D_003DC578.wordSource;
     }
@@ -616,26 +616,26 @@ s32 mnuUpdateIpuRegisterViewer(void) {
             }
         }
     }
-    func_00270B10();
+    mnuCommitPendingMovieDrawValues();
     packets = sdfCreateResetPacketList();
     sdfAppendPacket(packets, func_0011D3E8(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
     sdfCreatePacketA(packets, 0x80A03000, 0, (D_003DC578.cursor & 7) * 0xC0 + 0x7180, (D_003DC578.cursor >> 3) * 0xC0 + 0x79C0, (D_003DC578.cursor & 7) * 0xC0 + 0x7240, (D_003DC578.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfAppendPacket(packets, func_002E4960(0x7180, 0x79C0, 0xFF0080, 0, D_003BC650, D_003DC578.wordSource));
+    sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, D_003BC650, D_003DC578.wordSource));
     if (D_003DC578.wordPending != 0) {
-        sdfAppendPacket(packets, func_002E4960(0x7840, 0x79C0, 0xFF0080, 0, D_003BC650, D_003DC578.word));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_003BC650, D_003DC578.word));
     } else {
-        sdfAppendPacket(packets, func_002E4960(0x7840, 0x79C0, 0xFF0080, 0, D_003B1AD8));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7840, 0x79C0, 0xFF0080, 0, D_003B1AD8));
     }
     n = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfAppendPacket(packets, func_002E4960(0x7180, y, 0xFF0080, 0, D_003BC650, D_003DC578.blockSource + n));
+        sdfAppendPacket(packets, sdfCreateFormattedSifCommand(0x7180, y, 0xFF0080, 0, D_003BC650, D_003DC578.blockSource + n));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, n++) {
             if (D_003DC578.blockPending != 0) {
-                sdfAppendPacket(packets, func_002E4960(x, y, 0xFF0080, 0, D_003BC658, D_003DC578.block[n]));
+                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, D_003BC658, D_003DC578.block[n]));
             } else {
-                sdfAppendPacket(packets, func_002E4960(x, y, 0xFF0080, 0, D_003BC660));
+                sdfAppendPacket(packets, sdfCreateFormattedSifCommand(x, y, 0xFF0080, 0, D_003BC660));
             }
         }
     }
@@ -855,7 +855,7 @@ void *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *data) {
 extern u8 *D_003BAA00;
 extern s8 D_003BC6B5;
 
-void func_00271180(s32 list, s32 count, u8 *work) {
+void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
     s32 i;
 
     effResolveAndReleaseResource(*(u32 *)list);
@@ -879,7 +879,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
             effResolveAndReleaseResource(entries[i]);
         }
     } else {
-        func_00271180(entries, count, work);
+        movReleaseActivePartyCategoryModels(entries, count, work);
     }
 }
 
@@ -1177,11 +1177,11 @@ void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
         return;
     }
     func_0027E8D8(-0x10, -8, 0, *(s32 *)(menu + 0x138), 0x53);
-    func_00282BE8(0, 0, 0, menu + 0x15C, 0x53);
+    mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
     if (arg0 == 0) {
-        func_002BF790(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
-        func_002BF790(0x17A0, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0xF, 0x53);
-        func_002BF790(0x1E40, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0x10, 0x53);
+        itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
+        itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0xF, 0x53);
+        itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0x10, 0x53);
     }
 }
 

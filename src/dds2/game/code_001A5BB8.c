@@ -299,7 +299,7 @@ typedef struct UiCursor {
     s16 unk1A;
 } UiCursor;
 
-extern void func_001A19C8(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
 
 typedef struct SndSeqSelect {
@@ -325,7 +325,7 @@ typedef struct SndPad {
 } SndPad;
 extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
-extern void func_001A5EE8(s32, s32);
+extern void itfResetBattleFadeState(s32, s32);
 
 typedef struct UiSurface { u8 pad0[0x20]; } UiSurface;
 typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
@@ -355,7 +355,7 @@ extern s32 func_001197C0();
 extern s32 func_001198C0();
 
 /* Enable context rendering for every font object in the linked chain. */
-void func_001A5BB8(s32 fontObject) {
+void frFontEnableNodeContextModes(s32 fontObject) {
     for (; fontObject != 0; fontObject = *(s32 *)(fontObject + 0x24)) {
         frFontEnableContextMode(fontObject);
     }
@@ -394,7 +394,7 @@ void func_001A5CE8(UiPanel *panel) {
     }
 }
 
-void func_001A5DD8(u32 *arg0, s32 arg1) {
+void itfResetCursorPositionAndState(u32 *arg0, s32 arg1) {
     if (arg1 != 0) {
         *arg0 = 0x280;
         arg0[1] = 0xa10;
@@ -452,7 +452,7 @@ typedef struct UiResourceSlots {
 } UiResourceSlots;
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
-void func_001A5EB8(UiResourceSlots *slots) {
+void itfClearDrawStateWords(UiResourceSlots *slots) {
     s32 remaining;
     u32 *word;
 
@@ -465,7 +465,7 @@ void func_001A5EB8(UiResourceSlots *slots) {
     } while (-1 < remaining);
 }
 
-void func_001A5EE8(s32 arg0, s32 arg1) {
+void itfResetBattleFadeState(s32 arg0, s32 arg1) {
     if (arg1 == 0) {
         *(u8 *)arg0 = 0;
     }
@@ -552,10 +552,10 @@ void func_001A67E0(UiPanel *panel, s32 dy) {
     pos->y += dy;
     itfMesOffsetNodeChain(pos->chain, 0, dy);
     if (place->sprite != 0) {
-        func_001A19C8(place->sprite, 0, dy, 0, 0, 0);
+        itfAdvancePanelLayoutAndNotify(place->sprite, 0, dy, 0, 0, 0);
     }
     if (place->frame != 0) {
-        func_001A19C8(place->frame, 0, dy, 0, dy, 0);
+        itfAdvancePanelLayoutAndNotify(place->frame, 0, dy, 0, dy, 0);
     }
     if (origin->tex != 0) {
         origin->y += dy;
@@ -580,7 +580,7 @@ s32 sndSeqSelectPoll(s32 obj) {
     }
     if (dir != 0) {
         sndStepSequenceIndex(sel, dir);
-        func_001A5EE8(obj + 0x1D0, 1);
+        itfResetBattleFadeState(obj + 0x1D0, 1);
     }
     if (D_0037F510.confirm < 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
@@ -812,15 +812,15 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9130);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9580);
 
-u64 *func_001A96E8(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)func_0033A290(sdfAllocPacketAligned(0x30), 0x30);
+u64 *btlCreateGsTestRegisterPacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x48 : 0x47;
     return entry;
 }
 
-u64 *func_001A9740(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)func_0033A290(sdfAllocPacketAligned(0x30), 0x30);
+u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x43 : 0x42;
     return entry;
@@ -870,7 +870,7 @@ extern s32 func_001E9130(void);
 
 extern s32 func_001A9D70(void);
 
-s32 func_001A9988(void) {
+s32 btlUpdateActiveBattleFrame(void) {
     if (D_004366E4 == 0) {
         return 0;
     }
@@ -909,7 +909,7 @@ extern s32 fldInitializeBattleSceneFlow(void);
 
 extern s32 btlClearDeferredTasks(void);
 
-s32 func_001A9A30(void) {
+s32 btlUpdateBattleFieldPresentation(void) {
     BattleController *battle = (BattleController *)D_004366E4;
     if (battle == 0) {
         return 0;
@@ -934,16 +934,16 @@ extern char D_004366F0[];
 
 extern void func_001A9AA8();
 
-extern s32 func_001A9A30();
+extern s32 btlUpdateBattleFieldPresentation();
 
-extern s32 func_001A9988();
+extern s32 btlUpdateActiveBattleFrame();
 
 void btlCreateDrawTasks(void) {
     BattleController *battle = (BattleController *)D_004366E4;
     s32 draw;
-    draw = kwlnTaskCreate((s32)D_004366F0, 0x3F9, 0, 0, func_001A9988, func_001A9AA8, 0);
+    draw = kwlnTaskCreate((s32)D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
     battle->drawTask = draw;
-    func_00101968(draw, kwlnTaskCreate((s32)"battle_draw", 0x2B0E, 0, 0, func_001A9A30, 0, 0));
+    func_00101968(draw, kwlnTaskCreate((s32)"battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void func_001A9B40(void) {
@@ -963,18 +963,18 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9D70);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
 
-void func_001AA2E0(void) {
+void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();
     func_001CFB48();
     sndLoadSysEffLb();
 }
 
-u8 func_001AA308(void) {
+u8 btlIsRuntimeAllocated(void) {
     return D_004366E4 != 0;
 }
 
 s32 btlIsCurrentActorFullyMarked(void) {
-    if (func_001AA308() == 0) {
+    if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
     return (((BattleController *)D_004366E4)->flags & 0x06000000) == 0x06000000;
@@ -982,7 +982,7 @@ s32 btlIsCurrentActorFullyMarked(void) {
 
 s32 func_001AA350(void) {
     s32 state;
-    if (func_001AA308() == 0) {
+    if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
     state = D_004366E4;
@@ -1206,22 +1206,22 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABCC0);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABDE8);
 
-s8 func_001ABF00(UiObject *object, s32 index) {
+s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
     if (index == 0 && (object->flags & 0x400) != 0) {
         return *(s8 *)(D_00435DEC + object->index * 76 + 0x46);
     }
     return *(s8 *)(D_00435E1C + index * 2);
 }
 
-extern void func_001ABF68();
+extern void btlResolveUnitValueWithOverride();
 
 void func_001ABF50(s32 battler) {
-    func_001ABF68(battler + 0x120);
+    btlResolveUnitValueWithOverride(battler + 0x120);
 }
 
 extern void func_00119C78(s32, s32);
 
-void func_001ABF68(s32 arg0, s32 arg1) {
+void btlResolveUnitValueWithOverride(s32 arg0, s32 arg1) {
     s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(func_001AA6F8() + 0x6B8);
     if (hook != 0) {
         if (hook(arg0, arg1) != -1) {
@@ -1252,7 +1252,7 @@ s32 func_001AC050(s32 arg0, s32 arg1) {
     return D_00435DF8 + arg1 * 0x74;
 }
 
-s32 func_001AC098(s32 index) {
+s32 btlGetLoggedIndexedCommandItem(s32 index) {
     u16 item = *(u16 *)(D_00435E38 + index * 8 + 2);
     btlBossDebugPrintf(D_00415158, index, item);
     return item;
@@ -1621,7 +1621,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AFF38);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0760);
 
-s32 func_001B08A8(u8 *unit) {
+s32 btlTestActorStatusPredicate(u8 *unit) {
     s32 (*hook)(u8 *) = *(s32 (**)(u8 *))(func_001AA6F8() + 0x698);
     if (hook != 0) {
         if (hook(unit) != 0) {
@@ -1715,7 +1715,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1168);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1350);
 
-s32 func_001B1640(s32 first, s32 second, s32 other, s32 variant, s32 mode) {
+s32 btlQueryUnitChannelFlags(s32 first, s32 second, s32 other, s32 variant, s32 mode) {
     s32 flags;
     if (mode != 1) {
         return 0;
@@ -1767,7 +1767,7 @@ u32 func_001B2380(void) {
     return 0;
 }
 
-s32 func_001B2388(u8 *unit) {
+s32 btlCalculateAbilityRecoveryAmount(u8 *unit) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility((s32)unit + 0x120, 0x26E) != 0) {
         recovery = (s32)(*(u16 *)(unit + 0x12C) * D_00435E2C->mpRate);
@@ -1800,7 +1800,7 @@ s32 func_001B24C0(UiObject *object) {
     return object->currentValue * 100 / object->maximumValue < 26;
 }
 
-s32 func_001B24F8(UiObject *object, s32 delta) {
+s32 btlWouldUiValueFallBelowQuarter(UiObject *object, s32 delta) {
     s32 value = object->currentValue + delta;
     if (value <= 0) {
         return 1;
@@ -1838,7 +1838,7 @@ s32 btlBothSidesActive(UiObject *unit) {
     return 0;
 }
 
-s32 func_001B25F0(UiObject *object) {
+s32 btlIsUiObjectIndexAllowed(UiObject *object) {
     if ((object->flags & 0x400) != 0) {
         if (object->index >= 0x100) {
             return 0;
@@ -1866,7 +1866,7 @@ s32 func_001B27E8(s32 arg0, UiObject *unit, s32 arg2) {
         return 0;
     }
     func_001AA6F8();
-    kind = func_001ABF00(arg0, arg2);
+    kind = btlGetActorIndexedSignedValue(arg0, arg2);
     mask = func_001ACF68(kind);
     power = *(u16 *)(unit->selectedEntryIndex * 0x38 + D_00435E20 + 0x2E);
     if (power == 0) {
@@ -1888,7 +1888,7 @@ s32 func_001B28C8(s32 arg0) {
     return D_003B4F70[temp_v0 * 3];
 }
 
-s32 func_001B2900(UiObject *unit, s32 arg) {
+s32 btlTestSelectedItemCategoryMask(UiObject *unit, s32 arg) {
     s32 index = unit->selectedEntryIndex;
     u16 kind;
     if (index == -1) {
@@ -1968,7 +1968,7 @@ u8 func_001B33C8(u32 arg0) {
     return temp_v0 != 0;
 }
 
-s32 func_001B33E8(s32 object) {
+s32 btlChooseRandomAvailableOption(s32 object) {
     s32 choices[24];
     s32 count = func_001B32F8(object, choices);
     if (count != 0) {
@@ -2005,7 +2005,7 @@ s32 func_001B3430(s32 object) {
     return choices[effMiscRandMod(0, count)];
 }
 
-f32 func_001B3510(s32 unit, s32 unused, s32 index) {
+f32 btlGetActionCategoryMultiplier(s32 unit, s32 unused, s32 index) {
     s32 mode = *(u16 *)(index * 0x38 + D_00435E20 + 0x16);
     f32 rate;
     if (mode < 0xE) {
@@ -2255,7 +2255,7 @@ s32 func_001B45C8(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B4600);
 
-s32 func_001B4738(u8 *unit) {
+s32 btlRollActorEligibilityWithAbilityOverride(u8 *unit) {
     s32 (*hook)(u8 *) = *(s32 (**)(u8 *))(func_001AA6F8() + 0x6A4);
     if (hook != 0 && hook(unit) == 0) {
         return 0;
@@ -2696,7 +2696,7 @@ u32 func_001B7FB8(void) {
     return 0;
 }
 
-s32 func_001B8000(void) {
+s32 btlGetRegisteredTaskValueOrDefault(void) {
     if (func_001B7FB8() == 0) {
         return 0x80;
     }
@@ -2759,7 +2759,7 @@ void btlSetTaskPhase5(void) {
     }
 }
 
-void func_001B8278(s32 mode) {
+void btlSetTrackedTaskDisplayMode(s32 mode) {
     s32 task = func_001B88C8(7);
     s32 *state;
     if (task != 0) {
@@ -2971,7 +2971,7 @@ u32 btlSetSlotLowByteClamped(BtlSlotOwner *owner, s32 group, s32 slot, s32 delta
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BB5C0);
 
-void func_001BB888(void) {
+void btlReleaseMessageWindowTask(void) {
     u8 *window = (u8 *)kwlnTaskGetUserValue();
     itfMesCleanupWindow(*(s32 *)(window + 0x24), 0);
     sdfReleaseChipBlock(window);
@@ -3012,7 +3012,7 @@ extern void func_001BC108();
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-void func_001BB9E8(void) {
+void btlStartRegisteredChildTask(void) {
     u8 *work = (u8 *)func_001AA6F8();
     s32 task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, func_001BC108, sdfAllocAndClearQuadwords(0x20));
     func_00101968(*(s32 *)(work + 0x2C4), task);
@@ -3125,7 +3125,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BEF28);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF3C8);
 
-void func_001BF600(s32 handle) {
+void btlFreeRegisteredTaskData(s32 handle) {
     func_001AA6F8();
     sdfReleaseChipBlock(kwlnTaskGetUserValue(handle));
     func_001B88E0(1, 0);
@@ -3133,7 +3133,7 @@ void func_001BF600(s32 handle) {
 
 extern s8 D_0037F53D[];
 
-void func_001BF640(void) {
+void btlToggleModelFlagOnInput(void) {
     if (D_0037F53D[0] < 0) {
         if (mdlFlagTest(0xC0E) != 0) {
             mdlFlagClear(0xC0E);
@@ -3145,7 +3145,7 @@ void func_001BF640(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BF690);
 
-void func_001BF8B8(s32 handle) {
+void btlReleaseDialogTaskData(s32 handle) {
     u8 *window;
     func_001AA6F8();
     window = (u8 *)kwlnTaskGetUserValue(handle);
@@ -3341,7 +3341,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416740);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1300);
 
-void func_001C14E8(void) {
+void btlReleaseSelectionTaskBuffer(void) {
     if (func_001B88C8(2) != 0) {
         sdfReleaseChipBlock(D_00438F48);
     }

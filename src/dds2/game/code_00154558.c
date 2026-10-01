@@ -809,13 +809,13 @@ extern void func_00122F38(s32, s32, s32, s32);
 
 extern s64 func_00110628(u64);
 
-extern s64 func_001106D8(u64);
+extern s64 dds3AdvanceObjectValueCursor(u64);
 
 extern u64 func_00110CD8(u64, u64);
 
 extern void dds3DestroyWorldIndexNode(u64);
 
-extern s32 func_001106B8(u64);
+extern s32 dds3ResetObjectValueCursor(u64);
 
 typedef struct FldWorldItem {
     u8 pad0[0x18];
@@ -856,7 +856,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
         list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
         if (func_00110628(list) != 0) {
-            func_001106B8(list);
+            dds3ResetObjectValueCursor(list);
             do {
                 item = func_00110680(list);
                 if (item->data[1] == room) {
@@ -872,7 +872,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
                         break;
                     }
                 }
-            } while (func_001106D8(list) != 0);
+            } while (dds3AdvanceObjectValueCursor(list) != 0);
             dds3DestroyWorldIndexNode(list);
         }
     }
@@ -916,7 +916,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     if (world == D_00389770[4] && stage == D_00389770[5] + 1) {
         list = func_00110CD8(dds3GetWorldSecondaryObject(), 6);
         if (func_00110628(list) != 0) {
-            func_001106B8(list);
+            dds3ResetObjectValueCursor(list);
             do {
                 item = func_00110680(list);
                 if (item->data[1] == room) {
@@ -932,7 +932,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (func_001106D8(list) != 0);
+            } while (dds3AdvanceObjectValueCursor(list) != 0);
             dds3DestroyWorldIndexNode(list);
         }
     }
@@ -1172,7 +1172,7 @@ s32 fldCmdSetSceneBitsBarrierRoom(void) {
     return 1;
 }
 
-s32 func_00156070(void) {
+s32 fldOpClearMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
@@ -1184,7 +1184,7 @@ s32 func_00156070(void) {
     return 1;
 }
 
-s32 func_001560F8(void) {
+s32 fldOpSetMapTargetFlag(void) {
     s32 area = scrReadIntParameter(0);
     s32 floor, target;
     if (area == 0) area = D_00389780[0];
@@ -1269,7 +1269,7 @@ s32 fldCmdSetFloorFlag(void) {
 
 extern void func_001234E8(s32, s32, s32, s32);
 
-s32 func_00156440(void) {
+s32 fldOpClearRoomStateFlags(void) {
     s32 world;
     s32 stage;
     char *name;
@@ -1299,7 +1299,7 @@ s32 func_00156440(void) {
     return 1;
 }
 
-s32 func_00156538(void) {
+s32 fldOpSetRoomStateFlags(void) {
     s32 world;
     s32 stage;
     char *name;

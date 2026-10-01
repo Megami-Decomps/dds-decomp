@@ -7,7 +7,7 @@ extern s32 func_002D03F8(s32);
 
 extern void *sdfMemoryGetBlockAddress(s32);
 
-extern f32 func_002E8398(s32);
+extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
 
@@ -59,7 +59,7 @@ void *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
     resource->owner = owner;
     resource->sprite = sprite;
     resource->variant = variant;
-    resource->lifetime = (s32)(func_002E8398(0) * 30.0f + 10.0f);
+    resource->lifetime = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
     return resource;
 }
 

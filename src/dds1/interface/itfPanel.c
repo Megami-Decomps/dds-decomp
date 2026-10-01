@@ -51,7 +51,7 @@ void func_00199950(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s
     }
 }
 
-void func_00199998(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
+void itfAdvancePanelLayoutAndNotify(PanelDefinition *panel, s32 a10, s32 a14, s32 a18, s32 a1C, s32 a0C) {
     void (*handler)(void *, s32, s32, s32, s32) =
         (void (*)(void *, s32, s32, s32, s32))D_00357A00[panel->kind];
 
@@ -85,7 +85,7 @@ s32 func_00199A68(PanelDefinition *panel, s32 arg1) {
     s32 work = sdfAllocPacketAligned(0x20, arg1);
 
     sdfInitPacketList(work);
-    func_0019ACE0(work);
+    itfAppendGsPanelStatePacket(work);
     itfPanelDispatchHandler(panel, work);
     return ((PanelPacketDispatch *)arg1)->handler(arg1, work);
 }

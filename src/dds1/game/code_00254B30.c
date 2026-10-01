@@ -155,7 +155,7 @@ void itfDspSignalE(void) {
     dspStartEntry(7);
 }
 
-extern f32 func_002E8398(s32);
+extern f32 effMiscRandUnitFloat(s32);
 
 
 
@@ -174,16 +174,16 @@ void func_00255838(DspParticle *spark) {
     if (spark->timer < 0) {
         if (spark->phase != 0) {
             spark->phase = 0;
-            spark->timer = spark->timerMax = func_002E8398(0) * 30.0f + 1.0f;
-        } else if (func_002E8398(0) > 0.7f) {
-            spark->timer = spark->timerMax = func_002E8398(0) * 30.0f + 0.0f;
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 1.0f;
+        } else if (effMiscRandUnitFloat(0) > 0.7f) {
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 30.0f + 0.0f;
         } else {
             spark->phase = 1;
-            spark->timer = spark->timerMax = func_002E8398(0) * 60.0f + 45.0f;
-            spark->z = (func_002E8398(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
-            spark->size = func_002E8398(0) * 10.0f;
-            spark->x = func_002E8398(0) * 512.0f + -256.0f;
-            spark->y = func_002E8398(0) * 448.0f + -128.0f;
+            spark->timer = spark->timerMax = effMiscRandUnitFloat(0) * 60.0f + 45.0f;
+            spark->z = (effMiscRandUnitFloat(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = effMiscRandUnitFloat(0) * 10.0f;
+            spark->x = effMiscRandUnitFloat(0) * 512.0f + -256.0f;
+            spark->y = effMiscRandUnitFloat(0) * 448.0f + -128.0f;
         }
     }
 }
@@ -204,10 +204,10 @@ void func_002559F8(DspParticleState *state) {
 
     state->countdown = state->countdown - 1;
     if (state->countdown < 0) {
-        duration = func_002E8398(0) * 60.0f + 60.0f;
+        duration = effMiscRandUnitFloat(0) * 60.0f + 60.0f;
         state->period = duration;
         state->countdown = duration;
-        state->strength = func_002E8398(0) * 0.20000005f + 0.4f;
+        state->strength = effMiscRandUnitFloat(0) * 0.20000005f + 0.4f;
     }
     /* Advance every particle, including those waiting for their next phase. */
     particle = state->particles;

@@ -46,7 +46,7 @@ u32 func_00272A58(void) {
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s64 func_00272A90(s32 callback) {
+s64 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s64 state = func_00285670(context + 8, dispatchEntry, 0, callback);
@@ -59,7 +59,7 @@ s64 func_00272A90(s32 callback) {
     return state;
 }
 
-s64 func_00272B00(s32 arg0) {
+s64 mnuDrawStaffImageScreen(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();

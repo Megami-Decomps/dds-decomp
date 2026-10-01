@@ -49,7 +49,7 @@ extern f32 D_00438E14;
 
 extern u16 D_00438E04;
 
-extern void *func_003335E0(void);
+extern void *sdfCreateAssetWithDrawEntries(void);
 
 extern void *D_00438DB0;
 
@@ -137,7 +137,7 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, void *);
 
-extern u8 *func_0033A290(void *, s32);
+extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
 extern s32 func_00100400(void);
 
@@ -145,7 +145,7 @@ extern u8 D_00381ED0[];
 
 extern void func_0032DB30(const void *, void *, s32);
 
-extern void func_0032CF98(void *, void *);
+extern void sdfAppendDmaTagToList(void *, void *);
 
 extern void func_0032DB78(const void *, void *, s32);
 
@@ -267,7 +267,7 @@ void evtToggleSavedDrawVectors(s32 frames, f32 first, f32 second) {
 
 void evtEnsureDrawVectorState(void) {
     if (D_00438DB0 == NULL) {
-        D_00438DB0 = func_003335E0();
+        D_00438DB0 = sdfCreateAssetWithDrawEntries();
         ((EvtDrawState *)D_00438DB0)->value1C = 1.0f;
     }
 }
@@ -282,7 +282,7 @@ void evtSubmitGsRegister47(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_0033A290(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = 0x47;
     sdfAppendPacket(list, packet);
@@ -298,7 +298,7 @@ void evtSubmitGsRegister48(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_0033A290(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->registerId = 0x48;
     sdfAppendPacket(list, packet);
@@ -316,7 +316,7 @@ void evtSubmitTexturePacket(s32 value) {
     EvtGsCommand *command;
     sdfInitPacketList(list);
     packet = sdfAllocPacketAligned(0x30);
-    command = (EvtGsCommand *)func_0033A290(packet, 0x30);
+    command = (EvtGsCommand *)sdfConsFinalizePacketHeader(packet, 0x30);
     command->data = ((u64)value << 32) | 0x64;
     command->registerId = 0x42;
     sdfAppendPacket(list, packet);
@@ -332,7 +332,7 @@ void func_00108D80(void) {
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB30(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
-    func_0032CF98(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
         surface->submit(surface, list);
@@ -345,7 +345,7 @@ void func_00108E20(void) {
     sdfInitPacketList(list);
     texture = sdfAllocPacketAligned(0x40);
     func_0032DB78(D_00381ED0 + func_00100400() * 0x1F40, texture, 0);
-    func_0032CF98(list, texture);
+    sdfAppendDmaTagToList(list, texture);
     {
         EvtDrawSurface *surface = &D_0037FB48[D_00435CB8];
         surface->submit(surface, list);
@@ -390,7 +390,7 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
 }
 
 extern void sdfPktInit();
-extern void *func_0033D7B8();
+extern void *sdfFormatSifPacket();
 
 void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     u8 pkt[16];
@@ -402,7 +402,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     func_0032E4B8(packet);
     sdfAppendPacket(list, packet);
     sdfPktInit(pkt, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
-    sdfAppendPacket(list, func_0033D7B8(pkt, drawArg));
+    sdfAppendPacket(list, sdfFormatSifPacket(pkt, drawArg));
     surface = (EvtDrawSurface *)D_00380748;
     surface->submit(surface, list);
 }
@@ -464,7 +464,8 @@ void evtSelStateDestroy(void) {
     if (D_00435D18 != 0) {
         sdfReleaseChipBlock(D_00438E60);
         D_00435D18 = 0;
-        __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_CLEAR_W(vf10);
         VU0_STORE_VF(vf10, D_0037F590);
     }
 }
@@ -576,7 +577,7 @@ u32 evtPollFileMenuModeTwo(void) {
     return status;
 }
 
-u8 func_0010A528(void) {
+u8 evtWaitFileMenuTaskExit(void) {
     s64 operationResult;
 
     operationResult = fileMenuTaskExists();
@@ -605,7 +606,7 @@ u32 func_0010A5B8(void) {
     return 0;
 }
 
-void func_0010A5C0(void) {
+void evtStartSelectionFadeOut(void) {
     kwlnFadeBackgroundStartOut(0);
 }
 
@@ -837,7 +838,7 @@ u32 evtDestroySkyAndCampTasks(void) {
     return 0;
 }
 
-u8 func_0010AA48(void) {
+u8 evtWaitSkyCampTaskState(void) {
     s64 result;
 
     result = func_00260848();
@@ -904,7 +905,7 @@ u32 func_0010AB78(void) {
     return 0;
 }
 
-void func_0010AB80(void) {
+void evtLaunchFontTestScene(void) {
     func_001A03D8();
 }
 

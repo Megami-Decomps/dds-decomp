@@ -9,7 +9,7 @@ extern u64 effParamTableGetBlock(u64, u64);
 extern u32 effPcpScatterResAddRef(u32);
 
 extern u8 D_003AA868[];
-extern f32 func_00341240(void *state);
+extern f32 effMiscRandUnitFloat(void *state);
 extern f32 func_003407A0(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_003364B8(f32 angle);
@@ -144,7 +144,7 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 extern u8 D_00452020[0x2C];
 
-extern u32 func_003335E0(void);
+extern u32 sdfCreateAssetWithDrawEntries(void);
 
 extern void func_003332D0(u32 res, f32 scale);
 
@@ -418,15 +418,15 @@ void effScatterSpriteSpawn(PcpScatterWork10 *work, s32 index)
     f32 dir[4];
     f32 jitter;
 
-    sprite->spinAngle = func_00341240(D_003AA868) * (3.14159265f * 2.0f);
+    sprite->spinAngle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
     jitter = work->startRadiusJitter;
-    sprite->startRadius = work->startRadius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter));
+    sprite->startRadius = work->startRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
     jitter = work->endRadiusJitter;
-    sprite->radiusStep = (work->endRadius * (func_00341240(D_003AA868) * jitter + (1.0f - jitter)) - sprite->startRadius) / (f32)work->lifetime;
+    sprite->radiusStep = (work->endRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - sprite->startRadius) / (f32)work->lifetime;
     sprite->initialSize = work->initialSize;
-    dir[0] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    dir[1] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
-    dir[2] = (func_00341240(D_003AA868) - 0.5f) * 2.0f;
+    dir[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    dir[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    dir[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, dir);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, dir);
@@ -556,7 +556,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->scale = 1.0f;
     pool->color = 0x80808080;
     pool->sharedResource = 0;
-    pool->resource = func_003335E0();
+    pool->resource = sdfCreateAssetWithDrawEntries();
     func_003332D0(pool->resource, 1.0f);
     memset(D_00452020, 0, 0x2C);
     *(u16 *)(D_00452020 + 4) = 0x4000;

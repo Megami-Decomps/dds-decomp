@@ -264,7 +264,7 @@ void fldInitializeBattleSceneFlow(void) {
             func_00210E48();
         }
     }
-    func_001BF640();
+    btlToggleModelFlagOnInput();
     func_001C7F10();
 }
 
@@ -281,29 +281,29 @@ void func_001C80C8(void) {
 void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u64 first, u64 second) {
     u64 handle;
 
-    func_0019B8B0(0x13);
+    itfSetTextDrawLimit(0x13);
     handle = func_0019F5E8(x << 4, y << 3, 0, first, second, 0);
     func_0019D550(handle, 1, 0x53);
     frFontQueueGlyphInSelectedSlot(handle);
-    func_0019B8B0(0xffffffffffffffff);
+    itfSetTextDrawLimit(0xffffffffffffffff);
 }
 
 void func_001C8158(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
-    func_0019B8B0(0x13);
+    itfSetTextDrawLimit(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
-    func_0019B8B0(-1);
+    itfSetTextDrawLimit(-1);
 }
 
 void func_001C81F8(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
-    func_0019B8B0(0x13);
+    itfSetTextDrawLimit(0x13);
     handle = func_0019F460(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
-    func_0019B8B0(-1);
+    itfSetTextDrawLimit(-1);
 }
 
 s32 btlIsSceneActorCountWithinLimit(s32 unused, u32 limit) {
@@ -464,11 +464,11 @@ void func_001C9DC8(s32 unused) {
     } else {
         color = D_00438F48[1] | 0x89FEFF00;
     }
-    func_0019B8B0(0x13);
+    itfSetTextDrawLimit(0x13);
     handle = func_0019F460(0x1A0, 0xA60, 0xFF0010, color, (s32)text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
     frFontQueueGlyphInSelectedSlot(handle);
-    func_0019B8B0(-1);
+    itfSetTextDrawLimit(-1);
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9EA0);
@@ -1117,7 +1117,7 @@ extern char *D_004368B0;
 
 extern void btlLoadResourceBlock(void);
 
-extern void func_001BB9E8(void);
+extern void btlStartRegisteredChildTask(void);
 
 extern void func_001C1520(void);
 
@@ -1134,7 +1134,7 @@ void fldCreateSceneCleanupTask(void) {
     func_00101968(scene->taskParent, task);
     scene->sceneStatus = task;
     btlLoadResourceBlock();
-    func_001BB9E8();
+    btlStartRegisteredChildTask();
     func_001C1520();
     func_001C16B0(1);
     fldBeginSceneTransition();

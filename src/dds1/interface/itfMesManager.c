@@ -81,7 +81,7 @@ typedef struct ItfMesState {
     s32 renderValue;    /* 0xC: propagated to glyph nodes and option frame */
     s16 unk10;          /* 0x10 */
     s16 unk12;          /* 0x12 */
-    ItfMesBlk14 blk14;    /* 0x14: passed to func_0019DDA8 */
+    ItfMesBlk14 blk14;    /* 0x14: passed to itfResetCursorPositionAndState */
     ItfMesBlk24 blk24;    /* 0x24: passed to func_0019DDD0 */
     ItfMesBlk40 blk40;  /* 0x40 */
     u8 unkA0[4];        /* 0xA0 */
@@ -258,13 +258,13 @@ void frFontQueueGlyphInSelectedSlot(FrFontGlyph *arg0);
 
 void func_0019DDD0(void *arg0, s32 arg1);
 
-void func_0019DDA8(void *arg0, s32 arg1);
+void itfResetCursorPositionAndState(void *arg0, s32 arg1);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
 extern void func_00196BC0();
 
-s32 func_00196AE8();
+s32 itfDrawCustomColorText();
 
 s32 func_00195E60();
 
@@ -274,7 +274,7 @@ void itfMesEnableUnflaggedNodeContexts(ItfMesNode *node);
 
 void itfMesCopyGlyphShade();
 
-s8 func_00196BB0(s32 arg0);
+s8 itfTestTextInterfaceMask(s32 arg0);
 
 s32 func_00196BD8();
 
@@ -294,7 +294,7 @@ s32 itfMesMaxGroupedExtent(ItfMesNode *node);
 
 extern void frFontLoadTemporaryEntry(u32 arg0);
 
-extern ItfMesNode *func_00196AB0(s32 x, s32 y, s32 encodedText, s32 sub);
+extern ItfMesNode *itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub);
 
 extern u32 itfLoadTextureFromAsset(const char *path);
 
@@ -318,9 +318,9 @@ extern void func_0019DE18();
 
 extern void func_0019DE58();
 
-extern void func_0019DE88();
+extern void itfClearDrawStateWords();
 
-extern void func_0019DEB8();
+extern void itfResetBattleFadeState();
 
 extern s32 func_00195ED8();
 
@@ -538,12 +538,12 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
     mes->renderValue = 0xFFFFF0;
     mes->unk12 = 0;
     mes->callbackAddress = 0;
-    func_0019DDA8(&mes->blk14, 1);
+    itfResetCursorPositionAndState(&mes->blk14, 1);
     func_0019DDD0(&mes->blk24, 1);
     func_0019DE18(&mes->blk40);
     func_0019DE58(&mes->blkA4);
-    func_0019DE88(mes->tableD0);
-    func_0019DEB8((u8 *)mes + 0x1D0, 0);
+    itfClearDrawStateWords(mes->tableD0);
+    itfResetBattleFadeState((u8 *)mes + 0x1D0, 0);
     D_003D6EA0.activeWindowCount++;
     return window;
 }
@@ -583,7 +583,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
         frFontQueueGlyphInSelectedSlot(blk14->glyphChain);
         blk14->glyphChain = NULL;
     }
-    func_0019DDA8(blk14, 0);
+    itfResetCursorPositionAndState(blk14, 0);
 }
 
 void itfMesBuildOptionFrame(ItfMesState *mes) {
@@ -859,7 +859,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
     if (item == 0) {
         return item;
     }
-    glyph = func_00196AB0(0, 0, item, 0);
+    glyph = itfDrawDefaultColorText(0, 0, item, 0);
     extent = itfMesMaxGroupedExtent(glyph);
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
     return extent;
@@ -1014,7 +1014,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
         *(s32 *)(blk + 0xC) = 0;
     }
-    glyph = func_00196AE8(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
+    glyph = itfDrawCustomColorText(*(s32 *)(m + 0x24), *(s32 *)(blk + 4), blk[0x12], blk[0x13], blk[0x14], blk[0x15],
                           itfMesGetTableItem(*(ItfMesTable **)(blk + 8), *(s16 *)(blk + 0x18)), 0);
     if (*(s16 *)(m + 0x12) == 3) {
         if (func_00195E60(glyph) == 1) {
@@ -1027,20 +1027,20 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         itfMesEnableUnflaggedNodeContexts((ItfMesNode *)glyph);
     }
     itfMesCopyGlyphShade(glyph, blk);
-    flags = func_00196BB0(3);
+    flags = itfTestTextInterfaceMask(3);
     blk[0x11] = flags;
     if (flags & 2) {
         *(u32 *)m |= 0x10000;
     } else {
         *(u32 *)m &= 0xFFFEFFFF;
     }
-    if (func_00196BB0(4) != 0) {
+    if (itfTestTextInterfaceMask(4) != 0) {
         hook = *(void (**)())(m + 0x1DC);
         if (hook != NULL) {
             hook();
         }
     }
-    if (func_00196BB0(8) != 0) {
+    if (itfTestTextInterfaceMask(8) != 0) {
         helper = func_00196BD8();
         evtLipsExecFunction(helper, func_00196BE0());
     }
@@ -1090,7 +1090,7 @@ ItfMesNode *itfMesBuildNodeRows(u32 *items, s32 count, u32 mask, s32 x, s32 y, s
         if (mask & 1) {
             mask >>= 1;
         } else {
-            node = (ItfMesNode *)func_00196AE8(x, y, 0, 0, 0, 0x80, *items, node);
+            node = (ItfMesNode *)itfDrawCustomColorText(x, y, 0, 0, 0, 0x80, *items, node);
             mask >>= 1;
             y += node->rowHeightUnits << 3;
         }

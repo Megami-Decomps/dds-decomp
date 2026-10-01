@@ -1169,7 +1169,7 @@ u32 func_00222D18(ActionUnit *unit) {
     return 0;
 }
 
-extern void func_00217378(s32, s32);
+extern void btlFaceLinkedTargetAndFlagDirection(s32, s32);
 s32 func_00222DA8(s32 object) {
     s32 state = ((ActionUnit *)object)->stateFlags;
 
@@ -1180,7 +1180,7 @@ s32 func_00222DA8(s32 object) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217378(object, object);
+                btlFaceLinkedTargetAndFlagDirection(object, object);
                 return 1;
             }
         }
@@ -1355,7 +1355,7 @@ s32 func_00224188(s32 object) {
                 if ((((ActionUnit *)((ActionStateLink *)state)->owner)->flags & 0x1000) == 0) {
                     return 0;
                 }
-                func_00217378(object, object);
+                btlFaceLinkedTargetAndFlagDirection(object, object);
                 return 1;
             }
         }

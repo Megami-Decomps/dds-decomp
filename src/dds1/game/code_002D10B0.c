@@ -88,7 +88,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D14C8);
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
 
 extern vu8 D_003BD2EA;
-extern void func_002E1218(void);
+extern void sdfVuClearTransformCache(void);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {
@@ -99,7 +99,7 @@ void sdfWaitAndSelectBuffer(void) {
     }
     D_003BD2EA = buffer;
     sdfSelectDoubleBuffer((s8)D_003BD2EA);
-    func_002E1218();
+    sdfVuClearTransformCache();
 }
 
 s32 sdfFormatBitsPerPixelA(u32 format) {
@@ -174,7 +174,7 @@ extern s32 func_00312C08(void);
 extern void EIntr(void);
 extern struct SdfTexHead *func_002D18F8(s32 size, s32 arg1);
 
-SdfTexHead *func_002D1A18(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
+SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
     s32 bits = sdfFormatBitsPerPixelA(format);
     s32 size = (width * height * bits) >> 5;
     SdfTexHead *node;
@@ -214,7 +214,7 @@ void func_002D1B90(void *arg0) {
     }
 }
 
-void func_002D1C08(s32 arg0) {
+void sdfTexQueuePendingWork(s32 arg0) {
     sdfPendingQueuePush(&D_003BD9E8, arg0);
 }
 
@@ -297,7 +297,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
 
-void func_002D1FF0(s32 address, s32 packet) {
+void sdfTexEnqueuePacketWithSemaphore(s32 address, s32 packet) {
     SdfSemaObj *obj = &D_003EB848;
     SdfTexPacketTail *last;
 
@@ -313,7 +313,7 @@ void func_002D1FF0(s32 address, s32 packet) {
     SignalSema(obj->unk0);
 }
 
-void func_002D2070(s32 address) {
+void sdfTexQueueResourceRelease(s32 address) {
     SdfSemaObj *obj = &D_003EB848;
     SdfTexReleaseEntry *entry;
 
@@ -448,7 +448,7 @@ void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 arg1, s32 arg2) {
     buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
 }
 
-void func_002D24C0(SdfTex *tex, s32 arg1, s32 arg2) {
+void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 arg1, s32 arg2) {
     SdfTexBuf *buf = tex->unk2C;
 
     if (buf == NULL) {
@@ -467,7 +467,7 @@ INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2548);
 
 extern void func_002D2548();
 
-void func_002D2650(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
+void sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     s32 width;
     s32 height;
 
@@ -481,9 +481,9 @@ void func_002D2650(SdfTex *texture, s32 resourceWord, u8 *pixels, s32 mode) {
     func_002D2548(resourceWord, width, height, texture->unk19, pixels, mode);
 }
 
-void func_002D26A8(SdfTex *tex) {
+void sdfTexUploadSecondaryResource(SdfTex *tex) {
     if (tex->secondaryResource != NULL) {
-        func_002D2650(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
+        sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
     }
 }
 
@@ -498,7 +498,7 @@ void sdfTexListInsert(SdfTex *texture) {
     D_003BD308 = texture;
 }
 
-SdfTex *func_002D2728(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 

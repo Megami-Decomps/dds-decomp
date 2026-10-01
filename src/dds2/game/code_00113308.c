@@ -89,7 +89,7 @@ void func_00113660(EffectObject *object, u32 value) {
     data->timer = 0;
 }
 
-void func_001136A0(EffectObject *object) {
+void evtResetObjectPendingValue(EffectObject *object) {
     EffectObjectData *data;
 
     data = object->data;
@@ -99,10 +99,10 @@ void func_001136A0(EffectObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_001136B8);
 
-void func_00113760(EffectObject *object) {
+void evtDestroyEffectObjectData(EffectObject *object) {
     EffectObjectData *data;
 
-    func_00113CD0();
+    evtEndObjectValueTransition();
     effObjFreeInner(object);
     data = object->data;
     if (data->handle != -1) {
@@ -121,7 +121,7 @@ INCLUDE_ASM(const s32, "game/code_00113308", func_001137D8);
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00113AB0);
 
-void func_00113CD0(EffectObject *object) {
+void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;
 
     data = object->data;
@@ -230,7 +230,7 @@ void dds3RefreshStoredVec3(WorldObj *obj) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_00114640);
 
-s32 func_00114770(EffectObject *obj) {
+s32 evtInitializeEffectObjectData(EffectObject *obj) {
     EffectObjectData *data;
 
     effObjInnerCreate(obj);

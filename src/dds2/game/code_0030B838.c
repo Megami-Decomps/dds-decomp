@@ -14,7 +14,7 @@ extern void effObjSetInnerSecondVec(s32, void *);
 
 extern s32 func_0030DE08(f32, f32);
 
-extern void func_0030C5D8();
+extern void sdfCounterDestroyRuntime();
 
 extern s32 frFontMeasureLines(u64);
 
@@ -145,7 +145,7 @@ extern void *memset(void *, s32, u32);
 extern s32 func_0030B600(void);
 extern SdfCounterChannel *mnuListAppendNode(s32, s32);
 extern u8 *func_0030C568(s32);
-extern void func_0030D818(SdfCounterRuntime *, s32);
+extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 func_0030C9D0(s32);
 extern void func_0030C250(s32, s32);
 extern void func_0030CC68();
@@ -200,7 +200,7 @@ typedef struct SdfSpritePlace {
 
 extern SdfSpritePlace D_00400DF0[];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
-extern void func_00306F80(s32, s32, s32, s32, u32, s32, s32, s32);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, u32, s32, s32, s32);
 
 #define SDF_SPRITE(index) (((SdfSpriteSet *)D_0045C7C0[D_00400DF0[index].bank])->entries + D_00400DF0[index].slot)
 
@@ -313,7 +313,7 @@ s32 func_0030C378(s32 mask, s32 index) {
         ((SdfCounterRuntime *)D_004388C4)->posX = 0xB0;
         ((SdfCounterRuntime *)D_004388C4)->timer->y = 0x7E;
     }
-    func_0030D818(D_004388C4, index);
+    sdfCounterSelectChannelByIndex(D_004388C4, index);
     func_0030C250(func_0030C9D0(index) - 1, 0xB);
     return 1;
 }
@@ -330,7 +330,7 @@ u8 *func_0030C568(s32 scene) {
     return D_00400BB0 + scene * 52 - 0x34;
 }
 
-void func_0030C5D8(SdfCounterRuntime *rt) {
+void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
     SdfCounterChannel *channel;
 
     if (rt != NULL) {
@@ -345,7 +345,7 @@ void func_0030C5D8(SdfCounterRuntime *rt) {
 }
 
 void func_0030C640(void) {
-    func_0030C5D8(D_004388C4);
+    sdfCounterDestroyRuntime(D_004388C4);
 }
 
 s64 func_0030C660(void) {
@@ -489,7 +489,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D438);
 void func_0030D4F8(void) {
 }
 
-void func_0030D500(s32 arg0, s32 x, f32 fade) {
+void sdfCounterDrawSelectedTimerFade(s32 arg0, s32 x, f32 fade) {
     SdfCounterTimer *timer;
     s32 offset;
     f32 grow;
@@ -537,7 +537,7 @@ s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     return count;
 }
 
-void func_0030D818(SdfCounterRuntime *rt, s32 target) {
+void sdfCounterSelectChannelByIndex(SdfCounterRuntime *rt, s32 target) {
     SdfCounterChannel *channel;
     SdfCounterChannel *prev;
     s32 i;

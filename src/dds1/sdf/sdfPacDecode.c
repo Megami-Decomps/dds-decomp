@@ -94,7 +94,7 @@ void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
 void sdfPacStartRelocatingPacket(PacState *state, PacHead *packet);
 void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
-void func_002EEAA0(PacState *state, void *packet);
+void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void func_002DA058(s32 handle, s32 resource);
 s32 func_002D32A0(void *resource);
 s32 sdfResourceRetainAddress(s32 handle);
@@ -165,7 +165,7 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
             sdfPacBeginRelocatedPayload(state, packet);
             return 0;
         case 9:
-            func_002EEAA0(state, packet);
+            sdfQueueAndResetPacketWork(state, packet);
             return 0;
         case PAC_COMMAND_END:
             return 1;

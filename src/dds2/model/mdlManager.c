@@ -5,7 +5,7 @@ extern u64 fileGetResourceHandle(u64);
 
 extern u64 func_002C8110();
 
-extern u32 func_00343F38(u64);
+extern u32 sndBuildResourceHandleListFromOffsets(u64);
 
 extern u32 D_00438F90;
 
@@ -186,7 +186,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(u64 resource, s32 destination) {
     u32 resolved;
 
     handle = func_002C8110();
-    resolved = func_00343F38(handle);
+    resolved = sndBuildResourceHandleListFromOffsets(handle);
     *(u32 *)(destination + 0xc) = resolved;
     handle = fileGetResourceHandle(resource);
     func_003297C8(handle);

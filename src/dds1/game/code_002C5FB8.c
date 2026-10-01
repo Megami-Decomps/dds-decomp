@@ -148,7 +148,7 @@ s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
     return count;
 }
 
-void func_002C6010(SdfCounterRuntime *rt, s32 target) {
+void sdfCounterSelectChannelByIndex(SdfCounterRuntime *rt, s32 target) {
     SdfCounterChannel *channel;
     SdfCounterChannel *prev;
     s32 i;
@@ -510,7 +510,7 @@ f32 *func_002C8F40(f32 *vec, f32 *mat) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C8FE8);
 
-float func_002C9228(float x, float y) {
+float sdfPowFloatByTruncatedExponent(float x, float y) {
     float p = 1.0f;
     s32 i = 1;
 
@@ -550,7 +550,7 @@ float sdfQuatDot(float *lhs, float *rhs) {
                   lhs[3] * rhs[3];
 }
 
-float func_002C9780(float *arg0, float *arg1) {
+float sdfSumCrossProductComponents(float *arg0, float *arg1) {
     return (arg0[1] * arg1[2] - arg0[2] * arg1[1]) +
                   (arg0[2] * *arg1 - *arg0 * arg1[2]) +
                   (*arg0 * arg1[1] - arg0[1] * *arg1);

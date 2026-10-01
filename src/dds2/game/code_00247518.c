@@ -32,11 +32,11 @@ void *evtViewerScheduleFrameVariableTask(s32 arg0);
 
 extern u32 D_00435CD4;
 
-void func_00137818(void);
+void fldInitializeCameraColorResource(void);
 
 extern void func_0024DBB8(s32 arg0);
 extern s32 mnuPollTitleStreamStateLocked(void);
-extern void func_002A2408(void);
+extern void mnuMarkTitleStreamResetPending(void);
 extern void func_0025A280(s32 arg0, void *arg1);
 extern s32 func_0024D760(u8 *ctx);
 
@@ -411,19 +411,19 @@ INCLUDE_ASM(const s32, "game/code_00247518", func_0024A020);
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024A158);
 
 extern void func_002A8008(void);
-extern void func_002A7FD0(void);
+extern void mnuStopMovieDrawTask(void);
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EventViewerState *viewer) {
     if (viewer->timedActive == 1) {
         if (viewer->glyphAdvancePosition < viewer->timedStart) {
-            func_002A7FD0();
+            mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd < 0) {
             func_002A8008();
         } else if (viewer->glyphAdvancePosition >= viewer->timedEnd) {
-            func_002A7FD0();
+            mnuStopMovieDrawTask();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
@@ -852,7 +852,7 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EventViewerState *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024CE18);
 
-u32 func_0024D0F8(u32 unused0, u32 unused1, u32 viewerAddr) {
+u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, u32 viewerAddr) {
     if (evtEventViewerGetPendingNode(viewerAddr) != 0) {
         ((EventViewerState *)viewerAddr)->unk22AC = 0;
         ((EventViewerState *)viewerAddr)->unk22B4 = 0;
@@ -885,7 +885,7 @@ void *evtViewerInitializeUpdateSequence(void) {
     u64 viewer;
 
     viewer = kwlnTaskGetUserValue();
-    func_00137818();
+    fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     D_00435CD4 |= 0x2000000;
     return (void *)evtViewerScheduleFrameVariableTask;
@@ -920,7 +920,7 @@ void *evtViewerAdvanceUpdate(void) {
         if (func_0024D760((u8 *)window) == 0) {
             if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
                 if (viewer->unk2440 == 0x78) {
-                    func_002A2408();
+                    mnuMarkTitleStreamResetPending();
                 }
                 viewer->unk2440++;
                 D_00435CD4 |= 0x2000000;
@@ -953,14 +953,14 @@ extern void evtEventViewerShutdown();
 extern void func_003297C8();
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
-extern void func_0025F5D0();
+extern void mnuReleaseCampSceneRegisteredIds();
 void evtViewerCleanupMessageWindow(s32 arg0);
 
 void evtViewerRelease(viewer)
     EventViewerState *viewer;
 {
     if (func_0024D908(viewer->windowContext) == 0) {
-        func_0025F5D0(viewer);
+        mnuReleaseCampSceneRegisteredIds(viewer);
     }
     evtResetUnitVectorSlots();
     evtViewerCleanupMessageWindow((s32)viewer);
@@ -970,7 +970,7 @@ void evtViewerRelease(viewer)
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
     if (viewer->timedActive == 1) {
         if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag((s32)viewer) == 1) {
-            func_002A7FD0();
+            mnuStopMovieDrawTask();
         }
         viewer->timedActive = 0;
     }

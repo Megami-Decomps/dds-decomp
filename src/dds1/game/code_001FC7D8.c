@@ -12,7 +12,7 @@ typedef struct BtlJyokyoOwner {
 
 extern s32 func_001A2FD8(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
-extern s32 func_002D9E98(s32, s32);
+extern s32 sdfLoadMapRecordPositionVector(s32, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 
 extern s32 func_001A17F0();
@@ -36,7 +36,7 @@ extern void btlSelectTargetsWithoutActionMask();
 extern void func_002035E0();
 extern void func_00204008();
 extern void func_00204028();
-extern void func_00203F98();
+extern void btlAppendSelfAfterTargetScan();
 extern void func_00203CA8();
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
@@ -164,7 +164,7 @@ typedef struct BtlEffLinkEx {
     u8 kind;            /* 0x30 */
 } BtlEffLinkEx;
 
-BtlEffObj *func_001FD9B0(BtlEffOwner *owner, s32 arg, u8 kind) {
+BtlEffObj *btlCreateLinkedEffectTask(BtlEffOwner *owner, s32 arg, u8 kind) {
     BtlEffObj *obj = btlAllocTask(0x34);
     BtlEffLinkEx *link;
 
@@ -254,7 +254,7 @@ extern s32 D_003BAA84;
 extern void func_001AD970(s32);
 extern s32 func_001AD928(void);
 
-s32 func_001FE118(BtlObjLink *link) {
+s32 btlPollTimedTaskLink(BtlObjLink *link) {
     func_001A17F0();
     if (link->unk8 == 0) {
         func_001AD970(D_003BAA84 + link->arg * 0x19);
@@ -266,7 +266,7 @@ s32 func_001FE118(BtlObjLink *link) {
     return 0;
 }
 
-extern s32 func_001FE118();
+extern s32 btlPollTimedTaskLink();
 
 BtlEffObj *func_001FE198(BtlEffOwner *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -277,7 +277,7 @@ BtlEffObj *func_001FE198(BtlEffOwner *owner, s32 arg) {
     obj->flags |= 2;
     obj->id = 0x41;
     obj->ownerData = owner->ownerData;
-    obj->update = func_001FE118;
+    obj->update = btlPollTimedTaskLink;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
     link->arg = arg;
@@ -499,7 +499,7 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
         func_001BCB88(0, 8);
     }
     if (task->ticks >= 0x11) {
-        if (func_001AD3F0() == 1) {
+        if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0) {
                 func_001BCB88(1, 8);
                 func_001AD428();
@@ -535,7 +535,7 @@ u32 btlNextScaledRandom(u32 limit) {
 
 extern u32 btlNextScaledRandom(u32 limit);
 
-s32 func_001FEAA8(s32 a0, s32 a1) {
+s32 btlRandomInclusiveRange(s32 a0, s32 a1) {
     s32 lo = a1;
     s32 hi = a0;
 
@@ -575,7 +575,7 @@ typedef struct BtlHistObj {
     s8 counter; /* 0x146 */
 } BtlHistObj;
 
-void func_001FEB90(BtlHistObj *obj) {
+void btlAdvanceHistoryCounter(BtlHistObj *obj) {
     obj->counter++;
     obj->counter = obj->counter <= 0 ? 0 : obj->counter >= 0x21 ? 0x20 : obj->counter;
     func_001FEDE0((u8 *)obj, 0);
@@ -599,7 +599,7 @@ void btlClearNodeFlags(void) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 func_001FEC68(s32 context, BtlJyokyoOwner *owner, s32 mask) {
+s32 btlDispatchPackedActionWithScratch(s32 context, BtlJyokyoOwner *owner, s32 mask) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
@@ -688,7 +688,7 @@ void btlCmdSimpleG(void) {
 }
 
 void btlCmdSimpleH(void) {
-    func_00203F98();
+    btlAppendSelfAfterTargetScan();
 }
 
 void btlCmdSimpleI(void) {

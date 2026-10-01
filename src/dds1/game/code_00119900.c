@@ -109,7 +109,7 @@ extern Entry1A4 *dds3FindEntry(s32 rosterIndex);
 extern void func_00119900(s32 arg0, s32 arg1);
 extern void ptyMergeStockSkills(Entry1A4 *unit);
 extern s32 func_00119368(s32 arg0, s32 arg1);
-extern u8 func_001A1438(void);
+extern u8 btlIsRuntimeAllocated(void);
 extern f32 func_001A4598(void);
 extern u32 func_001A4630(void);
 extern s32 func_001A92D0(u32 arg0);
@@ -625,7 +625,7 @@ s32 evtRollRandomScale(void) {
 }
 
 s32 func_0011C1B8(void) {
-    s32 available = func_001A1438();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -639,7 +639,7 @@ s32 func_0011C1B8(void) {
 }
 
 s32 func_0011C208(void) {
-    s32 available = func_001A1438();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -653,7 +653,7 @@ s32 func_0011C208(void) {
 }
 
 s32 func_0011C258(void) {
-    s32 available = func_001A1438();
+    s32 available = btlIsRuntimeAllocated();
     s32 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -667,7 +667,7 @@ s32 func_0011C258(void) {
 }
 
 s32 evtPushAvailableChoiceRatio(void) {
-    s32 available = func_001A1438();
+    s32 available = btlIsRuntimeAllocated();
     u64 value;
     if (available) {
         s32 choice = scrReadIntParameter(0);
@@ -683,7 +683,7 @@ s32 evtPushAvailableChoiceRatio(void) {
 }
 
 s32 evtPushAvailableFloatValue(void) {
-    s32 v0 = func_001A1438();
+    s32 v0 = btlIsRuntimeAllocated();
     f32 val = 0.0f;
 
     if (v0 != 0) {
@@ -694,7 +694,7 @@ s32 evtPushAvailableFloatValue(void) {
 }
 
 s32 evtPushAvailableIntegerValue(void) {
-    s32 v0 = func_001A1438();
+    s32 v0 = btlIsRuntimeAllocated();
     s32 val = 0;
 
     if (v0 != 0) {

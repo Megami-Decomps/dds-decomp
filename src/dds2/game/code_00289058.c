@@ -9,8 +9,8 @@ extern void func_0028D070(s32, s32, s32);
 extern void func_00291118(void);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern void func_002A2408(void);
-extern void func_002A2550(void);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
 extern void mdlFlagSet(u16);
 
 typedef struct MenuNode {
@@ -166,8 +166,8 @@ void func_00289DC8(s32 object) {
     evtStageTestInit(0);
     kwlnFadeOutStart(0, 0, 0, 0);
     func_0010AE38("AT3 LOAD!!\n");
-    func_002A2408();
-    func_002A2550();
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
     func_002A2200(0x10);
     func_002A2388();
 }
@@ -202,8 +202,8 @@ void func_00289F58(void) {
     func_00291118();
     mnuReleaseMiddleMantraSpriteSlots();
     kwlnFadeOutStart(0, 0, 0, 0);
-    func_002A2408();
-    func_002A2550();
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
 }
 
 s32 func_00289FA0(s32 object) {

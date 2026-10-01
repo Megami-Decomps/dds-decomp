@@ -156,25 +156,11 @@ void func_002DD450(void) {
 }
 
 void sdfSetPrimaryIdentityMatrixVU(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vsub.xyzw vf28, vf0, vf0\n"
-        "vmr32.xyzw vf30, vf0\n"
-        "vmove.xyzw vf31, vf0\n"
-        "vaddw.x vf28, vf28, vf0w\n"
-        "vmr32.xyzw vf29, vf30\n"
-        ".set reorder\n");
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
 }
 
 void sdfSetAlternateIdentityMatrixVU(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vsub.xyzw vf24, vf0, vf0\n"
-        "vmr32.xyzw vf26, vf0\n"
-        "vmove.xyzw vf27, vf0\n"
-        "vaddw.x vf24, vf24, vf0w\n"
-        "vmr32.xyzw vf25, vf26\n"
-        ".set reorder\n");
+    VU0_SET_UNIT_MATRIX(vf24, vf25, vf26, vf27);
 }
 
 /* libvu0: sceVu0UnitMatrix */

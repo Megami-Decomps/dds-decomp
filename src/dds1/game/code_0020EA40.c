@@ -304,7 +304,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_0020ED90);
 
 extern char D_003A66C0[];
 
-void func_0020F808(void) {
+void btlRunCleanupAndLog(void) {
     BtlState *battle = (BtlState *)func_001A17F0();
     void (*cleanup)(void) = battle->cleanup;
     if (cleanup != 0) {
@@ -325,9 +325,9 @@ void btlReleaseBossData(void) {
     if (cleanup != 0) {
         cleanup();
     }
-    func_0020F808();
+    btlRunCleanupAndLog();
     if (battle->effect != 0) {
-        func_002CF5C0(battle->effect);
+        sdfReleaseChipOrRetainedResource(battle->effect);
         battle->effect = 0;
     }
     battle->unk_1F4 &= ~0x80000;
@@ -347,7 +347,7 @@ s32 btlFindScriptResource(char *name) {
     return bfFindScriptIndexByName(battle->scriptHandle, path);
 }
 
-void func_0020F940(s32 skill) {
+void btlStartSkillEventTask(s32 skill) {
     BtlState *battle = (BtlState *)func_001A17F0();
     s32 handle;
     if (battle->eventTaskId == -1) {
@@ -569,7 +569,7 @@ extern u8 *btlFindUnitByModeFlagged(s32);
 
 extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
-s32 func_00210450(void) {
+s32 btlOpStartSelectedUnitModelChange(void) {
     s32 choice = scrReadIntParameter(0);
     s32 unitIndex = scrReadIntParameter(1);
     s32 first = scrReadIntParameter(2);
@@ -1025,7 +1025,7 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern s32 fileRequestIsReady(void *);
 
-s8 func_002114E8(BattleModelEntry *entry) {
+s8 btlIsModelPackEntryReady(BattleModelEntry *entry) {
     s32 result;
     if (entry->state != 0) {
         return 1;
@@ -1086,7 +1086,7 @@ void btlLoadModelPack(s32 kind, s32 id) {
     }
 }
 
-void func_00211708(void) {
+void btlReleaseFoundModelEntry(void) {
     s32 entry;
 
     entry = btlFindModelEntry();
@@ -1109,7 +1109,7 @@ s32 btlGetEntryState(s32 kind, s32 value) {
 s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     s32 entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return func_002114E8((BattleModelEntry *)entry);
+        return btlIsModelPackEntryReady((BattleModelEntry *)entry);
     }
     return entry;
 }
@@ -1154,7 +1154,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_00211B88);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_00211CE8(s32 packet, s32 first, s32 second, s32 color) {
+void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
     sdfBuildPacketE(packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
                   0x8700, 0x9000, 0x8700, color, 0);
 }
@@ -1291,11 +1291,11 @@ extern void *sdfAllocatePacketList(s32);
 
 extern void *sdfAllocPacketAligned(s32);
 
-extern void func_002D4540(void *);
+extern void sdfClearLinkedPacketList(void *);
 
 extern void func_002D38B8(void *, void *, s32, s32, s32, s32, void *, s32, s32, s32);
 
-extern void func_002D4588(void *, void *);
+extern void sdfAppendPacketChainNode(void *, void *);
 
 extern u8 D_00325860[];
 
@@ -1307,9 +1307,9 @@ void btlInitializeGraphicsRuntime(void) {
     runtime->request = sdfResourceRetainAddress(runtime->handle);
     surface = sdfAllocatePacketList(0);
     context = sdfAllocPacketAligned(16);
-    func_002D4540(context);
+    sdfClearLinkedPacketList(context);
     func_002D38B8(surface, context, 0, 0, 0x200, 0xe0, runtime->request, 0, 0, 0);
-    func_002D4588(D_00325860, context);
+    sdfAppendPacketChainNode(D_00325860, context);
     D_00325708.invoke(&D_00325708, surface);
 }
 
@@ -1335,9 +1335,9 @@ extern void func_002D5CD0(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32
 void btlInitializeOverlayGraphics(void) {
     void *surface = sdfAllocatePacketList(0);
     void *context = sdfAllocPacketAligned(16);
-    func_002D4540(context);
+    sdfClearLinkedPacketList(context);
     func_002D5CD0(surface, context, *(s32 *)(D_003BA8F8 + 0x10), 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
-    func_002D4588(D_00325860, context);
+    sdfAppendPacketChainNode(D_00325860, context);
     D_00325708.invoke(&D_00325708, surface);
     D_003D7580.options |= 1;
 }
@@ -1421,7 +1421,7 @@ s32 func_00213B90(void) {
     return state == 4;
 }
 
-void func_00213BC0(void) {
+void btlMarkRuntimeUpdatePending(void) {
     if (D_003D7580.active != 0) {
         D_003D7580.pending = 1;
     }
@@ -1632,7 +1632,7 @@ extern void func_001958A0(void *, s32, s32);
 
 extern s32 frFontQueueGlyphInSelectedSlot(void *);
 
-s32 func_00214438(s32 width, s32 height, s32 mode) {
+s32 mnuQueueColoredGlyphAtPosition(s32 width, s32 height, s32 mode) {
     void *packet = func_00197748(width << 4, height << 3, 0xff0000, 0xa09dc380, mode, 0);
     func_001958A0(packet, 0, 0x60);
     return frFontQueueGlyphInSelectedSlot(packet);
@@ -1661,7 +1661,7 @@ extern void sdfInitPacketList(void *);
 
 extern void sdfAppendPacket(void *, s32);
 
-extern s32 func_002E4960(s32, s32, s32, s32, void *, u32);
+extern s32 sdfCreateFormattedSifCommand(s32, s32, s32, s32, void *, u32);
 
 extern u8 D_003BBAA8[];
 
@@ -1695,7 +1695,7 @@ s32 func_00214618(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
             if (index != selected) {
                 flag = 0;
             }
-            sdfAppendPacket(handle, func_002E4960((s32)x * 16 + 0x7000, rowY, 0xFF0000, flag, D_003BBAA8, index));
+            sdfAppendPacket(handle, sdfCreateFormattedSifCommand((s32)x * 16 + 0x7000, rowY, 0xFF0000, flag, D_003BBAA8, index));
             rowY += 0xC0;
         }
     }
@@ -1805,7 +1805,7 @@ INCLUDE_ASM(const s32, "game/code_0020EA40", func_00215FF8);
 
 INCLUDE_ASM(const s32, "game/code_0020EA40", func_002162E0);
 
-void func_002166A8(void) {
+void btlInitializeCommandSemaphoreSlots(void) {
     s32 i;
 
     D_003BD878 = sdfCreateSemaphore(1, 0x7f, 0);

@@ -3,18 +3,18 @@
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfAllocPacketAligned(s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
-extern u64 *func_0033A2D0(void *);
+extern u64 *sdfConsMeasurePacketWithHeader(void *);
 extern void sdfAppendPacket();
 
 extern s32 D_00435E6C;
 extern s32 D_00435E70;
-extern void func_0019B8B0(s32);
+extern void itfSetTextDrawLimit(s32);
 extern s32 func_0019FA08(s32, s32, s32, u32, s32, s32);
 extern s32 func_0019E5D8();
 extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
-extern void func_001A0438(void);
+extern void itfReleaseFontTestTaskResources(void);
 
 extern u32 D_0043658C;
 
@@ -166,11 +166,11 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
 
-void func_0019E7C8(s32 x, s32 y, s32 encodedText, s32 sub) {
+void itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub) {
     func_0019E848(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-void func_0019E800(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
+void itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
     func_0019E848(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
@@ -202,7 +202,7 @@ s32 func_0019E8A0(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 chann
     return result;
 }
 
-u32 func_0019E8E0(u32 mask) {
+u32 itfTestTextInterfaceMask(u32 mask) {
     return D_0043654C & mask;
 }
 
@@ -408,10 +408,10 @@ INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FC38);
 
-s32 func_0019FE00(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
+s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
     s32 result = 0;
 
-    func_0019B8B0(0x13);
+    itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
         result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
@@ -423,7 +423,7 @@ s32 func_0019FE00(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
         result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
         break;
     }
-    func_0019B8B0(-1);
+    itfSetTextDrawLimit(-1);
     return result;
 }
 
@@ -533,7 +533,7 @@ void itfLoadBackgroundSprite(void) {
     func_003297C8(buffer);
 }
 
-void func_001A0338(void) {
+void itfReleaseBackgroundSpriteTexture(void) {
     sdfTexReleaseReference(D_00438F24);
 }
 
@@ -568,13 +568,13 @@ void itfDrawBackgroundSprite(void) {
 
 void func_001A03D8(void) {
     itfLoadBackgroundSprite();
-    kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, func_001A0438, 0);
+    kwlnTaskCreate("test_font", 0x2B06, 0, 0, itfDrawBackgroundAndGetTaskReadyMask, itfReleaseFontTestTaskResources, 0);
     D_00436590 = scrCreateProcessTaskFromResource(0x258, "host0:../../../dds3data/font/test.bf", 0);
 }
 
-void func_001A0438(void) {
+void itfReleaseFontTestTaskResources(void) {
     frFontAdvanceOrRetainFadingGlyph(D_0043658C);
-    func_001A0338();
+    itfReleaseBackgroundSpriteTexture();
 }
 
 /* Return an all-bits-set ready mask only while the registered task is in state 3. */
@@ -745,7 +745,7 @@ void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s3
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
     sdfConsInitPacketHeader(packet, 0x4B, 2, 0x51, 3);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < 3; i++) {
         dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
         dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
@@ -766,7 +766,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
     sdfConsInitPacketHeader(packet, 0x4D, 2, 0x51, 4);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < 4; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -790,7 +790,7 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 4));
     sdfConsInitPacketHeader(packet, (flag << 9) | 0x5D, 3, 0x512, 4);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < 4; i++) {
         f32 *uvDst = (f32 *)dst;
 
@@ -824,7 +824,7 @@ void func_001A0E20(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors,
     y0 = vertices[0].y + 0x7900;
     x1 = vertices[1].x + 0x7000;
     y1 = vertices[1].y + 0x7900;
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
     dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
     dst[2] = (u64)uv->word[0] | ((u64)uv->word[1] << 32);
@@ -836,13 +836,13 @@ void func_001A0E20(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors,
     sdfAppendPacket(command, packet);
 }
 
-void func_001A0F88(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
+void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, void *command) {
     void *packet;
     u64 *dst;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
     sdfConsInitPacketHeader(packet, (flag << 9) | 0x46, 3, 0x551, 1);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     dst[0] = (u64)colors->word[0] | ((u64)colors->word[1] << 32);
     dst[1] = (u64)colors->word[2] | ((u64)colors->word[3] << 32);
     dst += 2;
@@ -862,7 +862,7 @@ void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, half));
     sdfConsInitPacketHeader(packet, 0x4C, 4, 0x5151, half);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -884,7 +884,7 @@ void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
     sdfConsInitPacketHeader(packet, 0x14A, 2, 0x51, count);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -906,7 +906,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
     sdfConsInitPacketHeader(packet, 0x49, 2, 0x51, count);
-    dst = func_0033A2D0(packet);
+    dst = sdfConsMeasurePacketWithHeader(packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -922,7 +922,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
 }
 
 extern void *sdfAllocPacketAligned(s32);
-extern u8 *func_0033A290(void *, s32);
+extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 extern void sdfAppendPacket();
 
 /* The packet builder returns a 0x30-byte command with two trailing qwords. */
@@ -934,20 +934,20 @@ typedef struct TextPacketTail {
 
 void itfSendBlendPacket(void *list, s64 value, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
-    TextPacketTail *command = func_0033A290(packet, 0x30);
+    TextPacketTail *command = sdfConsFinalizePacketHeader(packet, 0x30);
     command->value = value;
     command->registerCode = flag != 0 ? 0x48 : 0x47;
     sdfAppendPacket(list, packet);
 }
 
 extern void *sdfAllocPacketAligned(s32);
-extern u8 *func_0033A290(void *, s32);
+extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 extern void sdfAppendPacket();
 extern s64 D_003B4390[];
 
 void itfSendTablePacket(void *list, s32 index, s32 flag) {
     void *packet = sdfAllocPacketAligned(0x30);
-    TextPacketTail *command = func_0033A290(packet, 0x30);
+    TextPacketTail *command = sdfConsFinalizePacketHeader(packet, 0x30);
     s64 value = D_003B4390[index];
     command->value = value;
     command->registerCode = flag != 0 ? 0x43 : 0x42;

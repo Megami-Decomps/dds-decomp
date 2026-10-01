@@ -50,7 +50,7 @@ void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B2E0);
 
-void func_0024B358(s32 mode, MenuFadeHost *host) {
+void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
             sndStartTrackExtended(host->fadeColor);

@@ -82,7 +82,7 @@ void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
 
 void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 
-void func_00347948(PacState *state, void *packet);
+void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 
@@ -190,7 +190,7 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
             sdfPacBeginRelocatedPayload(state, packet);
             return 0;
         case 9:
-            func_00347948(state, packet);
+            sdfQueueAndResetPacketWork(state, packet);
             return 0;
         case PAC_COMMAND_END:
             return 1;

@@ -63,7 +63,7 @@ void effBlurSecondInitSlots(EffBlurWork2 *work) {
 }
 
 /* Allocate a slot array for the second variant and seed every slot. */
-EffBlurWork2 *func_00187460(EffBlurWork2 *src) {
+EffBlurWork2 *effCloneBlurWorkWithSlots(EffBlurWork2 *src) {
     s32 count = src->count;
     void *allocation = func_002D03F8(count * 0x30 + 0x38);
     EffBlurWork2 *work = (EffBlurWork2 *)sdfResourceRetainAddress(allocation);

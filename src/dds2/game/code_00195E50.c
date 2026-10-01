@@ -78,7 +78,7 @@ extern BDWork2C *func_0018EBC8(void *arg);
 
 extern BDWork24 *func_0018FBF8(void *arg);
 
-extern BDWork2C *func_0018F098(void *arg);
+extern BDWork2C *effCloneBlurWorkWithSlots(void *arg);
 
 extern Work30 D_003B22D0;
 
@@ -194,13 +194,13 @@ typedef struct GsSurface {
 extern GsSurface D_00380748;
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
-extern void *func_0033D810(s32, s32, s32, s32, s32);
+extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, s32);
 extern void sdfAppendPacket(void *, void *);
 
 void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     void *list = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfAppendPacket(list, func_0033D810(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, arg2, arg3));
+    sdfAppendPacket(list, sdfCreateFormattedSifCommand(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, arg2, arg3));
     D_00380748.submit(&D_00380748, list);
 }
 
@@ -367,7 +367,7 @@ void effInitWorks(void) {
     D_00438F10 = func_0018E850(D_003B2208);
     D_00438F0C = func_0018EBC8(D_003B21D8);
     D_00438F14 = func_0018FBF8(D_003B2278);
-    D_00438F18 = func_0018F098(D_003B22A0);
+    D_00438F18 = effCloneBlurWorkWithSlots(D_003B22A0);
     *(s32 *)effGetCh76Work() = 4;
 }
 

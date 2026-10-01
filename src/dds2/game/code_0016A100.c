@@ -304,12 +304,12 @@ void func_0016AB30(void) {
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AB48);
 
-void func_0016ABF8(EffParamWorkEx *work) {
+void effReleaseDispatchedParameterWork(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B8[work->id].func)(work->data);
     sdfReleaseChipBlock(work);
 }
 
-void func_0016AC40(EffParamWorkEx *work) {
+void effInvokeParameterWorkDispatch(EffParamWorkEx *work) {
     ((void (*)(void *))D_003B01B4[work->id].func)(work->data);
 }
 

@@ -221,7 +221,7 @@ extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
 
-extern s32 func_00124F08(void);
+extern s32 fldGetCampSceneControlMode(void);
 
 extern s32 func_00125140(void);
 
@@ -234,7 +234,7 @@ extern void func_00147188(s32);
 extern s32 D_003BAB08;
 
 s32 func_00141320(void) {
-    if (func_00124F08() != 0) {
+    if (fldGetCampSceneControlMode() != 0) {
         return 0;
     }
     if (func_00125140() != 0) {
@@ -962,7 +962,7 @@ extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first 
 
 extern void func_00133960(void);
 
-extern void func_00110860(s32, s32);
+extern void dds3SetWorldObjectDataValue(s32, s32);
 
 /* Enters the field camera state for a fresh scene: releases the title slots and
  * centers the camera on the scene's entry point. */
@@ -987,7 +987,7 @@ void fldEnterSceneCamera(void) {
     func_00133960();
     cam->unk70 = 4;
     frFontSetSharedRenderFlags(0x54);
-    func_00110860(dds3GetWorldObject(), 1);
+    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->stage;
     D_003BAEB8 = cam->unkC0;
@@ -1891,7 +1891,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldTestSceneLifecycleFlags(1) != 0) {
             return;
         }
-        if (func_00124F08() != 0) {
+        if (fldGetCampSceneControlMode() != 0) {
             return;
         }
         if (func_00125140() != 0) {
@@ -1941,9 +1941,9 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 func_002E5C68(u32, void *, u32);
+extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void func_002E5C38(u32);
+extern void sdfDevWaitThenReleaseCommandState(u32);
 
 void fldLoadNpcPalette(s32 field) {
     char path[64];
@@ -1954,8 +1954,8 @@ void fldLoadNpcPalette(s32 field) {
         fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, "%sF%03d.NPL", directory, field);
         command = sdfDevCreateCommandState(path);
-        func_002E5C68(command, D_003D44A0, 0x200);
-        func_002E5C38(command);
+        sdfDevQueueReadAndWait(command, D_003D44A0, 0x200);
+        sdfDevWaitThenReleaseCommandState(command);
     }
 }
 

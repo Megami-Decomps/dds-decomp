@@ -17,7 +17,7 @@ extern s32 ChangeThreadPriority(s32, s32);
 extern s32 iWakeupThread(s32);
 extern s32 SleepThread(void);
 
-s32 func_002CFC38(s32 event) {
+s32 sdfWakeThreadOnCompletionEvent(s32 event) {
     if (event == 2) {
         iWakeupThread(D_003BD9A0);
         if (D_003BD480 != 0) {

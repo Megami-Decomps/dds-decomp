@@ -45,16 +45,16 @@ void effTrackPolyReset(EffTrackPolyWork *track) {
     effTrackPolyInitData(track->data);
 }
 
-extern s32 func_00332D48(void *param, s32 id);
+extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
 extern void func_001906B0();
 
-void func_0018FEB0(EffTrackPolyWork *track) {
+void effSampleTrackPolyEndpoints(EffTrackPolyWork *track) {
     EffTrackPolyModel *model = track->model;
     u128 points[2];
 
-    func_00332D48(model->param, track->idA);
+    sdfLoadMapRecordPositionVector(model->param, track->idA);
     VU0_STORE_VF(vf10, points);
-    func_00332D48(model->param, track->idB);
+    sdfLoadMapRecordPositionVector(model->param, track->idB);
     VU0_STORE_VF(vf10, &points[1]);
     func_001906B0(track->data, points);
 }

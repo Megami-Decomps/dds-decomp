@@ -6,7 +6,7 @@ extern void *dds3GetObjectResourceHandle(void *slot);
 extern s32 func_00117570(void *handle);
 extern f32 evtGetValueScaleFactor(void *handle);
 
-s32 func_002203B0(void *obj) {
+s32 evtCheckWorldObjectResourceScale(void *obj) {
     f32 target = 1.0f;
     void *slot;
     void *handle;
@@ -57,7 +57,7 @@ extern s32 dds3AdvanceWorldCounter();
 extern s32 func_00112C08(s32 world, f32 *pos, f32 *rot);
 extern void effObjSetInnerFloat(s32 obj, f32 value);
 
-s32 func_002204A8(f32 *pos, f32 *rot) {
+s32 evtCreateWorldObjectAtTransform(f32 *pos, f32 *rot) {
     s32 obj = func_00112C08(dds3AdvanceWorldCounter(), pos, rot);
 
     if (obj == 0) {
@@ -121,7 +121,7 @@ typedef struct EvtWorldObj {
 extern EvtWorldObj *dds3GetWorldObject(void);
 extern void func_00112008(void *node, s32 value);
 
-s32 func_00220560(s32 index, s32 base) {
+s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
     EvtWorldObj *world = dds3GetWorldObject();
     EvtWorldNode *node;
     s32 value;

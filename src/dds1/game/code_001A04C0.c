@@ -29,15 +29,15 @@ INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A04C0);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A0910);
 
-u64 *func_001A0A78(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)func_002E13E0(sdfAllocPacketAligned(0x30), 0x30);
+u64 *btlCreateGsTestRegisterPacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x48 : 0x47;
     return entry;
 }
 
-u64 *func_001A0AD0(u64 owner, s32 alternative) {
-    u64 *entry = (u64 *)func_002E13E0(sdfAllocPacketAligned(0x30), 0x30);
+u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
+    u64 *entry = (u64 *)sdfConsFinalizePacketHeader(sdfAllocPacketAligned(0x30), 0x30);
     entry[4] = owner;
     entry[5] = alternative ? 0x43 : 0x42;
     return entry;
@@ -73,7 +73,7 @@ void func_001A0CD8(void) {
     } while (temp_v0 < 0xbff);
 }
 
-s32 func_001A0D18(void) {
+s32 btlUpdateActiveBattleFrame(void) {
     s32 state = D_003BB2E4;
     if (state == 0) {
         return 0;
@@ -97,7 +97,7 @@ s32 func_001A0D18(void) {
     return 0;
 }
 
-s32 func_001A0DC0(void) {
+s32 btlUpdateBattleFieldPresentation(void) {
     s32 state = D_003BB2E4;
     if (state == 0) {
         return 0;
@@ -128,9 +128,9 @@ void btlCreateDrawTasks(void) {
     s32 state = D_003BB2E4;
     u32 mainTask;
     u32 drawTask;
-    mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, func_001A0D18, func_001A0E38, 0);
+    mainTask = kwlnTaskCreate((u32)D_003BB2F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A0E38, 0);
     *(u32 *)(state + 0x29C) = mainTask;
-    drawTask = kwlnTaskCreate((u32)D_003A1598, 0x2B0E, 0, 0, func_001A0DC0, 0, 0);
+    drawTask = kwlnTaskCreate((u32)D_003A1598, 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0);
     func_00101A80(mainTask, drawTask);
 }
 
@@ -249,18 +249,18 @@ s32 func_001A1068(void) {
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A11F0);
 
-void func_001A1410(void) {
+void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();
     func_001C44F8();
     sndLoadSysEffLb();
 }
 
-u8 func_001A1438(void) {
+u8 btlIsRuntimeAllocated(void) {
     return D_003BB2E4 != 0;
 }
 
 s32 btlIsCurrentActorFullyMarked(void) {
-    if (func_001A1438() == 0) {
+    if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
     return (*(s32 *)(D_003BB2E4 + 0x1f4) & 0x6000000) == 0x6000000;
@@ -268,7 +268,7 @@ s32 btlIsCurrentActorFullyMarked(void) {
 
 s32 func_001A1480(void) {
     s32 state;
-    if (func_001A1438() == 0) {
+    if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
     state = D_003BB2E4;

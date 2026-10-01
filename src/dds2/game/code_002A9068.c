@@ -32,7 +32,7 @@ extern void func_00101968(s32, s32);
 
 extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
-extern void func_002C3E58(u8 *);
+extern void mnuClearPanelTransitionState(u8 *);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
@@ -92,7 +92,7 @@ extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void func_002BB510(s32, s32, s32, s32, s32);
 
-extern void func_002C0718(s32, s32, s32, u8 *, s32);
+extern void mnuDrawPanelListDefault(s32, s32, s32, u8 *, s32);
 
 extern void func_002AA530(s32, s32, s32, s32, u8 *, s32);
 
@@ -341,7 +341,7 @@ u8 *mnuGetStaffCategoryEntries(s32 kind, s32 *count, u8 *work) {
 
 /* Release the first category model plus one model per occupied party slot;
  * slotIndex is offset by the active party selection before indexing list. */
-void func_002A92D8(s32 list, s32 count, u8 *work) {
+void movReleaseActivePartyCategoryModels(s32 list, s32 count, u8 *work) {
     s32 i;
 
     effResolveAndReleaseResource(*(u32 *)list);
@@ -365,7 +365,7 @@ void movReleaseCategoryModels(s32 kind, u8 *work) {
             effResolveAndReleaseResource(entries[i]);
         }
     } else {
-        func_002A92D8(entries, count, work);
+        movReleaseActivePartyCategoryModels(entries, count, work);
     }
 }
 
@@ -556,7 +556,7 @@ typedef struct StaffResourceHeader {
 
 void func_002A9BC8(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
                    u32 layer) {
-    func_00306F80(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+    itfDrawGridWithResolvedSlot(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
 }
 
@@ -674,7 +674,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     memset(work, 0, 0xB1E0);
     ((CampVisualWork *)work)->allocationHandle = handle;
     effects = work + 0x11C;
-    func_002C3E58(work + 8);
+    mnuClearPanelTransitionState(work + 8);
     if (dds3AdminReadPreviousSignedSample() != 0) {
         ((CampVisualWork *)work)->menuResource = mnuAllocateValueRecord(1);
     } else {
@@ -909,7 +909,7 @@ void func_002AACB8(s32 kind, s32 task) {
     }
     if (func_002A9AB8(task) != 0) {
         func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
-        func_002C0718(0, 0, 0, work + 0x284, 0x53);
+        mnuDrawPanelListDefault(0, 0, 0, work + 0x284, 0x53);
         func_002AA530(0, 0, 0, visual->titleContext, work, 0x53);
     }
 }
