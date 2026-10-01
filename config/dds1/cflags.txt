@@ -7,7 +7,6 @@ game/code_0025BC38  -fno-optimize-sibling-calls  # 16 tail calls in 36 functions
 game/code_0026BD80  -fno-optimize-sibling-calls  # 14 tail calls in 31 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_0024E1C8  -fno-optimize-sibling-calls  # 11 tail calls in 37 functions, all jal+epilogue, no j to a function; neighbours sibcall (find_nosibcall.py)
 game/code_00228B38  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
-game/code_00249FA8  -fno-optimize-sibling-calls  # 7 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00250E88  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 3 parked candidates match only with it
 game/code_00253E58  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_00257200  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)

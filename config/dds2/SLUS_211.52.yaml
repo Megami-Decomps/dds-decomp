@@ -148,8 +148,7 @@ segments:
       - [0x91FF8, c, effect/effMagatuhi]  # Nocturne __FILE__
       - [0x95700, c, game/code_00194700]
       - [0x96BC8, c, effect/effMath]  # Nocturne __FILE__
-      - [0x96E50, c, game/code_00195E50]
-      - [0x98E40, c, effect/effEvent]  # Nocturne __FILE__
+      - [0x96E50, c, effect/effEvent]  # Nocturne __FILE__ (TU starts at 0x96E50: func_00198340 needs func_00197D50 compiled earlier)
       - [0x9B0C0, c, game/code_0019A0C0]
       - [0x9C7A8, c, interface/fmGslCont]  # Nocturne __FILE__
       - [0x9C840, c, game/code_0019B840]
@@ -197,7 +196,6 @@ segments:
       - [0x166AB8, c, game/code_00265AB8]
       - [0x166AD8, c, game/code_00265AD8]
       - [0x1675B0, c, game/code_002665B0]
-      - [0x16A978, c, game/code_00269978]
       - [0x16C680, c, game/code_0026B680]
       - [0x16C6A8, c, game/code_0026B6A8]
       - [0x16D1D0, c, game/code_0026C1D0]
@@ -379,7 +377,6 @@ segments:
       - [0x325BF0, .rodata, game/code_00261E10]
       - [0x325D20, .rodata, game/code_00265AD8]
       - [0x325E60, .rodata, game/code_002665B0]
-      - [0x325FF8, .rodata, game/code_00269978]
       - [0x326018, .rodata, game/code_0026B6A8]
       - [0x326030, .rodata, game/code_0026C1D0]
       - [0x3260B0, .rodata, game/code_0026DBF8]
@@ -473,8 +470,7 @@ segments:
       - [0x3344F0, .lit4, effect/effMagatuhi]
       - [0x334524, .lit4, game/code_00194700]
       - [0x334528, .lit4, effect/effMath]
-      - [0x33452C, .lit4, game/code_00195E50]
-      - [0x334550, .lit4, effect/effEvent]
+      - [0x33452C, .lit4, effect/effEvent]
       - [0x33455C, .lit4, game/code_0019A0C0]
       - [0x334564, .lit4, interface/frFont]
       - [0x334568, .lit4, game/code_001A5BB8]
@@ -561,8 +557,7 @@ segments:
       - [0x337434, .sdata, game/code_0016A100]
       - [0x337438, .sdata, effect/effPCPMisc]
       - [0x337440, .sdata, game/code_00194700]
-      - [0x337458, .sdata, game/code_00195E50]
-      - [0x337530, .sdata, effect/effEvent]
+      - [0x337458, .sdata, effect/effEvent]
       - [0x337540, .sdata, game/code_0019A0C0]
       - [0x337550, .sdata, interface/frFont]
       - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
