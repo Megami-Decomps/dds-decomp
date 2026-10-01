@@ -133,15 +133,15 @@ typedef struct StageTestEntry {
 
 typedef struct StageTestSlot {
     s32 entryIndex; /* 0x00 */
-    s32 unk04;
+    s32 assetResource; /* 0x04: mode-selected resource for the model request */
     s32 modelId;    /* 0x08 */
     s32 unk0C;
     s32 unk10;
-    u32 flags;      /* 0x14: bit 0 cleared by evtStageTestQueueMotion case 1 */
-    s32 state;      /* 0x18 */
-    s32 index;      /* 0x1C */
-    s32 unk20;
-    s32 unk24;
+    u32 flags;      /* 0x14: bit 0 suppresses the fallback motion */
+    s32 state;      /* 0x18: 0 idle, 1 queued, 2 playing, 3 fallback started, 4 forced fallback */
+    s32 motionIndex; /* 0x1C */
+    s32 blendLeadFrames; /* 0x20: negated initial motion time during blending */
+    s32 blendDurationFrames; /* 0x24: duration used to normalize the blend weight */
 } StageTestSlot;
 
 /* Battle stage test viewer state. Retail addresses it partly through
@@ -149,7 +149,7 @@ typedef struct StageTestSlot {
  * D_00457EB4..D_00457F1C symbols are all interior fields of this one object. */
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
-    s32 unk04;
+    s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
     s32 model;               /* 0x08 */
     s8 flag;                 /* 0x0C */
     StageTestEntry *entries; /* 0x10 */
@@ -157,7 +157,7 @@ typedef struct StageTestState {
     StageTestSlot slot[2];   /* 0x18 */
     s32 effect;              /* 0x68 */
     s32 pendingEffect;       /* 0x6C */
-    s32 unk70;               /* 0x70: DDS2 only, cleared together with model */
+    s32 modelUpdateStarted;  /* 0x70: DDS2 only, defers effect/motion work on the first update */
 } StageTestState;
 
 extern StageTestState D_00457EB0;
@@ -1590,18 +1590,19 @@ s32 sndPlayPartyItemSe(u32 id, s32 mode) {
     return 0;
 }
 
+/* Party-entry vitals and permanent bonuses; the unused bytes retain the retail layout. */
 typedef struct BtlPermanentBonusUnit {
     u8 pad00[6];
-    u16 unk06;
-    u16 unk08;
-    u16 unk0A;
-    u16 unk0C;
-    u16 unk0E;
+    u16 currentHp;   /* 0x06 */
+    u16 maxHp;       /* 0x08 */
+    u16 currentMp;   /* 0x0A */
+    u16 maxMp;       /* 0x0C */
+    u16 statusFlags; /* 0x0E: bit 0x4000 prevents the refill below */
     u8 pad10[6];
     s8 baseStats[5];
     u8 pad1B;
-    u16 unk1C;
-    u16 unk1E;
+    u16 hpBonus;     /* 0x1C: added by ptyComputeMaxHp */
+    u16 mpBonus;     /* 0x1E: added by ptyComputeMaxMp */
 } BtlPermanentBonusUnit;
 
 extern s32 func_001197C0(BtlPermanentBonusUnit *);
@@ -1619,6 +1620,8 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
+/* Apply a permanent stat/capacity item and refill eligible vitals.
+ * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
 s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
     s32 stat = -1;
     s32 valid = 0;
@@ -1645,24 +1648,24 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         valid = 1;
         break;
     case 5:
-        if (unit->unk08 >= 0x3E7 && unit->unk06 >= unit->unk08 &&
-            unit->unk0A >= unit->unk0C) {
+        if (unit->maxHp >= 0x3E7 && unit->currentHp >= unit->maxHp &&
+            unit->currentMp >= unit->maxMp) {
             return 2;
         }
-        unit->unk1C += 10;
-        if (unit->unk1C >= 0x3E8) {
-            unit->unk1C = 0x3E7;
+        unit->hpBonus += 10;
+        if (unit->hpBonus >= 0x3E8) {
+            unit->hpBonus = 0x3E7;
         }
         valid = 1;
         break;
     case 6:
-        if (unit->unk0C >= 0x3E7 && unit->unk06 >= unit->unk08 &&
-            unit->unk0A >= unit->unk0C) {
+        if (unit->maxMp >= 0x3E7 && unit->currentHp >= unit->maxHp &&
+            unit->currentMp >= unit->maxMp) {
             return 2;
         }
-        unit->unk1E += 10;
-        if (unit->unk1E >= 0x3E8) {
-            unit->unk1E = 0x3E7;
+        unit->mpBonus += 10;
+        if (unit->mpBonus >= 0x3E8) {
+            unit->mpBonus = 0x3E7;
         }
         valid = 1;
         break;
@@ -1675,7 +1678,7 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
     }
     if (stat >= 0) {
         if (unit->baseStats[stat] >= 0x63 &&
-            unit->unk06 >= unit->unk08 && unit->unk0A >= unit->unk0C) {
+            unit->currentHp >= unit->maxHp && unit->currentMp >= unit->maxMp) {
             return 2;
         }
         unit->baseStats[stat] += 2;
@@ -1684,11 +1687,11 @@ s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
         }
     }
 
-    unit->unk08 = func_001197C0(unit);
-    unit->unk0C = func_001198C0(unit);
-    if ((unit->unk0E & 0x4000) == 0) {
-        unit->unk0A = unit->unk0C;
-        unit->unk06 = unit->unk08;
+    unit->maxHp = func_001197C0(unit);
+    unit->maxMp = func_001198C0(unit);
+    if ((unit->statusFlags & 0x4000) == 0) {
+        unit->currentMp = unit->maxMp;
+        unit->currentHp = unit->maxHp;
     }
     return 1;
 }
@@ -1981,10 +1984,10 @@ void evtStageTestInit(s32 mode) {
     s32 value;
 
     D_00457EB0.mode = mode;
-    D_00457EB0.unk04 = 0;
+    D_00457EB0.assetRequest = 0;
     D_00457EB0.model = 0;
     D_00457EB0.flag = 0;
-    D_00457EB0.unk70 = 0;
+    D_00457EB0.modelUpdateStarted = 0;
     if (mode == 0) {
         D_00457EB0.entries = (StageTestEntry *)D_003E7978;
         offset = -140.0f;
@@ -1995,7 +1998,7 @@ void evtStageTestInit(s32 mode) {
     value = D_003E7970[mode];
     D_00457EB0.flags = 0;
     for (i = 0; i < 2; i++) {
-        D_00457EB0.slot[i].unk04 = value;
+        D_00457EB0.slot[i].assetResource = value;
         D_00457EB0.slot[i].modelId = -1;
         D_00457EB0.slot[i].unk0C = 0;
         D_00457EB0.slot[i].flags = 0;
@@ -2016,7 +2019,7 @@ void evtStageTestStop(void) {
     if (state->model != 0) {
         mdlDestroyContext(state->model);
         state->model = 0;
-        state->unk70 = 0;
+        state->modelUpdateStarted = 0;
     }
 }
 
@@ -2026,14 +2029,15 @@ void mnuResetWorkFloats(void) {
     D_0037F5E0[5] = 2048.0f;
 }
 
+/* Remember the model asset request result for the stage viewer. */
 void evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
-    D_00457EB0.unk04 = mdlRequestAsset();
+    D_00457EB0.assetRequest = mdlRequestAsset();
 }
 
 void mnuForwardTableByte(s32 encodedIndex) {
     StageTestSlot *slot = D_00457EB0.slot;
 
-    evtStageTestRequestModelAsset(slot->unk04, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
+    evtStageTestRequestModelAsset(slot->assetResource, D_00457EB0.entries[encodedIndex & 0xffff].modelId, 0);
 }
 
 u32 func_002C6B28(u32 *flags) {
@@ -2202,8 +2206,8 @@ s8 evtStageTestUpdate(s32 frame) {
             mnuApplyModelCamera(D_00457EB0.model);
             evtStageTestApplyEntryRotation(D_00457EB0.model);
             evtStageTestUpdateCamera();
-            if (D_00457EB0.unk70 == 0) {
-                D_00457EB0.unk70 = 1;
+            if (D_00457EB0.modelUpdateStarted == 0) {
+                D_00457EB0.modelUpdateStarted = 1;
             } else {
                 if (D_00457EB0.pendingEffect >= 0) {
                     evtStageTestCreateModelEffect(D_00457EB0.pendingEffect);
@@ -2241,37 +2245,40 @@ s32 evtStageTestCountFlags(s32 mode) {
     return count;
 }
 
+/* Queue a motion from the selected entry's column, with a 15-frame blend. */
 void evtStageTestQueueMotion(s32 kind, u32 index) {
     StageTestSlot *slot = D_00457EB0.slot;
-    f32 start = 0.0f;
-    s32 value;
+    f32 blendLeadFrames = 0.0f;
+    s32 motionIndex;
 
     if (index < 8) {
         switch (kind) {
         default:
-            start = 15.0f;
-            value = *(D_00457EB0.entries[slot->entryIndex].column[0] + index);
+            blendLeadFrames = 15.0f;
+            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[0] + index);
             break;
         case 1:
-            value = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
             slot->flags &= ~1;
             break;
         case 2:
-            value = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
+            motionIndex = *(D_00457EB0.entries[slot->entryIndex].column[1] + index);
             slot->flags |= 1;
             break;
         }
-        evtStageTestQueueMotionSegment(value, start, 15.0f);
+        evtStageTestQueueMotionSegment(motionIndex, blendLeadFrames, 15.0f);
     }
 }
 
-void evtStageTestQueueMotionSegment(u32 motionIndex, f32 startFrame, f32 endFrame) {
+/* Queue a motion and its blend timing; inputs are truncated to whole frames.
+ * The lead shifts initial motion time backwards, not to a start-frame endpoint. */
+void evtStageTestQueueMotionSegment(u32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames) {
     StageTestSlot *slot = D_00457EB0.slot;
 
     slot->state = 1;
-    slot->index = motionIndex;
-    slot->unk20 = (s32)startFrame;
-    slot->unk24 = (s32)endFrame;
+    slot->motionIndex = motionIndex;
+    slot->blendLeadFrames = (s32)blendLeadFrames;
+    slot->blendDurationFrames = (s32)blendDurationFrames;
 }
 
 void func_002C7530(void) {
@@ -2287,6 +2294,8 @@ s32 evtStageTestHasPendingMotion(void) {
     return 1;
 }
 
+/* Play the queued motion once, then start the entry's fallback unless suppressed.
+ * State 4 also permits the fallback before the active motion finishes. */
 void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *slot = D_00457EB0.slot;
     s32 index;
@@ -2294,17 +2303,17 @@ void evtStageTestAdvanceMotionQueue(void) {
 
     if (slot->state != 0 && slot->state != 3 && (node = evtStageTestGetActiveModel()) != 0) {
         if (slot->state == 1) {
-            index = slot->index;
+            index = slot->motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryPlainEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                mdlAddEntryPlainEx(node, 0, index, (s32)slot->blendLeadFrames, (s32)slot->blendDurationFrames);
                 slot->state = 2;
             }
         } else if (!(slot->flags & 1) && (*(u8 *)(*(s32 *)(node + 0x1C) + 0x30) == 5 || slot->state == 4)) {
             index = D_00457EB0.entries[slot->entryIndex].motionIndex;
 
             if (index < mdlGetNodeRefHalf(node, 0)) {
-                mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->unk20, (s32)slot->unk24);
+                mdlAddEntryFlaggedEx(node, 0, index, (s32)slot->blendLeadFrames, (s32)slot->blendDurationFrames);
                 slot->state = 3;
             }
         }
