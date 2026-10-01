@@ -129,8 +129,8 @@ extern FrFontSys frFontWork;
 /* Value record reached through D_00452724 entries. */
 typedef struct FrFontRecVal {
     u8 unk0[0x10];
-    u16 unk10;
-    u16 unk12;
+    u16 cellWidth;  /* 0x10: returned by frFontGetGlyphCellWidth */
+    u16 cellHeight; /* 0x12: returned by frFontGetGlyphCellHeight */
 } FrFontRecVal;
 
 typedef struct FrFontRec {
@@ -550,12 +550,12 @@ u32 frFontMeasureLines(FrFontGlyph *glyph) {
     for (line = glyph->chainHead; line != NULL; line = line->next) {
         node = line->firstChild;
         if (node != NULL) {
-            s8 b1 = line->u0.b.b1;
+            s8 spacing = line->u0.b.b1;
 
             do {
                 total += node->advance;
                 node = node->next;
-                total += b1;
+                total += spacing;
             } while (node != NULL);
         }
     }
@@ -572,7 +572,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex) {
             return D_00436558;
         }
     }
-    return D_00452724[index].val->unk10;
+    return D_00452724[index].val->cellWidth;
 }
 
 u32 frFontGetGlyphCellHeight(u8 fontIndex) {
@@ -583,7 +583,7 @@ u32 frFontGetGlyphCellHeight(u8 fontIndex) {
             return D_00436558;
         }
     }
-    return D_00452724[index].val->unk12;
+    return D_00452724[index].val->cellHeight;
 }
 
 void func_0019DB18(void) {
