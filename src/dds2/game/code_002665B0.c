@@ -423,7 +423,33 @@ void mnuReleaseSelectedProgressPanel(MenuProgressHost *host) {
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267238);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267358);
+typedef struct MenuSlotKind {
+    s16 kind;
+    s16 unk2;
+} MenuSlotKind;
+
+extern MenuSlotKind D_0038A3B8[];
+
+/* Same slot kind, or both kinds in the 0xF/0x1D/0x1E group. */
+s32 func_00267358(s32 index, s32 kind) {
+    s16 current = D_0038A3B8[index].kind;
+
+    if (kind == current) {
+        return 1;
+    }
+    if (kind == 0xF || kind == 0x1D || kind == 0x1E) {
+        if (current == 0xF) {
+            return 1;
+        }
+        if (current == 0x1D) {
+            return 1;
+        }
+        if (current == 0x1E) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002673B8);
 
@@ -1082,7 +1108,10 @@ extern void func_0026C900(void);
 
 
 typedef struct EventMenuSelection {
-    u8 pad00[0x60];
+    s32 kind;       /* 0x00 */
+    u8 pad04[0x44];
+    u32 flags;      /* 0x48 */
+    u8 pad4C[0x14];
     s32 entryIndex; /* 0x60 */
 } EventMenuSelection;
 
@@ -1090,12 +1119,9 @@ typedef struct EventMenuOwner {
     u8 pad00[0x1C];
     EventMenuSelection *selection; /* 0x1C */
     s32 state; /* 0x20 */
+    u8 pad24[0x18];
+    s32 scale; /* 0x3C: fade scale, 0x100 when fully shown */
 } EventMenuOwner;
-
-typedef struct EventVisualState {
-    u8 pad00[0x3C];
-    u32 statusFlag; /* 0x3C */
-} EventVisualState;
 
 typedef struct EventDispatchState {
     u8 pad00[8];
@@ -1103,7 +1129,7 @@ typedef struct EventDispatchState {
     s32 dispatchStatus; /* 0x54 */
     u32 dispatchValue; /* 0x58 */
     u8 pad5C[0x1C];
-    EventVisualState *visualState; /* 0x78 */
+    EventMenuOwner *visualState; /* 0x78 */
     EventMenuOwner *thresholdOwner; /* 0x7C */
     EventMenuOwner *menuOwner; /* 0x80 */
     s32 menuMode; /* 0x84 */
@@ -1201,7 +1227,83 @@ u32 func_00269C48(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269C50);
+extern u32 func_002C44E8(s32 mask);
+extern s32 func_002685F0(s32 action, s32 context);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void mnuSetPopupEntryFlagged(s32 *state, char *entry);
+extern void mnuClearListFlagsOneAndTwo(u32 list);
+extern void mnuRetreatListCursorDefault(u32 list);
+extern void mnuAdvanceListCursorDefault(u32 list);
+extern void mnuPlayInputSound(s32 mode, u32 buttons, u32 list);
+extern s32 D_003CE7D0[];
+extern char D_003CE848[];
+extern char D_003CE880[];
+extern char D_003CE8B8[];
+extern char D_003CE8F0[];
+
+/* Event panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
+s64 func_00269C50(u64 input) {
+    EventDispatchState *context = (EventDispatchState *)kwlnTaskGetUserValue();
+    u32 buttons = func_002C44E8(0x33);
+    s32 *state = &context->dispatchStatus;
+    s32 kind = context->visualState->selection->kind;
+    s32 frames;
+    s32 action;
+    EventMenuSelection *node;
+    s64 result;
+
+    result = func_002C4038((s32)context + 8, state, 0, input);
+    if (result != 0) {
+        return result;
+    }
+    frames = fldClassifyRemainingFrames((SceneTimerView *)context);
+    if (frames != 2) {
+        return 0;
+    }
+    if (context->visualState->scale < 0x100) {
+        return 0;
+    }
+    if (*state == 0) {
+        if (buttons & 1) {
+            node = context->visualState->selection;
+            action = D_003CE7D0[func_002674F8() * 5 + context->menuMode * 10 + kind];
+            if (!(node->flags & 1) || action == 3 || action == frames) {
+                if (func_002685F0(action, (s32)context) == 0) {
+                    switch (action) {
+                    case 2:
+                        if (context->menuOwner->state == 1) {
+                            mnuSetPopupEntryFlagged(state, D_003CE8F0);
+                        } else {
+                            mnuSetPopupEntryFlagged(state, D_003CE880);
+                        }
+                        break;
+                    case 1:
+                        kwlnFadeInStart(0, 0, 0, 0xF);
+                    default:
+                        mnuSetPopupEntryFlagged(state, D_003CE848 + action * 28);
+                        break;
+                    }
+                }
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(state, D_003CE8B8);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo((u32)context->visualState);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault((u32)context->visualState);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault((u32)context->visualState);
+        }
+        mnuPlayInputSound(0, buttons, (u32)context->visualState);
+    }
+    return 0;
+}
 
 s64 evtDispatchSelectionAfterFieldFrameGate(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -1231,7 +1333,7 @@ extern void evtFinishMessageWindowAndNotify(void);
 s32 evtClearDispatchVisualFlag(void) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
     evtRememberDispatchCallback(0, (s32)state);
-    state->visualState->statusFlag = 0;
+    state->visualState->scale = 0;
     mnuTerminalSetTrack(0, 0);
     evtFinishMessageWindowAndNotify();
     return 1;

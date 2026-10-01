@@ -62,6 +62,8 @@ typedef struct MenuTerminalWork {
     s32 reduced;             /* 0xDC */
     u8 padE0[4];
     s32 unkE4;               /* 0xE4 */
+    u8 padE8[0x78];
+    u32 resourceHandle;      /* 0x160: music bank handle */
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 
 extern s32 mnuCreateDualPercentPanel(s32, s32);
@@ -305,7 +307,30 @@ void mnuReleaseSelectedProgressPanel(s32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248E68);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249010);
+typedef struct MenuSlotKind {
+    s16 kind;
+    s16 unk2;
+} MenuSlotKind;
+
+extern MenuSlotKind D_0032EF18[];
+
+/* Same slot kind, or both kinds in the 30/31 pair. */
+s32 func_00249010(s32 index, s32 value) {
+    s16 current = D_0032EF18[index].kind;
+
+    if (value == current) {
+        return 1;
+    }
+    if (value == 30 || value == 31) {
+        if (current == 30) {
+            return 1;
+        }
+        if (current == 31) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249058);
 
@@ -601,7 +626,18 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00249DD0);
+extern s32 fldGetCurrentBgmHandle(void);
+extern void sndEnsureMidiBankResident(u32);
+
+/* Pick the scene's music bank (default bank when the mode is zero) and make it resident. */
+void func_00249DD0(MenuTerminalWork *work) {
+    if (work->mode == 0) {
+        work->resourceHandle = 0x20001;
+    } else {
+        work->resourceHandle = fldGetCurrentBgmHandle();
+    }
+    sndEnsureMidiBankResident(work->resourceHandle & 0xFFFF0000);
+}
 
 extern void mnuClearPanelTransitionState(void *);
 
@@ -612,8 +648,6 @@ extern void mnuTerminalBuildMenus(MenuTerminalWork *host);
 extern void evtLoadResourcePair(const char *, void *);
 
 extern void evtCreateMessageWindowIfMissing(s32);
-
-extern void func_00249DD0(s32);
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5E0);
 
@@ -644,7 +678,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     for (i = 0; i < 2; i++) {
         ((MenuTerminalWork *)obj)->cursor[i] = -1;
     }
-    func_00249DD0(obj);
+    func_00249DD0((MenuTerminalWork *)obj);
     return obj;
 }
 
@@ -1051,14 +1085,19 @@ typedef struct EvtBContext {
     s32 exitPending; /* 0xCC */
     s32 transitionPending; /* 0xD0 */
     s32 transitionStage; /* 0xD4 */
-    u8 padD8[0x80];
+    s32 menuActive;     /* 0xD8: cleared when the menu command chain ends */
+    s32 selectionStep;  /* 0xDC: nonzero once the selection chain is running */
+    u8 padE0[0x78];
     s32 effectHandle;   /* 0x158: effect resource handle */
     s32 dispatchMode; /* 0x15C */
     u32 resourceHandle; /* 0x160 */
 } EvtBContext;
 
 typedef struct EvtBSelectionNode {
-    u8 pad00[0x60];
+    s32 kind;       /* 0x00 */
+    u8 pad04[0x44];
+    u32 flags;      /* 0x48 */
+    u8 pad4C[0x14];
     s32 entryIndex; /* 0x60 */
 } EvtBSelectionNode;
 
@@ -1066,6 +1105,8 @@ typedef struct EvtBSelectionList {
     u8 pad00[0x1C];
     EvtBSelectionNode *selected; /* 0x1C */
     s32 mode; /* 0x20 */
+    u8 pad24[0x18];
+    s32 scale; /* 0x3C: fade scale, 0x100 when fully shown */
 } EvtBSelectionList;
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024B3A8);
@@ -1074,7 +1115,83 @@ u32 func_0024B470(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024B478);
+extern u32 func_00285B20(s32 mask);
+extern s32 func_0024A1D8(s32 action, s32 context);
+extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
+extern void mnuClearListFlagsOneAndTwo(u32 list);
+extern void mnuRetreatListCursorDefault(u32 list);
+extern void mnuAdvanceListCursorDefault(u32 list);
+extern void mnuPlayInputSound(s32 mode, u32 buttons, u32 list);
+extern s32 D_0036AC80[];
+extern u8 D_0036ACF8[];
+extern u8 D_0036AD30[];
+extern u8 D_0036AD68[];
+extern u8 D_0036ADA0[];
+
+/* Event-B panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
+s64 func_0024B478(u64 input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+    u32 buttons = func_00285B20(0x33);
+    s32 *state = &context->dispatchState;
+    s32 kind = ((EvtBSelectionList *)context->visualList)->selected->kind;
+    s32 frames;
+    s32 action;
+    EvtBSelectionNode *node;
+    s64 result;
+
+    result = func_00285670((s32)context + 8, state, 0, input);
+    if (result != 0) {
+        return result;
+    }
+    frames = fldClassifyRemainingFrames((SceneTimerView *)context);
+    if (frames != 2) {
+        return 0;
+    }
+    if (((EvtBSelectionList *)context->visualList)->scale < 0x100) {
+        return 0;
+    }
+    if (*state == 0) {
+        if (buttons & 1) {
+            node = ((EvtBSelectionList *)context->visualList)->selected;
+            action = D_0036AC80[func_00249198() * 5 + context->state7C * 10 + kind];
+            if (!(node->flags & 1) || action == 3 || action == frames) {
+                if (func_0024A1D8(action, (s32)context) == 0) {
+                    switch (action) {
+                    case 2:
+                        if (((EvtBSelectionList *)context->selectionList)->mode == 1) {
+                            mnuSetPopupEntryFlagged(state, D_0036ADA0);
+                        } else {
+                            mnuSetPopupEntryFlagged(state, D_0036AD30);
+                        }
+                        break;
+                    case 1:
+                        kwlnFadeInStart(0, 0, 0, 0xF);
+                    default:
+                        mnuSetPopupEntryFlagged(state, D_0036ACF8 + action * 28);
+                        break;
+                    }
+                }
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(state, D_0036AD68);
+        }
+        if (!(buttons & 0x300000)) {
+            mnuClearListFlagsOneAndTwo(context->visualList);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatListCursorDefault(context->visualList);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceListCursorDefault(context->visualList);
+        }
+        mnuPlayInputSound(0, buttons, context->visualList);
+    }
+    return 0;
+}
 
 
 s64 evtDispatchSelectionAfterFieldFrameGate(u64 request) {
@@ -1102,7 +1219,7 @@ s32 evtBClearAndReset(void) {
     s32 context = kwlnTaskGetUserValue();
 
     evtRememberDispatchCallback(0, context);
-    *(s32 *)(((EvtBContext *)context)->visualList + 0x3C) = 0;
+    ((EvtBSelectionList *)((EvtBContext *)context)->visualList)->scale = 0;
     mnuSetWorldObjectAndMenuEnabled(0);
     evtFinishMessageWindowAndNotify();
     return 1;
@@ -1257,7 +1374,7 @@ u32 evtSelectFinalVisualNode(void) {
     return 1;
 }
 
-/* PARKED M136_Pairs (family queue): DDS1 func_0024C120 (37w): already parked by L61 (c120_parked); re-tried with s64/s32 result and nested/&& forms: always 36/37 words match, the annulled bnezl after evtGetMessageWindowControlState vs retail's plain bnez + delay-slot `daddu $2,$0,$0`. Best draft c120A. */
+/* Terminal panel poll: once the message window is idle and the field frames are drained, open the follow-up popup. */
 extern u8 D_0036AE2C[];
 s64 func_0024C120(s32 request) {
     s32 state = kwlnTaskGetUserValue();
@@ -1308,7 +1425,25 @@ INCLUDE_ASM(const s32, "game/code_00248580", mnuOpenTerminalSelectionMessageWind
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024C3F8);
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024C578);
+/* Per-frame panel update: once the field frames are drained, pick the transition state from the selection chain, then run the panel. */
+s64 func_0024C578(s32 item) {
+    s32 state = kwlnTaskGetUserValue();
+
+    func_0024A2D8(state);
+    if (fldClassifyRemainingFrames((SceneTimerView *)state) != 0) {
+        if (((EvtBContext *)state)->selectionStep == 0) {
+            func_0024A340(1, state);
+        } else if (func_0024A6E8((SceneFrameOwner *)state) == 0) {
+            func_0024A340(1, state);
+        } else {
+            func_0024A340(0, state);
+        }
+        mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
+        func_0024A930(state);
+        func_0024A610(state);
+    }
+    return menuRunPanel(state, 1, item);
+}
 
 s64 evtBDispatchSync(s32 request) {
     s32 context = kwlnTaskGetUserValue();
