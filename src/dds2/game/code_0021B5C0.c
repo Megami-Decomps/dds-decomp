@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* The boss classification is checked by entry lookup and HEKATO scaling. */
 #define BTL_UNIT_BOSS_FLAG 0x400
@@ -227,9 +228,9 @@ s32 btlInitializeEffectVectors(BtlEffect *fx) {
     func_001EC868(fx, vec, 25.0f);
     btlCopyMotionTransform(fx->vecC0, vec);
     func_00336538(-0.87266463f);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(fx->vec40) : "memory");
-    __asm__ volatile(".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\tvmaddz.xyzw vf10, vf30, vf10z\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(fx->vecD0) : "memory");
+        VU0_STORE_VF(vf10, fx->vec40);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, fx->vecD0);
     fx->unk154 = 125.0f;
     fx->flags |= 0x841;
     return 1;

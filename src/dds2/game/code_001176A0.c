@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u32 D_00435E80;
 
@@ -141,28 +142,14 @@ u32 func_001178B8(EvtScaledValue *value) {
 void func_001178C0(EvtScaledValue *value) {
     void *vec = (void *)func_001178B8(value);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        :
-        : "r"(vec)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 /* Same, from the second quadword at +0x18. */
 void func_001178E0(EvtScaledValue *value) {
     void *vec = (void *)((u8 *)func_001178B8(value) + 0x10);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        :
-        : "r"(vec)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */

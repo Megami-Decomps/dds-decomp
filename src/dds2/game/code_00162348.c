@@ -364,7 +364,8 @@ void parDispatchKindInit(ParSystem *work, s32 index) {
 void func_00162B60(s32 particle, s32 index, u32 color) {
     u128 axis[2];
     __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F30));
+    VU0_LOAD_VF(vf11, D_00451F30);
+;
     __asm__ volatile (
         "vopmula.xyz ACC, vf10, vf11\n\t"
         "vopmsub.xyz vf10, vf11, vf10\n\t"
@@ -375,7 +376,8 @@ void func_00162B60(s32 particle, s32 index, u32 color) {
         "vrsqrt Q, vf0w, vf2w\n\t"
         "vwaitq\n\t"
         "vmulq.xyz vf10, vf10, Q");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F40));
+    VU0_LOAD_VF(vf11, D_00451F40);
+;
     __asm__ volatile (
         "vmul.xyzw vf10, vf10, vf11\n\t"
         "vmove.xyzw vf2, vf10\n\t"
@@ -383,9 +385,11 @@ void func_00162B60(s32 particle, s32 index, u32 color) {
         "vmove.xyzw vf12, vf2\n\t"
         "vmove.xyzw vf11, vf10\n\t"
         "vadd.xyzw vf10, vf10, vf12");
-    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    VU0_STORE_VF(vf10, &axis[0]);
+;
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
-    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
+    VU0_STORE_VF(vf11, &axis[1]);
+;
     func_00163518(particle, index, axis);
     parFadeAlphaCell(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
@@ -394,7 +398,8 @@ void func_00162B60(s32 particle, s32 index, u32 color) {
 void func_00162C48(s32 particle, s32 index, u32 color) {
     u128 axis[3];
     __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F30));
+    VU0_LOAD_VF(vf11, D_00451F30);
+;
     __asm__ volatile (
         "vopmula.xyz ACC, vf10, vf11\n\t"
         "vopmsub.xyz vf10, vf11, vf10\n\t"
@@ -405,17 +410,21 @@ void func_00162C48(s32 particle, s32 index, u32 color) {
         "vrsqrt Q, vf0w, vf2w\n\t"
         "vwaitq\n\t"
         "vmulq.xyz vf10, vf10, Q");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F40));
+    VU0_LOAD_VF(vf11, D_00451F40);
+;
     __asm__ volatile (
         "vmul.xyzw vf10, vf10, vf11\n\t"
         "vmove.xyzw vf2, vf10\n\t"
         "vmove.xyzw vf10, vf12\n\t"
         "vmove.xyzw vf12, vf2");
-    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[1]) : "memory");
+    VU0_STORE_VF(vf10, &axis[1]);
+;
     __asm__ volatile ("vmove.xyzw vf11, vf10\n\tvadd.xyzw vf10, vf10, vf12");
-    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    VU0_STORE_VF(vf10, &axis[0]);
+;
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
-    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[2]) : "memory");
+    VU0_STORE_VF(vf11, &axis[2]);
+;
     func_00163628(particle, index, axis);
     func_001638D8(particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
@@ -424,7 +433,8 @@ void func_00162C48(s32 particle, s32 index, u32 color) {
 void func_00162D38(s32 particle, s32 index, u32 color) {
     u128 axis[2];
     __asm__ volatile ("vmove.xyzw vf11, vf12\n\tvsub.xyzw vf10, vf10, vf11");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F30));
+    VU0_LOAD_VF(vf11, D_00451F30);
+;
     __asm__ volatile (
         "vopmula.xyz ACC, vf10, vf11\n\t"
         "vopmsub.xyz vf10, vf11, vf10\n\t"
@@ -435,7 +445,8 @@ void func_00162D38(s32 particle, s32 index, u32 color) {
         "vrsqrt Q, vf0w, vf2w\n\t"
         "vwaitq\n\t"
         "vmulq.xyz vf10, vf10, Q");
-    __asm__ volatile ("lqc2 vf11, 0(%0)" : : "r"(D_00451F40));
+    VU0_LOAD_VF(vf11, D_00451F40);
+;
     __asm__ volatile (
         "vmul.xyzw vf10, vf10, vf11\n\t"
         "vmove.xyzw vf2, vf10\n\t"
@@ -443,9 +454,11 @@ void func_00162D38(s32 particle, s32 index, u32 color) {
         "vmove.xyzw vf12, vf2\n\t"
         "vmove.xyzw vf11, vf10\n\t"
         "vadd.xyzw vf10, vf10, vf12");
-    __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(&axis[0]) : "memory");
+    VU0_STORE_VF(vf10, &axis[0]);
+;
     __asm__ volatile ("vmove.xyzw vf10, vf12\n\tvsub.xyzw vf11, vf11, vf10");
-    __asm__ volatile ("sqc2 vf11, 0(%0)" : : "r"(&axis[1]) : "memory");
+    VU0_STORE_VF(vf11, &axis[1]);
+;
     func_00190120(particle, index, axis);
     effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
 }
@@ -591,17 +604,17 @@ void func_001635D0(ParSystem *system, s32 index, void *delta) {
     s32 count = system->vertexWordCount;
     u8 *vertex = *(u8 **)cell;
     s32 i;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(delta) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, delta);
+;
     if (count > 0) {
         i = count;
         do {
-            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex));
-            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex) : "memory");
+            VU0_LOAD_VF(vf10, vertex);
+;
+            VU0_ADD(vf10, vf10, vf11);
+;
+            VU0_STORE_VF(vf10, vertex);
+;
             i--;
             vertex += 0x10;
         } while (i != 0);
@@ -615,23 +628,29 @@ void func_001636F0(ParSystem *system, s32 index, void *delta) {
     s32 count = cell->vertexCount / 3;
     u8 *vertex = (u8 *)cell->history;
     s32 i;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(delta));
+    VU0_LOAD_VF(vf11, delta);
+;
     if (count > 0) {
         i = count;
         do {
-            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex));
-            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex) : "memory");
-            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex + 0x10));
-            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex + 0x10) : "memory");
-            __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(vertex + 0x20));
-            __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-            __asm__ volatile ("sqc2 vf10, 0(%0)" : : "r"(vertex + 0x20) : "memory");
+            VU0_LOAD_VF(vf10, vertex);
+;
+            VU0_ADD(vf10, vf10, vf11);
+;
+            VU0_STORE_VF(vf10, vertex);
+;
+            VU0_LOAD_VF(vf10, vertex + 0x10);
+;
+            VU0_ADD(vf10, vf10, vf11);
+;
+            VU0_STORE_VF(vf10, vertex + 0x10);
+;
+            VU0_LOAD_VF(vf10, vertex + 0x20);
+;
+            VU0_ADD(vf10, vf10, vf11);
+;
+            VU0_STORE_VF(vf10, vertex + 0x20);
+;
             i--;
             vertex += 0x30;
         } while (i != 0);

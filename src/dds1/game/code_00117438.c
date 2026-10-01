@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s64 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
@@ -142,28 +143,16 @@ u32 func_00117650(EvtScaledValue *value) {
 void func_00117658(EvtScaledValue *value) {
     void *vec = (void *)func_00117650(value);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        :
-        : "r"(vec)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+
 }
 
 /* Same, from the second quadword at +0x18. */
 void func_00117678(EvtScaledValue *value) {
     void *vec = (void *)((u8 *)func_00117650(value) + 0x10);
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        :
-        : "r"(vec)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+
 }
 
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it

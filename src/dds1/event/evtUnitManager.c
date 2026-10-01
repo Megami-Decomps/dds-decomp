@@ -138,9 +138,9 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(info));
+                VU0_LOAD_VF(vf10, info);
     } else {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324770[0]));
+                VU0_LOAD_VF(vf10, D_00324770[0]);
     }
 }
 
@@ -162,9 +162,9 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"((u8 *)info + 0x40));
+                VU0_LOAD_VF(vf10, (u8 *)info + 0x40);
     } else {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324780));
+                VU0_LOAD_VF(vf10, D_00324780);
     }
 }
 
@@ -178,11 +178,11 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
         }
     }
     if (unit->flags & 0x400) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec10));
+                VU0_LOAD_VF(vf10, unit->vec10);
     } else if (ownVector) {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec10));
+                VU0_LOAD_VF(vf10, unit->vec10);
     } else {
-        __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(D_00324770[0] + 4));
+                VU0_LOAD_VF(vf10, D_00324770[0] + 4);
     }
 }
 
@@ -247,9 +247,9 @@ void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 arg) {
         "vwaitq\n\t"
         "vmulq.xyz vf10, vf10, Q\n\t"
         ".set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec30));
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
     evtLoadUnitDirectionVectorVU(unit);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(unit->vec20));
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
@@ -275,7 +275,7 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
     } else {
         func_00221D00(unit, arg, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
-        __asm__ volatile(".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder");
+                VU0_MOVE_VF(vf10, vf0);
         evtSetUnitNormalizedDirection(unit, arg);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }

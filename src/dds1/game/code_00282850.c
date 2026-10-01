@@ -1531,7 +1531,7 @@ f32 mnuSetModelScaleVector(void *model, s32 useTable) {
     vector[1] = scale;
     vector[2] = scale;
     vector[3] = 1.0f;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(vector));
+    VU0_LOAD_VF(vf10, vector);
     mdlStoreTertiaryVectorVU(model);
     return scale;
 }
@@ -1569,7 +1569,7 @@ void mnuApplyModelCamera(s32 model) {
         vec[2] = 0.0f;
         *(f32 *)(D_0037CE70 + 8) = (-400.0f - entry->position[2]) * scale;
     }
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(vec));
+    VU0_LOAD_VF(vf10, vec);
     mdlStorePrimaryVectorVU((void *)model);
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
@@ -209,11 +210,11 @@ void effParamDispatchFloat(f32 value) {
 }
 
 void effParamInitWork(EffInitWork *work) {
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353850));
+    VU0_LOAD_VF(vf10, &D_00353850);
     mdlStorePrimaryVectorVU(work);
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353860));
+    VU0_LOAD_VF(vf10, &D_00353860);
     func_00217FB8(work);
-    __asm__ volatile ("lqc2 $vf10, 0(%0)" :: "r" (&D_00353870));
+    VU0_LOAD_VF(vf10, &D_00353870);
     mdlStoreTertiaryVectorVU(work);
     mdlBroadcastMasked(work, 0x80808080);
     if (work->param != NULL) {
@@ -255,11 +256,7 @@ void *effParamAssembleWork(void *source) {
 }
 
 void effParamForwardVector(void *work, void *vec) {
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (vec) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
     mdlStorePrimaryVectorVU(work);
 }
 
@@ -268,11 +265,7 @@ void effParamBuildVector(void *work, f32 scalar) {
     f32 v[3];
 
     v[0] = v[1] = v[2] = scalar;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf10, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (v) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, v);
     mdlStoreTertiaryVectorVU(work);
 }
 
@@ -287,32 +280,13 @@ void effParamScatterVectors(EffScatterWork *work, void *src) {
     u8 *secondVector;
     u8 *thirdVector;
 
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf28, 0(%0)\n\t"
-        "lqc2 vf29, 16(%0)\n\t"
-        "lqc2 vf30, 32(%0)\n\t"
-        "lqc2 vf31, 48(%0)\n\t"
-        ".set reorder"
-        : : "r" (src) : "memory");
+    VU0_LOAD_MATRIX(src);
     firstVector = work->destination + 0x20;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf28, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (firstVector) : "memory");
+    VU0_STORE_VF(vf28, firstVector);
     secondVector = work->destination + 0x30;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf29, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (secondVector) : "memory");
+    VU0_STORE_VF(vf29, secondVector);
     thirdVector = work->destination + 0x40;
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "sqc2 vf30, 0(%0)\n\t"
-        ".set reorder"
-        : : "r" (thirdVector) : "memory");
+    VU0_STORE_VF(vf30, thirdVector);
 }
 
 void func_00162ED8(void) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern s32 func_00316ED0(void);
 
@@ -464,7 +465,7 @@ void evtSelStateDestroy(void) {
         sdfReleaseChipBlock(D_00438E60);
         D_00435D18 = 0;
         __asm__ volatile(".set noreorder\n\tvmove.xyzw $vf10, $vf0\n\tvmulx.w $vf10, $vf10, $vf0x\n\t.set reorder");
-        __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(D_0037F590) : "memory");
+        VU0_STORE_VF(vf10, D_0037F590);
     }
 }
 

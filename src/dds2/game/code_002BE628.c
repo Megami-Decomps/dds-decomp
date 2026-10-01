@@ -2003,7 +2003,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
-#define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
+
 
 extern s32 D_00435DF0;
 extern void mdlStoreTertiaryVectorVU(s32);
@@ -2019,7 +2019,7 @@ f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
     vec[1] = scale;
     vec[2] = scale;
     vec[3] = 1.0f;
-    VU_LOAD10(vec);
+    VU0_LOAD_VF(vf10, vec);
     mdlStoreTertiaryVectorVU(model);
     return scale;
 }
@@ -2069,7 +2069,7 @@ void mnuApplyModelCamera(s32 model) {
         vec[2] = 0.0f;
         ((MenuWorkCamera *)D_003E7950)->depth = (-400.0f - entry->position[2]) * scale;
     }
-    VU_LOAD10(vec);
+    VU0_LOAD_VF(vf10, vec);
     mdlStorePrimaryVectorVU(model);
 }
 

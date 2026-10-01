@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct SoundSlot {
     u32 remainingFrames;
@@ -355,7 +356,7 @@ void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     n->primary[1] = y;
     n->primary[2] = z;
     n->primary[3] = 0;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->primary));
+    VU0_LOAD_VF(vf10, n->primary);
     mdlStorePrimaryVectorVU(n->model);
 }
 
@@ -367,7 +368,7 @@ void func_0031C5E8(u8 *node, f32 x, f32 y, f32 z) {
     n->primary[0] += x;
     n->primary[1] += y;
     n->primary[2] += z;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->primary));
+    VU0_LOAD_VF(vf10, n->primary);
     mdlStorePrimaryVectorVU(n->model);
 }
 
@@ -379,7 +380,7 @@ void func_0031C630(u8 *node) {
     *(f32 *)(node + 0x14) = vec[1];
     *(f32 *)(node + 0x18) = vec[2];
     *(f32 *)(node + 0x1C) = vec[3];
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x10));
+    VU0_LOAD_VF(vf10, node + 0x10);
     func_00232AD0(*(u32 *)(node + 0x40));
 }
 
@@ -393,7 +394,7 @@ void mnuSetNodeScaleVector(u8 *node, f32 value) {
     n->tertiary[1] = value;
     n->tertiary[2] = value;
     n->tertiary[3] = 0;
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(n->tertiary));
+    VU0_LOAD_VF(vf10, n->tertiary);
     mdlStoreTertiaryVectorVU(n->model);
 }
 
