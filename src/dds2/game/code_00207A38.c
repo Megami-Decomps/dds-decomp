@@ -14,22 +14,29 @@ typedef struct BtlUnit {
     f32 height;
     f32 reach;
     u8 unk_B8[0x50];
-    u64 unitId; /* 0x108: compared against the battle command's unit ID */
-    u32 flags;
-    u32 unk_114;
-    u8 unk_118[8];
-    u16 unk_120;
-    u16 unk_122; /* 0x122: script-controlled unit parameter */
-    u16 mode;
-    u8 unk_126[0xE];
-    u16 unk_134; /* 0x134: queried unit parameter */
-    u8 pad136[0x1E6];
+    u64 unitId;              /* 0x108: compared against the battle command's unit ID */
+    union {
+        u64 flags64;         /* 0x110 */
+        struct {
+            u32 flags;       /* 0x110 */
+            u32 stateFlags;  /* 0x114 */
+        };
+    };
+    u8 pad118[8];
+    u16 statBits;            /* 0x120: queried for bit 0x2000 */
+    u16 unk_122;             /* 0x122: script-controlled unit parameter */
+    u16 mode;                /* 0x124 */
+    u8 pad126[8];
+    u16 conditionFlags;      /* 0x12E */
+    u8 pad130a[4];
+    u16 unk_134;             /* 0x134: queried unit parameter */
+    u8 pad130[0x1E6];
     u32 unk_31C;
-    u8 unk_320p[0x1C];
-    u32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
-    u32 effectHandle; /* 0x340: attached effect released during cleanup */
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
+    u8 pad320[0x1C];
+    u32 effectObject;        /* 0x33C: effect whose first inner vector becomes the origin */
+    void *effectHandle;      /* 0x340: attached effect released during cleanup */
+    u8 pad344[0x20];
+    struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
 
 typedef struct BtlActor {
@@ -443,7 +450,7 @@ f32 btlGetMaxUnitTop(u32 mask) {
                 best = value;
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return best;
 }
@@ -462,7 +469,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
                 best = value;
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return best;
 }
@@ -495,7 +502,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                 }
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return best;
 }
@@ -538,7 +545,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
                 }
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return nearest;
 }
@@ -577,7 +584,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
                 }
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     return farthest;
 }
@@ -587,7 +594,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
     BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
-    for (unit = work->unitList; unit != NULL; unit = unit->next) {
+    for (unit = work->unitList; unit != NULL; unit = unit->nextActor) {
         btlFlagUnitDefeatCandidate((s32)unit);
     }
 }
@@ -595,7 +602,7 @@ void btlFlagAllUnitsDefeatCandidate(void) {
 void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
     BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
-    for (unit = work->unitList; unit != NULL; unit = unit->next) {
+    for (unit = work->unitList; unit != NULL; unit = unit->nextActor) {
         btlClearUnitDefeatCandidate((s32)unit);
     }
 }
@@ -609,7 +616,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
             if (unit->flags & mask) {
                 btlFlagUnitDefeatCandidate((s32)unit);
             }
-            unit = unit->next;
+            unit = unit->nextActor;
         } while (unit != NULL);
     }
 }
@@ -623,7 +630,7 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
             if (unit->flags & mask) {
                 btlClearUnitDefeatCandidate((s32)unit);
             }
-            unit = unit->next;
+            unit = unit->nextActor;
         } while (unit != NULL);
     }
 }
@@ -666,7 +673,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
             if (((flags & mask) != 0) && ((flags & 0x20) == 0)) {
                 count += flags & 1;
             }
-            unit = unit->next;
+            unit = unit->nextActor;
         } while (unit != NULL);
     }
     return count;
@@ -1959,7 +1966,7 @@ u32 func_0020C180(void) {
                 return 1;
             }
         }
-        unit = unit->next;
+        unit = unit->nextActor;
     }
     scrSetIntegerReturnValue(0);
     return 1;
@@ -2337,7 +2344,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
         s32 unit = (s32)((BtlActor *)actor)->unit;
         s32 width = 2;
 
-        if (((BtlUnit *)unit)->unk_120 & 0x20) {
+        if (((BtlUnit *)unit)->statBits & 0x20) {
             width = 1;
         }
         func_001A45C0(window, 0, ((BtlUnit *)unit)->mode, width);
@@ -2384,7 +2391,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
                     evtConfigureUnitTransition(effect, 0);
                 }
             }
-            actor = (s32)((BtlUnit *)actor)->next;
+            actor = (s32)((BtlUnit *)actor)->nextActor;
         }
     }
 }
