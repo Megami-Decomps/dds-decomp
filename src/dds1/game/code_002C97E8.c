@@ -775,7 +775,25 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB4B8);
+extern s32 func_003014F0();
+extern void func_002CB6F8();
+
+/* Create a task resource work block with the name copied to two formatted buffers. */
+TaskWork *func_002CB4B8(char *name, s32 destroyCallback, u32 userData) {
+    s32 allocation = func_002D03F8(0x14);
+    TaskWork *work = sdfMemoryGetBlockAddress(allocation);
+
+    memset(work, 0, 0x14);
+    work->handle = allocation;
+    work->list = sdfCreateTaskHeader(userData);
+    sdfSetTaskDestroyCallback(work->list, destroyCallback);
+    sdfSetTaskSecondaryCallback(work->list, (s32)func_002CB6F8);
+    work->primaryTaskName = func_002CFEB8(strlen(name));
+    work->secondaryTaskName = func_002CFEB8(strlen(name) + 5);
+    func_003014F0(work->primaryTaskName, "%s", name);
+    func_003014F0(work->secondaryTaskName, "draw_%s", name);
+    return work;
+}
 
 typedef struct SdfTaskResourceWork {
     u32 allocation;            /* 0x00 */
@@ -1123,10 +1141,6 @@ void func_002CC740(void) {
 u32 func_002CC748(void) {
     return 0;
 }
-
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD288);
-
-INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD290);
 
 INCLUDE_SDATA(const s32, "game/code_002C97E8", D_003BD298);
 
