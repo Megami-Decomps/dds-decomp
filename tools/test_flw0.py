@@ -611,8 +611,8 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 2218, 736),
-            "dds2": (126, 1509, 1190),
+            "dds1": (129, 2290, 736),
+            "dds2": (126, 1751, 1190),
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0
@@ -1028,12 +1028,14 @@ end
             "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
             "ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR": (0x04A, 2, False),
             "SET_UNIT_VALUE": (0x04B, 2, False),
+            "ACTION_WINDOW_REQUEST_AND_POLL": (0x05E, 1, True),
             "RESTORE_CAMERA_NODE_MODE": (0x060, 0, False),
             "RELEASE_CURRENT_OBJECT": (0x061, 0, False),
             "CALL_EVENT": (0x066, 1, False),
             "READ_CURRENT_WORLD_OBJECT_ID": (0x068, 0, True),
             "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
             "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
+            "MOVE_OBJECT_ALONG_PATH": (0x06B, 3, False),
             "SET_MESSAGE_WINDOW_GEOMETRY": (0x071, 3, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
@@ -1343,7 +1345,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 38882)
+        self.assertEqual(profiled_command_uses, 41752)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1360,6 +1362,13 @@ end
             (0 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (30 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (0x010 << 16) | flw0.OPCODE_IDS["COMM"],
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x05E << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (0 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (202 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (101 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x06B << 16) | flw0.OPCODE_IDS["COMM"],
             flw0.OPCODE_IDS["END"],
         ]
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds2")
@@ -1369,12 +1378,14 @@ end
         self.assertIn("result = TEST_MODEL_FLAG(7)", view)
         self.assertIn("WAIT_FOR_TIMER_START()", view)
         self.assertIn("SCREEN_FADE_B(30, 0)", view)
+        self.assertIn("result = ACTION_WINDOW_REQUEST_AND_POLL(9)", view)
+        self.assertIn("MOVE_OBJECT_ALONG_PATH(101, 202, 0)", view)
 
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 99855, 26396),
-            "dds2": (140, 73364, 15621),
+            "dds1": (143, 92358, 18899),
+            "dds2": (140, 70818, 13075),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1551,7 +1562,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 38882)
+            (code_words, commands, profiled_commands), (168829, 53389, 41752)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1680,7 +1691,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-                (28401, 1910, 287),
+                (29786, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)

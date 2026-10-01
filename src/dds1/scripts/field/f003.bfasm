@@ -484,7 +484,7 @@ _9:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _37
@@ -787,7 +787,7 @@ _41:
     COMM 0x0203
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _45
@@ -821,7 +821,7 @@ _47:
   while (1) {
     push 1
     push 10
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _53
@@ -878,7 +878,7 @@ _55:
   while (1) {
     push 1
     push 11
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _57
@@ -918,7 +918,7 @@ _59:
   while (1) {
     push 1
     push 3
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _61
@@ -959,7 +959,7 @@ _63:
   if_not (local_int[15] == 0) goto _70
   push 1
   push 6
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _65
@@ -984,7 +984,7 @@ _78:
   if_not (local_int[15] == 0) goto _76
   push 1
   push 7
-  COMM 0x005e
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _71
@@ -1054,7 +1054,7 @@ _83:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _85
@@ -1076,7 +1076,7 @@ _87:
   while (1) {
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _89
@@ -1108,7 +1108,7 @@ _91:
     if_not (local_int[22] == 1) goto _111
     push 1
     push 1
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _93
@@ -1120,7 +1120,7 @@ _91:
     if_not (local_int[22] == 2) goto _112
     push 1
     push 9
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _95
@@ -1132,7 +1132,7 @@ _91:
     if_not (local_int[22] == 100) goto _113
     push 1
     push 2
-    COMM 0x005e
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
     PUSHREG
     EQ
     IF _97
@@ -1148,7 +1148,7 @@ _91:
       if_not (local_int[22] == 102) goto _115
       push 1
       push 3
-      COMM 0x005e
+      COMM ACTION_WINDOW_REQUEST_AND_POLL
       PUSHREG
       EQ
       IF _99
@@ -1164,7 +1164,7 @@ _91:
         if_not (local_int[22] == 104) goto _117
         push 1
         push 6
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _101
@@ -1176,7 +1176,7 @@ _91:
         if_not (local_int[22] == 105) goto _118
         push 1
         push 7
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _103
@@ -1188,7 +1188,7 @@ _91:
         if_not (local_int[22] == 106) goto _119
         push 1
         push 10
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _105
@@ -1200,7 +1200,7 @@ _91:
         if_not (local_int[22] == 107) goto _120
         push 1
         push 11
-        COMM 0x005e
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
         PUSHREG
         EQ
         IF _107
@@ -1514,14 +1514,14 @@ _162:
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   push 0
   push string(str_01path_02)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
   push result
-  COMM 0x006b
+  COMM MOVE_OBJECT_ALONG_PATH
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
   push result
   COMM 0x006c
@@ -1624,10 +1624,8 @@ baria_label:
   IF _184
 _165:
   while (1) {
-    push 9
-    COMM 0x005e
-    PUSHREG
-    IF _182
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _182
     push 0
     push local_int[43]
     COMM TEST_MODEL_FLAG
@@ -1784,10 +1782,8 @@ proc_0012:
   PROC proc_0012
 _186:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _192
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _192
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_01)
@@ -1903,10 +1899,8 @@ _198:
 _200:
 _202:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _227
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _227
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_02)
@@ -2253,10 +2247,8 @@ _233:
 _235:
 _237:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _260
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _260
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_03)
@@ -2602,10 +2594,8 @@ _266:
 _268:
 _270:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _294
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _294
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_04)
@@ -2918,10 +2908,8 @@ _300:
 _302:
 _304:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _318
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _318
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_05)
@@ -3090,10 +3078,8 @@ proc_0017:
   PROC proc_0017
 _320:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _329
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _329
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_06)
@@ -3220,10 +3206,8 @@ proc_0018:
   PROC proc_0018
 _331:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _341
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _341
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_07)
@@ -3366,10 +3350,8 @@ proc_0019:
   PROC proc_0019
 _343:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _347
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _347
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_08)
@@ -3415,30 +3397,28 @@ proc_001a:
   PROC proc_001a
 _349:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _351
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_09)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0040
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_59))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
-    PREPARE_UNIT_MOTION_STATE(local_int[64], 1, 10, 20, 0)
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(npc_09_01))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _351
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_09)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0040
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_59))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[64], 1, 10, 20, 0)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(npc_09_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _351:
     WAIT_FOR_TIMER_START()
   }
@@ -3448,10 +3428,8 @@ proc_001b:
   PROC proc_001b
 _353:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _358
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _358
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_10)
@@ -3498,29 +3476,27 @@ proc_001c:
   PROC proc_001c
 _360:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _362
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_11)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0043
-    PREPARE_UNIT_MOTION_STATE(local_int[67], 5, 10, 20, 0)
-    SET_UNIT_VALUE(local_int[67], 4)
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(aljira_02))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[67], 4, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _362
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_11)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0043
+      PREPARE_UNIT_MOTION_STATE(local_int[67], 5, 10, 20, 0)
+      SET_UNIT_VALUE(local_int[67], 4)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(aljira_02))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[67], 4, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _362:
     WAIT_FOR_TIMER_START()
   }
@@ -3530,10 +3506,8 @@ proc_001d:
   PROC proc_001d
 _364:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _369
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _369
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_01_2)
@@ -3599,10 +3573,8 @@ proc_001e:
   PROC proc_001e
 _371:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _376
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _376
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_02_2)
@@ -3661,10 +3633,8 @@ proc_001f:
   PROC proc_001f
 _378:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _383
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _383
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_03_2)
@@ -3725,10 +3695,8 @@ proc_0020:
   PROC proc_0020
 _385:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _389
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _389
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_04_2)
@@ -3773,27 +3741,25 @@ proc_0021:
   PROC proc_0021
 _391:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _393
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_05_2)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0048
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(npc_03_01))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _393
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_05_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0048
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(npc_03_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _393:
     WAIT_FOR_TIMER_START()
   }
@@ -3803,35 +3769,33 @@ proc_0022:
   PROC proc_0022
 _395:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _397
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_06_2)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x0049
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_67))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[73], result)
-    PREPARE_UNIT_MOTION_STATE(local_int[73], 1, 10, 20, 0)
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(rupa_01))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[73])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[73], 0, 10, 20, 0)
-    COMM 0x0216
-    SCREEN_FADE_B(0, 15)
-    WAIT_FOR_TIMER_LIMIT(15)
-    push 646
-    push 27
-    push 1
-    COMM 0x0097
-    CALL_EVENT(event(e646))
-    return
-    goto _397
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_06_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0049
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_67))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[73], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[73], 1, 10, 20, 0)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(rupa_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[73])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[73], 0, 10, 20, 0)
+      COMM 0x0216
+      SCREEN_FADE_B(0, 15)
+      WAIT_FOR_TIMER_LIMIT(15)
+      push 646
+      push 27
+      push 1
+      COMM 0x0097
+      CALL_EVENT(event(e646))
+      return
+    }
   _397:
     WAIT_FOR_TIMER_START()
   }
@@ -3841,27 +3805,25 @@ proc_0023:
   PROC proc_0023
 _399:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _401
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    push string(k_01npc_07_2)
-    COMM 0x01ff
-    PUSHREG
-    POPLIX 0x004a
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(npc_04_01))
-    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[74])
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    PREPARE_UNIT_MOTION_STATE(local_int[74], 0, 10, 20, 0)
-    SET_SOLAR_OVERLAY_MODE(3)
-    RELEASE_CURRENT_OBJECT()
-    WAIT_FOR_TIMER_START()
-    return
-    goto _401
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_07_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x004a
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(npc_04_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[74])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[74], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
   _401:
     WAIT_FOR_TIMER_START()
   }
@@ -3871,10 +3833,8 @@ proc_0024:
   PROC proc_0024
 _403:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _409
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _409
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_08_2)
@@ -3957,10 +3917,8 @@ proc_0025:
   PROC proc_0025
 _411:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _416
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _416
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_09_2)
@@ -4024,10 +3982,8 @@ proc_0026:
   PROC proc_0026
 _418:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _423
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _423
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_10_2)
@@ -4088,10 +4044,8 @@ proc_0027:
   PROC proc_0027
 _425:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _430
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _430
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_11_2)
@@ -4152,10 +4106,8 @@ proc_0028:
   PROC proc_0028
 _432:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _436
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _436
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_12)
@@ -4203,10 +4155,8 @@ proc_0029:
   PROC proc_0029
 _438:
   while (1) {
-    push 1
-    COMM 0x005e
-    PUSHREG
-    IF _442
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _442
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     push string(k_01npc_13)
