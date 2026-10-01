@@ -48,7 +48,32 @@ INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPush);
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraEventBitPop);
+extern s8 *sdfMemoryGetBlockAddress(void);
+extern void func_003297C8(s32 arg);
+
+void mtrMantraEventBitPop(s32 arg) {
+    s32 i;
+    s8 *data = sdfMemoryGetBlockAddress();
+
+    for (i = 0; i < 0x70; i++) {
+        if (*data != 0) {
+            mdlFlagSet(i + 0x920);
+        } else {
+            mdlFlagClear(i + 0x920);
+        }
+        data++;
+    }
+    for (i = 0; i < 6; i++) {
+        if (*data != 0) {
+            mdlFlagSet(i + 0x9A0);
+        } else {
+            mdlFlagClear(i + 0x9A0);
+        }
+        data++;
+    }
+    func_003297C8(arg);
+    evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
+}
 
 INCLUDE_ASM(const s32, "game/code_00285CE8", mtrMantraBitResetUnit);
 

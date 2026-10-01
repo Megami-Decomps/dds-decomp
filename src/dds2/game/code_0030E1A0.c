@@ -332,7 +332,17 @@ float *b;
     return func_003532B8(fldNormalizedVectorDot(a, b));
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FA28);
+void func_0030FA28(float *out, float *left, float *right) {
+    struct Vector4 { float x, y, z, w; } a, b;
+
+    a = *(struct Vector4 *)left;
+    b = *(struct Vector4 *)right;
+    func_0030F8D0(&a.x);
+    func_0030F8D0(&b.x);
+    out[0] = a.y * b.z - a.z * b.y;
+    out[1] = a.z * b.x - a.x * b.z;
+    out[2] = a.x * b.y - a.y * b.x;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FAF0);
 
