@@ -9,8 +9,7 @@ procedure e710_main reserved=0x00000000
 code
 e710_main:
   PROC e710_main
-  push 710
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(710)
   push 16
   push 710
   COMM 0x00ca

@@ -512,9 +512,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1363,9 +1361,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1685,8 +1681,7 @@ proc_001b:
     ENABLE_FIELD_COLLISION(28, 18, string(atari_hoji_01_2))
     DISABLE_FIELD_COLLISION(28, 18, string(atari_hoji_02_2))
     DISABLE_FIELD_COLLISION(28, 18, string(atari_hoji_03_2))
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 0
     push 28
     COMM 0x01f0
@@ -1838,16 +1833,10 @@ proc_001e:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_3))
     push local_int[70]
     COMM 0x009d
-    push 0
-    push local_int[68]
-    COMM 0x00ce
-    push 0
-    push local_int[69]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[68], 0)
+    SET_EFFECT_MODEL_CUT(local_int[69], 0)
     WAIT_FOR_TIMER_LIMIT(2)
-    push 0
-    push local_int[70]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[70], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     COMM 0x011f
     COMM 0x0121
@@ -1913,16 +1902,10 @@ proc_001f:
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10_4))
   push local_int[75]
   COMM 0x009d
-  push 0
-  push local_int[73]
-  COMM 0x00ce
-  push 0
-  push local_int[74]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[73], 0)
+  SET_EFFECT_MODEL_CUT(local_int[74], 0)
   WAIT_FOR_TIMER_LIMIT(2)
-  push 0
-  push local_int[75]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[75], 0)
   WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121
@@ -1988,16 +1971,10 @@ proc_0021:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_2))
     push local_int[82]
     COMM 0x009d
-    push 0
-    push local_int[80]
-    COMM 0x00ce
-    push 0
-    push local_int[81]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[80], 0)
+    SET_EFFECT_MODEL_CUT(local_int[81], 0)
     WAIT_FOR_TIMER_LIMIT(2)
-    push 0
-    push local_int[82]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[82], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     COMM 0x011f
     COMM 0x0121
@@ -2019,9 +1996,7 @@ after_010btl:
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(4)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 1
-    push 243
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(243, 1)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(GET_RING))
     FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2076,16 +2051,10 @@ proc_0023:
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_5))
   push local_int[87]
   COMM 0x009d
-  push 0
-  push local_int[85]
-  COMM 0x00ce
-  push 0
-  push local_int[86]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[85], 0)
+  SET_EFFECT_MODEL_CUT(local_int[86], 0)
   WAIT_FOR_TIMER_LIMIT(2)
-  push 0
-  push local_int[87]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[87], 0)
   WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121
@@ -2218,9 +2187,7 @@ warpscr_100:
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_5))
   push local_int[91]
   COMM 0x009d
-  push 0
-  push local_int[91]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[91], 0)
   WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121
@@ -2287,16 +2254,10 @@ proc_0027:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_7))
     push local_int[96]
     COMM 0x009d
-    push 0
-    push local_int[94]
-    COMM 0x00ce
-    push 0
-    push local_int[96]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[94], 0)
+    SET_EFFECT_MODEL_CUT(local_int[96], 0)
     WAIT_FOR_TIMER_LIMIT(2)
-    push 0
-    push local_int[95]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[95], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     COMM 0x011f
     COMM 0x0121
@@ -2350,16 +2311,10 @@ proc_0028:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_8))
     push local_int[99]
     COMM 0x009d
-    push 0
-    push local_int[97]
-    COMM 0x00ce
-    push 0
-    push local_int[99]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[97], 0)
+    SET_EFFECT_MODEL_CUT(local_int[99], 0)
     WAIT_FOR_TIMER_LIMIT(2)
-    push 0
-    push local_int[98]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[98], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     COMM 0x011f
     COMM 0x0121
@@ -2408,9 +2363,7 @@ proc_0029:
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_9))
   push local_int[101]
   COMM 0x009d
-  push 0
-  push local_int[101]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[101], 0)
   WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121

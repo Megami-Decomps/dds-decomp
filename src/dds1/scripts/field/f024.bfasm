@@ -629,9 +629,7 @@ _9:
                           goto _17
                         }
                       _17:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _19
                       }
                     _19:
@@ -1401,9 +1399,7 @@ _165:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[48]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[48], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1597,8 +1593,7 @@ _194:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION))
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_2))
     COMM 0x0013
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(5)
     push 0
@@ -1746,15 +1741,9 @@ proc_0016:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_3))
     push local_int[61]
     COMM 0x009d
-    push 0
-    push local_int[59]
-    COMM 0x00ce
-    push 0
-    push local_int[60]
-    COMM 0x00ce
-    push 0
-    push local_int[61]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[59], 0)
+    SET_EFFECT_MODEL_CUT(local_int[60], 0)
+    SET_EFFECT_MODEL_CUT(local_int[61], 0)
     WAIT_FOR_TIMER_LIMIT(20)
     push 0
     push 38
@@ -2711,9 +2700,7 @@ proc_0033:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_09_10))
     push local_int[74]
     COMM 0x009d
-    push 0
-    push local_int[74]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[74], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     push 0
     push 38
@@ -3894,9 +3881,7 @@ _407:
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_10))
   push local_int[93]
   COMM 0x009d
-  push 0
-  push local_int[93]
-  COMM 0x00ce
+  SET_EFFECT_MODEL_CUT(local_int[93], 0)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 11, 3, 15, 1)
   WAIT_FOR_TIMER_LIMIT(30)
@@ -3916,9 +3901,7 @@ win_genbu:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(6)
   CLEAR_MODEL_FLAG(1218)
-  push 1
-  push 133
-  COMM 0x0070
+  CHANGE_ITEM_COUNT(133, 1)
   WAIT_FOR_TIMER_LIMIT(30)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(WIN_GENBU))

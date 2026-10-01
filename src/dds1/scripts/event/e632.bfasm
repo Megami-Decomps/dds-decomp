@@ -24,16 +24,12 @@ e632_001:
   if (global_int[200] == 0) {
     SET_MODEL_FLAG(114)
     CLEAR_MODEL_FLAG(120)
-    push 633
-    push 263
-    COMM 0x0028
+    SUBMIT_EVENT_WITH_MODE(263, 633)
   } else {
   _2:
     CLEAR_MODEL_FLAG(114)
     SET_MODEL_FLAG(120)
-    push 633
-    push 279
-    COMM 0x0028
+    SUBMIT_EVENT_WITH_MODE(279, 633)
     goto _1
   }
 _1:

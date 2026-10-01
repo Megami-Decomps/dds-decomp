@@ -577,9 +577,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1428,9 +1426,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1847,8 +1843,7 @@ _259:
   if (TEST_MODEL_FLAG(1280) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     SET_MODEL_FLAG(1280)
     SET_MODEL_FLAG(2063)
     SET_MODEL_FLAG(1289)
@@ -2082,9 +2077,7 @@ proc_0025:
     SET_SOLAR_OVERLAY_MODE(2)
     ACTIVATE_MESSAGE_PANEL()
     MESSAGE_REQUEST_AND_POLL(message(METATRON_BATT))
-    push 1
-    push 240
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(240, 1)
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SET_SOLAR_OVERLAY_MODE(3)
     RELEASE_CURRENT_OBJECT()
@@ -2267,15 +2260,9 @@ proc_0028:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11_4))
     push local_int[68]
     COMM 0x009d
-    push 0
-    push local_int[66]
-    COMM 0x00ce
-    push 0
-    push local_int[67]
-    COMM 0x00ce
-    push 0
-    push local_int[68]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[66], 0)
+    SET_EFFECT_MODEL_CUT(local_int[67], 0)
+    SET_EFFECT_MODEL_CUT(local_int[68], 0)
     WAIT_FOR_TIMER_LIMIT(23)
     COMM 0x011f
     push 502
@@ -2373,15 +2360,9 @@ proc_0029:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_10_2))
     push local_int[72]
     COMM 0x009d
-    push 0
-    push local_int[70]
-    COMM 0x00ce
-    push 0
-    push local_int[71]
-    COMM 0x00ce
-    push 0
-    push local_int[72]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[70], 0)
+    SET_EFFECT_MODEL_CUT(local_int[71], 0)
+    SET_EFFECT_MODEL_CUT(local_int[72], 0)
     WAIT_FOR_TIMER_LIMIT(23)
     COMM 0x011f
     SET_MODEL_FLAG(1287)
@@ -2475,21 +2456,11 @@ proc_002b:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_5))
     push local_int[78]
     COMM 0x009d
-    push 0
-    push local_int[74]
-    COMM 0x00ce
-    push 0
-    push local_int[75]
-    COMM 0x00ce
-    push 0
-    push local_int[76]
-    COMM 0x00ce
-    push 0
-    push local_int[77]
-    COMM 0x00ce
-    push 0
-    push local_int[78]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[74], 0)
+    SET_EFFECT_MODEL_CUT(local_int[75], 0)
+    SET_EFFECT_MODEL_CUT(local_int[76], 0)
+    SET_EFFECT_MODEL_CUT(local_int[77], 0)
+    SET_EFFECT_MODEL_CUT(local_int[78], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     COMM 0x011f
     push 504
@@ -2862,15 +2833,9 @@ proc_0037:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_9))
     push local_int[83]
     COMM 0x009d
-    push 0
-    push local_int[81]
-    COMM 0x00ce
-    push 0
-    push local_int[82]
-    COMM 0x00ce
-    push 0
-    push local_int[83]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[81], 0)
+    SET_EFFECT_MODEL_CUT(local_int[82], 0)
+    SET_EFFECT_MODEL_CUT(local_int[83], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     COMM 0x011f
     push 501

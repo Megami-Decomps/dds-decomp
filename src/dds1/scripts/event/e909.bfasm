@@ -99,10 +99,7 @@ e909_first:
   return
 e909_hint:
   PROC e909_hint
-  push 100
-  COMM 0x000a
-  PUSHREG
-  POPLIX 0x0000
+  local_int[0] = RANDOM_ONE_TO(100)
   if (TEST_MODEL_FLAG(3057) == 0) {
     SET_MODEL_FLAG(3057)
   } else {

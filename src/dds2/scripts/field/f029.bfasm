@@ -816,9 +816,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1667,9 +1665,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1753,9 +1749,7 @@ _207:
       MESSAGE_REQUEST_AND_POLL(message(RING_029_001_02))
       SET_MESSAGE_WINDOW_GEOMETRY(0, 247, 3)
       MESSAGE_REQUEST_AND_POLL(message(RING_029_001_03))
-      push 1
-      push 247
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(247, 1)
       SET_MODEL_FLAG(450)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[52])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1841,9 +1835,7 @@ _214:
         _217:
           SET_MESSAGE_WINDOW_GEOMETRY(0, 84, 3)
           MESSAGE_REQUEST_AND_POLL(message(rantan_029_001_02_ans1_T))
-          push 1
-          push 84
-          COMM 0x0070
+          CHANGE_ITEM_COUNT(84, 1)
           SET_MODEL_FLAG(2592)
           push -(int32(50000))
           COMM 0x0139

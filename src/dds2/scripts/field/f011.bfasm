@@ -519,9 +519,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1370,9 +1368,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1934,8 +1930,7 @@ warpscr_start:
   PROC warpscr_start
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
-  push 0
-  COMM 0x001f
+  FADE_BACKGROUND_IN(0)
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_12)))
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_12_MOTION))
   push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_12_2))

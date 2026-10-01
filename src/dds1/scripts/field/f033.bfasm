@@ -454,9 +454,7 @@ _9:
                           goto _17
                         }
                       _17:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _19
                       }
                     _19:
@@ -1226,9 +1224,7 @@ _165:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[48]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[48], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1542,9 +1538,7 @@ modori_23:
   return
 moon_susume23:
   PROC moon_susume23
-  COMM 0x0027
-  PUSHREG
-  POPLIX 0x0032
+  local_int[50] = READ_SOLAR_PHASE()
   PREPARE_UNIT_MOTION_STATE(global_int[0], 18, 5, 8, 3)
   push 99
   COMM 0x0214
@@ -1576,16 +1570,11 @@ moon_susume23:
   WAIT_FOR_TIMER_LIMIT(15)
   push 99
   COMM 0x0215
-  push 1
-  COMM 0x0027
-  PUSHREG
-  ADD
+  push READ_SOLAR_PHASE() + 1
   COMM 0x0065
   push 15
   COMM 0x00ee
-  COMM 0x0027
-  PUSHREG
-  POPLIX 0x0032
+  local_int[50] = READ_SOLAR_PHASE()
   if (local_int[50] == 8) {
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(modori_23), 0))
   } else {
@@ -1704,9 +1693,7 @@ modori_27:
   return
 moon_susume27:
   PROC moon_susume27
-  COMM 0x0027
-  PUSHREG
-  POPLIX 0x0033
+  local_int[51] = READ_SOLAR_PHASE()
   push 99
   COMM 0x0214
   push 0
@@ -1737,16 +1724,11 @@ moon_susume27:
   WAIT_FOR_TIMER_LIMIT(15)
   push 99
   COMM 0x0215
-  push 1
-  COMM 0x0027
-  PUSHREG
-  ADD
+  push READ_SOLAR_PHASE() + 1
   COMM 0x0065
   push 15
   COMM 0x00ee
-  COMM 0x0027
-  PUSHREG
-  POPLIX 0x0033
+  local_int[51] = READ_SOLAR_PHASE()
   if (local_int[51] == 8) {
     WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(modori_27), 0))
   } else {
