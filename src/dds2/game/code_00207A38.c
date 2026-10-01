@@ -1,43 +1,7 @@
 #include "common.h"
+#include "btl.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
-
-typedef struct BtlUnit {
-    u8 unk_00[0x70];
-    f32 unk_70[4];
-    f32 sizeScale;
-    u8 unk_84[4];
-    f32 zOffset;
-    u8 unk_8C[4];
-    f32 muzzleOffset[4];
-    f32 bodyOffset[4];
-    f32 height;
-    f32 reach;
-    u8 unk_B8[0x50];
-    u64 unitId;              /* 0x108: compared against the battle command's unit ID */
-    union {
-        u64 flags64;         /* 0x110 */
-        struct {
-            u32 flags;       /* 0x110 */
-            u32 stateFlags;  /* 0x114 */
-        };
-    };
-    u8 pad118[8];
-    u16 statBits;            /* 0x120: queried for bit 0x2000 */
-    u16 unk_122;             /* 0x122: script-controlled unit parameter */
-    u16 mode;                /* 0x124 */
-    u8 pad126[8];
-    u16 conditionFlags;      /* 0x12E */
-    u8 pad130a[4];
-    u16 unk_134;             /* 0x134: queried unit parameter */
-    u8 pad130[0x1E6];
-    u32 unk_31C;
-    u8 pad320[0x1C];
-    u32 effectObject;        /* 0x33C: effect whose first inner vector becomes the origin */
-    void *effectHandle;      /* 0x340: attached effect released during cleanup */
-    u8 pad344[0x20];
-    struct BtlUnit *nextActor; /* 0x364 */
-} BtlUnit;
 
 typedef struct BtlActor {
     u8 unk_00[0x18];
@@ -363,11 +327,11 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00207C28);
 void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
-    pos[2] += unit->zOffset;
-    VU0_LOAD_VF(vf10, unit->unk_70);;
+    pos[2] += unit->positionZOffset;
+    VU0_LOAD_VF(vf10, unit->orientation);;
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->muzzleOffset);;
-    VU0_SET_VF2X(unit->sizeScale);
+    VU0_LOAD_VF(vf10, unit->bodyOffset);;
+    VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_LOAD_VF(vf11, pos);
@@ -377,11 +341,11 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
 void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
-    pos[2] += unit->zOffset;
-    VU0_LOAD_VF(vf10, unit->unk_70);;
+    pos[2] += unit->positionZOffset;
+    VU0_LOAD_VF(vf10, unit->orientation);;
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->bodyOffset);;
-    VU0_SET_VF2X(unit->sizeScale);
+    VU0_LOAD_VF(vf10, unit->muzzleOffset);;
+    VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_LOAD_VF(vf11, pos);
@@ -396,10 +360,10 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     }
     effObjFetchInnerFirstVec(unit->effectObject);
     VU0_STORE_VF(vf10, pos);
-    VU0_LOAD_VF(vf10, unit->unk_70);
+    VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->muzzleOffset);
-    VU0_SET_VF2X(unit->sizeScale);
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
+    VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_LOAD_VF(vf11, pos);
@@ -413,23 +377,23 @@ f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
     second = unit->reach;
     first = unit->height;
     if (first < second) {
-        return second * unit->sizeScale;
+        return second * unit->scale;
     }
-    return first * unit->sizeScale;
+    return first * unit->scale;
 }
 
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     VU0_STORE_VF(vf10, pos);;
-    return unit->height * unit->sizeScale * 0.5f - pos[1];
+    return unit->height * unit->scale * 0.5f - pos[1];
 }
 
 f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 pos[4];
     btlUnitGetMuzzlePosVU(unit);
     VU0_STORE_VF(vf10, pos);;
-    return -pos[1] - unit->height * unit->sizeScale * 0.5f;
+    return -pos[1] - unit->height * unit->scale * 0.5f;
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208000);
@@ -461,7 +425,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
     s32 first = 1;
     while (unit != NULL) {
         if ((unit->flags & 1) && (unit->flags & mask)) {
-            f32 value = unit->reach * unit->sizeScale;
+            f32 value = unit->reach * unit->scale;
             if (first) {
                 best = value;
                 first = 0;
@@ -485,7 +449,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF(vf10, pos);;
             if (mask & 0x200) {
-                value = pos[2] + unit->reach * unit->sizeScale;
+                value = pos[2] + unit->reach * unit->scale;
                 if (first) {
                     best = value;
                     first = 0;
@@ -493,7 +457,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
                     best = value;
                 }
             } else {
-                value = pos[2] - unit->reach * unit->sizeScale;
+                value = pos[2] - unit->reach * unit->scale;
                 if (first) {
                     best = value;
                     first = 0;
@@ -1086,7 +1050,7 @@ u32 btlScriptSetActorUnitParameter(void) {
 
     context = func_0010D8D0();
     value = scrReadIntParameter(0);
-    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk_122 = value;
+    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk122 = value;
     return 1;
 }
 
@@ -1957,7 +1921,7 @@ u32 func_0020C180(void) {
         mask = 0x400;
     }
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->unitId == id) {
+        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->owner == id) {
             u8 *stats = (u8 *)unit + 0x120;
             s32 current = func_001AA700(stats);
             s32 maximum = func_001AA740(stats);
@@ -2057,7 +2021,7 @@ u32 func_0020C530(void) {
     s32 context;
 
     context = func_0010D8D0();
-    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk_134);
+    scrSetIntegerReturnValue(((BtlUnit *)((BtlCommandCtx *)context)->actor)->unk134);
     return 1;
 }
 
@@ -2273,7 +2237,7 @@ u32 btlScriptReturnActorUnitParameter(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)func_0010D8D0();
-    scrSetIntegerReturnValue(((BtlUnit *)context->actor)->unk_122);
+    scrSetIntegerReturnValue(((BtlUnit *)context->actor)->unk122);
     return 1;
 }
 
@@ -2386,7 +2350,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
         s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {
             if ((((BtlUnit *)actor)->flags & 2) != 0) {
-                s32 effect = ((BtlUnit *)actor)->effectHandle;
+                s32 effect = ((BtlUnit *)actor)->ext;
                 if (effect != 0) {
                     evtConfigureUnitTransition(effect, 0);
                 }

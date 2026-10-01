@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_task.h"
 #include "pcp_vu0.h"
 
 extern s32 *btlFindGroupedEntity();
