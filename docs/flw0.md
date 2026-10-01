@@ -208,11 +208,11 @@ speaker references, and the separate speaker table:
 messages msg1
   message MSG_START_00 speaker=0
     page
-      control f2 08 ff ff
-      control f2 07 07 ff
+      segment-start
+      text-attribute 3 6
       font "から"
       newline
-      control f1 04
+      stream-end
     endpage
   endmessage
   select CHOICE
@@ -238,10 +238,15 @@ assembly remain byte-exact. `glyphs` is also the fallback for a code missing
 from the current map. DDS2 reuses the mapped code range; sequel-only or
 otherwise unmapped codes remain explicit `glyphs` values.
 
-`newline` emits byte `0x0A`, and `control` preserves a complete DDS control
-sequence. The lead byte determines the control length, so the assembler can
-reject a truncated sequence. `bytes` remains available inside a page, option,
-or speaker when a stream does not fit those forms. NUL terminators, record
+`newline` emits byte `0x0A`. The semantic message view also names the paired
+renderer behavior established by the native handlers: `segment-start`,
+`stream-end`, `conditional-newline`, `token SLOT`, `font-slot SLOT`, and
+`text-attribute SLOT VALUE`. Text-attribute slots 1 through 3 are kept neutral
+until their display roles are established; the operands are the decoded values
+stored by the renderer. `control` preserves every other complete DDS control
+sequence. The lead byte determines its length, so the assembler can reject a
+truncated sequence. `bytes` remains available inside a page, option, or speaker
+when a stream does not fit those forms. NUL terminators, record
 offsets, text lengths, alignment, and the packed relocation table are derived.
 Changing message text in symbolic source therefore moves every later record
 and pointer automatically. A selection may declare `ext`, `pattern`,

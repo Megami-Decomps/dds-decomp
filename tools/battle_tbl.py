@@ -3469,7 +3469,10 @@ def _command_disassemble(args: argparse.Namespace) -> None:
         table = decode_message(data)
         bank_names = tuple(f"{args.output.stem}-{kind}.msgasm" for kind in MESSAGE_BANK_KINDS)
         for name, bank in zip(bank_names, table.message_banks):
-            _write_text(args.output.parent / name, "\n".join(msg1.render(bank)) + "\n")
+            _write_text(
+                args.output.parent / name,
+                "\n".join(msg1.render(bank, semantic=True)) + "\n",
+            )
         source = render_message_source(table, bank_names)
     elif (
         segment_count in {4, 5}
