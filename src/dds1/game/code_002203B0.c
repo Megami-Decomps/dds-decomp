@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world.h"
 #include "pcp_vu0.h"
 
 extern void *dds3GetSlot(void *obj, s32 index);
@@ -103,26 +104,12 @@ typedef struct EvtWorldNode {
     struct EvtWorldNode *next; /* 0x20 */
 } EvtWorldNode;
 
-typedef struct EvtWorldList {
-    u8 pad00[0x4C];
-    EvtWorldNode *head; /* 0x4C */
-} EvtWorldList;
 
-typedef struct EvtWorldRoot {
-    u8 pad00[0x08];
-    EvtWorldList *list; /* 0x08 */
-} EvtWorldRoot;
-
-typedef struct EvtWorldObj {
-    u8 pad00[0x18];
-    EvtWorldRoot *root; /* 0x18 */
-} EvtWorldObj;
-
-extern EvtWorldObj *dds3GetWorldObject(void);
+extern EvtWorldObject *dds3GetWorldObject(void);
 extern void dds3SetObjectModeAndDefaultWeight(void *node, s32 value);
 
 s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
-    EvtWorldObj *world = dds3GetWorldObject();
+    EvtWorldObject *world = dds3GetWorldObject();
     EvtWorldNode *node;
     s32 value;
 
@@ -130,7 +117,7 @@ s32 evtApplyIndexValueToWorldNodes(s32 index, s32 base) {
         return 0;
     }
     value = index * 3 + base;
-    for (node = world->root->list->head; node != NULL; node = node->next) {
+    for (node = world->table->slots[6].head; node != NULL; node = node->next) {
         dds3SetObjectModeAndDefaultWeight(node, value);
     }
     return 1;
