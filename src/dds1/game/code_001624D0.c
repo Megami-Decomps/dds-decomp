@@ -143,7 +143,10 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_001629F0);
+void func_001629F0(EffParamWork *work) {
+    ((void (*)(void *))D_00353718[work->id].func)(work->data);
+    sdfReleaseChipBlock(work);
+}
 
 /* Invoke the kind-specific callback on this parameter block. */
 void effParamWorkInvokeCallback(EffParamWork *work) {
@@ -411,7 +414,73 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
     return effParamWorkCreate(id, data);
 }
 
-INCLUDE_ASM(const s32, "game/code_001624D0", func_001632E0);
+typedef struct {
+    u8 pad00[0x10];
+    u16 systemParam;
+    u8 pad12[2];
+    u32 count;
+    u8 pad18[4];
+    f32 scaledFirst;
+    f32 scaledSecond;
+    f32 rangeF24;
+    u32 spreadA;
+    u32 spreadB;
+    u16 perCell;
+    u8 pad32[6];
+    u32 field_0x38;
+    u32 pad3C;
+    u32 field_0x40;
+    u32 pad44;
+    u32 field_0x48;
+} ParamThunderHead;
+
+typedef struct {
+    u32 unk00;
+    u32 unk04;
+    f32 dirA[3];
+    f32 dirB[3];
+    f32 f20;
+    f32 f24;
+    u32 unk28;
+} ParamThunderCell;
+
+typedef struct {
+    ParamThunderHead head;
+    ParamThunderCell *cells;
+    u32 color;
+    f32 baseFirst;
+    f32 baseSecond;
+    void *system;
+    u32 handle;
+} ParamThunderWork;
+
+extern u32 func_002D03F8(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern void func_0015CEF8(void *system, u32 arg1, u32 arg2, u32 arg3);
+extern void func_0015D078(void *system, u32 value);
+
+ParamThunderWork *func_001632E0(ParamThunderHead *src) {
+    u32 handle = func_002D03F8(src->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
+    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(handle);
+    u32 i;
+
+    work->head = *src;
+    work->cells = (ParamThunderCell *)(work + 1);
+    work->baseFirst = src->scaledFirst;
+    work->baseSecond = src->scaledSecond;
+    work->handle = handle;
+    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, 4);
+    func_0015CEF8(work->system, work->head.field_0x38, work->head.field_0x40, work->head.field_0x48);
+    func_0015D078(work->system, work->head.systemParam);
+    for (i = 0; i < work->head.count; i++) {
+        work->cells[i].unk00 = 0;
+        work->cells[i].unk04 = 0;
+        work->cells[i].unk28 = 0;
+    }
+    work->color = 0x80808080;
+    return work;
+}
 
 INCLUDE_SDATA(const s32, "game/code_001624D0", D_003BB044);
 

@@ -12,7 +12,18 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_00257718);
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_002579B0);
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257BD8);
+typedef struct {
+    u8 pad00[0x484];
+    s32 field_0x484;
+    u8 pad488[8];
+    s32 field_0x490;
+} DisplayGridWork;
+
+extern void func_00257670(s32 argument, s32 work);
+void func_00257BD8(DisplayGridWork *work, s32 argument) {
+    func_00257670(argument, work->field_0x484);
+    mnuAdvanceWrappingFrame(&work->field_0x490);
+}
 
 INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraPulseFrame);
 
