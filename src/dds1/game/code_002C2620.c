@@ -91,7 +91,27 @@ LmapNode *fldLmapAdvanceWindowStart(LmapList *list) {
     return cur;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2658);
+LmapNode *func_002C2658(LmapList *list) {
+    LmapNode *cur = list->cur;
+    LmapNode *head = list->first;
+    LmapNode *node;
+    s32 i;
+
+    if (cur == list->lo) {
+        return cur;
+    }
+    node = head;
+    for (i = 0; i < list->capacity; i++) {
+        if (node == NULL) {
+            return cur;
+        }
+        node = node->next;
+    }
+    head = head->prev;
+    list->first = head;
+    list->count++;
+    return cur;
+}
 
 LmapNode *fldLmapAdvanceCursor(LmapList *list) {
     LmapNode *cur = list->cur;
