@@ -27,7 +27,36 @@ s32 sdfWakeThreadOnCompletionEvent(s32 event) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFC70);
+typedef struct ThreadWaiter {
+    struct ThreadWaiter *next; /* 0x0 */
+    s32 thread;                /* 0x4 */
+} ThreadWaiter;
+
+extern s32 D_003BD2D8;
+extern s32 D_003BD998;
+extern ThreadWaiter *D_003BD99C;
+extern void sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern void func_0030B568(s32);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern s32 WakeupThread(s32);
+
+/* Completion thread: each wake-up wakes every thread registered on the waiter list. */
+void func_002CFC70(void) {
+    ThreadWaiter *waiter;
+
+    sdfAddHandler(0, 2, sdfWakeThreadOnCompletionEvent, -1, 0);
+    func_0030B568(2);
+    for (;;) {
+        SleepThread();
+        D_003BD2D8++;
+        WaitSema(D_003BD998);
+        for (waiter = D_003BD99C; waiter != NULL; waiter = waiter->next) {
+            WakeupThread(waiter->thread);
+        }
+        SignalSema(D_003BD998);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002CFC18", func_002CFCF0);
 
