@@ -204,7 +204,34 @@ void func_001012E8(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101368);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101440);
+/* Blank the task-name scratch buffer, then run func_00101368 on every parentless task of the three scheduler lists. */
+void func_00101440(void)
+{
+    KwlnTask* task;
+    s32 i;
+
+    for (i = 0; i < 0x40; i++) {
+        D_003BDC48[i] = 0x20;
+    }
+    for (task = D_003BA800; task != NULL; task = task->listNext) {
+        if (task->parent == NULL) {
+            D_003BDC48[0] = 0;
+            func_00101368(task, 0);
+        }
+    }
+    for (task = D_003BA818; task != NULL; task = task->listNext) {
+        if (task->parent == NULL) {
+            D_003BDC48[0] = 0;
+            func_00101368(task, 0);
+        }
+    }
+    for (task = D_003BA80C; task != NULL; task = task->listNext) {
+        if (task->parent == NULL) {
+            D_003BDC48[0] = 0;
+            func_00101368(task, 0);
+        }
+    }
+}
 
 s32 kwlnTaskTickScheduler(void)
 {
