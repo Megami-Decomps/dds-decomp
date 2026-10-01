@@ -16,26 +16,10 @@ void dds3DestroyWorldNode(s32 ctx);
 s32 dds3GetSlot1Data(void);
 void func_001175A8(s32 ctx);
 void func_001175B8(s32 ctx);
-extern f32 evtScaleValueByMultiplier(s32, f32);
 extern char D_003AC038[];
 extern void *func_00101218(s32, s32);
 extern void func_003003F0(char *, void *);
 extern void kwlnTaskDestroyWithHierarchy(void *, s32);
-extern void func_00110928(s32);
-
-/* Owner whose +0x18 head is a chain of records; each record's +0x40 entry
-   is passed to func_00110928 when non-null. */
-typedef struct StageRecord {
-    u8 pad00[8];
-    struct StageRecord *next; /* 0x08 */
-    u8 pad0C[0x34];
-    s32 handle;               /* 0x40: notified when non-null */
-} StageRecord;
-
-typedef struct StageOwner {
-    u8 pad00[0x18];
-    StageRecord *first; /* 0x18 */
-} StageOwner;
 
 extern void *dds3AppendWorldNode(s32, s32);
 extern void dds3SetWorldSecondaryObject(void *);

@@ -573,6 +573,12 @@ typedef struct MdlDoneJob {
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
 
+/* Request slot handed back by func_002C7F38; its +0x60 word feeds the load apply. */
+typedef struct MdlLoadSlot {
+    u8 pad00[0x60];
+    u32 handle; /* 0x60 */
+} MdlLoadSlot;
+
 extern u32 D_00438F90;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
@@ -580,9 +586,9 @@ extern void btlRemoveGroupId(s32, s32);
 extern s32 func_00233280();
 
 /* Run a completed load job: apply it, drop its group id, then call its done callback and free it. */
-void func_00233520(void *owner, MdlDoneJob *job) {
+void func_00233520(MdlLoadSlot *owner, MdlDoneJob *job) {
     job->owner = owner;
-    func_00233280(*(u32 *)((u8 *)owner + 0x60), job->group, job->id, job->arg);
+    func_00233280(owner->handle, job->group, job->id, job->arg);
     WaitSema(D_00438F90);
     btlRemoveGroupId(job->group, job->id);
     SignalSema(D_00438F90);
@@ -610,7 +616,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 arg, s32 handle, void (*do
     job->doneArg = doneArg;
     job->done = done;
     slot = func_002C7F38(handle, 0, 0, func_00233520, job);
-    job->owner = (void *)slot;
+    job->owner = slot;
     if (done == NULL) {
         func_002C81D0(slot);
         func_002334F0((u32)job);
