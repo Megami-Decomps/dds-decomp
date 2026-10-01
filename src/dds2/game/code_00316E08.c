@@ -12,7 +12,7 @@ extern s32 D_00435BB0;
 
 extern s16 D_00435BAC;
 
-extern u8 D_0040ABF0[];
+extern s32 (*D_0040ABF0[])(u8 *work);
 
 extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
 
@@ -23,8 +23,6 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 extern void mnuResumeEffectQueueFrameAdvance(void);
 
 extern void func_00317AD0(u8 *handle);
-
-extern void func_00318068(u8 *handle);
 
 extern void *func_003292A8(s32 size);
 
@@ -142,9 +140,6 @@ u32 mdlAdvanceViewerPackageTask(void) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
-
-INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 extern char D_0042D4E0[];
 extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
@@ -156,6 +151,10 @@ s32 func_00317010(void) {
     scrDestroyAllNamedProcesses();
     return 1;
 }
+
+INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
+
+INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
@@ -176,8 +175,14 @@ INCLUDE_ASM(const s32, "game/code_00316E08", func_00317AD0);
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317E48);
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317FE0);
+u32 func_00318068(u8 *work) {
+    s32 (*update)(u8 *work) = *(s32 (**)(u8 *work))(work + 0x60);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00318068);
+    if (update(work) != 0) {
+        *(s32 (**)(u8 *work))(work + 0x60) = D_0040ABF0[*(s32 *)(work + 0x58)];
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_003180B8);
 

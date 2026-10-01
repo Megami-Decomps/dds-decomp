@@ -6,7 +6,7 @@ typedef struct ScriptContext {
     s32 stackDepth; /* 0x1C: number of stack values */
     s8 stackTypes[28]; /* 0x20 */
     union {
-        u32 stackValues[28];
+        s32 stackValues[28];
         f32 stackFloats[28];
     } stack; /* 0x3C */
     u8 padAC[0x10];
@@ -97,7 +97,24 @@ s32 bfStackPopInt(ScriptContext *script) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopFloat);
+f32 bfStackPopFloat(ScriptContext *script) {
+    s32 stackIndex = script->stackDepth;
+
+    script->stackDepth = stackIndex - 1;
+    switch (script->stackTypes[stackIndex - 1]) {
+    case 0:
+        return (f32)script->stack.stackValues[script->stackDepth];
+    case 4:
+        return 0.0f;
+    case 1:
+        return script->stack.stackFloats[script->stackDepth];
+    case 2:
+        return (f32)D_003BAA00->ints[script->stack.stackValues[script->stackDepth]];
+    case 3:
+        return D_003BAA00->floats[script->stack.stackValues[script->stackDepth]];
+    }
+    return 0.0f;
+}
 
 /* Push the word following the opcode, then advance past its operand. */
 u32 scrPushNextInstructionValue(ScriptContext *script) {
