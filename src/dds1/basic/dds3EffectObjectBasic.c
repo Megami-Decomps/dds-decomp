@@ -40,9 +40,9 @@ void sdfReleaseChipBlock(void *arg);
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
 void func_00114B18(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
-void func_00114CE8(void *bill, void *vec, s32 extra);
-void func_00114E90(void *bill, void *vec, s32 extra);
-void func_00114FE0(void *bill, void *vec, s32 extra);
+EffectObj *func_00114CE8(void *bill, void *vec, s32 extra);
+EffectObj *func_00114E90(void *bill, void *vec, s32 extra);
+EffectObj *func_00114FE0(void *bill, void *vec, s32 extra);
 void *func_001150F0();
 void func_00115398(void);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
@@ -56,6 +56,12 @@ extern void *func_0014FE28(void);
 extern void *func_0014FE48(void);
 
 extern void *func_0014FD20(void);
+extern u32 dds3AdvanceWorldCounter(void);
+extern void effCopyVector(void *source, void *destination);
+extern void func_0014FBF0(void *source, void *destination);
+
+extern void *func_00111388(void);
+extern void func_001111C8(void *id, void *owner);
 
 extern void *billCreateFromResource(s32 kind, s32 resourceId);
 
@@ -78,6 +84,8 @@ extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
 
 extern void effObjInnerVecBackup(void *params);
+
+
 
 /* Release the effect's dependent resources before clearing its data handle. */
 void effObjReleaseObjectData(EffectObj *obj) {
@@ -152,7 +160,37 @@ void func_00114CC8(EffectObj *obj) {
     billSetKind1Entry(obj->data->bill);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114CE8);
+EffectObj *func_00114CE8(void *bill, void *vec, s32 extra) {
+    u8 vector[0x10];
+    EffectObj *obj;
+    EffectData *data;
+    void *handle;
+    void *id;
+
+    memset(vector, 0, sizeof(vector));
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    if (obj == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, vector);
+    effCopyVector(bill, vector);
+    data = obj->data;
+    data->state = 3;
+    data->bill = bill;
+    data->flags = 0;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    handle = effObjGetObjectHandle(obj);
+    *(s32 *)((u8 *)handle + 8) = 2;
+    id = func_00111388();
+    if (id != NULL) {
+        *(void **)((u8 *)handle + 0x24) = id;
+        func_001111C8(id, obj);
+    }
+    return obj;
+}
 
 void func_00114DB8(EffectObj *obj, void *vec, s32 extra) {
     void *handle;
@@ -175,7 +213,37 @@ void effObjCreateResourceKindZero(s32 billId, void *vec, s32 extra) {
     func_00114CE8(handle, vec, extra);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114E90);
+EffectObj *func_00114E90(void *bill, void *vec, s32 extra) {
+    u8 vector[0x10];
+    EffectObj *obj;
+    EffectData *data;
+    void *handle;
+    void *id;
+
+    memset(vector, 0, sizeof(vector));
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    if (obj == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, vector);
+    func_0014FBF0(bill, vector);
+    data = obj->data;
+    data->state = 1;
+    data->bill = bill;
+    data->flags = 0;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    handle = effObjGetObjectHandle(obj);
+    *(s32 *)((u8 *)handle + 8) = 2;
+    id = func_00111388();
+    if (id != NULL) {
+        *(void **)((u8 *)handle + 0x24) = id;
+        func_001111C8(id, obj);
+    }
+    return obj;
+}
 
 void func_00114F60(u32 unused, void *vec, s32 extra) {
     void *handle;
@@ -191,7 +259,37 @@ void func_00114FA0(u32 unused, void *vec, s32 extra) {
     func_00114E90(handle, vec, extra);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00114FE0);
+EffectObj *func_00114FE0(void *bill, void *vec, s32 extra) {
+    u8 vector[0x10];
+    EffectObj *obj;
+    EffectData *data;
+    void *handle;
+    void *id;
+
+    memset(vector, 0, sizeof(vector));
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), vec, (void *)extra);
+    if (obj == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF(vf10, vec);
+    VU0_STORE_VF(vf10, vector);
+    func_0014FBF0(bill, vector);
+    data = obj->data;
+    data->state = 1;
+    data->bill = bill;
+    data->flags = 0;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    handle = effObjGetObjectHandle(obj);
+    *(s32 *)((u8 *)handle + 8) = 2;
+    id = func_00111388();
+    if (id != NULL) {
+        *(void **)((u8 *)handle + 0x24) = id;
+        func_001111C8(id, obj);
+    }
+    return obj;
+}
 
 void func_001150B0(u32 unused, void *vec, s32 extra) {
     void *handle;
@@ -299,7 +397,6 @@ s32 effObjGetIntParam(EffectObj *obj) {
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115970);
-
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001159E8);
 
 void effObjSetFlags(EffectObj *obj, s32 flags) {
