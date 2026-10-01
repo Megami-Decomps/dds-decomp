@@ -466,7 +466,42 @@ def _render_name(name: str) -> str:
     return name if _SYMBOL.fullmatch(name) else json.dumps(name)
 
 
-def _render_stream(data: bytes, indent: str) -> list[str]:
+_TEXT_ATTRIBUTE_CONTROLS = {
+    0x02: 1,
+    0x09: 2,
+    0x07: 3,
+}
+_TEXT_ATTRIBUTE_OPCODES = {
+    slot: opcode for opcode, slot in _TEXT_ATTRIBUTE_CONTROLS.items()
+}
+_SEGMENT_START_CONTROL = bytes.fromhex("f208ffff")
+_STREAM_END_CONTROL = bytes.fromhex("f104")
+_CONDITIONAL_NEWLINE_CONTROL = bytes.fromhex("f10f")
+
+
+def _render_control(chunk: bytes) -> str | None:
+    if chunk == _SEGMENT_START_CONTROL:
+        return "segment-start"
+    if chunk == _STREAM_END_CONTROL:
+        return "stream-end"
+    if chunk == _CONDITIONAL_NEWLINE_CONTROL:
+        return "conditional-newline"
+    if len(chunk) != 4 or chunk[0] != 0xF2 or chunk[3] != 0xFF:
+        return None
+
+    if chunk[2] == 0:
+        return None
+    value = chunk[2] - 1
+    if chunk[1] == 0x03:
+        return f"token {value}"
+    if chunk[1] == 0x06:
+        return f"font-slot {value}"
+    if (slot := _TEXT_ATTRIBUTE_CONTROLS.get(chunk[1])) is not None:
+        return f"text-attribute {slot} {value}"
+    return None
+
+
+def _render_stream(data: bytes, indent: str, semantic: bool) -> list[str]:
     lines: list[str] = []
     index = 0
     while index < len(data):
@@ -486,7 +521,10 @@ def _render_stream(data: bytes, indent: str) -> list[str]:
             size = 2 * (byte & 0x0F)
             if size >= 2 and index + size <= len(data):
                 chunk = data[index : index + size]
-                lines.append(f"{indent}control {' '.join(f'{item:02x}' for item in chunk)}")
+                directive = _render_control(chunk) if semantic else None
+                if directive is None:
+                    directive = f"control {' '.join(f'{item:02x}' for item in chunk)}"
+                lines.append(f"{indent}{directive}")
                 index += size
                 continue
         if byte >= 0x80 and byte < 0xF0 and index + 1 < len(data):
@@ -538,8 +576,8 @@ def _render_stream(data: bytes, indent: str) -> list[str]:
     return lines
 
 
-def render(data: bytes) -> list[str]:
-    """Render a canonical MSG1 bank as lines inside an FLW0 messages block."""
+def render(data: bytes, *, semantic: bool = False) -> list[str]:
+    """Render an MSG1 bank, optionally naming controls with proven semantics."""
 
     bank = decode(data)
     lines = ["messages msg1"]
@@ -549,7 +587,7 @@ def render(data: bytes) -> list[str]:
             lines.append(f"  message {_render_name(dialog.name)} speaker={speaker}")
             for page in dialog.pages:
                 lines.append("    page")
-                lines.extend(_render_stream(page, "      "))
+                lines.extend(_render_stream(page, "      ", semantic))
                 lines.append("    endpage")
             lines.append("  endmessage")
         else:
@@ -564,12 +602,12 @@ def render(data: bytes) -> list[str]:
             lines.append(f"  select {_render_name(dialog.name)}{fields}")
             for option in dialog.options:
                 lines.append("    option")
-                lines.extend(_render_stream(option, "      "))
+                lines.extend(_render_stream(option, "      ", semantic))
                 lines.append("    endoption")
             lines.append("  endselect")
     for index, speaker in enumerate(bank.speakers):
         lines.append(f"  speaker {index}")
-        lines.extend(_render_stream(speaker, "    "))
+        lines.extend(_render_stream(speaker, "    ", semantic))
         lines.append("  endspeaker")
     return lines
 
@@ -600,6 +638,13 @@ def _values(tokens: list[str], line_number: int) -> dict[str, str]:
     return values
 
 
+def _control_argument(text: str, line_number: int, context: str) -> int:
+    value = _integer(text, line_number, context)
+    if not 0 <= value <= 0xFE:
+        raise Msg1Error(f"line {line_number}: {context} must be between 0 and 254")
+    return value + 1
+
+
 def _parse_stream(content: list[tuple[int, str]]) -> bytes:
     output = bytearray()
     for line_number, line in content:
@@ -628,6 +673,43 @@ def _parse_stream(content: list[tuple[int, str]]) -> bytes:
             if len(tokens) != 1:
                 raise Msg1Error(f"line {line_number}: newline takes no operands")
             output.append(0x0A)
+        elif tokens[0] == "segment-start":
+            if len(tokens) != 1:
+                raise Msg1Error(f"line {line_number}: segment-start takes no operands")
+            output.extend(_SEGMENT_START_CONTROL)
+        elif tokens[0] == "stream-end":
+            if len(tokens) != 1:
+                raise Msg1Error(f"line {line_number}: stream-end takes no operands")
+            output.extend(_STREAM_END_CONTROL)
+        elif tokens[0] == "conditional-newline":
+            if len(tokens) != 1:
+                raise Msg1Error(
+                    f"line {line_number}: conditional-newline takes no operands"
+                )
+            output.extend(_CONDITIONAL_NEWLINE_CONTROL)
+        elif tokens[0] == "token":
+            if len(tokens) != 2:
+                raise Msg1Error(f"line {line_number}: token takes one slot")
+            slot = _control_argument(tokens[1], line_number, "token slot")
+            output.extend((0xF2, 0x03, slot, 0xFF))
+        elif tokens[0] == "font-slot":
+            if len(tokens) != 2:
+                raise Msg1Error(f"line {line_number}: font-slot takes one value")
+            slot = _control_argument(tokens[1], line_number, "font slot")
+            output.extend((0xF2, 0x06, slot, 0xFF))
+        elif tokens[0] == "text-attribute":
+            if len(tokens) != 3:
+                raise Msg1Error(
+                    f"line {line_number}: text-attribute takes a slot and value"
+                )
+            slot = _integer(tokens[1], line_number, "text attribute slot")
+            opcode = _TEXT_ATTRIBUTE_OPCODES.get(slot)
+            if opcode is None:
+                raise Msg1Error(
+                    f"line {line_number}: text attribute slot must be 1, 2, or 3"
+                )
+            value = _control_argument(tokens[2], line_number, "text attribute value")
+            output.extend((0xF2, opcode, value, 0xFF))
         elif tokens[0] == "glyphs":
             if len(tokens) < 2:
                 raise Msg1Error(f"line {line_number}: glyphs needs at least one code")
