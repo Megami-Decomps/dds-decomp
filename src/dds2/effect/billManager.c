@@ -58,9 +58,9 @@ BillObj *billAllocChild(void *arg0) {
     BillObj *obj;
 
     obj = func_00328D68(0x34);
-    obj->unk30 = NULL;
+    obj->entryList = NULL;
     if (arg0 != NULL) {
-        obj->unk30 = func_00157D38(arg0);
+        obj->entryList = func_00157D38(arg0);
     }
     return obj;
 }
@@ -68,7 +68,7 @@ BillObj *billAllocChild(void *arg0) {
 void billReleaseChild(BillObj *obj) {
     s32 child;
 
-    child = (s32)obj->unk30;
+    child = (s32)obj->entryList;
     if (child != 0) {
         effReleaseSharedTextureRecord(child);
     }
@@ -76,7 +76,7 @@ void billReleaseChild(BillObj *obj) {
 }
 
 void billProcessChild(BillObj *obj) {
-    func_00157EA0(obj, obj->unk30);
+    func_00157EA0(obj, obj->entryList);
 }
 
 BillObj *billAllocList(void *arg0) {
@@ -90,7 +90,7 @@ BillObj *billAllocList(void *arg0) {
     }
     n = data->entryCount;
     newobj = func_00328D68(n * 20 + 0x6C);
-    newobj->unk30 = data;
+    newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->unk48 = 0;
@@ -105,11 +105,11 @@ BillObj *billCloneList(BillObj *obj) {
     s32 n;
     BillObj *newobj;
 
-    data = obj->unk30;
+    data = obj->entryList;
     n = data->entryCount;
     data->unk14 = data->unk14 + 1;
     newobj = func_00328D68(n * 20 + 0x6C);
-    newobj->unk30 = data;
+    newobj->entryList = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->unk48 = 0;
@@ -119,7 +119,7 @@ BillObj *billCloneList(BillObj *obj) {
 }
 
 void billReleaseList(BillObj *obj) {
-    billReleaseSharedEntryBlock(obj->unk30);
+    billReleaseSharedEntryBlock(obj->entryList);
     sdfReleaseChipBlock(obj);
 }
 
@@ -205,8 +205,8 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
 
     newobj = D_003AA990[index].func(data);
     func_00158D68(newobj);
-    newobj->unk2C = index;
-    newobj->unk28 = D_003AA990[index].unk4;
+    newobj->kind = index;
+    newobj->callback = D_003AA990[index].unk4;
     return newobj;
 }
 
@@ -226,27 +226,27 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
     BillData *data;
 
-    if (source->unk2C == 1) {
+    if (source->kind == 1) {
         copy = billCloneList(source);
         func_00158D68(copy);
-        copy->unk2C = source->unk2C;
-        copy->unk28 = source->unk28;
+        copy->kind = source->kind;
+        copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
         func_00158D68(copy);
-        copy->unk2C = source->unk2C;
-        copy->unk28 = source->unk28;
-        data = source->unk30;
+        copy->kind = source->kind;
+        copy->callback = source->callback;
+        data = source->entryList;
         data->unk8 = data->unk8 + 1;
-        copy->unk30 = data;
+        copy->entryList = data;
     }
     return copy;
 }
 
 void billDispatchByKind(BillObj *obj) {
-    D_003AA998[obj->unk2C].func();
+    D_003AA998[obj->kind].func();
 }
 
 void billInvokeCallback(BillObj *obj) {
-    obj->unk28();
+    obj->callback();
 }

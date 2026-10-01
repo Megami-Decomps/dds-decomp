@@ -27,6 +27,10 @@ s32 billCreateIndexed(s32, s32);
 
 s32 func_001578C0(s32);
 
+/* Viewer-wide state for the model viewer task (DDS2 game/code_00233660 and
+ * DDS1 game/code_00218B48 share this layout field for field). Fields that are
+ * only written by a defaults initialiser and never read in either game are
+ * left as unkNN on purpose: there is no read to earn a role from. */
 typedef struct MdlViewState {
     s32 unk00;
     s32 viewerTask;
@@ -34,16 +38,16 @@ typedef struct MdlViewState {
     s8 unk09;
     s8 taskPhase; /* 0x0A: one-based index into D_003C87F0 */
     s8 unk0B;
-    s8 unk0C;
-    s8 unk0D;
+    s8 unitStepMode;  /* 0x0C: toggled by the step button, read as a 0/2 step */
+    s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys */
     u8 unk0E;
     u8 unk0F;
     u8 unk10;
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
-    s16 unk18;
-    s16 unk1A;
+    s16 fileIndex;    /* 0x18: first arg of func_00232198, the resource loader */
+    s16 fileSlot;     /* 0x1A: second arg of func_00232198 */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
@@ -53,12 +57,12 @@ typedef struct MdlViewState {
     s16 unk28;
     s16 unk2A;
     s16 unk2C;
-    s16 entryHeight; /* 0x2E */
-    s16 entryWidth;  /* 0x30: limited to entryHeight when drawing */
+    s16 entryHeight; /* 0x2E: low bound offered to mdlAddEntry* */
+    s16 entryWidth;  /* 0x30: high bound, limited to entryHeight when drawing */
     u8 pad32[2];
     s16 labelIndexA; /* 0x34: indexes D_003C88C0 */
     s16 labelIndexB; /* 0x36: indexes D_003C88C8 */
-    s16 unk38;
+    s16 scrollPage;  /* 0x38: page stepped by mdlUpdateViewerCursorWithPageStep */
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
     s16 unk3C;
     s16 unk3E;
@@ -71,7 +75,7 @@ typedef struct MdlViewState {
     s16 unk4E;
     s16 unk50;
     s16 unk52;
-    f32 unk54; /* viewer zoom, in hundredths */
+    f32 viewerScale; /* 0x54: viewer zoom, in hundredths */
     u8 pad58[0x34];
     s32 slotBeforeResources[1];
     void *resources[1];
@@ -1229,7 +1233,7 @@ extern void mdlAddEntryFlagged(MdlLoaded *loaded, s32 a, s32 b);
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlLoaded *loaded;
 
-    loaded = func_00232198(D_00453550.unk18, D_00453550.unk1A);
+    loaded = func_00232198(D_00453550.fileIndex, D_00453550.fileSlot);
     D_00453550.resources[0] = loaded;
     D_00453550.activeEntryId = 0;
     D_00453550.selectedEntryId = 0;
@@ -1391,7 +1395,7 @@ s32 func_002369C0(void) {
 }
 
 void mdlAdjustViewerScale(void) {
-    s32 value = (s32)(D_00453550.unk54 * 100.0f + 0.5f);
+    s32 value = (s32)(D_00453550.viewerScale * 100.0f + 0.5f);
 
     if (D_0037F510[0x27] & 2) {
         if (value < 0x32) {
@@ -1404,7 +1408,7 @@ void mdlAdjustViewerScale(void) {
                 value = 0x7D0;
             }
         }
-        D_00453550.unk54 = value * 0.01f;
+        D_00453550.viewerScale = value * 0.01f;
     } else if (D_0037F510[0x26] & 2) {
         if (value < 0x33) {
             value -= 1;
@@ -1416,17 +1420,17 @@ void mdlAdjustViewerScale(void) {
         } else {
             value -= 100;
         }
-        D_00453550.unk54 = value * 0.01f;
+        D_00453550.viewerScale = value * 0.01f;
     }
     if (D_0037F510[0x23] < 0) {
-        D_00453550.unk0C ^= 1;
+        D_00453550.unitStepMode ^= 1;
     }
-    D_00453550.unk0D = 0;
-    if (D_00453550.unk0C != 0) {
+    D_00453550.unitStepSign = 0;
+    if (D_00453550.unitStepMode != 0) {
         if (D_0037F510[0x25] != 0) {
-            D_00453550.unk0D = 1;
+            D_00453550.unitStepSign = 1;
         } else if (D_0037F510[0x24] != 0) {
-            D_00453550.unk0D = -1;
+            D_00453550.unitStepSign = -1;
         }
     }
 }
@@ -1459,8 +1463,8 @@ void func_00236B20(void) {
     } else {
         sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
-    step = D_00453550.unk0C != 0 ? 2 : 0;
-    sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_004370C0, D_00453550.unk54));
+    step = D_00453550.unitStepMode != 0 ? 2 : 0;
+    sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_004370C0, D_00453550.viewerScale));
 }
 
 u32 mdlUpdateViewerScaleTask(void) {
@@ -1490,13 +1494,13 @@ void func_00236E80(void) {
     s32 item; /* resource handle, then its frame id */
     MdlMotionState *motion;
 
-    if (mdlUpdateViewerCursorWithPageStep(&D_00453550.unk38, 5, 1) != 0) {
+    if (mdlUpdateViewerCursorWithPageStep(&D_00453550.scrollPage, 5, 1) != 0) {
         return;
     }
     if (D_0040B7D8[1] >= 0) {
         return;
     }
-    switch (D_00453550.unk38) {
+    switch (D_00453550.scrollPage) {
     case 0:
         if (D_00453550.resourceCount != 12) {
             D_00453550.resources[D_00453550.resourceCount] = 0;
@@ -1538,8 +1542,8 @@ void func_00236E80(void) {
         }
         break;
     }
-    D_00453550.unk1C = D_00453550.unk18 = func_00232EE8(D_00453550.resources[0]);
-    D_00453550.unk1E = D_00453550.unk1A = func_00232EF8(D_00453550.resources[0]);
+    D_00453550.unk1C = D_00453550.fileIndex = func_00232EE8(D_00453550.resources[0]);
+    D_00453550.unk1E = D_00453550.fileSlot = func_00232EF8(D_00453550.resources[0]);
     i = ((MdlLoaded *)D_00453550.resources[0])->unk12;
     if (i < 0) {
         i = 0;
