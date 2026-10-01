@@ -2,36 +2,45 @@
 #include "pcp_vu0.h"
 
 /* Polygon-track data: its ring position wraps against the entry count. */
-typedef struct {
+typedef struct EffTrackPolyData {
     u32 kind;           /* 0x00: draw-target selector */
     u32 color;          /* 0x04 */
-    s32 count;          /* 0x08 */
+    s32 count;          /* 0x08: vertex slots, including the reserved first pair */
     s32 activePointCount; /* 0x0C */
     s32 position;       /* 0x10 */
     s32 step;           /* 0x14 */
     u128 *points;      /* 0x18 */
-    s32 uvBase;         /* 0x1C */
-    void *nodeHandle;   /* 0x20 */
-    void *resourceHandle; /* 0x24 */
+    u32 *colors;        /* 0x1C: per-vertex gradient table after the points */
+    u32 nodeHandle;     /* 0x20: owned draw asset */
+    u32 resourceHandle; /* 0x24: allocation containing points/colors/data */
 } EffTrackPolyData; /* 0x28 */
 
 /* Model handle the track's point queries resolve against. */
 typedef struct {
-    u8 pad_0x00[0x18]; /* 0x00 */
-    void *param;       /* 0x18: sdf text parameter */
+    u8 pad00[0x18]; /* 0x00 */
+    void *param;       /* 0x18: map-record position-query source */
 } EffTrackPolyModel;
 
-/* Outer work area holding track state and the data pointer. */
+/* The constructor copies these 13 words before creating owned track data.
+ * The model pointer is one parameter, not the constructor's entire input.
+ * unk0C/unk10 bound the model value tested by the update routine. */
 typedef struct {
-    EffTrackPolyModel *model; /* 0x00 */
-    s32 idA;                  /* 0x04 */
-    s32 idB;                  /* 0x08 */
-    f32 unk0C;                /* 0x0C */
-    f32 unk10;                /* 0x10 */
-    s32 step;                 /* 0x14 */
-    u8  pad_0x18[0x1C];       /* 0x18 */
-    s32            state;     /* 0x34: cleared on reset */
-    EffTrackPolyData *data;   /* 0x38 */
+    EffTrackPolyModel *model;
+    s32 idA;
+    s32 idB;
+    f32 unk0C;
+    f32 unk10;
+    s32 sampleInterval; /* 0x14: updateCount modulus for endpoint sampling */
+    s32 historyLength;  /* 0x18: multiplied by the constructor's step count */
+    u32 unk1C;          /* 0x1C: constructor writes its fixed step count here */
+    u32 kind;
+    u32 gradientColors[4];
+} EffTrackPolyParams; /* 0x34 */
+
+typedef struct {
+    EffTrackPolyParams params;
+    u32 updateCount;    /* 0x34: increments each active update; gates sampling */
+    EffTrackPolyData *data; /* 0x38 */
 } EffTrackPolyWork; /* 0x3C */
 
 
@@ -42,7 +51,7 @@ void effTrackPolyRelease(EffTrackPolyWork *work) {
 }
 
 void effTrackPolyReset(EffTrackPolyWork *work) {
-    work->state = 0;
+    work->updateCount = 0;
     effTrackPolyInitData(work->data);
 }
 
@@ -50,12 +59,12 @@ extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
 extern void func_00188A78();
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {
-    EffTrackPolyModel *model = work->model;
+    EffTrackPolyModel *model = work->params.model;
     u128 points[2];
 
-    sdfLoadMapRecordPositionVector(model->param, work->idA);
+    sdfLoadMapRecordPositionVector(model->param, work->params.idA);
     VU0_STORE_VF(vf10, points);
-    sdfLoadMapRecordPositionVector(model->param, work->idB);
+    sdfLoadMapRecordPositionVector(model->param, work->params.idB);
     VU0_STORE_VF(vf10, &points[1]);
     func_00188A78(work->data, points);
 }
@@ -82,11 +91,11 @@ typedef struct EffTrackPolyList {
 
 extern u32 func_002D03F8(s32 size);
 extern u8 *sdfResourceRetainAddress(u32 handle);
-extern EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyModel *model);
+extern EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *params);
 
-/* Build a list of `count` track-poly works over one model. */
-EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyModel *model, u32 count) {
-    u32 handle = func_002D03F8(count * 4 + 0xC);
+/* Clone count tracks from one parameter block, each with its own data. */
+EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
+    u32 handle = func_002D03F8(count * sizeof(EffTrackPolyWork *) + sizeof(EffTrackPolyList));
     EffTrackPolyList *list = (EffTrackPolyList *)sdfResourceRetainAddress(handle);
     u32 i;
 
@@ -94,40 +103,40 @@ EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyModel *model, u32 
     list->items = (EffTrackPolyWork **)(list + 1);
     list->count = count;
     for (i = 0; i < count; i++) {
-        list->items[i] = effTrackPolyCreateWork(model);
+        list->items[i] = effTrackPolyCreateWork(params);
     }
     return list;
 }
 
-void func_00188480(EffTrackPolyWork ***list) {
-    u32 count = list[1];
+void func_00188480(EffTrackPolyList *list) {
+    u32 count = list->count;
     u32 i = 0;
 
     while (i < count) {
-        effTrackPolyRelease(list[0][i]);
+        effTrackPolyRelease(list->items[i]);
         i++;
     }
-    func_002D0918(list[2]);
+    func_002D0918(list->handle);
 }
 
-void func_001884E8(EffTrackPolyWork ***tables, s32 index, void *data) {
-    func_001882D8((*tables)[index], data);
+void func_001884E8(EffTrackPolyList *list, s32 index, void *data) {
+    func_001882D8(list->items[index], data);
 }
 
-void effTrackPolyResetIndexedWork(EffTrackPolyWork ***tables, s32 index) {
-    effTrackPolyReset((*tables)[index]);
+void effTrackPolyResetIndexedWork(EffTrackPolyList *list, s32 index) {
+    effTrackPolyReset(list->items[index]);
 }
 
-void effTrackPolySetIndexedColor(EffTrackPolyWork ***tables, s32 index, u32 value) {
-    effTrackPolySetColor((*tables)[index], value);
+void effTrackPolySetIndexedColor(EffTrackPolyList *list, s32 index, u32 color) {
+    effTrackPolySetColor(list->items[index], color);
 }
 
-void func_00188560(EffTrackPolyWork ***list) {
-    u32 count = list[1];
+void func_00188560(EffTrackPolyList *list) {
+    u32 count = list->count;
     u32 i = 0;
 
     while (i < count) {
-        func_00188300(list[0][i]);
+        func_00188300(list->items[i]);
         i++;
     }
 }
@@ -198,8 +207,9 @@ void effTrackPolyInitData(EffTrackPolyData *data) {
     data->activePointCount = 0;
 }
 
-void func_00188870(u32 *dst, u32 value) {
-    *dst = value;
+/* Select the draw target on the data created by the track constructor. */
+void func_00188870(EffTrackPolyData *data, u32 kind) {
+    data->kind = kind;
 }
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", func_00188878);
@@ -258,9 +268,9 @@ typedef struct EffTrackPolyDraw {
     u8 pad04[4];
     u32 color;      /* 0x08 */
     u8 pad0C[4];
-    u8 *points;     /* 0x10 */
+    u128 *points;   /* 0x10: the same vertex records owned by track data */
     u8 pad14[0xC];
-    s32 uvOffset;   /* 0x20 */
+    u32 *colors;   /* 0x20: gradient color for each input vertex */
     u8 pad24[8];
 } EffTrackPolyDraw; /* 0x2C */
 
@@ -279,7 +289,8 @@ extern void sdfConsAppendAssetPacket(s32, s32, s32);
 extern void sdfAppendPacket(s32, s32);
 extern s32 func_0015FE20(EffTrackPolyDraw *);
 
-/* Draw the track as strips of 16 point pairs: the ring buffer is walked as at most two runs (the recent end, then the wrapped start). */
+/* Walk at most two ring runs. Each full strip consumes 16 vertices, with
+ * two additional vertices overlapping the next strip (18 inputs total). */
 void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     s32 list = sdfAllocPacketAligned(0x20);
     s32 start[4];
@@ -307,10 +318,10 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         len[0] = recent;
         len[1] = 0;
     }
-    D_003D6640.uvOffset = data->uvBase;
+    D_003D6640.colors = data->colors;
     for (i = 0; i < 2; i++) {
         draw = &D_003D6640;
-        draw->points = (u8 *)data->points + (start[i] << 4);
+        draw->points = &data->points[start[i]];
         draw->color = data->color;
         draw->width = 0x10;
         draw->height = 0x12;
@@ -318,14 +329,14 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         while (remaining >= 0x12) {
             remaining -= 0x10;
             sdfAppendPacket(list, func_0015FE20(&D_003D6640));
-            D_003D6640.points += 0x100;
-            D_003D6640.uvOffset += 0x40;
+            D_003D6640.points += 0x10;
+            D_003D6640.colors += 0x10;
         }
         if (remaining >= 4) {
             draw->height = remaining;
             draw->width = remaining - 2;
             sdfAppendPacket(list, func_0015FE20(draw));
-            draw->uvOffset += remaining * 4;
+            draw->colors += remaining;
         }
     }
     if (data->kind < 4) {
