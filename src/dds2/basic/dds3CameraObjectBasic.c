@@ -107,14 +107,7 @@ void func_001130B8(void *obj, void *src) {
 void dds3LoadCameraVectorVU(EEF0Node *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x18) + 0x60;
 
-    __asm__ volatile (
-        ".set noreorder      \n"
-        "lqc2 vf10, 0(%0)    \n"
-        ".set reorder"
-        :
-        : "r" (p)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
 void dds3SetCameraValue(CameraObject *camera, f32 value) {

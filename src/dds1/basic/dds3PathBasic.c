@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 typedef struct {
     f32 x;
@@ -80,33 +81,12 @@ void dds3PreparePathVectorPair(PathObj *path) {
         func_00116B80(&index, &fraction, vectorData, path->time);
         entries = vectorData->entries;
         first = &entries[index];
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf10, 0(%0)\n"
-            ".set reorder"
-            :
-            : "r"(first)
-            : "memory"
-        );
+        VU0_LOAD_VF_MEMORY(vf10, first);
         second = &entries[index] + 1;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf11, 0(%0)\n"
-            ".set reorder"
-            :
-            : "r"(second)
-            : "memory"
-        );
+        VU0_LOAD_VF_MEMORY(vf11, second);
         effMiscQuaternionNlerpVU(second, fraction);
     } else {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "vmove.xyzw vf10, vf0\n"
-            ".set reorder"
-            :
-            :
-            : "memory"
-        );
+        VU0_MOVE_VF(vf10, vf0);
     }
 }
 
