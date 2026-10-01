@@ -179,9 +179,11 @@ s64 func_0026BB78(s32 request) {
     return menuSetHandler(state, 1, request);
 }
 
-/* Parked: build/parked/dds2/game/code_0026B6A8/func_0026BBC8.c (retail keeps a
-   jal tail here but sibcalls in the identical sibling func_0026BA20). */
-INCLUDE_ASM(const s32, "game/code_0026B6A8", func_0026BBC8);
+s64 func_0026BBC8(s32 request) {
+    s32 state = kwlnTaskGetUserValue();
+
+    return menuSetHandler(state, 2, request);
+}
 
 u32 mnuClearTerminalPanelSelection(void) {
     s32 state;

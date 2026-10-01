@@ -28,6 +28,10 @@ extern u64 effParamTableGetBlock(u64, u64);
 extern void func_001705A0();
 
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
+extern s32 func_00170858(EffectRecordGroup *group, s32 index);
+extern f32 D_00354980[];
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
 
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
@@ -179,7 +183,85 @@ void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0016F1D0", func_0016F5C8);
+typedef struct {
+    u8 pad00[8];
+    f32 accumulator;
+    f32 unk0C;
+} EffectArcQuadPart;
+
+typedef struct {
+    u8 pad00[0x58];
+    EffectArcQuadPart *parts;
+    u8 pad5C[0x0C];
+    f32 orbitRadius;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    u8 pad78[4];
+    EffectRecordGroup *resourceHandle;
+} EffectArcQuadWork;
+
+/* vu0 routine: billboard corner offsets for an arc particle */
+void func_0016F5C8(EffectArcQuadWork *work, s32 index) {
+    EffectArcQuadPart *part = &work->parts[index];
+    f32 *quad = (f32 *)func_00170858(work->resourceHandle, index);
+    f32 offset[4];
+    f32 unit[4];
+    f32 scaleA[4];
+    f32 scaleB[4];
+    f32 scaleC[4];
+    f32 sinv;
+    f32 height;
+
+    VEC3_SPLAT(scaleA, work->unk6C);
+    VEC3_SPLAT(scaleB, work->unk74);
+    VEC3_SPLAT(scaleC, work->unk70);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->orbitRadius;
+    offset[1] = 0;
+    offset[2] = sinv * work->orbitRadius;
+    height = part->unk0C;
+    D_00354980[0] = unit[0] * height;
+    D_00354980[1] = height + -1.0f;
+    D_00354980[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_00354980);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, scaleB);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, scaleC);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleC);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scaleA);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleC);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleB);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
 
 void effAdvanceVectorRecord(EffectRecordGroup *group, s32 index) {
     EffectVectorRecord *record;
