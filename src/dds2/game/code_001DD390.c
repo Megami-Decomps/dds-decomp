@@ -1183,7 +1183,7 @@ u32 btlApplyDeferredUnitStatus(void *arg) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    func_001AA850((u8 *)unit + 0x120, args[1]);
+    func_001AA850(&unit->statBits, args[1]);
     func_001E2758(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1217,8 +1217,8 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
         return 1;
     }
     if (((BtlCategoryTableEntry *)D_00435E20)[args->category].flags00 & 8) {
-        func_001AA770((u8 *)unit + 0x120, -0x7FFF);
-        func_001AA850((u8 *)unit + 0x120, 0x4000);
+        func_001AA770(&unit->statBits, -0x7FFF);
+        func_001AA850(&unit->statBits, 0x4000);
         unit->flags |= 0x20;
     }
     if (args->amount == 0) {
@@ -1226,10 +1226,10 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
     switch (((BtlCategoryTableEntry *)D_00435E20)[args->category].kind03) {
     case 1:
-        func_001AA770((u8 *)unit + 0x120, -args->amount);
+        func_001AA770(&unit->statBits, -args->amount);
         return 1;
     case 2:
-        func_001AA788((u8 *)unit + 0x120, -args->amount);
+        func_001AA788(&unit->statBits, -args->amount);
         return 1;
     default:
         return 1;
@@ -1480,7 +1480,7 @@ u32 btlRefreshEligibleActors(void) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->stateFlags & 8) == 0) {
                                 u16 prior = unit->conditionFlags;
-                                func_001AA850((u8 *)unit + 0x120, 1);
+                                func_001AA850(&unit->statBits, 1);
                                 func_001E2758(unit);
                                 if (unit->conditionFlags == 1 && prior != unit->conditionFlags) {
                                     unit->stateFlags |= 4;
@@ -2354,7 +2354,7 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
             VU0_LOAD_VF(vf11, D_004179E0);
             effMiscQuatMultiplyVU();
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, (u8 *)unit + 0x70);
+        VU0_STORE_VF_UNCLOBBERED(vf10, unit->orientation);
         VU0_LOAD_VF(vf11, D_004179E0);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, result);
@@ -2828,7 +2828,7 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
         rate = args->rate;
         if (rate > 0.0f && rate < 1.0f) {
             if (args->count == 0) {
-                PCP_COPY_VECTOR(&args->from, (u8 *)unit + 0x70);
+                PCP_COPY_VECTOR(&args->from, unit->orientation);
             }
             args->t = t + (1.0f - t) * rate;
             if (args->t > 0.999f) {
@@ -2861,7 +2861,7 @@ SoundTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, s8
     ((BtlVectorTaskArgs *)args)->unit30 = (u32)unit;
     ((BtlVectorTaskArgs *)args)->state24 = 0;
     ((BtlVectorTaskArgs *)args)->state28 = 0;
-    PCP_COPY_VECTOR(args, (u8 *)unit + 0x70);
+    PCP_COPY_VECTOR(args, unit->orientation);
     PCP_COPY_VECTOR(args + 0x10, target);
     return task;
 }

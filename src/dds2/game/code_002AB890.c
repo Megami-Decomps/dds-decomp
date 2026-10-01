@@ -37,6 +37,9 @@ typedef struct MenuResourceOwner {
 } MenuResourceOwner;
 
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
+extern void func_002AB8F0(s32);
+
+extern void func_002BAF50(s32, s32);
 
 void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_002AB690(arg0, arg1, arg2, 0, arg3, arg4, arg5);
@@ -93,7 +96,21 @@ void func_002ACB18(u32 arg0) {
 void func_002ACB38(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACB40);
+u32 func_002ACB40(void) {
+    s32 context = kwlnTaskGetUserValue();
+    s32 handle = func_003292A8(0x54);
+    u8 *resource = sdfResourceRetainAddress(handle);
+
+    *(u8 **)(context + 0xAA48) = resource;
+    memset(resource, 0, 0x54);
+    *(s32 *)resource = handle;
+    func_002ACB18(context);
+    func_002AB8F0(context);
+    mnuConfigurePanelResource(*(s32 *)(context + 0x118), *(s32 *)(context + 0xC4), 0, 0);
+    func_002BAF50(*(s32 *)(context + 0x108), context + 0xB10C);
+    mnuSeekListNode(0, *(u8 **)(*(u8 **)(context + 0x108) + 0x18));
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACBF8);
 
