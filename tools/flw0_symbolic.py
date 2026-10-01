@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import flw0
 import flw0_profiles
+import flw0_semantic
 import msg1
 
 
@@ -197,7 +198,12 @@ def _render_instruction(
     return f"  {name} 0x{operand:04x}", pc + 1
 
 
-def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
+def render(
+    script: flw0.Flw0File,
+    profile_name: str | None = None,
+    semantic: bool = False,
+    structured: bool = False,
+) -> str:
     """Render standard-layout FLW0 as symbolic version-2 source."""
 
     string_data = _require_standard_layout(script)
@@ -272,9 +278,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     instruction_boundaries: set[int] = set()
     while pc < len(words):
         instruction_boundaries.add(pc)
-        for symbol in symbols_at_pc.get(pc, ()):
-            lines.append(f"{symbol}:")
-        instruction, next_pc = _render_instruction(
+        _, pc = _render_instruction(
             words,
             pc,
             procedure_symbols,
@@ -284,8 +288,6 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
             message_symbols,
             selection_symbols,
         )
-        lines.append(instruction)
-        pc = next_pc
     instruction_boundaries.add(pc)
     invalid_targets = sorted(set(symbols_at_pc) - instruction_boundaries)
     if invalid_targets:
@@ -293,8 +295,48 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
         raise flw0.Flw0Error(
             f"table target is not an instruction boundary: {rendered}; use flw0 1"
         )
-    for symbol in symbols_at_pc.get(pc, ()):
-        lines.append(f"{symbol}:")
+    if semantic or structured:
+        lines.extend(
+            flw0_semantic.render_code(
+                words,
+                symbols_at_pc,
+                procedure_symbols,
+                jump_symbols,
+                command_profile,
+                string_symbols,
+                message_symbols,
+                selection_symbols,
+                lambda at: _render_instruction(
+                    words,
+                    at,
+                    procedure_symbols,
+                    jump_symbols,
+                    command_profile,
+                    string_symbols,
+                    message_symbols,
+                    selection_symbols,
+                ),
+                structured=structured,
+            )
+        )
+    else:
+        pc = 0
+        while pc < len(words):
+            for symbol in symbols_at_pc.get(pc, ()):
+                lines.append(f"{symbol}:")
+            instruction, pc = _render_instruction(
+                words,
+                pc,
+                procedure_symbols,
+                jump_symbols,
+                command_profile,
+                string_symbols,
+                message_symbols,
+                selection_symbols,
+            )
+            lines.append(instruction)
+        for symbol in symbols_at_pc.get(pc, ()):
+            lines.append(f"{symbol}:")
     lines.append("end")
     lines.append("")
     lines.extend(message_lines)
@@ -356,7 +398,7 @@ def _parse_code(
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
-    for line_number, line in content:
+    for line_number, line in flw0_semantic.lower_code(content, command_profile):
         if line.endswith(":"):
             symbol = _symbol(line[:-1].strip(), line_number)
             if symbol in labels:
