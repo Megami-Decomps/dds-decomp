@@ -11,10 +11,10 @@ jump_label _1 reserved=0x00000000
 code
 e702_main:
   PROC e702_main
-  COMM 0x000d
+  COMM WAIT_FOR_TIMER_START
   PUSHIS 0
   PUSHIS 85
-  COMM 0x0007
+  COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _2
@@ -24,7 +24,7 @@ e702_main:
 _2:
   PUSHIS 0
   PUSHIS 86
-  COMM 0x0007
+  COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _1
