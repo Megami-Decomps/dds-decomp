@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 extern s32 mdlFlagTest(u32 flagId);
 
 extern void mdlFlagSet(u32 flagId);
@@ -23,8 +23,6 @@ extern s32 kwlnTaskGetUserValue();
 extern void func_002C44E8(s32);
 
 extern void mnuTitleRenderFadeAndPanels(s32);
-
-extern s64 func_002C4038(s32, s32, s32, s32);
 
 extern s32 brsTaskIsUiUpdateAllowed(s32);
 
@@ -56,21 +54,21 @@ typedef struct MenuItemScene {
    fill differs from retail by one word; every source shape tried agrees). */
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
-void mnuStaffRunPanel1(s32 input) {
+s64 mnuStaffRunPanel1(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
-        func_002C4038(context + 8, context + 0x54, 1, input);
+        return menuSetHandler(context, 1, input);
     }
 }
 
-void mnuStaffRunPanel2(s32 input) {
+s64 mnuStaffRunPanel2(s32 input) {
     s32 context = kwlnTaskGetUserValue();
 
     if (brsTaskIsUiUpdateAllowed(context) != 0) {
         brsDecaySharedAnimCounter(context);
-        func_002C4038(context + 8, context + 0x54, 2, input);
+        return menuSetHandler(context, 2, input);
     }
 }
 
@@ -82,21 +80,21 @@ u32 func_00299EF8(void) {
     return 1;
 }
 
-void mnuStaffRunPanel0(s32 input) {
+s64 mnuStaffRunPanel0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     func_002C44E8(0x33);
-    func_002C4038(context + 8, context + 0x54, 0, input);
+    return menuSetHandler(context, 0, input);
 }
 
-void func_00299F50(s32 input) {
+s64 func_00299F50(s32 input) {
     s32 context = kwlnTaskGetUserValue();
     mnuTitleRenderFadeAndPanels(context);
-    func_002C4038(context + 8, context + 0x54, 1, input);
+    return menuSetHandler(context, 1, input);
 }
 
-void func_00299FA0(s32 input) {
+s64 func_00299FA0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    func_002C4038(context + 8, context + 0x54, 2, input);
+    return menuSetHandler(context, 2, input);
 }
 
 u32 func_00299FD8(void) {
@@ -169,18 +167,18 @@ INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A2F8);
 
 INCLUDE_ASM(const s32, "game/code_00299D58", func_0029A400);
 
-void func_0029A588(s32 request) {
+s64 func_0029A588(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     mnuTitleRenderFadeAndPanels(context);
-    func_002C4038(context + 8, context + 0x54, 1, request);
+    return menuSetHandler(context, 1, request);
 }
 
-void func_0029A5D8(s32 request) {
+s64 func_0029A5D8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 s32 mnuResetItemSelectionMarkers(void) {

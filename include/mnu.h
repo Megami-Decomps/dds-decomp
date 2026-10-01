@@ -14,6 +14,10 @@ static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
     return func_00285670(context + 8, (s32 *)(context + 0x54), mode, arg);
 }
 
+static inline s64 evtMenuSetHandler(s32 context, u64 mode, s32 callback) {
+    return func_002C4038(context + 0xc, (s32 *)(context + 0x58), mode, callback);
+}
+
 static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
     vec[0] = red;
     vec[1] = green;

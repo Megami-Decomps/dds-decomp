@@ -1,8 +1,6 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 mdlFlagTest(u32);
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -105,13 +103,13 @@ s64 func_00265360(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
-    return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 1, callback);
+    return evtMenuSetHandler(context, 1, callback);
 }
 
 s64 func_002653B8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C7F8(1, 0);
-    return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 2, callback);
+    return evtMenuSetHandler(context, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002651C0", func_00265408);
@@ -142,13 +140,13 @@ s64 func_002657F8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0025FD78(context);
     func_00297970(context);
-    return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 1, callback);
+    return evtMenuSetHandler(context, 1, callback);
 }
 
 s64 func_00265850(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038(context + 0xc, &((EvtMenuContext *)context)->window, 2, callback);
+    return evtMenuSetHandler(context, 2, callback);
 }
 
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */

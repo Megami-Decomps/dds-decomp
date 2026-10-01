@@ -1,8 +1,6 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s64 fileConsumeConfigTaskReady(void);
 
@@ -79,7 +77,7 @@ s64 func_002AB1B0(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
+    return menuSetHandler(context, 2, arg0);
 }
 
 u32 func_002AB1E8(void) {
@@ -123,14 +121,14 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
     func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
     func_002AA7A0(2, ((CampVisualWork *)context)->drawContext);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, arg0);
+    return menuSetHandler(context, 1, arg0);
 }
 
 s64 func_002AB368(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
+    return menuSetHandler(context, 2, arg0);
 }
 
 u32 func_002AB3A0(void) {
@@ -147,7 +145,7 @@ s64 func_002AB3C8(s32 arg0) {
     s64 state;
 
     context = kwlnTaskGetUserValue();
-    state = func_002C4038(context + 8, (s32 *)(context + 0x54), 0, arg0);
+    state = menuSetHandler(context, 0, arg0);
     if (state != 0) {
         return state;
     }
@@ -162,7 +160,7 @@ s64 func_002AB518(s32 arg0) {
     s32 context;
 
     context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, arg0);
+    return menuSetHandler(context, 2, arg0);
 }
 
 u32 func_002AB550(void) {

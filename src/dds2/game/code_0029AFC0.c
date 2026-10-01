@@ -1,10 +1,8 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0029AA48(s32);
 
@@ -52,19 +50,19 @@ s32 mnuCheckTableSums(MenuSumBytes *bytes, MenuSumTable *table) {
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B008);
 
-void func_0029B320(s32 request) {
+s64 func_0029B320(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0029AA48(context);
     func_0029AC20(context, 1);
-    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+    return menuSetHandler(context, 1, request);
 }
 
-void func_0029B378(s32 request) {
+s64 func_0029B378(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 u32 func_0029B3C0(void) {
@@ -84,19 +82,19 @@ u32 func_0029B410(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B418);
 
-void func_0029B600(s32 request) {
+s64 func_0029B600(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0029AA48(context);
     func_0029AC20(context, 1);
-    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+    return menuSetHandler(context, 1, request);
 }
 
-void func_0029B658(s32 request) {
+s64 func_0029B658(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B6A0);
@@ -122,19 +120,19 @@ s64 mnuRunPanelWithIdleFallback(u64 request) {
     return result;
 }
 
-void func_0029B810(s32 request) {
+s64 func_0029B810(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0029AA48(context);
     func_0029AC20(context, 0);
-    func_002C4038(context + 8, (s32 *)(context + 0x54), 1, request);
+    return menuSetHandler(context, 1, request);
 }
 
-void func_0029B868(s32 request) {
+s64 func_0029B868(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B8B0);

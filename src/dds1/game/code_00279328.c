@@ -132,9 +132,9 @@ s64 ptySkillMenuEnterPage(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-void func_00279728(s32 selection) {
+s64 func_00279728(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
-    func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
+    return menuRunPanel(context, 2, selection);
 }
 
 s32 ptySkillMenuUseSelectedInField(id, context)
@@ -227,9 +227,9 @@ s64 ptySkillMenuEnterConfirm(s32 callback) {
     return menuRunPanel(context, 1, callback);
 }
 
-void func_00279AF8(s32 selection) {
+s64 func_00279AF8(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
-    func_00285670(context + 8, (s32 *)(context + 0x54), 2, selection);
+    return menuRunPanel(context, 2, selection);
 }
 
 extern void mnuSelectPage(void *, u32);
