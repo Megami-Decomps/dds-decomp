@@ -128,8 +128,8 @@ void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015DC70);
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
-void polyStripPushPairsApart(PolyNode *obj, s32 index) {
-    PolyStrip *strip = (PolyStrip *)obj->cellSystemAddress;
+void polyStripPushPairsApart(PolyNode *node, s32 index) {
+    PolyStrip *strip = (PolyStrip *)node->cellSystemAddress;
     PolyStripEntry *entry = &strip->entries[index];
     f32 scale[4];
     f32 *p;
@@ -138,7 +138,7 @@ void polyStripPushPairsApart(PolyNode *obj, s32 index) {
 
     p = entry->points;
     pairs = strip->count / 2;
-    scale[0] = scale[1] = scale[2] = obj->unkD0;
+    scale[0] = scale[1] = scale[2] = node->unkD0;
     VU0_LOAD_VF(vf12, scale);
     for (i = 0; i < pairs; i++) {
         VU0_LOAD_VF(vf10, p + 4);
@@ -185,9 +185,9 @@ typedef struct {
 } PolyBand;
 
 /* Write radii radius and radius + radialWidth, then close the strip with its first pair. */
-void polyBandLayoutRing(PolyBand *obj, s32 index, f32 radius)
+void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
 {
-    PolyStrip *strip = obj->strip;
+    PolyStrip *strip = band->strip;
     PolyStripEntry *entry = &strip->entries[index];
     f32 dir[4];
     f32 baseRadiusVector[4];
@@ -203,11 +203,11 @@ void polyBandLayoutRing(PolyBand *obj, s32 index, f32 radius)
     out = entry->points;
     pairs = strip->count / 2;
     VEC3_SPLAT(baseRadiusVector, radius);
-    VEC3_SPLAT(offsetRadiusVector, radius + obj->radialWidth);
-    step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX(obj->matrix);
+    VEC3_SPLAT(offsetRadiusVector, radius + band->radialWidth);
+    step = 3.14159265f * 2.0f / (f32)band->segments;
+    VU0_LOAD_MATRIX(band->matrix);
     angle = 0.0f;
-    VU0_LOAD_VF(vf12, obj->origin);
+    VU0_LOAD_VF(vf12, band->origin);
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
         dir[1] = 0;
@@ -250,9 +250,9 @@ typedef struct {
 } PolyLiftedRing;
 
 /* Add a uniformly scaled ring and local-y lift to existing point pairs, then close the strip. */
-void polyStripBuildScaledRing(PolyLiftedRing *obj, s32 index) {
-    PolyStrip *strip = obj->strip;
-    PolyLiftedRingRecord *rec = &obj->recs[index];
+void polyStripBuildScaledRing(PolyLiftedRing *ring, s32 index) {
+    PolyStrip *strip = ring->strip;
+    PolyLiftedRingRecord *rec = &ring->recs[index];
     PolyStripEntry *entry = &strip->entries[index];
     f32 dir[4];
     f32 scale[4];
@@ -268,10 +268,10 @@ void polyStripBuildScaledRing(PolyLiftedRing *obj, s32 index) {
     out = entry->points;
     pairs = strip->count >> 1;
     scale[2] = scale[1] = scale[0] = rec->radius;
-    lift[1] = obj->lift;
+    lift[1] = ring->lift;
     lift[2] = lift[0] = 0;
-    step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX(obj->matrix);
+    step = 3.14159265f * 2.0f / (f32)ring->segments;
+    VU0_LOAD_MATRIX(ring->matrix);
     angle = 0.0f;
     for (i = 0; i < pairs - 1; i++) {
         dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
