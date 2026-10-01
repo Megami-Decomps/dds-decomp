@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import struct
 import sys
@@ -348,10 +349,143 @@ def _render_raw_payload(payload: bytes, indent: str = "  ") -> list[str]:
     ]
 
 
+def _type5_offsets(flw0: Flw0File) -> set[int]:
+    return {
+        word.operand_u16
+        for word in flw0.code_words()
+        if word.opcode == OPCODE_IDS["PUSHTYPE5"]
+    }
+
+
+def _type5_extent(flw0: Flw0File, section: Section) -> bytes:
+    """Return section 4 plus any trailing bytes reached by PUSHTYPE5."""
+
+    raw = flw0.to_bytes()[section.offset :]
+    extent = section.logical_size
+    for offset in _type5_offsets(flw0):
+        if offset >= len(raw):
+            continue
+        terminator = raw.find(b"\0", offset)
+        if terminator >= 0:
+            extent = max(extent, terminator + 1)
+    return raw[:extent]
+
+
+def _string_symbol(value: str, offset: int, used: set[str]) -> str:
+    base = re.sub(r"[^A-Za-z0-9_]", "_", value).strip("_")
+    if not base:
+        base = f"string_{offset:04x}"
+    elif base[0].isdigit():
+        base = f"str_{base}"
+    candidate = base
+    suffix = 2
+    while candidate in used:
+        candidate = f"{base}_{suffix}"
+        suffix += 1
+    used.add(candidate)
+    return candidate
+
+
+def _render_string_payload(
+    payload: bytes,
+    references: set[int],
+    used_symbols: set[str] | None = None,
+) -> tuple[list[str], dict[int, str]]:
+    """Render exact bytes, naming referenced NUL-terminated ASCII strings."""
+
+    used = used_symbols if used_symbols is not None else set()
+    candidates: list[tuple[int, int, str, str]] = []
+    previous_end = 0
+    for offset in sorted(references):
+        if offset >= len(payload) or (offset and payload[offset - 1] != 0):
+            continue
+        terminator = payload.find(b"\0", offset)
+        if terminator < 0 or offset < previous_end:
+            continue
+        raw = payload[offset:terminator]
+        if any(byte < 0x20 or byte > 0x7E for byte in raw):
+            continue
+        value = raw.decode("ascii")
+        symbol = _string_symbol(value, offset, used)
+        candidates.append((offset, terminator + 1, symbol, value))
+        previous_end = terminator + 1
+
+    lines: list[str] = []
+    symbols: dict[int, str] = {}
+    cursor = 0
+    for offset, end, symbol, value in candidates:
+        lines.extend(_render_raw_payload(payload[cursor:offset]))
+        lines.append(f"  string {symbol} {json.dumps(value)}")
+        symbols[offset] = symbol
+        cursor = end
+    lines.extend(_render_raw_payload(payload[cursor:]))
+    return lines, symbols
+
+
+def _parse_string_payload(
+    content: list[tuple[int, str]], maximum_size: int | None = None
+) -> tuple[bytes, dict[str, int]]:
+    chunks: list[bytes] = []
+    symbols: dict[str, int] = {}
+    size = 0
+    for line_number, line in content:
+        tokens = _tokens(line, line_number)
+        if not tokens:
+            continue
+        if tokens[0] == "string":
+            match = re.fullmatch(r"string\s+(\S+)\s+(.+)", line)
+            if match is None or not _symbolic_operand(match.group(1)):
+                raise Flw0Error(f"line {line_number}: invalid string declaration")
+            symbol = match.group(1)
+            if symbol in symbols:
+                raise Flw0Error(
+                    f"line {line_number}: duplicate string symbol {symbol!r}"
+                )
+            try:
+                value, literal_end = json.JSONDecoder().raw_decode(match.group(2))
+            except json.JSONDecodeError as exc:
+                raise Flw0Error(
+                    f"line {line_number}: invalid JSON string literal"
+                ) from exc
+            remainder = match.group(2)[literal_end:].lstrip()
+            if remainder and not remainder.startswith("#"):
+                raise Flw0Error(
+                    f"line {line_number}: unexpected text after string literal"
+                )
+            if not isinstance(value, str):
+                raise Flw0Error(f"line {line_number}: string value must be text")
+            try:
+                encoded = value.encode("ascii")
+            except UnicodeEncodeError as exc:
+                raise Flw0Error(f"line {line_number}: string value is not ASCII") from exc
+            if b"\0" in encoded:
+                raise Flw0Error(f"line {line_number}: string value contains NUL")
+            symbols[symbol] = size
+            chunk = encoded + b"\0"
+        elif len(tokens) == 2 and tokens[0] == "zero":
+            chunk = bytes(_unsigned(tokens[1], line_number))
+        elif len(tokens) == 2 and tokens[0] == "bytes":
+            try:
+                chunk = bytes.fromhex(tokens[1])
+            except ValueError as exc:
+                raise Flw0Error(f"line {line_number}: invalid byte string") from exc
+        else:
+            raise Flw0Error(
+                f"line {line_number}: expected 'string NAME TEXT', "
+                "'bytes HEX', or 'zero SIZE'"
+            )
+        if maximum_size is not None and size + len(chunk) > maximum_size:
+            raise Flw0Error(f"line {line_number}: string data exceeds declared extent")
+        chunks.append(chunk)
+        size += len(chunk)
+    return b"".join(chunks), symbols
+
+
 def _render_code(
     flw0: Flw0File,
     section: Section,
     command_profile: flw0_profiles.CommandProfile | None = None,
+    string_symbols: dict[int, str] | None = None,
 ) -> list[str]:
     payload = flw0.section_bytes(section)
     words = [
@@ -385,6 +519,12 @@ def _render_code(
             else:
                 lines.append(f"  {pc:04x}: {name}")
         else:
+            if opcode == OPCODE_IDS["PUSHTYPE5"] and string_symbols is not None:
+                symbol = string_symbols.get(operand)
+                if symbol is not None:
+                    lines.append(f"  {pc:04x}: {name} {symbol}")
+                    pc += 1
+                    continue
             if opcode == OPCODE_IDS["COMM"] and command_profile is not None:
                 command = command_profile.by_id.get(operand)
                 if command is not None:
@@ -433,15 +573,42 @@ def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
         ]
     )
 
+    string_rendering: tuple[int, int, list[str], dict[int, str]] | None = None
+    string_sections = [
+        section
+        for section in flw0.sections
+        if section.type_id == 4 and section.element_size == 1
+    ]
+    if len(string_sections) == 1:
+        string_section = string_sections[0]
+        string_payload = _type5_extent(flw0, string_section)
+        string_lines, string_symbols = _render_string_payload(
+            string_payload, _type5_offsets(flw0)
+        )
+        string_rendering = (
+            string_section.index,
+            len(string_payload),
+            string_lines,
+            string_symbols,
+        )
+
     covered = bytearray(flw0.physical_size)
     covered[: flw0.table_end] = b"\x01" * flw0.table_end
     for section in flw0.sections:
+        extent = ""
+        if (
+            string_rendering is not None
+            and section.index == string_rendering[0]
+            and string_rendering[1] != section.logical_size
+        ):
+            extent = f" extent=0x{string_rendering[1]:x}"
         lines.append(
             f"section {section.index} type={section.type_id} "
             f"stride=0x{section.element_size:x} count={section.element_count} "
-            f"offset=0x{section.offset:x}"
+            f"offset=0x{section.offset:x}{extent}"
         )
         payload = flw0.section_bytes(section)
+        covered_size = section.logical_size
         if section.type_id in (0, 1):
             noun = "proc" if section.type_id == 0 else "label"
             for row_index in range(section.element_count):
@@ -458,12 +625,22 @@ def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
                     f"reserved=0x{reserved:08x}{suffix}"
                 )
         elif section.type_id == 2 and section.element_size == 4:
-            lines.extend(_render_code(flw0, section, command_profile))
+            lines.extend(
+                _render_code(
+                    flw0,
+                    section,
+                    command_profile,
+                    string_rendering[3] if string_rendering is not None else None,
+                )
+            )
+        elif string_rendering is not None and section.index == string_rendering[0]:
+            lines.extend(string_rendering[2])
+            covered_size = string_rendering[1]
         else:
             lines.extend(_render_raw_payload(payload))
         lines.append("end")
         lines.append("")
-        covered[section.offset : section.logical_end] = b"\x01" * section.logical_size
+        covered[section.offset : section.offset + covered_size] = b"\x01" * covered_size
 
     raw = flw0.to_bytes()
     cursor = flw0.table_end
@@ -641,6 +818,7 @@ def _parse_code_payload(
     content: list[tuple[int, str]],
     section: Section,
     command_profile: flw0_profiles.CommandProfile | None = None,
+    string_symbols: dict[str, int] | None = None,
 ) -> bytes:
     words: list[int] = []
     for line_number, line in content:
@@ -682,7 +860,17 @@ def _parse_code_payload(
             if len(tokens) != 2:
                 raise Flw0Error(f"line {line_number}: {mnemonic} takes one value")
             operand_text = tokens[1]
-            if opcode == OPCODE_IDS["COMM"] and _symbolic_operand(operand_text):
+            if opcode == OPCODE_IDS["PUSHTYPE5"] and _symbolic_operand(operand_text):
+                if string_symbols is None or operand_text not in string_symbols:
+                    raise Flw0Error(
+                        f"line {line_number}: unknown string {operand_text!r}"
+                    )
+                operand = string_symbols[operand_text]
+                if operand >= 1 << 16:
+                    raise Flw0Error(
+                        f"line {line_number}: string offset does not fit in 16 bits"
+                    )
+            elif opcode == OPCODE_IDS["COMM"] and _symbolic_operand(operand_text):
                 if command_profile is None:
                     raise Flw0Error(
                         f"line {line_number}: named COMM operand requires a profile"
@@ -730,6 +918,7 @@ def parse_source(text: str) -> Flw0File:
     profile_name: str | None = None
     profile_line = 0
     section_records: list[tuple[Section, list[tuple[int, str]]]] = []
+    section_extents: dict[int, int] = {}
     preserves: list[tuple[int, bytes, int]] = []
     index = 1
     while index < len(meaningful):
@@ -756,7 +945,10 @@ def parse_source(text: str) -> Flw0File:
                 raise Flw0Error(f"line {line_number}: incomplete section")
             section_index = _unsigned(tokens[1], line_number)
             values = _key_values(tokens[2:], line_number)
-            if values.keys() != {"type", "stride", "count", "offset"}:
+            required_section_fields = {"type", "stride", "count", "offset"}
+            if not required_section_fields <= values.keys() or values.keys() - (
+                required_section_fields | {"extent"}
+            ):
                 raise Flw0Error(f"line {line_number}: invalid section fields")
             section = Section(
                 section_index,
@@ -765,6 +957,18 @@ def parse_source(text: str) -> Flw0File:
                 _unsigned(values["count"], line_number),
                 _unsigned(values["offset"], line_number),
             )
+            if "extent" in values:
+                if section.type_id != 4 or section.element_size != 1:
+                    raise Flw0Error(
+                        f"line {line_number}: extent is only valid for a byte-wide "
+                        "type-4 section"
+                    )
+                extent = _unsigned(values["extent"], line_number)
+                if extent < section.logical_size:
+                    raise Flw0Error(
+                        f"line {line_number}: extent is smaller than the logical section"
+                    )
+                section_extents[section.index] = extent
             content: list[tuple[int, str]] = []
             index += 1
             while index < len(meaningful) and meaningful[index][1] != "end":
@@ -852,11 +1056,37 @@ def parse_source(text: str) -> Flw0File:
             written[relative] = 1
 
     sections = tuple(section for section, _ in section_records)
+    string_payloads: dict[int, bytes] = {}
+    string_symbols: dict[str, int] = {}
+    type4_sections = [
+        section
+        for section, _ in section_records
+        if section.type_id == 4 and section.element_size == 1
+    ]
+    for section, content in section_records:
+        if section.type_id != 4 or section.element_size != 1:
+            continue
+        expected_extent = section_extents.get(section.index, section.logical_size)
+        payload, symbols = _parse_string_payload(content, maximum_size=expected_extent)
+        if len(payload) != expected_extent:
+            raise Flw0Error(
+                f"section {section.index}: string payload has {len(payload)} bytes, "
+                f"expected {expected_extent}"
+            )
+        string_payloads[section.index] = payload
+        string_symbols.update(symbols)
+    if string_symbols and len(type4_sections) != 1:
+        raise Flw0Error("named strings require exactly one type-4 section")
+
     for section, content in section_records:
         if section.type_id in (0, 1):
             payload = _parse_named_payload(content, section)
         elif section.type_id == 2 and section.element_size == 4:
-            payload = _parse_code_payload(content, section, command_profile)
+            payload = _parse_code_payload(
+                content, section, command_profile, string_symbols
+            )
+        elif section.index in string_payloads:
+            payload = string_payloads[section.index]
         else:
             payload = _parse_raw_payload(content, section)
         place(section.offset, payload, f"section {section.index}")

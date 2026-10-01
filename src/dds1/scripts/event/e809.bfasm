@@ -105,20 +105,20 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   0060: POPIX 0x000c
   0061: PUSHIX 0x000c
   0062: COMM 0x006a
-  0063: PUSHTYPE5 0x0000
+  0063: PUSHTYPE5 light03
   0064: COMM 0x0094
   0065: PUSHREG
   0066: PUSHIS 0x0028
   0067: PUSHIX 0x000c
   0068: COMM 0x00c4
-  0069: PUSHTYPE5 0x0010
+  0069: PUSHTYPE5 light03_MOTION
   006a: COMM 0x0094
   006b: PUSHREG
-  006c: PUSHTYPE5 0x0008
+  006c: PUSHTYPE5 light03_2
   006d: COMM 0x0094
   006e: PUSHREG
   006f: COMM 0x00c6
-  0070: PUSHTYPE5 0x001f
+  0070: PUSHTYPE5 light03_3
   0071: COMM 0x0094
   0072: PUSHREG
   0073: COMM 0x00e8
@@ -145,20 +145,20 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   0088: IF 0x0002  # "_3"
   0089: END
   008a: GOTO 0x0002  # "_3"
-  008b: PUSHTYPE5 0x0027
+  008b: PUSHTYPE5 light04
   008c: COMM 0x0094
   008d: PUSHREG
   008e: PUSHIS 0x001e
   008f: PUSHIX 0x000c
   0090: COMM 0x00c4
-  0091: PUSHTYPE5 0x0037
+  0091: PUSHTYPE5 light04_MOTION
   0092: COMM 0x0094
   0093: PUSHREG
-  0094: PUSHTYPE5 0x002f
+  0094: PUSHTYPE5 light04_2
   0095: COMM 0x0094
   0096: PUSHREG
   0097: COMM 0x00c6
-  0098: PUSHTYPE5 0x0046
+  0098: PUSHTYPE5 light04_3
   0099: COMM 0x0094
   009a: PUSHREG
   009b: COMM 0x00e8
@@ -229,20 +229,20 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   00de: COMM 0x0168
   00df: PUSHIS 0x0064
   00e0: COMM WAIT_FOR_TIMER_LIMIT
-  00e1: PUSHTYPE5 0x004e
+  00e1: PUSHTYPE5 light03_4
   00e2: COMM 0x0094
   00e3: PUSHREG
   00e4: PUSHIS 0x0082
   00e5: PUSHIX 0x000c
   00e6: COMM 0x00c4
-  00e7: PUSHTYPE5 0x005e
+  00e7: PUSHTYPE5 light03_MOTION_2
   00e8: COMM 0x0094
   00e9: PUSHREG
-  00ea: PUSHTYPE5 0x0056
+  00ea: PUSHTYPE5 light03_5
   00eb: COMM 0x0094
   00ec: PUSHREG
   00ed: COMM 0x00c6
-  00ee: PUSHTYPE5 0x006d
+  00ee: PUSHTYPE5 light03_6
   00ef: COMM 0x0094
   00f0: PUSHREG
   00f1: COMM 0x00e8
@@ -403,10 +403,17 @@ section 3 type=3 stride=0x1 count=1254 offset=0x7f8
   bytes 6e0752178002
 end
 
-section 4 type=4 stride=0x1 count=64 offset=0xcde
-  bytes 6c696768743033006c696768743033006c6967687430335f4d4f54494f4e006c
-  bytes 696768743033006c696768743034006c696768743034006c6967687430345f4d
+section 4 type=4 stride=0x1 count=64 offset=0xcde extent=0x75
+  string light03 "light03"
+  string light03_2 "light03"
+  string light03_MOTION "light03_MOTION"
+  string light03_3 "light03"
+  string light04 "light04"
+  string light04_2 "light04"
+  string light04_MOTION "light04_MOTION"
+  string light04_3 "light04"
+  string light03_4 "light03"
+  string light03_5 "light03"
+  string light03_MOTION_2 "light03_MOTION"
+  string light03_6 "light03"
 end
-
-preserve offset=0xd1e bytes=4f54494f4e006c696768743034006c696768743033006c696768743033006c69
-preserve offset=0xd3e bytes=67687430335f4d4f54494f4e006c69676874303300
