@@ -67,7 +67,7 @@ typedef struct EvtViewer {
 
 /* Min/max tracker fed from a live value. */
 typedef struct EvtRange {
-    u8 unk00[0x10];   /* 0x0 */
+    u8 pad00[0x10];    /* 0x0 */
     s32 min;          /* 0x10 */
     s32 max;          /* 0x14 */
     s32 value;        /* 0x18 */

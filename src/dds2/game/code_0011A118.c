@@ -31,7 +31,7 @@ typedef struct Entry1A4 {
 } Entry1A4;
 
 typedef struct TableEntry32 {
-    u16 unk0; /* 0x0 */
+    u16 value; /* 0x0: copied to active roster entry */
     u16 unk2; /* 0x2 */
 } TableEntry32;
 
@@ -403,7 +403,7 @@ INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C6A8);
 INCLUDE_ASM(const s32, "game/code_0011A118", func_0011C868);
 
 void evtCopyRosterTableValue(s32 entryAddress) {
-    ((Entry1A4 *)entryAddress)->tableValue = D_00386248[((Entry1A4 *)entryAddress)->rosterIndex].unk0;
+    ((Entry1A4 *)entryAddress)->tableValue = D_00386248[((Entry1A4 *)entryAddress)->rosterIndex].value;
 }
 
 void evtUpdateFlaggedEntries(void) {

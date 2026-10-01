@@ -113,7 +113,7 @@ typedef struct FieldSequenceRecord {
     u8 unk_68[8];
     char detail[16];
     char note[16];
-    u32 unk_90;
+    u32 options; /* 0x90: record options; submission copies the padded 0xA0 packet */
 } FieldSequenceRecord;
 
 typedef struct FieldStageCoordinate {
@@ -1357,7 +1357,7 @@ void fldInitializeSequenceAndResetFlags(FieldSequenceRecord *record, s32 stage, 
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
     D_00435F24 = 0;
     D_00387D60[0] = 0;
 }
@@ -1383,7 +1383,7 @@ void fldInitializeAlternateSequence(FieldSequenceRecord *record, s32 stage, s32 
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
@@ -1408,7 +1408,7 @@ void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record, s32 stage, s3
     record->link = link;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 
@@ -1434,7 +1434,7 @@ void fldInitializeSequenceWithNote(FieldSequenceRecord *record, s32 stage, s32 k
     record->link = 0;
     memset(record->detail, 0, sizeof(record->detail));
     strcpy(record->note, subname);
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kind, const char *name,
@@ -1452,7 +1452,7 @@ void fldInitializeLinkedSequence(FieldSequenceRecord *record, s32 stage, s32 kin
     record->unk_62 = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
-    record->unk_90 = 0;
+    record->options = 0;
 }
 
 u32 fldGetSceneStatusCode(void) {

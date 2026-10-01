@@ -396,10 +396,10 @@ typedef struct BattleGroupNode {
     u16 type;
     u8 flag;
     u8 unk_0D[3];
-    s32 unk_10;
+    s32 modelContext;
     s32 resourceList;
     s32 unk_18;
-    s32 ownedResource;
+    s32 requestHandle;
     BattleGroupSlot slots[8];
     s32 unk_A0;
     s32 unk_A4;
@@ -2513,7 +2513,7 @@ void btlRemoveGroupId(s32 group, s32 id) {
     } while (node != 0);
 }
 
-void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 initialValue, s32 ownedResource) {
+void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 arg4, s32 requestHandle) {
     BattleGroupNode *node;
     BattleGroupNode *head;
     s32 i;
@@ -2528,10 +2528,10 @@ void btlCreateGroupNode(s32 group, s32 type, s32 flag, s32 resourceList, s32 ini
     node->group = group;
     node->type = type;
     node->resourceList = resourceList;
-    node->unk_18 = initialValue;
-    node->ownedResource = ownedResource;
+    node->unk_18 = arg4;
+    node->requestHandle = requestHandle;
     node->prev = NULL;
-    node->unk_10 = 0;
+    node->modelContext = 0;
     for (i = 0; i != 8; i++) {
         node->slots[i].unk_0 = 0;
         node->slots[i].unk_8 = 0;
@@ -2565,14 +2565,14 @@ void btlDestroyGroupNode(BattleGroupNode *node) {
     }
     flag = node->flag;
     node->flag = 0;
-    if (node->unk_10 != 0) {
+    if (node->modelContext != 0) {
         do {
-            mdlDestroyContext(node->unk_10);
-        } while (node->unk_10 != 0);
+            mdlDestroyContext(node->modelContext);
+        } while (node->modelContext != 0);
     }
     if (flag != 0) {
         sdfResourceListRelease((void *)node->resourceList, 1);
-        sdfQueueNonzeroResourceId((void *)node->ownedResource);
+        sdfQueueNonzeroResourceId((void *)node->requestHandle);
         for (i = 0; i != 8; i++) {
             if (node->slots[i].resourceHandle != 0) {
                 func_003297C8(node->slots[i].resourceHandle);

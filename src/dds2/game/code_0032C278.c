@@ -1497,9 +1497,9 @@ typedef struct SdfDevSlot {
     u8 pad14[6];
     s16 unk1A;
     u32 unk1C;
-    u8 pad20[0x40];
-    u128 unk60;
-    u128 unk70;
+    u128 unitMatrix[4]; /* 0x20: four quadword rows */
+    u128 zeroVector;    /* 0x60 */
+    u128 unitScale;     /* 0x70: ones in XYZ */
 } SdfDevSlot;
 
 /* Allocate a dev slot and seed its unit matrix, unit scale and colour. */
@@ -1508,10 +1508,10 @@ SdfDevSlot *func_00330870(void) {
 
     slot = sdfAllocAndClearQuadwords(0x9C);
     slot->request = sdfDevCreateBufferedRequest(0, 4, 0x20);
-    EE_MMI_UNIT_MATRIX((u8 *)&slot->pad20[0]);
-    VU0_STORE_VF(vf0, (u8 *)&slot->unk60);
+    EE_MMI_UNIT_MATRIX((u8 *)&slot->unitMatrix[0]);
+    VU0_STORE_VF(vf0, (u8 *)&slot->zeroVector);
     VU0_SET_ONES_XYZ(vf10);
-    VU0_STORE_VF(vf10, (u8 *)&slot->unk70);
+    VU0_STORE_VF(vf10, (u8 *)&slot->unitScale);
     slot->unk1A = -1;
     slot->unk1C = 0x80808080;
     return slot;

@@ -91,7 +91,7 @@ typedef struct SdfDrawNode {
 
 /* The indexed resource words are stored at offset 0x0C of the asset table. */
 typedef struct SdfAssetTable {
-    u8 pad_0x00[0x0C];
+    u8 pad00[0x0C];
     s32 *entries;
 } SdfAssetTable;
 

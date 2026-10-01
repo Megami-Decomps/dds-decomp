@@ -1115,9 +1115,9 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4298);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B45D8);
 
 typedef struct SkillInfo {
-    u8 unk0[0x20];
+    u8 pad00[0x20];
     u32 count;
-    u16 id[14];
+    u16 codes[14];
 } SkillInfo;
 
 extern void func_00315388(u16, SkillInfo *);
@@ -1131,7 +1131,7 @@ u32 *mnuBuildOwnedSkillBits(void) {
     for (i = 0; i < 0xb0; i++) {
         func_00315388(i, &info);
         for (j = 0; j < info.count; j++) {
-            u16 id = info.id[j];
+            u16 id = info.codes[j];
             if (id != 0) {
                 bits[id >> 5] |= 1 << id;
             }
