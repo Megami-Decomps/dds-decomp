@@ -113,7 +113,7 @@ extern u8 D_00436FA0[];
 
 extern char *strcat(char *dst, const char *src);
 
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f32 scaleX, f32 scaleY);
 
 typedef struct MdlGroup {
     u8 unk0[0xC];
@@ -146,10 +146,10 @@ extern u64 func_002C8110();
 extern void filePollEntryCleanup();
 extern void mdlExecuteAndFreeJob(void *job);
 
-void mdlFinishLoadCmd(s32 arg0, MdlLoadCmd *cmd) {
-    cmd->handle = fileGetResourceHandle(arg0);
-    cmd->size = sdfRelocatePackedResourcePayload(func_002C8110(arg0));
-    filePollEntryCleanup(arg0);
+void mdlFinishLoadCmd(s32 entryId, MdlLoadCmd *cmd) {
+    cmd->handle = fileGetResourceHandle(entryId);
+    cmd->size = sdfRelocatePackedResourcePayload(func_002C8110(entryId));
+    filePollEntryCleanup(entryId);
     if (cmd->deferred == 0) {
         mdlExecuteAndFreeJob(cmd);
     }
@@ -163,10 +163,10 @@ typedef struct MdlLoadJob {
     u32 handle;    /* 0x1C */
 } MdlLoadJob;
 
-void mdlFinishLoadJob(s32 arg0, MdlLoadJob *job) {
-    job->handle = fileGetResourceHandle(arg0);
-    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_002C8110(arg0));
-    filePollEntryCleanup(arg0);
+void mdlFinishLoadJob(s32 entryId, MdlLoadJob *job) {
+    job->handle = fileGetResourceHandle(entryId);
+    job->sizeWord = sdfRelocatePackedResourceWordsFromHeader(func_002C8110(entryId));
+    filePollEntryCleanup(entryId);
     mdlExecuteAndFreeJob(job);
 }
 
@@ -317,7 +317,7 @@ extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
 /* Select (or create) the node for `id`, make it the current node of its slot
  * and apply its resource entries. */
-void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 arg2, s32 arg3, f32 arg4, f32 arg5) {
+void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 mode, s32 flag, f32 scaleX, f32 scaleY) {
     MdlNode *node;
     s16 slot;
 
@@ -334,27 +334,27 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 id, s32 arg2, s32 arg3, f3
     if (slot == 0) {
         ctx->first = node;
     }
-    func_00334280(node, arg2, arg3, arg4, arg5);
+    func_00334280(node, mode, flag, scaleX, scaleY);
     ctx->current.h.id = id;
-    ctx->current.h.arg = arg2;
+    ctx->current.h.arg = mode;
     mdlRemoveResourceSubtype(ctx, slot);
-    mdlApplyResourceEntries(ctx, arg2, slot);
+    mdlApplyResourceEntries(ctx, mode, slot);
 }
 
-void mdlAddEntryFlagged(MdlCtx *ctx, s32 arg1, s32 arg2) {
-    mdlFindOrCreateMotionRecordNode(ctx, arg1, arg2, 1, 0.0f, 0.0f);
+void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 mode) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 1, 0.0f, 0.0f);
 }
 
-void mdlAddEntryPlain(MdlCtx *ctx, s32 arg1, s32 arg2) {
-    mdlFindOrCreateMotionRecordNode(ctx, arg1, arg2, 0, 0.0f, 0.0f);
+void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 mode) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 0, 0.0f, 0.0f);
 }
 
-void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
-    mdlFindOrCreateMotionRecordNode(ctx, arg1, arg2, 1, arg4, arg5);
+void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 mode, f32 scaleX, f32 scaleY) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 1, scaleX, scaleY);
 }
 
-void mdlAddEntryPlainEx(MdlCtx *ctx, s32 arg1, s32 arg2, f32 arg4, f32 arg5) {
-    mdlFindOrCreateMotionRecordNode(ctx, arg1, arg2, 0, arg4, arg5);
+void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 mode, f32 scaleX, f32 scaleY) {
+    mdlFindOrCreateMotionRecordNode(ctx, searchId, mode, 0, scaleX, scaleY);
 }
 
 MdlNode *mdlFindNodeById(MdlCtx *ctx, s32 id) {
