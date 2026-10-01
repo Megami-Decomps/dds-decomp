@@ -6305,17 +6305,6 @@ void btlFlagTasksForUpdate(void) {
     }
 }
 
-typedef struct TaskCondition {
-    u8 kind;
-    u8 pad01[7];
-    union {
-        s32 count;
-        s64 handle;
-        s64 owner;
-        u16 taskKind;
-    } value;
-} TaskCondition;
-
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A40);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3A50);
@@ -8169,7 +8158,33 @@ INCLUDE_ASM(const s32, "game/code_001A1960", btlApplyUnitEffectScale);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001DB048);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlNormalizeActionCameraKeyScales);
+void btlNormalizeActionCameraKeyScales(s32 action) {
+    f32 *key = (f32 *)action;
+    u32 flags = *(u32 *)(action + 0xF0);
+    u32 i;
+    if (flags & 2) {
+        for (i = 0; i < 4; i++, key += 12) {
+            f32 *pos = key + 12;
+            VU0_LOAD_VF(vf10, key + 16);
+            VU0_NEGATE_XYZ(vf10);
+            VU0_LOAD_VF(vf11, pos);
+            VU0_SCALAR_OP(key[20] - 1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, pos);
+            key[20] = 1.0f;
+        }
+    } else if (flags & 4) {
+        f32 *src = key + 12;
+        f32 *dst = key + 24;
+        for (i = 1; i < 4; i++, dst += 12) {
+            f32 delta = dst[8] - src[8];
+            dst[0] -= dst[4] * delta;
+            dst[1] -= dst[5] * delta;
+            dst[2] -= dst[6] * delta;
+            dst[8] = src[8];
+        }
+    }
+}
 
 void btlInterpolateVectorStep(f32 *src) {
     f32 vec[4];
@@ -8261,7 +8276,15 @@ s32 btlStepPoseBlendFrame(u8 *actor) {
     return 0.9999990f <= value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlStepPoseBlendRatio);
+s32 btlStepPoseBlendRatio(u8 *actor) {
+    f32 ratio = (f32)*(s32 *)(actor + 0x110) / (f32)*(s32 *)(actor + 0x12C);
+    if (ratio <= 1.0f) {
+        func_001DB370(actor, actor + 0x30, actor + 0xC0, ratio);
+        return 0;
+    }
+    btlCopyMotionTransform(actor, actor + 0xC0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001DB698);
 
@@ -8480,7 +8503,14 @@ void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 v
     *(f32 *)(object + 0x24) = scale * 0.017453293f;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlSetEffectCameraKeys);
+void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f32 vz0, f32 vw0,
+                            f32 x1, f32 y1, f32 z1, f32 vx1, f32 vy1, f32 vz1, f32 vw1,
+                            f32 scale, f32 f154) {
+    btlInitMotionTransformFromComponents((u8 *)fx + 0x30, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
+    btlInitMotionTransformFromComponents((u8 *)fx + 0xC0, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
+    *(f32 *)(fx + 0x130) = f154;
+    *(u32 *)(fx + 0xF0) |= 0x41;
+}
 
 u32 btlGetActiveUnitId(void) {
     s32 temp_v0;
@@ -8590,7 +8620,25 @@ void btlRefreshWorldCameraHandle(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlGetWorldObjectDefault);
+extern s32 D_003BB668;
+extern s32 D_003BB664;
+
+s32 btlGetWorldObjectDefault(void) {
+    WorldMotionData *data;
+    s32 *value;
+    if (!(((BattleController *)btlGetRuntime())->flags & 2)) {
+        return D_003BB668;
+    }
+    data = dds3GetWorldCameraObject(dds3GetWorldObject());
+    if (data == 0) {
+        return D_003BB668;
+    }
+    value = (s32 *)((u8 *)data + 8);
+    if (*value == 0) {
+        return D_003BB664;
+    }
+    return *value;
+}
 
 s32 btlIsWorldMotionIdle(void) {
     s32 context = btlGetRuntime();
@@ -9608,7 +9656,19 @@ void btlInitTintTransitionDefault(u16 soundId) {
     D_0035F5C0.resource = 0x80;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", btlStepTintTransition);
+void btlStepTintTransition(void) {
+    SoundCommand *cmd = &D_0035F5C0;
+    u32 value;
+    u32 start;
+    if (cmd->currentId != 0) {
+        cmd->currentId += 0xFFFF;
+        start = cmd->resource;
+        value = (f32)(s32)(cmd->handle - start) * ((f32)cmd->currentId / (f32)cmd->nextId);
+        fldSetSkyDrawState(value + D_0035F5C0.resource);
+    } else {
+        fldSetSkyDrawState(cmd->resource);
+    }
+}
 
 typedef struct SoundTransition {
     u32 currentResource;
@@ -10763,7 +10823,13 @@ typedef struct SoundHandleNode {
 
 extern u32 func_002940D0(s32);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", sndCreateSystemEffectHandle);
+SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
+    SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
+    SoundBankEntry *entry = &D_0035F748[index];
+    node->actor = actor;
+    node->handle = func_002940D0(entry->resource);
+    return node;
+}
 
 void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];

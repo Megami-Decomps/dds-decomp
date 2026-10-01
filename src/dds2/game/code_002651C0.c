@@ -204,4 +204,15 @@ void mnuAwardCampProgressCurrency(void) {
     mdlFlagClear(0xa01);
 }
 
-INCLUDE_ASM(const s32, "game/code_002651C0", func_00265A60);
+/* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
+s32 func_00265A60(s32 object) {
+    u32 flag = D_003CE460[*(s32 *)(object + 8)];
+    if (flag == 0) {
+        return 0;
+    }
+    if (mdlFlagTest(flag) == 0) {
+        mdlFlagSet(flag);
+        return 1;
+    }
+    return 0;
+}

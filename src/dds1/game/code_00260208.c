@@ -525,13 +525,6 @@ u32 brsTaskTryDestroy(void) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_002629A8);
 
-/* func_00262A30 @ 0x00262A30, 88 bytes.
- * Near-miss 12/13 words: retail materialises several base+offset pointers
- * (`base+0x14`, `base+0x20`, `off+0xEF0`, `off+0x1230`) and writes through
- * them; ee-gcc folds everything to `base+off` plus constant displacements.
- * Writes: base+off+{0xF10=a3, 0xF0C=a2(u16), 0x1250=a4, 0x124C=a2(u16),
- * 0xF14=a5, 0x1254=a6} with off = index*104.
- */
 INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
 
 s32 brsTaskIsFadeIdle(void) {
