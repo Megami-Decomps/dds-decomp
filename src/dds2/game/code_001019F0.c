@@ -46,7 +46,45 @@ u32 func_001027B8(void) {
     work = (AdminWork *)func_00102790();
     return work->value;
 }
-INCLUDE_ASM(const s32, "game/code_001019F0", func_001027D8);
+
+extern void *func_00328D68(s32 size);
+
+/* Replace the admin task's attached data block (copied, max 0x100 bytes) and set its mode byte and flags. */
+void func_001027D8(s32 value, void *data, u32 size, s32 flag) {
+    AdminWork *work;
+    void *old;
+    u32 flags;
+
+    if (data == NULL || size <= 0x100) {
+        work = func_00102790();
+        old = work->unk1C;
+        work->unk09 = value;
+        flags = work->flags;
+        flags |= 1;
+        flags &= ~8;
+        flags &= ~0x10000;
+        work->flags = flags;
+        work->unk21 = 2;
+        if (old != NULL) {
+            sdfReleaseChipBlock(old);
+            work->unk1C = NULL;
+            work->unk20 = 0;
+        }
+        if (data != NULL) {
+            work->unk1C = func_00328D68(size);
+            memcpy(work->unk1C, data, size);
+            work->unk20 = size;
+        } else {
+            work->unk1C = NULL;
+            work->unk20 = 0;
+        }
+        if (flag != 0) {
+            work->flags |= 4;
+        } else {
+            work->flags &= ~4;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001019F0", D_00411198);
 
