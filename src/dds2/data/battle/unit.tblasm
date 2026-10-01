@@ -1,0 +1,777 @@
+battle-table 1 kind=unit profile=dds2
+
+party 0 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 1 flags=0x7 unit=1 hp=35 max_hp=34 mp=9 max_mp=9 level=1 stats=4,3,4,4,3
+party 2 flags=0x7 unit=2 hp=35 max_hp=34 mp=9 max_mp=9 level=1 stats=4,4,3,4,3
+party 3 flags=0x7 unit=3 hp=35 max_hp=34 mp=9 max_mp=9 level=1 stats=5,5,2,3,3
+party 4 flags=0x7 unit=4 hp=35 max_hp=34 mp=9 max_mp=9 level=1 stats=3,3,5,3,4
+party 5 flags=0x7 unit=5 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=5,4,3,3,3
+party 6 flags=0x7 unit=6 hp=24 max_hp=24 mp=9 max_mp=9 level=12 stats=9,10,12,13,7
+party 7 flags=0x7 unit=7 hp=24 max_hp=24 mp=9 max_mp=9 level=12 stats=11,11,11,8,10
+party 8 flags=0x7 unit=8 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=4,4,3,4,3
+party 9 flags=0x7 unit=9 hp=35 max_hp=34 mp=9 max_mp=9 level=45 stats=37,35,24,26,28
+party 10 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 11 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 12 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 13 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 14 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+party 15 flags=0x7 hp=24 max_hp=24 mp=9 max_mp=9 level=1 stats=2,1,2,2,2
+
+party-affinity 0 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 1 values=100,100,0x80000082,50,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 2 values=100,100,0x80000082,50,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 3 values=100,100,50,0x80000082,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 4 values=100,100,100,100,100,0x80000082,50,100,100,100,100,100,100,100,100,100
+party-affinity 5 values=100,100,100,100,0x80000082,50,100,100,100,100,100,100,100,100,100,100
+party-affinity 6 values=100,100,100,100,50,100,100,100,100,100,0x80000082,100,100,0x80000082,0x80000082,100
+party-affinity 7 values=100,100,100,100,50,100,0x80000082,100,100,100,100,100,100,100,100,100
+party-affinity 8 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 9 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 10 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 11 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 12 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 13 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 14 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+party-affinity 15 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+
+alternate-affinity 0 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+alternate-affinity 1 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 2 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 3 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 4 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 5 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 6 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 7 values=120,0x80000000,120,120,120,120,120,120,0x10000,120,120,120,120,120,120,100
+alternate-affinity 8 values=110,0x80000000,110,110,110,110,110,110,0x10000,110,110,110,110,110,110,100
+alternate-affinity 9 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 10 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 11 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 12 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 13 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 14 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+alternate-affinity 15 values=120,120,120,120,120,120,120,120,120,120,120,120,120,120,120,100
+
+enemy 0 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000000000000000 attack_repeats=1
+enemy-affinity 0 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 1 race=1 level=52 hp=360 max_hp=360 mp=432 max_mp=432 stats=29,38,56,38,39 summon_category=1 skills=39,521,352,193,84 macca=4600 experience=702 atma_points=1300 atma_bonus=68136 unknown_34_3d=00001000000000000000 drop_items=126,103 drop_rates=3,10 attack_repeats=1
+enemy-affinity 1 values=100,100,100,100,0x80000000,100,0x40000,100,0x10000,100,100,100,0x10000,0x10000,100,100
+enemy 2 race=1 level=60 hp=1000 max_hp=1000 mp=1000 max_mp=1000 stats=30,30,70,50,50 summon_category=2 skills=8,17,26,35,44,48,52 macca=20000 experience=2000 atma_points=1700 atma_bonus=68936 unknown_34_3d=00001000050000000000 drop_items=138,0 drop_rates=5,0 attack_repeats=1
+enemy-affinity 2 values=100,100,0x203e8,0x203e8,0x203e8,0x203e8,0x203e8,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 3 race=1 level=51 hp=348 max_hp=348 mp=404 max_mp=404 stats=37,36,50,33,41 summon_category=1 skills=86,87,189,165,181,182,184,183 macca=3500 experience=648 atma_points=1150 atma_bonus=67836 unknown_34_3d=00001000050000000000 drop_items=11,104 drop_rates=4,3 attack_repeats=1
+enemy-affinity 3 values=100,100,100,0x20000,50,100,100,100,0x10000,0x80000000,0x10000,100,100,100,100,100
+enemy 4 race=1 level=30 hp=212 max_hp=212 mp=248 max_mp=248 stats=20,23,32,23,25 summon_category=1 skills=60,61,86,87,164 macca=700 experience=200 atma_points=272 atma_bonus=66080 unknown_34_3d=00001000050000000000 drop_items=101,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 4 values=100,100,100,0x40000,100,0x80000000,100,100,0x20000,100,0x10000,100,0x10000,100,100,100
+enemy 5 race=1 level=29 hp=306 max_hp=306 mp=256 max_mp=256 stats=18,22,35,26,19 summon_category=2 skills=3,12,30,21,39 macca=660 experience=189 atma_points=268 atma_bonus=66072 unknown_34_3d=00001000050000000000 drop_items=11,119 drop_rates=10,7 attack_repeats=1
+enemy-affinity 5 values=100,0x80000000,0x20000,0x20000,0x20000,0x20000,0x20000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 6 race=1 level=26 hp=204 max_hp=204 mp=176 max_mp=176 stats=26,25,18,19,21 summon_category=1 skills=123,126,128,570 macca=600 experience=162 atma_points=320 atma_bonus=66176 unknown_34_3d=00001000050000000000 drop_items=109,0 drop_rates=8,0 attack_repeats=1
+enemy-affinity 6 values=50,50,100,100,100,100,0x10000,100,0x10000,0x10000,100,0x80000000,100,0x80000000,0x10000,100
+enemy 7 race=1 level=24 hp=168 max_hp=168 mp=212 max_mp=212 stats=19,18,29,16,20 summon_category=1 skills=2,184,161,357 macca=560 experience=148 atma_points=310 atma_bonus=66156 unknown_34_3d=00001000050000000000 drop_items=39,115 drop_rates=10,5 attack_repeats=1
+enemy-affinity 7 values=100,100,0x40000,0x80000000,100,100,50,100,50,0x80000000,0x10000,100,100,100,100,100
+enemy 8 race=1 level=23 hp=164 max_hp=164 mp=200 max_mp=200 stats=17,18,27,17,20 summon_category=1 skills=23,86,193,161 macca=540 experience=142 atma_points=305 atma_bonus=66146 unknown_34_3d=00001000050000000000 drop_items=99,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 8 values=100,100,100,100,0x10000,100,50,100,50,100,0x10000,100,0x80000000,0x80000000,100,100
+enemy 9 race=2 level=57 hp=428 max_hp=428 mp=408 max_mp=408 stats=55,50,45,32,36 summon_category=1 skills=21,24,26,131,570,571 macca=5800 experience=756 atma_points=1450 atma_bonus=68436 unknown_34_3d=00001000050000000000 drop_items=3,105 drop_rates=5,4 attack_repeats=1
+enemy-affinity 9 values=100,100,100,100,0x40000,100,100,100,0x10000,100,100,0x80000000,0x80000000,100,0x80000000,100
+enemy 10 race=2 level=60 hp=1000 max_hp=1000 mp=1000 max_mp=1000 stats=70,50,30,50,30 summon_category=2 skills=145,141,137,132 macca=20000 experience=2000 atma_points=1700 atma_bonus=68936 unknown_34_3d=00001000050000000000 drop_items=139,0 drop_rates=5,0 attack_repeats=1
+enemy-affinity 10 values=0x20064,0x20064,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,50
+enemy 11 race=2 level=51 hp=344 max_hp=344 mp=420 max_mp=420 stats=37,35,54,35,36 summon_category=1 skills=57,68,70,66,63 macca=2800 experience=534 atma_points=600 atma_bonus=66736 unknown_34_3d=00001000050000000000 drop_items=7,122 drop_rates=10,5 attack_repeats=1
+enemy-affinity 11 values=100,100,0x80000000,100,0x10000,100,100,100,50,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 12 race=2 level=56 hp=420 max_hp=420 mp=420 max_mp=420 stats=46,49,49,34,36 summon_category=1 skills=85,181,84,137 macca=6200 experience=792 atma_points=1550 atma_bonus=68636 unknown_34_3d=00001000050000000000 drop_items=123,95 drop_rates=3,4 attack_repeats=1
+enemy-affinity 12 values=0x40000,0x40000,100,0x80000000,100,100,100,100,100,0x10000,100,100,100,0x10000,100,50
+enemy 13 race=2 level=59 hp=396 max_hp=396 mp=488 max_mp=488 stats=41,40,63,42,39 summon_category=1 skills=6,24,42,33,15,68,64,47 macca=6200 experience=792 atma_points=1550 atma_bonus=68636 unknown_34_3d=00001000050000000000 drop_items=36,105 drop_rates=4,4 attack_repeats=1
+enemy-affinity 13 values=0x10000,0x10000,50,50,50,50,50,100,0x10000,0x10000,0x80000000,0x80000000,0x80000000,0x80000000,0x80000000,50
+enemy 14 race=2 level=57 hp=412 max_hp=412 mp=408 max_mp=408 stats=51,46,45,35,41 summon_category=1 skills=3,6,8,186,132 macca=5800 experience=756 atma_points=1450 atma_bonus=68436 unknown_34_3d=00001000050000000000 drop_items=7,89 drop_rates=5,4 attack_repeats=1
+enemy-affinity 14 values=100,100,0x40000,0x80000000,100,100,100,100,100,0x10000,100,100,100,0x10000,0x10000,100
+enemy 15 race=2 level=41 hp=296 max_hp=296 mp=268 max_mp=268 stats=34,33,26,40,29 summon_category=1 skills=125,41,39,571 macca=2300 experience=389 atma_points=360 atma_bonus=66256 unknown_34_3d=00001000050000000000 drop_items=102,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 15 values=100,100,100,100,100,100,0x10000,100,100,100,50,0x80000000,0x80000000,50,0x80000000,100
+enemy 16 race=2 level=50 hp=360 max_hp=360 mp=380 max_mp=380 stats=35,40,45,33,40 summon_category=1 skills=23,61,63,132,15 macca=2900 experience=570 atma_points=620 atma_bonus=66776 unknown_34_3d=00001000050000000000 drop_items=17,119 drop_rates=10,7 attack_repeats=1
+enemy-affinity 16 values=50,50,50,0x10000,100,0x40000,100,100,0x10000,50,100,100,100,100,100,100
+enemy 17 race=2 level=63 hp=672 max_hp=672 mp=524 max_mp=524 stats=47,49,68,37,38 summon_category=2 skills=192,193,52,141,0,139,53,48 macca=10000 experience=900 atma_points=1850 atma_bonus=69236 unknown_34_3d=00001000050000000000 drop_items=114,90 drop_rates=4,6 attack_repeats=1
+enemy-affinity 17 values=0x1012c,0x1012c,0x10000,0x80000000,0x10000,0x10000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,50
+enemy 18 race=2 level=19 hp=148 max_hp=148 mp=152 max_mp=152 stats=17,18,19,15,16 summon_category=1 skills=121,96,354,570 macca=425 experience=116 atma_points=285 atma_bonus=66106 unknown_34_3d=00001000050000000000 drop_items=6,118 drop_rates=5,10 attack_repeats=1
+enemy-affinity 18 values=100,100,100,100,100,100,0x80000000,100,100,100,100,100,100,50,0x10000,100
+enemy 19 race=2 level=17 hp=148 max_hp=148 mp=124 max_mp=124 stats=19,20,14,11,14 summon_category=1 skills=120,182,181,119 macca=380 experience=105 atma_points=275 atma_bonus=66086 unknown_34_3d=00001000050000000000 drop_items=98,0 drop_rates=15,0 attack_repeats=2 result_parameter=18
+enemy-affinity 19 values=100,100,100,100,100,100,0x10000,100,100,100,0x80000000,0x80000000,0x80000000,0x80000000,0x80000000,100
+enemy 20 race=2 level=27 hp=188 max_hp=188 mp=232 max_mp=232 stats=19,20,31,22,21 summon_category=1 skills=78,71,83,58 macca=620 experience=170 atma_points=325 atma_bonus=66186 unknown_34_3d=00001000050000000000 drop_items=47,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 20 values=100,100,100,100,0x80000000,100,100,100,0x80000000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 21 race=3 level=37 hp=260 max_hp=260 mp=296 max_mp=296 stats=24,28,37,30,29 summon_category=1 skills=3,61,63,193 macca=1700 experience=303 atma_points=318 atma_bonus=66172 unknown_34_3d=00001000050000000000 drop_items=11,116 drop_rates=5,5 attack_repeats=1
+enemy-affinity 21 values=100,100,0x40000,0x80000000,100,100,50,100,0x20000,0x80000000,100,100,100,100,100,100
+enemy 22 race=3 level=46 hp=320 max_hp=320 mp=344 max_mp=344 stats=27,34,40,33,45 summon_category=1 skills=39,63,165,3 macca=2300 experience=389 atma_points=480 atma_bonus=66496 unknown_34_3d=00001000050000000000 drop_items=47,103 drop_rates=7,5 attack_repeats=1
+enemy-affinity 22 values=100,100,0x40000,100,100,100,0x40000,100,0x10000,0x80000000,0x80000000,100,100,100,100,100
+enemy 23 race=3 level=41 hp=456 max_hp=456 mp=300 max_mp=300 stats=28,35,34,35,30 summon_category=2 skills=126,15,17,59 macca=2300 experience=389 atma_points=360 atma_bonus=66256 unknown_34_3d=00001000050000000000 drop_items=3,0 drop_rates=18,0 attack_repeats=1
+enemy-affinity 23 values=100,0x80000000,100,0x20000,100,100,0x10000,100,100,100,100,100,100,100,100,100
+enemy 24 race=3 level=35 hp=228 max_hp=228 mp=272 max_mp=272 stats=22,22,33,37,27 summon_category=1 skills=34,46,162,184,362,61 macca=1400 experience=266 atma_points=300 atma_bonus=66136 unknown_34_3d=00001000050000000000 drop_items=17,61 drop_rates=5,10 attack_repeats=1
+enemy-affinity 24 values=100,0x80000000,100,100,100,0x10000,0x10000,100,0x20000,0x80000000,100,100,100,100,100,100
+enemy 25 race=3 level=47 hp=316 max_hp=316 mp=324 max_mp=324 stats=37,32,34,47,33 summon_category=1 skills=131,182,183,35,571,30 macca=2500 experience=438 atma_points=540 atma_bonus=66616 unknown_34_3d=00001000050000000000 drop_items=15,125 drop_rates=6,4 attack_repeats=3 result_parameter=6
+enemy-affinity 25 values=100,0x80000000,100,100,0x80000000,0x20000,0x10000,100,100,0x20000,100,0x10000,100,100,100,100
+enemy 26 race=3 level=56 hp=576 max_hp=576 mp=392 max_mp=392 stats=39,40,42,50,43 summon_category=2 skills=63,178,365,126,46 macca=6000 experience=774 atma_points=1500 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=117,91 drop_rates=4,6 attack_repeats=1
+enemy-affinity 26 values=100,0x80000000,100,100,100,100,0x10000,100,0x20000,0x80000000,100,100,100,100,100,100
+enemy 27 race=3 level=16 hp=128 max_hp=128 mp=120 max_mp=120 stats=17,16,14,12,15 summon_category=1 skills=60,134,343 macca=360 experience=100 atma_points=270 atma_bonus=66076 unknown_34_3d=00001000050000000000 drop_items=48,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 27 values=100,100,100,100,100,0x80000000,50,100,0x10000,0x80000000,100,100,100,100,100,100
+enemy 28 race=3 level=23 hp=176 max_hp=176 mp=172 max_mp=172 stats=15,21,20,25,18 summon_category=1 skills=29,34,114,352 macca=540 experience=142 atma_points=305 atma_bonus=66146 unknown_34_3d=00001000050000000000 drop_items=44,45 drop_rates=10,5 attack_repeats=1
+enemy-affinity 28 values=100,0x80000000,100,100,0x80000000,0x10000,0x10000,100,100,100,100,0x10000,100,100,100,100
+enemy 29 race=3 level=18 hp=148 max_hp=148 mp=132 max_mp=132 stats=15,19,15,16,16 summon_category=1 skills=60,62,116,130 macca=400 experience=110 atma_points=280 atma_bonus=66096 unknown_34_3d=00001000050000000000 drop_items=27,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 29 values=100,50,100,100,100,100,50,100,0x10000,0x80000000,100,100,100,100,100,100
+enemy 30 race=3 level=12 hp=96 max_hp=96 mp=96 max_mp=96 stats=10,12,12,15,11 summon_category=1 skills=118,20,28,29 macca=200 experience=35 atma_points=230 atma_bonus=65996 unknown_34_3d=00001000050000000000 drop_items=44,124 drop_rates=10,7 attack_repeats=1
+enemy-affinity 30 values=100,0x80000000,100,100,0x80000000,0x10000,0x10000,100,100,100,100,100,100,100,100,100
+enemy 31 race=3 level=17 hp=120 max_hp=120 mp=148 max_mp=148 stats=12,13,20,17,16 summon_category=1 skills=20,23,60,61,163 macca=380 experience=105 atma_points=275 atma_bonus=66086 unknown_34_3d=00001000050000000000 drop_items=17,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 31 values=100,100,0x80000000,100,0x10000,100,50,100,0x20000,0x80000000,100,100,100,100,100,100
+enemy 32 race=6 level=11 hp=100 max_hp=100 mp=84 max_mp=84 stats=13,14,10,11,9 summon_category=1 skills=112,2,7 macca=200 experience=35 atma_points=230 atma_bonus=65996 unknown_34_3d=00001000050000000000 drop_items=38,112 drop_rates=10,7 attack_repeats=1
+enemy-affinity 32 values=100,100,0x10000,0x80000000,100,100,100,100,100,100,100,100,100,100,0x10000,100
+enemy 33 race=3 level=6 hp=64 max_hp=64 mp=64 max_mp=64 stats=8,10,10,5,6 summon_category=1 skills=184,49,341 macca=100 experience=12 atma_points=60 atma_bonus=65656 unknown_34_3d=00001000050000000000 drop_items=16,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 33 values=100,100,100,100,100,100,0x80000000,100,100,100,100,100,100,100,100,100
+enemy 34 race=4 level=60 hp=666 max_hp=666 mp=436 max_mp=436 stats=40,51,49,47,41 summon_category=2 skills=70,72,68,140,66 macca=10000 experience=846 atma_points=1700 atma_bonus=68936 unknown_34_3d=00001000050000000000 drop_items=17,103 drop_rates=5,10 attack_repeats=1
+enemy-affinity 34 values=50,50,100,100,0x20000,100,0x10000,100,0x80000000,0x10000,100,100,0x10000,100,100,100
+enemy 35 race=4 level=29 hp=204 max_hp=204 mp=240 max_mp=240 stats=21,22,31,26,20 summon_category=1 skills=16,71,356 macca=660 experience=189 atma_points=268 atma_bonus=66072 unknown_34_3d=00001000050000000000 drop_items=25,113 drop_rates=10,7 attack_repeats=1
+enemy-affinity 35 values=100,100,100,100,100,100,0x80000000,100,100,0x20000,100,0x80000000,100,100,100,100
+enemy 36 flags=0x4000 race=4 level=27 hp=228 max_hp=228 mp=188 max_mp=188 stats=29,30,20,16,18 summon_category=2 skills=121,85,187,569 macca=620 experience=170 atma_points=325 atma_bonus=66186 unknown_34_3d=00001000050000000000 drop_items=100,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 36 values=20,20,0x10000,100,100,100,0x80000000,100,100,100,100,100,100,50,100,100
+enemy 37 flags=0x4000 race=4 level=52 hp=600 max_hp=600 mp=368 max_mp=368 stats=43,48,40,33,36 summon_category=2 skills=82,126,59,181,184 macca=3000 experience=608 atma_points=640 atma_bonus=66816 unknown_34_3d=00001000050000000000 drop_items=103,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 37 values=0x10000,0x10000,100,0x40000,100,100,100,100,0x80000000,0x10000,100,100,100,0x80000000,100,100
+enemy 38 race=4 level=26 hp=204 max_hp=204 mp=192 max_mp=192 stats=30,25,22,18,14 summon_category=1 skills=121,23,20 macca=600 experience=162 atma_points=256 atma_bonus=66048 unknown_34_3d=00001000050000000000 drop_items=2,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 38 values=100,100,0x80000000,100,0x20000,100,0x80000000,100,100,100,100,100,100,100,100,100
+enemy 39 race=4 level=15 hp=204 max_hp=204 mp=124 max_mp=124 stats=14,19,16,11,11 summon_category=2 skills=118,126,71,177 macca=340 experience=95 atma_points=265 atma_bonus=66066 unknown_34_3d=00001000050000000000 drop_items=29,98 drop_rates=10,10 attack_repeats=3 result_parameter=8
+enemy-affinity 39 values=100,0x80000000,100,100,100,100,100,100,100,0x20000,50,50,50,50,50,100
+enemy 40 race=4 level=8 hp=64 max_hp=64 mp=84 max_mp=84 stats=10,8,13,7,8 summon_category=1 skills=10,37,83,337 macca=140 experience=22 atma_points=105 atma_bonus=65746 unknown_34_3d=00001000050000000000 drop_items=40,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 40 values=50,50,0x80000000,0x40000,100,0x80000000,50,100,100,0x100000,100,100,100,0x10000,100,100
+enemy 41 race=4 level=9 hp=76 max_hp=76 mp=96 max_mp=96 stats=7,10,15,9,9 summon_category=1 skills=19,22,71 macca=150 experience=26 atma_points=120 atma_bonus=65776 unknown_34_3d=00001000050000000000 drop_items=25,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 41 values=100,100,100,100,0x40000,100,0x80000000,100,100,50,100,100,100,100,100,100
+enemy 42 race=4 level=8 hp=144 max_hp=144 mp=68 max_mp=68 stats=11,16,9,4,6 summon_category=2 skills=112,119 macca=140 experience=22 atma_points=105 atma_bonus=65746 unknown_34_3d=00001000050000000000 drop_items=16,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 42 values=80,80,100,50,100,50,0x80000000,100,100,100,100,100,100,100,100,100
+enemy 43 race=5 level=48 hp=312 max_hp=312 mp=396 max_mp=396 stats=31,30,51,37,37 summon_category=1 skills=76,17,12,365,77,21 macca=2500 experience=438 atma_points=540 atma_bonus=66616 unknown_34_3d=00001000050000000000 drop_items=102,0 drop_rates=5,0 attack_repeats=1
+enemy-affinity 43 values=100,100,0x80000000,0x10000,0x20000,100,100,100,100,0x10000,50,50,50,50,50,100
+enemy 44 race=5 level=54 hp=356 max_hp=356 mp=452 max_mp=452 stats=34,35,59,35,44 summon_category=1 skills=21,24,88,46,47 macca=5500 experience=738 atma_points=1400 atma_bonus=68336 unknown_34_3d=00001000050000000000 drop_items=93,104 drop_rates=4,6 attack_repeats=1
+enemy-affinity 44 values=100,100,50,50,0x20000,50,100,100,0x80000000,0x10000,0x10000,100,100,100,100,100
+enemy 45 race=5 level=48 hp=352 max_hp=352 mp=296 max_mp=296 stats=43,40,26,39,38 summon_category=1 skills=187,131,128,570,571,569 macca=2600 experience=468 atma_points=560 atma_bonus=66656 unknown_34_3d=00001000050000000000 drop_items=3,113 drop_rates=10,5 attack_repeats=1
+enemy-affinity 45 values=50,50,100,100,100,100,100,100,100,0x20000,100,0x80000000,100,100,0x80000000,100
+enemy 46 race=5 level=27 hp=200 max_hp=200 mp=216 max_mp=216 stats=22,23,27,22,19 summon_category=1 skills=51,85,184 macca=650 experience=170 atma_points=260 atma_bonus=66056 unknown_34_3d=00001000050000000000 drop_items=28,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 46 values=50,50,100,100,0x80000000,100,0x80000000,100,0x80000000,0x20000,100,100,100,100,100,100
+enemy 47 race=5 level=49 hp=348 max_hp=348 mp=396 max_mp=396 stats=35,38,50,30,37 summon_category=1 skills=184,33,35,47 macca=2700 experience=500 atma_points=580 atma_bonus=66696 unknown_34_3d=00001000050000000000 drop_items=11,110 drop_rates=10,10 attack_repeats=1
+enemy-affinity 47 values=100,100,100,100,0x80000000,0x40000,100,100,0x20000,0x20000,100,100,0x10000,0x10000,100,100
+enemy 48 race=5 level=40 hp=268 max_hp=268 mp=320 max_mp=320 stats=33,27,40,29,29 summon_category=1 skills=66,98,53,190 macca=2200 experience=366 atma_points=348 atma_bonus=66232 unknown_34_3d=00001000050000000000 drop_items=49,119 drop_rates=10,5 attack_repeats=1
+enemy-affinity 48 values=100,100,100,100,100,100,50,100,0x80000000,0x20000,100,50,100,100,100,100
+enemy 49 race=5 level=27 hp=200 max_hp=200 mp=212 max_mp=212 stats=27,23,26,22,15 summon_category=1 skills=2,7,193 macca=620 experience=170 atma_points=260 atma_bonus=66056 unknown_34_3d=00001000050000000000 drop_items=38,39 drop_rates=15,5 attack_repeats=1
+enemy-affinity 49 values=100,100,0x40000,0x80000000,100,100,100,100,100,100,100,100,0x80000000,100,100,100
+enemy 50 race=5 level=28 hp=212 max_hp=212 mp=204 max_mp=204 stats=28,25,23,20,20 summon_category=1 skills=134,129,178,192 macca=640 experience=178 atma_points=330 atma_bonus=66196 unknown_34_3d=00001000050000000000 drop_items=15,118 drop_rates=10,7 attack_repeats=1
+enemy-affinity 50 values=50,50,100,100,100,100,0x80000000,100,100,100,100,0x80000000,100,0x80000000,100,100
+enemy 51 race=5 level=28 hp=196 max_hp=196 mp=232 max_mp=232 stats=23,21,30,21,21 summon_category=1 skills=67,66,70,361 macca=640 experience=178 atma_points=330 atma_bonus=66196 unknown_34_3d=00001000050000000000 drop_items=30,100 drop_rates=10,5 attack_repeats=1
+enemy-affinity 51 values=100,100,100,100,100,100,50,100,0x80000000,0x20000,0x10000,0x10000,0x80000000,0x10000,100,100
+enemy 52 race=5 level=21 hp=156 max_hp=156 mp=160 max_mp=160 stats=19,18,19,19,17 summon_category=1 skills=130,65,66 macca=475 experience=130 atma_points=295 atma_bonus=66126 unknown_34_3d=00001000050000000000 drop_items=49,121 drop_rates=10,7 attack_repeats=1
+enemy-affinity 52 values=100,100,100,100,100,0x80000000,100,100,0x80000000,0x20000,100,100,0x10000,100,100,100
+enemy 53 race=5 level=20 hp=164 max_hp=164 mp=136 max_mp=136 stats=21,21,14,16,16 summon_category=1 skills=120,29,189,192,569 macca=450 experience=123 atma_points=290 atma_bonus=66116 unknown_34_3d=00001000050000000000 drop_items=45,99 drop_rates=10,5 attack_repeats=1
+enemy-affinity 53 values=50,50,100,100,100,0x10000,100,100,0x10000,100,50,50,100,0x80000000,0x80000000,100
+enemy 54 race=5 level=19 hp=140 max_hp=140 mp=144 max_mp=144 stats=17,16,17,18,17 summon_category=1 skills=134,65,358 macca=425 experience=116 atma_points=285 atma_bonus=66106 unknown_34_3d=00001000050000000000 drop_items=2,124 drop_rates=10,3 attack_repeats=1
+enemy-affinity 54 values=100,100,50,100,0x80000000,100,100,100,0x80000000,0x10000,100,100,100,100,100,100
+enemy 55 race=5 level=18 hp=128 max_hp=128 mp=160 max_mp=160 stats=14,14,22,14,17 summon_category=1 skills=2,29,74,161,357 macca=400 experience=110 atma_points=280 atma_bonus=66096 unknown_34_3d=00001000050000000000 drop_items=9,115 drop_rates=10,5 attack_repeats=1
+enemy-affinity 55 values=100,100,0x40000,0x80000000,100,100,100,100,100,100,100,100,0x10000,100,100,100
+enemy 56 race=5 level=13 hp=104 max_hp=104 mp=108 max_mp=108 stats=12,13,14,14,11 summon_category=1 skills=120,2,29 macca=300 experience=80 atma_points=250 atma_bonus=66036 unknown_34_3d=00001000050000000000 drop_items=16,97 drop_rates=10,5 attack_repeats=1
+enemy-affinity 56 values=50,50,0x10000,100,100,100,100,100,100,100,0x80000000,0x80000000,0x80000000,0x80000000,0x80000000,100
+enemy 57 race=5 level=13 hp=120 max_hp=120 mp=96 max_mp=96 stats=12,17,11,13,11 summon_category=1 skills=119,11,16 macca=300 experience=80 atma_points=250 atma_bonus=66036 unknown_34_3d=00001000050000000000 drop_items=9,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 57 values=100,100,0x80000000,0x10000,100,100,100,100,100,100,0x80000000,100,100,100,0x80000000,100
+enemy 58 race=5 level=11 hp=92 max_hp=92 mp=104 max_mp=104 stats=11,12,15,9,10 summon_category=1 skills=60,122,176 macca=200 experience=35 atma_points=138 atma_bonus=65812 unknown_34_3d=00001000050000000000 drop_items=97,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 58 values=100,100,0x80000000,100,100,100,0x10000,100,0x20000,0x10000,100,100,100,100,100,100
+enemy 59 race=5 level=7 hp=76 max_hp=76 mp=7 max_mp=64 stats=9,12,9,6,7 summon_category=1 skills=112,75,50,85 macca=120 experience=18 atma_points=90 atma_bonus=65716 unknown_34_3d=00001000050000000000 drop_items=28,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 59 values=100,100,100,0x80000000,100,100,0x80000000,100,100,100,100,100,100,0x10000,100,100
+enemy 60 race=5 level=3 hp=32 max_hp=32 mp=48 max_mp=48 stats=5,5,9,5,5 summon_category=1 skills=37,338 macca=50 experience=9 atma_points=21 atma_bonus=65578 unknown_34_3d=00001000050000000000 drop_items=9,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 60 values=100,100,100,0x80000000,100,100,50,100,100,100,100,100,100,100,100,100
+enemy 61 race=6 level=58 hp=392 max_hp=392 mp=448 max_mp=448 stats=38,40,54,44,45 summon_category=1 skills=63,26,193,138,64,17 macca=6000 experience=774 atma_points=1500 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=120,92 drop_rates=5,4 attack_repeats=1
+enemy-affinity 61 values=100,100,100,0x40000,0x40000,100,100,100,0x20000,0x80000000,0x80000000,0x10000,0x10000,0x80000000,0x10000,100
+enemy 62 race=6 level=39 hp=280 max_hp=280 mp=264 max_mp=264 stats=33,31,27,31,33 summon_category=1 skills=122,7,3 macca=2000 experience=344 atma_points=339 atma_bonus=66214 unknown_34_3d=00001000050000000000 drop_items=122,102 drop_rates=5,7 attack_repeats=1
+enemy-affinity 62 values=100,100,0x40000,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100
+enemy 63 race=6 level=39 hp=212 max_hp=212 mp=272 max_mp=272 stats=32,33,29,34,27 summon_category=1 skills=8,17,81 macca=2000 experience=344 atma_points=339 atma_bonus=66214 unknown_34_3d=00001000050000000000 drop_items=21,125 drop_rates=7,5 attack_repeats=1
+enemy-affinity 63 values=100,100,0x10000,0x10000,100,100,0x80000000,100,100,100,100,0x10000,100,100,100,100
+enemy 64 race=6 level=28 hp=220 max_hp=220 mp=200 max_mp=200 stats=26,27,22,19,22 summon_category=1 skills=123,122,46 macca=640 experience=178 atma_points=264 atma_bonus=66064 unknown_34_3d=00001000050000000000 drop_items=54,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 64 values=100,100,100,100,100,100,100,100,100,0x10000,0x80000000,0x80000000,0x80000000,0x80000000,0x80000000,100
+enemy 65 race=6 level=29 hp=224 max_hp=224 mp=240 max_mp=240 stats=18,27,31,21,23 summon_category=1 skills=176,178,177,179,365 macca=660 experience=189 atma_points=268 atma_bonus=66072 unknown_34_3d=00001000050000000000 drop_items=17,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 65 values=100,100,100,100,100,100,0x80000000,100,0x10000,0x80000000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 66 race=6 level=28 hp=200 max_hp=200 mp=204 max_mp=204 stats=23,22,23,27,21 summon_category=1 skills=25,78,359 macca=640 experience=178 atma_points=264 atma_bonus=66064 unknown_34_3d=00001000050000000000 drop_items=43,110 drop_rates=10,5 attack_repeats=1
+enemy-affinity 66 values=100,100,100,100,0x40000,0x80000000,0x10000,100,100,100,100,100,100,100,100,100
+enemy 67 race=7 level=20 hp=160 max_hp=160 mp=144 max_mp=144 stats=22,20,16,15,15 summon_category=1 skills=128,98,65 macca=450 experience=123 atma_points=290 atma_bonus=66116 unknown_34_3d=00001000050000000000 drop_items=99,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 67 values=100,100,100,50,100,100,0x80000000,100,0x80000000,0x20000,100,100,100,100,100,100
+enemy 68 race=6 level=25 hp=180 max_hp=180 mp=192 max_mp=192 stats=23,20,23,21,19 summon_category=1 skills=121,127,34,32 macca=580 experience=155 atma_points=315 atma_bonus=66166 unknown_34_3d=00001000050000000000 drop_items=17,112 drop_rates=10,5 attack_repeats=1
+enemy-affinity 68 values=100,100,100,100,100,0x20000,0x80000000,100,100,100,0x80000000,0x80000000,100,100,0x10000,100
+enemy 69 race=6 level=24 hp=172 max_hp=172 mp=176 max_mp=176 stats=22,19,20,22,19 summon_category=1 skills=122,2,7,569 macca=560 experience=148 atma_points=310 atma_bonus=66156 unknown_34_3d=00001000050000000000 drop_items=2,125 drop_rates=5,5 attack_repeats=1
+enemy-affinity 69 values=50,100,0x40000,0x80100000,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 70 race=6 level=13 hp=96 max_hp=96 mp=120 max_mp=120 stats=12,11,17,13,11 summon_category=1 skills=40,38,73,50,176,59 macca=300 experience=80 atma_points=250 atma_bonus=66036 unknown_34_3d=00001000050000000000 drop_items=23,98 drop_rates=10,5 attack_repeats=1
+enemy-affinity 70 values=100,100,50,50,50,50,50,100,100,0x80000000,100,100,100,0x80000000,100,100
+enemy 71 race=6 level=11 hp=100 max_hp=100 mp=96 max_mp=96 stats=12,14,13,8,10 summon_category=1 skills=122,65,356 macca=200 experience=35 atma_points=230 atma_bonus=65996 unknown_34_3d=00001000050000000000 drop_items=1,109 drop_rates=10,7 attack_repeats=1
+enemy-affinity 71 values=100,100,0x80000000,100,100,100,100,100,100,0x10000,0x80000000,100,100,100,50,100
+enemy 72 race=6 level=12 hp=88 max_hp=88 mp=108 max_mp=108 stats=10,10,15,14,11 summon_category=1 skills=124,29,86 macca=250 experience=70 atma_points=240 atma_bonus=66016 unknown_34_3d=00001000050000000000 drop_items=42,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 72 values=100,100,100,100,0x80000000,0x40000,100,100,100,100,0x10000,100,100,100,100,100
+enemy 73 race=6 level=10 hp=100 max_hp=100 mp=72 max_mp=72 stats=11,15,8,9,10 summon_category=1 skills=114,115 macca=170 experience=30 atma_points=132 atma_bonus=65800 unknown_34_3d=00001000050000000000 drop_items=21,0 drop_rates=15,0 attack_repeats=2 result_parameter=7
+enemy-affinity 73 values=100,100,100,100,100,100,0x80000000,100,100,100,100,0x10000,100,100,100,100
+enemy 74 race=6 level=8 hp=64 max_hp=64 mp=76 max_mp=76 stats=7,8,11,9,11 summon_category=1 skills=19,22,160,58 macca=140 experience=22 atma_points=105 atma_bonus=65746 unknown_34_3d=00001000050000000000 drop_items=1,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 74 values=100,100,100,100,0x10000,0x80000000,100,100,100,100,100,100,100,100,0x10000,100
+enemy 75 race=6 level=4 hp=52 max_hp=52 mp=44 max_mp=44 stats=5,9,7,6,5 summon_category=1 skills=113,75 macca=55 experience=10 atma_points=21 atma_bonus=65578 unknown_34_3d=00001000050000000000 drop_items=27,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 75 values=100,100,100,50,100,0x80000000,0x10000,100,100,100,100,100,100,100,50,100
+enemy 76 race=6 level=3 hp=32 max_hp=32 mp=40 max_mp=40 stats=5,5,7,7,5 summon_category=1 skills=28 macca=50 experience=9 atma_points=21 atma_bonus=65578 unknown_34_3d=00001000050000000000 drop_items=1,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 76 values=100,0x80000000,100,0x80000000,100,50,50,100,100,100,100,100,100,100,100,100
+enemy 77 race=6 level=5 hp=44 max_hp=44 mp=68 max_mp=68 stats=4,6,12,8,6 summon_category=1 skills=83,160,58 macca=60 experience=11 atma_points=24 atma_bonus=65584 unknown_34_3d=00001000050000000000 drop_items=9,0 drop_rates=20,0 attack_repeats=2 result_parameter=5
+enemy-affinity 77 values=100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100,100,100
+enemy 78 race=7 level=50 hp=380 max_hp=380 mp=368 max_mp=368 stats=41,45,42,30,35 summon_category=1 skills=66,3,132,0,190 macca=4000 experience=666 atma_points=1200 atma_bonus=67936 unknown_34_3d=00001000050000000000 drop_items=56,94 drop_rates=4,2 attack_repeats=1
+enemy-affinity 78 values=0x20000,0x20000,0x40000,100,100,100,100,100,0x80000000,0x20000,0x80000000,0x10000,100,100,100,50
+enemy 79 race=7 level=46 hp=320 max_hp=320 mp=356 max_mp=356 stats=36,34,43,31,35 summon_category=1 skills=3,190,127,6 macca=2400 experience=413 atma_points=520 atma_bonus=66576 unknown_34_3d=00001000050000000000 drop_items=116,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 79 values=0x20000,0x20000,0x20000,100,0x80000000,100,0x10000,100,100,100,50,50,50,50,50,50
+enemy 80 race=7 level=6 hp=60 max_hp=60 mp=48 max_mp=48 stats=10,9,6,8,6 summon_category=1 skills=116,120 macca=100 experience=12 atma_points=60 atma_bonus=65656 unknown_34_3d=00001000050000000000 drop_items=27,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 80 values=100,100,0x80000000,100,100,0x80000000,100,100,100,0x10000,100,100,100,50,100,100
+enemy 81 race=7 level=38 hp=312 max_hp=312 mp=256 max_mp=256 stats=31,40,26,26,28 summon_category=1 skills=119,78,79,96 macca=1900 experience=323 atma_points=330 atma_bonus=66196 unknown_34_3d=00001000050000000000 drop_items=24,23 drop_rates=7,7 attack_repeats=1
+enemy-affinity 81 values=50,50,100,100,0x80000000,100,100,100,0x80000000,0x20000,100,100,100,100,100,100
+enemy 82 race=7 level=29 hp=228 max_hp=228 mp=208 max_mp=208 stats=29,28,23,24,16 summon_category=1 skills=131,54,176,177 macca=660 experience=189 atma_points=268 atma_bonus=66072 unknown_34_3d=00001000050000000000 drop_items=22,122 drop_rates=10,5 attack_repeats=1
+enemy-affinity 82 values=100,100,100,0x80000000,100,100,0x10000,100,0x80000000,0x10000,0x80000000,100,100,0x80000000,100,100
+enemy 83 race=7 level=31 hp=224 max_hp=224 mp=248 max_mp=248 stats=27,25,31,21,23 summon_category=1 skills=65,66,70 macca=740 experience=212 atma_points=276 atma_bonus=66088 unknown_34_3d=00001000050000000000 drop_items=49,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 83 values=100,100,0x80000000,100,100,100,100,100,0x20000,0x20000,100,100,100,100,100,100
+enemy 84 race=7 level=31 hp=220 max_hp=220 mp=150 max_mp=256 stats=20,24,33,27,23 summon_category=1 skills=73,84,50,53 macca=740 experience=212 atma_points=276 atma_bonus=66088 unknown_34_3d=00001000050000000000 drop_items=23,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 84 values=0x10000,100,100,0x100000,100,0x80000000,50,100,100,0x10000,0x10000,100,100,0x10000,100,50
+enemy 85 race=7 level=30 hp=240 max_hp=240 mp=200 max_mp=200 stats=32,30,20,23,18 summon_category=1 skills=117,135,192,361 macca=700 experience=200 atma_points=272 atma_bonus=66080 unknown_34_3d=00001000050000000000 drop_items=3,0 drop_rates=10,0 attack_repeats=2 result_parameter=5
+enemy-affinity 85 values=100,100,0x10000,100,100,100,100,100,0x80000000,0x10000,100,100,100,0x80000000,100,100
+enemy 86 race=7 level=36 hp=268 max_hp=268 mp=272 max_mp=272 stats=27,31,32,24,30 summon_category=1 skills=116,32,30,352 macca=1600 experience=284 atma_points=309 atma_bonus=66154 unknown_34_3d=00001000050000000000 drop_items=9,62 drop_rates=5,10 attack_repeats=1
+enemy-affinity 86 values=100,100,100,100,0x80000000,0x20000,100,100,0x10000,100,100,100,100,50,100,100
+enemy 87 race=7 level=25 hp=192 max_hp=192 mp=184 max_mp=184 stats=22,23,21,20,20 summon_category=1 skills=130,188,38,41 macca=580 experience=155 atma_points=315 atma_bonus=66166 unknown_34_3d=00001000050000000000 drop_items=9,121 drop_rates=7,5 attack_repeats=1
+enemy-affinity 87 values=100,100,100,100,0x80000000,0x80000000,50,100,100,100,100,100,50,100,0x80000000,100
+enemy 88 race=7 level=23 hp=212 max_hp=212 mp=148 max_mp=148 stats=27,30,14,12,16 summon_category=1 skills=126,119,43,189,570 macca=540 experience=142 atma_points=305 atma_bonus=66146 unknown_34_3d=00001000050000000000 drop_items=46,47 drop_rates=10,10 attack_repeats=1
+enemy-affinity 88 values=50,50,100,100,100,100,0x10000,100,100,100,0x80000000,100,100,0x80000000,100,100
+enemy 89 race=7 level=27 hp=188 max_hp=188 mp=196 max_mp=196 stats=30,20,22,23,18 summon_category=1 skills=124,29,32,84 macca=620 experience=170 atma_points=260 atma_bonus=66056 unknown_34_3d=00001000050000000000 drop_items=100,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 89 values=100,100,100,100,0x80000000,50,100,100,100,100,100,100,100,100,100,100
+enemy 90 flags=0x4000 race=7 level=16 hp=222 max_hp=222 mp=120 max_mp=120 stats=18,21,14,10,11 summon_category=2 skills=121,119,192,569 macca=360 experience=100 atma_points=270 atma_bonus=66076 unknown_34_3d=00001000050000000000 drop_items=2,0 drop_rates=20,0 attack_repeats=2 result_parameter=4
+enemy-affinity 90 values=100,100,100,100,100,100,0x80000000,100,100,0x10000,100,0x80000000,100,100,100,100
+enemy 91 race=7 level=42 hp=492 max_hp=492 mp=272 max_mp=272 stats=42,40,26,25,32 summon_category=2 skills=131,129,192,571 macca=2400 experience=413 atma_points=390 atma_bonus=66316 unknown_34_3d=00001000050000000000 drop_items=113,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 91 values=50,50,100,100,100,100,0x80000000,100,100,0x20000,0x80000000,0x80000000,0x80000000,0x80000000,0x80000000,100
+enemy 92 race=7 level=10 hp=80 max_hp=80 mp=100 max_mp=100 stats=9,10,15,10,9 summon_category=1 skills=28,29,78,69 macca=170 experience=30 atma_points=132 atma_bonus=65800 unknown_34_3d=00001000050000000000 drop_items=24,26 drop_rates=10,10 attack_repeats=1
+enemy-affinity 92 values=100,100,0x80000000,100,100,0x10000,100,100,0x80000000,0x20000,100,100,100,100,100,100
+enemy 93 race=7 level=6 hp=64 max_hp=64 mp=52 max_mp=52 stats=9,10,7,5,8 summon_category=1 skills=49 macca=100 experience=12 atma_points=60 atma_bonus=65656 unknown_34_3d=00001000050000000000 drop_items=22,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 93 values=100,100,100,0x80000000,100,100,100,100,100,100,100,50,100,100,100,100
+enemy 94 race=7 level=9 hp=80 max_hp=80 mp=80 max_mp=80 stats=11,11,11,8,9 summon_category=1 skills=19,182,181,54 macca=150 experience=26 atma_points=120 atma_bonus=65776 unknown_34_3d=00001000050000000000 drop_items=9,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 94 values=50,100,100,0x100000,100,0x80000000,100,100,0x80000000,0x10000,100,100,100,100,100,100
+enemy 95 race=7 level=32 hp=240 max_hp=240 mp=208 max_mp=208 stats=35,28,20,23,24 summon_category=2 skills=126,39,44 macca=780 experience=224 atma_points=280 atma_bonus=66096 unknown_34_3d=00001000050000000000 drop_items=101,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 95 values=100,100,100,100,100,0x80000000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 96 race=7 level=4 hp=52 max_hp=52 mp=44 max_mp=44 stats=7,9,7,4,5 summon_category=1 skills=10,13 macca=55 experience=10 atma_points=21 atma_bonus=65578 unknown_34_3d=00001000050000000000 drop_items=1,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 96 values=100,100,100,50,100,0x80000000,100,100,100,100,100,100,100,100,100,100
+enemy 97 flags=0x8440 race=18 level=15 hp=116 max_hp=116 mp=108 max_mp=108 stats=15,14,12,15,15 summon_category=1 macca=340 experience=95 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=38,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 97 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 98 flags=0x8440 race=18 level=15 hp=108 max_hp=108 mp=116 max_mp=116 stats=14,12,14,16,15 summon_category=1 macca=340 experience=95 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=40,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 98 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 99 flags=0x440 race=5 level=1 hp=30000 max_hp=30000 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=54 macca=20000 experience=1000 atma_points=1000 atma_bonus=67536 unknown_34_3d=00001000050000000000 drop_items=29,0 drop_rates=50,0 attack_repeats=1
+enemy-affinity 99 values=0x10000,0x10000,0x80000001,0x10000,0x10000,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
+enemy 100 race=9 level=1 hp=400 max_hp=400 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=181,182,184,183 macca=10000 experience=4000 atma_points=8000 atma_bonus=73536 unknown_34_3d=00001000000000000000 drop_items=36,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 100 values=0x10000,0x10000,20,0x100014,0x80000014,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 101 race=9 level=1 hp=300 max_hp=300 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=181,182,184,183 macca=4000 experience=1500 atma_points=3000 atma_bonus=69536 unknown_34_3d=00001000000000000000 drop_items=56,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 101 values=0x10000,0x10000,20,0x100014,0x10000,0x80000014,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 102 race=9 level=1 hp=200 max_hp=200 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=181,182,184,183 macca=2000 experience=400 atma_points=1500 atma_bonus=67536 unknown_34_3d=00001000000000000000 drop_items=3,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 102 values=0x10000,0x10000,0x80000014,0x10000,20,20,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 103 race=9 level=1 hp=150 max_hp=150 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=181,182,184,183 macca=1000 experience=100 atma_points=500 atma_bonus=66536 unknown_34_3d=00001000000000000000 drop_items=9,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 103 values=0x10000,0x10000,0x10000,0x80000014,20,20,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 104 race=7 level=37 hp=264 max_hp=264 mp=284 max_mp=284 stats=31,29,34,26,28 summon_category=1 skills=97,74,51 macca=1700 experience=303 atma_points=318 atma_bonus=66172 unknown_34_3d=00001000050000000000 drop_items=30,101 drop_rates=10,3 attack_repeats=1
+enemy-affinity 104 values=100,100,0x80000000,100,100,100,100,100,100,100,100,100,0x10000,100,100,100
+enemy 105 flags=0x440 race=5 level=1 hp=30000 max_hp=30000 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=54 macca=40000 experience=2000 atma_points=2000 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=30,0 drop_rates=50,0 attack_repeats=1
+enemy-affinity 105 values=0x10000,0x10000,0x80000001,0x10000,0x10000,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
+enemy 106 flags=0x2440 race=5 level=1 hp=30000 max_hp=30000 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=54 macca=600 experience=60 atma_points=100 atma_bonus=65636 unknown_34_3d=00001000050000000000 drop_items=28,0 drop_rates=50,0 attack_repeats=1
+enemy-affinity 106 values=0x10000,0x10000,0x80000001,0x10000,0x10000,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
+enemy 107 flags=0x2440 race=5 level=1 hp=30000 max_hp=30000 mp=999 max_mp=999 stats=1,1,1,1,1 summon_category=1 unknown_16_17=ff00 skills=54 macca=1000 experience=200 atma_points=300 atma_bonus=65836 unknown_34_3d=00001000050000000000 drop_items=15,0 drop_rates=50,0 attack_repeats=1
+enemy-affinity 107 values=0x10000,0x10000,0x80000001,0x10000,0x10000,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
+enemy 108 flags=0x400 race=26 level=70 hp=1200 max_hp=1200 mp=1000 max_mp=1000 stats=75,70,70,40,30 summon_category=2 skills=190,68,52,141,48,66 macca=10000 experience=2000 atma_points=4000 atma_bonus=73536 unknown_34_3d=00001000050000000000 drop_items=94,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 108 values=0x20000,0x20000,0x40000,0x100000,0x100000,100,100,100,50,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,1
+enemy 109 flags=0x8440 race=18 level=23 hp=168 max_hp=168 mp=160 max_mp=160 stats=19,19,17,22,22 summon_category=1 macca=540 experience=142 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=41,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 109 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 110 flags=0x8440 race=18 level=23 hp=160 max_hp=160 mp=168 max_mp=168 stats=17,17,19,25,21 summon_category=1 macca=540 experience=142 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=43,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 110 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 111 flags=0x8440 race=18 level=27 hp=208 max_hp=208 mp=192 max_mp=192 stats=26,25,21,24,17 summon_category=1 skills=105 macca=620 experience=170 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=48,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 111 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 112 flags=0x8440 race=18 level=27 hp=192 max_hp=192 mp=216 max_mp=216 stats=21,21,27,25,19 summon_category=1 skills=106 macca=620 experience=170 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=6,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 112 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 113 race=5 level=53 hp=372 max_hp=372 mp=364 max_mp=364 stats=35,40,38,45,46 summon_category=1 skills=131,132,30,33,189,571,570 macca=4300 experience=684 atma_points=1250 atma_bonus=68036 unknown_34_3d=00001000050000000000 drop_items=111,3 drop_rates=3,5 attack_repeats=1
+enemy-affinity 113 values=50,50,50,50,50,0x20000,100,100,0x20000,0x20000,100,0x80000000,100,100,0x80000000,100
+enemy 114 race=10 level=65 hp=714 max_hp=714 mp=472 max_mp=472 stats=61,54,53,42,36 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 114 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 115 race=10 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 115 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 116 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 116 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 117 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 117 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 118 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 118 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 119 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 119 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 120 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 120 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 121 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 121 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 122 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 122 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 123 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 123 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 124 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 124 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 125 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 125 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 126 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 126 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 127 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 127 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 128 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 128 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 129 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 129 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 130 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 130 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 131 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 131 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 132 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 132 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 133 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 133 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 134 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 134 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 135 race=1 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 135 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 136 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 136 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 137 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 137 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 138 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 138 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 139 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 139 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 140 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 140 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 141 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 141 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 142 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 142 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 143 race=2 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 143 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 144 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 144 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 145 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 145 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 146 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 146 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 147 race=3 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 147 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 148 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 148 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 149 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 149 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 150 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 150 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 151 race=4 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 151 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 152 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 152 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 153 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 153 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 154 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 154 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 155 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 155 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 156 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 156 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 157 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 157 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 158 race=6 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 158 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 159 race=6 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 159 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 160 race=6 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 160 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 161 race=6 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 161 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 162 race=7 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 162 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 163 race=7 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 163 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 164 race=7 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 164 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 165 race=7 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 165 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 166 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 166 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 167 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 167 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 168 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 168 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 169 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 169 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 170 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 170 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 171 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 171 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 172 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 172 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 173 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 173 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 174 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 174 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 175 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 175 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 176 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 176 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 177 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 177 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 178 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 skills=54 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 178 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 179 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 179 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 180 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 180 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 181 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 181 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 182 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 182 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 183 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 183 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 184 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 184 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 185 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 185 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 186 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 186 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 187 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 187 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 188 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 188 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 189 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 189 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 190 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 190 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 191 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 191 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 192 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 192 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 193 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 193 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 194 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 194 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 195 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 195 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 196 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 196 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 197 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 197 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 198 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 198 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 199 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 199 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 200 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 200 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 201 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 201 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 202 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 202 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 203 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 203 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 204 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 204 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 205 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 205 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 206 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 206 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 207 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 207 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 208 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 208 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 209 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 209 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 210 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 210 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 211 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 211 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 212 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 212 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 213 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 213 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 214 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 214 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 215 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 215 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 216 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 216 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 217 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 217 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 218 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 218 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 219 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 219 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 220 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 220 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 221 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 221 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 222 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 222 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 223 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 223 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 224 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 224 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 225 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 225 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 226 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 226 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 227 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 227 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 228 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 228 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 229 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 229 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 230 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 230 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 231 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 231 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 232 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 232 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 233 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 233 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 234 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 234 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 235 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 235 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 236 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 236 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 237 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 237 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 238 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 238 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 239 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 239 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 240 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 240 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 241 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 241 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 242 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 242 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 243 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 243 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 244 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 244 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 245 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 245 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 246 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 246 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 247 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 247 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 248 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 248 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 249 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 249 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 250 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 250 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 251 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 251 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 252 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 252 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 253 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 253 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 254 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 254 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 255 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 255 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 256 flags=0x40 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,28,28 summon_category=1 unknown_16_17=ff00 macca=65535 experience=65535 atma_points=65535 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 256 values=100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+enemy 257 flags=0x250 race=14 level=8 hp=600 max_hp=600 mp=600 max_mp=600 growth=1 unknown_0f=1 stats=15,12,15,5,6 summon_category=1 unknown_16_17=ff00 skills=370,119,49 experience=200 atma_points=600 atma_bonus=66736 unknown_34_3d=00001000050000000000 drop_items=2,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 257 values=100,100,100,0x100000,0x100000,0x80000000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 258 flags=0x250 race=14 level=13 hp=1000 max_hp=1000 mp=300 max_mp=300 stats=10,40,21,1,1 summon_category=2 unknown_16_17=ff00 skills=425,271,569 macca=2000 experience=1000 atma_points=1800 atma_bonus=69136 unknown_34_3d=00001000050000000000 drop_items=54,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 258 values=100,100,100,0x100000,0x100000,100,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 259 flags=0x244 race=14 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,28,28 summon_category=3 unknown_16_17=ff00 skills=371 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 259 values=100,100,100,0x100000,0x80100000,100,100,100,0x10000,0x10000,0x10000,0x10000,200,0x10000,0x10000,0x100000
+enemy 260 flags=0x250 race=15 level=17 hp=700 max_hp=700 mp=1824 max_mp=1824 stats=14,12,13,15,1 summon_category=1 unknown_16_17=ff00 macca=2000 experience=500 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 260 values=100,100,0x10000,0x100050,0x1000c8,80,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 261 flags=0x250 race=14 level=17 hp=850 max_hp=850 mp=1340 max_mp=1340 stats=13,10,15,16,1 summon_category=1 unknown_16_17=ff00 macca=2000 experience=500 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 261 values=100,100,0x80000000,0x10000,0x1000c8,0x10000,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 262 flags=0x4250 race=14 level=17 hp=1000 max_hp=1000 mp=704 max_mp=704 stats=30,8,8,14,1 summon_category=1 unknown_16_17=ff00 macca=2000 experience=500 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=110,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 262 values=0x10000,0x10000,100,0x100000,0x1000c8,0x80000000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 263 flags=0x250 race=10 level=25 hp=2000 max_hp=2000 mp=1120 max_mp=1120 stats=36,25,10,24,15 summon_category=1 unknown_16_17=ff00 skills=571 experience=4000 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=14,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 263 values=100,100,0x401f4,0x80100000,0x100064,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 264 flags=0x4270 race=14 level=30 hp=3500 max_hp=3500 mp=1200 max_mp=1200 stats=35,30,30,30,10 summon_category=3 unknown_16_17=ff00 skills=380,378,379,377 macca=20000 experience=3000 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=12,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 264 values=0x10000,0x10000,100,0x100000,0x1000c8,0x80000000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 265 flags=0x270 race=19 level=30 hp=1600 max_hp=1600 stats=23,20,20,21,24 summon_category=1 unknown_16_17=ff00 skills=383,386,387,394,395,404,405 macca=15000 experience=3000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 265 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 266 flags=0x270 race=19 level=30 hp=1600 max_hp=1600 stats=23,20,20,21,24 summon_category=1 unknown_16_17=ff00 skills=383,386,387,394,395,404,405 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 266 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 267 flags=0x250 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,28,28 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 267 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 268 flags=0x4000 race=4 level=65 hp=714 max_hp=714 mp=472 max_mp=472 stats=61,54,53,42,36 summon_category=2 skills=57,59,70,68,0,131 macca=10000 experience=936 atma_points=1950 atma_bonus=69436 unknown_34_3d=00001000050000000000 drop_items=13,106 drop_rates=5,2 attack_repeats=1
+enemy-affinity 268 values=100,100,100,100,100,100,0x10000,100,100,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,100
+enemy 269 flags=0x250 race=16 level=38 hp=2400 max_hp=2400 mp=2240 max_mp=2240 stats=38,37,32,10,6 summon_category=2 unknown_16_17=ff00 skills=530 macca=30000 experience=7000 atma_points=10000 atma_bonus=85536 unknown_34_3d=00001000050000000000 drop_items=114,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 269 values=100,100,0x80000000,0x100000,0x20000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 270 flags=0x250 race=14 level=35 hp=1800 max_hp=1800 mp=1000 max_mp=1000 stats=43,55,15,5,4 summon_category=1 unknown_16_17=ff00 skills=410 experience=40000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=2 result_parameter=13
+enemy-affinity 270 values=100,100,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 271 flags=0x250 race=14 level=35 hp=1800 max_hp=1800 mp=1000 max_mp=1000 stats=43,55,15,4,5 summon_category=1 unknown_16_17=ff00 skills=411 experience=40000 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=14,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 271 values=100,100,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 272 flags=0x270 race=14 level=40 hp=3080 max_hp=3080 mp=3520 max_mp=3520 stats=30,30,48,27,5 summon_category=2 unknown_16_17=ff00 skills=409,408,407 macca=50000 experience=12000 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=13,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 272 values=100,100,0x401f4,0x20000,0x80100000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 273 flags=0x270 race=14 level=38 hp=500 max_hp=500 mp=1000 max_mp=1000 stats=40,40,30,25,8 summon_category=1 unknown_16_17=ff00 skills=269,270 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 273 values=100,100,0x10000,0x100000,0x100000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 274 flags=0x270 race=14 level=38 hp=500 max_hp=500 mp=1000 max_mp=1000 stats=40,40,30,25,8 summon_category=1 unknown_16_17=ff00 skills=269,270 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 274 values=100,100,0x10000,0x100000,0x100000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 275 flags=0x2250 race=15 level=45 hp=3400 max_hp=3400 mp=3400 max_mp=3400 stats=31,40,40,22,20 summon_category=1 unknown_16_17=ff00 macca=800 experience=100 atma_points=80 atma_bonus=65696 unknown_34_3d=00001000050000000000 drop_items=120,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 275 values=100,100,0x20000,0x20000,0x20000,0x20000,0x20000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 276 flags=0x250 race=15 level=40 hp=1000 max_hp=1000 mp=1200 max_mp=1200 stats=34,30,35,23,16 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 276 values=100,100,50,0x80100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 277 flags=0x2250 race=14 level=50 hp=3200 max_hp=3200 mp=3800 max_mp=3800 stats=65,30,55,20,5 summon_category=2 unknown_16_17=ff00 skills=406,110,111 macca=1000 experience=150 atma_points=120 atma_bonus=65776 unknown_34_3d=00001000050000000000 drop_items=117,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 277 values=100,100,0x80000000,0x100000,0x100000,50,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 278 flags=0x2250 race=14 level=50 hp=3800 max_hp=3800 mp=3400 max_mp=3400 stats=50,45,60,30,8 summon_category=2 unknown_16_17=ff00 skills=420,421 macca=1200 experience=200 atma_points=150 atma_bonus=65836 unknown_34_3d=00001000050000000000 drop_items=111,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 278 values=100,0x80000000,100,0x100064,0x100000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 279 flags=0x2250 race=10 level=50 hp=3400 max_hp=3400 mp=1600 max_mp=1600 stats=51,35,50,22,5 summon_category=1 unknown_16_17=ff00 skills=385,384 macca=2000 experience=200 atma_points=300 atma_bonus=66136 unknown_34_3d=00001000050000000000 drop_items=13,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 279 values=100,100,0x401f4,0x80100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 280 flags=0x2250 race=10 level=70 hp=5000 max_hp=5000 mp=4000 max_mp=4000 stats=55,70,46,40,16 summon_category=1 unknown_16_17=ff00 skills=422,388,390 macca=3000 experience=200 atma_points=500 atma_bonus=66536 unknown_34_3d=00001000050000000000 drop_items=117,0 drop_rates=100,0 attack_repeats=8 result_parameter=2
+enemy-affinity 280 values=100,100,30,0x10001e,0x80100078,30,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 281 flags=0x4250 race=10 level=80 hp=4400 max_hp=4400 mp=4400 max_mp=4400 stats=80,52,52,26,18 summon_category=1 unknown_16_17=ff00 skills=393,392,368,369 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=4 result_parameter=16
+enemy-affinity 281 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 282 flags=0x2250 race=10 level=85 hp=11000 max_hp=11000 mp=40000 max_mp=40000 stats=90,30,90,40,10 summon_category=2 unknown_16_17=ff00 macca=4000 experience=300 atma_points=700 atma_bonus=66936 unknown_34_3d=00001000050000000000 drop_items=8,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 282 values=5,5,250,0x1000fa,0x1000fa,250,250,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 283 flags=0x12250 race=14 level=80 hp=9000 max_hp=9000 mp=5000 max_mp=5000 stats=90,80,80,60,2 summon_category=2 unknown_16_17=ff00 skills=412,260,153,154,259 macca=5000 experience=400 atma_points=1000 atma_bonus=67536 unknown_34_3d=00001000050000000000 drop_items=12,0 drop_rates=100,0 attack_repeats=8 result_parameter=10
+enemy-affinity 283 values=0x10000,0x10000,100,0x100000,0x40000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 284 flags=0x10250 race=14 level=80 hp=9000 max_hp=9000 mp=5000 max_mp=5000 stats=90,80,80,80,40 summon_category=4 unknown_16_17=ff00 skills=412,259,154 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=12,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 284 values=100,100,0x10000,0x10000,0x40000,0x10000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 285 flags=0x270 race=17 level=60 hp=3500 max_hp=3500 mp=5801 max_mp=5801 stats=45,50,40,50,25 summon_category=5 unknown_16_17=ff00 skills=155,414 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 285 values=100,100,0x4012c,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 286 flags=0x270 race=17 level=60 hp=3500 max_hp=3500 mp=5802 max_mp=5802 stats=45,50,40,50,25 summon_category=5 unknown_16_17=ff00 skills=156,373 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 286 values=100,100,100,0x100000,0x100000,0x4012c,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 287 flags=0x270 race=17 level=60 hp=3500 max_hp=3500 mp=5803 max_mp=5803 stats=45,50,40,50,25 summon_category=5 unknown_16_17=ff00 skills=157,374,413 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 287 values=100,100,100,0x100000,0x100064,100,0x4012c,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 288 flags=0x270 race=17 level=60 hp=3500 max_hp=3500 mp=5804 max_mp=5804 stats=45,50,40,50,25 summon_category=5 unknown_16_17=ff00 skills=158,375,376 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 288 values=100,100,100,0x100064,0x4012c,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 289 flags=0x270 race=17 level=60 hp=6000 max_hp=6000 mp=5805 max_mp=5805 stats=45,50,40,50,25 summon_category=5 unknown_16_17=ff00 skills=159,381,415 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 289 values=100,100,100,0x4012c,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 290 flags=0x2250 race=25 level=45 hp=5000 max_hp=5000 mp=32767 max_mp=32767 stats=45,45,45,45,30 summon_category=2 unknown_16_17=ff00 skills=426 macca=3000 experience=20 atma_points=500 atma_bonus=66536 unknown_34_3d=00001000050000000000 drop_items=178,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 290 values=100,100,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 291 flags=0x250 race=25 level=35 hp=3500 max_hp=3500 mp=3000 max_mp=3000 stats=40,40,40,40,30 summon_category=2 unknown_16_17=ff00 skills=109 macca=50000 experience=2000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 291 values=100,100,100,0x100000,0x100000,0x80100000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 292 flags=0x250 race=25 level=35 hp=3500 max_hp=3500 mp=5000 max_mp=5000 stats=40,40,40,40,30 summon_category=2 unknown_16_17=ff00 skills=107 macca=50000 experience=2000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 292 values=50,100,100,0x100000,0x80100000,0x40000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 293 flags=0x250 race=25 level=35 hp=3500 max_hp=3500 mp=3000 max_mp=3000 stats=40,40,40,40,30 summon_category=2 unknown_16_17=ff00 skills=108 macca=50000 experience=2000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 293 values=50,100,0x40000,0x80100000,0x100000,100,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 294 flags=0x2250 race=24 level=90 hp=22500 max_hp=22500 mp=32767 max_mp=32767 stats=99,99,99,99,50 summon_category=3 unknown_16_17=ff00 skills=261,301,300 macca=10000 experience=400 atma_points=1500 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=12,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 294 values=50,0x80000096,80,0x100050,0x100050,80,0x10000,80,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 295 flags=0x2270 race=20 level=99 hp=30000 max_hp=30000 mp=30000 max_mp=30000 stats=99,99,99,99,99 summon_category=5 unknown_16_17=ff00 macca=15000 experience=500 atma_points=2000 atma_bonus=69536 unknown_34_3d=00001000050000000000 drop_items=14,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 295 values=0x20000,0x20000,80,0x100050,0x100050,80,80,50,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 296 flags=0x2250 race=21 level=80 hp=10000 max_hp=10000 mp=32767 max_mp=32767 stats=99,60,77,85,50 summon_category=2 unknown_16_17=ff00 skills=266 macca=8000 experience=400 atma_points=1500 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=14,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 296 values=0x40000,100,200,0x1000c8,0x20000,0x20000,0x20000,100,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 297 flags=0x2250 race=22 level=80 hp=10000 max_hp=10000 mp=32767 max_mp=32767 stats=77,50,99,60,50 summon_category=2 unknown_16_17=ff00 skills=267,55,185,180,184,178,182,177 macca=8000 experience=400 atma_points=1500 atma_bonus=68536 unknown_34_3d=00001000050000000000 drop_items=180,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 297 values=0x10000,100,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 298 flags=0x250 race=23 level=48 hp=768 max_hp=768 mp=784 max_mp=784 stats=50,48,50,46,45 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 298 values=100,100,0x80000000,50,100,100,100,100,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 299 flags=0x250 race=23 level=48 hp=656 max_hp=656 mp=992 max_mp=992 stats=50,34,76,43,43 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 299 values=100,100,0x80000000,50,100,100,100,100,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 300 flags=0x250 race=23 level=48 hp=752 max_hp=752 mp=840 max_mp=840 stats=57,46,57,45,31 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 300 values=100,100,100,100,0x80000000,50,100,100,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 301 flags=0x250 race=23 level=48 hp=720 max_hp=720 mp=856 max_mp=856 stats=39,42,59,61,38 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 301 values=100,100,100,100,50,100,100,100,0x100000,0x100000,0x80100000,0x100000,0x100000,0x80100000,0x80100000,0x100000
+enemy 302 flags=0x6250 race=10 level=80 hp=3520 max_hp=3520 mp=3200 max_mp=3200 stats=80,52,62,30,11 summon_category=1 unknown_16_17=ff00 skills=392,571 macca=3000 experience=300 atma_points=600 atma_bonus=66736 unknown_34_3d=00001000050000000000 drop_items=111,0 drop_rates=100,0 attack_repeats=2 result_parameter=16
+enemy-affinity 302 values=100,100,0x80000096,0x10000,0x100000,0x10000,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 303 flags=0x4250 race=10 level=58 hp=3520 max_hp=3520 mp=3840 max_mp=3840 stats=50,52,62,31,10 summon_category=1 unknown_16_17=ff00 skills=393,392,368,369 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 303 values=100,100,0x10000,0x100000,0x10000,0x80000096,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 304 flags=0x40 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,28,28 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 304 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 305 flags=0x270 race=19 level=30 hp=1600 max_hp=1600 stats=23,20,20,21,24 summon_category=1 unknown_16_17=ff00 skills=382,399,400,401,402,417 macca=15000 experience=3000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 305 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 306 flags=0x270 race=19 level=30 hp=1600 max_hp=1600 stats=23,20,20,21,24 summon_category=1 unknown_16_17=ff00 skills=382,399,400,401,402,417 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 306 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 307 flags=0x240 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,28,28 summon_category=1 unknown_16_17=ff00 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 307 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 308 flags=0x270 race=19 level=35 hp=2200 max_hp=2200 stats=30,20,35,20,25 summon_category=1 unknown_16_17=ff00 skills=383,386,387,394,395,404,405 macca=20000 experience=3000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 308 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 309 flags=0x270 race=19 level=35 hp=2200 max_hp=2200 stats=30,20,35,20,25 summon_category=1 unknown_16_17=ff00 skills=382,399,400,401,402,417 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 309 values=50,50,100,0x100000,0x80100000,100,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 310 flags=0x270 race=19 level=35 hp=3300 max_hp=3300 stats=20,30,35,21,24 summon_category=1 unknown_16_17=ff00 skills=268,296,297,298 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=56,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 310 values=0x10000,0x10000,50,0x100032,0x100032,50,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 311 flags=0x254 race=14 level=15 hp=800 max_hp=800 mp=800 max_mp=800 stats=14,15,15,5,3 summon_category=3 unknown_16_17=ff00 skills=372,403 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 311 values=100,100,100,0x100000,0x80100000,100,100,100,0x10000,0x10000,0x10000,0x10000,200,0x10000,0x10000,0x100079
+enemy 312 flags=0x250 race=15 level=20 hp=1000 max_hp=1000 mp=3120 max_mp=3120 stats=14,14,18,20,4 summon_category=1 unknown_16_17=ff00 macca=3000 experience=800 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 312 values=100,100,0x10000,0x100050,0x1000c8,80,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 313 flags=0x250 race=14 level=20 hp=1280 max_hp=1280 mp=2280 max_mp=2280 stats=14,10,21,21,4 summon_category=1 unknown_16_17=ff00 macca=3000 experience=800 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=122,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 313 values=100,100,0x80000000,0x10000,0x1000c8,0x10000,50,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 314 flags=0x4250 race=14 level=22 hp=1680 max_hp=1680 mp=1080 max_mp=1080 stats=46,8,8,19,1 summon_category=1 unknown_16_17=ff00 macca=3000 experience=800 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 314 values=0x10000,0x10000,100,0x100000,0x1000c8,0x80000000,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 315 flags=0x40 race=3 level=5 hp=200 max_hp=200 mp=640 max_mp=640 growth=59 unknown_0f=1 stats=10,9,11,6,5 summon_category=1 unknown_16_17=ff00 skills=160,28,340 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 315 values=100,100,100,0x100000,0x100000,100,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 316 flags=0x40 race=6 level=20 hp=720 max_hp=720 mp=800 max_mp=800 stats=21,40,30,5,5 summon_category=1 unknown_16_17=ff00 skills=569 atma_points=100 atma_bonus=65736 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 316 values=100,100,0x40000,0x80100000,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000
+enemy 317 flags=0x40 race=4 level=30 hp=660 max_hp=660 mp=960 max_mp=960 stats=33,25,30,9,11 summon_category=1 unknown_16_17=ff00 skills=73,74,21,23,337 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 317 values=100,100,0x80000000,0x100000,0x20000,100,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 318 flags=0x40 race=4 level=30 hp=660 max_hp=660 mp=960 max_mp=960 stats=33,25,30,9,11 summon_category=1 unknown_16_17=ff00 skills=73,74,21,23,337 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 318 values=100,100,0x80000000,0x100000,0x20000,100,0x80000000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 319 race=7 level=3 hp=55 max_hp=55 mp=40 max_mp=40 stats=6,6,10,5,5 summon_category=1 unknown_16_17=ff00 skills=10,13 experience=10 atma_points=21 atma_bonus=65578 unknown_34_3d=00001000000000000000 drop_items=1,0 drop_rates=25,0 attack_repeats=1
+enemy-affinity 319 values=100,100,100,50,100,0x80000000,100,100,100,100,100,100,100,100,100,100
+enemy 320 flags=0x654 race=14 level=15 hp=800 max_hp=800 mp=800 max_mp=800 stats=14,15,15,5,3 summon_category=2 unknown_16_17=ff00 skills=372,403 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 320 values=130,130,130,0x100082,0x801000b4,130,130,130,0x10000,0x10000,0x10000,0x10000,200,0x10000,0x10000,0x100000
+enemy 321 flags=0x650 race=14 level=15 hp=1000 max_hp=1000 mp=1000 max_mp=1000 stats=15,25,20,15,10 summon_category=2 unknown_16_17=ff00 skills=372,403 macca=5000 experience=1600 atma_points=6000 atma_bonus=77536 unknown_34_3d=00001000050000000000 drop_items=119,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 321 values=100,100,100,0x100000,0x80100000,0x10000,100,100,0x10000,0x10000,0x10000,0x10000,200,0x10000,0x10000,0x100000
+enemy 322 race=3 level=3 hp=45 max_hp=45 mp=30 max_mp=30 stats=4,4,4,1,1 summon_category=1 unknown_16_17=ff00 skills=184,340,49 experience=10 atma_points=60 atma_bonus=65656 unknown_34_3d=00001000000000000000 drop_items=1,0 drop_rates=100,0 attack_repeats=1
+enemy-affinity 322 values=100,100,100,100,100,100,0x80000000,100,100,100,100,100,100,100,100,100
+enemy 323 flags=0x8444 race=18 level=3 hp=1000 max_hp=1000 stats=5,5,5,1,1 summon_category=1 unknown_16_17=ff00 skills=105 experience=10 atma_bonus=65536 unknown_34_3d=00001000000000000000 attack_repeats=1
+enemy-affinity 323 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 324 flags=0x200 race=5 level=99 hp=32767 max_hp=32767 mp=32767 max_mp=32767 stats=28,28,28,23,14 summon_category=1 experience=10 atma_points=30 atma_bonus=65596 unknown_34_3d=00001000000000000000 attack_repeats=1
+enemy-affinity 324 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 325 race=4 level=8 hp=126 max_hp=126 mp=64 max_mp=64 stats=11,13,8,5,5 summon_category=2 unknown_16_17=ff00 skills=112,119 experience=10 atma_points=30 atma_bonus=65596 unknown_34_3d=00001000000000000000 drop_items=16,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 325 values=100,100,100,100,100,100,0x80000000,100,100,100,100,100,100,100,100,100
+enemy 326 race=7 level=7 hp=80 max_hp=80 mp=52 max_mp=52 stats=20,8,7,8,8 summon_category=1 skills=49 macca=100 experience=12 atma_points=90 atma_bonus=65716 unknown_34_3d=00001000050000000000 drop_items=22,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 326 values=100,100,100,0x80000000,100,100,100,100,100,100,100,0x10000,100,100,100,100
+enemy 327 race=5 level=6 hp=56 max_hp=56 mp=52 max_mp=52 stats=16,8,7,3,8 summon_category=1 skills=49 experience=10 atma_points=30 atma_bonus=65596 unknown_34_3d=00001000050000000000 drop_items=22,0 drop_rates=15,0 attack_repeats=1
+enemy-affinity 327 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 328 flags=0x8440 race=18 level=4 hp=60 max_hp=60 stats=7,6,5,7,7 summon_category=1 macca=60 experience=11 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=38,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 328 values=100,0x80000000,100,100,100,100,100,100,0x10000,100,100,100,100,100,100,100
+enemy 329 race=6 level=10 hp=96 max_hp=96 mp=68 max_mp=68 stats=10,14,7,8,9 summon_category=1 skills=114,115 macca=170 experience=30 atma_points=132 atma_bonus=65800 unknown_34_3d=00001000050000000000 attack_repeats=2 result_parameter=7
+enemy-affinity 329 values=100,100,100,100,100,100,0x80000000,100,100,100,100,0x10000,100,100,100,100
+enemy 330 flags=0x2650 race=5 level=75 hp=6000 max_hp=6000 mp=1200 max_mp=1200 stats=70,55,90,60,50 summon_category=2 macca=3000 experience=200 atma_bonus=65536 unknown_34_3d=00001000000000000000 attack_repeats=1
+enemy-affinity 330 values=100,100,0x800000c8,0x401f4,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 331 flags=0x644 race=18 level=17 hp=1024 max_hp=1024 mp=1824 max_mp=1824 stats=5,15,40,4,5 summon_category=1 unknown_16_17=ff00 skills=106 macca=4000 experience=1000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 331 values=100,0x80000000,100,100,100,100,100,100,0x10000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 332 flags=0x644 race=18 level=17 hp=860 max_hp=860 mp=1340 max_mp=1340 stats=24,10,25,5,5 summon_category=1 unknown_16_17=ff00 skills=106 macca=4000 experience=1000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 332 values=100,0x80000000,100,100,100,100,100,100,0x10000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 333 flags=0x644 race=18 level=17 hp=1120 max_hp=1120 mp=704 max_mp=704 stats=38,18,5,3,5 summon_category=1 unknown_16_17=ff00 skills=105 macca=4000 experience=1000 atma_bonus=65536 unknown_34_3d=00001000050000000000 attack_repeats=1
+enemy-affinity 333 values=100,0x80000000,100,100,100,100,100,100,0x10000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000,0x100000
+enemy 334 flags=0x8440 race=18 level=15 hp=116 max_hp=116 mp=108 max_mp=108 stats=15,14,12,15,15 summon_category=1 skills=105 macca=480 experience=95 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=38,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 334 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 335 race=1 level=24 hp=168 max_hp=168 mp=212 max_mp=212 stats=19,18,29,16,20 summon_category=1 skills=2,184,161,357 macca=560 experience=148 atma_points=310 atma_bonus=66156 unknown_34_3d=00001000050000000000 drop_items=39,115 drop_rates=10,5 attack_repeats=1
+enemy-affinity 335 values=100,100,0x40000,0x80000000,100,100,100,100,50,0x20000,0x10000,100,100,100,100,100
+enemy 336 race=2 level=41 hp=296 max_hp=296 mp=268 max_mp=268 stats=34,33,26,40,29 summon_category=1 skills=125,41,39,571 macca=2300 experience=389 atma_points=360 atma_bonus=66256 unknown_34_3d=00001000050000000000 drop_items=102,0 drop_rates=10,0 attack_repeats=1
+enemy-affinity 336 values=100,100,100,100,100,100,0x10000,70,100,100,50,0x80000000,0x80000000,50,0x80000000,100
+enemy 337 race=5 level=48 hp=400 max_hp=400 mp=300 max_mp=300 stats=48,45,31,44,43 summon_category=1 skills=187,131,136,570 macca=2600 experience=468 atma_points=560 atma_bonus=66656 unknown_34_3d=00001000050000000000 drop_items=3,113 drop_rates=10,10 attack_repeats=1
+enemy-affinity 337 values=50,50,100,100,100,100,100,100,100,0x20000,100,0x80000000,100,100,0x80000000,100
+enemy 338 flags=0x8440 race=18 level=15 hp=116 max_hp=116 mp=108 max_mp=108 stats=15,14,12,15,15 summon_category=1 macca=340 experience=95 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=38,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 338 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy 339 flags=0x8440 race=18 level=15 hp=108 max_hp=108 mp=116 max_mp=116 stats=14,12,14,16,15 summon_category=1 macca=340 experience=95 atma_bonus=65536 unknown_34_3d=00001000050000000000 drop_items=40,0 drop_rates=20,0 attack_repeats=1
+enemy-affinity 339 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 340 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 341 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 342 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 343 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 344 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 345 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 346 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 347 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 348 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 349 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 350 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 351 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 352 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 353 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 354 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 355 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 356 values=100,100,100,100,100,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 357 values=80,80,80,0x100050,0x20000,0x20000,0x20000,50,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 358 values=0x40000,200,200,0x1000c8,0x1000c8,200,200,200,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 359 values=0x40000,100,0x20000,0x1000c8,0x1000c8,0x20000,0x20000,100,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 360 values=0x40000,100,0x20000,0x20000,0x1000c8,200,0x20000,100,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 361 values=0x40000,100,0x20000,0x20000,0x20000,200,200,100,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 362 values=0x40000,100,0x20000,0x20000,0x20000,0x20000,200,200,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 363 values=80,80,0x20000,0x20000,0x20000,80,80,50,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 364 values=80,80,80,0x20000,0x20000,0x20000,80,50,0x20000,0x20000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 365 values=100,100,200,0x1000c8,0x1000c8,200,200,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 366 values=100,100,0x40000,0x80000000,100,100,100,100,50,0x20000,0x10000,100,100,100,100,100
+enemy-affinity 367 values=100,100,100,100,100,100,0x10000,70,100,100,50,0x80000000,0x80000000,50,0x80000000,100
+enemy-affinity 368 values=0x40000,0x40000,100,0x100000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 369 values=0x10000,100,0x401f4,0x10000,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 370 values=0x10000,100,0x10000,0x401f4,0x100000,100,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 371 values=0x10000,100,100,0x100000,0x401f4,0x10000,100,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 372 values=0x10000,100,100,0x100000,0x100000,0x401f4,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 373 values=0x10000,100,100,0x100000,0x10000,100,0x401f4,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 374 values=100,100,50,100,0x80000000,100,100,100,0x20000,0x10000,100,100,100,100,100,100
+enemy-affinity 375 values=100,100,150,0x100096,0x80100000,150,0x10000,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100000
+enemy-affinity 376 values=100,100,100,0x10000,100,100,100,100,100,100,100,0x10000,100,100,100,100
+enemy-affinity 377 values=0x10000,0x10000,0x10000,0x80100001,0x10000,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
+enemy-affinity 378 values=0x10000,0x10000,0x10000,0x10000,0x80100001,0x10000,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000
+enemy-affinity 379 values=0x10000,0x10000,0x10000,0x10000,0x10000,0x80000001,0x10000,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000
+enemy-affinity 380 values=0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x80000001,1,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000
+enemy-affinity 381 values=150,150,150,150,150,0x800000c8,150,150,150,150,0x100096,0x100096,0x100096,0x100096,0x100096,0x100000
+enemy-affinity 382 values=100,100,10,10,10,100,10,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x110000
+enemy-affinity 383 values=0x10032,0x10000,1,1,1,1,0x80000078,100,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x10000,0x100001
