@@ -614,88 +614,91 @@ typedef struct BtlWork {
 } BtlWork;
 
 struct BtlUnit {
-    s32 state;
+    s32 state;                 /* 0x00 */
     u8 pad4[4];
-    u32 seqFlags;
-    u32 unkC;
-    s32 stateTime;
-    s32 unk14;
-    BtlUnit *link18;
+    u32 seqFlags;              /* 0x08 */
+    u32 unkC;                  /* 0x0C */
+    s32 stateTime;             /* 0x10 */
+    s32 unk14;                 /* 0x14 */
+    BtlUnit *link18;           /* 0x18: owning/linked unit */
     u8 pad1C[0x14];
-    f32 positionX;   /* 0x30: current unit position */
-    f32 positionY;   /* 0x34 */
-    f32 unk38;
+    f32 positionX;             /* 0x30: current unit position */
+    f32 positionY;             /* 0x34 */
+    f32 unk38;                 /* 0x38 */
     u8 pad3C[0x14];
-    f32 unk50;
-    u32 baseColor;
-    u8 pad58[0x28];
-    f32 scale;           /* 0x80 */
-    u32 overlayColor;
-    f32 positionZOffset;
-    u8 pad8C[0x24];
-    f32 height;          /* 0xB0 */
-    f32 reach;           /* 0xB4 */
+    f32 unk50;                 /* 0x50 */
+    u32 baseColor;             /* 0x54 */
+    u8 pad58[0x18];
+    f32 orientation[4];        /* 0x70: quaternion converted to a rotation matrix */
+    f32 scale;                 /* 0x80 */
+    u32 overlayColor;          /* 0x84 */
+    f32 positionZOffset;       /* 0x88 */
+    u8 pad8C[4];
+    f32 bodyOffset[4];         /* 0x90: scaled and rotated into the unit's body position */
+    u8 padA0[0x10];
+    f32 height;                /* 0xB0 */
+    f32 reach;                 /* 0xB4 */
     u8 padB8[4];
-    f32 unkBC;
-    f32 unkC0;
-    s32 resourceKind;    /* 0xC4 */
-    s32 resourceIndex;   /* 0xC8 */
-    u8 unkCC;
+    f32 unkBC;                 /* 0xBC */
+    f32 unkC0;                 /* 0xC0 */
+    s32 resourceKind;          /* 0xC4 */
+    s32 resourceIndex;         /* 0xC8 */
+    u8 unkCC;                  /* 0xCC */
     u8 padCD[0x1B];
-    u32 unkE8;
-    s32 unkEC;
-    s32 unkF0;
-    f32 fF4;
-    s16 unkF8;
-    s16 unkFA;
-    s32 effectIndex;     /* 0xFC */
-    s32 effectParameter; /* 0x100 */
-    f32 effectScale;     /* 0x104 */
-    u64 owner;
+    u32 unkE8;                 /* 0xE8 */
+    s32 unkEC;                 /* 0xEC */
+    s32 unkF0;                 /* 0xF0 */
+    f32 fF4;                   /* 0xF4 */
+    s16 unkF8;                 /* 0xF8 */
+    s16 unkFA;                 /* 0xFA */
+    s32 effectIndex;           /* 0xFC */
+    s32 effectParameter;       /* 0x100 */
+    f32 effectScale;           /* 0x104 */
+    u64 owner;                /* 0x108: compared against the battle command's unit ID */
     union {
-        u64 flags64;
+        u64 flags64;          /* 0x110 */
         struct {
-            u32 flags;
-            u32 stateFlags;
+            u32 flags;        /* 0x110 */
+            u32 stateFlags;   /* 0x114 */
         };
     };
-    s32 gunResourceFlags;
-    u8 lookupId;
+    s32 gunResourceFlags;      /* 0x118 */
+    u8 lookupId;               /* 0x11C */
     u8 pad11D[3];
-    u16 unk120;
+    u16 statBits;              /* 0x120: queried for bit 0x2000; base of the stat accessors */
     u8 pad122[2];
-    u16 mode;
+    u16 mode;                  /* 0x124 */
     u8 pad126[8];
-    u16 unk12E;
+    u16 conditionFlags;        /* 0x12E */
     u8 pad130[0x42];
-    u16 unk172;
-    BtlUnit *prev;
-    BtlUnit *next;
+    u16 unk172;                /* 0x172 */
+    BtlUnit *prev;             /* 0x174 */
+    BtlUnit *next;             /* 0x178 */
     u8 pad17C[0x168];
-    u8 unk2E4;
+    u8 unk2E4;                 /* 0x2E4 */
     u8 pad2E5[0x2B];
-    s32 unk310;
-    s32 unk314;
-    struct SoundResourceNode *node318;
-    struct SoundResourceLink *link31C;
-    struct SoundLink *link320;
-    struct ActiveSoundNode *node324;
-    s32 unk328;
-    void *gunResource;
-    u16 unk330;
+    s32 unk310;                /* 0x310 */
+    s32 unk314;                /* 0x314 */
+    struct SoundResourceNode *node318;      /* 0x318 */
+    struct SoundResourceLink *link31C;      /* 0x31C */
+    struct SoundLink *link320;              /* 0x320 */
+    struct ActiveSoundNode *node324;        /* 0x324 */
+    s32 unk328;                /* 0x328 */
+    void *gunResource;         /* 0x32C */
+    u16 unk330;                /* 0x330 */
     u8 pad332[2];
-    s32 unk334;
+    s32 unk334;                /* 0x334 */
     u8 pad338[4];
-    s32 effectObject;
-    BtlUnitExt *ext;
-    s32 unk344;
+    s32 effectObject;          /* 0x33C: effect whose first inner vector becomes the origin */
+    BtlUnitExt *ext;           /* 0x340 */
+    s32 unk344;                /* 0x344 */
     u8 pad348[4];
-    s32 unk34C;
-    s32 unk350;
+    s32 unk34C;                /* 0x34C */
+    s32 unk350;                /* 0x350 */
     u8 pad354[8];
-    u32 handle35C;
-    BtlUnit *previousActor;
-    BtlUnit *nextActor;
+    u32 handle35C;             /* 0x35C */
+    BtlUnit *previousActor;    /* 0x360 */
+    BtlUnit *nextActor;        /* 0x364 */
 };
 
 extern void btlResetIndexWork();
@@ -1990,7 +1993,7 @@ void btlCommandTaskStartEffects(BtlCommandTask *task) {
         }
         effectId = (task->actor->flags & 0x200) ? 0xF : 0x1E;
         countdown = 0x32;
-        if (btlDoesEnabledStatusMatchCurrentId(&task->actor->unk120, 0xDF) != 0) {
+        if (btlDoesEnabledStatusMatchCurrentId(&task->actor->statBits, 0xDF) != 0) {
             countdown = 0;
         }
         break;
@@ -2010,7 +2013,7 @@ void btlCommandTaskStartEffects(BtlCommandTask *task) {
         ((SceneTask *)object)->linkedOwnerId = task->actor->owner;
         btlStartTask(object);
     }
-    if ((task->actor->unk12E & 0x480) != 0) {
+    if ((task->actor->conditionFlags & 0x480) != 0) {
         btlDispatchStateHandler(task, 0x19);
     } else {
         btlDispatchStateHandler(task, 0x1B);
@@ -2044,7 +2047,7 @@ void btlCommandTaskReturnStart(BtlCommandTask *task) {
         }
     }
     if (actor->flags & 0x200) {
-        func_001AA868(&actor->unk120, 8);
+        func_001AA868(&actor->statBits, 8);
         btlSyncPlayerWork(actor);
     }
     if (!(actor->stateFlags & 0x40000)) {
@@ -2084,7 +2087,7 @@ void btlCommandTaskReturnUpdate(BtlUnit *task) {
     }
     if (fldReleaseIdleSceneActorResources((SceneActor *)task->link18) != 0) {
         if (unit->flags & 0x200) {
-            func_001AA868(&unit->unk120, 8);
+            func_001AA868(&unit->statBits, 8);
             func_001AB160(unit);
         }
         fldUpdateSceneGroupTask((SceneTask *)task);
@@ -2103,7 +2106,7 @@ void btlStartLinkedActorEffectTask(BtlUnit *unit) {
             task[0] = 0xA;
             *(u16 *)(task + 8) = 0x43;
             btlStartTask(task);
-            if (unit->link18->unk12E & 0x480) {
+            if (unit->link18->conditionFlags & 0x480) {
                 btlDispatchStateHandler(unit, 0x19);
                 return;
             }
@@ -2158,7 +2161,7 @@ void func_001DC838(void) {
 }
 
 void btlAdvanceStateWhenLinkedTasksFinish(BtlUnit *unit) {
-    if (btlCountTasksForOwner(*(u64 *)((u8 *)unit->link18 + 0x108)) == 0) {
+    if (btlCountTasksForOwner(unit->link18->owner) == 0) {
         btlDispatchStateHandler(unit, 0x1D);
     }
 }
@@ -2168,7 +2171,7 @@ void func_001DC888(void) {
 
 void func_001DC890(BtlUnit *unit) {
     BtlUnit *owner = unit->link18;
-    if (btlCountTasksForOwner(*(u64 *)((u8 *)owner + 0x108)) == 0) {
+    if (btlCountTasksForOwner(owner->owner) == 0) {
         owner->flags &= ~0x4000;
         btlDispatchStateHandler(unit, 2);
     }
@@ -2217,7 +2220,7 @@ void btlRemoveEligibleActorSceneTask(BtlUnit *task) {
     } else if (unit->flags & 0x400) {
         hookResult = 0;
         work = (BtlWork *)func_001AA6F8();
-        entryFlags = btlGetEntryFlagsUnlessDisabled((u8 *)unit + 0x120);
+        entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->statBits);
         if (work->hook618 != 0) {
             hookResult = work->hook618(unit);
         }

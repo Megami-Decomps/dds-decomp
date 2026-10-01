@@ -164,91 +164,91 @@ typedef struct BtlWork {
 } BtlWork;
 
 struct BtlUnit {
-    s32 state;
+    s32 state;                 /* 0x00 */
     u8 pad4[4];
-    u32 seqFlags;
-    u32 unkC;
-    s32 stateTime;
-    s32 unk14;
-    BtlUnit *link18;
+    u32 seqFlags;              /* 0x08 */
+    u32 unkC;                  /* 0x0C */
+    s32 stateTime;             /* 0x10 */
+    s32 unk14;                 /* 0x14 */
+    BtlUnit *link18;           /* 0x18: owning/linked unit */
     u8 pad1C[0x14];
-    f32 positionX;   /* 0x30: current unit position */
-    f32 positionY;   /* 0x34 */
-    f32 unk38;
+    f32 positionX;             /* 0x30: current unit position */
+    f32 positionY;             /* 0x34 */
+    f32 unk38;                 /* 0x38 */
     u8 pad3C[0x14];
-    f32 unk50;
-    u32 baseColor;
+    f32 unk50;                 /* 0x50 */
+    u32 baseColor;             /* 0x54 */
     u8 pad58[0x18];
-    f32 orientation[4]; /* 0x70: quaternion converted to a rotation matrix */
-    f32 scale;           /* 0x80 */
-    u32 overlayColor;
-    f32 positionZOffset;
+    f32 orientation[4];        /* 0x70: quaternion converted to a rotation matrix */
+    f32 scale;                 /* 0x80 */
+    u32 overlayColor;          /* 0x84 */
+    f32 positionZOffset;       /* 0x88 */
     u8 pad8C[4];
-    f32 bodyOffset[4]; /* 0x90: scaled and rotated into the unit's body position */
+    f32 bodyOffset[4];         /* 0x90: scaled and rotated into the unit's body position */
     u8 padA0[0x10];
-    f32 height;          /* 0xB0 */
-    f32 reach;           /* 0xB4 */
+    f32 height;                /* 0xB0 */
+    f32 reach;                 /* 0xB4 */
     u8 padB8[4];
-    f32 unkBC;
-    f32 unkC0;
-    s32 resourceKind;    /* 0xC4 */
-    s32 resourceIndex;   /* 0xC8 */
-    u8 unkCC;
+    f32 unkBC;                 /* 0xBC */
+    f32 unkC0;                 /* 0xC0 */
+    s32 resourceKind;          /* 0xC4 */
+    s32 resourceIndex;         /* 0xC8 */
+    u8 unkCC;                  /* 0xCC */
     u8 padCD[0x1B];
-    u32 unkE8;
-    s32 unkEC;
-    s32 unkF0;
-    f32 fF4;
-    s16 unkF8;
-    s16 unkFA;
-    s32 effectIndex;     /* 0xFC */
-    s32 effectParameter; /* 0x100 */
-    f32 effectScale;     /* 0x104 */
-    u64 owner;
+    u32 unkE8;                 /* 0xE8 */
+    s32 unkEC;                 /* 0xEC */
+    s32 unkF0;                 /* 0xF0 */
+    f32 fF4;                   /* 0xF4 */
+    s16 unkF8;                 /* 0xF8 */
+    s16 unkFA;                 /* 0xFA */
+    s32 effectIndex;           /* 0xFC */
+    s32 effectParameter;       /* 0x100 */
+    f32 effectScale;           /* 0x104 */
+    u64 owner;                /* 0x108: compared against the battle command's unit ID */
     union {
-        u64 flags64;
+        u64 flags64;          /* 0x110 */
         struct {
-            u32 flags;
-            u32 stateFlags;
+            u32 flags;        /* 0x110 */
+            u32 stateFlags;   /* 0x114 */
         };
     };
-    s32 gunResourceFlags;
-    u8 lookupId;
+    s32 gunResourceFlags;      /* 0x118 */
+    u8 lookupId;               /* 0x11C */
     u8 pad11D[3];
-    u16 unk120;
+    u16 statBits;              /* 0x120: queried for bit 0x2000; base of the stat accessors */
     u8 pad122[2];
-    u16 mode;
+    u16 mode;                  /* 0x124 */
     u8 pad126[8];
-    u16 unk12E;
+    u16 conditionFlags;        /* 0x12E */
     u8 pad130[0x42];
-    u16 unk172;
-    BtlUnit *prev;
-    BtlUnit *next;
+    u16 unk172;                /* 0x172 */
+    BtlUnit *prev;             /* 0x174 */
+    BtlUnit *next;             /* 0x178 */
     u8 pad17C[0x168];
-    u8 unk2E4;
+    u8 unk2E4;                 /* 0x2E4 */
     u8 pad2E5[0x2B];
-    s32 unk310;
-    s32 unk314;
-    struct SoundResourceNode *node318;
-    struct SoundResourceLink *link31C;
-    struct SoundLink *link320;
-    struct ActiveSoundNode *node324;
-    s32 unk328;
-    void *gunResource;
-    u16 unk330;
+    s32 unk310;                /* 0x310 */
+    s32 unk314;                /* 0x314 */
+    struct SoundResourceNode *node318;      /* 0x318 */
+    struct SoundResourceLink *link31C;      /* 0x31C */
+    struct SoundLink *link320;              /* 0x320 */
+    struct ActiveSoundNode *node324;        /* 0x324 */
+    s32 unk328;                /* 0x328 */
+    void *gunResource;         /* 0x32C */
+    u16 unk330;                /* 0x330 */
     u8 pad332[2];
-    s32 unk334;
+    s32 unk334;                /* 0x334 */
     u8 pad338[4];
-    s32 effectObject;
-    BtlUnitExt *ext;
-    s32 unk344;
+    s32 effectObject;          /* 0x33C: effect whose first inner vector becomes the origin */
+    BtlUnitExt *ext;           /* 0x340 */
+    s32 unk344;                /* 0x344 */
     u8 pad348[4];
-    s32 unk34C;
-    s32 unk350;
+    s32 unk34C;                /* 0x34C */
+    s32 unk350;                /* 0x350 */
     u8 pad354[8];
-    u32 handle35C;
-    BtlUnit *previousActor;
-    BtlUnit *nextActor;
+    u32 handle35C;             /* 0x35C */
+    BtlUnit *previousActor;    /* 0x360 */
+    BtlUnit *nextActor;        /* 0x364 */
 };
 
 extern void btlResetIndexWork();
@@ -929,7 +929,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
     s32 value;
     switch (argument[0]) {
     case 1:
-        if ((unit->flags64 & 0x1200) == 0x200 && (unit->unk120 & 0x10) == 0) {
+        if ((unit->flags64 & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
             return func_001AC0E0(unit->unk172);
         }
         if (argument[1] > 0) {
@@ -956,8 +956,8 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     switch (((BtlCommandArgument *)argument)->command) {
     case 1: {
         u32 count = btlGetIndexListCount(((BtlCommandArgument *)argument)->actorIndices);
-        if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->unk120 & 0x10)) &&
-            (unit->unk12E & 0x1000) == 0 && count == 1) {
+        if ((unit->flags & 0x200) && ((unit->flags & 0x1000) || (unit->statBits & 0x10)) &&
+            (unit->conditionFlags & 0x1000) == 0 && count == 1) {
             BtlCommandOption *option = ((BtlCommandArgument *)argument)->option;
             if (option->kind == 2 && option->inactive == 0) {
                 return 0x17;
@@ -972,7 +972,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
     case 7:
     case 8: {
         s32 index = ((BtlCommandArgument *)argument)->index;
-        if (index == 0xD6 && (unit->flags64 & 0x1200) == 0x200 && (unit->unk120 & 0x10) == 0) {
+        if (index == 0xD6 && (unit->flags64 & 0x1200) == 0x200 && (unit->statBits & 0x10) == 0) {
             return 0xC;
         }
         return ((BtlActionTableEntry *)D_00435E30)[index].kind;
@@ -985,7 +985,7 @@ u32 btlClassifyActionOperand(BtlUnit *unit, u8 *argument) {
 s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     s32 code;
 
-    btlGetEntryFlagsUnlessDisabled(&actor->unk120);
+    btlGetEntryFlagsUnlessDisabled(&actor->statBits);
     if (arg6 >= 0) {
         switch (((BtlCategoryTableEntry *)D_00435E20)[arg6].categoryType) {
         case 1:
@@ -1577,10 +1577,10 @@ u32 btlRefreshEligibleActors(void) {
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->stateFlags & 8) == 0) {
-                                u16 prior = unit->unk12E;
+                                u16 prior = unit->conditionFlags;
                                 func_001AA850((u8 *)unit + 0x120, 1);
                                 func_001E2758(unit);
-                                if (unit->unk12E == 1 && prior != unit->unk12E) {
+                                if (unit->conditionFlags == 1 && prior != unit->conditionFlags) {
                                     unit->stateFlags |= 4;
                                     work->flags21C |= 0x100;
                                 }
@@ -3950,7 +3950,7 @@ s32 btlIsActiveActor(BtlUnit *actor) {
 BtlUnit *btlFindUnitByModeClear(s32 mode) {
     BtlUnit *unit;
     for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
-        if (!(unit->unk120 & 0x20) && unit->mode == mode) {
+        if (!(unit->statBits & 0x20) && unit->mode == mode) {
             return unit;
         }
     }
@@ -3960,7 +3960,7 @@ BtlUnit *btlFindUnitByModeClear(s32 mode) {
 BtlUnit *btlFindUnitByModeFlagged(s32 mode) {
     BtlUnit *unit;
     for (unit = ((BtlWork *)func_001AA6F8())->actorList; unit != 0; unit = unit->nextActor) {
-        if ((unit->unk120 & 0x20) && unit->mode == mode) {
+        if ((unit->statBits & 0x20) && unit->mode == mode) {
             return unit;
         }
     }
@@ -4803,7 +4803,7 @@ s32 btlCanUseLinkedActor(s32 actor) {
     if (btlHasMarkedEntry14(actor)) {
         return 0;
     }
-    if (((BattleActionLinkState *)linked)->unit->unk12E & 0x480) {
+    if (((BattleActionLinkState *)linked)->unit->conditionFlags & 0x480) {
         return 0;
     }
     category = ((ActionUnit *)actor)->category;
@@ -8127,7 +8127,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         unit = args->unit;
         if (unit->flags & 0x200) {
             id = unit->mode;
-            if (unit->unk120 & 0x10) {
+            if (unit->statBits & 0x10) {
                 id += 0x20;
             } else if (unit->flags & 0x1000) {
                 id += 0x10;
