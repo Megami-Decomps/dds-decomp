@@ -1824,7 +1824,101 @@ void mdlDrawMapPositionRecords(u8 *obj) {
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewerEnd);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_002388F8);
+typedef struct MdlFogParams {
+    f32 near;  /* 0x00 */
+    f32 farA;  /* 0x04 */
+    f32 value; /* 0x08 */
+    f32 farB;  /* 0x0C */
+    u32 color; /* 0x10 */
+} MdlFogParams;
+
+extern char D_003C88A8[];
+extern char D_00437100[]; /* "%x" */
+extern char D_00437108[]; /* "fovy=" */
+extern char D_00437110[]; /* "%f" */
+extern char D_00437118[]; /* "fog=" */
+extern MdlFogParams D_0037F790;
+extern f32 D_0037F5E0[];
+extern s32 sdfPathExists(char *path);
+extern s32 func_002C80C8(char *path);
+extern void fileWaitReady(s32 file);
+extern s32 fileGetResourceHandle(s32 file);
+extern char *func_002C8110(s32 file);
+extern s32 fileGetResourceSize(s32 file);
+extern void func_002C7D00(s32 file);
+extern s32 func_0035C8F8();
+extern s32 memcmp(const void *, const void *, u32);
+
+/* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
+void func_002388F8(void) {
+    s32 file;
+    s32 handle;
+    char *data;
+    s32 size;
+    s32 pos;
+    s32 i;
+    char *line;
+    u32 color;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 fovy;
+    s32 fogNear;
+    f32 fogValue;
+    s32 fogFar;
+    f32 fogFarB;
+
+    if (sdfPathExists(D_003C88A8) == 0) {
+        return;
+    }
+    file = func_002C80C8(D_003C88A8);
+    fileWaitReady(file);
+    handle = fileGetResourceHandle(file);
+    data = func_002C8110(file);
+    size = fileGetResourceSize(file);
+    func_002C7D00(file);
+    pos = 0;
+    while (pos < size) {
+        i = pos;
+        while (i < size) {
+            if (data[i++] == '\n') {
+                break;
+            }
+        }
+        line = data + pos;
+        if (memcmp(line, "bg-color=", 9) == 0) {
+            if (func_0035C8F8(line + 9, D_00437100, &color) == 1) {
+                D_00435CBC = color;
+            }
+        } else if (memcmp(line, "eye-position=", 13) == 0) {
+            if (func_0035C8F8(line + 13, "%f,%f,%f", &x, &y, &z) == 3) {
+                ((f32 *)&D_003C87C0)[0] = x;
+                ((f32 *)&D_003C87C0)[1] = y;
+                ((f32 *)&D_003C87C0)[2] = z;
+            }
+        } else if (memcmp(line, "target-position=", 16) == 0) {
+            if (func_0035C8F8(line + 16, "%f,%f,%f", &x, &y, &z) == 3) {
+                ((f32 *)&D_003C87D0)[0] = x;
+                ((f32 *)&D_003C87D0)[1] = y;
+                ((f32 *)&D_003C87D0)[2] = z;
+            }
+        } else if (memcmp(line, D_00437108, 5) == 0) {
+            if (func_0035C8F8(line + 5, D_00437110, &fovy) == 1) {
+                D_0037F5E0[3] = fovy;
+            }
+        } else if (memcmp(line, D_00437118, 4) == 0) {
+            if (func_0035C8F8(line + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
+                D_0037F790.near = fogNear;
+                D_0037F790.value = fogValue;
+                D_0037F790.farA = fogFar;
+                D_0037F790.farB = fogFarB;
+                D_0037F790.color = color;
+            }
+        }
+        pos = i;
+    }
+    func_003297C8(handle);
+}
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00238BD8);
 
