@@ -132,6 +132,18 @@ can be named as `result` and read later:
   WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+A profiled command may give a small integer argument a command-specific name:
+
+```text
+  local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+```
+
+Here `ITEM_QUANTITY` lowers exactly to `PUSHIS 2`. The name is valid only in
+that argument of `READ_TREASURE_TABLE_VALUE`, which keeps unrelated integer
+domains separate. The disassembler uses a name only for a direct profiled
+`PUSHIS`; computed selectors, wider `PUSHI` values, and values outside the
+reviewed set remain ordinary expressions or numbers.
+
 Canonical branches and loops use ordinary blocks while retaining the labels
 already required by the exact jump table:
 
@@ -429,7 +441,7 @@ tables and both implementations:
 | `ENABLE_FIELD_MAP_ENTRY` | `0x111` | 3 | Enables a selected field-map entry |
 | `DISABLE_FIELD_MAP_ENTRY` | `0x112` | 3 | Disables a selected field-map entry |
 | `SET_FIELD_CAMERA_TABLE` | `0x113` | 1 | Selects the current field camera-table value |
-| `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns one of the current room's five treasure-table values |
+| `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns `CONTENT_KIND`, `ITEM_ID`, `ITEM_QUANTITY`, `TRAP_KIND`, or `AMOUNT` from the current room's treasure table |
 | `MARK_CURRENT_TREASURE_OPENED` | `0x115` | 0 | Marks the current task's treasure object as opened |
 | `TEST_CURRENT_TREASURE_OPENED` | `0x116` | 0 | Returns whether the current task's treasure object is already open |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |

@@ -102,6 +102,29 @@ class Integer(Expr):
 
 
 @dataclass(frozen=True)
+class SymbolicInteger(Expr):
+    name: str
+    value: int
+
+    def lower(self) -> list[str]:
+        return [f"PUSHIS {self.value}"]
+
+    def render(self, parent_precedence: int = 0) -> str:
+        return self.name
+
+
+@dataclass(frozen=True)
+class _UnresolvedSymbol(Expr):
+    name: str
+
+    def lower(self) -> list[str]:
+        raise AssertionError("unresolved command argument symbol")
+
+    def render(self, parent_precedence: int = 0) -> str:
+        return self.name
+
+
+@dataclass(frozen=True)
 class Float32(Expr):
     bits: int
 
@@ -229,6 +252,69 @@ class NativeCall(Expr):
         return f"{self.name}({', '.join(arg.render() for arg in self.arguments)})"
 
 
+def _resolve_argument_symbols(
+    expression: Expr,
+    command: flw0_profiles.NativeCommand,
+    argument_index: int,
+    line_number: int,
+) -> Expr:
+    symbols = command.symbols_for_argument(argument_index)
+    if isinstance(expression, _UnresolvedSymbol):
+        value = symbols.by_name.get(expression.name) if symbols is not None else None
+        if value is None:
+            raise flw0.Flw0Error(
+                f"line {line_number}: {expression.name!r} is not a symbolic value "
+                f"for argument {argument_index} of {command.name}"
+            )
+        return SymbolicInteger(expression.name, value)
+    if isinstance(expression, Unary):
+        return Unary(
+            expression.operator,
+            _resolve_argument_symbols(
+                expression.operand, command, argument_index, line_number
+            ),
+        )
+    if isinstance(expression, Binary):
+        return Binary(
+            expression.operator,
+            _resolve_argument_symbols(
+                expression.left, command, argument_index, line_number
+            ),
+            _resolve_argument_symbols(
+                expression.right, command, argument_index, line_number
+            ),
+        )
+    return expression
+
+
+def _find_unresolved_symbol(expression: Expr) -> str | None:
+    if isinstance(expression, _UnresolvedSymbol):
+        return expression.name
+    if isinstance(expression, Unary):
+        return _find_unresolved_symbol(expression.operand)
+    if isinstance(expression, Binary):
+        return _find_unresolved_symbol(expression.left) or _find_unresolved_symbol(
+            expression.right
+        )
+    if isinstance(expression, NativeCall):
+        for argument in expression.arguments:
+            if symbol := _find_unresolved_symbol(argument):
+                return symbol
+    return None
+
+
+def _symbolize_argument(
+    expression: Expr,
+    command: flw0_profiles.NativeCommand,
+    argument_index: int,
+) -> Expr:
+    if not isinstance(expression, Integer) or expression.wide:
+        return expression
+    symbols = command.symbols_for_argument(argument_index)
+    name = symbols.by_value.get(expression.value) if symbols is not None else None
+    return SymbolicInteger(name, expression.value) if name is not None else expression
+
+
 @dataclass(frozen=True)
 class _Pending:
     expression: Expr
@@ -301,6 +387,10 @@ class _ExpressionParser:
         if self.peek() is not None:
             raise flw0.Flw0Error(
                 f"line {self.line_number}: unexpected token {self.peek()!r}"
+            )
+        if symbol := _find_unresolved_symbol(expression):
+            raise flw0.Flw0Error(
+                f"line {self.line_number}: unknown value {symbol!r}"
             )
         return expression
 
@@ -375,9 +465,7 @@ class _ExpressionParser:
                 return Float32(0x7FC00000)
             if name == "inf":
                 return Float32(0x7F800000)
-            raise flw0.Flw0Error(
-                f"line {self.line_number}: unknown value {name!r}"
-            )
+            return _UnresolvedSymbol(name)
         self.take("(")
         if name in ("message", "selection", "event", "procedure", "string"):
             symbol = self.take()
@@ -443,7 +531,11 @@ class _ExpressionParser:
                 f"line {self.line_number}: {name} takes {command.stack_pop} arguments, "
                 f"found {len(arguments)}"
             )
-        return NativeCall(name, tuple(arguments), command.writes_result)
+        resolved = tuple(
+            _resolve_argument_symbols(argument, command, index, self.line_number)
+            for index, argument in enumerate(arguments)
+        )
+        return NativeCall(name, resolved, command.writes_result)
 
 
 def parse_expression(
@@ -1113,7 +1205,10 @@ def render_code(
             if command is None or len(stack) != command.stack_pop:
                 pc = raw(pc)
                 continue
-            arguments = tuple(pending.expression for pending in reversed(stack))
+            arguments = tuple(
+                _symbolize_argument(pending.expression, command, index)
+                for index, pending in enumerate(reversed(stack))
+            )
             call_start = min((pending.start for pending in stack), default=pc)
             stack = []
             call = NativeCall(command.name, arguments, command.writes_result)
