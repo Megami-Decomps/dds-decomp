@@ -37,6 +37,11 @@ Retail example: `func_0018CC98`.
 - In a sparse switch, an explicit `default: return;` after separately
   written cases can turn duplicate tail calls into one `jal` plus a
   shared epilogue (`func_0025FCD8`).
+- A switch that only picks a value (retail arms are `b <common>` with
+  `addiu $r, $0, X` in the delay slot, converging on one return) is written
+  with an accumulator: `s32 v = 1; switch (k) { case 0: v = 3; break; ... }
+  return v;`. A `return X;` per arm gives `j` instead of `b`
+  (`func_002C2F40`, `func_0030AAB0`).
 
 ## `slt; sltiu 1` vs `slt; xori 1`
 
@@ -585,6 +590,13 @@ line above the definition):
 - A literal whose retail copy an asm function of the unit still uses must
   stay `extern char D_X[]; /* "text" */` until that function is C
   (check_unit reports `SHARED`).
+- splat shows the zero bytes between a string and a following 8- or
+  16-aligned item (often a jump table) as extra `.asciz ""` entries. They
+  are alignment, not a literal: write the strings and drop the
+  `INCLUDE_RODATA` line if the blob holds only them; check_unit treats the
+  jump-table alignment as no PAD (`func_0021BFB0`). `.sdata` strings stay
+  `extern char D_X[]` with their `INCLUDE_SDATA` line: a literal moves to
+  `.rodata` and breaks the ELF even when check_unit passes.
 
 ## 128-bit data
 
@@ -597,6 +609,31 @@ hand-written.
 
 The EE ABI passes arguments 5 to 8 in `$8`–`$11` (not on the stack), so a
 7-argument call just loads `$8`–`$10`. Write the full prototype.
+
+## Frame size and dead parameters
+
+The local area is `frame - (highest saved-register offset + 8)`; size the
+function's locals from that, not from the first draft
+(`fldStartMiniTitleForUnlock`: 0x40 frame, saves at 0x30/0x38, so 0x30 of
+locals). A frame larger than the locals plus saves can also be an outgoing
+argument area, but only if retail stores to `0x0..0xF($sp)` before a call.
+A frame that is too large in our build often means a parameter retail never
+reads: drop it from the definition (`func_00108CB8`).
+
+## Address of a member vs a pointer member
+
+`addiu $a0, $base, 0x68` before a call passes the address of an embedded
+member (`f(&work->dma)`); `lw $a0, 0x68($base)` loads a pointer member
+(`f(work->dma)`). An embedded array behind a header is a struct with the
+array as its last member (`EffectRingBlock`, `MapRequestRing`).
+
+## Calls with fewer arguments than the callee reads
+
+When retail calls a function with fewer registers set than its body reads
+(a sibling `j` with `$5` never written), the original source had no
+prototype in scope. Declare it unprototyped (`void f();`) and write the
+definition K&R; a full prototype turns the call into an error
+(`fileSetRecordSecondVector`, DDS2).
 
 ## Assembler version
 
