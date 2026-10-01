@@ -2,11 +2,15 @@
 
 extern s64 kwlnTaskIsRegistered(u64);
 
-extern u64 scrReadIntParameter(u64);
+extern s32 scrReadIntParameter(s32 idx);
 
 extern s32 D_00435DD0;
 
 extern u32 D_004371F8;
+
+extern u32 D_00435CD4;
+
+extern s32 scrGetCommandTimer(void);
 
 extern u32 D_00437200;
 
@@ -223,7 +227,17 @@ u32 evtOpcodeInitializeEffectSoundChannel(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_002432A0);
+u32 func_002432A0(void) {
+    if (scrReadIntParameter(0) <= 0) {
+        D_00435CD4 |= 0x2000000;
+        return 1;
+    }
+    if (scrGetCommandTimer() < scrReadIntParameter(0)) {
+        D_00435CD4 |= 0x2000000;
+        return 0;
+    }
+    return 1;
+}
 
 typedef struct {
     u8 pad00[0xA40];
