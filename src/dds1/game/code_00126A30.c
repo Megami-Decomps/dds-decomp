@@ -7,15 +7,16 @@ extern void fldPlayFieldSeVolumePan(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
-/* One row of the per-area table; 0x5C is the stride retail uses. */
+/* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
+   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. */
 typedef struct {
     u32 unk00[11]; /* 0x00 */
     f32 unk2C;     /* 0x2C: written as a float by fldApplyActorEntryTrigger */
     u32 unk30[8];  /* 0x30 */
     u32 unk50[3];  /* 0x50 */
-} D_003CE3E0Row;
+} FldActorRow;
 
-extern D_003CE3E0Row D_003CE3E0[];
+extern FldActorRow D_003CE3E0[];
 extern s32 D_0032E530[];
 
 extern u8 D_00337D00[];
@@ -3985,7 +3986,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
 
 void fldReleaseActorTasksById(s32 id) {
     s32 i;
-    D_003CE3E0Row *task;
+    FldActorRow *task;
     FldActorEntry *actor;
 
     if (id != 0) {
