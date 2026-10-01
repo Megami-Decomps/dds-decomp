@@ -304,15 +304,15 @@ Lookup curves whose exact gameplay role remains uncertain retain neutral
 
 The AI programs use a separate battle-command vocabulary derived from each
 game's native dispatch table and handlers. It covers action and target
-selection, HP and party-state queries, history counters, scene transitions,
-and camera operations. Player/enemy group scans also name the paired action
-check and action-mode predicates, including their complementary forms. The
-native callbacks use the same `0x200`/`0x400` player/enemy filters as the
-established count and mask commands. This names 3,253 of 3,434 calls in DDS1
-and 3,703 of 3,801 calls in DDS2, allowing
-common code to read as conditions such as
-`AI_UNIT_HP_AT_OR_BELOW_RATE(25)`,
-`AI_ANY_ENEMY_ACTION_MODE_ZERO(7)`, and actions such as
-`AI_SELECT_SKILL(1)`. Calls whose handler role is still ambiguous remain as
-numeric `COMM` instructions; the profile does not infer names from usage
-alone.
+selection, HP and MP queries, queued and current actions, party state, history
+counters, scene transitions, and camera operations. Player/enemy group scans
+use the same `0x200`/`0x400` filters across the paired predicates and target
+selectors. Related-engine command identities support `AI_SELECT_ESCAPE`,
+`AI_SELECT_WAIT`, and `AI_RESTORE_BATTLE_CAMERA`; the DDS handlers establish
+their local contracts. This names 3,432 of 3,434 calls in DDS1 and 3,800 of
+3,801 calls in DDS2, allowing common code to read as conditions such as
+`AI_UNIT_MP_AT_OR_BELOW_RATE(25)`,
+`AI_ANY_PLAYER_HAS_QUEUED_ACTION(365)`, and actions such as
+`AI_SELECT_LOWEST_LEVEL_TARGET()`. Two calls to an exact DDS1 target-selection
+alias and one complex DDS2 action selector remain numeric because their
+distinct public roles are not established.
