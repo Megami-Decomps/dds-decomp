@@ -334,11 +334,6 @@ u32 evtSelectFinalVisualNode(void) {
     return 1;
 }
 
-/* Parked: body is dspUpdateFlagEvent (src/dds1/game/code_0024CFB0.c) with
- * menuSetHandler(state, 0, request), fldClassifyRemainingFrames instead of
- * dspStartFlagEvent, and D_003CE97C. Everything matches except the polarity
- * register of two guards: retail uses bnel $2,$0 (blez), mine picks the
- * opposite compare. Draft: /home/raikaru/sandbox_L61_Ports/a900_parked.txt */
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A900);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A998);

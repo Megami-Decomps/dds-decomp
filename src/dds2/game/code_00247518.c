@@ -848,9 +848,6 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D148);
 
-/* Parked: retail keeps the lui/addiu out of the jal delay slot (nop there);
- * ee-gcc 2.96 in this unit hoists it into $16 and moves to $2. Draft kept in
- * /home/raikaru/sandbox_L61_Ports/row20_parked.txt. */
 INCLUDE_ASM(const s32, "game/code_00247518", evtViewerPickNextHandler);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D430);
