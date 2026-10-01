@@ -512,4 +512,16 @@
 #define VU0_SET_VF10_W(f) \
     VU0_SCALAR_OP_CLOBBER(f, "vmulx.w vf10, vf0, vf2x")
 
+/* Store vf10 to base+off, recomputing the address. The tied output (no
+ * early clobber) lets gcc reuse the base register for the address. The
+ * `addiu` is part of the asm because the C form (`dst = base + off;` then a
+ * bare sqc2) was tried and picks other registers (retail addiu's into the
+ * base's register). */
+#define VU0_STORE_VF10_BASE_OFF(dst, base, off) __asm__ volatile ( \
+    ".set noreorder    \n" \
+    "addiu %0, %1, %2  \n" \
+    "sqc2 vf10, 0(%0)  \n" \
+    ".set reorder" \
+    : "=r" (dst) : "r" (base), "i" (off) : "memory")
+
 #endif

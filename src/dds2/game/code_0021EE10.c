@@ -1225,7 +1225,7 @@ s32 btlSelectActionCameraByTableFlags(ActionUnit *unit) {
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
+        /* Both arms are identical in retail; kept as written. */
         if ((flags & 0x10) == 0) {
             btlChooseBrahmaGroupCamera((u32)unit);
         } else {
@@ -1404,7 +1404,7 @@ s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        /* retail keeps both copies of this call, so the arms presumably differed in the original (e.g. a compiled-out debug call) */
+        /* Both arms are identical in retail; kept as written. */
         if ((flags & 0x10) == 0) {
             func_002240C0((u32)unit);
         } else {

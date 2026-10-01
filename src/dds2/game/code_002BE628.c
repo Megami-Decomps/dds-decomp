@@ -419,6 +419,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     }
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
+    /* Both arms are identical in retail; kept as written. */
     if (menu->flags & 0x80) {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selectedPanel, param);
     } else {
@@ -2332,7 +2333,36 @@ extern u8 D_0037F590[];
 extern u8 D_003846F0[];
 extern u8 D_003820F0[];
 
-INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestUpdateCamera);
+/* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
+void evtStageTestUpdateCamera(void)
+{
+    s128 eye;
+    s128 at;
+    s32 slot;
+
+    slot = func_00100400();
+    func_002C6790();
+    PCP_COPY_VECTOR(D_0037F690, D_003E7950);
+    PCP_COPY_VECTOR(D_0037F680, D_003E7940);
+    PCP_COPY_VECTOR(D_0037F6A0, D_003E7960);
+    sdfCameraBuildProjection(D_0037F5E0);
+    VU0_LOAD_VF(vf10, D_0037F680);
+    VU0_LOAD_VF(vf11, D_0037F690);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F590);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &eye);
+    VU0_LOAD_VF(vf10, D_0037F690);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &at);
+    sdfVuBuildLookAtBasis(&eye, &at, D_0037F6A0);
+    VU0_STORE_MATRIX_UNCLOBBERED(D_003846F0);
+    sdfConsBuildMatrixPacket(D_003820F0 + slot * 8000, D_0037F5E0, D_003846F0);
+    sdfConsCacheTransformedNode(D_0037F5E0, D_003846F0);
+}
 
 s8 evtStageTestUpdate(s32 frame) {
     s8 result = func_002C6CE8();

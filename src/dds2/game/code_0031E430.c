@@ -283,11 +283,11 @@ void itfDrawFadeGlyphForFrame(FadeEntry *entry) {
     }
     mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 6, 0x54);
     if (entry->frame != 1) {
-        if (entry->frame != 2) goto LAB_0031f0c4;
+        if (entry->frame != 2) goto update;
         mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 5, 0x54);
     }
     mnuDrawIndexedFadeGlyph(0, 0, entry->extent, 4, 0x54);
-LAB_0031f0c4:
+update:
     itfUpdateFade(entry);
 }
 

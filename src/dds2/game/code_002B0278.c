@@ -1212,6 +1212,7 @@ s64 mnuCampMenuDrawSlotLabel(s32 callback) {
         mnuCreateStaffImageSprite(0xe);
     }
     func_002AAC98(0, ((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index, D_003E69B0, context, 1, 0x53);
+    /* Both arms are identical in retail; kept as written. */
     if (((MenuWindowContainer *)((MenuContext *)context)->imageHandle)->list->cursor->index == 0) {
         func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
     } else {

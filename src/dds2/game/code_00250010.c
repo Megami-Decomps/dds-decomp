@@ -324,8 +324,6 @@ void evtCreateSkyTask(void) {
     kwlnTaskCreate(D_004373D0, 0x2B0E, 1, 1, (s32)evtUpdateSkyTask, (s32)evtResetSkyTaskFlags, 0);
 }
 
-/* Parked: build/parked/dds2/game/code_00250010/evtUpdateFrameVariableTask.c (needs a 4-word
-   stack local; an unused buffer matches but is a codegen lever, not source). */
 INCLUDE_ASM(const s32, "game/code_00250010", evtUpdateFrameVariableTask);
 
 extern s32 kwlnTaskCreate(char *name, s32 taskId, s32 arg2, s32 arg3, s32 update, s32 destroy, s32 data);

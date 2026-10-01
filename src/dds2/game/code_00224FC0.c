@@ -144,6 +144,7 @@ s32 btlDispatchActionByResourceFlags(BattleActionUnit *unit) {
 
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
         if ((flags & 0x10) == 0) {
             func_00224F88((u32)unit);
         } else {
