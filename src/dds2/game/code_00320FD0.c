@@ -41,7 +41,12 @@ typedef struct ResourceNode {
 typedef struct ResourceList {
     u32 count;
     ResourceNode *first;
+    ResourceNode *last;
+    u32 unk_C;
+    void (*onRemove)(u32, u32); /* 0x10: called with each node's id and handle */
 } ResourceList;
+
+extern void func_0035A880(ResourceNode *);
 
 u32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
 
@@ -54,7 +59,25 @@ u32 mnuRemoveResourceNodeById(u32 list) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321018);
+/* Notify and free every node, then reset the list. */
+void func_00321018(ResourceList *list) {
+    ResourceNode *node;
+
+    if (list != NULL) {
+        node = list->first;
+        if (node != NULL) {
+            do {
+                ResourceNode *current = node;
+                node = node->next;
+                list->onRemove(current->id, current->handle);
+                func_0035A880(current);
+            } while (node != NULL);
+        }
+        list->last = NULL;
+        list->first = NULL;
+        list->count = 0;
+    }
+}
 
 typedef struct SdfLink {
     u8 pad00[8];
