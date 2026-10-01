@@ -8,11 +8,11 @@
 /* Particle object layout mirrors the matching DDS1 unit and parManager. */
 typedef struct ParObj {
     u8 pad00[0x10];    /* 0x00 */
-    f32 unk10;          /* 0x10 */
-    f32 unk14;          /* 0x14 */
+    f32 scaleX;         /* 0x10: billboard child X scale */
+    f32 scaleY;         /* 0x14: billboard child Y scale */
     u8 pad18[0x10];    /* 0x18 */
     s32 unk28;          /* 0x28 */
-    s16 unk2C;          /* 0x2C */
+    s16 billboardMode;  /* 0x2C */
     u8 pad2E[0x5E];    /* 0x2E */
     f32 scale8C;       /* 0x8C */
     u8 pad90[0x14];    /* 0x90 */
@@ -99,7 +99,7 @@ typedef struct ParSystem {
     s16 unk2;            /* 0x02 */
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
-    s32 unkC;            /* 0x0C */
+    s32 groupDivisor;   /* 0x0C: cell-system allocator input */
     s32 handle;          /* 0x10 */
     ParCell *cells;      /* 0x14 */
     void *vertices;      /* 0x18 */
@@ -158,11 +158,11 @@ typedef struct ParEmitDesc {
     u8 pad14[0x04];
     s32 headerSize;     /* 0x18 */
     u8 pad1C[0xAC];
-    u16 unkC8;          /* 0xC8 */
+    u16 verticesPerCell; /* 0xC8: perCell input to parAllocateCellSystem */
     u8 padCA[0x0A];
     s32 unkD4;          /* 0xD4 */
     s32 unkD8;          /* 0xD8 */
-    s32 unkDC;          /* 0xDC */
+    s32 cellSystem;     /* 0xDC: allocated cell system */
     void *unkE0;        /* 0xE0 */
 } ParEmitDesc;
 
@@ -250,8 +250,8 @@ ParObj *parInstantiateKind(ParObj *src) {
     obj->dispatchIndex = src->dispatchIndex;
     if (src->unk28 == -1) {
         bill = billCloneObjectRetainingSharedData(src->billId);
-        billSetChildScaleComponents(bill, obj->unk10, obj->unk14);
-        billSetBillboardMode(bill, obj->unk2C);
+        billSetChildScaleComponents(bill, obj->scaleX, obj->scaleY);
+        billSetBillboardMode(bill, obj->billboardMode);
         billMarkKindOneFlag(bill);
         obj->billId = bill;
     }
@@ -552,7 +552,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     system->cellCount = count;
     system->unk2 = 2;
     system->vertexWordCount = perCell;
-    system->unkC = groupDivisor;
+    system->groupDivisor = groupDivisor;
     system->handle = handle;
     system->unk24 = 0;
     system->unk28 = 0;
@@ -1101,11 +1101,11 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     memcpy((u8 *)desc + 0xC0, (u8 *)src + src->headerSize, 0x30);
     desc->headerSize = 0xC0;
     desc->unkE0 = (u8 *)desc + 0xF0;
-    if (desc->unkC8 < 3) {
-        desc->unkC8 = 3;
+    if (desc->verticesPerCell < 3) {
+        desc->verticesPerCell = 3;
     }
-    desc->unkDC = parAllocateCellSystem(desc->count, desc->unkC8, 1, 0);
-    parDispatchSub(desc->unkDC, 0, desc->unkD4, desc->unkD8);
+    desc->cellSystem = parAllocateCellSystem(desc->count, desc->verticesPerCell, 1, 0);
+    parDispatchSub(desc->cellSystem, 0, desc->unkD4, desc->unkD8);
     func_00165600(desc);
     return desc;
 }
