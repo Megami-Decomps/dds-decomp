@@ -61,12 +61,29 @@ extern u8 D_0047B440[];
 
 extern s32 func_00342848();
 
-typedef struct SoundNode {
+typedef struct SdfStreamFrameNode {
     u8 pad00[8];
-    struct SoundNode *next;
-} SoundNode;
-
-extern SoundNode *sdfSoundNodeHead;
+    struct SdfStreamFrameNode *next; /* 0x08: sound list link */
+    u8 pad0C[8];
+    u8 audioMode;     /* 0x14: 0=none, 1=mono, 2=stereo */
+    u8 loopMode;      /* 0x15 */
+    u8 playbackMode;  /* 0x16 */
+    u8 pad17[5];
+    s32 bufferSize;   /* 0x1C */
+    s32 buffers[2];   /* 0x20 */
+    u8 pad28[0xC];
+    s32 resourceWord; /* 0x34: retained resource handle */
+    u8 pad38[4];
+    u16 width;        /* 0x3C */
+    u16 height;       /* 0x3E */
+    s32 sourceBytes;  /* 0x40: from stream header */
+    u8 pad44[0x10];
+    s32 scratchBuffer; /* 0x54 */
+    u8 pad58[4];
+    s32 firstParam;   /* 0x5C */
+    s32 secondParam;  /* 0x60 */
+} SdfStreamFrameNode;
+extern SdfStreamFrameNode *sdfSoundNodeHead;
 
 typedef struct SdfStreamNode {
     struct SdfStreamNode *prev;
@@ -621,9 +638,9 @@ void sdfStreamNodeAppend(SdfStreamNode *node, s32 inInterrupt) {
     }
 }
 
-void sdfSoundAppendNode(SoundNode *node) {
-    SoundNode **tail = &sdfSoundNodeHead;
-    SoundNode *current = *tail;
+void sdfSoundAppendNode(SdfStreamFrameNode *node) {
+    SdfStreamFrameNode **tail = &sdfSoundNodeHead;
+    SdfStreamFrameNode *current = *tail;
     if (current != NULL) {
         tail = &current->next;
         while ((current = *tail) != NULL) {
@@ -634,9 +651,9 @@ void sdfSoundAppendNode(SoundNode *node) {
     node->next = NULL;
 }
 
-void sdfSoundRemoveNode(SoundNode *node) {
-    SoundNode **link = &sdfSoundNodeHead;
-    SoundNode *current = *link;
+void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
+    SdfStreamFrameNode **link = &sdfSoundNodeHead;
+    SdfStreamFrameNode *current = *link;
     while (current != NULL) {
         if (current == node) {
             *link = current->next;
@@ -647,26 +664,6 @@ void sdfSoundRemoveNode(SoundNode *node) {
     }
 }
 
-typedef struct SdfStreamFrameNode {
-    u8 pad00[0x14];
-    u8 audioMode;     /* 0x14: 0=none, 1=mono, 2=stereo */
-    u8 loopMode;      /* 0x15 */
-    u8 playbackMode;  /* 0x16 */
-    u8 pad17[5];
-    s32 bufferSize;   /* 0x1C */
-    s32 buffers[2];   /* 0x20 */
-    u8 pad28[0xC];
-    s32 resourceWord; /* 0x34: retained resource handle */
-    u8 pad38[4];
-    u16 width;        /* 0x3C */
-    u16 height;       /* 0x3E */
-    s32 sourceBytes;  /* 0x40: from stream header */
-    u8 pad44[0x10];
-    s32 scratchBuffer; /* 0x54 */
-    u8 pad58[4];
-    s32 firstParam;   /* 0x5C */
-    s32 secondParam;  /* 0x60 */
-} SdfStreamFrameNode;
 
 extern s32 sdfAllocateBlockBySizeThreshold(s32);
 
@@ -971,7 +968,7 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00345488);
 void sdfSoundInitAndAppendNode(u8 *state, s32 format, s32 source, s32 size, s32 resource) {
     sdfStreamOpen(state, format, source, size);
     ((SdfStreamFrameNode *)state)->resourceWord = resource;
-    sdfSoundAppendNode((SoundNode *)state);
+    sdfSoundAppendNode((SdfStreamFrameNode *)state);
 }
 
 typedef struct SdfStreamParams {
@@ -999,7 +996,7 @@ void sdfStreamCreateWithParams(s32 state, SdfStreamParams *params, s32 source, s
 void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format, s32 first, s32 second, s32 resource) {
     sdfSoundInitFormattedNode(state, format, first, second);
     ((SdfStreamFrameNode *)state)->resourceWord = resource;
-    sdfSoundAppendNode((SoundNode *)state);
+    sdfSoundAppendNode((SdfStreamFrameNode *)state);
 }
 
 extern s32 D_004391FC;
