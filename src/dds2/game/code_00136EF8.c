@@ -318,18 +318,18 @@ typedef struct FldAreaState {
 } FldAreaState;
 
 /* Field actor table entries are 0x6C bytes; the area index stored by the
- * field state is zero-based, whereas entry->area is one-based. */
+ * field state is zero-based, whereas entry->floor is one-based. */
 typedef struct FldActorEntry {
     /* 0x00 */ s8 kind;
     /* 0x01 */ u8 pad01;
-    /* 0x02 */ s16 modelId;
-    /* 0x04 */ s16 area;
+    /* 0x02 */ s16 requiredFlag;
+    /* 0x04 */ s16 floor;
     /* 0x06 */ char name[0xC];
-    /* 0x12 */ s16 state;
-    /* 0x14 */ s16 state2;
-    /* 0x16 */ s16 state3;
-    /* 0x18 */ u8 name0[0xC];
-    /* 0x24 */ u8 name1[0xC];
+    /* 0x12 */ s16 motion;
+    /* 0x14 */ s16 secondaryMotion;
+    /* 0x16 */ s16 sound;
+    /* 0x18 */ u8 motionName[0xC];
+    /* 0x24 */ u8 otherName[0xC];
     /* 0x30 */ s8 variantMode;
     /* 0x31 */ u8 flags31;
     /* 0x32 */ s16 variant;
@@ -341,12 +341,12 @@ typedef struct FldActorEntry {
     /* 0x46 */ char linkName[0xC];
     /* 0x52 */ s8 unk52;
     /* 0x53 */ s8 unk53;
-    /* 0x54 */ s8 unk54;
-    /* 0x55 */ char unk55[0xF];
+    /* 0x54 */ s8 flags54;
+    /* 0x55 */ char pad55[0xF];
     /* 0x64 */ u8 flags64;
     /* 0x65 */ s8 unk65;
     /* 0x66 */ s8 unk66;
-    /* 0x67 */ s8 unk67;
+    /* 0x67 */ s8 value67;
     /* 0x68 */ s8 unk68;
     /* 0x69 */ s8 unk69;
     /* 0x6A */ s8 unk6A;
@@ -1077,9 +1077,9 @@ u8 *fldPickActorTemplateByName(const char *name) {
     }
     do {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        flag = entry->modelId;
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
@@ -1140,9 +1140,9 @@ u8 *fldFindActorEntryByName(const char *name) {
     }
     do {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        flag = entry->modelId;
+        flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1
+            && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
@@ -1194,7 +1194,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + index * 108);
-    if (entry->area == D_00389784[0] + 1 && entry->kind == 10) {
+    if (entry->floor == D_00389784[0] + 1 && entry->kind == 10) {
         fldSelectedActorEntryIndex = index;
         D_004361F8 = 8;
         return D_00391F30;
@@ -1213,15 +1213,15 @@ s32 fldQuerySelectedActorMotionState(s32 mode) {
     s16 a;
     u32 result;
     if (mode == 0 && entry->kind == 1) {
-        a = entry->state;
-        if (a == 5 || entry->state2 == 5 || a == 6 || entry->state2 == 6 || a == 7 ||
-            entry->state2 == 7 || a == 8 || entry->state2 == 8) {
+        a = entry->motion;
+        if (a == 5 || entry->secondaryMotion == 5 || a == 6 || entry->secondaryMotion == 6 || a == 7 ||
+            entry->secondaryMotion == 7 || a == 8 || entry->secondaryMotion == 8) {
             return 0x28;
         }
         return 0x14;
     }
     if (mode == 1) {
-        result = (u8)entry->unk54 & 8;
+        result = (u8)entry->flags54 & 8;
         return result != 0;
     }
     return 0;
@@ -1251,16 +1251,16 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     entry = (FldActorEntry *)(D_003932A0 + index * 108);
     kind = entry->kind;
     if (kind == 1) {
-        if (entry->area == D_00389784[0] + 1) {
-            fldPlayMenuSound(entry->state3);
+        if (entry->floor == D_00389784[0] + 1) {
+            fldPlayMenuSound(entry->sound);
             fldBeginNpcInteractionById(D_00449B30[index].unk00[1]);
             return;
         }
     } else if (kind == 2) {
-        if (entry->area == fldAreaState[5] + 1) {
+        if (entry->floor == fldAreaState[5] + 1) {
             fldAreaState[97] = 1;
             *(f32 *)&fldAreaState[96] = D_00449B30[index].unk2C;
-            if (entry->state == 1) {
+            if (entry->motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
             }
@@ -1271,16 +1271,16 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
         kwlnFadeSetRGB(0, 0, 0);
         return;
     } else if (kind == 5) {
-        if (entry->state == 0) {
+        if (entry->motion == 0) {
             D_003898FC[0] = 0x64;
         } else {
             D_003898FC[0] = -0x64;
         }
     } else if (kind == 10) {
     } else if (kind == 11) {
-        if (entry->area == D_00389784[0] + 1) {
-            if (entry->state == 3) {
-                fldApplyRoomObjectModeZero(0, 0, entry->name1, 0);
+        if (entry->floor == D_00389784[0] + 1) {
+            if (entry->motion == 3) {
+                fldApplyRoomObjectModeZero(0, 0, entry->otherName, 0);
                 return;
             }
         }
@@ -1338,19 +1338,19 @@ s32 fldGetActorStat0(s32 mode) {
 
     switch (mode) {
     case 0:
-        return actor->state;
+        return actor->motion;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
     case 3:
-        flags = (u16)actor->state2;
+        flags = (u16)actor->secondaryMotion;
         if (flags & 1) {
             return 1;
         }
@@ -1371,7 +1371,7 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
 
     switch (mode) {
     case 0:
-        switch (actor->state) {
+        switch (actor->motion) {
         case 0:
             return 0xC;
         case 1:
@@ -1385,20 +1385,20 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
         }
         return 0;
     case 1:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name0);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->motionName);
         if (entry != NULL) {
             return entry[1];
         }
     case 2:
-        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->name1);
+        entry = dds3FindObjectChainNodeByName(dds3GetWorldObject(), actor->otherName);
         if (entry != NULL) {
             return entry[1];
         }
-        return actor->state2;
+        return actor->secondaryMotion;
     case 3:
-        return actor->state2;
+        return actor->secondaryMotion;
     case 4:
-        return actor->state3;
+        return actor->sound;
     case 5:
         return D_003897C0[0] != 1;
     }
@@ -1409,7 +1409,7 @@ s32 fldGetMappedActorStateAttribute(u32 mode) {
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 kind) {
     FldActorEntry *entry = (FldActorEntry *)(D_003932A0 + fldSelectedActorEntryIndex * 108);
-    s16 index = entry->state;
+    s16 index = entry->motion;
     s32 *found;
     s32 flags;
 
@@ -1437,7 +1437,7 @@ s32 fldGetActorMotionEntry(u32 kind) {
     case 6:
         flags = entry->flags64;
         if (flags & 1) {
-            return entry->unk67;
+            return entry->value67;
         }
         return -1;
     }
@@ -1557,7 +1557,7 @@ void fldBeginNpcInteractionById(s32 id) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
             npc = (u32 *)&D_00449B30[i];
             if (npc[0] == 1 && npc[1] == id) {
-                fldApplyRoomObjectModeZero(0, 0, actor->name0, 0);
+                fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
                 return;
             }
         }
@@ -1570,8 +1570,8 @@ void fldBeginNpcInteractionById(s32 id) {
                 npc[7] = 0;
                 npc[8] = 0;
                 npc[9] = 0;
-                if (actor->state == 5 || actor->state2 == 5 || actor->state == 6 || actor->state2 == 6
-                    || actor->state == 7 || actor->state2 == 7 || actor->state == 8 || actor->state2 == 8) {
+                if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6 || actor->secondaryMotion == 6
+                    || actor->motion == 7 || actor->secondaryMotion == 7 || actor->motion == 8 || actor->secondaryMotion == 8) {
                     npc[10] = 0x28;
                 } else {
                     npc[10] = 0x14;
@@ -1603,11 +1603,11 @@ void fldApplyCurrentAreaActorEntries(void) {
 
     for (i = 0; i < 256; i++) {
         entry = (FldActorEntry *)(D_003932A0 + i * 108);
-        if (entry->kind == 1 && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->state != 0) {
-            fldApplyRoomObjectModeOne(0, 0, entry->name0, 0);
+        if (entry->kind == 1 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion != 0) {
+            fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
         }
-        if (entry->kind == 11 && entry->area == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->state == 3) {
-            fldApplyRoomObjectModeOne(0, 0, entry->name1, 0);
+        if (entry->kind == 11 && entry->floor == ((FldAreaState *)fldAreaState)->areaIndex + 1 && entry->motion == 3) {
+            fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
         }
     }
 }

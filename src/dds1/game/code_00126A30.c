@@ -3626,9 +3626,13 @@ typedef struct FldActorEntry {
     u8 flags54;            /* 0x54 */
     u8 pad55[0x0F];
     u8 flags64;            /* 0x64 */
-    u8 pad65[2];
+    u8 unk65;
+    u8 unk66;
     s8 value67;            /* 0x67 */
-    u8 pad68[4];
+    u8 unk68;
+    u8 unk69;
+    u8 unk6A;
+    u8 unk6B;
 } FldActorEntry;
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A01F8);
