@@ -1085,7 +1085,7 @@ void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
     pos[2] = z;
     handle = *emitter->res->drawNodeHandle;
     VU0_LOAD_VF_MEMORY(vf10, pos);
-    __asm__ volatile (".set noreorder\n\tvmove.w vf10, vf0\n\t.set reorder");
+    VU0_SET_W_ONE(vf10);
     VU0_STORE_VF(vf10, emitter->pos);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);

@@ -320,29 +320,10 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_LOAD_VF_MEMORY(vf30, zAxis);
     scale = drawNode->vectors[SDF_DRAW_SCALE_VECTOR];
     VU0_LOAD_VF_MEMORY(vf10, scale);
-    __asm__ volatile (
-        ".set noreorder                   \n"
-        "vmulx.xyzw vf28, vf28, vf10x     \n"
-        "vmuly.xyzw vf29, vf29, vf10y     \n"
-        "vmulz.xyzw vf30, vf30, vf10z     \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+    VU0_SCALE_MATRIX_ROWS(vf10);
     translation = drawNode->vectors[SDF_DRAW_TRANSLATION_VECTOR];
-    __asm__ volatile ("lqc2 vf31, 0(%0)" :: "r" (translation) : "memory");
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "lqc2 vf24, 0(%0)        \n"
-        "lqc2 vf25, 16(%0)       \n"
-        "lqc2 vf26, 32(%0)       \n"
-        "lqc2 vf27, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (parentMatrix)
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf31, translation);
+    VU0_LOAD_MATRIX_B(parentMatrix);
     sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
@@ -369,33 +350,9 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
 
     VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
-    __asm__ volatile (
-        "lqc2 vf10, 0(%0)"
-        :
-        : "r" (scale)
-        : "memory"
-    );
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmul.xyz vf28, vf28, vf10    \n"
-        "vmul.xyz vf29, vf29, vf10    \n"
-        "vmul.xyz vf30, vf30, vf10    \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "sqc2 vf28, %0           \n"
-        "sqc2 vf29, %1           \n"
-        "sqc2 vf30, %2           \n"
-        "sqc2 vf31, %3           \n"
-        ".set reorder"
-        :
-        : "m" (rootMatrix[0]), "m" (rootMatrix[1]), "m" (rootMatrix[2]), "m" (rootMatrix[3])
-        : "memory"
-    );
+    VU0_LOAD_VF_MEMORY(vf10, scale);
+    VU0_MUL_MATRIX_ROWS_VF10();
+    VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
     sdfModelUpdateDrawNodeTransforms(list->entries[0], rootMatrix, frame);
 }

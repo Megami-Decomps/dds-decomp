@@ -1187,40 +1187,15 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     VU0_LOAD_MATRIX_MEMORY(D_003846F0);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F650) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F660) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_MOVE_MATRIX_TO_B();
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1231,40 +1206,15 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     VU0_LOAD_MATRIX_MEMORY(D_00384790);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F9B0);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F9F0) : "memory");
-    __asm__ volatile ("vmul.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037FA00) : "memory");
-    __asm__ volatile ("vadd.xyzw vf10, vf10, vf11");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_MOVE_MATRIX_TO_B();
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF_MEMORY(vf11, D_0037F9F0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF_MEMORY(vf11, D_0037FA00);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1274,50 +1224,21 @@ void fldPrepareProjectionMatrix(void) {
     VU0_LOAD_MATRIX_MEMORY(D_003846F0);
     matrix = D_0037F610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "vmove.xyzw vf24, vf28\n"
-        "vmove.xyzw vf25, vf29\n"
-        "vmove.xyzw vf26, vf30\n"
-        "vmove.xyzw vf27, vf31\n"
-        ".set reorder"
-        : : : "memory");
+    VU0_MOVE_MATRIX_TO_B();
     matrix += 0x40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        ".set reorder"
-        : : "r"(matrix) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf12, 0(%0)\n"
-        ".set reorder"
-        : : "r"(D_0037F660) : "memory");
+    VU0_LOAD_VF_MEMORY(vf11, matrix);
+    VU0_LOAD_VF_MEMORY(vf12, D_0037F660);
 }
 
 void fldProjectPointWithPreparedMatrix(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf10, 0(%0)\n"
-        "vmulax.xyzw ACC, vf28, vf10x\n"
-        "vmadday.xyzw ACC, vf29, vf10y\n"
-        "vmaddaz.xyzw ACC, vf30, vf10z\n"
-        "vmaddw.xyzw vf10, vf31, vf0w\n"
-        "vdiv Q, vf0w, vf10w\n"
-        "vmove.w vf10, vf0\n"
-        "vwaitq\n"
-        "vmulq.xyzw vf10, vf10, Q\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        "vadd.xyzw vf10, vf10, vf12\n"
-        ".set reorder"
-        : : "r"(vec) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "sqc2 vf10, 0(%0)\n"
-        ".set reorder"
-        : : "r"(result) : "memory");
+    VU0_LOAD_VF_MEMORY(vf10, vec);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_STORE_VF(vf10, result);
     *dstX = result[0];
     *dstY = result[1];
 }

@@ -1742,14 +1742,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
     if (D_00453550.taskPhase < 4) {
         if (D_00453550.taskPhase >= 2) {
             list = sdfCreateResetPacketList();
-            __asm__ volatile(
-                ".set noreorder\n\t"
-                "vsub.xyzw $vf28, $vf0, $vf0\n\t"
-                "vmr32.xyzw $vf30, $vf0\n\t"
-                "vmove.xyzw $vf31, $vf0\n\t"
-                "vaddw.x $vf28, $vf28, $vf0w\n\t"
-                "vmr32.xyzw $vf29, $vf30\n\t"
-                ".set reorder" ::: "memory");
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
             sdfAppendPacket(list, func_00348188(D_003C8930, D_003C8990, 6, 0x80));
             D_00380048.submit(&D_00380048, list);
         }

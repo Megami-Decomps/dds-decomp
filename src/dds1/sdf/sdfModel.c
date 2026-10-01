@@ -384,27 +384,8 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
     VU0_LOAD_VF_MEMORY(vf10, scale);
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmul.xyz vf28, vf28, vf10    \n"
-        "vmul.xyz vf29, vf29, vf10    \n"
-        "vmul.xyz vf30, vf30, vf10    \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "sqc2 vf28, %0           \n"
-        "sqc2 vf29, %1           \n"
-        "sqc2 vf30, %2           \n"
-        "sqc2 vf31, %3           \n"
-        ".set reorder"
-        :
-        : "m" (rootMatrix[0]), "m" (rootMatrix[1]), "m" (rootMatrix[2]), "m" (rootMatrix[3])
-        : "memory"
-    );
+    VU0_MUL_MATRIX_ROWS_VF10();
+    VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
     list = model->list;
     sdfModelUpdateDrawNodeTransforms(list->entries[0], rootMatrix, frame);
 }

@@ -562,15 +562,8 @@ void func_0029BD38(s32 work) {
 void effScaleModelVec(s32 work, float scale) {
     u32 bits;
 
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vaddw.xyz vf10, vf0, vf0w    \n"
-        "vmulx.w vf10, vf0, vf0x      \n"
-        "mfc1 %0, $f12                \n"
-        "qmtc2.ni %0, $vf2            \n"
-        "vmulx.xyzw vf10, vf10, $vf2x \n"
-        ".set reorder"
-        : "+r" (bits) : : "memory");
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_SCALAR_OP_TMP(bits, scale, "vmulx.xyzw vf10, vf10, vf2x");
     mdlStoreTertiaryVectorVU((void *)((EffResourceOwner *)work)->model);
 }
 
