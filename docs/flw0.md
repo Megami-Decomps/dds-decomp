@@ -132,6 +132,22 @@ can be named as `result` and read later:
   WAIT_FOR_TASK_REMOVAL(result)
 ```
 
+When a profiled call's result is pushed immediately, canonical source keeps it
+as an expression through its exact consumer. This works even when older values
+are already pending on the VM stack:
+
+```text
+  WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(670, 1))
+  if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) {
+    # ...
+  }
+```
+
+The nested form lowers calls in the original order and emits one `PUSHREG` for
+each captured result. A label on the result push, a non-adjacent result read,
+or an unknown command retains explicit source instead of moving the value
+across an uncertain boundary.
+
 A profiled command may give a small integer argument a command-specific name:
 
 ```text
