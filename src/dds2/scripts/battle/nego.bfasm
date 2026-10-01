@@ -228,7 +228,7 @@ _2:
   push 0
   push 11
   push local_int[1]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   WAIT_FOR_TIMER_LIMIT(1 * 30)
   COMM 0x00d5
   if (1) {
@@ -319,7 +319,7 @@ NegoFailIntr:
   push 0
   push 12
   push local_int[8]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   push 8
   push 1
   push local_int[8]
@@ -348,7 +348,7 @@ NegoFailAttack:
   push 0
   push 12
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(local_int[10])
   return
 NegoFailEscape:
@@ -365,7 +365,7 @@ NegoFailEscape:
   push 0
   push 12
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   if (local_int[12] == 0) {
     local_int[19] = 1
   } else {
@@ -534,7 +534,7 @@ _39:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 0)
   MESSAGE_REQUEST_AND_POLL(18 + local_int[27])
   local_int[25] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
@@ -631,12 +631,12 @@ _47:
   push 0
   push 11
   push local_int[1]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   WAIT_FOR_TIMER_LIMIT(1 * 30)
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   COMM 0x00d5
   if (local_int[9] == 4113) {
     local_int[11] = local_int[11] / 2
@@ -648,7 +648,7 @@ DealMag:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   push local_int[4]
   COMM 0x0028
   PUSHREG
@@ -684,7 +684,7 @@ DealItem:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   push 4
   COMM 0x000a
   PUSHREG
@@ -766,7 +766,7 @@ RemunareJoin:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_INVITE))
   push 30
   push 0
@@ -810,7 +810,7 @@ RemunareMoney:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_MONEY))
   return
 RemunareMag:
@@ -823,7 +823,7 @@ RemunareMag:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_MAG))
   return
 RemunareItem:
@@ -837,7 +837,7 @@ RemunareItem:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_ITEM))
   return
 RemunareInfo:
@@ -845,7 +845,7 @@ RemunareInfo:
   push 0
   push 11
   push local_int[2]
-  COMM 0x00cd
+  COMM CREATE_FLAGGED_EFFECT_OBJECT
   MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_INFO))
   return
 RaptureMain:

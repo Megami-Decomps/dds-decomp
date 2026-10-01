@@ -1265,11 +1265,7 @@ suikomi_label:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[38])
   PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[40], 3, 25, 2)
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(local_int[37])
-  push local_int[41]
-  push 2
-  COMM 0x0015
-  PUSHREG
-  POPLIX 0x002a
+  local_int[42] = CREATE_LINKED_CAMERA_VIEWER(2, local_int[41])
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[42], local_int[38])
   push local_int[42]
   COMM 0x0124
@@ -1322,23 +1318,14 @@ _165:
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
       if (local_int[43] == 2560) {
-        push string(fld_f_bin_ICE_b_BED)
-        COMM 0x00cd
-        PUSHREG
-        POPLIX 0x0030
+        local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_b_BED))
       } else {
       _171:
         if (local_int[43] == 2561) {
-          push string(fld_f_bin_ICE_y_BED)
-          COMM 0x00cd
-          PUSHREG
-          POPLIX 0x0030
+          local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_y_BED))
         } else {
         _172:
-          push string(fld_f_bin_ICE_r_BED)
-          COMM 0x00cd
-          PUSHREG
-          POPLIX 0x0030
+          local_int[48] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_r_BED))
           goto _170
         }
       }
@@ -2198,10 +2185,7 @@ proc_0021:
   if_not (TEST_MODEL_FLAG(2569) == 1 && TEST_MODEL_FLAG(1734) == 0 && TEST_MODEL_FLAG(1739) == 1) goto _286
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(0)
-  push string(fld_f_bin_DVILIZE_BED)
-  COMM 0x00cd
-  PUSHREG
-  POPLIX 0x0037
+  local_int[55] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED))
   COMM 0x0216
   push 128
   COMM 0x0210
@@ -2213,11 +2197,7 @@ proc_0021:
   CLEAR_MODEL_FLAG(606)
   if_not (TEST_MODEL_FLAG(1510) == 0) goto _285
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_4)))
-  push 105
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPLIX 0x0036
+  local_int[54] = CREATE_LINKED_CAMERA_VIEWER(3, 105)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[54], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02)))
   push local_int[54]
   COMM 0x00ae
@@ -2307,11 +2287,7 @@ _280:
   goto _284
 _285:
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_2)))
-  push 105
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPLIX 0x0036
+  local_int[54] = CREATE_LINKED_CAMERA_VIEWER(3, 105)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[54], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08_2)))
   push local_int[54]
   COMM 0x00ae
@@ -2492,55 +2468,17 @@ proc_0025:
     push 128
     COMM 0x0210
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_5)))
-    push string(fld_f_bin_DVILIZE1_BED)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x003d
-    push string(fld_f_bin_DVILIZE1_BED_2)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x003e
-    push string(fld_f_bin_DVILIZE1_BED_3)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x003f
-    push string(fld_f_bin_DVILIZE1_BED_4)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0040
-    push string(fld_f_bin_DVILIZE1_BED_5)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0041
-    push string(fld_f_bin_DVILIZE1_B_BED)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0042
-    push 138
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x0038
-    push 138
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x0039
-    push 138
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x003a
-    push 138
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x003b
-    push 138
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x003c
+    local_int[61] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED))
+    local_int[62] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_2))
+    local_int[63] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_3))
+    local_int[64] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_4))
+    local_int[65] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_BED_5))
+    local_int[66] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE1_B_BED))
+    local_int[56] = CREATE_LINKED_CAMERA_VIEWER(3, 138)
+    local_int[57] = CREATE_LINKED_CAMERA_VIEWER(3, 138)
+    local_int[58] = CREATE_LINKED_CAMERA_VIEWER(3, 138)
+    local_int[59] = CREATE_LINKED_CAMERA_VIEWER(3, 138)
+    local_int[60] = CREATE_LINKED_CAMERA_VIEWER(3, 138)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[56], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_2)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[57], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04)))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[58], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_2)))
@@ -2766,15 +2704,8 @@ proc_0027:
     push 128
     COMM 0x0210
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_9)))
-    push string(fld_f_bin_DVILIZE_BED_2)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0044
-    push 18
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x0043
+    local_int[68] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_2))
+    local_int[67] = CREATE_LINKED_CAMERA_VIEWER(3, 18)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[67], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_3)))
     push local_int[67]
     COMM 0x00ae
@@ -2890,15 +2821,8 @@ proc_0029:
     push 128
     COMM 0x0210
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_13)))
-    push string(fld_f_bin_DVILIZE_BED_3)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0046
-    push 104
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x0045
+    local_int[70] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_3))
+    local_int[69] = CREATE_LINKED_CAMERA_VIEWER(3, 104)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[69], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_4)))
     push local_int[69]
     COMM 0x00ae
@@ -3021,15 +2945,8 @@ proc_002b:
     COMM 0x0070
     CLEAR_MODEL_FLAG(1523)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_17)))
-    push string(fld_f_bin_DVILIZE_BED_4)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0048
-    push 106
-    push 3
-    COMM 0x0015
-    PUSHREG
-    POPLIX 0x0047
+    local_int[72] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_4))
+    local_int[71] = CREATE_LINKED_CAMERA_VIEWER(3, 106)
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[71], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
     push local_int[71]
     COMM 0x00ae
