@@ -57,7 +57,10 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003283E0", func_00328520);
+void func_00328520(const char *format, ...) {
+    for (;;) {
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003283E0", sdfAddHandler);
 

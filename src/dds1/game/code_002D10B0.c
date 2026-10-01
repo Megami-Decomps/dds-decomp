@@ -42,7 +42,7 @@ extern u32 D_003BD2F8;
 void *func_002CFEB8(s32 size);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexHead *func_002D17D8(s32 size, s32 arg1);
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
 void sdfTexCreateSecondPacket(void);
 void func_002D2FB0(void);
 void sdfPendingQueuePush(void *arg0, s32 arg1);
@@ -53,9 +53,9 @@ s32 func_002D0A80(s32 address);
 
 s32 sdfChipIsInRange(s32 address);
 
-void sdfRequestDeferredGsImageCapture(u32 arg0, u32 arg1) {
-    D_003BD2F4 = arg0;
-    D_003BD2F8 = arg1;
+void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
+    D_003BD2F4 = destination;
+    D_003BD2F8 = onComplete;
     D_003BD2F0 = 1;
 }
 
@@ -176,15 +176,15 @@ extern s32 func_00312C08(void);
 extern void EIntr(void);
 extern struct SdfTexHead *func_002D18F8(s32 size, s32 arg1);
 
-SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s32 arg3, s32 arg4) {
+SdfTexHead *sdfTexAllocateHeadForDimensions(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
     s32 bits = sdfFormatBitsPerPixelA(format);
     s32 size = (width * height * bits) >> 5;
     SdfTexHead *node;
 
-    if (arg4 != 0) {
-        node = func_002D17D8(size, arg3);
+    if (useFirstAllocator != 0) {
+        node = func_002D17D8(size, allocationMode);
     } else {
-        node = func_002D18F8(size, arg3);
+        node = func_002D18F8(size, allocationMode);
     }
     node->width = width;
     node->height = height;
@@ -210,8 +210,8 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexHead *node) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1B28);
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0) {
-    SdfTexHead *node = (SdfTexHead *)arg0;
+void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
+    SdfTexHead *node = (SdfTexHead *)block;
     s32 state;
 
     if (node == NULL) {
@@ -230,8 +230,8 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0) {
     }
 }
 
-void sdfTexQueuePendingWork(s32 arg0) {
-    sdfPendingQueuePush(&D_003BD9E8, arg0);
+void sdfTexQueuePendingWork(s32 value) {
+    sdfPendingQueuePush(&D_003BD9E8, value);
 }
 
 void sdfTexInitializeLists(void) {
@@ -353,11 +353,11 @@ void sdfTexQueueResourceRelease(s32 address) {
     }
 }
 
-void sdfResetSemaphoreState(SdfSemaObj *arg0) {
-    arg0->unk4 = NULL;
-    arg0->unk8 = NULL;
-    arg0->unkC = NULL;
-    arg0->unk10 = 0;
+void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
+    semaphore->unk4 = NULL;
+    semaphore->unk8 = NULL;
+    semaphore->unkC = NULL;
+    semaphore->unk10 = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2140);
@@ -457,21 +457,21 @@ u64 func_002D2488(SdfTex *texture) {
     return texture->unk28->unk30;
 }
 
-void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 arg1, s32 arg2) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf;
 
     buf = texture->unk28;
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
+    buf->unk10 = (buf->unk10 & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
-void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 arg1, s32 arg2) {
+void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf = tex->unk2C;
 
     if (buf == NULL) {
         sdfTexCreateSecondPacket();
         buf = tex->unk2C;
     }
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (arg1 << 5) | (arg2 << 6);
+    buf->unk10 = (buf->unk10 & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
 void func_002D2530(SdfTex *texture, u8 value) {
@@ -514,17 +514,17 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
     ref->refCount = 1;
     tex->unk18 = arg6;
-    tex->unk19 = arg5;
+    tex->unk19 = paletteFormat;
     tex->unkC = x;
     tex->unkE = y;
     tex->unk1A = pixelFormat;
-    tex->unk1B = arg3;
+    tex->unk1B = maxMipLevel;
     tex->secondaryResource = (SdfTexResource *)secondary;
     tex->primaryResource = (SdfTexResource *)primary;
     tex->reference = ref;

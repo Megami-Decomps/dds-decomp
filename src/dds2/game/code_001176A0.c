@@ -314,8 +314,8 @@ INCLUDE_ASM(const s32, "game/code_001176A0", func_001189D0);
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118AB0);
 
-void sdfDispatchCmd(u32 context, u32 first, u32 second, u32 flags) {
-    func_00118AB0(context, first, second, (u8)flags);
+void sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    func_00118AB0(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
@@ -337,16 +337,16 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-void func_00118C58(u32 context, u32 first, u32 second, u8 flags) {
-    evtRunContext(10, first, second, context, flags);
+void func_00118C58(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-void func_00118C80(u32 context, u32 first, u32 second, u8 flags) {
-    evtRunContext(7, first, second, context, flags);
+void func_00118C80(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
-void sdfDispatchSubCmd(u32 context, u32 first, u32 second, u32 flags) {
-    func_00118C80(context, first, second, (u8)flags);
+void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118CC0);
@@ -457,27 +457,27 @@ u32 func_001190B0(s32 index, s32 queryArg, SdfPackedValue *packed) {
     return hit ? mask : 0;
 }
 
-u32 sdfQueryChannelValue(s32 channel, s32 arg1, SdfPackedValue *item) {
+u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
     u32 mode = D_00435E20[channel].mode;
 
     if (mode != 1 && mode != 3) {
         return 0;
     }
-    result = func_001190B0(channel, arg1, item);
+    result = func_001190B0(channel, queryArg, item);
     if (!((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < result)) {
         result = 0;
     }
     return result;
 }
 
-u32 sdfQueryChannelBits(s32 channel, s32 arg1, SdfPackedValue *item) {
+u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
 
     if (D_00435E20[channel].mode != 2) {
         return 0;
     }
-    result = func_001190B0(channel, arg1, item);
+    result = func_001190B0(channel, queryArg, item);
     if ((result & (item->flagsAndValue & SDF_PACKED_VALUE_MASK)) == 0) {
         result = 0;
     }

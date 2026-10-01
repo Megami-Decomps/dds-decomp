@@ -81,9 +81,9 @@ extern void sdfVuClearTransformCache(void);
 
 extern void func_0032B3F8();
 
-void sdfRequestDeferredGsImageCapture(u32 arg0, u32 arg1) {
-    D_004389E4 = arg0;
-    D_004389E8 = arg1;
+void sdfRequestDeferredGsImageCapture(u32 destination, u32 onComplete) {
+    D_004389E4 = destination;
+    D_004389E8 = onComplete;
     D_004389E0 = 1;
 }
 
@@ -484,21 +484,21 @@ u64 func_0032B338(SdfTex *texture) {
     return texture->unk28->unk30;
 }
 
-void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 firstMode, s32 secondMode) {
+void sdfTexSetPrimaryBufferModeBits(SdfTex *texture, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf;
 
     buf = texture->unk28;
-    buf->unk10 = (buf->unk10 & ~0x1E0) | (firstMode << 5) | (secondMode << 6);
+    buf->unk10 = (buf->unk10 & ~0x1E0) | (magFilter << 5) | (minFilter << 6);
 }
 
-void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 firstMode, s32 secondMode) {
+void sdfTexSetSecondaryPacketBits(SdfTex *tex, s32 magFilter, s32 minFilter) {
     SdfTexBuf *buf = tex->unk2C;
 
     if (buf == NULL) {
         sdfTexCreateSecondPacket();
         buf = tex->unk2C;
     }
-    buf->unk10 = (secondMode << 6) | ((firstMode << 5) | (buf->unk10 & ~0x1E0));
+    buf->unk10 = (minFilter << 6) | ((magFilter << 5) | (buf->unk10 & ~0x1E0));
 }
 
 void func_0032B3E0(SdfTex *texture, u8 value) {
@@ -541,17 +541,17 @@ void sdfTexListInsert(SdfTex *texture) {
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 arg3, s32 primary, s32 arg5, s32 arg6, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
     ref->refCount = 1;
     tex->unk18 = arg6;
-    tex->unk19 = arg5;
+    tex->unk19 = paletteFormat;
     tex->unkC = x;
     tex->unkE = y;
     tex->unk1A = pixelFormat;
-    tex->unk1B = arg3;
+    tex->unk1B = maxMipLevel;
     tex->secondaryResource = (SdfTexResource *)secondary;
     tex->primaryResource = (SdfTexResource *)primary;
     tex->reference = ref;
