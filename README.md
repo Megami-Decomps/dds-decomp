@@ -99,6 +99,7 @@ config/<v>/symbol_addrs.txt names and addresses (curated on top, generated below
 config/<v>/name_sources.txt provenance of every curated name (evidence / inferred)
 config/<v>/cflags.txt       per-file compiler options, with evidence
 src/<v>/<dir>/<unit>.c      C units; INCLUDE_ASM marks functions not decompiled yet
+src/<v>/scripts/            symbolic source for decompiled game scripts
 include/                    common.h, include_asm.h, fpu.h, macro.inc
 docs/CONTRIBUTING.md        how to decompile, verify, name and share a function
 docs/idioms.md              source shapes confirmed against retail codegen

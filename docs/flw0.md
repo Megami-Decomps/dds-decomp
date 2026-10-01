@@ -1,14 +1,19 @@
 # DDS BF/FLW0 scripts
 
 `tools/flw0.py` reads DDS BF script containers and converts them to a small,
-editable assembly format. Its preserve-layout writer keeps the original header
-values, section descriptors, offsets, gaps, padding, and trailing bytes. An
-untouched source file therefore assembles to the same bytes as its input.
+editable assembly format. It has two source forms: a physical format for exact
+forensic work and a symbolic format for maintained script decompositions.
 
 Disassemble a BF file:
 
 ```sh
 python3 tools/flw0.py disassemble event.bf event.bfasm
+```
+
+Use `--symbolic` to derive source whose layout can change:
+
+```sh
+python3 tools/flw0.py disassemble --symbolic event.bf event.bfasm
 ```
 
 Assemble it again:
@@ -24,9 +29,64 @@ python3 tools/flw0.py inspect event.bf
 python3 tools/flw0.py verify event.bf
 ```
 
-## Source format
+## Symbolic source
 
-The source is deliberately close to the VM. It records the physical layout
+Version 2 is the normal form for scripts kept in the repository. Procedure and
+jump-label declarations create symbols; labels in the code block give them
+word addresses. Instructions refer to those symbols instead of table indices:
+
+```text
+flw0 2
+
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=1
+
+procedure main
+procedure helper name="helper_proc"
+jump_label finished
+
+code
+main:
+  PROC main
+  CALL helper
+  IF finished
+helper:
+  PROC helper
+finished:
+  END
+end
+
+messages
+end
+
+strings
+  zero 240
+end
+```
+
+Declaration order defines the procedure and jump-label table indices. The
+assembler derives each table address from its code label, counts the encoded
+words, places all five sections consecutively, and computes their descriptors
+and the header size field. Adding or removing instructions therefore updates
+later addresses and offsets without hand-editing bookkeeping.
+
+The symbolic disassembler accepts the standard DDS five-section layout and
+canonical 32-byte name rows. It rejects irregular layouts rather than hiding
+bytes; use version 1 for those files. Message and string payloads remain raw
+until their internal formats are understood. In the current DDS1 event corpus,
+97 of 104 files use the canonical layout and round-trip exactly through this
+form; the other seven remain exact through version 1.
+
+The first tracked script is `src/dds1/scripts/event/e670.bfasm`. Assemble it
+with the same command as any other source:
+
+```sh
+python3 tools/flw0.py assemble src/dds1/scripts/event/e670.bfasm e670.bf
+```
+
+## Physical source
+
+Version 1 stays deliberately close to the container. It records physical layout
 once, then gives known sections readable forms. A small synthetic script looks
 like this:
 
@@ -79,16 +139,15 @@ readable even when another part of the file is opaque.
 The header exposes the signed integer and float local counts used by the DDS
 VM. Other fields retain offset-based names when their purpose is not established.
 
-## Editing boundary
+## Physical editing boundary
 
 The current writer preserves the existing physical layout. It supports edits
 whose encoded data still matches the descriptor sizes and offsets. It rejects
 missing bytes, changed section lengths, inconsistent overlaps, invalid code
 addresses, and out-of-range operands.
 
-Growing a section requires a distinct relayout mode and archive update. Keeping
-that operation separate makes ordinary low-level edits predictable and makes
-exact reconstruction straightforward to verify.
+Use symbolic version 2 when an edit changes section size. Archive insertion is
+outside this tool; the assembler produces the rebuilt BF file.
 
 Run the synthetic regression tests with:
 
