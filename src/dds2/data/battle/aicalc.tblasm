@@ -845,7 +845,7 @@ weighted-table 13
 end
 
 enemy-ai SKADI
-  decision 0 predicates=43:0x1ffffe,54:13,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),CHECK_UNIT_ACTION_MODE_ZERO(13),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=20 action=skill:TERADYNE
   choice 0 1 weight=20 action=skill:HEAVY_ROCK_209
   choice 0 2 weight=20 action=skill:ELEC_DRAIN
@@ -864,7 +864,7 @@ enemy-ai SKADI
 end
 
 enemy-ai PARVATI script=AI_PARUVA
-  decision 0 predicates=64:0,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ALL_TEN_ACTIONS(0),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=skill:EXPLODE_008
   choice 0 1 weight=20 action=skill:COLD_WAVE_011
   choice 0 2 weight=20 action=skill:JUPITER_S_FURY_01A
@@ -875,7 +875,7 @@ enemy-ai PARVATI script=AI_PARUVA
 end
 
 enemy-ai PALLAS_ATHENA
-  decision 0 predicates=56:12,2:50,58:11 routes=8,1,3,3,1,2,3,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),BOSS_HP_AT_OR_BELOW_RATE(50),ANY_GROUP_400_MATCHES_ACTION_ENTRY(11) routes=8,1,3,3,1,2,3,8
   choice 0 0 weight=25 action=skill:MARIN_KARIN
   choice 0 1 weight=25 action=skill:ALLURE_057
   choice 0 2 weight=25 action=skill:TAUNT
@@ -897,7 +897,7 @@ enemy-ai PALLAS_ATHENA
 end
 
 enemy-ai LAKSMI
-  decision 0 predicates=2:25,50:509,none routes=8,8,8,8,1,2,8,8
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(25),ACTION_REQUIREMENTS_MET(509),none routes=8,8,8,8,1,2,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:MARIN_KARIN
   choice 0 2 weight=20 action=skill:ALLURE_057
@@ -920,7 +920,7 @@ enemy-ai ALILAT_005 script=AI_ARIRAT
 end
 
 enemy-ai SCATHACH
-  decision 0 predicates=1:50,none,none routes=8,8,8,8,8,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,8,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=40 action=skill:COMATOSE
   choice 0 2 weight=30 action=skill:POWER_WAVE
@@ -930,7 +930,7 @@ enemy-ai SCATHACH
 end
 
 enemy-ai SATI_007
-  decision 0 predicates=58:11,43:0x1ffffe,2:80 routes=8,4,3,3,1,2,3,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),BOSS_HP_AT_OR_BELOW_RATE(80) routes=8,4,3,3,1,2,3,8
   choice 0 0 weight=30 action=skill:AGILAO
   choice 0 1 weight=20 action=skill:MAKAKAJA
   choice 0 2 action=skill:DIARAMA
@@ -948,7 +948,7 @@ enemy-ai SATI_007
   choice 2 4 weight=30 action=special:0
   choice 3 0 weight=30 action=skill:AGILAO
   choice 3 1 action=skill:MAKAKAJA
-  choice 3 2 weight=40 action=skill:DIARAMA effect=1:0
+  choice 3 2 weight=40 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 3 3 action=skill:ICE_REPEL
   choice 3 4 weight=30 action=special:0
   choice 4 0 weight=70 action=skill:AGILAO
@@ -959,7 +959,7 @@ enemy-ai SATI_007
 end
 
 enemy-ai SARASVATI
-  decision 0 predicates=54:13,2:50,50:504 routes=8,1,1,3,1,2,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(13),BOSS_HP_AT_OR_BELOW_RATE(50),ACTION_REQUIREMENTS_MET(504) routes=8,1,1,3,1,2,8,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=30 action=skill:MAZIONGA_017
   choice 0 2 weight=30 action=skill:MARIN_KARIN
@@ -983,14 +983,14 @@ enemy-ai SARASVATI
 end
 
 enemy-ai THOR
-  decision 0 predicates=12:2,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(2),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:ZIODYNE
   choice 0 2 weight=20 action=skill:MAZIODYNE_018
   choice 0 3 weight=20 action=skill:JUPITER_S_FURY_01A
   choice 0 4 weight=20 action=skill:SKULL_CLEAVE
-  choice 1 0 weight=50 action=special:0 effect=2:2
-  choice 1 1 weight=50 action=skill:SKULL_CLEAVE effect=2:2
+  choice 1 0 weight=50 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(2)
+  choice 1 1 weight=50 action=skill:SKULL_CLEAVE effect=SELECT_TARGETS_BY_ACTION_MASK(2)
 end
 
 enemy-ai NARASIMHA script=AI_NARASI
@@ -1001,20 +1001,20 @@ enemy-ai NARASIMHA script=AI_NARASI
 end
 
 enemy-ai BEIJI_WENG
-  decision 0 predicates=12:1024,27:0,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(1024),READY_WITHOUT_TURNS(0),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=25 action=skill:MAHAMAON_03F
   choice 0 1 weight=25 action=skill:VANITY_039
   choice 0 2 weight=25 action=skill:MAMUDOON_044
   choice 0 3 weight=25 action=skill:BLOOD_CURSE_046
   choice 1 0 weight=50 action=special:0
-  choice 1 1 weight=50 action=skill:MUDOON effect=2:1024
+  choice 1 1 weight=50 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 2 0 weight=25 action=special:0
   choice 2 1 weight=50 action=skill:BLOOD_CURSE_046
   choice 2 2 weight=25 action=skill:VANITY_039
 end
 
 enemy-ai MADA
-  decision 0 predicates=58:11,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SONIC_WAVE
   choice 0 2 weight=25 action=skill:TARUKAJA
@@ -1026,7 +1026,7 @@ enemy-ai MADA
 end
 
 enemy-ai MITHRA
-  decision 0 predicates=1:30,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=skill:MARAGIDYNE_006
   choice 0 1 weight=20 action=skill:MAZIODYNE_018
   choice 0 2 weight=20 action=skill:MATERADYNE_02A
@@ -1038,7 +1038,7 @@ enemy-ai MITHRA
 end
 
 enemy-ai SURT script=AI_SURUTO
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=skill:AGIDYNE
   choice 0 1 weight=20 action=skill:MARAGIDYNE_006
   choice 0 2 weight=20 action=skill:EXPLODE_008
@@ -1052,7 +1052,7 @@ enemy-ai SURT script=AI_SURUTO
 end
 
 enemy-ai HANUMAN_00F
-  decision 0 predicates=50:502,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(502),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=30 action=skill:MATERAZI_029
   choice 0 2 weight=30 action=skill:TERADYNE
@@ -1063,7 +1063,7 @@ enemy-ai HANUMAN_00F
 end
 
 enemy-ai GANESHA
-  decision 0 predicates=50:455,12:4,none routes=8,8,8,8,1,2,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(455),ANY_GROUP_200_HAS_ACTION_MASK(4),none routes=8,8,8,8,1,2,8,8
   choice 0 0 weight=20 action=skill:DEMON_RAGE
   choice 0 1 weight=20 action=skill:MAZIONGA_017
   choice 0 2 weight=20 action=skill:HAMAON
@@ -1078,7 +1078,7 @@ enemy-ai GANESHA
 end
 
 enemy-ai ARAHABAKI_011
-  decision 0 predicates=54:10,54:13,1:90 routes=3,134,3,3,1,2,3,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(10),CHECK_UNIT_ACTION_MODE_ZERO(13),UNIT_HP_AT_OR_BELOW_RATE(90) routes=3,134,3,3,1,2,3,8
   choice 0 0 weight=25 action=skill:POWER_CHARGE
   choice 0 1 weight=25 action=skill:MIND_CHARGE
   choice 0 2 weight=25 action=skill:LAST_WORD
@@ -1091,7 +1091,7 @@ enemy-ai ARAHABAKI_011
 end
 
 enemy-ai ATAVAKA
-  decision 0 predicates=43:0x1ffffe,12:256,50:452 routes=8,2,8,8,1,2,3,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ANY_GROUP_200_HAS_ACTION_MASK(256),ACTION_REQUIREMENTS_MET(452) routes=8,2,8,8,1,2,3,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=10 action=skill:HELL_THRUST
   choice 0 2 weight=50 action=skill:NEURAL_SHOCK
@@ -1100,8 +1100,8 @@ enemy-ai ATAVAKA
   choice 1 1 weight=30 action=skill:HELL_THRUST
   choice 1 2 weight=50 action=skill:NEURAL_SHOCK
   choice 1 3 action=skill:EARTH_DRAIN
-  choice 2 0 weight=50 action=special:0 effect=2:256
-  choice 2 1 weight=50 action=skill:HELL_THRUST effect=2:256
+  choice 2 0 weight=50 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(256)
+  choice 2 1 weight=50 action=skill:HELL_THRUST effect=SELECT_TARGETS_BY_ACTION_MASK(256)
   choice 3 0 weight=10 action=special:0
   choice 3 1 weight=20 action=skill:HELL_THRUST
   choice 3 2 weight=30 action=skill:NEURAL_SHOCK
@@ -1109,7 +1109,7 @@ enemy-ai ATAVAKA
 end
 
 enemy-ai ARES
-  decision 0 predicates=54:11,1:50,none routes=8,1,8,8,1,1,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(11),UNIT_HP_AT_OR_BELOW_RATE(50),none routes=8,1,8,8,1,1,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:MAD_RUSH
   choice 0 2 weight=30 action=skill:TARUKAJA
@@ -1120,7 +1120,7 @@ enemy-ai ARES
 end
 
 enemy-ai PAZUZU
-  decision 0 predicates=50:458,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(458),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:STUN_SPHERE
   choice 0 1 weight=25 action=skill:STONE_GAZE
   choice 0 2 weight=25 action=skill:PULINPA
@@ -1132,7 +1132,7 @@ enemy-ai PAZUZU
 end
 
 enemy-ai THRONE
-  decision 0 predicates=54:13,50:509,none routes=8,1,8,8,1,2,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(13),ACTION_REQUIREMENTS_MET(509),none routes=8,1,8,8,1,2,8,8
   choice 0 0 weight=25 action=skill:HAMAON
   choice 0 1 weight=25 action=skill:MAHAMAON_03F
   choice 0 2 weight=25 action=special:0
@@ -1144,7 +1144,7 @@ enemy-ai THRONE
 end
 
 enemy-ai NANDI
-  decision 0 predicates=1:50,2:50,50:521 routes=8,1,2,1,1,1,2,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),BOSS_HP_AT_OR_BELOW_RATE(50),ACTION_REQUIREMENTS_MET(521) routes=8,1,2,1,1,1,2,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:TERADYNE
   choice 0 2 weight=25 action=skill:MAHAMAON_03F
@@ -1159,24 +1159,24 @@ enemy-ai NANDI
 end
 
 enemy-ai HRESVELGR_017
-  decision 0 predicates=12:4,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(4),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:MAREVERT
   choice 0 2 weight=25 action=skill:COLD_WAVE_011
   choice 0 3 weight=25 action=skill:MABUFUDYNE_00F
-  choice 1 0 weight=50 action=skill:POWER_WAVE effect=2:4
-  choice 1 1 weight=50 action=special:0 effect=2:4
+  choice 1 0 weight=50 action=skill:POWER_WAVE effect=SELECT_TARGETS_BY_ACTION_MASK(4)
+  choice 1 1 weight=50 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(4)
 end
 
 enemy-ai PHOENIX
-  decision 0 predicates=2:70,43:0x1ffffe,58:11 routes=8,1,1,3,1,2,3,8
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(70),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ANY_GROUP_400_MATCHES_ACTION_ENTRY(11) routes=8,1,1,3,1,2,3,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:MAKAKAJA
   choice 0 2 weight=30 action=skill:DEATH_REPEL
   choice 0 3 weight=30 action=skill:SHOCK_WAVE
   choice 1 0 weight=25 action=special:0
   choice 1 1 action=skill:MAKAKAJA
-  choice 1 2 weight=50 action=skill:DIARAHAN effect=1:0
+  choice 1 2 weight=50 action=skill:DIARAHAN effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 1 3 weight=25 action=skill:SHOCK_WAVE
   choice 2 0 weight=30 action=special:0
   choice 2 1 weight=40 action=skill:MAKAKAJA
@@ -1189,7 +1189,7 @@ enemy-ai PHOENIX
 end
 
 enemy-ai GURR_019
-  decision 0 predicates=1:99,58:11,none routes=8,8,8,8,1,1,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(99),ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),none routes=8,8,8,8,1,1,8,8
   choice 0 0 weight=20 action=skill:SKULL_CLEAVE
   choice 0 1 weight=20 action=skill:SUKUKAJA
   choice 0 2 weight=20 action=skill:RAKUKAJA
@@ -1200,7 +1200,7 @@ enemy-ai GURR_019
 end
 
 enemy-ai HORUS
-  decision 0 predicates=43:0x1ffffe,56:12,1:30 routes=8,2,2,2,1,2,2,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),UNIT_HP_AT_OR_BELOW_RATE(30) routes=8,2,2,2,1,2,2,8
   choice 0 0 weight=25 action=skill:MAHAMAON_03F
   choice 0 1 weight=25 action=skill:RAKUNDA
   choice 0 2 weight=25 action=skill:MAGIC_REPEL_16D
@@ -1215,7 +1215,7 @@ enemy-ai HORUS
 end
 
 enemy-ai POWER_01B
-  decision 0 predicates=43:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=30 action=skill:HAMA
   choice 0 2 weight=20 action=skill:VILE_BLADE_086
@@ -1226,7 +1226,7 @@ enemy-ai POWER_01B
 end
 
 enemy-ai MACHA_01C
-  decision 0 predicates=1:50,43:0x1ffffe,none routes=8,3,8,8,2,1,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none routes=8,3,8,8,2,1,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:ZANMA
   choice 0 2 weight=25 action=skill:POISON_DART
@@ -1244,17 +1244,17 @@ enemy-ai MACHA_01C
 end
 
 enemy-ai ARCHANGEL
-  decision 0 predicates=3:50,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=40 action=special:0
   choice 0 1 weight=20 action=skill:MAHAMA_03E
   choice 0 2 weight=20 action=skill:HAMA
   choice 0 3 weight=20 action=skill:RAVING_SLASH
-  choice 1 0 weight=50 action=skill:RAVING_SLASH effect=1:0
-  choice 1 1 weight=50 action=skill:MUTE_BLOW effect=1:0
+  choice 1 0 weight=50 action=skill:RAVING_SLASH effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 1 1 weight=50 action=skill:MUTE_BLOW effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
 end
 
 enemy-ai ANZU
-  decision 0 predicates=27:0,50:445,none routes=8,0,8,8,1,8,8,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),ACTION_REQUIREMENTS_MET(445),none routes=8,0,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:ZANMA
   choice 0 2 weight=20 action=skill:STUN_NEEDLE
@@ -1266,7 +1266,7 @@ enemy-ai ANZU
 end
 
 enemy-ai PRINCIPALITY
-  decision 0 predicates=50:454,2:50,1:50 routes=8,1,1,2,1,3,3,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(454),BOSS_HP_AT_OR_BELOW_RATE(50),UNIT_HP_AT_OR_BELOW_RATE(50) routes=8,1,1,2,1,3,3,8
   choice 0 0 weight=50 action=skill:HAMAON
   choice 0 1 action=skill:MAZIONGA_017
   choice 0 2 weight=25 action=skill:ZIONGA
@@ -1282,7 +1282,7 @@ enemy-ai PRINCIPALITY
 end
 
 enemy-ai OROBAS
-  decision 0 predicates=27:0,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:AGILAO
   choice 0 2 weight=15 action=skill:FLAME_BREATH
@@ -1294,7 +1294,7 @@ enemy-ai OROBAS
 end
 
 enemy-ai ANDRAS_021
-  decision 0 predicates=43:0x1ffffe,58:2,none routes=3,8,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ANY_GROUP_400_MATCHES_ACTION_ENTRY(2),none routes=3,8,8,8,1,2,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:MAKAKAJA
   choice 0 2 weight=40 action=skill:VOID_EARTH
@@ -1309,7 +1309,7 @@ enemy-ai ANDRAS_021
 end
 
 enemy-ai SAMAEL_022
-  decision 0 predicates=27:0,12:2048,12:1024 routes=1,1,1,140,1,2,3,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),ANY_GROUP_200_HAS_ACTION_MASK(2048),ANY_GROUP_200_HAS_ACTION_MASK(1024) routes=1,1,1,140,1,2,3,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:BLOOD_CURSE_046
   choice 0 2 weight=20 action=skill:PETRIFIER_048
@@ -1320,12 +1320,12 @@ enemy-ai SAMAEL_022
   choice 1 2 action=skill:PETRIFIER_048
   choice 1 3 action=skill:MAMUDOON_044
   choice 1 4 weight=40 action=skill:REVELATION
-  choice 2 0 weight=100 action=special:0 effect=2:2048
-  choice 3 0 weight=100 action=skill:MUDOON effect=2:1024
+  choice 2 0 weight=100 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(2048)
+  choice 3 0 weight=100 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
 end
 
 enemy-ai GORGON
-  decision 0 predicates=27:0,43:0x1ffffe,50:462 routes=8,8,8,4,1,3,2,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ACTION_REQUIREMENTS_MET(462) routes=8,8,8,4,1,3,2,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:STONE_GAZE
   choice 0 2 weight=20 action=skill:FROST_BREATH
@@ -1350,7 +1350,7 @@ enemy-ai GORGON
 end
 
 enemy-ai TAN_KI
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SONIC_WAVE
   choice 0 2 weight=25 action=skill:SPELL_GLOOM
@@ -1362,7 +1362,7 @@ enemy-ai TAN_KI
 end
 
 enemy-ai NIDHOGGR
-  decision 0 predicates=58:11,54:10,54:13 routes=8,2,3,140,1,2,3,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),CHECK_UNIT_ACTION_MODE_ZERO(10),CHECK_UNIT_ACTION_MODE_ZERO(13) routes=8,2,3,140,1,2,3,8
   choice 0 0 weight=20 action=skill:POISON_RAIN
   choice 0 1 weight=20 action=skill:POWER_WAVE
   choice 0 2 weight=20 action=skill:MAREVERT
@@ -1376,7 +1376,7 @@ enemy-ai NIDHOGGR
 end
 
 enemy-ai NAGA_026
-  decision 0 predicates=50:441,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(441),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:HELL_THRUST
   choice 0 2 weight=20 action=skill:MAZIONGA_017
@@ -1389,7 +1389,7 @@ enemy-ai NAGA_026
 end
 
 enemy-ai COCKATRICE
-  decision 0 predicates=1:20,56:12,none routes=8,1,8,8,1,2,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(20),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none routes=8,1,8,8,1,2,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=20 action=skill:POWER_WAVE
   choice 0 2 weight=30 action=skill:STUN_NEEDLE
@@ -1405,7 +1405,7 @@ enemy-ai COCKATRICE
 end
 
 enemy-ai MIZUCHI
-  decision 0 predicates=43:0x1ffffe,50:436,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ACTION_REQUIREMENTS_MET(436),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:BUFU
   choice 0 2 weight=30 action=skill:PULINPA
@@ -1423,7 +1423,7 @@ enemy-ai MIZUCHI
 end
 
 enemy-ai LAMIA
-  decision 0 predicates=1:30,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:ZIO
   choice 0 2 weight=40 action=skill:MAZIO_016
@@ -1440,7 +1440,7 @@ enemy-ai TARRASQUE_02A
 end
 
 enemy-ai NYX
-  decision 0 predicates=43:0x1ffffe,12:8,none routes=8,1,8,8,2,1,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),ANY_GROUP_200_HAS_ACTION_MASK(8),none routes=8,1,8,8,2,1,8,8
   choice 0 0 weight=20 action=skill:DORMINA
   choice 0 1 weight=20 action=skill:COLD_WAVE_011
   choice 0 2 weight=20 action=skill:BUFUDYNE
@@ -1457,7 +1457,7 @@ enemy-ai NYX
 end
 
 enemy-ai LILITH
-  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:ZIODYNE
   choice 0 1 weight=25 action=skill:MAZIODYNE_018
   choice 0 2 weight=25 action=skill:FATAL_CHARM
@@ -1469,7 +1469,7 @@ enemy-ai LILITH
 end
 
 enemy-ai FLAUROS_02D
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SPELL_GLOOM
   choice 0 2 weight=25 action=skill:SKULL_CLEAVE
@@ -1481,7 +1481,7 @@ enemy-ai FLAUROS_02D
 end
 
 enemy-ai BLACK_OOZE
-  decision 0 predicates=7:2,58:11,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=GROUP_400_COUNT_AT_MOST(2),ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=20 action=skill:MAKAKAJA
   choice 0 1 weight=35 action=skill:LEECH
   choice 0 2 weight=25 action=skill:SONIC_WAVE
@@ -1505,7 +1505,7 @@ enemy-ai BLACK_OOZE
 end
 
 enemy-ai MOT
-  decision 0 predicates=1:30,58:11,none routes=8,8,8,8,1,1,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),none routes=8,8,8,8,1,1,8,8
   choice 0 0 weight=25 action=skill:MAKAKAJA
   choice 0 1 weight=25 action=skill:MAZANDYNE_021
   choice 0 2 weight=25 action=skill:TEMPEST_023
@@ -1516,7 +1516,7 @@ enemy-ai MOT
 end
 
 enemy-ai LOA_030
-  decision 0 predicates=1:10,56:12,27:0 routes=8,1,8,8,1,2,3,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(10),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),READY_WITHOUT_TURNS(0) routes=8,1,8,8,1,2,3,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:DEBILITATE_0BE
   choice 0 2 weight=25 action=skill:WICKED_CURSE
@@ -1532,7 +1532,7 @@ enemy-ai LOA_030
 end
 
 enemy-ai EFREET
-  decision 0 predicates=54:13,50:506,56:12 routes=1,3,1,0,1,2,0,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(13),ACTION_REQUIREMENTS_MET(506),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12) routes=1,3,1,0,1,2,0,8
   choice 0 0 weight=35 action=special:0
   choice 0 1 weight=20 action=skill:FLAME_BREATH
   choice 0 2 weight=25 action=skill:AGILAO
@@ -1554,7 +1554,7 @@ enemy-ai EFREET
 end
 
 enemy-ai OSE script=AI_OSE___
-  decision 0 predicates=56:7,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(7),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:VILE_BLADE_086
   choice 0 2 weight=25 action=skill:CHI_BLAST
@@ -1566,9 +1566,9 @@ enemy-ai OSE script=AI_OSE___
 end
 
 enemy-ai BAPHOMET_033
-  decision 0 predicates=50:457,27:0,43:0x1ffffe routes=4,2,1,4,1,2,3,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(457),READY_WITHOUT_TURNS(0),ANY_UNIT_PASSES_CHECK_400(0x1ffffe) routes=4,2,1,4,1,2,3,8
   choice 0 0 weight=10 action=skill:MAMUDO_043
-  choice 0 1 weight=20 action=skill:MUDOON effect=2:1024
+  choice 0 1 weight=20 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 0 2 weight=20 action=skill:BLOOD_CURSE_046
   choice 0 3 weight=20 action=skill:EXPEL_REPEL
   choice 0 4 weight=30 action=special:0
@@ -1577,45 +1577,45 @@ enemy-ai BAPHOMET_033
   choice 1 2 weight=25 action=special:0
   choice 1 3 weight=25 action=skill:BLOOD_CURSE_046
   choice 2 0 action=skill:MAMUDO_043
-  choice 2 1 action=skill:MUDOON effect=2:1024
+  choice 2 1 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 2 2 weight=40 action=skill:BLOOD_CURSE_046
   choice 2 3 weight=30 action=skill:EXPEL_REPEL
   choice 2 4 weight=30 action=special:0
   choice 3 0 weight=20 action=skill:MAMUDO_043
-  choice 3 1 weight=20 action=skill:MUDOON effect=2:1024
+  choice 3 1 weight=20 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 3 2 weight=30 action=skill:BLOOD_CURSE_046
   choice 3 3 action=skill:EXPEL_REPEL
   choice 3 4 weight=30 action=special:0
   choice 4 0 action=skill:MAMUDO_043
-  choice 4 1 action=skill:MUDOON effect=2:1024
+  choice 4 1 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 4 2 weight=50 action=skill:BLOOD_CURSE_046
   choice 4 3 action=skill:EXPEL_REPEL
   choice 4 4 weight=50 action=special:0
 end
 
 enemy-ai BERITH
-  decision 0 predicates=27:0,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
-  choice 0 1 weight=30 action=skill:MUDO effect=2:1024
-  choice 0 2 weight=10 action=skill:MUDOON effect=2:1024
+  choice 0 1 weight=30 action=skill:MUDO effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
+  choice 0 2 weight=10 action=skill:MUDOON effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 0 3 weight=30 action=skill:MUTE_BLOW
   choice 1 0 weight=40 action=special:0
   choice 1 1 weight=60 action=skill:MUTE_BLOW
 end
 
 enemy-ai SETANTA script=AI_SETANT
-  decision 0 predicates=54:10,12:256,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(10),ANY_GROUP_200_HAS_ACTION_MASK(256),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=40 action=skill:ZANMA
   choice 0 2 weight=30 action=skill:POWER_CHARGE
   choice 1 0 weight=50 action=special:0
   choice 1 1 weight=50 action=skill:DOUBLE_SLASH
-  choice 2 0 weight=50 action=special:0 effect=2:256
+  choice 2 0 weight=50 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(256)
   choice 2 1 weight=50 action=skill:DOUBLE_SLASH
 end
 
 enemy-ai ELIGOR script=AI_ERIGOL_RING
-  decision 0 predicates=43:0x1ffffe,27:0,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),READY_WITHOUT_TURNS(0),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=30 action=skill:MUDO
   choice 0 2 weight=30 action=skill:VILE_BLADE_086
@@ -1630,30 +1630,30 @@ enemy-ai ELIGOR script=AI_ERIGOL_RING
 end
 
 enemy-ai DIS
-  decision 0 predicates=2:50,50:433,43:0x1ffffe routes=8,2,4,2,1,2,3,8
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(50),ACTION_REQUIREMENTS_MET(433),ANY_UNIT_PASSES_CHECK_400(0x1ffffe) routes=8,2,4,2,1,2,3,8
   choice 0 0 weight=30 action=skill:AGILAO
-  choice 0 1 action=skill:DIARAMA effect=1:0
+  choice 0 1 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 0 2 weight=40 action=skill:MAKAJAMON_04A
   choice 0 3 weight=30 action=skill:ICE_REPEL
   choice 1 0 weight=20 action=skill:AGILAO
-  choice 1 1 weight=30 action=skill:DIARAMA effect=1:0
+  choice 1 1 weight=30 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 1 2 weight=20 action=skill:MAKAJAMON_04A
   choice 1 3 weight=30 action=skill:ICE_REPEL
   choice 2 0 weight=30 action=skill:AGILAO
   choice 2 1 weight=40 action=skill:MAKAJAMON_04A
   choice 2 2 weight=30 action=skill:MARAGION_1B1
   choice 3 0 weight=50 action=skill:AGILAO
-  choice 3 1 action=skill:DIARAMA effect=1:0
+  choice 3 1 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 3 2 weight=50 action=skill:MAKAJAMON_04A
   choice 3 3 action=skill:ICE_REPEL
   choice 4 0 weight=40 action=skill:AGILAO
-  choice 4 1 weight=30 action=skill:DIARAMA effect=1:0
+  choice 4 1 weight=30 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 4 2 weight=30 action=skill:MAKAJAMON_04A
   choice 4 3 action=skill:ICE_REPEL
 end
 
 enemy-ai ONKOT
-  decision 0 predicates=7:2,50:433,none routes=8,3,8,8,2,1,8,8
+  decision 0 predicates=GROUP_400_COUNT_AT_MOST(2),ACTION_REQUIREMENTS_MET(433),none routes=8,3,8,8,2,1,8,8
   choice 0 0 weight=15 action=skill:MARAGION_1B1
   choice 0 1 weight=35 action=special:0
   choice 0 2 weight=25 action=skill:DOUBLE_SLASH
@@ -1677,7 +1677,7 @@ enemy-ai ONKOT
 end
 
 enemy-ai TROLL
-  decision 0 predicates=12:4,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(4),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:MAD_RUSH
   choice 0 2 weight=30 action=skill:FROST_BREATH
@@ -1689,7 +1689,7 @@ enemy-ai TROLL
 end
 
 enemy-ai KAIWAN_03A
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=40 action=skill:HAMA
   choice 0 2 weight=30 action=skill:HELL_FANG
@@ -1701,16 +1701,16 @@ enemy-ai KAIWAN_03A
 end
 
 enemy-ai BLOB
-  decision 0 predicates=12:8,31:9,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(8),UNIT_STAT_AT_LEAST(9),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=40 action=skill:DREAM_HAZE
   choice 0 2 weight=30 action=skill:BODY_RUSH
-  choice 1 0 weight=100 action=skill:MP_THIEF effect=2:8
+  choice 1 0 weight=100 action=skill:MP_THIEF effect=SELECT_TARGETS_BY_ACTION_MASK(8)
   choice 2 0 weight=100 action=skill:SONIC_WAVE
 end
 
 enemy-ai HUA_PO_03C
-  decision 0 predicates=43:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=40 action=skill:TERA
   choice 0 2 weight=40 action=skill:VOID_ICE
@@ -1719,7 +1719,7 @@ enemy-ai HUA_PO_03C
 end
 
 enemy-ai BARONG
-  decision 0 predicates=54:13,27:0,none routes=8,8,8,8,1,2,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(13),READY_WITHOUT_TURNS(0),none routes=8,8,8,8,1,2,8,8
   choice 0 0 weight=20 action=skill:MAHAMAON_03F
   choice 0 1 weight=20 action=skill:COLD_WAVE_011
   choice 0 2 weight=20 action=skill:MIND_CHARGE
@@ -1732,7 +1732,7 @@ enemy-ai BARONG
 end
 
 enemy-ai ORTHRUS
-  decision 0 predicates=50:434,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(434),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:AGIDYNE
   choice 0 1 weight=25 action=skill:FLAME_BREATH
   choice 0 2 weight=25 action=special:0
@@ -1757,7 +1757,7 @@ enemy-ai TAO_TIE
 end
 
 enemy-ai APIS
-  decision 0 predicates=56:12,65:0,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),ANY_GROUP_400_HAS_ALL_TEN_ACTIONS(0),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=20 action=skill:TARUNDA
   choice 0 1 weight=20 action=skill:RAKUNDA
   choice 0 2 weight=25 action=skill:SUKUNDA
@@ -1774,7 +1774,7 @@ enemy-ai APIS
 end
 
 enemy-ai RAIJU
-  decision 0 predicates=43:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=30 action=skill:BOLT_FLARE
   choice 0 2 weight=25 action=skill:STUN_SPHERE
@@ -1786,18 +1786,18 @@ enemy-ai RAIJU
 end
 
 enemy-ai RAKSHASA
-  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=30 action=skill:DEATH_BLOW
   choice 0 2 weight=40 action=skill:WICKED_CURSE
   choice 1 0 action=special:0
   choice 1 1 weight=30 action=skill:DEATH_BLOW
   choice 1 2 weight=30 action=skill:WICKED_CURSE
-  choice 1 3 weight=40 action=skill:MUDO effect=2:1024
+  choice 1 3 weight=40 action=skill:MUDO effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
 end
 
 enemy-ai TAOWN
-  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SHOCK_WAVE
   choice 0 2 weight=25 action=skill:MAZANMA_020
@@ -1810,7 +1810,7 @@ enemy-ai TAOWN
 end
 
 enemy-ai GDON_045
-  decision 0 predicates=50:433,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(433),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:HELL_FANG
   choice 0 2 weight=25 action=skill:AGILAO
@@ -1823,7 +1823,7 @@ enemy-ai GDON_045
 end
 
 enemy-ai THOTH
-  decision 0 predicates=12:16,56:12,none routes=8,1,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(16),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none routes=8,1,8,8,1,2,8,8
   choice 0 0 weight=30 action=skill:MAKAJAM
   choice 0 1 weight=15 action=skill:MATERA_028
   choice 0 2 weight=20 action=skill:TARUNDA
@@ -1831,7 +1831,7 @@ enemy-ai THOTH
   choice 0 4 weight=20 action=skill:MAREVERT
   choice 1 0 action=skill:MAKAJAM
   choice 1 1 weight=25 action=skill:MATERA_028
-  choice 1 2 weight=50 action=skill:MP_THIEF effect=2:16
+  choice 1 2 weight=50 action=skill:MP_THIEF effect=SELECT_TARGETS_BY_ACTION_MASK(16)
   choice 1 3 weight=25 action=skill:TERAZI
   choice 2 0 weight=30 action=skill:MAKAJAM
   choice 2 1 weight=20 action=skill:MATERA_028
@@ -1841,15 +1841,15 @@ enemy-ai THOTH
 end
 
 enemy-ai NUE
-  decision 0 predicates=12:1024,43:0x1ffffe,none routes=8,3,8,8,1,2,8,8
-  decision 1 predicates=27:0,none,none routes=8,8,8,8,4,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(1024),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none routes=8,3,8,8,1,2,8,8
+  decision 1 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,4,8,8,8
   choice 0 0 weight=25 action=skill:HELL_FANG
   choice 0 1 weight=30 action=special:0
   choice 0 2 weight=10 action=skill:MUDO
   choice 0 3 weight=35 action=skill:FIRE_REPEL
   choice 1 0 weight=20 action=skill:HELL_FANG
   choice 1 1 weight=35 action=special:0
-  choice 1 2 weight=25 action=skill:MUDO effect=2:1024
+  choice 1 2 weight=25 action=skill:MUDO effect=SELECT_TARGETS_BY_ACTION_MASK(1024)
   choice 1 3 weight=20 action=skill:FIRE_REPEL
   choice 2 0 weight=40 action=skill:HELL_FANG
   choice 2 1 weight=60 action=special:0
@@ -1866,7 +1866,7 @@ enemy-ai NUE
 end
 
 enemy-ai NEKOMATA
-  decision 0 predicates=50:459,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(459),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=40 action=skill:ZANMA
   choice 0 2 weight=30 action=skill:MARIN_KARIN
@@ -1885,26 +1885,26 @@ enemy-ai PABILSAG_049
 end
 
 enemy-ai EMPUSA
-  decision 0 predicates=1:50,2:50,none routes=8,1,8,8,1,1,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),BOSS_HP_AT_OR_BELOW_RATE(50),none routes=8,1,8,8,1,1,8,8
   choice 0 0 weight=25 action=skill:MAZIO_016
-  choice 0 1 action=skill:DIA effect=1:0
+  choice 0 1 action=skill:DIA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 0 2 weight=30 action=special:0
   choice 0 3 weight=20 action=skill:REVERT
   choice 0 4 weight=25 action=skill:ZIO
   choice 1 0 weight=20 action=skill:MAZIO_016
-  choice 1 1 weight=40 action=skill:DIA effect=1:0
+  choice 1 1 weight=40 action=skill:DIA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 1 2 weight=20 action=special:0
   choice 1 3 action=skill:REVERT
   choice 1 4 weight=20 action=skill:ZIO
 end
 
 enemy-ai KELPIE_04B
-  decision 0 predicates=12:8,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(8),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=40 action=skill:DREAM_HAZE
   choice 0 2 weight=30 action=skill:NEEDLE_RUSH
-  choice 1 0 weight=50 action=special:0 effect=2:8
-  choice 1 1 weight=50 action=skill:NEEDLE_RUSH effect=2:8
+  choice 1 0 weight=50 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(8)
+  choice 1 1 weight=50 action=skill:NEEDLE_RUSH effect=SELECT_TARGETS_BY_ACTION_MASK(8)
 end
 
 enemy-ai ZHEN_04C
@@ -1914,21 +1914,21 @@ enemy-ai ZHEN_04C
 end
 
 enemy-ai ALP
-  decision 0 predicates=27:0,2:99,none routes=8,8,8,8,1,2,8,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),BOSS_HP_AT_OR_BELOW_RATE(99),none routes=8,8,8,8,1,2,8,8
   choice 0 0 weight=40 action=skill:PULINPA
-  choice 0 1 action=skill:DIA effect=1:0
+  choice 0 1 action=skill:DIA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 0 2 weight=40 action=skill:REVERT
   choice 0 3 weight=20 action=special:0
   choice 1 0 weight=50 action=skill:PULINPA
   choice 1 1 weight=50 action=skill:REVERT
   choice 2 0 weight=20 action=skill:PULINPA
-  choice 2 1 weight=60 action=skill:DIA effect=1:0
+  choice 2 1 weight=60 action=skill:DIA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=20 action=skill:REVERT
   choice 2 3 action=special:0
 end
 
 enemy-ai GIRIMEHKALA_04E script=AI_GIRIME_ZAKO
-  decision 0 predicates=none,none,27:0 routes=8,8,8,8,8,8,1,8
+  decision 0 predicates=none,none,READY_WITHOUT_TURNS(0) routes=8,8,8,8,8,8,1,8
   choice 0 0 weight=25 action=skill:DEMON_RAGE
   choice 0 1 weight=25 action=skill:MUDOON
   choice 0 2 weight=25 action=skill:AGIDYNE
@@ -1940,7 +1940,7 @@ enemy-ai GIRIMEHKALA_04E script=AI_GIRIME_ZAKO
 end
 
 enemy-ai RANGDA_04F
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:AGIDYNE
   choice 0 1 weight=25 action=special:0
   choice 0 2 weight=25 action=skill:DEBILITATE_0BE
@@ -1952,7 +1952,7 @@ enemy-ai RANGDA_04F
 end
 
 enemy-ai IKUSA
-  decision 0 predicates=1:30,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=50 action=special:0
   choice 0 1 weight=50 action=skill:RAVING_SLASH
   choice 1 0 weight=50 action=skill:RAVING_SLASH
@@ -1960,7 +1960,7 @@ enemy-ai IKUSA
 end
 
 enemy-ai LEGION_051
-  decision 0 predicates=12:256,50:452,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(256),ACTION_REQUIREMENTS_MET(452),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:STUN_SPHERE
   choice 0 2 weight=25 action=skill:STUN_WAVE_04F
@@ -1971,7 +1971,7 @@ enemy-ai LEGION_051
 end
 
 enemy-ai CHATTERSKULL
-  decision 0 predicates=1:20,56:12,7:2 routes=8,8,8,8,1,2,3,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(20),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),GROUP_400_COUNT_AT_MOST(2) routes=8,8,8,8,1,2,3,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SKULL_CLEAVE
   choice 0 2 weight=25 action=skill:TARUNDA
@@ -1990,7 +1990,7 @@ enemy-ai CHATTERSKULL
 end
 
 enemy-ai SHIKI_OUJI
-  decision 0 predicates=27:0,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=30 action=skill:MUDO
   choice 0 2 weight=20 action=skill:MUDOON
@@ -2002,7 +2002,7 @@ enemy-ai SHIKI_OUJI
 end
 
 enemy-ai SPECTER
-  decision 0 predicates=29:80,12:16,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=UNIT_STAT_AT_OR_ABOVE_RATE(80),ANY_GROUP_200_HAS_ACTION_MASK(16),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=60 action=skill:MAKAJAM
   choice 0 1 weight=10 action=skill:TENTARAFOO_054
   choice 0 2 weight=20 action=skill:MP_THIEF
@@ -2013,20 +2013,20 @@ enemy-ai SPECTER
   choice 1 2 weight=10 action=skill:MP_THIEF
   choice 1 3 weight=80 action=skill:DEATH_MARCH
   choice 1 4 action=special:0
-  choice 2 0 weight=15 action=skill:MAKAJAM effect=14:16
+  choice 2 0 weight=15 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 2 1 weight=30 action=skill:MP_THIEF
-  choice 2 2 weight=50 action=skill:MP_THIEF effect=2:16
+  choice 2 2 weight=50 action=skill:MP_THIEF effect=SELECT_TARGETS_BY_ACTION_MASK(16)
   choice 2 3 action=skill:DEATH_MARCH
   choice 2 4 weight=5 action=special:0
-  choice 3 0 weight=10 action=skill:MAKAJAM effect=14:16
+  choice 3 0 weight=10 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 3 1 weight=10 action=skill:MP_THIEF
-  choice 3 2 weight=10 action=skill:MP_THIEF effect=2:16
+  choice 3 2 weight=10 action=skill:MP_THIEF effect=SELECT_TARGETS_BY_ACTION_MASK(16)
   choice 3 3 weight=70 action=skill:DEATH_MARCH
   choice 3 4 action=special:0
 end
 
 enemy-ai TURDAK
-  decision 0 predicates=43:0x1ffffe,54:10,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),CHECK_UNIT_ACTION_MODE_ZERO(10),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=25 action=skill:DEATH_SPRAY
   choice 0 2 weight=20 action=skill:VENOM_FANG
@@ -2050,7 +2050,7 @@ enemy-ai TURDAK
 end
 
 enemy-ai PURSKI
-  decision 0 predicates=43:0x1ffffe,1:50,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(0x1ffffe),UNIT_HP_AT_OR_BELOW_RATE(50),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=40 action=skill:MAZANMA_020
   choice 0 1 weight=30 action=skill:RAVING_SLASH
   choice 0 2 weight=30 action=skill:ELEC_DRAIN
@@ -2066,7 +2066,7 @@ enemy-ai PURSKI
 end
 
 enemy-ai TARAKA
-  decision 0 predicates=56:5,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(5),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=20 action=skill:MUTE_BLOW
   choice 0 2 weight=20 action=skill:DARK_MIRAGE
@@ -2080,7 +2080,7 @@ enemy-ai TARAKA
 end
 
 enemy-ai TITAN
-  decision 0 predicates=1:30,56:12,none routes=8,3,8,8,1,2,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none routes=8,3,8,8,1,2,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=30 action=skill:AVALANCHE
   choice 0 2 weight=25 action=skill:TAUNT
@@ -2098,7 +2098,7 @@ enemy-ai TITAN
 end
 
 enemy-ai YAKSINI
-  decision 0 predicates=50:445,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(445),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=20 action=skill:ZANMA
   choice 0 2 weight=15 action=skill:MAZANMA_020
@@ -2112,8 +2112,8 @@ enemy-ai YAKSINI
 end
 
 enemy-ai GYU_KI_05A
-  decision 0 predicates=51:10,none,none routes=8,8,8,8,1,8,8,8
-  decision 1 predicates=27:0,none,none routes=8,8,8,8,2,8,8,8
+  decision 0 predicates=UNIT_PASSES_ACTION_ENTRY_QUERY(10),none,none routes=8,8,8,8,1,8,8,8
+  decision 1 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,2,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=20 action=skill:POWER_CHARGE
   choice 0 2 weight=30 action=skill:HELL_THRUST
@@ -2129,7 +2129,7 @@ enemy-ai GYU_KI_05A
 end
 
 enemy-ai HECATONCHEIRES_05B
-  decision 0 predicates=54:10,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=CHECK_UNIT_ACTION_MODE_ZERO(10),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=40 action=skill:SKULL_CLEAVE
   choice 0 1 weight=40 action=skill:CHI_BLAST
   choice 0 2 weight=20 action=skill:POWER_CHARGE
@@ -2138,7 +2138,7 @@ enemy-ai HECATONCHEIRES_05B
 end
 
 enemy-ai SHIKOME
-  decision 0 predicates=1:30,50:460,50:444 routes=8,3,5,8,1,2,4,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(30),ACTION_REQUIREMENTS_MET(460),ACTION_REQUIREMENTS_MET(444) routes=8,3,5,8,1,2,4,8
   choice 0 0 weight=20 action=special:0
   choice 0 1 weight=30 action=skill:STUN_SPHERE
   choice 0 2 weight=30 action=skill:ZAN
@@ -2166,7 +2166,7 @@ enemy-ai SHIKOME
 end
 
 enemy-ai GHOUL_05D
-  decision 0 predicates=7:3,41:0,none routes=8,0,8,8,1,0,8,8
+  decision 0 predicates=GROUP_400_COUNT_AT_MOST(3),HAS_DISTINCT_TARGET_SELECTION(0),none routes=8,0,8,8,1,0,8,8
   choice 0 0 weight=50 action=special:0
   choice 0 1 weight=50 action=skill:HP_THIEF
   choice 1 0 weight=40 action=special:0
@@ -2175,8 +2175,8 @@ enemy-ai GHOUL_05D
 end
 
 enemy-ai SHADOW
-  decision 0 predicates=58:11,none,none routes=8,8,8,8,1,8,8,8
-  decision 1 predicates=27:0,none,none routes=8,8,8,8,2,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),none,none routes=8,8,8,8,1,8,8,8
+  decision 1 predicates=READY_WITHOUT_TURNS(0),none,none routes=8,8,8,8,2,8,8,8
   choice 0 0 weight=20 action=skill:ZIO
   choice 0 1 weight=30 action=skill:SUKUKAJA
   choice 0 2 weight=30 action=skill:TARUKAJA
@@ -2197,7 +2197,7 @@ enemy-ai VETALA_05F
 end
 
 enemy-ai BUGABOO_060
-  decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
   choice 0 1 weight=70 action=skill:BUFU
   choice 1 0 weight=30 action=special:0
@@ -2206,7 +2206,7 @@ enemy-ai BUGABOO_060
 end
 
 enemy-ai KARMA_SOLDIER_061 script=AI_KARMA_1
-  decision 0 predicates=2:99,27:0,none routes=8,0,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(99),READY_WITHOUT_TURNS(0),none routes=8,0,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:RIFLE
   choice 0 1 weight=25 action=skill:MOLOTOV
   choice 0 2 weight=25 action=skill:ICE_BLAST
@@ -2215,13 +2215,13 @@ enemy-ai KARMA_SOLDIER_061 script=AI_KARMA_1
   choice 1 1 weight=25 action=skill:LAND_MINE
   choice 1 2 weight=25 action=skill:DARK_VEIL
   choice 1 3 weight=25 action=skill:HOLY_ARROW
-  choice 2 0 weight=50 action=skill:RATION effect=1:0
-  choice 2 1 weight=25 action=skill:BRAVE_RATION effect=1:0
+  choice 2 0 weight=50 action=skill:RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 2 1 weight=25 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=25 action=skill:MEDICAL_KIT
 end
 
 enemy-ai KARMA_SOLDIER_062 script=AI_KARMA_2
-  decision 0 predicates=2:99,27:0,none routes=8,0,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(99),READY_WITHOUT_TURNS(0),none routes=8,0,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:ASSAULT_ROD
   choice 0 1 weight=25 action=skill:MOLOTOV
   choice 0 2 weight=25 action=skill:ICE_BLAST
@@ -2230,8 +2230,8 @@ enemy-ai KARMA_SOLDIER_062 script=AI_KARMA_2
   choice 1 1 weight=25 action=skill:LAND_MINE
   choice 1 2 weight=25 action=skill:DARK_VEIL
   choice 1 3 weight=25 action=skill:HOLY_ARROW
-  choice 2 0 weight=50 action=skill:RATION effect=1:0
-  choice 2 1 weight=25 action=skill:BRAVE_RATION effect=1:0
+  choice 2 0 weight=50 action=skill:RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 2 1 weight=25 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=25 action=skill:MEDICAL_KIT
 end
 
@@ -2240,53 +2240,53 @@ enemy-ai OMOIKANE_063 script=AI_OMOIKA
 end
 
 enemy-ai SAKI_MITAMA script=AI_MITAMA
-  decision 0 predicates=58:2,none,none routes=8,1,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(2),none,none routes=8,1,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:TARUKAJA
   choice 0 1 weight=25 action=skill:SUKUKAJA
   choice 0 2 weight=25 action=skill:RAKUKAJA
   choice 0 3 weight=25 action=skill:MAKAKAJA
-  choice 0 4 action=special:1 effect=12:0
+  choice 0 4 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
   choice 1 0 action=skill:TARUKAJA
   choice 1 1 action=skill:SUKUKAJA
   choice 1 2 action=skill:RAKUKAJA
   choice 1 3 action=skill:MAKAKAJA
-  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 1 4 weight=100 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
 end
 
 enemy-ai KUSI_MITAMA script=AI_MITAMA
-  decision 0 predicates=58:6,none,none routes=8,1,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(6),none,none routes=8,1,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:TARUKAJA
   choice 0 1 weight=25 action=skill:SUKUKAJA
   choice 0 2 weight=25 action=skill:RAKUKAJA
   choice 0 3 weight=25 action=skill:MAKAKAJA
-  choice 0 4 action=special:1 effect=12:0
+  choice 0 4 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
   choice 1 0 action=skill:TARUKAJA
   choice 1 1 action=skill:SUKUKAJA
   choice 1 2 action=skill:RAKUKAJA
   choice 1 3 action=skill:MAKAKAJA
-  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 1 4 weight=100 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
 end
 
 enemy-ai NIGI_MITAMA script=AI_MITAMA
-  decision 0 predicates=58:4,none,none routes=8,1,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(4),none,none routes=8,1,8,8,1,8,8,8
   choice 0 0 weight=25 action=skill:TARUKAJA
   choice 0 1 weight=25 action=skill:SUKUKAJA
   choice 0 2 weight=25 action=skill:RAKUKAJA
   choice 0 3 weight=25 action=skill:MAKAKAJA
-  choice 0 4 action=special:1 effect=12:0
+  choice 0 4 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
   choice 1 0 action=skill:TARUKAJA
   choice 1 1 action=skill:SUKUKAJA
   choice 1 2 action=skill:RAKUKAJA
   choice 1 3 action=skill:MAKAKAJA
-  choice 1 4 weight=100 action=special:1 effect=12:0
+  choice 1 4 weight=100 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
 end
 
 enemy-ai ARA_MITAMA_067 script=AI_MITAMA
-  decision 0 predicates=58:0,none,none routes=8,1,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(0),none,none routes=8,1,8,8,1,8,8,8
 end
 
 enemy-ai PISACA
-  decision 0 predicates=12:16,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(16),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:SILENT_HOWL
   choice 0 2 weight=25 action=skill:MAKAJAMON_04A
@@ -2294,7 +2294,7 @@ enemy-ai PISACA
   choice 1 0 weight=20 action=special:0
   choice 1 1 weight=20 action=skill:SILENT_HOWL
   choice 1 2 weight=20 action=skill:MAKAJAMON_04A
-  choice 1 3 weight=40 action=skill:LEECH effect=2:16
+  choice 1 3 weight=40 action=skill:LEECH effect=SELECT_TARGETS_BY_ACTION_MASK(16)
 end
 
 enemy-ai OMOIKANE_069 script=AI_OMOIKA
@@ -2310,7 +2310,7 @@ enemy-ai OMOIKANE_06B script=AI_OMOIKA
 end
 
 enemy-ai GIRIMEHKALA_06C script=AI_GIRIME_DEKA
-  decision 0 predicates=23:50,56:12,none routes=8,1,8,8,1,1,8,8
+  decision 0 predicates=COUNTER_REACHED_LIMIT(50),ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none routes=8,1,8,8,1,1,8,8
   choice 0 0 weight=20 action=skill:DEBILITATE_0BE
   choice 0 1 weight=10 action=skill:MUDOON
   choice 0 2 weight=20 action=skill:LAST_WORD
@@ -2324,7 +2324,7 @@ enemy-ai GIRIMEHKALA_06C script=AI_GIRIME_DEKA
 end
 
 enemy-ai KARMA_SOLDIER_06D script=AI_KARMA_3
-  decision 0 predicates=2:99,27:0,none routes=8,0,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(99),READY_WITHOUT_TURNS(0),none routes=8,0,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:RIFLE
   choice 0 1 weight=25 action=skill:FIRE_BOMB
   choice 0 2 weight=25 action=skill:FROST_BOMB
@@ -2333,13 +2333,13 @@ enemy-ai KARMA_SOLDIER_06D script=AI_KARMA_3
   choice 1 1 weight=25 action=skill:MAGNI_BOMB
   choice 1 2 weight=25 action=skill:DARK_VEIL
   choice 1 3 weight=25 action=skill:HOLY_ARROW
-  choice 2 0 weight=50 action=skill:BRAVE_RATION effect=1:0
-  choice 2 1 weight=25 action=skill:HERO_RATION effect=1:0
+  choice 2 0 weight=50 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 2 1 weight=25 action=skill:HERO_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=25 action=skill:MEDICAL_TOOL
 end
 
 enemy-ai KARMA_SOLDIER_06E script=AI_KARMA_4
-  decision 0 predicates=2:99,27:0,none routes=8,0,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(99),READY_WITHOUT_TURNS(0),none routes=8,0,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:ASSAULT_ROD
   choice 0 1 weight=25 action=skill:FIRE_BOMB
   choice 0 2 weight=25 action=skill:FROST_BOMB
@@ -2348,13 +2348,13 @@ enemy-ai KARMA_SOLDIER_06E script=AI_KARMA_4
   choice 1 1 weight=25 action=skill:MAGNI_BOMB
   choice 1 2 weight=25 action=skill:DARK_VEIL
   choice 1 3 weight=25 action=skill:HOLY_ARROW
-  choice 2 0 weight=50 action=skill:BRAVE_RATION effect=1:0
-  choice 2 1 weight=25 action=skill:HERO_RATION effect=1:0
+  choice 2 0 weight=50 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 2 1 weight=25 action=skill:HERO_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=25 action=skill:MEDICAL_TOOL
 end
 
 enemy-ai KARMA_SOLDIER_06F script=AI_KARMA_5
-  decision 0 predicates=2:80,27:0,none routes=8,8,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(80),READY_WITHOUT_TURNS(0),none routes=8,8,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:RIFLE
   choice 0 1 weight=25 action=skill:FIRE_BOMB
   choice 0 2 weight=25 action=skill:FROST_BOMB
@@ -2365,12 +2365,12 @@ enemy-ai KARMA_SOLDIER_06F script=AI_KARMA_5
   choice 1 3 weight=20 action=skill:HOLY_ARROW
   choice 1 4 weight=20 action=skill:WILD_CARD
   choice 2 0 weight=20 action=skill:MEDICAL_TOOL
-  choice 2 1 weight=50 action=skill:BRAVE_RATION effect=1:0
+  choice 2 1 weight=50 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=30 action=skill:MEDICAL_KIT
 end
 
 enemy-ai KARMA_SOLDIER_070 script=AI_KARMA_6
-  decision 0 predicates=2:99,27:0,none routes=8,1,8,8,2,0,8,131
+  decision 0 predicates=BOSS_HP_AT_OR_BELOW_RATE(99),READY_WITHOUT_TURNS(0),none routes=8,1,8,8,2,0,8,131
   choice 0 0 weight=25 action=skill:ASSAULT_ROD
   choice 0 1 weight=25 action=skill:FIRE_BOMB
   choice 0 2 weight=25 action=skill:FROST_BOMB
@@ -2381,12 +2381,12 @@ enemy-ai KARMA_SOLDIER_070 script=AI_KARMA_6
   choice 1 3 weight=20 action=skill:HOLY_ARROW
   choice 1 4 weight=20 action=skill:WILD_CARD
   choice 2 0 weight=20 action=skill:MEDICAL_TOOL
-  choice 2 1 weight=50 action=skill:BRAVE_RATION effect=1:0
+  choice 2 1 weight=50 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 2 weight=30 action=skill:MEDICAL_KIT
 end
 
 enemy-ai CU_CHULAINN
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=skill:SKULL_CLEAVE
   choice 0 1 weight=20 action=skill:DEMON_RAGE
   choice 0 2 weight=20 action=skill:ZANDYNE
@@ -2439,7 +2439,7 @@ enemy-ai ENEMY_10A script=AI_KAKUHEKI_A2
 end
 
 enemy-ai KINGU
-  decision 0 predicates=12:1024,43:0x1ffffe,none routes=8,2,8,8,1,2,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(1024),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),none routes=8,2,8,8,1,2,8,8
   choice 0 0 weight=30 action=skill:VANITY_039
   choice 0 1 weight=30 action=skill:MAREVERT
   choice 0 2 weight=20 action=skill:BLOOD_CURSE_046
@@ -2467,21 +2467,21 @@ enemy-ai VRITRA script=AI_VURI
 end
 
 enemy-ai TENTACLE_111
-  decision 0 predicates=12:4,7:2,none routes=8,8,8,8,2,1,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(4),GROUP_400_COUNT_AT_MOST(2),none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=70 action=skill:ATTACK
   choice 0 1 weight=30 action=skill:SWEEP
   choice 1 0 weight=30 action=skill:ATTACK
   choice 1 1 weight=70 action=skill:SWEEP
-  choice 2 0 weight=100 action=skill:ATTACK effect=2:4
+  choice 2 0 weight=100 action=skill:ATTACK effect=SELECT_TARGETS_BY_ACTION_MASK(4)
 end
 
 enemy-ai TENTACLE_112
-  decision 0 predicates=12:4,7:2,none routes=8,8,8,8,2,1,8,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(4),GROUP_400_COUNT_AT_MOST(2),none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=70 action=skill:ATTACK
   choice 0 1 weight=30 action=skill:SWEEP
   choice 1 0 weight=30 action=skill:ATTACK
   choice 1 1 weight=70 action=skill:SWEEP
-  choice 2 0 weight=100 action=skill:ATTACK effect=2:4
+  choice 2 0 weight=100 action=skill:ATTACK effect=SELECT_TARGETS_BY_ACTION_MASK(4)
 end
 
 enemy-ai KALI script=AI_KAARII
@@ -2633,43 +2633,43 @@ enemy-ai ANDRAS_13B script=AI_ANDRAS
 end
 
 enemy-ai GDON_13C
-  decision 0 predicates=43:3,68:0,15:263 routes=5,6,5,1,2,3,1,8
+  decision 0 predicates=ANY_UNIT_PASSES_CHECK_400(3),UNITS_MISSING_STATUS_FLAG(0),HAS_OTHER_GROUP_400_UNIT_MODE(263) routes=5,6,5,1,2,3,1,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=70 action=skill:ICE_DRAIN
-  choice 0 2 weight=10 action=skill:REVERT effect=15:0
+  choice 0 2 weight=10 action=skill:REVERT effect=SELECT_GROUP_200_WITH_FLAG_1000(0)
   choice 0 3 weight=5 action=skill:MUDO
   choice 0 4 weight=5 action=skill:HAMA
   choice 1 0 weight=20 action=special:0
   choice 1 1 weight=80 action=skill:ICE_DRAIN
   choice 2 0 weight=50 action=special:0
-  choice 2 2 weight=20 action=skill:REVERT effect=15:0
+  choice 2 2 weight=20 action=skill:REVERT effect=SELECT_GROUP_200_WITH_FLAG_1000(0)
   choice 2 3 weight=10 action=skill:MUDO
   choice 2 4 weight=20 action=skill:HAMA
   choice 3 0 weight=50 action=special:0
   choice 3 1 weight=40 action=skill:ICE_DRAIN
   choice 3 3 weight=10 action=skill:MUDO
   choice 4 0 weight=80 action=special:0
-  choice 4 2 weight=20 action=skill:REVERT effect=15:0
+  choice 4 2 weight=20 action=skill:REVERT effect=SELECT_GROUP_200_WITH_FLAG_1000(0)
   choice 5 0 weight=100 action=special:0
   choice 6 0 weight=80 action=special:0
   choice 6 3 weight=20 action=skill:MUDO
 end
 
 enemy-ai NAGA_13D
-  decision 0 predicates=12:2,13:16,7:1 routes=8,8,8,2,1,8,5,8
-  decision 1 predicates=13:16,12:16,43:2 routes=8,8,2,3,2,3,4,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(2),ALL_GROUP_200_HAVE_ACTION_MASK(16),GROUP_400_COUNT_AT_MOST(1) routes=8,8,8,2,1,8,5,8
+  decision 1 predicates=ALL_GROUP_200_HAVE_ACTION_MASK(16),ANY_GROUP_200_HAS_ACTION_MASK(16),ANY_UNIT_PASSES_CHECK_400(2) routes=8,8,2,3,2,3,4,8
   choice 0 0 weight=5 action=special:0
   choice 0 1 weight=15 action=skill:MAKAJAM
   choice 0 2 weight=5 action=skill:MAKAJAMON_04A
   choice 0 3 weight=15 action=skill:ZIODYNE
   choice 0 4 weight=60 action=skill:VOID_FIRE
-  choice 1 0 weight=100 action=special:0 effect=2:2
+  choice 1 0 weight=100 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(2)
   choice 2 0 weight=10 action=special:0
   choice 2 3 weight=55 action=skill:ZIODYNE
   choice 2 4 weight=35 action=skill:MAZIONGA_017
   choice 3 0 weight=20 action=special:0
-  choice 3 1 weight=40 action=skill:MAKAJAM effect=14:16
-  choice 3 3 weight=25 action=skill:ZIODYNE effect=14:16
+  choice 3 1 weight=40 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
+  choice 3 3 weight=25 action=skill:ZIODYNE effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 3 4 weight=15 action=skill:MAZIONGA_017
   choice 4 0 weight=15 action=special:0
   choice 4 1 weight=30 action=skill:MAKAJAM
@@ -2677,26 +2677,26 @@ enemy-ai NAGA_13D
   choice 4 3 weight=15 action=skill:ZIODYNE
   choice 4 4 weight=20 action=skill:MAZIONGA_017
   choice 5 0 weight=25 action=special:0
-  choice 5 1 weight=30 action=skill:MAKAJAM effect=14:16
+  choice 5 1 weight=30 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 5 2 weight=20 action=skill:ZIODYNE
   choice 5 3 weight=25 action=skill:MAZIONGA_017
 end
 
 enemy-ai NAGA_13E
-  decision 0 predicates=12:2,13:16,7:1 routes=8,8,8,2,1,8,5,8
-  decision 1 predicates=13:16,12:16,43:2 routes=8,8,2,3,2,3,4,8
+  decision 0 predicates=ANY_GROUP_200_HAS_ACTION_MASK(2),ALL_GROUP_200_HAVE_ACTION_MASK(16),GROUP_400_COUNT_AT_MOST(1) routes=8,8,8,2,1,8,5,8
+  decision 1 predicates=ALL_GROUP_200_HAVE_ACTION_MASK(16),ANY_GROUP_200_HAS_ACTION_MASK(16),ANY_UNIT_PASSES_CHECK_400(2) routes=8,8,2,3,2,3,4,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=10 action=skill:MAKAJAM
   choice 0 2 weight=5 action=skill:MAKAJAMON_04A
   choice 0 3 weight=10 action=skill:ZIODYNE
   choice 0 4 weight=65 action=skill:VOID_FIRE
-  choice 1 0 weight=100 action=special:0 effect=2:2
+  choice 1 0 weight=100 action=special:0 effect=SELECT_TARGETS_BY_ACTION_MASK(2)
   choice 2 0 weight=10 action=special:0
   choice 2 3 weight=55 action=skill:ZIODYNE
   choice 2 4 weight=35 action=skill:MAZIONGA_017
   choice 3 0 weight=10 action=special:0
-  choice 3 1 weight=45 action=skill:MAKAJAM effect=14:16
-  choice 3 3 weight=25 action=skill:ZIODYNE effect=14:16
+  choice 3 1 weight=45 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
+  choice 3 3 weight=25 action=skill:ZIODYNE effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 3 4 weight=20 action=skill:MAZIONGA_017
   choice 4 0 weight=10 action=special:0
   choice 4 1 weight=30 action=skill:MAKAJAM
@@ -2704,7 +2704,7 @@ enemy-ai NAGA_13E
   choice 4 3 weight=25 action=skill:ZIODYNE
   choice 4 4 weight=20 action=skill:MAZIONGA_017
   choice 5 0 weight=10 action=special:0
-  choice 5 1 weight=30 action=skill:MAKAJAM effect=14:16
+  choice 5 1 weight=30 action=skill:MAKAJAM effect=SELECT_TARGETS_WITHOUT_ACTION_MASK(16)
   choice 5 2 weight=25 action=skill:ZIODYNE
   choice 5 3 weight=35 action=skill:MAZIONGA_017
 end
@@ -2723,7 +2723,7 @@ enemy-ai KUMBHANDA_141 script=AI_KUBAND2_3
 end
 
 enemy-ai ANDRAS_142
-  decision 0 predicates=58:2,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(2),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=25 action=special:0
   choice 0 1 weight=25 action=skill:MAKAKAJA
   choice 0 2 weight=50 action=skill:HP_THIEF
@@ -2751,9 +2751,9 @@ enemy-ai GHOUL_146 script=AI_GUURU_RING
 end
 
 enemy-ai KARMA_SOLDIER_148
-  decision 0 predicates=1:50,2:50,none routes=8,1,8,8,1,1,8,8
+  decision 0 predicates=UNIT_HP_AT_OR_BELOW_RATE(50),BOSS_HP_AT_OR_BELOW_RATE(50),none routes=8,1,8,8,1,1,8,8
   choice 0 0 weight=100 action=skill:RIFLE
-  choice 1 0 weight=30 action=skill:RATION effect=1:0
+  choice 1 0 weight=30 action=skill:RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 1 1 weight=70 action=skill:RIFLE
 end
 
@@ -2778,7 +2778,7 @@ end
 enemy-ai TRIBHVANA_AIR script=AI_3_OKAM
   choice 0 0 weight=75 action=skill:ASSAULT_ROD
   choice 0 1 weight=20 action=skill:SONIC_STONE
-  choice 0 2 weight=5 action=skill:RATION effect=1:0
+  choice 0 2 weight=5 action=skill:RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
 end
 
 enemy-ai TRIBHVANA_EARTH script=AI_3_OTOK
@@ -2786,20 +2786,20 @@ enemy-ai TRIBHVANA_EARTH script=AI_3_OTOK
 end
 
 enemy-ai KARMA_SOLDIER_14E
-  decision 1 predicates=2:20,6:10,none routes=8,2,8,8,8,8,8,8
+  decision 1 predicates=BOSS_HP_AT_OR_BELOW_RATE(20),RESET_AI_COUNTER_AT_LIMIT(10),none routes=8,2,8,8,8,8,8,8
   choice 0 0 weight=40 action=skill:RIFLE
   choice 0 1 weight=15 action=skill:MOLOTOV
   choice 0 2 weight=15 action=skill:ICE_BLAST
   choice 0 3 weight=15 action=skill:BOLT_ROD
   choice 0 4 weight=15 action=skill:LAND_MINE
   choice 2 0 weight=60 action=skill:RIFLE
-  choice 2 1 weight=20 action=skill:RATION effect=1:0
-  choice 2 2 weight=15 action=skill:BRAVE_RATION effect=1:0
+  choice 2 1 weight=20 action=skill:RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
+  choice 2 2 weight=15 action=skill:BRAVE_RATION effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 2 3 weight=5 action=skill:MEDICAL_KIT
 end
 
 enemy-ai SATI_14F script=AI_SATI___RING
-  decision 0 predicates=58:11,43:0x1ffffe,2:80 routes=8,4,3,3,1,2,3,8
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(11),ANY_UNIT_PASSES_CHECK_400(0x1ffffe),BOSS_HP_AT_OR_BELOW_RATE(80) routes=8,4,3,3,1,2,3,8
   choice 0 0 weight=30 action=skill:AGILAO
   choice 0 1 weight=20 action=skill:MAKAKAJA
   choice 0 2 action=skill:DIARAMA
@@ -2817,7 +2817,7 @@ enemy-ai SATI_14F script=AI_SATI___RING
   choice 2 4 weight=30 action=special:0
   choice 3 0 weight=30 action=skill:AGILAO
   choice 3 1 action=skill:MAKAKAJA
-  choice 3 2 weight=40 action=skill:DIARAMA effect=1:0
+  choice 3 2 weight=40 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 3 3 action=skill:ICE_REPEL
   choice 3 4 weight=30 action=special:0
   choice 4 0 weight=70 action=skill:AGILAO
@@ -2828,7 +2828,7 @@ enemy-ai SATI_14F script=AI_SATI___RING
 end
 
 enemy-ai HANUMAN_150 script=AI_HANUMA_RING
-  decision 0 predicates=50:502,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ACTION_REQUIREMENTS_MET(502),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=10 action=special:0
   choice 0 1 weight=30 action=skill:MATERAZI_029
   choice 0 2 weight=30 action=skill:TERADYNE
@@ -2843,7 +2843,7 @@ enemy-ai HANUMAN_150 script=AI_HANUMA_RING
   choice 2 4 weight=30 action=special:0
   choice 3 0 weight=30 action=skill:AGILAO
   choice 3 1 action=skill:MAKAKAJA
-  choice 3 2 weight=40 action=skill:DIARAMA effect=1:0
+  choice 3 2 weight=40 action=skill:DIARAMA effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)
   choice 3 3 action=skill:ICE_REPEL
   choice 3 4 weight=30 action=special:0
   choice 4 0 weight=70 action=skill:AGILAO
@@ -2854,7 +2854,7 @@ enemy-ai HANUMAN_150 script=AI_HANUMA_RING
 end
 
 enemy-ai FLAUROS_151 script=AI_FRAROU_RING
-  decision 0 predicates=56:12,none,none routes=8,8,8,8,1,8,8,8
+  decision 0 predicates=ANY_GROUP_200_MATCHES_ACTION_ENTRY(12),none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 action=special:0
   choice 0 1 weight=30 action=skill:SPELL_GLOOM
   choice 0 2 weight=30 action=skill:SKULL_CLEAVE
@@ -2866,9 +2866,9 @@ enemy-ai FLAUROS_151 script=AI_FRAROU_RING
 end
 
 enemy-ai KARMA_SOLDIER_152 script=AI_KARMA_AKA1
-  choice 0 0 weight=100 action=special:1 effect=12:0
+  choice 0 0 weight=100 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
 end
 
 enemy-ai KARMA_SOLDIER_153 script=AI_KARMA_AKA2
-  choice 0 0 weight=100 action=special:1 effect=12:0
+  choice 0 0 weight=100 action=special:1 effect=APPEND_SELF_AFTER_TARGET_SCAN(0)
 end
