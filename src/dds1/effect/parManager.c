@@ -60,7 +60,113 @@ void parReleaseObject(ParObj *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00158FA8);
+typedef struct {
+    u8 pad00[4];
+    void *records;
+} ParBurstBuffer;
+
+typedef struct {
+    f32 origin[4];
+    f32 headSpeed;
+    u8 pad14[0x10];
+    s32 frameCount;
+    u8 pad28[8];
+    u8 sub[0x64];
+    f32 speedJitter;
+    f32 spinJitter;
+    u8 pad9C[0x14];
+    f32 matrix[16];
+    u8 padF0[8];
+    ParBurstBuffer *buffer;
+    u8 padFC[0x54];
+    u8 mode;
+    u8 pad151[3];
+    u32 spread;
+    f32 speed;
+    f32 unk15C;
+    f32 f160;
+    f32 jitterA;
+    f32 jitterB;
+} ParBurstEmitter;
+
+typedef struct {
+    f32 pos[4];
+    f32 vel[3];
+    u8 pad1C[4];
+    s32 age;
+    u32 color;
+    f32 speed;
+    f32 spin;
+    f32 axis[3];
+    f32 rate;
+} ParBurstPacket;
+
+extern s32 effMiscRand(void *);
+extern f32 effMiscRandUnitFloat(void *);
+extern u8 D_0034DF38[];
+extern u8 D_003D6480[];
+
+void func_00158FA8(ParBurstEmitter *effect, u32 index) {
+    ParBurstPacket *packet = (ParBurstPacket *)effect->buffer->records;
+    f32 tmp[4];
+    f32 speed;
+    f32 jitter;
+    f32 length;
+
+    packet += index;
+    packet->color = 0;
+    packet->age = -(effMiscRand(D_003D6480) % (effect->spread + 1));
+    speed = effect->speed;
+    jitter = effect->jitterA;
+    tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    tmp[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, tmp);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, tmp);
+    packet->vel[0] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[0];
+    packet->vel[1] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[1];
+    packet->vel[2] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * tmp[2];
+    VU0_LOAD_VF(vf10, packet->vel);
+    VU0_LENGTH_VF10(length);
+    VU0_LOAD_MATRIX(effect->matrix);
+    VU0_LOAD_VF(vf10, packet->vel);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, packet->vel);
+    packet->pos[0] = packet->vel[0] + effect->origin[0];
+    packet->pos[1] = packet->vel[1] + effect->origin[1];
+    packet->pos[2] = packet->vel[2] + effect->origin[2];
+    if (effect->mode == 1) {
+        tmp[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        tmp[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        tmp[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        VU0_LOAD_VF(vf10, tmp);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, tmp);
+        packet->axis[0] = tmp[0];
+        packet->axis[1] = tmp[1];
+        packet->axis[2] = tmp[2];
+    } else {
+        packet->axis[0] = 0;
+        packet->axis[1] = -1.0f;
+        packet->axis[2] = 0;
+    }
+    jitter = effect->jitterB;
+    packet->rate = (effect->f160 * (effMiscRandUnitFloat(D_0034DF38) * jitter +
+                                    (1.0f - jitter)) - length) /
+                   effect->frameCount;
+    jitter = effect->speedJitter;
+    packet->speed = effect->headSpeed * (effMiscRandUnitFloat(D_0034DF38) * jitter +
+                                         (1.0f - jitter));
+    jitter = effect->spinJitter;
+    if (jitter != 0) {
+        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) *
+                       (3.14159265f * 2.0f);
+    } else {
+        packet->spin = 0;
+    }
+    parDispatchKindInit(effect->sub, index);
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159308);
 

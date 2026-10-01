@@ -81,6 +81,10 @@ extern u8 *effAllocateIdentityMatrixWork(u32);
 extern s32 effMiscRand(void *);
 
 extern u8 D_003AA868[];
+extern s32 func_001784B0(EffRecordPool *pool, s32 index);
+extern f32 D_003B12B0[];
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
 
 /* Allocate and initialize a circular fan, with randomized per-vertex offsets. */
 /* K&R: effCreateRingFanFromParams passes the table block as the raw 64-bit value. */
@@ -184,7 +188,85 @@ void effFlashWriteRingColorSlots(u8 *work, s32 index, s32 param) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00176E28", func_00177220);
+typedef struct {
+    u8 pad00[8];
+    f32 accumulator;
+    f32 unk0C;
+} EffectArcQuadPart;
+
+typedef struct {
+    u8 pad00[0x58];
+    EffectArcQuadPart *parts;
+    u8 pad5C[0x0C];
+    f32 orbitRadius;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    u8 pad78[4];
+    EffRecordPool *resourceHandle;
+} EffectArcQuadWork;
+
+/* vu0 routine: billboard corner offsets for an arc particle */
+void func_00177220(EffectArcQuadWork *work, s32 index) {
+    EffectArcQuadPart *part = &work->parts[index];
+    f32 *quad = (f32 *)func_001784B0(work->resourceHandle, index);
+    f32 offset[4];
+    f32 unit[4];
+    f32 scaleA[4];
+    f32 scaleB[4];
+    f32 scaleC[4];
+    f32 sinv;
+    f32 height;
+
+    VEC3_SPLAT(scaleA, work->unk6C);
+    VEC3_SPLAT(scaleB, work->unk74);
+    VEC3_SPLAT(scaleC, work->unk70);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
+    unit[1] = 0;
+    sinv = sdfSinPoly(part->accumulator);
+    unit[2] = sinv;
+    offset[0] = unit[0] * work->orbitRadius;
+    offset[1] = 0;
+    offset[2] = sinv * work->orbitRadius;
+    height = part->unk0C;
+    D_003B12B0[0] = unit[0] * height;
+    D_003B12B0[1] = height + -1.0f;
+    D_003B12B0[2] = sinv * height;
+    VU0_LOAD_VF(vf10, D_003B12B0);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, unit);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, scaleB);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleB);
+    VU0_LOAD_VF(vf10, scaleC);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, scaleC);
+    VU0_MOVE_VF(vf10, vf12);
+    VU0_LOAD_VF(vf11, scaleA);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleC);
+    VU0_STORE_VF(vf10, quad + 12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 8);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 16);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, scaleB);
+    VU0_ADD(vf10, vf10, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, quad + 4);
+}
 
 void effAdvanceVectorRecord(EffVectorWork *work, s32 index) {
     EffVectorPart *part;

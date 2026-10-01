@@ -550,6 +550,12 @@ typedef struct FnTbl24Create {
     u32 (*createResource)();
     u8 pad_0x08[0x10]; // 0x08
 } FnTbl24Create; // 0x18
+typedef struct EffModelResourceTable {
+    void (*fn)();
+    u32 (*createResource)();
+    u8 pad08[0x0C];
+    u32 resourceSize;
+} EffModelResourceTable;
 
 extern FnTbl24 D_003E9B90[];
 
@@ -607,7 +613,7 @@ extern FnTbl28 D_003EA018[];
 
 extern FnTbl28 D_003EA020[];
 
-extern FnTbl24Create D_003E9F08[];
+extern EffModelResourceTable D_003E9F08[];
 
 extern u8 D_0045C1A0[];
 
@@ -5804,7 +5810,28 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F4960);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F5168);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F5358);
+
+u32 func_002F5358(u16 kind, void *source, void *secondary, u32 param) {
+    u32 headerSize = 0x40;
+    u32 size = D_003E9F08[kind].resourceSize;
+    EffModelResource *effect = (EffModelResource *)func_00328D68(size + headerSize);
+
+    effect->source = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->updateCount = 0;
+    effect->kind = kind;
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
+    VU0_STORE_VF_UNCLOBBERED($vf0, (u8 *)effect + 0x10);
+    memcpy(effect->source, source, size);
+    if (secondary != NULL) {
+        effect->model = (void *)func_002DC1D0((u32)secondary, param);
+        effect->attributes = param;
+        effect->childResource = D_003E9F08[kind].createResource(effect->source, effect->model);
+        D_003E9F08[kind].fn(effect);
+    }
+    return (u32)effect;
+}
 
 u32 effCreateModelResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer();
