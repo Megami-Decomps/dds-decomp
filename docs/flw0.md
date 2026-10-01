@@ -150,6 +150,21 @@ pseudo-instruction only for the adjacent `PUSHIS` and
 Other integer pushes remain numeric, including computed or ambiguous message
 references.
 
+Selections use a distinct typed reference before the profiled selection
+command:
+
+```text
+  PUSHSELECT CHOICE
+  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
+```
+
+`PUSHSELECT` also assembles to `PUSHIS`, but its symbol must name a `select`
+record. A message declaration is rejected even when it has a valid source
+name. The disassembler uses this form only for an adjacent literal passed to
+`MESSAGE_SELECTION_REQUEST_AND_POLL`; dynamic, ambiguous, and raw-bank
+references remain numeric. The command waits for the selection to finish and
+returns the selected value through the VM result register.
+
 An adjacent literal target for the profiled event command uses the maintained
 event script's resource name:
 
@@ -168,6 +183,25 @@ absent targets stay numeric.
 
 The reading view carries the same evidence as `CALL_EVENT(event(e602))` while
 leaving an unresolved literal as `CALL_EVENT(10)`.
+
+A literal procedure-table index passed to the script-task command uses a local
+procedure symbol:
+
+```text
+  PUSHIS 0
+  PUSHPROC worker
+  COMM CREATE_SCRIPT_TASK
+  PUSHREG
+  COMM WAIT_FOR_TASK_REMOVAL
+```
+
+`PUSHPROC` assembles to `PUSHIS`. Its operand follows the procedure declaration
+when procedures are reordered, just like the operands of `CALL`, `JUMP`, and
+`PROC`. The disassembler emits it only for an in-range literal immediately
+before `CREATE_SCRIPT_TASK`; unrelated integers stay numeric. The other
+argument is a priority adjustment relative to the current script task, and the
+command returns the created task handle. That handle may be waited on, stored
+for later destruction, or intentionally left running.
 
 Physical version-1 sources use the same records after an `msg1` marker inside
 their type-3 section. Their section size remains fixed. Across the tracked
@@ -260,6 +294,7 @@ tables and both implementations:
 | `MESSAGE_REQUEST_AND_POLL` | `0x000` | 1 | Starts a message entry or waits for its current work |
 | `ACTIVATE_MESSAGE_PANEL` | `0x001` | 0 | Activates the current message panel |
 | `FINISH_SCRIPT_MESSAGE_WINDOW` | `0x002` | 0 | Waits for and finishes the active script message window |
+| `MESSAGE_SELECTION_REQUEST_AND_POLL` | `0x003` | 1 | Builds or waits for a selection and returns the selected value |
 | `TEST_MODEL_FLAG` | `0x007` | 1 | Tests a model flag and returns the result |
 | `SET_MODEL_FLAG` | `0x008` | 1 | Sets a model flag |
 | `CLEAR_MODEL_FLAG` | `0x009` | 1 | Clears a model flag |
@@ -280,9 +315,12 @@ tables and both implementations:
 | `READ_CURRENT_WORLD_OBJECT_ID` | `0x068` | 0 | Returns the current world object's ID, or `-1` when absent |
 | `CLEAR_UNIT_LOW_FLAG` | `0x069` | 1 | Clears the selected unit's low flag bit |
 | `SET_UNIT_LOW_FLAG` | `0x06A` | 1 | Sets the selected unit's low flag bit |
+| `SET_MESSAGE_WINDOW_GEOMETRY` | `0x071` | 3 | Applies three geometry values to the current message window |
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
+| `CREATE_SCRIPT_TASK` | `0x0A5` | 2 | Creates a task at a local procedure with a relative priority and returns its handle |
+| `DESTROY_REGISTERED_TASK` | `0x0A6` | 1 | Destroys a registered task and its hierarchy; an absent handle is ignored |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
@@ -297,12 +335,21 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 37,026 of 53,400 native calls in the complete DDS1
-corpus and 26,973 of 38,850 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 38,882 of 53,389 native calls in the complete DDS1
+corpus and 28,401 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
 or ambiguous message operand remains numeric.
+
+The selection pattern resolves a further 329 DDS1 and 287 DDS2 references to
+typed local `select` declarations. References in raw message banks and values
+computed at runtime remain numeric.
+
+Task creation resolves all 807 DDS1 and 463 DDS2 local procedure operands to
+`PUSHPROC`. The profile also names all 19 task-destruction calls. The source
+keeps explicit `PUSHREG`, local stores, waits, and destruction calls, so each
+task handle's lifetime remains visible without folding instructions away.
 
 The same profile information resolves 31 DDS1 and 43 DDS2 event calls to
 maintained `eNNN` sources. The remaining 11 DDS1 and four DDS2 literal event
@@ -364,7 +411,7 @@ the task creation and wait in `e670` become:
 ```text
   0004: push 1
   0005: push 670
-  0006: result = CREATE_POLYGON_MOVIE(1, 670)
+  0006: result = CREATE_POLYGON_MOVIE(670, 1)
   0007: push result
   0008: WAIT_FOR_TASK_REMOVAL(result)
 ```
@@ -379,8 +426,9 @@ tracked corpus lands on a NUL-delimited ASCII run in section 4, so the view
 shows both the byte offset and that observed text while retaining the
 conservative `type5_ref` name. The current profile resolves 1,334 of the
 corpus's 3,881 native-command instructions and reaches every tracked event
-file. Binary expressions follow the VM's verified order: the top stack value
-is the left operand and the next value is the right operand.
+file. Native call arguments follow the handler's parameter order: argument 0
+is popped from the top of the VM stack. Binary expressions use the same VM
+order, with the top stack value on the left and the next value on the right.
 
 ## Physical source
 

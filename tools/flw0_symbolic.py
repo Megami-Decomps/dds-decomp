@@ -14,6 +14,9 @@ import msg1
 
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 _PROCEDURE_OPCODES = {7, 10, 11}
+_PROCEDURE_REFERENCE_OPCODES = _PROCEDURE_OPCODES | {
+    flw0.OPCODE_IDS["PUSHIS"]
+}
 _JUMP_LABEL_OPCODES = {13, 28}
 _COMMAND_OPCODE = flw0.OPCODE_IDS["COMM"]
 _STANDARD_SECTIONS = ((0, 0x20), (1, 0x20), (2, 4), (3, 1), (4, 1))
@@ -131,6 +134,7 @@ def _render_instruction(
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[int, str],
     message_symbols: tuple[str | None, ...],
+    selection_symbols: tuple[str | None, ...],
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -146,6 +150,14 @@ def _render_instruction(
     )
     if message_symbol is not None:
         return f"  PUSHMSG {message_symbol}", pc + 1
+    selection_symbol = flw0._selection_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+        selection_symbols,
+    )
+    if selection_symbol is not None:
+        return f"  PUSHSELECT {selection_symbol}", pc + 1
     event_symbol = flw0._event_push_symbol(
         raw,
         words[pc + 1].raw if pc + 1 < len(words) else None,
@@ -153,6 +165,14 @@ def _render_instruction(
     )
     if event_symbol is not None:
         return f"  PUSHEVENT {event_symbol}", pc + 1
+    procedure_symbol = flw0._procedure_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+        procedure_symbols,
+    )
+    if procedure_symbol is not None:
+        return f"  PUSHPROC {procedure_symbol}", pc + 1
     if opcode in flw0._EXTENDED_OPCODES:
         if pc + 1 >= len(words) or operand:
             return f"  WORD 0x{raw:08x}", pc + 1
@@ -203,6 +223,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     )
     message_data = script.section_bytes(script.sections[3])
     message_symbols = flw0._message_symbols(message_data)[0]
+    selection_symbols = flw0._selection_symbols(message_data)[0]
     if message_data:
         try:
             message_lines = msg1.render(message_data)
@@ -261,6 +282,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
             command_profile,
             string_symbols,
             message_symbols,
+            selection_symbols,
         )
         lines.append(instruction)
         pc = next_pc
@@ -330,6 +352,7 @@ def _parse_code(
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[str, int],
     message_symbols: dict[str, int],
+    selection_symbols: dict[str, int],
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
@@ -361,6 +384,20 @@ def _parse_code(
                 (message_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
             )
             continue
+        if mnemonic == "PUSHSELECT":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHSELECT takes one symbol"
+                )
+            symbol = tokens[1]
+            if symbol not in selection_symbols:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown selection {symbol!r}"
+                )
+            words.append(
+                (selection_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
+            )
+            continue
         if mnemonic == "PUSHEVENT":
             if len(tokens) != 2:
                 raise flw0.Flw0Error(
@@ -378,6 +415,19 @@ def _parse_code(
                     f"event target {symbol!r}"
                 )
             words.append((event_id << 16) | flw0.OPCODE_IDS["PUSHIS"])
+            continue
+        if mnemonic == "PUSHPROC":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHPROC takes one symbol"
+                )
+            words.append(
+                SymbolReference(
+                    flw0.OPCODE_IDS["PUSHIS"],
+                    _symbol(tokens[1], line_number),
+                    line_number,
+                )
+            )
             continue
         if mnemonic == "WORD":
             if len(tokens) != 2:
@@ -452,10 +502,16 @@ def _parse_code(
             resolved.append(word)
             continue
         indices = (
-            procedure_indices if word.opcode in _PROCEDURE_OPCODES else jump_indices
+            procedure_indices
+            if word.opcode in _PROCEDURE_REFERENCE_OPCODES
+            else jump_indices
         )
         if word.symbol not in indices:
-            kind = "procedure" if word.opcode in _PROCEDURE_OPCODES else "jump label"
+            kind = (
+                "procedure"
+                if word.opcode in _PROCEDURE_REFERENCE_OPCODES
+                else "jump label"
+            )
             raise flw0.Flw0Error(
                 f"line {word.line_number}: unknown {kind} {word.symbol!r}"
             )
@@ -596,6 +652,7 @@ def parse(text: str) -> flw0.Flw0File:
     else:
         message_data = _parse_raw_block(blocks["messages"])
     message_symbols = flw0._message_symbols(message_data)[1]
+    selection_symbols = flw0._selection_symbols(message_data)[1]
     code, labels = _parse_code(
         blocks["code"],
         procedures,
@@ -603,6 +660,7 @@ def parse(text: str) -> flw0.Flw0File:
         command_profile,
         string_symbols,
         message_symbols,
+        selection_symbols,
     )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
