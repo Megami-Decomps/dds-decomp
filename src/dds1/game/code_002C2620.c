@@ -38,7 +38,7 @@ extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern s32 D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
-extern s32 func_002C2F40(void);
+extern s32 func_002C2F40();
 extern s32 fldLmapTaskUpdate(void);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
@@ -272,7 +272,45 @@ void func_002C2EF8(const char *fmt, ...) {
 
 INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2F40);
+/* Field-map mode index -> track slot. Index 7 is the only value with no arm of
+ * its own, so it falls through to the default of 1. */
+s32 func_002C2F40(s32 index) {
+    s32 slot = 1;
+
+    switch (index - 2) {
+    case 0:
+        slot = 1;
+        break;
+    case 1:
+        slot = 4;
+        break;
+    case 2:
+        slot = 9;
+        break;
+    case 3:
+        slot = 6;
+        break;
+    case 4:
+        slot = 5;
+        break;
+    case 5:
+        slot = 10;
+        break;
+    case 6:
+        slot = 3;
+        break;
+    case 8:
+        slot = 8;
+        break;
+    case 9:
+        slot = 2;
+        break;
+    case 10:
+        slot = 7;
+        break;
+    }
+    return slot;
+}
 
 void fldInitializeLmapState(void) {
     s64 flagSet;
