@@ -39,6 +39,12 @@ typedef struct SolarOverlayWork {
     SolarPoint points[8];
 } SolarOverlayWork;
 
+typedef struct SolarFlagEntry {
+    u8 pad[4];
+    u8 flag;   /* 0x04 */
+    u8 unk05;  /* 0x05 */
+} SolarFlagEntry;
+
 f32 effMiscRandUnitFloat(s32 seed);
 
 void evtLoadSolarNoiseSprite(u32 *sprite) {
@@ -117,9 +123,47 @@ INCLUDE_ASM(const s32, "game/code_002437F0", func_002446C8);
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244828);
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_00244988);
+void evtSetFirstUnflaggedSolarEntry(s32 base, s32 n) {
+    u8 *p = (u8 *)(base + 0xC);
+    SolarFlagEntry *tab = (SolarFlagEntry *)(base + 0xC);
+    s32 i;
+    (void)n;
+    i = 0;
+    if (p[4] != 0) {
+        goto scan;
+    }
+    p[4] = 1;
+    return;
+    /* Likewise fused ++i head test with a goto back-edge to the test. */
+scan:
+    if (++i < 8) {
+        if (tab[i].flag != 0) {
+            goto scan;
+        }
+        tab[i].flag = 1;
+    }
+}
 
-INCLUDE_ASM(const s32, "game/code_002437F0", func_002449E0);
+void evtConsumeFlaggedSolarEntry(s32 base, s32 n) {
+    u8 *p = (u8 *)(base + 0x36);
+    SolarFlagEntry *tab = (SolarFlagEntry *)(base + 0xC);
+    n = 7;
+    if (p[4] == 1) {
+        p[4] = 0;
+        return;
+    }
+    /* The adjust is fused into the head test so the 7 init survives, and the
+       goto targets the test so each pass adjusts once. Plain for/while forms
+       fold the init and walk the table instead of indexing it. */
+loop:
+    if (--n < 0) {
+        return;
+    }
+    if (tab[n].flag != 1) {
+        goto loop;
+    }
+    tab[n].flag = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002437F0", func_00244A38);
 

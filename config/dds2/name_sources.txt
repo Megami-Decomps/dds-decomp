@@ -2365,6 +2365,8 @@
 0x00243358	evtGetSolarPhase	inferred	Byte-identical dds1 twin 0x002286E8; Returns the solar phase byte at world offset 0xA41. [names_conflicts.tsv]
 0x00243368	evtSetSolarPhase	inferred	Masks the solar-world phase to four bits and resets its phase counter at +0xA44.
 0x002436A8	evtCreateSolarOverlayWork	inferred	Byte-identical DDS1 counterpart: Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
+0x00244988	evtSetFirstUnflaggedSolarEntry	inferred	DDS2 twin of DDS1 0x229CD0 (bit-identical body): sets entry-0 flag if clear else scans upward
+0x002449E0	evtConsumeFlaggedSolarEntry	inferred	DDS2 twin of DDS1 0x229D28 (bit-identical body): clears guard then scans downward
 0x00245508	evtInitializeVisualData	inferred	Populates the event object's visual parameter pairs at +0x3C and +0x9C after reading its current state.
 0x00246028	evtUnlinkListNode	inferred	Unlinks a doubly-linked event list node and decrements the owner's entry count.
 0x00246078	evtReorderListNodes	inferred	Scans the event list and reinserts out-of-order nodes according to their orderKey.
