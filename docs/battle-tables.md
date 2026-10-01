@@ -244,3 +244,13 @@ refer directly to `CALC_SOURCE_LEVEL()`, `CALC_TARGET_STAT(3)`, and
 `CALC_ACTION_HIT_LEVEL()`, then return through `CALC_SET_RESULT(...)`.
 Lookup curves whose exact gameplay role remains uncertain retain neutral
 `CALC_LEVEL_FACTOR_*` names.
+
+The AI programs use a separate battle-command vocabulary derived from each
+game's native dispatch table and handlers. It covers action and target
+selection, HP and party-state queries, history counters, scene transitions,
+and camera operations. This names 2,909 of 3,434 calls in DDS1 and 3,414 of
+3,801 calls in DDS2, allowing common code to read as conditions such as
+`AI_UNIT_HP_AT_OR_BELOW_RATE(25)` and actions such as
+`AI_SELECT_SKILL(1)`. Calls whose handler role is still ambiguous remain as
+numeric `COMM` instructions; the profile does not infer names from usage
+alone.

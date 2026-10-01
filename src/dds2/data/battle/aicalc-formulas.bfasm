@@ -493,14 +493,7 @@ calc_HUNT_RECOVERY:
 _80:
   local_int[27] = local_int[27] * CALC_RANDOM_SCALE(5)
   local_int[27] = CALC_SOURCE_MAX_HP() * local_int[27] / float32(100.0, bits=0x42c80000)
-  push 10
-  COMM 0x000a
-  PUSHREG
-  push 10
-  ADD
-  push local_int[27]
-  ADD
-  POPLIX 0x001b
+  local_int[27] = local_int[27] + (10 + RANDOM_ONE_TO(10))
   CALC_SET_RESULT(local_int[27])
   return
 calc_FEAR_HIT:
