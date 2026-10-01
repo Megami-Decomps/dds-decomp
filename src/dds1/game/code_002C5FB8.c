@@ -55,12 +55,17 @@ typedef struct MapRequestNode {
     u32 argument2;
     s32 active;
     struct MapRequestNode *next;
+    struct MapRequestNode *prev;
+    u8 pad18[8];
 } MapRequestNode;
 
 typedef struct {
-    u8 pad00[8];
+    u32 handle;           /* 0x00 */
+    MapRequestNode *first; /* 0x04 */
     MapRequestNode *next; /* 0x08 */
-    u8 pad0C[8];
+    MapRequestNode *third; /* 0x0C */
+    s16 count;            /* 0x10 */
+    s16 arg;              /* 0x12 */
     s16 interval;         /* 0x14 */
     s16 elapsed;          /* 0x16 */
     void (*callback)(void); /* 0x18 */
@@ -334,7 +339,39 @@ INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7738);
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7950);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C7A60);
+extern u32 func_002D03F8(s32 size);
+extern void *sdfMemoryGetBlockAddress(u32 handle);
+
+/* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
+MapRequestState *func_002C7A60(s16 count, s16 arg) {
+    s32 size = count * 0x20 + 0x44;
+    u32 handle = func_002D03F8(size);
+    MapRequestState *pool = sdfMemoryGetBlockAddress(handle);
+    MapRequestNode *node;
+    MapRequestNode *next;
+    MapRequestNode *first;
+    s32 n;
+
+    memset(pool, 0, size);
+    pool->handle = handle;
+    node = (MapRequestNode *)((u8 *)pool + 0x44);
+    pool->first = node;
+    pool->third = node;
+    pool->next = node;
+    for (n = count - 2; n != -1; n--) {
+        next = node + 1;
+        node->next = next;
+        next->prev = node;
+        node = node->next;
+    }
+    first = pool->first;
+    node->next = first;
+    first->prev = node;
+    pool->arg = arg;
+    pool->count = count;
+    pool->interval = 0;
+    return pool;
+}
 
 s64 func_002C7B38(u32 *sprite) {
     if (sprite != NULL) {

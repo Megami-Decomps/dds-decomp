@@ -64,7 +64,36 @@ s32 dds3GetWorldSlotValue(u8 *object, s32 index) {
     return *(s32 *)(*(u8 **)(object + 0x18) + (index << 2));
 }
 
-INCLUDE_ASM(const s32, "game/code_00111388", func_001114E8);
+extern u32 func_00110628();
+extern void *dds3AppendWorldIndexNode();
+extern u32 dds3ReadIndexedWorldObjectWord();
+extern u32 dds3AdvanceObjectValueCursor();
+extern void dds3DestroyWorldIndexNode();
+
+/* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
+void *func_001114E8(s32 object, s32 index, s32 (*filter)(u32)) {
+    s32 slot = dds3GetWorldSlotValue(object, index);
+    void *result;
+    u32 word;
+
+    if (func_00110628(slot) == 0) {
+        return NULL;
+    }
+    result = dds3AppendWorldIndexNode(0);
+    dds3ResetObjectValueCursor(slot);
+    do {
+        word = dds3ReadIndexedWorldObjectWord(slot);
+        if (filter == NULL || filter(word) != 0) {
+            func_001104F0(result, 1);
+            dds3WriteIndexedWorldObjectWord(result, word);
+        }
+    } while (dds3AdvanceObjectValueCursor(slot) != 0);
+    if (func_00110628(result) == 0) {
+        dds3DestroyWorldIndexNode(result);
+        return NULL;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00111388", func_001115B0);
 

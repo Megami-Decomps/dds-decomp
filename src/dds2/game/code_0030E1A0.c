@@ -33,7 +33,8 @@ extern u32 func_00343ED0(const char *, void *, s32);
 
 extern u32 func_0032C138(u32);
 
-extern s32 func_0030EE40(s32, s32);
+struct SdfRing;
+extern struct SdfRing *func_0030EE40(s16, s16);
 
 extern void fldSetMapRequestInterval(s32, u16);
 
@@ -94,11 +95,11 @@ void func_0030E878(void) {
 
 void func_0030E880(void) {
     s32 handler;
-    handler = func_0030EE40(0x14, 0xC);
+    handler = (s32)func_0030EE40(0x14, 0xC);
     D_004390AC = handler;
     ((MapRequestQueue *)D_004390AC)->callback = (s32)func_0030E940;
     fldSetMapRequestInterval(handler, 0);
-    D_004390B0 = func_0030EE40(0x14, 0x18);
+    D_004390B0 = (s32)func_0030EE40(0x14, 0x18);
     ((MapRequestQueue *)D_004390B0)->callback = (s32)func_0030E958;
     D_004390A8 = 5;
     D_004390A4 = 0;
@@ -130,7 +131,36 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EAA8);
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030ECC0);
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030EE40);
+/* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
+SdfRing *func_0030EE40(s16 count, s16 limit) {
+    s32 size = count * 0x20 + 0x44;
+    s32 allocation = func_003292A8(size);
+    SdfRing *ring = sdfMemoryGetBlockAddress(allocation);
+    SdfRingNode *node;
+    SdfRingNode *next;
+    SdfRingNode *first;
+    s32 n;
+
+    memset(ring, 0, size);
+    ring->allocation = allocation;
+    node = (SdfRingNode *)((u8 *)ring + 0x44);
+    ring->head = node;
+    ring->last = node;
+    ring->cursor = node;
+    for (n = count - 2; n != -1; n--) {
+        next = node + 1;
+        node->next = next;
+        next->prev = node;
+        node = node->next;
+    }
+    first = ring->head;
+    node->next = first;
+    first->prev = node;
+    ring->limit = limit;
+    ring->count = count;
+    ring->pad14 = 0;
+    return ring;
+}
 
 s64 func_0030EF18(u32 *sprite) {
     if (sprite != NULL) {

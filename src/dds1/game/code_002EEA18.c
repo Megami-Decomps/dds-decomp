@@ -178,10 +178,12 @@ void func_002EF7C8(const char *prefix, s32 group) {
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF858);
 
+struct SdfTreeItem;
+
 typedef struct SdfTreeNode {
     struct SdfTreeNode *first;   /* 0x0 */
     struct SdfTreeNode *second;  /* 0x4 */
-    u8 pad8[4];
+    struct SdfTreeItem *item;    /* 0x8 */
     s32 balance;                 /* 0xC */
 } SdfTreeNode;
 
@@ -216,7 +218,50 @@ SdfTreeNode *func_002EF8D8(SdfTreeNode *a, SdfTreeNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EF958);
 
-INCLUDE_ASM(const s32, "game/code_002EEA18", func_002EFA58);
+typedef struct SdfTreeItem {
+    struct SdfTreeItem *replaced; /* 0x0: previous item when a duplicate key replaces it */
+    u8 pad04[8];
+    f32 key;                      /* 0xC */
+} SdfTreeItem;
+
+extern void *sdfAllocPacketAligned();
+extern void func_002EF958();
+
+/* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
+void func_002EFA58(SdfTreeNode **tree, SdfTreeItem *item) {
+    SdfTreeNode *path[32];
+    s32 depth = 0;
+    SdfTreeNode **link = tree;
+    SdfTreeNode *cur = *tree;
+    SdfTreeNode *node;
+    f32 key = item->key;
+
+    while (cur != NULL) {
+        if (key == cur->item->key) {
+            item->replaced = cur->item;
+            cur->item = item;
+            return;
+        }
+        path[depth] = cur;
+        depth++;
+        if (cur->item->key < key) {
+            link = &cur->first;
+        } else {
+            link = &cur->second;
+        }
+        cur = *link;
+    }
+    item->replaced = NULL;
+    node = sdfAllocPacketAligned(0x10);
+    node->first = NULL;
+    node->second = NULL;
+    node->item = item;
+    *link = node;
+    node->balance = 0;
+    if (depth != 0) {
+        func_002EF958(path, depth, node, tree);
+    }
+}
 
 #define SDF_POOL_FREE_KIND 0xFFFF
 

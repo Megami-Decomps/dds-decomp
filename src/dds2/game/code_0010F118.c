@@ -10,7 +10,7 @@ extern void sdfReleaseChipBlock(void *p);
 typedef struct EffTransformNode EffTransformNode;
 
 typedef struct {
-    u8 pad00[0x4];              /* 0x00 */
+    s32 (*create)(EffTransformNode *);  /* 0x00 called to initialise a new node of this kind */
     void (*notify)(EffTransformNode *); /* 0x04 called with the node being destroyed */
 } EffTransformOwner;
 
@@ -19,13 +19,21 @@ typedef struct {
  * registers between calls (loaded with lqc2, stored with sqc2).
  */
 struct EffTransformNode {
-    u8 pad00[0x10];   /* 0x00 */
+    u32 word0;        /* 0x00 */
+    u32 word4;        /* 0x04 */
+    u32 word8;        /* 0x08 */
+    u32 kindTag;      /* 0x0C: node kind in the top byte */
     EffTransformOwner *owner; /* 0x10 */
-    u8 pad14[0x8];    /* 0x14 */
+    u32 word14;       /* 0x14 */
+    u32 word18;       /* 0x18 */
     EffTransformNode *inner;  /* 0x1C */
     EffTransformNode *prev;   /* 0x20 */
     EffTransformNode *next;   /* 0x24 */
-    u8 pad28[0x18];   /* 0x28 */
+    u32 word28;       /* 0x28 */
+    u32 word2C;       /* 0x2C */
+    u32 word30;       /* 0x30 */
+    u32 color;        /* 0x34 */
+    u8 pad38[0x8];    /* 0x38 */
     u128 vec40;       /* 0x40 */
     u128 vec50;       /* 0x50 */
     u128 vec60;       /* 0x60 */
@@ -68,9 +76,95 @@ INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F190);
 
 INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F490);
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F518);
+typedef struct DrawOps {
+    u8 pad00[0x10];
+    void (*draw)(struct DrawOps *self, void *list); /* 0x10 */
+} DrawOps;
 
-INCLUDE_ASM(const s32, "game/code_0010F118", func_0010F640);
+extern void *dds3GetWorldObject(void);
+extern void *kwlnTaskGetUserValue();
+extern s32 dds3ContainsNodeInAnyObjectChain();
+extern void *sdfAllocPacketAligned();
+extern void sdfInitPacketList();
+extern s32 func_0010F190();
+extern s32 func_0010F490();
+extern void kwlnDrawSpriteCell();
+extern DrawOps D_00380708;
+extern s8 D_0037F543[];
+extern void func_002458B8();
+
+/* Draw the task's status panel; the returned value is the follow-up handler (or -1 / 0). */
+s32 func_0010F518(void *task) {
+    s32 width;
+    u8 *node;
+    void *list;
+    void *spriteList;
+
+    if (dds3GetWorldObject() == NULL) {
+        return -1;
+    }
+    node = kwlnTaskGetUserValue(task);
+    if (dds3ContainsNodeInAnyObjectChain(dds3GetWorldObject(), node) == 0) {
+        return (s32)func_002458B8;
+    }
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    width = func_0010F190(node, 3, 0xA, list) + 0xB;
+    if (node[0xF] < 0xA) {
+        if (node[0xF] >= 4) {
+            width += func_0010F490(node, 3, width, list);
+        }
+    }
+    spriteList = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(spriteList);
+    kwlnDrawSpriteCell(spriteList, 0x24, 0x72, 0x23, width - 9);
+    D_00380708.draw(&D_00380708, spriteList);
+    D_00380708.draw(&D_00380708, list);
+    if (D_0037F543[0] < 0) {
+        return (s32)func_002458B8;
+    }
+    return 0;
+}
+
+extern void *func_00328D68(s32 size);
+extern EffTransformOwner *D_003849D8[];
+void effObjNodeDestroy(EffTransformNode *node);
+
+/* Allocate a node of `kind`, link its owner and run the owner's create hook. */
+EffTransformNode *func_0010F640(u32 kind) {
+    EffTransformNode *node;
+    EffTransformOwner *owner;
+
+    if (kind >= 0x12) {
+        return NULL;
+    }
+    node = func_00328D68(0x44);
+    if (node == NULL) {
+        return NULL;
+    }
+    node->kindTag = kind << 24;
+    node->color = 0x80808080;
+    node->word0 = 0;
+    node->word4 = 0;
+    node->word8 = 0;
+    owner = D_003849D8[kind];
+    node->owner = owner;
+    node->word14 = 0;
+    node->word18 = 0;
+    node->inner = NULL;
+    node->prev = NULL;
+    node->next = NULL;
+    node->word28 = 0;
+    node->word2C = 0;
+    node->word30 = 0;
+    if (owner != NULL && owner->create != NULL) {
+        if (owner->create(node) != 1) {
+            effObjNodeDestroy(node);
+            return NULL;
+        }
+    }
+    return node;
+}
 
 /* Notify the owner before unlinking and freeing this transform node. */
 void effObjNodeDestroy(EffTransformNode *node) {

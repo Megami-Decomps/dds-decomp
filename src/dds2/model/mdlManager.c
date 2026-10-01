@@ -50,7 +50,9 @@ typedef struct MdlInner {
 
 /* Context shared by the matched mdlManager helpers. */
 typedef struct MdlCtx {
-    u8 unk0[0xC];      /* 0x0 */
+    u8 unk0[4];        /* 0x0 */
+    struct MdlCtx *next; /* 0x4: link in the owner's context list */
+    u8 unk8[4];        /* 0x8 */
     MdlSub *sub;       /* 0xC */
     u32 unk10;         /* 0x10 */
     u32 *list14;       /* 0x14: intrusive list walked by mdlSetAllResourceFrames */
@@ -114,7 +116,49 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231718);
+typedef struct MdlSlot {
+    u32 flags;      /* 0x0: 1 = bit 0x100 of the request mode, 2 = bit 0x200 */
+    s16 value4;     /* 0x4 */
+    s16 value6;     /* 0x6 */
+    u32 first;      /* 0x8 */
+    u32 resource;   /* 0xC: released through func_003297C8 */
+} MdlSlot;
+
+typedef struct MdlSlotOwner {
+    u8 pad00[0xC];
+    u8 hasResources;    /* 0x0C */
+    u8 pad0D[3];
+    MdlCtx *contexts;   /* 0x10 */
+    u8 pad14[0xC];
+    MdlSlot slots[1];   /* 0x20 */
+} MdlSlotOwner;
+
+extern void func_003297C8();
+
+/* Release slot `index`: destroy its motions in every context and free the attached resource.
+   K&R definition: the caller below passes u64 values. */
+void func_00231718(owner, index)
+    MdlSlotOwner *owner;
+    s32 index;
+{
+    MdlCtx *ctx;
+
+    if (owner != NULL) {
+        if (owner->slots[index].first == 0) {
+            return;
+        }
+        for (ctx = owner->contexts; ctx != NULL; ctx = ctx->next) {
+            mdlReleaseFirstMatch(ctx, index);
+        }
+        if (owner->hasResources != 0) {
+            if (owner->slots[index].resource != 0) {
+                func_003297C8(owner->slots[index].resource);
+            }
+        }
+        owner->slots[index].first = 0;
+        owner->slots[index].resource = 0;
+    }
+}
 
 void mdlApplyCommandToGroupedEntity(u64 unused0, u64 unused1, u64 command) {
     u64 entity;
@@ -123,7 +167,24 @@ void mdlApplyCommandToGroupedEntity(u64 unused0, u64 unused1, u64 command) {
     func_00231718(entity, command);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231810);
+void func_00231810(s32 group, s32 id, u32 mode, s32 value6, s32 index, s32 value4, u32 first, u32 resource) {
+    MdlSlotOwner *owner = btlFindGroupedEntity(group, id);
+    MdlSlot *slot;
+
+    func_00231718(owner, index);
+    slot = &owner->slots[index];
+    slot->value4 = value4;
+    slot->value6 = value6;
+    slot->first = first;
+    slot->resource = resource;
+    slot->flags = 0;
+    if (mode & 0x100) {
+        slot->flags = 1;
+    }
+    if (mode & 0x200) {
+        slot->flags |= 2;
+    }
+}
 
 /* Group setup record carried in the payload of an mdlRequestAsset job. */
 typedef struct MdlGroupSetup {
