@@ -1,8 +1,6 @@
-#include "common.h"
+#include "mnu.h"
 
 extern void func_0025FD78(s32);
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -100,13 +98,13 @@ s64 func_00265E78(s32 callback) {
     if (*(s32 *)(context + 0xB8) != 0) {
         func_00294758(context, *(s32 *)(context + 0xB8));
     }
-    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+    return evtMenuSetHandler(context, 1, callback);
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s64 func_00265EE8(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
+    return evtMenuSetHandler(eventContext, 2, callback);
 }
 
 u32 func_00265F30(void) {
@@ -142,13 +140,13 @@ s64 func_00265FE8(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
-    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+    return evtMenuSetHandler(context, 1, callback);
 }
 
 s64 func_00266038(s32 callback) {
     s32 eventContext = kwlnTaskGetUserValue();
     func_0026C900();
-    return func_002C4038(eventContext + 0xc, &((EventCallbackContext *)eventContext)->dispatch, 2, callback);
+    return evtMenuSetHandler(eventContext, 2, callback);
 }
 
 u32 func_00266080(void) {
@@ -184,13 +182,13 @@ s64 func_00266188(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0025FD78(context);
-    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 1, callback);
+    return evtMenuSetHandler(context, 1, callback);
 }
 
 s64 evtDispatchSync(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
-    return func_002C4038(context + 0xC, (s32 *)(context + 0x58), 2, callback);
+    return evtMenuSetHandler(context, 2, callback);
 }
 
 u32 func_00266210(void) {

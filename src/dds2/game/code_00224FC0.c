@@ -1,9 +1,5 @@
-#include "common.h"
+#include "mnu.h"
 #include "btl.h"
-
-/* 5/10 words match. With this TU's default -O2 the call in the final
- * conditional is sibling-call-optimized to j, while retail has jal+epilogue.
- * Do not change per-file flags to force it. */
 
 extern s32 func_001AA6F8(void);
 
@@ -74,8 +70,8 @@ INCLUDE_ASM(const s32, "game/code_00224FC0", func_00225368);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_002254C8);
 
-void func_00225778(u32 unit) {
-    func_002254C8(unit);
+s64 func_00225778(u32 unit) {
+    return func_002254C8(unit);
 }
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
@@ -287,9 +283,9 @@ s32 btlClearUnitRestrictionFlag(void) {
     return -1;
 }
 
-void func_00226820(BattleActionUnit *unit) {
+s64 func_00226820(BattleActionUnit *unit) {
     if (unit->dispatchFlags & 8) {
-        func_001AA6F8();
+        return func_001AA6F8();
     }
 }
 

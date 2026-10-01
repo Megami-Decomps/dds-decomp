@@ -1,4 +1,4 @@
-#include "common.h"
+#include "mnu.h"
 
 extern void evtRememberDispatchCallback(s32, s32);
 
@@ -13,8 +13,6 @@ extern void func_0024DD78(void);
 extern void mnuSetPopupEntry(s32, s32);
 
 extern s64 evtGetMessageWindowControlState(void);
-
-extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -80,14 +78,14 @@ s64 func_0024B6C0(u64 request) {
     func_0024B2E0(state);
     func_0024A930(state);
     func_0024A610(state);
-    return func_00285670(state + 8, (s32 *)(state + 0x54), 1, request);
+    return menuRunPanel(state, 1, request);
 }
 
-void evtBSetupDispatchSync(s32 request) {
+s64 evtBSetupDispatchSync(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 s32 evtBClearAndReset(void) {
@@ -120,17 +118,17 @@ u32 func_0024B7E8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024B868);
 
-void evtBDispatchStart(s32 request) {
+s64 evtBDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_00285670(context + 8, context + 0x54, 1, request);
+    return menuRunPanel(context, 1, request);
 }
 
-void evtBSetupDispatchSyncB(s32 request) {
+s64 evtBSetupDispatchSyncB(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void mnuSelectFirstListNode(s32);
@@ -184,21 +182,21 @@ u32 func_0024BA78(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BB00);
 
-void func_0024BC18(s32 item) {
+s64 func_0024BC18(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
     func_0024A930(state);
     func_0024A610(state);
-    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return menuRunPanel(state, 1, item);
 }
 
-void evtBSetupDispatchSyncC(s32 request) {
+s64 evtBSetupDispatchSyncC(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void mnuRefreshThresholdNodeFlags(s32);
@@ -243,7 +241,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024BF48);
 
 extern void func_0024BF48(s32, s32);
 
-void func_0024C028(s32 item) {
+s64 func_0024C028(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
@@ -253,14 +251,14 @@ void func_0024C028(s32 item) {
     if (*(s32 *)(state + 0x7C) == 0) {
         func_0024BF48(1, state);
     }
-    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return menuRunPanel(state, 1, item);
 }
 
-void evtBSetupDispatchSyncD(s32 request) {
+s64 evtBSetupDispatchSyncD(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 u32 evtSelectFinalVisualNode(void) {
@@ -275,11 +273,11 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C120);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C1B8);
 
-void evtBSetupDispatchSyncE(s32 request) {
+s64 evtBSetupDispatchSyncE(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void mnuReleaseStaffImageHandles(s32);
@@ -312,10 +310,10 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C3F8);
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C578);
 
-void evtBDispatchSync(s32 request) {
+s64 evtBDispatchSync(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 typedef struct MenuEntry32 {
@@ -352,21 +350,21 @@ u32 func_0024C6F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024C700);
 
-void func_0024C7E8(s32 item) {
+s64 func_0024C7E8(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
     func_0024A930(state);
     func_0024A610(state);
-    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return menuRunPanel(state, 1, item);
 }
 
-void evtBSetupDispatchSyncF(s32 request) {
+s64 evtBSetupDispatchSyncF(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void dspSetActive(s32);
@@ -404,21 +402,21 @@ s64 evtBContinueDispatchOrRestoreTable(u64 input) {
     return dispatchResult;
 }
 
-void func_0024C9A0(s32 item) {
+s64 func_0024C9A0(s32 item) {
     s32 state = kwlnTaskGetUserValue();
     func_0024A2D8(state);
     func_0024A340(0, state);
     func_0024B2E0(state);
     func_0024A930(state);
     func_0024A610(state);
-    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return menuRunPanel(state, 1, item);
 }
 
-void evtBSetupDispatchSyncG(s32 request) {
+s64 evtBSetupDispatchSyncG(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024DD78();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void func_0024A728(s32, s32);
@@ -471,7 +469,7 @@ INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CB80);
 
 extern s32 func_0024A6E8(s32);
 
-void evtBDispatchSyncD2(s32 item) {
+s64 evtBDispatchSyncD2(s32 item) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0024A2D8(state);
@@ -485,13 +483,13 @@ void evtBDispatchSyncD2(s32 item) {
         func_0024A930(state);
     }
     func_0024A610(state);
-    func_00285670(state + 8, (s32 *)(state + 0x54), 1, item);
+    return menuRunPanel(state, 1, item);
 }
 
-void evtBDispatchSyncB(s32 request) {
+s64 evtBDispatchSyncB(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 extern void mnuFadeOrPlayCloseSfx(s32, s32);
@@ -518,17 +516,17 @@ u32 func_0024CE20(void) {
 
 INCLUDE_ASM(const s32, "game/code_0024B3A8", func_0024CE28);
 
-void evtBLateDispatchStart(s32 request) {
+s64 evtBLateDispatchStart(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0024A2D8(context);
-    func_00285670(context + 8, context + 0x54, 1, request);
+    return menuRunPanel(context, 1, request);
 }
 
-void evtBDispatchSyncC(s32 request) {
+s64 evtBDispatchSyncC(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024B3A8", D_003AF710);

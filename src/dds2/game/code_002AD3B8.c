@@ -1,8 +1,6 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0026C900(void);
 extern void func_002AAE80(s32);
@@ -178,15 +176,15 @@ s64 func_002AD3B8(s32 callback) {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
 /* Ask the menu state machine to handle a new request after clearing stale state. */
-void func_002AD4C0(s32 request) {
+s64 func_002AD4C0(s32 request) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 u32 func_002AD508(void) {
@@ -233,12 +231,12 @@ s64 func_002AD618(s32 callback) {
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
-void func_002AD6C0(s32 input) {
+s64 func_002AD6C0(s32 input) {
     s32 context = kwlnTaskGetUserValue();
-    func_002C4038(context + 8, context + 0x54, 2, input);
+    return menuSetHandler(context, 2, input);
 }
 
 u32 func_002AD6F8(void) {
@@ -285,12 +283,12 @@ s64 func_002AD808(s32 callback) {
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
 s64 func_002AD8B0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 u32 func_002AD8E8(void) {
@@ -336,12 +334,12 @@ s64 func_002AD9F8(s32 callback) {
         (s32)D_003E7050, context, 1, 0x53);
     func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
 s64 func_002ADAA0(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 u32 func_002ADAD8(void) {
@@ -412,12 +410,12 @@ s64 mnuStaffImageEnterD(s32 callback) {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     func_002AA7A0(2, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
 s64 func_002ADD68(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002ADDA0);
@@ -439,12 +437,12 @@ s64 func_002ADF90(s32 callback) {
             (s32)D_003E7050, context, 1, 0x53);
     }
     func_002AA7A0(0, ((MenuStaffContext *)context)->group);
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 1, callback);
+    return menuSetHandler(context, 1, callback);
 }
 
 s64 func_002AE078(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 s32 func_002AE0B0(s32 unused) {
@@ -578,11 +576,11 @@ void mnuDrawStaffCaption(s32 id, u8 *panel) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AE888);
 
-void func_002AEA58(s32 callback) {
+s64 func_002AEA58(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 /* One 0x2138-byte page slot supplies the resource checked before page setup. */
@@ -728,11 +726,11 @@ INCLUDE_RODATA(const s32, "game/code_002AD3B8", D_0042ACC8);
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF5E0);
 
-void func_002AF898(s32 callback) {
+s64 func_002AF898(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(context + 8, context + 0x54, 2, callback);
+    return menuSetHandler(context, 2, callback);
 }
 
 s32 func_002AF8E0(s32 unused) {

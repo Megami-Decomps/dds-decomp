@@ -1,10 +1,8 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
 
 extern s64 fileConsumeConfigTaskReady(void);
-
-extern s64 func_00285670(s32, s32 *, u64, u64);
 
 extern u8 D_0037C844[];
 
@@ -35,9 +33,9 @@ INCLUDE_ASM(const s32, "game/code_00272798", func_00272798);
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
 /* Submit a request to the active menu dispatcher in mode 2. */
-void func_002729C8(s32 request) {
+s64 func_002729C8(s32 request) {
     s32 context = kwlnTaskGetUserValue();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 s32 mnuStartStaffDisplay(void) {
@@ -79,12 +77,12 @@ s64 mnuDrawStaffImageScreen(s32 arg0) {
     func_0027E8D8(-0x10, -8, 0, ((StaffScreenContext *)context)->display, 0x54);
     mnuCreateStaffImageSprite(0x14);
     func_002723B0(2, ((StaffScreenContext *)context)->actor);
-    return func_00285670(context + 8, (s32 *)(context + 0x54), 1, arg0);
+    return menuRunPanel(context, 1, arg0);
 }
 
-void func_00272B80(s32 request) {
+s64 func_00272B80(s32 request) {
     s32 context = kwlnTaskGetUserValue();
-    func_00285670(context + 8, context + 0x54, 2, request);
+    return menuRunPanel(context, 2, request);
 }
 
 u32 func_00272BB8(void) {

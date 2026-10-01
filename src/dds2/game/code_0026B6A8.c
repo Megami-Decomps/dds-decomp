@@ -1,10 +1,8 @@
-#include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
 
 extern void func_002686F0(s32);
-
-extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_0026C900(void);
 
@@ -120,18 +118,18 @@ s64 dspUpdateFlagEvent(s32 request) {
     return 0;
 }
 
-void func_0026B9D0(s32 request) {
+s64 func_0026B9D0(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
-    func_002C4038(state + 8, state + 0x54, 1, request);
+    return menuSetHandler(state, 1, request);
 }
 
-void func_0026BA20(s32 request) {
+s64 func_0026BA20(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_0026C900();
-    func_002C4038(state + 8, state + 0x54, 2, request);
+    return menuSetHandler(state, 2, request);
 }
 
 u32 func_0026BA68(void) {
@@ -174,11 +172,11 @@ s64 func_0026BAF8(u64 request) {
     return result;
 }
 
-void func_0026BB78(s32 request) {
+s64 func_0026BB78(s32 request) {
     s32 state = kwlnTaskGetUserValue();
 
     func_002686F0(state);
-    func_002C4038(state + 8, state + 0x54, 1, request);
+    return menuSetHandler(state, 1, request);
 }
 
 /* Parked: build/parked/dds2/game/code_0026B6A8/func_0026BBC8.c (retail keeps a
