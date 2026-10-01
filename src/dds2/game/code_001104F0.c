@@ -4,8 +4,25 @@ extern u32 func_0012A6F0(u32);
 
 extern u32 func_0012AC90(u32, u32, u32, u32, u32, u32);
 
+typedef struct WorldListNode {
+    u8 pad00[0xF];
+    u8 kind;                    /* 0x0F */
+    u8 pad10[0x10];
+    struct WorldListNode *next; /* 0x20 */
+    struct WorldListNode *prev; /* 0x24 */
+    u8 pad28[8];
+    struct WorldObject *owner;  /* 0x30 */
+} WorldListNode;
+
+typedef struct WorldList {
+    s32 count;           /* 0x0 */
+    WorldListNode *head; /* 0x4 */
+    WorldListNode *tail; /* 0x8 */
+} WorldList;
+
 typedef struct WorldObjectData {
-    u8 pad00[0xC];
+    u8 pad00[8];
+    WorldList *lists;    /* 0x08 */
     u32 value0C;
     u32 value10;
     u32 handle14;
@@ -88,7 +105,26 @@ void dds3SetWorldObjectDataValue(WorldObject *object, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001104F0", func_00110AA8);
 
-INCLUDE_ASM(const s32, "game/code_001104F0", func_00110B50);
+extern void effObjNodeDestroy(void *node);
+
+/* Unlink a world list node from its kind's list in the owner's data and destroy it. */
+void func_00110B50(WorldListNode *node) {
+    WorldList *list;
+
+    if (node != NULL) {
+        if ((u32)(node->kind - 2) < 0x10) {
+            list = &node->owner->data->lists[node->kind];
+            if (list->head == node) {
+                list->head = node->next;
+            }
+            if (list->tail == node) {
+                list->tail = node->prev;
+            }
+            effObjNodeDestroy(node);
+            list->count--;
+        }
+    }
+}
 
 void func_00110BE0(WorldObject *object, u32 value) {
     WorldObjectData *data;

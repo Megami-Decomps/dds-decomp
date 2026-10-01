@@ -163,7 +163,32 @@ INCLUDE_ASM(const s32, "effect/billManager", func_001518D8);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151A88);
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00151C58);
+/* Shared entry-list block: reference count at +0x14, entry count at +0x10 and entry pointers at +0x18. */
+typedef struct BillEntryBlock {
+    void *allocation; /* 0x00 */
+    u8 pad04[0xC];
+    s32 entryCount;   /* 0x10 */
+    s32 refCount;     /* 0x14 */
+    void **entries;   /* 0x18 */
+} BillEntryBlock;
+
+/* Drop one reference; the last one releases every entry and the block itself. */
+void func_00151C58(void *arg) {
+    BillEntryBlock *block = arg;
+    s32 i;
+
+    block->refCount = block->refCount - 1;
+    if (block->refCount == 0) {
+        i = 0;
+        if (block->entryCount > 0) {
+            do {
+                func_00150260(block->entries[i]);
+                i++;
+            } while (i < block->entryCount);
+        }
+        func_002D0918(block->allocation);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00151CE8);
 

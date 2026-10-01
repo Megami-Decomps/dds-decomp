@@ -66,4 +66,21 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102C58);
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102CD8);
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102E58);
+/* Per-mode entry of the admin dispatch table: three function pointers, 12 bytes each; D_003297D4 holds the second (destroy). */
+void func_00102E58(void* task)
+{
+    AdminWork* work;
+    void (*destroy)(void);
+
+    work = kwlnTaskGetUserValue(task);
+    if (work->unk08 >= 0) {
+        destroy = (void (*)(void))D_003297D4[work->unk08 * 3];
+        if (destroy != NULL) {
+            destroy();
+        }
+    }
+    if (work->unk1C != NULL) {
+        sdfReleaseChipBlock(work->unk1C);
+    }
+    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+}

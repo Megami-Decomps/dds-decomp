@@ -4,8 +4,25 @@ extern u32 func_00128780(u32, u32, u32, u32, u32, u32);
 
 extern u32 func_001281E0(u32);
 
+typedef struct WorldListNode {
+    u8 pad00[0xF];
+    u8 kind;                    /* 0x0F */
+    u8 pad10[0x10];
+    struct WorldListNode *next; /* 0x20 */
+    struct WorldListNode *prev; /* 0x24 */
+    u8 pad28[8];
+    struct WorldObject *owner;  /* 0x30 */
+} WorldListNode;
+
 typedef struct {
-    u8 pad00[0xC];
+    s32 count;           /* 0x0 */
+    WorldListNode *head; /* 0x4 */
+    WorldListNode *tail; /* 0x8 */
+} WorldList;
+
+typedef struct {
+    u8 pad00[8];
+    WorldList *lists;    /* 0x08 */
     u32 value0C; /* 0x0C */
     u32 value10; /* 0x10 */
     u32 handle14; /* 0x14: stored result from either resource call below */
@@ -13,7 +30,7 @@ typedef struct {
     s32 value20; /* 0x20 */
 } WorldObjectData;
 
-typedef struct {
+typedef struct WorldObject {
     u8 pad00[4];
     s16 index;   /* 0x04 */
     u16 value06; /* 0x06 */
@@ -89,7 +106,26 @@ void dds3SetWorldObjectDataValue(WorldObject *object, s8 value) {
 
 INCLUDE_ASM(const s32, "game/code_001102C8", func_00110880);
 
-INCLUDE_ASM(const s32, "game/code_001102C8", func_00110928);
+extern void effObjNodeDestroy(void *node);
+
+/* Unlink a world list node from its kind's list in the owner's data and destroy it. */
+void func_00110928(WorldListNode *node) {
+    WorldList *list;
+
+    if (node != NULL) {
+        if ((u32)(node->kind - 2) < 0x10) {
+            list = &node->owner->data->lists[node->kind];
+            if (list->head == node) {
+                list->head = node->next;
+            }
+            if (list->tail == node) {
+                list->tail = node->prev;
+            }
+            effObjNodeDestroy(node);
+            list->count--;
+        }
+    }
+}
 
 void func_001109B8(WorldObject *object, u32 value) {
     WorldObjectData *data;
