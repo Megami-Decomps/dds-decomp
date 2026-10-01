@@ -351,25 +351,25 @@ void evtResetUnitVectorSlots(void) {
     }
 }
 
-void evtSetSlotVectors(s32 index, s32 state, s32 id, f32 *a, f32 *b, f32 *c) {
-    if (index < 7) {
-        D_003D7BD8[index].vec[0] = a[0];
-        D_003D7BD8[index].state = state;
-        D_003D7BD8[index].vec[1] = a[1];
-        D_003D7BD8[index].vec[2] = a[2];
-        D_003D7BD8[index].vec[3] = 0;
-        D_003D7BD8[index].vec[4] = b[0];
-        D_003D7BD8[index].vec[5] = b[1];
-        D_003D7BD8[index].vec[6] = b[2];
-        D_003D7BD8[index].vec[7] = b[3];
-        D_003D7BD8[index].vec[8] = c[0];
-        D_003D7BD8[index].vec[9] = c[1];
-        D_003D7BD8[index].vec[10] = c[2];
-        D_003D7BD8[index].vec[11] = 1.0f;
-        if (state == 3) {
-            D_003D7BD8[index].id = id;
+void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpoint, f32 *secondEndpoint, f32 *color) {
+    if (slotIndex < 7) {
+        D_003D7BD8[slotIndex].vec[0] = firstEndpoint[0];
+        D_003D7BD8[slotIndex].state = slotState;
+        D_003D7BD8[slotIndex].vec[1] = firstEndpoint[1];
+        D_003D7BD8[slotIndex].vec[2] = firstEndpoint[2];
+        D_003D7BD8[slotIndex].vec[3] = 0;
+        D_003D7BD8[slotIndex].vec[4] = secondEndpoint[0];
+        D_003D7BD8[slotIndex].vec[5] = secondEndpoint[1];
+        D_003D7BD8[slotIndex].vec[6] = secondEndpoint[2];
+        D_003D7BD8[slotIndex].vec[7] = secondEndpoint[3];
+        D_003D7BD8[slotIndex].vec[8] = color[0];
+        D_003D7BD8[slotIndex].vec[9] = color[1];
+        D_003D7BD8[slotIndex].vec[10] = color[2];
+        D_003D7BD8[slotIndex].vec[11] = 1.0f;
+        if (slotState == 3) {
+            D_003D7BD8[slotIndex].id = unitId;
         } else {
-            D_003D7BD8[index].id = 0;
+            D_003D7BD8[slotIndex].id = 0;
         }
     }
 }

@@ -362,13 +362,19 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
+typedef struct {
+    s32 firstWord;
+    s32 work;
+    s32 thirdWord;
+    s32 fourthWord;
+} SdfMsg;
+
 /* Store the message words and install release callbacks on its work pointer. */
-void sdfStoreMessageWordsAndNotifyConsumer(u32 *message, u32 firstWord, u32 work, u32 thirdWord,
-                                    u32 fourthWord) {
-    message[3] = fourthWord;
-    *message = firstWord;
-    message[2] = thirdWord;
-    message[1] = (s32)work;
+void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord) {
+    message->fourthWord = fourthWord;
+    message->firstWord = firstWord;
+    message->thirdWord = thirdWord;
+    message->work = work;
     sdfInstallPoolNodeReleaseCallbacks(work);
 }
 

@@ -95,7 +95,7 @@ typedef struct EventViewerState {
     s32 pendingWork;  /* 0x2428: reset when pendingResource is released */
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0x10];
-    s32 unk2440; /* 0x2440 */
+    s32 titleStreamWaitFrames; /* 0x2440 */
     u8 pad2444[0x4C]; /* allocated as 0x2490 bytes */
 } EventViewerState;
 
@@ -800,24 +800,24 @@ void *evtViewerInitializeUpdateSequence(void) {
 void *evtViewerAdvanceUpdate(void) {
     EventViewerState *viewer = (EventViewerState *)kwlnTaskGetUserValue();
     EvtWindowContext *window;
-    s32 flags;
+    s32 windowFlags;
 
     func_00232E20(viewer->windowContext);
     window = (EvtWindowContext *)viewer->windowContext;
-    flags = window->flags;
-    if ((flags & 8) == 0) {
+    windowFlags = window->flags;
+    if ((windowFlags & 8) == 0) {
         kwlnDrawControlFlags |= 0x2000000;
         return 0;
     } else {
-        if ((flags & 1) != 0) {
+        if ((windowFlags & 1) != 0) {
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
         if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
-            if (viewer->unk2440 == 0x78) {
+            if (viewer->titleStreamWaitFrames == 0x78) {
                 mnuMarkTitleStreamResetPending();
             }
-            viewer->unk2440++;
+            viewer->titleStreamWaitFrames++;
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
@@ -916,18 +916,18 @@ extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *
 extern s32 evtCreateSkyTask(void);
 
 void evtViewerCreateTaskWithSky(void) {
-    s32 handle;
-    u32 *state;
-    void *task;
+    s32 viewerHandle;
+    u32 *viewer;
+    void *viewerTask;
 
     D_003BA8EC = 0x80000000;
-    handle = func_002D03F8(0x2490);
-    state = sdfResourceRetainAddress(handle);
-    memset(state, 0, 0x2490);
-    *state = handle;
-    task = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, state);
-    func_00101A80((s32)task, evtCreateSkyTask());
-    func_00232D48(state);
+    viewerHandle = func_002D03F8(0x2490);
+    viewer = sdfResourceRetainAddress(viewerHandle);
+    memset(viewer, 0, 0x2490);
+    *viewer = viewerHandle;
+    viewerTask = kwlnTaskCreate(D_003ADB20, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, viewer);
+    func_00101A80((s32)viewerTask, evtCreateSkyTask());
+    func_00232D48(viewer);
 }
 
 void evtEventViewerDestroyTask(void) {

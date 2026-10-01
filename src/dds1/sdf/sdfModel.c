@@ -140,10 +140,10 @@ typedef struct {
 } SdfObj;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
+    s32 firstWord;
+    s32 work;
+    s32 thirdWord;
+    s32 fourthWord;
 } SdfMsg;
 
 typedef struct {
@@ -397,10 +397,10 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
 
 /* Store the message words and install release callbacks on its work pointer. */
 void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord) {
-    message->unkC = fourthWord;
-    message->unk0 = firstWord;
-    message->unk8 = thirdWord;
-    message->unk4 = work;
+    message->fourthWord = fourthWord;
+    message->firstWord = firstWord;
+    message->thirdWord = thirdWord;
+    message->work = work;
     sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
