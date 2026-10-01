@@ -4,6 +4,12 @@ extern s64 kwlnTaskIsRegistered(u64);
 
 extern s32 scrReadIntParameter(s32 idx);
 
+/* Event-command work prefix; the +0xE4 key selects the parent field task. */
+typedef struct {
+    u8 pad00[0xE4];
+    u32 taskKey;
+} EvtCommandWork;
+
 extern s32 D_00435DD0;
 
 extern u32 D_004371F8;
@@ -41,18 +47,43 @@ void func_00243430(void);
 void func_002457B8(s32 arg0);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+void func_0035B6E0(const char *fmt, ...);
+void func_0010AE38(const char *fmt, ...);
+extern char D_00422030[];
+extern char D_00421FE8[];
+s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
+s32 evtCreateTaskWithValue(s32 taskId, s32 value);
+s32 evtPreloadBgm(s32 id);
+s32 evtIsBgmLoaded(s32 id);
 
 INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
 
-INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
+u32 func_00242D10(void) {
+    EvtCommandWork *work;
+    s32 id;
+    s32 entry;
+    s32 task;
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242D10);
-
-/* Event-command work prefix; the +0xE4 key selects the parent field task. */
-typedef struct {
-    u8 pad00[0xE4];
-    u32 taskKey;
-} EvtCommandWork;
+    work = (EvtCommandWork *)func_0010D8C8();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->taskKey == 0) {
+        func_0035B6E0(D_00421FE8);
+        return 1;
+    }
+    id = scrReadIntParameter(0);
+    entry = evtFindTaskResourceEntryByKey(id, scrReadIntParameter(1));
+    if (entry == 0) {
+        func_0010AE38(D_00422030, scrReadIntParameter(1));
+        return 1;
+    } else {
+        task = evtCreateTaskWithValue(0x2AFE, entry);
+        func_00101968(work->taskKey, task);
+        scrSetIntegerReturnValue(task);
+    }
+    return 1;
+}
 
 u32 evtOpcodeCreateWorldChildTask(void) {
     EvtCommandWork *work;
@@ -122,6 +153,10 @@ u32 evtOpcodeSetFadeTarget(void) {
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00421FE8);
+
+INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422030);
+
 INCLUDE_RODATA(const s32, "game/code_00242CB8", D_00422050);
 
 u32 evtSetSkyAlpha(void) {
@@ -150,7 +185,19 @@ u32 evtHideSky(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00243068);
+u32 func_00243068(void) {
+    s32 id;
+
+    if (scrGetCommandTimer() == 0) {
+        evtPreloadBgm(scrReadIntParameter(0));
+    } else {
+        id = scrReadIntParameter(0);
+        if (evtIsBgmLoaded(id) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 u32 evtOpcodePlayBgm(void) {
     u64 id;
