@@ -3,6 +3,8 @@
 
 extern s32 func_001AA6F8(void);
 
+extern u8 *D_00435E20;
+
 extern u32 btlHasMarkedEntry14(u32);
 
 extern void btlClearRuntimeFlag2000(void);
@@ -405,7 +407,31 @@ INCLUDE_RODATA(const s32, "game/code_00224FC0", D_0041B4D0);
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226C98);
 
-INCLUDE_ASM(const s32, "game/code_00224FC0", btlCheckActiveEffectForSpecialTarget);
+s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
+    BattleEffectState *effect;
+    if (!(target->flags & 0x400)) {
+        return 0;
+    }
+    switch (target->mode) {
+    case 0x12E:
+    case 0x12F:
+        break;
+    default:
+        return 0;
+    }
+    effect = ((BattleActionContext *)func_001AA6F8())->effect;
+    if (effect->active != 1) {
+        return 0;
+    }
+    if (actor->flags & 0x200) {
+        if (command != 0) {
+            if (D_00435E20[command * 0x38 + 8] == 0) {
+                return 0;
+            }
+        }
+    }
+    return (bits * 2) & 4;
+}
 
 INCLUDE_ASM(const s32, "game/code_00224FC0", func_00226F58);
 

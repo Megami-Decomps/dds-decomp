@@ -480,7 +480,12 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00323DF0);
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324238);
+extern char D_0045C890[12];
+
+/* Copy the 12-byte resource progress parameter block. */
+void func_00324238(u8 *src) {
+    memcpy(D_0045C890, src, sizeof(D_0045C890));
+}
 
 u32 mnuGetActiveEffectWorkEntry(void) {
     return D_004390D8;
