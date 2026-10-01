@@ -472,6 +472,27 @@ end
                 )
                 battle_tbl.validate_aicalc_references(table, skill)
 
+        dds1_text = (ROOT / "src/dds1/data/battle/aicalc.tblasm").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("UNIT_HP_AT_OR_BELOW_RATE(25)", dds1_text)
+        self.assertIn("effect=SELECT_LOWEST_CURRENT_HP_TARGET(0)", dds1_text)
+        self.assertIn("effect=7:0", dds1_text)
+        dds2_text = (ROOT / "src/dds2/data/battle/aicalc.tblasm").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("ACTION_REQUIREMENTS_MET(509)", dds2_text)
+        self.assertIn("effect=SELECT_GROUP_200_WITH_FLAG_1000(0)", dds2_text)
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError, "unknown predicate operation"
+        ):
+            battle_tbl._ai_operation(
+                "NOT_A_PREDICATE(1)",
+                7,
+                "predicate",
+                battle_tbl.AICALC_PREDICATE_SYMBOLS["dds1"],
+            )
+
         dds1_source = ROOT / "src/dds1/data/battle/aicalc.tblasm"
         dds1 = battle_tbl.parse_aicalc_source(
             dds1_source.read_text(encoding="utf-8"),

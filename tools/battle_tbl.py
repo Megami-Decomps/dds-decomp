@@ -489,6 +489,104 @@ _ACTION_ID_ARGUMENTS = frozenset(
 )
 
 
+def _operation_symbols(
+    values: tuple[tuple[int, str], ...],
+) -> flw0_profiles.IntegerSymbols:
+    return flw0_profiles.IntegerSymbols(values, complete=False)
+
+
+AICALC_PREDICATE_SYMBOLS = {
+    "dds1": _operation_symbols(
+        (
+            (1, "UNIT_HP_AT_OR_BELOW_RATE"),
+            (2, "BOSS_HP_AT_OR_BELOW_RATE"),
+            (4, "RESET_AI_COUNTER_AT_LIMIT"),
+            (5, "GROUP_400_COUNT_AT_MOST"),
+            (6, "GROUP_200_COUNT_AT_MOST"),
+            (7, "UNIT_HAS_ACTION_MASK"),
+            (8, "ANY_GROUP_400_HAS_ACTION_MASK"),
+            (9, "ANY_GROUP_200_HAS_ACTION_MASK"),
+            (10, "ALL_GROUP_200_HAVE_ACTION_MASK"),
+            (11, "HAS_GROUP_200_UNIT_MODE"),
+            (12, "HAS_OTHER_GROUP_400_UNIT_MODE"),
+            (13, "ANY_GROUP_200_PASSES_ACTION_ENTRY_QUERY"),
+            (14, "ANY_GROUP_400_PASSES_ACTION_ENTRY_QUERY"),
+            (18, "UNIT_PASSES_ACTION_TEN_CHECK"),
+            (20, "COUNTER_REACHED_LIMIT"),
+            (21, "AI_COUNTER_REACHED_LIMIT"),
+            (22, "TURN_REACHED_LIMIT"),
+            (23, "READY_WITHOUT_TURNS"),
+            (24, "UNIT_STAT_AT_OR_BELOW_RATE"),
+            (25, "HAS_AVAILABLE_OPTION"),
+            (29, "ACTION_IS_USABLE"),
+            (31, "ANY_GROUP_400_HAS_NEGATIVE_ACTION_QUERY"),
+            (34, "HAS_OTHER_GROUP_400_DIFFERENT_UNIT_MODE"),
+            (35, "ANY_UNIT_PASSES_CHECK_200"),
+            (36, "ANY_UNIT_PASSES_CHECK_400"),
+            (42, "GROUP_400_UNIT_HAS_ACTION"),
+            (43, "UNIT_PASSES_ACTION_ENTRY_QUERY"),
+            (48, "ANY_GROUP_200_MATCHES_ACTION_ENTRY"),
+            (50, "ANY_GROUP_400_MATCHES_ACTION_ENTRY"),
+            (52, "ANY_GROUP_200_LACKS_FLAG_1000"),
+            (56, "ANY_GROUP_200_HAS_ALL_TEN_ACTIONS"),
+            (57, "ANY_GROUP_400_HAS_ALL_TEN_ACTIONS"),
+            (60, "HISTORY_COUNTER_IS_ZERO"),
+            (61, "ANY_UNIT_BLOCKS_GROUP_200_ELEMENT"),
+            (62, "ANY_GROUP_400_HAS_QUERY"),
+            (69, "UNIT_HAS_EITHER_SPECIAL_ACTION"),
+        )
+    ),
+    "dds2": _operation_symbols(
+        (
+            (1, "UNIT_HP_AT_OR_BELOW_RATE"),
+            (2, "BOSS_HP_AT_OR_BELOW_RATE"),
+            (3, "ANY_GROUP_200_HP_AT_OR_BELOW_RATE"),
+            (6, "RESET_AI_COUNTER_AT_LIMIT"),
+            (7, "GROUP_400_COUNT_AT_MOST"),
+            (12, "ANY_GROUP_200_HAS_ACTION_MASK"),
+            (13, "ALL_GROUP_200_HAVE_ACTION_MASK"),
+            (15, "HAS_OTHER_GROUP_400_UNIT_MODE"),
+            (23, "COUNTER_REACHED_LIMIT"),
+            (27, "READY_WITHOUT_TURNS"),
+            (29, "UNIT_STAT_AT_OR_ABOVE_RATE"),
+            (31, "UNIT_STAT_AT_LEAST"),
+            (41, "HAS_DISTINCT_TARGET_SELECTION"),
+            (43, "ANY_UNIT_PASSES_CHECK_400"),
+            (50, "ACTION_REQUIREMENTS_MET"),
+            (51, "UNIT_PASSES_ACTION_ENTRY_QUERY"),
+            (54, "CHECK_UNIT_ACTION_MODE_ZERO"),
+            (56, "ANY_GROUP_200_MATCHES_ACTION_ENTRY"),
+            (58, "ANY_GROUP_400_MATCHES_ACTION_ENTRY"),
+            (64, "ANY_GROUP_200_HAS_ALL_TEN_ACTIONS"),
+            (65, "ANY_GROUP_400_HAS_ALL_TEN_ACTIONS"),
+            (68, "UNITS_MISSING_STATUS_FLAG"),
+        )
+    ),
+}
+
+
+AICALC_EFFECT_SYMBOLS = {
+    "dds1": _operation_symbols(
+        (
+            (1, "SELECT_LOWEST_CURRENT_HP_TARGET"),
+            (2, "SELECT_TARGETS_BY_ACTION_MASK"),
+            (3, "SELECT_TARGETS_BY_UNIT_MODE"),
+            (12, "APPEND_SELF_AFTER_TARGET_SCAN"),
+            (14, "SELECT_TARGETS_WITHOUT_ACTION_MASK"),
+        )
+    ),
+    "dds2": _operation_symbols(
+        (
+            (1, "SELECT_LOWEST_CURRENT_HP_TARGET"),
+            (2, "SELECT_TARGETS_BY_ACTION_MASK"),
+            (12, "APPEND_SELF_AFTER_TARGET_SCAN"),
+            (14, "SELECT_TARGETS_WITHOUT_ACTION_MASK"),
+            (15, "SELECT_GROUP_200_WITH_FLAG_1000"),
+        )
+    ),
+}
+
+
 def _id_symbols(values: tuple[str, ...], prefix: str) -> flw0_profiles.IntegerSymbols:
     bases: list[str] = []
     for index, value in enumerate(values):
@@ -2085,12 +2183,30 @@ def _parse_bits_or_float(
     return _integer(fields["bits"], line_number, context)
 
 
-def _ai_operation(text: str, line_number: int, context: str) -> AiOperation:
+def _ai_operation(
+    text: str,
+    line_number: int,
+    context: str,
+    symbols: flw0_profiles.IntegerSymbols,
+) -> AiOperation:
     if text == "none":
         return AiOperation()
+    named = re.fullmatch(r"([A-Z][A-Z0-9_]*)\(([^()]*)\)", text)
+    if named is not None:
+        try:
+            selector = symbols.by_name[named.group(1)]
+        except KeyError as exc:
+            raise BattleTableError(
+                f"line {line_number}: unknown {context} operation {named.group(1)!r}"
+            ) from exc
+        return AiOperation(
+            selector,
+            _integer(named.group(2), line_number, f"{context} argument"),
+        )
     if ":" not in text:
         raise BattleTableError(
-            f"line {line_number}: {context} needs SELECTOR:ARGUMENT or none"
+            f"line {line_number}: {context} needs NAME(ARGUMENT), "
+            "SELECTOR:ARGUMENT, or none"
         )
     selector_text, argument_text = text.split(":", 1)
     return AiOperation(
@@ -2099,9 +2215,14 @@ def _ai_operation(text: str, line_number: int, context: str) -> AiOperation:
     )
 
 
-def _ai_operations(text: str, line_number: int) -> tuple[AiOperation, ...]:
+def _ai_operations(
+    text: str,
+    line_number: int,
+    symbols: flw0_profiles.IntegerSymbols,
+) -> tuple[AiOperation, ...]:
     values = tuple(
-        _ai_operation(value, line_number, "predicate") for value in text.split(",")
+        _ai_operation(value, line_number, "predicate", symbols)
+        for value in text.split(",")
     )
     if len(values) != 3:
         raise BattleTableError(f"line {line_number}: predicates needs three values")
@@ -2426,7 +2547,9 @@ def parse_aicalc_source(
                     child[2:], child_number, {"predicates", "routes"}, "decision"
                 )
                 predicates = _ai_operations(
-                    child_fields.get("predicates", "none,none,none"), child_number
+                    child_fields.get("predicates", "none,none,none"),
+                    child_number,
+                    AICALC_PREDICATE_SYMBOLS[profile.name],
                 )
                 routes = _int_list(child_fields.get("routes", ""), child_number, "routes")
                 if len(routes) != 8:
@@ -2451,7 +2574,12 @@ def parse_aicalc_source(
                 groups[group_index][choice_index] = AiChoice(
                     _value(child_fields, "weight", 0, child_number),
                     _ai_action(child_fields["action"], child_number, symbols),
-                    _ai_operation(child_fields.get("effect", "none"), child_number, "effect"),
+                    _ai_operation(
+                        child_fields.get("effect", "none"),
+                        child_number,
+                        "effect",
+                        AICALC_EFFECT_SYMBOLS[profile.name],
+                    ),
                 )
             else:
                 raise BattleTableError(f"line {child_number}: expected decision, choice, or end")
@@ -3604,12 +3732,17 @@ def render_skill_source(table: SkillTable) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _ai_operation_text(operation: AiOperation) -> str:
+def _ai_operation_text(
+    operation: AiOperation,
+    symbols: flw0_profiles.IntegerSymbols,
+) -> str:
     if operation == AiOperation():
         return "none"
     argument = (
         f"{operation.argument:#x}" if operation.argument >= 0x1000 else str(operation.argument)
     )
+    if operation.selector in symbols.by_value:
+        return f"{symbols.by_value[operation.selector]}({argument})"
     return f"{operation.selector}:{argument}"
 
 
@@ -3695,7 +3828,11 @@ def render_aicalc_source(
             if decision == AiDecision():
                 continue
             predicates = ",".join(
-                _ai_operation_text(operation) for operation in decision.predicates
+                _ai_operation_text(
+                    operation,
+                    AICALC_PREDICATE_SYMBOLS[table.profile.name],
+                )
+                for operation in decision.predicates
             )
             routes = _list(decision.routes)
             lines.append(
@@ -3711,7 +3848,13 @@ def render_aicalc_source(
                     f"action={_ai_action_text(choice.action, symbols)}"
                 )
                 if choice.effect != AiOperation():
-                    choice_fields.append(f"effect={_ai_operation_text(choice.effect)}")
+                    choice_fields.append(
+                        "effect="
+                        + _ai_operation_text(
+                            choice.effect,
+                            AICALC_EFFECT_SYMBOLS[table.profile.name],
+                        )
+                    )
                 lines.append(
                     f"  choice {group_index} {choice_index} {' '.join(choice_fields)}"
                 )
