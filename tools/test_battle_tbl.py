@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import sys
 import unittest
+from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 
@@ -457,6 +458,28 @@ end
                 (256, 672, 254, 9),
             ),
         }
+        expected_controls = {
+            "dds1": Counter(
+                {
+                    "segment-start": 1018,
+                    "font-slot": 4864,
+                    "conditional-newline": 930,
+                    "text-attribute": 210,
+                    "token": 50,
+                    "control": 77,
+                }
+            ),
+            "dds2": Counter(
+                {
+                    "segment-start": 1191,
+                    "font-slot": 1191,
+                    "conditional-newline": 932,
+                    "text-attribute": 254,
+                    "token": 62,
+                    "control": 116,
+                }
+            ),
+        }
         for game, (text_counts, bank_counts) in expected.items():
             with self.subTest(game=game):
                 source = ROOT / f"src/{game}/data/battle/msg.tblasm"
@@ -474,6 +497,24 @@ end
                 self.assertEqual(
                     battle_tbl.decode_message(battle_tbl.encode_message(table)), table
                 )
+                controls = Counter()
+                raw_controls = set()
+                for kind, bank in zip(
+                    battle_tbl.MESSAGE_BANK_KINDS, table.message_banks
+                ):
+                    path = source.with_name(f"msg-{kind}.msgasm")
+                    rendered = "\n".join(
+                        battle_tbl.msg1.render(bank, semantic=True)
+                    ) + "\n"
+                    self.assertEqual(path.read_text(encoding="utf-8"), rendered)
+                    for line in rendered.splitlines():
+                        directive = line.strip().split(maxsplit=1)
+                        if directive and directive[0] in expected_controls[game]:
+                            controls[directive[0]] += 1
+                            if directive[0] == "control":
+                                raw_controls.add(line.strip())
+                self.assertEqual(controls, expected_controls[game])
+                self.assertEqual(raw_controls, {"control f1 11"})
                 unit = battle_tbl.parse_unit_source(
                     (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
                 )

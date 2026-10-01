@@ -759,6 +759,14 @@ end
         content = [(index, line.strip()) for index, line in enumerate(rendered[1:], 1)]
         self.assertEqual(msg1.parse_source(content), binary)
 
+        semantic = msg1.render(binary, semantic=True)
+        self.assertIn("      segment-start", semantic)
+        self.assertIn("      stream-end", semantic)
+        semantic_content = [
+            (index, line.strip()) for index, line in enumerate(semantic[1:], 1)
+        ]
+        self.assertEqual(msg1.parse_source(semantic_content), binary)
+
         edited = [line.replace('text "Hello"', 'text "A longer greeting"') for line in rendered]
         edited_content = [(index, line.strip()) for index, line in enumerate(edited[1:], 1)]
         edited_binary = msg1.parse_source(edited_content)
@@ -799,6 +807,38 @@ end
         ]
         with self.assertRaisesRegex(msg1.Msg1Error, "not in the DDS1 MSG1 map"):
             msg1.parse_source(bad)
+
+    def test_msg1_semantic_controls_preserve_native_operands(self) -> None:
+        controls = bytes.fromhex(
+            "f208ffff f20602ff f20205ff f20901ff f20781ff "
+            "f20301ff f10f f104"
+        )
+        bank = msg1.Bank((msg1.Message("CONTROL", 0xFFFF, (controls,)),), ())
+        binary = msg1.encode(bank)
+        source = msg1.render(binary, semantic=True)
+        expected = {
+            "      segment-start",
+            "      font-slot 1",
+            "      text-attribute 1 4",
+            "      text-attribute 2 0",
+            "      text-attribute 3 128",
+            "      token 0",
+            "      conditional-newline",
+            "      stream-end",
+        }
+        self.assertTrue(expected.issubset(source))
+        content = [(index, line.strip()) for index, line in enumerate(source[1:], 1)]
+        self.assertEqual(msg1.parse_source(content), binary)
+
+        invalid = [
+            (1, "message BAD speaker=none"),
+            (2, "page"),
+            (3, "text-attribute 4 0"),
+            (4, "endpage"),
+            (5, "endmessage"),
+        ]
+        with self.assertRaisesRegex(msg1.Msg1Error, "slot must be 1, 2, or 3"):
+            msg1.parse_source(invalid)
 
     def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
         source = """\

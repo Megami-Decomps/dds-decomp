@@ -230,6 +230,12 @@ reassembles every bank canonically. Corpus checks also join the 384 enemy name
 and description rows to `UNIT.TBL`, the item-name rows to the SKILL item domain,
 and the skill-name rows to the full SKILL ID domain.
 
+The maintained battle banks use the native- and corpus-verified semantic
+control view.
+For example, `segment-start`, `font-slot 1`, `text-attribute 1 4`, `token 0`,
+and `conditional-newline` replace their encoded `F1`/`F2` byte sequences.
+Controls whose behavior is still unknown remain explicit `control` rows.
+
 ## Battle AI and formulas
 
 `AICALC.TBL` holds the enemy decision tables, shared calculation words, and
