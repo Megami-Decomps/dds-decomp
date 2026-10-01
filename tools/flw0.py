@@ -606,6 +606,30 @@ def _event_push_symbol(
     return command_profile.events_by_id.get(event_id)
 
 
+def _procedure_push_symbol(
+    raw: int,
+    next_raw: int | None,
+    command_profile: flw0_profiles.CommandProfile | None,
+    procedure_symbols: tuple[str, ...] | list[str] | None,
+) -> str | None:
+    """Resolve a literal procedure argument to CREATE_SCRIPT_TASK."""
+
+    if command_profile is None or procedure_symbols is None or next_raw is None:
+        return None
+    command = command_profile.by_name.get("CREATE_SCRIPT_TASK")
+    if command is None:
+        return None
+    procedure_index = raw >> 16
+    if (
+        raw & 0xFFFF != OPCODE_IDS["PUSHIS"]
+        or procedure_index >= len(procedure_symbols)
+        or next_raw & 0xFFFF != OPCODE_IDS["COMM"]
+        or next_raw >> 16 != command.command_id
+    ):
+        return None
+    return procedure_symbols[procedure_index]
+
+
 def _render_code(
     flw0: Flw0File,
     section: Section,

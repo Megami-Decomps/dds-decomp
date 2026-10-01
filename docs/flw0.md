@@ -184,6 +184,25 @@ absent targets stay numeric.
 The reading view carries the same evidence as `CALL_EVENT(event(e602))` while
 leaving an unresolved literal as `CALL_EVENT(10)`.
 
+A literal procedure-table index passed to the script-task command uses a local
+procedure symbol:
+
+```text
+  PUSHIS 0
+  PUSHPROC worker
+  COMM CREATE_SCRIPT_TASK
+  PUSHREG
+  COMM WAIT_FOR_TASK_REMOVAL
+```
+
+`PUSHPROC` assembles to `PUSHIS`. Its operand follows the procedure declaration
+when procedures are reordered, just like the operands of `CALL`, `JUMP`, and
+`PROC`. The disassembler emits it only for an in-range literal immediately
+before `CREATE_SCRIPT_TASK`; unrelated integers stay numeric. The other
+argument is a priority adjustment relative to the current script task, and the
+command returns the created task handle. That handle may be waited on, stored
+for later destruction, or intentionally left running.
+
 Physical version-1 sources use the same records after an `msg1` marker inside
 their type-3 section. Their section size remains fixed. Across the tracked
 corpus, this form covers all 36 nonempty banks: 179 dialogs, 257 message pages,
@@ -300,6 +319,8 @@ tables and both implementations:
 | `PREPARE_UNIT_MOTION_STATE` | `0x073` | 5 | Looks up an event unit and applies four motion-state values |
 | `READ_SECONDARY_WORLD_ID_VALUE` | `0x094` | 1 | Looks up a named secondary-world ID and returns its value or zero |
 | `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
+| `CREATE_SCRIPT_TASK` | `0x0A5` | 2 | Creates a task at a local procedure with a relative priority and returns its handle |
+| `DESTROY_REGISTERED_TASK` | `0x0A6` | 1 | Destroys a registered task and its hierarchy; an absent handle is ignored |
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
@@ -314,8 +335,8 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 38,060 of 53,389 native calls in the complete DDS1
-corpus and 27,934 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 38,882 of 53,389 native calls in the complete DDS1
+corpus and 28,401 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
@@ -324,6 +345,11 @@ or ambiguous message operand remains numeric.
 The selection pattern resolves a further 329 DDS1 and 287 DDS2 references to
 typed local `select` declarations. References in raw message banks and values
 computed at runtime remain numeric.
+
+Task creation resolves all 807 DDS1 and 463 DDS2 local procedure operands to
+`PUSHPROC`. The profile also names all 19 task-destruction calls. The source
+keeps explicit `PUSHREG`, local stores, waits, and destruction calls, so each
+task handle's lifetime remains visible without folding instructions away.
 
 The same profile information resolves 31 DDS1 and 43 DDS2 event calls to
 maintained `eNNN` sources. The remaining 11 DDS1 and four DDS2 literal event
