@@ -401,7 +401,41 @@ void mnuStoreTaskResult(char *audioPath) {
     D_00454D30[9] = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A20A0);
+extern u32 D_00454D58[];
+extern s32 fileIsRequestReadyInCurrentMode(u32);
+extern s32 fileGetResourceHandle(u32);
+extern u32 func_002C8110(u32);
+extern s32 fileGetResourceSize(u32);
+extern void func_002C7D00(u32);
+extern s32 func_003293C8(s32);
+extern s32 sdfMemoryGetBlockAddress(s32);
+extern void func_003504A8(u32 *);
+
+/* When the pending title-stream file is ready, copy it into a fresh block,
+ * record the entry count (size / entry size) and mark the queue as loaded. */
+s32 func_002A20A0(u32 *queue) {
+    s32 ready = fileIsRequestReadyInCurrentMode(D_00438FEC);
+
+    if (ready != 0) {
+        s32 handle = fileGetResourceHandle(D_00438FEC);
+        u32 data = func_002C8110(D_00438FEC);
+        s32 size = fileGetResourceSize(D_00438FEC);
+        s32 block;
+
+        func_002C7D00(D_00438FEC);
+        block = func_003293C8(size);
+        D_00454D30[5] = sdfMemoryGetBlockAddress(block);
+        D_00454D30[8] = block;
+        memcpy((void *)queue[5], (void *)data, size);
+        queue[0] = size / (s32)queue[2];
+        queue[1] = 0;
+        func_003298C0(handle);
+        func_003504A8(D_00454D58);
+        D_00454D30[9] = 2;
+        ready = 1;
+    }
+    return ready;
+}
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_004285F0);
 

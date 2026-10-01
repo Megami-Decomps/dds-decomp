@@ -443,7 +443,41 @@ void mnuStoreTaskResult(void) {
     D_003D9140[9] = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A490);
+extern u32 D_003D9168[];
+extern s32 fileIsRequestReadyInCurrentMode(u32);
+extern s32 fileGetResourceHandle(u32);
+extern u32 func_00288B90(u32);
+extern s32 fileGetResourceSize(u32);
+extern void func_002887A0(u32);
+extern s32 func_002D0518(s32);
+extern s32 sdfMemoryGetBlockAddress(s32);
+extern void func_002F7628(u32 *);
+
+/* When the pending title-stream file is ready, copy it into a fresh block,
+ * record the entry count (size / entry size) and mark the queue as loaded. */
+s32 func_0026A490(u32 *queue) {
+    s32 ready = fileIsRequestReadyInCurrentMode(D_003BD8D4);
+
+    if (ready != 0) {
+        s32 handle = fileGetResourceHandle(D_003BD8D4);
+        u32 data = func_00288B90(D_003BD8D4);
+        s32 size = fileGetResourceSize(D_003BD8D4);
+        s32 block;
+
+        func_002887A0(D_003BD8D4);
+        block = func_002D0518(size);
+        D_003D9140[5] = sdfMemoryGetBlockAddress(block);
+        D_003D9140[8] = block;
+        memcpy((void *)queue[5], (void *)data, size);
+        queue[0] = size / (s32)queue[2];
+        queue[1] = 0;
+        func_002D0A10(handle);
+        func_002F7628(D_003D9168);
+        D_003D9140[9] = 2;
+        ready = 1;
+    }
+    return ready;
+}
 
 INCLUDE_ASM(const s32, "game/code_00268AB8", func_0026A588);
 
