@@ -188,7 +188,7 @@ struct PcpScatterWork3 {
     u8 pad00[0x20];
     s32 unk20;
     s32 unk24;
-    u32 unk28;
+    u32 assetResource; /* 0x28: released with sdfQueueAssetRelease */
     u32 unk2C;
     PcpScatterRes *res;
     u8 pad34[0x20];
@@ -744,8 +744,6 @@ void effScatterReleaseObjectAndBuffer(PcpScatterWork4 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017B000);
-
 typedef struct PcpScatterRing {
     f32 unk00;
     f32 tiltAngle;
@@ -756,7 +754,7 @@ typedef struct PcpScatterRing {
     f32 angleStep;
     f32 radius;
     f32 radiusStep;
-    u8 pad24[4];
+    f32 heightOffset;
 } PcpScatterRing;
 
 typedef struct PcpScatterBlockObject {
@@ -765,15 +763,104 @@ typedef struct PcpScatterBlockObject {
 } PcpScatterBlockObject;
 
 typedef struct PcpScatterWork11 {
-    u8 pad00[0xCC];
-    f32 riseDecay;
-    u8 padD0[8];
-    f32 tiltDamping;
-    u8 padDC[0x9C];
-    PcpScatterRing *rings;
+    u8 pad00[0x98];
+    s32 lifetime;           /* 0x98 */
+    u8 pad9C[0x14];
+    f32 angleStepBase;      /* 0xB0 */
+    f32 angleStepJitter;    /* 0xB4 */
+    f32 riseStep;           /* 0xB8 */
+    f32 tiltScale;          /* 0xBC */
+    f32 heightOffsetBase;   /* 0xC0 */
+    f32 heightOffsetJitter; /* 0xC4 */
+    f32 initialRise;        /* 0xC8 */
+    f32 riseDecay;          /* 0xCC */
+    u8 padD0[4];
+    f32 initialTiltSpeed;   /* 0xD4 */
+    f32 tiltDamping;        /* 0xD8 */
+    f32 radiusBase;         /* 0xDC */
+    f32 radiusJitter;       /* 0xE0 */
+    f32 radiusEndBase;      /* 0xE4 */
+    f32 radiusEndJitter;    /* 0xE8 */
+    u8 padEC[4];
+    u32 vCount;             /* 0xF0 */
+    u32 vTail;              /* 0xF4 */
+    u8 padF8[0x80];
+    PcpScatterRing *rings;  /* 0x178 */
     u8 pad17C[8];
-    u32 scatterObject;
+    u32 scatterObject;      /* 0x184 */
 } PcpScatterWork11;
+
+/* Initialise ring `index`: randomised radius/angle/rise parameters, then the first set of vertex pairs. */
+void func_0017B000(PcpScatterWork11 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 height;
+    f32 rise;
+    f32 riseStep;
+    f32 u;
+    f32 du;
+    f32 v;
+    f32 jitter;
+    f32 s;
+    u32 count;
+    u32 i;
+
+    ring = &work->rings[index];
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
+    jitter = work->angleStepJitter;
+    angleStep = work->angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    riseStep = work->riseStep;
+    jitter = work->radiusJitter;
+    radius = work->radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->heightOffsetJitter;
+    height = work->heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->radiusEndJitter;
+    rise = 0.0f;
+    ring->radiusStep = (work->radiusEndBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - radius) / (f32)work->lifetime;
+    ring->unk00 = work->tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->tiltAngle = rise;
+    ring->angle = angle;
+    ring->radius = radius;
+    ring->heightOffset = height;
+    ring->angleStep = angleStep;
+    ring->tiltSpeed = work->initialTiltSpeed;
+    ring->rise = work->initialRise;
+    func_003364B8(ring->unk00);
+    func_00336818(ring->tiltAngle);
+    sdfMultiplyVuMatrixInPlace();
+    v = (f32)work->vTail;
+    u = 0.0f;
+    du = (f32)work->vCount / (f32)count;
+    for (i = 0; i < count; i++) {
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[1] = rise;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] = vertex[1] - height;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        uv[0] = u;
+        uv[2] = u;
+        uv[1] = 0;
+        uv[3] = v;
+        uv += 4;
+        rise += riseStep;
+        u += du;
+        angle += angleStep;
+        vertex += 8;
+    }
+}
 
 /* Advance ring `index`: rebuild the rotation matrix, then lay the ring's vertex pairs around it. */
 void effScatterRingUpdate(PcpScatterWork11 *work, s32 index)
@@ -935,20 +1022,106 @@ void effScatterReleaseInstanceResources(PcpScatterWork5 *work) {
     func_003297C8(work->ownedBuffer);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017BA90);
-
 typedef struct PcpScatterWork12 {
-    u8 pad00[0xCC];
-    f32 riseDecay;
-    u8 padD0[8];
-    f32 tiltDamping;
-    u8 padDC[0x10];
-    f32 radiusDamping;
-    u8 padF0[0x8C];
-    PcpScatterRing *rings;
+    u8 pad00[0x98];
+    s32 lifetime;           /* 0x98 */
+    u8 pad9C[0x14];
+    f32 angleStepBase;      /* 0xB0 */
+    f32 angleStepJitter;    /* 0xB4 */
+    f32 riseStep;           /* 0xB8 */
+    f32 tiltScale;          /* 0xBC */
+    f32 heightOffsetBase;   /* 0xC0 */
+    f32 heightOffsetJitter; /* 0xC4 */
+    f32 initialRise;        /* 0xC8 */
+    f32 riseDecay;          /* 0xCC */
+    u8 padD0[4];
+    f32 initialTiltSpeed;   /* 0xD4 */
+    f32 tiltDamping;        /* 0xD8 */
+    f32 radiusBase;         /* 0xDC */
+    f32 radiusJitter;       /* 0xE0 */
+    f32 radiusStepBase;     /* 0xE4 */
+    f32 radiusStepJitter;   /* 0xE8 */
+    f32 radiusDamping;      /* 0xEC */
+    u8 padF0[4];
+    u32 vCount;             /* 0xF4 */
+    u32 vTail;              /* 0xF8 */
+    u8 padFC[0x80];
+    PcpScatterRing *rings;  /* 0x17C */
     u8 pad180[0xC];
-    u32 scatterObject;
+    u32 scatterObject;      /* 0x18C */
 } PcpScatterWork12;
+
+/* Initialise ring `index`: randomised radius/angle/rise parameters, then the first set of vertex pairs. */
+void func_0017BA90(PcpScatterWork12 *work, s32 index)
+{
+    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    PcpScatterRing *ring;
+    f32 angle;
+    f32 angleStep;
+    f32 radius;
+    f32 height;
+    f32 rise;
+    f32 riseStep;
+    f32 u;
+    f32 du;
+    f32 v;
+    f32 jitter;
+    f32 s;
+    u32 count;
+    u32 i;
+
+    ring = &work->rings[index];
+    count = ((PcpScatterBlockObject *)work->scatterObject)->stride >> 1;
+    angle = effMiscRandUnitFloat(D_003AA868) * (3.14159265f * 2.0f);
+    jitter = work->angleStepJitter;
+    angleStep = work->angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    riseStep = work->riseStep;
+    jitter = work->radiusJitter;
+    radius = work->radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->heightOffsetJitter;
+    height = work->heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    jitter = work->radiusStepJitter;
+    rise = 0.0f;
+    ring->radiusStep = work->radiusStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    ring->unk00 = work->tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->tiltAngle = rise;
+    ring->angle = angle;
+    ring->radius = radius;
+    ring->heightOffset = height;
+    ring->angleStep = angleStep;
+    ring->tiltSpeed = work->initialTiltSpeed;
+    ring->rise = work->initialRise;
+    func_003364B8(ring->unk00);
+    func_00336818(ring->tiltAngle);
+    sdfMultiplyVuMatrixInPlace();
+    v = (f32)work->vTail;
+    u = 0.0f;
+    du = (f32)work->vCount / (f32)count;
+    for (i = 0; i < count; i++) {
+        vertex[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        vertex[1] = rise;
+        s = sdfSinPoly(angle);
+        vertex[4] = vertex[0];
+        vertex[5] = vertex[1] - height;
+        vertex[6] = vertex[2] = s * radius;
+        VU0_LOAD_VF(vf10, vertex);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex);
+        VU0_LOAD_VF(vf10, vertex + 4);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, vertex + 4);
+        uv[0] = u;
+        uv[2] = u;
+        uv[1] = 0;
+        uv[3] = v;
+        uv += 4;
+        rise += riseStep;
+        u += du;
+        angle += angleStep;
+        vertex += 8;
+    }
+}
 
 /* Same ring update as effScatterRingUpdate, with the ring's 0x20 radius step scaled as well. */
 void effScatterRingUpdateScaled(PcpScatterWork12 *work, s32 index)
@@ -1030,7 +1203,6 @@ typedef struct PcpScatterUpdateB {
 
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
-extern void func_0017BA90(void *work, u32 index);
 extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
 extern void func_0017DA28(void *draw);
 
@@ -1073,7 +1245,7 @@ void func_0017BFA8(PcpScatterUpdateB *work) {
             draw->colors[i] = 0;
         } else {
             if (particleAge == 0) {
-                func_0017BA90(work, i);
+                func_0017BA90((PcpScatterWork12 *)work, i);
             } else if (particleAge > 0) {
                 if (particleAge < fadeIn && fadeIn != 0) {
                     t = (f32)particleAge / (f32)fadeIn;
@@ -1276,7 +1448,108 @@ void effScatterRingUpdateScaledLong(PcpScatterWork13 *work, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CB28);
+/* Instance C as the update pass sees it: like instance B with a longer header and a two-stage colour. */
+typedef struct PcpScatterUpdateC {
+    u8 pad00[0x40];
+    f32 vec[4];          /* 0x40 */
+    u8 pad50[0x44];
+    u8 loop;             /* 0x94 */
+    u8 pad95[3];
+    s32 duration;        /* 0x98 */
+    u32 particleCount;   /* 0x9C */
+    u8 padA0[4];
+    u32 delayRange;      /* 0xA4 */
+    s32 fadeIn;          /* 0xA8 */
+    s32 fadeRange;       /* 0xAC */
+    u8 padB0[0x44];
+    s32 colorA;          /* 0xF4 */
+    s32 colorB;          /* 0xF8 */
+    u8 padFC[0x88];
+    PcpScatterParticle *particles; /* 0x184 */
+    f32 scale;           /* 0x188 */
+    s32 color;           /* 0x18C */
+    s32 age;             /* 0x190 */
+    PcpScatterDraw *draw; /* 0x194 */
+} PcpScatterUpdateC;
+
+extern void func_0017C598(void *work, u32 index);
+
+/* Per-frame update of a fading, optionally looping scatter instance whose colour blends between two keys over its lifetime. */
+void func_0017CB28(PcpScatterUpdateC *work) {
+    s32 loop;
+    s32 duration = work->duration;
+    PcpScatterDraw *draw = work->draw;
+    PcpScatterParticle *particle = work->particles;
+    u32 count = work->particleCount;
+    s32 fadeIn;
+    s32 fadeRange;
+    u32 delay;
+    s32 age;
+    s32 remaining;
+    f32 total;
+    f32 t;
+    f32 u;
+    s32 colorMul;
+    s32 colorA;
+    s32 colorB;
+    s32 color;
+    u32 i;
+
+    age = work->age;
+    loop = work->loop;
+    fadeIn = work->fadeIn;
+    fadeRange = work->fadeRange;
+    delay = work->delayRange;
+    colorA = work->colorA;
+    colorB = work->colorB;
+    colorMul = work->color;
+    if (duration < age) {
+        return;
+    }
+    remaining = duration - age;
+    if (fadeRange >= remaining && fadeRange != 0) {
+        total = (f32)remaining / (f32)fadeRange;
+    } else {
+        total = 1.0f;
+    }
+    for (i = 0; i < count; i++) {
+        s32 particleAge = particle->age;
+
+        if (duration < particleAge) {
+            draw->colors[i] = 0;
+        } else {
+            if (particleAge == 0) {
+                func_0017C598(work, i);
+            } else if (particleAge > 0) {
+                u = (f32)particleAge;
+                color = effBlendColor(colorA, colorB, u / (f32)duration);
+                if (particleAge < fadeIn && fadeIn != 0) {
+                    t = u / (f32)fadeIn;
+                } else {
+                    t = 1.0f;
+                }
+                color = effMultiplyPackedColors(colorMul, color);
+                draw->colors[i] = effBlendColor(color & 0xFFFFFF, color, t * total);
+                effScatterRingUpdateScaledLong((PcpScatterWork13 *)work, i);
+            }
+            if (loop != 0 && !(age < duration)) {
+                particle->age = -(effMiscRand(D_003AA868) % delay);
+            } else {
+                particle->age++;
+            }
+        }
+        particle++;
+    }
+    if (loop != 0 && age >= duration) {
+        work->age = 0;
+    } else {
+        work->age++;
+    }
+    draw->scale = work->scale;
+    PCP_COPY_VECTOR(draw, work->vec);
+    effScatterStoreSourceTransformMatrix(draw, work);
+    func_0017DA28(draw);
+}
 
 void func_0017CE00(PcpScatterWork6 *work, void *src) {
     PCP_COPY_VECTOR(&work->particleParams, src);
