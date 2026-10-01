@@ -4,7 +4,9 @@ extern s32 func_002E92C0(s32 id);
 
 extern s32 D_003BD490;
 
-typedef struct FE250Entry {
+/* Per-track volume/balance record; unk4 and unk5 are the two balance bytes
+   read by sndGetNonnegativeEntryBalance. */
+typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
     /* 0x2 */ u8 unk2;
@@ -13,7 +15,7 @@ typedef struct FE250Entry {
     /* 0x5 */ u8 unk5;
     /* 0x6 */ u8 unk6;
     /* 0x7 */ u8 unk7;
-} FE250Entry;
+} SndTrackVolume;
 
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
@@ -34,21 +36,21 @@ typedef struct FE0C0 {
     /* 0x000 */ u8 pad000[0x208];
     /* 0x208 */ u32 unk208;
     /* 0x20C */ u32 unk20C;
-} FE0C0;
+} SndMixerBlock;
 
 /* Second view of the same block: the 13 track slots live at 0x190. */
-typedef struct FE0C0Slots {
+typedef struct SndMixerBlockSlots {
     /* 0x000 */ u8 pad000[0x190];
     /* 0x190 */ SndTrackSlot slots[13];
-} FE0C0Slots;
+} SndMixerBlockSlots;
 
 extern void func_0030B458(void *dst, void *src);
 
-extern FE250Entry D_003FE0D0[];
+extern SndTrackVolume D_003FE0D0[];
 
-extern FE250Entry D_003FE250[];
+extern SndTrackVolume D_003FE250[];
 
-extern FE0C0 D_003FE0C0;
+extern SndMixerBlock D_003FE0C0;
 
 u32 func_002E8900();
 
@@ -96,7 +98,7 @@ void sndUpdateScaledListenerState(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 func_002E92C0(s32 packed) {
-    FE0C0Slots *work = (FE0C0Slots *)&D_003FE0C0;
+    SndMixerBlockSlots *work = (SndMixerBlockSlots *)&D_003FE0C0;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 i;
@@ -181,7 +183,7 @@ u8 func_002E95B0(s32 index) {
 }
 
 s32 sndGetNonnegativeEntryBalance(s32 index) {
-    FE250Entry *entry = &D_003FE250[index];
+    SndTrackVolume *entry = &D_003FE250[index];
     s32 difference = entry->unk4 - entry->unk5;
 
     if (difference <= 0) {
@@ -190,11 +192,11 @@ s32 sndGetNonnegativeEntryBalance(s32 index) {
     return difference;
 }
 
-FE250Entry *func_002E95F0(void) {
+SndTrackVolume *func_002E95F0(void) {
     return D_003FE0D0;
 }
 
-FE250Entry *func_002E9600(void) {
+SndTrackVolume *func_002E9600(void) {
     return D_003FE250;
 }
 
