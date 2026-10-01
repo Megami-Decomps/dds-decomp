@@ -17,6 +17,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Test FLW0 tooling and tracked scripts
+        run: python3 tools/test_flw0.py
+
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
       # Pull requests from forks get no secrets and skip the build.

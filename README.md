@@ -14,8 +14,10 @@ source that compiles to byte-identical copies of the retail executables and
 reads like the source the developers wrote.
 
 > [!IMPORTANT]
-> This repository does **not** contain game assets, executables or any other
-> copyrighted material. You need your own copy of the games to build it.
+> This repository contains reconstructed source, including source-form game
+> scripts and data. It does **not** contain disc images, retail executables or
+> archives, extracted game files, SDK binaries, or generated build outputs.
+> You need your own copy of the games to build the retail executables.
 >
 > This is not a PC port. It rebuilds the original PS2 executables.
 
@@ -55,6 +57,7 @@ python tools/download_tools.py   # ee-gcc 2.96 + ee-as, decompals binutils, objd
 python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.52 (SHA-1 checked)
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
+ninja dds1-scripts               # assemble and verify all tracked DDS1 event scripts
 ```
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
