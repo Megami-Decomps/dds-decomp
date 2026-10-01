@@ -7,6 +7,13 @@ extern s32 kwlnTaskGetUserValue();
 extern s32 D_003BAA00;
 
 extern s64 func_00285670(s32, s32 *, u64, u64);
+extern s32 func_002D03F8(s32);
+extern void *sdfResourceRetainAddress(s32);
+extern void *memset(void *, s32, u32);
+extern void func_00272D50(s32);
+extern void mnuForwardDupArg(s32, s32, s32, s32, s32);
+extern void mnuActivatePanelAndConfigureGridResources(s32, s32, s32, s32);
+extern s32 mnuSeekListNode(s32, s32);
 
 typedef struct {
     u32 allocation; /* 0x00 */
@@ -72,7 +79,28 @@ void func_00273390(u32 context) {
 void func_002733B0() {
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_002733B8);
+s32 func_002733B8(void) {
+    StaffDisplayContext *context;
+    StaffWindowResources *resources;
+    s32 handle;
+
+    context = (StaffDisplayContext *)kwlnTaskGetUserValue();
+    handle = func_002D03F8(0x2C);
+    resources = sdfResourceRetainAddress(handle);
+    context->resources = resources;
+    memset(resources, 0, 0x2C);
+    resources->allocation = handle;
+    func_00273390((u32)context);
+    func_00272D50((s32)context);
+    mnuForwardDupArg(*(s32 *)((u8 *)context + 0x128),
+                     *(s32 *)((u8 *)context + 0x74), 0, 0, 0);
+    mnuActivatePanelAndConfigureGridResources(
+        *(s32 *)((u8 *)context + 0x138),
+        *(s32 *)((u8 *)context + 0xD8), 0, 1);
+    mnuSeekListNode(0,
+                    *(s32 *)(*(s32 *)((u8 *)context + 0x128) + 0x14));
+    return 1;
+}
 
 s32 mnuStaffFreeDisplayResources(void) {
     StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue();
