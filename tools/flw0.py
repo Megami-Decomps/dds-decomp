@@ -482,11 +482,65 @@ def _parse_string_payload(
     return b"".join(chunks), symbols
 
 
+def _symbolic_operand(text: str) -> bool:
+    return bool(text) and (text[0].isalpha() or text[0] == "_") and all(
+        character.isalnum() or character == "_" for character in text[1:]
+    )
+
+
+def _message_symbols(payload: bytes) -> tuple[tuple[str | None, ...], dict[str, int]]:
+    """Return unambiguous source-safe MSG1 names by index and by name."""
+
+    if not payload:
+        return (), {}
+    try:
+        bank = msg1.decode(payload)
+    except msg1.Msg1Error:
+        return (), {}
+    counts: dict[str, int] = {}
+    for dialog in bank.dialogs:
+        counts[dialog.name] = counts.get(dialog.name, 0) + 1
+    by_index = tuple(
+        dialog.name
+        if counts[dialog.name] == 1 and _symbolic_operand(dialog.name)
+        else None
+        for dialog in bank.dialogs
+    )
+    return by_index, {
+        symbol: index
+        for index, symbol in enumerate(by_index)
+        if symbol is not None
+    }
+
+
+def _message_push_symbol(
+    raw: int,
+    next_raw: int | None,
+    command_profile: flw0_profiles.CommandProfile | None,
+    message_symbols: tuple[str | None, ...] | None,
+) -> str | None:
+    if command_profile is None or message_symbols is None or next_raw is None:
+        return None
+    command = command_profile.by_name.get("MESSAGE_REQUEST_AND_POLL")
+    if command is None:
+        return None
+    message_index = raw >> 16
+    if (
+        raw & 0xFFFF != OPCODE_IDS["PUSHIS"]
+        or message_index >= len(message_symbols)
+        or next_raw & 0xFFFF != OPCODE_IDS["COMM"]
+        or next_raw >> 16 != command.command_id
+    ):
+        return None
+    return message_symbols[message_index]
+
+
 def _render_code(
     flw0: Flw0File,
     section: Section,
     command_profile: flw0_profiles.CommandProfile | None = None,
     string_symbols: dict[int, str] | None = None,
+    message_symbols: tuple[str | None, ...] | None = None,
 ) -> list[str]:
     payload = flw0.section_bytes(section)
     words = [
@@ -506,6 +560,16 @@ def _render_code(
             pc += 1
             continue
         name = OPCODE_NAMES[opcode]
+        message_symbol = _message_push_symbol(
+            raw,
+            words[pc + 1] if pc + 1 < len(words) else None,
+            command_profile,
+            message_symbols,
+        )
+        if message_symbol is not None:
+            lines.append(f"  {pc:04x}: PUSHMSG {message_symbol}")
+            pc += 1
+            continue
         if opcode in _EXTENDED_OPCODES:
             if pc + 1 >= len(words) or operand:
                 lines.append(f"  {pc:04x}: WORD 0x{raw:08x}")
@@ -593,6 +657,17 @@ def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
             string_symbols,
         )
 
+    message_symbols: tuple[str | None, ...] | None = None
+    message_sections = [
+        section
+        for section in flw0.sections
+        if section.type_id == 3 and section.element_size == 1
+    ]
+    if len(message_sections) == 1:
+        message_symbols = _message_symbols(
+            flw0.section_bytes(message_sections[0])
+        )[0]
+
     covered = bytearray(flw0.physical_size)
     covered[: flw0.table_end] = b"\x01" * flw0.table_end
     for section in flw0.sections:
@@ -632,6 +707,7 @@ def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
                     section,
                     command_profile,
                     string_rendering[3] if string_rendering is not None else None,
+                    message_symbols,
                 )
             )
         elif section.type_id == 3 and section.element_size == 1 and payload:
@@ -835,17 +911,12 @@ def _parse_raw_payload(content: list[tuple[int, str]], section: Section) -> byte
     return payload
 
 
-def _symbolic_operand(text: str) -> bool:
-    return bool(text) and (text[0].isalpha() or text[0] == "_") and all(
-        character.isalnum() or character == "_" for character in text[1:]
-    )
-
-
 def _parse_code_payload(
     content: list[tuple[int, str]],
     section: Section,
     command_profile: flw0_profiles.CommandProfile | None = None,
     string_symbols: dict[str, int] | None = None,
+    message_symbols: dict[str, int] | None = None,
 ) -> bytes:
     words: list[int] = []
     for line_number, line in content:
@@ -867,6 +938,16 @@ def _parse_code_payload(
         if not tokens:
             raise Flw0Error(f"line {line_number}: missing instruction")
         mnemonic = tokens[0].upper()
+        if mnemonic == "PUSHMSG":
+            if len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: PUSHMSG takes one symbol")
+            symbol = tokens[1]
+            if message_symbols is None or symbol not in message_symbols:
+                raise Flw0Error(f"line {line_number}: unknown message {symbol!r}")
+            words.append(
+                (message_symbols[symbol] << 16) | OPCODE_IDS["PUSHIS"]
+            )
+            continue
         if mnemonic == "WORD":
             if len(tokens) != 2:
                 raise Flw0Error(f"line {line_number}: WORD takes one value")
@@ -1105,13 +1186,38 @@ def parse_source(text: str) -> Flw0File:
     if string_symbols and len(type4_sections) != 1:
         raise Flw0Error("named strings require exactly one type-4 section")
 
+    message_payloads: dict[int, bytes] = {}
+    message_symbols: dict[str, int] = {}
+    message_sections = [
+        section
+        for section, _ in section_records
+        if section.type_id == 3 and section.element_size == 1
+    ]
+    for section, content in section_records:
+        if section.type_id != 3 or section.element_size != 1 or not content:
+            continue
+        first_number, first_line = content[0]
+        if _tokens(first_line, first_number) != ["msg1"]:
+            continue
+        payload = _parse_raw_payload(content, section)
+        message_payloads[section.index] = payload
+        message_symbols.update(_message_symbols(payload)[1])
+    if message_symbols and len(message_sections) != 1:
+        raise Flw0Error("named messages require exactly one type-3 section")
+
     for section, content in section_records:
         if section.type_id in (0, 1):
             payload = _parse_named_payload(content, section)
         elif section.type_id == 2 and section.element_size == 4:
             payload = _parse_code_payload(
-                content, section, command_profile, string_symbols
+                content,
+                section,
+                command_profile,
+                string_symbols,
+                message_symbols,
             )
+        elif section.index in message_payloads:
+            payload = message_payloads[section.index]
         elif section.index in string_payloads:
             payload = string_payloads[section.index]
         else:
