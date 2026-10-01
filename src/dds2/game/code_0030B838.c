@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "gs_packet.h"
 #include "sdf.h"
 
 extern s32 D_004388B4;
@@ -396,9 +397,6 @@ float sdfCounterGetScaledValue(void) {
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CA38);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CC68);
-
-/* Packs four 8-bit channels into an RGBA word. */
-#define PACK(r, g, b, a) ((u8)(r) | ((a) << 24) | (((u8)(b) << 16) | ((u8)(g) << 8)))
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
 void func_0030CEF0(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {

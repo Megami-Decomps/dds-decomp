@@ -64,12 +64,12 @@ s32 scrReadIntParameter(s32 idx);
 
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
-INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
-
 extern char D_003ACA78[];
 extern s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
 extern s32 evtCreateTaskWithValue(s32 taskId, s32 value);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+
+INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
 u32 func_002280B0(void) {
     EvtCommandWork *work;

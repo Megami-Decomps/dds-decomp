@@ -1748,6 +1748,8 @@ typedef struct BtlPermanentBonusUnit {
 extern s32 func_001197C0(BtlPermanentBonusUnit *);
 extern s32 func_001198C0(BtlPermanentBonusUnit *);
 
+/* Apply a permanent stat/capacity item and refill eligible vitals.
+ * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B300);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B350);
@@ -1760,8 +1762,6 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-/* Apply a permanent stat/capacity item and refill eligible vitals.
- * Returns 0 for other items, 1 when accepted, or 2 when capped and already full. */
 s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
     s32 stat = -1;
     s32 valid = 0;

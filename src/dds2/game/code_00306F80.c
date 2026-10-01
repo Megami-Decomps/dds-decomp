@@ -941,11 +941,3 @@ void sdfGridSeekLastNode(u8 *entry) {
     sdfGridSeekSelectedNodeByIndex(((GridListCursor *)entry)->count - 1, entry);
 }
 
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438868);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438870);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438878);
-
-INCLUDE_SDATA(const s32, "game/code_00306F80", D_00438880);
-

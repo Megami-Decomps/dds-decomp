@@ -102,7 +102,7 @@ typedef struct FileManWork {
 
 extern FileManWork D_00457F28;
 
-void *func_002C7F38(u32 request, s32 flags, void *dispatch, s32 arg4, s32 arg5) {
+void *func_002C7F38(u32 request, s32 flags, void *dispatch, s32 onComplete, s32 userData) {
     u8 *work;
     u8 *packet;
 
@@ -113,7 +113,7 @@ void *func_002C7F38(u32 request, s32 flags, void *dispatch, s32 arg4, s32 arg5) 
     if (flags != 0) {
         func_00346AE8(packet);
     }
-    func_002C7D78(work, 1, request, arg4, arg5);
+    func_002C7D78(work, 1, request, onComplete, userData);
     return work;
 }
 

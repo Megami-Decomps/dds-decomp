@@ -19,9 +19,24 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDA50);
+extern s32 D_00435DD0;
+u8 func_002BDA50(s32 index) {
+    if (index == 0) {
+        return 0;
+    }
+    return *(u8 *)(index + D_00435DD0 + 0x20000 - 0x1910);
+}
 
-INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDA78);
+extern s32 D_00435E3C;
+
+s8 func_002BDA78(s32 value) {
+    s32 index = value - 0xC0;
+
+    if (value == 0) {
+        return 0;
+    }
+    return *(s8 *)(D_00435E3C + index * 6 + 5);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDAA8);
 
@@ -29,7 +44,6 @@ INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BDC38);
 
 INCLUDE_ASM(const s32, "game/code_002BD5C8", func_002BE080);
 
-extern s32 D_00435DD0;
 extern s32 func_00314C10(s32);
 extern s32 uiBlendColors();
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);

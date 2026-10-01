@@ -142,7 +142,7 @@ extern FrFontRec D_00452724[];
 
 extern s32 D_00436558;
 
-extern FrFontGlyph *func_0019CE78(void *glyphData, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern FrFontGlyph *func_0019CE78(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
 
 extern void *func_00328D68(s32 size);
 
@@ -336,8 +336,9 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CCC0);
 
-FrFontCtx *frFontAppendGlyphFromData(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph) {
-    FrFontGlyph *glyph = func_0019CE78(glyphData, arg1, arg2, arg3, 0);
+/* Append text glyphs; a negative fontIndex keeps the current font selection. */
+FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph) {
+    FrFontGlyph *glyph = func_0019CE78(text, fontIndex, firstOption, secondOption, 0);
 
     if (glyph == NULL) {
         return (FrFontCtx *)previousGlyph;

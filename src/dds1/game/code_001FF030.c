@@ -3698,11 +3698,11 @@ extern char D_003A6018[];
 
 /* Random battle camera shot (A-E:0..2). Must stay defined above its callers in this
    file: retail's btlChooseDefeatCameraByActionAndTargets sees it as nothrow (bnez vs bnel in the branch slot). */
+/* Select one of three fixed camera-key sets; keep K&R for the no-argument caller. */
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5FF0);
 
 INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A6018);
 
-/* Select one of three fixed camera-key sets; keep K&R for the no-argument caller. */
 void func_0020AFB8(unit)
     u8 *unit;
 {

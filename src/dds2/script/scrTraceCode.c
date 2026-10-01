@@ -6,11 +6,7 @@ void scrPushInteger(ScrData *scr, s32 val);
 void bfStackPushFloat(ScrData *scr, f32 val);
 f32 bfStackPopFloat();
 
-#define SCR_STACK_TYPE_STRING 5
-
 extern ScrData *scrCurrentContext;
-
-#define SCR_STACK_RET 27
 
 extern ScrVM *D_00435DD0;
 extern u32 (*D_00384948[])(ScrData *scr);

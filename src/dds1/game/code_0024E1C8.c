@@ -232,7 +232,130 @@ INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF7A8);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_0024FBB8);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_002501E0);
+extern void mnuDrawDisplaySpriteAndPanelMarks(s32, s32, s32);
+extern void func_002546D8(s32, s32);
+extern void func_00254758(s32, s32, s32, s32, s32);
+extern void func_00254778(s32, s32, s32, s32, s32);
+extern void func_002549F0(s32, s32, s32, s32, s32, s32);
+extern void func_00254B30(s32, s32, s32, s32, s32, s32);
+extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
+extern void func_00254810(s32, s32, s32, s32, s32, s32);
+
+/* Scene draw state: fade phase 1..5 and its frame counter. */
+typedef struct MenuFadeWork {
+    u8 pad00[4];
+    s32 phase;      /* 0x04 */
+    s32 timer;      /* 0x08 */
+} MenuFadeWork;
+
+/* Per-phase window draw: a sprite/panel fade driven by the frame counter (phases 1/5 fade in, 2 fades out, 3 fades in reversed, 4 holds). */
+s32 func_002501E0(s32 unused, MenuFadeWork *work) {
+    f32 shade;
+    f32 elapsed;
+    f32 ratio;
+    s32 sel = func_002CB3B8(D_003BC4CC, -1);
+    s32 amount;
+    s32 limit;
+
+    switch (work->phase) {
+    case 1:
+        ratio = (f32)work->timer / 10.0f;
+        shade = ratio + ratio;
+        if (shade > 1.0f) {
+            shade = 1.0f;
+        }
+        amount = (s32)(ratio * 128.0f);
+        mnuDrawDisplaySpriteAndPanelMarks(sel, amount, 0x52);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, amount, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
+        if (ratio < 0.5f) {
+            shade = 0.0f;
+        } else {
+            shade = (ratio - 0.5f) * 2.0f;
+        }
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, (s32)(ratio * 128.0f), (s32)work, 0x53);
+        return 0;
+    case 5:
+        ratio = (f32)work->timer / 10.0f;
+        shade = ratio + ratio;
+        if (shade > 1.0f) {
+            shade = 1.0f;
+        }
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        amount = (s32)(ratio * 128.0f);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - shade) * -24.0f), 1, amount, (s32)work, 0x53);
+        if (ratio < 0.5f) {
+            shade = 0.0f;
+        } else {
+            shade = (ratio - 0.5f) * 2.0f;
+        }
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, (s32)(ratio * 128.0f), (s32)work, 0x53);
+        return 0;
+    case 2:
+        limit = work->timer;
+        ratio = (f32)limit / 10.0f;
+        if (limit < 4) {
+            shade = (f32)limit * 0.25f;
+        } else {
+            shade = 1.0f;
+        }
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        amount = (s32)((1.0f - ratio) * 128.0f);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)(ratio * 36.0f), 1, amount, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shade) * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, amount, (s32)work, 0x53);
+        return 0;
+    case 3:
+        limit = work->timer;
+        elapsed = limit;
+        ratio = elapsed / 10.0f;
+        if (limit < 4) {
+            shade = elapsed * 0.25f;
+            shade = 1.0f - shade;
+        } else {
+            shade = 0.0f;
+        }
+        ratio = 1.0f - ratio;
+        amount = (s32)(ratio * 128.0f);
+        mnuDrawDisplaySpriteAndPanelMarks(sel, amount, 0x52);
+        func_002546D8(amount, 0x52);
+        func_00254758(0, 0, 1, amount, 0x53);
+        func_00254778(0, 0, 1, amount, 0x53);
+        func_002549F0(0, 0, 1, amount, (s32)work, 0x53);
+        func_00254B30(0, (s32)((1.0f - ratio) * 36.0f), 1, amount, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shade * 128.0f), (s32)work, 0x53);
+        func_00254810(0, 0, 1, amount, (s32)work, 0x53);
+        return 0;
+    case 4:
+        mnuDrawDisplaySpriteAndPanelMarks(sel, 0x80, 0x52);
+        func_002546D8(0x80, 0x52);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_00254778(0, 0, 1, 0x80, 0x53);
+        func_002549F0(0, 0, 1, 0x80, (s32)work, 0x53);
+        func_00254B30(0, 0, 1, 0x80, (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, 0x80, (s32)work, 0x53);
+        func_00254810(0, 0, 1, 0x80, (s32)work, 0x53);
+        break;
+    case 0:
+    case 6:
+    case 7:
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250758);
 

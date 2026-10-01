@@ -1,4 +1,5 @@
 #include "common.h"
+#include "gs_packet.h"
 #include "pcp_vu0.h"
 
 extern u32 D_0037F770[4];
@@ -148,10 +149,6 @@ extern void func_001971E0(void);
 extern void effCopyCh76Common(void *);
 
 extern void func_001971D0(void);
-
-#define DRAW_VIEWPORT_WIDTH 0x200
-
-#define DRAW_VIEWPORT_HEIGHT 0x1C0
 
 typedef struct {
     u32 x;

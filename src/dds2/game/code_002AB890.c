@@ -1,7 +1,5 @@
 #include "mnu.h"
 
-extern s64 func_002ACF38(void);
-
 extern s32 D_00435DD0;
 
 extern s32 kwlnTaskGetUserValue();
@@ -54,7 +52,16 @@ void mnuDestroyResourceOwnerWindowContainers(MenuResourceOwner *object) {
     mnuDestroyWindowContainer(resources->second);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD08);
+extern void func_002B9720(s32);
+
+s32 func_002ABD08(s32 itemId, MenuResourceOwner *owner) {
+    MenuResourceSet *resources = owner->resources;
+
+    if (*(u8 *)((itemId & 0xFFFF) + D_00435DD0 + 0x1340) == 0) {
+        func_002B9720(resources->first);
+    }
+    return ((MenuStaffList *)resources->first)->window->panelActive != 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABD60);
 
@@ -143,12 +150,51 @@ s64 mnuFinishStaffReturnPopup(s32 callback) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACF38);
+extern s32 func_002C5A28(s32, s32, s32, s32);
+extern s32 evtGetIndexedEventRecordId(s32);
+extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
+extern void func_0011A118(s32, s32);
+extern void mnuInitPartyPanelSlots(s32);
+extern void func_002BCA98(s32);
+extern void func_002BCAB0(s32);
+
+typedef struct StaffUseSelectionList {
+    u8 pad00[0x1C];
+    s32 *selectedIndex; /* 0x1C */
+} StaffUseSelectionList;
+
+typedef struct StaffUseContext {
+    u8 pad00[0xA914];
+    StaffUseSelectionList *list; /* 0xA914 */
+} StaffUseContext;
+
+s32 func_002ACF38(itemId, context)
+s32 itemId;
+s32 context;
+{
+    s32 partyPanel = context + 0x284;
+    s32 targetUnit = D_00435DD0 + *(((StaffUseContext *)context)->list->selectedIndex) * 0x1C4 + 0xA60;
+    s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
+
+    if (result != 1) {
+        if (result == 2) {
+            return 0;
+        }
+        if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+            return 0;
+        }
+    }
+    func_0011A118(itemId, -1);
+    mnuInitPartyPanelSlots(context + 0xA928);
+    func_002BCA98(partyPanel);
+    func_002BCAB0(partyPanel);
+    return 1;
+}
 
 /* Record the choice only while the resource is active; the follow-up runs regardless. */
 void mnuApplyResourceSelection(s32 index, s32 context) {
     MenuResourceSet *resources;
-    s64 resourceActive;
+    s32 resourceActive;
 
     resources = ((MenuResourceOwner *)context)->resources;
     resourceActive = func_002ACF38();

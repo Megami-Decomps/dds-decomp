@@ -137,9 +137,9 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s3
 
 extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
 
-extern FrFontCtx *frFontAppendGlyphFromData(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph);
+extern FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph);
 
-extern FrFontGlyph *func_001951C8(void *glyphData, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern FrFontGlyph *func_001951C8(void *text, s32 fontIndex, s32 firstOption, s32 secondOption, s32 existingGlyph);
 
 void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 
@@ -331,8 +331,9 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195010);
 
-FrFontCtx *frFontAppendGlyphFromData(void *glyphData, s8 arg1, s8 arg2, s8 arg3, s32 previousGlyph) {
-    FrFontGlyph *glyph = func_001951C8(glyphData, arg1, arg2, arg3, 0);
+/* Append text glyphs; a negative fontIndex keeps the current font selection. */
+FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyph) {
+    FrFontGlyph *glyph = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
 
     if (glyph == NULL) {
         return (FrFontCtx *)previousGlyph;

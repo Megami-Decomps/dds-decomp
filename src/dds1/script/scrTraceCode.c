@@ -1,9 +1,6 @@
 #include "common.h"
 #include "scr.h"
 
-#define SCR_STACK_RET 27
-#define SCR_STACK_TYPE_STRING 5
-
 extern ScrVM *D_003BAA00;
 extern ScrData *scrCurrentContext;
 extern ScrCommand D_0039E288[];

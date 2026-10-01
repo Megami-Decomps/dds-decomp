@@ -183,8 +183,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 INCLUDE_ASM(const s32, "game/code_00231A80", mdlRequestAsset);
 
-void func_00231DB0(u32 arg0, u32 arg1) {
-    mdlRequestAsset(arg0, arg1, 1);
+void func_00231DB0(u32 group, u32 id) {
+    mdlRequestAsset(group, id, 1);
 }
 
 void mdlUnlinkGroupEntry(MdlLink *link) {
@@ -680,9 +680,9 @@ INCLUDE_ASM(const s32, "game/code_00231A80", func_002330C8);
 
 INCLUDE_ASM(const s32, "game/code_00231A80", func_00233280);
 
-void mdlDestroyLoadRequestOwner(u32 arg0) {
-    func_002C7CE8(*(u32 *)((s32)arg0 + 8));
-    sdfReleaseChipBlock(arg0);
+void mdlDestroyLoadRequestOwner(u32 res) {
+    func_002C7CE8(*(u32 *)((s32)res + 8));
+    sdfReleaseChipBlock(res);
 }
 
 /* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */

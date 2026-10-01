@@ -287,16 +287,16 @@ void mdlExecuteAndFreeJob(MdlPacket *packet) {
     sdfReleaseChipBlock(packet);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(void *arg0, MdlLoadReq *req) {
+void mdlRecordLoadedSizeAndReleaseHandle(void *resource, MdlLoadReq *destination) {
     void *handle;
     u32 size;
 
     handle = func_00288B90();
     size = sndBuildResourceHandleListFromOffsets(handle);
-    req->size = size;
-    handle = fileGetResourceHandle(arg0);
+    destination->size = size;
+    handle = fileGetResourceHandle(resource);
     func_002D0918(handle);
-    filePollEntryCleanup(arg0);
+    filePollEntryCleanup(resource);
 }
 
 typedef struct MdlLoadCmd {
@@ -340,8 +340,8 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
 
-void func_00217298(u32 arg0, u32 arg1) {
-    mdlRequestAsset(arg0, arg1, 1);
+void func_00217298(u32 group, u32 id) {
+    mdlRequestAsset(group, id, 1);
 }
 
 typedef struct MdlGroup {

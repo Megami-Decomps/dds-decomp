@@ -675,8 +675,8 @@ u32 func_00190100() {
 void func_00190118() {
     sndReleaseAllVoices();
 }
-
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190130);
+
 
 extern u8 D_003563F0[];
 
@@ -731,7 +731,6 @@ void effEventSetState(EffEventWork *work, u32 value) {
 INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
 
 struct EffEventWork;
-
 /* Init block of the event holder (0x30 bytes, copied to the event's owner record). */
 typedef struct {
     f32 pos[3];           /* 0x00 */
@@ -746,6 +745,7 @@ typedef struct {
     u32 color;            /* 0x2C */
 } __attribute__((packed)) EffEventInit; /* 0x30 */
 
+
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
     u32 handle;           /* 0x00 */
@@ -753,8 +753,9 @@ typedef struct EffEventLight {
     EffEventInit init;    /* 0x08 */
     u8 active;            /* 0x38 */
 } EffEventLight; /* 0x3C */
-
 extern struct EffEventWork *func_00190130();
+
+
 
 EffEventLight *effEventLightCreate(u32 arg, f32 param) {
     EffEventLight *work = func_002CFEB8(sizeof(EffEventLight));

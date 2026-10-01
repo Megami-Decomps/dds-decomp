@@ -54,13 +54,13 @@ INCLUDE_ASM(const s32, "effect/billManager", func_00158C00);
 
 INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
 
-BillObj *billAllocChild(void *arg0) {
+BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
 
     obj = func_00328D68(0x34);
     obj->entryList = NULL;
-    if (arg0 != NULL) {
-        obj->entryList = func_00157D38(arg0);
+    if (resourceData != NULL) {
+        obj->entryList = func_00157D38(resourceData);
     }
     return obj;
 }
@@ -79,14 +79,14 @@ void billProcessChild(BillObj *obj) {
     func_00157EA0(obj, obj->entryList);
 }
 
-BillObj *billAllocList(void *arg0) {
+BillObj *billAllocList(void *resourceData) {
     BillData *data;
     BillObj *newobj;
     s32 n;
 
     data = NULL;
-    if (arg0 != NULL) {
-        data = func_00159678(arg0);
+    if (resourceData != NULL) {
+        data = func_00159678(resourceData);
     }
     n = data->entryCount;
     newobj = func_00328D68(n * 20 + 0x6C);

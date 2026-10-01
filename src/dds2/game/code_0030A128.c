@@ -270,10 +270,10 @@ s32 fldLmapTaskExists(void) {
 void func_0030AA68(const char *fmt, ...) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
-
 /* Counter kind -> timer preset. Kinds 5, 6 and 13 have no arm of their own,
  * so they fall through to the default of 1. */
+INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D240);
+
 s32 func_0030AAB0(s32 kind) {
     s32 preset = 1;
 

@@ -500,9 +500,9 @@ s32 mnuPollTitleStreamStateLocked(void) {
     return mnuTitleStreamStatus[9];
 }
 
-INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
-
 extern void fileWaitIdle(void);
+
+INCLUDE_RODATA(const s32, "game/code_00268AB8", D_003AFCF0);
 
 void func_0026A778(void) {
     WaitSema(mnuTitleStreamSemaphore);

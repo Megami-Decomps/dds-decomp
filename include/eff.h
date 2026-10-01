@@ -172,9 +172,6 @@ typedef struct EffectBufferTail {
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
 
-/* Degrees-to-radians factor for aim offsets and spreads. */
-#define EFF_DEG2RAD 0.017453292f
-
 /* Mid-grey fragment colour (0x80 in each channel). */
 #define EFF_THUNDER_FRAGMENT_GREY 0x80808080
 

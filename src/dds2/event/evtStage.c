@@ -66,24 +66,24 @@ void evtClearWorldSlotStatusFlag(void) {
 
 INCLUDE_ASM(const s32, "event/evtStage", func_0023AE08);
 
-void func_0023AE70(s32 arg0, void *arg1) {
+void func_0023AE70(s32 unused, void *data) {
     s32 slotData;
 
     slotData = dds3GetSlot1Data();
     if (slotData != 0) {
-        func_001177D0(slotData, arg1);
+        func_001177D0(slotData, data);
     }
 }
 
-/* Attach the object to the node its owned handle points at. */
-s32 evtStageRelinkOwnedNodeResource(void *object, void *arg1) {
+/* Attach object to the node referenced by owner's owned handle. */
+s32 evtStageRelinkOwnedNodeResource(void *object, void *owner) {
     StageNodeRef *ref;
     void *node;
 
     if (object == NULL) {
         return 0;
     }
-    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(arg1);
+    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(owner);
     if (ref == NULL) {
         return 0;
     }
