@@ -2283,18 +2283,10 @@ void mnuProjectViewPoint(void) {
         ".set reorder"
         : : : "memory");
     matrix += 0x40;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        "vmul.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(matrix) : "memory");
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf11, 0(%0)\n"
-        "vadd.xyzw vf10, vf10, vf11\n"
-        ".set reorder"
-        : : "r"(D_00324660) : "memory");
+    VU0_LOAD_VF(vf11, matrix);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_00324660);
+    VU0_ADD(vf10, vf10, vf11);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028A150", func_00292CE0);

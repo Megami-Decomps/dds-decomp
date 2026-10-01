@@ -171,25 +171,7 @@ void sdfWriteIdentityMatrixToMemory(void *dst) {
 /* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void sdfTransposeVuMatrix(void) {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "qmfc2.ni $8, vf28\n"
-        "qmfc2.ni $9, vf29\n"
-        "qmfc2.ni $10, vf30\n"
-        "qmfc2.ni $11, vf31\n"
-        "pextlw $12, $9, $8\n"
-        "pextuw $13, $9, $8\n"
-        "pextlw $14, $11, $10\n"
-        "pextuw $15, $11, $10\n"
-        "pcpyld $8, $14, $12\n"
-        "pcpyud $9, $12, $14\n"
-        "pcpyld $10, $15, $13\n"
-        "pcpyud $11, $13, $15\n"
-        "qmtc2.ni $8, vf28\n"
-        "qmtc2.ni $9, vf29\n"
-        "qmtc2.ni $10, vf30\n"
-        "qmtc2.ni $11, vf31\n"
-        ".set reorder\n");
+    VU0_MATRIX4_TRANSPOSE();
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */

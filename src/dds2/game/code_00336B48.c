@@ -873,9 +873,9 @@ void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, u8 *node, void *matrix) {
     VU0_STORE_MATRIX(packet->matrixA);
     sdfPostmultiplyVuMatrixFromMemory(node + 0x30);
     VU0_STORE_MATRIX(packet->matrixB);
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x70));
+    VU0_LOAD_VF(vf10, node + 0x70);
         VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecA);
-    __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0x0(%0)\n\t.set reorder" : : "r"(node + 0x80));
+    VU0_LOAD_VF(vf10, node + 0x80);
         VU0_STORE_VF_UNCLOBBERED(vf10, packet->vecB);
     VU0_LOAD_MATRIX(matrix);
     sdfInvertRigidVuTransform();

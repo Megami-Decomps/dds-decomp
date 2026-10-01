@@ -4725,8 +4725,8 @@ u8 *effAllocateBlock(u16 kind, void *source) {
     ((EffClassWork *)effect)->scale = 1.0f;
     ((EffClassWork *)effect)->kind = kind;
     ((EffClassWork *)effect)->frame = 0;
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect) : "memory");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf0, 0(%0)\n\t.set reorder" : : "r"(effect + 0x10) : "memory");
+    VU0_STORE_VF(vf0, effect);
+    VU0_STORE_VF(vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
     return effect;
 }
