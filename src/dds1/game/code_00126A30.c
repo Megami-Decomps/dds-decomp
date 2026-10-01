@@ -7,7 +7,15 @@ extern void fldPlayFieldSeVolumePan(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
-extern u32 D_003CE3E0[][23];
+/* One row of the per-area table; 0x5C is the stride retail uses. */
+typedef struct {
+    u32 unk00[11]; /* 0x00 */
+    f32 unk2C;     /* 0x2C: written as a float by fldApplyActorEntryTrigger */
+    u32 unk30[8];  /* 0x30 */
+    u32 unk50[3];  /* 0x50 */
+} D_003CE3E0Row;
+
+extern D_003CE3E0Row D_003CE3E0[];
 extern s32 D_0032E530[];
 
 extern u8 D_00337D00[];
@@ -3736,14 +3744,14 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     if (kind == 1) {
         if (entry->floor == D_0032E3C4[0] + 1) {
             fldPlayFieldSeVolumePan(entry->sound);
-            fldReleaseActorTasksById(D_003CE3E0[index][1]);
+            fldReleaseActorTasksById(D_003CE3E0[index].unk00[1]);
             return;
         }
     } else if (kind == 2) {
         if (entry->floor == fldAreaState[5] + 1) {
             s32 motion = entry->motion;
 
-            *(f32 *)&fldAreaState[93] = *(f32 *)&D_003CE3E0[index][11];
+            *(f32 *)&fldAreaState[93] = D_003CE3E0[index].unk2C;
             fldAreaState[94] = 1;
             if (motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
@@ -3924,33 +3932,32 @@ INCLUDE_ASM(const s32, "game/code_00126A30", fldFindTableEntry);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
 
-extern u32 D_003CE3E0[][23];
 void fldResetActorSlots(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
-        D_003CE3E0[i][0] = 0;
-        D_003CE3E0[i][1] = 0;
-        D_003CE3E0[i][2] = 0;
-        D_003CE3E0[i][3] = -1;
-        D_003CE3E0[i][4] = 0;
-        D_003CE3E0[i][5] = -1;
-        D_003CE3E0[i][6] = -1;
-        D_003CE3E0[i][7] = 0;
-        D_003CE3E0[i][8] = 0;
-        D_003CE3E0[i][9] = 0;
-        D_003CE3E0[i][11] = 0;
-        D_003CE3E0[i][12] = 0;
-        D_003CE3E0[i][13] = 0;
-        D_003CE3E0[i][14] = 0;
-        D_003CE3E0[i][15] = 0;
-        D_003CE3E0[i][16] = 0;
-        D_003CE3E0[i][17] = 0;
-        D_003CE3E0[i][18] = 0;
-        D_003CE3E0[i][19] = 0;
-        D_003CE3E0[i][20] = 0;
-        D_003CE3E0[i][21] = 0;
-        D_003CE3E0[i][22] = 0;
+        D_003CE3E0[i].unk00[0] = 0;
+        D_003CE3E0[i].unk00[1] = 0;
+        D_003CE3E0[i].unk00[2] = 0;
+        D_003CE3E0[i].unk00[3] = -1;
+        D_003CE3E0[i].unk00[4] = 0;
+        D_003CE3E0[i].unk00[5] = -1;
+        D_003CE3E0[i].unk00[6] = -1;
+        D_003CE3E0[i].unk00[7] = 0;
+        D_003CE3E0[i].unk00[8] = 0;
+        D_003CE3E0[i].unk00[9] = 0;
+        D_003CE3E0[i].unk2C = 0.0f;
+        D_003CE3E0[i].unk30[0] = 0;
+        D_003CE3E0[i].unk30[1] = 0;
+        D_003CE3E0[i].unk30[2] = 0;
+        D_003CE3E0[i].unk30[3] = 0;
+        D_003CE3E0[i].unk30[4] = 0;
+        D_003CE3E0[i].unk30[5] = 0;
+        D_003CE3E0[i].unk30[6] = 0;
+        D_003CE3E0[i].unk30[7] = 0;
+        D_003CE3E0[i].unk50[0] = 0;
+        D_003CE3E0[i].unk50[1] = 0;
+        D_003CE3E0[i].unk50[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
@@ -3978,32 +3985,32 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
 
 void fldReleaseActorTasksById(s32 id) {
     s32 i;
-    u32 *task;
+    D_003CE3E0Row *task;
     FldActorEntry *actor;
 
     if (id != 0) {
         if (id != -1) {
             for (i = 0; i < 256; i++) {
                 actor = (FldActorEntry *)(D_00337D00 + i * 108);
-                task = D_003CE3E0[i];
-                if (task[0] == 1 && task[1] == id) {
-                    task[0] = 2;
-                    task[7] = 0;
-                    task[8] = 0;
-                    task[9] = 0;
+                task = &D_003CE3E0[i];
+                if (task->unk00[0] == 1 && task->unk00[1] == id) {
+                    task->unk00[0] = 2;
+                    task->unk00[7] = 0;
+                    task->unk00[8] = 0;
+                    task->unk00[9] = 0;
                     if (actor->motion == 5 || actor->secondaryMotion == 5 || actor->motion == 6
                         || actor->secondaryMotion == 6 || actor->motion == 7 || actor->secondaryMotion == 7
                         || actor->motion == 8 || actor->secondaryMotion == 8) {
-                        task[10] = 0x28;
+                        task->unk00[10] = 0x28;
                     } else {
-                        task[10] = 0x14;
+                        task->unk00[10] = 0x14;
                     }
-                    task[11] = 0;
-                    task[12] = 0;
-                    task[13] = 0;
-                    task[17] = 0;
-                    task[18] = 0;
-                    task[19] = 0;
+                    task->unk2C = 0.0f;
+                    task->unk30[0] = 0;
+                    task->unk30[1] = 0;
+                    task->unk30[5] = 0;
+                    task->unk30[6] = 0;
+                    task->unk30[7] = 0;
                     fldApplyPendingCameraHeading();
                 }
             }
