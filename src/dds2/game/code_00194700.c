@@ -321,7 +321,7 @@ typedef struct EffResourceDescriptor {
     u32 word00;
     u32 word04;
     u32 word08;
-    s32 word0C;
+    s32 resourceCount;
     u32 word10[5];
     u32 word24;
     u32 word28;
@@ -330,16 +330,17 @@ typedef struct EffResourceDescriptor {
     void *word34;
     u32 word38;
     u32 word3C;
-    EffResourceList *word40;
+    EffResourceList *resourceList; /* 0x40: source list retained by descriptor */
 } EffResourceDescriptor;
 
+/* Build a resource descriptor with the list's count and head. */
 EffResourceDescriptor *func_00195060(EffResourceList *list) {
     EffResourceDescriptor *resource = func_00328D68(0x44);
 
     resource->word00 = 0;
     resource->word04 = 0xC8;
     resource->word08 = 0;
-    resource->word0C = list->count;
+    resource->resourceCount = list->count;
     resource->word10[0] = 0;
     resource->word10[1] = 0;
     resource->word10[2] = 0;
@@ -352,7 +353,7 @@ EffResourceDescriptor *func_00195060(EffResourceList *list) {
     resource->word34 = list->head;
     resource->word38 = 0;
     resource->word3C = 0;
-    resource->word40 = list;
+    resource->resourceList = list;
     return resource;
 }
 

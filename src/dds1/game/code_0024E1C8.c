@@ -106,14 +106,14 @@ void mnuStopResourceTask(void) {
 typedef struct {
     s32 value;      /* 0x00 */
     u8 pad04[8];
-    u32 unk0C;      /* 0x0C */
+    u32 slotFlags;      /* 0x0C: bit 5 marks this mantra source slot active */
     u8 pad10[4];
 } MnuSourceSlot;
 
 /* Mantra source entry behind prfReqGetEntryRecord (0x54 bytes). */
 typedef struct {
     u8 pad00[0x2C];
-    u32 unk2C;             /* 0x2C */
+    u32 flags;             /* 0x2C: bit 5 selects slot 0 */
     u8 pad30[4];
     MnuSourceSlot slot[2]; /* 0x34 */
 } MnuSourceEntry;
@@ -126,9 +126,9 @@ s32 mnuGetMantraSourceValue(u16 index) {
     MnuSourceEntry *entry = prfReqGetEntryRecord(index);
     s32 slot = 0;
 
-    if (entry->unk2C & 0x20) {
+    if (entry->flags & 0x20) {
         slot = 0;
-    } else if (entry->slot[0].unk0C & 0x20) {
+    } else if (entry->slot[0].slotFlags & 0x20) {
         slot = 1;
     } else {
         return result;
