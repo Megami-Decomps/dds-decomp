@@ -372,11 +372,11 @@ _9:
       MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
     } else {
     _42:
-      local_int[0] = READ_TREASURE_TABLE_VALUE(0)
-      local_int[1] = READ_TREASURE_TABLE_VALUE(1)
-      local_int[2] = READ_TREASURE_TABLE_VALUE(2)
-      local_int[3] = READ_TREASURE_TABLE_VALUE(3)
-      local_int[4] = READ_TREASURE_TABLE_VALUE(4)
+      local_int[0] = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
+      local_int[1] = READ_TREASURE_TABLE_VALUE(ITEM_ID)
+      local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+      local_int[3] = READ_TREASURE_TABLE_VALUE(TRAP_KIND)
+      local_int[4] = READ_TREASURE_TABLE_VALUE(AMOUNT)
       if (local_int[0] == 1) {
         MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
       } else {

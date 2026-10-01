@@ -503,6 +503,39 @@ class Flw0Tests(unittest.TestCase):
                 (1, "COMM WAIT_FOR_TIMER_LIMIT"),
             ],
         )
+        selector = flw0_semantic.parse_expression(
+            "READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            selector.lower(),
+            ["PUSHIS 2", "COMM READ_TREASURE_TABLE_VALUE", "PUSHREG"],
+        )
+        self.assertEqual(
+            selector.render(), "READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)"
+        )
+        dynamic_selector = flw0_semantic.parse_expression(
+            "READ_TREASURE_TABLE_VALUE(local_int[0])",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            dynamic_selector.lower(),
+            ["PUSHLIX 0", "COMM READ_TREASURE_TABLE_VALUE", "PUSHREG"],
+        )
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "not a symbolic value for argument 0"
+        ):
+            flw0_semantic.parse_expression(
+                "SET_SOLAR_OVERLAY_MODE(CONTENT_KIND)",
+                1,
+                flw0_profiles.DDS1,
+            )
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown value 'CONTENT_KIND'"):
+            flw0_semantic.parse_expression(
+                "CONTENT_KIND", 1, flw0_profiles.DDS1
+            )
 
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
         self.assertEqual(
@@ -1079,6 +1112,20 @@ end
                     for command in profile.commands
                 }
                 self.assertEqual(commands, expected)
+                treasure_fields = profile.by_name[
+                    "READ_TREASURE_TABLE_VALUE"
+                ].symbols_for_argument(0)
+                self.assertIsNotNone(treasure_fields)
+                self.assertEqual(
+                    treasure_fields.by_value,
+                    {
+                        0: "CONTENT_KIND",
+                        1: "ITEM_ID",
+                        2: "ITEM_QUANTITY",
+                        3: "TRAP_KIND",
+                        4: "AMOUNT",
+                    },
+                )
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
         root = TOOLS.parent
@@ -1411,7 +1458,7 @@ end
         self.assertIn("result = ACTION_WINDOW_REQUEST_AND_POLL(9)", view)
         self.assertIn("MOVE_OBJECT_ALONG_PATH(101, 202, 0)", view)
         self.assertIn("ENABLE_FIELD_MODELS(4, 3, 2, 1)", view)
-        self.assertIn("result = READ_TREASURE_TABLE_VALUE(4)", view)
+        self.assertIn("result = READ_TREASURE_TABLE_VALUE(AMOUNT)", view)
         self.assertIn("MARK_CURRENT_TREASURE_OPENED()", view)
         self.assertIn("result = TEST_CURRENT_TREASURE_OPENED()", view)
 
