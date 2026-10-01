@@ -493,8 +493,6 @@ void effWriteFlashColorSlot(PcpFlashWork1 *work, s32 index, s32 param)
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashTrianglePulseWriteCorners(PcpFlashWork1 *work, s32 index, void *view)
 {
@@ -536,8 +534,6 @@ void effFlashTrianglePulseWriteCorners(PcpFlashWork1 *work, s32 index, void *vie
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashUpdateWork1(PcpFlashWork1 *work) {
     f32 axis[4];
     s32 index;
@@ -716,8 +712,6 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
     part->angle = work->initialAngleSpread * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
 void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
 {
@@ -775,8 +769,6 @@ void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void *orientation)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
@@ -934,8 +926,6 @@ void effFlashOrbitScalingSetParticleColors(PcpFlashWork3 *work, s32 index, s32 p
     }
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
 void effFlashArcQuadScaling(PcpFlashWork3 *work, s32 index)
 {
@@ -1006,8 +996,6 @@ void effFlashArcQuadScaling(PcpFlashWork3 *work, s32 index)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashOrbitScalingAdvanceAngle(PcpFlashWork3 *work, s32 index)
 {
     PcpFlashPtc14 *part;
@@ -1193,8 +1181,6 @@ void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 index, s32 param
     }
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: billboard corner offsets for a particle on an arc, built from a normalised direction and its perpendicular */
 void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
 {
@@ -1257,8 +1243,6 @@ void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashOrbitArcAdvanceAngle(PcpFlashWork5 *work, s32 index)
 {
     PcpFlashPtc10 *part;
@@ -1341,8 +1325,6 @@ void effFlashSpawnParticle6(PcpFlashWork6 *work, s32 index, void *orientation) {
     part->increment = work->angularSpread * ((func_002E8398(D_0034DF38) - 0.5f) * 2.0f);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: corner offsets of a flash particle's billboard, turned around the view axis by the particle's angle */
 void effFlashRotatedQuad(PcpFlashWork6 *work, s32 index, void *view)
 {
@@ -1405,8 +1387,6 @@ void effFlashRotatedQuad(PcpFlashWork6 *work, s32 index, void *view)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashAdvanceOrbitPhase(PcpFlashWork6 *work, s32 index, void *orientation)
 {
     PcpFlashPtc20A *part;
@@ -1551,8 +1531,6 @@ void effFlashRadialTriangleSetParticleColors(PcpFlashWork7 *work, s32 index, s32
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
 {
@@ -1594,8 +1572,6 @@ void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashUpdateWork7(PcpFlashWork7 *work) {
     s128 axis;
     s32 restart;
@@ -1715,8 +1691,6 @@ INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DBA0);
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DC90);
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
 void effFlashRotatedStripPair(PcpFlashWork8 *work, s32 index, void *view)
 {
@@ -1791,8 +1765,6 @@ void effFlashRotatedStripPair(PcpFlashWork8 *work, s32 index, void *view)
     VU0_LOAD_VF(vf10, inner);
     VU0_STORE_VF(vf10, mirror);
 }
-#undef VEC3_SPLAT
-
 void effFlashRadialStripAdvanceAngle(PcpFlashWork8 *work, s32 index, void *orientation)
 {
     PcpFlashPtc20B *part;
@@ -1944,8 +1916,6 @@ void effFlashFadingOrbitSetParticleColors(PcpFlashWork9 *work, s32 index, s32 pa
     }
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: billboard corner offsets for a scaling particle on an arc, built from a normalised direction and its perpendicular */
 void effFlashArcQuadScalingB(PcpFlashWork9 *work, s32 index)
 {
@@ -2016,8 +1986,6 @@ void effFlashArcQuadScalingB(PcpFlashWork9 *work, s32 index)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashFadingOrbitAdvanceAngle(PcpFlashWork9 *work, s32 index)
 {
     PcpFlashPtc14 *part;
@@ -2155,8 +2123,6 @@ void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashWork10 *work, s32 ind
     slot->third = func_0018DDF8(rgb1 | 0xFF000000, param);
 }
 
-#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
-
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
 {
@@ -2198,8 +2164,6 @@ void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-#undef VEC3_SPLAT
-
 void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 axis[4];
     s32 restart;
