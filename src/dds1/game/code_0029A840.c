@@ -573,6 +573,12 @@ typedef struct EffKindWork {
     u8 pad_0x34[0xC]; // 0x34
 } EffKindWork; // 0x40
 
+/* Source payload's kind selects the initial rendering mode. */
+typedef struct EffKindSource {
+    u8 pad_00[0x28];
+    s32 modeKind;
+} EffKindSource;
+
 extern EffKindDesc D_0037E770[];
 
 extern EffKindDesc D_0037E7E8[];
@@ -1253,6 +1259,14 @@ void effFadeFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
+/* 0x18-byte effect header followed by a copied 0x40-byte fade payload. */
+typedef struct EffFadeVectorWork {
+    u8 vector[0x10];
+    u32 frame;
+    u32 color;
+    u8 source[0x40];
+} EffFadeVectorWork;
+
 u8 *effCreateFadeVectorWork(source)
 const u8 *source;
 {
@@ -1275,11 +1289,11 @@ void func_0029C710(void) {
 }
 
 void effCloneFadeVectorWork(s32 work) {
-    effCreateFadeVectorWork(work + 0x18);
+    effCreateFadeVectorWork(((EffFadeVectorWork *)work)->source);
 }
 
 void effResetFadeVectorFrame(s32 work) {
-    *(u32 *)(work + 0x10) = 0;
+    ((EffFadeVectorWork *)work)->frame = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C748);
@@ -1289,8 +1303,18 @@ void func_0029CDE0(void *dst, void *src) {
 }
 
 void func_0029CDF0(s32 work, u32 value) {
-    *(u32 *)(work + 0x14) = value;
+    ((EffFadeVectorWork *)work)->color = value;
 }
+
+/* Selection effect stores paired 8-byte entries and their reset buffer. */
+typedef struct EffSelectionWork {
+    u8 pad_00[8];
+    u32 *entries;
+    u8 pad_0C[4];
+    u32 buffer;
+    u8 pad_14[0x38];
+    u32 count;
+} EffSelectionWork;
 
 void effResetSelectionEntryBuffers(s32 work) {
     u32 count;
@@ -1298,8 +1322,8 @@ void effResetSelectionEntryBuffers(s32 work) {
     u32 index;
 
     index = 0;
-    count = *(u32 *)(work + 0x4c);
-    entries = *(u32 **)(work + 8);
+    count = ((EffSelectionWork *)work)->count;
+    entries = ((EffSelectionWork *)work)->entries;
     if (count != 0) {
         do {
             index = index + 1;
@@ -1307,7 +1331,7 @@ void effResetSelectionEntryBuffers(s32 work) {
             entries = entries + 2;
         } while (index < count);
     }
-    memset(*(u32 *)(work + 0x10), 0, count << 3);
+    memset(((EffSelectionWork *)work)->buffer, 0, count << 3);
 }
 
 void func_0029CE50(void *work) {
@@ -1855,7 +1879,7 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
     VU0_STORE_VF($vf0, work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
-    switch (*(s32 *)(source + 0x28)) {
+    switch (((EffKindSource *)source)->modeKind) {
     case 1:
         work->mode = 0x44;
         break;
@@ -1948,7 +1972,7 @@ EffKindWork *func_0029E0F0(u16 kind, u8 *source) {
     VU0_STORE_VF($vf0, work);
     work->payload = (u8 *)work + headerSize;
     memcpy(work->payload, source, size);
-    switch (*(s32 *)(source + 0x28)) {
+    switch (((EffKindSource *)source)->modeKind) {
     case 1:
         work->mode = 0x44;
         break;
@@ -2204,9 +2228,11 @@ typedef struct EffBillConfig {
         u32 count;      // 0x38
         s32 signedCount;
     } frames;
-    u8 pad_3C[0x1A];
+    u8 outputMode;      // 0x3C, copied to the blend output
+    u8 pad_3D[0x19];
     u8 mode;            // 0x56
-    u8 pad_57[0x1D];
+    u8 pad_57[0x19];
+    u32 drawProgress;    // 0x70, progress of the mesh-draw variant
     union {
         u32 quantizedSamples; // 0x74, clamped to at least four
         s32 signedRows;
@@ -2216,8 +2242,12 @@ typedef struct EffBillConfig {
     u8 pad_80[8];
     f32 rowOffset;        // 0x88, applied across each four-vertex row
     u32 resourceId;     // 0x8C
-    u8 pad_90[0x29];
+    u8 pad_90[4];
+    u8 meshMode;        // 0x94, copied to the mesh output
+    u8 pad_95[0x24];
     u8 alternateMode;   // 0xB9, animation variants use this instead of mode
+    u8 pad_BA[0x23];
+    u8 alternateMeshMode; // 0xDD, copied to the other mesh-draw variant
 } EffBillConfig;
 
 u8 *effCreateBillFrameNode(u8 *config, u32 resource) {
@@ -2249,7 +2279,8 @@ typedef struct EffBillOutput {
     u32 textureId;      // 0x00
     u32 color;          // 0x04
     u32 field_08;       // 0x08
-    u8 pad_0C[8];
+    u8 outputMode;      // 0x0C
+    u8 pad_0D[7];
     u8 mode;            // 0x14
 } EffBillOutput;
 typedef struct EffMeshOutput {
@@ -2348,7 +2379,7 @@ u8 *billCreateCellNode(u8 *config, u32 resource) {
     u8 *node = body;
 
     body += headerSize;
-    *(u8 **)(node + 8) = base;
+    ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
     return node;
@@ -2439,7 +2470,7 @@ u8 *billCreateParticleNode(u8 *config, u32 resource) {
     u8 *node = body;
 
     body += headerSize;
-    *(u8 **)(node + 8) = base;
+    ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     ((EffFrameState *)node)->asset = (u8 *)func_002A3BD8(count, 1, resource);
     return node;
@@ -2530,8 +2561,8 @@ u8 *billAllocateAnimatedTransformEntries(u8 *config) {
 
     *(u8 **)(node + 8) = base;
     *(u8 **)node = entries;
-    if (*(u32 *)(config + 0x70) == 0) {
-        *(u32 *)(config + 0x70) = 1;
+    if (((EffBillConfig *)config)->drawProgress == 0) {
+        ((EffBillConfig *)config)->drawProgress = 1;
     }
     return node;
 }
@@ -2678,7 +2709,7 @@ u8 *billAllocEmitterNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    *(u8 **)(node + 8) = base;
+    ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2815,7 +2846,7 @@ u8 *billAllocStripNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    *(u8 **)(node + 8) = base;
+    ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -3562,7 +3593,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     ((EffBillOutput *)out)->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
         ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-        *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
+        ((EffBillOutput *)out)->outputMode = ((EffBillConfig *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -3644,7 +3675,7 @@ void func_002A4C40(BillCellDrawWork *work) {
         PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
         effRunClassPostFrame((s32)dst);
         *(u32 *)out = ((EffBillConfig *)config)->textureId;
-        out[0x14] = *(u8 *)(config + 0x3C);
+        ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -3733,7 +3764,7 @@ void billDrawCellBlendB(BillCellDrawWork *work) {
     ((EffBillOutput *)out)->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
         ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-        *(u8 *)(out + 0xC) = *(u8 *)(config + 0x3C);
+        ((EffBillOutput *)out)->outputMode = ((EffBillConfig *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -4292,13 +4323,13 @@ void func_002A7288(u32 nodeAddr, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease(*(u32 *)(work + 0x2c));
-    func_002D0918(*(u32 *)(work + 0x38));
+    sdfQueueAssetRelease((u32)((EffSurfaceGridNode *)work)->handle);
+    func_002D0918((u32)((EffSurfaceGridNode *)work)->allocation);
 }
 
 void effResetSurfaceGridFrame(s32 work) {
-    *(u32 *)(work + 0x14) = 0;
-    *(u32 *)(work + 0x18) = 3;
+    ((EffSurfaceGridNode *)work)->field_14 = 0;
+    ((EffSurfaceGridNode *)work)->field_18 = 3;
 }
 
 /* Three-vector ring sampler; DDS1 stores its counters at 0x10-0x1C. */
@@ -4526,11 +4557,24 @@ typedef struct EffScaleRangeConfig {
     f32 endRand;
 } EffScaleRangeConfig;
 
+/* The seed is initialized to one of eight negative sentinel values. */
+typedef struct EffScaleRangeEntry {
+    u8 pad_00[0x14];
+    s32 negativeSeed;
+    u8 pad_18[0x18];
+} EffScaleRangeEntry;
+
+typedef struct EffScaleRangeWork {
+    u8 pad_00[0x30];
+    EffScaleRange *range;
+    EffScaleRangeConfig *config;
+} EffScaleRangeWork;
+
 extern float func_002E8398(void *);
 
 void effSeedBillScaleRange(u8 *work) {
-    EffScaleRangeConfig *config = *(EffScaleRangeConfig **)(work + 0x34);
-    EffScaleRange *range = *(EffScaleRange **)(work + 0x30);
+    EffScaleRangeConfig *config = ((EffScaleRangeWork *)work)->config;
+    EffScaleRange *range = ((EffScaleRangeWork *)work)->range;
     s32 steps = config->steps;
     u8 *entry = range->entries;
     f32 start = config->startBase * (func_002E8398(D_00324550) * config->startRand + (1.0f - config->startRand));
@@ -4550,7 +4594,7 @@ void effSeedBillScaleRange(u8 *work) {
     if (count != 0) {
         do {
             index++;
-            *(s32 *)(entry + 0x14) = -1 - (effMiscRand(D_00324550) & 7);
+            ((EffScaleRangeEntry *)entry)->negativeSeed = -1 - (effMiscRand(D_00324550) & 7);
             entry += 0x30;
         } while (index < count);
     }
@@ -5705,7 +5749,7 @@ void func_002AF370(BillCellDrawWork *work) {
     blended[0] = packed;
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffMeshOutput *)out)->mode = *(u8 *)(config + 0xDD);
+    ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->alternateMeshMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -5897,7 +5941,7 @@ void effOffsetNodeRowsVU(u8 *work) {
 void func_002B0408(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = *(u32 *)(config + 0x70);
+    u32 progress = ((EffBillConfig *)config)->drawProgress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -5924,7 +5968,7 @@ void func_002B0408(BillCellDrawWork *work) {
     blended[0] = packed;
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffMeshOutput *)out)->mode = *(u8 *)(config + 0x94);
+    ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->meshMode;
     scale = func_00297270(config + 0x34, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
@@ -6875,8 +6919,8 @@ void effApplyKeyframeAngle(u8 *work) {
     u32 count = *(u32 *)span;
     f32 value;
 
-    if (count != 0 && count >= *(u32 *)(work + 0x28)) {
-        f32 t = (f32)*(s32 *)(work + 0x28) / (f32)count;
+    if (count != 0 && count >= ((EffActiveResource *)work)->frame) {
+        f32 t = (f32)(s32)((EffActiveResource *)work)->frame / (f32)count;
         value = ((span[2] - span[1]) * t + span[1]) * 0.017453293f;
         func_001DC2A0(state + 0x70, value);
         D_003BC9A8 = value;
