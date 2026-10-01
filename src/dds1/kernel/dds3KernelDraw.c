@@ -126,6 +126,8 @@ extern DrawBlkD88 D_003C2D88;
 extern DrawBlkC70 D_003C2C70;
 extern DrawBlkCD0 D_003C2CD0;
 extern DrawBlkD30 D_003C2D30;
+extern DrawBlkCD0 D_003C2CA0;
+extern DrawBlkD30 D_003C2D00;
 extern u32 D_003C2DCC;
 extern u8 D_003C2DCB;
 extern u8 D_003C2E17;
@@ -149,8 +151,12 @@ extern u16 D_003BD71A;
 extern u16 D_003BD728;
 extern u16 D_003BD724;
 extern u16 D_003BD72A;
+extern u16 D_003BD72C;
+extern u16 D_003BD72E;
 extern u16 D_003BD726;
 extern u16 D_003BD736;
+extern u16 D_003BD738;
+extern u16 D_003BD73A;
 extern u16 D_003BD734;
 extern u16 D_003BD730;
 extern u16 D_003BD732;
@@ -168,6 +174,7 @@ extern void func_0018F6E8(void);
 extern void func_0018F750(void);
 extern void func_0018F3B0(void);
 extern void effCopyCh71Common(void *);
+extern u32 effGetCh72Work(void);
 extern void func_0018F428(void);
 extern void effCopyCh72Common(void *);
 extern void func_0018F4E0(void);
@@ -177,6 +184,7 @@ extern void effCopyCh75Common(void *);
 extern void func_0018F740(void);
 extern void func_0018F438(void);
 extern void effCopyCh76Common(void *);
+extern u32 effGetCh76Work(void);
 extern void func_0018F598(void);
 
 void kwlnDrawCopyRow128(void *src) {
@@ -446,7 +454,17 @@ void kwlnDrawSetCd0Triple(u32 first, u32 second, u32 third) {
     D_003C2CD0.unk20 = third;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106DF0);
+void func_00106DF0(s32 mode) {
+    D_003C2CA0 = *(DrawBlkCD0 *)effGetCh72Work();
+    D_003BD72C = 0;
+    D_003BD72E = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= 0xFFFEFFFF;
+        effCopyCh72Common(&D_003C2CD0);
+    } else {
+        kwlnDrawControlFlags |= 0x10000;
+    }
+}
 
 void kwlnDrawSetupCd0(s32 mode) {
     DrawBlkCD0 *blk = &D_003C2CD0;
@@ -508,7 +526,17 @@ void kwlnDrawSetD30Triple(u32 first, u32 second, u32 third) {
     D_003C2D30.unk24 = third;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00107018);
+void func_00107018(s32 mode) {
+    D_003C2D00 = *(DrawBlkD30 *)effGetCh76Work();
+    D_003BD738 = 0;
+    D_003BD73A = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= 0xFEFFFFFF;
+        effCopyCh76Common(&D_003C2D30);
+    } else {
+        kwlnDrawControlFlags |= 0x1000000;
+    }
+}
 
 void kwlnDrawSetupD30(s32 mode) {
     DrawBlkD30 *blk = &D_003C2D30;
