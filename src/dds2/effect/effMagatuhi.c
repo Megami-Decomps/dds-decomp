@@ -416,7 +416,100 @@ void effMagatuhiCopyVecs(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193280);
+/* One orbiting particle (0x48 bytes): the angle and radius advance by per-frame steps at a fixed height. */
+typedef struct {
+    s32 delay;      /* 0x00 */
+    f32 height;     /* 0x04 */
+    f32 angle;      /* 0x08 */
+    f32 angleStep;  /* 0x0C */
+    f32 radius;     /* 0x10 */
+    f32 radiusStep; /* 0x14 */
+    u8 pad18[0x30];
+} EffMagatuhiRingParticle; /* 0x48 */
+
+typedef struct {
+    u8 matrix[0x40];       /* 0x00 */
+    f32 origin[4];         /* 0x40 */
+    u8 pad50[4];
+    s32 spread;            /* 0x54 modulus of the particle delay */
+    u8 pad58[0x28];
+    u32 count;             /* 0x80 */
+    u32 maxSteps;          /* 0x84 */
+    u8 pad88[0x94];
+    EffMagatuhiRingParticle *particles; /* 0x11C */
+    void *managedResource; /* 0x120 */
+} EffMagatuhiRingWork;
+
+extern u32 func_001947F8(void *block);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+/* Advance the ring family: each slot is replayed from a random delay, one orbit step at a time, into the value table. */
+void func_00193280(EffMagatuhiWork *arg) {
+    u32 k;
+    EffMagatuhiRingWork *work;
+    EffMagatuhiWork *valueWork;
+    EffMagatuhiRingParticle *particle;
+    u32 count;
+    s32 spread;
+    u32 maxSteps;
+    u32 i;
+    u32 steps;
+    s32 delay; /* random start delay; afterwards the part of it that is replayed */
+    f32 out[4];
+    f32 origin[4];
+    f32 height;
+    f32 angle;
+    f32 radius;
+    f32 angleStep;
+    f32 radiusStep;
+
+    if (arg->type == 3) {
+        if (func_001947F8(arg->ptr08) == 2) {
+            work = effGetHandlerArg(arg->ptr08);
+            count = work->count;
+            valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
+            maxSteps = work->maxSteps;
+            spread = work->spread;
+            particle = work->particles;
+            PCP_COPY_VECTOR(origin, work->origin);
+            VU0_LOAD_MATRIX(work);
+            for (i = 0; i < count; i += 3, particle++) {
+                effMagatuhiInitParticleA(work, i);
+                delay = effMiscRand(D_003AA868) % spread;
+                particle->delay = delay;
+                if (maxSteps < delay) {
+                    steps = maxSteps;
+                    delay -= steps;
+                } else {
+                    steps = maxSteps - delay;
+                    delay = 0;
+                }
+                angleStep = particle->angleStep;
+                radiusStep = particle->radiusStep;
+                height = particle->height;
+                angle = particle->angle + angleStep * (f32)delay;
+                radius = particle->radius + radiusStep * (f32)delay;
+                out[3] = 0;
+                for (k = 0; k < steps; k++) {
+                    out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                    out[1] = height;
+                    out[2] = sdfSinPoly(angle) * radius;
+                    VU0_LOAD_VF(vf11, origin);
+                    VU0_LOAD_VF(vf10, out);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, out);
+                    func_00191450(valueWork, i, out);
+                    angle += angleStep;
+                    radius += radiusStep;
+                }
+                particle->radius = radius;
+                particle->angle = angle;
+            }
+        }
+    }
+}
 
 /* Fifth family head: 0xE0 bytes, count at 0x44. */
 typedef struct {
@@ -646,7 +739,108 @@ void effMagatuhiCopyVecs3(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00194428);
+/* One drifting particle (0x90 bytes): a base point plus a direction scaled by an advancing amount. */
+typedef struct {
+    f32 pos[3];        /* 0x00 */
+    u8 padC[4];
+    f32 dir[3];        /* 0x10; dir[1] is the one that advances each step */
+    u8 pad1C[4];
+    s32 delay;         /* 0x20 */
+    f32 scale;         /* 0x24 */
+    f32 angle;         /* 0x28 */
+    f32 liftStep;      /* 0x2C */
+    u8 pad30[0x60];
+} EffMagatuhiDriftParticle; /* 0x90 */
+
+typedef struct {
+    u8 matrix[0x40];       /* 0x00 */
+    f32 origin[4];         /* 0x40 */
+    u8 pad50[4];
+    s32 spread;            /* 0x54 modulus of the particle delay */
+    u8 pad58[0x18];
+    f32 angleStep;         /* 0x70 */
+    u8 pad74[4];
+    f32 scaleStep;         /* 0x78 */
+    u8 pad7C[4];
+    u32 count;             /* 0x80 */
+    u32 maxSteps;          /* 0x84 */
+    u8 pad88[0x94];
+    EffMagatuhiDriftParticle *particles; /* 0x11C */
+    void *pad120;
+    void *managedResource; /* 0x124 */
+} EffMagatuhiDriftWork;
+
+/* Advance the drift family: each slot is replayed from a random delay, one step at a time, into the value table. */
+void func_00194428(EffMagatuhiWork *arg) {
+    u32 k;
+    EffMagatuhiDriftWork *work;
+    EffMagatuhiWork *valueWork;
+    EffMagatuhiDriftParticle *particle;
+    u32 count;
+    s32 spread;
+    u32 maxSteps;
+    u32 i;
+    u32 steps;
+    s32 delay; /* random start delay; afterwards the part of it that is replayed */
+    f32 out[4];
+    f32 origin[4];
+    f32 lift;
+    f32 angle;
+    f32 scale;
+    f32 liftStep;
+    f32 angleStep;
+    f32 scaleStep;
+
+    if (arg->type == 3) {
+        if (func_001947F8(arg->ptr08) == 4) {
+            work = effGetHandlerArg(arg->ptr08);
+            count = work->count;
+            valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
+            maxSteps = work->maxSteps;
+            spread = work->spread;
+            particle = work->particles;
+            PCP_COPY_VECTOR(origin, work->origin);
+            VU0_LOAD_MATRIX(work);
+            for (i = 0; i < count; i += 3, particle++) {
+                func_00193F10(work, i);
+                delay = effMiscRand(D_003AA868) % spread;
+                particle->delay = delay;
+                if (maxSteps < delay) {
+                    steps = maxSteps;
+                    delay -= steps;
+                } else {
+                    steps = maxSteps - delay;
+                    delay = 0;
+                }
+                angleStep = work->angleStep;
+                scaleStep = work->scaleStep;
+                liftStep = particle->liftStep;
+                angle = particle->angle + angleStep * (f32)delay;
+                scale = particle->scale + scaleStep * (f32)delay;
+                lift = particle->dir[1] + liftStep * (f32)delay;
+                out[3] = 0;
+                for (k = 0; k < steps; k++) {
+                    lift += liftStep;
+                    sdfSinPoly(angle);
+                    out[0] = particle->pos[0] + particle->dir[0] * scale;
+                    out[1] = particle->pos[1] + lift;
+                    out[2] = particle->pos[2] + particle->dir[2] * scale;
+                    VU0_LOAD_VF(vf11, origin);
+                    VU0_LOAD_VF(vf10, out);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, out);
+                    func_00191450(valueWork, i, out);
+                    scale += scaleStep;
+                    angle += angleStep;
+                }
+                particle->scale = scale;
+                particle->angle = angle;
+                particle->dir[1] = lift;
+            }
+        }
+    }
+}
 
 extern u32 func_001947F8(void *block);
 

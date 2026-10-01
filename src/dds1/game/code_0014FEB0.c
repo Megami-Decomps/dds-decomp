@@ -28,7 +28,19 @@ INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150040);
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_001500F0);
+extern s32 D_003BD7F4;
+extern u32 D_003D6438[];
+extern void billDispatchByKind(u32);
+
+void func_001500F0(void) {
+    u32 i;
+
+    D_003BD7F4 = 0;
+    for (i = 0; i < 15; i++) {
+        billDispatchByKind(D_003D6438[i]);
+    }
+}
+
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150148);
 
 /* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the

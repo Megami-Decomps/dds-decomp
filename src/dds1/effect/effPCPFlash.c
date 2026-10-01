@@ -32,7 +32,6 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 extern void func_0016A088();
 extern void func_0016A6C0();
 extern void *func_0016C0E8();
-extern void func_0016D940();
 
 typedef struct PcpFlashParticle10 {
     u32 color;
@@ -324,7 +323,8 @@ struct PcpFlashWork8 {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u8 pad4C[0x84];
+    u32 unk4C;
+    u8 pad50[0x80];
     PcpFlashPtc20B *parts;
     u32 updateCount;
     u32 colorParam;
@@ -1911,7 +1911,35 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016D940);
+/* Clone the 0xD0-byte parameter block, then give every particle a random negative start age (two handle slots per particle). */
+PcpFlashWork8 *func_0016D940(src)
+    PcpFlashWork8 *src;
+{
+    u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc20B) + sizeof(PcpFlashWork8));
+    PcpFlashWork8 *work = (PcpFlashWork8 *)sdfResourceRetainAddress(handle);
+    PcpFlashRadialHandle *record;
+    u32 range;
+    u32 i;
+
+    memcpy(work, src, 0xD0);
+    work->parts = (PcpFlashPtc20B *)(work + 1);
+    work->ownedBuffer = handle;
+    work->colorParam = 0x80808080;
+    work->updateCount = 0;
+    work->renderScale = 1.0f;
+    if (work->randomRange == 0) {
+        work->randomRange = 1;
+    }
+    record = (PcpFlashRadialHandle *)func_00170250(work->particleCount * 2);
+    record->unk5C = 1.0f;
+    record->unk50 = work->unk4C;
+    work->resourceHandle = (u32)record;
+    range = work->randomRange;
+    for (i = 0; i < work->particleCount; i++) {
+        work->parts[i].age = -(effMiscRand(D_0034DF38) % range);
+    }
+    return work;
+}
 
 void effFlashRadialStripSpawnFromTable(void *data)
 {
@@ -1945,7 +1973,17 @@ void effFlashRadialStripSetRenderScale(PcpFlashWork8 *work, f32 value)
 
 INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DBA0);
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016DC90);
+void func_0016DC90(PcpFlashWork8 *work, s32 index, void *orientation) {
+    PcpFlashPtc20B *part = work->parts + index;
+    f32 factor;
+
+    part->angle = effMiscRandUnitFloat(D_0034DF38) * 6.2831853f;
+    factor = effMiscRandUnitFloat(D_0034DF38) * 0.3f + 0.7f;
+    part->thickness = work->maxScale * factor;
+    factor = work->unk34;
+    part->span = work->unk30 * (effMiscRandUnitFloat(D_0034DF38) * factor + (1.0f - factor));
+    part->increment = work->unk3C * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
+}
 
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
 void effFlashRotatedStripPair(PcpFlashWork8 *work, s32 index, void *view)
@@ -2029,7 +2067,6 @@ void effFlashRadialStripAdvanceAngle(PcpFlashWork8 *work, s32 index, void *orien
     part->angle += part->increment;
 }
 
-extern void func_0016DC90(void *, s32, void *);
 extern void func_0016DBA0(void *, s32, s32);
 
 void effFlashUpdateWork8(PcpFlashWork8 *work) {

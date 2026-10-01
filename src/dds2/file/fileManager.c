@@ -197,7 +197,26 @@ void fileWaitIdle(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_002C8238);
+typedef struct FileWindowSlot {
+    u8 pad00[0x10];
+    s32 unk10;
+    s32 unk14;
+    u8 pad18[0xC];
+    s32 unk24;
+    s32 unk28;
+    u8 pad2C[4];
+} FileWindowSlot; /* 0x30 */
+
+FileWindowSlot *func_002C8238(s32 id, s32 first, s32 second, s32 left, s32 right) {
+    FileWindowSlot *slot = sdfAllocAndClearQuadwords(0x30);
+
+    slot->unk24 = first;
+    slot->unk28 = first;
+    slot->unk14 = second;
+    slot->unk10 = second;
+    func_002C7D78(slot, 2, id, left, right);
+    return slot;
+}
 
 void func_002C82C8(a, b, c)
 s32 a;
