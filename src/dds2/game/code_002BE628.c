@@ -1602,7 +1602,96 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B440);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B4C0);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", btlItemApplyPermanentBonus);
+typedef struct BtlPermanentBonusUnit {
+    u8 pad00[6];
+    u16 unk06;
+    u16 unk08;
+    u16 unk0A;
+    u16 unk0C;
+    u16 unk0E;
+    u8 pad10[6];
+    s8 baseStats[5];
+    u8 pad1B;
+    u16 unk1C;
+    u16 unk1E;
+} BtlPermanentBonusUnit;
+
+extern s32 func_001197C0(BtlPermanentBonusUnit *);
+extern s32 func_001198C0(BtlPermanentBonusUnit *);
+
+s32 btlItemApplyPermanentBonus(u16 item, BtlPermanentBonusUnit *unit) {
+    s32 stat = -1;
+    s32 valid = 0;
+
+    switch (item - 0x59) {
+    case 0:
+        stat = 0;
+        valid = 1;
+        break;
+    case 1:
+        stat = 1;
+        valid = 1;
+        break;
+    case 2:
+        stat = 2;
+        valid = 1;
+        break;
+    case 3:
+        stat = 3;
+        valid = 1;
+        break;
+    case 4:
+        stat = 4;
+        valid = 1;
+        break;
+    case 5:
+        if (unit->unk08 >= 0x3E7 && unit->unk06 >= unit->unk08 &&
+            unit->unk0A >= unit->unk0C) {
+            return 2;
+        }
+        unit->unk1C += 10;
+        if (unit->unk1C >= 0x3E8) {
+            unit->unk1C = 0x3E7;
+        }
+        valid = 1;
+        break;
+    case 6:
+        if (unit->unk0C >= 0x3E7 && unit->unk06 >= unit->unk08 &&
+            unit->unk0A >= unit->unk0C) {
+            return 2;
+        }
+        unit->unk1E += 10;
+        if (unit->unk1E >= 0x3E8) {
+            unit->unk1E = 0x3E7;
+        }
+        valid = 1;
+        break;
+    default:
+        break;
+    }
+
+    if (valid == 0) {
+        return 0;
+    }
+    if (stat >= 0) {
+        if (unit->baseStats[stat] >= 0x63 &&
+            unit->unk06 >= unit->unk08 && unit->unk0A >= unit->unk0C) {
+            return 2;
+        }
+        unit->baseStats[stat] += 2;
+        if (unit->baseStats[stat] >= 0x64) {
+            unit->baseStats[stat] = 0x63;
+        }
+    }
+
+    unit->unk08 = func_001197C0(unit);
+    unit->unk0C = func_001198C0(unit);
+    if ((unit->unk0E & 0x4000) == 0) {
+        unit->unk0A = unit->unk0C;
+        unit->unk06 = unit->unk08;
+    }
+    return 1;
+}
 
 s32 ptyChooseFirstAvailableRosterId(void) {
     if (ptyIsRosterEntryPresent(1)) return 1;
