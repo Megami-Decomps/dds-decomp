@@ -21,6 +21,8 @@ typedef struct MenuSlotState {
     u8 padCC[0x14];
     s32 slotCopy;   /* 0xE0 */
     s32 mode;       /* 0xE4 */
+    u8 padE8[0x6C];
+    s32 fadeColor;  /* 0x154 */
 } MenuSlotState;
 
 extern void evtLoadResourcePair(const char *, u8 *);
@@ -721,13 +723,6 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     }
 }
 
-typedef struct MenuFadeHost {
-    u8 pad00[0x84];
-    s32 reduced;      /* 0x84 */
-    u8 pad88[0xCC];
-    s32 fadeColor;    /* 0x154 */
-} MenuFadeHost;
-
 INCLUDE_ASM(const s32, "game/code_002665B0", func_002680E0);
 
 extern void sndStartTrackExtended(s32);
@@ -735,7 +730,7 @@ extern void func_003425B0(void);
 extern void func_00342580(s32);
 extern void func_003425D8(void);
 
-void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
+void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
     if (mode == 0) {
         if (host->reduced == 0) {
             sndStartTrackExtended(host->fadeColor);
@@ -772,7 +767,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     }
     *(s32 *)(obj + 0x150) = 0xF;
     func_002680E0((s32)obj);
-    mnuApplyFadeTrackMode(0, (MenuFadeHost *)obj);
+    mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
     func_002C1B58(obj + 0x3E8, 0x60);
     return obj;
 }
