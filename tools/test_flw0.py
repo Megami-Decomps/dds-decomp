@@ -710,8 +710,8 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 3983, 736),
-            "dds2": (126, 3328, 1190),
+            "dds1": (129, 4079, 736),
+            "dds2": (126, 3416, 1190),
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0
@@ -1168,12 +1168,19 @@ end
             "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
+            "CONSUME_FIELD_SKILL_END_NOTICE": (0x1F1, 1, True),
             "READ_SUCTION_WARP_VALUE": (0x1FA, 1, True),
             "READ_BARRIER_VALUE": (0x1FB, 1, True),
+            "READ_CURRENT_SCENE_SELECTION_RESOURCE": (0x1FE, 0, True),
             "FIND_FIELD_EFFECT_BY_NAME": (0x1FF, 1, True),
             "READ_ELEVATOR_TABLE_VALUE": (0x200, 1, True),
+            "ADVANCE_FIELD_INTERACTION": (0x205, 2, True),
+            "READ_FIELD_INTERACTION_VALUE": (0x206, 2, True),
+            "READ_FIELD_INTERACTION_KIND": (0x207, 0, True),
             "READ_LADDER_TABLE_VALUE": (0x208, 1, True),
+            "POLL_ELEVATOR_MOVE_STATE": (0x20B, 0, True),
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
+            "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
@@ -1202,6 +1209,12 @@ end
                     },
                 )
                 selector_domains = {
+                    "CONSUME_FIELD_SKILL_END_NOTICE": {
+                        0: "LIGHTOMA",
+                        1: "LIFTOMA",
+                        2: "RIBERAMA",
+                        3: "ESTOMA",
+                    },
                     "READ_SUCTION_WARP_VALUE": {
                         0: "STATE_CODE",
                         1: "SOURCE_VECTOR_ID",
@@ -1238,6 +1251,14 @@ end
                         ].symbols_for_argument(0)
                         self.assertIsNotNone(symbols)
                         self.assertEqual(symbols.by_value, expected_symbols)
+                field_info_columns = profile.by_name[
+                    "READ_FIELD_INTERACTION_VALUE"
+                ].symbols_for_argument(1)
+                self.assertIsNotNone(field_info_columns)
+                self.assertEqual(
+                    field_info_columns.by_value,
+                    {0: "ROW_TYPE", 1: "MESSAGE_ID"},
+                )
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
         root = TOOLS.parent
@@ -1523,7 +1544,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 44962)
+        self.assertEqual(profiled_command_uses, 45297)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1577,8 +1598,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 85438, 11979),
-            "dds2": (140, 65364, 7621),
+            "dds1": (143, 85008, 11549),
+            "dds2": (140, 64968, 7225),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1755,7 +1776,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 44962)
+            (code_words, commands, profiled_commands), (168829, 53389, 45297)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1884,7 +1905,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-                (32675, 1910, 287),
+            (32983, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
