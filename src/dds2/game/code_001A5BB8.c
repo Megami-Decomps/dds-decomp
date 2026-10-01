@@ -1344,7 +1344,60 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC0F8);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlFindEligibleTargetForMultiActorCommand);
+extern u32 btlGetIndexListCount(s32);
+extern u32 btlGetIndexListEntry(s32, s32);
+
+s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, s32 arg1) {
+    u32 count;
+    u32 i;
+    s32 cmd;
+    s32 index;
+
+    if (arg0 == 0) {
+        goto fail;
+    }
+    if (arg1 == 0) {
+        goto fail;
+    }
+    count = btlGetIndexListCount(arg1);
+    if (count < 2) {
+        return 0;
+    }
+    cmd = *(s32 *)(arg0 + 0x20);
+    if (cmd < 2) {
+        goto fail;
+    }
+    if (cmd >= 5) {
+        if (cmd > 8) {
+            goto fail;
+        }
+        if (cmd < 7) {
+            goto fail;
+        }
+    }
+    if (cmd == 4) {
+        index = btlGetLoggedIndexedCommandItem(*(s32 *)(arg0 + 0x28));
+    } else {
+        index = *(s32 *)(arg0 + 0x24);
+    }
+    if (*(u8 *)(datCommandRecords + index * 56 + 8) != 0) {
+        goto fail;
+    }
+    if (*(u8 *)(datCommandRecords + index * 56 + 0x24) != 2) {
+        goto fail;
+    }
+    if (*(u16 *)(datCommandRecords + index * 56 + 0x26) == 0) {
+        goto fail;
+    }
+    for (i = 0; i < count; i++) {
+        if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
+             *(u16 *)(btlGetIndexListEntry(arg1, i) + 0x12E)) != 0) {
+            return i;
+        }
+    }
+fail:
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
 
@@ -1836,7 +1889,34 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B17E8);
 void func_001B1F78(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlCalculateEnemyExperienceReward);
+
+extern f32 func_001B20C8(u8 *, u8 *, s32);
+
+s32 btlCalculateEnemyExperienceReward(u8 *acquirer, u8 *enemy) {
+    s32 result = 0;
+    u8 *entry;
+    f32 ratio;
+    u32 ep;
+
+    if (!(*(u32 *)(enemy + 0x110) & 0x400)) {
+        return result;
+    }
+    if (acquirer != 0 && !(*(u32 *)(acquirer + 0x110) & 0x200)) {
+        return result;
+    }
+    entry = (u8 *)(datEnemyRecords + *(u16 *)(enemy + 0x124) * 76);
+    ratio = func_001B20C8(acquirer, enemy, 1);
+    ep = (u32)((f32)*(u16 *)(entry + 0x2E) * ratio);
+    if (*(u32 *)entry & 0x2000) {
+        ep *= 100;
+    }
+    if (acquirer != 0) {
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f]\n", ep, *(u16 *)(entry + 0x2E), ratio);
+    } else {
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f](acquisition)\n", ep, *(u16 *)(entry + 0x2E), ratio);
+    }
+    return ep;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B20C8);
 
@@ -1863,7 +1943,16 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
     return money;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlCalculateHuntEpReward);
+s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
+    u8 *entry = (u8 *)(datEnemyRecords + *(u16 *)(arg1 + 0x124) * 76);
+    f32 ratio = func_001B20C8(arg0, arg1, 0);
+    u32 ep = (u32)((f32)*(u16 *)(entry + 0x30) * ratio);
+    if (*(u32 *)entry & 0x2000) {
+        ep *= 100;
+    }
+    btlBossDebugPrintf("btl:ep=%d[%d,%.3f](hunt)\n", ep, *(u16 *)(entry + 0x30), ratio);
+    return ep;
+}
 
 u32 func_001B2380(void) {
     return 0;
@@ -2513,24 +2602,62 @@ s32 btlCountFlaggedSceneActors(void) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlInitializeCommandPanelSlotTables);
+typedef struct BattleCmdPanelSlot {
+    u8 pad_00[5];
+    u8 flag;
+    u16 value;
+    u8 pad_08[8];
+} BattleCmdPanelSlot;
+
+typedef struct BattleCmdPanelHead {
+    u8 kind;
+    s8 index;
+    u16 mask;
+    u8 pad_04[8];
+    u32 first;
+} BattleCmdPanelHead;
+
+typedef struct BattleCmdPanel {
+    BattleCmdPanelHead head;
+    BattleCmdPanelSlot slotsA[5];
+    BattleCmdPanelSlot slotsB[5];
+} BattleCmdPanel;
+
+extern void *sdfAllocAndClearQuadwords(s32);
+extern s16 btlGetActorIdForClass(s8);
+extern void btlGetActorClassPair(s8, u32 *, u32 *);
+
+void btlInitializeCommandPanelSlotTables(void) {
+    u32 tableA[5] = {0x40, 0x30, 0x20, 0x10, 0};
+    u32 tableB[5] = {0, 0x10, 0x20, 0x30, 0x40};
+    s32 i;
+
+    btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
+    ((BattleCmdPanelHead *)btlCommandPanelWork)->kind = 1;
+    ((BattleCmdPanelHead *)btlCommandPanelWork)->index = 0;
+    ((BattleCmdPanelHead *)btlCommandPanelWork)->mask =
+        btlGetActorIdForClass(((BattleCmdPanelHead *)btlCommandPanelWork)->index);
+    btlGetActorClassPair(((BattleCmdPanelHead *)btlCommandPanelWork)->index,
+                         &((BattleCmdPanelHead *)btlCommandPanelWork)->first,
+                         (u32 *)(btlCommandPanelWork + 0x10));
+    for (i = 0; i < 5; i++) {
+        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].flag = 0;
+        ((BattleCmdPanel *)btlCommandPanelWork)->slotsA[i].value = tableB[i];
+        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].flag = 1;
+        ((BattleCmdPanel *)btlCommandPanelWork)->slotsB[i].value = tableA[i];
+    }
+}
 
 s16 btlGetActorIdForClass(s8 classId) {
-    ActorClassIds table = btlActorIdsByClass;
-    return table.values[classId];
+    s16 table[8] = {0x13, 0x17, 0x15, 0x16, 0x18, 0x14, 0x14, 0x14};
+    return table[classId];
 }
 
 void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
-    ActorClassPairTable pairs = btlActorClassPairs;
-    *first = pairs.values[classId * 2];
-    *second = pairs.values[classId * 2 + 1];
+    u32 pairs[14] = {0x19, 4, 0x27, 4, 0x27, 4, 0x35, 4, 0x43, 4, 0x51, 4, 0x5F, 4};
+    *first = pairs[classId * 2];
+    *second = pairs[classId * 2 + 1];
 }
-
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415AF0);
-
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", btlActorIdsByClass);
-
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", btlActorClassPairs);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B5A20);
 

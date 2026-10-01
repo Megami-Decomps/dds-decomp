@@ -170,8 +170,6 @@ void polyReleaseBandNodeResources(PolyBandResourceNode *obj) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E100);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E148);
-
 /* Band node: an origin, a transform, the ring's segment count and a strip at 0xF0. */
 typedef struct {
     f32 origin[4];      /* 0x0 */
@@ -183,6 +181,51 @@ typedef struct {
     u8 padCC[0x24];     /* 0xCC */
     PolyStrip *strip;   /* 0xF0 */
 } PolyBand;
+
+void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
+
+/* Ring record: the age counter and the per-frame radius change. */
+typedef struct PolyRingRecord {
+    s32 age;   /* 0x0 */
+    f32 step;  /* 0x4 */
+} PolyRingRecord;
+
+/* Band node as seen by the ring spawner: two base radii, each with a random jitter fraction, and the record table. */
+typedef struct PolyRingSpawner {
+    u8 pad00[0x14];
+    s32 duration;       /* 0x14 */
+    u8 pad18[0xB4];
+    f32 startRadius;    /* 0xCC */
+    f32 endRadius;      /* 0xD0 */
+    f32 startJitter;    /* 0xD4 */
+    f32 endJitter;      /* 0xD8 */
+    u8 padDC[0x18];
+    PolyRingRecord *records; /* 0xF4 */
+} PolyRingSpawner;
+
+extern u8 D_0034DF38[];
+extern f32 effMiscRandUnitFloat(void *state);
+
+/* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
+void func_0015E148(PolyRingSpawner *spawner, s32 index) {
+    PolyRingRecord *record = spawner->records;
+    f32 spread;
+    f32 start;
+    f32 end;
+
+    record += index;
+    spread = spawner->startJitter;
+    start = spawner->startRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    spread = spawner->endJitter;
+    end = spawner->endRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    record->age = 0;
+    if (spawner->duration > 0) {
+        record->step = (end - start) / (f32)spawner->duration;
+    } else {
+        record->step = end - start;
+    }
+    polyBandLayoutRing((PolyBand *)spawner, index, start);
+}
 
 /* Write radii radius and radius + radialWidth, then close the strip with its first pair. */
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
@@ -415,7 +458,44 @@ void polyReleaseCellBoundNodeResources(PolyRotatingBandResourceNode *obj) {
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015EEF0);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015EF50);
+/* Rotating-band record: age, start radius, per-frame radius step, start angle and ring phase. */
+typedef struct PolyRotatingRecord {
+    s32 age;        /* 0x00 */
+    f32 radius;     /* 0x04 */
+    f32 radiusStep; /* 0x08 */
+    f32 angle;      /* 0x0C */
+    f32 phase;      /* 0x10 */
+} PolyRotatingRecord; /* 0x14 */
+
+/* Band node as seen by the rotating spawner: jittered base radii, delay group size, start angle and the record table. */
+typedef struct PolyRotatingSpawner {
+    u8 pad00[0x14];
+    s32 duration;       /* 0x14 */
+    u8 pad18[0xB4];
+    f32 startRadius;    /* 0xCC */
+    f32 endRadius;      /* 0xD0 */
+    f32 startJitter;    /* 0xD4 */
+    f32 endJitter;      /* 0xD8 */
+    u32 groupSize;      /* 0xDC */
+    f32 angleScale;     /* 0xE0 */
+    u8 padE4[0x14];
+    PolyRotatingRecord *records; /* 0xF8 */
+} PolyRotatingSpawner;
+
+/* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
+void func_0015EF50(PolyRotatingSpawner *spawner, u32 index) {
+    PolyRotatingRecord *record = spawner->records;
+    f32 spread;
+
+    record += index;
+    spread = spawner->startJitter;
+    record->age = 0;
+    record->radius = spawner->startRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    spread = spawner->endJitter;
+    record->radiusStep = (spawner->endRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->duration;
+    record->angle = spawner->angleScale * 0.017453292f;
+    record->phase = 6.2831852f / (f32)spawner->groupSize * (f32)(index % spawner->groupSize);
+}
 
 typedef struct {
     u8 ageBytes[4]; /* Native updates use this signed age word; retain its byte-array view. */
