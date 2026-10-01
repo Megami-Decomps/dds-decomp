@@ -55,7 +55,7 @@ typedef struct {
     f32 unk24;
 } PathOut;
 
-void func_00116B80(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
+void func_00116B80(s32 *arg0, f32 *arg1, f32 arg2, void *arg3);
 void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
@@ -78,7 +78,7 @@ void dds3PreparePathVectorPair(PathObj *path) {
     PathEntry16 *second;
     if (path->flags & 2) {
         vectorData = path->vectorData;
-        func_00116B80(&index, &fraction, vectorData, path->time);
+        func_00116B80(&index, &fraction, path->time, vectorData);
         entries = vectorData->entries;
         first = &entries[index];
         VU0_LOAD_VF_MEMORY(vf10, first);
