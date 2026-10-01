@@ -97,7 +97,8 @@ typedef struct SceneTask {
     s32 command;
     s32 commandValue;         /* 0x24 */
     s32 commandReference;      /* 0x28: resolved for command 4 */
-    u8 pad2C[0x1C];
+    u8 pad2C[0x14];
+    s64 linkedOwnerId;        /* 0x40: owner linked to scene-group/effect tasks */
     void (*onUpdate)(void);   /* 0x48 */
     void (*onComplete)(void); /* 0x4C */
     u16 actionStage;          /* 0x50 */
@@ -330,7 +331,7 @@ s32 btlLoadBankWhenTasksIdle(void) {
 
 void fldMarkGridTiles(BattleSceneWork *scene) {
     u8 *tile = (u8 *)func_00200D00(scene->tileX, scene->tileY);
-    *(u64 *)(tile + 0x40) = 0x8000000000000001ULL;
+    ((SceneTask *)tile)->linkedOwnerId = 0x8000000000000001ULL;
     btlStartTask(tile);
     tile = (u8 *)func_00200F28(scene->tileX, scene->tileY);
     btlStartTask(tile);
@@ -1212,7 +1213,7 @@ u8 *fldCreateSceneGroupAction(u8 *actor, u32 owner, s32 groupIndex) {
     *(s16 *)(object + 0x20) = 0x61;
     object[0x10] = 0;
     if (actor != 0) {
-        *(u64 *)(object + 0x40) = ((SceneTask *)actor)->actor->ownerId;
+        ((SceneTask *)object)->linkedOwnerId = ((SceneTask *)actor)->actor->ownerId;
     }
     ((SceneTask *)object)->onComplete = (void (*)(void))func_001D4120;
     ((SceneTask *)object)->onUpdate = 0;
@@ -1248,7 +1249,7 @@ u8 *fldCreateSceneActorAction(u8 *actor, u32 owner) {
     *(s16 *)(object + 0x20) = 0x62;
     object[0x10] = 0;
     if (actor != 0) {
-        *(u64 *)(object + 0x40) = ((SceneTask *)actor)->actor->ownerId;
+        ((SceneTask *)object)->linkedOwnerId = ((SceneTask *)actor)->actor->ownerId;
     }
     ((SceneTask *)object)->onUpdate = (void (*)(void))func_001D4200;
     ((SceneTask *)object)->onComplete = (void (*)(void))fldActivateRequestedSceneActor;

@@ -131,7 +131,8 @@ typedef struct SceneTask {
     s32 command;
     s32 commandValue;         /* 0x24 */
     s32 commandReference;      /* 0x28: resolved for command 4 */
-    u8 pad2C[0x1C];
+    u8 pad2C[0x14];
+    s64 linkedOwnerId;        /* 0x40: owner linked to scene-group/effect tasks */
     void (*onUpdate)(void);   /* 0x48 */
     void (*onComplete)(void); /* 0x4C */
     u16 actionStage;          /* 0x50 */
@@ -1598,7 +1599,7 @@ void func_001D4FE8(u8 *task) {
             sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
             *sceneTask = 7;
             *(s64 *)(sceneTask + 8) = ownerId;
-            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
+            ((SceneTask *)sceneTask)->linkedOwnerId = unit->ownerId;
             btlStartTask(sceneTask);
             memset(&block, 0, 0x2C);
             hp = unit->statA;
@@ -1627,7 +1628,7 @@ void func_001D4FE8(u8 *task) {
             sceneTask = fldCreateSceneGroupAction(task, 0x64, 1);
             *sceneTask = 7;
             *(s64 *)(sceneTask + 8) = ownerId;
-            *(s64 *)(sceneTask + 0x40) = unit->ownerId;
+            ((SceneTask *)sceneTask)->linkedOwnerId = unit->ownerId;
             btlStartTask(sceneTask);
             btlDispatchStateHandler(task, 0x1B);
             break;
@@ -1635,7 +1636,7 @@ void func_001D4FE8(u8 *task) {
         effect = func_0020F200(task);
         if (effect > 0) {
             object = (u8 *)btlCreateEffObjB(unit, effect);
-            *(s64 *)(object + 0x40) = ownerId;
+            ((SceneTask *)object)->linkedOwnerId = ownerId;
             btlStartTask(object);
         }
         ((SceneTask *)task)->flags |= 0x200;
@@ -1851,7 +1852,7 @@ void btlCommandStartSoundTasks(u8 *task) {
         effect = func_0020F200(task);
         if (effect > 0) {
             object = (u8 *)btlCreateEffObjB(unit, effect);
-            *(s64 *)(object + 0x40) = ownerId;
+            ((SceneTask *)object)->linkedOwnerId = ownerId;
             btlStartTask(object);
         }
         ((SceneTask *)task)->flags |= 0x200;
@@ -2006,7 +2007,7 @@ void btlCommandTaskStartEffects(BtlCommandTask *task) {
         btlStartTask(btlCreateEffObjA(0, task->kind));
         object = fldCreateSceneGroupAction((u8 *)task, countdown, 1);
         *(s32 *)(object + 0x28) = effectId;
-        *(u64 *)(object + 0x40) = task->actor->owner;
+        ((SceneTask *)object)->linkedOwnerId = task->actor->owner;
         btlStartTask(object);
     }
     if ((task->actor->unk12E & 0x480) != 0) {
@@ -2053,7 +2054,7 @@ void btlCommandTaskReturnStart(BtlCommandTask *task) {
             object = fldCreateSceneGroupAction((u8 *)task, 0x32, 1);
         }
         *(s32 *)(object + 0x28) = 0xF;
-        *(u64 *)(object + 0x40) = task->actor->owner;
+        ((SceneTask *)object)->linkedOwnerId = task->actor->owner;
         btlStartTask(object);
     }
     object = (u8 *)func_001E6428((s32)actor, 1);
