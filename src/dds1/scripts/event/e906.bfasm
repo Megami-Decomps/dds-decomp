@@ -13,7 +13,7 @@ code
 e906_main:
   PROC e906_main
   PUSHIS 0
-  COMM 0x0000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 e906_dead:
   PROC e906_dead

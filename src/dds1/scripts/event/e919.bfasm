@@ -10,7 +10,7 @@ code
 e919_main:
   PROC e919_main
   PUSHIS 0
-  COMM 0x0000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 end
 
