@@ -34,7 +34,19 @@ s32 evtCreateScriptObject(s32 a, s32 b, s32 c, s32 d, s32 e) {
     return (s32)object;
 }
 
-INCLUDE_ASM(const s32, "game/code_00116878", func_001168F0);
+/* Same as evtCreateScriptObject but stores arg3 at work+0xC instead of 0x10; the store
+   order gives retail's saved-register order (see the DDS2 twin). */
+s32 func_001168F0(s32 a, s32 b, s32 c, s32 d, s32 e) {
+    ScriptObj *object = (ScriptObj *)func_00110880(10);
+    ObjWork *work = (ObjWork *)object->work;
+
+    object->unk4 = a;
+    work->unkC = d;
+    work->unk4 = b;
+    work->unk8 = c;
+    object->unk8 = e;
+    return (s32)object;
+}
 
 typedef struct ObjWithWork {
     u8 unk0[0x18];
