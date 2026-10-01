@@ -449,14 +449,23 @@ def main():
         if rodata_relocs.get(table_off, ("", ""))[1] != ".text":
             end = next(s for s in starts if s > table_off)
             item = rodata[table_off:end]
+            # Words the linker fills in (a table of pointers to strings or
+            # data) hold only an addend here: compare the rest, and leave the
+            # pointer values to the full build's checksum.
+            reloc_words = {o - table_off for o in rodata_relocs if table_off <= o < end}
             nul = item.find(b"\0")
-            if nul >= 0 and all(32 <= c < 127 or c in b"\t\n\r\x1b" for c in item[:nul]) \
+            if reloc_words:
+                item = item[:max(max(reloc_words) + 4, len(item.rstrip(b"\0")))]
+            elif nul >= 0 and all(32 <= c < 127 or c in b"\t\n\r\x1b" for c in item[:nul]) \
                     and not any(item[nul:]):
                 item = item[:nul + 1]  # a string; the rest is alignment
             else:
                 item = item.rstrip(b"\0") or item[:4]
             theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
-            if item != theirs:
+            mine_cmp, theirs_cmp = bytearray(item), bytearray(theirs)
+            for w in reloc_words:
+                mine_cmp[w:w + 4] = theirs_cmp[w:w + 4] = b"\0\0\0\0"
+            if mine_cmp != theirs_cmp:
                 bad += 1
                 print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
             elif (pad := retail_padding(retail_addr, len(item))) and \
