@@ -22,7 +22,9 @@ extern void func_001D6300(void *, void *);
 extern void btlSetUnitPosition(BtlUnit *, void *);
 
 typedef struct BtlUnit {
-    u8 unk_00[0x90];
+    u8 unk_00[0x30];
+    f32 position[4]; /* 0x30: current world position, passed to btlSetUnitPosition */
+    u8 unk_40[0x50];
     s32 position90; /* 0x90 */
     f32 position94;
     f32 position98;
@@ -149,9 +151,13 @@ extern s32 btlGetIndexListEntry(void *, u32);
 
 /* Linked-command target/direction and motion fields; DDS2 moves the target/flags +0x20. */
 typedef struct BtlLinkedCommand {
-    u8 pad00[0x50];
+    u8 pad00[0x30];
+    f32 position[4]; /* 0x30: source pose for the linked command */
+    u8 pad40[0x10];
     f32 coordinate50; /* 0x50: increased when motion begins */
-    u8 pad54[0x8C];
+    u8 pad54[0x6C];
+    f32 rotation[4]; /* 0xC0: current orientation, paired with coordinate50 */
+    u8 padD0[0x10];
     f32 coordinateE0; /* 0xE0: increased along with coordinate50 */
     u8 padE4[0xC];
     u32 flags;         /* 0xF0 */
@@ -205,31 +211,31 @@ typedef struct BtlActionTableRow {
 
 extern void btlClearRuntimeFlag2000(void);
 
-s32 btlDispatchActionAnimationB(u8 *unit) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
+s32 btlDispatchActionAnimationB(BtlUnit *unit) {
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[unit->unk_114].flags;
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            func_0020AFB8(unit);
+            func_0020AFB8((u8 *)unit);
         } else {
-            btlSetEffectCameraKeys(unit, 59.2f, -700.6f, -1901.2f,
+            btlSetEffectCameraKeys((void *)unit, 59.2f, -700.6f, -1901.2f,
                            0.092f, 0.023f, -0.009f, 0.987f,
                            59.2f, -160.6f, -1901.2f, -0.106f,
                            0.025f, -0.014f, 0.985f, 45.0f, 30.0f);
         }
-        ((BtlUnit *)unit)->flags = 0;
+        unit->flags = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_0020B348(unit, unit, 0);
+        func_0020B348((void *)unit, (void *)unit, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
             void *other = (void *)btlGetIndexListEntry((void *)((BtlEventEntry *)unit)->task->unk_60, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190(unit, other);
-            ((BtlUnit *)unit)->flags = 0;
+            func_0020B190((u8 *)unit, other);
+            unit->flags = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020AFB8(unit);
+            func_0020AFB8((u8 *)unit);
         }
     } else {
         return 0;
@@ -248,15 +254,15 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D168);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D2E0);
 
-s32 btlAllowsSpeciesCondition(u8 *unit, u8 *other, s32 condition) {
+s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition) {
     s32 kind;
-    if ((((BtlUnit *)unit)->flags & 0x200) == 0) {
+    if ((unit->flags & 0x200) == 0) {
         return 1;
     }
     if (condition != 0) {
         return 0;
     }
-    kind = ((BtlUnit *)other)->mode;
+    kind = other->mode;
     switch (kind) {
     case 0x13d:
     case 0x13e:
@@ -278,35 +284,35 @@ u32 func_0020D548(void) {
 }
 
 s32 func_0020D550(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0) {
         return -1;
     }
     if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
         return -1;
     }
-    if (((BtlUnit *)unit)->mode == 0x114) {
+    if (unit->mode == 0x114) {
         return 11;
     }
     return -1;
 }
 
 s32 func_0020D598(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
         return -1;
     }
-    if (((BtlUnit *)unit)->mode == 0x111) {
+    if (unit->mode == 0x111) {
         return 11;
     }
     return -1;
 }
 
 s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
-    BtlTask *link = *(BtlTask **)((u8 *)unit + 0xF4);
+    BtlTask *link = unit->task;
     BtlUnit *other;
     f32 pos[4] __attribute__((aligned(16)));
 
@@ -321,7 +327,7 @@ s32 func_0020D5E0(BtlUnit *unit, s32 unused1, s32 unused2) {
         return 0;
     }
     if (unit->unk_114 == 0x175) {
-        PCP_COPY_VECTOR(pos, (u8 *)other + 0x30);
+        PCP_COPY_VECTOR(pos, other->position);
         pos[2] += 600.0f;
         btlSetUnitPosition(other, pos);
     }
@@ -335,14 +341,14 @@ s64 func_0020D668(void *unit, s8 unused1, s8 unused2) {
 }
 
 s32 func_0020D690(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
         return -1;
     }
-    if (((BtlUnit *)unit)->mode == 0x109) {
+    if (unit->mode == 0x109) {
         return 11;
     }
     return -1;
@@ -384,7 +390,8 @@ s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
 }
 
 s32 btlNormalizeActionForSkill(s32 battler, s32 action) {
-    if ((((BtlUnit *)battler)->flags & 0x400) == 0 || ((BtlUnit *)battler)->mode != 0x13c) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0 || unit->mode != 0x13c) {
         return action;
     }
     switch (action) {
@@ -415,7 +422,7 @@ void btlRecenterUnitsOnLead(void) {
         func_001D6300(lead, pos);
         shift = -pos[0];
         pos[0] = 0;
-        PCP_COPY_VECTOR((u8 *)lead + 0x30, pos);
+        PCP_COPY_VECTOR(lead->position, pos);
         btlSetUnitPosition(lead, pos);
         for (unit = work->units; unit != 0; unit = unit->next) {
             if (unit->flags & 1) {
@@ -423,7 +430,7 @@ void btlRecenterUnitsOnLead(void) {
                     if (unit != lead) {
                         func_001D6300(unit, pos);
                         pos[0] = pos[0] + shift;
-                        PCP_COPY_VECTOR((u8 *)unit + 0x30, pos);
+                        PCP_COPY_VECTOR(unit->position, pos);
                         btlSetUnitPosition(unit, pos);
                     }
                 }
@@ -447,7 +454,8 @@ u8 func_0020D9A8(s32 action) {
 }
 
 s32 btlNormalizeActionForStatus(s32 battler, s32 action) {
-    if ((((BtlUnit *)battler)->flags & 0x400) == 0 || ((BtlUnit *)battler)->mode != 0x115) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0 || unit->mode != 0x115) {
         return action;
     }
     switch (action) {
@@ -458,20 +466,20 @@ s32 btlNormalizeActionForStatus(s32 battler, s32 action) {
 }
 
 s32 func_0020D9F8(s32 battler, s32 action) {
-    u8 *unit = (u8 *)battler;
-    if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
+    BtlUnit *unit = (BtlUnit *)battler;
+    if ((unit->flags & 0x400) == 0) {
         return -1;
     }
-    if (*((u8 *)D_003BAA60 + action * 32 + 3) == 0) {
+    if (((BtlActionTableRow *)D_003BAA60)[action].enabled == 0) {
         return -1;
     }
-    if (((BtlUnit *)unit)->mode == 0x113) {
+    if (unit->mode == 0x113) {
         return 11;
     }
     return -1;
 }
 
-void btlSelectRandomDefeatCamera(u8 *unit) {
+void btlSelectRandomDefeatCamera(void *unit) {
     btlFlagAllUnitDefeatCandidatesTask();
     switch (effMiscRandMod(0, 2)) {
     case 0:
@@ -491,14 +499,14 @@ extern void func_00204838(void *, void *, void *, s32, s32, f32, f32, f32);
 
 extern void func_001DB698(void *);
 
-void btlRaiseLinkedActionPose(u8 *actor) {
-    u8 *position = actor + 0x30;
-    u8 *rotation = actor + 0xc0;
+void btlRaiseLinkedActionPose(BtlLinkedCommand *actor) {
+    u8 *position = (u8 *)actor->position;
+    u8 *rotation = (u8 *)&actor->rotation;
     func_00204838(actor, position, rotation, 0, 1, 0.25f, 0.0f, 0.5f);
-    ((BtlLinkedCommand *)actor)->value130 = 30.0f;
-    ((BtlLinkedCommand *)actor)->flags |= 0x41;
-    ((BtlLinkedCommand *)actor)->coordinate50 += 500.0f;
-    ((BtlLinkedCommand *)actor)->coordinateE0 += 500.0f;
+    actor->value130 = 30.0f;
+    actor->flags |= 0x41;
+    actor->coordinate50 += 500.0f;
+    actor->coordinateE0 += 500.0f;
     func_001DB698(position);
     func_001DB698(rotation);
 }
@@ -515,36 +523,36 @@ INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E058);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E170);
 
-extern void btlSelectRandomDefeatCamera(u8 *);
+extern void btlSelectRandomDefeatCamera(void *);
 
-s32 func_0020E868(u8 *unit) {
-    u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
-    u8 *other;
-    if (((BtlTask *)entry)->unit->flags & 0x200) {
-        if (btlGetIndexListCount(((BtlTask *)entry)->unk_60) == 1) {
-            other = (u8 *)btlGetIndexListEntry(((BtlTask *)entry)->unk_60, 0);
-            if ((((BtlUnit *)other)->flags & 0x400) == 0) {
+s32 func_0020E868(BtlUnit *unit) {
+    BtlTask *entry = ((BtlEventEntry *)unit)->task;
+    BtlUnit *other;
+    if (entry->unit->flags & 0x200) {
+        if (btlGetIndexListCount((void *)entry->unk_60) == 1) {
+            other = (BtlUnit *)btlGetIndexListEntry((void *)entry->unk_60, 0);
+            if ((other->flags & 0x400) == 0) {
                 return 0;
             }
-            btlRaiseLinkedActionPose(unit);
+            btlRaiseLinkedActionPose((BtlLinkedCommand *)unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020DC38(unit, unit, 0);
-            ((BtlUnit *)unit)->flags = 0;
+            func_0020DC38((void *)unit, (void *)unit, 0);
+            unit->flags = 0;
         }
         return 1;
     }
     return 0;
 }
 
-s32 func_0020E910(u8 *unit) {
-    u16 flags = ((BtlActionTableRow *)D_003BAA60)[((BtlUnit *)unit)->unk_114].flags;
+s32 func_0020E910(BtlUnit *unit) {
+    u16 flags = ((BtlActionTableRow *)D_003BAA60)[unit->unk_114].flags;
     if (flags & 0x1000) {
         btlFlagAllUnitDefeatCandidatesTask();
         if (!(flags & 0x10)) {
-            btlSelectRandomDefeatCamera(unit);
+            btlSelectRandomDefeatCamera((void *)unit);
         } else {
-            btlSetEffectCameraKeys(unit, -203.0f, -531.1f, -1259.0f,
+            btlSetEffectCameraKeys((void *)unit, -203.0f, -531.1f, -1259.0f,
                            0.124f, -0.07f, -0.021f, 0.981f,
                            -203.0f, -46.1f, -1259.0f, -0.144f,
                            -0.066f, -0.003f, 0.978f, 45.0f, 30.0f);
@@ -552,12 +560,12 @@ s32 func_0020E910(u8 *unit) {
         return 1;
     }
     if (flags & 0x2000) {
-        if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->unk_60) == 1) {
+        if (btlGetIndexListCount((void *)((BtlEventEntry *)unit)->task->unk_60) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            btlRaiseLinkedActionPose(unit);
+            btlRaiseLinkedActionPose((BtlLinkedCommand *)unit);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
-            btlSelectRandomDefeatCamera(unit);
+            btlSelectRandomDefeatCamera((void *)unit);
         }
         return 1;
     }
