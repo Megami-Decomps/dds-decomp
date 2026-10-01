@@ -93,26 +93,34 @@ def _get_profile(
         raise flw0.Flw0Error(f"{prefix}unknown command profile {name!r}") from exc
 
 
-def _require_standard_layout(script: flw0.Flw0File) -> None:
+def _require_standard_layout(script: flw0.Flw0File) -> bytes:
     shape = tuple((section.type_id, section.element_size) for section in script.sections)
     if shape != _STANDARD_SECTIONS:
         raise flw0.Flw0Error(
             "symbolic source requires the standard five DDS sections; use flw0 1"
         )
     cursor = script.table_end
-    for section in script.sections:
+    for section in script.sections[:4]:
         if section.offset != cursor:
             raise flw0.Flw0Error(
                 f"section {section.index} has noncanonical offset 0x{section.offset:x}; "
                 "use flw0 1"
             )
         cursor += section.logical_size
-    if cursor != script.physical_size:
+    string_section = script.sections[4]
+    if string_section.offset != cursor:
+        raise flw0.Flw0Error(
+            f"section 4 has noncanonical offset 0x{string_section.offset:x}; "
+            "use flw0 1"
+        )
+    string_data = flw0._type5_extent(script, string_section)
+    if string_section.offset + len(string_data) != script.physical_size:
         raise flw0.Flw0Error("file has trailing or uncovered bytes; use flw0 1")
     if script.header.declared_size != script.sections[4].offset:
         raise flw0.Flw0Error(
             "declared size is not the string-section offset; use flw0 1"
         )
+    return string_data
 
 
 def _render_instruction(
@@ -165,7 +173,7 @@ def _render_instruction(
 def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     """Render standard-layout FLW0 as symbolic version-2 source."""
 
-    _require_standard_layout(script)
+    string_data = _require_standard_layout(script)
     command_profile = _get_profile(profile_name)
     procedures = script.named_rows(0)
     jump_labels = script.named_rows(1)
@@ -184,7 +192,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
         _unique_symbol(row.name, "label", row.row_index, used) for row in jump_labels
     ]
     string_lines, string_symbols = flw0._render_string_payload(
-        script.section_bytes(script.sections[4]), flw0._type5_offsets(script), used
+        string_data, flw0._type5_offsets(script), used
     )
     message_data = script.section_bytes(script.sections[3])
     message_symbols = flw0._message_symbols(message_data)[0]
@@ -261,7 +269,10 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     lines.append("end")
     lines.append("")
     lines.extend(message_lines)
-    lines.extend(("end", "", "strings"))
+    string_header = "strings"
+    if len(string_data) != script.sections[4].logical_size:
+        string_header += f" count={script.sections[4].element_count}"
+    lines.extend(("end", "", string_header))
     lines.extend(string_lines)
     lines.append("end")
     return "\n".join(lines).rstrip() + "\n"
@@ -466,6 +477,7 @@ def parse(text: str) -> flw0.Flw0File:
     jump_labels: list[Declaration] = []
     blocks: dict[str, list[tuple[int, str]]] = {}
     messages_are_msg1 = False
+    string_count_record: tuple[str, int] | None = None
     index = 1
     while index < len(meaningful):
         line_number, line = meaningful[index]
@@ -498,6 +510,10 @@ def parse(text: str) -> flw0.Flw0File:
         if directive in ("code", "messages", "strings"):
             valid_header = len(tokens) == 1 or (
                 directive == "messages" and tokens == ["messages", "msg1"]
+            ) or (
+                directive == "strings"
+                and len(tokens) == 2
+                and tokens[1].startswith("count=")
             )
             if not valid_header or directive in blocks:
                 raise flw0.Flw0Error(f"line {line_number}: invalid {directive} block")
@@ -511,6 +527,8 @@ def parse(text: str) -> flw0.Flw0File:
             blocks[directive] = content
             if directive == "messages" and len(tokens) == 2:
                 messages_are_msg1 = True
+            if directive == "strings" and len(tokens) == 2:
+                string_count_record = (tokens[1].split("=", 1)[1], line_number)
             index += 1
             continue
         raise flw0.Flw0Error(
@@ -536,6 +554,15 @@ def parse(text: str) -> flw0.Flw0File:
 
     command_profile = _get_profile(*profile_record) if profile_record else None
     string_data, string_symbols = flw0._parse_string_payload(blocks["strings"])
+    string_count = len(string_data)
+    if string_count_record is not None:
+        string_count = flw0._unsigned(
+            string_count_record[0], string_count_record[1]
+        )
+        if string_count > len(string_data):
+            raise flw0.Flw0Error(
+                f"line {string_count_record[1]}: string count exceeds payload size"
+            )
     if messages_are_msg1:
         try:
             message_data = msg1.parse_source(blocks["messages"])
@@ -571,9 +598,8 @@ def parse(text: str) -> flw0.Flw0File:
             raise flw0.Flw0Error(
                 f"section {index} payload size is not divisible by stride {stride}"
             )
-        sections.append(
-            flw0.Section(index, type_id, stride, len(payload) // stride, offset)
-        )
+        element_count = string_count if index == 4 else len(payload) // stride
+        sections.append(flw0.Section(index, type_id, stride, element_count, offset))
         offset += len(payload)
 
     int_locals = flw0._signed_halfword(locals_values["int"], 0)
@@ -588,6 +614,8 @@ def parse(text: str) -> flw0.Flw0File:
         flw0._unsigned(header_values["word18"], 0),
         flw0._unsigned(header_values["word1c"], 0),
     )
-    return flw0.parse(
+    script = flw0.parse(
         flw0.Flw0File(header, tuple(sections), b"".join(payloads)).to_bytes()
     )
+    _require_standard_layout(script)
+    return script

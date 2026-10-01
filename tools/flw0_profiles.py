@@ -49,7 +49,9 @@ DDS1 = CommandProfile(
     ),
 )
 
-PROFILES = {DDS1.name: DDS1}
+DDS2 = CommandProfile("dds2", ())
+
+PROFILES = {profile.name: profile for profile in (DDS1, DDS2)}
 
 
 def get(name: str) -> CommandProfile:
