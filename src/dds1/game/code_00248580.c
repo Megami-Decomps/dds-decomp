@@ -296,13 +296,13 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
     mnuRefreshThresholdNodeFlags(host->list);
 }
 
-void mnuReleaseProgressWorkList(s32 arg0) {
-    mnuDestroyListState((u32)((MenuTerminalWork *)arg0)->list);
+void mnuReleaseProgressWorkList(MenuTerminalWork *work) {
+    mnuDestroyListState((u32)work->list);
 }
 
-void mnuReleaseSelectedProgressPanel(s32 arg0) {
-    mnuReleaseDualPercentPanel(((MenuTerminalWork *)arg0)->list->selectedNode->panel);
-    func_0027B888((u32)((MenuTerminalWork *)arg0)->list);
+void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
+    mnuReleaseDualPercentPanel(work->list->selectedNode->panel);
+    func_0027B888((u32)work->list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00248E68);
@@ -549,12 +549,12 @@ s32 mnuTickInitState(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_00249850);
 
-void mnuReleaseMenuVisualWorkResources(s32 arg0) {
-    mnuClearEntries(arg0 + 400);
-    mnuReleasePartyIconBundles(arg0 + 400);
-    mnuDestroyPanelGroup(((MenuVisualWork *)arg0)->panelGroup);
-    func_00283820(((MenuVisualWork *)arg0)->displayResource);
-    func_00285160(((MenuVisualWork *)arg0)->effectResource);
+void mnuReleaseMenuVisualWorkResources(MenuVisualWork *work) {
+    mnuClearEntries((s32)work + 400);
+    mnuReleasePartyIconBundles((s32)work + 400);
+    mnuDestroyPanelGroup(work->panelGroup);
+    func_00283820(work->displayResource);
+    func_00285160(work->effectResource);
 }
 
 void effUpdateAttached(s32 arg0, s32 arg1, s32 arg2, MenuVisualWork *work) {
