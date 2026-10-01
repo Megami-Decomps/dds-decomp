@@ -78,7 +78,8 @@ typedef struct {
     s32 fadeOut;           /* 0x50 */
     u8 pad54[0x10];
     u32 count;             /* 0x64 */
-    u8 pad68[0x118];
+    u32 duration;          /* 0x68 */
+    u8 pad6C[0x114];
 } EffMagatuhiHeadSecond; /* 0x180 */
 
 typedef struct {
@@ -263,6 +264,14 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018A838);
 extern void *effMathGetSlotAt(void *slots, s32 index);
 extern void func_0018DFA8(void *slots, s32 index, void *out);
 extern void func_001891A8(void *owner);
+extern void func_0018A838(void *work, s32 index);
+extern void func_00189818(void *valueWork, s32 index, void *out);
+
+typedef struct {
+    u8 pad00[0x30];
+    f32 scale; /* 0x30 */
+    f32 base;  /* 0x34 */
+} EffMagatuhiSlot;
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018AB40);
 
@@ -278,7 +287,51 @@ void effMagatuhiCopyHandlerRows(EffMagatuhiWork *work, EffMagatuhiRowsSrc *src) 
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_0018ADD8);
+void func_0018ADD8(EffMagatuhiWork *arg) {
+    EffMagatuhiWideSecond *work = effGetHandlerArg(arg->ptr08);
+    EffMagatuhiWork *valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
+    u32 duration = work->head.duration;
+    s32 life = work->head.life;
+    u32 count = work->head.count;
+    s32 *delays = work->delays;
+    f32 out[4];
+    f32 from[4];
+    f32 to[4];
+    f32 t;
+    f32 step;
+    u32 i;
+    u32 j;
+    s32 span;
+    EffMagatuhiSlot *slot;
+
+    for (i = 0; i < count; i += 4) {
+        func_0018A838(work, i);
+        *delays = effMiscRand(D_0034DF38) % life;
+        slot = effMathGetSlotAt(work->mathResource, i);
+        if (duration < *delays) {
+            slot->scale = slot->base * (f32)(*delays - duration);
+            span = duration;
+        } else {
+            slot->scale = 0.0f;
+            span = duration - *delays;
+        }
+        t = 0.0f;
+        func_0018DFA8(work->mathResource, i, from);
+        slot->scale = slot->base * (f32)*delays;
+        func_0018DFA8(work->mathResource, i, to);
+        step = 1.0f / (f32)span;
+        for (j = 0; j < span; j++) {
+            VU0_LOAD_VF(vf10, from);
+            VU0_LOAD_VF(vf11, to);
+            VU0_LERP_VF10(t);
+            VU0_STORE_VF(vf10, out);
+            func_00189818(valueWork, i, out);
+            t += step;
+        }
+        (*delays)++;
+        delays += 4;
+    }
+}
 
 /* Parameter head shared by the third and fourth families (copied to 0x40 inside the work). */
 typedef struct {

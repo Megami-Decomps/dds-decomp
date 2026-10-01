@@ -438,8 +438,6 @@ extern s32 frFontQueueGlyphInSelectedSlot(void *);
 
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
-extern s32 func_0022ED90(u8 *, u8 *, s32, u8 *, s32);
-
 extern void *sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
@@ -2336,15 +2334,34 @@ s32 mnuQueueColoredGlyphAtPosition(s32 width, s32 height, s32 mode) {
     return frFontQueueGlyphInSelectedSlot(packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_0022ED90);
-
-s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
-    s32 offset = ((MenuList *)settings)->rows * 24 + 4;
-    func_0020D1C0(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
-    return func_0022ED90(first, second, mode, settings, extra);
+s32 func_0022ED90(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
+    u32 first;
+    u32 count;
+    u32 index;
+    u32 end;
+    u32 selected;
+    s32 rowY;
+    first = ((MenuList *)menu)->top;
+    count = ((MenuList *)menu)->rows;
+    end = first + count;
+    index = first;
+    selected = ((MenuList *)menu)->cursor;
+    rowY = (s32)y;
+    for (; index < end; index++) {
+        void *packet = func_0019F448((s32)x << 4, rowY << 3, 0xFF0000, index == selected ? 0x89FEFF80 : 0xA09DC380, items[index], 0);
+        func_0019D550(packet, 0, 0x60);
+        frFontQueueGlyphInSelectedSlot(packet);
+        rowY += 0x18;
+    }
 }
 
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
+s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 *items) {
+    s32 offset = ((MenuList *)settings)->rows * 24 + 4;
+    func_0020D1C0(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
+    return func_0022ED90(first, second, mode, settings, items);
+}
+
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
     void *handle;
     u32 first;
     u32 count;
@@ -2372,7 +2389,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
         }
     }
     D_00380748.draw(&D_00380748, (s32)handle);
-    return func_0022ED90(x + 0x2C, y, mode, menu, extra);
+    return func_0022ED90(x + 0x2C, y, mode, menu, items);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022F068);

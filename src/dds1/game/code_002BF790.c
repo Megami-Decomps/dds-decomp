@@ -40,7 +40,8 @@ typedef struct GridTextWidget {
     s32 width;           /* 0x28 */
     s32 height;          /* 0x2C */
     u32 reference;       /* 0x30 */
-    u8 pad34[0xC];
+    u8 pad34[8];
+    s32 rowOffset;       /* 0x3C */
 } GridTextWidget;
 
 extern s32 sdfGridSeekSelectedNodeByIndex(s32, void *);
@@ -748,7 +749,64 @@ s32 itfGetGridChildLayoutMode(u8 *widget, u32 target) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C20F8);
+typedef struct GridValueEntry {
+    char *label;     /* 0x00 */
+    u16 pad04;
+    u16 index;       /* 0x06 */
+    s32 *kind;       /* 0x08: 0 decimal, 1 hex, 2 float */
+    f32 value;       /* 0x0C */
+    s32 width;       /* 0x10 */
+    u8 pad14[0x14];
+    void (*format)(void *, void *, char *, s32); /* 0x28 */
+} GridValueEntry;
+
+extern s32 strlen(const char *);
+extern char *strcpy(char *, const char *);
+extern s32 func_003014F0(char *, const char *, ...);
+extern double fptodp(f32);
+
+void func_002C20F8(GridTextWidget *widget, GridValueEntry *entry, char *out) {
+    char text[0x100];
+    char prefix[0x100];
+    char format[0x100];
+
+    if (entry->format != NULL) {
+        entry->format(widget, entry, text, 0x100);
+    } else if (entry->kind == NULL) {
+        func_003014F0(text, "%s", entry->label);
+    } else {
+        if (strlen(entry->label) == 0) {
+            strcpy(prefix, "");
+        } else {
+            func_003014F0(prefix, "%s ", entry->label);
+        }
+        switch (*entry->kind) {
+        case 0:
+            func_003014F0(format, "%%s%%0%dd", entry->width);
+            func_003014F0(text, format, prefix, (s32)entry->value);
+            break;
+        case 1:
+            func_003014F0(format, "%%s0x%%0%dX", entry->width - 2);
+            func_003014F0(text, format, prefix, (s32)entry->value);
+            break;
+        case 2:
+            func_003014F0(format, "%%s%%0%d.1f", entry->width);
+            func_003014F0(text, format, prefix, (double)entry->value);
+            break;
+        }
+    }
+    if (widget->flags & 0x100) {
+        s32 row = entry->index + widget->rowOffset;
+
+        if (!(widget->flags & 0x200)) {
+            func_003014F0(out, "%03d:%s", row, text);
+        } else {
+            func_003014F0(out, "0x%03X:%s", row, text);
+        }
+    } else {
+        strcpy(out, text);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C22F0);
 

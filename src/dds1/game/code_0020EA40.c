@@ -1640,12 +1640,6 @@ s32 mnuQueueColoredGlyphAtPosition(s32 width, s32 height, s32 mode) {
     return frFontQueueGlyphInSelectedSlot(packet);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00214490);
-
-extern void func_001FB140(u8 *, u8 *, s32, s32, u32, u32);
-
-extern s32 func_00214490(u8 *, u8 *, s32, u8 *, s32);
-
 typedef struct BtlMenuSelection {
     u8 pad00[4];
     u32 selected; /* 0x04 */
@@ -1653,10 +1647,33 @@ typedef struct BtlMenuSelection {
     s32 count;    /* 0x0C */
 } BtlMenuSelection;
 
-s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 extra) {
+s32 func_00214490(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
+    u32 first;
+    u32 count;
+    u32 index;
+    u32 end;
+    u32 selected;
+    s32 rowY;
+    first = ((BtlMenuSelection *)menu)->first;
+    count = ((BtlMenuSelection *)menu)->count;
+    end = first + count;
+    index = first;
+    selected = ((BtlMenuSelection *)menu)->selected;
+    rowY = (s32)y;
+    for (; index < end; index++) {
+        void *packet = func_00197748((s32)x << 4, rowY << 3, 0xFF0000, index == selected ? 0x89FEFF80 : 0xA09DC380, items[index], 0);
+        func_001958A0(packet, 0, 0x60);
+        frFontQueueGlyphInSelectedSlot(packet);
+        rowY += 0x18;
+    }
+}
+
+extern void func_001FB140(u8 *, u8 *, s32, s32, u32, u32);
+
+s32 mnuDrawMenuFrameSizedToRows(u8 *first, u8 *second, s32 mode, u8 *settings, s32 *items) {
     s32 offset = ((BtlMenuSelection *)settings)->count * 24 + 4;
     func_001FB140(first - 4, second - 4, mode, offset, 0x80806020, 0x30000000);
-    return func_00214490(first, second, mode, settings, extra);
+    return func_00214490(first, second, mode, settings, items);
 }
 
 extern void sdfInitPacketList(void *);
@@ -1674,7 +1691,7 @@ typedef struct BtlMenuDrawer {
 
 extern BtlMenuDrawer D_00325748;
 
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 *items) {
     void *handle;
     u32 first;
     u32 count;
@@ -1702,7 +1719,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *menu, s32 extra) {
         }
     }
     D_00325748.draw(&D_00325748, (s32)handle);
-    return func_00214490(x + 0x2C, y, mode, menu, extra);
+    return func_00214490(x + 0x2C, y, mode, menu, items);
 }
 
 extern s32 D_003BAA70;

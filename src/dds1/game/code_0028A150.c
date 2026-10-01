@@ -340,7 +340,7 @@ extern void *fileBeginDetectionRequest(u32 callback);
 
 extern void *fileScanSlotStates(void);
 
-extern void func_0028BF38(void);
+extern void *func_0028BF38(void);
 
 extern s32 fileReqGetSize(s32 request);
 
@@ -415,7 +415,7 @@ extern u32 D_003BC834;
 
 extern s32 fileBeginPromptDialog(void *start, void *finish, s32 mode);
 
-extern void func_0028BAC0(void);
+extern void *func_0028BAC0(void);
 extern void *fileLoadMainBlobBegin(void);
 extern void *mcHandleSetupResult(void);
 
@@ -1104,9 +1104,77 @@ void *fileSlotSelectPollClear(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028BAC0);
-
 extern s8 D_00324510[];
+
+void *func_0028BAC0(void) {
+    s32 reqStatus;
+
+    D_003BC810 = 0;
+    if (D_003BC858 == 0) {
+        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+            sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
+            D_003BC858 = 1;
+        }
+    }
+    if (fileReqPoll() != 0) {
+        if (D_003BC858 == 1) {
+            D_003BC854 = 0;
+            D_003BC810 = 0;
+            if (D_003BC824 != 0) {
+                return fileBeginSlotResetPrompt();
+            }
+            if (D_003BC848 == 0) {
+                return fileBeginWait(&fileAbortSlotFlow);
+            }
+            return mcdEnterSelectedFileFlow();
+        }
+        reqStatus = fileReqGetStatus(D_003BC7E8);
+        switch (reqStatus) {
+        case 1:
+            if (D_003BC854 == 1) {
+                fileClearAllSlotFlags();
+                fileSetMenuFlowState(1);
+                D_003BC854 = 0;
+                D_003BC810 = 0;
+                return fileResetSelection();
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        case 0:
+            fileClearAllSlotFlags();
+            if (D_003BC854 != 1) {
+                D_003BC854 = 1;
+                D_003BC858 = 0;
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        case 2:
+            if (D_003BC848 == 0) {
+                fileClearAllSlotFlags();
+                D_003BC854 = 0;
+                D_003BC834 = 2;
+                return (void *)fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+            }
+            if (D_003BC854 != 7) {
+                fileClearAllSlotFlags();
+                D_003BC854 = 7;
+                D_003BC858 = 0;
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        case 3:
+            if (D_003BC854 != 2) {
+                fileClearAllSlotFlags();
+                D_003BC854 = 2;
+                D_003BC858 = 0;
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        }
+    }
+    return NULL;
+}
 
 void *filePollSlotScanOrReset(void) {
     if (D_003BC858 == 0) {
@@ -1181,7 +1249,69 @@ void *fileBeginDetectionRequest(u32 callback) {
     return func_0028BF38;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_0028BF38);
+void *func_0028BF38(void) {
+    s32 fileStatus;
+
+    if (D_003BC858 == 0) {
+        if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
+            fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
+            sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+            D_003BC858 = 1;
+        }
+    }
+    if (fileReqPoll() != 0) {
+        if (D_003BC858 == 1) {
+            fileSetMenuFlowState(0);
+            D_003BC854 = 0;
+            D_003BC810 = 0;
+            if (D_003BD904 == -1) {
+                return fileBeginWait((void *)-1);
+            }
+            return ((void *(*)(void))D_003BD904)();
+        }
+        fileStatus = fileReqGetStatus(D_003BC7E8);
+        switch (fileStatus) {
+        case 1:
+            if (D_003BC854 == 1) {
+                fileClearAllSlotFlags();
+                fileSetMenuFlowState(1);
+                D_003BC854 = 0;
+                D_003BC810 = 0;
+                return fileResetSelection();
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        case 0:
+            return fileBeginSlotMetadataRefresh();
+        case 2:
+            if (D_003BC848 == 0) {
+                fileClearAllSlotFlags();
+                fileSetMenuFlowState(0);
+                D_003BC854 = 0;
+                D_003BC834 = 2;
+                return (void *)fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+            }
+            if (D_003BC854 != 7) {
+                fileClearAllSlotFlags();
+                fileSetMenuFlowState(0);
+                D_003BC854 = 7;
+                D_003BC858 = 0;
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        case 3:
+            if (D_003BC854 != 2) {
+                fileClearAllSlotFlags();
+                fileSetMenuFlowState(0);
+                D_003BC854 = 2;
+                D_003BC858 = 0;
+            }
+            fileReqBegin(D_003BC7E8);
+            break;
+        }
+    }
+    return NULL;
+}
 
 void *fileBeginReadSlotIcon(void) {
     u8 buf[0x50];
