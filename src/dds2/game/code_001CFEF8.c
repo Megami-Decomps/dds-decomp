@@ -184,7 +184,9 @@ typedef struct BattleSceneWork {
     s32 scriptTarget;         /* 0x4D4 */
     u8 pad4D8[0xC];
     u32 values[64];
-    s32 (*sceneCallback)();
+    s32 (*sceneCallback)();    /* 0x5E4 */
+    u8 pad5E8[0x44];
+    void (*completionHook)();  /* 0x62C */
 } BattleSceneWork;
 
 extern SceneDescriptor *D_00435E04;
@@ -1126,7 +1128,7 @@ void func_001D3ED8(void) {
                 scene->flags |= 0x800;
                 return;
             }
-            hook = *(void (**)(void))((u8 *)scene + 0x62C);
+            hook = scene->completionHook;
             if (hook != 0) {
                 hook();
             }
