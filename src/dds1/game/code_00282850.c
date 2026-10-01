@@ -285,8 +285,9 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuStageTestS
     mnuAdvancePanelTransition((s32)menu);
 }
 
-void mnuDrawPanelListDefault(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    mnuDrawStageTestList(arg0, arg1, arg2, 0, arg3, arg4);
+/* Same as mnuDrawStageTestList with no override value; arg5 is unused. */
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuStageTestState *menu, s32 param, s32 unused) {
+    mnuDrawStageTestList(x, y, z, 0, menu, param);
 }
 
 typedef struct MenuPoint {

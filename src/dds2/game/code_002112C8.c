@@ -3308,13 +3308,13 @@ f32 btlGetBossPresenceActionScale(BtlUnitNode *unit, BtlUnitNode *target) {
     return scale;
 }
 
-void btlSetSkillTaskResults(BtlSkillTask *task, s32 arg1, s32 arg2, s32 skillId) {
+void btlSetSkillTaskResults(BtlSkillTask *task, s32 flags, s32 otherFlags, s32 skillId) {
     s32 percent = 100;
     if (skillId >= 0x1AB && skillId < 0x220) {
         percent *= btlGetSlotValueAdjustedForSpecialAbility(task->unit, skillId);
     }
-    task->adjustedValue = btlAdjustPointsForCombatFlags(task->unit, arg1, arg2, percent, skillId);
-    task->resultKind = btlGetCommandResultKindFromFlags(arg1, arg2, skillId);
+    task->adjustedValue = btlAdjustPointsForCombatFlags(task->unit, flags, otherFlags, percent, skillId);
+    task->resultKind = btlGetCommandResultKindFromFlags(flags, otherFlags, skillId);
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_0021B828);
