@@ -202,6 +202,7 @@ def render(
     script: flw0.Flw0File,
     profile_name: str | None = None,
     semantic: bool = False,
+    structured: bool = False,
 ) -> str:
     """Render standard-layout FLW0 as symbolic version-2 source."""
 
@@ -294,7 +295,7 @@ def render(
         raise flw0.Flw0Error(
             f"table target is not an instruction boundary: {rendered}; use flw0 1"
         )
-    if semantic:
+    if semantic or structured:
         lines.extend(
             flw0_semantic.render_code(
                 words,
@@ -315,6 +316,7 @@ def render(
                     message_symbols,
                     selection_symbols,
                 ),
+                structured=structured,
             )
         )
     else:
