@@ -227,7 +227,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     )
     n.rule(
         "battle_tbl",
-        f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $in $out",
+        f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $context $in $out",
         description="battle table $in",
     )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
@@ -416,7 +416,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 source = source.relative_to(ROOT)
                 output = battle_output_dir / f"{source.stem.upper()}.TBL"
                 dependencies = ["tools/battle_tbl.py"]
+                context = ""
                 if source.stem == "aicalc":
+                    message_source = source.with_name("msg.tblasm")
+                    skill_source = source.with_name("skill.tblasm")
                     dependencies.extend(
                         (
                             "tools/flw0.py",
@@ -427,8 +430,15 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                             "tools/dds1_msg1_chars.tsv",
                             str(source.with_name("aicalc-ai.bfasm")),
                             str(source.with_name("aicalc-formulas.bfasm")),
+                            str(message_source),
+                            str(source.with_name("msg-items.msgasm")),
+                            str(source.with_name("msg-skills.msgasm")),
+                            str(source.with_name("msg-status-help.msgasm")),
+                            str(source.with_name("msg-command-help.msgasm")),
+                            str(skill_source),
                         )
                     )
+                    context = f"--messages {message_source} --skills {skill_source}"
                 elif source.stem == "msg":
                     dependencies.extend(
                         (
@@ -445,7 +455,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     "battle_tbl",
                     str(source),
                     implicit=dependencies,
-                    variables={"outdir": str(output.parent)},
+                    variables={"outdir": str(output.parent), "context": context},
                 )
                 battle_outputs.append(str(output))
             battle_stamp = battle_output_dir / "battle_tables.ok"

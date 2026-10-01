@@ -11,8 +11,8 @@ python3 tools/battle_tbl.py disassemble UNIT.TBL unit.tblasm
 python3 tools/battle_tbl.py assemble unit.tblasm UNIT.TBL
 python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
 python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
-python3 tools/battle_tbl.py disassemble AICALC.TBL aicalc.tblasm
-python3 tools/battle_tbl.py assemble aicalc.tblasm AICALC.TBL
+python3 tools/battle_tbl.py disassemble --messages msg.tblasm AICALC.TBL aicalc.tblasm
+python3 tools/battle_tbl.py assemble --messages msg.tblasm --skills skill.tblasm aicalc.tblasm AICALC.TBL
 python3 tools/battle_tbl.py disassemble MSG.TBL msg.tblasm
 python3 tools/battle_tbl.py assemble msg.tblasm MSG.TBL
 ninja dds1-battle-data dds2-battle-data
@@ -260,7 +260,7 @@ predicate or effect handler has not earned a stable gameplay name:
 enemy-ai 2 script=ai_ishisu_zako
   decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=50 action=skill:86
+  choice 1 0 weight=50 action=skill:MARIN_KARIN
   choice 5 0 weight=100 action=preset:1:4
 end
 ```
@@ -272,6 +272,21 @@ the argument. Action values distinguish direct `skill` IDs, six native
 Direct skill actions are checked against the paired `SKILL.TBL`. Script
 references use the actual procedure names from the AI program rather than
 bare table indices.
+
+Skill symbols come from the indexed `skill-name` rows in the paired battle
+`MSG.TBL` source. Names are normalized to uppercase identifiers, so direct
+selections read as `AI_SELECT_SKILL(AGI)` and queued-action checks can use
+`AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D)`. Repeated display names all
+receive their hexadecimal ID, such as `MARAGI_004` and `MARAGI_1B0`, so a new
+collision fails old source instead of silently changing its numeric meaning.
+Empty and reserved display rows use `SKILL_` followed by the hexadecimal ID.
+This makes every symbol deterministic and reversible without maintaining a
+second name registry.
+
+Only native-command arguments established as action IDs receive this symbol
+domain. Masks, modes, percentages, and uncertain arguments remain numeric.
+The normal build supplies both `msg.tblasm` for name resolution and
+`skill.tblasm` for range validation when assembling `AICALC.TBL`.
 
 DDS2's separate weighted tables contain eight `{value, weight}` entries. Zero
 entries are omitted from source:
@@ -312,7 +327,7 @@ selectors. Related-engine command identities support `AI_SELECT_ESCAPE`,
 their local contracts. This names 3,432 of 3,434 calls in DDS1 and 3,800 of
 3,801 calls in DDS2, allowing common code to read as conditions such as
 `AI_UNIT_MP_AT_OR_BELOW_RATE(25)`,
-`AI_ANY_PLAYER_HAS_QUEUED_ACTION(365)`, and actions such as
+`AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D)`, and actions such as
 `AI_SELECT_LOWEST_LEVEL_TARGET()`. Two calls to an exact DDS1 target-selection
 alias and one complex DDS2 action selector remain numeric because their
 distinct public roles are not established.

@@ -16,6 +16,19 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import battle_tbl  # noqa: E402
+import flw0_semantic  # noqa: E402
+
+
+def _battle_symbols(game: str) -> battle_tbl.BattleSymbols:
+    directory = ROOT / f"src/{game}/data/battle"
+    source = directory / "msg.tblasm"
+    table = battle_tbl.parse_message_source(
+        source.read_text(encoding="utf-8"), source.parent
+    )
+    skill = battle_tbl.parse_skill_source(
+        (directory / "skill.tblasm").read_text(encoding="utf-8")
+    )
+    return battle_tbl.battle_symbols_from_message(table, skill)
 
 
 class BattleTableTests(unittest.TestCase):
@@ -401,8 +414,9 @@ end
         for game, counts in expected.items():
             with self.subTest(game=game):
                 source = ROOT / f"src/{game}/data/battle/aicalc.tblasm"
+                symbols = _battle_symbols(game)
                 table = battle_tbl.parse_aicalc_source(
-                    source.read_text(encoding="utf-8"), source.parent
+                    source.read_text(encoding="utf-8"), source.parent, symbols
                 )
                 ai_count = len(battle_tbl.flw0.parse(table.ai_script).named_rows(0))
                 formula_count = len(
@@ -433,7 +447,9 @@ end
 
         dds1_source = ROOT / "src/dds1/data/battle/aicalc.tblasm"
         dds1 = battle_tbl.parse_aicalc_source(
-            dds1_source.read_text(encoding="utf-8"), dds1_source.parent
+            dds1_source.read_text(encoding="utf-8"),
+            dds1_source.parent,
+            _battle_symbols("dds1"),
         )
         groups = [list(group) for group in dds1.enemies[0].groups]
         groups[0][0] = battle_tbl.AiChoice(weight=1, action=0x7000)
@@ -542,8 +558,35 @@ end
         with self.assertRaisesRegex(battle_tbl.BattleTableError, "row is 17 bytes"):
             battle_tbl.encode_message(replace(dds2, text_tables=tuple(text_tables)))
 
+    def test_battle_name_symbols_are_stable_and_typed(self) -> None:
+        symbols = _battle_symbols("dds1")
+        self.assertEqual(symbols.skills.by_name["AGI"], 1)
+        self.assertEqual(symbols.skills.by_name["MARAGI_004"], 4)
+        self.assertEqual(symbols.skills.by_name["MARAGI_1B0"], 432)
+        self.assertEqual(symbols.skills.by_name["SKILL_000"], 0)
+        self.assertEqual(len(symbols.skills.by_name), 608)
+
+        profile = battle_tbl.aicalc_command_profile("dds1", symbols)
+        select = profile.by_name["AI_SELECT_SKILL"]
+        queued = profile.by_name["AI_ANY_PLAYER_HAS_QUEUED_ACTION"]
+        self.assertEqual(select.symbols_for_argument(0).by_name["AGI"], 1)
+        self.assertEqual(
+            queued.symbols_for_argument(0).by_name["MAGIC_REPEL_16D"], 365
+        )
+        with self.assertRaisesRegex(
+            battle_tbl.flw0.Flw0Error, "620 is outside the integer domain"
+        ):
+            flw0_semantic.parse_expression("AI_SELECT_SKILL(620)", 1, profile)
+        with self.assertRaisesRegex(
+            battle_tbl.flw0.Flw0Error, "not a symbolic value"
+        ):
+            flw0_semantic.parse_expression(
+                "AI_SELECT_SKILL(SKILL_26C)", 1, profile
+            )
+
     def test_tracked_battle_corpus_hashes(self) -> None:
         for game in ("dds1", "dds2"):
+            symbols = _battle_symbols(game)
             manifest = ROOT / f"config/{game}/battle_tables.sha1"
             for entry in manifest.read_text(encoding="utf-8").splitlines():
                 digest, output = entry.split()
@@ -565,10 +608,12 @@ end
                     data = battle_tbl.encode_skill(model)
                     rendered = battle_tbl.render_skill_source(battle_tbl.decode_skill(data))
                 elif name == "aicalc":
-                    model = battle_tbl.parse_aicalc_source(source_text, source.parent)
+                    model = battle_tbl.parse_aicalc_source(
+                        source_text, source.parent, symbols
+                    )
                     data = battle_tbl.encode_aicalc(model)
                     rendered = battle_tbl.render_aicalc_source(
-                        battle_tbl.decode_aicalc(data)
+                        battle_tbl.decode_aicalc(data), symbols=symbols
                     )
                 elif name == "msg":
                     model = battle_tbl.parse_message_source(source_text, source.parent)
@@ -595,7 +640,9 @@ end
             battle_tbl.validate_unit_skill(unit, skill)
             aicalc_source = ROOT / f"src/{game}/data/battle/aicalc.tblasm"
             aicalc = battle_tbl.parse_aicalc_source(
-                aicalc_source.read_text(encoding="utf-8"), aicalc_source.parent
+                aicalc_source.read_text(encoding="utf-8"),
+                aicalc_source.parent,
+                symbols,
             )
             battle_tbl.validate_aicalc_references(aicalc, skill)
 

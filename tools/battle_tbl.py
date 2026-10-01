@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import math
+import re
 import shlex
 import struct
 import sys
@@ -13,6 +15,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 import flw0
+import flw0_profiles
 import flw0_symbolic
 import msg1
 
@@ -462,6 +465,102 @@ class MessageTable:
     profile: MessageProfile
     text_tables: tuple[tuple[str, ...], ...]
     message_banks: tuple[bytes, ...]
+
+
+@dataclass(frozen=True)
+class BattleSymbols:
+    """Source-level names for battle IDs recovered from the fixed text tables."""
+
+    profile_name: str
+    skills: flw0_profiles.IntegerSymbols
+
+
+_EXPRESSION_NAMES = frozenset(("INF", "NAN", "RESULT"))
+_ACTION_ID_ARGUMENTS = frozenset(
+    (
+        "AI_SELECT_SKILL",
+        "AI_ENEMY_HAS_ACTION",
+        "AI_ACTOR_CAN_USE_ACTION",
+        "AI_SELECT_DIRECT_ACTION",
+        "AI_ANY_ENEMY_HAS_QUEUED_ACTION",
+        "AI_ANY_PLAYER_HAS_QUEUED_ACTION",
+    )
+)
+
+
+def _id_symbols(values: tuple[str, ...], prefix: str) -> flw0_profiles.IntegerSymbols:
+    bases: list[str] = []
+    for index, value in enumerate(values):
+        base = re.sub(r"[^A-Za-z0-9]+", "_", value).strip("_").upper()
+        if (
+            not base
+            or base[0].isdigit()
+            or base in _EXPRESSION_NAMES
+            or re.fullmatch(r"0X[0-9A-F]+", base)
+        ):
+            base = f"{prefix}_{index:03X}"
+        bases.append(base)
+
+    counts = Counter(bases)
+    used: set[str] = set()
+    symbols: list[tuple[int, str]] = []
+    for index, base in enumerate(bases):
+        candidate = base if counts[base] == 1 else f"{base}_{index:03X}"
+        if candidate in used:
+            candidate = f"{prefix}_{index:03X}"
+        used.add(candidate)
+        symbols.append((index, candidate))
+    return flw0_profiles.IntegerSymbols(tuple(symbols), complete=True)
+
+
+def battle_symbols_from_message(
+    table: MessageTable, skill: SkillTable | None = None
+) -> BattleSymbols:
+    """Build deterministic, collision-safe symbols from one battle MSG table."""
+
+    if skill is not None and skill.profile.name != table.profile.name:
+        raise BattleTableError(
+            f"cannot join {table.profile.name} battle names with "
+            f"{skill.profile.name} SKILL"
+        )
+    by_directive = {
+        profile.directive: values
+        for profile, values in zip(table.profile.text_profiles, table.text_tables)
+    }
+    skill_names = by_directive["skill-name"]
+    if skill is not None:
+        skill_names = skill_names[: len(skill.action_attributes)]
+    return BattleSymbols(
+        table.profile.name,
+        _id_symbols(skill_names, "SKILL"),
+    )
+
+
+def aicalc_command_profile(
+    profile_name: str, symbols: BattleSymbols | None = None
+) -> flw0_profiles.CommandProfile:
+    """Return the AICALC command profile, optionally typed with battle IDs."""
+
+    profile = flw0_profiles.get(f"{profile_name}-aicalc")
+    if symbols is None:
+        return profile
+    if symbols.profile_name != profile_name:
+        raise BattleTableError(
+            f"cannot use {symbols.profile_name} battle symbols with {profile_name} AICALC"
+        )
+    commands = []
+    for command in profile.commands:
+        if command.name not in _ACTION_ID_ARGUMENTS:
+            commands.append(command)
+            continue
+        argument_symbols = list(
+            command.argument_symbols or (None,) * command.stack_pop
+        )
+        argument_symbols[0] = symbols.skills
+        commands.append(
+            replace(command, argument_symbols=tuple(argument_symbols))
+        )
+    return replace(profile, commands=tuple(commands))
 
 
 def default_zone(profile: EncountProfile) -> Zone:
@@ -1938,12 +2037,18 @@ def _ai_operations(text: str, line_number: int) -> tuple[AiOperation, ...]:
     return values
 
 
-def _ai_action(text: str, line_number: int) -> int:
+def _ai_action(
+    text: str,
+    line_number: int,
+    symbols: BattleSymbols | None = None,
+) -> int:
     if ":" not in text:
         return _integer(text, line_number, "AI action")
     parts = text.split(":")
     kind = parts[0]
     if kind == "skill" and len(parts) == 2:
+        if symbols is not None and parts[1] in symbols.skills.by_name:
+            return symbols.skills.by_name[parts[1]]
         return _integer(parts[1], line_number, "skill action")
     if kind == "preset" and len(parts) == 3:
         preset = _integer(parts[1], line_number, "action preset")
@@ -1964,13 +2069,17 @@ def _ai_action(text: str, line_number: int) -> int:
     raise BattleTableError(f"line {line_number}: invalid AI action {text!r}")
 
 
-def _read_flw0_source(path: Path, kind: str) -> bytes:
+def _read_flw0_source(
+    path: Path,
+    kind: str,
+    profile: flw0_profiles.CommandProfile | None = None,
+) -> bytes:
     try:
         source = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise BattleTableError(f"cannot read {kind} script {path}: {exc}") from exc
     try:
-        return flw0.parse_source(source).to_bytes()
+        return flw0.parse_source(source, profile=profile).to_bytes()
     except flw0.Flw0Error as exc:
         raise BattleTableError(f"invalid {kind} script {path}: {exc}") from exc
 
@@ -2083,7 +2192,11 @@ def parse_message_source(text: str, source_dir: Path = Path(".")) -> MessageTabl
     return table
 
 
-def parse_aicalc_source(text: str, source_dir: Path = Path(".")) -> AiCalcTable:
+def parse_aicalc_source(
+    text: str,
+    source_dir: Path = Path("."),
+    symbols: BattleSymbols | None = None,
+) -> AiCalcTable:
     """Assemble AICALC source and its sibling FLW0 source files."""
 
     meaningful = [
@@ -2123,9 +2236,12 @@ def parse_aicalc_source(text: str, source_dir: Path = Path(".")) -> AiCalcTable:
     if set(script_files) != {"ai", "formula"}:
         raise BattleTableError("AICALC source needs one AI and one formula script")
 
-    ai_script = _read_flw0_source(source_dir / script_files["ai"][1], "AI")
+    command_profile = aicalc_command_profile(profile.name, symbols)
+    ai_script = _read_flw0_source(
+        source_dir / script_files["ai"][1], "AI", command_profile
+    )
     formula_script = _read_flw0_source(
-        source_dir / script_files["formula"][1], "formula"
+        source_dir / script_files["formula"][1], "formula", command_profile
     )
     procedures = flw0.parse(ai_script).named_rows(0)
     procedures_by_name = {row.name: row.row_index for row in procedures}
@@ -2257,7 +2373,7 @@ def parse_aicalc_source(text: str, source_dir: Path = Path(".")) -> AiCalcTable:
                     raise BattleTableError(f"line {child_number}: choice needs action=")
                 groups[group_index][choice_index] = AiChoice(
                     _value(child_fields, "weight", 0, child_number),
-                    _ai_action(child_fields["action"], child_number),
+                    _ai_action(child_fields["action"], child_number, symbols),
                     _ai_operation(child_fields.get("effect", "none"), child_number, "effect"),
                 )
             else:
@@ -3319,10 +3435,12 @@ def _ai_operation_text(operation: AiOperation) -> str:
     return f"{operation.selector}:{argument}"
 
 
-def _ai_action_text(action: int) -> str:
+def _ai_action_text(action: int, symbols: BattleSymbols | None = None) -> str:
     family = action & 0xF000
     argument = action & 0xFFF
     if family == 0:
+        if symbols is not None and action in symbols.skills.by_value:
+            return f"skill:{symbols.skills.by_value[action]}"
         return f"skill:{action}"
     if 0x1000 <= family <= 0x6000:
         return f"preset:{family >> 12}:{argument}"
@@ -3337,6 +3455,7 @@ def render_aicalc_source(
     table: AiCalcTable,
     ai_script_file: str = "aicalc-ai.bfasm",
     formula_script_file: str = "aicalc-formulas.bfasm",
+    symbols: BattleSymbols | None = None,
 ) -> str:
     """Render canonical AICALC table source with sibling script references."""
 
@@ -3407,7 +3526,9 @@ def render_aicalc_source(
                     continue
                 choice_fields = []
                 _append(choice_fields, "weight", choice.weight)
-                choice_fields.append(f"action={_ai_action_text(choice.action)}")
+                choice_fields.append(
+                    f"action={_ai_action_text(choice.action, symbols)}"
+                )
                 if choice.effect != AiOperation():
                     choice_fields.append(f"effect={_ai_operation_text(choice.effect)}")
                 lines.append(
@@ -3458,8 +3579,30 @@ def _write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def _load_message_source(path: Path | None) -> MessageTable | None:
+    if path is None:
+        return None
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BattleTableError(f"cannot read battle message source {path}: {exc}") from exc
+    return parse_message_source(source, path.parent)
+
+
+def _load_skill_source(path: Path | None) -> SkillTable | None:
+    if path is None:
+        return None
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BattleTableError(f"cannot read skill source {path}: {exc}") from exc
+    return parse_skill_source(source)
+
+
 def _command_disassemble(args: argparse.Namespace) -> None:
     data = _read(args.input)
+    message = _load_message_source(args.messages)
+    symbols = battle_symbols_from_message(message) if message is not None else None
     segments = _split_segments(data)
     segment_count = len(segments)
     if (
@@ -3480,6 +3623,7 @@ def _command_disassemble(args: argparse.Namespace) -> None:
         and all(segment[8:12] == b"FLW0" for segment in segments[-2:])
     ):
         table = decode_aicalc(data)
+        command_profile = aicalc_command_profile(table.profile.name, symbols)
         ai_name = f"{args.output.stem}-ai.bfasm"
         formula_name = f"{args.output.stem}-formulas.bfasm"
         try:
@@ -3488,18 +3632,20 @@ def _command_disassemble(args: argparse.Namespace) -> None:
                 f"{table.profile.name}-aicalc",
                 semantic=True,
                 structured=True,
+                profile=command_profile,
             )
             formula_source = flw0_symbolic.render(
                 flw0.parse(table.formula_script),
                 f"{table.profile.name}-aicalc",
                 semantic=True,
                 structured=True,
+                profile=command_profile,
             )
         except flw0.Flw0Error as exc:
             raise BattleTableError(f"cannot render AICALC script source: {exc}") from exc
         _write_text(args.output.parent / ai_name, ai_source)
         _write_text(args.output.parent / formula_name, formula_source)
-        source = render_aicalc_source(table, ai_name, formula_name)
+        source = render_aicalc_source(table, ai_name, formula_name, symbols)
     elif segment_count == 6:
         source = render_encount_source(decode_encount(data))
     elif segment_count == 5:
@@ -3530,6 +3676,11 @@ def _command_assemble(args: argparse.Namespace) -> None:
     if len(tokens) != 4 or tokens[:2] != ["battle-table", "1"]:
         raise BattleTableError("invalid battle table source header")
     header = _fields(tokens[2:], line_number, {"kind", "profile"}, "header")
+    message = _load_message_source(args.messages)
+    skill = _load_skill_source(args.skills)
+    symbols = (
+        battle_symbols_from_message(message, skill) if message is not None else None
+    )
     if header.get("kind") == "encounter":
         data = encode_encount(parse_encount_source(source))
     elif header.get("kind") == "unit":
@@ -3537,7 +3688,9 @@ def _command_assemble(args: argparse.Namespace) -> None:
     elif header.get("kind") == "skill":
         data = encode_skill(parse_skill_source(source))
     elif header.get("kind") == "aicalc":
-        data = encode_aicalc(parse_aicalc_source(source, args.input.parent))
+        table = parse_aicalc_source(source, args.input.parent, symbols)
+        validate_aicalc_references(table, skill)
+        data = encode_aicalc(table)
     elif header.get("kind") == "message":
         data = encode_message(parse_message_source(source, args.input.parent))
     else:
@@ -3553,6 +3706,16 @@ def main(argv: list[str] | None = None) -> int:
         ("assemble", _command_assemble),
     ):
         command = subparsers.add_parser(name)
+        command.add_argument(
+            "--messages",
+            type=Path,
+            help="battle MSG source used to resolve skill symbols",
+        )
+        command.add_argument(
+            "--skills",
+            type=Path,
+            help="battle SKILL source used to validate action references",
+        )
         command.add_argument("input", type=Path)
         command.add_argument("output", type=Path)
         command.set_defaults(handler=handler)
