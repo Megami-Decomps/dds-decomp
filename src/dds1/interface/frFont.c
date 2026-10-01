@@ -12,7 +12,7 @@ typedef struct FrFontCtx {
             u8 unk2[2];      /* 0x2 */
         } bytes;
     } u0;
-    u32 unk4;                /* 0x4 */
+    u32 contextCursor;     /* 0x4: advanced by frFontAdvanceContextCursor */
     u32 unk8;                /* 0x8 */
     union {
         u32 w;                   /* 0xC: word view */
@@ -379,7 +379,7 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 advance, s32 height) 
 }
 
 void frFontSetContextPair(FrFontCtx *ctx, u32 first, u32 second) {
-    ctx->unk4 = first;
+    ctx->contextCursor = first;
     ctx->unk8 = second;
 }
 
@@ -643,13 +643,13 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
         pending = ctx->flag1D;
     }
     if (pending != 0) {
-        frFontSetContextPair(ctx->u14.ptr, ctx->u0.word, ctx->unk4);
+                frFontSetContextPair(ctx->u14.ptr, ctx->u0.word, ctx->contextCursor);
         ctx->flag1D = 0;
     }
 }
 
 void frFontAdvanceContextCursor(FrFontCtx *ctx) {
-    ctx->unk4 += D_003BB164 * 8;
+    ctx->contextCursor += D_003BB164 * 8;
     ctx->flag1C = 1;
     ctx->flag1D = 1;
 }
