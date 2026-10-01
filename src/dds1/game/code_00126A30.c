@@ -3712,7 +3712,59 @@ typedef struct FldTaskRecordWork {
     u32 key;
 } FldTaskRecordWork;
 
-INCLUDE_ASM(const s32, "game/code_00126A30", fldApplyActorEntryTrigger);
+void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
+    s32 index;
+    s32 kind;
+    s32 record;
+    FldActorEntry *entry;
+
+    if (checkTaskRecord != 0) {
+        record = fldGetTaskRecordValue(((FldTaskRecordWork *)func_0010D6A0())->key);
+        if (record == 0) {
+            return;
+        }
+        if (fldFindActorEntryByName((const char *)record) == 0) {
+            return;
+        }
+    }
+    index = fldSelectedActorEntryIndex;
+    entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    kind = entry->kind;
+    if (kind == 1) {
+        if (entry->floor == D_0032E3C4[0] + 1) {
+            fldPlayFieldSeVolumePan(entry->sound);
+            fldReleaseActorTasksById(D_003CE3E0[index][1]);
+            return;
+        }
+    } else if (kind == 2) {
+        if (entry->floor == fldAreaState[5] + 1) {
+            s32 motion = entry->motion;
+
+            *(f32 *)&fldAreaState[93] = *(f32 *)&D_003CE3E0[index][11];
+            fldAreaState[94] = 1;
+            if (motion == 1) {
+                kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
+                return;
+            }
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            return;
+        }
+    } else if (kind == 3) {
+        kwlnFadeSetRGB(0, 0, 0);
+        return;
+    } else if (kind == 5) {
+        if (entry->motion == 0) {
+            D_0032E530[0] = 0x64;
+        } else {
+            D_0032E530[0] = -0x64;
+        }
+    } else if (kind == 10) {
+    } else if (kind == 11) {
+    } else if (kind == 12) {
+    } else if (kind == 4) {
+        fldApplyPendingCameraHeading();
+    }
+}
 
 extern s32 func_00110ED0(u64, s32, void *);
 extern void dds3SetWorldCameraObject(u64, s32);
