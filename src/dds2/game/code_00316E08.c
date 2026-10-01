@@ -142,7 +142,18 @@ u32 mdlAdvanceViewerPackageTask(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317010);
+INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
+extern char D_0042D4E0[];
+extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
+extern void scrDestroyAllNamedProcesses(void);
+
+s32 func_00317010(void) {
+    evtPrintDeveloperConsoleMessage(D_0042D4E0, 0);
+    dds3AdminSubmitModeRequest(0x1D, 0, 0, 0);
+    scrDestroyAllNamedProcesses();
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
 
