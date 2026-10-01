@@ -215,7 +215,7 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 /* The 0x50-byte parameter block copied by all block-set clones. */
 typedef struct EffPCPBlockSetParams {
     u32 unk00[7];
-    u32 groupSize[3];
+    s32 groupSize[3];
     u32 unk28[10];
 } EffPCPBlockSetParams;
 
@@ -2823,9 +2823,63 @@ void func_0017D4B8(EffPCPTripleWork *work, u32 val) {
     work->color = val;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017D4C0);
+extern u32 effParamWorkCreate(s32 kind, void *params);
 
-extern EffPCPBlockSetWork *func_0017D4C0(void *first, void **blocks);
+typedef struct EffPCPBlockModelInfo {
+    u8 pad00[0x2E];
+    u16 unk2E;
+} EffPCPBlockModelInfo;
+
+typedef struct EffPCPBlockModel {
+    u8 pad00[0x1C];
+    EffPCPBlockModelInfo *info;
+} EffPCPBlockModel;
+
+/* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
+EffPCPBlockSetWork *func_0017D4C0(void *first, void **blocks) {
+    EffPCPBlockSetWork *work;
+    EffPCPBlockModel *model;
+    u32 i;
+    u32 j;
+    u32 n;
+
+    work = func_002CFEB8(0x10C);
+    memset(work, 0, 0x10C);
+    work->params = *(EffPCPBlockSetParams *)first;
+    work->unkB0 = 0;
+    work->color = 0x80808080;
+    work->mode = 0;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->headHandle = effParamWorkCreate(3, blocks[0]);
+    work->handleA[0] = effParamWorkCreate(0, blocks[1]);
+    work->handleA[1] = effParamWorkCreate(0, blocks[2]);
+    work->handleA[2] = effParamWorkCreate(0, blocks[3]);
+    work->handleA[3] = effParamWorkCreate(0, blocks[4]);
+    work->handleA[4] = effParamWorkCreate(3, blocks[5]);
+    model = effParamWorkGetData(work->headHandle);
+    work->count = model->info->unk2E;
+    for (i = 0; i < 3; i++) {
+        if (work->params.groupSize[i] > 0) {
+            n = work->count * work->params.groupSize[i];
+            work->alloc[i] = (u32)func_002D03F8(n * 4);
+            work->list[i] = sdfResourceRetainAddress((void *)work->alloc[i]);
+            work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
+            for (j = 1; j < n; j++) {
+                work->list[i][j] = 0;
+            }
+        } else {
+            work->alloc[i] = 0;
+        }
+    }
+    work->handleB[0] = effParamWorkCreate(0, blocks[9]);
+    work->handleB[1] = effParamWorkCreate(0, blocks[10]);
+    work->handleB[2] = effParamWorkCreate(0, blocks[11]);
+    work->handleB[3] = effParamWorkCreate(0, blocks[12]);
+    work->handleB[4] = effParamWorkCreate(6, blocks[13]);
+    work->tailHandle = effParamWorkCreate(0, blocks[14]);
+    return work;
+}
+
 
 typedef struct {
     void *block1;
@@ -4920,13 +4974,35 @@ void effPcpEventWorkInitEntries(EffPCPEventWork32 *work) {
     }
 }
 
+/* Seven floats: the head of an event work copied verbatim from its parameter block. */
 typedef struct {
-    u32 word[7];
+    f32 word[7];
 } EffPCPEventHead28;
 
 extern u32 effParamWorkCreate(s32 kind, void *params);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00183EE0);
+/* Allocate an event work: copy the 0x1C-byte head, clear the links, then create the resource and owner from the optional parameters. */
+EffPCPEventWork32 *func_00183EE0(EffPCPEventHead28 *head, void *resourceParams, void *ownerParams) {
+    EffPCPEventWork32 *work = func_002CFEB8(0x40);
+
+    *(EffPCPEventHead28 *)work = *head;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->owner = 0;
+    work->entries = 0;
+    work->resource = 0;
+    work->unk30 = 0;
+    if (resourceParams != 0) {
+        work->resource = effParamWorkCreate(3, resourceParams);
+    }
+    if (ownerParams != 0) {
+        work->owner = func_00190100(ownerParams);
+    }
+    if (work->owner != 0) {
+        effPcpEventWorkInitEntries(work);
+    }
+    return work;
+}
 
 void effPcpEventWorkCreateFromTable(void *args) {
     void *param0;
