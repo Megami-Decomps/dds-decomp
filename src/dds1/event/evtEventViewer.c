@@ -43,7 +43,7 @@ typedef struct EvtGroupTable {
 typedef struct EvtViewer {
     s32 unk00;           /* 0x0 */
     u32 flags;           /* 0x4 */
-    EvtGroupTable *unk08; /* 0x8 */
+    EvtGroupTable *groupTable; /* 0x8 */
     s32 unk0C;           /* 0xC */
     u8 pad10[4];
     s32 unk14;           /* 0x14 */
@@ -341,9 +341,9 @@ void evtEventViewerShutdown(EvtViewer *viewer)
     while (viewer->head != NULL) {
         evtEventViewerDestroyEntry(viewer->head, viewer);
     }
-    if (viewer->unk08 != 0) {
-        evtPolygonMovieFreeWork(viewer->unk08);
-        viewer->unk08 = 0;
+    if (viewer->groupTable != 0) {
+        evtPolygonMovieFreeWork(viewer->groupTable);
+        viewer->groupTable = 0;
     }
     kwlnPadResetMotorLevelsAndOutput();
 }
@@ -353,9 +353,9 @@ void evtEventViewerReleaseGroups(EvtViewer *viewer)
 {
     s32 i;
 
-    if (viewer->unk08 != NULL) {
-        for (i = 0; i < viewer->unk08->count; i++) {
-            btlRemoveCurrentGroupedEntity(viewer->unk08->recs[i].group, viewer->unk08->recs[i].type);
+    if (viewer->groupTable != NULL) {
+        for (i = 0; i < viewer->groupTable->count; i++) {
+            btlRemoveCurrentGroupedEntity(viewer->groupTable->recs[i].group, viewer->groupTable->recs[i].type);
         }
     }
 }
