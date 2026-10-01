@@ -2025,13 +2025,13 @@ u8 *billCreateCellNode(u8 *config, u32 handle) {
     body += headerSize;
     ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffBillOwnedWork *)node)->references = effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
 void billReleaseCellNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    func_003297C8(((EffBillOwnedWork *)work)->allocation);
+    effReleaseResourceRefs(((EffFrameState *)work)->asset);
+    func_003297C8(((EffFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E11D0);
@@ -2105,13 +2105,13 @@ u8 *billCreateParticleNode(u8 *config, u32 handle) {
     body += headerSize;
     ((EffFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffBillOwnedWork *)node)->references = effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
 void billReleaseParticleNode(s32 work) {
-    effReleaseResourceRefs(((EffBillOwnedWork *)work)->references);
-    func_003297C8(((EffBillOwnedWork *)work)->allocation);
+    effReleaseResourceRefs(((EffFrameState *)work)->asset);
+    func_003297C8(((EffFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
@@ -2828,9 +2828,9 @@ u8 *effCreateActiveResource(EffActiveInstance *obj) {
     return (u8 *)work;
 }
 
-void effResetActiveInstanceFrame(u8 *work) {
-    D_003E9950[((EffActiveInstance *)work)->kind].fn();
-    ((EffClassWork *)work)->frame = 0;
+void effResetActiveInstanceFrame(EffClassWork *work) {
+    D_003E9950[work->kind].fn();
+    work->frame = 0;
 }
 
 void effAdvanceActiveInstanceFrame(work)
@@ -10326,7 +10326,7 @@ extern void sdfTexReleaseReference(s32, u32, u32);
 
 void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
     u32 i = 0;
-    u32 count = ((EffSlotSet *)owner)->entryCount;
+    u32 count = ((EffResourceSet *)owner)->count;
     u32 *resources;
 
     if (count != 0) {
