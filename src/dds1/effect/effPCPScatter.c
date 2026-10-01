@@ -153,7 +153,7 @@ struct PcpScatterWork3 {
     s32 unk24;
     u32 assetResource; /* 0x28: released with sdfQueueAssetRelease */
     u32 releaseHandle; /* 0x2C: released with func_002D0918 */
-    PcpScatterRes *res;
+    PcpScatterRes *sharedResource; /* 0x30: reference-counted */
     u8 pad34[0x20];
     u32 unk54;
 };
@@ -535,8 +535,8 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
 
 void effPcpScatterReleasePoolResources(PcpScatterWork3 *work)
 {
-    if (work->res != NULL) {
-        effPcpScatterResRelease(work->res);
+    if (work->sharedResource != NULL) {
+        effPcpScatterResRelease(work->sharedResource);
     }
     sdfQueueAssetRelease(work->assetResource);
     func_002D0918(work->releaseHandle);
@@ -549,15 +549,15 @@ void effPcpScatterCreatePoolResource(PcpScatterWork3 *work, u32 resId)
     PcpScatterRes *res;
 
     res = effPcpScatterResCreate(resId);
-    work->res = res;
+    work->sharedResource = res;
 }
 
 void effPcpScatterSharePoolResource(PcpScatterWork3 *work, PcpScatterWork3 *src)
 {
     PcpScatterRes *res;
 
-    res = effPcpScatterResAddRef(src->res);
-    work->res = res;
+    res = effPcpScatterResAddRef(src->sharedResource);
+    work->sharedResource = res;
 }
 
 s32 effPcpScatterGetRecordAddress(PcpScatterWork3 *work, s32 index)

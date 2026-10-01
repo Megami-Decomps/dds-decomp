@@ -12,7 +12,7 @@ typedef struct {
 } EffBattleMiscCtx; /* 0x114 */
 
 typedef struct {
-    u8 unk00;
+    u8 querySelector; /* 0x00 */
     u8 value; /* 0x01 */
 } EffBattleMiscParam;
 
@@ -20,9 +20,9 @@ extern u32 D_003AB050[];
 
 extern void (*D_003AF208[])();
 
-/* Look up the position provider selected by param->unk00; it leaves the vector in vf10. */
+/* Look up the position provider selected by param->querySelector; it leaves the vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffBattleMiscParam *param, u128 *out) {
-    D_003AF208[param->unk00](owner, param);
+    D_003AF208[param->querySelector](owner, param);
     VU0_STORE_VF(vf10, out);
 }
 
@@ -161,7 +161,7 @@ f32 effBattleMiscQueryScalar(EffBattleMiscUnit *unit, EffBattleMiscParam *param)
     EffBattleMiscUnit *other;
     f32 result = 0;
 
-    switch (param->unk00) {
+    switch (param->querySelector) {
     case 0:
         result = unit->fB4 * unit->f80;
         break;
