@@ -512,13 +512,13 @@ void func_0030D500(s32 arg0, s32 x, f32 fade) {
 }
 
 s32 func_0030D780(u64 arg0) {
-    u64 temp_v0;
-    s32 temp_v1;
+    u64 text;
+    s32 width;
 
-    temp_v0 = func_0019F448(0, 0, 0, 0, arg0, 0);
-    temp_v1 = frFontMeasureLines(temp_v0);
-    frFontQueueGlyphInSelectedSlot(temp_v0);
-    return temp_v1;
+    text = func_0019F448(0, 0, 0, 0, arg0, 0);
+    width = frFontMeasureLines(text);
+    frFontQueueGlyphInSelectedSlot(text);
+    return width;
 }
 
 s32 fldCountMaskBitsBeforeOrdinal(s32 mask, s32 ordinal) {
@@ -681,11 +681,11 @@ s32 fldReleaseLocalMapResources(void) {
 }
 
 void func_0030E130(void) {
-    s32 temp_v0;
+    s32 value;
 
     D_00439098 = 0;
-    temp_v0 = sdfCounterGetDisplayValue();
-    D_0043909C = temp_v0 - 1;
+    value = sdfCounterGetDisplayValue();
+    D_0043909C = value - 1;
     D_004390A0 = 0x3c;
 }
 

@@ -1199,12 +1199,12 @@ void func_0017CE28(u8 *matrix, void *src) {
 INCLUDE_ASM(const s32, "effect/effPCPScatter", func_0017CE88);
 
 void func_0017D078(u64 table) {
-    u64 temp_v0;
-    u64 temp_v1;
+    u64 shared;
+    u64 local;
 
-    temp_v0 = effParamTableGetBlock(table, 0);
-    temp_v1 = effParamTableGetBlock(table, 1);
-    func_0017CE88(temp_v0, temp_v1);
+    shared = effParamTableGetBlock(table, 0);
+    local = effParamTableGetBlock(table, 1);
+    func_0017CE88(shared, local);
 }
 
 PcpScatterWork7 *func_0017D0C0(PcpScatterWork7 *work)

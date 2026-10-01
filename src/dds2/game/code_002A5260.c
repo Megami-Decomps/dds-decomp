@@ -116,17 +116,17 @@ void func_002A5E00(void) {
 }
 
 void func_002A5EE8(u32 arg0, s32 arg1) {
-    s32 temp_v0;
+    u32 work;
 
     func_002A7AF0();
-    temp_v0 = D_00437A40;
+    work = D_00437A40;
     if (D_00437A40 != 0) {
         *(u32 *)(D_00437A40 + 0x10c) = 1;
         if (arg1 == 0) {
-            *(u32 *)(temp_v0 + 0x110) = 0x80;
+            *(u32 *)(work + 0x110) = 0x80;
         }
         else {
-            *(u32 *)(temp_v0 + 0x110) = 0;
+            *(u32 *)(work + 0x110) = 0;
         }
         *(u32 *)(D_00437A40 + 0x114) = 0;
     }
@@ -140,13 +140,13 @@ void func_002A5F40(void) {
 }
 
 u32 func_002A5F68(void) {
-    u32 temp_v0;
+    u32 state;
 
-    temp_v0 = 0;
+    state = 0;
     if (D_00437A40 != 0) {
-        temp_v0 = *(u32 *)(D_00437A40 + 0x10c);
+        state = *(u32 *)(D_00437A40 + 0x10c);
     }
-    return temp_v0;
+    return state;
 }
 
 extern void func_003458F0(u32, u32, u32, u32, u32);
@@ -690,15 +690,15 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A75A8);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7730);
 
 void func_002A78B0(void) {
-    s64 temp_v0;
+    s64 pending;
 
     D_00435BAC = 2;
     func_002A2408();
     func_002A2550();
     func_002A6018();
     do {
-        temp_v0 = sdfCheckPendingWorkWithInterrupts();
-    } while (temp_v0 != 0);
+        pending = sdfCheckPendingWorkWithInterrupts();
+    } while (pending != 0);
     func_003298C0(*D_00437AB0);
     D_00437AB0 = (u32 *)0x0;
 }

@@ -914,14 +914,14 @@ void btlScalarRangeSetStartClearEnd(s32 range, f32 start) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_002096C8);
 
 void btlScalarRangeInitQuadratic(s32 range, f32 start) {
-    f32 temp_f0;
+    f32 zero;
 
     ((BtlScalarRange *)range)->zero = 0.0f;
     ((BtlScalarRange *)range)->start = start;
-    temp_f0 = ((BtlScalarRange *)range)->zero;
+    zero = ((BtlScalarRange *)range)->zero;
     ((BtlScalarRange *)range)->end = start;
-    ((BtlScalarRange *)range)->target = temp_f0;
-    if (start == temp_f0) {
+    ((BtlScalarRange *)range)->target = zero;
+    if (start == zero) {
         return;
     }
     ((BtlScalarRange *)range)->inverseSpan = 1.0f / (start * start * 0.25f);

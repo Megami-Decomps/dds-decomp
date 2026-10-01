@@ -91,10 +91,10 @@ void mnuCreateMovieManagerTask(void) {
 }
 
 u32 func_002A80C0(void) {
-    u64 temp_v0;
+    u64 value;
 
-    temp_v0 = scrReadIntParameter(0);
-    func_002A7AF0(temp_v0);
+    value = scrReadIntParameter(0);
+    func_002A7AF0(value);
     D_00437AE8 = 0;
     return 1;
 }
