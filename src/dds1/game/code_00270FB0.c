@@ -569,7 +569,27 @@ u8 mnuIsFadeIdle(void) {
     return fadeActive == 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_00272280);
+extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_003014F0(char *, const char *, s32);
+extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
+extern void func_001958A0(s32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+extern u8 *D_003BAA00;
+extern char D_003BC6C0[];
+
+
+void func_00272280(s32 unused0, s32 unused1, s32 z, s32 firstSlot,
+                   s32 secondSlot, s32 drawFlags, s32 unused6, s32 unused7) {
+    char text[0x10];
+    s32 glyph;
+
+    itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, firstSlot, 0, drawFlags);
+    itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, secondSlot, 3, drawFlags);
+    func_003014F0(text, D_003BC6C0, *(s32 *)(D_003BAA00 + 0x3C));
+    glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
+    func_001958A0(glyph, 1, drawFlags);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
 
 extern u32 D_0037B988[];
 

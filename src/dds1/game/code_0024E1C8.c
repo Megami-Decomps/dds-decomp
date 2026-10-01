@@ -240,5 +240,49 @@ INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250820);
 
 INCLUDE_ASM(const s32, "game/code_0024E1C8", func_002508D8);
 
-INCLUDE_ASM(const s32, "game/code_0024E1C8", func_00250978);
+typedef struct MnuSceneGridWork {
+    u8 pad00[0x18];
+    void (*callback)(void);
+    void (*freeTaskData)(s32, void *);
+} MnuSceneGridWork;
+
+typedef struct MnuSceneContext {
+    u8 pad00[0x484];
+    MnuSceneGridWork *grid;
+    u8 pad488[0x11C];
+    u16 cursorX;
+    u16 cursorY;
+} MnuSceneContext;
+
+extern MnuSceneGridWork *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
+extern void sdfSetShortPairValues(MnuSceneGridWork *, s32, s32);
+extern void mnuFreeTaskData(s32, void *);
+extern void func_0025A680(void);
+extern void func_002CC0D0(MnuSceneGridWork *);
+extern void func_00253208(s32, s32, s32 *, s32 *);
+extern void *sdfGridSelectFilledCell(MnuSceneGridWork *, s32, s32);
+extern void func_002512F0(s32, s32);
+
+void func_00250978(s32 context) {
+    MnuSceneContext *scene = (MnuSceneContext *)context;
+    s32 coordinates[2];
+    s32 record;
+    s32 field;
+
+    scene->grid = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
+                                (u8 *)scene + 4, 0);
+    sdfSetShortPairValues(scene->grid, 1, 1);
+    scene->grid->freeTaskData = mnuFreeTaskData;
+    scene->grid->callback = func_0025A680;
+    record = func_002CB3B8(D_003BC4CC, 0);
+    field = *(s32 *)(*(s32 *)(record + 0xC) + 0x1C);
+    func_00253208(context, *(s32 *)(field + 0x70),
+                  &coordinates[0], &coordinates[1]);
+    if (sdfGridSelectFilledCell(scene->grid, coordinates[0], coordinates[1]) == NULL) {
+        func_002CC0D0(scene->grid);
+    }
+    scene->cursorX = 0;
+    scene->cursorY = 0;
+    func_002512F0(context, 1);
+}
 
