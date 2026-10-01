@@ -821,3 +821,10 @@ These are fakes, and check_unit reports them as `TRICK`:
 - asm used for anything but COP2/MMI under the rules in "Inline asm: COP2 and
   MMI" (check_unit reports mostly-asm functions as `ASMBODY`);
 - dummy variables or `volatile` added only to steer codegen.
+
+Reusing one local for several values is fine when a single type and a neutral
+name fit every use (`i` across loops, `t`/`factor`/`n` for successive
+calculations), as C89 code with all declarations at the top often does. It is a
+fake when the reuse only reads correctly under a misleading name (a `column`
+counter holding a row bound), or when the variable exists only to steer
+register allocation.
