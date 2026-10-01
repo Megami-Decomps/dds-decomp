@@ -1,6 +1,13 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+#define SDF_DRAW_TRANSLATION_VECTOR 0
+#define SDF_DRAW_SCALE_VECTOR 1
+#define SDF_DRAW_X_AXIS_VECTOR 2
+#define SDF_DRAW_Y_AXIS_VECTOR 3
+#define SDF_DRAW_Z_AXIS_VECTOR 4
+#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
+
 extern void *sdfInitNodeHeaderFromWords(s32 arg0, s32 arg1, s32 arg2);
 extern void *func_002CFEB8(s32 arg0);
 extern void *sdfDevCreateBufferedRequest(s32 arg0, s32 arg1, s32 arg2);
@@ -14,24 +21,24 @@ extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_002E1FF8(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
 
-/* 16-byte packet, written at quadword, word, halfword and byte granularity. */
+/* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
 typedef struct {
     union {
-        s64 q;
+        s64 bits;
         struct {
-            u16 h0;
-            u8 b2;
-            u8 b3;
-            u32 w4;
-        } p;
-    } u0;
+            u16 quadwordCount;
+            u8 reservedByte;
+            u8 control; /* PCE, tag ID and IRQ in the high tag byte */
+            u32 address;
+        } fields;
+    } dmaTag;
     union {
-        s64 q;
+        s64 bits;
         struct {
-            s32 w8;
-            s32 wC;
-        } p;
-    } u8;
+            s32 firstCode;
+            s32 secondCode;
+        } fields;
+    } vifCodes;
 } SdfPacket; /* 0x10 */
 
 typedef struct {
@@ -41,7 +48,7 @@ typedef struct {
 
 typedef struct {
     u8 pad_0x00[0x04];
-    s16 unk4;
+    s16 count; /* 0x04: draw-node entries */
     u8 pad_0x06[0x06];
     struct SdfDrawNode **entries;
 } SdfList;
@@ -49,16 +56,16 @@ typedef struct {
 typedef struct {
     SdfList *list;     /* 0x00 */
     u8 pad_0x04[0x0C]; /* 0x04 */
-    void *unk10;       /* 0x10 */
+    void *slotPairs;   /* 0x10: buffer allocated by sdfModelAllocateSlotPairs */
     u8 pad_0x14[0x05]; /* 0x14 */
-    u8 unk19;          /* 0x19 */
+    u8 flags;          /* 0x19: bit 0 looks up node IDs; bit 2 selects alternate item setup */
     u8 pad_0x1A[0x06]; /* 0x1A */
     u8 transformStart; /* 0x20: COP2 reads 0x40 bytes across following fields */
     u8 pad_0x21[0x07];
     struct SdfNode *nodes[2]; /* 0x28: per-slot node lists */
     s32 packetAddressBase; /* 0x30: base of 128-byte indexed address packets */
     u8 pad_0x34[0x04]; /* 0x34 */
-    s32 unk38;         /* 0x38 */
+    s32 commandList;   /* 0x38: source measured and compiled into both slot lists */
     u8 pad_0x3C[0x34];
     u8 scaleVector[0x10]; /* 0x70 */
 } SdfModel;
@@ -70,16 +77,16 @@ typedef struct SdfDrawNode {
     u8 pad08[4];
     struct SdfDrawNode *children; /* 0x0C */
     u8 pad10[8];
-    s32 unk18;                    /* 0x18 */
+    s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
     u8 pad1C[0x14];
     u32 address;                  /* 0x30 */
-    s32 unk34;                    /* 0x34 */
-    void *unk38;                  /* 0x38: item this node was built from */
+    s32 boundsAddress;            /* 0x34: optional address of two local xyz box corners */
+    void *sourceItem;             /* 0x38: item this node was built from */
     u8 pad3C[0x14];
     u8 quaternion[0x10];          /* 0x50 */
     u8 vectors[5][0x10];         /* 0x60-0xAF: COP2 inputs */
-    u8 padB0[0x10];
-    u8 transformed[0x40];        /* 0xC0: four COP2 output vectors */
+    u8 localTranslationRow[0x10]; /* 0xB0: fourth row written by sdfDrawNodeBuildMatrix */
+    u8 worldMatrix[0x40];         /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
 
 /* The indexed resource words are stored at offset 0x0C of the asset table. */
@@ -100,12 +107,12 @@ typedef struct {
 } SdfInfo;
 
 typedef struct SdfNode {
-    void *unk0;       /* 0x0 */
-    u8 unk4;          /* 0x4 */
-    s8 unk5;          /* 0x5 */
-    s16 unk6;         /* 0x6 */
+    void *next;        /* 0x00: next node in the per-slot command list */
+    u8 kind;          /* 0x04: packed payload or routed command */
+    s8 packetSelector; /* 0x05: high nibble filters the pass, low nibble selects a packet list */
+    s16 quadwordCount; /* 0x06: payload size rounded up to 16-byte units */
     u8 pad_0x08[0x4]; /* 0x8 */
-    s32 unkC;         /* 0xC */
+    s32 resourceHandle; /* 0x0C: retained backing allocation, zero for standalone nodes */
 } SdfNode; /* 0x10 */
 
 typedef struct {
@@ -152,15 +159,15 @@ typedef struct {
 /* Per-item record applied to a draw node by sdfDrawNodeSetFromItem (0x50 bytes). */
 typedef struct {
     u8 pad00[8];
-    s32 unk8;         /* 0x08 */
-    u8 pad0C[4];
-    f32 x;            /* 0x10 */
-    f32 y;            /* 0x14 */
-    f32 z;            /* 0x18 */
+    s32 nodeId;       /* 0x08 */
+    u8 pad0C[4];      /* 0x0C: parent-node index used during construction */
+    f32 rotationX;    /* 0x10: Euler angles supplied to the quaternion builder */
+    f32 rotationY;    /* 0x14 */
+    f32 rotationZ;    /* 0x18 */
     u8 pad1C[4];
-    u128 vec20;       /* 0x20 */
-    u128 vec30;       /* 0x30 */
-    s32 unk40;        /* 0x40 */
+    u128 translation; /* 0x20 */
+    u128 scale;       /* 0x30 */
+    s32 boundsAddress; /* 0x40: optional local-box corners used by clipping */
 } SdfItem;
 
 extern SdfModel *sdfModelCreateFromAssetData(void *arg0, void *arg1);
@@ -170,22 +177,23 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
+/* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelFindDrawNode);
 
-/* Emit the model's indexed address and fixed packet command words. */
+/* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
 SdfPacket *sdfModelWriteAddressPacket(SdfModel *model, SdfPacket *packet, s32 index) {
     u32 address = (model->packetAddressBase + (index << 7)) & 0x0FFFFFFF;
 
-    packet->u0.q = ((s64)address << 32) | 0x30000008;
-    packet->u8.p.wC = 0x6C07C000;
-    packet->u8.p.w8 = 0;
+    packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
+    packet->vifCodes.fields.secondCode = 0x6C07C000;
+    packet->vifCodes.fields.firstCode = 0;
     return packet + 1;
 }
 
-/* Append a zeroed packet with its fixed first command word. */
+/* Append a DMA RET tag with no transferred quadwords and zero VIF codes. */
 SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
-    packet->u8.q = 0;
-    packet->u0.q = 0x60000000;
+    packet->vifCodes.bits = 0;
+    packet->dmaTag.bits = 0x60000000;
     return packet + 1;
 }
 
@@ -206,33 +214,35 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8388);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D83F8);
 
+/* Build the local rotation basis and append its translation as the fourth row. */
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
     VU0_LOAD_VF(vf10, node->quaternion);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf31, node->vectors[0]);
-    VU0_STORE_MATRIX(node->vectors[2]);
+    VU0_LOAD_VF(vf31, node->vectors[SDF_DRAW_TRANSLATION_VECTOR]);
+    VU0_STORE_MATRIX(node->vectors[SDF_DRAW_X_AXIS_VECTOR]);
 }
 
+/* Copy item identity, Euler rotation, translation, scale and optional clipping bounds. */
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
-    node->unk38 = item;
-    node->unk18 = item->unk8;
-    func_002E7F20(item->x, item->y, item->z);
+    node->sourceItem = item;
+    node->nodeId = item->nodeId;
+    func_002E7F20(item->rotationX, item->rotationY, item->rotationZ);
     VU0_STORE_VF(vf10, node->quaternion);
-    PCP_COPY_VECTOR(node->vectors[0], &item->vec20);
-    PCP_COPY_VECTOR(node->vectors[1], &item->vec30);
-    ((f32 *)node->vectors[0])[3] = 1.0f;
+    PCP_COPY_VECTOR(node->vectors[SDF_DRAW_TRANSLATION_VECTOR], &item->translation);
+    PCP_COPY_VECTOR(node->vectors[SDF_DRAW_SCALE_VECTOR], &item->scale);
+    ((f32 *)node->vectors[SDF_DRAW_TRANSLATION_VECTOR])[3] = 1.0f;
     sdfDrawNodeBuildMatrix(node);
-    node->unk34 = item->unk40;
+    node->boundsAddress = item->boundsAddress;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
 
 /* Reset the node lists and initialize both per-model slots. */
-void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
+void sdfModelResetAndInitNodes(SdfModel *model, s32 commandList, s32 packetSelector) {
     s32 i = 0;
     s32 j = 0;
 
-    model->unk38 = arg1;
+    model->commandList = commandList;
     sdfFreeNodeLists();
     sdfEnsureFreeRootWorkspace(model);
     sdfDrawNodeBuildMatrix((SdfDrawNode *)model);
@@ -241,7 +251,7 @@ void sdfModelResetAndInitNodes(SdfModel *model, s32 arg1, s32 arg2) {
     j = 0;
     do {
         i++;
-        func_002D83F8(model, arg1, arg2, 0, j);
+        func_002D83F8(model, commandList, packetSelector, 0, j);
         j = i;
     } while (i != 2);
 }
@@ -271,7 +281,7 @@ void sdfModelAllocateSlotPairs(SdfModel *model, s32 count) {
 
     if (count > 0) {
         buf = sdfDevCreateBufferedRequest(count, 0x10, 1);
-        model->unk10 = buf;
+        model->slotPairs = buf;
         entries = buf->entries;
         for (i = 0; i != count; i++) {
             for (j = 0; j != 2; j++) {
@@ -311,7 +321,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     s32 count;
     u8 *item;
 
-    model->unk19 |= 4;
+    model->flags |= SDF_MODEL_ALTERNATE_ITEM_SETUP;
     list = listRef->items;
     count = list->count;
     item = &list->firstItem;
@@ -327,7 +337,7 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
 
 /* Compose each draw node's VU transform and visit its circular child list. */
 void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix, s32 frame) {
-    u8 *xAxis = drawNode->vectors[2];
+    u8 *xAxis = drawNode->vectors[SDF_DRAW_X_AXIS_VECTOR];
     u8 *yAxis;
     u8 *zAxis;
     u8 *scale;
@@ -337,18 +347,18 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     SdfDrawNode *child;
 
         VU0_LOAD_VF_MEMORY(vf28, xAxis);
-    yAxis = drawNode->vectors[3];
+    yAxis = drawNode->vectors[SDF_DRAW_Y_AXIS_VECTOR];
         VU0_LOAD_VF_MEMORY(vf29, yAxis);
-    zAxis = drawNode->vectors[4];
+    zAxis = drawNode->vectors[SDF_DRAW_Z_AXIS_VECTOR];
         VU0_LOAD_VF_MEMORY(vf30, zAxis);
-    scale = drawNode->vectors[1];
+    scale = drawNode->vectors[SDF_DRAW_SCALE_VECTOR];
         VU0_LOAD_VF_MEMORY(vf10, scale);
     VU0_SCALE_MATRIX_ROWS(vf10);
-    translation = drawNode->vectors[0];
+    translation = drawNode->vectors[SDF_DRAW_TRANSLATION_VECTOR];
     VU0_LOAD_VF_MEMORY(vf31, translation);
     VU0_LOAD_MATRIX_B(parentMatrix);
     sdfMultiplyVuMatrixInPlace();
-    transformed = drawNode->transformed;
+    transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
