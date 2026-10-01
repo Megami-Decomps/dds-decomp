@@ -1164,14 +1164,8 @@ _47:
     EQ
     IF _51
     RESTORE_CAMERA_NODE_MODE()
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0007
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0008
+    local_int[7] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[8] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[7] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1221,14 +1215,8 @@ _53:
     return
     goto _55
   _55:
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x0009
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000a
+    local_int[9] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[10] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[9] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1274,14 +1262,8 @@ _61:
     return
     goto _63
   _63:
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000b
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000c
+    local_int[11] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[12] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[11] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -1370,14 +1352,8 @@ _74:
   return
 hasigo_label:
   PROC hasigo_label
-  push 0
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x000e
-  push 3
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0011
+  local_int[14] = READ_LADDER_TABLE_VALUE(DIRECTION)
+  local_int[17] = READ_LADDER_TABLE_VALUE(USE_DIRECT_ACTION_WINDOW)
   local_int[13] = 1
 _77:
   if_not (local_int[13]) goto _78
@@ -1396,7 +1372,7 @@ _79:
 _84:
   push 1
   push 6
-  COMM 0x021d
+  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
   PUSHREG
   EQ
   IF _81
@@ -1421,7 +1397,7 @@ _85:
 _90:
   push 1
   push 7
-  COMM 0x021d
+  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
   PUSHREG
   EQ
   IF _87
@@ -1444,14 +1420,8 @@ _78:
   COMM 0x011b
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push 1
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x000f
-  push 2
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0010
+  local_int[15] = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
+  local_int[16] = READ_LADDER_TABLE_VALUE(EFFECT_UNIT_ID)
   ADD_EFFECT_UNIT_TO_WORLD(local_int[16])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[15])
@@ -1760,38 +1730,14 @@ elvstart_label:
   PROC elvstart_label
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   local_int[29] = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
-  push 0
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001e
-  push 14
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0025
-  push 2
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001f
-  push 3
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0020
-  push 4
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0021
-  push 5
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0022
-  push 6
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0023
-  push 7
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0024
+  local_int[30] = READ_ELEVATOR_TABLE_VALUE(DESTINATION_COUNT)
+  local_int[37] = READ_ELEVATOR_TABLE_VALUE(REMAINING_DESTINATIONS)
+  local_int[31] = READ_ELEVATOR_TABLE_VALUE(2)
+  local_int[32] = READ_ELEVATOR_TABLE_VALUE(3)
+  local_int[33] = READ_ELEVATOR_TABLE_VALUE(4)
+  local_int[34] = READ_ELEVATOR_TABLE_VALUE(5)
+  local_int[35] = READ_ELEVATOR_TABLE_VALUE(6)
+  local_int[36] = READ_ELEVATOR_TABLE_VALUE(7)
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(4)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
@@ -1960,26 +1906,11 @@ _176:
   return
 suikomi_label:
   PROC suikomi_label
-  push 0
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x002b
-  push 1
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0028
-  push 2
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0027
-  push 3
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0029
-  push 4
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x002a
+  local_int[43] = READ_SUCTION_WARP_VALUE(STATE_CODE)
+  local_int[40] = READ_SUCTION_WARP_VALUE(SOURCE_VECTOR_ID)
+  local_int[39] = READ_SUCTION_WARP_VALUE(EFFECT_UNIT_ID)
+  local_int[41] = READ_SUCTION_WARP_VALUE(MAP_ENTRY_ID)
+  local_int[42] = READ_SUCTION_WARP_VALUE(MOTION_ID)
   if (local_int[43] == 12) {
     RESTORE_CAMERA_NODE_MODE()
     SCREEN_FADE_B(0, 5)
@@ -2021,13 +1952,11 @@ _181:
       WAIT_FOR_TIMER_LIMIT(5)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[40])
-      push 5
-      COMM 0x01fa
-      PUSHREG
-      IF _183
-      COMM 0x00a4
-      ADD_EFFECT_UNIT_TO_WORLD(-(1))
-      goto _183
+      result = READ_SUCTION_WARP_VALUE(5)
+      if (result) {
+        COMM 0x00a4
+        ADD_EFFECT_UNIT_TO_WORLD(-(1))
+      }
     _183:
       SCREEN_FADE_A(0, 15)
       WAIT_FOR_TIMER_LIMIT(25)
@@ -2081,34 +2010,13 @@ _193:
   return
 baria_label:
   PROC baria_label
-  push 0
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002d
-  push 1
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002e
-  push 2
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002f
-  push 3
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0030
-  push 4
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0030
-  push 5
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0031
-  push 6
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0033
+  local_int[45] = READ_BARRIER_VALUE(BARRIER_MODEL_FLAG)
+  local_int[46] = READ_BARRIER_VALUE(EFFECT_UNIT_ID)
+  local_int[47] = READ_BARRIER_VALUE(SOURCE_VECTOR_ID)
+  local_int[48] = READ_BARRIER_VALUE(3)
+  local_int[48] = READ_BARRIER_VALUE(4)
+  local_int[49] = READ_BARRIER_VALUE(COMPLETION_FLAG)
+  local_int[51] = READ_BARRIER_VALUE(MAP_ENTRY_ID)
   push 0
   push local_int[49]
   COMM TEST_MODEL_FLAG
@@ -3842,21 +3750,19 @@ proc_0030:
   PROC proc_0030
 _337:
   while (1) {
-    push 2
-    COMM 0x021d
-    PUSHREG
-    IF _339
-    RESTORE_CAMERA_NODE_MODE()
-    push 2
-    COMM 0x01f8
-    SET_SOLAR_OVERLAY_MODE(0)
-    SCREEN_FADE_B(0, 5)
-    WAIT_FOR_TIMER_LIMIT(5)
-    push string(str_01pos_01_2)
-    push 12
-    COMM 0x0098
-    return
-    goto _339
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(2)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      push 2
+      COMM 0x01f8
+      SET_SOLAR_OVERLAY_MODE(0)
+      SCREEN_FADE_B(0, 5)
+      WAIT_FOR_TIMER_LIMIT(5)
+      push string(str_01pos_01_2)
+      push 12
+      COMM 0x0098
+      return
+    }
   _339:
     WAIT_FOR_TIMER_START()
   }
@@ -3866,10 +3772,8 @@ proc_0031:
   PROC proc_0031
 _341:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _349
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _349
     push 0
     push 1225
     COMM TEST_MODEL_FLAG
@@ -4053,10 +3957,8 @@ proc_0033:
   PROC proc_0033
 _359:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _363
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _363
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4094,10 +3996,8 @@ proc_0034:
   PROC proc_0034
 _365:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _369
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _369
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4135,10 +4035,8 @@ proc_0035:
   PROC proc_0035
 _371:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _375
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _375
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4176,10 +4074,8 @@ proc_0036:
   PROC proc_0036
 _377:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _381
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _381
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4217,10 +4113,8 @@ proc_0037:
   PROC proc_0037
 _383:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _387
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _387
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4258,10 +4152,8 @@ proc_0038:
   PROC proc_0038
 _389:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _393
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _393
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4299,10 +4191,8 @@ proc_0039:
   PROC proc_0039
 _395:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _399
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _399
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4340,10 +4230,8 @@ proc_003a:
   PROC proc_003a
 _401:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _405
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _405
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4381,10 +4269,8 @@ proc_003b:
   PROC proc_003b
 _407:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _411
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _411
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4422,10 +4308,8 @@ proc_003c:
   PROC proc_003c
 _413:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _417
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _417
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4463,10 +4347,8 @@ proc_003d:
   PROC proc_003d
 _419:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _423
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _423
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4504,10 +4386,8 @@ proc_003e:
   PROC proc_003e
 _425:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _429
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _429
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4545,10 +4425,8 @@ proc_003f:
   PROC proc_003f
 _431:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _435
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _435
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4586,10 +4464,8 @@ proc_0040:
   PROC proc_0040
 _437:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _441
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _441
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4627,10 +4503,8 @@ proc_0041:
   PROC proc_0041
 _443:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _447
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _447
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -4668,10 +4542,8 @@ proc_0042:
   PROC proc_0042
 _449:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _453
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _453
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5285,10 +5157,8 @@ proc_004a:
   PROC proc_004a
 _491:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _499
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _499
     push 0
     push 1226
     COMM TEST_MODEL_FLAG
@@ -5472,10 +5342,8 @@ proc_004c:
   PROC proc_004c
 _509:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _513
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _513
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5513,10 +5381,8 @@ proc_004d:
   PROC proc_004d
 _515:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _519
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _519
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5554,10 +5420,8 @@ proc_004e:
   PROC proc_004e
 _521:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _525
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _525
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5595,10 +5459,8 @@ proc_004f:
   PROC proc_004f
 _527:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _531
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _531
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5636,10 +5498,8 @@ proc_0050:
   PROC proc_0050
 _533:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _537
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _537
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5677,10 +5537,8 @@ proc_0051:
   PROC proc_0051
 _539:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _543
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _543
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5718,10 +5576,8 @@ proc_0052:
   PROC proc_0052
 _545:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _549
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _549
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5759,10 +5615,8 @@ proc_0053:
   PROC proc_0053
 _551:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _555
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _555
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5800,10 +5654,8 @@ proc_0054:
   PROC proc_0054
 _557:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _561
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _561
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5841,10 +5693,8 @@ proc_0055:
   PROC proc_0055
 _563:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _567
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _567
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5882,10 +5732,8 @@ proc_0056:
   PROC proc_0056
 _569:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _573
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _573
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5923,10 +5771,8 @@ proc_0057:
   PROC proc_0057
 _575:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _579
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _579
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -5964,10 +5810,8 @@ proc_0058:
   PROC proc_0058
 _581:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _585
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _585
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6005,10 +5849,8 @@ proc_0059:
   PROC proc_0059
 _587:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _591
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _591
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6046,10 +5888,8 @@ proc_005a:
   PROC proc_005a
 _593:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _597
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _597
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6087,10 +5927,8 @@ proc_005b:
   PROC proc_005b
 _599:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _603
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _603
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6128,10 +5966,8 @@ proc_005c:
   PROC proc_005c
 _605:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _609
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _609
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6569,21 +6405,19 @@ proc_0064:
   PROC proc_0064
 _641:
   while (1) {
-    push 2
-    COMM 0x021d
-    PUSHREG
-    IF _643
-    RESTORE_CAMERA_NODE_MODE()
-    push 2
-    COMM 0x01f8
-    SET_SOLAR_OVERLAY_MODE(0)
-    SCREEN_FADE_B(0, 5)
-    WAIT_FOR_TIMER_LIMIT(5)
-    push string(str_01pos_01_7)
-    push 17
-    COMM 0x0098
-    return
-    goto _643
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(2)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      push 2
+      COMM 0x01f8
+      SET_SOLAR_OVERLAY_MODE(0)
+      SCREEN_FADE_B(0, 5)
+      WAIT_FOR_TIMER_LIMIT(5)
+      push string(str_01pos_01_7)
+      push 17
+      COMM 0x0098
+      return
+    }
   _643:
     WAIT_FOR_TIMER_START()
   }
@@ -6715,10 +6549,8 @@ proc_0066:
   PROC proc_0066
 _653:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _657
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _657
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6756,10 +6588,8 @@ proc_0067:
   PROC proc_0067
 _659:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _663
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _663
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6797,10 +6627,8 @@ proc_0068:
   PROC proc_0068
 _665:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _669
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _669
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6838,10 +6666,8 @@ proc_0069:
   PROC proc_0069
 _671:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _675
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _675
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6879,10 +6705,8 @@ proc_006a:
   PROC proc_006a
 _677:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _681
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _681
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6920,10 +6744,8 @@ proc_006b:
   PROC proc_006b
 _683:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _687
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _687
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -6961,10 +6783,8 @@ proc_006c:
   PROC proc_006c
 _689:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _693
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _693
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7002,10 +6822,8 @@ proc_006d:
   PROC proc_006d
 _695:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _699
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _699
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7043,10 +6861,8 @@ proc_006e:
   PROC proc_006e
 _701:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _705
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _705
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7084,10 +6900,8 @@ proc_006f:
   PROC proc_006f
 _707:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _711
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _711
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7125,10 +6939,8 @@ proc_0070:
   PROC proc_0070
 _713:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _717
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _717
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7166,10 +6978,8 @@ proc_0071:
   PROC proc_0071
 _719:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _723
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _723
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7207,10 +7017,8 @@ proc_0072:
   PROC proc_0072
 _725:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _729
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _729
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7248,10 +7056,8 @@ proc_0073:
   PROC proc_0073
 _731:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _735
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _735
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7289,10 +7095,8 @@ proc_0074:
   PROC proc_0074
 _737:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _741
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _741
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7330,10 +7134,8 @@ proc_0075:
   PROC proc_0075
 _743:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _747
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _747
     push 0
     push 9
     COMM TEST_MODEL_FLAG
@@ -7371,10 +7173,8 @@ proc_0076:
   PROC proc_0076
 _749:
   while (1) {
-    push 1
-    COMM 0x021d
-    PUSHREG
-    IF _753
+    result = ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(1)
+    if_not (result) goto _753
     push 0
     push 9
     COMM TEST_MODEL_FLAG

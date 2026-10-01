@@ -508,14 +508,8 @@ _39:
     EQ
     IF _43
     RESTORE_CAMERA_NODE_MODE()
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000a
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000b
+    local_int[10] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[11] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[10] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -565,14 +559,8 @@ _45:
     return
     goto _47
   _47:
-    push 0
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000c
-    push 1
-    COMM 0x020c
-    PUSHREG
-    POPLIX 0x000d
+    local_int[12] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+    local_int[13] = READ_DOOR_WARP_VALUE(FADE_MODE)
     COMM 0x0204
     if (local_int[12] == 40) {
       WAIT_FOR_TIMER_LIMIT(20)
@@ -653,10 +641,7 @@ _58:
   return
 hasigo_label:
   PROC hasigo_label
-  push 0
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x000f
+  local_int[15] = READ_LADDER_TABLE_VALUE(DIRECTION)
   local_int[14] = 1
 _61:
   if_not (local_int[14]) goto _62
@@ -694,14 +679,8 @@ _62:
   SET_SOLAR_OVERLAY_MODE(6)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push 1
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0010
-  push 2
-  COMM 0x0208
-  PUSHREG
-  POPLIX 0x0011
+  local_int[16] = READ_LADDER_TABLE_VALUE(SOURCE_VECTOR_ID)
+  local_int[17] = READ_LADDER_TABLE_VALUE(EFFECT_UNIT_ID)
   ADD_EFFECT_UNIT_TO_WORLD(local_int[17])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[16])
@@ -995,38 +974,14 @@ elvstart_label:
   PROC elvstart_label
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   local_int[28] = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
-  push 0
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001d
-  push 14
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0024
-  push 2
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001e
-  push 3
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x001f
-  push 4
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0020
-  push 5
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0021
-  push 6
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0022
-  push 7
-  COMM 0x0200
-  PUSHREG
-  POPLIX 0x0023
+  local_int[29] = READ_ELEVATOR_TABLE_VALUE(DESTINATION_COUNT)
+  local_int[36] = READ_ELEVATOR_TABLE_VALUE(REMAINING_DESTINATIONS)
+  local_int[30] = READ_ELEVATOR_TABLE_VALUE(2)
+  local_int[31] = READ_ELEVATOR_TABLE_VALUE(3)
+  local_int[32] = READ_ELEVATOR_TABLE_VALUE(4)
+  local_int[33] = READ_ELEVATOR_TABLE_VALUE(5)
+  local_int[34] = READ_ELEVATOR_TABLE_VALUE(6)
+  local_int[35] = READ_ELEVATOR_TABLE_VALUE(7)
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(4)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
@@ -1197,26 +1152,11 @@ suikomi_label:
   RESTORE_CAMERA_NODE_MODE()
   SCREEN_FADE_B(0, 6)
   WAIT_FOR_TIMER_LIMIT(6)
-  push 0
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x002a
-  push 1
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0027
-  push 2
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0026
-  push 3
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0028
-  push 4
-  COMM 0x01fa
-  PUSHREG
-  POPLIX 0x0029
+  local_int[42] = READ_SUCTION_WARP_VALUE(STATE_CODE)
+  local_int[39] = READ_SUCTION_WARP_VALUE(SOURCE_VECTOR_ID)
+  local_int[38] = READ_SUCTION_WARP_VALUE(EFFECT_UNIT_ID)
+  local_int[40] = READ_SUCTION_WARP_VALUE(MAP_ENTRY_ID)
+  local_int[41] = READ_SUCTION_WARP_VALUE(MOTION_ID)
   ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[40])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[39])
@@ -1238,30 +1178,12 @@ suikomi_label:
   return
 baria_label:
   PROC baria_label
-  push 0
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002c
-  push 1
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002d
-  push 2
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002e
-  push 3
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002f
-  push 4
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x002f
-  push 5
-  COMM 0x01fb
-  PUSHREG
-  POPLIX 0x0030
+  local_int[44] = READ_BARRIER_VALUE(BARRIER_MODEL_FLAG)
+  local_int[45] = READ_BARRIER_VALUE(EFFECT_UNIT_ID)
+  local_int[46] = READ_BARRIER_VALUE(SOURCE_VECTOR_ID)
+  local_int[47] = READ_BARRIER_VALUE(3)
+  local_int[47] = READ_BARRIER_VALUE(4)
+  local_int[48] = READ_BARRIER_VALUE(COMPLETION_FLAG)
   push 0
   push local_int[48]
   COMM TEST_MODEL_FLAG
