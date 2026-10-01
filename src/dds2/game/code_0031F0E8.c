@@ -209,7 +209,34 @@ u32 dds3RegisterPendingNamedReferences(u32 *object, u32 extra) {
     return object[0];
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F778);
+extern void func_0035C860(char *dst, const char *format, ...);
+extern s32 func_00359A98(const char *name, const char *path);
+extern void func_0035A648(u32 *data, s32 size, s32 flag, s32 handle);
+extern void func_003594A8(s32 handle);
+extern const char D_00438968[];
+extern const char D_00438970[];
+
+s32 func_0031F778(u32 *object, s32 arg1, s32 arg2) {
+    char buffer[0x100];
+    u32 record[2];
+    s32 handle;
+    u32 *pending;
+
+    func_0035C860(buffer, D_00438968, arg1, arg2);
+    handle = func_00359A98(buffer, D_00438970);
+    if (handle == 0) {
+        return 0;
+    }
+    dds3ApplyNamedRelocations(object);
+    pending = (u32 *)dds3WritePendingNamedReferenceValues((u32)object);
+    record[0] = object[0];
+    record[1] = pending[0];
+    func_0035A648(record, 8, 1, handle);
+    dds3RegisterPendingNamedReferences(object, handle);
+    dds3RegisterPendingNamedReferences(pending, handle);
+    func_003594A8(handle);
+    return 1;
+}
 
 void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size) {
     s32 count = size >> 2;
