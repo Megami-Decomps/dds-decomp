@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world.h"
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
@@ -831,21 +832,6 @@ typedef struct EvtWorldNode {
     struct EvtWorldNode *next; /* 0x20 */
 } EvtWorldNode;
 
-typedef struct EvtWorldSlot {
-    u8 pad00[4];
-    EvtWorldNode *head; /* 0x04 */
-    u8 pad08[4];
-} EvtWorldSlot; /* 0xC bytes */
-
-typedef struct EvtWorldTable {
-    u8 pad00[8];
-    EvtWorldSlot *slots; /* 0x08 */
-} EvtWorldTable;
-
-typedef struct EvtWorldObject {
-    u8 pad00[0x18];
-    EvtWorldTable *table; /* 0x18 */
-} EvtWorldObject;
 
 extern EvtWorldObject *dds3GetWorldObject();
 
@@ -865,7 +851,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
     }
     count = 0;
     for (i = 0; i < 0x12; i++) {
-        if (i != 3) {
+        if (i != EVT_WORLD_SLOT_MOVIE) {
             for (node = dds3GetWorldObject()->table->slots[i].head; node != NULL; node = node->next) {
                 if (node->name != NULL) {
                     count++;

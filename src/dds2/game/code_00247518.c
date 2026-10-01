@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world.h"
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
@@ -252,24 +253,6 @@ s32 evtViewFindGlyphAtOrBefore(EventViewerState *viewer) {
 extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
-/* The viewer follows two lists within the same world layer. These partial
- * layouts name only offsets traversed here; the owning world remains opaque. */
-typedef struct EvtWorldRoot {
-    u8 pad0[0x18];
-    s32 scene; /* 0x18 */
-} EvtWorldRoot;
-
-typedef struct EvtWorldScene {
-    u8 pad0[8];
-    s32 layer; /* 0x08 */
-} EvtWorldScene;
-
-typedef struct EvtWorldLayer {
-    u8 pad0[0x28];
-    s32 movieObjects; /* 0x28 */
-    u8 pad2C[0x14];
-    s32 groupObjects; /* 0x40 */
-} EvtWorldLayer;
 
 typedef struct EvtWorldLink {
     u8 pad0[0x20];
@@ -277,8 +260,8 @@ typedef struct EvtWorldLink {
 } EvtWorldLink;
 
 void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
-    s32 scene;
-    s32 world;
+    s32 table;
+    s32 slots;
     s32 object;
     EvtViewNode *node;
     s32 time;
@@ -286,11 +269,11 @@ void evtViewerClampMovieTimes(s32 endTime, EventViewerState *viewer) {
     EvtViewGlyph *glyph;
 
     if (dds3GetWorldObject() != 0) {
-        scene = ((EvtWorldRoot *)dds3GetWorldObject())->scene;
-        if (scene != 0) {
-            world = ((EvtWorldScene *)scene)->layer;
-            if (world != 0) {
-                object = ((EvtWorldLayer *)world)->movieObjects;
+        table = (s32)((EvtWorldObject *)dds3GetWorldObject())->table;
+        if (table != 0) {
+            slots = (s32)((EvtWorldTable *)table)->slots;
+            if (slots != 0) {
+                object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
                 if (object != 0) {
                     do {
                         node = (EvtViewNode *)viewer->groups;
@@ -331,7 +314,7 @@ void evtViewerSyncWorldGroups(u32 position, EventViewerState *viewer) {
     EvtViewNode *found;
 
     if (dds3GetWorldObject() != 0) {
-        list = (u8 *)((EvtWorldLayer *)((EvtWorldScene *)((EvtWorldRoot *)dds3GetWorldObject())->scene)->layer)->groupObjects;
+        list = (u8 *)((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head;
         while (list != 0) {
             found = 0;
             for (node = (EvtViewNode *)viewer->groups; node != 0; node = node->next) {
@@ -865,6 +848,9 @@ INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D148);
 
+/* Parked: retail keeps the lui/addiu out of the jal delay slot (nop there);
+ * ee-gcc 2.96 in this unit hoists it into $16 and moves to $2. Draft kept in
+ * /home/raikaru/sandbox_L61_Ports/row20_parked.txt. */
 INCLUDE_ASM(const s32, "game/code_00247518", evtViewerPickNextHandler);
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_0024D430);

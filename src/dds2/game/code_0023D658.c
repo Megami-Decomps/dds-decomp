@@ -1,11 +1,12 @@
 #include "common.h"
+#include "evt_world.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_004371F0;
 
-/* Event lip-sync registry: world -> root -> list -> unit links. */
+/* Slot-specific lip-sync node/model chain within the world's unit lists. */
 typedef struct EvtLipsModel {
     u8 pad00[0x18];
     void *chunk;        /* 0x18 */
@@ -29,20 +30,6 @@ typedef struct EvtLipsNode {
     struct EvtLipsNode *next; /* 0x20 */
 } EvtLipsNode;
 
-typedef struct EvtLipsList {
-    u8 pad00[0x40];
-    EvtLipsNode *head;  /* 0x40 */
-} EvtLipsList;
-
-typedef struct EvtLipsRoot {
-    u8 pad00[0x08];
-    EvtLipsList *list;  /* 0x08 */
-} EvtLipsRoot;
-
-typedef struct EvtLipsWorld {
-    u8 pad00[0x18];
-    EvtLipsRoot *root;  /* 0x18 */
-} EvtLipsWorld;
 
 extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
@@ -888,7 +875,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
     if (id == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == id) {
             unit = node->link->unit;
@@ -916,7 +903,7 @@ void evtLipsStopFunction(void) {
     if (D_004371F0 == 0) {
         return;
     }
-    for (node = ((EvtLipsWorld *)dds3GetWorldObject())->root->list->head; node != NULL; node = node->next) {
+    for (node = ((EvtWorldObject *)dds3GetWorldObject())->table->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
         model = node->link->mh->model;
         if (sdfGetUniqueChunkValue(model->chunk) == D_004371F0) {
             unit = node->link->unit;
