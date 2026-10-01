@@ -1,0 +1,92 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e930_main reserved=0x00000000
+procedure e930_first reserved=0x00000000
+
+code
+e930_main:
+  PROC e930_main
+  PUSHIS 0
+  COMM 0x0000
+  END
+e930_first:
+  PROC e930_first
+  COMM 0x003e
+  PUSHIS 99
+  PUSHIS 2
+  PUSHIS 0
+  COMM 0x0197
+  COMM 0x0001
+  PUSHIS 0
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 99
+  COMM 0x0198
+  PUSHIS 100
+  PUSHIS 2
+  PUSHIS 0
+  COMM 0x0197
+  PUSHIS 75
+  PUSHIS 18
+  PUSHIS 2
+  PUSHIS 0
+  COMM 0x01a1
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 16
+  PUSHIS 2
+  PUSHIS 0
+  COMM 0x01b2
+  PUSHIS 25
+  COMM 0x000e
+  PUSHI 0x0001000f
+  COMM 0x000b
+  PUSHIS 110
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 1
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 100
+  COMM 0x0198
+  COMM 0x01a4
+  COMM 0x003f
+  PUSHIS 8
+  COMM 0x000e
+  END
+end
+
+messages msg1
+  message MSG_SERA_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Lives link to one another,"
+      newline
+      text "and the world continues..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_SERA_01 speaker=0
+    page
+      control f2 08 ff ff
+      text "I won't run anymore, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Sera"
+  endspeaker
+end
+
+strings
+  zero 240
+end

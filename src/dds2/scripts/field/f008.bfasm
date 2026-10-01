@@ -1,0 +1,4940 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=84 float=0
+
+procedure hirakenai_label reserved=0x00000000
+procedure badkaifuku_label reserved=0x00000000
+procedure kireta_label reserved=0x00000000
+procedure itembox_label reserved=0x00000000
+procedure warp_label reserved=0x00000000
+procedure doorwarp_label reserved=0x00000000
+procedure dexitwarp_label reserved=0x00000000
+procedure fldhunt_dexitwarp_label reserved=0x00000000
+procedure dinwarp_label reserved=0x00000000
+procedure runwarp_label reserved=0x00000000
+procedure anawarp_label reserved=0x00000000
+procedure tobiwarp_label reserved=0x00000000
+procedure hasigo_label reserved=0x00000000
+procedure heal_label reserved=0x00000000
+procedure save_label reserved=0x00000000
+procedure npctalk_label reserved=0x00000000
+procedure elvstart_label reserved=0x00000000
+procedure suikomi_label reserved=0x00000000
+procedure baria_label reserved=0x00000000
+procedure proc_0013 name="008_001_k_01npc_01" reserved=0x00000000
+procedure proc_0014 name="008_001_k_01npc_02" reserved=0x00000000
+procedure proc_0015 name="008_001_k_01npc_03" reserved=0x00000000
+procedure proc_0016 name="008_001_k_01npc_04" reserved=0x00000000
+procedure proc_0017 name="008_001_k_01npc_05" reserved=0x00000000
+procedure proc_0018 name="008_001_k_01npc_06" reserved=0x00000000
+procedure proc_0019 name="008_002_k_01npc_01" reserved=0x00000000
+procedure proc_001a name="008_002_k_01npc_02" reserved=0x00000000
+procedure proc_001b name="008_002_k_01npc_03" reserved=0x00000000
+procedure proc_001c name="008_002_k_01npc_04" reserved=0x00000000
+procedure proc_001d name="008_002_k_01npc_05" reserved=0x00000000
+procedure proc_001e name="008_002_k_01npc_06" reserved=0x00000000
+procedure proc_001f name="008_003_k_01npc_01" reserved=0x00000000
+procedure proc_0020 name="008_003_k_01npc_02" reserved=0x00000000
+procedure proc_0021 name="008_003_k_01npc_03" reserved=0x00000000
+procedure proc_0022 name="008_003_k_01npc_04" reserved=0x00000000
+procedure proc_0023 name="008_003_k_01npc_05" reserved=0x00000000
+procedure proc_0024 name="008_003_k_01npc_06" reserved=0x00000000
+procedure proc_0025 name="008_003_k_01npc_07" reserved=0x00000000
+procedure proc_0026 name="008_003_k_01npc_08" reserved=0x00000000
+procedure proc_0027 name="008_003_k_01npc_09" reserved=0x00000000
+procedure proc_0028 name="008_003_k_01npc_10" reserved=0x00000000
+procedure proc_0029 name="008_003_k_01npc_11" reserved=0x00000000
+procedure proc_002a name="008_003_k_01npc_12" reserved=0x00000000
+procedure proc_002b name="008_003_k_01npc_13" reserved=0x00000000
+procedure proc_002c name="008_004_k_01npc_01" reserved=0x00000000
+procedure proc_002d name="008_004_k_01npc_02" reserved=0x00000000
+procedure proc_002e name="008_004_k_01npc_03" reserved=0x00000000
+procedure proc_002f name="008_004_k_01npc_04" reserved=0x00000000
+procedure proc_0030 name="008_004_k_01npc_05" reserved=0x00000000
+procedure proc_0031 name="008_005_k_01npc_01" reserved=0x00000000
+procedure proc_0032 name="008_005_k_01npc_03" reserved=0x00000000
+procedure proc_0033 name="001_start" reserved=0x00000000
+procedure proc_0034 name="002_start" reserved=0x00000000
+procedure proc_0035 name="003_start" reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _12 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _16 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _21 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _23 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _33 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _36 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _38 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _40 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _42 reserved=0x00000000
+jump_label _41 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _10 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _48 reserved=0x00000000
+jump_label _56 reserved=0x00000000
+jump_label _55 reserved=0x00000000
+jump_label _57 reserved=0x00000000
+jump_label _59 reserved=0x00000000
+jump_label _53 reserved=0x00000000
+jump_label _54 reserved=0x00000000
+jump_label _64 reserved=0x00000000
+jump_label _63 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _61 reserved=0x00000000
+jump_label _62 reserved=0x00000000
+jump_label _71 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _70 reserved=0x00000000
+jump_label _75 reserved=0x00000000
+jump_label _73 reserved=0x00000000
+jump_label _74 reserved=0x00000000
+jump_label _79 reserved=0x00000000
+jump_label _81 reserved=0x00000000
+jump_label _84 reserved=0x00000000
+jump_label _83 reserved=0x00000000
+jump_label _85 reserved=0x00000000
+jump_label _87 reserved=0x00000000
+jump_label _90 reserved=0x00000000
+jump_label _89 reserved=0x00000000
+jump_label _92 reserved=0x00000000
+jump_label _91 reserved=0x00000000
+jump_label _93 reserved=0x00000000
+jump_label _77 reserved=0x00000000
+jump_label _78 reserved=0x00000000
+jump_label _96 reserved=0x00000000
+jump_label _95 reserved=0x00000000
+jump_label _99 reserved=0x00000000
+jump_label _97 reserved=0x00000000
+jump_label _98 reserved=0x00000000
+jump_label _103 reserved=0x00000000
+jump_label _101 reserved=0x00000000
+jump_label _102 reserved=0x00000000
+jump_label _107 reserved=0x00000000
+jump_label _109 reserved=0x00000000
+jump_label _111 reserved=0x00000000
+jump_label _113 reserved=0x00000000
+jump_label _115 reserved=0x00000000
+jump_label _117 reserved=0x00000000
+jump_label _119 reserved=0x00000000
+jump_label _121 reserved=0x00000000
+jump_label _124 reserved=0x00000000
+jump_label _125 reserved=0x00000000
+jump_label _126 reserved=0x00000000
+jump_label _127 reserved=0x00000000
+jump_label _128 reserved=0x00000000
+jump_label _129 reserved=0x00000000
+jump_label _130 reserved=0x00000000
+jump_label _131 reserved=0x00000000
+jump_label _132 reserved=0x00000000
+jump_label _133 reserved=0x00000000
+jump_label _134 reserved=0x00000000
+jump_label _123 reserved=0x00000000
+jump_label _136 reserved=0x00000000
+jump_label _105 reserved=0x00000000
+jump_label _106 reserved=0x00000000
+jump_label _140 reserved=0x00000000
+jump_label _142 reserved=0x00000000
+jump_label _144 reserved=0x00000000
+jump_label _146 reserved=0x00000000
+jump_label _149 reserved=0x00000000
+jump_label _148 reserved=0x00000000
+jump_label _152 reserved=0x00000000
+jump_label _151 reserved=0x00000000
+jump_label _154 reserved=0x00000000
+jump_label _153 reserved=0x00000000
+jump_label _155 reserved=0x00000000
+jump_label _157 reserved=0x00000000
+jump_label _159 reserved=0x00000000
+jump_label _161 reserved=0x00000000
+jump_label _163 reserved=0x00000000
+jump_label _138 reserved=0x00000000
+jump_label _139 reserved=0x00000000
+jump_label _166 reserved=0x00000000
+jump_label _167 reserved=0x00000000
+jump_label _168 reserved=0x00000000
+jump_label _169 reserved=0x00000000
+jump_label _170 reserved=0x00000000
+jump_label _165 reserved=0x00000000
+jump_label _174 reserved=0x00000000
+jump_label _172 reserved=0x00000000
+jump_label _173 reserved=0x00000000
+jump_label _177 reserved=0x00000000
+jump_label _178 reserved=0x00000000
+jump_label _176 reserved=0x00000000
+jump_label _179 reserved=0x00000000
+jump_label _183 reserved=0x00000000
+jump_label _185 reserved=0x00000000
+jump_label _181 reserved=0x00000000
+jump_label _182 reserved=0x00000000
+jump_label _187 reserved=0x00000000
+jump_label _191 reserved=0x00000000
+jump_label _189 reserved=0x00000000
+jump_label _190 reserved=0x00000000
+jump_label _193 reserved=0x00000000
+jump_label _197 reserved=0x00000000
+jump_label _199 reserved=0x00000000
+jump_label _202 reserved=0x00000000
+jump_label _201 reserved=0x00000000
+jump_label _203 reserved=0x00000000
+jump_label _195 reserved=0x00000000
+jump_label _196 reserved=0x00000000
+jump_label _205 reserved=0x00000000
+jump_label _210 reserved=0x00000000
+jump_label _209 reserved=0x00000000
+jump_label _211 reserved=0x00000000
+jump_label _207 reserved=0x00000000
+jump_label _208 reserved=0x00000000
+jump_label _216 reserved=0x00000000
+jump_label _215 reserved=0x00000000
+jump_label _217 reserved=0x00000000
+jump_label _213 reserved=0x00000000
+jump_label _214 reserved=0x00000000
+jump_label _221 reserved=0x00000000
+jump_label _219 reserved=0x00000000
+jump_label _220 reserved=0x00000000
+jump_label _226 reserved=0x00000000
+jump_label _225 reserved=0x00000000
+jump_label _227 reserved=0x00000000
+jump_label _223 reserved=0x00000000
+jump_label _224 reserved=0x00000000
+jump_label _232 reserved=0x00000000
+jump_label _231 reserved=0x00000000
+jump_label _233 reserved=0x00000000
+jump_label _229 reserved=0x00000000
+jump_label _230 reserved=0x00000000
+jump_label _237 reserved=0x00000000
+jump_label _235 reserved=0x00000000
+jump_label _236 reserved=0x00000000
+jump_label _241 reserved=0x00000000
+jump_label _239 reserved=0x00000000
+jump_label _240 reserved=0x00000000
+jump_label _245 reserved=0x00000000
+jump_label _243 reserved=0x00000000
+jump_label _244 reserved=0x00000000
+jump_label _249 reserved=0x00000000
+jump_label _247 reserved=0x00000000
+jump_label _248 reserved=0x00000000
+jump_label _253 reserved=0x00000000
+jump_label _251 reserved=0x00000000
+jump_label _252 reserved=0x00000000
+jump_label _257 reserved=0x00000000
+jump_label _255 reserved=0x00000000
+jump_label _256 reserved=0x00000000
+jump_label _261 reserved=0x00000000
+jump_label _259 reserved=0x00000000
+jump_label _260 reserved=0x00000000
+jump_label _265 reserved=0x00000000
+jump_label _263 reserved=0x00000000
+jump_label _264 reserved=0x00000000
+jump_label _270 reserved=0x00000000
+jump_label _269 reserved=0x00000000
+jump_label _271 reserved=0x00000000
+jump_label _267 reserved=0x00000000
+jump_label _268 reserved=0x00000000
+jump_label _276 reserved=0x00000000
+jump_label _275 reserved=0x00000000
+jump_label _277 reserved=0x00000000
+jump_label _273 reserved=0x00000000
+jump_label _274 reserved=0x00000000
+jump_label _282 reserved=0x00000000
+jump_label _281 reserved=0x00000000
+jump_label _283 reserved=0x00000000
+jump_label _279 reserved=0x00000000
+jump_label _280 reserved=0x00000000
+jump_label _288 reserved=0x00000000
+jump_label _287 reserved=0x00000000
+jump_label _289 reserved=0x00000000
+jump_label _285 reserved=0x00000000
+jump_label _286 reserved=0x00000000
+jump_label _293 reserved=0x00000000
+jump_label _291 reserved=0x00000000
+jump_label _292 reserved=0x00000000
+jump_label _297 reserved=0x00000000
+jump_label _295 reserved=0x00000000
+jump_label _296 reserved=0x00000000
+jump_label _301 reserved=0x00000000
+jump_label _299 reserved=0x00000000
+jump_label _300 reserved=0x00000000
+jump_label _305 reserved=0x00000000
+jump_label _303 reserved=0x00000000
+jump_label _304 reserved=0x00000000
+jump_label _309 reserved=0x00000000
+jump_label _307 reserved=0x00000000
+jump_label _308 reserved=0x00000000
+jump_label _313 reserved=0x00000000
+jump_label _311 reserved=0x00000000
+jump_label _312 reserved=0x00000000
+jump_label _317 reserved=0x00000000
+jump_label _315 reserved=0x00000000
+jump_label _316 reserved=0x00000000
+jump_label _321 reserved=0x00000000
+jump_label _319 reserved=0x00000000
+jump_label _320 reserved=0x00000000
+jump_label _326 reserved=0x00000000
+jump_label _325 reserved=0x00000000
+jump_label _327 reserved=0x00000000
+jump_label _323 reserved=0x00000000
+jump_label _324 reserved=0x00000000
+jump_label _332 reserved=0x00000000
+jump_label _331 reserved=0x00000000
+jump_label _333 reserved=0x00000000
+jump_label _329 reserved=0x00000000
+jump_label _330 reserved=0x00000000
+jump_label _338 reserved=0x00000000
+jump_label _337 reserved=0x00000000
+jump_label _339 reserved=0x00000000
+jump_label _335 reserved=0x00000000
+jump_label _336 reserved=0x00000000
+jump_label _344 reserved=0x00000000
+jump_label _343 reserved=0x00000000
+jump_label _345 reserved=0x00000000
+jump_label _341 reserved=0x00000000
+jump_label _342 reserved=0x00000000
+jump_label _349 reserved=0x00000000
+jump_label _347 reserved=0x00000000
+jump_label _348 reserved=0x00000000
+jump_label _353 reserved=0x00000000
+jump_label _351 reserved=0x00000000
+jump_label _352 reserved=0x00000000
+jump_label _357 reserved=0x00000000
+jump_label _355 reserved=0x00000000
+jump_label _356 reserved=0x00000000
+
+code
+hirakenai_label:
+  PROC hirakenai_label
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 86
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+badkaifuku_label:
+  PROC badkaifuku_label
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 87
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+kireta_label:
+  PROC kireta_label
+  COMM 0x0060
+  COMM 0x0218
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _1
+  PUSHIS 88
+  COMM 0x0000
+  GOTO _1
+_1:
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _3
+  PUSHIS 91
+  COMM 0x0000
+  GOTO _3
+_3:
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _5
+  PUSHIS 90
+  COMM 0x0000
+  GOTO _5
+_5:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _7
+  PUSHIS 89
+  COMM 0x0000
+  GOTO _7
+_7:
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+itembox_label:
+  PROC itembox_label
+_9:
+  PUSHIS 1
+  IF _10
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _43
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 6
+  COMM 0x00c3
+  COMM 0x0116
+  PUSHREG
+  IF _42
+  PUSHIS 74
+  COMM 0x0000
+  GOTO _41
+_42:
+  PUSHIS 0
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0001
+  PUSHIS 2
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0002
+  PUSHIS 3
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0003
+  PUSHIS 4
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0004
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _14
+  PUSHIS 67
+  COMM 0x0000
+  GOTO _13
+_14:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _12
+  PUSHIS 77
+  COMM 0x0000
+  GOTO _11
+_12:
+  PUSHIS 71
+  COMM 0x0000
+  GOTO _11
+_11:
+  GOTO _13
+_13:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _16
+  PUSHIS 68
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _15
+_16:
+  PUSHIS 72
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _15
+_15:
+  PUSHIS 0
+  PUSHLIX 0x0005
+  EQ
+  IF _40
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _29
+  COMM 0x0115
+  PUSHLIX 0x0004
+  COMM 0x0166
+  END
+  GOTO _28
+_29:
+  PUSHIS 2
+  PUSHLIX 0x0003
+  EQ
+  IF _30
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 100
+  PUSHIS 15
+  COMM 0x00ab
+  PUSHIS 15
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 15
+  PUSHIS 100
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 1
+  COMM 0x013a
+  PUSHIS 80
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_30:
+  PUSHIS 3
+  PUSHLIX 0x0003
+  EQ
+  IF _31
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 2
+  COMM 0x013a
+  PUSHIS 80
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_31:
+  PUSHIS 4
+  PUSHLIX 0x0003
+  EQ
+  IF _32
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 4
+  COMM 0x013a
+  PUSHIS 81
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_32:
+  PUSHIS 5
+  PUSHLIX 0x0003
+  EQ
+  IF _33
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 5
+  COMM 0x013a
+  PUSHIS 82
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_33:
+  PUSHIS 6
+  PUSHLIX 0x0003
+  EQ
+  IF _34
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 6
+  COMM 0x013a
+  PUSHIS 83
+  COMM 0x0000
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _28
+_34:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  LE
+  IF _26
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _20
+  PUSHIS 34
+  COMM 0x011b
+  GOTO _19
+_20:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _18
+  PUSHIS 43
+  COMM 0x011b
+  GOTO _17
+_18:
+  PUSHIS 33
+  COMM 0x011b
+  GOTO _17
+_17:
+  GOTO _19
+_19:
+  COMM 0x011c
+  COMM 0x0115
+  COMM 0x0002
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 0
+  PUSHLIX 0x0001
+  EQ
+  IF _24
+  PUSHIS 84
+  COMM 0x0000
+  GOTO _23
+_24:
+  PUSHIS 3
+  PUSHLIX 0x0001
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 0
+  PUSHLIX 0x0002
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 108
+  PUSHLIX 0x0001
+  LE
+  PUSHIS 96
+  PUSHLIX 0x0001
+  GE
+  AND
+  IF _22
+  PUSHIS 76
+  COMM 0x0000
+  GOTO _21
+_22:
+  PUSHIS 75
+  COMM 0x0000
+  GOTO _21
+_21:
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x0070
+  GOTO _23
+_23:
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _25
+_26:
+  PUSHIS 3
+  PUSHLIX 0x0000
+  EQ
+  IF _25
+  COMM 0x0115
+  PUSHIS 32
+  COMM 0x0214
+  PUSHIS 0
+  PUSHLIX 0x0004
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 79
+  COMM 0x0000
+  PUSHLIX 0x0004
+  COMM 0x0139
+  GOTO _25
+_25:
+  GOTO _28
+_28:
+  GOTO _39
+_40:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _38
+  PUSHIS 69
+  COMM 0x0000
+  GOTO _37
+_38:
+  PUSHIS 49
+  COMM 0x0007
+  PUSHREG
+  IF _36
+  PUSHIS 78
+  COMM 0x0000
+  GOTO _35
+_36:
+  PUSHIS 73
+  COMM 0x0000
+  GOTO _35
+_35:
+  GOTO _37
+_37:
+  GOTO _39
+_39:
+  GOTO _41
+_41:
+  COMM 0x0002
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+  GOTO _43
+_43:
+  COMM 0x000d
+  GOTO _9
+_10:
+  END
+warp_label:
+  PROC warp_label
+  COMM 0x0060
+  COMM 0x0219
+  PUSHREG
+  POPLIX 0x0006
+  PUSHIS 1
+  PUSHLIX 0x0006
+  EQ
+  IF _45
+  COMM 0x0204
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 0
+  PUSHF 0x3e051eb8
+  PUSHF 0x00000000
+  PUSHF 0x3dcccccd
+  PUSHIS 2
+  PUSHIS 175
+  PUSHIS 60
+  COMM 0x00ef
+  PUSHIS 101
+  PUSHIS 132
+  PUSHIS 132
+  PUSHIS 132
+  COMM 0x00f0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 256
+  COMM 0x00f1
+  PUSHIS 1
+  COMM 0x00f2
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 30
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 0
+  COMM 0x00f3
+  GOTO _45
+_45:
+  COMM 0x0202
+  END
+  END
+doorwarp_label:
+  PROC doorwarp_label
+_47:
+  PUSHIS 1
+  IF _48
+  COMM 0x0203
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _51
+  COMM 0x0060
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0007
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0008
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0007
+  EQ
+  IF _49
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _49
+_49:
+  PUSHIS 20
+  PUSHLIX 0x0008
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _51
+_51:
+  COMM 0x000d
+  GOTO _47
+_48:
+  END
+dexitwarp_label:
+  PROC dexitwarp_label
+_53:
+  PUSHIS 1
+  IF _54
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _59
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  COMM 0x020d
+  COMM 0x0001
+  PUSHIS 63
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 64
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _56
+  COMM 0x0002
+  GOTO _55
+_56:
+  COMM 0x0002
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM 0x0061
+  PUSHIS 7
+  COMM 0x00c3
+  END
+  GOTO _55
+_55:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0009
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000a
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0009
+  EQ
+  IF _57
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _57
+_57:
+  PUSHIS 45
+  PUSHLIX 0x000a
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _59
+_59:
+  COMM 0x000d
+  GOTO _53
+_54:
+  END
+fldhunt_dexitwarp_label:
+  PROC fldhunt_dexitwarp_label
+_61:
+  PUSHIS 1
+  IF _62
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _67
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 65
+  COMM 0x0000
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 66
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _64
+  COMM 0x0002
+  GOTO _63
+_64:
+  COMM 0x0002
+  COMM 0x0061
+  END
+  GOTO _63
+_63:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000b
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000c
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x000b
+  EQ
+  IF _65
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _65
+_65:
+  PUSHIS 45
+  PUSHLIX 0x000c
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x021a
+  COMM 0x0202
+  END
+  GOTO _67
+_67:
+  COMM 0x000d
+  GOTO _61
+_62:
+  END
+dinwarp_label:
+  PROC dinwarp_label
+_69:
+  PUSHIS 1
+  IF _70
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _71
+  COMM 0x0060
+  COMM 0x0204
+  PUSHIS 45
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 45
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _71
+_71:
+  COMM 0x000d
+  GOTO _69
+_70:
+  END
+runwarp_label:
+  PROC runwarp_label
+  COMM 0x0203
+  COMM 0x0060
+  COMM 0x0204
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x0202
+  END
+anawarp_label:
+  PROC anawarp_label
+  COMM 0x0060
+  COMM 0x0203
+  COMM 0x0204
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  COMM 0x0202
+  END
+tobiwarp_label:
+  PROC tobiwarp_label
+_73:
+  PUSHIS 1
+  IF _74
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _75
+  COMM 0x0060
+  PUSHIS 37
+  COMM 0x011b
+  COMM 0x0204
+  PUSHIS 4
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 5
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x011c
+  PUSHIS 30
+  COMM 0x000e
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+  GOTO _75
+_75:
+  COMM 0x000d
+  GOTO _73
+_74:
+  END
+hasigo_label:
+  PROC hasigo_label
+  PUSHIS 0
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000e
+  PUSHIS 3
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0011
+  PUSHIS 1
+  POPLIX 0x000d
+_77:
+  PUSHLIX 0x000d
+  IF _78
+  PUSHIS 0
+  PUSHLIX 0x000e
+  EQ
+  IF _92
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _84
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _79
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _79
+_79:
+  GOTO _83
+_84:
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _81
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _81
+_81:
+  GOTO _83
+_83:
+  GOTO _91
+_92:
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _90
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _85
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _85
+_85:
+  GOTO _89
+_90:
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _87
+  PUSHIS 0
+  POPLIX 0x000d
+  GOTO _87
+_87:
+  GOTO _89
+_89:
+  GOTO _91
+_91:
+  PUSHIS 1
+  PUSHLIX 0x000d
+  EQ
+  IF _93
+  COMM 0x000d
+  GOTO _93
+_93:
+  GOTO _77
+_78:
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 36
+  COMM 0x011b
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 1
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000f
+  PUSHIS 2
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x0010
+  PUSHLIX 0x0010
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x000f
+  PUSHIX 0x0000
+  COMM 0x004a
+  COMM 0x0204
+  PUSHIS 0
+  PUSHLIX 0x000e
+  EQ
+  IF _96
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 8
+  PUSHIX 0x0000
+  COMM 0x0073
+  GOTO _95
+_96:
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 9
+  PUSHIX 0x0000
+  COMM 0x0073
+  GOTO _95
+_95:
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 11
+  COMM 0x000e
+  COMM 0x011c
+  PUSHIS 49
+  COMM 0x000e
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+heal_label:
+  PROC heal_label
+_97:
+  PUSHIS 1
+  IF _98
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _99
+  COMM 0x0060
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 900
+  COMM 0x020f
+  END
+  GOTO _99
+_99:
+  COMM 0x000d
+  GOTO _97
+_98:
+  END
+save_label:
+  PROC save_label
+_101:
+  PUSHIS 1
+  IF _102
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _103
+  COMM 0x0060
+  PUSHIS 20
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 901
+  COMM 0x020f
+  END
+  GOTO _103
+_103:
+  COMM 0x000d
+  GOTO _101
+_102:
+  END
+npctalk_label:
+  PROC npctalk_label
+  COMM 0x0207
+  PUSHREG
+  POPLIX 0x0018
+  PUSHIS 1
+  POPLIX 0x0019
+_105:
+  PUSHLIX 0x0019
+  IF _106
+  PUSHIS 0
+  PUSHLIX 0x0018
+  EQ
+  IF _124
+  PUSHIS 0
+  POPLIX 0x0019
+  END
+  GOTO _123
+_124:
+  PUSHIS 1
+  PUSHLIX 0x0018
+  EQ
+  IF _125
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _107
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _107
+_107:
+  GOTO _123
+_125:
+  PUSHIS 2
+  PUSHLIX 0x0018
+  EQ
+  IF _126
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _109
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _109
+_109:
+  GOTO _123
+_126:
+  PUSHIS 100
+  PUSHLIX 0x0018
+  EQ
+  IF _127
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _111
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _111
+_111:
+  GOTO _123
+_127:
+  PUSHIS 101
+  PUSHLIX 0x0018
+  EQ
+  IF _128
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_128:
+  PUSHIS 102
+  PUSHLIX 0x0018
+  EQ
+  IF _129
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _113
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _113
+_113:
+  GOTO _123
+_129:
+  PUSHIS 103
+  PUSHLIX 0x0018
+  EQ
+  IF _130
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_130:
+  PUSHIS 104
+  PUSHLIX 0x0018
+  EQ
+  IF _131
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _115
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _115
+_115:
+  GOTO _123
+_131:
+  PUSHIS 105
+  PUSHLIX 0x0018
+  EQ
+  IF _132
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _117
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _117
+_117:
+  GOTO _123
+_132:
+  PUSHIS 106
+  PUSHLIX 0x0018
+  EQ
+  IF _133
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _119
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _119
+_119:
+  GOTO _123
+_133:
+  PUSHIS 107
+  PUSHLIX 0x0018
+  EQ
+  IF _134
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _121
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _121
+_121:
+  GOTO _123
+_134:
+  PUSHIS 199
+  PUSHLIX 0x0018
+  EQ
+  IF _123
+  PUSHIS 0
+  POPLIX 0x0019
+  GOTO _123
+_123:
+  PUSHIS 1
+  PUSHLIX 0x0019
+  EQ
+  IF _136
+  COMM 0x000d
+  GOTO _136
+_136:
+  GOTO _105
+_106:
+  COMM 0x0060
+  PUSHIS 6
+  COMM 0x00c3
+  PUSHIS 1
+  POPLIX 0x0013
+  PUSHIS 0
+  POPLIX 0x0017
+  COMM 0x01fe
+  PUSHREG
+  POPLIX 0x001a
+_138:
+  PUSHIS 1
+  IF _139
+  PUSHIS 10
+  PUSHLIX 0x0013
+  LT
+  IF _154
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  GOTO _153
+_154:
+  PUSHIS 0
+  POPLIX 0x0012
+  PUSHIS 0
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0014
+  PUSHIS 2
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x001b
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0014
+  EQ
+  IF _152
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _142
+  COMM 0x0002
+  PUSHIS 0
+  PUSHLIX 0x001b
+  EQ
+  IF _140
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  GOTO _140
+_140:
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _142
+_142:
+  GOTO _151
+_152:
+  PUSHIS 1
+  PUSHLIX 0x0013
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0015
+  PUSHIS 0
+  PUSHLIX 0x0017
+  EQ
+  IF _146
+  PUSHIS 1
+  POPLIX 0x0017
+  COMM 0x0001
+  PUSHIS 0
+  PUSHLIX 0x001b
+  EQ
+  IF _144
+  PUSHTYPE5 ppos01
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x001a
+  COMM 0x01e0
+  GOTO _144
+_144:
+  GOTO _146
+_146:
+  PUSHIS 0
+  PUSHLIX 0x0014
+  EQ
+  IF _149
+  PUSHLIX 0x0015
+  COMM 0x0000
+  GOTO _148
+_149:
+  PUSHIS 1
+  PUSHLIX 0x0014
+  EQ
+  IF _148
+  PUSHLIX 0x0015
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0012
+  GOTO _148
+_148:
+  GOTO _151
+_151:
+  PUSHLIX 0x0012
+  PUSHLIX 0x0013
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0013
+  COMM 0x000d
+  GOTO _153
+_153:
+  PUSHIS 200
+  PUSHLIX 0x0013
+  GE
+  IF _155
+  END
+  GOTO _155
+_155:
+  PUSHIS 100
+  PUSHLIX 0x0013
+  EQ
+  IF _159
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _157
+  COMM 0x0002
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _157
+_157:
+  COMM 0x020e
+  END
+  GOTO _159
+_159:
+  PUSHIS 0
+  PUSHLIX 0x0013
+  EQ
+  IF _163
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _161
+  COMM 0x0002
+  PUSHLIX 0x001a
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _161
+_161:
+  PUSHIS 7
+  COMM 0x00c3
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM 0x0061
+  END
+  GOTO _163
+_163:
+  GOTO _138
+_139:
+  COMM 0x0061
+  END
+  END
+elvstart_label:
+  PROC elvstart_label
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01cam_01
+  COMM 0x0094
+  PUSHREG
+  POPLIX 0x001d
+  PUSHIS 0
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001e
+  PUSHIS 14
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0025
+  PUSHIS 2
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001f
+  PUSHIS 3
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0020
+  PUSHIS 4
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0021
+  PUSHIS 5
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0022
+  PUSHIS 6
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0023
+  PUSHIS 7
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0024
+  COMM 0x0060
+  PUSHIS 4
+  COMM 0x00c3
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x004b
+  PUSHLIX 0x001d
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHLIX 0x0025
+  PUSHLIX 0x0025
+  COMM 0x0209
+  COMM 0x0001
+  PUSHIS 92
+  COMM 0x0000
+  PUSHIS 1
+  PUSHLIX 0x001e
+  EQ
+  IF _166
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 93
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_166:
+  PUSHIS 2
+  PUSHLIX 0x001e
+  EQ
+  IF _167
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 2
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 94
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_167:
+  PUSHIS 3
+  PUSHLIX 0x001e
+  EQ
+  IF _168
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 3
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 95
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_168:
+  PUSHIS 4
+  PUSHLIX 0x001e
+  EQ
+  IF _169
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 96
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_169:
+  PUSHIS 5
+  PUSHLIX 0x001e
+  EQ
+  IF _170
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0023
+  PUSHIS 4
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 97
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_170:
+  PUSHIS 6
+  PUSHLIX 0x001e
+  EQ
+  IF _165
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0023
+  PUSHIS 4
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0024
+  PUSHIS 5
+  COMM 0x0071
+  PUSHLIX 0x0025
+  COMM 0x0040
+  PUSHIS 6
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 98
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001c
+  GOTO _165
+_165:
+  COMM 0x0002
+  PUSHLIX 0x001e
+  PUSHLIX 0x001c
+  EQ
+  IF _177
+  PUSHIS 4
+  COMM 0x000e
+  GOTO _176
+_177:
+  PUSHLIX 0x0025
+  PUSHLIX 0x001c
+  EQ
+  IF _178
+  PUSHIS 4
+  COMM 0x000e
+  GOTO _176
+_178:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 4
+  PUSHIS 10
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 4
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0214
+  PUSHLIX 0x001c
+  PUSHLIX 0x0025
+  COMM 0x0209
+  PUSHIS 4
+  COMM 0x000e
+  PUSHIS 20
+  COMM 0x000e
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0026
+_172:
+  PUSHIS 1
+  PUSHLIX 0x0026
+  NEQ
+  IF _173
+  PUSHIS 2
+  PUSHLIX 0x0026
+  EQ
+  IF _174
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0215
+  COMM 0x020a
+  PUSHLIX 0x001c
+  COMM 0x0201
+  END
+  GOTO _174
+_174:
+  COMM 0x000d
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0026
+  GOTO _172
+_173:
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 46
+  COMM 0x0215
+  PUSHIS 47
+  COMM 0x0214
+  PUSHIS 20
+  COMM 0x000e
+  GOTO _176
+_176:
+  PUSHIS 48
+  COMM 0x0214
+  PUSHIS 0
+  PUSHTYPE5 str_01path_01
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01all_d01
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 0
+  PUSHTYPE5 str_01path_02
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01all_d02
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006b
+  PUSHTYPE5 str_01all_d01_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x006c
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  COMM 0x020a
+  PUSHLIX 0x001c
+  COMM 0x0201
+  END
+suikomi_label:
+  PROC suikomi_label
+  PUSHIS 0
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x002b
+  PUSHIS 1
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0028
+  PUSHIS 2
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0027
+  PUSHIS 3
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0029
+  PUSHIS 4
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x002a
+  PUSHIS 12
+  PUSHLIX 0x002b
+  EQ
+  IF _179
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHLIX 0x0027
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 1
+  PUSHLIX 0x002a
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x01fd
+  PUSHIS 20
+  COMM 0x000e
+  PUSHIS 97
+  COMM 0x0214
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  PUSHIS 1
+  PUSHLIX 0x002a
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x01fc
+  COMM 0x0202
+  END
+  GOTO _179
+_179:
+  PUSHIS 13
+  PUSHLIX 0x002b
+  EQ
+  IF _187
+_181:
+  PUSHIS 1
+  IF _182
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  IF _185
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 5
+  COMM 0x01fa
+  PUSHREG
+  IF _183
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  GOTO _183
+_183:
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 25
+  COMM 0x000e
+  COMM 0x0204
+  PUSHIS 65
+  COMM 0x0214
+  PUSHIS 40
+  COMM 0x000e
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 17
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _185
+_185:
+  COMM 0x000d
+  GOTO _181
+_182:
+  GOTO _187
+_187:
+  PUSHIS 14
+  PUSHLIX 0x002b
+  EQ
+  IF _193
+_189:
+  PUSHIS 1
+  IF _190
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  IF _191
+  COMM 0x0060
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHLIX 0x0027
+  COMM 0x0019
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 66
+  COMM 0x0214
+  PUSHIS 0
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 18
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIX 0x0000
+  COMM 0x006a
+  PUSHIS 5
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 5
+  COMM 0x000e
+  COMM 0x0202
+  END
+  GOTO _191
+_191:
+  COMM 0x000d
+  GOTO _189
+_190:
+  GOTO _193
+_193:
+  END
+baria_label:
+  PROC baria_label
+  PUSHIS 0
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002d
+  PUSHIS 1
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002e
+  PUSHIS 2
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002f
+  PUSHIS 3
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0030
+  PUSHIS 4
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0030
+  PUSHIS 5
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0031
+  PUSHIS 6
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0033
+  PUSHIS 0
+  PUSHLIX 0x0031
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _205
+_195:
+  PUSHIS 1
+  IF _196
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  IF _203
+  PUSHIS 0
+  PUSHLIX 0x002d
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _202
+  COMM 0x0060
+  COMM 0x0001
+  PUSHIS 102
+  COMM 0x0000
+  COMM 0x0002
+  COMM 0x0061
+  END
+  GOTO _201
+_202:
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  PUSHTYPE5 fld_f_bin_ICE_b_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0032
+  PUSHLIX 0x002f
+  PUSHLIX 0x0032
+  COMM 0x009d
+  PUSHLIX 0x002e
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x002f
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 99
+  COMM 0x0000
+  PUSHIS 105
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 106
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _199
+  COMM 0x0002
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 32
+  COMM 0x011b
+  PUSHIS 3
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 24
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 60
+  COMM 0x000e
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM 0x00ce
+  COMM 0x011c
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 30
+  PUSHIS 1
+  COMM 0x0010
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 0
+  PUSHTYPE5 BARIA
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHTYPE5 BARIA_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x0073
+  PUSHIS 15
+  PUSHIS 1
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHIS 30
+  COMM 0x000e
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 15
+  COMM 0x000e
+  PUSHLIX 0x0032
+  COMM 0x009b
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 15
+  COMM 0x000e
+  PUSHLIX 0x0031
+  COMM 0x0008
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0033
+  NEQ
+  IF _197
+  PUSHLIX 0x0033
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0111
+  GOTO _197
+_197:
+  COMM 0x0061
+  PUSHIS 3
+  COMM 0x00c3
+  END
+  GOTO _199
+_199:
+  COMM 0x0002
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0061
+  PUSHIS 3
+  COMM 0x00c3
+  GOTO _201
+_201:
+  GOTO _203
+_203:
+  COMM 0x000d
+  GOTO _195
+_196:
+  GOTO _205
+_205:
+  END
+  END
+proc_0013:
+  PROC proc_0013
+_207:
+  PUSHIS 1
+  IF _208
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _211
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0034
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _210
+  PUSHIS 4
+  COMM 0x0000
+  PUSHTYPE5 ppos01_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0034
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 5
+  COMM 0x0000
+  PUSHLIX 0x0034
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _209
+_210:
+  PUSHIS 7
+  PUSHLIX 0x0034
+  COMM 0x004b
+  PUSHIS 2
+  COMM 0x0000
+  PUSHTYPE5 ppos01_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0034
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x0000
+  PUSHLIX 0x0034
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 7
+  PUSHLIX 0x0034
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _209
+_209:
+  GOTO _211
+_211:
+  COMM 0x000d
+  GOTO _207
+_208:
+  END
+proc_0014:
+  PROC proc_0014
+_213:
+  PUSHIS 1
+  IF _214
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _217
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0035
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _216
+  PUSHIS 9
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x0000
+  PUSHLIX 0x0035
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _215
+_216:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 6
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHTYPE5 ppos01_4
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0035
+  COMM 0x01e0
+  PUSHIS 7
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 8
+  COMM 0x0000
+  PUSHLIX 0x0035
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0035
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _215
+_215:
+  GOTO _217
+_217:
+  COMM 0x000d
+  GOTO _213
+_214:
+  END
+proc_0015:
+  PROC proc_0015
+_219:
+  PUSHIS 1
+  IF _220
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _221
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0036
+  PUSHTYPE5 ppos01_5
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 11
+  COMM 0x0000
+  COMM 0x0001
+  PUSHIS 12
+  COMM 0x0000
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _221
+_221:
+  COMM 0x000d
+  GOTO _219
+_220:
+  END
+proc_0016:
+  PROC proc_0016
+_223:
+  PUSHIS 1
+  IF _224
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _227
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0037
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _226
+  PUSHTYPE5 ppos01_6
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0037
+  COMM 0x01e0
+  PUSHIS 14
+  COMM 0x0000
+  PUSHLIX 0x0037
+  COMM 0x01e1
+  PUSHIS 15
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _225
+_226:
+  PUSHTYPE5 ppos01_7
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0037
+  COMM 0x01e0
+  PUSHIS 13
+  COMM 0x0000
+  PUSHLIX 0x0037
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0037
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _225
+_225:
+  GOTO _227
+_227:
+  COMM 0x000d
+  GOTO _223
+_224:
+  END
+proc_0017:
+  PROC proc_0017
+_229:
+  PUSHIS 1
+  IF _230
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _233
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_05
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0038
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _232
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 18
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHTYPE5 ppos01_8
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 19
+  COMM 0x0000
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _231
+_232:
+  PUSHTYPE5 ppos01_9
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 16
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 17
+  COMM 0x0000
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _231
+_231:
+  GOTO _233
+_233:
+  COMM 0x000d
+  GOTO _229
+_230:
+  END
+proc_0018:
+  PROC proc_0018
+_235:
+  PUSHIS 1
+  IF _236
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _237
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_06
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0039
+  PUSHTYPE5 ppos01_10
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0039
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0039
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 20
+  COMM 0x0000
+  PUSHLIX 0x0039
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0039
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _237
+_237:
+  COMM 0x000d
+  GOTO _235
+_236:
+  END
+proc_0019:
+  PROC proc_0019
+_239:
+  PUSHIS 1
+  IF _240
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _241
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003a
+  PUSHIS 6
+  PUSHLIX 0x003a
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 21
+  COMM 0x0000
+  PUSHLIX 0x003a
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 6
+  PUSHLIX 0x003a
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _241
+_241:
+  COMM 0x000d
+  GOTO _239
+_240:
+  END
+proc_001a:
+  PROC proc_001a
+_243:
+  PUSHIS 1
+  IF _244
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _245
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003b
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 5
+  PUSHIS 3
+  PUSHLIX 0x003b
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 22
+  COMM 0x0000
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _245
+_245:
+  COMM 0x000d
+  GOTO _243
+_244:
+  END
+proc_001b:
+  PROC proc_001b
+_247:
+  PUSHIS 1
+  IF _248
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _249
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003c
+  PUSHIS 7
+  PUSHLIX 0x003c
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 23
+  COMM 0x0000
+  PUSHLIX 0x003c
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 7
+  PUSHLIX 0x003c
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _249
+_249:
+  COMM 0x000d
+  GOTO _247
+_248:
+  END
+proc_001c:
+  PROC proc_001c
+_251:
+  PUSHIS 1
+  IF _252
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _253
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003d
+  PUSHTYPE5 ppos01_11
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003d
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  PUSHIS 24
+  COMM 0x0000
+  COMM 0x0001
+  PUSHIS 25
+  COMM 0x0000
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _253
+_253:
+  COMM 0x000d
+  GOTO _251
+_252:
+  END
+proc_001d:
+  PROC proc_001d
+_255:
+  PUSHIS 1
+  IF _256
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _257
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_05_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003e
+  PUSHIS 3
+  PUSHLIX 0x003e
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 26
+  COMM 0x0000
+  PUSHTYPE5 ppos01_12
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 27
+  COMM 0x0000
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x003e
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _257
+_257:
+  COMM 0x000d
+  GOTO _255
+_256:
+  END
+proc_001e:
+  PROC proc_001e
+_259:
+  PUSHIS 1
+  IF _260
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _261
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_06_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003f
+  PUSHIS 6
+  PUSHLIX 0x003f
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 ppos01_13
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x003f
+  COMM 0x01e0
+  PUSHIS 28
+  COMM 0x0000
+  PUSHLIX 0x003f
+  COMM 0x01e1
+  PUSHIS 29
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 6
+  PUSHLIX 0x003f
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _261
+_261:
+  COMM 0x000d
+  GOTO _259
+_260:
+  END
+proc_001f:
+  PROC proc_001f
+_263:
+  PUSHIS 1
+  IF _264
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _265
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0040
+  PUSHTYPE5 ppos01_14
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0040
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x0040
+  COMM 0x0073
+  PUSHIS 3
+  PUSHLIX 0x0040
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 30
+  COMM 0x0000
+  PUSHLIX 0x0040
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0040
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _265
+_265:
+  COMM 0x000d
+  GOTO _263
+_264:
+  END
+proc_0020:
+  PROC proc_0020
+_267:
+  PUSHIS 1
+  IF _268
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _271
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0041
+  PUSHTYPE5 ppos01_15
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0041
+  COMM 0x01e0
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0007
+  PUSHREG
+  IF _270
+  PUSHIS 32
+  COMM 0x0000
+  PUSHLIX 0x0041
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0041
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _269
+_270:
+  PUSHIS 31
+  COMM 0x0000
+  PUSHLIX 0x0041
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0041
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _269
+_269:
+  GOTO _271
+_271:
+  COMM 0x000d
+  GOTO _267
+_268:
+  END
+proc_0021:
+  PROC proc_0021
+_273:
+  PUSHIS 1
+  IF _274
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _277
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0042
+  PUSHTYPE5 ppos01_16
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0042
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0042
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0007
+  PUSHREG
+  IF _276
+  PUSHIS 34
+  COMM 0x0000
+  PUSHLIX 0x0042
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0042
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _275
+_276:
+  PUSHIS 33
+  COMM 0x0000
+  PUSHLIX 0x0042
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0042
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _275
+_275:
+  GOTO _277
+_277:
+  COMM 0x000d
+  GOTO _273
+_274:
+  END
+proc_0022:
+  PROC proc_0022
+_279:
+  PUSHIS 1
+  IF _280
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _283
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0043
+  PUSHTYPE5 ppos01_17
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0043
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0043
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0007
+  PUSHREG
+  IF _282
+  PUSHIS 36
+  COMM 0x0000
+  PUSHLIX 0x0043
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0043
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _281
+_282:
+  PUSHIS 35
+  COMM 0x0000
+  PUSHLIX 0x0043
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0043
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _281
+_281:
+  GOTO _283
+_283:
+  COMM 0x000d
+  GOTO _279
+_280:
+  END
+proc_0023:
+  PROC proc_0023
+_285:
+  PUSHIS 1
+  IF _286
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _289
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_05_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0044
+  PUSHTYPE5 ppos01_18
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0044
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 5
+  PUSHLIX 0x0044
+  COMM 0x0073
+  PUSHIS 3
+  PUSHLIX 0x0044
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0007
+  PUSHREG
+  IF _288
+  PUSHIS 38
+  COMM 0x0000
+  PUSHLIX 0x0044
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0044
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _287
+_288:
+  PUSHIS 37
+  COMM 0x0000
+  PUSHLIX 0x0044
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0044
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _287
+_287:
+  GOTO _289
+_289:
+  COMM 0x000d
+  GOTO _285
+_286:
+  END
+proc_0024:
+  PROC proc_0024
+_291:
+  PUSHIS 1
+  IF _292
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _293
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_06_3
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0045
+  PUSHTYPE5 ppos01_19
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0045
+  COMM 0x01e0
+  PUSHIS 1
+  PUSHLIX 0x0045
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 39
+  COMM 0x0000
+  PUSHLIX 0x0045
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0045
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _293
+_293:
+  COMM 0x000d
+  GOTO _291
+_292:
+  END
+proc_0025:
+  PROC proc_0025
+_295:
+  PUSHIS 1
+  IF _296
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _297
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_07
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0046
+  PUSHTYPE5 ppos01_20
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0046
+  COMM 0x01e0
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 40
+  COMM 0x0000
+  PUSHLIX 0x0046
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0046
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _297
+_297:
+  COMM 0x000d
+  GOTO _295
+_296:
+  END
+proc_0026:
+  PROC proc_0026
+_299:
+  PUSHIS 1
+  IF _300
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _301
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_08
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0047
+  PUSHTYPE5 ppos01_21
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0047
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0047
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 41
+  COMM 0x0000
+  PUSHTYPE5 k_01pos_01
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0047
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0047
+  COMM 0x0073
+  PUSHIS 42
+  COMM 0x0000
+  PUSHLIX 0x0047
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0047
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _301
+_301:
+  COMM 0x000d
+  GOTO _299
+_300:
+  END
+proc_0027:
+  PROC proc_0027
+_303:
+  PUSHIS 1
+  IF _304
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _305
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_09
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0048
+  PUSHTYPE5 ppos01_22
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0048
+  COMM 0x01e0
+  PUSHIS 4
+  PUSHLIX 0x0048
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 43
+  COMM 0x0000
+  PUSHLIX 0x0048
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x0048
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _305
+_305:
+  COMM 0x000d
+  GOTO _303
+_304:
+  END
+proc_0028:
+  PROC proc_0028
+_307:
+  PUSHIS 1
+  IF _308
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _309
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_10
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0049
+  PUSHTYPE5 ppos01_23
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0049
+  COMM 0x01e0
+  PUSHIS 4
+  PUSHLIX 0x0049
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 44
+  COMM 0x0000
+  PUSHLIX 0x0049
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x0049
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _309
+_309:
+  COMM 0x000d
+  GOTO _307
+_308:
+  END
+proc_0029:
+  PROC proc_0029
+_311:
+  PUSHIS 1
+  IF _312
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _313
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_11
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004a
+  PUSHTYPE5 ppos01_24
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004a
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004a
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 45
+  COMM 0x0000
+  PUSHLIX 0x004a
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004a
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _313
+_313:
+  COMM 0x000d
+  GOTO _311
+_312:
+  END
+proc_002a:
+  PROC proc_002a
+_315:
+  PUSHIS 1
+  IF _316
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _317
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_12
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004b
+  PUSHIS 4
+  PUSHLIX 0x004b
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 46
+  COMM 0x0000
+  PUSHLIX 0x004b
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x004b
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _317
+_317:
+  COMM 0x000d
+  GOTO _315
+_316:
+  END
+proc_002b:
+  PROC proc_002b
+_319:
+  PUSHIS 1
+  IF _320
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _321
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_13
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004c
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 ppos01_25
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004c
+  COMM 0x01e0
+  PUSHIS 47
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004c
+  COMM 0x0073
+  PUSHIS 48
+  COMM 0x0000
+  PUSHLIX 0x004c
+  COMM 0x01e1
+  PUSHIS 49
+  COMM 0x0000
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004c
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _321
+_321:
+  COMM 0x000d
+  GOTO _319
+_320:
+  END
+proc_002c:
+  PROC proc_002c
+_323:
+  PUSHIS 1
+  IF _324
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _327
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_4
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004d
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _326
+  PUSHIS 51
+  COMM 0x0000
+  PUSHTYPE5 ppos01_26
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004d
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004d
+  COMM 0x0073
+  PUSHIS 52
+  COMM 0x0000
+  PUSHLIX 0x004d
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  GOTO _325
+_326:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x004d
+  COMM 0x0073
+  PUSHIS 50
+  COMM 0x0000
+  PUSHLIX 0x004d
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _325
+_325:
+  GOTO _327
+_327:
+  COMM 0x000d
+  GOTO _323
+_324:
+  END
+proc_002d:
+  PROC proc_002d
+_329:
+  PUSHIS 1
+  IF _330
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _333
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_02_4
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004e
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _332
+  PUSHIS 54
+  COMM 0x0000
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x004e
+  COMM 0x0073
+  PUSHIS 55
+  COMM 0x0000
+  PUSHLIX 0x004e
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _331
+_332:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x004e
+  COMM 0x0073
+  PUSHIS 53
+  COMM 0x0000
+  PUSHLIX 0x004e
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _331
+_331:
+  GOTO _333
+_333:
+  COMM 0x000d
+  GOTO _329
+_330:
+  END
+proc_002e:
+  PROC proc_002e
+_335:
+  PUSHIS 1
+  IF _336
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _339
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_4
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004f
+  PUSHTYPE5 ppos01_27
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x01e0
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _338
+  PUSHIS 57
+  COMM 0x0000
+  PUSHLIX 0x004f
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004f
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _337
+_338:
+  PUSHIS 56
+  COMM 0x0000
+  PUSHLIX 0x004f
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004f
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _337
+_337:
+  GOTO _339
+_339:
+  COMM 0x000d
+  GOTO _335
+_336:
+  END
+proc_002f:
+  PROC proc_002f
+_341:
+  PUSHIS 1
+  IF _342
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _345
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_04_4
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0050
+  PUSHTYPE5 ppos01_28
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0050
+  COMM 0x0073
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHIS 14
+  COMM 0x0007
+  PUSHREG
+  IF _344
+  PUSHIS 59
+  COMM 0x0000
+  PUSHLIX 0x0050
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0050
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _343
+_344:
+  PUSHIS 58
+  COMM 0x0000
+  PUSHLIX 0x0050
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0050
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _343
+_343:
+  GOTO _345
+_345:
+  COMM 0x000d
+  GOTO _341
+_342:
+  END
+proc_0030:
+  PROC proc_0030
+_347:
+  PUSHIS 1
+  IF _348
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _349
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_05_4
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0051
+  PUSHIS 3
+  PUSHLIX 0x0051
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 k_01pos_01_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0051
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x0051
+  COMM 0x0073
+  PUSHIS 60
+  COMM 0x0000
+  PUSHLIX 0x0051
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0051
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _349
+_349:
+  COMM 0x000d
+  GOTO _347
+_348:
+  END
+proc_0031:
+  PROC proc_0031
+_351:
+  PUSHIS 1
+  IF _352
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _353
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_01_5
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0052
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 k_01pos_01_3
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0052
+  COMM 0x01e0
+  PUSHIS 61
+  COMM 0x0000
+  PUSHLIX 0x0052
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0052
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  GOTO _353
+_353:
+  COMM 0x000d
+  GOTO _351
+_352:
+  END
+proc_0032:
+  PROC proc_0032
+_355:
+  PUSHIS 1
+  IF _356
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _357
+  COMM 0x0060
+  PUSHIS 2
+  COMM 0x00c3
+  PUSHTYPE5 k_01npc_03_5
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0053
+  PUSHIS 3
+  PUSHLIX 0x0053
+  COMM 0x004b
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0001
+  PUSHTYPE5 ppos01_29
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0053
+  COMM 0x01e0
+  PUSHIS 62
+  COMM 0x0000
+  PUSHLIX 0x0053
+  COMM 0x01e1
+  COMM 0x0002
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0053
+  COMM 0x0073
+  PUSHIS 3
+  COMM 0x00c3
+  COMM 0x0061
+  COMM 0x000d
+  END
+  GOTO _357
+_357:
+  COMM 0x000d
+  GOTO _355
+_356:
+  END
+proc_0033:
+  PROC proc_0033
+  PUSHTYPE5 str_01cam_01_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x00a3
+  PUSHIS 40
+  COMM 0x0113
+  END
+proc_0034:
+  PROC proc_0034
+  PUSHTYPE5 str_01cam_01_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x00a3
+  PUSHIS 40
+  COMM 0x0113
+  END
+proc_0035:
+  PROC proc_0035
+  PUSHTYPE5 str_01cam_01_4
+  COMM 0x0094
+  PUSHREG
+  COMM 0x00a3
+  PUSHIS 40
+  COMM 0x0113
+  END
+end
+
+messages
+  bytes 070000000c3600004d5347310000000008350000040100007100000000000200
+  bytes 000000009803000000000000e003000000000000340400000000000078040000
+  bytes 00000000d80400000000000048050000000000009405000000000000f8050000
+  bytes 0000000080060000000000000007000000000000740700000000000004080000
+  bytes 000000004008000000000000c8080000000000008c09000000000000240a0000
+  bytes 00000000940a000000000000000b000000000000900b000000000000240c0000
+  bytes 00000000bc0c000000000000200d000000000000a80d0000000000001c0e0000
+  bytes 00000000880e000000000000c40e0000000000003c0f000000000000a40f0000
+  bytes 0000000024100000000000008410000000000000d81000000000000070110000
+  bytes 000000006812000000000000fc12000000000000a01300000000000028140000
+  bytes 000000007014000000000000dc14000000000000501500000000000034160000
+  bytes 0000000090160000000000000c170000000000008018000000000000dc180000
+  bytes 00000000b019000000000000201a0000000000007c1a000000000000201b0000
+  bytes 00000000841b000000000000581c000000000000d81c000000000000301d0000
+  bytes 00000000701d000000000000e41d000000000000501e000000000000f41e0000
+  bytes 00000000401f000000000000a41f0000000000001420000000000000cc200000
+  bytes 000000009021000000000000002200000000000098220000000000002c230000
+  bytes 010000007023000000000000b023000001000000142400000000000054240000
+  bytes 01000000b424000000000000f424000000000000442500000000000094250000
+  bytes 01000000fc250000000000003c260000000000008c26000000000000cc260000
+  bytes 000000001c27000000000000c8270000000000002c280000000000007c280000
+  bytes 00000000c82800000000000018290000000000007c29000000000000e4290000
+  bytes 000000004c2a0000000000008c2a000000000000182b000000000000602b0000
+  bytes 00000000e02b0000000000002c2c0000000000007c2c000000000000cc2c0000
+  bytes 000000001c2d000001000000602d000001000000a42d000001000000f42d0000
+  bytes 01000000542e000001000000c02e0000010000003c2f000000000000c42f0000
+  bytes 000000003430000000000000a030000000000000143100000000000080310000
+  bytes 00000000ec310000000000005c320000010000009c32000000000000dc320000
+  bytes 0000000020330000010000006433000000000000a433000000000000dc330000
+  bytes 00000000143400006034000009000000000000000000000068756e6772790000
+  bytes 000000000000000000000000000000000100ffffbc03000023000000f208ffff
+  bytes f20707ff3e20546865207061727479207761732068756e6772792e0af1040000
+  bytes 68756e6772793032000000000000000000000000000000000100ffff04040000
+  bytes 2e000000f208fffff20707ff3e20546865207061727479206772657720776561
+  bytes 6b2066726f6d2068756e6765722e0af104000000636965726f5f3030385f3030
+  bytes 315f3031610000000000000001000000580400001d000000f208fffff20707ff
+  bytes 4865792c2069736e2774206461742e2e2e0af10400000000636965726f5f3030
+  bytes 385f3030315f30316200000000000000010000009c0400003b000000f208ffff
+  bytes f20707ff596561682e2e2e20486527732064652073616d652063617420776520
+  bytes 7361770a696e206465204a756e6b79617264210af1040000636965726f5f3030
+  bytes 385f3030315f3032610000000000000001000000fc0400004a000000f208ffff
+  bytes f20707ff2765792c206576656e2074686f75676820776527726520646174612c
+  bytes 2077650a7374696c6c2067657420687572742c20616e64206665656c20706169
+  bytes 6e2e0af104000000636965726f5f3030385f3030315f30326200000000000000
+  bytes 010000006c05000027000000f208fffff20707ff446f6e277420776f726b2075
+  bytes 7320746f6f20686172642c206a613f0af1040000726f616c645f3030385f3030
+  bytes 315f3031610000000000000001000100b80500003e000000f208fffff20707ff
+  bytes 54686572652077617320612063617420696e20746865204a756e6b796172643f
+  bytes 0a54686174277320737472616e67652e2e2e0af104000000726f616c645f3030
+  bytes 385f3030315f30316200000000000000010001001c06000061000000f208ffff
+  bytes f20707ff596f75207765726520676976656e206261736963206b6e6f776c6564
+  bytes 67652c0a736f20697420776f756c646e277420626520646966666963756c7420
+  bytes 746f0a66756e6374696f6e20696e207265616c6974792e2e2e0af10400000000
+  bytes 726f616c645f3030385f3030315f3031630000000000000001000100a4060000
+  bytes 5c000000f208fffff20707ff2e2e2e4275742077687920776f756c6420746865
+  bytes 792070757420736f6d657468696e670a736f20756e6e65636573736172792069
+  bytes 6e73696465207468652061637475616c0a73696d756c6174696f6e3f0af10400
+  bytes 726f616c645f3030385f3030315f303261000000000000000100010024070000
+  bytes 4e000000f208fffff20707ff416c6c206578697374656e636520697320726567
+  bytes 756c617465642062790a736f6c617220646174612c207768656e20796f752067
+  bytes 657420646f776e0a746f2069742e0af104000000726f616c645f3030385f3030
+  bytes 315f3032620000000000000001000100980700006b000000f208fffff20707ff
+  bytes 546865206c696e65206265747765656e206469676974616c207265616c697479
+  bytes 20616e640a7265616c207265616c6974792069732076616775652e2e2e206966
+  bytes 20746865726527730a616e7920646966666572656e636520617420616c6c2e0a
+  bytes f1040000736368726f5f3030385f3030315f303100000000000000000100ffff
+  bytes 2808000015000000f208fffff41310ff0b01f20781ff80ea0af2150000000000
+  bytes 736368726f5f3030385f3030315f303200000000000000000200ffff68080000
+  bytes 9f0800005e000000f208fffff20707ff3e20497420706565727320617420796f
+  bytes 75207468726f75676820646565702c0a73696c76657220657965732e0af104f2
+  bytes 08ffff3e204974277320646566696e6974656c79207468652073616d65206361
+  bytes 742e0af1040000006e706330345f3030385f3030315f30310000000000000000
+  bytes 02000200f00800001f09000099000000f208fffff20707ff5468697320697320
+  bytes 746865206d61696e20646f6d65206f66204b61726d6120436974792e0af104f2
+  bytes 08ffff546869732069732077686572652074686520436f72706f72617465204f
+  bytes 66666963650a6973206c6f63617465642c2061732077656c6c20617320746865
+  bytes 2073686f7070696e670a6d616c6c2c20616e64207468696e6773206c696b6520
+  bytes 746861742e0af104000000006e706330345f3030385f3030315f303261000000
+  bytes 0000000001000200b009000072000000f208fffff20707ff4a75737420626574
+  bytes 7765656e20796f7520616e64206d652c204920686561720a7468657265277320
+  bytes 736f6d6520696e7465726e616c2069737375657320676f696e670a6f6e206265
+  bytes 747765656e204d6164616d6520616e6420746865204469726563746f722e0af1
+  bytes 040000006e706330345f3030385f3030315f3032620000000000000001000200
+  bytes 480a00004b000000f208fffff20707ff4920686f7065207468657920776f726b
+  bytes 207468696e6773206f75742e0a4920646f6e2774207265616c6c792077616e74
+  bytes 20746f2074616b652073696465732e0af10400006e706330355f3030385f3030
+  bytes 315f3031610000000000000001000300b80a000048000000f208fffff20707ff
+  bytes 54686520707269736f6e65727320657363617065643f0a57656c6c2c20746865
+  bytes 20536f63696574792062657474657220676574206f6e20746861742e0af10400
+  bytes 6e706330355f3030385f3030315f3031620000000000000001000300240b0000
+  bytes 6a000000f208fffff20707ff57652c2074686520656c697465732c2077696c6c
+  bytes 2062652072656275696c64696e670a74686520776f726c642e2054686579276c
+  bytes 6c20626520696e2074726f75626c650a696620616e797468696e672068617070
+  bytes 656e7320746f207573210af1040000006e706330355f3030385f3030315f3032
+  bytes 610000000000000001000300b40b00006f000000f208fffff20707ff48756d61
+  bytes 6e73206172652074686520756c74696d617465206265696e67732e0a4a757374
+  bytes 206c6f6f6b2061726f756e64206174207468697320636974792c206275696c74
+  bytes 0a6279206b6e6f776c6564676520776520746f6f6b2066726f6d20476f642e0a
+  bytes f10400006e706330355f3030385f3030315f3032620000000000000001000300
+  bytes 480c000072000000f208fffff20707ff5468652073756e2077656e7420637261
+  bytes 7a792c20627574207765206f76657263616d650a74686174206279206275696c
+  bytes 64696e672074686520646f6d65732e0a4576656e7475616c6c792c207765276c
+  bytes 6c2062652067726561746572207468616e20476f642e0af1040000006e706330
+  bytes 365f3030385f3030315f3031000000000000000001000300e00c00003d000000
+  bytes f208fffff20707ff43616e277420796f75206b65657020697420646f776e3f0a
+  bytes 49276d20747279696e6720746f2073686f702c20686572652e0af10400000000
+  bytes 636965726f5f3030385f3030325f3031000000000000000001000000440d0000
+  bytes 64000000f208fffff20707ff4e6f206d61747465722077686174206765747320
+  bytes 7468726f776e2061742075732c0a49206b6e6f772077652063616e2068616e64
+  bytes 6c652069742e2e2e0a446174206d616b6573206974206b696e64612066756e2c
+  bytes 206a613f0af10400726f616c645f3030385f3030325f30310000000000000000
+  bytes 01000100cc0d00004f000000f208fffff20707ff496620492764206e65766572
+  bytes 206d657420796f7520677579732c207468656e20490a776f756c642062652072
+  bytes 65616374696e67206a757374206c696b65207468656d2e0af104000066726564
+  bytes 5f3030385f3030325f303100000000000000000001000400400e000048000000
+  bytes f208fffff20707ff4f68206d616e2c2074686973206973206772656174210a4c
+  bytes 6f6f6b206174207468656d2e2e2e205468657927726520616c6c2070616e6963
+  bytes 6b6564210af10400736368726f5f3030385f3030325f30310000000000000000
+  bytes 0100ffffac0e000015000000f208fffff41310ff2901f20781ff80ea0af21500
+  bytes 00000000736368726f5f3030385f3030325f303200000000000000000100ffff
+  bytes e80e000053000000f208fffff20707ff3e20596f75206665656c207361646e65
+  bytes 737320616e6420667269656e64736869700a66726f6d20746865206465707468
+  bytes 73206f662074686f73652073696c76657220657965732e0af10400006e706330
+  bytes 355f3030385f3030325f3031610000000000000001000300600f000043000000
+  bytes f208fffff20707ff54682d54686520776f726c6420697320676f696e6720746f
+  bytes 206469736170706561720a7768656e207468652073756e207269736573213f0a
+  bytes f10400006e706330355f3030385f3030325f3031620000000000000001000300
+  bytes c80f00005b000000f208fffff20707ff5768657265207468652068656c6c2069
+  bytes 7320746865204b61726d6120536f6369657479213f0a57686174206172652074
+  bytes 68657920706c616e6e696e6720746f20646f2061626f75740a74686973213f0a
+  bytes f10400006e706330365f3030385f3030325f3031610000000000000001000300
+  bytes 481000003b000000f208fffff20707ff2e2e2e5468697320697320616c6c2073
+  bytes 6f2073756464656e2e0a49276d206e6f7420726561647920746f20646965210a
+  bytes f10400006e706330365f3030385f3030325f3031620000000000000001000300
+  bytes a81000002e000000f208fffff20707ff492e2e2e0a49206861766520736f206d
+  bytes 7563682073686f7070696e67206c656674210af104000000736572615f303038
+  bytes 5f3030335f30310000000000000000000200050000110000441100006d000000
+  bytes f208fffff20707ff536368726f6564696e6765722077617320746865206e616d
+  bytes 65206f6620746865206361740a44722e2048656174206761766520746f206d65
+  bytes 2e0af104f208ffff2e2e2e4275742c20697420776173206a7573742061206e6f
+  bytes 726d616c206361742e0af1040000000067616c655f3030385f3030335f303100
+  bytes 0000000000000000030006009c110000d611000040120000cb000000f208ffff
+  bytes f20707ff4265696e67206f76657270726f746563746564206f6e6c79206d616b
+  bytes 657320610a706572736f6e207765616b65722e0af104f208ffff49662070656f
+  bytes 706c65206f75746c6976652074686569722062656e65666163746f722c0a7468
+  bytes 656e207468657920776f6e277420686176652074686520736b696c6c730a6e65
+  bytes 6365737361727920746f206c697665206f6e207468656972206f776e2e0af104
+  bytes f208ffff4f6e652063616e6e6f742067726f7720696e73696465206120736865
+  bytes 6c6c2e0af104000067616c655f3030385f3030335f3032000000000000000000
+  bytes 010006008c1200006d000000f208fffff20707ff53696e636520686520677569
+  bytes 64656420796f752c204920646f7562740a68652773206f757220656e656d792e
+  bytes 2e2e204275742c2077687920776f756c640a736f6d656f6e6520757365207468
+  bytes 65206e616d65206f6620536572612773206361743f0af1040000000063696572
+  bytes 6f5f3030385f3030335f3031000000000000000002000000241300004c130000
+  bytes 7b000000f208fffff20707ff49206665656c20736f72727920666f7220646573
+  bytes 6520677579732e2e2e0af104f208ffff446f20796f75207468696e6b20697420
+  bytes 626f74686572732064656d206461740a6465792063616e2774206c6976652077
+  bytes 6974686f757420736f6d656f6e650a656c736527732068656c703f0af1040000
+  bytes 636965726f5f3030385f3030335f3032000000000000000002000000c8130000
+  bytes 031400005f000000f208fffff20707ff4461742063617427732064652073616d
+  bytes 65206f6e65207765207361770a696e206465204a756e6b796172642c206a613f
+  bytes 0af104f208ffff5768617420646f20796f75206d65616e2c2068652074616c6b
+  bytes 65643f0af1040000667265645f3030385f3030335f3031000000000000000000
+  bytes 010004004c14000024000000f208fffff20707ff49276d206e6f7468696e6720
+  bytes 6c696b65207468656d2e2e2e0af10400667265645f3030385f3030335f303200
+  bytes 0000000000000000010004009414000045000000f208fffff20707ff49207361
+  bytes 77206120636174206c696b6520746861742c206275742e2e2e0a486520736565
+  bytes 6d656420737472616e67652c20736f6d65686f772e0af104000000006e706330
+  bytes 355f3030385f3030335f3031000000000000000002000300041500002f150000
+  bytes 49000000f208fffff20707ff49276d207374696c6c206e6f7420646f6e652073
+  bytes 686f7070696e67207965742e0af104f208ffff43276d6f6e21204f70656e2074
+  bytes 68652073746f7265210af104000000006e706330355f3030385f3030335f3032
+  bytes 0000000000000000030003007c150000b6150000ed150000b5000000f208ffff
+  bytes f20707ff4120636174213f2057687920776f756c64204920636172652061626f
+  bytes 75740a736f6d6520737475706964206361743f0af104f208ffff4c6f6f6b2c20
+  bytes 69662069742773206e6f74206f6e206d79206c6973742c0a7468656e20492064
+  bytes 6f6e27742063617265210af104f208ffff546869732073616c65277320687567
+  bytes 652c20616e642049276d206e6f740a676f696e6720746f206d69737320697420
+  bytes 666f7220616e797468696e67210af104000000006e706330365f3030385f3030
+  bytes 345f30310000000000000000010002005816000038000000f208fffff20707ff
+  bytes 546865204379626572205368616d616e2773207269676874207468657265210a
+  bytes 476f20676574207468656d210af104006e706330375f3030385f3030345f3031
+  bytes 000000000000000001000200b416000058000000f208fffff20707ff48616e64
+  bytes 206f76657220746865204379626572205368616d616e2e0a5768617420617265
+  bytes 20796f7520706c616e6e696e6720746f20646f2c0a64657374726f7920746865
+  bytes 20776f726c64213f0af104006e706330385f3030385f3030335f303161000000
+  bytes 00000000040007003c1700008b170000bc1700000d18000043010000f208ffff
+  bytes f20707ff416c6c2074686520736f6c64696572732068617665206265656e2067
+  bytes 6976656e0a6f726465727320746f206361707475726520746865204379626572
+  bytes 205368616d616e2e0af104f208ffff2e2e2e546865206f726465722063616d65
+  bytes 2066726f6d207468652043686965660a4469726563746f722e0af104f208ffff
+  bytes 536865206d656e74696f6e6564207573696e6720746865205368616d616e0a74
+  bytes 6f2073746f7020476f642c20627574207468617420646f65736e27740a6d616b
+  bytes 652073656e73652e2e2e0af104f208ffff546865204547472077617320646573
+  bytes 74726f7965642c20616e64207468617427730a746865206f6e6c792077617920
+  bytes 746f20737065616b207769746820476f642d2d616e640a736865206861642075
+  bytes 7320646973706f7365206f662074686520696e68696269746f722e0af1040000
+  bytes 6e706330385f3030385f3030335f3031620000000000000001000700a4180000
+  bytes 37000000f208fffff20707ff576974686f757420616c6c20746861742c206974
+  bytes 2773206a757374206e6f7420706f737369626c652e2e2e0af10400006e706330
+  bytes 395f3030385f3030335f3031000000000000000003000300081900003c190000
+  bytes 85190000a7000000f208fffff20707ff57682d57686174213f0a50656f706c65
+  bytes 2074686174207475726e20696e746f206d6f6e73746572733f0af104f208ffff
+  bytes 2e2e2e4176617461722054756e6572733f0a54686520536f6369657479207761
+  bytes 7320676f696e6720746f207475726e2075730a696e746f206d6f6e7374657273
+  bytes 213f0af104f208ffff486f7720636f756c64207468657920747269636b207573
+  bytes 206c696b6520746861743f0af10400006e706331305f3030385f3030335f3031
+  bytes 000000000000000001000300d419000049000000f208fffff20707ff542d5461
+  bytes 6b65206d6520736f6d65776865726520736166652e2e2e210a4920646f6e2774
+  bytes 2077616e6e61206469652d2d49276c6c2070617920796f75210af10400000000
+  bytes 736368726f5f3030385f3030335f303100000000000000000100ffff441a0000
+  bytes 37000000f208fffff20707ff3e205468652073696c7665722065796573206172
+  bytes 652063616c6d20616e640a656e636f75726167696e672e0af10400006e706331
+  bytes 325f3030385f3030335f3031000000000000000002000300a41a0000cc1a0000
+  bytes 7a000000f208fffff20707ff49742077617320612062697264210a4e6f2e2e2e
+  bytes 204120706c616e653f0af104f208ffff49742077617320746f6f206461726b20
+  bytes 746f2074656c6c2c2062757420490a6b6e6f772069742077617320696e207468
+  bytes 652061646d696e6973747261746976650a64697374726963742e0af104000000
+  bytes 6e706331335f3030385f3030335f3031610000000000000001000700441b0000
+  bytes 3e000000f208fffff20707ff49206b6e6577207468652070656f706c65207768
+  bytes 6f20796f7520677579730a77657265206d6f64656c65642061667465722e0af1
+  bytes 040000006e706331335f3030385f3030335f3031620000000000000003000700
+  bytes b01b0000f91b0000231c0000a5000000f208fffff20707ff5365727068207761
+  bytes 7320726573706f6e7369626c6520666f72207468652043796265720a5368616d
+  bytes 616e2773206d656e74616c2073746162696c6974792e0af104f208ffff486561
+  bytes 74206d6f6e69746f7265642068657220706879736963616c206865616c74682e
+  bytes 0af104f208ffff417267696c6c61207761732061206e757273652077686f2077
+  bytes 6f726b65640a756e64657220486561742e0af104000000006e706331335f3030
+  bytes 385f3030335f30316300000000000000010007007c1c000059000000f208ffff
+  bytes f20707ff536572706820627261696e77617368656420417267696c6c6120616e
+  bytes 6420757365640a6865722061732061207370792c20746f206b65657020486561
+  bytes 74206f7574206f660a686973207761792e0af10400000000616c6a6972615f30
+  bytes 30385f3030345f30310000000000000001000800fc1c000034000000f208ffff
+  bytes f20707ff54686573652070656f706c652061726520626574746572207468616e
+  bytes 20467265643f0a486f77213f0af10400616c6a6972615f3030385f3030345f30
+  bytes 326100000000000001000800541d00001a000000f208fffff20707ff44617461
+  bytes 2e2e2e202a736967682a0af104000000616c6a6972615f3030385f3030345f30
+  bytes 326200000000000001000800941d00004f000000f208fffff20707ff49742066
+  bytes 65656c73206c696b6520746865206d6f737420696d706f7274616e7420646174
+  bytes 610a6973206d697373696e672066726f6d207573207269676874206e6f772e0a
+  bytes f104000067616c655f3030385f3030345f303100000000000000000001000600
+  bytes 081e000048000000f208fffff20707ff57686174206861766520746865736520
+  bytes 70656f706c6520646f6e6520746f0a66656e6420666f72207468656972206f77
+  bytes 6e206c697665732e2e2e213f0af1040067616c655f3030385f3030345f303261
+  bytes 000000000000000002000600781e0000b41e00007c000000f208fffff20707ff
+  bytes 5468652073756e20636f6e74726f6c73207468652063697263756c6174696f6e
+  bytes 0a6f6620736f6c617220646174612e2e2e0af104f208ffff496e20746865204a
+  bytes 756e6b796172642c2074686174206379636c65207761730a65737461626c6973
+  bytes 68656420627920746865207261696e2e0af1040067616c655f3030385f303034
+  bytes 5f303262000000000000000001000600181f000026000000f208fffff20707ff
+  bytes 4275742c206966207468617427732074686520636173652e2e2e0af104000000
+  bytes 6e706330335f3030385f3030345f3031000000000000000001000200641f0000
+  bytes 3f000000f208fffff20707ff4973207468617420746865206e657720756e6966
+  bytes 6f726d3f0a53776565742c207768656e20646f207765206765742027656d3f0a
+  bytes f10400006e706330335f3030385f3030345f3032000000000000000001000200
+  bytes c81f00004b000000f208fffff20707ff5573696e67204d616e74726120697320
+  bytes 70726574747920747269636b792e0a49276d20676c61642049206f6e6c792068
+  bytes 61766520677561726420647574792e0af10400006e706330345f3030385f3030
+  bytes 345f30310000000000000000020003003c2000007b20000090000000f208ffff
+  bytes f20707ff4920776973682074686f73652064616d6e207361766167657320776f
+  bytes 756c640a6c6561726e20746865697220706c6163652e2e2e0af104f208ffff57
+  bytes 65276420626520626574746572206f6666206966207468657920646965642e2e
+  bytes 2e0a5265736f757263657320617265206c696d6974656420656e6f7567680a61
+  bytes 732069742069732e0af104006e706330345f3030385f3030345f303200000000
+  bytes 0000000002000300f42000003e2100009b000000f208fffff20707ff54686520
+  bytes 6c61626f7261746f727920646f6d6520686f6c647320746865206469616d6f6e
+  bytes 640a6f662068756d616e20776973646f6d2d2d746865204547472e0af104f208
+  bytes ffff54686174277320776865726520746865792073746f726520736f6c617220
+  bytes 646174612c0a636f7069656420647572696e6720636f6d6d756e69636174696f
+  bytes 6e207769746820476f642e0af10400006e706330355f3030385f3030345f3031
+  bytes 000000000000000001000300b42100004c000000f208fffff20707ff54686174
+  bytes 20776f6d616e20616e6e6f7973207468652068656c6c206f75747461206d6521
+  bytes 0a5463682e2e2e2047657420686572206f7574206f6620686572652e0af10400
+  bytes 616c6a697261325f3030385f3030355f30310000000000000200080028220000
+  bytes 782200006d000000f208fffff20707ff596f752063616e277420657870656374
+  bytes 20746f20676f207468726f756768206c6966650a77697468206f746865722070
+  bytes 656f706c652070726f74656374696e6720796f752e0af104f208ffff2e2e2e53
+  bytes 6572766573207468656d2072696768742e0af104000000006e706330335f3030
+  bytes 385f3030355f3031000000000000000002000300c0220000e522000069000000
+  bytes f208fffff20707ff54686520454747206973206f7574746120636f6e74726f6c
+  bytes 213f0af104f208ffff576879207468652068656c6c2064696420796f7520646f
+  bytes 20746861743f0a57686174277320676f696e6720746f2068617070656e20746f
+  bytes 206d65213f0af104000000004558495457415250000000000000000000000000
+  bytes 000000000100ffff502300001d000000f208fffff20707ff3e204c6561766520
+  bytes 74686520617265613f0af1040000000045584954574152505f53454c00000000
+  bytes 000000000000000000000200000000009c230000a523000011000000f208ffff
+  bytes 5965732e00f208ffff4e6f2e00000000464c4448554e54455849545741525000
+  bytes 00000000000000000100ffffd42300003e000000f208fffff20707ff3e205769
+  bytes 6c6c20796f752073746f7020746865204669656c642048756e7420616e640a6c
+  bytes 656176652074686520617265613f0af104000000464c4448554e544558495457
+  bytes 4152505f53454c00000000000000020000000000402400004924000011000000
+  bytes f208ffff5965732e00f208ffff4e6f2e00000000484f53454b49000000000000
+  bytes 0000000000000000000000000100ffff782400003a000000f208fffff20707ff
+  bytes 3e204120737472616e6765206f626a65637420686f7665727320696e206d6964
+  bytes 6169722e0a546f7563682069743f0af104000000484f53454b495f53454c0000
+  bytes 0000000000000000000000000000020000000000e0240000e924000011000000
+  bytes f208ffff5965732e00f208ffff4e6f2e00000000484f53454b495f4e4f474554
+  bytes 0000000000000000000000000100ffff182500002a000000f208fffff20707ff
+  bytes 3e20596f752064656369646564206e6f7420746f20746f7563682069742e0af1
+  bytes 04000000484f53454b495f47455400000000000000000000000000000100ffff
+  bytes 682500002b000000f208fffff20707ff3e204f627461696e656420f20205fff2
+  bytes 0301fff20201ff207820f20302ff2e0af104000054414b415241000000000000
+  bytes 0000000000000000000000000100ffffb825000044000000f208fffff20707ff
+  bytes 3e205468657265206973206120626f7820656d697474696e67206c6967687420
+  bytes 66726f6d0a6974732070616e656c2e204f70656e2069743f0af1040054414b41
+  bytes 52415f53454c0000000000000000000000000000000002000000000028260000
+  bytes 3126000011000000f208ffff5965732e00f208ffff4e6f2e0000000054414b41
+  bytes 52415f4e4f4745540000000000000000000000000100ffff6026000029000000
+  bytes f208fffff20707ff3e20596f752064656369646564206e6f7420746f206f7065
+  bytes 6e2069742e0af1040000000054414b4152415f5354494c4c4745540000000000
+  bytes 000000000100ffffb026000019000000f208fffff20707ff3e20497427732065
+  bytes 6d7074792e0af1040000000054414b4152415f47455400000000000000000000
+  bytes 000000000100fffff02600002b000000f208fffff20707ff3e204f627461696e
+  bytes 656420f20205fff20301fff20201ff207820f20302ff2e0af104000054414b41
+  bytes 52415f47455432000000000000000000000000000200ffff442700006e270000
+  bytes 84000000f208fffff20707ff3e204f627461696e656420f20205fff20301fff2
+  bytes 0201ff207820f20302ff2e0af104f208ffff3e20506c616e7473206172652076
+  bytes 657279207261726520696e207468697320776f726c642e0a546865792063616e
+  bytes 2062652074726164656420696e206174204d4144204d41525420666f720a6d6f
+  bytes 6e65792e0af1040053554e5f54414b4152410000000000000000000000000000
+  bytes 0100ffffec2700003f000000f208fffff20707ff3e2054686572652069732061
+  bytes 20737472616e67652c20666c6f7765722d6c696b650a6f626a6563742e20546f
+  bytes 7563682069743f0af104000053554e5f54414b4152415f4e4f47455400000000
+  bytes 000000000100ffff502800002a000000f208fffff20707ff3e20596f75206465
+  bytes 6369646564206e6f7420746f20746f7563682069742e0af10400000054414b41
+  bytes 52415f4d414b415f4745540000000000000000000100ffffa028000025000000
+  bytes f208fffff20707ff3e204f627461696e656420f20205ff24f20301fff20201ff
+  bytes 2e0af1040000000054414b4152415f44414d4147450000000000000000000000
+  bytes 0100ffffec2800002b000000f208fffff20707ff3e2054686520656e74697265
+  bytes 20706172747920746f6f6b2064616d6167652e0af104000054414b4152415f44
+  bytes 414d4147455f504f49534f4e000000000100ffff3c2900003d000000f208ffff
+  bytes f20707ff3e2054686520656e7469726520706172747920746f6f6b2064616d61
+  bytes 67652c0a616e642077617320706f69736f6e65642e0af1040000000054414b41
+  bytes 52415f44414d4147455f414348450000000000000100ffffa029000042000000
+  bytes f208fffff20707ff3e2054686520656e7469726520706172747920746f6f6b20
+  bytes 64616d6167652c0a616e64206861642073746f6d6163682061636865732e0af1
+  bytes 0400000054414b4152415f44414d4147455f434c4f534500000000000100ffff
+  bytes 082a000041000000f208fffff20707ff3e2054686520656e7469726520706172
+  bytes 747920746f6f6b2064616d6167652c0a616e6420686164206d61676963207365
+  bytes 616c65642e0af1040000000054414b4152415f4b415241474554000000000000
+  bytes 000000000100ffff702a00001b000000f208fffff20707ff3e20497420776173
+  bytes 20656d7074792e0af104000054414b4152415341474153490000000000000000
+  bytes 000000000300ffffb82a0000da2a0000ee2a00005d000000f208fffff20707ff
+  bytes 3e20f20303ff20666f756e6420736f6d657468696e672e0af104f208fffff207
+  bytes 07ff2e2e2e2e2e2e2e2e2e0af104f208ffff3e204f627461696e656420f20205
+  bytes fff20301fff20201ff207820f20302ff2e0af10400000000434f4d505f4f5045
+  bytes 4e4552524f52000000000000000000000100ffff3c2b000022000000f208ffff
+  bytes f20707ff3e2043616e6e6f74206265207573656420686572652e0af104000000
+  bytes 4241445f4b414946554b5553495441594f000000000000000100ffff842b0000
+  bytes 5b000000f208fffff20707ff3e2044756520746f20746865206465636c696e65
+  bytes 20696e0a536f6c6172204e6f6973652c20746865207061727479207761730a72
+  bytes 656c6965766564206f662061626e6f726d616c207374617475732e0af1040000
+  bytes 434f4d505f4c494748544d41454e440000000000000000000100ffff042c0000
+  bytes 28000000f208fffff20707ff3e204c696768742042616c6c2773206566666563
+  bytes 7420656e6465642e0af10400434f4d505f4553544f4d41454e44000000000000
+  bytes 000000000100ffff502c000029000000f208fffff20707ff3e2054686520616e
+  bytes 74692d64656d6f6e206669656c642066616465642e0af10400000000434f4d50
+  bytes 5f5245424552414d41454e4400000000000000000100ffffa02c000029000000
+  bytes f208fffff20707ff3e205468652064656d6f6e2061747472616374696f6e2066
+  bytes 616465642e0af10400000000434f4d505f52454655544f4d41454e4400000000
+  bytes 000000000100fffff02c000029000000f208fffff20707ff3e20436f72652053
+  bytes 6869656c6427732065666665637420656e6465642e0af1040000000057415250
+  bytes 5f454c565f4d53470000000000000000000000000100ffff402d00001d000000
+  bytes f208fffff20707ff3e2053656c656374206120666c6f6f722e0af10400000000
+  bytes 574152505f454c565f53454c3100000000000000000000000000020000000000
+  bytes 8c2d0000962d000016000000f208fffff20301ff2e00f208ffff43616e63656c
+  bytes 2e000000574152505f454c565f53454c32000000000000000000000000000300
+  bytes 00000000d42d0000de2d0000e82d000020000000f208fffff20302ff2e00f208
+  bytes fffff20301ff2e00f208ffff43616e63656c2e00574152505f454c565f53454c
+  bytes 3300000000000000000000000000040000000000282e0000322e00003c2e0000
+  bytes 462e00002a000000f208fffff20303ff2e00f208fffff20302ff2e00f208ffff
+  bytes f20301ff2e00f208ffff43616e63656c2e000000574152505f454c565f53454c
+  bytes 34000000000000000000000000000500000000008c2e0000962e0000a02e0000
+  bytes aa2e0000b42e000034000000f208fffff20304ff2e00f208fffff20303ff2e00
+  bytes f208fffff20302ff2e00f208fffff20301ff2e00f208ffff43616e63656c2e00
+  bytes 574152505f454c565f53454c3500000000000000000000000000060000000000
+  bytes fc2e0000062f0000102f00001a2f0000242f00002e2f00003e000000f208ffff
+  bytes f20305ff2e00f208fffff20304ff2e00f208fffff20303ff2e00f208fffff203
+  bytes 02ff2e00f208fffff20301ff2e00f208ffff43616e63656c2e00000057415250
+  bytes 5f454c565f53454c36000000000000000000000000000700000000007c2f0000
+  bytes 862f0000902f00009a2f0000a42f0000ae2f0000b82f000048000000f208ffff
+  bytes f20306ff2e00f208fffff20305ff2e00f208fffff20304ff2e00f208fffff203
+  bytes 03ff2e00f208fffff20302ff2e00f208fffff20301ff2e00f208ffff43616e63
+  bytes 656c2e00464c445f424c55454943455f4b45594841564500000000000100ffff
+  bytes e82f000049000000f208fffff20707ff3e204120626c75652077616c6c207374
+  bytes 616e647320696e20746865207761792e0a54686520426c7565204b6579206d61
+  bytes 792064657374726f792069742e0af10400000000464c445f5245444943455f4b
+  bytes 4559484156450000000000000100ffff5830000047000000f208fffff20707ff
+  bytes 3e2041207265642077616c6c207374616e647320696e20746865207761792e0a
+  bytes 54686520526564204b6579206d61792064657374726f792069742e0af1040000
+  bytes 464c445f594552574943455f4b45594841564500000000000100ffffc4300000
+  bytes 4d000000f208fffff20707ff3e20412079656c6c6f772077616c6c207374616e
+  bytes 647320696e20746865207761792e0a5468652059656c6c6f77204b6579206d61
+  bytes 792064657374726f792069742e0af10400000000464c445f424c554549434500
+  bytes 0000000000000000000000000100ffff3831000048000000f208fffff20707ff
+  bytes 3e204120626c75652077616c6c207374616e647320696e20746865207761792e
+  bytes 0a596f752063616e6e6f742070617373207468726f7567682069742e0af10400
+  bytes 464c445f52454449434500000000000000000000000000000100ffffa4310000
+  bytes 47000000f208fffff20707ff3e2041207265642077616c6c207374616e647320
+  bytes 696e20746865207761792e0a596f752063616e6e6f742070617373207468726f
+  bytes 7567682069742e0af1040000464c445f59455257494345000000000000000000
+  bytes 000000000100ffff103200004a000000f208fffff20707ff3e20412079656c6c
+  bytes 6f772077616c6c207374616e647320696e20746865207761792e0a596f752063
+  bytes 616e6e6f742070617373207468726f7567682069742e0af104000000464c445f
+  bytes 4943455f425245414b00000000000000000000000100ffff8032000019000000
+  bytes f208fffff20707ff3e2044657374726f792069743f0af10400000000464c445f
+  bytes 4943455f425245414b5f53454c000000000000000000020000000000c8320000
+  bytes d132000011000000f208ffff5965732e00f208ffff4e6f2e00000000494e4654
+  bytes 45535430000000000000000000000000000000000100ffff0033000020000000
+  bytes f208fffff20707ff3e2046697273742c20746865206261736963732e0af10400
+  bytes 494e465445535431000000000000000000000000000000000100ffff44330000
+  bytes 20000000f208fffff20707ff3e2053656c656374696e67206973206e6578742e
+  bytes 0af10400494e4654455354315f53454c00000000000000000000000000000200
+  bytes 00000000903300009933000011000000f208ffff5965732e00f208ffff4e6f2e
+  bytes 00000000494e4654455354315f5945530000000000000000000000000100ffff
+  bytes c833000013000000f208fffff20707ff5965732e2e2e3f0af1040000494e4654
+  bytes 455354315f4e4f000000000000000000000000000100ffff0034000012000000
+  bytes f208fffff20707ff4e6f2e2e2e3f0af104000000444f4f525f4e4f545f4f5045
+  bytes 4e00000000000000000000000100ffff3834000025000000f208fffff20707ff
+  bytes 3e2054686520646f6f7220697320736875742074696768742e0af10400000000
+  bytes 843400008a340000913400009f340000b3340000b8340000bd340000c2340000
+  bytes dd3400004369656c6f00526f6c616e64004b61726d6120536f6c64696572004b
+  bytes 61726d612043697479205265736964656e74004672656400536572610047616c
+  bytes 65004b61726d6120546563686e6963616c205265736561726368657200417267
+  bytes 696c6c6100000000020404040404040404040404040404040404040404040404
+  bytes 0404040404040404040404040404040404040404040404040404040404040404
+  bytes 0404040404040404040404040404040404040404040404040404040404040404
+  bytes 040404040404040404040404040404040404040404040404040216242a223038
+  bytes 263244403a481e024202604c3836484a4c32443a361e3c3440302a024a07784a
+  bytes 0250024224360238076e2e3e0fb42e0766382e0250320766402c203a36025026
+  bytes 3238025a026038024a024824021c34021c32021c282836021c28202802543228
+  bytes 262832343420074224402628282824022007240f2a172e1f34273638363a3636
+  bytes 3822021c2224021c1c1c1837
+end
+
+strings count=32
+  string ppos01 "ppos01"
+  string str_01cam_01 "01cam_01"
+  string str_01all_d01 "01all_d01"
+  string str_01path_01 "01path_01"
+  string str_01all_d02 "01all_d02"
+  string str_01path_02 "01path_02"
+  string str_01all_d01_2 "01all_d01"
+  string fld_f_bin_ICE_b_BED "/fld/f/bin/ICE_b.BED"
+  string BARIA "BARIA"
+  string BARIA_2 "BARIA"
+  string k_01npc_01 "k_01npc_01"
+  string ppos01_2 "ppos01"
+  string ppos01_3 "ppos01"
+  string k_01npc_02 "k_01npc_02"
+  string ppos01_4 "ppos01"
+  string k_01npc_03 "k_01npc_03"
+  string ppos01_5 "ppos01"
+  string k_01npc_04 "k_01npc_04"
+  string ppos01_6 "ppos01"
+  string ppos01_7 "ppos01"
+  string k_01npc_05 "k_01npc_05"
+  string ppos01_8 "ppos01"
+  string ppos01_9 "ppos01"
+  string k_01npc_06 "k_01npc_06"
+  string ppos01_10 "ppos01"
+  string k_01npc_01_2 "k_01npc_01"
+  string k_01npc_02_2 "k_01npc_02"
+  string k_01npc_03_2 "k_01npc_03"
+  string k_01npc_04_2 "k_01npc_04"
+  string ppos01_11 "ppos01"
+  string k_01npc_05_2 "k_01npc_05"
+  string ppos01_12 "ppos01"
+  string k_01npc_06_2 "k_01npc_06"
+  string ppos01_13 "ppos01"
+  string k_01npc_01_3 "k_01npc_01"
+  string ppos01_14 "ppos01"
+  string k_01npc_02_3 "k_01npc_02"
+  string ppos01_15 "ppos01"
+  string k_01npc_03_3 "k_01npc_03"
+  string ppos01_16 "ppos01"
+  string k_01npc_04_3 "k_01npc_04"
+  string ppos01_17 "ppos01"
+  string k_01npc_05_3 "k_01npc_05"
+  string ppos01_18 "ppos01"
+  string k_01npc_06_3 "k_01npc_06"
+  string ppos01_19 "ppos01"
+  string k_01npc_07 "k_01npc_07"
+  string ppos01_20 "ppos01"
+  string k_01npc_08 "k_01npc_08"
+  string ppos01_21 "ppos01"
+  string k_01pos_01 "k_01pos_01"
+  string k_01npc_09 "k_01npc_09"
+  string ppos01_22 "ppos01"
+  string k_01npc_10 "k_01npc_10"
+  string ppos01_23 "ppos01"
+  string k_01npc_11 "k_01npc_11"
+  string ppos01_24 "ppos01"
+  string k_01npc_12 "k_01npc_12"
+  string k_01npc_13 "k_01npc_13"
+  string ppos01_25 "ppos01"
+  string k_01npc_01_4 "k_01npc_01"
+  string ppos01_26 "ppos01"
+  string k_01npc_02_4 "k_01npc_02"
+  string k_01npc_03_4 "k_01npc_03"
+  string ppos01_27 "ppos01"
+  string k_01npc_04_4 "k_01npc_04"
+  string ppos01_28 "ppos01"
+  string k_01npc_05_4 "k_01npc_05"
+  string k_01pos_01_2 "k_01pos_01"
+  string k_01npc_01_5 "k_01npc_01"
+  string k_01pos_01_3 "k_01pos_01"
+  string k_01npc_03_5 "k_01npc_03"
+  string ppos01_29 "ppos01"
+  string str_01cam_01_2 "01cam_01"
+  string str_01cam_01_3 "01cam_01"
+  string str_01cam_01_4 "01cam_01"
+end

@@ -1,0 +1,218 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=1 float=0
+
+procedure e802_main reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+
+code
+e802_main:
+  PROC e802_main
+  PUSHIS 802
+  COMM 0x00c8
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 3
+  PUSHIS 802
+  COMM 0x00ca
+  PUSHF 0x3f333333
+  PUSHF 0x3f266666
+  PUSHF 0x3f266666
+  PUSHIS 0
+  COMM 0x00b4
+  PUSHF 0x3e99999a
+  PUSHF 0x3e99999a
+  PUSHF 0x3e99999a
+  PUSHIS 0
+  COMM 0x00b5
+  PUSHF 0x3e99999a
+  PUSHF 0x3e99999a
+  PUSHF 0x3e99999a
+  PUSHIS 0
+  COMM 0x00b6
+  PUSHF 0x3e23d70a
+  PUSHF 0x3eb33333
+  PUSHF 0x3ed1eb85
+  PUSHIS 0
+  COMM 0x00bb
+  PUSHIS 9000
+  PUSHIS 130
+  PUSHIS 1100
+  PUSHIS 255
+  PUSHIS 0
+  COMM 0x00bc
+  PUSHIS 0
+  PUSHIS 1
+  PUSHIS 175
+  COMM 0x0014
+  PUSHIS 105
+  MINUS
+  PUSHIS 0
+  COMM 0x0048
+  PUSHIS 4
+  PUSHIS 802
+  COMM 0x00c9
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1065
+  COMM 0x0007
+  PUSHREG
+  IF _2
+  PUSHTYPE5 str_01pos_01
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0000
+  COMM 0x004a
+  GOTO _1
+_2:
+  PUSHTYPE5 str_01pos_02
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0000
+  COMM 0x004a
+  GOTO _1
+_1:
+  PUSHLIX 0x0000
+  COMM 0x00ae
+  PUSHF 0x3eb33333
+  PUSHF 0x3e99999a
+  PUSHF 0x3e99999a
+  PUSHF 0x3f59999a
+  PUSHF 0x3f4ccccd
+  PUSHF 0x3f400000
+  PUSHIS 0
+  PUSHLIX 0x0000
+  COMM 0x00af
+  PUSHF 0x3d4ccccd
+  MINUS
+  PUSHF 0x3f4ccccd
+  PUSHF 0x3dcccccd
+  MINUS
+  PUSHIS 0
+  PUSHLIX 0x0000
+  COMM 0x00b0
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x000f
+  PUSHIS 0
+  PUSHIS 1065
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _3
+  PUSHIS 1065
+  COMM 0x0008
+  PUSHTYPE5 str_01cam_02
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHIS 1
+  PUSHIS 15
+  PUSHIS 3
+  PUSHIS 23
+  PUSHLIX 0x0000
+  COMM 0x0073
+  PUSHIS 0
+  PUSHIS 25
+  PUSHIS 0
+  PUSHTYPE5 str_01pos_01_2
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0000
+  COMM 0x0017
+  PUSHTYPE5 str_01cam_02_MOTION
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_02_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHIS 100
+  COMM 0x000e
+  PUSHTYPE5 str_01pos_03
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0000
+  COMM 0x004a
+  PUSHLIX 0x0000
+  COMM 0x0123
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 0
+  PUSHTYPE5 str_01pos_04
+  COMM 0x0094
+  PUSHREG
+  PUSHLIX 0x0000
+  COMM 0x0017
+  PUSHTYPE5 str_01cam_03
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0019
+  PUSHTYPE5 str_01cam_03_MOTION
+  COMM 0x0094
+  PUSHREG
+  PUSHTYPE5 str_01cam_03_2
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0013
+  PUSHLIX 0x0000
+  COMM 0x0049
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 20
+  PUSHIS 0
+  PUSHLIX 0x0000
+  COMM 0x0073
+  PUSHTYPE5 str_01cam_03_3
+  COMM 0x0094
+  PUSHREG
+  COMM 0x0055
+  GOTO _3
+_3:
+  PUSHIS 10
+  PUSHIS 0
+  COMM 0x0010
+  PUSHIS 10
+  COMM 0x000e
+  COMM 0x0043
+  COMM 0x0099
+  PUSHLIX 0x0000
+  COMM 0x0016
+  COMM 0x0023
+  PUSHIS 0
+  COMM 0x011d
+  END
+end
+
+messages msg1
+  message MSG_TEST speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      font "テスト中..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+end
+
+strings
+  string str_01pos_01 "01pos_01"
+  string str_01pos_02 "01pos_02"
+  string str_01cam_02 "01cam_02"
+  string str_01pos_01_2 "01pos_01"
+  string str_01cam_02_2 "01cam_02"
+  string str_01cam_02_MOTION "01cam_02_MOTION"
+  string str_01pos_03 "01pos_03"
+  string str_01pos_04 "01pos_04"
+  string str_01cam_03 "01cam_03"
+  string str_01cam_03_2 "01cam_03"
+  string str_01cam_03_MOTION "01cam_03_MOTION"
+  string str_01cam_03_3 "01cam_03"
+  zero 22
+end

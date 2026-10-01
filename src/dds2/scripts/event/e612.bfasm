@@ -1,0 +1,47 @@
+flw0 2
+profile dds2
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e612_001 reserved=0x00000000
+
+code
+e612_001:
+  PROC e612_001
+  PUSHIS 10
+  COMM 0x0008
+  PUSHIS 136
+  COMM 0x0009
+  PUSHIS 137
+  COMM 0x0009
+  PUSHIS 138
+  COMM 0x0009
+  PUSHIS 139
+  COMM 0x0009
+  COMM 0x01e7
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x000f
+  COMM 0x0043
+  COMM 0x0099
+  PUSHIS 1
+  PUSHIS 612
+  COMM 0x00aa
+  PUSHREG
+  COMM 0x00a7
+  COMM 0x0043
+  COMM 0x0099
+  PUSHIS 613
+  PUSHIS 771
+  COMM 0x0028
+  COMM 0x002e
+  END
+end
+
+messages
+end
+
+strings
+  zero 240
+end
