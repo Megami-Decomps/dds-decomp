@@ -9,6 +9,9 @@ void evtInitializeVisualData(s32 arg0);
 void func_0022AB00(s32 arg0);
 
 void func_0022AB90(void);
+s32 evtGetMirroredSolarPhase(void);
+void func_0022A8D8(u32 arg0);
+void func_0022A248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u32 arg5, s32 arg6);
 
 extern s32 D_003BD890;
 
@@ -68,7 +71,34 @@ void evtInitializeVisualData(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A8D8);
 
-INCLUDE_ASM(const s32, "game/code_0022A248", func_0022A960);
+void func_0022A960(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5) {
+    s32 mirrored;
+    mirrored = (s8)evtGetMirroredSolarPhase();
+    func_0022A8D8(arg4);
+    if ((D_003BD88C & 1) != 0) {
+        if ((D_003BD88C & 2) != 0) {
+            if (D_003BD890 < D_003BD894) {
+                D_003BD890++;
+            } else {
+                D_003BD88C = 0;
+            }
+        } else if ((D_003BD88C & 4) != 0) {
+            if (D_003BD890 > 0) {
+                D_003BD890--;
+            } else {
+                D_003BD88C &= ~1;
+            }
+        }
+        if ((D_003BD88C & 1) != 0) {
+            s32 scaled = (s32)((f32)arg3 * ((f32)D_003BD890 / (f32)D_003BD894));
+            func_0022A248(arg0, arg1, arg2, scaled, mirrored, arg4, arg5);
+            return;
+        }
+    }
+    if ((D_003BD88C & 4) == 0) {
+        func_0022A248(arg0, arg1, arg2, arg3, mirrored, arg4, arg5);
+    }
+}
 
 s32 func_0022AAF0(void) {
     return D_003BD88C != 0;
