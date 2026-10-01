@@ -149,12 +149,75 @@
 #define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t.set reorder" \
     : : "r" (f))
+/* Same scale with the explicit mfc1 into $2 that the viewer-model asm spells
+ * out, and with $2 plus memory declared clobbered. */
+#define VU0_SCALE_VF_MFC1(vf, f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t" \
+    ".set reorder" \
+    : : "f" (f) : "$2", "memory")
 /* vf10 = vf10 * (1 - t) + vf11 * t (vf0.w is 1.0): the two-vector lerp of the
  * particle, motion and battle tween code (45 retail sites). */
 #define VU0_LERP_VF10(t) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
     "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
     : : "r" (t))
+/* Same lerp with the explicit mfc1 the motion-blend asm spells out, finishing
+ * with vmove.w vf10, vf0 (renormalise w to 1). */
+#define VU0_LERP_VF10_W(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
+    "vmove.w vf10, vf0\n\t.set reorder" \
+    : : "f" (t))
+/* Same lerp, finishing with vmove.xyzw vf11, vf10 (copy the result into vf11). */
+#define VU0_LERP_VF10_COPY(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
+    "vmove.xyzw vf11, vf10\n\t.set reorder" \
+    : : "f" (t))
+/* vf28-vf31 = (vf28-vf31) * (vf20-vf23): the full 4x4 product with the
+ * primary on the left, column sums landing in vf2/vf3/vf4 before the copy
+ * back. DDS1 sdfVuMultiplyScratchByPrimary / DDS2 code_00336B48. */
+#define VU0_MATRIX4_MUL_PRIMARY_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf20x\n\tvmadday.xyzw ACC, vf29, vf20y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf20z\n\tvmaddw.xyzw vf2, vf31, vf20w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf21x\n\tvmadday.xyzw ACC, vf29, vf21y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf21z\n\tvmaddw.xyzw vf3, vf31, vf21w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf22x\n\tvmadday.xyzw ACC, vf29, vf22y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf22z\n\tvmaddw.xyzw vf4, vf31, vf22w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf23x\n\tvmadday.xyzw ACC, vf29, vf23y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf23z\n\tvmaddw.xyzw vf31, vf31, vf23w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder" \
+    : : : "memory")
+/* vf28-vf31 = (vf20-vf23) * (vf28-vf31): the same product with the scratch
+ * bank on the left. DDS1 sdfVuMultiplyPrimaryByScratch / DDS2 code_00336B48. */
+#define VU0_MATRIX4_MUL_SCRATCH_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf20, vf28x\n\tvmadday.xyzw ACC, vf21, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf28z\n\tvmaddw.xyzw vf28, vf23, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf29x\n\tvmadday.xyzw ACC, vf21, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf29z\n\tvmaddw.xyzw vf29, vf23, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf30x\n\tvmadday.xyzw ACC, vf21, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf30z\n\tvmaddw.xyzw vf30, vf23, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf31x\n\tvmadday.xyzw ACC, vf21, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf31z\n\tvmaddw.xyzw vf31, vf23, vf31w\n\t" \
+    ".set reorder" \
+    : : : "memory")
+/* vf28-vf31 = (vf24-vf27) * (vf28-vf31): the same product with the second
+ * matrix bank on the left. DDS1 sdfVuMultiplyBanks / DDS2 code_00336768. */
+#define VU0_MATRIX4_MUL_BANK_B_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf24, vf28x\n\tvmadday.xyzw ACC, vf25, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf28z\n\tvmaddw.xyzw vf28, vf27, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf29x\n\tvmadday.xyzw ACC, vf25, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf29z\n\tvmaddw.xyzw vf29, vf27, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf30x\n\tvmadday.xyzw ACC, vf25, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf30z\n\tvmaddw.xyzw vf30, vf27, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf31x\n\tvmadday.xyzw ACC, vf25, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf31z\n\tvmaddw.xyzw vf31, vf27, vf31w\n\t" \
+    ".set reorder" \
+    : : : "memory")
 /* Register-to-register vector copy between calls (vmove.xyzw). */
 #define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "fpu.h"
 
 #include "fld.h"
@@ -1249,17 +1250,9 @@ void fldInitializeDisplayAndSceneSound(void) {
 
 void fldResetPlayerSceneTransformState(void) {
     u32 *buffer = D_0038A640;
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(buffer) : "memory");
+    VU0_STORE_VF(vf0, buffer);
     buffer += 4;
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf0, 0(%0)\n"
-        ".set reorder"
-        : : "r"(buffer) : "memory");
+    VU0_STORE_VF(vf0, buffer);
     fldPlayerObject = 0;
     *fldGetPlayerSceneStateAddress() = 0;
 }
@@ -1460,17 +1453,9 @@ void fldSnapshotAndReleasePlayerSceneObject(void) {
         if (dds3GetWorldSecondaryObject() != 0) {
             buffer = D_0038A640;
             effObjFetchInnerFirstVec(fldPlayerObject);
-            __asm__ volatile(
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(buffer) : "memory");
+            VU0_STORE_VF(vf10, buffer);
             effObjFetchInnerSecondVecNorm(fldPlayerObject);
-            __asm__ volatile(
-                ".set noreorder\n"
-                "sqc2 vf10, 0(%0)\n"
-                ".set reorder"
-                : : "r"(buffer + 4) : "memory");
+            VU0_STORE_VF(vf10, buffer + 4);
         }
         fldPlayerObject = 0;
         D_00435F10 = 0;

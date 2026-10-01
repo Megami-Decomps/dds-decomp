@@ -470,13 +470,13 @@ void effPCPThunderFree3(EffPCPThunderWorkB *work) {
 }
 
 void effThunderShiftOriginByVectorDelta(u8 *p, void *src) {
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf11, $vf11, $vf10\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p));
-    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p) : "memory");
+        VU0_LOAD_VF(vf10, p + 0x10);
+        VU0_LOAD_VF(vf11, src);
+        VU0_STORE_VF(vf11, p + 0x10);
+        VU0_SUB(vf11, vf11, vf10);
+        VU0_LOAD_VF(vf10, p);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, p);
 }
 
 void effPCPThunderSetParam58(EffPCPThunderWorkB *work, u32 value) {
@@ -552,13 +552,13 @@ void effPCPThunderFree4(EffPCPThunderWorkB *work) {
 }
 
 void effThunderShiftEndpointsWithAnchor(u8 *p, void *src) {
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p + 0x10));
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(src));
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf11, 0(%0)\n\t.set reorder" : : "r"(p + 0x10) : "memory");
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf11, $vf11, $vf10\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p));
-    __asm__ volatile(".set noreorder\n\tvadd.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(".set noreorder\n\tsqc2 $vf10, 0(%0)\n\t.set reorder" : : "r"(p) : "memory");
+        VU0_LOAD_VF(vf10, p + 0x10);
+        VU0_LOAD_VF(vf11, src);
+        VU0_STORE_VF(vf11, p + 0x10);
+        VU0_SUB(vf11, vf11, vf10);
+        VU0_LOAD_VF(vf10, p);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, p);
 }
 
 void func_0016DD88(EffPCPThunderWorkB *work, u32 value) {

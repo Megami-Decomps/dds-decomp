@@ -161,7 +161,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, ((EffFileRequest *)source)->resourceParam);
             VU0_SET_ONES_XYZ(vf10);
-            __asm__ volatile(".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f"(owner->scale) : "$2", "memory");
+            VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU((void *)owner->model);
         }
     }
@@ -197,13 +197,7 @@ void effRecreateModelFromSource(u32 *work, u8 *source) {
     model = func_00217680(func_002183D0(original->model), func_002183E0(original->model));
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "mfc1 $2, %0\n"
-        "qmtc2.ni $2, vf2\n"
-        "vmulx.xyzw vf10, vf10, vf2x\n"
-        ".set reorder"
-        : : "f"(owner->scale) : "$2", "memory");
+    VU0_SCALE_VF_MFC1(vf10, owner->scale);
     mdlStoreTertiaryVectorVU(model);
     owner->model = (u32)model;
 }
