@@ -20,6 +20,12 @@ typedef struct MdlSub {
 typedef struct MdlEntry {
     u8 unk0[0x14]; /* 0x0 */
     s16 enabled;   /* 0x14 */
+    u8 pad16[0x6A];
+    f32 row0[3];   /* 0x80: basis rows eased by func_002179A8 */
+    u8 pad8C[4];
+    f32 row1[3];   /* 0x90 */
+    u8 pad9C[4];
+    f32 row2[3];   /* 0xA0 */
 } MdlEntry;
 
 /* Entry table pointed to by the first word of MdlInner. */
@@ -469,7 +475,78 @@ void func_00217878(MdlCtx *ctx, s32 arg) {
     func_002174C0(ctx, arg);
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_002179A8);
+extern void sdfSetPrimaryIdentityMatrixVU(void *);
+extern void sdfRotateVuMatrixAboutX(f32 angle);
+extern void sdfRotateVuMatrixAboutY(f32 angle);
+
+/* Same update as func_00217878, first easing the entry `index` towards a pitch/yaw rotation (degrees). */
+void func_002179A8(MdlCtx *ctx, s32 arg, s32 index, f32 pitch, f32 yaw) {
+    MdlInner *inner;
+    MdlEntry *entry = NULL;
+    f32 rows[4][4];
+    f32 amount;
+    f32 weight;
+    f32 keep;
+    u32 *rec;
+    s32 i;
+
+    inner = ctx->inner;
+    if (index != -1) {
+        entry = inner->entries->items[index];
+        sdfSetPrimaryIdentityMatrixVU(inner->entries);
+        sdfRotateVuMatrixAboutX(pitch * 0.017453293f);
+        sdfRotateVuMatrixAboutY(yaw * 0.017453293f);
+        VU0_STORE_MATRIX(rows);
+    }
+    for (i = 0; i != 4; i++) {
+        if (ctx->slots[i] != NULL) {
+            if (ctx->slots[i]->unk30 != 0) {
+                func_002DB660(ctx->slots[i]);
+            }
+        }
+    }
+    amount = pitch;
+    if (index != -1) {
+        if (amount < 0.0f) {
+            amount = -amount;
+        }
+        weight = 1.0f;
+        if (amount < 25.0f) {
+            weight = amount / 25.0f;
+        }
+        keep = 1.0f - weight;
+        entry->row0[0] = rows[0][0] * weight + entry->row0[0] * keep;
+        entry->row0[1] = rows[0][1] * weight + entry->row0[1] * keep;
+        entry->row0[2] = rows[0][2] * weight + entry->row0[2] * keep;
+        entry->row1[0] = rows[1][0] * weight + entry->row1[0] * keep;
+        entry->row1[1] = rows[1][1] * weight + entry->row1[1] * keep;
+        entry->row1[2] = rows[1][2] * weight + entry->row1[2] * keep;
+        entry->row2[0] = rows[2][0] * weight + entry->row2[0] * keep;
+        entry->row2[1] = rows[2][1] * weight + entry->row2[1] * keep;
+        entry->row2[2] = rows[2][2] * weight + entry->row2[2] * keep;
+    }
+    if (ctx->flags & 1) {
+        return;
+    }
+    inner = ctx->inner;
+    sdfModelUpdateCurrentFrameTransforms(inner);
+    func_002D9238(arg, inner);
+    if (ctx->flags & 2) {
+        return;
+    }
+    if (ctx->flags & 4) {
+        if ((inner->flags19 & 0x10) == 0) {
+            return;
+        }
+    }
+    for (rec = ctx->list14; rec != NULL; rec = (u32 *)*rec) {
+        mdlDispatchViewerAnchorRecord(ctx, rec);
+    }
+    if (ctx->devList == NULL) {
+        return;
+    }
+    func_002174C0(ctx, arg);
+}
 
 void mdlEnableAllEntries(MdlCtx *ctx) {
     MdlEntryTable *table = ctx->inner->entries;

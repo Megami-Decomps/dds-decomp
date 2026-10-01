@@ -1107,7 +1107,86 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CA8);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412CF0);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001244A8);
+/* Snap an angle in degrees to the nearest of the eight compass directions. */
+f32 func_001244A8(f32 angle) {
+    f32 best;
+    s32 index;
+    f32 diff;
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    best = 900.0f;
+    index = -1;
+    diff = fabsf(fldAngleDifference(0.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 0;
+    }
+    diff = fabsf(fldAngleDifference(45.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 1;
+    }
+    diff = fabsf(fldAngleDifference(90.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 2;
+    }
+    diff = fabsf(fldAngleDifference(135.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 3;
+    }
+    diff = fabsf(fldAngleDifference(180.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 4;
+    }
+    diff = fabsf(fldAngleDifference(225.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 5;
+    }
+    diff = fabsf(fldAngleDifference(270.0f, angle));
+    if (diff < best) {
+        best = diff;
+        index = 6;
+    }
+    diff = fabsf(fldAngleDifference(315.0f, angle));
+    if (diff < best) {
+        index = 7;
+    }
+    switch (index) {
+    case 0:
+        angle = 0.0f;
+        break;
+    case 1:
+        angle = 45.0f;
+        break;
+    case 2:
+        angle = 90.0f;
+        break;
+    case 3:
+        angle = 135.0f;
+        break;
+    case 4:
+        angle = 180.0f;
+        break;
+    case 5:
+        angle = 225.0f;
+        break;
+    case 6:
+        angle = 270.0f;
+        break;
+    case 7:
+        angle = 315.0f;
+        break;
+    }
+    return angle;
+}
 
 extern f32 fldAngleDifference(f32, f32);
 
