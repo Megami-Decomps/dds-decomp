@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import sys
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -391,6 +392,60 @@ end
         with self.assertRaisesRegex(battle_tbl.BattleTableError, "nonzero alignment"):
             battle_tbl.decode_encount(bytes(bad_padding))
 
+    def test_aicalc_semantic_structure_and_references(self) -> None:
+        expected = {
+            "dds1": (72, 29, 667, 0),
+            "dds2": (89, 32, 773, 32),
+        }
+        for game, counts in expected.items():
+            with self.subTest(game=game):
+                source = ROOT / f"src/{game}/data/battle/aicalc.tblasm"
+                table = battle_tbl.parse_aicalc_source(
+                    source.read_text(encoding="utf-8"), source.parent
+                )
+                ai_count = len(battle_tbl.flw0.parse(table.ai_script).named_rows(0))
+                formula_count = len(
+                    battle_tbl.flw0.parse(table.formula_script).named_rows(0)
+                )
+                formula_source = source.with_name("aicalc-formulas.bfasm").read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn("CALC_SET_RESULT(", formula_source)
+                self.assertNotIn("COMM 0x016c", formula_source)
+                self.assertEqual(
+                    (
+                        ai_count,
+                        formula_count,
+                        len(table.calculation_words),
+                        len(table.weighted_tables),
+                    ),
+                    counts,
+                )
+                self.assertEqual(
+                    battle_tbl.decode_aicalc(battle_tbl.encode_aicalc(table)), table
+                )
+                skill_source = ROOT / f"src/{game}/data/battle/skill.tblasm"
+                skill = battle_tbl.parse_skill_source(
+                    skill_source.read_text(encoding="utf-8")
+                )
+                battle_tbl.validate_aicalc_references(table, skill)
+
+        dds1_source = ROOT / "src/dds1/data/battle/aicalc.tblasm"
+        dds1 = battle_tbl.parse_aicalc_source(
+            dds1_source.read_text(encoding="utf-8"), dds1_source.parent
+        )
+        groups = [list(group) for group in dds1.enemies[0].groups]
+        groups[0][0] = battle_tbl.AiChoice(weight=1, action=0x7000)
+        enemies = list(dds1.enemies)
+        enemies[0] = replace(
+            enemies[0], groups=tuple(tuple(group) for group in groups)
+        )
+        invalid = replace(dds1, enemies=tuple(enemies))
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError, "weighted table 0 outside AICALC"
+        ):
+            battle_tbl.validate_aicalc_references(invalid)
+
     def test_tracked_battle_corpus_hashes(self) -> None:
         for game in ("dds1", "dds2"):
             manifest = ROOT / f"config/{game}/battle_tables.sha1"
@@ -413,6 +468,12 @@ end
                     model = battle_tbl.parse_skill_source(source_text)
                     data = battle_tbl.encode_skill(model)
                     rendered = battle_tbl.render_skill_source(battle_tbl.decode_skill(data))
+                elif name == "aicalc":
+                    model = battle_tbl.parse_aicalc_source(source_text, source.parent)
+                    data = battle_tbl.encode_aicalc(model)
+                    rendered = battle_tbl.render_aicalc_source(
+                        battle_tbl.decode_aicalc(data)
+                    )
                 else:
                     self.fail(f"unhandled tracked battle table {name}")
                 self.assertEqual(hashlib.sha1(data).hexdigest(), digest)
@@ -430,6 +491,11 @@ end
             )
             battle_tbl.validate_skill_references(skill)
             battle_tbl.validate_unit_skill(unit, skill)
+            aicalc_source = ROOT / f"src/{game}/data/battle/aicalc.tblasm"
+            aicalc = battle_tbl.parse_aicalc_source(
+                aicalc_source.read_text(encoding="utf-8"), aicalc_source.parent
+            )
+            battle_tbl.validate_aicalc_references(aicalc, skill)
 
 
 if __name__ == "__main__":

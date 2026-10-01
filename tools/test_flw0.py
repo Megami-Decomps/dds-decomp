@@ -1182,6 +1182,57 @@ end
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
+            "CALC_SET_RESULT": (0x16C, 1, False),
+            "CALC_SOURCE_LEVEL": (0x16D, 0, True),
+            "CALC_TARGET_LEVEL": (0x16E, 0, True),
+            "CALC_SOURCE_STAT": (0x16F, 1, True),
+            "CALC_TARGET_STAT": (0x170, 1, True),
+            "CALC_ACTION_HIT_LEVEL": (0x171, 0, True),
+            "CALC_ACTION_AILMENT_LEVEL": (0x172, 0, True),
+            "CALC_ACTION_POWER": (0x173, 0, True),
+            "CALC_ACTION_MAGIC_BASE": (0x174, 0, True),
+            "CALC_SOURCE_FLAG_20_CLEAR": (0x175, 0, True),
+            "CALC_SOURCE_ACTION_AFFINITY": (0x176, 0, True),
+            "CALC_TARGET_ACTION_AFFINITY": (0x177, 0, True),
+            "CALC_SOURCE_ATTACK_AFFINITY": (0x178, 0, True),
+            "CALC_TARGET_ATTACK_AFFINITY": (0x179, 0, True),
+            "CALC_RANDOM_SCALE": (0x17A, 1, True),
+            "CALC_CURRENT_RESULT": (0x17B, 0, True),
+            "CALC_ACTION_MAGIC_LIMIT": (0x17C, 0, True),
+            "CALC_GROUP_AVERAGE_LEVEL": (0x17D, 1, True),
+            "CALC_GROUP_AVERAGE_STAT": (0x17E, 2, True),
+            "CALC_ENCOUNTER_ZONE_FACTOR": (0x17F, 0, True),
+            "CALC_ESCAPE_BONUS_COUNTER": (0x180, 0, True),
+            "CALC_SOURCE_HP": (0x181, 0, True),
+            "CALC_TARGET_HP": (0x182, 0, True),
+            "CALC_SOURCE_MAX_HP": (0x183, 0, True),
+            "CALC_TARGET_MAX_HP": (0x184, 0, True),
+            "CALC_LEVEL_MAX_HP_FACTOR": (0x186, 0, True),
+            "CALC_LEVEL_MAX_MP_FACTOR": (0x187, 0, True),
+            "CALC_TARGET_HP_BAND_FACTOR": (0x188, 0, True),
+            "CALC_LEVEL_FACTOR_360": (0x189, 0, True),
+            "CALC_LEVEL_FACTOR_4EC": (0x18A, 0, True),
+            "CALC_ROLL_TARGET_FLAG_RESULT": (0x18B, 0, True),
+            "CALC_ACTION_DEATH_TYPE": (0x18C, 0, True),
+            "CALC_LEVEL_CRITICAL_FACTOR": (0x18D, 0, True),
+            "CALC_LEVEL_RECOVERY_FACTOR": (0x18E, 0, True),
+            "CALC_SOURCE_ROSTER_BASE": (0x195, 0, True),
+            "CALC_TARGET_HP_FINE_FACTOR": (0x1A5, 0, True),
+            "CALC_SOURCE_ATTACK_POWER": (0x1D0, 0, True),
+            "CALC_GROUP_AVERAGE_MAX_HP": (0x1D2, 1, True),
+            "CALC_GROUP_AVERAGE_HP": (0x1D3, 1, True),
+        }
+        dds2_only = {
+            "CALC_MONEY_BASE": (0x05A, 0, True),
+            "CALC_MONEY_LEVEL_FACTOR": (0x162, 0, True),
+        }
+        shared_expected = {
+            name: contract for name, contract in expected.items()
+            if not name.startswith("CALC_")
+        }
+        battle_expected = {
+            name: contract for name, contract in expected.items()
+            if name.startswith("CALC_")
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
             with self.subTest(profile=profile.name):
@@ -1193,7 +1244,7 @@ end
                     )
                     for command in profile.commands
                 }
-                self.assertEqual(commands, expected)
+                self.assertEqual(commands, shared_expected)
                 treasure_fields = profile.by_name[
                     "READ_TREASURE_TABLE_VALUE"
                 ].symbols_for_argument(0)
@@ -1258,6 +1309,26 @@ end
                 self.assertEqual(
                     field_info_columns.by_value,
                     {0: "ROW_TYPE", 1: "MESSAGE_ID"},
+                )
+
+        for profile in (
+            flw0_profiles.DDS1_AICALC,
+            flw0_profiles.DDS2_AICALC,
+        ):
+            with self.subTest(profile=profile.name):
+                commands = {
+                    command.name: (
+                        command.command_id,
+                        command.stack_pop,
+                        command.writes_result,
+                    )
+                    for command in profile.commands
+                }
+                self.assertEqual(
+                    commands,
+                    shared_expected
+                    | battle_expected
+                    | (dds2_only if profile.name == "dds2-aicalc" else {}),
                 )
 
     def test_dds_event_namespaces_match_maintained_sources(self) -> None:
