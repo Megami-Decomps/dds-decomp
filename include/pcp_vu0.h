@@ -537,5 +537,22 @@
     ".set noreorder\n\tsqc2 vf28, %0\n\tsqc2 vf29, %1\n\tsqc2 vf30, %2\n\tsqc2 vf31, %3\n\t" \
     ".set reorder" \
     : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")
+/* Blend two source rows (+0x30) by the weight at node + 0x40, writing row
+ * +0x30 back (xy lerp of sourceA toward sourceB). Shared by the DDS1/DDS2
+ * sdfVuBlendNodeXY twins. */
+#define VU0_BLEND_NODE_XY(node, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (a), "r" (b) : "memory")
+/* Load-normalize-store of one packed vector in a single block ("+m" operand
+ * with a memory clobber). Splitting this into LOAD/NORMALIZE/STORE reshapes
+ * the caller's scheduling (DDS2 effInitializeParticleDirection), so the
+ * fused form is kept. */
+#define VU0_NORMALIZE_PACKED_VECTOR(v) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, %0\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\tsqc2 vf10, %0\n\t.set reorder" \
+    : "+m" (v) :: "memory")
 
 #endif
