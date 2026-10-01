@@ -59,7 +59,7 @@ typedef struct DdsAllocBlock {
     u32 buffer; /* 0x04 */
 } DdsAllocBlock;
 
-u64 dds3AllocateEmptyPackedValueBuffer(void) {
+DdsAllocBlock *dds3AllocateEmptyPackedValueBuffer(void) {
     DdsAllocBlock *block = (DdsAllocBlock *)func_0035A828(8);
     u32 buffer;
 
@@ -67,7 +67,7 @@ u64 dds3AllocateEmptyPackedValueBuffer(void) {
     buffer = func_0035A828(0x10000);
     block->used = 0;
     block->buffer = buffer;
-    return (u64)block;
+    return block;
 }
 
 void func_0031F138(u32 node) {
@@ -94,8 +94,8 @@ void func_0031F208(u32 unused, u32 node) {
 }
 
 
-u64 dds3AllocateAndAttachPackedValueBuffer(s32 object) {
-    u64 record;
+DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
+    DdsAllocBlock *record;
 
     record = dds3AllocateEmptyPackedValueBuffer();
     func_00320CE0(*(u32 *)(object + 4), 0, record);
@@ -116,7 +116,25 @@ void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F340);
+/* Append `bytes` copies of the source data into the object's 0x10000-byte allocation blocks, moving on to a fresh block when one fills up. */
+void func_0031F340(DdsPackedObject *object, const void *source, u32 bytes) {
+    DdsAllocBlock *block = (DdsAllocBlock *)func_0031F270((s32)object);
+
+    if (bytes != 0) {
+        do {
+            u32 remaining = 0x10000 - block->used;
+            u32 count = remaining < bytes ? remaining : bytes;
+
+            memcpy((void *)(block->buffer + block->used), source, count);
+            bytes -= count;
+            block->used += count;
+            object->maxPackedOffset += count;
+            if (block->used > 0xffff) {
+                block = dds3AllocateAndAttachPackedValueBuffer((s32)object);
+            }
+        } while (bytes != 0);
+    }
+}
 
 void dds3WritePackedValue(destination, datum, size)
     u32 destination;
@@ -125,7 +143,7 @@ void dds3WritePackedValue(destination, datum, size)
 {
     u32 value[4];
     value[0] = datum;
-    func_0031F340((u32 *)destination, value, size);
+    func_0031F340((DdsPackedObject *)destination, value, size);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F430);
