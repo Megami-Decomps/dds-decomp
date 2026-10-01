@@ -1411,10 +1411,7 @@ _195:
       SET_SOLAR_OVERLAY_MODE(2)
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      push string(fld_f_bin_ICE_b_BED)
-      COMM 0x00cd
-      PUSHREG
-      POPLIX 0x0032
+      local_int[50] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_b_BED))
       push local_int[47]
       push local_int[50]
       COMM 0x009d

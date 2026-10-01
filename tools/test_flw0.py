@@ -1121,6 +1121,7 @@ end
             "SCREEN_FADE_A": (0x00F, 2, False),
             "SCREEN_FADE_B": (0x010, 2, False),
             "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
+            "CREATE_LINKED_CAMERA_VIEWER": (0x015, 2, True),
             "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
@@ -1144,6 +1145,7 @@ end
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "CREATE_FLAGGED_EFFECT_OBJECT": (0x0CD, 1, True),
             "REQUEST_ALTERNATE_FIELD_SEQUENCE": (0x100, 2, False),
             "SET_FIELD_ENVIRONMENT": (0x101, 2, False),
             "ENABLE_FIELD_MODELS": (0x103, 4, False),
@@ -1521,7 +1523,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 44544)
+        self.assertEqual(profiled_command_uses, 44962)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1575,8 +1577,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 86116, 12657),
-            "dds2": (140, 65982, 8239),
+            "dds1": (143, 85438, 11979),
+            "dds2": (140, 65364, 7621),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1753,7 +1755,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 44544)
+            (code_words, commands, profiled_commands), (168829, 53389, 44962)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1882,7 +1884,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-                (32306, 1910, 287),
+                (32675, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
