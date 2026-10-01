@@ -89,7 +89,9 @@ typedef struct BtlUnit {
     u8 unk_00[0x30];
     f32 position[4]; /* 0x30: world position, target of btlSetUnitPosition */
     f32 rotation[4]; /* 0x40: world orientation, target of btlSetUnitRotation */
-    u8 unk_50[0x40];
+    u8 unk_50[0x30];
+    f32 scale80;     /* 0x80 */
+    u8 unk_84[0xC];
     s32 position90; /* 0x90 */
     f32 position94;
     f32 position98;
@@ -1802,7 +1804,76 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002045E8);
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_00204838);
+typedef struct BtlCamState {
+    f32 position[4];  /* 0x00 */
+    f32 direction[4]; /* 0x10 */
+    f32 distance;     /* 0x20 */
+    f32 fov;          /* 0x24 */
+} BtlCamState;
+
+extern void btlFlagAllUnitsDefeatCandidate(void);
+extern void btlCopyMotionTransform();
+extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
+extern void func_001DB698();
+extern f32 func_002FA148(f32);
+
+/* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
+void func_00204838(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 userExtent;
+    f32 targetExtent;
+    f32 minDistance;
+    f32 angle;
+    f32 length;
+
+    btlFlagAllUnitsDefeatCandidate();
+    front->fov = ((f32 *)command)[9];
+    if (swapRoles == 0) {
+        user = btlGetTargetUnitForLink((BtlUnit *)command);
+        target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    } else {
+        target = btlGetTargetUnitForLink((BtlUnit *)command);
+        user = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    }
+    userExtent = user->positionB4 * user->scale80;
+    targetExtent = target->positionB4 * target->scale80;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] += user->positionB0 * user->scale80 * frontLift;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF(vf10, targetPos);
+    targetPos[1] += target->positionB0 * target->scale80 * backLift;
+    if (targetPos[0] <= userPos[0]) {
+        targetPos[0] = targetPos[0] + targetExtent * sideScale;
+    } else {
+        targetPos[0] = targetPos[0] - targetExtent * sideScale;
+    }
+    VU0_LOAD_VF(vf10, userPos);
+    VU0_STORE_VF(vf10, front->position);
+    VU0_LOAD_VF(vf11, targetPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    front->distance = length;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, front->direction);
+    angle = front->fov * 1.3333333f * 0.5f;
+    front->distance = front->distance + targetExtent * 1.5f / func_002FA148(angle);
+    minDistance = userExtent / func_002FA148(angle);
+    if (front->distance < minDistance) {
+        front->distance = minDistance;
+    }
+    btlCopyMotionTransform(back, front);
+    back->distance += 250.0f;
+    if (mirror != 0) {
+        func_001DB698(front);
+        func_001DB698(back);
+    }
+    btlUnitFaceTarget(user, target);
+    btlUnitFaceTarget(target, user);
+}
 
 u32 func_00204AC0(void) {
     return 0xffffffff;
@@ -2609,13 +2680,9 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00207718);
 
-extern void btlCopyMotionTransform();
-
 extern void btlSetActorEffectParameterOrMuzzlePosition();
 
 extern void btlInterpolateVectorStep();
-
-extern void func_001DB698();
 
 typedef struct BtlAimUnit {
     u8 pad00[0x30];
