@@ -10,8 +10,8 @@ procedure e902_dead reserved=0x00000000
 code
 e902_main:
   PROC e902_main
-  PUSHIS 0
-  COMM 0x0000
+  PUSHMSG MSG_000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 e902_dead:
   PROC e902_dead
