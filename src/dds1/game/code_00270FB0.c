@@ -540,7 +540,26 @@ INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20C0);
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B20D0);
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", mnuCreateCampTasks);
+extern u8 *func_00271E58(void);
+extern void func_00272798();
+extern void func_002728F8();
+extern void func_002729C8();
+extern void func_00101A80(s32, s32);
+extern void kwlnFadeOutStart(s8, s8, s8, s32);
+
+void mnuCreateCampTasks(void) {
+    s32 work;
+    s32 draw;
+
+    work = (s32)func_00271E58();
+    kwlnTaskCreate(D_003BC6B8, 0x3F2, 1, 0, func_00272798, 0, work);
+    draw = kwlnTaskCreate(D_003B20C0, 0x2B07, 1, 0, func_002728F8, 0, work);
+    kwlnTaskCreate(D_003B20D0, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, work);
+    func_00101A80(draw, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, work));
+    func_00101A80(draw, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, work));
+    kwlnFadeOutStart(0, 0, 0, 0xF);
+    D_003BC6B4 = 1;
+}
 
 void mnuDestroyCampTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003BC6B8, 0);
