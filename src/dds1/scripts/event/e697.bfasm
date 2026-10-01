@@ -219,84 +219,64 @@ e697_main:
   COMM 0x009e
   push global_int[26]
   COMM 0x009e
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff81))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff81))
   push global_int[8]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff75))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff75))
   push global_int[9]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff76))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff76))
   push global_int[10]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff78))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff78))
   push global_int[11]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff79))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff79))
   push global_int[12]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff80))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff80))
   push global_int[13]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff82))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff82))
   push global_int[14]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff83))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff83))
   push global_int[15]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff84))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff84))
   push global_int[16]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff85))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff85))
   push global_int[17]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff86))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff86))
   push global_int[18]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff87))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff87))
   push global_int[19]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff88))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff88))
   push global_int[20]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff89))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff89))
   push global_int[21]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff90))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff90))
   push global_int[22]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff91))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff91))
   push global_int[23]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff92))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff92))
   push global_int[24]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff93))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff93))
   push global_int[25]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff94))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff94))
   push global_int[26]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff77))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff77))
   push global_int[86]
   COMM 0x009d
   push 0
@@ -313,13 +293,11 @@ e697_main:
   COMM 0x012b
   push 1
   COMM 0x0041
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03))
   push 0
   push global_int[1]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_2))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_2))
   push 0
   push global_int[2]
   COMM 0x00c4
@@ -355,14 +333,10 @@ e697_main:
   push 1
   push 697
   COMM 0x008e
-  result = CREATE_SCRIPT_TASK(procedure(e697_010), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e697_020), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e697_030), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e697_040), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_010), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_020), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_030), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_040), -(1)))
   push 10
   push 697
   COMM 0x00cb
@@ -377,16 +351,13 @@ e697_main:
   COMM 0x009e
   push global_int[88]
   COMM 0x009e
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff770))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff770))
   push global_int[87]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(eff750))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(eff750))
   push global_int[88]
   COMM 0x009d
-  result = CREATE_SCRIPT_TASK(procedure(e697_050), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e697_050), -(1)))
   SCREEN_FADE_B(1, 1)
   WAIT_FOR_TIMER_LIMIT(60)
   SET_MODEL_FLAG(87)
@@ -400,13 +371,9 @@ e697_main:
   return
 e697_010:
   PROC e697_010
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
-  push result
-  push string(cam01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam01)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_2))
   COMM 0x0013
   SET_UNIT_VALUE(global_int[1], 0)
   PREPARE_UNIT_MOTION_STATE(global_int[1], 1, 0, 10, 0)
@@ -429,13 +396,9 @@ e697_010:
   return
 e697_020:
   PROC e697_020
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam02))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam02_MOTION))
-  push result
-  push string(cam02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam02)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam02_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam02_2))
   COMM 0x0013
   push 0
   push 3
@@ -450,13 +413,9 @@ e697_020:
   return
 e697_030:
   PROC e697_030
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam03))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam03_MOTION))
-  push result
-  push string(cam03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam03)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam03_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam03_2))
   COMM 0x0013
   push 0
   push 3
@@ -470,27 +429,18 @@ e697_030:
   return
 e697_040:
   PROC e697_040
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam04))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam04_MOTION))
-  push result
-  push string(cam04_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam04)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam04_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam04_2))
   COMM 0x0013
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04))
   push 110
   push global_int[1]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_MOTION))
-  push result
-  push string(light04_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_2))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
   COMM 0x00e8
   PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
   push 70
@@ -546,13 +496,9 @@ e697_040:
   return
 e697_050:
   PROC e697_050
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam05))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam05_MOTION))
-  push result
-  push string(cam05_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam05)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam05_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam05_2))
   COMM 0x0013
   push global_int[9]
   COMM 0x009f
@@ -713,19 +659,14 @@ e697_050:
   COMM 0x009b
   push global_int[26]
   COMM 0x009b
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light05))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light05))
   push 70
   push global_int[1]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light05_MOTION))
-  push result
-  push string(light05_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light05_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light05_2))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light05_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light05_3))
   COMM 0x00e8
   WAIT_FOR_TIMER_LIMIT(40)
   SET_UNIT_VALUE(global_int[1], 0)
@@ -742,13 +683,9 @@ e697_050:
   WAIT_FOR_TIMER_LIMIT(10)
   push global_int[27]
   COMM 0x0016
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_MOTION))
-  push result
-  push string(cam06_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam06)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_2))
   COMM 0x0013
   push float32(1.0, bits=0x3f800000)
   push float32(1.0, bits=0x3f800000)
@@ -780,16 +717,14 @@ e697_050:
   COMM 0x00c9
   PUSHREG
   POPIX 0x0005
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p01))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(p01)))
   PREPARE_UNIT_MOTION_STATE(global_int[5], 3, 0, 0, 2)
   push 7
   push 697
   COMM 0x00c9
   PUSHREG
   POPIX 0x0005
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p01_2))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], READ_SECONDARY_WORLD_ID_VALUE(string(p01_2)))
   PREPARE_UNIT_MOTION_STATE(global_int[5], 3, 0, 0, 2)
   WAIT_FOR_TIMER_LIMIT(50)
   ACTIVATE_MESSAGE_PANEL()
@@ -1032,98 +967,52 @@ e697_050:
   COMM 0x00c9
   PUSHREG
   POPIX 0x0055
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p12))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p13))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[40], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p14))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[41], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p15))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[42], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p16))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[43], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p17))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[44], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p18))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[45], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p19))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[46], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p20))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[47], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p21))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[48], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p22))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[49], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p23))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[50], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p24))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[51], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p25))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[52], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p27))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[54], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p28))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[55], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p29))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[56], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p30))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[57], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p31))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[58], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p32))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[59], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p33))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[60], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p34))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[61], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p35))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[62], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p36))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[63], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p37))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[64], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p38))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[65], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p39))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[66], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p40))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[67], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p41))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[68], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p42))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[69], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p43))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[70], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p44))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[71], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p45))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[72], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p46))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[73], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p47))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[74], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p48))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[75], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p49))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[76], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p50))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[77], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p51))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[78], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p52))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[79], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p53))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[80], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p54))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[81], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p55))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[82], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p56))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[83], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p57))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[84], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p58))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[85], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(p12)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[40], READ_SECONDARY_WORLD_ID_VALUE(string(p13)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[41], READ_SECONDARY_WORLD_ID_VALUE(string(p14)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[42], READ_SECONDARY_WORLD_ID_VALUE(string(p15)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[43], READ_SECONDARY_WORLD_ID_VALUE(string(p16)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[44], READ_SECONDARY_WORLD_ID_VALUE(string(p17)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[45], READ_SECONDARY_WORLD_ID_VALUE(string(p18)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[46], READ_SECONDARY_WORLD_ID_VALUE(string(p19)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[47], READ_SECONDARY_WORLD_ID_VALUE(string(p20)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[48], READ_SECONDARY_WORLD_ID_VALUE(string(p21)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[49], READ_SECONDARY_WORLD_ID_VALUE(string(p22)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[50], READ_SECONDARY_WORLD_ID_VALUE(string(p23)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[51], READ_SECONDARY_WORLD_ID_VALUE(string(p24)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[52], READ_SECONDARY_WORLD_ID_VALUE(string(p25)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[54], READ_SECONDARY_WORLD_ID_VALUE(string(p27)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(p28)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[56], READ_SECONDARY_WORLD_ID_VALUE(string(p29)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[57], READ_SECONDARY_WORLD_ID_VALUE(string(p30)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[58], READ_SECONDARY_WORLD_ID_VALUE(string(p31)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[59], READ_SECONDARY_WORLD_ID_VALUE(string(p32)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[60], READ_SECONDARY_WORLD_ID_VALUE(string(p33)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(p34)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(p35)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[63], READ_SECONDARY_WORLD_ID_VALUE(string(p36)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[64], READ_SECONDARY_WORLD_ID_VALUE(string(p37)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[65], READ_SECONDARY_WORLD_ID_VALUE(string(p38)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[66], READ_SECONDARY_WORLD_ID_VALUE(string(p39)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[67], READ_SECONDARY_WORLD_ID_VALUE(string(p40)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[68], READ_SECONDARY_WORLD_ID_VALUE(string(p41)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[69], READ_SECONDARY_WORLD_ID_VALUE(string(p42)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[70], READ_SECONDARY_WORLD_ID_VALUE(string(p43)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[71], READ_SECONDARY_WORLD_ID_VALUE(string(p44)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[72], READ_SECONDARY_WORLD_ID_VALUE(string(p45)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[73], READ_SECONDARY_WORLD_ID_VALUE(string(p46)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[74], READ_SECONDARY_WORLD_ID_VALUE(string(p47)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[75], READ_SECONDARY_WORLD_ID_VALUE(string(p48)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[76], READ_SECONDARY_WORLD_ID_VALUE(string(p49)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[77], READ_SECONDARY_WORLD_ID_VALUE(string(p50)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[78], READ_SECONDARY_WORLD_ID_VALUE(string(p51)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[79], READ_SECONDARY_WORLD_ID_VALUE(string(p52)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[80], READ_SECONDARY_WORLD_ID_VALUE(string(p53)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[81], READ_SECONDARY_WORLD_ID_VALUE(string(p54)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[82], READ_SECONDARY_WORLD_ID_VALUE(string(p55)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[83], READ_SECONDARY_WORLD_ID_VALUE(string(p56)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[84], READ_SECONDARY_WORLD_ID_VALUE(string(p57)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[85], READ_SECONDARY_WORLD_ID_VALUE(string(p58)))
   PREPARE_UNIT_MOTION_STATE(global_int[6], 1, 0, 0, 2)
   PREPARE_UNIT_MOTION_STATE(global_int[40], 1, 0, 0, 2)
   PREPARE_UNIT_MOTION_STATE(global_int[41], 1, 0, 0, 2)
@@ -1177,13 +1066,9 @@ e697_050:
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(MSG_007))
   FINISH_SCRIPT_MESSAGE_WINDOW()
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam07))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam07_MOTION))
-  push result
-  push string(cam07_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam07)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam07_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam07_2))
   COMM 0x0013
   SET_UNIT_VALUE(global_int[1], 10)
   PREPARE_UNIT_MOTION_STATE(global_int[1], 9, 0, 10, 0)

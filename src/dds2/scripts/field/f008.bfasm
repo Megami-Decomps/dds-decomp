@@ -402,107 +402,77 @@ itembox_label:
   PROC itembox_label
 _9:
   while (1) {
-    push 1
-    push 9
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _43
-    RESTORE_CAMERA_NODE_MODE()
-    ACTIVATE_MESSAGE_PANEL()
-    SET_SOLAR_OVERLAY_MODE(6)
-    result = TEST_CURRENT_TREASURE_OPENED()
-    if (result) {
-      MESSAGE_REQUEST_AND_POLL(74)
-    } else {
-    _42:
-      local_int[0] = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
-      local_int[1] = READ_TREASURE_TABLE_VALUE(ITEM_ID)
-      local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
-      local_int[3] = READ_TREASURE_TABLE_VALUE(TRAP_KIND)
-      local_int[4] = READ_TREASURE_TABLE_VALUE(AMOUNT)
-      if (local_int[0] == 1) {
-        MESSAGE_REQUEST_AND_POLL(67)
+    if (ACTION_WINDOW_REQUEST_AND_POLL(9) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      ACTIVATE_MESSAGE_PANEL()
+      SET_SOLAR_OVERLAY_MODE(6)
+      if (TEST_CURRENT_TREASURE_OPENED()) {
+        MESSAGE_REQUEST_AND_POLL(74)
       } else {
-      _14:
-        result = TEST_MODEL_FLAG(49)
-        if (result) {
-          MESSAGE_REQUEST_AND_POLL(77)
+      _42:
+        local_int[0] = READ_TREASURE_TABLE_VALUE(CONTENT_KIND)
+        local_int[1] = READ_TREASURE_TABLE_VALUE(ITEM_ID)
+        local_int[2] = READ_TREASURE_TABLE_VALUE(ITEM_QUANTITY)
+        local_int[3] = READ_TREASURE_TABLE_VALUE(TRAP_KIND)
+        local_int[4] = READ_TREASURE_TABLE_VALUE(AMOUNT)
+        if (local_int[0] == 1) {
+          MESSAGE_REQUEST_AND_POLL(67)
         } else {
-        _12:
-          MESSAGE_REQUEST_AND_POLL(71)
-          goto _11
+        _14:
+          if (TEST_MODEL_FLAG(49)) {
+            MESSAGE_REQUEST_AND_POLL(77)
+          } else {
+          _12:
+            MESSAGE_REQUEST_AND_POLL(71)
+            goto _11
+          }
+        _11:
+          goto _13
         }
-      _11:
-        goto _13
-      }
-    _13:
-      push 1
-      push 3
-      COMM 0x013c
-      if (local_int[0] == 1) {
-        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(68)
-      } else {
-      _16:
-        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(72)
-        goto _15
-      }
-    _15:
-      if_not (local_int[5] == 0) goto _40
-      if (local_int[3] == 1) {
-        MARK_CURRENT_TREASURE_OPENED()
-        push local_int[4]
-        COMM 0x0166
-        return
-      } else {
-      _29:
-        if (local_int[3] == 2) {
-          MARK_CURRENT_TREASURE_OPENED()
-          push 35
-          COMM 0x011b
-          COMM 0x011c
-          push 100
-          push 15
-          COMM 0x00ab
-          push 15
-          push 1
-          push 0
-          COMM 0x001a
-          push 15
-          push 100
-          push 1
-          COMM 0x001a
-          push 1
-          COMM 0x013a
-          MESSAGE_REQUEST_AND_POLL(80)
-          COMM 0x011f
-          COMM 0x0121
+      _13:
+        push 1
+        push 3
+        COMM 0x013c
+        if (local_int[0] == 1) {
+          local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(68)
         } else {
-        _30:
-          if (local_int[3] == 3) {
+        _16:
+          local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(72)
+          goto _15
+        }
+      _15:
+        if_not (local_int[5] == 0) goto _40
+        if (local_int[3] == 1) {
+          MARK_CURRENT_TREASURE_OPENED()
+          push local_int[4]
+          COMM 0x0166
+          return
+        } else {
+        _29:
+          if (local_int[3] == 2) {
             MARK_CURRENT_TREASURE_OPENED()
             push 35
             COMM 0x011b
             COMM 0x011c
-            push 200
-            push 20
+            push 100
+            push 15
             COMM 0x00ab
-            push 20
+            push 15
             push 1
             push 0
             COMM 0x001a
-            push 20
-            push 200
+            push 15
+            push 100
             push 1
             COMM 0x001a
-            push 2
+            push 1
             COMM 0x013a
             MESSAGE_REQUEST_AND_POLL(80)
             COMM 0x011f
             COMM 0x0121
           } else {
-          _31:
-            if (local_int[3] == 4) {
+          _30:
+            if (local_int[3] == 3) {
               MARK_CURRENT_TREASURE_OPENED()
               push 35
               COMM 0x011b
@@ -518,14 +488,14 @@ _9:
               push 200
               push 1
               COMM 0x001a
-              push 4
+              push 2
               COMM 0x013a
-              MESSAGE_REQUEST_AND_POLL(81)
+              MESSAGE_REQUEST_AND_POLL(80)
               COMM 0x011f
               COMM 0x0121
             } else {
-            _32:
-              if (local_int[3] == 5) {
+            _31:
+              if (local_int[3] == 4) {
                 MARK_CURRENT_TREASURE_OPENED()
                 push 35
                 COMM 0x011b
@@ -541,14 +511,14 @@ _9:
                 push 200
                 push 1
                 COMM 0x001a
-                push 5
+                push 4
                 COMM 0x013a
-                MESSAGE_REQUEST_AND_POLL(82)
+                MESSAGE_REQUEST_AND_POLL(81)
                 COMM 0x011f
                 COMM 0x0121
               } else {
-              _33:
-                if (local_int[3] == 6) {
+              _32:
+                if (local_int[3] == 5) {
                   MARK_CURRENT_TREASURE_OPENED()
                   push 35
                   COMM 0x011b
@@ -564,109 +534,130 @@ _9:
                   push 200
                   push 1
                   COMM 0x001a
-                  push 6
+                  push 5
                   COMM 0x013a
-                  MESSAGE_REQUEST_AND_POLL(83)
+                  MESSAGE_REQUEST_AND_POLL(82)
                   COMM 0x011f
                   COMM 0x0121
                 } else {
-                _34:
-                  if (local_int[0] <= 1) {
-                    if (local_int[0] == 1) {
-                      push 34
-                      COMM 0x011b
-                    } else {
-                    _20:
-                      result = TEST_MODEL_FLAG(49)
-                      if (result) {
-                        push 43
-                        COMM 0x011b
-                      } else {
-                      _18:
-                        push 33
-                        COMM 0x011b
-                        goto _17
-                      }
-                    _17:
-                      goto _19
-                    }
-                  _19:
-                    COMM 0x011c
+                _33:
+                  if (local_int[3] == 6) {
                     MARK_CURRENT_TREASURE_OPENED()
-                    FINISH_SCRIPT_MESSAGE_WINDOW()
-                    WAIT_FOR_TIMER_LIMIT(45)
-                    ACTIVATE_MESSAGE_PANEL()
-                    if (local_int[1] == 0) {
-                      MESSAGE_REQUEST_AND_POLL(84)
-                    } else {
-                    _24:
-                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
-                      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
-                      if (local_int[1] >= 96 && local_int[1] <= 108) {
-                        MESSAGE_REQUEST_AND_POLL(76)
-                      } else {
-                      _22:
-                        MESSAGE_REQUEST_AND_POLL(75)
-                        goto _21
-                      }
-                    _21:
-                      push local_int[2]
-                      push local_int[1]
-                      COMM 0x0070
-                      goto _23
-                    }
-                  _23:
+                    push 35
+                    COMM 0x011b
+                    COMM 0x011c
+                    push 200
+                    push 20
+                    COMM 0x00ab
+                    push 20
+                    push 1
+                    push 0
+                    COMM 0x001a
+                    push 20
+                    push 200
+                    push 1
+                    COMM 0x001a
+                    push 6
+                    COMM 0x013a
+                    MESSAGE_REQUEST_AND_POLL(83)
                     COMM 0x011f
                     COMM 0x0121
                   } else {
-                  _26:
-                    if (local_int[0] == 3) {
+                  _34:
+                    if (local_int[0] <= 1) {
+                      if (local_int[0] == 1) {
+                        push 34
+                        COMM 0x011b
+                      } else {
+                      _20:
+                        if (TEST_MODEL_FLAG(49)) {
+                          push 43
+                          COMM 0x011b
+                        } else {
+                        _18:
+                          push 33
+                          COMM 0x011b
+                          goto _17
+                        }
+                      _17:
+                        goto _19
+                      }
+                    _19:
+                      COMM 0x011c
                       MARK_CURRENT_TREASURE_OPENED()
-                      push 32
-                      COMM 0x0214
-                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
-                      MESSAGE_REQUEST_AND_POLL(79)
-                      push local_int[4]
-                      COMM 0x0139
+                      FINISH_SCRIPT_MESSAGE_WINDOW()
+                      WAIT_FOR_TIMER_LIMIT(45)
+                      ACTIVATE_MESSAGE_PANEL()
+                      if (local_int[1] == 0) {
+                        MESSAGE_REQUEST_AND_POLL(84)
+                      } else {
+                      _24:
+                        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
+                        SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
+                        if (local_int[1] >= 96 && local_int[1] <= 108) {
+                          MESSAGE_REQUEST_AND_POLL(76)
+                        } else {
+                        _22:
+                          MESSAGE_REQUEST_AND_POLL(75)
+                          goto _21
+                        }
+                      _21:
+                        push local_int[2]
+                        push local_int[1]
+                        COMM 0x0070
+                        goto _23
+                      }
+                    _23:
+                      COMM 0x011f
+                      COMM 0x0121
+                    } else {
+                    _26:
+                      if (local_int[0] == 3) {
+                        MARK_CURRENT_TREASURE_OPENED()
+                        push 32
+                        COMM 0x0214
+                        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                        MESSAGE_REQUEST_AND_POLL(79)
+                        push local_int[4]
+                        COMM 0x0139
+                      }
                     }
+                  _25:
+                    goto _28
                   }
-                _25:
-                  goto _28
                 }
               }
             }
           }
         }
-      }
-    _28:
-      goto _39
-    _40:
-      if (local_int[0] == 1) {
-        MESSAGE_REQUEST_AND_POLL(69)
-      } else {
-      _38:
-        result = TEST_MODEL_FLAG(49)
-        if (result) {
-          MESSAGE_REQUEST_AND_POLL(78)
+      _28:
+        goto _39
+      _40:
+        if (local_int[0] == 1) {
+          MESSAGE_REQUEST_AND_POLL(69)
         } else {
-        _36:
-          MESSAGE_REQUEST_AND_POLL(73)
-          goto _35
+        _38:
+          if (TEST_MODEL_FLAG(49)) {
+            MESSAGE_REQUEST_AND_POLL(78)
+          } else {
+          _36:
+            MESSAGE_REQUEST_AND_POLL(73)
+            goto _35
+          }
+        _35:
+          goto _37
         }
-      _35:
-        goto _37
+      _37:
+        goto _39
+      _39:
+        goto _41
       }
-    _37:
-      goto _39
-    _39:
-      goto _41
+    _41:
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      RELEASE_CURRENT_OBJECT()
+      SET_SOLAR_OVERLAY_MODE(7)
+      return
     }
-  _41:
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    RELEASE_CURRENT_OBJECT()
-    SET_SOLAR_OVERLAY_MODE(7)
-    return
-    goto _43
   _43:
     WAIT_FOR_TIMER_START()
   }
@@ -715,25 +706,20 @@ doorwarp_label:
 _47:
   while (1) {
     COMM 0x0203
-    push 1
-    push 2
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _51
-    RESTORE_CAMERA_NODE_MODE()
-    local_int[7] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
-    local_int[8] = READ_DOOR_WARP_VALUE(FADE_MODE)
-    COMM 0x0204
-    if (local_int[7] == 40) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      local_int[7] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+      local_int[8] = READ_DOOR_WARP_VALUE(FADE_MODE)
+      COMM 0x0204
+      if (local_int[7] == 40) {
+        WAIT_FOR_TIMER_LIMIT(20)
+      }
+    _49:
+      SCREEN_FADE_B(local_int[8], 20)
       WAIT_FOR_TIMER_LIMIT(20)
+      COMM 0x0202
+      return
     }
-  _49:
-    SCREEN_FADE_B(local_int[8], 20)
-    WAIT_FOR_TIMER_LIMIT(20)
-    COMM 0x0202
-    return
-    goto _51
   _51:
     WAIT_FOR_TIMER_START()
   }
@@ -743,48 +729,39 @@ dexitwarp_label:
   PROC dexitwarp_label
 _53:
   while (1) {
-    push 1
-    push 10
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _59
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(6)
-    COMM 0x020d
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(63)
-    push 1
-    push 3
-    COMM 0x013c
-    push 0
-    push 64
-    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _56
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    goto _55
-  _56:
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    RELEASE_CURRENT_OBJECT()
-    SET_SOLAR_OVERLAY_MODE(7)
-    return
-    goto _55
-  _55:
-    local_int[9] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
-    local_int[10] = READ_DOOR_WARP_VALUE(FADE_MODE)
-    COMM 0x0204
-    if (local_int[9] == 40) {
-      WAIT_FOR_TIMER_LIMIT(20)
+    if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(6)
+      COMM 0x020d
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(63)
+      push 1
+      push 3
+      COMM 0x013c
+      if (MESSAGE_SELECTION_REQUEST_AND_POLL(64) == 0) {
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+      } else {
+      _56:
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        ADD_EFFECT_UNIT_TO_WORLD(-(1))
+        RELEASE_CURRENT_OBJECT()
+        SET_SOLAR_OVERLAY_MODE(7)
+        return
+        goto _55
+      }
+    _55:
+      local_int[9] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+      local_int[10] = READ_DOOR_WARP_VALUE(FADE_MODE)
+      COMM 0x0204
+      if (local_int[9] == 40) {
+        WAIT_FOR_TIMER_LIMIT(20)
+      }
+    _57:
+      SCREEN_FADE_B(local_int[10], 45)
+      WAIT_FOR_TIMER_LIMIT(45)
+      COMM 0x0202
+      return
     }
-  _57:
-    SCREEN_FADE_B(local_int[10], 45)
-    WAIT_FOR_TIMER_LIMIT(45)
-    COMM 0x0202
-    return
-    goto _59
   _59:
     WAIT_FOR_TIMER_START()
   }
@@ -794,45 +771,36 @@ fldhunt_dexitwarp_label:
   PROC fldhunt_dexitwarp_label
 _61:
   while (1) {
-    push 1
-    push 2
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _67
-    RESTORE_CAMERA_NODE_MODE()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(65)
-    push 1
-    push 3
-    COMM 0x013c
-    push 0
-    push 66
-    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _64
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    goto _63
-  _64:
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    RELEASE_CURRENT_OBJECT()
-    return
-    goto _63
-  _63:
-    local_int[11] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
-    local_int[12] = READ_DOOR_WARP_VALUE(FADE_MODE)
-    COMM 0x0204
-    if (local_int[11] == 40) {
-      WAIT_FOR_TIMER_LIMIT(20)
+    if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(65)
+      push 1
+      push 3
+      COMM 0x013c
+      if (MESSAGE_SELECTION_REQUEST_AND_POLL(66) == 0) {
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+      } else {
+      _64:
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        RELEASE_CURRENT_OBJECT()
+        return
+        goto _63
+      }
+    _63:
+      local_int[11] = READ_DOOR_WARP_VALUE(MOTION_DURATION)
+      local_int[12] = READ_DOOR_WARP_VALUE(FADE_MODE)
+      COMM 0x0204
+      if (local_int[11] == 40) {
+        WAIT_FOR_TIMER_LIMIT(20)
+      }
+    _65:
+      SCREEN_FADE_B(local_int[12], 45)
+      WAIT_FOR_TIMER_LIMIT(45)
+      COMM 0x021a
+      COMM 0x0202
+      return
     }
-  _65:
-    SCREEN_FADE_B(local_int[12], 45)
-    WAIT_FOR_TIMER_LIMIT(45)
-    COMM 0x021a
-    COMM 0x0202
-    return
-    goto _67
   _67:
     WAIT_FOR_TIMER_START()
   }
@@ -842,19 +810,14 @@ dinwarp_label:
   PROC dinwarp_label
 _69:
   while (1) {
-    push 1
-    push 11
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _71
-    RESTORE_CAMERA_NODE_MODE()
-    COMM 0x0204
-    SCREEN_FADE_B(1, 45)
-    WAIT_FOR_TIMER_LIMIT(45)
-    COMM 0x0202
-    return
-    goto _71
+    if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      COMM 0x0204
+      SCREEN_FADE_B(1, 45)
+      WAIT_FOR_TIMER_LIMIT(45)
+      COMM 0x0202
+      return
+    }
   _71:
     WAIT_FOR_TIMER_START()
   }
@@ -882,27 +845,22 @@ tobiwarp_label:
   PROC tobiwarp_label
 _73:
   while (1) {
-    push 1
-    push 3
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _75
-    RESTORE_CAMERA_NODE_MODE()
-    push 37
-    COMM 0x011b
-    COMM 0x0204
-    WAIT_FOR_TIMER_LIMIT(4)
-    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
-    WAIT_FOR_TIMER_LIMIT(30)
-    COMM 0x011c
-    WAIT_FOR_TIMER_LIMIT(30)
-    COMM 0x011f
-    COMM 0x0121
-    COMM 0x0202
-    return
-    goto _75
+    if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      push 37
+      COMM 0x011b
+      COMM 0x0204
+      WAIT_FOR_TIMER_LIMIT(4)
+      global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+      PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
+      WAIT_FOR_TIMER_LIMIT(30)
+      COMM 0x011c
+      WAIT_FOR_TIMER_LIMIT(30)
+      COMM 0x011f
+      COMM 0x0121
+      COMM 0x0202
+      return
+    }
   _75:
     WAIT_FOR_TIMER_START()
   }
@@ -917,50 +875,30 @@ _77:
   if_not (local_int[13]) goto _78
   if_not (local_int[14] == 0) goto _92
   if_not (local_int[17] == 0) goto _84
-  push 1
-  push 6
-  COMM ACTION_WINDOW_REQUEST_AND_POLL
-  PUSHREG
-  EQ
-  IF _79
-  local_int[13] = 0
-  goto _79
+  if (ACTION_WINDOW_REQUEST_AND_POLL(6) == 1) {
+    local_int[13] = 0
+  }
 _79:
   goto _83
 _84:
-  push 1
-  push 6
-  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
-  PUSHREG
-  EQ
-  IF _81
-  local_int[13] = 0
-  goto _81
+  if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) {
+    local_int[13] = 0
+  }
 _81:
   goto _83
 _83:
   goto _91
 _92:
   if_not (local_int[17] == 0) goto _90
-  push 1
-  push 7
-  COMM ACTION_WINDOW_REQUEST_AND_POLL
-  PUSHREG
-  EQ
-  IF _85
-  local_int[13] = 0
-  goto _85
+  if (ACTION_WINDOW_REQUEST_AND_POLL(7) == 1) {
+    local_int[13] = 0
+  }
 _85:
   goto _89
 _90:
-  push 1
-  push 7
-  COMM ACTION_WINDOW_REQUEST_AND_POLL_DIRECT
-  PUSHREG
-  EQ
-  IF _87
-  local_int[13] = 0
-  goto _87
+  if (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(7) == 1) {
+    local_int[13] = 0
+  }
 _87:
   goto _89
 _89:
@@ -1006,19 +944,14 @@ heal_label:
   PROC heal_label
 _97:
   while (1) {
-    push 1
-    push 9
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _99
-    RESTORE_CAMERA_NODE_MODE()
-    SCREEN_FADE_B(0, 20)
-    WAIT_FOR_TIMER_LIMIT(20)
-    push 900
-    COMM 0x020f
-    return
-    goto _99
+    if (ACTION_WINDOW_REQUEST_AND_POLL(9) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      SCREEN_FADE_B(0, 20)
+      WAIT_FOR_TIMER_LIMIT(20)
+      push 900
+      COMM 0x020f
+      return
+    }
   _99:
     WAIT_FOR_TIMER_START()
   }
@@ -1028,19 +961,14 @@ save_label:
   PROC save_label
 _101:
   while (1) {
-    push 1
-    push 9
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _103
-    RESTORE_CAMERA_NODE_MODE()
-    SCREEN_FADE_B(0, 20)
-    WAIT_FOR_TIMER_LIMIT(20)
-    push 901
-    COMM 0x020f
-    return
-    goto _103
+    if (ACTION_WINDOW_REQUEST_AND_POLL(9) == 1) {
+      RESTORE_CAMERA_NODE_MODE()
+      SCREEN_FADE_B(0, 20)
+      WAIT_FOR_TIMER_LIMIT(20)
+      push 901
+      COMM 0x020f
+      return
+    }
   _103:
     WAIT_FOR_TIMER_START()
   }
@@ -1060,38 +988,23 @@ _105:
   } else {
   _124:
     if_not (local_int[24] == 1) goto _125
-    push 1
-    push 1
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _107
-    local_int[25] = 0
-    goto _107
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1) == 1) {
+      local_int[25] = 0
+    }
   _107:
     goto _123
   _125:
     if_not (local_int[24] == 2) goto _126
-    push 1
-    push 9
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _109
-    local_int[25] = 0
-    goto _109
+    if (ACTION_WINDOW_REQUEST_AND_POLL(9) == 1) {
+      local_int[25] = 0
+    }
   _109:
     goto _123
   _126:
     if_not (local_int[24] == 100) goto _127
-    push 1
-    push 2
-    COMM ACTION_WINDOW_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _111
-    local_int[25] = 0
-    goto _111
+    if (ACTION_WINDOW_REQUEST_AND_POLL(2) == 1) {
+      local_int[25] = 0
+    }
   _111:
     goto _123
   _127:
@@ -1100,14 +1013,9 @@ _105:
     } else {
     _128:
       if_not (local_int[24] == 102) goto _129
-      push 1
-      push 3
-      COMM ACTION_WINDOW_REQUEST_AND_POLL
-      PUSHREG
-      EQ
-      IF _113
-      local_int[25] = 0
-      goto _113
+      if (ACTION_WINDOW_REQUEST_AND_POLL(3) == 1) {
+        local_int[25] = 0
+      }
     _113:
       goto _123
     _129:
@@ -1116,50 +1024,30 @@ _105:
       } else {
       _130:
         if_not (local_int[24] == 104) goto _131
-        push 1
-        push 6
-        COMM ACTION_WINDOW_REQUEST_AND_POLL
-        PUSHREG
-        EQ
-        IF _115
-        local_int[25] = 0
-        goto _115
+        if (ACTION_WINDOW_REQUEST_AND_POLL(6) == 1) {
+          local_int[25] = 0
+        }
       _115:
         goto _123
       _131:
         if_not (local_int[24] == 105) goto _132
-        push 1
-        push 7
-        COMM ACTION_WINDOW_REQUEST_AND_POLL
-        PUSHREG
-        EQ
-        IF _117
-        local_int[25] = 0
-        goto _117
+        if (ACTION_WINDOW_REQUEST_AND_POLL(7) == 1) {
+          local_int[25] = 0
+        }
       _117:
         goto _123
       _132:
         if_not (local_int[24] == 106) goto _133
-        push 1
-        push 10
-        COMM ACTION_WINDOW_REQUEST_AND_POLL
-        PUSHREG
-        EQ
-        IF _119
-        local_int[25] = 0
-        goto _119
+        if (ACTION_WINDOW_REQUEST_AND_POLL(10) == 1) {
+          local_int[25] = 0
+        }
       _119:
         goto _123
       _133:
         if_not (local_int[24] == 107) goto _134
-        push 1
-        push 11
-        COMM ACTION_WINDOW_REQUEST_AND_POLL
-        PUSHREG
-        EQ
-        IF _121
-        local_int[25] = 0
-        goto _121
+        if (ACTION_WINDOW_REQUEST_AND_POLL(11) == 1) {
+          local_int[25] = 0
+        }
       _121:
         goto _123
       _134:
@@ -1225,8 +1113,7 @@ _138:
     local_int[23] = 1
     ACTIVATE_MESSAGE_PANEL()
     if (local_int[27] == 0) {
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[26], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[26], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01)))
     }
   _144:
     goto _146
@@ -1438,22 +1325,9 @@ _165:
 _176:
   push 48
   COMM 0x0214
-  push 0
-  push string(str_01path_01)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
-  push result
-  COMM MOVE_OBJECT_ALONG_PATH
-  push 0
-  push string(str_01path_02)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
-  push result
-  COMM MOVE_OBJECT_ALONG_PATH
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
-  push result
+  MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_01)), 0)
+  MOVE_OBJECT_ALONG_PATH(READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02)), READ_SECONDARY_WORLD_ID_VALUE(string(str_01path_02)), 0)
+  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
   COMM 0x006c
   WAIT_FOR_TIMER_LIMIT(20)
   SCREEN_FADE_B(0, 15)
@@ -1503,15 +1377,13 @@ _179:
   if_not (local_int[43] == 13) goto _187
 _181:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(11)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(11)) {
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
       global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[40])
-      result = READ_SUCTION_WARP_VALUE(5)
-      if (result) {
+      if (READ_SUCTION_WARP_VALUE(5)) {
         COMM 0x00a4
         ADD_EFFECT_UNIT_TO_WORLD(-(1))
       }
@@ -1539,8 +1411,7 @@ _187:
   if_not (local_int[43] == 14) goto _193
 _189:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(11)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(11)) {
       RESTORE_CAMERA_NODE_MODE()
       SCREEN_FADE_B(0, 5)
       WAIT_FOR_TIMER_LIMIT(5)
@@ -1575,106 +1446,91 @@ baria_label:
   local_int[48] = READ_BARRIER_VALUE(4)
   local_int[49] = READ_BARRIER_VALUE(COMPLETION_FLAG)
   local_int[51] = READ_BARRIER_VALUE(MAP_ENTRY_ID)
-  push 0
-  push local_int[49]
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _205
+  if_not (TEST_MODEL_FLAG(local_int[49]) == 0) goto _205
 _195:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
-    if_not (result) goto _203
-    push 0
-    push local_int[45]
-    COMM TEST_MODEL_FLAG
-    PUSHREG
-    EQ
-    IF _202
-    RESTORE_CAMERA_NODE_MODE()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(102)
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    RELEASE_CURRENT_OBJECT()
-    return
-    goto _201
-  _202:
-    RESTORE_CAMERA_NODE_MODE()
-    SET_SOLAR_OVERLAY_MODE(2)
-    SCREEN_FADE_B(0, 10)
-    WAIT_FOR_TIMER_LIMIT(10)
-    push string(fld_f_bin_ICE_b_BED)
-    COMM 0x00cd
-    PUSHREG
-    POPLIX 0x0032
-    push local_int[47]
-    push local_int[50]
-    COMM 0x009d
-    ADD_EFFECT_UNIT_TO_WORLD(local_int[46])
-    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[47])
-    PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
-    SCREEN_FADE_A(0, 10)
-    WAIT_FOR_TIMER_LIMIT(10)
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(99)
-    MESSAGE_REQUEST_AND_POLL(105)
-    push 0
-    push 106
-    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-    PUSHREG
-    EQ
-    IF _199
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    WAIT_FOR_TIMER_LIMIT(10)
-    push 32
-    COMM 0x011b
-    PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
-    WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push local_int[50]
-    COMM 0x00ce
-    COMM 0x011c
-    WAIT_FOR_TIMER_LIMIT(30)
-    WAIT_FOR_TIMER_LIMIT(30)
-    SCREEN_FADE_B(1, 30)
-    WAIT_FOR_TIMER_LIMIT(30)
-    DISABLE_FIELD_MODELS(0, 0, string(BARIA), 0)
-    DISABLE_FIELD_COLLISION(0, 0, string(BARIA_2))
-    PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
-    SCREEN_FADE_A(1, 15)
-    WAIT_FOR_TIMER_LIMIT(15)
-    WAIT_FOR_TIMER_LIMIT(30)
-    SCREEN_FADE_B(0, 15)
-    WAIT_FOR_TIMER_LIMIT(15)
-    push local_int[50]
-    COMM 0x009b
-    COMM 0x011f
-    COMM 0x0121
-    COMM 0x00a4
-    ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    SCREEN_FADE_A(0, 15)
-    WAIT_FOR_TIMER_LIMIT(15)
-    SET_MODEL_FLAG(local_int[49])
-    if (local_int[51] != -(1)) {
-      ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[51])
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(9)) goto _203
+    if (TEST_MODEL_FLAG(local_int[45]) == 0) {
+      RESTORE_CAMERA_NODE_MODE()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(102)
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      RELEASE_CURRENT_OBJECT()
+      return
+    } else {
+    _202:
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      SCREEN_FADE_B(0, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      push string(fld_f_bin_ICE_b_BED)
+      COMM 0x00cd
+      PUSHREG
+      POPLIX 0x0032
+      push local_int[47]
+      push local_int[50]
+      COMM 0x009d
+      ADD_EFFECT_UNIT_TO_WORLD(local_int[46])
+      global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[47])
+      PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
+      SCREEN_FADE_A(0, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(99)
+      MESSAGE_REQUEST_AND_POLL(105)
+      if (MESSAGE_SELECTION_REQUEST_AND_POLL(106) == 0) {
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        WAIT_FOR_TIMER_LIMIT(10)
+        push 32
+        COMM 0x011b
+        PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
+        WAIT_FOR_TIMER_LIMIT(60)
+        push 0
+        push local_int[50]
+        COMM 0x00ce
+        COMM 0x011c
+        WAIT_FOR_TIMER_LIMIT(30)
+        WAIT_FOR_TIMER_LIMIT(30)
+        SCREEN_FADE_B(1, 30)
+        WAIT_FOR_TIMER_LIMIT(30)
+        DISABLE_FIELD_MODELS(0, 0, string(BARIA), 0)
+        DISABLE_FIELD_COLLISION(0, 0, string(BARIA_2))
+        PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
+        SCREEN_FADE_A(1, 15)
+        WAIT_FOR_TIMER_LIMIT(15)
+        WAIT_FOR_TIMER_LIMIT(30)
+        SCREEN_FADE_B(0, 15)
+        WAIT_FOR_TIMER_LIMIT(15)
+        push local_int[50]
+        COMM 0x009b
+        COMM 0x011f
+        COMM 0x0121
+        COMM 0x00a4
+        ADD_EFFECT_UNIT_TO_WORLD(-(1))
+        SCREEN_FADE_A(0, 15)
+        WAIT_FOR_TIMER_LIMIT(15)
+        SET_MODEL_FLAG(local_int[49])
+        if (local_int[51] != -(1)) {
+          ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[51])
+        }
+      _197:
+        RELEASE_CURRENT_OBJECT()
+        SET_SOLAR_OVERLAY_MODE(3)
+        return
+      }
+    _199:
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      SCREEN_FADE_B(0, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      COMM 0x00a4
+      ADD_EFFECT_UNIT_TO_WORLD(-(1))
+      SCREEN_FADE_A(0, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      RELEASE_CURRENT_OBJECT()
+      SET_SOLAR_OVERLAY_MODE(3)
+      goto _201
     }
-  _197:
-    RELEASE_CURRENT_OBJECT()
-    SET_SOLAR_OVERLAY_MODE(3)
-    return
-    goto _199
-  _199:
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    SCREEN_FADE_B(0, 10)
-    WAIT_FOR_TIMER_LIMIT(10)
-    COMM 0x00a4
-    ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    SCREEN_FADE_A(0, 10)
-    WAIT_FOR_TIMER_LIMIT(10)
-    RELEASE_CURRENT_OBJECT()
-    SET_SOLAR_OVERLAY_MODE(3)
-    goto _201
   _201:
     goto _203
   _203:
@@ -1689,18 +1545,15 @@ proc_0013:
   PROC proc_0013
 _207:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _211
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _211
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[52] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(4)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[52], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[52], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2)))
       PREPARE_UNIT_MOTION_STATE(local_int[52], 2, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(5)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[52])
@@ -1714,8 +1567,7 @@ _207:
     _210:
       SET_UNIT_VALUE(local_int[52], 7)
       MESSAGE_REQUEST_AND_POLL(2)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_3))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[52], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[52], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_3)))
       PREPARE_UNIT_MOTION_STATE(local_int[52], 8, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(3)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[52])
@@ -1738,15 +1590,13 @@ proc_0014:
   PROC proc_0014
 _213:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _217
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _217
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[53] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(9)
       PREPARE_UNIT_MOTION_STATE(local_int[53], 3, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(10)
@@ -1762,8 +1612,7 @@ _213:
       PREPARE_UNIT_MOTION_STATE(local_int[53], 3, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(6)
       PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_4))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[53], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[53], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_4)))
       MESSAGE_REQUEST_AND_POLL(7)
       PREPARE_UNIT_MOTION_STATE(local_int[53], 1, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(8)
@@ -1787,13 +1636,11 @@ proc_0015:
   PROC proc_0015
 _219:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[54] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_03))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_5))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[54], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[54], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_5)))
       PREPARE_UNIT_MOTION_STATE(local_int[54], 1, 10, 20, 0)
       WAIT_FOR_TIMER_LIMIT(10)
       MESSAGE_REQUEST_AND_POLL(11)
@@ -1816,17 +1663,14 @@ proc_0016:
   PROC proc_0016
 _223:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _227
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _227
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[55] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_04))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_6))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[55], result)
+    if (TEST_MODEL_FLAG(14)) {
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_6)))
       MESSAGE_REQUEST_AND_POLL(14)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[55])
       MESSAGE_REQUEST_AND_POLL(15)
@@ -1838,8 +1682,7 @@ _223:
       return
     } else {
     _226:
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_7))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[55], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[55], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_7)))
       MESSAGE_REQUEST_AND_POLL(13)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[55])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1861,20 +1704,17 @@ proc_0017:
   PROC proc_0017
 _229:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _233
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _233
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[56] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_05))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       PREPARE_UNIT_MOTION_STATE(local_int[56], 1, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(18)
       PREPARE_UNIT_MOTION_STATE(local_int[56], 0, 10, 20, 0)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_8))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[56], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[56], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_8)))
       MESSAGE_REQUEST_AND_POLL(19)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[56])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1885,8 +1725,7 @@ _229:
       return
     } else {
     _232:
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_9))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[56], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[56], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_9)))
       MESSAGE_REQUEST_AND_POLL(16)
       PREPARE_UNIT_MOTION_STATE(local_int[56], 1, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(17)
@@ -1910,13 +1749,11 @@ proc_0018:
   PROC proc_0018
 _235:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[57] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_06))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_10))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[57], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[57], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_10)))
       PREPARE_UNIT_MOTION_STATE(local_int[57], 1, 10, 20, 0)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -1938,8 +1775,7 @@ proc_0019:
   PROC proc_0019
 _239:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[58] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_2))
@@ -1964,8 +1800,7 @@ proc_001a:
   PROC proc_001a
 _243:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[59] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02_2))
@@ -1990,8 +1825,7 @@ proc_001b:
   PROC proc_001b
 _247:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[60] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_03_2))
@@ -2016,13 +1850,11 @@ proc_001c:
   PROC proc_001c
 _251:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[61] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_04_2))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_11))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[61], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[61], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_11)))
       PREPARE_UNIT_MOTION_STATE(local_int[61], 1, 10, 20, 0)
       WAIT_FOR_TIMER_LIMIT(10)
       MESSAGE_REQUEST_AND_POLL(24)
@@ -2045,8 +1877,7 @@ proc_001d:
   PROC proc_001d
 _255:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[62] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_05_2))
@@ -2054,8 +1885,7 @@ _255:
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(26)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_12))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[62], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[62], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_12)))
       MESSAGE_REQUEST_AND_POLL(27)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[62])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2074,16 +1904,14 @@ proc_001e:
   PROC proc_001e
 _259:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[63] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_06_2))
       SET_UNIT_VALUE(local_int[63], 6)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_13))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[63], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[63], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_13)))
       MESSAGE_REQUEST_AND_POLL(28)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[63])
       MESSAGE_REQUEST_AND_POLL(29)
@@ -2103,13 +1931,11 @@ proc_001f:
   PROC proc_001f
 _263:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[64] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_3))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_14))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_14)))
       PREPARE_UNIT_MOTION_STATE(local_int[64], 4, 10, 20, 0)
       SET_UNIT_VALUE(local_int[64], 3)
       WAIT_FOR_TIMER_LIMIT(10)
@@ -2132,17 +1958,14 @@ proc_0020:
   PROC proc_0020
 _267:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _271
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _271
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[65] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02_3))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_15))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_15)))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(41)
-    if (result) {
+    if (TEST_MODEL_FLAG(41)) {
       MESSAGE_REQUEST_AND_POLL(32)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2174,18 +1997,15 @@ proc_0021:
   PROC proc_0021
 _273:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _277
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _277
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[66] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_03_3))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_16))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_16)))
     PREPARE_UNIT_MOTION_STATE(local_int[66], 1, 10, 20, 0)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(41)
-    if (result) {
+    if (TEST_MODEL_FLAG(41)) {
       MESSAGE_REQUEST_AND_POLL(34)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2217,18 +2037,15 @@ proc_0022:
   PROC proc_0022
 _279:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _283
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _283
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[67] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_04_3))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_17))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_17)))
     PREPARE_UNIT_MOTION_STATE(local_int[67], 1, 10, 20, 0)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(41)
-    if (result) {
+    if (TEST_MODEL_FLAG(41)) {
       MESSAGE_REQUEST_AND_POLL(36)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2260,19 +2077,16 @@ proc_0023:
   PROC proc_0023
 _285:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _289
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _289
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[68] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_05_3))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_18))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[68], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[68], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_18)))
     PREPARE_UNIT_MOTION_STATE(local_int[68], 5, 10, 20, 0)
     SET_UNIT_VALUE(local_int[68], 3)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(41)
-    if (result) {
+    if (TEST_MODEL_FLAG(41)) {
       MESSAGE_REQUEST_AND_POLL(38)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[68])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2304,13 +2118,11 @@ proc_0024:
   PROC proc_0024
 _291:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[69] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_06_3))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_19))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[69], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[69], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_19)))
       SET_UNIT_VALUE(local_int[69], 1)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -2332,13 +2144,11 @@ proc_0025:
   PROC proc_0025
 _295:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[70] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_07))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_20))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[70], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[70], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_20)))
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(40)
@@ -2359,19 +2169,16 @@ proc_0026:
   PROC proc_0026
 _299:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[71] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_08))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_21))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_21)))
       PREPARE_UNIT_MOTION_STATE(local_int[71], 1, 10, 20, 0)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(41)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01)))
       PREPARE_UNIT_MOTION_STATE(local_int[71], 0, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(42)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[71])
@@ -2391,13 +2198,11 @@ proc_0027:
   PROC proc_0027
 _303:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[72] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_09))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_22))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_22)))
       SET_UNIT_VALUE(local_int[72], 4)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -2419,13 +2224,11 @@ proc_0028:
   PROC proc_0028
 _307:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[73] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_10))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_23))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[73], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[73], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_23)))
       SET_UNIT_VALUE(local_int[73], 4)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -2447,13 +2250,11 @@ proc_0029:
   PROC proc_0029
 _311:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[74] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_11))
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_24))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[74], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[74], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_24)))
       PREPARE_UNIT_MOTION_STATE(local_int[74], 1, 10, 20, 0)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
@@ -2475,8 +2276,7 @@ proc_002a:
   PROC proc_002a
 _315:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[75] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_12))
@@ -2501,15 +2301,13 @@ proc_002b:
   PROC proc_002b
 _319:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[76] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_13))
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_25))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[76], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[76], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_25)))
       MESSAGE_REQUEST_AND_POLL(47)
       PREPARE_UNIT_MOTION_STATE(local_int[76], 1, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(48)
@@ -2531,18 +2329,15 @@ proc_002c:
   PROC proc_002c
 _323:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _327
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _327
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[77] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_4))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(51)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_26))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[77], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[77], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_26)))
       PREPARE_UNIT_MOTION_STATE(local_int[77], 1, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(52)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[77])
@@ -2575,15 +2370,13 @@ proc_002d:
   PROC proc_002d
 _329:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _333
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _333
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[78] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_02_4))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(54)
       PREPARE_UNIT_MOTION_STATE(local_int[78], 3, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(55)
@@ -2618,17 +2411,14 @@ proc_002e:
   PROC proc_002e
 _335:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _339
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _339
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[79] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_03_4))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_27))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[79], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[79], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_27)))
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(57)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[79])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2660,18 +2450,15 @@ proc_002f:
   PROC proc_002f
 _341:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if_not (result) goto _345
+    if_not (ACTION_WINDOW_REQUEST_AND_POLL(1)) goto _345
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(2)
     local_int[80] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_04_4))
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_28))
-    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[80], result)
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[80], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_28)))
     PREPARE_UNIT_MOTION_STATE(local_int[80], 1, 10, 20, 0)
     WAIT_FOR_TIMER_LIMIT(10)
     ACTIVATE_MESSAGE_PANEL()
-    result = TEST_MODEL_FLAG(14)
-    if (result) {
+    if (TEST_MODEL_FLAG(14)) {
       MESSAGE_REQUEST_AND_POLL(59)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[80])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2703,16 +2490,14 @@ proc_0030:
   PROC proc_0030
 _347:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[81] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_05_4))
       SET_UNIT_VALUE(local_int[81], 3)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01_2))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[81], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[81], READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01_2)))
       PREPARE_UNIT_MOTION_STATE(local_int[81], 4, 10, 20, 0)
       MESSAGE_REQUEST_AND_POLL(60)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[81])
@@ -2732,15 +2517,13 @@ proc_0031:
   PROC proc_0031
 _351:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[82] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_01_5))
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01_3))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[82], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[82], READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01_3)))
       MESSAGE_REQUEST_AND_POLL(61)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[82])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2758,16 +2541,14 @@ proc_0032:
   PROC proc_0032
 _355:
   while (1) {
-    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
-    if (result) {
+    if (ACTION_WINDOW_REQUEST_AND_POLL(1)) {
       RESTORE_CAMERA_NODE_MODE()
       SET_SOLAR_OVERLAY_MODE(2)
       local_int[83] = FIND_FIELD_EFFECT_BY_NAME(string(k_01npc_03_5))
       SET_UNIT_VALUE(local_int[83], 3)
       WAIT_FOR_TIMER_LIMIT(10)
       ACTIVATE_MESSAGE_PANEL()
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_29))
-      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[83], result)
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[83], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_29)))
       MESSAGE_REQUEST_AND_POLL(62)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[83])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2784,22 +2565,19 @@ _356:
   return
 proc_0033:
   PROC proc_0033
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2))
   COMM 0x00a3
   SET_FIELD_CAMERA_TABLE(40)
   return
 proc_0034:
   PROC proc_0034
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
   COMM 0x00a3
   SET_FIELD_CAMERA_TABLE(40)
   return
 proc_0035:
   PROC proc_0035
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_4))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_4))
   COMM 0x00a3
   SET_FIELD_CAMERA_TABLE(40)
   return

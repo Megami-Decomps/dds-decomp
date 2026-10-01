@@ -103,492 +103,453 @@ e909_hint:
   COMM 0x000a
   PUSHREG
   POPLIX 0x0000
-  push 0
-  push 3057
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _21
-  SET_MODEL_FLAG(3057)
-  goto _20
-_21:
-  push 1
-  push 3057
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  push 0
-  push 3058
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  AND
-  IF _20
-  SET_MODEL_FLAG(3058)
-  COMM 0x003e
-  COMM 0x01d4
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_START_00))
-  push 0
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _14
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+  if (TEST_MODEL_FLAG(3057) == 0) {
+    SET_MODEL_FLAG(3057)
   } else {
-  _2:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-    goto _1
+  _21:
+    if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3057) == 1) {
+      SET_MODEL_FLAG(3058)
+      COMM 0x003e
+      COMM 0x01d4
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_START_00))
+      push 0
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _14
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+      } else {
+      _2:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+        goto _1
+      }
+    _1:
+      goto _13
+    _14:
+      push 1
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _15
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+      } else {
+      _4:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+        goto _3
+      }
+    _3:
+      goto _13
+    _15:
+      push 2
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _16
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+      } else {
+      _6:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+        goto _5
+      }
+    _5:
+      goto _13
+    _16:
+      push 3
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _17
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+      } else {
+      _8:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+        goto _7
+      }
+    _7:
+      goto _13
+    _17:
+      push 4
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _18
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+      } else {
+      _10:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+        goto _9
+      }
+    _9:
+      goto _13
+    _18:
+      push 5
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _13
+      if (local_int[0] <= 50) {
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+      } else {
+      _12:
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+        goto _11
+      }
+    _11:
+      goto _13
+    _13:
+      SET_MODEL_FLAG(3069)
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      COMM 0x003f
+      return
+    }
   }
-_1:
-  goto _13
-_14:
-  push 1
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _15
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _4:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-    goto _3
-  }
-_3:
-  goto _13
-_15:
-  push 2
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _16
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _6:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _5
-  }
-_5:
-  goto _13
-_16:
-  push 3
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _17
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _8:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _7
-  }
-_7:
-  goto _13
-_17:
-  push 4
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _18
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-  } else {
-  _10:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _9
-  }
-_9:
-  goto _13
-_18:
-  push 5
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _13
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-  } else {
-  _12:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _11
-  }
-_11:
-  goto _13
-_13:
-  SET_MODEL_FLAG(3069)
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  COMM 0x003f
-  return
-  goto _20
 _20:
-  push 1
-  push 3058
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _87
-  push 1
-  COMM 0x01b3
-  PUSHREG
-  EQ
-  IF _35
-  CLEAR_MODEL_FLAG(3071)
-  CLEAR_MODEL_FLAG(3070)
-  CLEAR_MODEL_FLAG(3069)
-  CLEAR_MODEL_FLAG(3068)
-  push 1
-  push 25
-  push 270
-  push 1
-  COMM 0x01b4
-  PUSHREG
-  EQ
-  IF _32
-  if (local_int[0] <= 10) {
-    SET_MODEL_FLAG(3069)
+  if (TEST_MODEL_FLAG(3058) == 1) {
+    push 1
+    COMM 0x01b3
+    PUSHREG
+    EQ
+    IF _35
+    CLEAR_MODEL_FLAG(3071)
+    CLEAR_MODEL_FLAG(3070)
+    CLEAR_MODEL_FLAG(3069)
+    CLEAR_MODEL_FLAG(3068)
+    push 1
+    push 25
+    push 270
+    push 1
+    COMM 0x01b4
+    PUSHREG
+    EQ
+    IF _32
+    if (local_int[0] <= 10) {
+      SET_MODEL_FLAG(3069)
+    }
+  _23:
+    goto _31
+  _32:
+    push 1
+    push 50
+    push 270
+    push 1
+    COMM 0x01b4
+    PUSHREG
+    EQ
+    IF _33
+    if (local_int[0] <= 20) {
+      SET_MODEL_FLAG(3069)
+    }
+  _25:
+    goto _31
+  _33:
+    push 1
+    push 75
+    push 270
+    push 1
+    COMM 0x01b4
+    PUSHREG
+    EQ
+    IF _34
+    if (local_int[0] <= 40) {
+      SET_MODEL_FLAG(3069)
+    }
+  _27:
+    goto _31
+  _34:
+    if (local_int[0] <= 60) {
+      SET_MODEL_FLAG(3069)
+    }
+  _29:
+    goto _31
+  _31:
+    goto _35
+  _35:
+    COMM 0x003e
+    COMM 0x01d4
+    ACTIVATE_MESSAGE_PANEL()
+    if_not (TEST_MODEL_FLAG(3071) == 1) goto _84
+    push 0
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _38
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L400))
+    goto _37
+  _38:
+    push 1
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _39
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L401))
+    goto _37
+  _39:
+    push 2
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _40
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L402))
+    goto _37
+  _40:
+    push 3
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _41
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L403))
+    goto _37
+  _41:
+    push 4
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _42
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L404))
+    goto _37
+  _42:
+    push 5
+    COMM 0x01b5
+    PUSHREG
+    EQ
+    IF _37
+    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L405))
+    goto _37
+  _37:
+    goto _83
+  _84:
+    if (TEST_MODEL_FLAG(3070) == 1) {
+      push 0
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _45
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L300))
+      goto _44
+    _45:
+      push 1
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _46
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L301))
+      goto _44
+    _46:
+      push 2
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _47
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L302))
+      goto _44
+    _47:
+      push 3
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _48
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L303))
+      goto _44
+    _48:
+      push 4
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _49
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L304))
+      goto _44
+    _49:
+      push 5
+      COMM 0x01b5
+      PUSHREG
+      EQ
+      IF _44
+      MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L305))
+      goto _44
+    _44:
+      SET_MODEL_FLAG(3071)
+    } else {
+    _85:
+      if (TEST_MODEL_FLAG(3069) == 1) {
+        push 1
+        COMM 0x01b3
+        PUSHREG
+        EQ
+        IF _51
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_CHANGE))
+        goto _51
+      _51:
+        push 0
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _54
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L201))
+        goto _53
+      _54:
+        push 1
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _55
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L201))
+        goto _53
+      _55:
+        push 2
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _56
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L202))
+        goto _53
+      _56:
+        push 3
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _57
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L202))
+        goto _53
+      _57:
+        push 4
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _58
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L203))
+        goto _53
+      _58:
+        push 5
+        COMM 0x01b5
+        PUSHREG
+        EQ
+        IF _53
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L203))
+        goto _53
+      _53:
+        SET_MODEL_FLAG(3070)
+      } else {
+      _86:
+        push 1
+        COMM 0x01b3
+        PUSHREG
+        EQ
+        IF _60
+        MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_CHANGE))
+        goto _60
+      _60:
+        if (local_int[0] <= 5 && TEST_MODEL_FLAG(3068) == 0) {
+          MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_00))
+          SET_MODEL_FLAG(3068)
+        } else {
+        _82:
+          push 0
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _75
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+          } else {
+          _63:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+            goto _62
+          }
+        _62:
+          goto _74
+        _75:
+          push 1
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _76
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+          } else {
+          _65:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+            goto _64
+          }
+        _64:
+          goto _74
+        _76:
+          push 2
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _77
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+          } else {
+          _67:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+            goto _66
+          }
+        _66:
+          goto _74
+        _77:
+          push 3
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _78
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
+          } else {
+          _69:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+            goto _68
+          }
+        _68:
+          goto _74
+        _78:
+          push 4
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _79
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+          } else {
+          _71:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+            goto _70
+          }
+        _70:
+          goto _74
+        _79:
+          push 5
+          COMM 0x01b5
+          PUSHREG
+          EQ
+          IF _74
+          if (local_int[0] <= 50) {
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
+          } else {
+          _73:
+            MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
+            goto _72
+          }
+        _72:
+          goto _74
+        _74:
+          SET_MODEL_FLAG(3069)
+          goto _81
+        }
+      _81:
+        goto _83
+      }
+    }
+  _83:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    COMM 0x003f
   }
-_23:
-  goto _31
-_32:
-  push 1
-  push 50
-  push 270
-  push 1
-  COMM 0x01b4
-  PUSHREG
-  EQ
-  IF _33
-  if (local_int[0] <= 20) {
-    SET_MODEL_FLAG(3069)
-  }
-_25:
-  goto _31
-_33:
-  push 1
-  push 75
-  push 270
-  push 1
-  COMM 0x01b4
-  PUSHREG
-  EQ
-  IF _34
-  if (local_int[0] <= 40) {
-    SET_MODEL_FLAG(3069)
-  }
-_27:
-  goto _31
-_34:
-  if (local_int[0] <= 60) {
-    SET_MODEL_FLAG(3069)
-  }
-_29:
-  goto _31
-_31:
-  goto _35
-_35:
-  COMM 0x003e
-  COMM 0x01d4
-  ACTIVATE_MESSAGE_PANEL()
-  push 1
-  push 3071
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _84
-  push 0
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _38
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L400))
-  goto _37
-_38:
-  push 1
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _39
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L401))
-  goto _37
-_39:
-  push 2
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _40
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L402))
-  goto _37
-_40:
-  push 3
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _41
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L403))
-  goto _37
-_41:
-  push 4
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _42
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L404))
-  goto _37
-_42:
-  push 5
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _37
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L405))
-  goto _37
-_37:
-  goto _83
-_84:
-  push 1
-  push 3070
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _85
-  push 0
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _45
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L300))
-  goto _44
-_45:
-  push 1
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _46
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L301))
-  goto _44
-_46:
-  push 2
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _47
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L302))
-  goto _44
-_47:
-  push 3
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _48
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L303))
-  goto _44
-_48:
-  push 4
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _49
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L304))
-  goto _44
-_49:
-  push 5
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _44
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L305))
-  goto _44
-_44:
-  SET_MODEL_FLAG(3071)
-  goto _83
-_85:
-  push 1
-  push 3069
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _86
-  push 1
-  COMM 0x01b3
-  PUSHREG
-  EQ
-  IF _51
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_CHANGE))
-  goto _51
-_51:
-  push 0
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _54
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L201))
-  goto _53
-_54:
-  push 1
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _55
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L201))
-  goto _53
-_55:
-  push 2
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _56
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L202))
-  goto _53
-_56:
-  push 3
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _57
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L202))
-  goto _53
-_57:
-  push 4
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _58
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L203))
-  goto _53
-_58:
-  push 5
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _53
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L203))
-  goto _53
-_53:
-  SET_MODEL_FLAG(3070)
-  goto _83
-_86:
-  push 1
-  COMM 0x01b3
-  PUSHREG
-  EQ
-  IF _60
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_CHANGE))
-  goto _60
-_60:
-  push 0
-  push 3068
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  push local_int[0] <= 5
-  AND
-  IF _82
-  MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_00))
-  SET_MODEL_FLAG(3068)
-  goto _81
-_82:
-  push 0
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _75
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _63:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-    goto _62
-  }
-_62:
-  goto _74
-_75:
-  push 1
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _76
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _65:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-    goto _64
-  }
-_64:
-  goto _74
-_76:
-  push 2
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _77
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _67:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _66
-  }
-_66:
-  goto _74
-_77:
-  push 3
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _78
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L101))
-  } else {
-  _69:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _68
-  }
-_68:
-  goto _74
-_78:
-  push 4
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _79
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-  } else {
-  _71:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _70
-  }
-_70:
-  goto _74
-_79:
-  push 5
-  COMM 0x01b5
-  PUSHREG
-  EQ
-  IF _74
-  if (local_int[0] <= 50) {
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L102))
-  } else {
-  _73:
-    MESSAGE_REQUEST_AND_POLL(message(MSG_HINT_L103))
-    goto _72
-  }
-_72:
-  goto _74
-_74:
-  SET_MODEL_FLAG(3069)
-  goto _81
-_81:
-  goto _83
-_83:
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  COMM 0x003f
-  goto _87
 _87:
   return
 e909_dead:

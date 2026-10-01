@@ -56,14 +56,11 @@ e802_main:
   COMM 0x00c9
   PUSHREG
   POPLIX 0x0000
-  result = TEST_MODEL_FLAG(1065)
-  if (result) {
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01))
-    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], result)
+  if (TEST_MODEL_FLAG(1065)) {
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
   } else {
   _2:
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02))
-    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], result)
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02)))
     goto _1
   }
 _1:
@@ -85,57 +82,38 @@ _1:
   push local_int[0]
   COMM 0x00b0
   SCREEN_FADE_A(0, 10)
-  push 0
-  push 1065
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _3
-  SET_MODEL_FLAG(1065)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02))
-  ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
-  PREPARE_UNIT_MOTION_STATE(local_int[0], 23, 3, 15, 1)
-  push 0
-  push 25
-  push 0
-  push string(str_01pos_01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  push local_int[0]
-  COMM 0x0017
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
-  push result
-  push string(str_01cam_02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  WAIT_FOR_TIMER_LIMIT(100)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], result)
-  push local_int[0]
-  COMM 0x0123
-  push 0
-  push 20
-  push 0
-  push string(str_01pos_04)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  push local_int[0]
-  COMM 0x0017
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03))
-  ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION))
-  push result
-  push string(str_01cam_03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  WAIT_FOR_UNIT_MOTION(local_int[0])
-  PREPARE_UNIT_MOTION_STATE(local_int[0], 0, 20, 20, 1)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_3))
-  push result
-  COMM 0x0055
-  goto _3
+  if (TEST_MODEL_FLAG(1065) == 0) {
+    SET_MODEL_FLAG(1065)
+    ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02)))
+    PREPARE_UNIT_MOTION_STATE(local_int[0], 23, 3, 15, 1)
+    push 0
+    push 25
+    push 0
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01_2))
+    push local_int[0]
+    COMM 0x0017
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_MOTION))
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02_2))
+    COMM 0x0013
+    WAIT_FOR_TIMER_LIMIT(100)
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03)))
+    push local_int[0]
+    COMM 0x0123
+    push 0
+    push 20
+    push 0
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04))
+    push local_int[0]
+    COMM 0x0017
+    ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03)))
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION))
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_2))
+    COMM 0x0013
+    WAIT_FOR_UNIT_MOTION(local_int[0])
+    PREPARE_UNIT_MOTION_STATE(local_int[0], 0, 20, 20, 1)
+    push READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_3))
+    COMM 0x0055
+  }
 _3:
   SCREEN_FADE_B(0, 10)
   WAIT_FOR_TIMER_LIMIT(10)

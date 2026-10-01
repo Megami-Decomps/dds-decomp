@@ -161,13 +161,9 @@ _8:
   PUSHREG
   EQ
   IF _10
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_04))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_04_MOTION))
-  push result
-  push string(cam06_04_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam06_04)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_04_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_04_2))
   COMM 0x0013
   goto _9
 _10:
@@ -177,13 +173,9 @@ _10:
   PUSHREG
   EQ
   IF _11
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_03))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_03_MOTION))
-  push result
-  push string(cam06_03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam06_03)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_03_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_03_2))
   COMM 0x0013
   goto _9
 _11:
@@ -193,13 +185,9 @@ _11:
   PUSHREG
   EQ
   IF _12
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_02))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_02_MOTION))
-  push result
-  push string(cam06_02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam06_02)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_02_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_02_2))
   COMM 0x0013
   goto _9
 _12:
@@ -209,13 +197,9 @@ _12:
   PUSHREG
   EQ
   IF _9
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam06_01_MOTION))
-  push result
-  push string(cam06_01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam06_01)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_01_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam06_01_2))
   COMM 0x0013
   goto _9
 _9:
@@ -246,16 +230,12 @@ _9:
   push 0
   push global_int[12]
   COMM 0x0079
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02))
   push 0
   push global_int[15]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02_MOTION))
-  push result
-  push string(light02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_2))
   COMM 0x00c6
   push float32(0.6000000238418579, bits=0x3f19999a)
   push float32(0.550000011920929, bits=0x3f0ccccd)
@@ -292,8 +272,7 @@ _9:
   COMM 0x00cb
   PUSHREG
   POPIX 0x000a
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(s03))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(s03))
   push global_int[10]
   COMM 0x009d
   push global_int[10]
@@ -303,8 +282,7 @@ _9:
   COMM 0x00cb
   PUSHREG
   POPIX 0x000e
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(g001))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(g001))
   push global_int[14]
   COMM 0x009d
   push global_int[14]
@@ -339,19 +317,14 @@ _9:
   WAIT_FOR_TIMER_LIMIT(110)
   DESTROY_REGISTERED_TASK(local_int[0])
   local_int[0] = CREATE_SCRIPT_TASK(procedure(e807_010_2), -(1))
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03))
   push 10
   push global_int[15]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION))
-  push result
-  push string(light03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_2))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_3))
   COMM 0x00e8
   WAIT_FOR_TIMER_LIMIT(110)
 _14:

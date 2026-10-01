@@ -38,13 +38,11 @@ _2:
   POPIX 0x0001
   COMM 0x0051
   if (global_int[1] == 0) {
-    result = CREATE_SCRIPT_TASK(procedure(e502_002), -(1))
-    WAIT_FOR_TASK_REMOVAL(result)
+    WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e502_002), -(1)))
   } else {
   _4:
     if (global_int[1] == 1) {
-      result = CREATE_SCRIPT_TASK(procedure(e502_003), -(1))
-      WAIT_FOR_TASK_REMOVAL(result)
+      WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e502_003), -(1)))
     }
   }
 _3:
