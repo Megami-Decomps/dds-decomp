@@ -21,8 +21,9 @@ typedef struct MdlViewState {
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
-    s16 fileIndex;        /* 0x18: first arg of func_00217680, the resource loader */
-    s16 fileSlot;         /* 0x1A: second arg of func_00217680 */
+    s16 unk18; /* 0x18: first s16 handed to func_00217680, and set from
+                 func_002183D0's return */
+    s16 unk1A; /* 0x1A: second s16, and set from func_002183E0 */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
@@ -1179,7 +1180,7 @@ extern MdlResource *func_00217680(s16, s16);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
-    MdlResource *resource = func_00217680(D_003D7A50.fileIndex, D_003D7A50.fileSlot);
+    MdlResource *resource = func_00217680(D_003D7A50.unk18, D_003D7A50.unk1A);
 
     /* Required to match: storing through a typed pointer preserves the load/store order. */
     *(MdlResource **)&D_003D7A50.resources[0] = resource;
@@ -1516,8 +1517,8 @@ void func_0021C310(void) {
         }
         break;
     }
-    D_003D7A50.unk1C = D_003D7A50.fileIndex = func_002183D0(D_003D7A50.resources[0]);
-    D_003D7A50.unk1E = D_003D7A50.fileSlot = func_002183E0(D_003D7A50.resources[0]);
+    D_003D7A50.unk1C = D_003D7A50.unk18 = func_002183D0(D_003D7A50.resources[0]);
+    D_003D7A50.unk1E = D_003D7A50.unk1A = func_002183E0(D_003D7A50.resources[0]);
     i = ((MdlResource *)D_003D7A50.resources[0])->unk12;
     if (i < 0) {
         i = 0;

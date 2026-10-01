@@ -183,7 +183,8 @@ struct PcpFlashPtc10 {
     u32 color;
     s32 age;
     f32 accumulator;
-    f32 unk0C;
+    f32 stepSpeed; /* 0x0C: multiplied by decay each step, then added to
+                       * accumulator; also read as the particle's height */
 };
 
 typedef struct PcpFlashWork5 PcpFlashWork5;
@@ -1187,7 +1188,74 @@ void effFlashAccumulatingParticleAdvance(PcpFlashWork4 *work, s32 index)
     part->accumulator += work->increment;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPFlash", func_0016BE48);
+extern void func_0016BAC0(PcpFlashWork4 *, s32, s32);
+extern void func_0016BBB0(PcpFlashWork4 *, s32);
+
+void func_0016BE48(PcpFlashWork4 *work)
+{
+    s32 index;
+    s32 count;
+    PcpFlashPtc1C *part;
+    s32 lifetime;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 randomRange;
+    s32 restart;
+    s32 fadeParam;
+    PcpFlashHandle *handle;
+
+    count = work->particleCount;
+    part = work->parts;
+    lifetime = work->lifetime;
+    fadeIn = work->fadeInTime;
+    fadeOut = work->fadeOutTime;
+    restart = work->restartRandomly;
+    randomRange = work->randomRange;
+    fadeParam = work->colorParam;
+    for (index = 0; index < count; index++, part++) {
+        s32 age = part->age;
+        s32 color;
+        f32 factor;
+
+        if (age == 0) {
+            func_0016BBB0(work, index);
+            func_0016BAC0(work, index, 0);
+            part->color = 0x80808080;
+            factor = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+            part->unk08 = work->unk3C * factor;
+            factor = effMiscRandUnitFloat(D_0034DF38) * 0.7f + 0.3f;
+            part->unk0C = work->unk30 * factor;
+            part->unk10 = work->unk34 * factor;
+            part->unk14 = 0;
+        } else if (age >= lifetime) {
+            if (restart != 0) {
+                part->age = ~(effMiscRand(D_0034DF38) % randomRange);
+            }
+            color = 0;
+            func_0016BAC0(work, index, color);
+        } else if (age > 0) {
+            effFlashAccumulatingParticleAdvance(work, index);
+            func_0016BBB0(work, index);
+            if (part->age < fadeIn && fadeIn != 0) {
+                factor = (f32)part->age / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - part->age && fadeOut != 0) {
+                factor = (f32)(lifetime - part->age) / (f32)fadeOut;
+            } else {
+                factor = 1.0f;
+            }
+            color = effMultiplyPackedColors(effBlendColor(0, part->color, factor), fadeParam);
+            func_0016BAC0(work, index, color);
+        }
+        part->age = part->age + 1;
+    }
+    handle = (PcpFlashHandle *)work->resourceHandle;
+    handle->origin[0] = work->origin[0];
+    work->unk54 = work->unk54 + 1;
+    handle->origin[1] = work->origin[1];
+    handle->origin[2] = work->origin[2];
+    handle->renderScale = work->renderScale;
+    func_00170380(handle);
+}
 
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
@@ -1343,7 +1411,7 @@ void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
     offset[0] = unit[0] * work->orbitRadius;
     offset[1] = 0;
     offset[2] = sinv * work->orbitRadius;
-    height = part->unk0C;
+    height = part->stepSpeed;
     D_00354930[0] = unit[0] * height;
     D_00354930[1] = height + -1.0f;
     D_00354930[2] = sinv * height;
@@ -1802,14 +1870,14 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
                 effFlashRotatedTriangle(work, index, &axis);
                 effFlashRadialTriangleSetParticleColors(work, index, 0);
                 part->accumulator = startA;
-                part->unk0C = startB;
+                part->stepSpeed = startB;
                 part->color = 0x80808080;
             } else if (age > 0) {
-                f32 speed = part->unk0C;
+                f32 speed = part->stepSpeed;
                 s32 remain;
                 f32 blend;
 
-                part->unk0C = speed * decay;
+                part->stepSpeed = speed * decay;
                 part->accumulator = part->accumulator + speed;
                 effFlashRotatedTriangle(work, index, &axis);
                 if (age < fadeIn && fadeIn != 0) {
@@ -2450,14 +2518,14 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
                 effFlashRotatedTriangleB(work, index, axis);
                 effFlashOffsetRadialTriangleSetParticleColors(work, index, 0);
                 part->accumulator = startA;
-                part->unk0C = startB;
+                part->stepSpeed = startB;
                 part->color = 0x80808080;
             } else if (age > 0) {
-                f32 speed = part->unk0C;
+                f32 speed = part->stepSpeed;
                 s32 remain;
                 f32 blend;
 
-                part->unk0C = speed * decay;
+                part->stepSpeed = speed * decay;
                 part->accumulator = part->accumulator + speed;
                 effFlashRotatedTriangleB(work, index, axis);
                 if (age < fadeIn && fadeIn != 0) {

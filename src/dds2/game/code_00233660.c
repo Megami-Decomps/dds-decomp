@@ -46,8 +46,9 @@ typedef struct MdlViewState {
     u8 pad11[3];
     s16 unk14;
     s16 resourceCount;
-    s16 fileIndex;    /* 0x18: first arg of func_00232198, the resource loader */
-    s16 fileSlot;     /* 0x1A: second arg of func_00232198 */
+    s16 unk18; /* 0x18: first s16 handed to func_00232198, and set from
+                 func_00232EE8's return */
+    s16 unk1A; /* 0x1A: second s16, and set from func_00232EF8 */
     s16 unk1C;
     s16 unk1E;
     s16 unk20;
@@ -1233,7 +1234,7 @@ extern void mdlAddEntryFlagged(MdlLoaded *loaded, s32 a, s32 b);
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlLoaded *loaded;
 
-    loaded = func_00232198(D_00453550.fileIndex, D_00453550.fileSlot);
+    loaded = func_00232198(D_00453550.unk18, D_00453550.unk1A);
     D_00453550.resources[0] = loaded;
     D_00453550.activeEntryId = 0;
     D_00453550.selectedEntryId = 0;
@@ -1542,8 +1543,8 @@ void func_00236E80(void) {
         }
         break;
     }
-    D_00453550.unk1C = D_00453550.fileIndex = func_00232EE8(D_00453550.resources[0]);
-    D_00453550.unk1E = D_00453550.fileSlot = func_00232EF8(D_00453550.resources[0]);
+    D_00453550.unk1C = D_00453550.unk18 = func_00232EE8(D_00453550.resources[0]);
+    D_00453550.unk1E = D_00453550.unk1A = func_00232EF8(D_00453550.resources[0]);
     i = ((MdlLoaded *)D_00453550.resources[0])->unk12;
     if (i < 0) {
         i = 0;
