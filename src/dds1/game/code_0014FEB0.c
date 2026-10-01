@@ -7,10 +7,23 @@ INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150040);
 
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_001500F0);
-
 INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150148);
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150260);
+void func_00150260(void *arg) {
+    struct {
+        void *field_0x00;
+        u32 field_0x04;
+        s32 field_0x08;
+        u8 pad_0x0C[0x38];
+        void *field_0x44;
+    } *entry = arg;
+
+    entry->field_0x08--;
+    if (entry->field_0x08 == 0) {
+        sdfTexReleaseReferenceViaHandler(entry->field_0x00);
+        func_002D0918(entry->field_0x44);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0014FEB0", D_003A0AA8);
 
