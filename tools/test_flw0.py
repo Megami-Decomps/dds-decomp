@@ -713,17 +713,27 @@ end
             "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
             "SCREEN_FADE_A": (0x00F, 2, False),
             "SCREEN_FADE_B": (0x010, 2, False),
+            "ADD_EFFECT_UNIT_TO_WORLD": (0x012, 1, False),
+            "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD": (0x019, 1, False),
             "RESET_DRAW_EFFECTS": (0x043, 0, False),
             "RETURN_TO_TITLE": (0x046, 0, False),
+            "WAIT_FOR_UNIT_MOTION": (0x049, 1, False),
+            "ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR": (0x04A, 2, False),
+            "SET_UNIT_VALUE": (0x04B, 2, False),
             "RESTORE_CAMERA_NODE_MODE": (0x060, 0, False),
             "RELEASE_CURRENT_OBJECT": (0x061, 0, False),
             "CALL_EVENT": (0x066, 1, False),
+            "READ_CURRENT_WORLD_OBJECT_ID": (0x068, 0, True),
+            "CLEAR_UNIT_LOW_FLAG": (0x069, 1, False),
+            "SET_UNIT_LOW_FLAG": (0x06A, 1, False),
             "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
             "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
             "RESET_FIELD_EFFECTS": (0x099, 0, False),
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
+            "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
         }
         for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
@@ -858,7 +868,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53400)
-        self.assertEqual(profiled_command_uses, 32695)
+        self.assertEqual(profiled_command_uses, 37026)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -884,6 +894,31 @@ end
         self.assertIn("result = TEST_MODEL_FLAG(7)", view)
         self.assertIn("WAIT_FOR_TIMER_START()", view)
         self.assertIn("SCREEN_FADE_B(0, 30)", view)
+
+    def test_reading_view_uses_world_unit_stack_contracts(self) -> None:
+        code = [
+            7,
+            (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x012 << 16) | flw0.OPCODE_IDS["COMM"],
+            (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x049 << 16) | flw0.OPCODE_IDS["COMM"],
+            (8 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x04A << 16) | flw0.OPCODE_IDS["COMM"],
+            (0x068 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (10 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (20 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x1E0 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
+        self.assertIn("ADD_EFFECT_UNIT_TO_WORLD(4)", view)
+        self.assertIn("WAIT_FOR_UNIT_MOTION(4)", view)
+        self.assertIn("ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(8, 9)", view)
+        self.assertIn("result = READ_CURRENT_WORLD_OBJECT_ID()", view)
+        self.assertIn("push result", view)
+        self.assertIn("QUEUE_WORLD_OBJECT_PENDING_VALUE(10, 20)", view)
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -984,7 +1019,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53400, 32695)
+            (code_words, commands, profiled_commands), (168829, 53400, 37026)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1097,7 +1132,7 @@ end
         )
         self.assertEqual(
             (totals["profiled_commands"], totals["message_references"]),
-            (23630, 1910),
+            (26973, 1910),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
