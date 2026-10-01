@@ -16,10 +16,10 @@ extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void func_00257150();
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(s32, s32, s32);
 
-void mnuDrawMantraPulseStripAndKind(s32 arg0, s32 arg1, s32 arg2) {
-    itfDspDrawStrip(0, 0, 0, arg1, arg2);
-    func_00257150(arg0, arg1, arg2);
-    mnuChooseDisplaySpriteKindFromEntryFlags(arg0, arg1, arg2);
+void mnuDrawMantraPulseStripAndKind(void *object, s32 scale, s32 context) {
+    itfDspDrawStrip(0, 0, 0, scale, context);
+    func_00257150(object, scale, context);
+    mnuChooseDisplaySpriteKindFromEntryFlags(object, scale, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);

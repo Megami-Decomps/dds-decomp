@@ -322,13 +322,13 @@ s32 effAdvanceChanCursor(void *vertex, EffChan *channel) {
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B418);
 
-void effClearChanCursor(EffChan *arg0) {
-    arg0->cursorIndex = 0;
-    arg0->cursorPosition = 0;
+void effClearChanCursor(EffChan *chan) {
+    chan->cursorIndex = 0;
+    chan->cursorPosition = 0;
 }
 
-void effSetChanStep(EffChan *arg0, f32 arg1) {
-    arg0->cursorStep = arg1;
+void effSetChanStep(EffChan *chan, f32 step) {
+    chan->cursorStep = step;
 }
 
 void *effGetFontListHead(void) {
