@@ -70,6 +70,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x00F, "SCREEN_FADE_A", 2, writes_result=False),
     NativeCommand(0x010, "SCREEN_FADE_B", 2, writes_result=False),
     NativeCommand(0x012, "ADD_EFFECT_UNIT_TO_WORLD", 1, writes_result=False),
+    NativeCommand(0x015, "CREATE_LINKED_CAMERA_VIEWER", 2, writes_result=True),
     NativeCommand(
         0x019, "ADD_FLAGGED_EFFECT_UNIT_TO_WORLD", 1, writes_result=False
     ),
@@ -99,6 +100,7 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1, writes_result=False),
     NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2, writes_result=True),
     NativeCommand(0x0C3, "SET_SOLAR_OVERLAY_MODE", 1, writes_result=False),
+    NativeCommand(0x0CD, "CREATE_FLAGGED_EFFECT_OBJECT", 1, writes_result=True),
     NativeCommand(
         0x100, "REQUEST_ALTERNATE_FIELD_SEQUENCE", 2, writes_result=False
     ),

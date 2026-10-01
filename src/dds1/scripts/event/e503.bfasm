@@ -32,16 +32,8 @@ e503_main:
   push 3
   push 500
   COMM 0x004d
-  push 45
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0001
-  push 44
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0002
+  global_int[1] = CREATE_LINKED_CAMERA_VIEWER(3, 45)
+  global_int[2] = CREATE_LINKED_CAMERA_VIEWER(3, 44)
   PREPARE_UNIT_MOTION_STATE(global_int[2], 1, 0, 10, 1)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(p02)))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(p00)))
@@ -96,16 +88,8 @@ _4:
   push 3
   push 500
   COMM 0x004d
-  push 45
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0001
-  push 44
-  push 3
-  COMM 0x0015
-  PUSHREG
-  POPIX 0x0002
+  global_int[1] = CREATE_LINKED_CAMERA_VIEWER(3, 45)
+  global_int[2] = CREATE_LINKED_CAMERA_VIEWER(3, 44)
   PREPARE_UNIT_MOTION_STATE(global_int[2], 1, 0, 0, 1)
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(p03)))
   PREPARE_UNIT_MOTION_STATE(global_int[1], 1, 0, 10, 3)

@@ -1058,11 +1058,7 @@ suikomi_label:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[39])
   PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[41], 3, 25, 2)
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(local_int[38])
-  push local_int[42]
-  push 2
-  COMM 0x0015
-  PUSHREG
-  POPLIX 0x002b
+  local_int[43] = CREATE_LINKED_CAMERA_VIEWER(2, local_int[42])
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[43], local_int[39])
   PREPARE_UNIT_MOTION_STATE(local_int[43], 0, 0, 0, 2)
   SCREEN_FADE_A(0, 6)
@@ -1109,10 +1105,7 @@ _151:
       SET_SOLAR_OVERLAY_MODE(6)
       SCREEN_FADE_B(0, 10)
       WAIT_FOR_TIMER_LIMIT(10)
-      push string(fld_f_bin_ICE_BED)
-      COMM 0x00cd
-      PUSHREG
-      POPLIX 0x0031
+      local_int[49] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_ICE_BED))
       push local_int[46]
       push local_int[49]
       COMM 0x009d
