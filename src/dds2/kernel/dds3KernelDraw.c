@@ -247,7 +247,29 @@ void kwlnDrawSetDc8First(u32 value) {
     D_0043E548.u00.w = value;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", func_00106460);
+typedef struct {
+    u8 data[0x18];
+} DrawBlock18;
+
+extern DrawBlock18 *effGetCh74Params(void);
+extern u16 D_00438E50;
+extern u16 D_00438E52;
+
+extern DrawBlock18 D_0043E530;
+extern DrawBlock18 D_0043E550;
+
+void func_00106460(s32 mode) {
+    D_0043E530 = *effGetCh74Params();
+    D_00438E50 = 0;
+    D_00438E52 = mode;
+    if (mode == 0) {
+        kwlnDrawControlFlags &= ~0x100000;
+        kwlnDrawInitRect((DrawRect *)&D_0043E550);
+        func_00197328((void *)((u8 *)&D_0043E550 - 8));
+    } else {
+        kwlnDrawControlFlags |= 0x100000;
+    }
+}
 
 void kwlnDrawSetupDc8(s32 mode) {
     DrawBlkDC8 *blk = &D_0043E548;
