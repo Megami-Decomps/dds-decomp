@@ -390,6 +390,35 @@ end
         )
         self.assertEqual(flw0_symbolic.render(script, "dds1"), source)
 
+    def test_tracked_dds1_event_corpus_assembles_exact_hashes(self) -> None:
+        root = TOOLS.parent
+        source_dir = root / "src/dds1/scripts/event"
+        manifest = root / "config/dds1/event_scripts.sha1"
+        records = []
+        for line in manifest.read_text(encoding="ascii").splitlines():
+            expected, output = line.split()
+            output_path = Path(output)
+            self.assertEqual(output_path.parent, Path("build/dds1/scripts/event"))
+            records.append(
+                (expected, source_dir / output_path.with_suffix(".bfasm").name)
+            )
+
+        tracked = sorted(source_dir.glob("*.bfasm"))
+        self.assertEqual(sorted(source for _, source in records), tracked)
+        self.assertEqual(len(records), 104)
+
+        versions = {1: 0, 2: 0}
+        for expected, source in records:
+            with self.subTest(source=source.name):
+                text = source.read_text(encoding="utf-8")
+                version = int(text.split(None, 2)[1])
+                versions[version] += 1
+                if version == 2:
+                    self.assertIn("\nprofile dds1\n", text)
+                rebuilt = flw0.parse_source(text).to_bytes()
+                self.assertEqual(sha1(rebuilt).hexdigest(), expected)
+        self.assertEqual(versions, {1: 7, 2: 97})
+
 
 if __name__ == "__main__":
     unittest.main()

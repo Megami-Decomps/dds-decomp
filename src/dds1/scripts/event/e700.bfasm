@@ -1,0 +1,67 @@
+flw0 2
+profile dds1
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e700_main reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+
+code
+e700_main:
+  PROC e700_main
+  COMM 0x000d
+  PUSHIS 0
+  PUSHIS 26
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _2
+  PUSHIS 629
+  COMM 0x0066
+  GOTO _1
+_2:
+  PUSHIS 0
+  PUSHIS 38
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 1
+  PUSHIS 22
+  COMM 0x0007
+  PUSHREG
+  EQ
+  AND
+  IF _3
+  PUSHIS 636
+  COMM 0x0066
+  GOTO _1
+_3:
+  PUSHIS 0
+  PUSHIS 79
+  COMM 0x0007
+  PUSHREG
+  EQ
+  PUSHIS 1
+  PUSHIS 77
+  COMM 0x0007
+  PUSHREG
+  EQ
+  AND
+  IF _1
+  PUSHIS 661
+  COMM 0x0066
+  GOTO _1
+_1:
+  COMM 0x002e
+  END
+end
+
+messages
+end
+
+strings
+  zero 240
+end
