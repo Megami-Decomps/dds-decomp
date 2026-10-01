@@ -63,11 +63,32 @@ typedef struct ParCell {
     u32 color;       /* 0x10 set to grey 0x80808080 */
 } ParCell; /* 0x14 */
 
+typedef struct ParDrawState {
+    u16 width;      /* 0x00 */
+    u16 height;     /* 0x02 */
+    u16 flags;      /* 0x04 */
+    u8 pad06[2];
+    s32 unk08;      /* 0x08 */
+    u8 pad0C[4];
+    s32 unk10;      /* 0x10 */
+    s32 unk14;      /* 0x14 */
+    s32 unk18;      /* 0x18 */
+    u8 pad1C[4];
+    s32 unk20;      /* 0x20 */
+    u8 pad24[8];
+} ParDrawState; /* 0x2C */
+
 /* Free-list links mirror the DDS2 particle unit. */
 struct ParListNode {
     u8 pad00[0x54];
     ParListNode *next;
 };
+
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(s32);
+extern void sdfConsAppendClearPacket(s32, s32);
+extern void sdfAppendPacket(s32, s32);
+extern s32 func_0015FE20(ParDrawState *);
 
 struct ParCellNode {
     u8 pad00[0x24];
@@ -1020,19 +1041,6 @@ void parReleaseDrawBlock(ParBlock *block) {
     func_002D0918(block->handle);
 }
 
-typedef struct ParDrawState {
-    u16 width;      /* 0x00 */
-    u16 height;     /* 0x02 */
-    u16 flags;      /* 0x04 */
-    u8 pad06[2];
-    s32 unk08;      /* 0x08 */
-    u8 pad0C[4];
-    s32 unk10;      /* 0x10 */
-    u8 pad14[0xC];
-    s32 unk20;      /* 0x20 */
-    u8 pad24[8];
-} ParDrawState; /* 0x2C */
-
 typedef struct ParDrawCmd {
     s32 count;      /* 0x00 */
     s32 unk4;
@@ -1040,16 +1048,6 @@ typedef struct ParDrawCmd {
     s32 unkC;
     void (*finish)(void *, s32); /* 0x10 */
 } ParDrawCmd;
-
-extern s32 sdfAllocPacketAligned(s32);
-
-extern void sdfInitPacketList(s32);
-
-extern void sdfConsAppendClearPacket(s32, s32);
-
-extern void sdfAppendPacket(s32, s32);
-
-extern s32 func_0015FE20(ParDrawState *);
 
 void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParDrawCmd *cmd) {
     s32 list = sdfAllocPacketAligned(0x20);

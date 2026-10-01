@@ -488,7 +488,106 @@ void effMagatuhiCopyVecs2(EffMagatuhiMidWork *dst, EffMagatuhiMidWork *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00193AD0);
+/* One orbiting particle (0x54 bytes): height, angle and radius each advance by a per-frame step. */
+typedef struct {
+    s32 delay;      /* 0x00 */
+    f32 height;     /* 0x04 */
+    f32 heightStep; /* 0x08 */
+    f32 angle;      /* 0x0C */
+    f32 angleStep;  /* 0x10 */
+    f32 radius;     /* 0x14 */
+    f32 radiusStep; /* 0x18 */
+    u8 pad1C[0x38];
+} EffMagatuhiOrbitParticle; /* 0x54 */
+
+typedef struct {
+    u8 matrix[0x40];       /* 0x00 */
+    f32 origin[4];         /* 0x40 */
+    u8 pad50[4];
+    s32 spread;            /* 0x54 modulus of the particle delay */
+    u8 pad58[0x2C];
+    u32 count;             /* 0x84 */
+    u32 maxSteps;          /* 0x88 */
+    u8 pad8C[0x94];
+    EffMagatuhiOrbitParticle *particles; /* 0x120 */
+    void *managedResource; /* 0x124 */
+} EffMagatuhiOrbitWork;
+
+extern u32 func_001947F8(void *block);
+extern void func_00193668(void *work, u32 index);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+/* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
+void func_00193AD0(EffMagatuhiWork *arg) {
+    u32 k;
+    EffMagatuhiOrbitWork *work;
+    EffMagatuhiWork *valueWork;
+    EffMagatuhiOrbitParticle *particle;
+    u32 count;
+    s32 spread;
+    u32 maxSteps;
+    u32 i;
+    u32 steps;
+    s32 delay; /* random start delay; afterwards the part of it that is replayed */
+    f32 out[4];
+    f32 origin[4];
+    f32 height;
+    f32 angle;
+    f32 radius;
+    f32 heightStep;
+    f32 angleStep;
+    f32 radiusStep;
+
+    if (arg->type == 3) {
+        if (func_001947F8(arg->ptr08) == 3) {
+            work = effGetHandlerArg(arg->ptr08);
+            count = work->count;
+            valueWork = ((EffMagatuhiOwner *)work->managedResource)->valueWork;
+            maxSteps = work->maxSteps;
+            spread = work->spread;
+            particle = work->particles;
+            PCP_COPY_VECTOR(origin, work->origin);
+            VU0_LOAD_MATRIX(work);
+            for (i = 0; i < count; i += 3, particle++) {
+                func_00193668(work, i);
+                delay = effMiscRand(D_003AA868) % spread;
+                particle->delay = delay;
+                if (maxSteps < delay) {
+                    steps = maxSteps;
+                    delay -= steps;
+                } else {
+                    steps = maxSteps - delay;
+                    delay = 0;
+                }
+                angleStep = particle->angleStep;
+                radiusStep = particle->radiusStep;
+                heightStep = particle->heightStep;
+                angle = particle->angle + angleStep * (f32)delay;
+                radius = particle->radius + radiusStep * (f32)delay;
+                height = particle->height + heightStep * (f32)delay;
+                out[3] = 0;
+                for (k = 0; k < steps; k++) {
+                    out[0] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+                    out[1] = height;
+                    out[2] = sdfSinPoly(angle) * radius;
+                    VU0_LOAD_VF(vf11, origin);
+                    VU0_LOAD_VF(vf10, out);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, out);
+                    func_00191450(valueWork, i, out);
+                    height += heightStep;
+                    angle += angleStep;
+                    radius += radiusStep;
+                }
+                particle->height = height;
+                particle->radius = radius;
+                particle->angle = angle;
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 matrix[0x40];       /* 0x00 identity */

@@ -3278,7 +3278,78 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013A720);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013A9B0);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AC10);
+typedef struct FldProbeKind {
+    u8 pad00[0xC];
+    u32 *kind; /* 0x0C */
+} FldProbeKind;
+
+typedef struct FldProbeTarget {
+    u8 pad00[0x40];
+    u8 position[0x10]; /* 0x40 */
+    u8 quaternion[0x10]; /* 0x50 */
+} FldProbeTarget;
+
+typedef struct FldProbeActor {
+    u8 pad00[0x1C];
+    FldProbeTarget *target; /* 0x1C */
+} FldProbeActor;
+
+extern void effMiscQuaternionToMatrixVU(void);
+
+s32 func_0013AC10(s32 index, FldProbeActor *actor, f32 *position) {
+    f32 dir[4];
+    f32 length;
+    f32 dot;
+    f32 angle;
+    u32 kind;
+
+    kind = *((FldProbeKind *)D_003307B0[index][8])->kind;
+    switch (kind) {
+    case 0:
+        VU0_LOAD_VF(vf10, actor->target->quaternion);
+        effMiscQuaternionToMatrixVU();
+        VU0_STORE_VF(vf30, dir);
+        dir[1] = 0.0f;
+        VU0_LOAD_VF(vf10, dir);
+        VU0_NORMALIZE_VF10();
+        VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_LOAD_VF(vf10, position);
+        VU0_LOAD_VF(vf11, actor->target->position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, dir);
+        dir[1] = 0.0f;
+        VU0_LOAD_VF(vf10, dir);
+        VU0_LENGTH_VF10(length);
+        VU0_NORMALIZE_VF10();
+        VU0_MOVE_VF(vf11, vf12);
+        VU0_DOT_XYZ(dot, vf10, vf11);
+        angle = dot * 180.0f / 3.14f;
+        if (angle < 0.0f) {
+            return 0;
+        }
+        if (200.0f < length) {
+            return 0;
+        }
+        return 1;
+    case 1:
+        return D_003C93E0[index].unk13C == kind;
+    case 2:
+        VU0_LOAD_VF(vf10, actor->target->quaternion);
+        effMiscQuaternionToMatrixVU();
+        VU0_STORE_VF(vf30, dir);
+        dir[1] = 0.0f;
+        VU0_LOAD_VF(vf10, dir);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, dir);
+        dot = fldDotVector(dir, D_003C93E0[index].center);
+        if (dot < 0.5f) {
+            return 0;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
     f32 probe[3];
