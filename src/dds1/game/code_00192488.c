@@ -57,6 +57,8 @@ extern void func_001926A8(EffPrim *arg0, u32 arg1);
 extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
 extern void func_001934E8(EffPrim *arg0, void *arg1);
 extern void func_001935B8(EffPrim *arg0, void *arg1);
+extern void effMathReleaseWorkResource(void *work);
+extern void func_001629F0(void *handle);
 
 /* Header block copied into every channel work (0x168 bytes): the random record count and modulus live inside it. */
 typedef struct EffChanHead {
@@ -121,7 +123,23 @@ EffChanWork *func_00192488(EffChanSource *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_00192638);
+void func_00192638(EffChanWork *work) {
+    EffChanRecord *record;
+    u32 i = 0;
+    u32 count;
+
+    effMathReleaseWorkResource(work->slots);
+    count = work->head.count;
+    record = work->records;
+    if (count != 0) {
+        do {
+            func_001629F0(record->param);
+            record++;
+            i++;
+        } while (i < count);
+    }
+    func_002D0918(work->buffer);
+}
 
 INCLUDE_ASM(const s32, "game/code_00192488", func_001926A8);
 

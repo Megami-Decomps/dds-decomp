@@ -106,15 +106,15 @@ extern void func_002EDBD8(void *, u32);
 extern void func_002EDC40(void *);
 extern void func_00288818(void *, s32, u32, u32, u32);
 
-void *func_002889D8(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4) {
+void *func_002889D8(u32 request, u32 flags, u32 dispatch, u32 onComplete, u32 userData) {
     void *work = sdfAllocAndClearQuadwords(0x70);
-    void *data = (u8 *)work + 0x30;
+    void *packet = (u8 *)work + 0x30;
 
-    func_002EDBD8(data, arg2);
-    if (arg1 != 0) {
-        func_002EDC40(data);
+    func_002EDBD8(packet, dispatch);
+    if (flags != 0) {
+        func_002EDC40(packet);
     }
-    func_00288818(work, 1, arg0, arg3, arg4);
+    func_00288818(work, 1, request, onComplete, userData);
     return work;
 }
 
@@ -126,7 +126,19 @@ void func_00288AA8(u32 request) {
     func_002889D8(request, 1, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288AD0);
+typedef struct FileRequestCallbackWork {
+    u8 pad00[3];
+    u8 unk03;
+    u8 pad04[0x2C];
+} FileRequestCallbackWork;
+
+void *func_00288AD0(u32 request, u32 mode, u32 dispatch, u32 callback) {
+    FileRequestCallbackWork *work = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
+
+    work->unk03 = mode;
+    func_00288818(work, 0, request, dispatch, callback);
+    return work;
+}
 
 void func_00288B48(u32 request) {
     func_00288AD0(request, 0, 0, 0);
