@@ -88,7 +88,9 @@ typedef struct EvtFrameNode {
 
 typedef struct EvtFrameList {
     s32 kind;           /* 0x00 */
-    u8 pad04[0x4C];
+    u8 pad04[0xC];
+    struct EvtModelOwner *owner; /* 0x10 */
+    u8 pad14[0x3C];
     s32 count;          /* 0x50 */
     EvtFrameNode *head; /* 0x54 */
 } EvtFrameList;
@@ -137,7 +139,8 @@ typedef struct EvtRuntime {
     f32 fvalueMax; /* 0x2324 */
     u8 pad2328[0x6C];
     s32 cutSel; /* 0x2394 */
-    u8 pad2398[0x30];
+    s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
+    u8 pad239C[0x2C];
     s32 tableColumn; /* 0x23C8: index within selected table row */
     u8 pad23CC[0x14];
     s32 selected; /* 0x23E0 */
@@ -1078,9 +1081,145 @@ s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
     return 2;
 }
 
+typedef struct EvtMotionBits {
+    s32 group : 8;
+    s32 motion : 8;
+    s32 loop : 8;
+    s32 hokan : 8;
+} EvtMotionBits;
+
+typedef union EvtMotionValue {
+    s32 word;
+    EvtMotionBits bits;
+} EvtMotionValue;
+
+typedef struct EvtModelRef {
+    u8 pad00[0xC];
+    s32 handle; /* 0xC */
+} EvtModelRef;
+
+typedef struct EvtModelSlot {
+    u8 pad00[0xC];
+    EvtModelRef *ref; /* 0xC */
+} EvtModelSlot;
+
+struct EvtModelOwner {
+    u8 pad00[0x18];
+    EvtModelSlot *slot; /* 0x18 */
+};
+
+typedef struct EvtMotionData {
+    u8 pad00[4];
+    s32 **frames; /* 0x4 */
+} EvtMotionData;
+
+typedef struct EvtMotionNode {
+    u8 pad00[8];
+    EvtMotionData *data; /* 0x8 */
+} EvtMotionNode;
+
+extern EvtMotionNode *mdlFindNodeById(s32 model, s32 index);
+extern s32 mdlGetNodeRefHalf(s32 model, s32 index);
+
 INCLUDE_ASM(const s32, "game/code_00250010", func_00254CE0);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254F80);
+extern void func_00254CE0();
+
+/* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
+s32 func_00254F80(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    s32 model;
+    s32 count;
+    EvtMotionValue packed;
+
+    list = sdfCreateResetPacketList();
+    model = ctx->frameList->owner->slot->ref->handle;
+    func_00250338(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
+    D_00380748.submit(&D_00380748, list);
+    if (ctx->mode != 0x10) {
+        return 0;
+    }
+    if (D_0037F510.decTen & 2) {
+        if (ctx->fieldIndex == 0) {
+            ctx->fieldIndex = 3;
+        } else {
+            ctx->fieldIndex = ctx->fieldIndex - 1;
+        }
+    } else if (D_0037F510.incTen & 2) {
+        if (ctx->fieldIndex == 3) {
+            ctx->fieldIndex = 0;
+        } else {
+            ctx->fieldIndex = ctx->fieldIndex + 1;
+        }
+    }
+    packed.word = ctx->value;
+    count = mdlGetNodeRefHalf(model, packed.bits.group);
+    switch (ctx->fieldIndex) {
+    case 0:
+        if (D_0037F510.incOne & 2) {
+            do {
+                if (packed.bits.group < 3) {
+                    packed.bits.group = packed.bits.group + 1;
+                } else {
+                    packed.bits.group = 0;
+                }
+            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+        } else if (D_0037F510.decOne & 2) {
+            do {
+                if (packed.bits.group > 0) {
+                    packed.bits.group = packed.bits.group - 1;
+                } else {
+                    packed.bits.group = 3;
+                }
+            } while (mdlFindNodeById(model, packed.bits.group) == NULL);
+        }
+        if (packed.bits.motion >= mdlGetNodeRefHalf(model, packed.bits.group)) {
+            packed.bits.motion = 0;
+        }
+        break;
+    case 1:
+        if (D_0037F510.incOne & 2) {
+            if (packed.bits.motion >= count - 1) {
+                packed.bits.motion = 0;
+            } else {
+                packed.bits.motion = packed.bits.motion + 1;
+            }
+        } else if (D_0037F510.decOne & 2) {
+            if (packed.bits.motion > 0) {
+                packed.bits.motion = packed.bits.motion - 1;
+            } else {
+                packed.bits.motion = count - 1;
+            }
+        }
+        break;
+    case 2:
+        if ((D_0037F510.incOne & 2) || (D_0037F510.decOne & 2)) {
+            packed.bits.loop = packed.bits.loop == 0;
+        }
+        break;
+    case 3:
+        if (D_0037F510.incOne & 2) {
+            if (packed.bits.hokan < 0x64) {
+                packed.bits.hokan = packed.bits.hokan + 1;
+            } else {
+                packed.bits.hokan = 0;
+            }
+        }
+        if (D_0037F510.decOne & 2) {
+            if (packed.bits.hokan > 0) {
+                packed.bits.hokan = packed.bits.hokan - 1;
+            } else {
+                packed.bits.hokan = 0x64;
+            }
+        }
+        break;
+    }
+    ctx->value = packed.word;
+    if (D_0037F510.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->data->frames[packed.bits.motion] != NULL) {
+        return 1;
+    }
+    return D_0037F510.cancel >= 0 ? 0 : -1;
+}
 
 extern char D_00424090[]; /* "UNIT ALL" */
 extern char D_004376E8[]; /* "ALL" */
