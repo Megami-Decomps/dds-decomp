@@ -68,10 +68,12 @@ typedef struct {
     f32 groupFloat;   /* 0x90 */
 } EffBossParams;
 
+/* One randomized cell: the position is head->{x,y,z}Range scaled by head->scale,
+   the delay is a negative offset modulo head->spread, and flip is a random bit. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
+    f32 positionX;
+    f32 positionY;
+    f32 positionZ;
     s32 delay;        /* 0x0C */
     u8 flip;          /* 0x10 */
     u8 pad11[3];
@@ -104,12 +106,14 @@ typedef struct {
     EffParamWork *paramWork; /* 0xA8 */
 } EffBossWork;
 
+/* Indexed group entry, returned by effGetIndexedEffectGroupIndexEntry. No field
+   is read in this unit, so the words stay unnamed. */
 typedef struct {
-    u32 w0;
-    u32 w1;
-    u32 w2;
-    u32 w3;
-    u32 w4;
+    u32 word00;
+    u32 word04;
+    u32 word08;
+    u32 word0C;
+    u32 word10;
 } EffBossIndex; /* 0x14 */
 
 typedef struct {
@@ -151,11 +155,11 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     f32 scale = work->head.scale;
     f32 t;
 
-    cell->x = work->head.xRange * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend)) * scale;
+    cell->positionX = work->head.xRange * (effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend)) * scale;
     blend = work->head.yBlend;
     t = effMiscRandUnitFloat(D_003AA868) * blend + (1.0f - blend);
-    cell->y = work->head.yRange * t * scale;
-    cell->z = work->head.zRange * t * scale;
+    cell->positionY = work->head.yRange * t * scale;
+    cell->positionZ = work->head.zRange * t * scale;
     cell->flip = effMiscRand(D_003AA868) & 1;
     cell->delay = -(effMiscRand(D_003AA868) % work->head.spread);
 }
