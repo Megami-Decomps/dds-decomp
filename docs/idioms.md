@@ -403,7 +403,14 @@ Black, SOTN). They are worth trying, but not yet confirmed here:
 `jal callee; ...; ld $31; jr $31` when:
 
 - the caller or callee is varargs, or the callee returns a struct;
-- the return value is converted (`return (u8)f();`, s64 callee in an s32 function);
+- the caller returns the callee's value and their return modes differ: an
+  `s64`/`u64` function returning an `s32` call, or a narrow (`s8`/`u8`/`s16`/
+  `u16`) callee returned from a wider caller (`return (u8)f();` too).
+  `void`→`void`, `s32`→`s32` and `u32`→`u32` always sibcall. A shared wrapper
+  that returns `u64`, written as `return menuRunPanel(...)` from an `s64`
+  function, is why whole menu units have no `j` tails (no file flag needed);
+  use the callee's real return type from its matched definition, never a
+  made-up one;
 - the address of a local or parameter is taken, or arguments go on the stack;
 - the whole file was built with `-fno-optimize-sibling-calls` (see
   `config/dds1/cflags.txt`; `tools/find_nosibcall.py` finds such files).
