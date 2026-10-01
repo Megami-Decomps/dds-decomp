@@ -29,11 +29,16 @@ e902_dead:
   END
 end
 
-messages
-  bytes 070000007a0000004d5347310000000078000000020000000100000000000200
-  bytes 0000000018000000580000000000000000000000000000004d53475f30303000
-  bytes 000000000000000000000000000000000100ffff3c0000001a000000f208ffff
-  bytes f20707ff81d781ca81d983ff808e808e808e0af1040000000716
+messages msg1
+  message MSG_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 81d7 81ca 81d9 83ff 808e 808e 808e
+      newline
+      control f1 04
+    endpage
+  endmessage
 end
 
 strings

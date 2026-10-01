@@ -2130,99 +2130,388 @@ section 2 type=2 stride=0x4 count=2154 offset=0x170
 end
 
 section 3 type=3 stride=0x1 count=2952 offset=0x2318
-  bytes 07000000880b00004d534731000000005c0b00002c0000000f00000000000200
-  bytes 000000008800000000000000f400000000000000dc01000000000000bc030000
-  bytes 000000003404000000000000b4040000000000006005000000000000fc050000
-  bytes 00000000d4060000000000006807000001000000d80700000000000018080000
-  bytes 00000000e0080000000000006c090000000000008c0a0000300b000001000000
-  bytes 00000000000000004d53475f3030310000000000000000000000000000000000
-  bytes 02000000b0000000cd00000043000000f208fffff20707ff829d829d848d8184
-  bytes 80e280fd818c80e982890af104f208ffff829d829d85cc84b5818886e485a380
-  bytes ea84db81aa80fd81a0818c80fe82890af10400004d53475f3030320000000000
-  bytes 0000000000000000000000000400000024010000430100007001000099010000
-  bytes b6000000f208fffff20707fff11285f280f580e28188829d829d84f184f28289
-  bytes 0af104f208fffff11280e281a2829d829d829d829d82a683f48dd48ee182a781
-  bytes 8684d28194819780eb80e982890af104f208fffff11281a681a081a28288899c
-  bytes 80ea80fb80e480fe818180fd8186818d8188829d829d0af104f208fffff11281
-  bytes 8780e481a281a783f08296818d828886a9819f80e981a70a84d383ef80e48197
-  bytes 80ed80f5818485a483ef80f580fd81a780f580e282890af1040000004d53475f
-  bytes 3030330000000000000000000000000000000000060000001402000062020000
-  bytes a6020000ec0200003603000070030000a7010000f208fffff20707ff83f080ea
-  bytes 8dd58784818c83fc818c81ef81bd81d581e3818d828881ef828481d981fa81b0
-  bytes 0a85c9819a80f580fd86c2818982888199819a87eb80ff858081a880fd82890a
-  bytes f104f208fffff11280fe80e981a78288899c80ea81bb81ea81fb81ca81c08196
-  bytes 85ec80e980e4818c81b00a8afa80e6818485b9819f818d80f5818880e9818180
-  bytes fd82890af104f208fffff11283f48dd48ee1818680f58184899c80ea84c584ef
-  bytes 80e9818780e480e9829d829d0a85ae8ba4819f81a984d484d581a080e0818180
-  bytes fd80e981a7818882890af104f208fffff11280f580e980f5899c818d828885e0
-  bytes 85e181b087a080ef80fd80fe80ef8185818880ed82880a8dba83c6818591db83
-  bytes de819c818581a085ce80eb89e6818180fd82890af104f208fffff11281f081fe
-  bytes 81c089da8ff5818981a087bd80f381aa80fd80fb818c83c6829d829d0a848981
-  bytes 8c88838ddc8490849180fe82890af104f208fffff112899c818881a7818e8288
-  bytes 8aaa819c81a980e981a085dd81aa818880e282890a818681a0818982a681c881
-  bytes c981ef82a781b08db380ed84aa86e480ea8188829d829d0af10400004d53475f
-  bytes 303034000000000000000000000000000000000001000000e003000051000000
-  bytes f208fffff20707fff112829d829d81e381d9818c85ba86ed8186818d908d83fe
-  bytes 818c81a680e4818881a0818c80fe82890a85cb80f3818880e480ff818d84fb80
-  bytes e9818584f583dc81a680e282890af104000000004d53475f3030350000000000
-  bytes 00000000000000000000000001000000580400005b000000f208fffff20707ff
-  bytes f11280fe80ea828890f180e684d680ef81a983fe818d81a280ea81848b928186
-  bytes 818881a982890a8997818481b08de980eb88da80ed80f7819c818585b9819c81
-  bytes a7818a8cd384ef81898188829d829d0af10400004d53475f3030354200000000
-  bytes 00000000000000000000000002000000dc0400000705000084000000f208ffff
-  bytes f20707fff11281e381d9818d80fb81b1818881a0818c81b086c180f580f780ec
-  bytes 80fd82890af104f208fffff11280fb818c89a985bb818885fc81a081a881898a
-  bytes 85889380f582888997818481b090e8818984e080f70a8a958b9885a3818c84c5
-  bytes 84a38189818d828883ea81b084ed80ef818480eb80fd818c80fe82890af10400
-  bytes 4d53475f30303600000000000000000000000000000000000200000088050000
-  bytes c405000073000000f208fffff20707fff11281e381d9818d878488b5818c80fd
-  bytes 819f81890a88da80ed80f7889384dc818580e081a9819780eb8188818c80fe82
-  bytes 890af104f208fffff11280fb81aa80ea8288819080e28184818d81e381d987b3
-  bytes 86db818c0a89a985b781b081a0869d89c380f781a982890af10400004d53475f
-  bytes 3030370000000000000000000000000000000000030000002806000066060000
-  bytes 9c060000ab000000f208fffff20707fff112848081b08683819f81a9819780eb
-  bytes 818580e081a882880a848081b08683819f8184818d80e280ef818880e2818c80
-  bytes e982890af104f208fffff11280fb818c8dcc81b08688819f81a9818c818d81e3
-  bytes 81d98185818d818880e282890a829d829d878488b580fe82890af104f208ffff
-  bytes f11281e381d9818d80fd80fe8288878488b581b0849f81a780f70a88a28bae85
-  bytes 98818580e081aa818e80e280e282890af10400004d53475f3030380000000000
-  bytes 00000000000000000000000002000000fc0600003a0700006a000000f208ffff
-  bytes f20707fff11285c281a280e98189869a81a88288848885c980f582880a878488
-  bytes b5818c85cc84f4818c8486858f8186818881a9829d829d0af104f208fffff112
-  bytes 80fb81aa80ea85be8fa6818980f5818485be898d818c83ee8afb8188818c80fe
-  bytes 82890af1040000004d53475f3030390000000000000000000000000000000000
-  bytes 010000008c0700004b000000f208fffff20707fff11280fb80e4818d828884f4
-  bytes 81ad818880e280e9818b809f0a878488b5818d80fd80fe828887ca90b2818580
-  bytes e081aa818e81a680e2818c80fe8186829d829d0af10400005455494b415f544f
-  bytes 493031000000000000000000000000000000020000000000040800000d080000
-  bytes 14000000f208ffff818d80e200f208ffff80e280e280e6004d53475f3030395f
-  bytes 41000000000000000000000000000000030000004408000078080000b4080000
-  bytes 9a000000f208fffff20707fff11280fb80e480e982890a81c881c981ef818c83
-  bytes c8879481a780f580f380ea868d80e981a980e982890af104f208fffff112829d
-  bytes 829d81a2818d81a8828888de818c86dd87d084f087d0818781a08186818d0a88
-  bytes 9f80ea868180e481a680e480fe818882890af104f208fffff11280e280f881aa
-  bytes 8288899c818981a086dc83c680f5818481a081a780e880e482890af104000000
-  bytes 4d53475f3030395f420000000000000000000000000000000200000008090000
-  bytes 3309000064000000f208fffff20707fff112829d829d84cb86eb818d899c81a0
-  bytes 828880fd80fe818c83eb83c780e982890af104f208fffff11283f080ea86b588
-  bytes 83829d829d0a86b585ce84d3848d81a9818d80f881a0818880e9818180fd81a6
-  bytes 80e480fe818882890af104004d53475f3030395f430000000000000000000000
-  bytes 00000000040000009c090000d1090000f8090000380a0000ed000000f208ffff
-  bytes f20707fff112829d829d80f38184828880fb81ab80fb81ab8489818d848f80e9
-  bytes 818b818e818881a781b182890af112f104f208ffff8997818480ea84b381ad81
-  bytes a9819c818589a984f5818d818580eb818880e282890af104f208ffff899c818d
-  bytes 84eb848480e2818480e281a980e9818b82880a80f1818c83dc818985ad80ff85
-  bytes af819f81a983cf80f580e284eb8ae3829d829d0af112f104f208ffff85c981b1
-  bytes 80fe81c581cb81d7828481df81b7818c86e381a883fe818988d981ab80e48186
-  bytes 0a80f781a985a380ea828884ff84eb87ff81898eb085b481b085f9819f818480
-  bytes e281a982890af104000000004d53475f30313000000000000000000000000000
-  bytes 0000000002000000b40a0000060b00007a000000f208fffff20707ff88de818c
-  bytes 87cd80e9818881c481d9828081fb81b08db380f180e4818680f781a985a38189
-  bytes 0a84ec80f581848e8181aa81b0868f81a987a28189818d80e280e9818880e282
-  bytes 9d829d0af104f208ffff878488b581b08dd581a9818c818d829d829d80f1818c
-  bytes 84898188818c80fe80810af104000000340b00008ac886fd0000000002040404
-  bytes 0404040404040404040404021602340f6e1fe63c400254024c076802483a021c
-  bytes 076002440f8a0242
+  msg1
+  message MSG_001 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 829d 829d 848d 8184 80e2 80fd 818c 80e9 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 829d 829d 85cc 84b5 8188 86e4 85a3 80ea 84db 81aa 80fd 81a0
+      glyphs 818c 80fe 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_002 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 85f2 80f5 80e2 8188 829d 829d 84f1 84f2 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80e2 81a2 829d 829d 829d 829d 82a6 83f4 8dd4 8ee1 82a7 8186
+      glyphs 84d2 8194 8197 80eb 80e9 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 81a6 81a0 81a2 8288 899c 80ea 80fb 80e4 80fe 8181 80fd 8186
+      glyphs 818d 8188 829d 829d
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 8187 80e4 81a2 81a7 83f0 8296 818d 8288 86a9 819f 80e9 81a7
+      newline
+      glyphs 84d3 83ef 80e4 8197 80ed 80f5 8184 85a4 83ef 80f5 80fd 81a7
+      glyphs 80f5 80e2 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_003 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 83f0 80ea 8dd5 8784 818c 83fc 818c 81ef 81bd 81d5 81e3 818d
+      glyphs 8288 81ef 8284 81d9 81fa 81b0
+      newline
+      glyphs 85c9 819a 80f5 80fd 86c2 8189 8288 8199 819a 87eb 80ff 8580
+      glyphs 81a8 80fd 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80fe 80e9 81a7 8288 899c 80ea 81bb 81ea 81fb 81ca 81c0 8196
+      glyphs 85ec 80e9 80e4 818c 81b0
+      newline
+      glyphs 8afa 80e6 8184 85b9 819f 818d 80f5 8188 80e9 8181 80fd 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 83f4 8dd4 8ee1 8186 80f5 8184 899c 80ea 84c5 84ef 80e9 8187
+      glyphs 80e4 80e9 829d 829d
+      newline
+      glyphs 85ae 8ba4 819f 81a9 84d4 84d5 81a0 80e0 8181 80fd 80e9 81a7
+      glyphs 8188 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80f5 80e9 80f5 899c 818d 8288 85e0 85e1 81b0 87a0 80ef 80fd
+      glyphs 80fe 80ef 8185 8188 80ed 8288
+      newline
+      glyphs 8dba 83c6 8185 91db 83de 819c 8185 81a0 85ce 80eb 89e6 8181
+      glyphs 80fd 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 81f0 81fe 81c0 89da 8ff5 8189 81a0 87bd 80f3 81aa 80fd 80fb
+      glyphs 818c 83c6 829d 829d
+      newline
+      glyphs 8489 818c 8883 8ddc 8490 8491 80fe 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 899c 8188 81a7 818e 8288 8aaa 819c 81a9 80e9 81a0 85dd 81aa
+      glyphs 8188 80e2 8289
+      newline
+      glyphs 8186 81a0 8189 82a6 81c8 81c9 81ef 82a7 81b0 8db3 80ed 84aa
+      glyphs 86e4 80ea 8188 829d 829d
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_004 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 829d 829d 81e3 81d9 818c 85ba 86ed 8186 818d 908d 83fe 818c
+      glyphs 81a6 80e4 8188 81a0 818c 80fe 8289
+      newline
+      glyphs 85cb 80f3 8188 80e4 80ff 818d 84fb 80e9 8185 84f5 83dc 81a6
+      glyphs 80e2 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_005 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 80fe 80ea 8288 90f1 80e6 84d6 80ef 81a9 83fe 818d 81a2 80ea
+      glyphs 8184 8b92 8186 8188 81a9 8289
+      newline
+      glyphs 8997 8184 81b0 8de9 80eb 88da 80ed 80f7 819c 8185 85b9 819c
+      glyphs 81a7 818a 8cd3 84ef 8189 8188 829d 829d
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_005B speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 81e3 81d9 818d 80fb 81b1 8188 81a0 818c 81b0 86c1 80f5 80f7
+      glyphs 80ec 80fd 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80fb 818c 89a9 85bb 8188 85fc 81a0 81a8 8189 8a85 8893 80f5
+      glyphs 8288 8997 8184 81b0 90e8 8189 84e0 80f7
+      newline
+      glyphs 8a95 8b98 85a3 818c 84c5 84a3 8189 818d 8288 83ea 81b0 84ed
+      glyphs 80ef 8184 80eb 80fd 818c 80fe 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_006 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 81e3 81d9 818d 8784 88b5 818c 80fd 819f 8189
+      newline
+      glyphs 88da 80ed 80f7 8893 84dc 8185 80e0 81a9 8197 80eb 8188 818c
+      glyphs 80fe 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80fb 81aa 80ea 8288 8190 80e2 8184 818d 81e3 81d9 87b3 86db
+      glyphs 818c
+      newline
+      glyphs 89a9 85b7 81b0 81a0 869d 89c3 80f7 81a9 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_007 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 8480 81b0 8683 819f 81a9 8197 80eb 8185 80e0 81a8 8288
+      newline
+      glyphs 8480 81b0 8683 819f 8184 818d 80e2 80ef 8188 80e2 818c 80e9
+      glyphs 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80fb 818c 8dcc 81b0 8688 819f 81a9 818c 818d 81e3 81d9 8185
+      glyphs 818d 8188 80e2 8289
+      newline
+      glyphs 829d 829d 8784 88b5 80fe 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 81e3 81d9 818d 80fd 80fe 8288 8784 88b5 81b0 849f 81a7 80f7
+      newline
+      glyphs 88a2 8bae 8598 8185 80e0 81aa 818e 80e2 80e2 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_008 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 85c2 81a2 80e9 8189 869a 81a8 8288 8488 85c9 80f5 8288
+      newline
+      glyphs 8784 88b5 818c 85cc 84f4 818c 8486 858f 8186 8188 81a9 829d
+      glyphs 829d
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80fb 81aa 80ea 85be 8fa6 8189 80f5 8184 85be 898d 818c 83ee
+      glyphs 8afb 8188 818c 80fe 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_009 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 80fb 80e4 818d 8288 84f4 81ad 8188 80e2 80e9 818b 809f
+      newline
+      glyphs 8784 88b5 818d 80fd 80fe 8288 87ca 90b2 8185 80e0 81aa 818e
+      glyphs 81a6 80e2 818c 80fe 8186 829d 829d
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select TUIKA_TOI01
+    option
+      control f2 08 ff ff
+      glyphs 818d 80e2
+    endoption
+    option
+      control f2 08 ff ff
+      glyphs 80e2 80e2 80e6
+    endoption
+  endselect
+  message MSG_009_A speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 80fb 80e4 80e9 8289
+      newline
+      glyphs 81c8 81c9 81ef 818c 83c8 8794 81a7 80f5 80f3 80ea 868d 80e9
+      glyphs 81a9 80e9 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 829d 829d 81a2 818d 81a8 8288 88de 818c 86dd 87d0 84f0 87d0
+      glyphs 8187 81a0 8186 818d
+      newline
+      glyphs 889f 80ea 8681 80e4 81a6 80e4 80fe 8188 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 80e2 80f8 81aa 8288 899c 8189 81a0 86dc 83c6 80f5 8184 81a0
+      glyphs 81a7 80e8 80e4 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_009_B speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 829d 829d 84cb 86eb 818d 899c 81a0 8288 80fd 80fe 818c 83eb
+      glyphs 83c7 80e9 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      glyphs 83f0 80ea 86b5 8883 829d 829d
+      newline
+      glyphs 86b5 85ce 84d3 848d 81a9 818d 80f8 81a0 8188 80e9 8181 80fd
+      glyphs 81a6 80e4 80fe 8188 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_009_C speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      control f1 12
+      glyphs 829d 829d 80f3 8184 8288 80fb 81ab 80fb 81ab 8489 818d 848f
+      glyphs 80e9 818b 818e 8188 81a7 81b1 8289
+      newline
+      control f1 12
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 8997 8184 80ea 84b3 81ad 81a9 819c 8185 89a9 84f5 818d 8185
+      glyphs 80eb 8188 80e2 8289
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 899c 818d 84eb 8484 80e2 8184 80e2 81a9 80e9 818b 8288
+      newline
+      glyphs 80f1 818c 83dc 8189 85ad 80ff 85af 819f 81a9 83cf 80f5 80e2
+      glyphs 84eb 8ae3 829d 829d
+      newline
+      control f1 12
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 85c9 81b1 80fe 81c5 81cb 81d7 8284 81df 81b7 818c 86e3 81a8
+      glyphs 83fe 8189 88d9 81ab 80e4 8186
+      newline
+      glyphs 80f7 81a9 85a3 80ea 8288 84ff 84eb 87ff 8189 8eb0 85b4 81b0
+      glyphs 85f9 819f 8184 80e2 81a9 8289
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_010 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 88de 818c 87cd 80e9 8188 81c4 81d9 8280 81fb 81b0 8db3 80f1
+      glyphs 80e4 8186 80f7 81a9 85a3 8189
+      newline
+      glyphs 84ec 80f5 8184 8e81 81aa 81b0 868f 81a9 87a2 8189 818d 80e2
+      glyphs 80e9 8188 80e2 829d 829d
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      glyphs 8784 88b5 81b0 8dd5 81a9 818c 818d 829d 829d 80f1 818c 8489
+      glyphs 8188 818c 80fe 8081
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    glyphs 8ac8 86fd
+  endspeaker
 end
 
 section 4 type=4 stride=0x1 count=32 offset=0x2ea0 extent=0x253

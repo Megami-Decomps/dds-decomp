@@ -14,11 +14,19 @@ e916_main:
   END
 end
 
-messages
-  bytes 070000007b0000004d5347310000000078000000030000000100000000000200
-  bytes 00000000180000004c0000000100000000000000000000004d53475f53544152
-  bytes 545f3030000000000000000000000000010000003c00000010000000f208ffff
-  bytes f20707ff80e981a80af104005000000081bd829981da000007160c
+messages msg1
+  message MSG_START_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      glyphs 80e9 81a8
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    glyphs 81bd 8299 81da
+  endspeaker
 end
 
 strings

@@ -115,18 +115,40 @@ e911_dead:
   END
 end
 
-messages
-  bytes 070000005d0100004d5347310000000054010000090000000300000000000200
-  bytes 0000000028000000000000007800000000000000c80000001c01000002000000
-  bytes 00000000000000004d53475f534552415f303000000000000000000000000000
-  bytes 010000004c0000002c000000f208fffff20707ff284f7574206f6620636f6e74
-  bytes 726f6c20616761696e213f204765657a2e2e2e290af104004d53475f48415249
-  bytes 5f303000000000000000000000000000010001009c0000002b000000f208ffff
-  bytes f20707ff496d70726573736976652e2e2e2062757420697420656e6473206865
-  bytes 7265210af10400004d53475f484152495f303100000000000000000000000000
-  bytes 01000100ec00000030000000f208fffff20707ff596f75207368616c6c206e6f
-  bytes 74206573636170652074686973207075726761746f7279210af1040024010000
-  bytes 2901000053657261004861726968617261000000020404021628281c02
+messages msg1
+  message MSG_SERA_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "(Out of control again!? Geez...)"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HARI_00 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Impressive... but it ends here!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HARI_01 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "You shall not escape this purgatory!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Sera"
+  endspeaker
+  speaker 1
+    text "Harihara"
+  endspeaker
 end
 
 strings

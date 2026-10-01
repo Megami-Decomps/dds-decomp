@@ -155,26 +155,68 @@ e502_003_msg:
   END
 end
 
-messages
-  bytes 07000000420200004d53473100000000340200000e0000000600000000000200
-  bytes 0000000040000000010000008000000000000000e0000000000000002c010000
-  bytes 000000008001000000000000c401000014020000000000000000000000000000
-  bytes 5349455f54455354303031000000000000000000000000000100ffff64000000
-  bytes 1a000000f208fffff20781ff81fb829981d18299818c88a889ef818d0a000000
-  bytes 544553545f53454c000000000000000000000000000000000000020000000000
-  bytes ac000000cd00000031000000f208ffff86dc83c6818d80f781a980ea92c380f5
-  bytes 8a8380ff818d80f5818880e200f208ffff80e280e284dd84c280fe0000000000
-  bytes 4845545f54455354303031000000000000000000000000000100ffff04010000
-  bytes 25000000f208fffff20781ff8c8180e581880a85da81a7818880eb81a185da81
-  bytes a781aa81a980fa0a0000000047494c5f54455354303031000000000000000000
-  bytes 000000000100ffff5001000030000000f208fffff20781ff81d781ca81d9818d
-  bytes 84b384b480fe0a80e883e7818d868d92ca30303181898a9a88b280f580fd0a00
-  bytes 42414b5548415f54455354303031000000000000000000000100ffffa4010000
-  bytes 20000000f208fffff20781ff80e0819a82998299829982998299829981b18081
-  bytes 80810a0042414b5548415f54455354303032000000000000000000000100ffff
-  bytes e80100002a000000f208fffff20781ff868d92ca30303281898a9a88b280f581
-  bytes 9c80f580fd0a81d781ca81d984b384b40a000000020404040404021622022c26
-  bytes 2a22
+messages msg1
+  message SIE_TEST001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 81fb 8299 81d1 8299 818c 88a8 89ef 818d
+      newline
+    endpage
+  endmessage
+  select TEST_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      glyphs 86dc 83c6 818d 80f7 81a9 80ea 92c3 80f5 8a83 80ff 818d 80f5
+      glyphs 8188 80e2
+    endoption
+    option
+      control f2 08 ff ff
+      glyphs 80e2 80e2 84dd 84c2 80fe
+    endoption
+  endselect
+  message HET_TEST001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 8c81 80e5 8188
+      newline
+      glyphs 85da 81a7 8188 80eb 81a1 85da 81a7 81aa 81a9 80fa
+      newline
+    endpage
+  endmessage
+  message GIL_TEST001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 81d7 81ca 81d9 818d 84b3 84b4 80fe
+      newline
+      glyphs 80e8 83e7 818d 868d 92ca
+      text "001"
+      glyphs 8189 8a9a 88b2 80f5 80fd
+      newline
+    endpage
+  endmessage
+  message BAKUHA_TEST001 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 80e0 819a 8299 8299 8299 8299 8299 8299 81b1 8081 8081
+      newline
+    endpage
+  endmessage
+  message BAKUHA_TEST002 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 868d 92ca
+      text "002"
+      glyphs 8189 8a9a 88b2 80f5 819c 80f5 80fd
+      newline
+      glyphs 81d7 81ca 81d9 84b3 84b4
+      newline
+    endpage
+  endmessage
 end
 
 strings

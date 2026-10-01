@@ -40,14 +40,27 @@ e907_dead:
   END
 end
 
-messages
-  bytes 07000000d10000004d53473100000000cc000000050000000200000000000200
-  bytes 00000000200000000000000058000000ac000000000000000000000000000000
-  bytes 4d53475f30303000000000000000000000000000000000000100ffff44000000
-  bytes 13000000f208fffff20707ff54657374696e670af10400004d53475f53544152
-  bytes 545f30300000000000000000000000000100ffff7c00000030000000f208ffff
-  bytes f20707ff417267696c6c6120706172746963697061746573200a696e20746865
-  bytes 20626174746c652e0af10400020402161c
+messages msg1
+  message MSG_000 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Testing"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_00 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Argilla participates "
+      newline
+      text "in the battle."
+      newline
+      control f1 04
+    endpage
+  endmessage
 end
 
 strings

@@ -106,17 +106,39 @@ e905_first:
   END
 end
 
-messages
-  bytes 07000000300100004d5347310000000028010000080000000300000000000200
-  bytes 0000000028000000000000006400000000000000b8000000fc00000001000000
-  bytes 00000000000000004d53475f53544152545f3030000000000000000000000000
-  bytes 010000004c00000015000000f208fffff20707ff44616d6d69742e2e2e0af104
-  bytes 000000004d53475f53544152545f303100000000000000000000000001000000
-  bytes 8800000030000000f208fffff20707ff446f6e27742077757373206f7574206e
-  bytes 6f772e0a5468697320697320736572696f7573210af104004d53475f53544152
-  bytes 545f303200000000000000000000000001000000dc0000001d000000f208ffff
-  bytes f20707ff43276d6f6e21204669676874206d6521210af1040000000000010000
-  bytes 486561740000000002040402161e2a14
+messages msg1
+  message MSG_START_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Dammit..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_01 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Don't wuss out now."
+      newline
+      text "This is serious!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_02 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "C'mon! Fight me!!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Heat"
+  endspeaker
 end
 
 strings

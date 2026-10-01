@@ -123,37 +123,109 @@ e501_001_msg:
   END
 end
 
-messages
-  bytes 07000000ac0300004d5347310000000094030000180000000c00000000000200
-  bytes 000000007000000000000000b400000000000000080100000000000024010000
-  bytes 0000000064010000000000009801000000000000d00100000000000008020000
-  bytes 0000000044020000000000008c02000000000000d40200000000000020030000
-  bytes 740300000000000000000000000000004e534945303034300000000000000000
-  bytes 00000000000000000100ffff940000001d000000f208fffff20781ff81e38299
-  bytes 81d90a81c381b581fc80ea878381890a000000004e4845543031343000000000
-  bytes 0000000000000000000000000100ffffd80000002f000000f208fffff20781ff
-  bytes 89e880e6818481b1818c80e9808081c381b581fc0a848381b087d580e2818480
-  bytes e580e9809f0a00004e47494c3030343000000000000000000000000000000000
-  bytes 000000004e48455430313530000000000000000000000000000000000100ffff
-  bytes 480100001a000000f208fffff20781ff84e9818c86a086da818d8080848080fe
-  bytes 0a0000004e53455230303130000000000000000000000000000000000100ffff
-  bytes 880100000e000000f208fffff20781ff858681a60a0000004e53494530303530
-  bytes 000000000000000000000000000000000100ffffbc01000014000000f208ffff
-  bytes f20781ff84e9818c80ea808085860a004e534552303032300000000000000000
-  bytes 00000000000000000100fffff401000012000000f208fffff20781ff80fb80e4
-  bytes 808085860a0000004e47494c3030353000000000000000000000000000000000
-  bytes 0100ffff2c02000018000000f208fffff20781ff80e883e7818d8080848085a3
-  bytes 80fe0a004e53455230303330000000000000000000000000000000000100ffff
-  bytes 6802000023000000f208fffff20781ff8489818d81cc81fa0a85db81b086fa80
-  bytes ef8189848d80fd818c0a00004e41525530313730000000000000000000000000
-  bytes 000000000100ffffb002000023000000f208fffff20781ff86fa80ef8189848d
-  bytes 80fd818181840a818780f180e981a7809f0a00004e5345523030343100000000
-  bytes 0000000000000000000000000100fffff802000025000000f208fffff20781ff
-  bytes 81ad80e981a7818880e20a848081a084d980e68184818880e2818c0a00000000
-  bytes 4e53455230303432000000000000000000000000000000000100ffff44030000
-  bytes 2f000000f208fffff20781ff84d980e6818481a9818c818d0a85db81b086fa80
-  bytes ef80fd80e28181818480f1818680fe80ef0a0000020404040404040404040404
-  bytes 02162238201a1c1c1e242426
+messages msg1
+  message NSIE0040 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 81e3 8299 81d9
+      newline
+      glyphs 81c3 81b5 81fc 80ea 8783 8189
+      newline
+    endpage
+  endmessage
+  message NHET0140 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 89e8 80e6 8184 81b1 818c 80e9 8080 81c3 81b5 81fc
+      newline
+      glyphs 8483 81b0 87d5 80e2 8184 80e5 80e9 809f
+      newline
+    endpage
+  endmessage
+  message NGIL0040 speaker=0
+  endmessage
+  message NHET0150 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 84e9 818c 86a0 86da 818d 8080 8480 80fe
+      newline
+    endpage
+  endmessage
+  message NSER0010 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 8586 81a6
+      newline
+    endpage
+  endmessage
+  message NSIE0050 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 84e9 818c 80ea 8080 8586
+      newline
+    endpage
+  endmessage
+  message NSER0020 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 80fb 80e4 8080 8586
+      newline
+    endpage
+  endmessage
+  message NGIL0050 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 80e8 83e7 818d 8080 8480 85a3 80fe
+      newline
+    endpage
+  endmessage
+  message NSER0030 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 8489 818d 81cc 81fa
+      newline
+      glyphs 85db 81b0 86fa 80ef 8189 848d 80fd 818c
+      newline
+    endpage
+  endmessage
+  message NARU0170 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 86fa 80ef 8189 848d 80fd 8181 8184
+      newline
+      glyphs 8187 80f1 80e9 81a7 809f
+      newline
+    endpage
+  endmessage
+  message NSER0041 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 81ad 80e9 81a7 8188 80e2
+      newline
+      glyphs 8480 81a0 84d9 80e6 8184 8188 80e2 818c
+      newline
+    endpage
+  endmessage
+  message NSER0042 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 81 ff
+      glyphs 84d9 80e6 8184 81a9 818c 818d
+      newline
+      glyphs 85db 81b0 86fa 80ef 80fd 80e2 8181 8184 80f1 8186 80fe 80ef
+      newline
+    endpage
+  endmessage
 end
 
 strings

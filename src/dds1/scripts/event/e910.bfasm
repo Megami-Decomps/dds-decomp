@@ -39,12 +39,19 @@ e910_dead:
   END
 end
 
-messages
-  bytes 070000008f0000004d534731000000008c000000030000000100000000000200
-  bytes 0000000018000000600000000100000000000000000000004d53475f53455241
-  bytes 5f303000000000000000000000000000010000003c00000024000000f208ffff
-  bytes f20707ff45766572796f6e652c20646f6e2774206769766520696e210af10400
-  bytes 640000005365726100000000071616
+messages msg1
+  message MSG_SERA_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Everyone, don't give in!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Sera"
+  endspeaker
 end
 
 strings

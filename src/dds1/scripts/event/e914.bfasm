@@ -106,17 +106,41 @@ e914_first:
   END
 end
 
-messages
-  bytes 07000000400100004d5347310000000038010000080000000300000000000200
-  bytes 0000000028000000000000006000000000000000cc0000000c01000001000000
-  bytes 00000000000000004d53475f53544152545f3030000000000000000000000000
-  bytes 010000004c00000012000000f208fffff20707ff4865682e2e2e0af104000000
-  bytes 4d53475f53544152545f30310000000000000000000000000100000084000000
-  bytes 48000000f208fffff20707ff416c7269676874207468656e2e2e2e0a4c657427
-  bytes 7320736565207768617420796f75277265206d6164650a6f662c204d722e204c
-  bytes 65616465722e2e2e0af104004d53475f53544152545f30320000000000000000
-  bytes 0000000001000000f000000019000000f208fffff20707ff54696d6520746f20
-  bytes 64696521210af1040000000010010000486561740000000002040402161c3612
+messages msg1
+  message MSG_START_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Heh..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_01 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Alright then..."
+      newline
+      text "Let's see what you're made"
+      newline
+      text "of, Mr. Leader..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_02 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Time to die!!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Heat"
+  endspeaker
 end
 
 strings

@@ -723,98 +723,322 @@ e909_dead:
   END
 end
 
-messages
-  bytes 07000000580b00004d53473100000000200b0000380000001700000000000200
-  bytes 00000000c8000000000000001001000000000000b40100000000000000020000
-  bytes 000000007002000000000000d00200000000000040030000000000009c030000
-  bytes 0000000008040000000000005404000000000000b00400000000000010050000
-  bytes 000000007005000000000000d00500000000000030060000000000008c060000
-  bytes 000000003007000000000000d007000000000000700800000000000010090000
-  bytes 00000000b009000000000000540a000000000000a80a0000ec0a000002000000
-  bytes 00000000000000004d53475f53544152545f544f554d45490000000000000000
-  bytes 0100ffffec00000022000000f208fffff20707ff3e20526176616e6120697320
-  bytes 696e76697369626c652e0af1040000004d53475f53544152545f303000000000
-  bytes 0000000000000000040000004001000069010000930100009f01000071000000
-  bytes f208fffff20707ff57616974212049206d696768742062652061626c6520746f
-  bytes 2068656c702e0af104f208ffff49207468696e6b20492063616e2e2e2e206665
-  bytes 656c206869732070726573656e63652e0af104f208ffff486d2e2e2e0af104f2
-  bytes 08ffff4f682120486527732d2d0af104000000004d53475f48494e545f303000
-  bytes 00000000000000000000000001000000d801000025000000f208fffff20707ff
-  bytes 2e2e2e49276d20736f7272792c2049206c6f73742068696d2e0af10400000000
-  bytes 4d53475f48494e545f4c31303100000000000000000000000100000024020000
-  bytes 4c000000f208fffff20707ff486527732073747261696768742061686561642e
-  bytes 2e2e206f7220746f20746865206c6566742e0a446566696e6974656c79206e6f
-  bytes 74207468652072696768742e0af104004d53475f48494e545f4c313032000000
-  bytes 000000000000000001000000940200003a000000f208fffff20707ff48652069
-  bytes 736e277420696e207468652063656e7465722e0a54727920746865206c656674
-  bytes 206f722072696768742e0af1040000004d53475f48494e545f4c313033000000
-  bytes 000000000000000001000000f40200004b000000f208fffff20707ff48652773
-  bytes 20696e207468652063656e7465722e2e2e206f7220746f207468652072696768
-  bytes 742e0a446566696e6974656c79206e6f7420746865206c6566742e0af1040000
-  bytes 4d53475f48494e545f4c32303100000000000000000000000100000064030000
-  bytes 35000000f208fffff20707ff492063616e206665656c20686973207072657365
-  bytes 6e6365206f6e0a746865206c65667420736964652e0af104000000004d53475f
-  bytes 48494e545f4c323032000000000000000000000001000000c003000047000000
-  bytes f208fffff20707ff492063616e2774206665656c206869732070726573656e63
-  bytes 65206f6e206569746865720a736964652e2e2e20547279207468652063656e74
-  bytes 65722e0af10400004d53475f48494e545f4c3230330000000000000000000000
-  bytes 010000002c04000028000000f208fffff20707ff48652773206f6e2074686520
-  bytes 726967687420736f6d6577686572652e0af104004d53475f48494e545f4c3330
-  bytes 300000000000000000000000010000007804000036000000f208fffff20707ff
-  bytes 48652773206f6e20746865206c6566742e20466f756e642068696d210a546865
-  bytes 20666172206c656674210af1040000004d53475f48494e545f4c333031000000
-  bytes 000000000000000001000000d40400003a000000f208fffff20707ff546f2074
-  bytes 6865206c6566742e2e2e205468657265210a48652773207365636f6e6420746f
-  bytes 20746865206c656674210af1040000004d53475f48494e545f4c333032000000
-  bytes 0000000000000000010000003405000039000000f208fffff20707ff546f2074
-  bytes 6865206c6566742e2e2e204f68210a4a7573742061206c6974746c6520746f20
-  bytes 746865206c656674210af104000000004d53475f48494e545f4c333033000000
-  bytes 000000000000000001000000940500003b000000f208fffff20707ff546f2074
-  bytes 68652072696768742e2e2e204f68210a4a7573742061206c6974746c6520746f
-  bytes 20746865207269676874210af10400004d53475f48494e545f4c333034000000
-  bytes 000000000000000001000000f40500003c000000f208fffff20707ff546f2074
-  bytes 68652072696768742e2e2e205468657265210a48652773207365636f6e642074
-  bytes 6f20746865207269676874210af104004d53475f48494e545f4c333035000000
-  bytes 0000000000000000010000005406000038000000f208fffff20707ff48652773
-  bytes 206f6e207468652072696768742e20466f756e642068696d210a546865206661
-  bytes 72207269676874210af104004d53475f48494e545f4c34303000000000000000
-  bytes 0000000002000000b4060000090700007a000000f208fffff20707ff49206361
-  bytes 6e2073656e73652e2e2e0a48697320627265617468696e672e2e2e2048697320
-  bytes 706f7765722e2e2e0a486973206861747265642e2e2e20492063616e20666565
-  bytes 6c2068696d2e0af104f208ffff4865277320616c6c207468652077617920746f
-  bytes 20746865206c656674210af1040000004d53475f48494e545f4c343031000000
-  bytes 00000000000000000200000058070000ad07000075000000f208fffff20707ff
-  bytes 492063616e2073656e73652e2e2e0a48697320627265617468696e672e2e2e20
-  bytes 48697320706f7765722e2e2e0a486973206861747265642e2e2e20492063616e
-  bytes 206665656c2068696d2e0af104f208ffff48652773207365636f6e6420746f20
-  bytes 746865206c656674210af104000000004d53475f48494e545f4c343032000000
-  bytes 000000000000000002000000f80700004d08000075000000f208fffff20707ff
-  bytes 492063616e2073656e73652e2e2e0a48697320627265617468696e672e2e2e20
-  bytes 48697320706f7765722e2e2e0a486973206861747265642e2e2e20492063616e
-  bytes 206665656c2068696d2e0af104f208ffff48652773206a75737420736c696768
-  bytes 746c79206c656674210af104000000004d53475f48494e545f4c343033000000
-  bytes 00000000000000000200000098080000ed08000076000000f208fffff20707ff
-  bytes 492063616e2073656e73652e2e2e0a48697320627265617468696e672e2e2e20
-  bytes 48697320706f7765722e2e2e0a486973206861747265642e2e2e20492063616e
-  bytes 206665656c2068696d2e0af104f208ffff48652773206a75737420736c696768
-  bytes 746c79207269676874210af1040000004d53475f48494e545f4c343034000000
-  bytes 000000000000000002000000380900008d09000076000000f208fffff20707ff
-  bytes 492063616e2073656e73652e2e2e0a48697320627265617468696e672e2e2e20
-  bytes 48697320706f7765722e2e2e0a486973206861747265642e2e2e20492063616e
-  bytes 206665656c2068696d2e0af104f208ffff48652773207365636f6e6420746f20
-  bytes 746865207269676874210af1040000004d53475f48494e545f4c343035000000
-  bytes 000000000000000002000000d80900002d0a00007b000000f208fffff20707ff
-  bytes 492063616e2073656e73652e2e2e0a48697320627265617468696e672e2e2e20
-  bytes 48697320706f7765722e2e2e0a486973206861747265642e2e2e20492063616e
-  bytes 206665656c2068696d2e0af104f208ffff4865277320616c6c20746865207761
-  bytes 7920746f20746865207269676874210af10400004d53475f48494e545f434841
-  bytes 4e474500000000000000000001000000780a00002d000000f208fffff20707ff
-  bytes 4865206d6f766564210a4265206361726566756c2c2065766572796f6e652e2e
-  bytes 2e0af104000000004d53475f5241565f30300000000000000000000000000000
-  bytes 01000100cc0a00001e000000f208fffff20707ff417267682e2e2e2044616d6e
-  bytes 20796f7521210af104000000f40a0000f90a00005365726100526176616e6100
-  bytes 02040404040404040404040404040404040404040404040216240f4c26383038
-  bytes 2e36262e303030302e0250024e024e024e024e02502a1402
+messages msg1
+  message MSG_START_TOUMEI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Ravana is invisible."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_START_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Wait! I might be able to help."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I think I can... feel his presence."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Hm..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Oh! He's--"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_00 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...I'm sorry, I lost him."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L101 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's straight ahead... or to the left."
+      newline
+      text "Definitely not the right."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L102 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He isn't in the center."
+      newline
+      text "Try the left or right."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L103 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's in the center... or to the right."
+      newline
+      text "Definitely not the left."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L201 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can feel his presence on"
+      newline
+      text "the left side."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L202 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can't feel his presence on either"
+      newline
+      text "side... Try the center."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L203 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's on the right somewhere."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L300 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's on the left. Found him!"
+      newline
+      text "The far left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L301 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "To the left... There!"
+      newline
+      text "He's second to the left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L302 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "To the left... Oh!"
+      newline
+      text "Just a little to the left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L303 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "To the right... Oh!"
+      newline
+      text "Just a little to the right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L304 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "To the right... There!"
+      newline
+      text "He's second to the right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L305 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He's on the right. Found him!"
+      newline
+      text "The far right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L400 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's all the way to the left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L401 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's second to the left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L402 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's just slightly left!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L403 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's just slightly right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L404 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's second to the right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_L405 speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I can sense..."
+      newline
+      text "His breathing... His power..."
+      newline
+      text "His hatred... I can feel him."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He's all the way to the right!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_HINT_CHANGE speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "He moved!"
+      newline
+      text "Be careful, everyone..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message MSG_RAV_00 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Argh... Damn you!!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Sera"
+  endspeaker
+  speaker 1
+    text "Ravana"
+  endspeaker
 end
 
 strings
