@@ -355,13 +355,13 @@ void mnuReleaseStaffSpriteHandles(StaffSpriteHandles *handles) {
     } while (index < 2);
 }
 
-void mnuInitializeStaffPageWindows(u32 arg0, u32 *arg1, u32 arg2, u32 arg3) {
-    mnuInitPageWindow(arg0, arg3, arg1[3], 7, arg1[4], 0, *arg1, 0x11);
-    func_0027FAA8(arg0, *arg1);
-    func_0027FBE0(arg0, arg1 + 9);
-    func_0027FC10(arg0, arg1 + 0x11);
-    mnuRegisterResourceHandles(arg0, arg1 + 0x19);
-    mnuUpdateHandleStates(arg0);
+void mnuInitializeStaffPageWindows(u32 container, u32 *resources, u32 unused, u32 mode) {
+    mnuInitPageWindow(container, mode, resources[3], 7, resources[4], 0, *resources, 0x11);
+    func_0027FAA8(container, *resources);
+    func_0027FBE0(container, resources + 9);
+    func_0027FC10(container, resources + 0x11);
+    mnuRegisterResourceHandles(container, resources + 0x19);
+    mnuUpdateHandleStates(container);
 }
 
 void mnuAppendCampSpriteRequests(u32 *list, u32 *state) {
@@ -623,28 +623,28 @@ INCLUDE_ASM(const s32, "game/code_00270FB0", func_002723B0);
 
 INCLUDE_ASM(const s32, "game/code_00270FB0", func_00272518);
 
-void func_00272668(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    func_00272518(arg0, arg1, arg2, arg3, arg4, 0, arg5);
+void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
+    func_00272518(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
-void mnuDrawStaffCampScreen(s32 arg0, s32 arg1) {
-    u8 *menu = (u8 *)kwlnTaskGetUserValue(arg1);
+void mnuDrawStaffCampScreen(s32 kind, s32 task) {
+    u8 *menu = (u8 *)kwlnTaskGetUserValue(task);
 
     mnuDrawBackdrop(menu + 0x13C, 0x20);
-    if (func_002719F0(arg1) == 0) {
+    if (func_002719F0(task) == 0) {
         return;
     }
     func_0027E8D8(-0x10, -8, 0, (s32)((StaffSpriteHandles *)menu)->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, menu + 0x15C, 0x53);
-    if (arg0 == 0) {
+    if (kind == 0) {
         itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, *(s32 *)(menu + 0x64), 6, 0x53);
         itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0xF, 0x53);
         itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, *(s32 *)(menu + 0x60), 0x10, 0x53);
     }
 }
 
-void func_00272778(u32 arg0) {
-    mnuDrawStaffCampScreen(0, arg0);
+void func_00272778(u32 task) {
+    mnuDrawStaffCampScreen(0, task);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2100);

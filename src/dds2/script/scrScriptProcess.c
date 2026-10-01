@@ -14,7 +14,7 @@ extern ScrProcGlobals *D_00435DD0;
 
 s32 bfParseFLW0(s32 arg0, s32 arg1);
 
-s32 bfContextCreate(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+s32 bfContextCreate(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex);
 
 /* Load a script resource, create its VM process and retain its resource handle. */
 s32 scrOpenProcessFromResource(s32 scriptId, s32 option)
@@ -74,14 +74,14 @@ void scrCreateTaskWithDefaultOption(u32 processId) {
     bfParseFLW0(processId, 0);
 }
 
-s32 scrCreateTaskFromContextParameters(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
+s32 scrCreateTaskFromContextParameters(s32 priority, s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings, s32 procedureIndex)
 {
-    return scrProcCreateTask(a0, bfContextCreate(a1, a2, a3, a4, a5, a6, a7, a8));
+    return scrProcCreateTask(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-s32 func_0010BF30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6)
+s32 func_0010BF30(s32 header, s32 procedureSection, s32 procedures, s32 labels, s32 instructions, s32 auxiliaryData, s32 strings)
 {
-    return bfContextCreate(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0);
+    return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }
 
 extern void evtPrintDeveloperConsoleMessage(char *, u32);

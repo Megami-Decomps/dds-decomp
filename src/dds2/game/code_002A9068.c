@@ -570,9 +570,9 @@ typedef struct StaffResourceHeader {
     u32 resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
 
-void mnuDrawCampGridResourceSlot(s32 drawWork, u32 arg1, u32 arg2, s32 record, u32 unused,
+void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
                    u32 layer) {
-    itfDrawGridWithResolvedSlot(drawWork + 0x60, arg1, arg2, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
 }
 
@@ -883,12 +883,12 @@ INCLUDE_ASM(const s32, "game/code_002A9068", func_002AA9D8);
 
 extern void func_002AA9D8(u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
-void func_002AAC70(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g) {
-    func_002AA9D8(a, b, c, d, e, f, 0, 0, g);
+void func_002AAC70(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
+    func_002AA9D8(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);
 }
 
-void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
-    func_002AAC70(a, b, c, d, e, 0, f);
+void func_002AAC98(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 layer) {
+    func_002AAC70(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
 typedef struct CampDrawPosition {

@@ -480,10 +480,10 @@ void func_001057A8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
-u64 evtBuildFrameStatePacketList(s32 arg0) {
+u64 evtBuildFrameStatePacketList(s32 stateIndex) {
     u64 list = sdfCreateResetPacketList();
 
-    sdfAppendPacket(list, D_0043DDA0 + arg0 * 0x160 + func_00100400() * 0xB0);
+    sdfAppendPacket(list, D_0043DDA0 + stateIndex * 0x160 + func_00100400() * 0xB0);
     return list;
 }
 
@@ -698,8 +698,8 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106188);
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00106288);
 
-void func_001063A8(f32 arg0) {
-    D_0037F5EC[0] = arg0;
+void func_001063A8(f32 value) {
+    D_0037F5EC[0] = value;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C20);

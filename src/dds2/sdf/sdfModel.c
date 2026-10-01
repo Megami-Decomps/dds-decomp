@@ -362,14 +362,14 @@ void sdfModelUpdateCurrentFrameTransforms(SdfModel *model) {
     sdfModelUpdateRootTransforms(model, (s8)sdfCurrentBufferIndex);
 }
 
-/* Store four message words, then notify the consumer of the second word. */
-void sdfStoreMessageWordsAndNotifyConsumer(u32 *arg0, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4) {
-    arg0[3] = arg4;
-    *arg0 = arg1;
-    arg0[2] = arg3;
-    arg0[1] = (s32)arg2;
-    sdfInstallPoolNodeReleaseCallbacks(arg2);
+/* Store the message words and install release callbacks on its work pointer. */
+void sdfStoreMessageWordsAndNotifyConsumer(u32 *message, u32 firstWord, u32 work, u32 thirdWord,
+                                    u32 fourthWord) {
+    message[3] = fourthWord;
+    *message = firstWord;
+    message[2] = thirdWord;
+    message[1] = (s32)work;
+    sdfInstallPoolNodeReleaseCallbacks(work);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331B68);
