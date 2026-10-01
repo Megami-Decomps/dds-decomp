@@ -1,5 +1,16 @@
 #include "common.h"
 
+/* Object record reached through an owned-handle lookup; the linked node sits
+   at +0x14. */
+typedef struct StageNodeRef {
+    u8 pad00[0x14];
+    void *node; /* 0x14 */
+} StageNodeRef;
+
+extern void *dds3GetObjectOwnedHandle(void *);
+extern void dds3SetSlotKey(void *, void *);
+extern void dds3ReplaceObjectResource(void *);
+
 s32 dds3GetWorldSecondaryObject(void);
 void dds3DestroyWorldNode(s32 ctx);
 s32 dds3GetSlot1Data(void);
@@ -57,4 +68,23 @@ INCLUDE_ASM(const s32, "event/evtStage", func_00220298);
 
 INCLUDE_ASM(const s32, "event/evtStage", func_00220300);
 
-INCLUDE_ASM(const s32, "event/evtStage", func_00220340);
+/* Attach the object to the node its owned handle points at. */
+s32 func_00220340(void *object, void *arg1) {
+    StageNodeRef *ref;
+    void *node;
+
+    if (object == NULL) {
+        return 0;
+    }
+    ref = (StageNodeRef *)dds3GetObjectOwnedHandle(arg1);
+    if (ref == NULL) {
+        return 0;
+    }
+    node = ref->node;
+    if (node == NULL) {
+        return 0;
+    }
+    dds3SetSlotKey(node, object);
+    dds3ReplaceObjectResource(node);
+    return 1;
+}
