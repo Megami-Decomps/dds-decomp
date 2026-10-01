@@ -323,6 +323,27 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   has a longer chain and is emitted first regardless of order, and moving a
   statement also changes the live ranges seen by global alloc (sched1 runs
   before it), so callee-saved assignments can shift (DDS1 `func_00183EE0`).
+- Reading the scheduler: `tools/cc.sh -DSKIP_ASM -dS -fsched-verbose=5 file.c -o x.o`
+  (compile the unit copy outside `src/`, so the dump files stay in its
+  directory; `-dR` for sched2) writes `file.c.NN.sched`/`.sched2` with, per
+  function, the dependence table (`prio`, `cost`, forward dependents) and
+  every `Ready list (t = N)` with the insn picked. The list is sorted so the
+  LAST entry is issued first. Ties on priority and dependent count keep the
+  previous pass's order (sched2 sees sched1's output), which is why two
+  independent stores come out in an order unrelated to the source once their
+  operand chains differ in length. An insn with an alias-set conflict against
+  an earlier store (e.g. a `u32` field store after a struct copy that ends in a
+  `u32` word) gets an anti-dependence on it and becomes ready later than a
+  float-field store, so it is emitted after it (DDS1 `func_00183EE0`).
+- The member types of a block-copied struct decide which later stores may be
+  hoisted above the copy: gcc gives the struct copy the struct's alias set, and a
+  later store to a field whose type occurs inside that struct is ordered after
+  the copy. `typedef struct { u32 word[7]; } Head;` made the `u32 color` store
+  wait for the copy and come out after the float `scale` store, while retail has
+  `sw color` first; declaring the head as `f32 word[7]` (the copy is still
+  `ldl/ldr`) lets the integer store go first and matches (DDS1 `func_00183EE0`,
+  DDS2 `func_0018BB38`). When two heap stores come out in the wrong order, try
+  the other scalar type for the copied block.
 
 ## Pointer and loop addressing
 
