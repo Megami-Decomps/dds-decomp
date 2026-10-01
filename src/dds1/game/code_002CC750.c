@@ -294,7 +294,15 @@ u32 sdfSetFlagBySlotId(u8 *work, u32 id) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyTestProfileFlag0);
+s32 ptyTestProfileFlag0(s32 work, u16 id) {
+    u32 word;
+    u32 shift;
+    u32 *flags;
+
+    prfDecodeFlagPair(id, &word, &shift);
+    flags = (u32 *)datGameState;
+    return (flags[0x2e9f0 / 4 + word + ((ScrVmOperand *)work)->h04 * 7] & (1 << shift)) != 0;
+}
 
 s32 scrCheckStateBits(ScrVmOperand *work) {
     u32 index = 0;

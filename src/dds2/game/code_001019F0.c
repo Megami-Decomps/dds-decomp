@@ -8,7 +8,32 @@ extern char D_00435C18[];
 extern void *func_00101740(char *);
 extern u32 kwlnTaskGetUserValue(void *);
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_001019F0);
+typedef struct KwlnLinkNode {
+    u8 unk00[0x44];              /* 0x0 */
+    struct KwlnLinkNode *next;   /* 0x44: chain head */
+    struct KwlnLinkNode *first;  /* 0x48 */
+    struct KwlnLinkNode *link;   /* 0x4C: intrusive link */
+} KwlnLinkNode;
+
+void func_001019F0(KwlnLinkNode *node) {
+    KwlnLinkNode *head = node->next;
+
+    if (head == 0) {
+        return;
+    }
+    if (head->first == node) {
+        head->first = node->link;
+    } else {
+        KwlnLinkNode *prev = head->first;
+
+        while (prev->link != node) {
+            prev = prev->link;
+        }
+        prev->link = node->link;
+    }
+    node->next = 0;
+    node->link = 0;
+}
 
 void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
     func_00100F48(1, object, mask, scope);
