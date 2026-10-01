@@ -48,7 +48,7 @@ extern u32 sdfGetUniqueChunkValue();
 extern s32 mdlGetNodeRefHalf();
 
 /* Event work layout overlaps event/evtUnitManager's EvtUnit at
- * value, flags, and unkBC. */
+ * value, flags, and the field at +0xBC. */
 typedef struct EvtUnit {
     u8 pad00[0x04];     /* 0x00 */
     s32 objectId;       /* 0x04: returned to event scripts */
@@ -66,15 +66,15 @@ typedef struct EvtUnit {
     f32 pathSpeed;      /* 0xA4: signed path speed */
     u32 flags;          /* 0xA8 */
     s16 mode;           /* 0xAC */
-    s16 unkAE;          /* 0xAE */
-    s16 unkB0;          /* 0xB0 */
-    s16 unkB2;          /* 0xB2 */
+    s16 transitionSourceKind; /* 0xAE */
+    s16 motionSubmode; /* 0xB0: motion/path submode */
+    s16 motionTicks;    /* 0xB2: elapsed timed-motion ticks */
     s16 frameCount;      /* 0xB4: transition duration in frames */
     s16 unkB6;          /* 0xB6 */
     u8 padB8[0x04];     /* 0xB8 */
-    u16 unkBC;          /* 0xBC */
-    s16 unkBE;          /* 0xBE */
-    s16 unkC0;          /* 0xC0 */
+    u16 scriptUnitValue; /* 0xBC: set by the script unit-value command */
+    s16 statePairFirst; /* 0xBE: first world-unit state value */
+    s16 statePairSecond; /* 0xC0: second world-unit state value */
     u8 padC2[0x2E];     /* 0xC2 */
     s16 tableValues[12]; /* 0xF0: script-indexed entries */
     s16 unk108[12];     /* 0x108 */
@@ -326,7 +326,7 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
         work->frameCount = frames;
         work->unkB6 = 0;
         work->unk94 = 0;
-        work->unkB2 = 0;
+        work->motionTicks = 0;
     }
 }
 
@@ -345,15 +345,15 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
     s128 *destination = &work->vector;
 
-    work->unkB0 = mode;
+    work->motionSubmode = mode;
     work->mode = 1;
-    work->unkAE = 0;
+    work->transitionSourceKind = 0;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(destination, vector);
     work->frameCount = frames;
     work->unkB6 = valueB6;
     work->unk94 = value94;
-    work->unkB2 = 0;
+    work->motionTicks = 0;
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
@@ -363,7 +363,7 @@ void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 object
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
         evtBeginUnitVectorTransition(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
-        work->unkAE = 1;
+        work->transitionSourceKind = 1;
         work->linkedUnit = worldUnit;
     }
 }
@@ -392,11 +392,11 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     switch (mode) {
     case 0:
-        work->unkB0 = 0;
+        work->motionSubmode = 0;
         work->flags &= ~2;
         break;
     case 1:
-        work->unkB0 = 3;
+        work->motionSubmode = 3;
         work->flags |= 2;
         break;
     }
@@ -423,14 +423,14 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         break;
     }
     work->mode = 1;
-    work->unkAE = 2;
+    work->transitionSourceKind = 2;
     work->linkedUnit = pathSource;
     func_001171A0(path);
     VU0_STORE_VF($vf10, &work->vector);
     work->frameCount = frames;
     work->unkB6 = valueB6;
     work->unk94 = 0;
-    work->unkB2 = 0;
+    work->motionTicks = 0;
 }
 
 s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
@@ -438,7 +438,7 @@ s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
 
     if (value != 0) {
         eventUnit->unk94 = value;
-        eventUnit->unkB2 = 0;
+        eventUnit->motionTicks = 0;
         eventUnit->mode = 4;
         result = 1;
     }
@@ -1037,7 +1037,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkB2 = 0;
+    unit->motionTicks = 0;
     {
         s32 mode = scrReadIntParameter(2);
         s32 objectId = scrReadIntParameter(1);
@@ -1058,7 +1058,7 @@ u32 evtOpStartUnitPathFollow(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkB2 = 0;
+    unit->motionTicks = 0;
     {
         s32 objectId = scrReadIntParameter(1);
         s32 frames = scrReadIntParameter(5);
@@ -1089,6 +1089,7 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
     return 1;
 }
 
+/* Store the script-supplied value for the selected event unit. */
 u32 evtCommandSetUnitValue(void) {
     s32 id;
     EvtUnit *unit;
@@ -1098,10 +1099,11 @@ u32 evtCommandSetUnitValue(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBC = scrReadIntParameter(1);
+    unit->scriptUnitValue = scrReadIntParameter(1);
     return 1;
 }
 
+/* Store the two script-supplied world-unit state values. */
 u32 evtCmdSetWorldUnitStatePair(void) {
     s32 id;
     EvtUnit *unit;
@@ -1111,8 +1113,8 @@ u32 evtCmdSetWorldUnitStatePair(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkBE = scrReadIntParameter(1);
-    unit->unkC0 = scrReadIntParameter(2);
+    unit->statePairFirst = scrReadIntParameter(1);
+    unit->statePairSecond = scrReadIntParameter(2);
     return 1;
 }
 
@@ -1141,7 +1143,7 @@ u32 evtOpAttachUnitToWorldObject(void) {
     if (unit == NULL) {
         return 1;
     }
-    unit->unkB2 = 0;
+    unit->motionTicks = 0;
     objectId = scrReadIntParameter(1);
     frames = scrReadIntParameter(2);
     evtAttachSecondaryWorldUnit(unit, objectId, frames);

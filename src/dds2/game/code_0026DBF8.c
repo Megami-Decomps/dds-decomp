@@ -234,7 +234,7 @@ typedef struct MantraSourceEntry {
 typedef struct {
     s32 value;      /* 0x00 */
     u8 pad04[8];
-    u32 unk0C;      /* 0x0C */
+    u32 slotFlags;      /* 0x0C: bit 5 marks this mantra source slot active */
     u8 pad10[4];
 } MnuSourceSlot;
 
@@ -413,7 +413,7 @@ s32 mnuGetMantraSourceValue(u16 index) {
 
     if (entry->flags & 0x20) {
         slot = 0;
-    } else if (entry->slot[0].unk0C & 0x20) {
+    } else if (entry->slot[0].slotFlags & 0x20) {
         slot = 1;
     } else {
         return result;
