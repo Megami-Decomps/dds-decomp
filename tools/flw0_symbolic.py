@@ -131,6 +131,7 @@ def _render_instruction(
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[int, str],
     message_symbols: tuple[str | None, ...],
+    selection_symbols: tuple[str | None, ...],
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -146,6 +147,14 @@ def _render_instruction(
     )
     if message_symbol is not None:
         return f"  PUSHMSG {message_symbol}", pc + 1
+    selection_symbol = flw0._selection_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+        selection_symbols,
+    )
+    if selection_symbol is not None:
+        return f"  PUSHSELECT {selection_symbol}", pc + 1
     event_symbol = flw0._event_push_symbol(
         raw,
         words[pc + 1].raw if pc + 1 < len(words) else None,
@@ -203,6 +212,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     )
     message_data = script.section_bytes(script.sections[3])
     message_symbols = flw0._message_symbols(message_data)[0]
+    selection_symbols = flw0._selection_symbols(message_data)[0]
     if message_data:
         try:
             message_lines = msg1.render(message_data)
@@ -261,6 +271,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
             command_profile,
             string_symbols,
             message_symbols,
+            selection_symbols,
         )
         lines.append(instruction)
         pc = next_pc
@@ -330,6 +341,7 @@ def _parse_code(
     command_profile: flw0_profiles.CommandProfile | None,
     string_symbols: dict[str, int],
     message_symbols: dict[str, int],
+    selection_symbols: dict[str, int],
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
@@ -359,6 +371,20 @@ def _parse_code(
                 )
             words.append(
                 (message_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
+            )
+            continue
+        if mnemonic == "PUSHSELECT":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHSELECT takes one symbol"
+                )
+            symbol = tokens[1]
+            if symbol not in selection_symbols:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown selection {symbol!r}"
+                )
+            words.append(
+                (selection_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
             )
             continue
         if mnemonic == "PUSHEVENT":
@@ -596,6 +622,7 @@ def parse(text: str) -> flw0.Flw0File:
     else:
         message_data = _parse_raw_block(blocks["messages"])
     message_symbols = flw0._message_symbols(message_data)[1]
+    selection_symbols = flw0._selection_symbols(message_data)[1]
     code, labels = _parse_code(
         blocks["code"],
         procedures,
@@ -603,6 +630,7 @@ def parse(text: str) -> flw0.Flw0File:
         command_profile,
         string_symbols,
         message_symbols,
+        selection_symbols,
     )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
