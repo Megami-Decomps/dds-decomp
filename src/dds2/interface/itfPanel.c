@@ -1,14 +1,15 @@
 #include "common.h"
 #include "eff.h"
 
-extern void func_003297C8(void *arg0);
+extern void func_003297C8(void *resource);
 
-void itfPanelReleasePrimitiveResources(EffPrim *arg0) {
-    if (arg0 != NULL) {
-        if (arg0->recordCount != 0) {
-            func_003297C8(arg0->unk4);
+/* Release the resources held by the primitive's two resource slots. */
+void itfPanelReleasePrimitiveResources(EffPrim *primitive) {
+    if (primitive != NULL) {
+        if (primitive->recordCount != 0) {
+            func_003297C8(primitive->unk4);
         }
-        func_003297C8(arg0->unk0);
+        func_003297C8(primitive->unk0);
     }
 }
 
@@ -77,11 +78,11 @@ extern void *sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(s32);
 extern void itfAppendGsPanelStatePacket(s32);
 
-s32 itfBuildAndSubmitPanelPacket(PanelDefinition *panel, s32 arg1) {
+s32 itfBuildAndSubmitPanelPacket(PanelDefinition *panel, s32 owner) {
     s32 work = sdfAllocPacketAligned(0x20);
 
     sdfInitPacketList(work);
     itfAppendGsPanelStatePacket(work);
     itfPanelDispatchHandler(panel, work);
-    return ((s32 (*)(s32, s32))*(u32 *)(arg1 + 0x10))(arg1, work);
+    return ((s32 (*)(s32, s32))*(u32 *)(owner + 0x10))(owner, work);
 }
