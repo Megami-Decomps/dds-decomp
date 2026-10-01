@@ -1,6 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
-#include "btl.h"
+#include "btl_state.h"
 #include "ee_mmi.h"
 
 extern s32 *btlFindGroupedEntity();
@@ -72,7 +72,6 @@ extern void func_003014F0(char *, const char *, const char *, s32);
 
 extern s32 func_001A17F0(void);
 
-struct BattleModelEntry;
 
 
 extern s32 func_0020DC38();

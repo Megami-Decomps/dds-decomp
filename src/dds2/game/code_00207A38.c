@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -23,31 +23,7 @@ typedef struct BtnSurface {
     void (*submit)(struct BtnSurface *, void *);
 } BtnSurface;
 
-typedef struct BtlState {
-    u8 unk_000[0x218];
-    u32 flags; /* 0x218 */
-    u8 pad21C[0x30];
-    BtlUnit *units;
-    u8 unk_250[0x24];
-    u32 field274;
-    u8 pad278[8];
-    u16 field280;
-    u8 pad282[2];
-    u8 pad284[0x20];
-    s32 field2A4;
-    u8 pad2A8[0x18];
-    BtlList *list;
-    BtlList *taskList; /* 0x2C4: source list for spawned actor tasks */
-    s32 slot;
-    s32 boundTask; /* 0x2CC */
-    u8 pad2D0[0x218];
-    u32 buttonTextureHandle; /* 0x4E8: retained until the battle UI releases it */
-} BtlState;
 
-typedef struct BtlWorkList {
-    u8 pad0[0x24C];
-    BtlUnit *unitList;
-} BtlWorkList;
 
 typedef struct BtlCommandCtx {
     u8 pad00[0xC];
@@ -557,16 +533,16 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_00208BF0);
 
 void btlFlagAllUnitsDefeatCandidate(void) {
     BtlUnit *unit;
-    BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
-    for (unit = work->unitList; unit != NULL; unit = unit->nextActor) {
+    BtlState *work = (BtlState *)func_001AA6F8();
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
         btlFlagUnitDefeatCandidate((s32)unit);
     }
 }
 
 void btlClearAllUnitDefeatCandidates(void) {
     BtlUnit *unit;
-    BtlWorkList *work = (BtlWorkList *)func_001AA6F8();
-    for (unit = work->unitList; unit != NULL; unit = unit->nextActor) {
+    BtlState *work = (BtlState *)func_001AA6F8();
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
         btlClearUnitDefeatCandidate((s32)unit);
     }
 }
@@ -622,8 +598,8 @@ void btlClearActorUnitDefeatCandidates(s32 actor) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00208F78);
-
 INCLUDE_ASM(const s32, "game/code_00207A38", func_00209078);
+
 
 s32 btlCountActiveUnitsWithFlags(s32 mask) {
     BtlUnit *unit;
@@ -1061,8 +1037,8 @@ u32 btlScriptSetBattleWorkParameter(void) {
     battle = func_001AA6F8();
     func_0010D8D0();
     value = scrReadIntParameter(0);
-    *(u8 *)(battle + 0x282) = 4;
-    ((BtlState *)battle)->field2A4 = value;
+    ((BtlState *)battle)->requestMode = 4;
+    ((BtlState *)battle)->requestArgument = value;
     return 1;
 }
 
@@ -2013,7 +1989,7 @@ u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
     battle = func_001AA6F8();
-    scrSetIntegerReturnValue(((BtlState *)battle)->field274);
+    scrSetIntegerReturnValue(((BtlState *)battle)->turnCount);
     return 1;
 }
 
@@ -2053,7 +2029,7 @@ u32 func_0020C5C0(void) {
     s32 battle;
 
     battle = func_001AA6F8();
-    scrSetIntegerReturnValue(((BtlState *)battle)->field280);
+    scrSetIntegerReturnValue(((BtlState *)battle)->phase);
     return 1;
 }
 
@@ -2301,7 +2277,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
     s32 task;
     s32 window;
 
-    task = scrCreateTaskForProcessId(((BtlState *)battle)->taskList->count - 1, D_00435E7C, option);
+    task = scrCreateTaskForProcessId(((BtlList *)((BtlState *)battle)->scriptOwner)->count - 1, D_00435E7C, option);
     scrSetCurrentActor(task, actor);
     window = *(s32 *)(kwlnTaskGetUserValue(task) + 0xCC);
     if (window >= 0) {
@@ -2313,7 +2289,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
         }
         func_001A45C0(window, 0, ((BtlUnit *)unit)->mode, width);
     }
-    func_00101968((s32)((BtlState *)battle)->taskList, task);
+    func_00101968((s32)((BtlState *)battle)->scriptOwner, task);
     ((BtlState *)battle)->boundTask = task;
 }
 
@@ -2346,7 +2322,7 @@ void func_0020CE70(void) {
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     s32 state = func_001AA6F8();
-    if ((((BtlState *)state)->flags & 0x40000000) == 0) {
+    if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {
             if ((((BtlUnit *)actor)->flags & 2) != 0) {

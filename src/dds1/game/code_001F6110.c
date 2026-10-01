@@ -1,5 +1,5 @@
 #include "common.h"
-#include "btl.h"
+#include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -72,27 +72,6 @@ typedef struct BtlList {
     s32 count;
 } BtlList;
 
-typedef struct BtlState {
-    u8 unk_000[0x1F4];
-    u32 battleFlags; /* 0x1F4 */
-    u8 unk_1F8[0x30];
-    BtlUnit *units;
-    u8 unk_22C[0x24];
-    u32 value250; /* 0x250: queried by a battle script command */
-    u8 unk_254[8];
-    u16 value25C; /* 0x25C: queried by a battle script command */
-    u8 mode25E;   /* 0x25E */
-    u8 unk_25F[0x21];
-    s32 argument280; /* 0x280 */
-    u8 unk_284[0x18];
-    BtlList *list;
-    u8 unk_2A0[4];
-    s32 slot;
-    u8 unk_2A8[0x20C];
-    u32 buttonTextureHandle; /* 0x4B4: retained until battle UI releases it */
-    u8 unk_4B8[0x138];
-    void (*updateCallback)(void); /* 0x5F0 */
-} BtlState;
 
 typedef struct BtlCmdCtx {
     u8 unk_00[0xC];
@@ -946,8 +925,8 @@ u32 btlScriptSetBattleWorkParameter(void) {
     battle = func_001A17F0();
     func_0010D6A8();
     value = scrReadIntParameter(0);
-    ((BtlState *)battle)->mode25E = 4;
-    ((BtlState *)battle)->argument280 = value;
+    ((BtlState *)battle)->requestMode = 4;
+    ((BtlState *)battle)->requestArgument = value;
     return 1;
 }
 
@@ -1727,7 +1706,7 @@ u32 btlScriptReturnWorkParameter(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    scrSetIntegerReturnValue(((BtlState *)battle)->value250);
+    scrSetIntegerReturnValue(((BtlState *)battle)->turnCount);
     return 1;
 }
 
@@ -1767,7 +1746,7 @@ u32 func_001FA5A8(void) {
     s32 battle;
 
     battle = func_001A17F0();
-    scrSetIntegerReturnValue(((BtlState *)battle)->value25C);
+    scrSetIntegerReturnValue(((BtlState *)battle)->phase);
     return 1;
 }
 
@@ -1998,7 +1977,7 @@ extern s32 D_003BAAA8;
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     BtlState *state = (BtlState *)func_001A17F0();
-    s32 slot = scrCreateTaskForProcessId(state->list->count - 1, D_003BAAA8, taskArg);
+    s32 slot = scrCreateTaskForProcessId(((BtlList *)state->scriptOwner)->count - 1, D_003BAAA8, taskArg);
     s32 handle;
     scrSetCurrentActor(slot, actor);
     handle = *(s32 *)((u8 *)kwlnTaskGetUserValue(slot) + 0xCC);
@@ -2006,8 +1985,8 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
         BtlUnit *unit = actor->unit;
         func_0019C590(handle, 0, unit->mode, (unit->statBits & 0x20) ? 1 : 2);
     }
-    func_00101A80(state->list, slot);
-    state->slot = slot;
+    func_00101A80(state->scriptOwner, slot);
+    state->boundTask = slot;
 }
 
 
