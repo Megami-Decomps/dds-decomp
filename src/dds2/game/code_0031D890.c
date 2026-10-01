@@ -26,7 +26,28 @@ typedef struct CompactSlotPool {
     s32 count;
 } CompactSlotPool;
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031D890);
+extern u32 func_003292A8(s32 size);
+extern void *sdfMemoryGetBlockAddress(u32 handle);
+extern void evtPrintDeveloperConsoleMessage(char *text, s32 value);
+
+typedef struct SpriteWorkPool {
+    u32 handle;
+    u8 *items;
+    s32 count;
+} SpriteWorkPool;
+
+/* Sprite-number work pool: count 0x14-byte items plus a 0xC-byte header. */
+u32 func_0031D890(u32 count) {
+    u32 size = count * 0x14 + 0xC;
+    u32 handle = func_003292A8(size);
+    SpriteWorkPool *pool = (SpriteWorkPool *)sdfMemoryGetBlockAddress(handle);
+    memset(pool, 0, size);
+    pool->handle = handle;
+    pool->count = count;
+    pool->items = (u8 *)pool + 0xC;
+    evtPrintDeveloperConsoleMessage("Sprite Num Work Crate Size[%d]\n", size);
+    return (u32)pool;
+}
 
 void func_0031D928(u32 *sprite) {
     func_003297C8(*sprite);

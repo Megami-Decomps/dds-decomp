@@ -103,6 +103,8 @@ typedef struct Cb3714C {
 
 extern Cb3714C D_003B0044[];
 
+extern Cb3714C D_003B0048[];
+
 extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern u8 D_00380828[];
@@ -114,6 +116,54 @@ extern EffDispatchEntry D_003B01B8[];
 extern void sdfReleaseChipBlock(void *p);
 
 extern EffDispatchEntry D_003B01B4[];
+
+extern u32 func_003292A8(s32 size);
+extern u8 *sdfResourceRetainAddress(u32 handle);
+extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
+extern void func_00164C68(void *system, u32 value);
+extern void func_00164AE8(void *system, void *a, void *b, void *c);
+
+/* Parameter head (0x4C bytes) copied verbatim into the work. */
+typedef struct {
+    u8 pad00[0x10];
+    u16 systemParam;    /* 0x10 */
+    u8 pad12[2];
+    u32 count;          /* 0x14 number of cells */
+    u8 pad18[4];
+    f32 scaledFirst;    /* 0x1C */
+    f32 scaledSecond;   /* 0x20 */
+    f32 rangeF24;       /* 0x24 */
+    u32 spreadA;        /* 0x28 modulus of the first cell counter */
+    u32 spreadB;        /* 0x2C modulus of the second cell counter */
+    u16 perCell;        /* 0x30 */
+    u8 pad32[0x04];
+    void *unk38;        /* 0x38 first dispatch argument */
+    u32 pad3C;
+    void *dispatchArg;  /* 0x40 second dispatch argument */
+    u32 pad44;
+    void *unk48;        /* 0x48 third dispatch argument */
+} EffThunderHead4C;
+
+typedef struct {
+    u32 unk00;
+    u32 unk04;
+    f32 dirA[3];        /* 0x08 */
+    f32 dirB[3];        /* 0x14 */
+    f32 f20;            /* 0x20 */
+    f32 f24;            /* 0x24 */
+    u32 unk28;
+} EffThunderCell2C; /* 0x2C */
+
+typedef struct {
+    EffThunderHead4C head;
+    EffThunderCell2C *cells; /* 0x4C */
+    u32 color;          /* 0x50 */
+    f32 baseFirst;      /* 0x54 */
+    f32 baseSecond;     /* 0x58 */
+    void *system;       /* 0x5C */
+    u32 handle;         /* 0x60 */
+} EffThunderWork4C; /* 0x64 */
 
 INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A100);
 
@@ -140,7 +190,10 @@ EffParamWork *effParamWorkCreate(u16 id, void *data) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016A620);
+void func_0016A620(EffParamWork *work) {
+    D_003B0048[work->id].cb(work->data);
+    sdfReleaseChipBlock(work);
+}
 
 /* Invoke the kind-specific callback on this parameter block. */
 void effParamWorkInvokeCallback(EffParamWork *work) {
@@ -395,7 +448,29 @@ EffParamWork *effParamCreateFromTable(EffParamWork *work, s32 index) {
     return effParamWorkCreate(id, data);
 }
 
-INCLUDE_ASM(const s32, "game/code_0016A100", func_0016AF38);
+/* Second thunder effect: the cell sub-system is dispatched with three head
+ * pointers and a perCell group divisor of four. */
+EffThunderWork4C *func_0016AF38(EffThunderHead4C *src) {
+    u32 handle = func_003292A8(src->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(handle);
+    u32 i;
+
+    work->head = *src;
+    work->cells = (EffThunderCell2C *)(work + 1);
+    work->baseFirst = src->scaledFirst;
+    work->baseSecond = src->scaledSecond;
+    work->handle = handle;
+    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, 4);
+    func_00164AE8(work->system, work->head.unk38, work->head.dispatchArg, work->head.unk48);
+    func_00164C68(work->system, work->head.systemParam);
+    for (i = 0; i < work->head.count; i++) {
+        work->cells[i].unk00 = 0;
+        work->cells[i].unk04 = 0;
+        work->cells[i].unk28 = 0;
+    }
+    work->color = 0x80808080;
+    return work;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0016A100", D_00436434);
 

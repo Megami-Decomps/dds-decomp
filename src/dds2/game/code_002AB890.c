@@ -6,6 +6,8 @@ extern s32 D_00435DD0;
 
 extern s32 kwlnTaskGetUserValue();
 
+extern void func_003297C8(s32);
+
 extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 extern void func_002AAE80(s32);
@@ -93,7 +95,7 @@ void func_002ACB18(u32 arg0) {
     mnuSwitchCampVisualCategory(2, arg0);
 }
 
-void func_002ACB38(void) {
+void func_002ACB38(s32 object) {
 }
 
 u32 func_002ACB40(void) {
@@ -112,7 +114,18 @@ u32 func_002ACB40(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACBF8);
+/* Close the staff selection state: drop the owner's window containers, run
+ * the owner's teardown hook, then close the party's resource menu. */
+s32 func_002ACBF8(void) {
+    s32 context = kwlnTaskGetUserValue();
+    MenuResourceOwner *owner = (MenuResourceOwner *)context;
+    MenuResourceSet *party = owner->resources;
+
+    mnuDestroyResourceOwnerWindowContainers(owner);
+    func_002ACB38(context);
+    func_003297C8(*(s32 *)party);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 

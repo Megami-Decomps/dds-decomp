@@ -211,8 +211,6 @@ void sdfLoadIopModulePair(const char *prefix, s32 group) {
     func_0034EC40();
 }
 
-INCLUDE_ASM(const s32, "game/code_003478C0", func_00348700);
-
 struct SdfTreeItem;
 
 typedef struct SdfTreeNode {
@@ -221,6 +219,36 @@ typedef struct SdfTreeNode {
     struct SdfTreeItem *item;    /* 0x8 */
     s32 balance;                 /* 0xC */
 } SdfTreeNode;
+
+/* Balance-flag rotation on the second link: `node` takes the place under
+ * `a`'s second link; returns the new subtree root. */
+SdfTreeNode *func_00348700(SdfTreeNode *a, SdfTreeNode *node) {
+    SdfTreeNode *root = a;
+    SdfTreeNode *pivot;
+
+    if (root->balance < 0) {
+        pivot = root->second;
+        node->first = pivot->second;
+        root->second = pivot->first;
+        pivot->second = node;
+        pivot->first = root;
+        if (pivot->balance > 0) {
+            node->balance = -1;
+            root->balance = 0;
+        } else {
+            node->balance = 0;
+            root->balance = 1;
+        }
+        pivot->balance = 0;
+    } else {
+        node->balance = 0;
+        node->first = root->second;
+        root->balance = 0;
+        root->second = node;
+        pivot = root;
+    }
+    return pivot;
+}
 
 /* Balance-flag rotation: `node` takes the place under `a`'s first link; returns the new subtree root. */
 SdfTreeNode *sdfRotateBalancedTreeFirstLink(SdfTreeNode *a, SdfTreeNode *node) {
