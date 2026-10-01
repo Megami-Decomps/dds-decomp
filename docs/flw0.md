@@ -434,6 +434,24 @@ An unused value, or a value that reaches a command with an unknown stack
 contract, remains as an explicit `push`. The semantic view therefore removes
 VM mechanics only when a known instruction accounts for the value.
 
+The structured form additionally recognizes the compiler's canonical forward
+branches and natural loops:
+
+```sh
+python3 tools/flw0.py view --structured src/dds1/scripts/battle/nego.bfasm
+```
+
+It emits nested `if`, `else`, and `while` blocks and removes only the branch and
+back-edge instructions owned by those regions. A region is structured only
+when its intervals are properly nested, no procedure or external edge enters
+its interior, `if` arms do not cross into each other, and a loop condition has
+no visible side effect before its test. Other control flow remains as labels
+and gotos inside or beside the recovered blocks.
+
+Across the maintained scripts this recovers 813 DDS1 and 1,263 DDS2 natural
+loops, plus 3,522 and 3,497 conditional regions. Of those conditionals, 1,221
+DDS1 and 1,068 DDS2 regions include a recovered `else` arm.
+
 This is a derived reading aid, not another source format. An unprofiled native
 command is printed numerically and invalidates the inferred stack; later
 self-contained pushes can still form known arguments. Analysis starts at each
