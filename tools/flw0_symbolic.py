@@ -146,6 +146,13 @@ def _render_instruction(
     )
     if message_symbol is not None:
         return f"  PUSHMSG {message_symbol}", pc + 1
+    event_symbol = flw0._event_push_symbol(
+        raw,
+        words[pc + 1].raw if pc + 1 < len(words) else None,
+        command_profile,
+    )
+    if event_symbol is not None:
+        return f"  PUSHEVENT {event_symbol}", pc + 1
     if opcode in flw0._EXTENDED_OPCODES:
         if pc + 1 >= len(words) or operand:
             return f"  WORD 0x{raw:08x}", pc + 1
@@ -353,6 +360,24 @@ def _parse_code(
             words.append(
                 (message_symbols[symbol] << 16) | flw0.OPCODE_IDS["PUSHIS"]
             )
+            continue
+        if mnemonic == "PUSHEVENT":
+            if len(tokens) != 2:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: PUSHEVENT takes one symbol"
+                )
+            if command_profile is None:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: named event target requires a profile"
+                )
+            symbol = tokens[1]
+            event_id = command_profile.events_by_name.get(symbol)
+            if event_id is None:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown {command_profile.name} "
+                    f"event target {symbol!r}"
+                )
+            words.append((event_id << 16) | flw0.OPCODE_IDS["PUSHIS"])
             continue
         if mnemonic == "WORD":
             if len(tokens) != 2:
