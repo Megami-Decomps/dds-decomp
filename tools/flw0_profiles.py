@@ -61,12 +61,16 @@ SHARED_DDS_COMMANDS = (
         0x04A, "ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR", 2, writes_result=False
     ),
     NativeCommand(0x04B, "SET_UNIT_VALUE", 2, writes_result=False),
+    NativeCommand(
+        0x05E, "ACTION_WINDOW_REQUEST_AND_POLL", 1, writes_result=True
+    ),
     NativeCommand(0x060, "RESTORE_CAMERA_NODE_MODE", 0, writes_result=False),
     NativeCommand(0x061, "RELEASE_CURRENT_OBJECT", 0, writes_result=False),
     NativeCommand(0x066, "CALL_EVENT", 1, writes_result=False),
     NativeCommand(0x068, "READ_CURRENT_WORLD_OBJECT_ID", 0, writes_result=True),
     NativeCommand(0x069, "CLEAR_UNIT_LOW_FLAG", 1, writes_result=False),
     NativeCommand(0x06A, "SET_UNIT_LOW_FLAG", 1, writes_result=False),
+    NativeCommand(0x06B, "MOVE_OBJECT_ALONG_PATH", 3, writes_result=False),
     NativeCommand(0x071, "SET_MESSAGE_WINDOW_GEOMETRY", 3, writes_result=False),
     NativeCommand(0x073, "PREPARE_UNIT_MOTION_STATE", 5, writes_result=False),
     NativeCommand(0x094, "READ_SECONDARY_WORLD_ID_VALUE", 1, writes_result=True),
