@@ -12,44 +12,39 @@ jump_label _1 reserved=0x00000000
 code
 e905_main:
   PROC e905_main
-  PUSHMSG MSG_000
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_000))
+  return
 e905_dead:
   PROC e905_dead
   COMM 0x0161
   PUSHREG
   POPLIX 0x0000
   COMM 0x003e
-  PUSHIS 99
-  PUSHLIX 0x0000
-  EQ
-  IF _2
-  PUSHIS 0
-  COMM 0x01ce
-  PUSHIS 99
-  PUSHIS 266
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 24
-  MINUS
-  PUSHIS 99
-  COMM 0x0198
-  GOTO _1
-_2:
-  PUSHIS 0
-  COMM 0x01ce
-  PUSHIS 100
-  PUSHIS 265
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 24
-  MINUS
-  PUSHIS 100
-  COMM 0x0198
-  GOTO _1
+  if (local_int[0] == 99) {
+    push 0
+    COMM 0x01ce
+    push 99
+    push 266
+    push 1
+    COMM 0x0197
+    push -(24)
+    push 99
+    COMM 0x0198
+  } else {
+  _2:
+    push 0
+    COMM 0x01ce
+    push 100
+    push 265
+    push 1
+    COMM 0x0197
+    push -(24)
+    push 100
+    COMM 0x0198
+    goto _1
+  }
 _1:
-  END
+  return
 end
 
 messages msg1

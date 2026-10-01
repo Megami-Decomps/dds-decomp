@@ -107,50 +107,45 @@ jump_label _70 reserved=0x00000000
 code
 NormalNegoStart:
   PROC NormalNegoStart
-  CALL NegoInit
-  JUMP NegoMain
-  END
+  call NegoInit
+  jump NegoMain
+  return
 FailNegoStart:
   PROC FailNegoStart
-  CALL NegoInit
-  PUSHIS 100
-  POPLIX 0x0000
+  call NegoInit
+  local_int[0] = 100
   COMM 0x00fb
-  PUSHIS 0
-  POPLIX 0x000d
-  PUSHIS 0
-  PUSHIS 1
-  PUSHLIX 0x0002
+  local_int[13] = 0
+  push 0
+  push 1
+  push local_int[2]
   COMM 0x00d7
-  PUSHIS 0
-  PUSHIS 1
-  MINUS
+  push 0
+  push -(1)
   COMM 0x00db
-  PUSHIS 1
-  PUSHLIX 0x0002
+  push 1
+  push local_int[2]
   COMM 0x00db
   COMM 0x00d5
-  PUSHMSG DUMMY_ERROR
-  COMM MESSAGE_REQUEST_AND_POLL
-  CALL NegoExit
-  PUSHIS 0
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_ERROR))
+  call NegoExit
+  push 0
   COMM 0x00fc
-  END
+  return
 NegoInit:
   PROC NegoInit
-  PUSHIS 0
-  POPLIX 0x0000
+  local_int[0] = 0
   COMM 0x00c8
   PUSHREG
   POPLIX 0x0001
   COMM 0x00c9
   PUSHREG
   POPLIX 0x0002
-  PUSHLIX 0x0001
+  push local_int[1]
   COMM 0x00d4
   PUSHREG
   POPLIX 0x0003
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00d4
   PUSHREG
   POPLIX 0x0004
@@ -160,1014 +155,764 @@ NegoInit:
   COMM 0x00d3
   PUSHREG
   POPLIX 0x0006
-  PUSHIS 4
-  PUSHIS 1
-  PUSHLIX 0x0005
-  SUB
-  DIV
-  POPLIX 0x0007
-  PUSHIS 1
-  PUSHIS 4
-  PUSHLIX 0x0007
-  MUL
-  PUSHIS 1
-  PUSHLIX 0x0005
-  SUB
-  SUB
-  ADD
-  POPLIX 0x0007
-  PUSHIS 1
-  POPLIX 0x000d
-  PUSHIS 1
-  PUSHLIX 0x0003
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 1
-  PUSHLIX 0x0004
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  END
+  local_int[7] = (local_int[5] - 1) / 4
+  local_int[7] = local_int[5] - 1 - local_int[7] * 4 + 1
+  local_int[13] = 1
+  SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[3], 1)
+  SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 1)
+  return
 NegoMain:
   PROC NegoMain
   COMM 0x00f4
   PUSHREG
   POPLIX 0x000e
-  PUSHIS 0
-  POPLIX 0x000f
+  local_int[15] = 0
 _1:
-  PUSHLIX 0x000e
-  PUSHLIX 0x000f
-  LT
-  IF _2
-  PUSHLIX 0x000f
-  COMM 0x00f5
-  PUSHREG
-  POPLIX 0x0008
-  PUSHLIX 0x0008
-  PUSHLIX 0x0002
-  NEQ
-  IF _5
-  PUSHIS 1
-  PUSHLIX 0x000e
-  COMM 0x000a
-  PUSHREG
-  SUB
-  POPLIX 0x0010
-  PUSHIS 0
-  PUSHLIX 0x0010
-  EQ
-  IF _3
-  JUMP NegoFailIntr
-  GOTO _3
-_3:
-  GOTO _5
-_5:
-  PUSHIS 1
-  PUSHLIX 0x000f
-  ADD
-  POPLIX 0x000f
-  GOTO _1
+  while (local_int[15] < local_int[14]) {
+    push local_int[15]
+    COMM 0x00f5
+    PUSHREG
+    POPLIX 0x0008
+    if_not (local_int[2] != local_int[8]) goto _5
+    push 1
+    push local_int[14]
+    COMM 0x000a
+    PUSHREG
+    SUB
+    POPLIX 0x0010
+    if (local_int[16] == 0) {
+      jump NegoFailIntr
+    }
+  _3:
+    goto _5
+  _5:
+    local_int[15] = local_int[15] + 1
+  }
 _2:
-  PUSHIS 0
-  PUSHLIX 0x0002
+  push 0
+  push local_int[2]
   COMM 0x00cc
-  PUSHIS 0
-  PUSHLIX 0x0001
+  push 0
+  push local_int[1]
   COMM 0x00cc
-  PUSHIS 16
-  PUSHLIX 0x0001
-  PUSHLIX 0x0002
+  push 16
+  push local_int[1]
+  push local_int[2]
   COMM 0x00e4
-  PUSHIS 16
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
+  push 16
+  push local_int[2]
+  push local_int[1]
   COMM 0x00e4
-  PUSHIS 16
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
+  push 16
+  push local_int[2]
+  push local_int[1]
   COMM 0x00e2
-  PUSHLIX 0x0001
+  push local_int[1]
   COMM 0x00e3
-  PUSHIS 0
-  PUSHIS 1
-  MINUS
+  push 0
+  push -(1)
   COMM 0x00db
-  PUSHIS 1
-  PUSHLIX 0x0001
+  push 1
+  push local_int[1]
   COMM 0x00db
-  PUSHIS 1
-  PUSHLIX 0x0002
+  push 1
+  push local_int[2]
   COMM 0x00db
-  PUSHIS 0
-  PUSHIS 0
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
+  push 0
+  push 0
+  push local_int[2]
+  push local_int[1]
   COMM 0x00d8
-  PUSHLIX 0x0005
+  push local_int[5]
   COMM 0x00e5
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0001
+  push 0
+  push 11
+  push local_int[1]
   COMM 0x00cd
-  PUSHIS 30
-  PUSHIS 1
-  MUL
-  COMM WAIT_FOR_TIMER_LIMIT
+  WAIT_FOR_TIMER_LIMIT(1 * 30)
   COMM 0x00d5
-  PUSHIS 1
-  IF _8
-  CALL NegoStartTest
-  GOTO _7
-_8:
-  PUSHIS 0
-  POPLIX 0x000a
-  CALL NegoFail
-  GOTO _7
+  if (1) {
+    call NegoStartTest
+  } else {
+  _8:
+    local_int[10] = 0
+    call NegoFail
+    goto _7
+  }
 _7:
-  JUMP NegoExit
-  END
+  jump NegoExit
+  return
 NegoExit:
   PROC NegoExit
-  PUSHIS 1
-  PUSHIS 1
-  MINUS
+  push 1
+  push -(1)
   COMM 0x00db
-  PUSHIS 0
-  PUSHLIX 0x000d
-  NEQ
-  IF _9
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x00d9
-  GOTO _9
+  if (local_int[13] != 0) {
+    push 0
+    push 0
+    COMM 0x00d9
+  }
 _9:
   COMM 0x00d6
   COMM 0x00e6
-  PUSHIS 1
-  PUSHLIX 0x0001
+  push 1
+  push local_int[1]
   COMM 0x00db
-  PUSHIS 0
-  PUSHLIX 0x0001
+  push 0
+  push local_int[1]
   COMM 0x00cc
-  PUSHIS 16
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0001
+  push 16
+  push -(1)
+  push local_int[1]
   COMM 0x00e4
-  PUSHIS 16
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0001
+  push 16
+  push -(1)
+  push local_int[1]
   COMM 0x00e2
-  PUSHIS 0
-  PUSHLIX 0x0002
-  GE
-  IF _11
-  PUSHIS 1
-  PUSHLIX 0x0002
-  COMM 0x00db
-  PUSHIS 0
-  PUSHLIX 0x0002
-  COMM 0x00cc
-  PUSHIS 16
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0002
-  COMM 0x00e4
-  GOTO _11
+  if (local_int[2] >= 0) {
+    push 1
+    push local_int[2]
+    COMM 0x00db
+    push 0
+    push local_int[2]
+    COMM 0x00cc
+    push 16
+    push -(1)
+    push local_int[2]
+    COMM 0x00e4
+  }
 _11:
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00f6
-  PUSHLIX 0x0000
+  push local_int[0]
   COMM 0x00d1
-  END
+  return
 NegoFail:
   PROC NegoFail
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x000a
   PUSHREG
   SUB
   POPLIX 0x0011
-  PUSHIS 0
-  PUSHLIX 0x0011
-  EQ
-  IF _14
-  JUMP NegoFailEscape
-  GOTO _13
-_14:
-  JUMP NegoFailAttack
-  GOTO _13
+  if (local_int[17] == 0) {
+    jump NegoFailEscape
+  } else {
+  _14:
+    jump NegoFailAttack
+    goto _13
+  }
 _13:
-  END
+  return
 NegoFailIntr:
   PROC NegoFailIntr
-  PUSHLIX 0x0008
+  push local_int[8]
   COMM 0x00d4
   PUSHREG
   POPLIX 0x0012
-  PUSHIS 1
-  PUSHLIX 0x0012
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 8
-  PUSHIS 5
-  PUSHLIX 0x0008
+  SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[18], 1)
+  push 8
+  push 5
+  push local_int[8]
   COMM 0x00f8
-  PUSHIS 8
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHIS 12
-  PUSHLIX 0x0008
+  WAIT_FOR_TIMER_LIMIT(8)
+  push 0
+  push 12
+  push local_int[8]
   COMM 0x00cd
-  PUSHIS 8
-  PUSHIS 1
-  PUSHLIX 0x0008
+  push 8
+  push 1
+  push local_int[8]
   COMM 0x00d7
   COMM 0x00d5
-  PUSHMSG DUMMY_FAIL
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHLIX 0x0008
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_FAIL))
+  push 0
+  push local_int[8]
   COMM 0x00cc
   COMM 0x00d6
-  PUSHIS 0
-  POPLIX 0x0000
-  PUSHLIX 0x0000
+  local_int[0] = 0
+  push local_int[0]
   COMM 0x00d1
-  END
+  return
 NegoFailAttack:
   PROC NegoFailAttack
-  PUSHIS 0
-  POPLIX 0x0000
+  local_int[0] = 0
   COMM 0x00e6
-  PUSHIS 0
-  PUSHLIX 0x0001
+  push 0
+  push local_int[1]
   COMM 0x00db
-  PUSHIS 0
-  PUSHIS 1
-  PUSHLIX 0x0002
+  push 0
+  push 1
+  push local_int[2]
   COMM 0x00d7
-  PUSHIS 0
-  PUSHIS 12
-  PUSHLIX 0x0002
+  push 0
+  push 12
+  push local_int[2]
   COMM 0x00cd
-  PUSHLIX 0x000a
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(local_int[10])
+  return
 NegoFailEscape:
   PROC NegoFailEscape
-  PUSHIS 3
-  POPLIX 0x0000
+  local_int[0] = 3
   COMM 0x00e6
-  PUSHIS 0
-  PUSHLIX 0x0001
+  push 0
+  push local_int[1]
   COMM 0x00db
-  PUSHIS 0
-  PUSHIS 1
-  PUSHLIX 0x0002
+  push 0
+  push 1
+  push local_int[2]
   COMM 0x00d7
-  PUSHIS 0
-  PUSHIS 12
-  PUSHLIX 0x0002
+  push 0
+  push 12
+  push local_int[2]
   COMM 0x00cd
-  PUSHIS 0
-  PUSHLIX 0x000c
-  EQ
-  IF _16
-  PUSHIS 1
-  POPLIX 0x0013
-  GOTO _15
-_16:
-  PUSHIS 2
-  POPLIX 0x0013
-  GOTO _15
+  if (local_int[12] == 0) {
+    local_int[19] = 1
+  } else {
+  _16:
+    local_int[19] = 2
+    goto _15
+  }
 _15:
-  PUSHLIX 0x0013
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 30
-  PUSHIS 0
-  PUSHLIX 0x0002
+  MESSAGE_REQUEST_AND_POLL(local_int[19])
+  push 30
+  push 0
+  push local_int[2]
   COMM 0x00ce
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00cf
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00f7
-  PUSHIS 1
-  MINUS
-  POPLIX 0x0002
-  END
+  local_int[2] = -(1)
+  return
 NegoStart:
   PROC NegoStart
-  PUSHIS 0
-  POPLIX 0x0014
-  PUSHIS 86
-  PUSHLIX 0x0004
-  EQ
-  IF _20
-  PUSHIS 1
-  PUSHLIX 0x0007
-  EQ
-  IF _18
-  PUSHIS 1
-  POPLIX 0x0014
-  GOTO _17
-_18:
-  PUSHIS 3
-  PUSHLIX 0x0007
-  EQ
-  IF _17
-  PUSHIS 2
-  POPLIX 0x0014
-  GOTO _17
+  local_int[20] = 0
+  if_not (local_int[4] == 86) goto _20
+  if (local_int[7] == 1) {
+    local_int[20] = 1
+  } else {
+  _18:
+    if (local_int[7] == 3) {
+      local_int[20] = 2
+    }
+  }
 _17:
-  GOTO _20
+  goto _20
 _20:
-  PUSHIS 1
-  PUSHLIX 0x0014
-  EQ
-  IF _23
-  JUMP AftyBad
-  GOTO _22
-_23:
-  PUSHIS 0
-  PUSHLIX 0x0014
-  EQ
-  IF _24
-  JUMP AftyNormal
-  GOTO _22
-_24:
-  JUMP AftyPerfect
-  GOTO _22
+  if (local_int[20] == 1) {
+    jump AftyBad
+  } else {
+  _23:
+    if (local_int[20] == 0) {
+      jump AftyNormal
+    } else {
+    _24:
+      jump AftyPerfect
+      goto _22
+    }
+  }
 _22:
-  END
+  return
 NegoStartTest:
   PROC NegoStartTest
-  PUSHIS 0
-  POPLIX 0x0015
-  PUSHLIX 0x0007
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
+  local_int[21] = 0
+  push local_int[7]
+  push local_int[2]
+  push local_int[1]
   COMM 0x00fa
   PUSHREG
   POPLIX 0x0015
-  PUSHIS 0
-  PUSHLIX 0x0015
-  EQ
-  IF _26
-  JUMP AftyNormal
-  GOTO _25
-_26:
-  PUSHIS 0
-  PUSHLIX 0x0015
-  LT
-  IF _27
-  PUSHIS 1
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0015
-  MUL
-  SUB
-  POPLIX 0x000a
-  JUMP AftyBad
-  GOTO _25
-_27:
-  PUSHIS 1
-  PUSHLIX 0x0015
-  SUB
-  POPLIX 0x000a
-  JUMP AftyPerfect
-  GOTO _25
+  if (local_int[21] == 0) {
+    jump AftyNormal
+  } else {
+  _26:
+    if (local_int[21] < 0) {
+      local_int[10] = local_int[21] * -(1) - 1
+      jump AftyBad
+    } else {
+    _27:
+      local_int[10] = local_int[21] - 1
+      jump AftyPerfect
+      goto _25
+    }
+  }
 _25:
-  END
+  return
 AftyBad:
   PROC AftyBad
-  PUSHIS 15
-  PUSHLIX 0x000a
-  ADD
-  POPLIX 0x000a
-  JUMP NegoFailAttack
-  END
+  local_int[10] = local_int[10] + 15
+  jump NegoFailAttack
+  return
 AftyNormal:
   PROC AftyNormal
-  PUSHIS 2
-  PUSHLIX 0x0006
-  EQ
-  IF _29
-  JUMP RemunareMain
-  GOTO _28
-_29:
-  PUSHIS 1
-  PUSHLIX 0x0006
-  PUSHIS 10
-  ADD
-  SUB
-  COMM MESSAGE_REQUEST_AND_POLL
-  JUMP DealMain
-  GOTO _28
+  if (local_int[6] == 2) {
+    jump RemunareMain
+  } else {
+  _29:
+    MESSAGE_REQUEST_AND_POLL(10 + local_int[6] - 1)
+    jump DealMain
+    goto _28
+  }
 _28:
-  END
+  return
 AftyGood:
   PROC AftyGood
-  PUSHIS 0
-  POPLIX 0x0016
-  PUSHIS 0
-  PUSHLIX 0x0016
-  LT
-  IF _31
-  JUMP DealSuccess
-  GOTO _30
-_31:
-  JUMP DealMain
-  GOTO _30
+  local_int[22] = 0
+  if (local_int[22] < 0) {
+    jump DealSuccess
+  } else {
+  _31:
+    jump DealMain
+    goto _30
+  }
 _30:
-  END
+  return
 AftyPerfect:
   PROC AftyPerfect
-  PUSHIS 13
-  PUSHLIX 0x000a
-  ADD
-  POPLIX 0x000a
-  PUSHLIX 0x000a
-  COMM MESSAGE_REQUEST_AND_POLL
-  JUMP RemunareMain
-  END
+  local_int[10] = local_int[10] + 13
+  MESSAGE_REQUEST_AND_POLL(local_int[10])
+  jump RemunareMain
+  return
 DealMain:
   PROC DealMain
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x000a
   PUSHREG
   SUB
   POPLIX 0x0018
-  PUSHIS 0
-  POPLIX 0x000c
-  PUSHIS 0
-  PUSHLIX 0x0018
-  EQ
-  IF _33
-  CALL DealMoney
-  GOTO _32
-_33:
-  PUSHIS 1
-  PUSHLIX 0x0018
-  EQ
-  IF _34
-  CALL DealMag
-  GOTO _32
-_34:
-  CALL DealItem
-  GOTO _32
+  local_int[12] = 0
+  if (local_int[24] == 0) {
+    call DealMoney
+  } else {
+  _33:
+    if (local_int[24] == 1) {
+      call DealMag
+    } else {
+    _34:
+      call DealItem
+      goto _32
+    }
+  }
 _32:
-  PUSHIS 0
-  PUSHLIX 0x000c
-  EQ
-  IF _38
-  PUSHIS 10000
+  if_not (local_int[12] == 0) goto _38
+  push 10000
   COMM 0x000a
   PUSHREG
   POPLIX 0x0017
-  PUSHIS 5000
-  PUSHLIX 0x0017
-  LT
-  IF _36
-  PUSHMSG DUMMY_REQ_CONTINUE
-  COMM MESSAGE_REQUEST_AND_POLL
-  JUMP DealMain
-  GOTO _35
-_36:
-  JUMP DealSuccess
-  GOTO _35
+  if (local_int[23] < 5000) {
+    MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_CONTINUE))
+    jump DealMain
+  } else {
+  _36:
+    jump DealSuccess
+    goto _35
+  }
 _35:
-  GOTO _37
+  goto _37
 _38:
-  JUMP DealFail
-  GOTO _37
+  jump DealFail
+  goto _37
 _37:
-  END
+  return
 DealMoney:
   PROC DealMoney
-  PUSHLIX 0x0004
+  push local_int[4]
   COMM 0x0028
   PUSHREG
   POPLIX 0x000b
-  PUSHIS 1000
-  PUSHLIX 0x000b
-  MUL
-  POPLIX 0x000b
-  PUSHIS 1
-  PUSHLIX 0x0001
+  local_int[11] = local_int[11] * 1000
+  push 1
+  push local_int[1]
   COMM 0x00e7
   PUSHREG
   POPLIX 0x001a
-  PUSHIS 0
-  POPLIX 0x001b
+  local_int[27] = 0
 _39:
-  PUSHIS 1
-  IF _40
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  if_not (1) goto _40
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHIS 0
-  PUSHLIX 0x000b
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x001b
-  PUSHIS 18
-  ADD
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT DUMMY_REQ_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0019
-  PUSHIS 0
-  PUSHLIX 0x0019
-  EQ
-  IF _46
-  PUSHIS 0
-  COMM 0x001f
-  PUSHREG
-  POPLIX 0x001c
-  PUSHLIX 0x000b
-  PUSHLIX 0x001c
-  GE
-  IF _42
-  PUSHLIX 0x000b
-  MINUS
-  COMM 0x001f
-  PUSHIS 0
-  POPLIX 0x000c
-  GOTO _41
-_42:
-  PUSHMSG DUMMY_REQ_EMPTY_MONEY
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 2
-  POPLIX 0x000c
-  GOTO _41
-_41:
-  GOTO _40
-  GOTO _45
-_46:
-  PUSHLIX 0x001b
-  PUSHLIX 0x001a
-  LE
-  IF _44
-  PUSHMSG DUMMY_REQ_FAIL_MONEY
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 1
-  POPLIX 0x000c
-  GOTO _40
-  GOTO _43
-_44:
-  PUSHLIX 0x001b
-  COMM 0x00de
-  PUSHREG
-  POPLIX 0x0008
-  PUSHLIX 0x001b
-  COMM 0x00df
-  PUSHREG
-  POPLIX 0x0009
-  CALL DealMoneyIntr
-  PUSHIS 1
-  PUSHLIX 0x001b
-  ADD
-  POPLIX 0x001b
-  GOTO _43
-_43:
-  GOTO _45
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 0)
+  MESSAGE_REQUEST_AND_POLL(18 + local_int[27])
+  local_int[25] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
+  if (local_int[25] == 0) {
+    push 0
+    COMM 0x001f
+    PUSHREG
+    POPLIX 0x001c
+    if (local_int[28] >= local_int[11]) {
+      push -local_int[11]
+      COMM 0x001f
+      local_int[12] = 0
+    } else {
+    _42:
+      MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_EMPTY_MONEY))
+      local_int[12] = 2
+      goto _41
+    }
+  _41:
+    goto _40
+  } else {
+  _46:
+    if (local_int[26] <= local_int[27]) {
+      MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_FAIL_MONEY))
+      local_int[12] = 1
+      goto _40
+    } else {
+    _44:
+      push local_int[27]
+      COMM 0x00de
+      PUSHREG
+      POPLIX 0x0008
+      push local_int[27]
+      COMM 0x00df
+      PUSHREG
+      POPLIX 0x0009
+      call DealMoneyIntr
+      local_int[27] = local_int[27] + 1
+      goto _43
+    }
+  _43:
+    goto _45
+  }
 _45:
-  GOTO _39
+  goto _39
 _40:
-  END
+  return
 DealMoneyIntr:
   PROC DealMoneyIntr
   COMM 0x00d6
-  PUSHLIX 0x0001
-  PUSHLIX 0x0008
-  NEQ
-  IF _47
-  PUSHLIX 0x0001
-  POPLIX 0x001d
-  COMM 0x00e6
-  PUSHIS 0
-  PUSHLIX 0x0001
-  COMM 0x00cc
-  PUSHIS 16
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0001
-  COMM 0x00e4
-  PUSHIS 16
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0001
-  COMM 0x00e2
-  PUSHLIX 0x0008
-  POPLIX 0x0001
-  PUSHIS 16
-  PUSHLIX 0x0001
-  PUSHLIX 0x0002
-  COMM 0x00e4
-  PUSHIS 1
-  PUSHLIX 0x0001
-  COMM 0x00db
-  PUSHIS 0
-  PUSHLIX 0x0001
-  COMM 0x00cc
-  PUSHIS 16
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
-  COMM 0x00e4
-  PUSHIS 16
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
-  COMM 0x00e2
-  PUSHLIX 0x0001
-  COMM 0x00e3
-  PUSHIS 0
-  PUSHLIX 0x001d
-  COMM 0x00db
-  GOTO _47
+  if (local_int[8] != local_int[1]) {
+    local_int[29] = local_int[1]
+    COMM 0x00e6
+    push 0
+    push local_int[1]
+    COMM 0x00cc
+    push 16
+    push -(1)
+    push local_int[1]
+    COMM 0x00e4
+    push 16
+    push -(1)
+    push local_int[1]
+    COMM 0x00e2
+    local_int[1] = local_int[8]
+    push 16
+    push local_int[1]
+    push local_int[2]
+    COMM 0x00e4
+    push 1
+    push local_int[1]
+    COMM 0x00db
+    push 0
+    push local_int[1]
+    COMM 0x00cc
+    push 16
+    push local_int[2]
+    push local_int[1]
+    COMM 0x00e4
+    push 16
+    push local_int[2]
+    push local_int[1]
+    COMM 0x00e2
+    push local_int[1]
+    COMM 0x00e3
+    push 0
+    push local_int[29]
+    COMM 0x00db
+  }
 _47:
-  PUSHLIX 0x0009
-  POPLIX 0x0005
-  PUSHLIX 0x0005
+  local_int[5] = local_int[9]
+  push local_int[5]
   COMM 0x00e5
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0001
+  push 0
+  push 11
+  push local_int[1]
   COMM 0x00cd
-  PUSHIS 30
-  PUSHIS 1
-  MUL
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  WAIT_FOR_TIMER_LIMIT(1 * 30)
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
   COMM 0x00d5
-  PUSHIS 4113
-  PUSHLIX 0x0009
-  EQ
-  IF _49
-  PUSHIS 2
-  PUSHLIX 0x000b
-  DIV
-  POPLIX 0x000b
-  GOTO _49
+  if (local_int[9] == 4113) {
+    local_int[11] = local_int[11] / 2
+  }
 _49:
-  END
+  return
 DealMag:
   PROC DealMag
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHLIX 0x0004
+  push local_int[4]
   COMM 0x0028
   PUSHREG
   POPLIX 0x000b
-  PUSHIS 0
-  PUSHLIX 0x000b
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHMSG DUMMY_REQ_MAG
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT DUMMY_REQ_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001f
-  PUSHIS 0
-  PUSHLIX 0x001f
-  EQ
-  IF _54
-  PUSHIS 0
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 0)
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_MAG))
+  local_int[31] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
+  if_not (local_int[31] == 0) goto _54
+  push 0
   COMM 0x001f
   PUSHREG
   POPLIX 0x001e
-  PUSHLIX 0x000b
-  PUSHLIX 0x001e
-  GE
-  IF _52
-  PUSHLIX 0x000b
-  MINUS
-  COMM 0x001f
-  PUSHIS 0
-  POPLIX 0x000c
-  GOTO _51
-_52:
-  PUSHMSG DUMMY_REQ_FAIL_MAG
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 2
-  POPLIX 0x000c
-  GOTO _51
+  if (local_int[30] >= local_int[11]) {
+    push -local_int[11]
+    COMM 0x001f
+    local_int[12] = 0
+  } else {
+  _52:
+    MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_FAIL_MAG))
+    local_int[12] = 2
+    goto _51
+  }
 _51:
-  GOTO _53
+  goto _53
 _54:
-  PUSHMSG DUMMY_REQ_FAIL_MAG
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 1
-  POPLIX 0x000c
-  GOTO _53
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_FAIL_MAG))
+  local_int[12] = 1
+  goto _53
 _53:
-  END
+  return
 DealItem:
   PROC DealItem
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHIS 4
+  push 4
   COMM 0x000a
   PUSHREG
   POPLIX 0x000b
-  PUSHIS 3
-  PUSHLIX 0x000b
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHMSG DUMMY_REQ_ITEM
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT DUMMY_REQ_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0021
-  PUSHIS 0
-  PUSHLIX 0x0021
-  EQ
-  IF _58
-  PUSHIS 0
-  PUSHLIX 0x000b
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[11], 3)
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_ITEM))
+  local_int[33] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(DUMMY_REQ_SEL))
+  if_not (local_int[33] == 0) goto _58
+  push 0
+  push local_int[11]
   COMM 0x0070
   PUSHREG
   POPLIX 0x0020
-  PUSHIS 0
-  PUSHLIX 0x0020
-  GT
-  IF _56
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x000b
-  COMM 0x0070
-  PUSHIS 0
-  POPLIX 0x000c
-  GOTO _55
-_56:
-  PUSHMSG DUMMY_REQ_FAIL_ITEM
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 2
-  POPLIX 0x000c
-  GOTO _55
+  if (local_int[32] > 0) {
+    push -(1)
+    push local_int[11]
+    COMM 0x0070
+    local_int[12] = 0
+  } else {
+  _56:
+    MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_FAIL_ITEM))
+    local_int[12] = 2
+    goto _55
+  }
 _55:
-  GOTO _57
+  goto _57
 _58:
-  PUSHMSG DUMMY_REQ_FAIL_ITEM
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 1
-  POPLIX 0x000c
-  GOTO _57
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_REQ_FAIL_ITEM))
+  local_int[12] = 1
+  goto _57
 _57:
-  END
+  return
 DealSuccess:
   PROC DealSuccess
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x000a
   PUSHREG
   SUB
   POPLIX 0x0022
-  PUSHIS 0
-  PUSHLIX 0x0022
-  EQ
-  IF _59
-  JUMP NegoFailEscape
-  GOTO _59
+  if (local_int[34] == 0) {
+    jump NegoFailEscape
+  }
 _59:
-  JUMP RemunareMain
-  END
+  jump RemunareMain
+  return
 DealFail:
   PROC DealFail
-  JUMP RaptureMain
-  END
+  jump RaptureMain
+  return
 RemunareMain:
   PROC RemunareMain
-  PUSHIS 3
-  POPLIX 0x0000
-  PUSHLIX 0x0006
-  POPLIX 0x0023
-  PUSHIS 1
-  PUSHLIX 0x0023
-  EQ
-  IF _62
-  JUMP RemunareJoin
-  GOTO _61
-_62:
-  PUSHIS 2
-  PUSHLIX 0x0023
-  EQ
-  IF _63
-  JUMP RemunareMoneyAndGoods
-  GOTO _61
-_63:
-  JUMP RemunareInfo
-  GOTO _61
+  local_int[0] = 3
+  local_int[35] = local_int[6]
+  if (local_int[35] == 1) {
+    jump RemunareJoin
+  } else {
+  _62:
+    if (local_int[35] == 2) {
+      jump RemunareMoneyAndGoods
+    } else {
+    _63:
+      jump RemunareInfo
+      goto _61
+    }
+  }
 _61:
-  END
+  return
 RemunareJoin:
   PROC RemunareJoin
   COMM 0x00e6
-  PUSHIS 0
-  PUSHLIX 0x0001
+  push 0
+  push local_int[1]
   COMM 0x00db
-  PUSHIS 0
-  PUSHIS 1
-  PUSHLIX 0x0002
+  push 0
+  push 1
+  push local_int[2]
   COMM 0x00d7
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHMSG DUMMY_SUCCESS_INVITE
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 30
-  PUSHIS 0
-  PUSHLIX 0x0002
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_INVITE))
+  push 30
+  push 0
+  push local_int[2]
   COMM 0x00ce
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00cf
-  PUSHLIX 0x0002
+  push local_int[2]
   COMM 0x00d0
-  PUSHIS 1
-  MINUS
-  POPLIX 0x0002
-  END
+  local_int[2] = -(1)
+  return
 RemunareMoneyAndGoods:
   PROC RemunareMoneyAndGoods
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x000a
   PUSHREG
   SUB
   POPLIX 0x0024
-  PUSHIS 0
-  PUSHLIX 0x0024
-  EQ
-  IF _65
-  JUMP RemunareMoney
-  GOTO _64
-_65:
-  PUSHIS 1
-  PUSHLIX 0x0024
-  EQ
-  IF _66
-  JUMP RemunareMag
-  GOTO _64
-_66:
-  JUMP RemunareItem
-  GOTO _64
+  if (local_int[36] == 0) {
+    jump RemunareMoney
+  } else {
+  _65:
+    if (local_int[36] == 1) {
+      jump RemunareMag
+    } else {
+    _66:
+      jump RemunareItem
+      goto _64
+    }
+  }
 _64:
-  END
+  return
 RemunareMoney:
   PROC RemunareMoney
-  PUSHLIX 0x0004
+  push local_int[4]
   COMM 0x0028
   PUSHREG
   POPLIX 0x0025
-  PUSHIS 0
-  PUSHLIX 0x0025
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[37], 0)
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHMSG DUMMY_SUCCESS_MONEY
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_MONEY))
+  return
 RemunareMag:
   PROC RemunareMag
-  PUSHLIX 0x0004
+  push local_int[4]
   COMM 0x0028
   PUSHREG
   POPLIX 0x0026
-  PUSHIS 0
-  PUSHLIX 0x0026
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[38], 0)
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHMSG DUMMY_SUCCESS_MAG
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_MAG))
+  return
 RemunareItem:
   PROC RemunareItem
-  PUSHIS 0
-  PUSHLIX 0x0004
+  push 0
+  push local_int[4]
   COMM 0x0027
   PUSHREG
   POPLIX 0x0027
-  PUSHIS 3
-  PUSHLIX 0x0027
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[39], 3)
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHMSG DUMMY_SUCCESS_ITEM
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_ITEM))
+  return
 RemunareInfo:
   PROC RemunareInfo
-  PUSHIS 0
-  PUSHIS 11
-  PUSHLIX 0x0002
+  push 0
+  push 11
+  push local_int[2]
   COMM 0x00cd
-  PUSHMSG DUMMY_SUCCESS_INFO
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(DUMMY_SUCCESS_INFO))
+  return
 RaptureMain:
   PROC RaptureMain
-  PUSHIS 0
-  POPLIX 0x0000
-  PUSHLIX 0x0006
-  POPLIX 0x0028
-  PUSHIS 1
-  PUSHLIX 0x0028
-  EQ
-  IF _68
-  JUMP RaptureJoin
-  GOTO _67
-_68:
-  PUSHIS 2
-  PUSHLIX 0x0028
-  EQ
-  IF _69
-  JUMP RaptureMoneyAndGoods
-  GOTO _67
-_69:
-  JUMP RaptureInfo
-  GOTO _67
+  local_int[0] = 0
+  local_int[40] = local_int[6]
+  if (local_int[40] == 1) {
+    jump RaptureJoin
+  } else {
+  _68:
+    if (local_int[40] == 2) {
+      jump RaptureMoneyAndGoods
+    } else {
+    _69:
+      jump RaptureInfo
+      goto _67
+    }
+  }
 _67:
-  END
+  return
 RaptureJoin:
   PROC RaptureJoin
-  PUSHIS 37
-  POPLIX 0x000a
-  JUMP NegoFail
-  END
+  local_int[10] = 37
+  jump NegoFail
+  return
 RaptureMoneyAndGoods:
   PROC RaptureMoneyAndGoods
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x000a
   PUSHREG
   SUB
   POPLIX 0x0029
-  PUSHIS 0
-  PUSHLIX 0x0029
-  EQ
-  IF _71
-  JUMP RaptureMoney
-  GOTO _70
-_71:
-  PUSHIS 1
-  PUSHLIX 0x0029
-  EQ
-  IF _72
-  JUMP RaptureMag
-  GOTO _70
-_72:
-  JUMP RaptureItem
-  GOTO _70
+  if (local_int[41] == 0) {
+    jump RaptureMoney
+  } else {
+  _71:
+    if (local_int[41] == 1) {
+      jump RaptureMag
+    } else {
+    _72:
+      jump RaptureItem
+      goto _70
+    }
+  }
 _70:
-  END
+  return
 RaptureMoney:
   PROC RaptureMoney
-  PUSHIS 38
-  POPLIX 0x000a
-  JUMP NegoFail
-  END
+  local_int[10] = 38
+  jump NegoFail
+  return
 RaptureMag:
   PROC RaptureMag
-  PUSHIS 39
-  POPLIX 0x000a
-  JUMP NegoFail
-  END
+  local_int[10] = 39
+  jump NegoFail
+  return
 RaptureItem:
   PROC RaptureItem
-  PUSHIS 40
-  POPLIX 0x000a
-  JUMP NegoFail
-  END
+  local_int[10] = 40
+  jump NegoFail
+  return
 RaptureInfo:
   PROC RaptureInfo
-  PUSHIS 41
-  POPLIX 0x000a
-  JUMP NegoFail
-  END
+  local_int[10] = 41
+  jump NegoFail
+  return
 end
 
 messages msg1

@@ -9,17 +9,14 @@ procedure e710_main reserved=0x00000000
 code
 e710_main:
   PROC e710_main
-  PUSHIS 710
+  push 710
   COMM 0x00c8
-  PUSHIS 16
-  PUSHIS 710
+  push 16
+  push 710
   COMM 0x00ca
-  PUSHIS 1
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 1000
-  COMM WAIT_FOR_TIMER_LIMIT
-  END
+  SCREEN_FADE_B(0, 1)
+  WAIT_FOR_TIMER_LIMIT(1000)
+  return
 end
 
 messages msg1

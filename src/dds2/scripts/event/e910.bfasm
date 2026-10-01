@@ -10,23 +10,21 @@ procedure e910_dead reserved=0x00000000
 code
 e910_main:
   PROC e910_main
-  PUSHMSG MSG_000
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_000))
+  return
 e910_dead:
   PROC e910_dead
   COMM 0x003e
-  PUSHIS 0
+  push 0
   COMM 0x01ce
-  PUSHIS 100
-  PUSHIS 277
-  PUSHIS 1
+  push 100
+  push 277
+  push 1
   COMM 0x0197
-  PUSHIS 24
-  MINUS
-  PUSHIS 100
+  push -(24)
+  push 100
   COMM 0x0198
-  END
+  return
 end
 
 messages msg1

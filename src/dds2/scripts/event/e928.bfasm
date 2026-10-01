@@ -9,9 +9,8 @@ procedure e928_main reserved=0x00000000
 code
 e928_main:
   PROC e928_main
-  PUSHMSG MSG_000
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_000))
+  return
 end
 
 messages msg1

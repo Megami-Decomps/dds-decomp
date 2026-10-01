@@ -11,78 +11,68 @@ procedure e912_dead reserved=0x00000000
 code
 e912_main:
   PROC e912_main
-  PUSHMSG MSG_000
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_000))
+  return
 e912_first:
   PROC e912_first
   COMM 0x003e
-  PUSHIS 1
+  push 1
   COMM 0x01ce
-  PUSHIS 80
-  PUSHIS 283
-  PUSHIS 1
+  push 80
+  push 283
+  push 1
   COMM 0x0197
-  PUSHIS 5
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 18
-  PUSHIS 283
-  PUSHIS 1
+  WAIT_FOR_TIMER_LIMIT(5)
+  push 18
+  push 283
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 317
-  PUSHIS 1
+  push 18
+  push 317
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 318
-  PUSHIS 1
+  push 18
+  push 318
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 319
-  PUSHIS 1
+  push 18
+  push 319
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 320
-  PUSHIS 1
+  push 18
+  push 320
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 321
-  PUSHIS 1
+  push 18
+  push 321
+  push 1
   COMM 0x01b2
-  PUSHIS 18
-  PUSHIS 322
-  PUSHIS 1
+  push 18
+  push 322
+  push 1
   COMM 0x01b2
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 24
-  PUSHIS 1
-  COMM SCREEN_FADE_A
-  PUSHIS 24
-  MINUS
-  PUSHIS 80
+  WAIT_FOR_TIMER_LIMIT(10)
+  SCREEN_FADE_A(1, 24)
+  push -(24)
+  push 80
   COMM 0x0198
   COMM 0x003f
-  END
+  return
 e912_dead:
   PROC e912_dead
   COMM 0x003e
-  PUSHIS 0
+  push 0
   COMM 0x01ce
-  PUSHIS 100
-  PUSHIS 283
-  PUSHIS 1
+  push 100
+  push 283
+  push 1
   COMM 0x0197
-  PUSHIS 13
-  MINUS
-  PUSHIS 100
+  push -(13)
+  push 100
   COMM 0x0198
-  PUSHIS 0
-  PUSHIS 1
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  END
+  SCREEN_FADE_B(1, 0)
+  WAIT_FOR_TIMER_LIMIT(20)
+  return
 end
 
 messages msg1

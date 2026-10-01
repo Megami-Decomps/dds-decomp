@@ -24,352 +24,290 @@ jump_label _14 reserved=0x00000000
 code
 e809_main:
   PROC e809_main
-  PUSHIS 4
+  push 4
   COMM 0x011e
   PUSHREG
   POPLIX 0x0000
-  PUSHIS 5
+  push 5
   COMM 0x011e
   PUSHREG
   POPLIX 0x0001
-  PUSHIS 809
+  push 809
   COMM 0x00c8
-  PUSHIS 3
-  PUSHIS 809
+  push 3
+  push 809
   COMM 0x00ca
-  COMM WAIT_FOR_TIMER_START
+  WAIT_FOR_TIMER_START()
   COMM 0x0075
   PUSHREG
   POPIX 0x000b
-  PUSHF 0x44160000
-  MINUS
-  PUSHF 0x42c80000
-  MINUS
-  PUSHF 0x00000000
-  PUSHIX 0x000b
+  push -float32(600.0, bits=0x44160000)
+  push -float32(100.0, bits=0x42c80000)
+  push float32(0.0, bits=0x00000000)
+  push global_int[11]
   COMM 0x0077
-  PUSHF 0x3f800000
-  PUSHF 0x00000000
-  PUSHF 0x00000000
-  PUSHF 0x00000000
-  PUSHIX 0x000b
+  push float32(1.0, bits=0x3f800000)
+  push float32(0.0, bits=0x00000000)
+  push float32(0.0, bits=0x00000000)
+  push float32(0.0, bits=0x00000000)
+  push global_int[11]
   COMM 0x00da
-  PUSHIX 0x000b
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 0
-  PUSHIS 1
-  PUSHIS 90
+  ADD_EFFECT_UNIT_TO_WORLD(global_int[11])
+  push 0
+  push 1
+  push 90
   COMM 0x0014
-  PUSHIS 100
-  MINUS
-  PUSHIS 0
+  push -(100)
+  push 0
   COMM 0x0048
-  PUSHF 0x3e8f5c29
-  PUSHF 0x3e99999a
-  PUSHF 0x3ef5c28f
-  PUSHIS 0
+  push float32(0.2800000011920929, bits=0x3e8f5c29)
+  push float32(0.30000001192092896, bits=0x3e99999a)
+  push float32(0.47999998927116394, bits=0x3ef5c28f)
+  push 0
   COMM 0x00b4
-  PUSHF 0x3f028f5c
-  MINUS
-  PUSHF 0x3f147ae1
-  PUSHF 0x3f2147ae
-  PUSHIS 0
+  push -float32(0.5099999904632568, bits=0x3f028f5c)
+  push float32(0.5799999833106995, bits=0x3f147ae1)
+  push float32(0.6299999952316284, bits=0x3f2147ae)
+  push 0
   COMM 0x00b5
-  PUSHF 0x3efae148
-  PUSHF 0x3e800000
-  PUSHF 0x3ec28f5c
-  PUSHIS 0
+  push float32(0.49000000953674316, bits=0x3efae148)
+  push float32(0.25, bits=0x3e800000)
+  push float32(0.3799999952316284, bits=0x3ec28f5c)
+  push 0
   COMM 0x00b6
-  PUSHF 0x3e8ccccd
-  PUSHF 0x3e20c49c
-  PUSHF 0x00000000
-  PUSHIS 0
+  push float32(0.2750000059604645, bits=0x3e8ccccd)
+  push float32(0.15700000524520874, bits=0x3e20c49c)
+  push float32(0.0, bits=0x00000000)
+  push 0
   COMM 0x00bb
-  PUSHI 0x00013c82
-  PUSHIS 150
-  PUSHIS 1008
-  PUSHIS 255
-  PUSHIS 0
+  push int32(81026)
+  push 150
+  push 1008
+  push 255
+  push 0
   COMM 0x00bc
-  PUSHIS 0
-  PUSHIS 5
-  PUSHIS 0
+  push 0
+  push 5
+  push 0
   COMM 0x0047
-  PUSHIS 6
-  PUSHIS 809
+  push 6
+  push 809
   COMM 0x00c9
   PUSHREG
   POPIX 0x000c
-  PUSHIX 0x000c
-  COMM SET_UNIT_LOW_FLAG
-  PUSHTYPE5 light03
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIS 40
-  PUSHIX 0x000c
+  SET_UNIT_LOW_FLAG(global_int[12])
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03))
+  push result
+  push 40
+  push global_int[12]
   COMM 0x00c4
-  PUSHTYPE5 light03_MOTION
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 light03_2
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION))
+  push result
+  push string(light03_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   COMM 0x00c6
-  PUSHTYPE5 light03_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_3))
+  push result
   COMM 0x00e8
-  PUSHIS 1
-  MINUS
-  PUSHPROC e809_010_2
-  COMM CREATE_SCRIPT_TASK
-  PUSHREG
-  POPIX 0x000f
+  global_int[15] = CREATE_SCRIPT_TASK(procedure(e809_010_2), -(1))
 _1:
-  PUSHIS 2
+  push 2
   COMM 0x011e
   PUSHREG
   IF _2
-  PUSHIS 1
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _1
+  WAIT_FOR_TIMER_LIMIT(1)
+  goto _1
 _2:
-  PUSHIX 0x000f
-  COMM DESTROY_REGISTERED_TASK
-  PUSHIX 0x000e
+  DESTROY_REGISTERED_TASK(global_int[15])
+  push global_int[14]
   COMM 0x009b
-  PUSHIS 1
+  push 1
   COMM 0x011e
   PUSHREG
   IF _3
-  END
-  GOTO _3
+  return
+  goto _3
 _3:
-  PUSHTYPE5 light04
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIS 30
-  PUSHIX 0x000c
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04))
+  push result
+  push 30
+  push global_int[12]
   COMM 0x00c4
-  PUSHTYPE5 light04_MOTION
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 light04_2
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_MOTION))
+  push result
+  push string(light04_2)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   COMM 0x00c6
-  PUSHTYPE5 light04_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
+  push result
   COMM 0x00e8
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 12
-  PUSHIS 809
+  WAIT_FOR_TIMER_LIMIT(30)
+  push 12
+  push 809
   COMM 0x00d0
   PUSHREG
   POPIX 0x0006
-  PUSHLIX 0x0000
-  PUSHIS 1
-  PUSHIX 0x0006
+  push local_int[0]
+  push 1
+  push global_int[6]
   COMM 0x0168
-  PUSHIS 125
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
-  PUSHF 0x3f6d0e56
-  PUSHF 0x3c23d70a
+  WAIT_FOR_TIMER_LIMIT(125)
+  push 1
+  push float32(0.9259999990463257, bits=0x3f6d0e56)
+  push float32(0.009999999776482582, bits=0x3c23d70a)
   COMM 0x00ea
-  PUSHIS 32
-  PUSHIS 128
-  PUSHIS 128
-  PUSHIS 128
+  push 32
+  push 128
+  push 128
+  push 128
   COMM 0x00eb
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 150
+  push 0
+  push 0
+  push 150
   COMM 0x00ec
-  PUSHIS 5
+  push 5
   COMM 0x00ed
-  PUSHIS 5
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
+  WAIT_FOR_TIMER_LIMIT(5)
+  push 0
   COMM 0x011d
-  PUSHIS 0
+  push 0
   COMM 0x012d
-  PUSHIS 255
-  PUSHIS 255
-  PUSHIS 255
-  PUSHIS 255
+  push 255
+  push 255
+  push 255
+  push 255
   COMM 0x012e
-  PUSHIS 1
+  push 1
   COMM 0x0130
-  PUSHIS 1
+  push 1
   COMM 0x00ee
-  PUSHIX 0x0006
+  push global_int[6]
   COMM 0x009b
-  PUSHIX 0x0007
+  push global_int[7]
   COMM 0x009b
-  PUSHIS 80
+  push 80
   COMM 0x0131
-  PUSHIS 15
-  PUSHIS 809
+  push 15
+  push 809
   COMM 0x00d0
   PUSHREG
   POPIX 0x0008
-  PUSHIS 0
-  PUSHIS 6
+  push 0
+  push 6
   COMM 0x011e
   PUSHREG
-  PUSHIS 0
-  PUSHIX 0x0008
+  push 0
+  push global_int[8]
   COMM 0x009c
-  PUSHLIX 0x0001
-  PUSHIS 1
-  PUSHIX 0x0008
+  push local_int[1]
+  push 1
+  push global_int[8]
   COMM 0x0168
-  PUSHIS 100
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHTYPE5 light03_4
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIS 130
-  PUSHIX 0x000c
+  WAIT_FOR_TIMER_LIMIT(100)
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_4))
+  push result
+  push 130
+  push global_int[12]
   COMM 0x00c4
-  PUSHTYPE5 light03_MOTION_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 light03_5
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION_2))
+  push result
+  push string(light03_5)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
   COMM 0x00c6
-  PUSHTYPE5 light03_6
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_6))
+  push result
   COMM 0x00e8
-  PUSHIS 1
-  MINUS
-  PUSHPROC e809_010_1
-  COMM CREATE_SCRIPT_TASK
-  PUSHREG
-  POPIX 0x000d
-  PUSHIS 80
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
+  global_int[13] = CREATE_SCRIPT_TASK(procedure(e809_010_1), -(1))
+  WAIT_FOR_TIMER_LIMIT(80)
+  push 1
   COMM 0x011d
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
+  WAIT_FOR_TIMER_LIMIT(20)
 _5:
-  PUSHIS 3
+  push 3
   COMM 0x011e
   PUSHREG
   IF _6
-  PUSHIS 1
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _5
+  WAIT_FOR_TIMER_LIMIT(1)
+  goto _5
 _6:
-  PUSHIX 0x000d
-  COMM DESTROY_REGISTERED_TASK
-  PUSHIX 0x0009
+  DESTROY_REGISTERED_TASK(global_int[13])
+  push global_int[9]
   COMM 0x009b
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
+  SCREEN_FADE_B(0, 15)
+  WAIT_FOR_TIMER_LIMIT(15)
   COMM 0x0023
-  END
+  return
 e809_010_1:
   PROC e809_010_1
-  PUSHIS 5
+  push 5
   COMM 0x011e
   PUSHREG
   POPLIX 0x0003
-  PUSHIS 9
-  PUSHIS 809
+  push 9
+  push 809
   COMM 0x00d0
   PUSHREG
   POPIX 0x0009
-  PUSHLIX 0x0003
-  PUSHIS 1
-  PUSHIX 0x0009
+  push local_int[3]
+  push 1
+  push global_int[9]
   COMM 0x0168
-  PUSHIS 0
-  POPLIX 0x0002
+  local_int[2] = 0
 _7:
-  PUSHIS 1
-  IF _8
-  PUSHIS 0
-  PUSHLIX 0x0002
-  EQ
-  IF _9
-  PUSHLIX 0x0003
-  PUSHIS 1
-  PUSHIX 0x0009
-  COMM 0x0168
-  GOTO _9
-_9:
-  PUSHIS 1
-  PUSHLIX 0x0002
-  ADD
-  POPLIX 0x0002
-  PUSHIS 270
-  PUSHLIX 0x0002
-  GE
-  IF _11
-  PUSHIS 0
-  POPLIX 0x0002
-  GOTO _11
-_11:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _7
+  while (1) {
+    if (local_int[2] == 0) {
+      push local_int[3]
+      push 1
+      push global_int[9]
+      COMM 0x0168
+    }
+  _9:
+    local_int[2] = local_int[2] + 1
+    if (local_int[2] >= 270) {
+      local_int[2] = 0
+    }
+  _11:
+    WAIT_FOR_TIMER_START()
+  }
 _8:
-  END
+  return
 e809_010_2:
   PROC e809_010_2
-  PUSHIS 4
+  push 4
   COMM 0x011e
   PUSHREG
   POPLIX 0x0005
-  PUSHIS 9
-  PUSHIS 809
+  push 9
+  push 809
   COMM 0x00d0
   PUSHREG
   POPIX 0x000e
-  PUSHLIX 0x0005
-  PUSHIS 1
-  PUSHIX 0x000e
+  push local_int[5]
+  push 1
+  push global_int[14]
   COMM 0x0168
-  PUSHIS 0
-  POPLIX 0x0004
+  local_int[4] = 0
 _13:
-  PUSHIS 1
-  IF _14
-  PUSHIS 0
-  PUSHLIX 0x0004
-  EQ
-  IF _15
-  PUSHLIX 0x0005
-  PUSHIS 1
-  PUSHIX 0x000e
-  COMM 0x0168
-  GOTO _15
-_15:
-  PUSHIS 1
-  PUSHLIX 0x0004
-  ADD
-  POPLIX 0x0004
-  PUSHIS 270
-  PUSHLIX 0x0004
-  GE
-  IF _17
-  PUSHIS 0
-  POPLIX 0x0004
-  GOTO _17
-_17:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _13
+  while (1) {
+    if (local_int[4] == 0) {
+      push local_int[5]
+      push 1
+      push global_int[14]
+      COMM 0x0168
+    }
+  _15:
+    local_int[4] = local_int[4] + 1
+    if (local_int[4] >= 270) {
+      local_int[4] = 0
+    }
+  _17:
+    WAIT_FOR_TIMER_START()
+  }
 _14:
-  END
+  return
 end
 
 messages msg1

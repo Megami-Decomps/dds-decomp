@@ -1450,7 +1450,9 @@ end
             sha1(rebuilt).hexdigest(),
             "f662f1c11775216fd98f34fb034fec5f8e0e3177",
         )
-        self.assertEqual(flw0_symbolic.render(script, "dds1"), source)
+        self.assertEqual(
+            flw0_symbolic.render(script, "dds1", structured=True), source
+        )
 
     def test_tracked_dds1_script_corpus_assembles_exact_hashes(self) -> None:
         root = TOOLS.parent
@@ -1493,10 +1495,14 @@ end
                 version = int(text.split(None, 2)[1])
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
-                message_references += len(re.findall(r"\bPUSHMSG\b", text))
-                selection_references += len(re.findall(r"\bPUSHSELECT\b", text))
-                event_references += len(re.findall(r"\bPUSHEVENT\b", text))
-                procedure_references += len(re.findall(r"\bPUSHPROC\b", text))
+                message_references += len(re.findall(r"\bPUSHMSG\b|\bmessage\(", text))
+                selection_references += len(
+                    re.findall(r"\bPUSHSELECT\b|\bselection\(", text)
+                )
+                event_references += len(re.findall(r"\bPUSHEVENT\b|\bevent\(", text))
+                procedure_references += len(
+                    re.findall(r"\bPUSHPROC\b|\bprocedure\(", text)
+                )
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
@@ -1536,7 +1542,9 @@ end
                 if version == 1:
                     self.assertEqual(flw0.render_source(script, "dds1"), text)
                 else:
-                    self.assertEqual(flw0_symbolic.render(script, "dds1"), text)
+                    self.assertEqual(
+                        flw0_symbolic.render(script, "dds1", structured=True), text
+                    )
         self.assertEqual(versions, {1: 14, 2: 129})
         self.assertEqual(
             (message_banks, decoded_banks, dialogs, pages, options, speakers),
@@ -1610,16 +1618,16 @@ end
                     for word in _instruction_words(script)
                 )
                 totals["message_references"] += len(
-                    re.findall(r"\bPUSHMSG\b", text)
+                    re.findall(r"\bPUSHMSG\b|\bmessage\(", text)
                 )
                 totals["selection_references"] += len(
-                    re.findall(r"\bPUSHSELECT\b", text)
+                    re.findall(r"\bPUSHSELECT\b|\bselection\(", text)
                 )
                 totals["event_references"] += len(
-                    re.findall(r"\bPUSHEVENT\b", text)
+                    re.findall(r"\bPUSHEVENT\b|\bevent\(", text)
                 )
                 totals["procedure_references"] += len(
-                    re.findall(r"\bPUSHPROC\b", text)
+                    re.findall(r"\bPUSHPROC\b|\bprocedure\(", text)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -1647,7 +1655,9 @@ end
                 if version == 1:
                     self.assertEqual(flw0.render_source(script, "dds2"), text)
                 else:
-                    self.assertEqual(flw0_symbolic.render(script, "dds2"), text)
+                    self.assertEqual(
+                        flw0_symbolic.render(script, "dds2", structured=True), text
+                    )
 
         self.assertEqual(totals["versions"], {1: 14, 2: 126})
         self.assertEqual(
