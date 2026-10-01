@@ -78,7 +78,21 @@ extern void func_0026C900(void);
 extern void func_0026C710(void);
 extern void fldInitializeLmapTaskVariant(LmapTaskState *task);
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A128);
+LmapNode *func_0030A128(LmapList *list) {
+    LmapNode *cur = list->cur;
+    LmapNode *node = list->first;
+
+    if (cur == list->hi) {
+        return cur;
+    }
+    node = node->next;
+    if (node == NULL) {
+        return cur;
+    }
+    list->count--;
+    list->first = node;
+    return cur;
+}
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A160);
 
