@@ -310,7 +310,81 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015E8B8);
 
 INCLUDE_ASM(const s32, "effect/polyManager", func_0015E900);
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E9A0);
+typedef struct {
+    s32 time;   /* 0x0 */
+    u32 radius; /* 0x4 */
+} PolyArcRec; /* 8 bytes */
+
+typedef struct {
+    f32 origin[4];      /* 0x0 */
+    u8 pad10[4];        /* 0x10 */
+    s32 duration;       /* 0x14 */
+    u8 pad18[8];        /* 0x18 */
+    f32 matrix[16];     /* 0x20 */
+    u8 pad60[0x64];     /* 0x60 */
+    u32 segments;       /* 0xC4 */
+    f32 width;          /* 0xC8 */
+    u8 padCC[0x14];     /* 0xCC */
+    PolyStrip *strip;   /* 0xE0 */
+    PolyArcRec *recs;   /* 0xE4 */
+} PolyArc;
+
+/* Lay a ring of point pairs for strip entry `index` on an arc of the node: the inner row sits at the arc's sine radius, the outer row `width` further out. */
+void func_0015E9A0(PolyArc *obj, s32 index) {
+    PolyStrip *strip = obj->strip;
+    PolyArcRec *rec = &obj->recs[index];
+    PolyStripEntry *entry = &strip->entries[index];
+    f32 dir[4];
+    f32 ring[4];
+    f32 radius;
+    f32 inner;
+    f32 drop;
+    f32 width;
+    f32 step;
+    f32 angle;
+    f32 *out;
+    f32 *first;
+    s32 pairs;
+    s32 i;
+
+    entry->count = strip->count;
+    out = entry->points;
+    pairs = strip->count >> 1;
+    radius = rec->radius;
+    angle = (f32)rec->time / (f32)obj->duration * 3.14159265f;
+    inner = radius * sdfSinPoly(angle);
+    drop = radius * sdfEvaluateCosineViaSinePhaseShift(angle) - radius;
+    step = 3.14159265f * 2.0f / (f32)obj->segments;
+    VU0_LOAD_MATRIX(obj->matrix);
+    width = obj->width;
+    angle = 0.0f;
+    VU0_LOAD_VF(vf12, obj->origin);
+    for (i = 0; i < pairs - 1; i++) {
+        dir[0] = ring[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        dir[2] = sdfSinPoly(angle);
+        ring[1] = drop;
+        ring[2] = dir[2] * (inner + width);
+        ring[0] *= inner + width;
+        VU0_LOAD_VF(vf10, ring);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, ring);
+        dir[1] = drop;
+        dir[0] *= inner;
+        dir[2] *= inner;
+        VU0_LOAD_VF(vf10, dir);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out + 4);
+        VU0_LOAD_VF(vf10, ring);
+        VU0_ADD(vf10, vf10, vf12);
+        VU0_STORE_VF(vf10, out);
+        out += 8;
+        angle += step;
+    }
+    first = entry->points;
+    PCP_COPY_VECTOR(out, first);
+    PCP_COPY_VECTOR(out + 4, first + 4);
+}
 
 void polyScaleTransformFirstComponent(f32 scale, PolyNode *obj) {
     obj->unkCC = obj->unkCC * scale;
