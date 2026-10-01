@@ -258,7 +258,7 @@ struct PcpFlashWork6 {
     f32 acrossSpan;
     f32 maxScale;
     f32 angularSpread;
-    u8 pad48[0x04];
+    u32 unk48;
     PcpFlashPtc20A *parts;
     u32 updateCount;
     u32 colorParam;
@@ -283,7 +283,7 @@ struct PcpFlashWork7 {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u8 pad38[0x04];
+    u32 unk38;
     PcpFlashPtc10 *parts;
     s32 updateCount;
     u32 colorParam;
@@ -382,7 +382,7 @@ struct PcpFlashWork10 {
     f32 initialRadialSpeed;
     f32 radialDamping;
     f32 originOffset;
-    u8 pad3C[0x04];
+    u32 unk3C;
     PcpFlashPtc10 *parts;
     s32 updateCount;
     u32 colorParam;
@@ -1269,7 +1269,7 @@ PcpFlashWork6 *func_0016C9F0(src)
     }
     record = (PcpFlashRadialHandle *)func_0016FB08(work->particleCount);
     work->resourceHandle = (u32)record;
-    record->unk50 = *(u32 *)((u8 *)work + 0x48);
+    record->unk50 = work->unk48;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(D_0034DF38) % range);
@@ -1525,7 +1525,7 @@ PcpFlashWork7 *func_0016D2A8(src)
     work->updateCount = 0;
     record = func_0016FF50(work->particleCount);
     work->resourceHandle = (u32)record;
-    record->unk50 = *(u32 *)((u8 *)work + 0x38);
+    record->unk50 = work->unk38;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
@@ -2138,7 +2138,7 @@ PcpFlashWork10 *func_0016EB00(src)
     work->updateCount = 0;
     record = func_0016FF50(work->particleCount);
     work->resourceHandle = (u32)record;
-    record->unk50 = *(u32 *)((u8 *)work + 0x3C);
+    record->unk50 = work->unk3C;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
