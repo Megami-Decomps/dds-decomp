@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -60,40 +61,6 @@ extern u8 D_003BB820[];
 
 extern u64 btlCreateCommandSoundUpdateTask(void);
 
-typedef struct BtlUnit {
-    u8 unk_00[0x70];
-    f32 rotation[4];
-    f32 scale;
-    u8 unk_84[4];
-    f32 zOffset;
-    u8 unk_8C[4];
-    f32 muzzleOffset[4];
-    f32 localBodyPosition[4];
-    f32 height;
-    f32 reach;
-    u8 unk_B8[0x30];
-    u32 stateFlags; /* 0xE8 */
-    u8 unk_EC[4];
-    s32 effectState; /* 0xF0 */
-    u8 unk_F4[4];
-    s16 effectTimerA; /* 0xF8 */
-    s16 effectTimerB; /* 0xFA */
-    s32 effectArgA; /* 0xFC */
-    s32 effectArgB; /* 0x100 */
-    f32 effectValue; /* 0x104 */
-    u64 unitId; /* 0x108: compared against the battle command's unit ID */
-    u32 flags;
-    u32 effectFlags; /* 0x114 */
-    u8 unk_118[8];
-    u16 unk_120;
-    u16 unk_122;
-    u16 mode;
-    u8 unk_126[0x1F6];
-    u32 effectObject;
-    u32 statusEffectHandle;
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
-} BtlUnit;
 
 typedef struct BtlActor {
     u8 unk_00[0x18];
@@ -229,9 +196,9 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
-    VU0_LOAD_VF(vf10, unit->rotation);
+    VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->muzzleOffset);
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -244,9 +211,9 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->zOffset;
-    VU0_LOAD_VF(vf10, unit->rotation);
+    VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->localBodyPosition);
+    VU0_LOAD_VF(vf10, unit->muzzleOffset);
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -263,9 +230,9 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     }
     effObjFetchInnerFirstVec(unit->effectObject);
     VU0_STORE_VF(vf10, pos);
-    VU0_LOAD_VF(vf10, unit->rotation);
+    VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();
-    VU0_LOAD_VF(vf10, unit->muzzleOffset);
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -536,14 +503,14 @@ void btlUpdateUnitActors(void) {
         btlSetUnitPosition((s32)actor, (s32)((u8 *)actor + 0x30));
         btlSetUnitRotation((s32)actor, (s32)((u8 *)actor + 0x40));
         if ((btlIsActorModeAcceptedByBattleHook((s32)actor) == 0 && actor->effectState != 0) ||
-            (actor->stateFlags & 2) != 0) {
+            (actor->updateFlags & 2) != 0) {
             func_001D5990((s32)actor);
             actor->effectTimerA = 0;
             actor->effectTimerB = 0;
             func_001D5578((s32)actor, actor->effectArgA, actor->effectArgB,
                           actor->effectValue);
         }
-        actor->effectFlags &= ~0x8000;
+        actor->stateFlags &= ~0x8000;
         actor = actor->next;
     }
     {
@@ -562,8 +529,8 @@ void btlRefreshUnitEffects(void) {
     u32 handle;
     while (unit != NULL) {
         if (unit->flags & 2) {
-            if (unit->effectFlags & 0x10) {
-                handle = unit->statusEffectHandle;
+            if (unit->stateFlags & 0x10) {
+                handle = (u32)unit->ext;
                 evtSetUnitStatusFlags(handle);
                 VU0_LOAD_VF(vf10, unit);
                 evtSetUnitNormalizedDirection(handle, 0);
@@ -968,7 +935,7 @@ u32 btlScriptSetActorUnitParameter(void) {
 
     context = func_0010D6A8();
     value = scrReadIntParameter(0);
-    ((BtlCmdCtx *)context)->unit->unk_122 = value;
+    ((BtlCmdCtx *)context)->unit->unk122 = value;
     return 1;
 }
 
@@ -1672,7 +1639,7 @@ u32 btlCmdCheckHpPercent(void) {
         mask = 0x400;
     }
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->unitId == id) {
+        if ((unit->flags & 1) && (unit->flags & mask) && !(unit->flags & 0x20) && unit->identity == id) {
             u8 *stats = (u8 *)unit + 0x120;
             s32 current = func_001A17F8(stats);
             s32 maximum = func_001A1838(stats);
@@ -2037,7 +2004,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
     handle = *(s32 *)((u8 *)kwlnTaskGetUserValue(slot) + 0xCC);
     if (handle >= 0) {
         BtlUnit *unit = actor->unit;
-        func_0019C590(handle, 0, unit->mode, (unit->unk_120 & 0x20) ? 1 : 2);
+        func_0019C590(handle, 0, unit->mode, (unit->statBits & 0x20) ? 1 : 2);
     }
     func_00101A80(state->list, slot);
     state->slot = slot;
@@ -2079,7 +2046,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
         BtlUnit *actor = ((BtlState *)state)->units;
         while (actor != 0) {
             if ((actor->flags & 2) != 0) {
-                s32 effect = actor->statusEffectHandle;
+                s32 effect = (s32)actor->ext;
                 if (effect != 0) {
                     evtConfigureUnitTransition(effect, 0);
                 }

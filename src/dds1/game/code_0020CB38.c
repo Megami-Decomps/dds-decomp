@@ -21,52 +21,6 @@ extern void func_001D6300(void *, void *);
 
 extern void btlSetUnitPosition(BtlUnit *, void *);
 
-typedef struct BtlUnit {
-    u8 unk_00[0x30];
-    f32 position[4]; /* 0x30: current world position, passed to btlSetUnitPosition */
-    u8 unk_40[0x50];
-    s32 bodyOffsetXBits; /* 0x90: retain integer stores to the vector components */
-    f32 bodyOffsetY;
-    f32 bodyOffsetZ;
-    s32 bodyOffsetWBits;
-    u8 unk_A0[0x10];
-    f32 height;
-    f32 reach;
-    f32 positionB8;
-    f32 positionBC;
-    u8 unk_C0[8];
-    u32 species;
-    u8 unk_CC[0x14];
-    s32 displaySpecies; /* 0xE0 */
-    u8 unk_E4[8];
-    s32 unk_EC;
-    u32 unk_F0;
-    u8 unk_F4[0xC];
-    u8 unk_100[8];
-    u64 identity; /* 0x108: compared to exclude the current actor */
-    u32 flags;
-    u32 stateFlags;
-    u8 unk_118[4];
-    u8 lookupId;      /* 0x11C */
-    u8 unk_11D[3];
-    u16 statBits;
-    u8 unk_122[2];
-    u16 mode;
-    u16 hp;           /* 0x126 */
-    u16 maxHp;        /* 0x128 */
-    u16 unk_12A;      /* 0x12A */
-    u8 unk_12C[2];
-    u16 conditionFlags;
-    u8 unk_130[4];
-    u16 actionTime;   /* 0x134: tick count of the unit's last action */
-    u8 unk_136[0x17A];
-    s16 actionSlot;   /* 0x2B0 */
-    u8 unk_2B2[0x6A];
-    u32 unk_31C;
-    struct BtlUnitModel *model;
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
-} BtlUnit;
 
 typedef struct BtlState {
     u8 unk_000[0x1C0];

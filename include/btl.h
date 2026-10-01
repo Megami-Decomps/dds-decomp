@@ -15,6 +15,85 @@ typedef struct BattleEffectState {
 
 typedef struct BtlUnit BtlUnit;
 
+#ifdef VERSION_DDS1
+/* Battle unit, DDS1 (0x348). Retail accessors distinguish world rotation at
+ * +0x40 from the orientation quaternion at +0x70; body/muzzle offsets are
+ * +0x90/+0xA0 respectively. Effect origin/scene extension are +0x31C/+0x320.
+ * The actor chain ends at +0x344. Command state/action words are a different
+ * object and must not be interpreted through this unit layout. */
+typedef struct BtlUnit {
+    u8 pad00[0x30];
+    f32 position[4]; /* 0x30: world position */
+    f32 rotation[4]; /* 0x40: world rotation passed to btlSetUnitRotation */
+    u8 pad50[0x20];
+    f32 orientation[4]; /* 0x70: quaternion converted to a VU matrix */
+    f32 scale; /* 0x80 */
+    u8 pad84[4];
+    f32 zOffset; /* 0x88: added before rotating a local offset */
+    u8 pad8C[4];
+    union {
+        /* Accessor names describe caller intent: GetMuzzlePosVU reads this
+         * body-reach offset; GetBodyPosVU reads muzzleOffset at +0xA0. */
+        f32 bodyOffset[4]; /* 0x90: same field naming as DDS2 */
+        struct {
+            /* Some setup paths write zero as integer bits, not float stores. */
+            s32 bodyOffsetXBits;
+            f32 bodyOffsetY;
+            f32 bodyOffsetZ;
+            s32 bodyOffsetWBits;
+        };
+    };
+    f32 muzzleOffset[4]; /* 0xA0: read by btlUnitGetBodyPosVU */
+    f32 height; /* 0xB0 */
+    f32 reach; /* 0xB4 */
+    f32 unkB8; /* Setup stores mirror height/reach; meaning otherwise unknown. */
+    f32 unkBC;
+    u8 padC0[8];
+    u32 species; /* 0xC8 */
+    u8 padCC[0x14];
+    s32 displaySpecies; /* 0xE0 */
+    u8 padE4[4];
+    u32 updateFlags; /* 0xE8: bit 1 forces the actor update's reset path */
+    s32 unkEC;
+    s32 effectState; /* 0xF0 */
+    u8 padF4[4];
+    s16 effectTimerA; /* 0xF8 */
+    s16 effectTimerB; /* 0xFA */
+    s32 effectArgA; /* 0xFC */
+    s32 effectArgB; /* 0x100 */
+    f32 effectValue; /* 0x104 */
+    u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
+    /* Keep the status pair flat: 32-bit updates and address-based 64-bit scans
+     * coexist in retail. Preserve the original separate-member layout. */
+    u32 flags; /* 0x110 */
+    u32 stateFlags; /* 0x114 */
+    u32 gunResourceFlags; /* 0x118 */
+    u8 lookupId; /* 0x11C */
+    u8 pad11D[3];
+    u16 statBits; /* 0x120: base of the unit stat accessors */
+    u16 unk122; /* 0x122: script-controlled unit parameter */
+    u16 mode; /* 0x124 */
+    u16 hp; /* 0x126 */
+    u16 maxHp; /* 0x128 */
+    u16 unk_12A;
+    u8 pad12C[2];
+    u16 conditionFlags; /* 0x12E */
+    u8 pad130[4];
+    u16 actionTime; /* 0x134 */
+    u8 pad136[0x17A];
+    s16 actionSlot; /* 0x2B0 */
+    u8 pad2B2[0x66];
+    u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
+    u8 secondCountdown; /* 0x319 */
+    u8 pad31A[2];
+    u32 effectObject; /* 0x31C: supplies the effect's first inner vector */
+    BtlUnitModel *ext; /* 0x320: +0x8C points to model flags; also an event handle */
+    u8 pad324[0x1C];
+    struct BtlUnit *previousActor; /* 0x340 */
+    struct BtlUnit *next; /* 0x344: actor-list link, not a task-chain link */
+} BtlUnit;
+#endif /* VERSION_DDS1 */
+
 
 
 #ifdef VERSION_DDS2
