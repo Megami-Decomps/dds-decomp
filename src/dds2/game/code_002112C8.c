@@ -126,7 +126,7 @@ typedef struct BattleWork {
 typedef struct BattleNamedResource BattleNamedResource;
 
 
-/* Same action-state link layout used by code_0021EE10.c. */
+/* Action-state link shared by the camera, motion and AI command paths in this unit. */
 typedef struct ActionStateLink {
     u8 pad00[0x18];
     BtlUnit *unit; /* 0x18 */
@@ -678,8 +678,19 @@ s32 btlMatchesActorEntryCodeCondition(actor, kind)
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00212CB8);
 
+extern const s32 btlRequiredActionCategories[10];
 
-INCLUDE_ASM(const s32, "game/code_002112C8", btlUnitHasAllTenActions);
+s32 btlUnitHasAllTenActions(void *actor) {
+    s32 actions[10];
+    s32 i;
+    memcpy(actions, btlRequiredActionCategories, sizeof(actions));
+    for (i = 0; i < 10; i++) {
+        if (btlTestSelectedItemCategoryMask(actor, actions[i]) == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 s32 func_00212F20(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
