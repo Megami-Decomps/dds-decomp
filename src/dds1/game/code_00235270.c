@@ -45,6 +45,10 @@ extern u8 D_003BBF80[];
 extern u8 D_003BBF90[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
+extern char D_003BC0A8[]; /* " EVENT" */
+extern char D_003BC0B0[]; /* "%3d" */
+extern char D_003BC0B8[]; /* "   CUT" */
+extern char D_003BC0C0[]; /* "%03d" */
 extern char D_003BC098[];
 extern u16 D_003BD898;
 extern u16 D_003BD89A;
@@ -122,7 +126,9 @@ typedef struct EvtRuntime {
     u8 pad22B0[4];
     s32 groupCursor; /* 0x22B4 */
     s32 inputB; /* 0x22B8 */
-    u8 pad22BC[0x38];
+    u8 pad22BC[0x14];
+    s32 charRow; /* 0x22D0 */
+    u8 pad22D4[0x20];
     s32 entryCursor; /* 0x22F4 */
     s32 entryFirst;  /* 0x22F8 */
     u8 pad22FC[0x4];
@@ -609,9 +615,128 @@ s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236AC8);
+void func_00236AC8(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    s32 color = 0;
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00236D80);
+    if (ctx->charRow == index) {
+        color = 4;
+    }
+    switch (index) {
+    case 0:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
+        return;
+    case 1:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
+        return;
+    case 3:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " L,R = NO-+"));
+        return;
+    case 4:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " U,D = SELECT"));
+        return;
+    case 5:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE40));
+        return;
+    case 6:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE50));
+        return;
+    case 7:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " RL  = SET 600"));
+        break;
+    }
+}
+
+s32 func_00236D80(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    u32 num;
+
+    list = sdfCreateResetPacketList();
+    func_00235598(list, x, y, 0x12, 0xB, 0, 8, (u8 *)ctx, evtDrawEventFileNameRow, func_00236AC8);
+    D_00325748.invoke(&D_00325748, (void *)list);
+    if (ctx->actionMode != 9) {
+        return 0;
+    }
+    if (D_00324510[0x26] < 0) {
+        ctx->charRow ^= 1;
+    }
+    if (D_00324510[0x27] < 0) {
+        ctx->charRow ^= 1;
+    }
+    if (D_00324510[0x24] & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_003BBE78 >= 0x1F5) {
+                D_003BBE78--;
+            }
+            break;
+        case 1:
+            if (D_003BBE7A >= 2) {
+                D_003BBE7A--;
+            }
+            break;
+        }
+    }
+    if (D_00324510[0x25] & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_003BBE78 < 0x3E7) {
+                D_003BBE78++;
+            }
+            break;
+        case 1:
+            if (D_003BBE7A < 0x3E7) {
+                D_003BBE7A++;
+            }
+            break;
+        }
+    }
+    if (D_00324510[0x28] & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_003BBE78 >= 0x1F5) {
+                num = (u16)(D_003BBE78 - 500);
+                if (num < 0x1F4) {
+                    D_003BBE78 = 0x1F4;
+                } else {
+                    D_003BBE78 -= 500;
+                }
+            }
+            break;
+        case 1:
+            if (D_003BBE7A >= 2) {
+                num = (u16)(D_003BBE7A - 10);
+                if (num == 0) {
+                    D_003BBE7A = 1;
+                } else {
+                    D_003BBE7A -= 10;
+                }
+            }
+            break;
+        }
+    }
+    if (D_00324510[0x2A] & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            D_003BBE78 += 100;
+            break;
+        case 1:
+            D_003BBE7A += 10;
+            break;
+        }
+    }
+    if (D_00324510[0x21] < 0) {
+        return 1;
+    }
+    if (D_00324510[0x23] < 0) {
+        return -1;
+    }
+    if (D_00324510[0x20] < 0) {
+        D_003BBE78 = 0x258;
+    }
+    return 0;
+}
 
 void evtDrawSelectedEntryLabel(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;

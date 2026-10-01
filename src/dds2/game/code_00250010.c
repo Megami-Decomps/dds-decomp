@@ -171,8 +171,8 @@ typedef struct EvtPad {
     s8 cancel;  /* 0x23 */
     u8 decOne;  /* 0x24 */
     u8 incOne;  /* 0x25 */
-    u8 decTen;  /* 0x26 */
-    u8 incTen;  /* 0x27 */
+    s8 decTen;  /* 0x26 */
+    s8 incTen;  /* 0x27 */
     u8 decHun;  /* 0x28 */
     u8 pad29;
     u8 incHun;  /* 0x2A */
@@ -186,6 +186,10 @@ extern char D_004233F0[]; /* " RR  = ENTER" */
 extern char D_00423400[]; /* " RD  = CANCEL" */
 extern char D_00423428[]; /* " L,R = VALUE-+" */
 extern char D_004374A0[]; /* "     %d" */
+extern char D_004374F0[]; /* " EVENT" */
+extern char D_004374F8[]; /* "%3d" */
+extern char D_00437500[]; /* "   CUT" */
+extern char D_00437508[]; /* "%03d" */
 extern s32 sdfCreateResetPacketList(void);
 extern void func_00250338(s32 list, s32 x, s32 y, s32 col, s32 rows, s32 first, s32 total, EvtRuntime *ctx,
                           EvtMenuHeaderFn header, EvtMenuRowFn row);
@@ -663,9 +667,128 @@ s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00251868);
+void func_00251868(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
+    s32 color = 0;
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00251B20);
+    if (ctx->charRow == index) {
+        color = 4;
+    }
+    switch (index) {
+    case 0:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004374F0));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_004374F8, D_004372B0));
+        return;
+    case 1:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_00437500));
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_00437508, D_004372B2));
+        return;
+    case 3:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " L,R = NO-+"));
+        return;
+    case 4:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " U,D = SELECT"));
+        return;
+    case 5:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_004233F0));
+        return;
+    case 6:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_00423400));
+        return;
+    case 7:
+        sdfAppendPacket(list, sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " RL  = SET 600"));
+        break;
+    }
+}
+
+s32 func_00251B20(s32 x, s32 y, EvtRuntime *ctx) {
+    s32 list;
+    u32 num;
+
+    list = sdfCreateResetPacketList();
+    func_00250338(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, func_00251868);
+    D_00380748.submit(&D_00380748, list);
+    if (ctx->mode != 9) {
+        return 0;
+    }
+    if (D_0037F510.decTen < 0) {
+        ctx->charRow ^= 1;
+    }
+    if (D_0037F510.incTen < 0) {
+        ctx->charRow ^= 1;
+    }
+    if (D_0037F510.decOne & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_004372B0 >= 0x1F5) {
+                D_004372B0--;
+            }
+            break;
+        case 1:
+            if (D_004372B2 >= 2) {
+                D_004372B2--;
+            }
+            break;
+        }
+    }
+    if (D_0037F510.incOne & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_004372B0 < 0x3E7) {
+                D_004372B0++;
+            }
+            break;
+        case 1:
+            if (D_004372B2 < 0x3E7) {
+                D_004372B2++;
+            }
+            break;
+        }
+    }
+    if (D_0037F510.decHun & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            if (D_004372B0 >= 0x1F5) {
+                num = (u16)(D_004372B0 - 500);
+                if (num < 0x1F4) {
+                    D_004372B0 = 0x1F4;
+                } else {
+                    D_004372B0 -= 500;
+                }
+            }
+            break;
+        case 1:
+            if (D_004372B2 >= 2) {
+                num = (u16)(D_004372B2 - 10);
+                if (num == 0) {
+                    D_004372B2 = 1;
+                } else {
+                    D_004372B2 -= 10;
+                }
+            }
+            break;
+        }
+    }
+    if (D_0037F510.incHun & 2) {
+        switch (ctx->charRow) {
+        case 0:
+            D_004372B0 += 100;
+            break;
+        case 1:
+            D_004372B2 += 10;
+            break;
+        }
+    }
+    if (D_0037F510.confirm < 0) {
+        return 1;
+    }
+    if (D_0037F510.cancel < 0) {
+        return -1;
+    }
+    if (D_0037F510.syncKey < 0) {
+        D_004372B0 = 0x258;
+    }
+    return 0;
+}
 
 extern char D_00437510[]; /* "NAME:" */
 
