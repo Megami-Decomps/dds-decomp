@@ -1324,8 +1324,6 @@ u32 func_0022B9D0(void) {
     return 1;
 }
 
-/* Parked: build/parked/dds2/game/code_00227288/func_0022BA08.c (the frames test
-   lands one word late; structure, frame and every field offset are confirmed). */
 INCLUDE_ASM(const s32, "game/code_00227288", func_0022BA08);
 
 u32 btlCreateScriptResourceTask(u32 object, u32 group) {

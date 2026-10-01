@@ -50,8 +50,6 @@ typedef struct MenuItemScene {
     u32 slots[5];
 } MenuItemScene;
 
-/* Parked: build/parked/dds2/game/code_00299D58/brsMessageInputStep.c (delay-slot
-   fill differs from retail by one word; every source shape tried agrees). */
 INCLUDE_ASM(const s32, "game/code_00299D58", brsMessageInputStep);
 
 s64 mnuStaffRunPanel1(s32 input) {
