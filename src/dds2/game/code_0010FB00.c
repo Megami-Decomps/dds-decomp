@@ -28,7 +28,22 @@ void dds3LoadOrBuildObjectMatrix(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FB70);
+s32 func_0010FB70(u8 *left, u8 *right) {
+    f32 length;
+    f32 leftLimit;
+    f32 rightLimit;
+
+    VU0_LOAD_VF(vf10, left + 0x40);
+    VU0_LOAD_VF(vf11, right + 0x40);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    leftLimit = *(f32 *)(left + 0xC4);
+    rightLimit = *(f32 *)(right + 0xC4);
+    if (fabsf(length) - (leftLimit + rightLimit) < 0.0f) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FBD0);
 
