@@ -6,6 +6,10 @@ extern u64 kwlnTaskGetUserValue(void);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
+extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+
+extern void func_00144178(void);
+
 void fldReleasePanelState(void) {
     u64 state;
 
@@ -14,7 +18,9 @@ void fldReleasePanelState(void) {
     D_00436204 = 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_001441F0);
+void func_001441F0(void) {
+    D_00436204 = kwlnTaskCreate("inputpanel", 0x2B0B, 1, 1, func_00144178, fldReleasePanelState, 0);
+}
 
 void fldDestroyPanelTaskIfPresent(void) {
     if (D_00436204 != 0) {

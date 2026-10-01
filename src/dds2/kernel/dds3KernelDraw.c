@@ -216,11 +216,19 @@ extern void func_00196FE8(void);
 
 extern u128 D_0037F780;
 
+typedef struct {
+    u32 w[5];
+} DrawWord20;
+
+extern DrawWord20 D_0037F790;
+
 void kwlnDrawCopyRow128(u128 *row) {
     PCP_COPY_VECTOR(&D_0037F780, row);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyWords20);
+void kwlnDrawCopyWords20(DrawWord20 *src) {
+    memcpy(&D_0037F790, src, 0x14);
+}
 
 void dds3DrawSetIndexedWord(u32 value, s32 index) {
     D_0037F770[index] = value;

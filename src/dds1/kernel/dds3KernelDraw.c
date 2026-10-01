@@ -183,7 +183,9 @@ void kwlnDrawCopyRow128(void *src) {
     PCP_COPY_VECTOR(&D_00324780, src);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", kwlnDrawCopyWords20);
+void kwlnDrawCopyWords20(DrawWord20 *src) {
+    memcpy(&D_00324790, src, 0x14);
+}
 
 void dds3DrawSetIndexedWord(u32 value, s32 index) {
     D_00324770[index] = value;
