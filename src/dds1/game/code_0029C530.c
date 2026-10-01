@@ -813,11 +813,55 @@ typedef struct EffFadeOut {
     s32 unk14;    // 0x14
 } EffFadeOut;
 
+/* Curve entry the blend helper (func_00296F58 / func_002D7458) reads; 0x24 bytes. */
+typedef struct EffFadeCurve {
+    u8 mode;          /* 0x00: 0 = ramp from the limit, 1 = hold, 2 = step */
+    u8 pad01[3];
+    f32 span;         /* 0x04: divisor when mode is 0 */
+    f32 rate;         /* 0x08 */
+    u8 pad0C[8];
+    f32 value2;       /* 0x14 */
+    f32 threshold;    /* 0x18: compared against progress in modes 1 and 2 */
+    f32 value3;       /* 0x1C */
+    f32 value4;       /* 0x20 */
+} EffFadeCurve; /* 0x24 */
+
+/* Second curve the blend helper takes; 0x10 bytes at 0x24. */
+typedef struct EffFadeCurve2 {
+    u8 mode;       /* 0x00 */
+    u8 pad01[3];
+    f32 span;      /* 0x04 */
+    f32 rate;      /* 0x08 */
+    f32 value2;    /* 0x0C */
+} EffFadeCurve2; /* 0x10 */
+
+/* Curve entry the rate helper (func_00297270) reads; 0x2C bytes. */
+typedef struct EffRateCurve {
+    u8 mode;          /* 0x00 */
+    u8 pad01[3];
+    f32 span;         /* 0x04: divisor when mode is 0 */
+    f32 rate;         /* 0x08 */
+    u8 pad0C[8];
+    f32 value2;       /* 0x14 */
+    f32 threshold;    /* 0x18 */
+    f32 value3;       /* 0x1C */
+    f32 value4;       /* 0x20 */
+    u8 pad24[8];
+} EffRateCurve; /* 0x2C */
+
 typedef struct EffFadeConfig {
-    u8 pad_00[0xB8];
-    s32 progress; // 0xB8
-    u8 pad_BC[4];
-    EffFadeOut out; // 0xC0
+    /* Individually placed curves, not a regular array. The two the blend
+     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
+     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    EffFadeCurve blendA;   /* 0x00 */
+    EffFadeCurve2 blendB2; /* 0x24 */
+    EffFadeCurve blendB;   /* 0x34 */
+    u8 pad58[8];
+    EffRateCurve rateA;   /* 0x60 */
+    EffRateCurve rateB;   /* 0x8C */
+    s32 progress;         /* 0xB8 */
+    u8 padBC[4];
+    EffFadeOut out;       /* 0xC0 */
 } EffFadeConfig;
 
 typedef struct EffMapOut {
@@ -873,11 +917,19 @@ typedef struct EffRateOut {
 } EffRateOut;
 
 typedef struct EffRateConfig {
-    u8 pad_00[0xB8];
-    s32 progress; // 0xB8
-    u8 fixedMode; // 0xBC
-    u8 pad_BD[3];
-    EffRateOut out; // 0xC0
+    /* Individually placed curves, not a regular array. The two the blend
+     * helper takes sit at 0x00 and 0x34; the two the rate helper takes sit at
+     * 0x60 and 0x8C. Strides are irregular, so they are named, not indexed. */
+    EffFadeCurve blendA;   /* 0x00 */
+    EffFadeCurve2 blendB2; /* 0x24 */
+    EffFadeCurve blendB;   /* 0x34 */
+    u8 pad58[8];
+    EffRateCurve rateA;   /* 0x60 */
+    EffRateCurve rateB;   /* 0x8C */
+    s32 progress;         /* 0xB8 */
+    u8 fixedMode;         /* 0xBC */
+    u8 padBD[3];
+    EffRateOut out;       /* 0xC0 */
 } EffRateConfig;
 
 void effUpdateFadeBlendA(EffFadeWork *work) {
@@ -904,7 +956,7 @@ void effUpdateFadeBlendA(EffFadeWork *work) {
     out->unk1C = 0;
     out->unk20 = 0x200;
     out->unk24 = 0x1C0;
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -915,8 +967,8 @@ void effUpdateFadeBlendA(EffFadeWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress) * 0.01f;
+    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->rateB = func_00297270(&config->rateA, limit, progress) * 0.01f;
     out->param = work->param;
     effDrawBlurRectangle(out);
 }
@@ -959,7 +1011,7 @@ void func_0029D1E8(EffFadeWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_00297270((u8 *)config + 0x8C, limit, progress);
+    rate = func_00297270(&config->rateB, limit, progress);
     if (config->fixedMode != 0) {
         out->posX = 0;
         out->posY = 0;
@@ -982,7 +1034,7 @@ void func_0029D1E8(EffFadeWork *work) {
         out->posX = px;
         out->posY = py << 1;
     }
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -993,8 +1045,8 @@ void func_0029D1E8(EffFadeWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress) * 0.01f;
+    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->rateB = func_00297270(&config->rateA, limit, progress) * 0.01f;
     out->param = work->param;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -1038,7 +1090,7 @@ void effUpdateFadeMapA(EffFadeWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_00297270((u8 *)config + 0x8C, limit, progress);
+    rate = func_00297270(&config->rateB, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1057,7 +1109,7 @@ void effUpdateFadeMapA(EffFadeWork *work) {
         out->posX = (s32)pos[0] - 0x800;
         out->posY = ((s32)pos[1] - 0x800) << 1;
     }
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1068,8 +1120,8 @@ void effUpdateFadeMapA(EffFadeWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) * 0.01f;
-    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress) * 0.01f;
+    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
+    out->rateB = func_00297270(&config->rateA, limit, progress) * 0.01f;
     out->param = work->param;
     func_00187098(out);
 }
@@ -1113,7 +1165,7 @@ void effUpdateFadeMapB(EffFadeWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_00297270((u8 *)config + 0x8C, limit, progress);
+    rate = func_00297270(&config->rateB, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1132,7 +1184,7 @@ void effUpdateFadeMapB(EffFadeWork *work) {
         out->posX = (s32)pos[0] - 0x800;
         out->posY = ((s32)pos[1] - 0x800) << 1;
     }
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1143,8 +1195,8 @@ void effUpdateFadeMapB(EffFadeWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) * 0.01f;
-    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress) * 0.01f;
+    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
+    out->rateB = func_00297270(&config->rateA, limit, progress) * 0.01f;
     out->param = work->param;
     func_00187598(out);
 }
@@ -1184,7 +1236,7 @@ void effUpdateFadeBlendB(EffFadeWork *work) {
     out->unk1C = 0;
     out->unk20 = 0x200;
     out->unk24 = 0x1C0;
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1195,8 +1247,8 @@ void effUpdateFadeBlendB(EffFadeWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270((u8 *)config + 0x34, limit, progress) + 1.0f;
-    out->rateB = func_00297270((u8 *)config + 0x60, limit, progress);
+    out->rateA = func_00297270(&config->blendB, limit, progress) + 1.0f;
+    out->rateB = func_00297270(&config->rateA, limit, progress);
     out->param = work->param;
     func_00187988(out);
 }
@@ -1223,7 +1275,7 @@ void effUpdateFadeBlendC(EffFadeWork *work) {
     out->unkC = 0;
     out->unk10 = 0x200;
     out->unk14 = 0x1C0;
-    second = func_00296F58((u8 *)config, (u8 *)config + 0x24, limit, progress);
+    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->baseColor;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
