@@ -17,11 +17,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Test script and field-data tooling
+      - name: Test script and data tooling
         run: |
           python3 tools/test_flw0.py
           python3 tools/test_inf.py
           python3 tools/test_wap.py
+          python3 tools/test_battle_tbl.py
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
