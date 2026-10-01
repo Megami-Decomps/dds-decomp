@@ -13,6 +13,8 @@ typedef struct {
 } SolarLayerTimer;
 
 void func_00228CA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+extern void func_002CAAC8(s32, s32, s32 *, s32, s32, s32);
+extern s32 D_0036832C[];
 
 u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
 void effDestroyResourceSlotSet(u32 sprite);
@@ -56,9 +58,59 @@ INCLUDE_ASM(const s32, "game/code_00228B38", func_00228FB0);
 
 INCLUDE_ASM(const s32, "game/code_00228B38", func_00229100);
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00229230);
+/* Indexed solar-table pass, then the shared layer setup with the 0xA rate. */
+void func_00229230(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+    s32 n;
+    if (t0 == 0) {
+        return;
+    }
+    n = t0;
+    evtInitializeSolarOverlay(t2);
+    {
+        s32 tmp = 0;
+        s32 *p;
+        if (n >= 8) {
+            goto afterloop;
+        }
+        p = (s32 *)D_0036832C + t0 * 8;
+        do {
+            func_002CAAC8(p[-1], 0xFF, &tmp, p[0], 1, t2);
+            n++;
+            p += 8;
+        } while (n < 8);
+afterloop: ;
+    }
+    evtFinalizeSolarOverlay(t2);
+    func_00228CA0(a0, a1, 0, a3, 0xA, 0x20, t1, t2);
+    func_00228C38(t2);
+}
 
-INCLUDE_ASM(const s32, "game/code_00228B38", func_00229320);
+/* Indexed solar-table pass, then the shared layer setup with the 0x10 rate. */
+void func_00229320(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, s32 t2, s32 t3) {
+    s32 n;
+    if (t0 == 0) {
+        return;
+    }
+    n = t0;
+    evtInitializeSolarOverlay(t2);
+    {
+        s32 tmp = 0;
+        s32 *p;
+        if (n >= 8) {
+            goto afterloop;
+        }
+        p = (s32 *)D_0036832C + t0 * 8;
+        do {
+            func_002CAAC8(p[-1], 0xFF, &tmp, p[0], 1, t2);
+            n++;
+            p += 8;
+        } while (n < 8);
+afterloop: ;
+    }
+    evtFinalizeSolarOverlay(t2);
+    func_00228CA0(a0, a1, 0, a3, 0x10, 0x20, t1, t2);
+    func_00228C38(t2);
+}
 
 /* Draw the selected solar-noise layer; intermediate layers also receive layer 9. */
 void evtDrawSolarLayerPair(s32 x, s32 y, s32 z, s32 width, s32 layer, s32 context, s32 color) {
