@@ -66,7 +66,36 @@ INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
-INCLUDE_ASM(const s32, "game/code_00228058", func_002280B0);
+extern char D_003ACA78[];
+extern s32 evtFindTaskResourceEntryByKey(u32 id, s32 key);
+extern s32 evtCreateTaskWithValue(s32 taskId, s32 value);
+void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+
+u32 func_002280B0(void) {
+    EvtCommandWork *work;
+    s32 id;
+    s32 entry;
+    s32 task;
+
+    work = func_0010D6A0();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->taskKey == 0) {
+        func_003003F0(D_003ACA78);
+        return 1;
+    }
+    id = scrReadIntParameter(0);
+    entry = evtFindTaskResourceEntryByKey(id, scrReadIntParameter(1));
+    if (entry == 0) {
+        evtPrintDeveloperConsoleMessage("TEX_BE not fount RID = %d\n", scrReadIntParameter(1));
+        return 1;
+    }
+    task = evtCreateTaskWithValue(0x2AFE, entry);
+    func_00101A80(work->taskKey, task);
+    scrSetIntegerReturnValue(task);
+    return 1;
+}
 
 u32 evtOpcodeCreateWorldChildTask(void) {
     EvtCommandWork *work;
