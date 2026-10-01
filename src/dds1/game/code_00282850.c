@@ -704,9 +704,18 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00284C48);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00284EB8);
 
+/* The compact 0x3C-byte profile panel stores a cap, option and initial grid point. */
+typedef struct MenuProfilePanel {
+    u8 pad00[0x10];
+    s32 capValue;
+    s32 option;
+    MenuPoint gridOrigin;
+    u8 pad20[0x1C];
+} MenuProfilePanel;
+
 void mnuSetProfilePanelValues(s32 item, s32 value, s32 option) {
-    *(s32 *)(item + 0x10) = value;
-    *(s32 *)(item + 0x14) = option;
+    ((MenuProfilePanel *)item)->capValue = value;
+    ((MenuProfilePanel *)item)->option = option;
 }
 
 u32 *mnuCreateProfilePanel(s32 source) {
@@ -728,7 +737,7 @@ void func_00285160(void) {
 void func_00285178(s32 item, u32 grid, u32 unused, u32 firstIndex,
                                     u32 secondIndex) {
     itfGridStorePosition((u32 *)(item + 0x18));
-    itfSetGridEntryQuantizedAndRefresh(*(u32 *)(item + 0x18), *(u32 *)(item + 0x1c), 0, 0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(((MenuProfilePanel *)item)->gridOrigin.x, ((MenuProfilePanel *)item)->gridOrigin.y, 0, 0, 0, 0);
     itfGridStorePosition(item + 0x20, grid, firstIndex);
     itfGridStorePosition(item + 0x28, grid, secondIndex);
 }
@@ -773,8 +782,14 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_00285670);
 
+/* Popup state retains the entry address at +0x44. */
+typedef struct MenuPopupState {
+    u8 pad00[0x44];
+    s32 entryAddress;
+} MenuPopupState;
+
 u8 mnuIsPopupEntryValue(s32 item, s32 value) {
-    return *(s32 *)(item + 0x44) == value;
+    return ((MenuPopupState *)item)->entryAddress == value;
 }
 
 void mnuSetPopupEntry(s32 out, s32 entry) {
@@ -802,8 +817,8 @@ void mnuAttachAndMarkMenuEntry(s32 out, s32 entry) {
 }
 
 void mnuBindPresentMenuEntry(s32 item, u32 out) {
-    if (*(s32 *)(item + 0x44) != 0) {
-        mnuSetPopupEntryFlagged(out, *(s32 *)(item + 0x44));
+    if (((MenuPopupState *)item)->entryAddress != 0) {
+        mnuSetPopupEntryFlagged(out, ((MenuPopupState *)item)->entryAddress);
         return;
     }
 }
@@ -1269,8 +1284,13 @@ INCLUDE_ASM(const s32, "game/code_00282850", btlItemApplyPermanentBonus);
 
 INCLUDE_ASM(const s32, "game/code_00282850", btlItemApplyDirectEffect);
 
+typedef struct MenuSelectionEntry {
+    u8 pad00[0xE];
+    u16 flags;
+} MenuSelectionEntry;
+
 s32 mnuGetSelectionFromFlags(s32 entry) {
-    u16 flags = *(u16 *)(entry + 0xe);
+    u16 flags = ((MenuSelectionEntry *)entry)->flags;
     if (flags & 0x400) return 0;
     if (flags & 0x100) return 1;
     if (flags & 0x80) return 2;
@@ -1469,11 +1489,17 @@ typedef struct MenuBlock40 {
     u32 word[10];
 } MenuBlock40;
 
+typedef struct MenuPendingBlock {
+    u32 flags;
+    MenuBlock40 committed;
+    MenuBlock40 pending; /* 0x2C */
+} MenuPendingBlock;
+
 s32 mnuCommitPendingBlock(u8 *object) {
     if (!(*(u32 *)object & 1)) {
         return 0;
     }
-    *(MenuBlock40 *)(object + 4) = *(MenuBlock40 *)(object + 0x2C);
+    ((MenuPendingBlock *)object)->committed = ((MenuPendingBlock *)object)->pending;
     *(u32 *)object &= ~1;
     return 1;
 }
