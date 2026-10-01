@@ -6,6 +6,18 @@ typedef struct WorldObjectPointer {
     u32 *value;
 } WorldObjectPointer;
 
+/* One entry of the chain table value[2] points at; the walk follows next. */
+typedef struct WorldChainNode {
+    u8 pad00[0x20];
+    struct WorldChainNode *next; /* 0x20 */
+} WorldChainNode;
+
+typedef struct WorldChainEntry {
+    u8 pad00[4];
+    WorldChainNode *node; /* 0x04 */
+    u8 pad08[4];
+} WorldChainEntry; /* 0x0C */
+
 s32 func_001104F8(s32 object, s32 (*callback)(void *));
 
 s32 dds3ExchangeAreaSlot(void *arg);
@@ -17,17 +29,17 @@ void dds3DestroyWorldIndexNode(u32 node);
 void sdfReleaseChipBlock(void *arg);
 
 const s32 dds3ContainsNodeInObjectChain(WorldObjectPointer *object, s32 index, s32 value) {
-    u32 *node;
+    WorldChainNode *node;
 
     if (object == NULL || value == 0) {
         return 0;
     }
-    node = *(u32 **)((u8 *)object->value[2] + index * 12 + 4);
+    node = ((WorldChainEntry *)object->value[2])[index].node;
     while (node != NULL) {
-        if (node == (u32 *)value) {
+        if ((u32 *)node == (u32 *)value) {
             return 1;
         }
-        node = *(u32 **)((u8 *)node + 0x20);
+        node = node->next;
     }
     return 0;
 }
@@ -41,16 +53,16 @@ const s32 dds3ContainsNodeInAnyObjectChain(WorldObjectPointer *object, s32 value
     }
     p = (u8 *)object->value[2] + 4;
     for (i = 0; i < 0x12; i++, p += 0xC) {
-        u32 *node = *(u32 **)p;
+        WorldChainNode *node = *(WorldChainNode **)p;
 
         if (node == NULL) {
             continue;
         }
         do {
-            if (node == (u32 *)value) {
+            if ((u32 *)node == (u32 *)value) {
                 return 1;
             }
-            node = *(u32 **)((u8 *)node + 0x20);
+            node = node->next;
         } while (node != 0);
     }
     return 0;
