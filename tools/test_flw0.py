@@ -36,6 +36,7 @@ def _fixture(
     code_words: list[int] | None = None,
     message_data: bytes = b"",
     procedure_rows: tuple[tuple[str, int], ...] = (("synthetic_001", 0),),
+    jump_rows: tuple[tuple[str, int], ...] = (),
 ) -> bytes:
     """Build the significant shape of a small DDS event script."""
 
@@ -43,24 +44,30 @@ def _fixture(
         code_words = [7, (42 << 16) | 29, 9]
     sections = [
         (0, 0x20, len(procedure_rows)),
-        (1, 0x20, 0),
+        (1, 0x20, len(jump_rows)),
         (2, 4, len(code_words)),
         (3, 1, len(message_data)),
         (4, 1, 0xF0),
     ]
     table_end = 0x20 + len(sections) * 0x10
     proc = b"".join(_named_row(name, pc) for name, pc in procedure_rows)
+    labels = b"".join(_named_row(name, pc) for name, pc in jump_rows)
     code = b"".join(struct.pack("<I", word) for word in code_words)
     string_padding = bytes(0xF0)
     offsets = [
         table_end,
         table_end + len(proc),
-        table_end + len(proc),
-        table_end + len(proc) + len(code),
-        table_end + len(proc) + len(code) + len(message_data),
+        table_end + len(proc) + len(labels),
+        table_end + len(proc) + len(labels) + len(code),
+        table_end + len(proc) + len(labels) + len(code) + len(message_data),
     ]
     physical_size = (
-        table_end + len(proc) + len(code) + len(message_data) + len(string_padding)
+        table_end
+        + len(proc)
+        + len(labels)
+        + len(code)
+        + len(message_data)
+        + len(string_padding)
     )
     declared_size = physical_size - len(string_padding)
 
@@ -79,7 +86,7 @@ def _fixture(
         struct.pack("<IIII", type_id, size, count, offset)
         for (type_id, size, count), offset in zip(sections, offsets)
     )
-    return header + table + proc + code + message_data + string_padding
+    return header + table + proc + labels + code + message_data + string_padding
 
 
 def _instruction_words(script: flw0.Flw0File) -> tuple[flw0.InstructionWord, ...]:
@@ -900,6 +907,37 @@ end
         self.assertIn("profile dds1", result.stdout)
         self.assertIn("CREATE_POLYGON_MOVIE(670, 1)", result.stdout)
 
+        semantic = subprocess.run(
+            [
+                sys.executable,
+                str(TOOLS / "flw0.py"),
+                "view",
+                "--semantic",
+                str(path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(semantic.returncode, 0, semantic.stderr)
+        self.assertIn("FLW0 semantic reading view", semantic.stdout)
+        self.assertIn("result = CREATE_POLYGON_MOVIE(670, 1)", semantic.stdout)
+        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", semantic.stdout)
+        self.assertNotIn("push 670", semantic.stdout)
+        self.assertNotIn("push result", semantic.stdout)
+
+    def test_semantic_view_keeps_values_before_unknown_consumers(self) -> None:
+        code = [
+            flw0.OPCODE_IDS["PROC"],
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x123 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(
+            flw0.parse(_fixture(code)), "dds1", semantic=True
+        )
+        self.assertIn("0001: push 9", view)
+        self.assertIn("0002: COMM 0x0123  # unknown stack effect", view)
+
     def test_reading_view_is_conservative_after_unknown_command(self) -> None:
         code = [
             7,
@@ -927,6 +965,82 @@ end
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
         self.assertIn("0003: result = CREATE_POLYGON_MOVIE(670, 1)", view)
         self.assertIn("0005: push result<?>", view)
+
+    def test_reading_view_joins_stack_and_result_across_labels(self) -> None:
+        stack_code = [
+            flw0.OPCODE_IDS["PROC"],
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["IF"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            (2 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["ADD"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        stack_view = flw0_view.render(
+            flw0.parse(
+                _fixture(stack_code, jump_rows=(("else", 5), ("join", 6)))
+            ),
+            "dds1",
+        )
+        self.assertIn("0007: push (2 + 9)", stack_view)
+
+        result_code = [
+            flw0.OPCODE_IDS["PROC"],
+            (0x068 << 16) | flw0.OPCODE_IDS["COMM"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["IF"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        result_view = flw0_view.render(
+            flw0.parse(
+                _fixture(result_code, jump_rows=(("else", 5), ("join", 6)))
+            ),
+            "dds1",
+        )
+        self.assertIn("0006: push result", result_view)
+
+    def test_reading_view_discards_disagreeing_join_values(self) -> None:
+        code = [
+            flw0.OPCODE_IDS["PROC"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["IF"],
+            (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (2 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["ADD"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(
+            flw0.parse(_fixture(code, jump_rows=(("else", 5), ("join", 6)))),
+            "dds1",
+        )
+        self.assertIn("0007: push (2 + <?>)", view)
+
+    def test_semantic_view_folds_equal_values_from_both_branch_arms(self) -> None:
+        code = [
+            flw0.OPCODE_IDS["PROC"],
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["IF"],
+            (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+            (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(
+            flw0.parse(_fixture(code, jump_rows=(("else", 5), ("join", 6)))),
+            "dds1",
+            semantic=True,
+        )
+        self.assertIn("0006: WAIT_FOR_TIMER_LIMIT(3)", view)
+        self.assertNotIn("0003: push 3", view)
+        self.assertNotIn("0005: push 3", view)
 
     def test_verified_nonwriter_preserves_result_state(self) -> None:
         code = [
@@ -1010,6 +1124,32 @@ end
         self.assertIn("result = TEST_MODEL_FLAG(7)", view)
         self.assertIn("WAIT_FOR_TIMER_START()", view)
         self.assertIn("SCREEN_FADE_B(30, 0)", view)
+
+    def test_semantic_view_handles_both_tracked_corpora(self) -> None:
+        root = TOOLS.parent
+        expected = {
+            "dds1": (143, 99855, 26396),
+            "dds2": (140, 73364, 15621),
+        }
+        for game, expected_counts in expected.items():
+            files = 0
+            statements = 0
+            explicit_pushes = 0
+            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+                source = path.read_text(encoding="utf-8")
+                view = flw0_view.render(
+                    flw0.parse_source(source), game, semantic=True
+                )
+                files += 1
+                statements += len(
+                    re.findall(r"^  [0-9a-f]{4}:", view, re.MULTILINE)
+                )
+                explicit_pushes += len(
+                    re.findall(r"^  [0-9a-f]{4}: push ", view, re.MULTILINE)
+                )
+            self.assertEqual(
+                (files, statements, explicit_pushes), expected_counts
+            )
 
     def test_reading_view_uses_world_unit_stack_contracts(self) -> None:
         code = [
