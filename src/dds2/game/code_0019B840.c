@@ -131,7 +131,25 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BC60);
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BCC8);
+extern volatile s32 D_004389DC; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
+extern void sceGsSetDefLoadImage(void *, s16, s32, s32, s32, s32, s32, s32);
+extern void sceGsExecLoadImage(void *, s32);
+extern void sceGsSyncPath(s32, s32);
+extern void FlushCache(s32);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+
+/* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
+void func_0019BCC8(s16 buffer, s32 image) {
+    u8 loadImage[0x60];
+
+    sceGsSetDefLoadImage(loadImage, buffer, 1, 0, 0, 0, 8, 2);
+    WaitSema(D_004389DC);
+    FlushCache(0);
+    sceGsExecLoadImage(loadImage, image);
+    sceGsSyncPath(0, 0);
+    SignalSema(D_004389DC);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BD48);
 
