@@ -298,7 +298,16 @@ typedef struct {
 
 extern FldS16Row D_003931A0[];
 
-extern u32 D_00449B30[][23];
+/* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
+   scanned by fldReleaseActorTasksById. 0x5C is the stride retail uses. */
+typedef struct {
+    u32 unk00[11]; /* 0x00 */
+    f32 unk2C;     /* 0x2C: read as a float when copying to fldAreaState[96] */
+    u32 unk30[8];  /* 0x30 */
+    u32 unk50[3];  /* 0x50 */
+} FldActorRow; /* 0x5C bytes */
+
+extern FldActorRow D_00449B30[];
 
 typedef struct FldAreaState {
     u8 pad0[0x14];
@@ -1172,13 +1181,13 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     if (kind == 1) {
         if (entry->area == D_00389784[0] + 1) {
             fldPlayMenuSound(entry->state3);
-            fldBeginNpcInteractionById(D_00449B30[index][1]);
+            fldBeginNpcInteractionById(D_00449B30[index].unk00[1]);
             return;
         }
     } else if (kind == 2) {
         if (entry->area == fldAreaState[5] + 1) {
             fldAreaState[97] = 1;
-            *(f32 *)&fldAreaState[96] = *(f32 *)&D_00449B30[index][11];
+            *(f32 *)&fldAreaState[96] = D_00449B30[index].unk2C;
             if (entry->state == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
@@ -1409,28 +1418,28 @@ void fldResetActorSlots(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
-        D_00449B30[i][0] = 0;
-        D_00449B30[i][1] = 0;
-        D_00449B30[i][2] = 0;
-        D_00449B30[i][3] = -1;
-        D_00449B30[i][4] = 0;
-        D_00449B30[i][5] = -1;
-        D_00449B30[i][6] = -1;
-        D_00449B30[i][7] = 0;
-        D_00449B30[i][8] = 0;
-        D_00449B30[i][9] = 0;
-        D_00449B30[i][11] = 0;
-        D_00449B30[i][12] = 0;
-        D_00449B30[i][13] = 0;
-        D_00449B30[i][14] = 0;
-        D_00449B30[i][15] = 0;
-        D_00449B30[i][16] = 0;
-        D_00449B30[i][17] = 0;
-        D_00449B30[i][18] = 0;
-        D_00449B30[i][19] = 0;
-        D_00449B30[i][20] = 0;
-        D_00449B30[i][21] = 0;
-        D_00449B30[i][22] = 0;
+        D_00449B30[i].unk00[0] = 0;
+        D_00449B30[i].unk00[1] = 0;
+        D_00449B30[i].unk00[2] = 0;
+        D_00449B30[i].unk00[3] = -1;
+        D_00449B30[i].unk00[4] = 0;
+        D_00449B30[i].unk00[5] = -1;
+        D_00449B30[i].unk00[6] = -1;
+        D_00449B30[i].unk00[7] = 0;
+        D_00449B30[i].unk00[8] = 0;
+        D_00449B30[i].unk00[9] = 0;
+        D_00449B30[i].unk2C = 0.0f;
+        D_00449B30[i].unk30[0] = 0;
+        D_00449B30[i].unk30[1] = 0;
+        D_00449B30[i].unk30[2] = 0;
+        D_00449B30[i].unk30[3] = 0;
+        D_00449B30[i].unk30[4] = 0;
+        D_00449B30[i].unk30[5] = 0;
+        D_00449B30[i].unk30[6] = 0;
+        D_00449B30[i].unk30[7] = 0;
+        D_00449B30[i].unk50[0] = 0;
+        D_00449B30[i].unk50[1] = 0;
+        D_00449B30[i].unk50[2] = 0;
     }
     fldSelectedActorEntryIndex = -1;
 }
@@ -1474,7 +1483,7 @@ void fldBeginNpcInteractionById(s32 id) {
     if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
         for (i = 0; i < 0x100; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = D_00449B30[i];
+            npc = (u32 *)&D_00449B30[i];
             if (npc[0] == 1 && npc[1] == id) {
                 fldApplyRoomObjectModeZero(0, 0, actor->name0, 0);
                 return;
@@ -1483,7 +1492,7 @@ void fldBeginNpcInteractionById(s32 id) {
     } else {
         for (i = 0; i < 256; i++) {
             actor = (FldActorEntry *)(D_003932A0 + i * 108);
-            npc = D_00449B30[i];
+            npc = (u32 *)&D_00449B30[i];
             if (npc[0] == 1 && npc[1] == id) {
                 npc[0] = 2;
                 npc[7] = 0;
