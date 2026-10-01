@@ -1,6 +1,20 @@
 #include "common.h"
 
 extern s8 D_003BDA80;
+extern u16 D_00398910[];
+
+typedef struct ClockTime {
+    u8 pad0;
+    u8 sec;   /* 0x1 */
+    u8 min;   /* 0x2 */
+    u8 hour;  /* 0x3 */
+    u8 day;   /* 0x4 */
+    u8 month; /* 0x5 */
+    u16 year; /* 0x6 */
+} ClockTime;
+
+void func_002E8430(void *state, s32 seed);
+void func_002E8548(ClockTime *now);
 
 extern u32 effMiscRand(void *state);
 
@@ -17,7 +31,17 @@ u32 effMiscRandMod(void *state, u32 modulus) {
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8430);
 
-INCLUDE_ASM(const s32, "game/code_002E8398", func_002E84A0);
+/* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
+void func_002E84A0(void *state) {
+    ClockTime now;
+    s32 t;
+
+    func_002E8548(&now);
+    t = now.year * 0x16E + now.day + D_00398910[now.month + 7] + 0xFFF4FF83;
+    t = t * 0x18 + now.hour;
+    t = t * 0x3C + now.min;
+    func_002E8430(state, t * 0x3C + now.sec);
+}
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8548);
 

@@ -13,6 +13,7 @@ extern ScrData *D_00438E8C;
 #define SCR_STACK_RET 27
 
 extern ScrVM *D_00435DD0;
+extern u32 (*D_00384948[])(ScrData *scr);
 
 u32 scrPushImmediateInteger(ScrData *scr) {
     scrPushInteger(scr, scr->instructions[scr->pc].parts.sOperand);
@@ -280,7 +281,28 @@ u32 bfOpJumpIfFalse(ScrData *scr)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "script/scrTraceCode", bfContextStep);
+/* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
+ * 1 when a handler returns 2 (yield for one tick). */
+u32 bfContextStep(ScrData *scr) {
+    u32 result;
+
+    while (1) {
+        result = D_00384948[scr->instructions[scr->pc].parts.opCode](scr);
+        if (result == 0) {
+            scr->cmdTimer = 0;
+            return 2;
+        }
+        if (result == 2) {
+            break;
+        }
+        if (result == 1) {
+            scr->cmdTimer = 0;
+        }
+    }
+    scr->cmdTimer++;
+    scr->timer++;
+    return 1;
+}
 
 /* Script command parameter `idx` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */

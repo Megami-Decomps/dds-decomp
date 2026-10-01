@@ -2,11 +2,15 @@
 #include "pcp_vu0.h"
 
 typedef struct {
-    u8 pad0[0x80];
-    u32 handle;
-    u8 pad84[4];
-    u32 flags;
-    f32 value8C;
+    u8 pad0[0x40];
+    u128 vec40;       /* 0x40 */
+    u128 vec50;       /* 0x50 */
+    u128 vec60;       /* 0x60 */
+    u8 pad70[0x10];   /* 0x70 */
+    u32 handle;       /* 0x80 */
+    s32 unk84;        /* 0x84 */
+    u32 flags;        /* 0x88 */
+    f32 value;        /* 0x8C */
 } CameraData;
 
 typedef struct {
@@ -70,13 +74,17 @@ u32 dds3GetCameraHandle(CameraObject *camera) {
 typedef struct ActionObj {
     u8 unk0[4];    /* 0x0 */
     s32 unk4;      /* 0x4 */
-    u8 unk8[0x14]; /* 0x8 */
+    u8 unk8[0x10]; /* 0x8 */
+    CameraData *data; /* 0x18 */
     s32 unk1C;     /* 0x1C */
 } ActionObj;
 
 extern ActionObj *func_00110AA8();
 
 extern void dds3EnsureSlotData();
+extern void effObjSetInnerFirstVec(ActionObj *obj, void *vec);
+extern void effObjInnerVecBackup(s32 inner);
+extern void func_00112D10(ActionObj *obj);
 
 ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
     ActionObj *obj = func_00110AA8(4);
@@ -88,9 +96,36 @@ ActionObj *dds3CreateCameraObjectWithSlotData(s32 value) {
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112E30);
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112F28);
+ActionObj *func_00112F28(s32 value, void *innerVec, u128 *vec60, u128 *vec50) {
+    ActionObj *obj = dds3CreateCameraObjectWithSlotData(value);
+    CameraData *data = obj->data;
 
-INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112FC0);
+    data->value = 0.6283185f;
+    data->unk84 = 0;
+    effObjSetInnerFirstVec(obj, innerVec);
+    effObjInnerVecBackup(obj->unk1C);
+    PCP_COPY_VECTOR(&data->vec50, vec50);
+    PCP_COPY_VECTOR(&data->vec60, vec60);
+    func_00112D10(obj);
+    return obj;
+}
+
+ActionObj *func_00112FC0(s32 slotValue, f32 value, void *innerVec, u128 *vec40, u128 *vec50, s32 flag84) {
+    ActionObj *obj = dds3CreateCameraObjectWithSlotData(slotValue);
+    CameraData *data = obj->data;
+
+    data->value = value;
+    data->unk84 = flag84;
+    effObjSetInnerFirstVec(obj, innerVec);
+    effObjInnerVecBackup(obj->unk1C);
+    PCP_COPY_VECTOR(&data->vec50, vec50);
+    PCP_COPY_VECTOR(&data->vec40, vec40);
+    if (flag84 == 0) {
+        PCP_COPY_VECTOR(&data->vec60, vec40);
+    }
+    func_00112D10(obj);
+    return obj;
+}
 
 void func_00113080(void) {
     func_00110B50();
@@ -112,12 +147,12 @@ void dds3LoadCameraVectorVU(EEF0Node *arg0) {
 
 void dds3SetCameraValue(CameraObject *camera, f32 value) {
     CameraData *state = camera->data;
-    state->value8C = value;
+    state->value = value;
     state->flags |= 1;
 }
 
 f32 dds3GetCameraValue(CameraObject *camera) {
-    return camera->data->value8C;
+    return camera->data->value;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00113110);
