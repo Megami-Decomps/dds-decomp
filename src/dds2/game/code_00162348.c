@@ -323,7 +323,7 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     }
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+    VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, D_00451F30);
 }
 
