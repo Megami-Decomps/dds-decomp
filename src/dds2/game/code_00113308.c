@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 extern u64 dds3GetWorldSecondaryObject(void);
 
@@ -21,6 +22,7 @@ typedef struct EffectObjectData {
 typedef struct EffectObject {
     u8 pad00[0x18];
     EffectObjectData *data;
+    f32 *source; /* 0x1C */
 } EffectObject;
 
 typedef struct WorldSubState {
@@ -119,7 +121,102 @@ void evtDestroyEffectObjectData(EffectObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_00113308", func_001137D8);
 
-INCLUDE_ASM(const s32, "game/code_00113308", func_00113AB0);
+typedef struct FollowTargetInfo {
+    u32 flags;       /* 0x00 */
+    u8 pad04[0x14];
+    s32 mapRecord;   /* 0x18 */
+} FollowTargetInfo;
+
+typedef struct FollowTarget {
+    u8 pad00[0x8C];
+    FollowTargetInfo *info; /* 0x8C */
+    u8 pad90[0x43];
+    u8 height;       /* 0xD3 */
+    f32 offsetY;     /* 0xD4 */
+} FollowTarget;
+
+typedef struct FollowLevel {
+    u8 pad00[0x1F];
+    u8 value;        /* 0x1F */
+} FollowLevel;
+
+typedef struct FollowConfig {
+    u8 pad00[0x18];
+    FollowLevel *level; /* 0x18 */
+} FollowConfig;
+
+typedef struct FollowTransition {
+    u8 pad00[0xC];
+    FollowConfig *config; /* 0x0C */
+} FollowTransition;
+
+extern s32 dds3TestObjectFlags(EffectObject *, s32);
+extern void func_00112518(void *, EffectObject *);
+extern void func_00120B88(EffectObject *);
+extern FollowTransition *func_00113230(EffectObject *);
+extern s32 sdfLoadMapRecordPositionVector(s32, s32);
+extern s32 effObjTestNodeFlags(f32 *, s32);
+extern void func_001200E8(s32, f32, f32, f32, f32);
+extern u8 D_00380788[];
+
+s32 func_00113AB0(EffectObject *obj) {
+    f32 vec[4];
+    FollowTarget *target;
+    FollowConfig *config;
+    s32 level;
+    s32 pickMode;
+
+    memset(vec, 0, 0x10);
+    vec[3] = 1.0f;
+    if (dds3TestObjectFlags(obj, 1)) {
+        return 1;
+    }
+    target = (FollowTarget *)func_00113318(obj);
+    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->info->flags & 1)) {
+        func_00120B88(obj);
+    }
+    if ((s32)obj->data->word14 == -1) {
+        func_00112518(D_00380788, obj);
+    } else {
+        func_00112518(D_00380788 + (s32)obj->data->word14 * 0x10, obj);
+    }
+    if (!dds3TestObjectFlags(obj, 0x400)) {
+        return 1;
+    }
+    if (dds3TestObjectFlags(obj, 0x1000)) {
+        return 1;
+    }
+    if (target == NULL) {
+        return 1;
+    }
+    config = func_00113230(obj)->config;
+    if (dds3TestObjectFlags(obj, 0x4000)) {
+        level = target->height;
+    } else {
+        level = config->level->value;
+    }
+    pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
+    if (sdfLoadMapRecordPositionVector(target->info->mapRecord, 0)) {
+        VU0_STORE_VF(vf10, vec);
+        vec[1] = pickMode == 1 ? target->offsetY : obj->source[0x44 / 4];
+        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0xC4 / 4]);
+    } else {
+        if (effObjTestNodeFlags(obj->source, 8)) {
+            vec[0] = obj->source[0x70 / 4];
+            vec[1] = obj->source[0x74 / 4];
+            vec[2] = obj->source[0x78 / 4];
+        } else {
+            vec[0] = obj->source[0x40 / 4];
+            vec[1] = obj->source[0x44 / 4];
+            vec[2] = obj->source[0x48 / 4];
+        }
+        if (pickMode == 1) {
+            vec[1] = target->offsetY;
+        }
+        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0xC4 / 4]);
+    }
+    return 1;
+}
 
 void evtEndObjectValueTransition(EffectObject *object) {
     EffectObjectData *data;

@@ -642,7 +642,67 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_003448D0);
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344A08);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344B40);
+extern void *memcpy(void *dst, const void *src, u32 n);
+
+typedef struct SoundFeed {
+    u8 pad00[0x51];
+    u8 done;       /* 0x51 */
+    u8 count;      /* 0x52: blocks filled so far */
+    u8 start;      /* 0x53: ring slot of block 0 */
+    u32 ring;      /* 0x54: ring buffer base */
+    u8 pad58[4];
+    s32 (*read)(struct SoundFeed *, u32, s32, void *, s32); /* 0x5C */
+    u32 source;    /* 0x60 */
+} SoundFeed;
+
+void func_00344B40(SoundFeed *feed) {
+    s32 slot;
+    s32 count;
+    s32 got;
+    u32 dst;
+    s32 eof;
+
+    count = feed->count;
+    if (feed->done == 0 && count < 7) {
+        do {
+            slot = feed->start;
+            eof = 0;
+            dst = feed->ring;
+            slot += count;
+            if (slot >= 8) {
+                slot -= 8;
+            }
+            dst += slot << 13;
+            dst = (dst & 0x0FFFFFFF) | 0x20000000;
+            got = feed->read(feed, feed->source, 0, &eof, 0);
+            if (got < 0x2000) {
+                if (eof == 0) {
+                    return;
+                }
+                if (got > 0) {
+                    feed->read(feed, feed->source, 1, (void *)dst, got);
+                    count++;
+                }
+                feed->done = 1;
+            } else {
+                if (got == 0x2000) {
+                    if (eof != 0) {
+                        feed->done = 1;
+                    }
+                }
+                feed->read(feed, feed->source, 1, (void *)dst, 0x2000);
+                count++;
+            }
+            if (slot == 7) {
+                memcpy((void *)(((feed->ring - 0x100) & 0x0FFFFFFF) | 0x20000000), (void *)(dst + 0x1F00), 0x100);
+            }
+            feed->count = count;
+            if (feed->done != 0) {
+                break;
+            }
+        } while (count < 7);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344D60);
 
