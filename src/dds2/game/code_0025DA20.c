@@ -823,6 +823,7 @@ void mnuReleaseCampSceneRegisteredIds(CampScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
+
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
 
 typedef struct ShopEffectGraphics {
@@ -912,6 +913,7 @@ void mnuShopDestroyNestedEffectBatch(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FA28);
 
+
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FC08);
 
 typedef struct ShopSceneCleanup {
@@ -974,7 +976,35 @@ s32 mnuCampHasEligibleOwnedItems(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025FF18);
+typedef struct CampWindowListData {
+    u8 pad00[0x2C];
+    void (*callback)(void);
+    void *buffer;
+} CampWindowListData;
+
+extern void func_00295400(void);
+
+s32 func_0025FF18(s32 count, s32 *enabled, u8 *settings) {
+    u8 *window;
+    s32 *storage;
+    s32 i;
+
+    window = (u8 *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x16);
+    mnuSetWindowEntryParameters(0, (s32)window, 0, 8, 0xA);
+    for (i = 0; i < count; i++) {
+        if (enabled[i] != 0) {
+            *(s32 *)(mnuAppendWindowListNode((s32)window, 0) + 0x60) = i;
+        }
+    }
+    ((CampWindowListData *)*(s32 *)(window + 0x18))->callback = func_00295400;
+    storage = func_00328D68(0x14);
+    memset(storage, 0, 0x14);
+    ((CampWindowListData *)*(s32 *)(window + 0x18))->buffer = storage;
+    *(u16 *)((u8 *)storage + 0xC) = *(u16 *)(settings + 0xA0);
+    *(u16 *)((u8 *)storage + 0xE) = *(u16 *)(settings + 0xA2);
+    *(u16 *)((u8 *)storage + 0x10) = *(u16 *)(settings + 0xA4);
+    return (s32)window;
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260020);
 
