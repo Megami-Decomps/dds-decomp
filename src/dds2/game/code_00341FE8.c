@@ -14,7 +14,9 @@ void sndEnsureMidiBankResident(s32 trackId);
 
 u32 func_003417A8(u32 command, u32 channel, void *packet, u32 size);
 
-typedef struct FE250Entry {
+/* Per-track volume/balance record; unk4 and unk5 are the two balance bytes
+   read by sndGetNonnegativeEntryBalance. */
+typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
     /* 0x2 */ u8 unk2;
@@ -23,9 +25,9 @@ typedef struct FE250Entry {
     /* 0x5 */ u8 unk5;
     /* 0x6 */ u8 unk6;
     /* 0x7 */ u8 unk7;
-} FE250Entry;
+} SndTrackVolume;
 
-extern FE250Entry D_0047ABD0[];
+extern SndTrackVolume D_0047ABD0[];
 
 extern s32 func_00342168(s32 id);
 
@@ -85,15 +87,15 @@ typedef struct SndTrackSlot {
     u8 pad06[2];
 } SndTrackSlot;
 
-typedef struct FE7AA40Slots {
+typedef struct SndMixerBlockSlots {
     /* 0x000 */ u8 pad000[0x190];
     /* 0x190 */ SndTrackSlot slots[13];
-} FE7AA40Slots;
+} SndMixerBlockSlots;
 
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 func_00342168(s32 packed) {
-    FE7AA40Slots *work = (FE7AA40Slots *)D_0047AA40;
+    SndMixerBlockSlots *work = (SndMixerBlockSlots *)D_0047AA40;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
     s32 i;
@@ -178,7 +180,7 @@ u8 func_00342458(s32 index) {
 }
 
 s32 sndGetNonnegativeEntryBalance(s32 index) {
-    FE250Entry *entry = &D_0047ABD0[index];
+    SndTrackVolume *entry = &D_0047ABD0[index];
     s32 difference = entry->unk4 - entry->unk5;
 
     if (difference <= 0) {
@@ -191,7 +193,7 @@ u8 *func_00342498(void) {
     return D_0047AA50;
 }
 
-FE250Entry *sndGetTrackSlotTable(void) {
+SndTrackVolume *sndGetTrackSlotTable(void) {
     return D_0047ABD0;
 }
 
