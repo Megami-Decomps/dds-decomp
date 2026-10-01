@@ -33,10 +33,10 @@ extern void func_00118798(SdfChannel *channel);
 
 typedef struct ActionObj {
     u8 unk0[4];   /* 0x0 */
-    s32 unk4;     /* 0x4 */
-    s32 unk8;     /* 0x8 */
+    s32 firstPayload; /* 0x4: first scalar passed to evtSpawnActionObj11 */
+    s32 thirdPayload; /* 0x8: third scalar passed to evtSpawnActionObj11 */
     u8 unkC[0xC]; /* 0xC */
-    s32 unk18;    /* 0x18 */
+    s32 secondPayload; /* 0x18: second payload passed to evtSpawnActionObj11 */
 } ActionObj;
 
 typedef struct EvtScaledValue {
@@ -186,9 +186,9 @@ void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
 ActionObj *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
     ActionObj *obj = dds3AppendWorldObjectNode(0x11);
 
-    obj->unk18 = b;
-    obj->unk4 = a;
-    obj->unk8 = c;
+    obj->secondPayload = b;
+    obj->firstPayload = a;
+    obj->thirdPayload = c;
     return obj;
 }
 
