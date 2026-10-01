@@ -302,7 +302,96 @@ SKILL_ACTION_ENUMS = {
 }
 
 
+_AFFINITY_EFFECTS = (
+    (1, "VOID_PHYS"),
+    (2, "VOID_FIRE"),
+    (3, "VOID_ICE"),
+    (4, "VOID_ELEC"),
+    (5, "VOID_FORCE"),
+    (6, "VOID_EARTH"),
+    (7, "VOID_EXPEL"),
+    (8, "VOID_DEATH"),
+    (9, "VOID_CHARM"),
+    (10, "VOID_POISON"),
+    (11, "VOID_MUTE"),
+    (12, "VOID_PANIC"),
+    (13, "VOID_NERVE"),
+    (14, "DRAIN_PHYS"),
+    (15, "DRAIN_FIRE"),
+    (16, "DRAIN_ICE"),
+    (17, "DRAIN_ELEC"),
+    (18, "DRAIN_FORCE"),
+    (19, "DRAIN_EARTH"),
+    (20, "REPEL_PHYS_20"),
+    (21, "REPEL_FIRE"),
+    (22, "REPEL_ICE"),
+    (23, "REPEL_ELEC"),
+    (24, "REPEL_FORCE"),
+    (25, "REPEL_EARTH"),
+    (26, "REPEL_EXPEL"),
+    (27, "REPEL_DEATH"),
+    (28, "TETRAJA"),
+    (29, "REPEL_PHYS_29"),
+    (30, "REPEL_MAGIC"),
+)
+
+
+SKILL_ACTION_PROFILE_ENUMS = {
+    "dds1": {
+        "affinity_effect": _integer_symbols(*_AFFINITY_EFFECTS),
+        "program": _integer_symbols(
+            (1, "ANALYZE"),
+            (2, "CALL_REINFORCEMENTS"),
+            (3, "ESCAPE"),
+            (4, "CALM_DEATH"),
+            (5, "REDUCE_ENCOUNTER_RATE"),
+            (6, "INCREASE_ENCOUNTER_RATE"),
+            (7, "NULL_DAMAGE_ZONES"),
+            (9, "RAGE"),
+            (10, "ITEM_DROP"),
+            (12, "GUARD"),
+            (13, "CANNIBALIZE"),
+            (14, "DRAGON_THRASH"),
+            (15, "REUNITE"),
+        ),
+    },
+    "dds2": {
+        "affinity_effect": _integer_symbols(
+            *_AFFINITY_EFFECTS, (31, "VOID_AILMENT")
+        ),
+        "program": _integer_symbols(
+            (1, "ANALYZE"),
+            (2, "CALL_REINFORCEMENTS"),
+            (3, "ESCAPE"),
+            (4, "CALM_DEATH"),
+            (5, "REDUCE_ENCOUNTER_RATE"),
+            (6, "INCREASE_ENCOUNTER_RATE"),
+            (7, "NULL_DAMAGE_ZONES"),
+            (9, "RAGE"),
+            (10, "ITEM_DROP"),
+            (12, "GUARD"),
+            (14, "DRAGON_THRASH"),
+            (15, "REUNITE"),
+            (16, "GATE_TO_ABYSS"),
+            (17, "REGURGITATE"),
+            (19, "GORGE"),
+            (20, "CONVICTION"),
+            (21, "SCATTER"),
+            (22, "DESERT_WIND"),
+            (23, "RETRIBUTION"),
+        ),
+    },
+}
+
+
 SKILL_ACTION_FLAGS = {
+    "flags": _integer_symbols(
+        (0x02, "DRAIN"),
+        (0x08, "FORFEIT_HP"),
+        (0x20, "HUNT"),
+        (0x40, "PHYSICAL_AMMO"),
+        (0x80, "ELEMENTAL_AMMO"),
+    ),
     "use": _integer_symbols(
         (1, "FIELD"),
         (2, "BATTLE"),
@@ -381,8 +470,8 @@ class SkillAction:
     base_status: int = 0
     support_type: int = 0
     support_points: int = 0
-    death_type: int = 0
-    lookup_id: int = 0
+    hunt_rate: int = 0
+    affinity_effect: int = 0
     program: int = 0
     magic_base: int = 0
     magic_limit: int = 0
@@ -1565,8 +1654,8 @@ def encode_skill(table: SkillTable) -> bytes:
             _u16(row.base_status, f"{context} base_status"),
             _u32(row.support_type, f"{context} support_type"),
             _s8(row.support_points, f"{context} support_points"),
-            _u8(row.death_type, f"{context} death_type"),
-            _u16(row.lookup_id, f"{context} lookup_id"),
+            _u8(row.hunt_rate, f"{context} hunt_rate"),
+            _u16(row.affinity_effect, f"{context} affinity_effect"),
             _u32(row.program, f"{context} program"),
             _s16(row.magic_base, f"{context} magic_base"),
             _s16(row.magic_limit, f"{context} magic_limit"),
@@ -2232,8 +2321,16 @@ def _value(fields: dict[str, str], key: str, base: int, line: int) -> int:
     return _integer(fields[key], line, key) if key in fields else base
 
 
+def _skill_action_symbols(
+    profile_name: str, key: str
+) -> flw0_profiles.IntegerSymbols | None:
+    return SKILL_ACTION_PROFILE_ENUMS[profile_name].get(
+        key, SKILL_ACTION_ENUMS.get(key)
+    )
+
+
 def _skill_action_value(
-    fields: dict[str, str], key: str, line_number: int
+    fields: dict[str, str], key: str, line_number: int, profile_name: str
 ) -> int:
     if key not in fields:
         return 0
@@ -2241,9 +2338,8 @@ def _skill_action_value(
         return _symbolic_flags(
             fields[key], line_number, key, SKILL_ACTION_FLAGS[key]
         )
-    return _symbolic_integer(
-        fields[key], line_number, key, SKILL_ACTION_ENUMS.get(key)
-    )
+    symbols = _skill_action_symbols(profile_name, key)
+    return _symbolic_integer(fields[key], line_number, key, symbols)
 
 
 def _bytes_field(
@@ -2791,7 +2887,9 @@ def parse_skill_source(text: str) -> SkillTable:
             fields = _fields(tokens[2:], line_number, action_fields, directive)
             row = SkillAction(
                 **{
-                    name: _skill_action_value(fields, name, line_number)
+                    name: _skill_action_value(
+                        fields, name, line_number, profile.name
+                    )
                     for name in SkillAction.__dataclass_fields__
                 }
             )
@@ -3778,7 +3876,7 @@ def render_skill_source(table: SkillTable) -> str:
     lines.append("")
 
     action_renderers = (
-        ("flags", "hex"), ("use", "symbol"), ("effect_type", "symbol"),
+        ("flags", "symbol"), ("use", "symbol"), ("effect_type", "symbol"),
         ("cost_type", "symbol"), ("cost", "int"), ("cost_base", "int"),
         ("target_type", "symbol"), ("target_area", "symbol"),
         ("target_rule", "symbol"), ("target_random", "symbol"),
@@ -3790,8 +3888,8 @@ def render_skill_source(table: SkillTable) -> str:
         ("mp_base", "int"), ("effect_percent", "int"),
         ("ailment_type", "symbol"), ("ailment_level", "int"),
         ("base_status", "symbol"), ("support_type", "symbol"),
-        ("support_points", "int"), ("death_type", "int"),
-        ("lookup_id", "int"), ("program", "int"),
+        ("support_points", "int"), ("hunt_rate", "int"),
+        ("affinity_effect", "symbol"), ("program", "symbol"),
         ("magic_base", "int"), ("magic_limit", "int"),
     )
     for index, row in enumerate(table.actions):
@@ -3809,9 +3907,10 @@ def render_skill_source(table: SkillTable) -> str:
                             value, SKILL_ACTION_FLAGS[attribute]
                         )
                     else:
-                        text = _symbolic_text(
-                            value, SKILL_ACTION_ENUMS.get(attribute)
+                        symbols = _skill_action_symbols(
+                            table.profile.name, attribute
                         )
+                        text = _symbolic_text(value, symbols)
                     fields.append(f"{attribute}={text}")
             else:
                 _append(fields, attribute, value)
