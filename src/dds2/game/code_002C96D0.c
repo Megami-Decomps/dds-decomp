@@ -1182,9 +1182,8 @@ void *fileUpdateWait(void) {
     return NULL;
 }
 
-/* Keep arg0: renaming it changes fileAcquireRecord's full-unit codegen. */
-void *fileSetMenuCallbackAndClearResult(u32 arg0) {
-    D_00439020 = arg0;
+void *fileSetMenuCallbackAndClearResult(u32 menuCallback) {
+    D_00439020 = menuCallback;
     D_00437D40 = 0;
     return mcdFinishFileDetection;
 }
@@ -4417,7 +4416,13 @@ void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileAcquireRecord);
+void fileAcquireRecord(FileSlotTable *record) {
+    if (record->references == 0) {
+        fileResetSlotStates(record);
+    }
+    D_003E95C0[record->type].acquire(record);
+    record->references++;
+}
 
 void fileReadVectorPtr20(u8 *obj, void *dst) {
     PCP_COPY_VECTOR(dst, *(u8 **)(obj + 0x20));

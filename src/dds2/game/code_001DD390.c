@@ -5405,6 +5405,9 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417D70);
 
 void btlPrepareRandomizedActionCameraPose(ActionUnit *action, XformData *from, XformData *to) {
     f32 quat[4];
+    /* Four camera presets: two quaternion rows at [0..3] and [4..7],
+       target-distance multiplier at [8], camera parameter at [9], and
+       two unused zero slots. Keep the rows contiguous for the VU loads. */
     f32 poses[4][12] = {
         {0.0f, -0.94f, 0.02f, 0.3f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
         {0.06f, -0.94f, -0.18f, 0.25f, 0.0f, -1.0f, 0.0f, 0.0f, 1.15f, 25.0f, 0.0f, 0.0f},
@@ -7422,7 +7425,13 @@ typedef struct SoundHandleNode {
     void *actor;
 } SoundHandleNode;
 
-INCLUDE_ASM(const s32, "game/code_001DD390", sndCreateSystemEffectHandle);
+SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
+    SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
+    SoundEntry *entry = &D_003BDE18[index];
+    node->actor = actor;
+    node->handle = func_002D4138(entry->unk4);
+    return node;
+}
 
 extern void mdlLoadPrimaryVectorVU(s32);
 

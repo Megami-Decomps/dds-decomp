@@ -52,8 +52,16 @@ typedef struct MdlViewState {
     s32 resources[1];
 } MdlViewState;
 
-typedef struct MdlCtrlState {
+typedef struct MdlPadState {
     u8 pad00[4];
+    s8 stepDownA;  /* 0x04 */
+    s8 stepUpA;    /* 0x05 */
+    s8 stepDownB;  /* 0x06 */
+    s8 stepUpB;    /* 0x07 */
+} MdlPadState;
+
+typedef struct MdlCtrlState {
+    MdlPadState *pad;
     u8 unk04;
     u8 pad05[3];
     s32 unk08;
@@ -213,7 +221,69 @@ void mdlReleaseViewerSlotResources(void) {
     sdfReleaseMemorySlot(&D_003BBB70);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_00218CA8);
+/* Three-entry name table plus a small header, built from the first slot-table entry. */
+typedef struct MdlViewerHeader {
+    s16 kind;
+    s16 unk02;
+    s16 unk04;
+    s16 unk06;
+} MdlViewerHeader;
+
+extern s32 func_002D03F8(s32 size);
+extern void *func_002CFEB8(s32 size);
+extern u32 sdfResourceRetainAddress(s32 handle);
+extern u32 strlen(const char *);
+extern char *strcpy(char *, const char *);
+extern MdlViewerHeader *D_003BD880;
+extern char **D_003BD884;
+
+void func_00218CA8(void) {
+    s32 i;
+    char *source;
+    char *copy;
+
+    mdlReleaseViewerSlotResources();
+    D_003BBB6C = func_002D03F8(8);
+    D_003BD880 = (MdlViewerHeader *)sdfResourceRetainAddress(D_003BBB6C);
+    D_003BD880->kind = 5;
+    D_003BD880->unk02 = 0;
+    D_003BD880->unk04 = 0x1000;
+    D_003BD880->unk06 = 0x3E8;
+    D_003BBB70 = func_002D03F8(0xC);
+    D_003BD884 = (char **)sdfResourceRetainAddress(D_003BBB70);
+    for (i = 0; i != 3; i++) {
+        switch (i) {
+        case 0:
+            source = (char *)D_00365858[0].entries->b;
+            break;
+        case 1:
+            source = (char *)D_00365858[0].entries->a;
+            break;
+        default:
+            source = (char *)D_00365858[0].entries->c;
+            break;
+        }
+        if (source != NULL) {
+            copy = func_002CFEB8(strlen(source) + 1);
+            strcpy(copy, source);
+            switch (i) {
+            case 0:
+                D_003BD884[1] = copy;
+                break;
+            case 1:
+                D_003BD884[0] = copy;
+                break;
+            case 2:
+                D_003BD884[2] = copy;
+                break;
+            }
+        }
+    }
+    D_00367900[5].entries = (MdlSlotEntry *)D_003BD880;
+    D_00367900[5].count = 1;
+    D_00365858[5].entries = (MdlSlotEntry *)D_003BD884;
+    D_00365858[5].count = 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
@@ -1531,7 +1601,102 @@ void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 var
                   (D_003D7B50.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1, packedColor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021EB60);
+typedef struct MdlValueEdit {
+    u8 pad00[4];
+    f32 *target;   /* 0x04 */
+    s32 min;       /* 0x08 */
+    s32 max;       /* 0x0C */
+    u8 pad10[8];
+} MdlValueEdit;
+
+extern MdlValueEdit D_00367D58[];
+
+/* Step the number being edited in table slot `index`: coarse steps (A) and fine steps (B),
+   held-button repeat, wrapping from one end of [min, max] to the other on a fresh press. */
+void func_0021EB60(s32 index) {
+    MdlValueEdit *edit = &D_00367D58[index];
+    f32 *target = edit->target;
+    s32 value = (s32)(*target + 0.5f);
+    s32 stepA;
+    s32 stepB;
+    MdlPadState *pad;
+    s32 min;
+    s32 max;
+
+    if (value < 1000) {
+        stepA = 10;
+        stepB = 1;
+    } else if (value < 10000) {
+        stepA = 100;
+        stepB = 10;
+    } else {
+        stepA = 1000;
+        stepB = 100;
+    }
+    min = edit->min;
+    pad = D_003D7B50.pad;
+    max = edit->max;
+    if (pad->stepUpA & 0x80) {
+        if (value < max) {
+            value += stepA;
+            if (value > max) {
+                value = max;
+            }
+        } else {
+            value = min;
+        }
+    } else if (pad->stepUpA & 2) {
+        value += stepA;
+        if (value > max) {
+            value = max;
+        }
+    } else if (pad->stepDownA & 0x80) {
+        if (min < value) {
+            value -= stepA;
+            if (value < min) {
+                value = min;
+            }
+        } else {
+            value = max;
+        }
+    } else if (pad->stepDownA & 2) {
+        value -= stepA;
+        if (value < min) {
+            value = min;
+        }
+    } else if (pad->stepUpB & 0x80) {
+        if (value < max) {
+            value += stepB;
+            if (value > max) {
+                value = max;
+            }
+        } else {
+            value = min;
+        }
+    } else if (pad->stepUpB & 2) {
+        value += stepB;
+        if (value > max) {
+            value = max;
+        }
+    } else if (pad->stepDownB & 0x80) {
+        if (min < value) {
+            value -= stepB;
+            if (value < min) {
+                value = min;
+            }
+        } else {
+            value = max;
+        }
+    } else if (pad->stepDownB & 2) {
+        value -= stepB;
+        if (value < min) {
+            value = min;
+        }
+    } else {
+        return;
+    }
+    *target = value;
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ECF0);
 
