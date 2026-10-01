@@ -362,6 +362,14 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `/* never read; gcc drops the stores but keeps the frame slot */`
   (DDS1 `func_0018E548` frame 0x10 and `func_0015DE88` frame 0x20 with one
   store, plus DDS2 twins). Not a way to change register allocation.
+- A single shared failure exit (`goto fail;` ... `fail: return 0;`) is ordinary
+  developer C (several guards jumping to one failure exit). Use it only when
+  plain `return 0;` provably differs: plain returns hoist `$2 = 0` to function
+  entry and let reorg steal the epilogue's first `ld` into annulled `bnezl`/`beqzl`
+  slots (two return labels), and merged guard chains lose the per-branch
+  `daddu $2,$0,$0` slot copies that retail has. Name the label for its meaning
+  (`fail`, `notFound`), never for the epilogue (DDS1/DDS2
+  `btlFindEligibleTargetForMultiActorCommand`).
 
 ## Pointer and loop addressing
 
