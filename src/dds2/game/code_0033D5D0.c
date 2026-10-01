@@ -30,8 +30,8 @@ extern u32 D_0040B990[];
 extern char D_0040B9D0[];
 
 typedef struct DevState {
-    struct DevState *unk0; /* 0x0 */
-    struct DevState *unk4; /* 0x4 */
+    struct DevState *next; /* 0x0 */
+    struct DevState *previous; /* 0x4 */
     struct DevState *workerNext; /* 0x8 */
     struct DevState *workerPrev; /* 0xC */
     void *resource; /* 0x10 */
@@ -653,9 +653,9 @@ void func_0033EC48(DevState *state) {
     if (worker->threadId < 0) {
         sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
     }
-    state->unk4 = D_00438B0C;
+    state->previous = D_00438B0C;
     if (D_00438B0C != NULL) {
-        D_00438B0C->unk0 = state;
+        D_00438B0C->next = state;
     } else {
         D_00438B08 = state;
     }
@@ -689,17 +689,17 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     s64 interrupts;
 
     interrupts = func_0036DE70();
-    prev = state->unk4;
-    next = state->unk0;
+    prev = state->previous;
+    next = state->next;
     if (prev == NULL) {
         D_00438B14 = next;
     } else {
-        prev->unk0 = next;
+        prev->next = next;
     }
     if (next == NULL) {
         D_00438B18 = prev;
     } else {
-        next->unk4 = prev;
+        next->previous = prev;
     }
     D_00438B10 -= 1;
     if (interrupts != 0) {

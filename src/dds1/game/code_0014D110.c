@@ -9,7 +9,7 @@ typedef struct FldCamPose {
     u8 pad18[0x18];
     f32 focusPos[3]; /* 0x30 */
     u8 pad3C[0x14];
-    s32 unk50;
+    s32 focusActive; /* 0x50 */
     u8 pad54[0x10];
     f32 negatedAngle;
     u8 pad68[8];
@@ -402,7 +402,7 @@ s32 fldCmdFocusCameraOnObject(void) {
         return 1;
     }
     work = (FldCamPose *)fldAreaState;
-    work->unk50 = 1;
+    work->focusActive = 1;
     work->focusPos[0] = obj->model->pos[0];
     work->focusPos[1] = obj->model->pos[1];
     work->focusPos[2] = obj->model->pos[2];
@@ -429,7 +429,7 @@ s32 fldUpdateLookAtSegment(void) {
     FldVec3 near;
     FldVec3 far;
 
-    cam->unk50 = 0;
+    cam->focusActive = 0;
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
