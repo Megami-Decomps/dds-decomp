@@ -63,30 +63,30 @@ extern u64 btlCreateCommandSoundUpdateTask(void);
 
 
 typedef struct BtlActor {
-    u8 unk_00[0x18];
+    u8 pad00[0x18];
     BtlUnit *unit;
 } BtlActor;
 
 typedef struct BtlList {
-    u8 unk_00[0x20];
+    u8 pad00[0x20];
     s32 count;
 } BtlList;
 
 
 typedef struct BtlCmdCtx {
-    u8 unk_00[0xC];
+    u8 pad00[0xC];
     u32 flags; /* 0x0C: command-context flags */
-    u8 unk_10[8];
+    u8 pad10[8];
     BtlUnit *unit;
-    u8 unk_1C[4];
+    u8 pad1C[4];
     s32 commandMode;
     s32 commandValue;
-    u8 unk_28[4];
-    void *unk_2C;
-    void *unk_30;
-    u8 unk_34[4];
+    u8 pad28[4];
+    void *actionProbeFirst;
+    void *actionProbeSecond;
+    u8 pad34[4];
     u32 parameter38; /* 0x38 */
-    u8 unk_3C[0x50];
+    u8 pad3C[0x50];
     u32 parameter8C; /* 0x8C */
 } BtlCmdCtx;
 
@@ -856,8 +856,8 @@ u32 btlScriptSelectModeAValueOne(void) {
 typedef struct BtlActionProbe {
     u16 id;         /* 0x00 */
     u8 pad_02[2];
-    void *first;    /* 0x04 */
-    void *second;   /* 0x08 */
+    void *actionProbeFirst;    /* 0x04 */
+    void *actionProbeSecond;   /* 0x08 */
 } BtlActionProbe;
 
 extern s8 *D_003BAA4C;
@@ -874,10 +874,10 @@ u32 btlScriptSelectActionEntry(void) {
     if (D_003BAA4C[index * 2 + 1] == 1) {
         if (func_001A8A30(context->unit, index) != 0 &&
             func_001A3CE0(context->unit, index, &probe) != 0) {
-            context->unk_2C = probe.first;
+            context->actionProbeFirst = probe.actionProbeFirst;
             context->commandMode = 3;
             context->commandValue = probe.id;
-            context->unk_30 = probe.second;
+            context->actionProbeSecond = probe.actionProbeSecond;
         } else {
             context->commandValue = 0;
             context->commandMode = 1;

@@ -89,9 +89,9 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         func_0020B348((void *)command, (void *)command, 0);
     } else if (flags & 8) {
         if (btlGetIndexListCount(command->task->unk_60) == 1) {
-            void *other = (void *)btlGetIndexListEntry((void *)command->task->unk_60, 0);
+            void *target = (void *)btlGetIndexListEntry((void *)command->task->unk_60, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190((u8 *)command, other);
+            func_0020B190((u8 *)command, target);
             command->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
@@ -194,9 +194,7 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
 
 extern s32 btlOffsetSpecialTargetPositionForAction();
 
-s64 func_0020D668(BtlLinkedCommand *command, s8 unused1, s8 unused2) {
-    return btlOffsetSpecialTargetPositionForAction(command, unused1, unused2);
-}
+INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D668);
 
 s32 func_0020D690(BtlUnit *unit, s32 action) {
     if ((unit->flags & 0x400) == 0) {
@@ -370,9 +368,7 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DC38);
 
-s64 func_0020DE50(void) {
-    return func_0020DC38();
-}
+INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE70);
 
