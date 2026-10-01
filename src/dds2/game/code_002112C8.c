@@ -364,9 +364,9 @@ typedef struct BtlUnit {
     u32 unk_31C;
     struct BtlUnitModel *model;
     u8 unk_324[0x18];
-    void *effObj;
-    u8 unk_340[4];
-    struct BtlUnit *next;
+    void *effObj;            /* 0x33C */
+    u8 unk_340[0x24];
+    struct BtlUnit *nextActor; /* 0x364 */
 } BtlUnit;
 
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);

@@ -30,7 +30,7 @@ typedef struct BtlWork {
     u8 pad0[0x208];
     s32 unk208;
     u8 pad20C[0x40];
-    BtlUnit *actorList;
+    struct BtlUnitNode *actorList;
     u8 pad250[0x18];
     u16 unk268;
     u8 pad26A[0x36];
@@ -52,7 +52,7 @@ typedef struct BtlSkillTask {
     u8 pad0[8];
     u32 flags;
     u8 pad0C[0xC];
-    BtlUnit *unit;
+    struct BtlUnitNode *unit;
     u8 pad1C[8];
     s32 kind;
     u8 pad28[0x20];
@@ -97,19 +97,25 @@ typedef struct BtlParams {
     f32 ratioMax;
 } BtlParams;
 
-struct BtlUnit {
+/* Sparse view of the battle unit: this unit only walks the actor list and
+ * reads three fields, so it names only those. The layout is the canonical
+ * BtlUnit's; see code_001DD390 for the full one. Renamed from BtlUnit because
+ * a partial view under the full type's name hides which fields are really
+ * known here. */
+struct BtlUnitNode {
     u8 pad0[0x110];
-    u32 flags;
-    u32 stateFlags;
+    u32 flags;               /* 0x110 */
+    u32 stateFlags;          /* 0x114 */
     u8 pad118[4];
-    u8 state;
+    u8 state;                /* 0x11C */
     u8 pad11D[7];
-    u16 mode;
+    u16 mode;                /* 0x124 */
     u8 pad126[0x21A];
-    BtlUnitExt *ext;
+    BtlUnitExt *ext;         /* 0x340 */
     u8 pad344[0x20];
-    BtlUnit *next;
+    struct BtlUnitNode *next; /* 0x364: actor-list link */
 };
+typedef struct BtlUnitNode BtlUnitNode;
 
 extern BtlParams *D_00435E44;
 extern BtlEntry *D_00435E30;
@@ -117,17 +123,17 @@ extern BtlWork *func_001AA6F8(void);
 extern s32 btlBossDebugPrintf(const char *, ...);
 extern BtlTask *func_001E5FF8(s32, s32);
 extern void btlStartTask(BtlTask *);
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnitNode *, s32);
 extern BtlTask *sndCreateStationedSeTask(s32);
-extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
-extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnitNode *, s32);
+extern s32 btlAdjustPointsForCombatFlags(BtlUnitNode *, s32, s32, s32, s32);
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 extern void func_001EC868(void *, f32 *, f32);
 extern void btlCopyMotionTransform(void *, f32 *);
 extern void func_00336538(f32);
 extern void btlFlagAllUnitDefeatCandidatesTask();
 extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
-extern BtlUnit *func_002172B8(BtlEffect *);
+extern BtlUnitNode *func_002172B8(BtlEffect *);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
@@ -158,7 +164,7 @@ u64 btlStartSubtaskWithInput(u64 input) {
     return task->result;
 }
 
-void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
+void btlMarkActiveBossUnitExtensionFlags(BtlUnitNode *unit) {
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (unit->flags & 2) {
             unit->ext->flags |= 0x1000000;
@@ -168,8 +174,8 @@ void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit) {
     }
 }
 
-f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target) {
-    BtlUnit *other;
+f32 btlGetBossPresenceActionScale(BtlUnitNode *unit, BtlUnitNode *target) {
+    struct BtlUnitNode *other;
     f32 scale = 1.0f;
     if (unit->flags & 0x200) {
         if (target->mode == 0x110) {
@@ -254,7 +260,7 @@ INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E778);
 
 INCLUDE_ASM(const s32, "game/code_0021B5C0", func_0021E8C0);
 
-s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
+s32 btlMapBossEntryKindToIndex(BtlUnitNode *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
@@ -279,7 +285,7 @@ s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index) {
     }
 }
 
-s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
+s32 btlGetBossEntryKind(BtlUnitNode *unit, s32 index) {
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return -1;
     }
@@ -289,7 +295,7 @@ s32 btlGetBossEntryKind(BtlUnit *unit, s32 index) {
     return D_00435E30[index].kind;
 }
 
-s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
+s32 btlRemapBossResponseForActionPhase(BtlUnitNode *unit, s32 value) {
     s32 mode;
     if (!(unit->flags & BTL_UNIT_BOSS_FLAG)) {
         return value;
@@ -308,7 +314,7 @@ s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value) {
     return value;
 }
 
-void btlPlayStationedSoundForActiveBossAction(BtlUnit *unit) {
+void btlPlayStationedSoundForActiveBossAction(BtlUnitNode *unit) {
     s32 mode;
     if (unit->flags & BTL_UNIT_BOSS_FLAG) {
         if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
@@ -355,7 +361,7 @@ void btlAccumulateBossRatioScale(BtlSkillTask *task) {
     }
 }
 
-f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
+f32 btlGetBossRatioScale(BtlUnitNode *unit, s32 unused, s32 kind, s32 flag) {
     f32 scale = 1.0f;
     if (kind == BTL_SKILL_HEKATO && flag == 1) {
         if (unit->flags & BTL_UNIT_BOSS_FLAG) {
@@ -365,10 +371,10 @@ f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag) {
     return scale;
 }
 
-BtlUnit *btlFindUnitByMode(void) {
+BtlUnitNode *btlFindUnitByMode(void) {
     BtlWork *work = func_001AA6F8();
     BtlSub718 *sub = work->sub;
-    BtlUnit *unit;
+    struct BtlUnitNode *unit;
     if (sub->b.active == 0) {
         return 0;
     }
