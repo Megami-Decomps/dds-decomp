@@ -40,18 +40,21 @@ INCLUDE_ASM(const s32, "game/code_00157A50", func_00157CE0);
 
 INCLUDE_ASM(const s32, "game/code_00157A50", func_00157D38);
 
-void func_00157E50(void *arg) {
-    struct {
-        void *field_0x00;
-        u32 field_0x04;
-        s32 field_0x08;
-        u8 pad_0x0C[0x38];
-        void *field_0x44;
-    } *entry = arg;
+/* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the
+ * reference count and +0x44 the allocation released when it reaches zero. */
+typedef struct TexRecord {
+    void *texture;     /* 0x00 */
+    u32 flags;         /* 0x04 */
+    s32 refCount;      /* 0x08 */
+    u8 pad0C[0x38];
+    void *allocation;  /* 0x44 */
+} TexRecord;
 
-    entry->field_0x08--;
-    if (entry->field_0x08 == 0) {
-        sdfTexReleaseReferenceViaHandler(entry->field_0x00);
-        func_003297C8(entry->field_0x44);
+/* Drop one reference; the last one releases the texture and its allocation. */
+void func_00157E50(TexRecord *entry) {
+    entry->refCount--;
+    if (entry->refCount == 0) {
+        sdfTexReleaseReferenceViaHandler(entry->texture);
+        func_003297C8(entry->allocation);
     }
 }
