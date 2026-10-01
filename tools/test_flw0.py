@@ -19,6 +19,7 @@ if str(TOOLS) not in sys.path:
 import flw0
 import flw0_profiles
 import flw0_symbolic
+import flw0_view
 
 
 def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
@@ -120,6 +121,26 @@ class Flw0Tests(unittest.TestCase):
         self.assertIn("0001: PUSHI 0xdeadbeef", source)
         self.assertIn("0003: WORD 0x1234ffff", source)
         self.assertEqual(flw0.parse_source(source).to_bytes(), original)
+
+    def test_physical_source_supports_a_command_profile(self) -> None:
+        original = _fixture(
+            [
+                7,
+                (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+                flw0.OPCODE_IDS["END"],
+            ]
+        )
+        source = flw0.render_source(flw0.parse(original), "dds1")
+        self.assertIn("flw0 1\nprofile dds1\n", source)
+        self.assertIn("0002: COMM WAIT_FOR_TIMER_LIMIT", source)
+        self.assertEqual(flw0.parse_source(source).to_bytes(), original)
+
+        without_profile = source.replace("profile dds1\n", "")
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "named COMM operand requires a profile"
+        ):
+            flw0.parse_source(without_profile)
 
     def test_source_preserves_gap_unknown_section_and_raw_row(self) -> None:
         original = bytearray(_fixture())
@@ -363,20 +384,140 @@ end
 
     def test_dds1_command_profile_records_verified_stack_pops(self) -> None:
         commands = {
-            command.name: (command.command_id, command.stack_pop)
+            command.name: (
+                command.command_id,
+                command.stack_pop,
+                command.writes_result,
+            )
             for command in flw0_profiles.DDS1.commands
         }
         self.assertEqual(
             commands,
             {
-                "RESET_DRAW_EFFECTS": (0x043, 0),
-                "RETURN_TO_TITLE": (0x046, 0),
-                "RESET_FIELD_EFFECTS": (0x099, 0),
-                "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1),
-                "CREATE_POLYGON_MOVIE": (0x0AA, 2),
-                "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0),
+                "MESSAGE_REQUEST_AND_POLL": (0x000, 1, False),
+                "ACTIVATE_MESSAGE_PANEL": (0x001, 0, False),
+                "FINISH_SCRIPT_MESSAGE_WINDOW": (0x002, 0, False),
+                "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
+                "SCREEN_FADE_A": (0x00F, 2, False),
+                "RESET_DRAW_EFFECTS": (0x043, 0, False),
+                "RETURN_TO_TITLE": (0x046, 0, False),
+                "CALL_EVENT": (0x066, 1, False),
+                "RESET_FIELD_EFFECTS": (0x099, 0, False),
+                "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
+                "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
+                "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
             },
         )
+
+    def test_reading_view_lifts_verified_commands_and_result_flow(self) -> None:
+        path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        source = path.read_text(encoding="utf-8")
+        self.assertEqual(flw0_view.source_profile_name(source), "dds1")
+        view = flw0_view.render(flw0.parse_source(source), "dds1")
+        self.assertIn("procedure e670_001 @ 0x0000", view)
+        self.assertIn("0004: push 1", view)
+        self.assertIn("0005: push 670", view)
+        self.assertIn("0006: result = CREATE_POLYGON_MOVIE(1, 670)", view)
+        self.assertIn("0007: push result", view)
+        self.assertIn("0008: WAIT_FOR_TASK_REMOVAL(result)", view)
+        self.assertIn("000c: return_or_end", view)
+
+    def test_reading_view_cli_uses_the_source_profile(self) -> None:
+        path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        result = subprocess.run(
+            [sys.executable, str(TOOLS / "flw0.py"), "view", str(path)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("profile dds1", result.stdout)
+        self.assertIn("CREATE_POLYGON_MOVIE(1, 670)", result.stdout)
+
+    def test_reading_view_is_conservative_after_unknown_command(self) -> None:
+        code = [
+            7,
+            (9 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x123 << 16) | flw0.OPCODE_IDS["COMM"],
+            (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
+        self.assertIn("0002: COMM 0x0123  # unknown stack effect", view)
+        self.assertIn("0004: WAIT_FOR_TIMER_LIMIT(4)", view)
+        self.assertNotIn("WAIT_FOR_TIMER_LIMIT(9)", view)
+
+    def test_reading_view_result_state_stops_at_control_transfer(self) -> None:
+        code = [
+            7,
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (670 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x0AA << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["GOTO"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
+        self.assertIn("0003: result = CREATE_POLYGON_MOVIE(1, 670)", view)
+        self.assertIn("0005: push result<?>", view)
+
+    def test_verified_nonwriter_preserves_result_state(self) -> None:
+        code = [
+            7,
+            (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (670 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x0AA << 16) | flw0.OPCODE_IDS["COMM"],
+            (0x043 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
+        self.assertIn("0004: RESET_DRAW_EFFECTS()", view)
+        self.assertIn("0005: push result", view)
+
+    def test_reading_view_lifts_expression_and_false_branch(self) -> None:
+        code = [
+            7,
+            (2 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (5 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            flw0.OPCODE_IDS["LT"],
+            flw0.OPCODE_IDS["IF"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds1")
+        self.assertIn("0003: push (5 < 2)", view)
+        self.assertIn("0004: if !((5 < 2)) goto jump_label[0x0000]", view)
+
+    def test_reading_view_handles_every_tracked_script(self) -> None:
+        source_dir = TOOLS.parent / "src/dds1/scripts/event"
+        type5_uses = 0
+        command_uses = 0
+        profiled_command_uses = 0
+        for path in sorted(source_dir.glob("*.bfasm")):
+            with self.subTest(source=path.name):
+                source = path.read_text(encoding="utf-8")
+                script = flw0.parse_source(source)
+                profile_name = flw0_view.source_profile_name(source)
+                self.assertEqual(profile_name, "dds1")
+                view = flw0_view.render(script, profile_name)
+                self.assertIn("FLW0 reading view", view)
+                self.assertIn("messages ", view)
+                strings = flw0_view.type5_strings(script)
+                for word in script.code_words():
+                    if word.opcode == flw0.OPCODE_IDS["COMM"]:
+                        command_uses += 1
+                        if word.operand_u16 in flw0_profiles.DDS1.by_id:
+                            profiled_command_uses += 1
+                    if word.opcode == flw0.OPCODE_IDS["PUSHTYPE5"]:
+                        type5_uses += 1
+                        self.assertIn(word.operand_u16, strings)
+                        self.assertIn(
+                            f"type5_ref(0x{word.operand_u16:04x}, ",
+                            view,
+                        )
+        self.assertEqual(type5_uses, 315)
+        self.assertEqual(command_uses, 3881)
+        self.assertEqual(profiled_command_uses, 1334)
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -413,8 +554,7 @@ end
                 text = source.read_text(encoding="utf-8")
                 version = int(text.split(None, 2)[1])
                 versions[version] += 1
-                if version == 2:
-                    self.assertIn("\nprofile dds1\n", text)
+                self.assertIn("\nprofile dds1\n", text)
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
         self.assertEqual(versions, {1: 7, 2: 97})

@@ -17,6 +17,8 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Iterable
 
+import flw0_profiles
+
 
 HEADER_SIZE = 0x20
 SECTION_SIZE = 0x10
@@ -346,7 +348,11 @@ def _render_raw_payload(payload: bytes, indent: str = "  ") -> list[str]:
     ]
 
 
-def _render_code(flw0: Flw0File, section: Section) -> list[str]:
+def _render_code(
+    flw0: Flw0File,
+    section: Section,
+    command_profile: flw0_profiles.CommandProfile | None = None,
+) -> list[str]:
     payload = flw0.section_bytes(section)
     words = [
         struct.unpack_from("<I", payload, pc * 4)[0]
@@ -379,6 +385,12 @@ def _render_code(flw0: Flw0File, section: Section) -> list[str]:
             else:
                 lines.append(f"  {pc:04x}: {name}")
         else:
+            if opcode == OPCODE_IDS["COMM"] and command_profile is not None:
+                command = command_profile.by_id.get(operand)
+                if command is not None:
+                    lines.append(f"  {pc:04x}: {name} {command.name}")
+                    pc += 1
+                    continue
             target_name = None
             if opcode in (7, 10, 11):
                 target_name = procedure_names.get(operand)
@@ -390,26 +402,36 @@ def _render_code(flw0: Flw0File, section: Section) -> list[str]:
     return lines
 
 
-def render_source(flw0: Flw0File) -> str:
+def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
     """Render a self-contained, byte-exact low-level source file."""
 
+    command_profile = None
+    if profile_name is not None:
+        try:
+            command_profile = flw0_profiles.get(profile_name)
+        except KeyError as exc:
+            raise Flw0Error(f"unknown command profile {profile_name!r}") from exc
     header = flw0.header
-    lines = [
-        "flw0 1",
-        "",
-        (
-            "header "
-            f"word00=0x{header.word_00:08x} "
-            f"declared_size=0x{header.declared_size:08x} "
-            f"word0c=0x{header.word_0c:08x} "
-            f"int_locals={header.int_local_count} "
-            f"float_locals={header.float_local_count} "
-            f"word18=0x{header.word_18:08x} "
-            f"word1c=0x{header.word_1c:08x} "
-            f"physical_size=0x{flw0.physical_size:x}"
-        ),
-        "",
-    ]
+    lines = ["flw0 1"]
+    if command_profile is not None:
+        lines.append(f"profile {command_profile.name}")
+    lines.extend(
+        [
+            "",
+            (
+                "header "
+                f"word00=0x{header.word_00:08x} "
+                f"declared_size=0x{header.declared_size:08x} "
+                f"word0c=0x{header.word_0c:08x} "
+                f"int_locals={header.int_local_count} "
+                f"float_locals={header.float_local_count} "
+                f"word18=0x{header.word_18:08x} "
+                f"word1c=0x{header.word_1c:08x} "
+                f"physical_size=0x{flw0.physical_size:x}"
+            ),
+            "",
+        ]
+    )
 
     covered = bytearray(flw0.physical_size)
     covered[: flw0.table_end] = b"\x01" * flw0.table_end
@@ -436,7 +458,7 @@ def render_source(flw0: Flw0File) -> str:
                     f"reserved=0x{reserved:08x}{suffix}"
                 )
         elif section.type_id == 2 and section.element_size == 4:
-            lines.extend(_render_code(flw0, section))
+            lines.extend(_render_code(flw0, section, command_profile))
         else:
             lines.extend(_render_raw_payload(payload))
         lines.append("end")
@@ -609,7 +631,17 @@ def _parse_raw_payload(content: list[tuple[int, str]], section: Section) -> byte
     return payload
 
 
-def _parse_code_payload(content: list[tuple[int, str]], section: Section) -> bytes:
+def _symbolic_operand(text: str) -> bool:
+    return bool(text) and (text[0].isalpha() or text[0] == "_") and all(
+        character.isalnum() or character == "_" for character in text[1:]
+    )
+
+
+def _parse_code_payload(
+    content: list[tuple[int, str]],
+    section: Section,
+    command_profile: flw0_profiles.CommandProfile | None = None,
+) -> bytes:
     words: list[int] = []
     for line_number, line in content:
         line = line.split("#", 1)[0].strip()
@@ -649,10 +681,23 @@ def _parse_code_payload(content: list[tuple[int, str]], section: Section) -> byt
         else:
             if len(tokens) != 2:
                 raise Flw0Error(f"line {line_number}: {mnemonic} takes one value")
-            if opcode == 29 and tokens[1].startswith("-"):
-                operand = _signed_halfword(tokens[1], line_number)
+            operand_text = tokens[1]
+            if opcode == OPCODE_IDS["COMM"] and _symbolic_operand(operand_text):
+                if command_profile is None:
+                    raise Flw0Error(
+                        f"line {line_number}: named COMM operand requires a profile"
+                    )
+                command = command_profile.by_name.get(operand_text.upper())
+                if command is None:
+                    raise Flw0Error(
+                        f"line {line_number}: unknown {command_profile.name} "
+                        f"command {operand_text!r}"
+                    )
+                operand = command.command_id
+            elif opcode == 29 and operand_text.startswith("-"):
+                operand = _signed_halfword(operand_text, line_number)
             else:
-                operand = _unsigned(tokens[1], line_number, bits=16)
+                operand = _unsigned(operand_text, line_number, bits=16)
             words.append((operand << 16) | opcode)
     if len(words) != section.element_count:
         raise Flw0Error(
@@ -682,6 +727,8 @@ def parse_source(text: str) -> Flw0File:
         raise Flw0Error("source must begin with 'flw0 1' or 'flw0 2'")
 
     header_values: dict[str, str] | None = None
+    profile_name: str | None = None
+    profile_line = 0
     section_records: list[tuple[Section, list[tuple[int, str]]]] = []
     preserves: list[tuple[int, bytes, int]] = []
     index = 1
@@ -695,6 +742,13 @@ def parse_source(text: str) -> Flw0File:
             if header_values is not None:
                 raise Flw0Error(f"line {line_number}: duplicate header")
             header_values = _key_values(tokens[1:], line_number)
+            index += 1
+            continue
+        if tokens[0] == "profile":
+            if profile_name is not None or len(tokens) != 2:
+                raise Flw0Error(f"line {line_number}: invalid or duplicate profile")
+            profile_name = tokens[1]
+            profile_line = line_number
             index += 1
             continue
         if tokens[0] == "section":
@@ -749,6 +803,14 @@ def parse_source(text: str) -> Flw0File:
 
     if header_values is None:
         raise Flw0Error("source has no header")
+    command_profile = None
+    if profile_name is not None:
+        try:
+            command_profile = flw0_profiles.get(profile_name)
+        except KeyError as exc:
+            raise Flw0Error(
+                f"line {profile_line}: unknown command profile {profile_name!r}"
+            ) from exc
     expected_header = {
         "word00",
         "declared_size",
@@ -794,7 +856,7 @@ def parse_source(text: str) -> Flw0File:
         if section.type_id in (0, 1):
             payload = _parse_named_payload(content, section)
         elif section.type_id == 2 and section.element_size == 4:
-            payload = _parse_code_payload(content, section)
+            payload = _parse_code_payload(content, section, command_profile)
         else:
             payload = _parse_raw_payload(content, section)
         place(section.offset, payload, f"section {section.index}")
@@ -910,7 +972,7 @@ def main() -> int:
     disassemble_parser.add_argument(
         "--profile",
         metavar="NAME",
-        help="name native commands using a version-2 command profile",
+        help="name native commands using a game-specific command profile",
     )
 
     assemble_parser = commands.add_parser(
@@ -918,6 +980,17 @@ def main() -> int:
     )
     assemble_parser.add_argument("input", type=Path)
     assemble_parser.add_argument("output", type=Path)
+
+    view_parser = commands.add_parser(
+        "view", help="render a conservative, stack-aware reading view"
+    )
+    view_parser.add_argument("input", type=Path, help="physical or symbolic source")
+    view_parser.add_argument("output", nargs="?", type=Path)
+    view_parser.add_argument(
+        "--profile",
+        metavar="NAME",
+        help="native-command profile used to lift known calls",
+    )
 
     args = parser.parse_args()
     try:
@@ -932,14 +1005,12 @@ def main() -> int:
             return 0
         if args.command == "disassemble":
             script = parse(args.input.read_bytes())
-            if args.profile is not None and not args.symbolic:
-                raise Flw0Error("--profile requires --symbolic")
             if args.symbolic:
                 import flw0_symbolic
 
                 source = flw0_symbolic.render(script, args.profile)
             else:
-                source = render_source(script)
+                source = render_source(script, args.profile)
             if args.output is None:
                 print(source, end="")
             else:
@@ -948,6 +1019,17 @@ def main() -> int:
         if args.command == "assemble":
             source = args.input.read_text(encoding="utf-8")
             args.output.write_bytes(parse_source(source).to_bytes())
+            return 0
+        if args.command == "view":
+            import flw0_view
+
+            source = args.input.read_text(encoding="utf-8")
+            profile_name = args.profile or flw0_view.source_profile_name(source)
+            rendered = flw0_view.render(parse_source(source), profile_name)
+            if args.output is None:
+                print(rendered, end="")
+            else:
+                args.output.write_text(rendered, encoding="utf-8")
             return 0
     except (OSError, Flw0Error) as exc:
         parser.error(str(exc))
