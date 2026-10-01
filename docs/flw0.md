@@ -418,6 +418,7 @@ tables and both implementations:
 | `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
 | `SCREEN_FADE_B` | `0x010` | 2 | Starts the selected screen fade-in when its timer reaches zero |
 | `ADD_EFFECT_UNIT_TO_WORLD` | `0x012` | 1 | Adds the selected player object or effect-unit ID to the active world |
+| `CREATE_LINKED_CAMERA_VIEWER` | `0x015` | 2 | Creates the linked-camera viewer object and returns its fixed object ID |
 | `ADD_FLAGGED_EFFECT_UNIT_TO_WORLD` | `0x019` | 1 | Adds the selected player object, or marks and adds an effect-unit ID |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
@@ -441,6 +442,7 @@ tables and both implementations:
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
+| `CREATE_FLAGGED_EFFECT_OBJECT` | `0x0CD` | 1 | Creates and flags an effect object from a resource name, returning its object ID or zero |
 | `REQUEST_ALTERNATE_FIELD_SEQUENCE` | `0x100` | 2 | Starts an alternate field sequence from a mode and resource name |
 | `SET_FIELD_ENVIRONMENT` | `0x101` | 2 | Applies a field-environment selector and value |
 | `ENABLE_FIELD_MODELS` | `0x103` | 4 | Enables the selected field model set and applies its transition mode |
