@@ -236,7 +236,7 @@ void func_0019C968(s32 window, s32 arg1, s32 arg2);
 
 void itfMesFinishWindowAndClearStatus(s32 window);
 
-void itfMesCleanupWindow(s32 window, s32 arg1);
+void itfMesCleanupWindow(s32 window, s32 alsoSecondary);
 
 void itfMesResetWindow(s32 window);
 
@@ -558,7 +558,7 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesStartEntry);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019BBF8);
 
-void itfMesCleanupWindow(s32 window, s32 arg1) {
+void itfMesCleanupWindow(s32 window, s32 alsoSecondary) {
     ItfMesState *mes;
     ItfMesBlk24 *blk24;
     ItfMesBlk14 *blk14;
@@ -576,7 +576,7 @@ void itfMesCleanupWindow(s32 window, s32 arg1) {
     itfMesResetCursorState(blk24, 0);
     mes->flags &= ~7;
     mes->flags &= 0xFFFDFFFF;
-    if (arg1 == 0) {
+    if (alsoSecondary == 0) {
         return;
     }
     if (blk14->glyphChain != NULL) {
@@ -806,8 +806,8 @@ u32 itfMesGetWindowTableValue(s32 window, s32 index) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C590);
 
-void func_0019C838(s32 window, u32 arg1, u32 arg2) {
-    func_0019D460((u32)itfWindowSlots[window].mes, arg1, arg2, 0);
+void func_0019C838(s32 window, u32 entryIndex, u32 itemIndex) {
+    func_0019D460((u32)itfWindowSlots[window].mes, entryIndex, itemIndex, 0);
 }
 
 void func_0019C868(s32 window) {
@@ -832,22 +832,22 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     return previous;
 }
 
-u32 itfMesGetEntryTableItem(s32 window, s32 arg1, s32 arg2) {
-    return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, arg1)->table, arg2);
+u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
+    return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C968);
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", func_0019C9F0);
 
-s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
+s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesTable *table;
     u32 item;
     ItfMesNode *glyph;
     s32 extent;
 
-    table = itfMesGetEntry(mes, arg1)->table;
+    table = itfMesGetEntry(mes, entryIndex)->table;
     if (table->count == 0) {
         return 0;
     }
@@ -855,7 +855,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 arg1, s32 arg2) {
     if (mes->temporaryFontEntry != 0) {
         frFontLoadTemporaryEntry(mes->temporaryFontEntry);
     }
-    item = itfMesGetTableItem(table, arg2);
+    item = itfMesGetTableItem(table, itemIndex);
     if (item == 0) {
         return item;
     }
