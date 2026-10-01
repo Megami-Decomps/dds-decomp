@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 
 extern u8 D_00435B88;
 
@@ -13,6 +14,16 @@ extern u32 D_00435B90;
 extern u32 D_00435B94;
 
 extern u8 D_00435B89;
+
+extern KwlnTask *kwlnDelayedStartTaskHead;
+extern KwlnTask *D_00435BD4;
+extern s32 D_00435BD8;
+extern KwlnTask *kwlnDelayedDestroyTaskHead;
+extern KwlnTask *D_00435BE0;
+extern s32 D_00435BE4;
+extern KwlnTask *D_00435BE8;
+extern KwlnTask *D_00435BEC;
+extern s32 D_00435BF0;
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_00100000);
 
@@ -76,7 +87,106 @@ INCLUDE_ASM(const s32, "game/code_00100000", func_001004B0);
 
 INCLUDE_ASM(const s32, "game/code_00100000", func_001005C8);
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_00100740);
+void func_00100740(KwlnTask *task) {
+    KwlnTask *cur;
+    KwlnTask *prev;
+
+    switch (task->flags & 0xF) {
+    case 1:
+        cur = kwlnDelayedStartTaskHead;
+        break;
+    case 0:
+        return;
+    case 2:
+        cur = D_00435BE8;
+        break;
+    case 3:
+        cur = kwlnDelayedDestroyTaskHead;
+        break;
+    default:
+        return;
+    }
+    if (cur == NULL) {
+        switch (task->flags & 0xF) {
+        case 1:
+            kwlnDelayedStartTaskHead = task;
+            D_00435BD4 = task;
+            break;
+        case 2:
+            D_00435BE8 = task;
+            D_00435BEC = task;
+            break;
+        case 3:
+            kwlnDelayedDestroyTaskHead = task;
+            D_00435BE0 = task;
+            break;
+        }
+        task->listPrev = NULL;
+        task->listNext = NULL;
+    } else {
+        while (cur != NULL) {
+            if (task->unk20 < cur->unk20) {
+                if (cur->listPrev != NULL) {
+                    cur->listPrev->listNext = task;
+                    task->listPrev = cur->listPrev;
+                    task->listNext = cur;
+                    cur->listPrev = task;
+                } else {
+                    switch (task->flags & 0xF) {
+                    case 1:
+                        kwlnDelayedStartTaskHead = task;
+                        break;
+                    case 2:
+                        D_00435BE8 = task;
+                        break;
+                    case 3:
+                        kwlnDelayedDestroyTaskHead = task;
+                        break;
+                    }
+                    task->listPrev = NULL;
+                    task->listNext = cur;
+                    cur->listPrev = task;
+                }
+                break;
+            }
+            cur = cur->listNext;
+        }
+        if (cur == NULL) {
+            switch (task->flags & 0xF) {
+            case 1:
+                prev = D_00435BD4;
+                prev->listNext = task;
+                task->listPrev = prev;
+                D_00435BD4 = task;
+                break;
+            case 2:
+                prev = D_00435BEC;
+                prev->listNext = task;
+                task->listPrev = prev;
+                D_00435BEC = task;
+                break;
+            case 3:
+                prev = D_00435BE0;
+                prev->listNext = task;
+                task->listPrev = prev;
+                D_00435BE0 = task;
+                break;
+            }
+            task->listNext = NULL;
+        }
+    }
+    switch (task->flags & 0xF) {
+    case 1:
+        D_00435BD8++;
+        break;
+    case 2:
+        D_00435BF0++;
+        break;
+    case 3:
+        D_00435BE4++;
+        break;
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_00100000", D_00435B80);
 
