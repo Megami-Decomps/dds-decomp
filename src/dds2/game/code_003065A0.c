@@ -1,14 +1,24 @@
 #include "common.h"
 
+extern s32 effGetSlotWorkOrOverride(s32, s32);
+
+extern void func_00306970(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
 INCLUDE_ASM(const s32, "game/code_003065A0", func_003065A0);
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306678);
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306970);
 
-INCLUDE_ASM(const s32, "game/code_003065A0", func_00306BF0);
+void func_00306BF0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8) {
+    func_00306970(a0, a1, a2, a6 + 0x14, a3, a4, a5, a6, a7);
+}
+void func_00306C28(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7) {
+    func_00306970(a0, a1, a2, a3, a4, a5, a6,
+                  effGetSlotWorkOrOverride(a5, a6), a7);
+}
 
-INCLUDE_ASM(const s32, "game/code_003065A0", func_00306C28);
+
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306CD0);
 
