@@ -348,6 +348,7 @@ s32 mnuCreateDualPercentPanel(MenuTitleResource *resource, MenuProgressHost *hos
     return panel;
 }
 
+/* Release both texture sets and the backing allocation for the panel pair. */
 void mnuReleaseDualPercentPanel(s32 panel) {
     if (panel != 0) {
         mnuReleaseSpriteTextures();
@@ -656,6 +657,7 @@ void mnuTerminalSetTrack(s8 mode, s8 enable) {
 
     if (mode == 1) {
         if (enable == 1) {
+            /* Both arms are identical in retail; kept as written. */
             if (work->reduced == 0) {
                 sndStartTrackExtended(work->fadeColor);
             } else {

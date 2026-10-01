@@ -18,13 +18,13 @@ typedef struct FileWork {
 } FileWork;
 
 typedef struct FileRequest {
-    u8 pad00;
+    u8 mode; /* 0x00: mode 1 uses the conditional readiness path */
     u8 state; /* 0x01: ready when 6 */
     u8 pad02[0xA];
     u32 handle; /* 0x0C */
     s32 size; /* 0x10 */
     u8 pad14[0x54];
-    u16 unk68;
+    u16 stateRequired; /* 0x68: gate state == 6 readiness checks */
     u16 slot; /* 0x6A */
 } FileRequest;
 
@@ -156,9 +156,9 @@ extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
 s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
     s32 result;
 
-    if (file->pad00 == 1) {
+    if (file->mode == 1) {
         result = 0;
-        if (file->unk68 != 0) {
+        if (file->stateRequired != 0) {
             result = file->state == 6;
         }
         return result;
@@ -168,7 +168,7 @@ s32 fileIsRequestReadyInCurrentMode(FileRequest *file) {
 
 s32 fileRequestIsReady(FileRequest *file) {
     s32 result = 0;
-    if (file->unk68 != 0) {
+    if (file->stateRequired != 0) {
         result = file->state == 6;
     }
     return result;
@@ -199,21 +199,21 @@ void fileWaitIdle(void) {
 
 typedef struct FileWindowSlot {
     u8 pad00[0x10];
-    s32 unk10;
-    s32 unk14;
+    s32 secondValueCopy; /* 0x10 */
+    s32 secondValue;     /* 0x14 */
     u8 pad18[0xC];
-    s32 unk24;
-    s32 unk28;
+    s32 firstValue;      /* 0x24 */
+    s32 firstValueCopy;  /* 0x28 */
     u8 pad2C[4];
 } FileWindowSlot; /* 0x30 */
 
-FileWindowSlot *func_002C8238(s32 id, s32 first, s32 second, s32 left, s32 right) {
+FileWindowSlot *func_002C8238(s32 id, s32 firstValue, s32 secondValue, s32 left, s32 right) {
     FileWindowSlot *slot = sdfAllocAndClearQuadwords(0x30);
 
-    slot->unk24 = first;
-    slot->unk28 = first;
-    slot->unk14 = second;
-    slot->unk10 = second;
+    slot->firstValue = firstValue;
+    slot->firstValueCopy = firstValue;
+    slot->secondValue = secondValue;
+    slot->secondValueCopy = secondValue;
     func_002C7D78(slot, 2, id, left, right);
     return slot;
 }

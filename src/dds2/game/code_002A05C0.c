@@ -318,29 +318,30 @@ void sndUploadStreamToBothIopBuffers(u32 source) {
     func_0034E820(1, 0x80e0, 0, 2, 0, 0);
 }
 
-typedef struct SndSampleBuf {
-    u8 pad0[0x18];
-    s16 *samples;
-} SndSampleBuf;
+/* Title-stream sample buffer. */
+typedef struct MixSource {
+    u8 pad00[0x18];
+    s16 *samples; /* 0x18 */
+} MixSource;
 
-void sndMixSampleBuffers(s16 *dst, SndSampleBuf *b, SndSampleBuf *a) {
-    s16 *src = a->samples;
+void sndMixSampleBuffers(s16 *dst, MixSource *first, MixSource *second) {
+    s16 *in = second->samples;
     s16 *out = dst;
     s32 i;
     for (i = 0; i < 0x800; i++) {
-        *out++ = *src++;
+        *out++ = *in++;
     }
-    src = b->samples;
+    in = first->samples;
     out -= 0x800;
     for (i = 0; i < 0x800; i++) {
-        s32 v = *out + *src++;
-        if (v > 0x7FFF) {
-            v = 0x7FFF;
+        s32 sample = *out + *in++;
+        if (sample > 0x7FFF) {
+            sample = 0x7FFF;
         }
-        if (v < -0x7FFF) {
-            v = -0x7FFF;
+        if (sample < -0x7FFF) {
+            sample = -0x7FFF;
         }
-        *out++ = v;
+        *out++ = sample;
     }
 }
 
