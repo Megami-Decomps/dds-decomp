@@ -1478,12 +1478,22 @@ u32 effRetainKindSecondaryAsset(u32 work) {
     return work;
 }
 
+/* Billboard state shared with the DDS1 effect constructor and clone path. */
+typedef struct EffBillboardWork {
+    u8 transform[0x20];
+    f32 scale;
+    u32 color;
+    s32 frame;
+    u8 payload[0x38];
+    u32 billboard; /* 0x64 */
+} EffBillboardWork;
+
 u8 *effCreateBillboardWork(u8 *source) {
     u8 *work = (u8 *)func_00328D68(0x68);
     memset(work, 0, 0x68);
-    *(s32 *)(work + 0x28) = 0;
-    *(u32 *)(work + 0x24) = 0x80808080;
-    *(float *)(work + 0x20) = 1.0f;
+    ((EffBillboardWork *)work)->frame = 0;
+    ((EffBillboardWork *)work)->color = 0x80808080;
+    ((EffBillboardWork *)work)->scale = 1.0f;
     VU0_STORE_VF(vf0, work);
     VU0_STORE_VF(vf0, work + 0x10);
     if (source == NULL) {
@@ -1491,7 +1501,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     }
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            *(u32 *)(source + 0x14));
-    *(s32 *)(work + 0x64) =
+    ((EffBillboardWork *)work)->billboard =
         billCreateIndexed(1, fileResolveSecondaryBuffer(source));
     return work;
 }
@@ -1499,7 +1509,7 @@ u8 *effCreateBillboardWork(u8 *source) {
 void effBillboardWorkRelease(u32 work) {
     s32 billboard;
 
-    billboard = *(s32 *)((s32)work + 100);
+    billboard = ((EffBillboardWork *)work)->billboard;
     if (billboard != 0) {
         billDispatchByKind(billboard);
     }
@@ -1516,38 +1526,39 @@ u8 *effDuplicateBillState(const u8 *source) {
 void effReplaceBillboardClone(s32 dst, s32 src) {
     u32 billboard;
 
-    if (*(s32 *)(dst + 100) != 0) {
-        billDispatchByKind(*(s32 *)(dst + 100));
+    if (((EffBillboardWork *)dst)->billboard != 0) {
+        billDispatchByKind(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = func_00159A50(*(u32 *)(src + 100));
-    *(u32 *)(dst + 100) = billboard;
+    billboard = func_00159A50(((EffBillboardWork *)src)->billboard);
+    ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
 void effBillboardEntryFrameReset(s32 work) {
-    billSetEntryFrameMode1(*(u32 *)(work + 100), 0);
-    *(u32 *)(work + 0x28) = 0;
+    billSetEntryFrameMode1(((EffBillboardWork *)work)->billboard, 0);
+    ((EffBillboardWork *)work)->frame = 0;
 }
 
-typedef struct EffBillPlayback {
-    u8 vec[0x10];    // 0x00
-    u8 orient[0x10]; // 0x10
-    f32 scale;       // 0x20
-    u8 pad24[4];
-    s32 frame;       // 0x28
-    f32 speedX;      // 0x2C
-    f32 speedY;      // 0x30
-    u8 pad34[0x30];
-    u32 bill;        // 0x64
-} EffBillPlayback;
+/* Rotation and per-axis beam scale; same layout as the DDS1 beam work. */
+typedef struct EffBeamWork {
+    u8 pad_00[0x10];
+    u8 rotation[0x10];
+    f32 scale;
+    u32 color;
+    s32 frame;
+    f32 heightScale;
+    f32 widthScale;
+    u8 pad_34[0x30];
+    u32 billboard;
+} EffBeamWork;
 
-void func_002E0698(EffBillPlayback *work) {
+void func_002E0698(EffBeamWork *work) {
     u128 dir;
     f32 angle;
     f32 len;
 
-    if (work->frame < billGetFirstEntryFramePeriod(work->bill)) {
-        billSetEntryFrameMode1(work->bill, work->frame);
-        VU0_LOAD_VF(vf10, work->orient);
+    if (work->frame < billGetFirstEntryFramePeriod(work->billboard)) {
+        billSetEntryFrameMode1(work->billboard, work->frame);
+        VU0_LOAD_VF(vf10, work->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0042BC10);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -1558,10 +1569,10 @@ void func_002E0698(EffBillPlayback *work) {
             len = 0.3f;
         }
         len *= work->scale;
-        billSetChildScaleComponents(work->bill, len * work->speedY, work->speedX * work->scale);
-        billSetLengthExtent(work->bill, angle);
-        effCopyVector(work->bill, work);
-        billInvokeCallback(work->bill);
+        billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
+        billSetLengthExtent(work->billboard, angle);
+        effCopyVector(work->billboard, work);
+        billInvokeCallback(work->billboard);
         work->frame++;
     }
 }
@@ -1575,7 +1586,7 @@ void effCopyBillboardOrientation(s128 *dst, s128 *src) {
 }
 
 void effSetBillboardColor(s32 work, u32 value) {
-    *(u32 *)(work + 0x24) = value;
+    ((EffBillboardWork *)work)->color = value;
 }
 
 void effSetBillboardMatrixComponent(Matrix4 *mat, float value) {
@@ -2480,18 +2491,30 @@ void func_002E5540(u8 *work) {
     func_002E5E88(out, mtx);
 }
 
+/* Common header of class-dispatched billboard/resource work (0x40-byte prefix). */
+typedef struct EffClassWork {
+    u8 transform[0x20]; // 0x00, two VU0 vectors
+    f32 scale;           // 0x20
+    u32 color;           // 0x24
+    u32 frame;           // 0x28
+    s32 kind;            // 0x2C
+    u32 resource;        // 0x30
+    void *payload;       // 0x34
+    u8 pad_38[8];
+} EffClassWork;
+
 u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_003E9968[kind].resourceSize;
     u8 *effect = func_00328D68(size + headerSize);
-    *(u8 **)(effect + 0x34) = effect + headerSize;
-    *(u32 *)(effect + 0x24) = 0x80808080;
-    *(float *)(effect + 0x20) = 1.0f;
-    *(u32 *)(effect + 0x2C) = kind;
-    *(u32 *)(effect + 0x28) = 0;
+    ((EffClassWork *)effect)->payload = effect + headerSize;
+    ((EffClassWork *)effect)->color = 0x80808080;
+    ((EffClassWork *)effect)->scale = 1.0f;
+    ((EffClassWork *)effect)->kind = kind;
+    ((EffClassWork *)effect)->frame = 0;
     VU0_STORE_VF(vf0, effect);
     VU0_STORE_VF(vf0, effect + 0x10);
-    memcpy(*(void **)(effect + 0x34), source, size);
+    memcpy(((EffClassWork *)effect)->payload, source, size);
     return effect;
 }
 
@@ -2510,7 +2533,7 @@ u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
 u8 *effCreateFileResourceInstance(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (*(u16 *)(work + 0x1C)) {
+    switch (((EffFileRequest *)work)->secondaryMode) {
     case 1:
         break;
     case 4:
@@ -2518,7 +2541,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(*(u16 *)(work + 0xC), source, (u32)secondary);
+    return effCreateResourceInstanceA(((EffFileRequest *)work)->kind, source, (u32)secondary);
 }
 
 extern EffOp28 D_003E9958[];
@@ -2551,7 +2574,7 @@ u8 *effCreateActiveResource(EffActiveInstance *obj) {
 
 void effResetActiveInstanceFrame(u8 *work) {
     D_003E9950[((EffActiveInstance *)work)->kind].fn();
-    *(u32 *)(work + 0x28) = 0;
+    ((EffClassWork *)work)->frame = 0;
 }
 
 void effAdvanceActiveInstanceFrame(work)
@@ -2564,7 +2587,7 @@ s32 *work;
 }
 
 void effDispatchActiveInstanceDraw(s32 work) {
-    D_003E9964[*(s32 *)(work + 0x2C)].fn((void *)work);
+    D_003E9964[((EffClassWork *)work)->kind].fn((void *)work);
 }
 
 void effUpdateAndDrawActiveInstance(u32 work) {
@@ -2581,7 +2604,7 @@ void effCopyActiveInstanceOrientation(s128 *dst, s128 *src) {
 }
 
 void effSetActiveInstanceColor(s32 work, u32 value) {
-    *(u32 *)(work + 0x24) = value;
+    ((EffClassWork *)work)->color = value;
 }
 
 void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
@@ -2597,7 +2620,7 @@ typedef struct EffTrackSet {
     s32 count;     // 0x10
     u8 flag;       // 0x14
     u8 pad_15[3];
-    void *unk18;
+    void *shared;    // 0x18: released via EffResourceRefs.shared
     u8 *buffer;    // 0x1C
     u8 *columns;   // 0x20
     u8 *tail;      // 0x24
@@ -2672,7 +2695,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->count = count;
     set->allocation = base;
     set->flag = 0;
-    set->unk18 = 0;
+    set->shared = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(set->handle, 1.0f);
     memset(D_004582B0, 0, 0x2C);
@@ -2683,11 +2706,11 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 extern u32 D_00437E54;
 
 u32 func_002E5C50(u32 arg0, u16 kind, u32 arg2) {
-    u8 *effect = (u8 *)effCreateTrackSet(arg0, kind);
+    EffTrackSet *effect = effCreateTrackSet(arg0, kind);
 
-    if (*(u32 *)(effect + 0x20) != 0) {
+    if (effect->columns != 0) {
         if (arg2 == 0) {
-            switch (*(u16 *)(effect + 0xC)) {
+            switch (effect->kind) {
             case 3:
                 if (D_00437E58[0] == 0) {
                     D_00437E60[0] = (RefObj *)effCloneSharedReferenceWithValue(D_00437E50, 0x100);
@@ -2702,7 +2725,7 @@ u32 func_002E5C50(u32 arg0, u16 kind, u32 arg2) {
                 break;
             }
         } else {
-            *(void **)(effect + 0x18) = func_002DDAA8((void *)arg2);
+            effect->shared = func_002DDAA8((void *)arg2);
         }
     }
     return (u32)effect;
@@ -2710,17 +2733,6 @@ u32 func_002E5C50(u32 arg0, u16 kind, u32 arg2) {
 
 
 
-/* Common header of class-dispatched billboard/resource work (0x40-byte prefix). */
-typedef struct EffClassWork {
-    u8 transform[0x20]; // 0x00, two VU0 vectors
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    s32 kind;            // 0x2C
-    u32 resource;        // 0x30
-    void *payload;       // 0x34
-    u8 pad_38[8];
-} EffClassWork;
 
 /* Render instance owns either a billboard or a reference, plus an asset slot. */
 typedef struct EffRenderResourceState {
@@ -3074,7 +3086,7 @@ void effCreateClassWorkFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effPayloadPointerSet(*(u16 *)(request + 0xc), source);
+    effPayloadPointerSet(((EffFileRequest *)request)->kind, source);
 }
 
 void effDestroyClassWork(u32 *obj) {
@@ -3969,7 +3981,7 @@ void effCreateClassResourceFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effCreateClassResourceWork(*(u16 *)(request + 0xc), source);
+    effCreateClassResourceWork(((EffFileRequest *)request)->kind, source);
 }
 
 void effDestroyClassResourceWork(s32 work) {
@@ -4698,7 +4710,7 @@ extern u8 *effCreateResourceInstanceB(u16, void *, u32);
 u8 *effCreateFileResourceInstanceB(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer(work);
     void *source;
-    switch (*(u16 *)(work + 0x1C)) {
+    switch (((EffFileRequest *)work)->secondaryMode) {
     case 1:
         break;
     case 4:
@@ -4706,7 +4718,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceB(*(u16 *)(work + 0xC), source, (u32)secondary);
+    return effCreateResourceInstanceB(((EffFileRequest *)work)->kind, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(u32 *obj) {
@@ -5262,7 +5274,7 @@ void effResourceInstanceCreateFromFile(s32 work) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effCreateResourceInstanceC(*(u16 *)(work + 0xc), source);
+    effCreateResourceInstanceC(((EffFileRequest *)work)->kind, source);
 }
 
 void effDispatchCleanupOp(u8 *work) {

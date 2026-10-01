@@ -1433,7 +1433,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     memset(work, 0, 0x68);
     ((EffBillboardWork *)work)->frame = 0;
     ((EffBillboardWork *)work)->color = 0x80808080;
-    *(float *)(work + 0x20) = 1.0f;
+    ((EffBillboardWork *)work)->scale = 1.0f;
     VU0_STORE_VF(vf0, work);
     VU0_STORE_VF(vf0, work + 0x10);
     if (source == NULL) {
@@ -2606,7 +2606,7 @@ typedef struct EffTrackSet {
     s32 count;     // 0x10
     u8 flag;       // 0x14
     u8 pad_15[3];
-    void *unk18;
+    void *shared;    // 0x18: released via EffResourceRefs.shared
     u8 *buffer;    // 0x1C
     u8 *columns;   // 0x20
     u8 *tail;      // 0x24
@@ -2671,7 +2671,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->count = count;
     set->allocation = base;
     set->flag = 0;
-    set->unk18 = 0;
+    set->shared = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(set->handle, 1.0f);
     memset(D_003DC9E0, 0, 0x2C);
@@ -2682,11 +2682,11 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
 extern u32 D_003BC96C;
 
 u32 func_002A3BD8(u32 arg0, u32 kind, u32 arg2) {
-    u8 *effect = (u8 *)effCreateTrackSet(arg0, (u16)kind);
+    EffTrackSet *effect = effCreateTrackSet(arg0, (u16)kind);
 
-    if (*(u32 *)(effect + 0x20) != 0) {
+    if (effect->columns != 0) {
         if (arg2 == 0) {
-            switch (*(u16 *)(effect + 0xC)) {
+            switch (effect->kind) {
             case 3:
                 if (D_003BC970[0] == 0) {
                     D_003BC978[0] = (RefObj *)effCloneSharedReferenceWithValue(D_003BC968, 0x100);
@@ -2701,7 +2701,7 @@ u32 func_002A3BD8(u32 arg0, u32 kind, u32 arg2) {
                 break;
             }
         } else {
-            *(void **)(effect + 0x18) = func_0029BD90((void *)arg2);
+            effect->shared = func_0029BD90((void *)arg2);
         }
     }
     return (u32)effect;
