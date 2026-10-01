@@ -56,6 +56,14 @@ typedef struct SdfMapPositionRecord {
     s32 id;
     u8 pad08[0x38];
 } SdfMapPositionRecord;
+/* Map-position chunk: 0x10 header, then the records back to back. */
+typedef struct SdfMapPositionChunk {
+    SdfChunk header;
+    u8 pad0C[4];
+    SdfMapPositionRecord records[1]; /* 0x10 */
+} SdfMapPositionChunk;
+
+
 
 #define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
 #define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
@@ -101,9 +109,19 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
 
 void *sdfChunkFindRecordById(SdfTextParam *, s32);
 
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource);
+/* 0x40-byte map record: an id word, then the three basis vectors. The
+ * record loop in the caller steps by sizeof(SdfMapBasisRecord). */
+typedef struct SdfMapBasisRecord {
+    u32 id;        /* 0x00 */
+    u32 pad04;
+    u128 eye;      /* 0x10 */
+    u128 up;       /* 0x20 */
+    u128 at;       /* 0x30 */
+} SdfMapBasisRecord; /* 0x40 */
 
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource);
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapBasisRecord *record);
+
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapBasisRecord *record);
 
 typedef struct SdfResourceList {
     u32 unk0;
@@ -223,44 +241,46 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 }
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
-/* vu0 routine: look-at basis rows in vf28-vf31 from the resource vectors (+0x10, +0x20, +0x30), then transform by the matrix */
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, void *resource) {
-    u8 *matrix = sdfModelFindDrawNode(param, *(u32 *)resource);
+/* vu0 routine: look-at basis rows in vf28-vf31 from the record's vectors, then transform by the matrix */
+void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapBasisRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(param, record->id);
     u8 *p;
 
-    p = (u8 *)resource + 0x20;
+    p = (u8 *)record + 0x20;
     VU0_LOAD_VF(vf10, p);
     VU0_MOVE_VF(vf30, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    p = (u8 *)resource + 0x30;
+    p = (u8 *)record + 0x30;
     VU0_LOAD_VF(vf10, p);
     VU0_NEGATE_XYZ(vf10);
     VU0_MOVE_VF(vf29, vf10);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf28, vf10);
-    VU0_LOAD_VF(vf31, (u8 *)resource + 0x10);
+    VU0_LOAD_VF(vf31, (u8 *)record + 0x10);
     VU0_SET_W_ONE(vf31);
     sdfPostmultiplyVuMatrixFromMemory(matrix + 0xC0);
 }
 
 extern u8 *sdfModelFindDrawNode(SdfTextParam *, u32);
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, void *resource) {
-    u8 *matrix = sdfModelFindDrawNode(param, *(u32 *)resource) + 0xC0;
+void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapBasisRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(param, record->id) + 0xC0;
 
     VU0_LOAD_MATRIX(matrix);
-    VU0_LOAD_VF(vf10, (u8 *)resource + 0x10);
+    VU0_LOAD_VF(vf10, (u8 *)record + 0x10);
     VU0_TRANSFORM_POINT(vf10, vf10);
 }
 
 void *sdfChunkFindRecordById(SdfTextParam *param, s32 id) {
     SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionChunk *positions;
     SdfMapPositionRecord *entry;
     u8 *end;
     if (chunk == NULL) {
         return NULL;
     }
-    entry = (SdfMapPositionRecord *)((u8 *)chunk + 0x10);
+    positions = (SdfMapPositionChunk *)chunk;
+    entry = positions->records;
     end = (u8 *)chunk + chunk->size;
     while ((u8 *)entry < end) {
         if (entry->id == id) {
