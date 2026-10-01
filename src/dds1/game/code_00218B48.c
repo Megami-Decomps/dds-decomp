@@ -11,8 +11,8 @@ typedef struct MdlViewState {
     s8 unk0B;
     s8 unk0C;
     s8 unk0D;
-    s8 unk0E;
-    s8 unk0F;
+    u8 unk0E;
+    u8 unk0F;
     s8 unk10;
     u8 pad11[3];
     s16 unk14;
@@ -35,7 +35,8 @@ typedef struct MdlViewState {
     s16 unk36;
     s16 unk38;
     s16 nodeCursor; /* 0x3A: selection within the loaded node count */
-    u8 pad3C[4];
+    s16 unk3C;
+    s16 unk3E;
     s16 unk40;
     s16 unk42;
     s16 unk44;
@@ -148,6 +149,18 @@ void func_002EDC50(void *buffer);
 
 
 s32 mdlCountRecords(s32);
+
+extern u32 D_003BA8EC;
+
+extern void kwlnDebugGraphSetEnabled(s8 mode);
+
+extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
+
+extern void func_0011DC50(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
+
+extern s8 D_00324510[];
+
+extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
 /* Assemble the resource request in a temporary buffer before loading it. */
 extern void sdfReleaseChipBlock();
@@ -447,7 +460,58 @@ void mdlDrawMarkParamsPanel(s32 list, s32 x, s32 y, s32 z, EffMarkParams *params
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_002198D8);
+/* Edit the marker parameters with the pad: rows 0-6 are the scalar fields, 7-22 the color bytes. */
+void func_002198D8(EffMarkParams *params, s16 *cursor) {
+    s32 selected = *cursor;
+    u8 *channel;
+
+    if (D_00324510[0x27] < 0) {
+        selected = selected != 0x16 ? selected + 1 : 0;
+    } else if (((u8)D_00324510[0x27] & 2) != 0 && selected < 0x16) {
+        selected++;
+    } else if (D_00324510[0x26] < 0) {
+        selected = selected != 0 ? selected - 1 : 0x16;
+    } else if (((u8)D_00324510[0x26] & 2) != 0 && selected > 0) {
+        selected--;
+    } else {
+        switch (selected) {
+        case 0:
+            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, D_00324510);
+            break;
+        case 1:
+            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, D_00324510);
+            break;
+        case 2:
+            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, D_00324510);
+            break;
+        case 3:
+            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, D_00324510);
+            break;
+        case 4:
+            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, D_00324510);
+            break;
+        case 5:
+            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, D_00324510);
+            break;
+        case 6:
+            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, D_00324510);
+            break;
+        default:
+            channel = (u8 *)params->colors + selected - 7;
+            if (D_00324510[0x25] < 0) {
+                *channel += 1;
+            } else if (((u8)D_00324510[0x25] & 2) != 0 && *channel < 0xFF) {
+                *channel += 1;
+            } else if (D_00324510[0x24] < 0) {
+                *channel -= 1;
+            } else if (((u8)D_00324510[0x24] & 2) != 0 && *channel != 0) {
+                *channel -= 1;
+            }
+            break;
+        }
+    }
+    *cursor = selected;
+}
 
 typedef struct MdlPartEntry {
     u32 kind;     /* 0x00: billboard or effect */
@@ -1085,10 +1149,17 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 count, s32 step) {
     return 0;
 }
 
+typedef struct MdlMotionState {
+    u8 pad00[0x32];
+    u8 reverse; /* 0x32 */
+} MdlMotionState;
+
 typedef struct MdlResource {
-    u8 pad00[0x18];
-    u8 *chunk;      /* 0x18 */
-    s32 hasEntries; /* 0x1C */
+    u8 pad00[0x12];
+    s16 unk12;
+    u8 pad14[4];
+    u8 *chunk;              /* 0x18 */
+    MdlMotionState *motion; /* 0x1C */
 } MdlResource;
 
 extern MdlResource *func_00217680(s16, s16);
@@ -1106,7 +1177,7 @@ void mdlLoadViewerResourceAndResetCursors(void) {
     D_003D7A50.unk28 = 0;
     D_003D7A50.unk2A = 0;
     D_003D7A50.unk2C = 0;
-    if (resource->hasEntries != 0) {
+    if (resource->motion != NULL) {
         mdlAddEntryFlagged(resource, 0, 0);
     }
     D_003D7A50.nodeCursor = 0;
@@ -1280,8 +1351,6 @@ s32 func_0021BE50(void) {
     return 0;
 }
 
-extern s8 D_00324510[];
-
 /* Change the viewer scale in hundredths, with larger steps at larger values. */
 void mdlAdjustViewerScale(void) {
     s32 value = (s32)(D_003D7A50.unk54 * 100.0f + 0.5f);
@@ -1343,7 +1412,72 @@ u32 func_0021C2E8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C310);
+extern s32 func_002183D0(s32);
+extern s32 func_002183E0(s32);
+extern void mdlDestroyContext(s32 resource);
+extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
+
+void func_0021C310(void) {
+    s32 i;
+    s32 item; /* resource handle, then its frame id */
+    MdlMotionState *motion;
+
+    if (mdlUpdateViewerCursorWithPageStep(&D_003D7A50.unk38, 5, 1) != 0) {
+        return;
+    }
+    if (D_00398628[1] >= 0) {
+        return;
+    }
+    switch (D_003D7A50.unk38) {
+    case 0:
+        if (D_003D7A50.resourceCount != 12) {
+            D_003D7A50.resources[D_003D7A50.resourceCount] = 0;
+            D_003D7A50.resourceCount++;
+            mdlRotateViewResourcesRight();
+            mdlLoadViewerResourceAndResetCursors();
+        }
+        break;
+    case 1:
+        if (D_003D7A50.resourceCount >= 2) {
+            mdlDestroyContext(D_003D7A50.resources[0]);
+            D_003D7A50.resources[0] = 0;
+            mdlRotateViewList();
+            D_003D7A50.resourceCount--;
+        }
+        break;
+    case 2:
+        if (D_003D7A50.resourceCount >= 2) {
+            mdlRotateViewResourcesRight();
+        }
+        break;
+    case 3:
+        if (D_003D7A50.resourceCount >= 2) {
+            mdlRotateViewList();
+        }
+        break;
+    case 4:
+        for (i = 0; i < D_003D7A50.resourceCount; i++) {
+            item = D_003D7A50.resources[i];
+            motion = ((MdlResource *)item)->motion;
+            if (motion != NULL) {
+                item = ((MdlResource *)item)->unk12;
+                if (motion->reverse == 0) {
+                    sdfMotionInitializeAtZeroTime(motion, item, 0);
+                } else {
+                    sdfMotionInitializeAtZeroTime(motion, item, 1);
+                }
+            }
+        }
+        break;
+    }
+    D_003D7A50.unk1C = D_003D7A50.unk18 = func_002183D0(D_003D7A50.resources[0]);
+    D_003D7A50.unk1E = D_003D7A50.unk1A = func_002183E0(D_003D7A50.resources[0]);
+    i = ((MdlResource *)D_003D7A50.resources[0])->unk12;
+    if (i < 0) {
+        i = 0;
+    }
+    D_003D7A50.unk24 = D_003D7A50.unk22 = i;
+}
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C518);
 
@@ -1403,7 +1537,72 @@ s32 mdlIsDebugTimeGraph(void) {
     return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C920);
+/* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
+void func_0021C920(void) {
+    switch (D_003D7A50.unk3E) {
+    case 0:
+        if (mdlUpdateViewerCursorWithPageStep(&D_003D7A50.unk3C, 10, 1) != 0) {
+            return;
+        }
+        if (D_00398628[1] >= 0) {
+            return;
+        }
+        switch (D_003D7A50.unk3C) {
+        case 0:
+            D_003D7A50.unk0E ^= 1;
+            break;
+        case 1:
+            kwlnDebugGraphSetEnabled(mdlIsDebugTimeGraph() == 0);
+            break;
+        case 2:
+            D_003D7A50.unk0F ^= 1;
+            break;
+        case 3:
+        case 4:
+        case 5:
+            D_003D7A50.unk3E = 1;
+            break;
+        case 6:
+        case 7:
+        case 8:
+            D_003D7A50.unk3E = D_003D7A50.unk3C - 4;
+            break;
+        case 9:
+            PCP_COPY_VECTOR(&D_00367A10, &D_003D7B20);
+            PCP_COPY_VECTOR(&D_00367A20, &D_003D7B30);
+            func_0021E068();
+            break;
+        }
+        break;
+    case 1:
+        fldStepColorChannelByPad(&D_003BA8EC, D_003D7A50.unk3C - 3, D_00398628);
+        if (D_00398628[1] < 0 || D_00398628[3] < 0) {
+            D_003D7A50.unk3E = 0;
+        }
+        break;
+    case 2:
+        if (D_00398628[1] < 0 || D_00398628[3] < 0) {
+            D_003D7A50.unk3E = 0;
+        } else {
+            func_0011DC50(&D_003D7A50.unk4A, 2, 1, 8, 1, 1);
+        }
+        break;
+    case 3:
+        if (D_00398628[1] < 0 || D_00398628[3] < 0) {
+            D_003D7A50.unk3E = 0;
+        } else {
+            func_0011DC50(&D_003D7A50.unk4C, 2, 1, 8, 1, 1);
+        }
+        break;
+    case 4:
+        if (D_00398628[1] < 0 || D_00398628[3] < 0) {
+            D_003D7A50.unk3E = 0;
+        } else {
+            func_0011DC50(&D_003D7A50.unk4E, 2, 1, 8, 1, 1);
+        }
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE18);
 
@@ -1559,8 +1758,6 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021DD88);
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E068);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E1C8);
-
-extern void mdlDestroyContext(s32 resource);
 
 void mdlFreeViewResources(void) {
     s32 i;
