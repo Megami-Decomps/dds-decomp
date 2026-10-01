@@ -668,32 +668,42 @@ end
         self.assertIn("unknown command profile 'unknown'", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
 
-    def test_dds1_command_profile_records_verified_stack_pops(self) -> None:
-        commands = {
-            command.name: (
-                command.command_id,
-                command.stack_pop,
-                command.writes_result,
-            )
-            for command in flw0_profiles.DDS1.commands
+    def test_dds_command_profiles_record_verified_stack_effects(self) -> None:
+        expected = {
+            "MESSAGE_REQUEST_AND_POLL": (0x000, 1, False),
+            "ACTIVATE_MESSAGE_PANEL": (0x001, 0, False),
+            "FINISH_SCRIPT_MESSAGE_WINDOW": (0x002, 0, False),
+            "TEST_MODEL_FLAG": (0x007, 1, True),
+            "SET_MODEL_FLAG": (0x008, 1, False),
+            "CLEAR_MODEL_FLAG": (0x009, 1, False),
+            "WAIT_FOR_TIMER_START": (0x00D, 0, False),
+            "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
+            "SCREEN_FADE_A": (0x00F, 2, False),
+            "SCREEN_FADE_B": (0x010, 2, False),
+            "RESET_DRAW_EFFECTS": (0x043, 0, False),
+            "RETURN_TO_TITLE": (0x046, 0, False),
+            "RESTORE_CAMERA_NODE_MODE": (0x060, 0, False),
+            "RELEASE_CURRENT_OBJECT": (0x061, 0, False),
+            "CALL_EVENT": (0x066, 1, False),
+            "PREPARE_UNIT_MOTION_STATE": (0x073, 5, False),
+            "READ_SECONDARY_WORLD_ID_VALUE": (0x094, 1, True),
+            "RESET_FIELD_EFFECTS": (0x099, 0, False),
+            "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
+            "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
+            "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
         }
-        self.assertEqual(
-            commands,
-            {
-                "MESSAGE_REQUEST_AND_POLL": (0x000, 1, False),
-                "ACTIVATE_MESSAGE_PANEL": (0x001, 0, False),
-                "FINISH_SCRIPT_MESSAGE_WINDOW": (0x002, 0, False),
-                "WAIT_FOR_TIMER_LIMIT": (0x00E, 1, False),
-                "SCREEN_FADE_A": (0x00F, 2, False),
-                "RESET_DRAW_EFFECTS": (0x043, 0, False),
-                "RETURN_TO_TITLE": (0x046, 0, False),
-                "CALL_EVENT": (0x066, 1, False),
-                "RESET_FIELD_EFFECTS": (0x099, 0, False),
-                "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
-                "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
-                "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
-            },
-        )
+        for profile in (flw0_profiles.DDS1, flw0_profiles.DDS2):
+            with self.subTest(profile=profile.name):
+                commands = {
+                    command.name: (
+                        command.command_id,
+                        command.stack_pop,
+                        command.writes_result,
+                    )
+                    for command in profile.commands
+                }
+                self.assertEqual(commands, expected)
 
     def test_reading_view_lifts_verified_commands_and_result_flow(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -775,12 +785,12 @@ end
         self.assertIn("0004: if !((5 < 2)) goto jump_label[0x0000]", view)
 
     def test_reading_view_handles_every_tracked_script(self) -> None:
-        source_dir = TOOLS.parent / "src/dds1/scripts/event"
+        source_dir = TOOLS.parent / "src/dds1/scripts"
         type5_uses = 0
         command_uses = 0
         profiled_command_uses = 0
-        for path in sorted(source_dir.glob("*.bfasm")):
-            with self.subTest(source=path.name):
+        for path in sorted(source_dir.rglob("*.bfasm")):
+            with self.subTest(source=path.relative_to(source_dir)):
                 source = path.read_text(encoding="utf-8")
                 script = flw0.parse_source(source)
                 profile_name = flw0_view.source_profile_name(source)
@@ -801,9 +811,34 @@ end
                             f"type5_ref(0x{word.operand_u16:04x}, ",
                             view,
                         )
-        self.assertEqual(type5_uses, 315)
-        self.assertEqual(command_uses, 3881)
-        self.assertEqual(profiled_command_uses, 1334)
+        self.assertEqual(type5_uses, 7863)
+        self.assertEqual(command_uses, 53400)
+        self.assertEqual(profiled_command_uses, 32695)
+
+    def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
+        code = [
+            7,
+            *((value << 16) | flw0.OPCODE_IDS["PUSHIS"] for value in range(1, 6)),
+            (0x073 << 16) | flw0.OPCODE_IDS["COMM"],
+            (12 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x094 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (7 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x007 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (0x00D << 16) | flw0.OPCODE_IDS["COMM"],
+            (0 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (30 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x010 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["END"],
+        ]
+        view = flw0_view.render(flw0.parse(_fixture(code)), "dds2")
+        self.assertIn("PREPARE_UNIT_MOTION_STATE(1, 2, 3, 4, 5)", view)
+        self.assertIn("result = READ_SECONDARY_WORLD_ID_VALUE(12)", view)
+        self.assertIn("push result", view)
+        self.assertIn("result = TEST_MODEL_FLAG(7)", view)
+        self.assertIn("WAIT_FOR_TIMER_START()", view)
+        self.assertIn("SCREEN_FADE_B(0, 30)", view)
 
     def test_tracked_e670_source_assembles_exact_file(self) -> None:
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
@@ -817,73 +852,96 @@ end
         )
         self.assertEqual(flw0_symbolic.render(script, "dds1"), source)
 
-    def test_tracked_dds1_event_corpus_assembles_exact_hashes(self) -> None:
+    def test_tracked_dds1_script_corpus_assembles_exact_hashes(self) -> None:
         root = TOOLS.parent
-        source_dir = root / "src/dds1/scripts/event"
-        manifest = root / "config/dds1/event_scripts.sha1"
+        source_dir = root / "src/dds1/scripts"
+        manifest = root / "config/dds1/scripts.sha1"
         records = []
         for line in manifest.read_text(encoding="ascii").splitlines():
             expected, output = line.split()
             output_path = Path(output)
-            self.assertEqual(output_path.parent, Path("build/dds1/scripts/event"))
-            records.append(
-                (expected, source_dir / output_path.with_suffix(".bfasm").name)
-            )
+            relative = output_path.relative_to("build/dds1/scripts")
+            records.append((expected, source_dir / relative.with_suffix(".bfasm")))
 
-        tracked = sorted(source_dir.glob("*.bfasm"))
+        tracked = sorted(source_dir.rglob("*.bfasm"))
         self.assertEqual(sorted(source for _, source in records), tracked)
-        self.assertEqual(len(records), 104)
+        self.assertEqual(len(records), 143)
 
         versions = {1: 0, 2: 0}
         message_banks = 0
+        decoded_banks = 0
         dialogs = 0
         pages = 0
         options = 0
         speakers = 0
+        code_words = 0
+        commands = 0
+        profiled_commands = 0
         font_directives = 0
         glyph_directives = 0
         message_references = 0
+        short_string_counts = 0
         for expected, source in records:
-            with self.subTest(source=source.name):
+            with self.subTest(source=source.relative_to(source_dir)):
                 text = source.read_text(encoding="utf-8")
                 font_directives += len(re.findall(r"^\s+font ", text, re.MULTILINE))
                 glyph_directives += len(re.findall(r"^\s+glyphs ", text, re.MULTILINE))
+                short_string_counts += "\nstrings count=" in text
                 version = int(text.split(None, 2)[1])
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
-                message_references += text.count("PUSHMSG ")
+                message_references += len(re.findall(r"\bPUSHMSG\b", text))
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
                 script = flw0.parse(rebuilt)
-                message_data = script.section_bytes(script.sections[3])
-                if message_data:
+                code_words += len(script.code_words())
+                commands += sum(
+                    word.opcode == flw0.OPCODE_IDS["COMM"]
+                    for word in script.code_words()
+                )
+                profiled_commands += sum(
+                    word.opcode == flw0.OPCODE_IDS["COMM"]
+                    and word.operand_u16 in flw0_profiles.DDS1.by_id
+                    for word in script.code_words()
+                )
+                message_sections = script.sections_of_type(3)
+                if message_sections and (
+                    message_data := script.section_bytes(message_sections[0])
+                ):
                     message_banks += 1
-                    bank = msg1.decode(message_data)
-                    dialogs += len(bank.dialogs)
-                    speakers += len(bank.speakers)
-                    pages += sum(
-                        len(dialog.pages)
-                        for dialog in bank.dialogs
-                        if isinstance(dialog, msg1.Message)
-                    )
-                    options += sum(
-                        len(dialog.options)
-                        for dialog in bank.dialogs
-                        if isinstance(dialog, msg1.Selection)
-                    )
-                    if version == 1:
-                        self.assertIn("\n  msg1\n", text)
-                        self.assertEqual(flw0.render_source(script, "dds1"), text)
+                    try:
+                        bank = msg1.decode(message_data)
+                    except msg1.Msg1Error:
+                        pass
                     else:
-                        self.assertIn("\nmessages msg1\n", text)
-                        self.assertEqual(flw0_symbolic.render(script, "dds1"), text)
-        self.assertEqual(versions, {1: 7, 2: 97})
+                        decoded_banks += 1
+                        dialogs += len(bank.dialogs)
+                        speakers += len(bank.speakers)
+                        pages += sum(
+                            len(dialog.pages)
+                            for dialog in bank.dialogs
+                            if isinstance(dialog, msg1.Message)
+                        )
+                        options += sum(
+                            len(dialog.options)
+                            for dialog in bank.dialogs
+                            if isinstance(dialog, msg1.Selection)
+                        )
+                if version == 1:
+                    self.assertEqual(flw0.render_source(script, "dds1"), text)
+                else:
+                    self.assertEqual(flw0_symbolic.render(script, "dds1"), text)
+        self.assertEqual(versions, {1: 14, 2: 129})
         self.assertEqual(
-            (message_banks, dialogs, pages, options, speakers),
-            (36, 179, 257, 16, 27),
+            (message_banks, decoded_banks, dialogs, pages, options, speakers),
+            (72, 67, 2702, 3109, 1028, 184),
         )
-        self.assertEqual((font_directives, glyph_directives), (606, 2))
-        self.assertEqual(message_references, 188)
+        self.assertEqual(
+            (code_words, commands, profiled_commands), (168829, 53400, 32695)
+        )
+        self.assertEqual((font_directives, glyph_directives), (1154, 210))
+        self.assertEqual(message_references, 2368)
+        self.assertEqual(short_string_counts, 30)
 
     def test_tracked_dds2_script_corpus_assembles_exact_hashes(self) -> None:
         root = TOOLS.parent
@@ -910,6 +968,8 @@ end
             "speakers": 0,
             "code_words": 0,
             "commands": 0,
+            "profiled_commands": 0,
+            "message_references": 0,
             "font": 0,
             "glyphs": 0,
             "short_string_counts": 0,
@@ -931,6 +991,14 @@ end
                 totals["commands"] += sum(
                     word.opcode == flw0.OPCODE_IDS["COMM"]
                     for word in script.code_words()
+                )
+                totals["profiled_commands"] += sum(
+                    word.opcode == flw0.OPCODE_IDS["COMM"]
+                    and word.operand_u16 in flw0_profiles.DDS2.by_id
+                    for word in script.code_words()
+                )
+                totals["message_references"] += len(
+                    re.findall(r"\bPUSHMSG\b", text)
                 )
                 message_sections = script.sections_of_type(3)
                 if message_sections and (
@@ -974,6 +1042,10 @@ end
         )
         self.assertEqual(
             (totals["code_words"], totals["commands"]), (123441, 38850)
+        )
+        self.assertEqual(
+            (totals["profiled_commands"], totals["message_references"]),
+            (23630, 1910),
         )
         self.assertEqual((totals["font"], totals["glyphs"]), (433, 159))
         self.assertEqual(totals["short_string_counts"], 22)
