@@ -209,6 +209,22 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   in the caller reproduces the bytes, but it is a codegen lever, not the
   source. The definition form of the callee (`static`, return type,
   prototype) makes no difference.
+  Mechanism (gdb on cc1, `fill_slots_from_thread`): when the delay slot comes
+  from the branch target, the insn stays unannulled only if it sets nothing
+  in `opposite_needed`, the registers `mark_target_live_regs` reports live at
+  the fall-through. That set is a forward simulation from the start of the
+  extended block (REG_DEAD regs only die at the next label) and
+  `find_dead_or_set_registers` then stops at the first throwing call. So a
+  fall-through that starts with an extern call keeps the slot register
+  "live" and the branch becomes `beqzl`/`bnel`; with the callee compiled
+  earlier in the unit the scan runs on, sees the call clobber the register and
+  the branch stays plain. Toy-verified on `func_00190708` (callee
+  `func_00190118`, defined in the unit before `effEvent`), DDS2
+  `func_00224500` (callee `func_00217470`) and `func_00183EE0` (callee
+  `effPcpEventWorkInitEntries`, same unit: the branch matches once the C
+  function is visible, no unit change needed). For `func_00190708` and
+  `func_00224500` the callee sits in another unit, i.e. those units are one
+  translation unit in retail.
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.
@@ -582,6 +598,22 @@ line above the definition):
 - Reuse one `f32 wave` across `(f32)frame / 60` and `f(wave * pi)`
   to keep both live ranges in `$f20` across the call; separate locals
   change the FPR assignment (`func_0026EEE8`).
+- ee-as emits one `.lit4` word per `li.s` and never merges equal values. Two
+  pool entries holding the same float therefore mean cc1 loaded the constant
+  twice. `t = 0.0f; if (c) t = a / b;` is a branch around a block, so cse
+  (`skip_blocks`) keeps a constant loaded before it for the code after it: one
+  entry, and the register survives the next call in a callee-saved FPR.
+  `t = c ? a / b : 0.0f;` expands with a jump over the then-arm, the join
+  label has two uses while cse runs, the path stops there and the constant is
+  reloaded: two entries (`func_0025AA20` family, `3.14159265f` twice).
+- cc1 truncates decimal float literals: `0.2f` is 0x3E4CCCCC, `0.1f` is
+  0x3DCCCCCC, `3.14159265f` is 0x40490FDA, and `3.1415925f` is 0x40490FD9.
+  Retail's "0.19999999" / "0.099999994" are `0.2f` / `0.1f`; write what the
+  programmer wrote, not the shortest decimal of the retail bits.
+- A call result scaled right away, `t = sdfSinPoly(x) * 0.2f + 0.1f;`,
+  keeps `t` in `$f0`; `t = sdfSinPoly(x);` followed by a use of `t` lets cse
+  forward `$f0` into the multiply, and `t` then takes the preference of the
+  `(x - 5.0f) / 40.0f` numerator's register (`$f1`) instead.
 - Float arguments to an unprototyped callee are promoted to double and go
   through soft-float helper calls (extra `jal`s). Give the callee a
   prototype with `f32` parameters.
