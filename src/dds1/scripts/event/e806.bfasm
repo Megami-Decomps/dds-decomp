@@ -91,7 +91,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 829d 8181 8081 8081
+      font "……っ!!"
       newline
       control f1 04
     endpage
@@ -100,23 +100,23 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8c95 80e9 80f7 8188 81a6 8288 8088 85b2 83f4 8a82 8089 8289
+      font "脅かすなよ、(主人公)。"
       newline
-      glyphs 8480 80e9 84d3 80fd 818c 80e9 8186 84f4 8181 80fd 81a6
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      glyphs 829d 829d 829d 80fb 81aa 8189 80f5 8184 81a0 80e8 80e9 80f5
-      glyphs 80e2 80fe 81ab 809f
+      font "何か出たのかと思ったよ"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 80f1 818c 86b9 8d85 8288 86ac 81a0 80e2 8188 80e2 81b1 80fe
-      glyphs 80fa 8289
+      font "………それにしてもおかし"
+      font "いだろ?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "この病院、誰もいないんだ"
+      font "ぜ。"
       newline
       control f1 04
     endpage
@@ -125,7 +125,7 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 83e7 8288 86ac 80e9 8189 83ef 8181 80fd 80e9 809f
+      font "お前、誰かに会ったか?"
       newline
       control f1 04
     endpage
@@ -133,48 +133,48 @@ messages msg1
   select KAIWA_SEL
     option
       control f2 08 ff ff
-      glyphs 83ef 8181 80fd
+      font "会った"
     endoption
     option
       control f2 08 ff ff
-      glyphs 83ef 8181 8184 8188 80e2
+      font "会ってない"
     endoption
   endselect
   message ISAMU_004 speaker=0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 829d 829d 829d 829d 829d
+      font "………………"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 81d2 81b3 81be 8186 80e9 86a0 80e4 8188 818c 818d 84f0 80f5
-      glyphs 80fe 80fc 809f
+      font "チアキとか言うなのは無し"
+      font "だぞ?"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 829d 80e0 829b 80df 8289
+      font "……あ～ぁ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 88b8 83ee 8189 83ef 80e6 81a9 8186 84f4 8181 8184 848d 80fd
-      glyphs 818c 8189 8188 8289
+      font "先生に会えると思って来た"
+      font "のにな。"
       newline
-      glyphs 80f1 80f1 8189 84bc 8d85 80f5 8184 81a9 8181 8184 86a3 80fe
-      glyphs 81a6 8188 809f
+      font "ここに入院してるって話だ"
+      font "よな?"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 88b8 83ee 8288 8480 8ab4 8189 80e2 81a9 81b1 80fe 81ab
-      glyphs 809f
+      font "…先生、何処にいるんだろ"
+      font "?"
       newline
       control f1 04
     endpage
@@ -183,24 +183,24 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 829d 80e0 829b 80df 8289
+      font "……あ～ぁ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 88b8 83ee 8189 83ef 80e6 81a9 8186 84f4 8181 8184 848d 80fd
-      glyphs 818c 8189 8188 8289
+      font "先生に会えると思って来た"
+      font "のにな。"
       newline
-      glyphs 80f1 80f1 8189 84bc 8d85 80f5 8184 81a9 8181 8184 86a3 80fe
-      glyphs 81a6 8188 809f
+      font "ここに入院してるって話だ"
+      font "よな?"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 88b8 83ee 8288 8480 8ab4 8189 80e2 81a9 81b1 80fe 81ab
-      glyphs 809f
+      font "…先生、何処にいるんだろ"
+      font "?"
       newline
       control f1 04
     endpage
@@ -209,45 +209,45 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80f3 8181 80eb 8cd3 80f5 80e2 83dc 85ca 85ef 85ae 80e9 80ef
-      glyphs 80fd 80ef 8187 829d
+      font "さっき怪しい地下室見かけ"
+      font "たけど…"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 819c 80f3 80e9 80e0 81b1 8188 84ff 84eb 87ff 8188 84cb 8189
+      font "まさかあんな不気味な所に"
       newline
-      glyphs 80e2 81a9 818d 80f8 8188 80e2 81a6 8188 809f
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      glyphs 829d 80e0 80df 8081 84f4 80e2 84d3 80f5 80fd 80fe 80ef 8185
-      glyphs 81a0 90a5 84eb 80ea 80f7 81a9 8081
+      font "いるはずないよな?"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 81d2 81b3 81be 8181 8184 8288 819c 80fe 85ca 8189 80e2 81a9
-      glyphs 81a6 8188 809f
-      newline
-      glyphs 829d 8186 81a8 80e0 80e6 80f8 8288 8483 84ae 81a9 81a6 8289
+      font "…あぁ!思い出しただけで"
+      font "も寒気がする!"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 80f1 81b1 8188 84ff 84eb 87ff 8188 86b9 8d85 8288 86bf 88c1
-      glyphs 818d 80f5 80fd 80ed 8188 80e2 8188 829d
+      font "チアキって、まだ下にいる"
+      font "よな?"
+      newline
+      font "…とりあえず、俺戻るよ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      font "こんな不気味な病院、長居"
+      font "はしたくないな…"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 81b5 81c6 81f1
+    font "イサム"
   endspeaker
 end
 

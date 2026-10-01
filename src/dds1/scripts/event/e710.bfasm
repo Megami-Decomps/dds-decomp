@@ -27,8 +27,8 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8080 8080 83e1 818c 89a9 81a7 80ec 818d 8080 88ff 80f5 80ed
-      glyphs 8bce 81aa 81a6 80e4
+      font "  死の安らぎは 等しく"
+      font "訪れよう"
       newline
     endpage
   endmessage
@@ -36,11 +36,11 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8080 8080 83e1 818c 89a9 81a7 80ec 818d 8080 88ff 80f5 80ed
-      glyphs 8bce 81aa 81a6 80e4
+      font "  死の安らぎは 等しく"
+      font "訪れよう"
       newline
-      glyphs 8080 8080 83f4 8189 8680 80f8 8186 81a0 8080 83eb 83c7 8189
-      glyphs 8680 80f8 8186 81a0
+      font "  人に非ずとも 悪魔に"
+      font "非ずとも"
       newline
       control f1 04
     endpage
@@ -49,8 +49,8 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8080 8080 84aa 80e2 8188 81a9 85cc 84f4 818c 8bf3 80eb 8189
-      glyphs 8184
+      font "  大いなる意思の導きに"
+      font "て"
       newline
       control f1 04
     endpage
@@ -59,11 +59,11 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 05 ff
-      glyphs 8080 8080 83e1 818c 89a9 81a7 80ec 818d 8080 88ff 80f5 80ed
-      glyphs 8bce 81aa 81a6 80e4
+      font "  死の安らぎは 等しく"
+      font "訪れよう"
       newline
-      glyphs 8080 8080 83f4 8189 8680 80f8 8186 81a0 8080 83eb 83c7 8189
-      glyphs 8680 80f8 8186 81a0
+      font "  人に非ずとも 悪魔に"
+      font "非ずとも"
       newline
     endpage
   endmessage
@@ -71,8 +71,8 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 05 ff
-      glyphs 8080 8080 84aa 80e2 8188 81a9 85cc 84f4 818c 8bf3 80eb 8189
-      glyphs 8184
+      font "  大いなる意思の導きに"
+      font "て"
       newline
     endpage
   endmessage

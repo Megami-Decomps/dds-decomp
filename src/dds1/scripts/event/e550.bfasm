@@ -203,8 +203,8 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 809e 8cb1 8bc1 8c8d 86a3 80ea 81f2 8299 81fc 81b0 868e 88a2
-      glyphs 80f5 819c 80f5 80fd 8289
+      font ">携帯電話がメールを受信"
+      font "しました。"
       newline
       control f1 04
     endpage
@@ -214,27 +214,27 @@ messages msg1
       control f2 08 ff ff
       control f2 07 06 ff
       control f2 02 01 ff
-      glyphs 8088 85b2 83f4 8a82 8089 8196
+      font "(主人公)へ"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 84e9 84c4 80fe 80fc 8288 84d9 80e6 8184 81a9 80e9 809f
+      font "今日だぞ、覚えてるか?"
       newline
-      glyphs 81f7 81b7 81c4 88b8 83ee 818c 80e8 85ae 88ca 80e2 8189 848f
-      glyphs 80ed 818c 8289
+      font "ユウコ先生のお見舞いに行"
+      font "くの。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 80f8 8181 8186 88a6 8296 84a4 8a82 85b5 8185 84e6 8181 8184
-      glyphs 81a9 818c 8189
+      font "ずっと代々木公園で待って"
+      font "るのに"
       newline
-      glyphs 8480 80f5 8184 81a9 81b1 80fe 81a6 8289
+      font "何してるんだよ。"
       newline
-      glyphs 83c9 80ed 80f1 80e2 81a6 8289
+      font "早くこいよ。"
       newline
       control f1 04
     endpage
@@ -243,17 +243,17 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 809e 81c0 81fa 81ca 818c 87cb 83f4 80e9 81a7 818c 81f2 8299
-      glyphs 81fc 818c 81a6 80e4 80fe 8289
+      font ">クラスの友人からのメー"
+      font "ルのようだ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 809e 81c0 81fa 81ca 81f2 81b5 81d9 8088 85f4 8089 818c
+      font ">クラスメイト(男)の"
       newline
-      glyphs 83e6 83e7 81b0 84bc 83c6 80f5 8184 85ca 80f3 80e2 8289
+      font "名前を入力して下さい。"
       newline
       control f2 02 01 ff
       control f1 04
@@ -263,19 +263,19 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 88a6 8296 84a4 8a82 85b5 8185 84e6 8181 8184 81a9 80e9
-      glyphs 81a7
+      font "…代々木公園で待ってるか"
+      font "ら"
       newline
-      glyphs 83c9 80ed 848d 81a9 81b1 80fe 80fc 8081
+      font "早く来るんだぞ!"
       newline
-      glyphs 8080 8080 8080 8080 8080 8080 8080 8080 8080 8080 8080 8080
-      glyphs 8080 8088 89d8 8089 81a6 81a8
+      font "            "
+      font " (勇)より"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 81c0 81fa 81ca 81f2 81b5 81d9
+    font "クラスメイト"
   endspeaker
 end
 

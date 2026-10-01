@@ -19,13 +19,13 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 80e9 81a8
+      font "かり"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 81f2 81d0 81d9 81fe 8284
+    font "メタトロン"
   endspeaker
 end
 

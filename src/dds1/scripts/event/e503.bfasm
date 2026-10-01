@@ -553,8 +553,8 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 81a6 80ed 80f1 80f1 819c 8185 80fd 8187 81a8 8182 80e2 80fd
-      glyphs 8188 8289
+      font "よくここまでたどりついた"
+      font "な。"
       newline
       control f1 04
     endpage
@@ -563,11 +563,11 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 83cc 8185 81a0 83eb 83c7 8185 81a0 8188 80e2
-      glyphs 85f4 8289
+      font "・・・神でも悪魔でもない"
+      font "男。"
       newline
-      glyphs 83f4 8185 80e0 81a9 85bd 81b0 8982 8184 80fd 81d8 81e4 81fc
-      glyphs 81e0 8299 81d5 818c 84cb 86dd 85a3 8289
+      font "人である事を捨てたデビル"
+      font "ハーツの所有者。"
       newline
       control f1 04
     endpage
@@ -576,8 +576,8 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80e8 83e7 80ea 80f1 80f1 8189 848d 81a9 85bd 818d 85ce 8181
-      glyphs 8184 80e2 80fd 8289
+      font "お前がここに来る事は解っ"
+      font "ていた。"
       newline
       control f1 04
     endpage
@@ -586,11 +586,11 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 80f1 818c 8784 88b5 80ea 88e1 819c 81aa 80fd
-      glyphs 86b5 89fa 8288
+      font "・・・この世界が産まれた"
+      font "理由、"
       newline
-      glyphs 828a 828a 828a 80e8 83e7 87b3 86db 818c 8893 84dc 80f7 81a9
-      glyphs 85cc 87ff 8288
+      font "・・・お前自身の存在する"
+      font "意味、"
       newline
       control f1 04
     endpage
@@ -599,8 +599,8 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 80fb 80f5 8184 8288 80f1 818c 8784 88b5 818c
-      glyphs 848f 80ed 8bf6
+      font "・・・そして、この世界の"
+      font "行く末"
       newline
       control f1 04
     endpage
@@ -609,11 +609,11 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 8997 8184 818c 8b8c 88fe 818d 81f3 81db 81da 8189 83ef 80e6
-      glyphs 818e
+      font "全ての疑問はモナドに会え"
+      font "ば"
       newline
-      glyphs 81ad 80e9 81a9 828a 828a 828a 8288 80fb 80e4 88a2 80f6 8184
-      glyphs 81a9 818c 80fe 81ab 80e4 8289
+      font "わかる・・・、そう信じて"
+      font "るのだろう。"
       newline
       control f1 04
     endpage
@@ -622,10 +622,10 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 8997 8184 81b0 85dd 81a9 85bd 80ea 80e8 83e7
-      glyphs 8189 8186 8181 8184
+      font "・・・全てを知る事がお前"
+      font "にとって"
       newline
-      glyphs 86cf 80f9 8186 818d 8687 81a7 818a 80ea 8188 828a 828a 828a
+      font "幸せとは限らぬがな・・・"
       newline
       control f1 04
     endpage
@@ -634,9 +634,9 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80f1 818c 8888 81b0 87fa 80ef 81aa 818e
+      font "この道を抜ければ"
       newline
-      glyphs 81f3 81db 81da 8189 83ef 80e4 85bd 80ea 84d3 848d 81a9 8289
+      font "モナドに会う事が出来る。"
       newline
       control f1 04
     endpage
@@ -645,10 +645,10 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80fd 80fe 80f5 8288
+      font "ただし、"
       newline
-      glyphs 8481 81a8 87fa 80ef 81aa 81aa 818e 818c 86a3 80fe 80ea 828a
-      glyphs 828a 828a
+      font "通り抜けれればの話だが・"
+      font "・・"
       newline
       control f1 04
     endpage
@@ -657,10 +657,10 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 80fb 81aa 8185 81a0 80e8 83e7 818d
+      font "それでもお前は"
       newline
-      glyphs 81f3 81db 81da 818c 83dc 8189 848f 80ed 85bd 81b0 86ed 819e
-      glyphs 818c 80e9 809f
+      font "モナドの地に行く事を望む"
+      font "のか?"
       newline
       control f1 04
     endpage
@@ -668,28 +668,28 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
   message KAIWA speaker=1
     page
       control f2 08 ff ff
-      glyphs 8187 80e4 80f5 819c 80f7 80e9 809f
+      font "どうしますか?"
       newline
     endpage
   endmessage
   select KAIWA_SEL
     option
       control f2 08 ff ff
-      glyphs 80fb 81aa 8185 81a0 84b2 819e
+      font "それでも進む"
     endoption
     option
       control f2 08 ff ff
-      glyphs 828a 828a 828a 86e5 80eb 879d 80f7
+      font "・・・引き返す"
     endoption
   endselect
   message LILITH_011 speaker=0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 81a6 80e9 81ab 80e4 8289
+      font "・・・よかろう。"
       newline
-      glyphs 81f3 81db 81da 8196 8186 8182 8188 80ea 81a9 8bf8 81b0 8ab2
-      glyphs 80e2 8184 81a2 81a9 8289
+      font "モナドへとつながる扉を開"
+      font "いてやる。"
       newline
       control f1 04
     endpage
@@ -698,11 +698,11 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 828a 828a 828a 80fb 80e4 80e9 8289 80fe 80ea 84eb 80ea 80e9
-      glyphs 81ad 8181 80fd 81a7
+      font "・・・そうか。だが気がか"
+      font "わったら"
       newline
-      glyphs 80f1 80f1 8189 848d 81a9 81b1 80fe 8188 8289 84e6 8181 8184
-      glyphs 80e2 81a9 80fc 8289
+      font "ここに来るんだな。待って"
+      font "いるぞ。"
       newline
       control f1 04
     endpage
@@ -710,8 +710,8 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
   message ERROR speaker=0
     page
       control f2 08 ff ff
-      glyphs 81ca 81c0 81fb 81e8 81d9 818c 81b9 81fa 8299 80fe 8181 80ff
-      glyphs 81a1 8081
+      font "スクリプトのエラーだっち"
+      font "ゃ!"
       newline
       control f1 04
     endpage
@@ -719,32 +719,32 @@ section 3 type=3 stride=0x1 count=1875 offset=0xaf0
   message MODE speaker=1
     page
       control f2 08 ff ff
-      glyphs 8187 818c 81d7 81ca 81d9 8189 80f5 819c 80f7 80e9 809f
+      font "どのテストにしますか?"
       newline
     endpage
   endmessage
   select MODE_SEL
     option
       control f2 08 ff ff
-      glyphs 81d7 81ca 81d9 81b5 81ea 8284 81d9 8091 8080 81ca 81c0 81fb
-      glyphs 81e8 81d9 8092 81fb 81fb 81ca 81b5 81ea 8284 81d9
+      font "テストイベント1 スクリ"
+      font "プト2リリスイベント"
     endoption
     option
       control f2 08 ff ff
-      glyphs 81d7 81ca 81d9 81b5 81ea 8284 81d9 8092 8080 80f6 8181 80eb
-      glyphs 81f1 8299 81e4 8299
+      font "テストイベント2 じっき"
+      font "ムービー"
     endoption
     option
       control f2 08 ff ff
-      glyphs 81b5 81ea 8284 81d9 8092 818c 80e9 81b1 80f9 80e2 81a6 8184
-      glyphs 80e2 8088 81f1 8299 81e4 8299 8089
+      font "イベント2のかんせいよて"
+      font "い(ムービー)"
     endoption
   endselect
   speaker 0
-    glyphs 81fb 81fb 81ca
+    font "リリス"
   endspeaker
   speaker 1
-    glyphs 8080
+    font " "
   endspeaker
 end
 

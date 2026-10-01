@@ -463,13 +463,13 @@ section 3 type=3 stride=0x1 count=147 offset=0xa34
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 829d 83cd 83e2 818c 8bac 8196 81a6 80e4 80f1 80fb 8289
+      font "…邪教の館へようこそ。"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 83cd 83e2 818c 85b2
+    font "邪教の主"
   endspeaker
 end
 

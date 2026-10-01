@@ -356,8 +356,8 @@ messages msg1
     page
       control f2 08 ff ff
       control f2 07 06 ff
-      glyphs 81a6 80ed 80f1 80f1 819c 8185 80fd 8187 81a8 8182 80e2 80fd
-      glyphs 8188 8289
+      font "よくここまでたどりついた"
+      font "な。"
       newline
       control f1 04
     endpage
@@ -365,8 +365,8 @@ messages msg1
   message ERROR speaker=0
     page
       control f2 08 ff ff
-      glyphs 81ca 81c0 81fb 81e8 81d9 818c 81b9 81fa 8299 80fe 8181 80ff
-      glyphs 81a1 8081
+      font "スクリプトのエラーだっち"
+      font "ゃ!"
       newline
       control f1 04
     endpage
@@ -374,32 +374,33 @@ messages msg1
   message MODE speaker=1
     page
       control f2 08 ff ff
-      glyphs 8187 818c 81d7 81ca 81d9 8189 80f5 819c 80f7 80e9 809f
+      font "どのテストにしますか?"
       newline
     endpage
   endmessage
   select MODE_SEL
     option
       control f2 08 ff ff
-      glyphs 81d7 81ca 81d9 81b5 81ea 8284 81d9 8091 8080 81e7 81fa 8299
-      glyphs 81d7 81ca 81d9
+      font "テストイベント1 ブラー"
+      font "テスト"
     endoption
     option
       control f2 08 ff ff
-      glyphs 81d7 81ca 81d9 81b5 81ea 8284 81d9 8092 8080 81d8 81b4 81ca
-      glyphs 81d9 8299 81c8 81f8 8284 81e7 81fa 8299
+      font "テストイベント2 デ"
+      glyphs 81b4
+      font "ストーションブラー"
     endoption
     option
       control f2 08 ff ff
-      glyphs 81d7 81ca 81d9 81b5 81ea 8284 81d9 8093 8080 81ef 81fc 81d2
-      glyphs 81e7 81fa 8299
+      font "テストイベント3 マルチ"
+      font "ブラー"
     endoption
   endselect
   speaker 0
-    glyphs 81fb 81fb 81ca
+    font "リリス"
   endspeaker
   speaker 1
-    glyphs 8080
+    font " "
   endspeaker
 end
 

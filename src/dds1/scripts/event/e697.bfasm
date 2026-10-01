@@ -2135,14 +2135,14 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 829d 829d 848d 8184 80e2 80fd 818c 80e9 8289
+      font "……来ていたのか。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 829d 829d 85cc 84b5 8188 86e4 85a3 80ea 84db 81aa 80fd 81a0
-      glyphs 818c 80fe 8289
+      font "……意外な役者が現れたも"
+      font "のだ。"
       newline
       control f1 04
     endpage
@@ -2152,33 +2152,33 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 85f2 80f5 80e2 8188 829d 829d 84f1 84f2 8289
+      font "久しいな……少年。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 80e2 81a2 829d 829d 829d 829d 82a6 83f4 8dd4 8ee1 82a7 8186
-      glyphs 84d2 8194 8197 80eb 80e9 8289
+      font "いや…………「人修羅」と"
+      font "呼ぶべきか。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 81a6 81a0 81a2 8288 899c 80ea 80fb 80e4 80fe 8181 80fd 8186
-      glyphs 818d 8188 829d 829d
+      font "よもや、君がそうだったと"
+      font "はな……"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 8187 80e4 81a2 81a7 83f0 8296 818d 8288 86a9 819f 80e9 81a7
+      font "どうやら我々は、初めから"
       newline
-      glyphs 84d3 83ef 80e4 8197 80ed 80f5 8184 85a4 83ef 80f5 80fd 81a7
-      glyphs 80f5 80e2 8289
+      font "出会うべくして再会したら"
+      font "しい。"
       newline
       control f1 04
     endpage
@@ -2187,64 +2187,64 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 83f0 80ea 8dd5 8784 818c 83fc 818c 81ef 81bd 81d5 81e3 818d
-      glyphs 8288 81ef 8284 81d9 81fa 81b0
+      font "我が創世の為のマガツヒは"
+      font "、マントラを"
       newline
-      glyphs 85c9 819a 80f5 80fd 86c2 8189 8288 8199 819a 87eb 80ff 8580
-      glyphs 81a8 80fd 8289
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      control f1 12
-      glyphs 80fe 80e9 81a7 8288 899c 80ea 81bb 81ea 81fb 81ca 81c0 8196
-      glyphs 85ec 80e9 80e4 818c 81b0
-      newline
-      glyphs 8afa 80e6 8184 85b9 819f 818d 80f5 8188 80e9 8181 80fd 8289
+      font "減ぼした時に、ほぼ満ち足"
+      font "りた。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 83f4 8dd4 8ee1 8186 80f5 8184 899c 80ea 84c5 84ef 80e9 8187
-      glyphs 80e4 80e9 829d 829d
+      font "だから、君がオベリスクへ"
+      font "向かうのを"
       newline
-      glyphs 85ae 8ba4 819f 81a9 84d4 84d5 81a0 80e0 8181 80fd 80e9 81a7
-      glyphs 8188 8289
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      control f1 12
-      glyphs 80f5 80e9 80f5 899c 818d 8288 85e0 85e1 81b0 87a0 80ef 80fd
-      glyphs 80fe 80ef 8185 8188 80ed 8288
-      newline
-      glyphs 8dba 83c6 8185 91db 83de 819c 8185 81a0 85ce 80eb 89e6 8181
-      glyphs 80fd 8289
+      font "敢えて止めはしなかった。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 81f0 81fe 81c0 89da 8ff5 8189 81a0 87bd 80f3 81aa 80fd 80fb
-      glyphs 818c 83c6 829d 829d
+      font "人修羅として君が本物かど"
+      font "うか……"
       newline
-      glyphs 8489 818c 8883 8ddc 8490 8491 80fe 8289
+      font "見極める必要もあったから"
+      font "な。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 899c 8188 81a7 818e 8288 8aaa 819c 81a9 80e9 81a0 85dd 81aa
-      glyphs 8188 80e2 8289
+      font "しかし君は、刺客を退けた"
+      font "だけでなく、"
       newline
-      glyphs 8186 81a0 8189 82a6 81c8 81c9 81ef 82a7 81b0 8db3 80ed 84aa
-      glyphs 86e4 80ea 8188 829d 829d
+      font "独力で巫女までも解き放っ"
+      font "た。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      font "ミロク経典にも記されたそ"
+      font "の力……"
+      newline
+      font "私の想像以上だ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      font "君ならば、務まるかも知れ"
+      font "ない。"
+      newline
+      font "ともに「シジマ」を啓く大"
+      font "役がな……"
       newline
       control f1 04
     endpage
@@ -2254,11 +2254,11 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 829d 829d 81e3 81d9 818c 85ba 86ed 8186 818d 908d 83fe 818c
-      glyphs 81a6 80e4 8188 81a0 818c 80fe 8289
+      font "……ヒトの欲望とは灯火の"
+      font "ようなものだ。"
       newline
-      glyphs 85cb 80f3 8188 80e4 80ff 818d 84fb 80e9 8185 84f5 83dc 81a6
-      glyphs 80e2 8289
+      font "小さなうちは暖かで心地よ"
+      font "い。"
       newline
       control f1 04
     endpage
@@ -2268,11 +2268,11 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 80fe 80ea 8288 90f1 80e6 84d6 80ef 81a9 83fe 818d 81a2 80ea
-      glyphs 8184 8b92 8186 8188 81a9 8289
+      font "だが、燃え続ける火はやが"
+      font "て炎となる。"
       newline
-      glyphs 8997 8184 81b0 8de9 80eb 88da 80ed 80f7 819c 8185 85b9 819c
-      glyphs 81a7 818a 8cd3 84ef 8189 8188 829d 829d
+      font "全てを焼き尽くすまで止ま"
+      font "らぬ怪物にな……"
       newline
       control f1 04
     endpage
@@ -2282,19 +2282,19 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 81e3 81d9 818d 80fb 81b1 8188 81a0 818c 81b0 86c1 80f5 80f7
-      glyphs 80ec 80fd 8289
+      font "ヒトはそんなものを愛しす"
+      font "ぎた。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 80fb 818c 89a9 85bb 8188 85fc 81a0 81a8 8189 8a85 8893 80f5
-      glyphs 8288 8997 8184 81b0 90e8 8189 84e0 80f7
+      font "その安易な温もりに依存し"
+      font "、全てを灰に帰す"
       newline
-      glyphs 8a95 8b98 85a3 818c 84c5 84a3 8189 818d 8288 83ea 81b0 84ed
-      glyphs 80ef 8184 80eb 80fd 818c 80fe 8289
+      font "破壊者の本性には、目を背"
+      font "けてきたのだ。"
       newline
       control f1 04
     endpage
@@ -2304,20 +2304,20 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 81e3 81d9 818d 8784 88b5 818c 80fd 819f 8189
+      font "ヒトは世界のために"
       newline
-      glyphs 88da 80ed 80f7 8893 84dc 8185 80e0 81a9 8197 80eb 8188 818c
-      glyphs 80fe 8289
+      font "尽くす存在であるべきなの"
+      font "だ。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 80fb 81aa 80ea 8288 8190 80e2 8184 818d 81e3 81d9 87b3 86db
-      glyphs 818c
+      font "それが、ひいてはヒト自身"
+      font "の"
       newline
-      glyphs 89a9 85b7 81b0 81a0 869d 89c3 80f7 81a9 8289
+      font "安息をも約束する。"
       newline
       control f1 04
     endpage
@@ -2327,29 +2327,29 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 8480 81b0 8683 819f 81a9 8197 80eb 8185 80e0 81a8 8288
+      font "何を求めるべきであり、"
       newline
-      glyphs 8480 81b0 8683 819f 8184 818d 80e2 80ef 8188 80e2 818c 80e9
-      glyphs 8289
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      control f1 12
-      glyphs 80fb 818c 8dcc 81b0 8688 819f 81a9 818c 818d 81e3 81d9 8185
-      glyphs 818d 8188 80e2 8289
-      newline
-      glyphs 829d 829d 8784 88b5 80fe 8289
+      font "何を求めてはいけないのか"
+      font "。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 81e3 81d9 818d 80fd 80fe 8288 8784 88b5 81b0 849f 81a7 80f7
+      font "その線を定めるのはヒトで"
+      font "はない。"
       newline
-      glyphs 88a2 8bae 8598 8185 80e0 81aa 818e 80e2 80e2 8289
+      font "……世界だ。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      font "ヒトはただ、世界を照らす"
+      newline
+      font "信号台であればいい。"
       newline
       control f1 04
     endpage
@@ -2359,18 +2359,18 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 85c2 81a2 80e9 8189 869a 81a8 8288 8488 85c9 80f5 8288
+      font "穏やかに回り、明減し、"
       newline
-      glyphs 8784 88b5 818c 85cc 84f4 818c 8486 858f 8186 8188 81a9 829d
-      glyphs 829d
+      font "世界の意思の一部となる…"
+      font "…"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 80fb 81aa 80ea 85be 8fa6 8189 80f5 8184 85be 898d 818c 83ee
-      glyphs 8afb 8188 818c 80fe 8289
+      font "それが最善にして最高の生"
+      font "業なのだ。"
       newline
       control f1 04
     endpage
@@ -2380,10 +2380,10 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 80fb 80e4 818d 8288 84f4 81ad 8188 80e2 80e9 818b 809f
+      font "そうは、思わないかね?"
       newline
-      glyphs 8784 88b5 818d 80fd 80fe 8288 87ca 90b2 8185 80e0 81aa 818e
-      glyphs 81a6 80e2 818c 80fe 8186 829d 829d
+      font "世界はただ、静寂であれば"
+      font "よいのだと……"
       newline
       control f1 04
     endpage
@@ -2391,11 +2391,11 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
   select TUIKA_TOI01
     option
       control f2 08 ff ff
-      glyphs 818d 80e2
+      font "はい"
     endoption
     option
       control f2 08 ff ff
-      glyphs 80e2 80e2 80e6
+      font "いいえ"
     endoption
   endselect
   message MSG_009_A speaker=0
@@ -2403,28 +2403,28 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 80fb 80e4 80e9 8289
+      font "そうか。"
       newline
-      glyphs 81c8 81c9 81ef 818c 83c8 8794 81a7 80f5 80f3 80ea 868d 80e9
-      glyphs 81a9 80e9 8289
-      newline
-      control f1 04
-    endpage
-    page
-      control f2 08 ff ff
-      control f1 12
-      glyphs 829d 829d 81a2 818d 81a8 8288 88de 818c 86dd 87d0 84f0 87d0
-      glyphs 8187 81a0 8186 818d
-      newline
-      glyphs 889f 80ea 8681 80e4 81a6 80e4 80fe 8188 8289
+      font "シジマの素晴らしさが分か"
+      font "るか。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 80e2 80f8 81aa 8288 899c 8189 81a0 86dc 83c6 80f5 8184 81a0
-      glyphs 81a7 80e8 80e4 8289
+      font "……やはり、他の有象無象"
+      font "どもとは"
+      newline
+      font "格が違うようだな。"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f1 12
+      font "いずれ、君にも協力しても"
+      font "らおう。"
       newline
       control f1 04
     endpage
@@ -2434,18 +2434,18 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 829d 829d 84cb 86eb 818d 899c 81a0 8288 80fd 80fe 818c 83eb
-      glyphs 83c7 80e9 8289
+      font "……所詮は君も、ただの悪"
+      font "魔か。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
       control f1 12
-      glyphs 83f0 80ea 86b5 8883 829d 829d
+      font "我が理想……"
       newline
-      glyphs 86b5 85ce 84d3 848d 81a9 818d 80f8 81a0 8188 80e9 8181 80fd
-      glyphs 81a6 80e4 80fe 8188 8289
+      font "理解出来るはずもなかった"
+      font "ようだな。"
       newline
       control f1 04
     endpage
@@ -2455,36 +2455,36 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
       control f2 08 ff ff
       control f2 07 07 ff
       control f1 12
-      glyphs 829d 829d 80f3 8184 8288 80fb 81ab 80fb 81ab 8489 818d 848f
-      glyphs 80e9 818b 818e 8188 81a7 81b1 8289
+      font "……さて、そろそろ私は行"
+      font "かねばならん。"
       newline
       control f1 12
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 8997 8184 80ea 84b3 81ad 81a9 819c 8185 89a9 84f5 818d 8185
-      glyphs 80eb 8188 80e2 8289
+      font "全てが終わるまで安心はで"
+      font "きない。"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 899c 818d 84eb 8484 80e2 8184 80e2 81a9 80e9 818b 8288
+      font "君は気付いているかね、"
       newline
-      glyphs 80f1 818c 83dc 8189 85ad 80ff 85af 819f 81a9 83cf 80f5 80e2
-      glyphs 84eb 8ae3 829d 829d
+      font "この地に立ち込める妖しい"
+      font "気配……"
       newline
       control f1 12
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 85c9 81b1 80fe 81c5 81cb 81d7 8284 81df 81b7 818c 86e3 81a8
-      glyphs 83fe 8189 88d9 81ab 80e4 8186
+      font "減んだゴズテンノウの残り"
+      font "火に与ろうと"
       newline
-      glyphs 80f7 81a9 85a3 80ea 8288 84ff 84eb 87ff 8189 8eb0 85b4 81b0
-      glyphs 85f9 819f 8184 80e2 81a9 8289
+      font "する者が、不気味に胎動を"
+      font "始めている。"
       newline
       control f1 04
     endpage
@@ -2493,24 +2493,24 @@ section 3 type=3 stride=0x1 count=2952 offset=0x2318
     page
       control f2 08 ff ff
       control f2 07 07 ff
-      glyphs 88de 818c 87cd 80e9 8188 81c4 81d9 8280 81fb 81b0 8db3 80f1
-      glyphs 80e4 8186 80f7 81a9 85a3 8189
+      font "他の愚かなコトワリを啓こ"
+      font "うとする者に"
       newline
-      glyphs 84ec 80f5 8184 8e81 81aa 81b0 868f 81a9 87a2 8189 818d 80e2
-      glyphs 80e9 8188 80e2 829d 829d
+      font "決して遅れを取る訳にはい"
+      font "かない……"
       newline
       control f1 04
     endpage
     page
       control f2 08 ff ff
-      glyphs 8784 88b5 81b0 8dd5 81a9 818c 818d 829d 829d 80f1 818c 8489
-      glyphs 8188 818c 80fe 8081
+      font "世界を創るのは……この私"
+      font "なのだ!"
       newline
       control f1 04
     endpage
   endmessage
   speaker 0
-    glyphs 8ac8 86fd
+    font "氷川"
   endspeaker
 end
 

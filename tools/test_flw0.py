@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 import struct
 import subprocess
 import sys
@@ -231,7 +232,7 @@ class Flw0Tests(unittest.TestCase):
         self.assertIn('      text "Hello"', rendered)
         self.assertIn("      control f2 08 ff ff", rendered)
         self.assertIn("  select CHOICE ext=0 pattern=0 reserved=0 trailing=00", rendered)
-        self.assertIn("    glyphs 83f4 8dd4 8ee1", rendered)
+        self.assertIn('    font "人修羅"', rendered)
         content = [(index, line.strip()) for index, line in enumerate(rendered[1:], 1)]
         self.assertEqual(msg1.parse_source(content), binary)
 
@@ -251,6 +252,30 @@ class Flw0Tests(unittest.TestCase):
         self.assertEqual(msg1.parse_source(quoted_content), quoted_binary)
         with self.assertRaisesRegex(msg1.Msg1Error, "not printable ASCII"):
             msg1.encode(msg1.Bank((msg1.Message("BAD\nNAME", 0xFFFF, ()),), ()))
+
+    def test_msg1_font_text_preserves_preferred_and_ambiguous_glyphs(self) -> None:
+        bank = msg1.Bank(
+            (msg1.Message("FONT", 0xFFFF, (bytes.fromhex("81b381b281b581b4"),)),),
+            (),
+        )
+        binary = msg1.encode(bank)
+        rendered = msg1.render(binary)
+        self.assertIn('      font "ア"', rendered)
+        self.assertIn("      glyphs 81b2", rendered)
+        self.assertIn('      font "イ"', rendered)
+        self.assertIn("      glyphs 81b4", rendered)
+        content = [(index, line.strip()) for index, line in enumerate(rendered[1:], 1)]
+        self.assertEqual(msg1.parse_source(content), binary)
+
+        bad = [
+            (1, "message BAD speaker=none"),
+            (2, "page"),
+            (3, 'font "🙂"'),
+            (4, "endpage"),
+            (5, "endmessage"),
+        ]
+        with self.assertRaisesRegex(msg1.Msg1Error, "not in the DDS1 MSG1 map"):
+            msg1.parse_source(bad)
 
     def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
         source = """\
@@ -694,9 +719,13 @@ end
         pages = 0
         options = 0
         speakers = 0
+        font_directives = 0
+        glyph_directives = 0
         for expected, source in records:
             with self.subTest(source=source.name):
                 text = source.read_text(encoding="utf-8")
+                font_directives += len(re.findall(r"^\s+font ", text, re.MULTILINE))
+                glyph_directives += len(re.findall(r"^\s+glyphs ", text, re.MULTILINE))
                 version = int(text.split(None, 2)[1])
                 versions[version] += 1
                 self.assertIn("\nprofile dds1\n", text)
@@ -730,6 +759,7 @@ end
             (message_banks, dialogs, pages, options, speakers),
             (36, 179, 257, 16, 27),
         )
+        self.assertEqual((font_directives, glyph_directives), (606, 2))
 
 
 if __name__ == "__main__":

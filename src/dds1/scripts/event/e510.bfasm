@@ -195,20 +195,20 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
       control f2 08 ff ff
       control f2 07 06 ff
       control f2 02 06 ff
-      glyphs 8de0 81a9 84c4 84a6 84fc 80ea 86ab 80e2 8184 80e2 81a9 8186
+      font "或る日金太が歩いていると"
       newline
-      glyphs 8bff 80f5 80e2 80e8 8b97 83f7 80ea 85e2 80f0 8184 80eb 80fd
+      font "美しいお姫様が逃げてきた"
       newline
-      glyphs 82a6 83eb 80e2 83f4 8189 818b 80e5 84e9 85e3 81ad 81aa 8184
-      glyphs 80e2 81a9 818c
+      font "「悪い人にねぇ今追われて"
+      font "いるの"
       newline
-      glyphs 8080 80e8 85cd 80e2 84a6 84fc 89ae 8181 8184 80e5 8081 82a7
+      font " お願い金太守ってぇ!」"
       newline
-      glyphs 84a6 84fc 89ae 8181 8184
+      font "金太守って"
       newline
-      glyphs 84a6 84fc 89ae 8181 8184
+      font "金太守って"
       newline
-      glyphs 80eb 81b1 80fd 819c 81a0 8181 8184 8081
+      font "きんたまもって!"
       newline
       control f1 04
     endpage
@@ -217,11 +217,11 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 86ac 81a0 82a6 83cc 82a7 8189 85ad 80ff 85ec 80e9 80e4 80f1
-      glyphs 8186 818d 8185 80eb 8188 80e9 8181 80fd 8289
+      font "誰も「神」に立ち向かうこ"
+      font "とはできなかった。"
       newline
-      glyphs 84f0 86c8 8288 80e0 81a7 81a4 81a9 8ce1 81a8 818c 86a0 86da
-      glyphs 81a0 8481 80f6 8188 80e9 8181 80fd 8289
+      font "無論、あらゆる祈りの言葉"
+      font "も通じなかった。"
       newline
     endpage
   endmessage
@@ -229,21 +229,21 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 82a6 83cc 82a7 818d 8a95 8b98 818c 8687 81a8 81b0 88da 80ed
-      glyphs 80f5 8288
+      font "「神」は破壊の限りを尽く"
+      font "し、"
       newline
-      glyphs 8784 88b5 818d 84bb 8ca0 8189 89ac 80ff 8190 80f5 80ea 81aa
-      glyphs 8184 80e2 80fd 8289
+      font "世界は混沌に打ちひしがれ"
+      font "ていた。"
       newline
-      glyphs 8b9c 899e 81b0 86ed 819e 83e1 85a3 80fd 80ff 818c 89e4 818d
-      glyphs 8b9d 80e9 81aa 8288
+      font "復活を望む死者たちの墓は"
+      font "暴かれ、"
       newline
-      glyphs 83db 80fd 80ff 818d 85f5 80e2 8189 8afe 81b0 86bc 80eb 8288
+      font "獣たちは互いに牙を剥き、"
       newline
-      glyphs 83ee 80eb 86e3 8181 80fd 83f4 84cd 818d 86d0 86ed 8186 84ff
-      glyphs 88a2 8189
+      font "生き残った人間は絶望と不"
+      font "信に"
       newline
-      glyphs 89b3 80ed 8de5 81b1 80fe 8289
+      font "重く沈んだ。"
       newline
     endpage
   endmessage
@@ -251,22 +251,22 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 85b3 83fe 80ea 89e5 80e6 8288 84f0 8488 818c 83d1 81b0 869f
-      glyphs 80e6 80fd 86c2 8288
+      font "野火が消え、無明の夜を迎"
+      font "えた時、"
       newline
-      glyphs 8486 859b 818c 8b86 80ea 83dc 8189 8a8c 80fd 81ad 81a9 8de6
-      glyphs 81a6 81a8
+      font "一匹の蛇が地に横たわる屍"
+      font "より"
       newline
-      glyphs 8de7 80e2 84d3 8184 80eb 80fd 8289
+      font "這い出てきた。"
       newline
-      glyphs 8b86 818d 83e9 81b0 80ed 818b 81a7 80f9 8184 8de8 81b0 8ddd
-      glyphs 81a8 8288
+      font "蛇は体をくねらせて丘を登"
+      font "り、"
       newline
-      glyphs 8de9 80ef 88f2 80f0 80fd 80e9 81b1 84a4 818c 8cd8 8189 8186
-      glyphs 80ee 81ab 81b0 8d97 80e2 80fd 8289
+      font "焼け焦げたかん木の脇にと"
+      font "ぐろを卷いた。"
       newline
-      glyphs 80fb 80f5 8184 87b2 81b0 81a0 80fd 80f0 8184 84e6 8181 80fd
-      glyphs 8289
+      font "そして音をもたげて待った"
+      font "。"
       newline
     endpage
   endmessage
@@ -274,8 +274,8 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 82a6 83cc 82a7 818d 8b86 8189 85ec 80e9 8181 8184 86a0 8181
-      glyphs 80fd 8289
+      font "「神」は蛇に向かって言っ"
+      font "た。"
       newline
     endpage
   endmessage
@@ -283,17 +283,17 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 83e0
+      font "呪"
       newline
-      glyphs 81ad
+      font "わ"
       newline
-      glyphs 81aa
+      font "れ"
       newline
-      glyphs 8184
+      font "て"
       newline
-      glyphs 80e0
+      font "あ"
       newline
-      glyphs 81aa
+      font "れ"
       newline
     endpage
   endmessage
@@ -301,19 +301,19 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
     page
       control f2 08 ff ff
       control f2 07 11 ff
-      glyphs 80f1 81aa 80ea 82a6 83cc 82a7 818c 86a0 86da 818c 8288 80fb
-      glyphs 818c 85f9 819c 81a8 8185 80e0 8181 80fd 8289
+      font "これが「神」の言葉の、そ"
+      font "の始まりであった。"
       newline
-      glyphs 8b86 818d 8bca 8dea 8189 8bda 80f4 80f3 81aa 80fd 84aa 83dc
-      glyphs 8189 85ec 80ef 8184
+      font "蛇は暗雲に閉ざされた大地"
+      font "に向けて"
       newline
-      glyphs 89a3 81a8 8184 80e2 8181 80fd 8289
+      font "降りていった。"
       newline
-      glyphs 8b86 818d 8793 85de 818c 8deb 80e2 8288 8793 85de 818c 889a
-      glyphs 8bd1 81b0 81a0 80fd 81a7 80f7 8197 80ed 8288
+      font "蛇は幾多の災い、幾多の試"
+      font "練をもたらすべく、"
       newline
-      glyphs 8bb9 83eb 818c 8c9a 8d97 80ed 8784 88b5 8196 8186 84b2 81b1
-      glyphs 8185 80e2 8181 80fd 8289
+      font "憎悪の渦卷く世界へと進ん"
+      font "でいった。"
       newline
     endpage
   endmessage
@@ -322,15 +322,15 @@ section 3 type=3 stride=0x1 count=1385 offset=0x34c
       control f2 08 ff ff
       control f2 07 11 ff
       control f2 02 06 ff
-      glyphs 84eb 8cbf 8189 8aca 819f 81a9 81f2 81fc 81ef 81bd 85cb 85d6
+      font "気軽に読めるメルマガ小説"
       newline
-      glyphs 85fe 84c4 85c7 8dec 82c1 86bf 8ded 85cb 85d6
+      font "毎日発刊★長編小説"
       newline
-      glyphs 8ddd 87be 80f5 8184 83ef 89a4 8189 8188 81ab 80e4 8081 8081
+      font "登録して会員になろう!!"
       newline
-      glyphs 8080
+      font " "
       newline
-      glyphs 83ef 89a4 8ddd 87be 818d 80f1 80ff 81a7 8081 8081
+      font "会員登録はこちら!!"
       newline
       control f1 04
     endpage
