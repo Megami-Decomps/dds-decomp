@@ -32,8 +32,8 @@ typedef struct ObjBaseFull {
     u32 unkC;
     void *slots[8];
     void *extData;
-    s32 unk34;
-    void *unk38;
+    s32 devSlot; /* 0x34: released by sdfReleaseDevSlot */
+    void *motion; /* 0x38: released by sdfDestroyMotion */
     s32 mode;    /* 0x3C */
     f32 weight;  /* 0x40 */
     u32 unk44;
@@ -60,8 +60,8 @@ void func_00111840(ObjBaseFull *base) {
         }
     }
     func_00111B40(owner);
-    if (base->unk34 != 0) {
-        sdfReleaseDevSlot(base->unk34, 1, 1);
+    if (base->devSlot != 0) {
+        sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
     dds3DestroyWorldIndexNode(base->unk4);
     sdfReleaseChipBlock(base);
@@ -139,7 +139,7 @@ void func_00111B40(World *world) {
             }
         } else {
             sdfReleaseDevSlot(base->unkC, 1, 1);
-            sdfDestroyMotion(base->unk38);
+            sdfDestroyMotion(base->motion);
         }
         base->unkC = 0;
         base->unk8 = 3;

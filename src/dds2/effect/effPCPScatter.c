@@ -118,7 +118,7 @@ typedef struct PcpScatterPool {
     u8 pad00[0x10];
     s32 unk10;                /* 0x10: set to 1 on creation */
     u32 color;                /* 0x14: 0x80808080 on creation */
-    s32 unk18;                /* 0x18: 6 * record count */
+    s32 secondWordCount;     /* 0x18: number of auxiliary record words */
     f32 scale;                /* 0x1C: 1.0f on creation */
     s32 recordBase;           /* 0x20: base of 0x60-byte records */
     s32 auxRecordBase;        /* 0x24: base of 0x18-byte records */
@@ -189,8 +189,8 @@ struct PcpScatterWork3 {
     s32 unk20;
     s32 unk24;
     u32 assetResource; /* 0x28: released with sdfQueueAssetRelease */
-    u32 unk2C;
-    PcpScatterRes *res;
+    u32 releaseHandle; /* 0x2C: released with func_003297C8 */
+    PcpScatterRes *sharedResource; /* 0x30: reference-counted */
     u8 pad34[0x20];
     u32 unk54;
 };
@@ -551,7 +551,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->recordBase = (s32)block;
     pool->unk10 = 1;
     pool->auxRecordBase = (s32)(block + first);
-    pool->unk18 = second;
+    pool->secondWordCount = second;
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->color = 0x80808080;
