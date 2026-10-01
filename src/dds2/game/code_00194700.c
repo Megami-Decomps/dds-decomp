@@ -311,7 +311,50 @@ void effFreeWorkList(EffWork *root) {
     sdfReleaseChipBlock(root);
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_00195060);
+typedef struct EffResourceList {
+    s32 count;
+    s32 unk04;
+    void *head;
+} EffResourceList;
+
+typedef struct EffResourceDescriptor {
+    u32 word00;
+    u32 word04;
+    u32 word08;
+    s32 word0C;
+    u32 word10[5];
+    u32 word24;
+    u32 word28;
+    u32 word2C;
+    void *word30;
+    void *word34;
+    u32 word38;
+    u32 word3C;
+    EffResourceList *word40;
+} EffResourceDescriptor;
+
+EffResourceDescriptor *func_00195060(EffResourceList *list) {
+    EffResourceDescriptor *resource = func_00328D68(0x44);
+
+    resource->word00 = 0;
+    resource->word04 = 0xC8;
+    resource->word08 = 0;
+    resource->word0C = list->count;
+    resource->word10[0] = 0;
+    resource->word10[1] = 0;
+    resource->word10[2] = 0;
+    resource->word10[3] = 0;
+    resource->word10[4] = 0;
+    resource->word24 = 0x53;
+    resource->word28 = 0x40806020;
+    resource->word2C = 0x30000000;
+    resource->word30 = list->head;
+    resource->word34 = list->head;
+    resource->word38 = 0;
+    resource->word3C = 0;
+    resource->word40 = list;
+    return resource;
+}
 
 INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
 
