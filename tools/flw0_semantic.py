@@ -229,6 +229,31 @@ class NativeCall(Expr):
         return f"{self.name}({', '.join(arg.render() for arg in self.arguments)})"
 
 
+@dataclass(frozen=True)
+class _Pending:
+    expression: Expr
+    start: int
+    end: int
+
+
+@dataclass(frozen=True)
+class _Statement:
+    start: int
+    end: int
+    text: str
+
+
+@dataclass(frozen=True)
+class _Region:
+    kind: str
+    start: int
+    end: int
+    condition_pc: int
+    body_start: int
+    false_start: int | None
+    true_terminal: int
+
+
 class _ExpressionParser:
     def __init__(
         self,
@@ -590,6 +615,7 @@ def _line_label(node: object) -> str | None:
 def _lower_nodes(
     nodes: tuple[object, ...],
     profile: flw0_profiles.CommandProfile | None,
+    following_label: str | None = None,
 ) -> list[tuple[int, str]]:
     lowered: list[tuple[int, str]] = []
     for index, node in enumerate(nodes):
@@ -602,7 +628,11 @@ def _lower_nodes(
             continue
 
         assert isinstance(node, _Structured)
-        next_label = _line_label(nodes[index + 1]) if index + 1 < len(nodes) else None
+        next_label = (
+            _line_label(nodes[index + 1])
+            if index + 1 < len(nodes)
+            else following_label
+        )
         condition = parse_expression(node.condition, node.line_number, profile)
         if node.kind == "while":
             start_label = _line_label(nodes[index - 1]) if index else None
@@ -633,7 +663,13 @@ def _lower_nodes(
         lowered.extend(_lower_nodes(node.body, profile))
         if node.alternative is not None:
             lowered.append((node.line_number, f"GOTO {next_label}"))
-            lowered.extend(_lower_nodes(node.alternative, profile))
+            # A nested conditional at the end of an else arm may share the
+            # enclosing join label, which appears after the outer block.
+            lowered.extend(_lower_nodes(node.alternative, profile, next_label))
+        else:
+            # The retail compiler's canonical one-arm shape retains this
+            # otherwise redundant jump to the join label.
+            lowered.append((node.line_number, f"GOTO {next_label}"))
     return lowered
 
 
@@ -677,6 +713,244 @@ def literal_expression(
     return None
 
 
+def _find_regions(
+    words: tuple[flw0.InstructionWord, ...],
+    instruction_pcs: list[int],
+    next_pcs: dict[int, int],
+    conditions: dict[int, _Pending],
+    symbols_at_pc: dict[int, list[str]],
+    procedure_symbols: list[str],
+    jump_symbols: list[str],
+) -> dict[int, _Region]:
+    """Find canonical regions whose implicit lowering preserves every word."""
+
+    positions = {pc: index for index, pc in enumerate(instruction_pcs)}
+    instruction_set = set(instruction_pcs)
+    symbol_pcs = {
+        symbol: pc for pc, symbols in symbols_at_pc.items() for symbol in symbols
+    }
+    procedure_starts = {
+        symbol_pcs[symbol]
+        for symbol in procedure_symbols
+        if symbol in symbol_pcs
+    }
+    label_pcs = {
+        index: symbol_pcs[symbol]
+        for index, symbol in enumerate(jump_symbols)
+        if symbol in symbol_pcs
+    }
+
+    def successors(pc: int) -> tuple[int, ...]:
+        word = words[pc]
+        next_pc = next_pcs[pc]
+        if word.opcode >= len(flw0.OPCODE_NAMES):
+            return (next_pc,) if next_pc in instruction_set else ()
+        if word.opcode in (flw0.OPCODE_IDS["END"], flw0.OPCODE_IDS["JUMP"]):
+            return ()
+        if word.opcode == flw0.OPCODE_IDS["GOTO"]:
+            target = label_pcs.get(word.operand_u16)
+            return (target,) if target in instruction_set else ()
+        if word.opcode == flw0.OPCODE_IDS["IF"]:
+            targets = []
+            if next_pc in instruction_set:
+                targets.append(next_pc)
+            target = label_pcs.get(word.operand_u16)
+            if target in instruction_set and target not in targets:
+                targets.append(target)
+            return tuple(targets)
+        return (next_pc,) if next_pc in instruction_set else ()
+
+    predecessors: dict[int, list[int]] = {pc: [] for pc in instruction_pcs}
+    for pc in instruction_pcs:
+        for target in successors(pc):
+            predecessors[target].append(pc)
+
+    def first_symbol(pc: int) -> str | None:
+        symbols = symbols_at_pc.get(pc, ())
+        return symbols[0] if symbols else None
+
+    def last_symbol(pc: int) -> str | None:
+        symbols = symbols_at_pc.get(pc, ())
+        return symbols[-1] if symbols else None
+
+    candidates: list[_Region] = []
+    for condition_pc, condition in conditions.items():
+        false_index_value = words[condition_pc].operand_u16
+        false_start = label_pcs.get(false_index_value)
+        if (
+            false_start not in positions
+            or false_start <= condition_pc
+            or condition.start not in positions
+        ):
+            continue
+        false_index = positions[false_start]
+        if false_index == 0:
+            continue
+        true_terminal = instruction_pcs[false_index - 1]
+        terminal = words[true_terminal]
+        if terminal.opcode != flw0.OPCODE_IDS["GOTO"]:
+            continue
+        terminal_target = label_pcs.get(terminal.operand_u16)
+        false_symbol = (
+            jump_symbols[false_index_value]
+            if false_index_value < len(jump_symbols)
+            else None
+        )
+        terminal_symbol = (
+            jump_symbols[terminal.operand_u16]
+            if terminal.operand_u16 < len(jump_symbols)
+            else None
+        )
+
+        body_start = next_pcs[condition_pc]
+        if (
+            terminal_target == false_start
+            and false_symbol == terminal_symbol == first_symbol(false_start)
+        ):
+            region = _Region(
+                "if",
+                condition.start,
+                false_start,
+                condition_pc,
+                body_start,
+                None,
+                true_terminal,
+            )
+        elif (
+            terminal_target is not None
+            and terminal_target > false_start
+            and false_symbol == first_symbol(false_start)
+            and terminal_symbol == first_symbol(terminal_target)
+        ):
+            region = _Region(
+                "ifelse",
+                condition.start,
+                terminal_target,
+                condition_pc,
+                body_start,
+                false_start,
+                true_terminal,
+            )
+        elif (
+            terminal_target is not None
+            and terminal_target < condition_pc
+            and condition.start == terminal_target
+            and false_symbol == first_symbol(false_start)
+            and terminal_symbol == last_symbol(terminal_target)
+        ):
+            region = _Region(
+                "while",
+                terminal_target,
+                false_start,
+                condition_pc,
+                body_start,
+                None,
+                true_terminal,
+            )
+        else:
+            continue
+
+        if true_terminal in symbols_at_pc:
+            continue
+        if any(region.start < pc < region.end for pc in procedure_starts):
+            continue
+        has_external_entry = any(
+            source < region.start or source >= region.end
+            for pc in instruction_pcs
+            if region.start < pc < region.end
+            for source in predecessors[pc]
+        )
+        crosses_ifelse_arms = False
+        if region.kind == "ifelse" and region.false_start is not None:
+            for pc in instruction_pcs:
+                if not region.body_start <= pc <= region.true_terminal:
+                    continue
+                if any(
+                    region.false_start <= target < region.end
+                    for target in successors(pc)
+                ):
+                    crosses_ifelse_arms = True
+                    break
+        if not has_external_entry and not crosses_ifelse_arms:
+            candidates.append(region)
+
+    crossing: set[_Region] = set()
+    for index, left in enumerate(candidates):
+        for right in candidates[index + 1 :]:
+            if (
+                left.start < right.start < left.end < right.end
+                or right.start < left.start < right.end < left.end
+            ):
+                crossing.update((left, right))
+    return {
+        region.start: region for region in candidates if region not in crossing
+    }
+
+
+def _format_statements(
+    statements: list[_Statement],
+    symbols_at_pc: dict[int, list[str]],
+    code_end: int,
+    regions: dict[int, _Region],
+    conditions: dict[int, _Pending],
+) -> list[str]:
+    by_start = {statement.start: statement for statement in statements}
+    lines: list[str] = []
+
+    def emit_labels(pc: int, indent: int, suppress: bool = False) -> None:
+        if suppress:
+            return
+        for symbol in symbols_at_pc.get(pc, ()):
+            lines.append(f"{'  ' * indent}{symbol}:")
+
+    def emit_range(
+        start: int,
+        end: int,
+        indent: int = 0,
+        suppress_first_labels: bool = False,
+    ) -> None:
+        pc = start
+        first = True
+        while pc < end:
+            region = regions.get(pc)
+            if region is not None and region.end <= end:
+                emit_labels(pc, indent, suppress_first_labels and first)
+                prefix = "  " * (indent + 1)
+                keyword = "while" if region.kind == "while" else "if"
+                condition = conditions[region.condition_pc].expression.render()
+                lines.append(f"{prefix}{keyword} ({condition}) {{")
+                emit_range(region.body_start, region.true_terminal, indent + 1)
+                if region.kind == "ifelse":
+                    lines.append(f"{prefix}}} else {{")
+                    assert region.false_start is not None
+                    emit_labels(region.false_start, indent + 1)
+                    emit_range(
+                        region.false_start,
+                        region.end,
+                        indent + 1,
+                        suppress_first_labels=True,
+                    )
+                lines.append(f"{prefix}}}")
+                pc = region.end
+                first = False
+                continue
+
+            emit_labels(pc, indent, suppress_first_labels and first)
+            statement = by_start.get(pc)
+            if statement is None or statement.end > end:
+                raise flw0.Flw0Error(
+                    f"semantic renderer lost the instruction at code word 0x{pc:x}"
+                )
+            lines.append(f"{'  ' * (indent + 1)}{statement.text}")
+            pc = statement.end
+            first = False
+
+    if statements:
+        emit_range(statements[0].start, code_end)
+    emit_labels(code_end, 0)
+    return lines
+
+
 def render_code(
     words: tuple[flw0.InstructionWord, ...],
     symbols_at_pc: dict[int, list[str]],
@@ -687,27 +961,38 @@ def render_code(
     message_symbols: tuple[str | None, ...],
     selection_symbols: tuple[str | None, ...],
     raw_instruction: Callable[[int], tuple[str, int]],
+    structured: bool = False,
 ) -> list[str]:
-    """Render exact hybrid code, lifting only procedure-local linear idioms."""
+    """Render exact hybrid code, lifting only procedure-local proven idioms."""
 
-    lines: list[str] = []
-    stack: list[Expr] = []
+    instruction_pcs: list[int] = []
+    next_pcs: dict[int, int] = {}
+    cursor = 0
+    while cursor < len(words):
+        instruction_pcs.append(cursor)
+        _, next_pc = raw_instruction(cursor)
+        next_pcs[cursor] = next_pc
+        cursor = next_pc
+
+    statements: list[_Statement] = []
+    stack: list[_Pending] = []
+    conditions: dict[int, _Pending] = {}
     result_known = False
 
-    def emit(text: str) -> None:
-        lines.append(f"  {text}")
+    def emit(text: str, start: int, end: int) -> None:
+        statements.append(_Statement(start, end, text))
 
     def flush_stack() -> None:
         nonlocal stack
-        for expression in stack:
-            emit(f"push {expression.render()}")
+        for pending in stack:
+            emit(f"push {pending.expression.render()}", pending.start, pending.end)
         stack = []
 
     def raw(pc: int) -> int:
         nonlocal result_known
         flush_stack()
         instruction, next_pc = raw_instruction(pc)
-        lines.append(instruction)
+        emit(instruction.strip(), pc, next_pc)
         result_known = False
         return next_pc
 
@@ -718,10 +1003,7 @@ def render_code(
     while pc < len(words):
         if pc in symbols_at_pc:
             flush_stack()
-            stack = []
             result_known = False
-            for symbol in symbols_at_pc[pc]:
-                lines.append(f"{symbol}:")
 
         word = words[pc]
         opcode = word.opcode
@@ -736,7 +1018,7 @@ def render_code(
             if expression is None:
                 pc = raw(pc)
                 continue
-            stack.append(expression)
+            stack.append(_Pending(expression, pc, pc + 2))
             pc += 2
             continue
 
@@ -762,15 +1044,19 @@ def render_code(
                 expression = Reference("procedure", procedure)
             else:
                 expression = literal_expression(opcode, operand)
-            stack.append(expression)
+            assert expression is not None
+            stack.append(_Pending(expression, pc, pc + 1))
             pc += 1
             continue
 
         if opcode == flw0.OPCODE_IDS["PUSHTYPE5"]:
             symbol = string_symbols.get(operand)
-            stack.append(
-                Reference("string", symbol) if symbol is not None else Type5Offset(operand)
+            expression = (
+                Reference("string", symbol)
+                if symbol is not None
+                else Type5Offset(operand)
             )
+            stack.append(_Pending(expression, pc, pc + 1))
             pc += 1
             continue
 
@@ -779,7 +1065,7 @@ def render_code(
             if isinstance(expression, Result) and not result_known:
                 pc = raw(pc)
                 continue
-            stack.append(expression)
+            stack.append(_Pending(expression, pc, pc + 1))
             pc += 1
             continue
 
@@ -789,7 +1075,10 @@ def render_code(
                 continue
             left = stack.pop()
             right = stack.pop()
-            stack.append(Binary(_OPCODE_TO_BINARY[opcode], left, right))
+            expression = Binary(
+                _OPCODE_TO_BINARY[opcode], left.expression, right.expression
+            )
+            stack.append(_Pending(expression, min(left.start, right.start), pc + 1))
             pc += 1
             continue
 
@@ -797,8 +1086,11 @@ def render_code(
             if not stack:
                 pc = raw(pc)
                 continue
+            argument = stack.pop()
             operator = "-" if opcode == flw0.OPCODE_IDS["MINUS"] else "!"
-            stack.append(Unary(operator, stack.pop()))
+            stack.append(
+                _Pending(Unary(operator, argument.expression), argument.start, pc + 1)
+            )
             pc += 1
             continue
 
@@ -808,7 +1100,11 @@ def render_code(
                 continue
             value = stack.pop()
             target_name = _OPCODE_TO_STORE[opcode]
-            emit(f"{target_name}[{_signed(operand, 16)}] = {value.render()}")
+            text = (
+                f"{target_name}[{_signed(operand, 16)}] = "
+                f"{value.expression.render()}"
+            )
+            emit(text, value.start, pc + 1)
             pc += 1
             continue
 
@@ -817,11 +1113,11 @@ def render_code(
             if command is None or len(stack) != command.stack_pop:
                 pc = raw(pc)
                 continue
-            arguments = tuple(reversed(stack))
+            arguments = tuple(pending.expression for pending in reversed(stack))
+            call_start = min((pending.start for pending in stack), default=pc)
             stack = []
             call = NativeCall(command.name, arguments, command.writes_result)
 
-            # The common call/PUSHREG/store sequence is one source assignment.
             store_pc = pc + 2
             if (
                 command.writes_result
@@ -833,16 +1129,17 @@ def render_code(
                 and store_pc not in symbols_at_pc
             ):
                 store = words[store_pc]
-                emit(
+                text = (
                     f"{_OPCODE_TO_STORE[store.opcode]}"
-                    f"[{_signed(store.operand_u16, 16)}] = "
-                    f"{call.render()}"
+                    f"[{_signed(store.operand_u16, 16)}] = {call.render()}"
                 )
+                emit(text, call_start, pc + 3)
                 result_known = True
                 pc += 3
                 continue
 
-            emit(("result = " if command.writes_result else "") + call.render())
+            text = ("result = " if command.writes_result else "") + call.render()
+            emit(text, call_start, pc + 1)
             result_known = bool(command.writes_result) or (
                 result_known and command.writes_result is False
             )
@@ -855,7 +1152,13 @@ def render_code(
                 pc = raw(pc)
                 continue
             condition = stack.pop()
-            emit(f"if_not ({condition.render()}) goto {symbol}")
+            condition = _Pending(condition.expression, condition.start, pc + 1)
+            conditions[pc] = condition
+            emit(
+                f"if_not ({condition.expression.render()}) goto {symbol}",
+                condition.start,
+                pc + 1,
+            )
             pc += 1
             continue
 
@@ -868,7 +1171,7 @@ def render_code(
             if symbol is None:
                 pc = raw(pc)
             else:
-                emit(f"call {symbol}")
+                emit(f"call {symbol}", pc, pc + 1)
                 result_known = False
                 pc += 1
             continue
@@ -877,7 +1180,7 @@ def render_code(
             if symbol is None:
                 pc = raw(pc)
             else:
-                emit(f"jump {symbol}")
+                emit(f"jump {symbol}", pc, pc + 1)
                 result_known = False
                 pc += 1
             continue
@@ -886,18 +1189,31 @@ def render_code(
             if symbol is None:
                 pc = raw(pc)
             else:
-                emit(f"goto {symbol}")
+                emit(f"goto {symbol}", pc, pc + 1)
                 result_known = False
                 pc += 1
             continue
         if opcode == flw0.OPCODE_IDS["END"] and operand == 0:
-            emit("return")
+            emit("return", pc, pc + 1)
             result_known = False
             pc += 1
             continue
         pc = raw(pc)
 
     flush_stack()
-    for symbol in symbols_at_pc.get(len(words), ()):
-        lines.append(f"{symbol}:")
-    return lines
+    regions = (
+        _find_regions(
+            words,
+            instruction_pcs,
+            next_pcs,
+            conditions,
+            symbols_at_pc,
+            procedure_symbols,
+            jump_symbols,
+        )
+        if structured
+        else {}
+    )
+    return _format_statements(
+        statements, symbols_at_pc, len(words), regions, conditions
+    )
