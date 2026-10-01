@@ -27,69 +27,74 @@ typedef struct PolyMovieObject {
     PolyMovieState *state;
 } PolyMovieObject;
 
-/* Polygon-movie event parameter blocks blended by the functions below. */
+/* Polygon-movie event parameter blocks blended by the functions below.
+ * Each field is named for how the blend functions use it:
+ *   lerpN  -> func_00232FB0, the float lerp
+ *   valueN -> func_00233020, the u32 lerp
+ *   v, m   -> func_00232FE0, the s32 lerp over a 2-vector and a 2x2 matrix
+ *   flagWord is copied from the source record and never blended. */
 typedef struct EvtBlendA {
     u32 color;    /* 0x00 */
-    u32 word;     /* 0x04 */
-    f32 f0;       /* 0x08 */
-    f32 f1;       /* 0x0C */
+    u32 flagWord; /* 0x04 */
+    f32 lerp0;    /* 0x08 */
+    f32 lerp1;    /* 0x0C */
     s32 v[2];     /* 0x10 */
     s32 m[2][2];  /* 0x18 */
 } EvtBlendA;
 
 typedef struct EvtBlendB {
-    u32 u0;       /* 0x00 */
+    u32 value0;   /* 0x00 */
     u32 color;    /* 0x04 */
-    u32 word;     /* 0x08 */
-    f32 f0;       /* 0x0C */
-    f32 f1;       /* 0x10 */
+    u32 flagWord; /* 0x08 */
+    f32 lerp0;    /* 0x0C */
+    f32 lerp1;    /* 0x10 */
     s32 v[2];     /* 0x14 */
     s32 m[2][2];  /* 0x1C */
 } EvtBlendB;
 
 typedef struct EvtBlendD {
-    u32 u0;       /* 0x00 */
+    u32 value0;   /* 0x00 */
     s32 v[2];     /* 0x04 */
     u32 color;    /* 0x0C */
-    u32 word;     /* 0x10 */
+    u32 flagWord; /* 0x10 */
 } EvtBlendD;
 
 typedef struct EvtBlendE {
-    u32 u0;       /* 0x00 */
-    u32 u1;       /* 0x04 */
-    f32 f0;       /* 0x08 */
+    u32 value0;   /* 0x00 */
+    u32 value1;   /* 0x04 */
+    f32 lerp0;    /* 0x08 */
     u32 color;    /* 0x0C */
-    u32 word;     /* 0x10 */
-    f32 f1;       /* 0x14 */
-    f32 f2;       /* 0x18 */
+    u32 flagWord; /* 0x10 */
+    f32 lerp1;    /* 0x14 */
+    f32 lerp2;    /* 0x18 */
     s32 v[2];     /* 0x1C */
-    u32 u2;       /* 0x24 */
-    u32 u3;       /* 0x28 */
+    u32 value2;   /* 0x24 */
+    u32 value3;   /* 0x28 */
 } EvtBlendE;
 
 typedef struct EvtBlendF {
-    u32 u0;       /* 0x00 */
-    f32 f0;       /* 0x04 */
-    f32 f1;       /* 0x08 */
+    u32 value0;   /* 0x00 */
+    f32 lerp0;    /* 0x04 */
+    f32 lerp1;    /* 0x08 */
     u32 color;    /* 0x0C */
-    u32 word;     /* 0x10 */
-    f32 f2;       /* 0x14 */
-    f32 f3;       /* 0x18 */
-    f32 f4;       /* 0x1C */
+    u32 flagWord; /* 0x10 */
+    f32 lerp2;    /* 0x14 */
+    f32 lerp3;    /* 0x18 */
+    f32 lerp4;    /* 0x1C */
     s32 v[2];     /* 0x20 */
-    u32 u1;       /* 0x28 */
+    u32 value1;   /* 0x28 */
 } EvtBlendF;
 
 typedef struct EvtBlendG {
     u32 color;    /* 0x00 */
-    u32 word;     /* 0x04 */
+    u32 flagWord; /* 0x04 */
     s32 m[2][2];  /* 0x08 */
 } EvtBlendG;
 
 typedef struct EvtBlendH {
     s32 w[4];     /* 0x00 */
     s32 x;        /* 0x10 */
-    u32 word;     /* 0x14 */
+    u32 flagWord; /* 0x14 */
     u8 pad[8];    /* 0x18 */
     s32 y[3];     /* 0x20 */
     s32 z[3];     /* 0x2C */
@@ -355,9 +360,9 @@ void evtBlendParamsA(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
         b = &D_00368590;
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
-    out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
-    out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
+    out->flagWord = a->flagWord;
+    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
@@ -382,11 +387,11 @@ void evtBlendParamsB(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *o
     if (b == NULL) {
         b = &D_003685C0;
     }
-    out->u0 = func_00233020(enable, t, a->u0, b->u0);
+    out->value0 = func_00233020(enable, t, a->value0, b->value0);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
-    out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
-    out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
+    out->flagWord = a->flagWord;
+    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
@@ -417,7 +422,7 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EvtBlendG *a, EvtBlendG 
         }
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
+    out->flagWord = a->flagWord;
 }
 
 void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out)
@@ -433,12 +438,12 @@ void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *o
     if (b == NULL) {
         b = &D_00368610;
     }
-    out->u0 = func_00233020(enable, t, a->u0, b->u0);
+    out->value0 = func_00233020(enable, t, a->value0, b->value0);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
+    out->flagWord = a->flagWord;
 }
 
 void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out)
@@ -454,18 +459,18 @@ void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *o
     if (b == NULL) {
         b = &D_00368640;
     }
-    out->u0 = func_00233020(enable, t, a->u0, b->u0);
-    out->u1 = func_00233020(enable, t, a->u1, b->u1);
-    out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
+    out->value0 = func_00233020(enable, t, a->value0, b->value0);
+    out->value1 = func_00233020(enable, t, a->value1, b->value1);
+    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
-    out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
-    out->f2 = func_00232FB0(enable, t, a->f2, b->f2);
-    out->u2 = func_00233020(enable, t, a->u2, b->u2);
+    out->flagWord = a->flagWord;
+    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
+    out->lerp2 = func_00232FB0(enable, t, a->lerp2, b->lerp2);
+    out->value2 = func_00233020(enable, t, a->value2, b->value2);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
-    out->u3 = func_00233020(enable, t, a->u3, b->u3);
+    out->value3 = func_00233020(enable, t, a->value3, b->value3);
 }
 
 void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out)
@@ -481,18 +486,18 @@ void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *o
     if (b == NULL) {
         b = &D_00368670;
     }
-    out->u0 = func_00233020(enable, t, a->u0, b->u0);
-    out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
-    out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
+    out->value0 = func_00233020(enable, t, a->value0, b->value0);
+    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
-    out->f2 = func_00232FB0(enable, t, a->f2, b->f2);
-    out->f3 = func_00232FB0(enable, t, a->f3, b->f3);
-    out->f4 = func_00232FB0(enable, t, a->f4, b->f4);
+    out->flagWord = a->flagWord;
+    out->lerp2 = func_00232FB0(enable, t, a->lerp2, b->lerp2);
+    out->lerp3 = func_00232FB0(enable, t, a->lerp3, b->lerp3);
+    out->lerp4 = func_00232FB0(enable, t, a->lerp4, b->lerp4);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
-    out->u1 = func_00233020(enable, t, a->u1, b->u1);
+    out->value1 = func_00233020(enable, t, a->value1, b->value1);
 }
 
 void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out)
@@ -510,9 +515,9 @@ void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
         b = &D_003686A0;
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->word = a->word;
-    out->f0 = func_00232FB0(enable, t, a->f0, b->f0);
-    out->f1 = func_00232FB0(enable, t, a->f1, b->f1);
+    out->flagWord = a->flagWord;
+    out->lerp0 = func_00232FB0(enable, t, a->lerp0, b->lerp0);
+    out->lerp1 = func_00232FB0(enable, t, a->lerp1, b->lerp1);
     for (i = 0; i < 2; i++) {
         out->v[i] = func_00232FE0(enable, t, a->v[i], b->v[i]);
     }
@@ -535,7 +540,7 @@ void evtBlendParamsH(s32 enable, f32 t, EvtBlendH *a, EvtBlendH *b, EvtBlendH *o
     out->w[1] = func_00232FE0(enable, t, a->w[1], b->w[1]);
     out->w[2] = func_00232FE0(enable, t, a->w[2], b->w[2]);
     out->w[3] = func_00232FE0(enable, t, a->w[3], b->w[3]);
-    out->word = a->word;
+    out->flagWord = a->flagWord;
     for (i = 0; i < 3; i++) {
         out->y[i] = func_00232FE0(enable, t, a->y[i], b->y[i]);
         out->z[i] = func_00232FE0(enable, t, a->z[i], b->z[i]);

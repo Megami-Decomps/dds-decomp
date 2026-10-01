@@ -95,15 +95,15 @@ extern EffDispatchEntry D_003B01CC[];
 
 extern EffDispatchEntry D_003B01D4[];
 
-/* Callback table at D_003B0044 (0x28 bytes per entry). */
-typedef struct Cb3714C {
+/* Kind-specific callback slot, 0x28 bytes per entry. */
+typedef struct EffParamCallbackEntry {
     void (*cb)(void *arg); /* 0x00 */
     u8 pad4[0x24];         /* 0x04 */
-} Cb3714C;
+} EffParamCallbackEntry;
 
-extern Cb3714C D_003B0044[];
+extern EffParamCallbackEntry D_003B0044[];
 
-extern Cb3714C D_003B0048[];
+extern EffParamCallbackEntry D_003B0048[];
 
 extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
