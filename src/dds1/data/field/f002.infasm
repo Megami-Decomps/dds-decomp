@@ -1,0 +1,6 @@
+inf 1
+
+set 1 kind=event area=0 action=2 event_hit=7 event="01d_02"
+  flag 0 id=25 off=warp on=row0
+  row 0 kind=action message=-1 go=warp,0,0,0 flag_off=1696 flag_on=0 view=0 ex=0
+end

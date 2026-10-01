@@ -1,0 +1,11 @@
+inf 1
+
+set 1 kind=event area=0 action=1 event_hit=2 event="01d_01"
+  flag 0 id=50 off=row0 on=warp
+  row 0 kind=message message=@DONT_OPEN go=0,0,0,0 flag_off=0 flag_on=0 view=0 ex=0
+end
+
+set 2 kind=event area=0 action=1 event_hit=2 event="01d_02"
+  flag 0 id=167 off=warp on=row0
+  row 0 kind=action message=-1 go=warp,0,0,0 flag_off=0 flag_on=1739 view=0 ex=0
+end

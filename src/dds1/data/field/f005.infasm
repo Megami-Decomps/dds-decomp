@@ -1,0 +1,19 @@
+inf 1
+
+set 1 kind=event area=0 action=2 event_hit=1 event="01d_05"
+  flag 0 id=0 off=row0 on=0
+  row 0 kind=message message=126 go=0,0,0,0 flag_off=0 flag_on=0 view=0 ex=0
+end
+
+set 2 kind=event area=0 action=1 event_hit=2 event="01d_02"
+  flag 0 id=31 off=row0 on=warp
+  row 0 kind=message message=127 go=0,0,0,0 flag_off=0 flag_on=0 view=0 ex=0
+end
+
+set 3 kind=event area=0 action=2 event_hit=5 event="01d_03"
+  flag 0 id=22 off=warp on=0
+end
+
+set 4 kind=event area=0 action=2 event_hit=4 event="01d_02"
+  flag 0 id=22 off=warp on=0
+end
