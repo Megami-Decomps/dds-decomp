@@ -381,7 +381,21 @@ INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3220);
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3420);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3510);
+s32 func_002C3510(void) {
+    s32 bits;
+
+    bits = mdlFlagTest(0x400);
+    bits |= mdlFlagTest(0x401) << 1;
+    bits |= mdlFlagTest(0x402) << 2;
+    bits |= mdlFlagTest(0x403) << 3;
+    bits |= mdlFlagTest(0x404) << 4;
+    bits |= mdlFlagTest(0x405) << 5;
+    bits |= mdlFlagTest(0x406) << 6;
+    bits |= mdlFlagTest(0x407) << 7;
+    bits |= mdlFlagTest(0x408) << 8;
+    bits |= mdlFlagTest(0x409) << 9;
+    return bits;
+}
 
 s32 mdlCollectFlagBitsIntoMask(void) {
     s32 bits;
