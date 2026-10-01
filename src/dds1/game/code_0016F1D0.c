@@ -429,12 +429,12 @@ s32 func_00170870(EffectRecordGroup *group, s32 index) {
     return (s32)group->indices + index * 0x14;
 }
 
-void func_00170888(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x50) = arg1;
+void func_00170888(s32 slot, u32 color) {
+    *(u32 *)(slot + 0x50) = color;
 }
 
-void func_00170890(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x54) = arg1;
+void func_00170890(s32 slot, u32 color) {
+    *(u32 *)(slot + 0x54) = color;
 }
 
 void func_00170898(u8 *work, f32 value) {

@@ -6,11 +6,11 @@ extern AdminWork* dds3GetAdminTaskWork(void);
 extern void dds3AdminSubmitModeRequest(s32 a0, s32 a1, s32 a2, s32 a3);
 
 /* Configure administrative state from three caller-supplied parameters. */
-void dds3AdminSubmitMarkedRequest(s32 a0, s32 a1, s32 a2)
+void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
 {
     AdminWork* work;
 
-    dds3AdminSubmitModeRequest(a0, a1, a2, 0);
+    dds3AdminSubmitModeRequest(value, data, size, 0);
     work = dds3GetAdminTaskWork();
     work->flags |= 8;
 }

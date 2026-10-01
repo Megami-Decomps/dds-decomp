@@ -20,11 +20,11 @@ extern AdminDispatch ddsAdminModeCallbacks[];
 extern u8 D_003BA848[];
 
 /* Configure administrative state from three caller-supplied parameters. */
-void dds3AdminSubmitMarkedRequest(s32 a0, s32 a1, s32 a2)
+void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
 {
     AdminWork* work;
 
-    dds3AdminSubmitModeRequest(a0, a1, a2, 0);
+    dds3AdminSubmitModeRequest(value, data, size, 0);
     work = dds3GetAdminTaskWork();
     work->flags |= 8;
 }
