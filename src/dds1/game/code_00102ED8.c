@@ -260,7 +260,44 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104678);
+typedef struct KwlnImageSize {
+    u8 pad00[0xC];
+    s16 width;  /* 0x0C */
+    s16 height; /* 0x0E */
+} KwlnImageSize;
+
+extern s32 sdfConsCreateDrawPacket(s32, void *, s32);
+extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
+                                        s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
+
+/* Draw a texture-sized outline: scale the longer side down to 0x100 texels (0x400 is treated as 0x3FF) and submit one textured line packet. */
+void func_00104678(s32 list, KwlnImageSize *image) {
+    s32 width = image->width;
+    s32 height = image->height;
+    s32 drawWidth;
+    s32 drawHeight;
+
+    sdfConsCreateDrawPacket(list, image, 0);
+    drawWidth = width * 0x10;
+    drawHeight = height * 8;
+    if (width < height) {
+        if (height > 0x100) {
+            drawHeight = 0x800;
+            drawWidth = (width << 8) / height * 0x10;
+        }
+    } else if (width > 0x100) {
+        drawWidth = 0x1000;
+        drawHeight = (height << 8) / width * 8;
+    }
+    if (width == 0x400) {
+        width--;
+    }
+    if (height == 0x400) {
+        height--;
+    }
+    sdfAppendTexturedLinePacket(list, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
+                                width * 0x10, height * 0x10, 0x0FFFFF80, 0);
+}
 
 void kwlnTextureDrawPageCounter(void *task) {
     char buffer[0x70];
@@ -666,7 +703,28 @@ void kwlnFadeSetMode(s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106268);
+/* Step the background fade counter in the direction chosen by the control flags and derive the fade alpha and the two ramp values. */
+void func_00106268(void) {
+    f32 ratio;
+
+    if (kwlnDrawControlFlags & 0x0C000000) {
+        if (kwlnDrawControlFlags & 0x04000000) {
+            kwlnBackgroundFadeCounter--;
+        } else {
+            kwlnBackgroundFadeCounter++;
+        }
+        ratio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
+        kwlnBackgroundFadeColor[3] = (kwlnBackgroundFadeCounter << 7) / kwlnBackgroundFadeDuration;
+        D_003BA92E = 49.0f - ratio * 49.0f;
+        D_003BA930 = 79.0f - ratio * 79.0f;
+        if (((kwlnDrawControlFlags & 0x04000000) && kwlnBackgroundFadeCounter == 0) ||
+            ((kwlnDrawControlFlags & 0x08000000) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
+            kwlnBackgroundFadeCounter = 0;
+            kwlnBackgroundFadeDuration = 0;
+            kwlnDrawControlFlags &= 0xF3FFFFFF;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106368);
 
