@@ -272,8 +272,8 @@ void func_002C2EF8(const char *fmt, ...) {
 
 INCLUDE_RODATA(const s32, "game/code_002C2620", D_003B3CA0);
 
-/* Field-map mode index -> track slot. Index 7 is the only value with no arm of
- * its own, so it falls through to the default of 1. */
+/* Field-map mode index -> track slot. Indices 7 and 12 are the only values in
+ * range with no arm of their own, so they fall through to the default of 1. */
 s32 func_002C2F40(s32 index) {
     s32 slot = 1;
 

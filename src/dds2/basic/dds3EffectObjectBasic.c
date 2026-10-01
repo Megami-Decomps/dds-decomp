@@ -145,7 +145,6 @@ extern void *func_001115B0(void);
 extern void effCopyVector(void *source, void *destination);
 extern void func_00157790(void *source, void *destination);
 
-
 EffectObj *func_00114F50(bill, vec, extra)
     void *bill;
     void *vec;

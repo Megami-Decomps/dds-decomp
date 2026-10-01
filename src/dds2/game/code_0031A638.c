@@ -10,29 +10,37 @@ INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A770);
 
 INCLUDE_ASM(const s32, "game/code_0031A638", func_0031A7F8);
 
+typedef struct TimerWork {
+    u8 pad00[0x80];
+    s32 progress;  /* 0x80 clamped to 100 */
+    s32 step;      /* 0x84 quantised progress band */
+    s16 completed; /* 0x88 non-zero once the final band is reached */
+} TimerWork;
+
 void func_0031A830(u8 *work) {
+    TimerWork *timer = (TimerWork *)work;
     s32 progress;
     f32 ratio;
 
-    if (*(s32 *)(work + 0x80) >= 0x65) {
-        *(s32 *)(work + 0x80) = 0x64;
+    if (timer->progress >= 0x65) {
+        timer->progress = 0x64;
     }
-    progress = *(s32 *)(work + 0x80);
+    progress = timer->progress;
     ratio = (f32)progress / 100.0f;
-    if (*(s16 *)(work + 0x88) != 0) {
+    if (timer->completed != 0) {
         return;
     }
     if (ratio < 0.25f) {
-        *(s32 *)(work + 0x84) = 1;
+        timer->step = 1;
     } else if (ratio < 0.5f) {
-        *(s32 *)(work + 0x84) = 2;
+        timer->step = 2;
     } else if (ratio < 0.75f) {
-        *(s32 *)(work + 0x84) = 4;
+        timer->step = 4;
     } else if (ratio < 1.0f) {
-        *(s32 *)(work + 0x84) = 8;
+        timer->step = 8;
     } else {
-        *(s32 *)(work + 0x84) = 0x14;
-        *(s16 *)(work + 0x88) = 0x258;
+        timer->step = 0x14;
+        timer->completed = 0x258;
         func_0031B2E0(0x1E00005, 0);
     }
 }
