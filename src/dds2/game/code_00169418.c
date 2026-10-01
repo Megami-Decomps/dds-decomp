@@ -10,6 +10,8 @@ extern u32 D_00436424;
 
 extern u32 D_00436414;
 
+extern s32 effBTLFieldColorGetBaseColor(s32, s16, s16, s32);
+
 /* Keep the original selector and optional overrides separately for field-color lookups. */
 typedef struct Entry20B {
     u32 value;
@@ -56,7 +58,10 @@ void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
 
 INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 
-INCLUDE_ASM(const s32, "game/code_00169418", func_00169580);
+/* Variant and kind are narrowed to their stored widths before the lookup. */
+s32 func_00169580(s32 colorId, s16 variant, s16 kind, s32 arg3) {
+    return effBTLFieldColorGetBaseColor(colorId, variant, kind, arg3);
+}
 
 u32 effBTLFieldColorGetEntryWord(s32 index) {
     return D_003AB070[index].value;

@@ -65,6 +65,16 @@ void evtReleaseSceneResource(Scene *scene) {
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
 
-/* Destroys the task named by `name`; stays asm: retail keeps the tail call as
-   jal+epilogue, which needs a nosibcall flag this unit does not carry. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtDestroyNamedTask);
+/* Destroys the task named by `name`, if there is one. The `return` inside the
+   nested block is what keeps retail's jal+epilogue instead of a sibling call. */
+void evtDestroyNamedTask(void *ctx, const char *name) {
+    void *task;
+
+    if (name != NULL) {
+        task = kwlnTaskGetTaskByName(name);
+        if (task == NULL) {
+            return;
+        }
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+}

@@ -75,7 +75,21 @@ extern LmapNode *func_002C2600(LmapList *);
 extern LmapNode *func_002C2620(LmapList *);
 extern LmapNode *func_002C2658(LmapList *);
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2620);
+LmapNode *func_002C2620(LmapList *list) {
+    LmapNode *cur = list->cur;
+    LmapNode *node = list->first;
+
+    if (cur == list->hi) {
+        return cur;
+    }
+    node = node->next;
+    if (node == NULL) {
+        return cur;
+    }
+    list->count--;
+    list->first = node;
+    return cur;
+}
 
 INCLUDE_ASM(const s32, "game/code_002C2620", func_002C2658);
 
