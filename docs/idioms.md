@@ -225,6 +225,16 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   function is visible, no unit change needed). For `func_00190708` and
   `func_00224500` the callee sits in another unit, i.e. those units are one
   translation unit in retail.
+  Quick test without touching the repo: copy the unit to a scratch file, put
+  a K&R stub (`void callee() { }`, or `s32 callee() { return 0; }` when the
+  result is used) before the caller, and run
+  `check_unit.py <unit> --source <copy>`. If the caller then reports OK the
+  callee must be compiled earlier in the same TU (merge the units or match
+  the callee first); the reverse test (replace an earlier C callee by an
+  `extern` prototype) finds the opposite evidence, a unit that has to be
+  split (`func_00280978`: `mnuClearListFlagsOneAndTwo`/`mnuTestListFlagTwo`
+  must be opaque). A ternary `t = c ? a : b;` also adds a jump to the join
+  label, which stops cse's skip-block path (see "Float constants").
 - A `"memory"` clobber on a COP2 save/restore asm stops gcc reusing `$4`
   across it; retail's code has none.
 - `(n * 6 + 1) << 16` gives retail's `lui $1; addu` large-immediate add.

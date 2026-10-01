@@ -1397,7 +1397,31 @@ void fldPrepareDeferredSceneTransition(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00124D70);
+extern u32 fileGetSelectionPendingFlag(void);
+extern void func_00122B58();
+extern char D_00435F48[];
+
+void func_00124D70(void) {
+    FieldSequenceRecord record;
+    u32 mode;
+
+    if (fileGetSelectionPendingFlag() == 1) {
+        return;
+    }
+    if (*(s16 *)(D_00435DD0 + 0xE) != 0) {
+        mode = 1;
+        dds3AdminSubmitModeRequest(0x1E, &mode, 4, 0);
+        return;
+    }
+    func_00122B58(1);
+    D_00389988[0x4C / 4] = 0;
+    D_00389988[0x44 / 4] = 1;
+    mdlFlagSet(0xC0F);
+    fldSetDeferredFieldCommand(0, 0);
+    fldInitializeSequenceAndResetFlags(&record, 1, 1, D_00435F48);
+    record.options = 1;
+    dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+}
 
 extern void fldInitDisplayObjects();
 extern void fldResetPendingSounds();
@@ -1697,7 +1721,37 @@ INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EF0);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00126110);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_001265D0);
+typedef struct FieldVec4 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} FieldVec4;
+
+extern FieldVec4 D_00412F10;
+extern FieldVec4 D_00412F20;
+extern char D_00435F58[];
+extern u32 func_00112F28(void *, FieldVec4 *, FieldVec4 *, FieldVec4 *);
+extern void dds3SetCameraVector(u32, FieldVec4 *);
+extern void effObjSetInnerFloat(u32, f32);
+extern void dds3SetWorldCameraObject(u64, u32);
+
+void func_001265D0(void) {
+    FieldVec4 a = D_00412F10;
+    FieldVec4 b;
+    FieldVec4 c;
+    u32 *world = &D_00435F60;
+    u32 object;
+    memset(&b, 0, sizeof(b));
+    b.w = 1.0f;
+    c = D_00412F20;
+    object = func_00112F28(dds3AdvanceWorldCounter(), &b, &c, &a);
+    *world = object;
+    dds3SetWorldEntryCallbackTarget((void *)object, D_00435F58);
+    dds3SetCameraVector(*world, &c);
+    effObjSetInnerFloat(*world, 2.0f);
+    dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), *world);
+}
 
 u32 func_001266D8(void) {
     return 0;
@@ -2045,6 +2099,8 @@ void func_001285E8(void) {
     fldSelectActorFromSceneIndexTables();
 }
 
+extern void func_00128658(void);
+
 void func_00128600(void) {
     fldStopCurrentBgm();
 }
@@ -2062,7 +2118,24 @@ void fldSetDeferredFieldCommand(u32 arg0, u32 arg1) {
     fldDeferredCommandParameter = arg1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00128658);
+extern s32 dds3AdminGetRequestedMode(void);
+extern s32 dds3AdminReadPreviousUnsignedSample(void);
+extern s32 func_00141CF0(s32, u32);
+
+void func_00128658(void) {
+    if (fldDeferredCommand == 0) {
+        return;
+    }
+    if (dds3AdminGetRequestedMode() > 0) {
+        return;
+    }
+    if (dds3AdminGetRequestedMode() < 0 && (dds3AdminReadPreviousUnsignedSample() & 1) != 0) {
+        return;
+    }
+    if (func_00141CF0(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
+        fldDeferredCommand = 0;
+    }
+}
 
 void fldSetPendingSceneAction(u32 command) {
     D_00435F70 = command;

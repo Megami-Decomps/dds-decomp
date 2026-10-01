@@ -32,6 +32,12 @@ extern s64 btlIsCurrentActorFullyMarked(void);
 
 extern s32 func_002DC1D0(u32, u32);
 
+extern s32 btlFindGroupedEntity(s32, u16);
+
+extern void mdlLoadViewerPackage(s32, u16, s32, u32, u32);
+
+extern u16 D_00437E2C;
+
 extern EffModelOwner *effCreateModelOwner();
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
@@ -105,7 +111,17 @@ VU0_MOVE_VF(vf10, vf0);
     *(u32 *)model &= ~1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC1D0);
+s32 func_002DC1D0(u32 kind, u32 flags) {
+    s32 result;
+    while (btlFindGroupedEntity(6, D_00437E2C) != 0) {
+        D_00437E2C++;
+    }
+    mdlLoadViewerPackage(6, D_00437E2C, 0x101, kind, flags);
+    result = (s32)func_00232198(6, D_00437E2C);
+    effInitModelVUState((void *)result);
+    D_00437E2C++;
+    return result;
+}
 
 void effDestroyModelContext(s32 owner) {
     *(u32 *)(*(s32 *)(owner + 0x18) + 0x80) = 0;
