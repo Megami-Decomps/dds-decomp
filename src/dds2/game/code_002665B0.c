@@ -28,7 +28,6 @@ typedef struct MenuSlotState {
 
 extern void evtLoadResourcePair(const char *, u8 *);
 extern void evtCreateMessageWindowIfMissing(s32);
-extern void func_002680E0(s32);
 extern void mnuSnapshotCampTextureHandles(u8 *);
 extern void func_002673B8();
 extern void mnuClearPanelTransitionState(u8 *);
@@ -750,7 +749,18 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_002680E0);
+extern s32 fldGetCurrentBgmHandle(void);
+extern void sndEnsureMidiBankResident(u32);
+
+/* Pick the scene's music bank (default bank when the scene is not reduced) and make it resident. */
+void func_002680E0(MenuSlotState *host) {
+    if (host->reduced == 0) {
+        host->fadeColor = 0x20000;
+    } else {
+        host->fadeColor = fldGetCurrentBgmHandle();
+    }
+    sndEnsureMidiBankResident(host->fadeColor & 0xFFFF0000);
+}
 
 extern void func_003425B0(void);
 extern void func_003425D8(void);
@@ -791,7 +801,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
         (&((MenuSlotState *)obj)->cur)[i] = -1;
     }
     *(s32 *)(obj + 0x150) = 0xF;
-    func_002680E0((s32)obj);
+    func_002680E0((MenuSlotState *)obj);
     mnuApplyFadeTrackMode(0, (MenuSlotState *)obj);
     func_002C1B58(obj + 0x3E8, 0x60);
     return obj;
@@ -1143,7 +1153,9 @@ typedef struct EventDispatchState {
     s32 exitState; /* 0xD4 */
     s32 menuActive;      /* 0xD8: cleared when the menu command chain ends */
     s32 selectionStep;  /* 0xDC: compared against 2 by evtExitSelectionMenuAndSendSoundCommand */
-    u8 padE0[0x6C];
+    u8 padE0[4];
+    s32 savedMenuMode;   /* 0xE4: nonzero re-requests the bank resource on entry */
+    u8 padE8[0x64];
     s32 stage;           /* 0x14C */
     u8 pad150[4];
     u32 menuResource;    /* 0x154: released by func_00342580 */
@@ -1561,7 +1573,7 @@ s64 evtPollDispatchAfterFade(u64 request) {
             if (*dispatch == 0 && state->fadeStarted == 1 &&
                 mnuCheckResourceTask() == 0) {
                 if (sdfCheckPendingWorkWithInterrupts() != 0) return 0;
-                func_002680E0((s32)state);
+                func_002680E0((MenuSlotState *)state);
                 state->fadeStarted = 0;
                 mnuSetPopupEntryFlagged(dispatch, D_003CE848);
             }
@@ -1719,7 +1731,39 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026B260);
+/* Selection chain startup: fade in once the field frames are drained, then open the popup when the fade finishes. */
+s64 func_0026B260(u64 request) {
+    EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue();
+    s32 *dispatch = &state->dispatchStatus;
+    s64 result = func_002C4038((s32)state + 8, dispatch, 0, request);
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatch == 0) {
+        if (fldClassifyRemainingFrames((SceneTimerView *)state) != 0) {
+            return 0;
+        }
+        switch (state->stage) {
+        case 1:
+            kwlnFadeInStart(0, 0, 0, 15);
+            if (state->savedMenuMode != 0) {
+                func_002680E0((MenuSlotState *)state);
+            }
+            state->stage = 2;
+            break;
+        case 2:
+            if (kwlnFadeIsActive() != 0) {
+                return 0;
+            }
+            mnuSetPopupEntryFlagged(dispatch, D_003CE848);
+            break;
+        default:
+            return 0;
+        }
+    }
+    return 0;
+}
 
 s64 evtBDispatchSyncD2(s32 request) {
     s32 state = kwlnTaskGetUserValue();
