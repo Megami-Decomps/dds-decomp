@@ -1214,7 +1214,7 @@ s32 func_00214330(void) {
     return 0;
 }
 
-extern s32 D_00435E1C;
+extern s8 *D_00435E1C;
 
 extern s32 D_00435E20;
 
@@ -1849,7 +1849,39 @@ void btlSelectLinkedTargets(s32 task, s32 unused, s8 linked) {
     btlFreeIndexList(list);
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_002172B8);
+extern s32 btlCanUseLinkedActor();
+
+/* Pick the acting unit for a linked command: a usable linked unit without flag 0x1000, else the link's own unit. */
+BtlUnit *func_002172B8(BtlLinkedCommand *command) {
+    s32 kind = command->actionCode;
+
+    if ((u32)(kind - 1) >= 0x29F) {
+        return command->link->unit;
+    }
+    if (D_00435E1C[kind * 2 + 1] != 1) {
+        return command->link->unit;
+    }
+    if (command->linkedA == NULL && command->linkedB == NULL) {
+        return command->link->unit;
+    }
+    if (btlCanUseLinkedActor(command) == 0) {
+        return command->link->unit;
+    }
+    if (command->linkedA != NULL) {
+        if (command->linkedB != NULL) {
+            return command->link->unit;
+        }
+        if (!(command->linkedA->flags & 0x1000)) {
+            return command->linkedA;
+        }
+    }
+    if (command->linkedB != NULL) {
+        if (!(command->linkedB->flags & 0x1000)) {
+            return command->linkedB;
+        }
+    }
+    return command->link->unit;
+}
 
 
 void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
