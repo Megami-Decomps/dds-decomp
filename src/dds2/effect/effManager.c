@@ -116,10 +116,24 @@ s32 func_00157878(EffNode *node) {
     return D_003AA748[node->type].fn24(node->instance);
 }
 
+extern void func_0035B6E0(const char *, void *);
+extern void *func_00343ED0(void *, u32 *, s32);
+extern void *func_001578C0(u32);
+extern void *func_003297C8(void *);
 INCLUDE_ASM(const s32, "effect/effManager", func_001578C0);
 
 void func_001579C8(u32 parameter) {
     effCreateNode(5, 0, parameter);
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_001579E8);
+void *func_001579E8(void *resource) {
+    u32 resolvedId;
+    void *resourceHandle;
+    void *node;
+
+    func_0035B6E0("d3p file read...[%s]\n", resource);
+    resourceHandle = func_00343ED0(resource, &resolvedId, 0);
+    node = func_001578C0(resolvedId);
+    func_003297C8(resourceHandle);
+    return node;
+}

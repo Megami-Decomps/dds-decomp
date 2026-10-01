@@ -1,5 +1,27 @@
 #include "common.h"
 
+
+typedef struct EffBattleVoiceState {
+    u8 pad00[0xC3C];
+    s32 activeCount;
+} EffBattleVoiceState;
+
+typedef struct EffBattleVoiceOwner {
+    u32 unk00;
+    EffBattleVoiceState *state;
+    u8 pad08[0x14];
+    u16 voiceKind;
+    u8 pad1E[0xA];
+    s32 voices[0x3C];
+} EffBattleVoiceOwner;
+
+extern char D_003A0DB8[];
+extern void func_001629F0(s32);
+extern void func_003003F0(char *, u16, void *, s32);
+extern void sndUnlinkVoice(void *);
+extern void sdfReleaseChipBlock(void *);
+
+
 /* Shared work area for the battle-effect helpers in this TU. */
 typedef struct BattleEffect {
     u8  pad_0x00[0x10]; /* 0x00 */
@@ -13,7 +35,20 @@ typedef struct BattleEffect {
     u32 unk120;         /* 0x120 */
 } BattleEffect; /* 0x124 */
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160B00);
+void func_00160B00(EffBattleVoiceOwner *owner) {
+    s32 i;
+
+    for (i = 0; i < 0x3C; i++) {
+        if (owner->voices[i] != 0) {
+            func_001629F0(owner->voices[i]);
+        }
+    }
+    sndUnlinkVoice(owner);
+    owner->state->activeCount--;
+    func_003003F0(D_003A0DB8, owner->voiceKind, owner->state,
+                  owner->state->activeCount);
+    sdfReleaseChipBlock(owner);
+}
 
 u16 effBattleGetMode(BattleEffect *work) {
     return work->mode;
@@ -88,6 +123,7 @@ INCLUDE_ASM(const s32, "effect/effBattle", func_00161588);
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161600);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161650);
+
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00161790);
 

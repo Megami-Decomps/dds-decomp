@@ -1,5 +1,25 @@
 #include "common.h"
 
+typedef struct EffBattleVoiceState {
+    u8 pad00[0xC3C];
+    s32 activeCount;
+} EffBattleVoiceState;
+
+typedef struct EffBattleVoiceOwner {
+    u32 unk00;
+    EffBattleVoiceState *state;
+    u8 pad08[0x14];
+    u16 voiceKind;
+    u8 pad1E[0xA];
+    s32 voices[0x3C];
+} EffBattleVoiceOwner;
+
+extern char D_00414478[];
+extern void func_0016A620(s32);
+extern void func_0035B6E0(char *, u16, void *, s32);
+extern void sndUnlinkVoice(void *);
+extern void sdfReleaseChipBlock(void *);
+
 /* Only the value read through the effect's source pointer is known. */
 typedef struct BattleEffectValueSource {
     u8 pad00[0x48];
@@ -20,7 +40,20 @@ typedef struct BattleEffect {
     u32 value120;
 } BattleEffect;
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_001686F0);
+void func_001686F0(EffBattleVoiceOwner *owner) {
+    s32 i;
+
+    for (i = 0; i < 0x3C; i++) {
+        if (owner->voices[i] != 0) {
+            func_0016A620(owner->voices[i]);
+        }
+    }
+    sndUnlinkVoice(owner);
+    owner->state->activeCount--;
+    func_0035B6E0(D_00414478, owner->voiceKind, owner->state,
+                  owner->state->activeCount);
+    sdfReleaseChipBlock(owner);
+}
 
 u16 effBattleGetMode(BattleEffect *effect) {
     return effect->mode;
