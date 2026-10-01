@@ -2267,14 +2267,7 @@ extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
 void mnuProjectViewPoint(void) {
     u8 *matrix;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003296F0) : "memory");
+    VU0_LOAD_MATRIX(D_003296F0);
     matrix = D_00324610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (

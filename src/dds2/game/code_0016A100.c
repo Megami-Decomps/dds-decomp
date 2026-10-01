@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 
 /* Effect parameter-set dispatch tables. Every effect kind owns one 0x28-byte
  * entry per table; the handler lives at +0x0. Slots are declared as separate
@@ -270,14 +271,7 @@ void effParamScatterVectors(EffScatterWork *work, void *src) {
     u8 *d1;
     u8 *d2;
 
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "lqc2 vf28, 0(%0)\n\t"
-        "lqc2 vf29, 16(%0)\n\t"
-        "lqc2 vf30, 32(%0)\n\t"
-        "lqc2 vf31, 48(%0)\n\t"
-        ".set reorder"
-        : : "r" (src) : "memory");
+    VU0_LOAD_MATRIX(src);
     d0 = work->destination + 0x20;
     __asm__ volatile (
         ".set noreorder\n\t"

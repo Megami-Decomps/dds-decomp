@@ -47,6 +47,26 @@
     "lqc2 vf31, 48(%0)\n\t" \
     ".set reorder" \
     : : "r" (src))
+/* Same load when the source asm also barred compiler memory motion; retail
+ * uses this form where the matrix is written by a callee in between. */
+#define VU0_LOAD_MATRIX_MEMORY(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%0)\n\t" \
+    "lqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\t" \
+    "lqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+/* Same store without a compiler memory clobber, for the effect-allocator sites
+ * where retail keeps the matrix address CSE'd across the store. */
+#define VU0_STORE_MATRIX_NOCLOBBER(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst))
 
 /* Store vf28-vf31 to four quadwords (pairs with VU0_LOAD_MATRIX). */
 #define VU0_STORE_MATRIX(dst) __asm__ volatile ( \

@@ -956,7 +956,7 @@ void mdlResolveAnchorPosition(void *chunk, MdlAnchorRec *rec, f32 *out) {
     u8 *matrix = sdfModelFindDrawNode(chunk, info->id);
     f32 scale = rec->scale;
 
-    __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(matrix + 0xC0));
+    VU0_LOAD_MATRIX(matrix + 0xC0);
         VU0_LOAD_VF(vf10, info->pos);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -1733,7 +1733,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
     if (D_003D7A50.unk0A == 3) {
         list = sdfCreateResetPacketList();
         resource = (MdlResource *)D_003D7A50.resources[0];
-        __asm__ volatile(".set noreorder\n\tlqc2 vf28, 0(%0)\n\tlqc2 vf29, 0x10(%0)\n\tlqc2 vf30, 0x20(%0)\n\tlqc2 vf31, 0x30(%0)\n\t.set reorder" : : "r"(resource->chunk + 0x20));
+    VU0_LOAD_MATRIX(resource->chunk + 0x20);
         packet = func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
         if ((D_00398628[13] < 0) & (D_003BBCB8 == 0)) {
             D_003BBCB8 = 1;
