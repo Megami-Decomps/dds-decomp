@@ -981,7 +981,7 @@ void fldInitSceneFadeRecords(void) {
         rec++;
     }
     while (i < 8) {
-        memset(rec, 0, 8);
+        memset(rec, 0, sizeof(*rec));
         rec->target = -1;
         i++;
         rec++;

@@ -311,6 +311,8 @@ void mnuSlidePathPoint(s32 position, s32 *outX, s32 *outY) {
     s32 segment = func_002A47E8(position);
     s32 start = func_002A4770(segment);
     s32 end = func_002A4870(segment);
+    /* Consecutive table words give each segment's start/end X at +8/+9
+       and start/end Y at +12/+13; the last X shares the first Y word. */
     s32 x0 = D_003E38A0[segment + 8];
     s32 y0 = D_003E38A0[segment + 12];
     s32 dx = D_003E38A0[segment + 9] - x0;

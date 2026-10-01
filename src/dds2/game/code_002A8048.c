@@ -14,7 +14,7 @@ typedef struct MnuMovieTransfer {
     u8 cursor;           /* 0x01: nibble being edited, 0..15 */
     u8 wordPending;      /* 0x02 */
     u8 blockPending;     /* 0x03 */
-    u32 wordSource;      /* 0x04 */
+    u32 wordSource;      /* 0x04: register address, dereferenced as s32 when copying word */
     u32 blockSource;     /* 0x08 */
     s32 word;            /* 0x0C */
     u8 block[0x40];      /* 0x10 */
@@ -262,7 +262,7 @@ void mnuCommitPendingMovieDrawValues(void) {
         D_00457E60.word = *(s32 *)D_00457E60.wordSource;
     }
     if (D_00457E60.blockPending != 0) {
-        memcpy(D_00457E60.block, (void *)D_00457E60.blockSource, 0x40);
+        memcpy(D_00457E60.block, (void *)D_00457E60.blockSource, sizeof(D_00457E60.block));
     }
 }
 
