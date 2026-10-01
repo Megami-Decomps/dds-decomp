@@ -68,11 +68,13 @@ typedef struct PcpFlashColorSlot {
     s32 third;
 } PcpFlashColorSlot;
 
-typedef struct PcpFlashWork2 PcpFlashWork2;
+typedef struct PcpFlashStreakWork PcpFlashStreakWork;
 
 typedef struct PcpFlashRotatingParticle PcpFlashRotatingParticle;
 
-struct PcpFlashWork2 {
+/* Spawn, rotation and draw passes share this 0x58-byte streak work.
+   The position-rotation routine uses the same parts pointer at 0x40. */
+struct PcpFlashStreakWork {
     f32 origin[3];
     u8 pad0C[0x04];
     s32 particleCount;
@@ -176,9 +178,11 @@ struct PcpFlashWork4 {
     u32 resourceHandle;
 };
 
-typedef struct PcpFlashPtc10 PcpFlashPtc10;
+/* Shared 0x10-byte motion state: accumulator is an angle for orbit arcs and
+   a radius for radial triangles; stepSpeed is radial speed or arc height. */
+typedef struct PcpFlashMotionParticle PcpFlashMotionParticle;
 
-struct PcpFlashPtc10 {
+struct PcpFlashMotionParticle {
     u32 color;
     s32 age;
     f32 accumulator;
@@ -186,9 +190,12 @@ struct PcpFlashPtc10 {
                        * accumulator; also read as the particle's height */
 };
 
-typedef struct PcpFlashWork5 PcpFlashWork5;
+typedef struct PcpFlashOrbitArcWork PcpFlashOrbitArcWork;
 
-struct PcpFlashWork5 {
+/* The orbit constructor and renderer share this 0x80-byte work record.
+   The 0x58-byte copied parameters are followed by the motion-particle array
+   pointer and draw/resource state. */
+struct PcpFlashOrbitArcWork {
     f32 origin[3];
     u8 pad0C[0x04];
     s32 particleCount;
@@ -210,7 +217,7 @@ struct PcpFlashWork5 {
     f32 unk4C;
     f32 increment;
     u32 unk54;
-    PcpFlashPtc10 *parts;
+    PcpFlashMotionParticle *parts;
     u32 unk5C;
     u32 colorParam;
     f32 renderScale;
@@ -281,7 +288,7 @@ struct PcpFlashWork7 {
     f32 initialRadialSpeed;
     f32 radialDamping;
     u32 unk38;
-    PcpFlashPtc10 *parts;
+    PcpFlashMotionParticle *parts;
     s32 updateCount;
     u32 colorParam;
     f32 renderScale;
@@ -381,7 +388,7 @@ struct PcpFlashWork10 {
     f32 radialDamping;
     f32 originOffset;
     u32 unk3C;
-    PcpFlashPtc10 *parts;
+    PcpFlashMotionParticle *parts;
     s32 updateCount;
     u32 colorParam;
     f32 renderScale;
@@ -401,28 +408,22 @@ struct PcpFlashRotatingParticle {
     f32 initialScale;
 };
 
-typedef struct PcpFlashRotationWork {
-    u8 pad00[0x40];
-    PcpFlashRotatingParticle *parts;
-} PcpFlashRotationWork;
 
 typedef struct PcpFlashColorSlot5 {
     s32 color[5];
 } PcpFlashColorSlot5;
 
+/* The constructors and update passes share this draw record: origin at 0x40,
+   a write-only control word at 0x50, and render scale at 0x5C. */
 typedef struct PcpFlashHandle {
     u8 pad00[0x40];
     f32 origin[3];
-    u8 pad4C[0x10];
+    u8 pad4C[4];
+    u32 unk50;
+    u8 pad54[8];
     f32 renderScale;
 } PcpFlashHandle;
 
-typedef struct PcpFlashRadialHandle {
-    u8 pad00[0x50];
-    u32 unk50;
-    u8 pad54[8];
-    f32 unk5C;
-} PcpFlashRadialHandle;
 
 extern u8 D_00324680[];
 
@@ -435,15 +436,12 @@ extern void effFlashTrianglePulseWriteCorners();
 extern void func_00170078(void *);
 
 
-extern void effFlashBillboardQuad(PcpFlashWork2 *, s32, void *);
+extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
 
 extern void func_0016FC58(void *);
 
 extern void effFlashArcQuadScaling(PcpFlashWork3 *, s32);
 
-/* Particle elements. Only the fields touched by the matched accumulators are
-   known; each struct's size is the element stride used to index its array. */
-typedef struct PcpFlashPtc10 PcpFlashPtc10;
 
 extern void effFlashRotatedTriangle(PcpFlashWork7 *, s32, void *);
 
@@ -631,7 +629,7 @@ void func_0016A878(void)
     func_0016A6C0();
 }
 
-void effFlashRotatingStreakDestroy(PcpFlashWork2 *work)
+void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work)
 {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_002D0918(work->ownedBuffer);
@@ -641,19 +639,19 @@ void effFlashRotatingStreakCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effFlashRotatingStreakSetColorParam(PcpFlashWork2 *work, u32 value)
+void effFlashRotatingStreakSetColorParam(PcpFlashStreakWork *work, u32 value)
 {
     work->colorParam = value;
 }
 
-void effFlashRotatingStreakSetRenderScale(PcpFlashWork2 *work, f32 value)
+void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
 {
     work->renderScale = value;
 }
 
 extern s32 effGetIndexedEffectGroupIndexEntry(s32 handle, s32 index);
 
-void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 index, s32 param)
+void effFlashColorSlot5Set(PcpFlashStreakWork *work, s32 index, s32 param)
 {
     PcpFlashColorSlot5 *slot;
     s32 rgb1;
@@ -678,7 +676,7 @@ void effFlashColorSlot5Set(PcpFlashWork2 *work, s32 index, s32 param)
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
 
-void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orientation) {
+void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *orientation) {
     PcpFlashRotatingParticle *part = work->parts + index;
     f32 direction[4];
     f32 factor;
@@ -713,7 +711,7 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
 }
 
 /* vu0 routine: the four corner offsets of a rotating particle's billboard around its scaled position */
-void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
+void effFlashBillboardQuad(PcpFlashStreakWork *work, s32 index, void *view)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
     f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
@@ -769,7 +767,7 @@ void effFlashBillboardQuad(PcpFlashWork2 *work, s32 index, void *view)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void *orientation)
+void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *orientation)
 {
     PcpFlashRotatingParticle *part = &work->parts[index];
     f32 position[4];
@@ -786,7 +784,7 @@ void effRotateFlashParticlePosition(PcpFlashRotationWork *work, s32 index, void 
     part->position[2] = position[2];
 }
 
-void effFlashUpdateStreak(PcpFlashWork2 *work) {
+void effFlashUpdateStreak(PcpFlashStreakWork *work) {
     s128 axis;
     s32 index;
     s32 lifetime;
@@ -844,7 +842,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
                         part->scale = maxScale;
                     }
                 }
-                effRotateFlashParticlePosition((PcpFlashRotationWork *)work, index, &axis);
+                effRotateFlashParticlePosition(work, index, &axis);
                 effFlashBillboardQuad(work, index, &axis);
                 if (part->age < half) {
                     blend = (f32)age / (f32)half;
@@ -871,7 +869,7 @@ PcpFlashWork3 *func_0016AFF0(src)
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc14) + sizeof(PcpFlashWork3));
     PcpFlashWork3 *work = (PcpFlashWork3 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     f32 angle;
     f32 step;
     u32 range;
@@ -887,8 +885,8 @@ PcpFlashWork3 *func_0016AFF0(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = (PcpFlashRadialHandle *)func_0016FB08(work->particleCount);
-    record->unk5C = 1.0f;
+    record = (PcpFlashHandle *)func_0016FB08(work->particleCount);
+    record->renderScale = 1.0f;
     record->unk50 = work->unk44;
     work->resourceHandle = (u32)record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
@@ -1114,7 +1112,7 @@ PcpFlashWork4 *func_0016B800(src)
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc1C) + sizeof(PcpFlashWork4));
     PcpFlashWork4 *work = (PcpFlashWork4 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     f32 angle;
     f32 step;
     u32 range;
@@ -1130,8 +1128,8 @@ PcpFlashWork4 *func_0016B800(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = (PcpFlashRadialHandle *)func_00170250(work->particleCount * 2);
-    record->unk5C = 1.0f;
+    record = (PcpFlashHandle *)func_00170250(work->particleCount * 2);
+    record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
     work->resourceHandle = (u32)record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
@@ -1260,77 +1258,51 @@ void func_0016BE48(PcpFlashWork4 *work)
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
 
-typedef struct EffectRingVertex {
-    s32 pad0;
-    s32 offset;
-    f32 angle;
-    s32 padC;
-} EffectRingVertex;
 
-typedef struct EffectRing {
-    u8 pad00[0x10];
-    u32 count;
-    u8 pad14[8];
-    s32 spread;
-    u8 pad20[0x10];
-    f32 param30;
-    f32 param34;
-    f32 param38;
-    u8 pad3C[0x14];
-    u32 unk50;
-    u32 unk54;
-    EffectRingVertex *vertices;
-    s32 unk5C;
-    u32 color;
-    f32 scale;
-    f32 unk68;
-    u8 pad6C[4];
-    f32 unk70;
-    f32 unk74;
-    u32 handle;
-    u8 *matrix;
-} EffectRing;
-
-typedef struct EffectRingBlock {
-    EffectRing header;
-    EffectRingVertex vertices[1];
-} EffectRingBlock;
+/* The orbit-arc particles follow the same work header used by its draw and
+   angle-update passes; this is an allocation container, not a second view. */
+typedef struct PcpFlashOrbitArcBlock {
+    PcpFlashOrbitArcWork header;
+    PcpFlashMotionParticle parts[1];
+} PcpFlashOrbitArcBlock;
 
 void *func_0016C0E8(source)
-EffectRing *source;
+PcpFlashOrbitArcWork *source;
 {
     u32 handle;
-    EffectRingBlock *block;
-    EffectRing *ring;
+    PcpFlashOrbitArcBlock *block;
+    PcpFlashOrbitArcWork *ring;
+    PcpFlashHandle *record;
     f32 angle;
     f32 step;
     u32 spread;
     u32 i;
 
-    handle = func_002D03F8(source->count * 16 + 0x80);
-    block = (EffectRingBlock *)sdfResourceRetainAddress(handle);
+    handle = func_002D03F8((u32)source->particleCount * 16 + 0x80);
+    block = (PcpFlashOrbitArcBlock *)sdfResourceRetainAddress(handle);
     ring = &block->header;
     memcpy(ring, source, 0x58);
-    ring->vertices = block->vertices;
-    ring->handle = handle;
-    ring->color = 0x80808080;
-    ring->unk68 = ring->param38;
-    ring->unk70 = ring->param30;
-    ring->unk74 = ring->param34;
+    ring->parts = block->parts;
+    ring->ownedBuffer = handle;
+    ring->colorParam = 0x80808080;
+    ring->orbitRadius = ring->unk38;
+    ring->upSpan = ring->unk30;
+    ring->acrossSpan = ring->unk34;
     ring->unk5C = 0;
-    ring->scale = 1.0f;
-    if (ring->spread == 0) {
-        ring->spread = 1;
+    ring->renderScale = 1.0f;
+    if (ring->randomRange == 0) {
+        ring->randomRange = 1;
     }
     angle = EFFECT_RING_START_ANGLE;
-    ring->matrix = (u8 *)func_0016FB08(ring->count);
-    *(f32 *)(ring->matrix + 0x5C) = 1.0f;
-    *(u32 *)(ring->matrix + 0x50) = ring->unk54;
-    step = EFFECT_RING_FULL_TURN / ring->count;
-    spread = ring->spread;
-    for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].offset = -(effMiscRand(D_0034DF38) % spread);
-        ring->vertices[i].angle = angle;
+    record = (PcpFlashHandle *)func_0016FB08(ring->particleCount);
+    record->renderScale = 1.0f;
+    record->unk50 = ring->unk54;
+    ring->resourceHandle = (u32)record;
+    step = EFFECT_RING_FULL_TURN / (u32)ring->particleCount;
+    spread = ring->randomRange;
+    for (i = 0; i < (u32)ring->particleCount; i++) {
+        ring->parts[i].age = -(effMiscRand(D_0034DF38) % spread);
+        ring->parts[i].accumulator = angle;
         angle += step;
     }
     return ring;
@@ -1346,7 +1318,7 @@ void func_0016C358(void)
     func_0016C0E8();
 }
 
-void effFlashOrbitArcDestroy(PcpFlashWork5 *work)
+void effFlashOrbitArcDestroy(PcpFlashOrbitArcWork *work)
 {
     effReleaseRecordGroupAssetAndHandle(work->resourceHandle);
     func_002D0918(work->ownedBuffer);
@@ -1356,17 +1328,17 @@ void effFlashOrbitArcCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effFlashOrbitArcSetColorParam(PcpFlashWork5 *work, u32 value)
+void effFlashOrbitArcSetColorParam(PcpFlashOrbitArcWork *work, u32 value)
 {
     work->colorParam = value;
 }
 
-void effFlashOrbitArcSetRenderScale(PcpFlashWork5 *work, f32 value)
+void effFlashOrbitArcSetRenderScale(PcpFlashOrbitArcWork *work, f32 value)
 {
     work->renderScale = value;
 }
 
-void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 index, s32 param)
+void effFlashOrbitArcSetParticleColors(PcpFlashOrbitArcWork *work, s32 index, s32 param)
 {
     PcpFlashColorSlot5 *slot;
     s32 rgb1;
@@ -1389,9 +1361,9 @@ void effFlashOrbitArcSetParticleColors(PcpFlashWork5 *work, s32 index, s32 param
 }
 
 /* vu0 routine: billboard corner offsets for a particle on an arc, built from a normalised direction and its perpendicular */
-void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
+void effFlashArcQuad(PcpFlashOrbitArcWork *work, s32 index)
 {
-    PcpFlashPtc10 *part = &work->parts[index];
+    PcpFlashMotionParticle *part = &work->parts[index];
     f32 *quad = effGetIndexedEffectGroupRecord(work->resourceHandle, index);
     f32 offset[4];
     f32 unit[4];
@@ -1450,9 +1422,9 @@ void effFlashArcQuad(PcpFlashWork5 *work, s32 index)
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad + 4);
 }
-void effFlashOrbitArcAdvanceAngle(PcpFlashWork5 *work, s32 index)
+void effFlashOrbitArcAdvanceAngle(PcpFlashOrbitArcWork *work, s32 index)
 {
-    PcpFlashPtc10 *part;
+    PcpFlashMotionParticle *part;
 
     part = &work->parts[index];
     part->accumulator += work->increment;
@@ -1465,7 +1437,7 @@ PcpFlashWork6 *func_0016C9F0(src)
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc20A) + sizeof(PcpFlashWork6));
     PcpFlashWork6 *work = (PcpFlashWork6 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     u32 range;
     u32 i;
 
@@ -1478,7 +1450,7 @@ PcpFlashWork6 *func_0016C9F0(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = (PcpFlashRadialHandle *)func_0016FB08(work->particleCount);
+    record = (PcpFlashHandle *)func_0016FB08(work->particleCount);
     work->resourceHandle = (u32)record;
     record->unk50 = work->unk48;
     range = work->randomRange;
@@ -1718,18 +1690,18 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
     func_0016FC58(handle);
 }
 
-extern PcpFlashRadialHandle *func_0016FF50(s32 count);
+extern PcpFlashHandle *func_0016FF50(s32 count);
 
 PcpFlashWork7 *func_0016D2A8(src)
     PcpFlashWork7 *src;
 {
-    u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc10) + sizeof(PcpFlashWork7));
+    u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashWork7));
     PcpFlashWork7 *work = (PcpFlashWork7 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     u32 i;
 
     memcpy(work, src, 0x3C);
-    work->parts = (PcpFlashPtc10 *)(work + 1);
+    work->parts = (PcpFlashMotionParticle *)(work + 1);
     work->colorParam = 0x80808080;
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
@@ -1790,7 +1762,7 @@ void effFlashRadialTriangleSetParticleColors(PcpFlashWork7 *work, s32 index, s32
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangle(PcpFlashWork7 *work, s32 index, void *view)
 {
-    PcpFlashPtc10 *part = &work->parts[index];
+    PcpFlashMotionParticle *part = &work->parts[index];
     f32 *quad = effGetGroupRecordByIndex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
@@ -1841,7 +1813,7 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
     f32 startA;
     f32 startB;
     f32 decay;
-    PcpFlashPtc10 *part;
+    PcpFlashMotionParticle *part;
     PcpFlashHandle *handle;
 
     VU0_LOAD_VF($vf10, D_00324680);
@@ -1917,7 +1889,7 @@ PcpFlashWork8 *func_0016D940(src)
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc20B) + sizeof(PcpFlashWork8));
     PcpFlashWork8 *work = (PcpFlashWork8 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     u32 range;
     u32 i;
 
@@ -1930,8 +1902,8 @@ PcpFlashWork8 *func_0016D940(src)
     if (work->randomRange == 0) {
         work->randomRange = 1;
     }
-    record = (PcpFlashRadialHandle *)func_00170250(work->particleCount * 2);
-    record->unk5C = 1.0f;
+    record = (PcpFlashHandle *)func_00170250(work->particleCount * 2);
+    record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
     work->resourceHandle = (u32)record;
     range = work->randomRange;
@@ -2161,7 +2133,7 @@ PcpFlashWork9 *func_0016E290(src)
 {
     u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc14) + sizeof(PcpFlashWork9));
     PcpFlashWork9 *work = (PcpFlashWork9 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     f32 angle;
     f32 step;
     u32 range;
@@ -2177,8 +2149,8 @@ PcpFlashWork9 *func_0016E290(src)
         work->randomRange = 1;
     }
     angle = -3.14159265f / 2.0f;
-    record = (PcpFlashRadialHandle *)func_0016FB08(work->particleCount);
-    record->unk5C = 1.0f;
+    record = (PcpFlashHandle *)func_0016FB08(work->particleCount);
+    record->renderScale = 1.0f;
     record->unk50 = work->unk4C;
     work->resourceHandle = (u32)record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
@@ -2407,13 +2379,13 @@ void effFlashUpdateWork9(PcpFlashWork9 *work) {
 PcpFlashWork10 *func_0016EB00(src)
     PcpFlashWork10 *src;
 {
-    u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashPtc10) + sizeof(PcpFlashWork10));
+    u32 handle = func_002D03F8(src->particleCount * sizeof(PcpFlashMotionParticle) + sizeof(PcpFlashWork10));
     PcpFlashWork10 *work = (PcpFlashWork10 *)sdfResourceRetainAddress(handle);
-    PcpFlashRadialHandle *record;
+    PcpFlashHandle *record;
     u32 i;
 
     memcpy(work, src, 0x40);
-    work->parts = (PcpFlashPtc10 *)(work + 1);
+    work->parts = (PcpFlashMotionParticle *)(work + 1);
     work->colorParam = 0x80808080;
     work->ownedBuffer = handle;
     work->renderScale = 1.0f;
@@ -2474,7 +2446,7 @@ void effFlashOffsetRadialTriangleSetParticleColors(PcpFlashWork10 *work, s32 ind
 /* vu0 routine: a triangle of corner offsets for a flash particle, two of them turned around the view axis by index * step */
 void effFlashRotatedTriangleB(PcpFlashWork10 *work, s32 index, void *view)
 {
-    PcpFlashPtc10 *part = &work->parts[index];
+    PcpFlashMotionParticle *part = &work->parts[index];
     f32 *quad = effGetGroupRecordByIndex(work->resourceHandle, index);
     f32 base[4];
     f32 size[4];
@@ -2526,7 +2498,7 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
     f32 startB;
     f32 decay;
     f32 scale;
-    PcpFlashPtc10 *part;
+    PcpFlashMotionParticle *part;
     PcpFlashHandle *handle;
 
     VU0_LOAD_VF($vf10, D_00324680);
