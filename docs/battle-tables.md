@@ -5,14 +5,24 @@ to editable `.tblasm` source. It currently supports `ENCOUNT.TBL`, `UNIT.TBL`,
 `SKILL.TBL`, `AICALC.TBL`, and `MSG.TBL`:
 
 ```sh
-python3 tools/battle_tbl.py disassemble ENCOUNT.TBL encount.tblasm
-python3 tools/battle_tbl.py assemble encount.tblasm ENCOUNT.TBL
-python3 tools/battle_tbl.py disassemble UNIT.TBL unit.tblasm
-python3 tools/battle_tbl.py assemble unit.tblasm UNIT.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  ENCOUNT.TBL encount.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  encount.tblasm ENCOUNT.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm UNIT.TBL unit.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm unit.tblasm UNIT.TBL
 python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
 python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
-python3 tools/battle_tbl.py disassemble AICALC.TBL aicalc.tblasm
-python3 tools/battle_tbl.py assemble aicalc.tblasm AICALC.TBL
+python3 tools/battle_tbl.py disassemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  AICALC.TBL aicalc.tblasm
+python3 tools/battle_tbl.py assemble \
+  --messages msg.tblasm --skills skill.tblasm --units unit.tblasm \
+  aicalc.tblasm AICALC.TBL
 python3 tools/battle_tbl.py disassemble MSG.TBL msg.tblasm
 python3 tools/battle_tbl.py assemble msg.tblasm MSG.TBL
 ninja dds1-battle-data dds2-battle-data
@@ -66,7 +76,7 @@ selected profile. An encounter names its enemy slots and battle setup values:
 ```text
 battle-table 1 kind=encounter profile=dds1
 
-encounter 606 voice=2 enemies=109,109 backgrounds=228,1 flags=0x4 bgm=31 event=606
+encounter 1 enemies=JACK_FROST_036,MOTHMAN,MOTHMAN,MOTHMAN,JACK_FROST_036 backgrounds=222,2 flags=0xd
 ```
 
 Default-zone and background maps use separate vocabulary for the same physical
@@ -119,8 +129,17 @@ Enemy templates connect the encounter enemy IDs to combat stats, skill IDs,
 rewards, drops, and basic-attack behavior:
 
 ```text
-enemy 6 race=1 level=30 hp=220 max_hp=220 mp=288 max_mp=288 growth=6 stats=30,25,30,25,18 skills=22,84,85,50,164 macca=900 experience=221 atma_points=300
+enemy SARASVATI race=1 level=30 hp=220 max_hp=220 mp=288 max_mp=288 growth=6 stats=30,25,30,25,18 skills=MAZIO_016,TENTARAFOO,SONIC_WAVE,MP_THIEF_032,MEDIARAMA_0A4 macca=900 experience=221 atma_points=300
 ```
+
+Enemy identities come from the 384 indexed `enemy-name` rows in the paired
+`MSG.TBL`. The same symbol selects a UNIT template and affinity row, appears
+in ENCOUNT formation slots, and selects the corresponding AICALC row. Repeated
+display names all receive their hexadecimal ID, such as `JACK_FROST_036` and
+`JACK_FROST_143`; placeholder rows use `ENEMY_` followed by the hexadecimal
+ID. UNIT skill lists use the same SKILL symbols as battle AI. The normal build
+checks every nonzero encounter member and authored AI row against a populated
+UNIT template, and every UNIT skill against the paired SKILL domain.
 
 Affinity rows hold 19 packed `u32` values. Their low halfword is the numeric
 rate used by battle calculations; the high halfword contains behavior flags.
@@ -134,8 +153,9 @@ party-affinity 1 values=100,100,0x80000078,50,100,100,100,100,100,100,100,100,10
 Fields whose consumers establish a type but not a stable gameplay name retain
 offset-based names. Unknown byte spans use fixed-length hexadecimal values.
 The assembler validates every row count, list width, integer range, segment
-size, and alignment byte before writing a table. Corpus tests also join every
-nonzero encounter enemy ID to a populated enemy template in the paired game.
+size, and alignment byte before writing a table. Context-aware assembly also
+joins every nonzero encounter enemy ID to a populated template in the paired
+game.
 
 ## Skill source
 
@@ -253,25 +273,45 @@ Each enemy has three decision tiers. A tier evaluates three packed predicates
 and uses their truth pattern to read one of eight route bytes. Retail routes
 normally select one of seven groups or use `8` to continue to another tier.
 Each group contains five `{weight, action, effect}` choices. The source makes
-those boundaries explicit while retaining numeric selector IDs where the
-predicate or effect handler has not earned a stable gameplay name:
+those boundaries explicit. Predicate and effect operation names come from the
+profile-specific native callback tables and the behavior of their handlers:
 
 ```text
-enemy-ai 2 script=ai_ishisu_zako
-  decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
+enemy-ai ISIS_002 script=ai_ishisu_zako
+  decision 0 predicates=ANY_GROUP_400_MATCHES_ACTION_ENTRY(2),TURN_REACHED_LIMIT(2),HAS_AVAILABLE_OPTION(0) routes=0,8,8,2,8,8,8,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=50 action=skill:86
+  choice 1 0 weight=50 action=skill:MARIN_KARIN
   choice 5 0 weight=100 action=preset:1:4
 end
 ```
 
-A packed predicate or effect writes `selector:argument`; the physical word
-uses its high 10 bits for the native handler selector and its low 22 bits for
-the argument. Action values distinguish direct `skill` IDs, six native
-`preset` families, DDS2 `weighted` tables, and built-in `special` actions.
-Direct skill actions are checked against the paired `SKILL.TBL`. Script
-references use the actual procedure names from the AI program rather than
-bare table indices.
+A named operation writes `NAME(argument)`. Its physical word uses the high 10
+bits for the native handler selector and the low 22 bits for the argument.
+Selectors whose behavior remains unresolved retain the exact
+`selector:argument` form. The selector tables differ between DDS1 and DDS2, so
+the assembler resolves names through the selected game profile rather than
+assuming that equal numbers mean equal behavior.
+
+Action values distinguish direct `skill` IDs, six native `preset` families,
+DDS2 `weighted` tables, and built-in `special` actions. Direct skill actions
+are checked against the paired `SKILL.TBL`. Script references use the actual
+procedure names from the AI program rather than bare table indices.
+
+Skill symbols come from the indexed `skill-name` rows in the paired battle
+`MSG.TBL` source. Names are normalized to uppercase identifiers, so direct
+selections read as `AI_SELECT_SKILL(AGI)` and queued-action checks can use
+`AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D)`. Repeated display names all
+receive their hexadecimal ID, such as `MARAGI_004` and `MARAGI_1B0`, so a new
+collision fails old source instead of silently changing its numeric meaning.
+Empty and reserved display rows use `SKILL_` followed by the hexadecimal ID.
+This makes every symbol deterministic and reversible without maintaining a
+second name registry.
+
+Only native-command arguments established as action IDs receive this symbol
+domain. Masks, modes, percentages, and uncertain arguments remain numeric.
+The normal build supplies `msg.tblasm` for name resolution, `skill.tblasm` for
+the action domain, and `unit.tblasm` for the enemy identity join when
+assembling `AICALC.TBL`.
 
 DDS2's separate weighted tables contain eight `{value, weight}` entries. Zero
 entries are omitted from source:
@@ -304,10 +344,15 @@ Lookup curves whose exact gameplay role remains uncertain retain neutral
 
 The AI programs use a separate battle-command vocabulary derived from each
 game's native dispatch table and handlers. It covers action and target
-selection, HP and party-state queries, history counters, scene transitions,
-and camera operations. This names 2,909 of 3,434 calls in DDS1 and 3,414 of
+selection, HP and MP queries, queued and current actions, party state, history
+counters, scene transitions, and camera operations. Player/enemy group scans
+use the same `0x200`/`0x400` filters across the paired predicates and target
+selectors. Related-engine command identities support `AI_SELECT_ESCAPE`,
+`AI_SELECT_WAIT`, and `AI_RESTORE_BATTLE_CAMERA`; the DDS handlers establish
+their local contracts. This names 3,432 of 3,434 calls in DDS1 and 3,800 of
 3,801 calls in DDS2, allowing common code to read as conditions such as
-`AI_UNIT_HP_AT_OR_BELOW_RATE(25)` and actions such as
-`AI_SELECT_SKILL(1)`. Calls whose handler role is still ambiguous remain as
-numeric `COMM` instructions; the profile does not infer names from usage
-alone.
+`AI_UNIT_MP_AT_OR_BELOW_RATE(25)`,
+`AI_ANY_PLAYER_HAS_QUEUED_ACTION(MAGIC_REPEL_16D)`, and actions such as
+`AI_SELECT_LOWEST_LEVEL_TARGET()`. Two calls to an exact DDS1 target-selection
+alias and one complex DDS2 action selector remain numeric because their
+distinct public roles are not established.

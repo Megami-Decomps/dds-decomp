@@ -1,684 +1,684 @@
 battle-table 1 kind=encounter profile=dds1
 
-encounter 1 enemies=54,67,67,67,54 backgrounds=222,2 flags=0xd
+encounter 1 enemies=JACK_FROST_036,MOTHMAN,MOTHMAN,MOTHMAN,JACK_FROST_036 backgrounds=222,2 flags=0xd
 
-encounter 2 enemies=89,89
+encounter 2 enemies=YAKA,YAKA
 
-encounter 3 enemies=89,89,89
+encounter 3 enemies=YAKA,YAKA,YAKA
 
-encounter 4 enemies=89,89,89,89
+encounter 4 enemies=YAKA,YAKA,YAKA,YAKA
 
-encounter 5 enemies=74,74 flags=0x100
+encounter 5 enemies=ALP,ALP flags=0x100
 
-encounter 6 enemies=74,74,74 flags=0x100
+encounter 6 enemies=ALP,ALP,ALP flags=0x100
 
-encounter 7 enemies=90
+encounter 7 enemies=GHOUL_05A
 
-encounter 8 enemies=89
+encounter 8 enemies=YAKA
 
-encounter 9 enemies=90,90,90
+encounter 9 enemies=GHOUL_05A,GHOUL_05A,GHOUL_05A
 
-encounter 10 enemies=40 flags=0x100
+encounter 10 enemies=COCKATRICE_028 flags=0x100
 
-encounter 11 enemies=89,89,89,89,89 flags=0x100
+encounter 11 enemies=YAKA,YAKA,YAKA,YAKA,YAKA flags=0x100
 
-encounter 12 enemies=72 flags=0x104
+encounter 12 enemies=EMPUSA_048 flags=0x104
 
-encounter 13 enemies=72,72 flags=0x104
+encounter 13 enemies=EMPUSA_048,EMPUSA_048 flags=0x104
 
-encounter 14 enemies=99 flags=0x104
+encounter 14 enemies=ONMORAKI flags=0x104
 
-encounter 15 enemies=99,99 flags=0x104
+encounter 15 enemies=ONMORAKI,ONMORAKI flags=0x104
 
-encounter 16 enemies=99,99,99 flags=0x104
+encounter 16 enemies=ONMORAKI,ONMORAKI,ONMORAKI flags=0x104
 
-encounter 17 enemies=36
+encounter 17 enemies=TARRASQUE_024
 
-encounter 18 enemies=102,90,102
+encounter 18 enemies=PRETA,GHOUL_05A,PRETA
 
-encounter 19 enemies=90,90
+encounter 19 enemies=GHOUL_05A,GHOUL_05A
 
-encounter 20 enemies=88,40,88 flags=0x100
+encounter 20 enemies=MOU_RYO,COCKATRICE_028,MOU_RYO flags=0x100
 
-encounter 21 enemies=99,99,99,99 flags=0x104
+encounter 21 enemies=ONMORAKI,ONMORAKI,ONMORAKI,ONMORAKI flags=0x104
 
-encounter 22 enemies=99,99,99,99,99 flags=0x104
+encounter 22 enemies=ONMORAKI,ONMORAKI,ONMORAKI,ONMORAKI,ONMORAKI flags=0x104
 
-encounter 23 enemies=74,72,74 flags=0x100
+encounter 23 enemies=ALP,EMPUSA_048,ALP flags=0x100
 
-encounter 24 enemies=99,74,99 flags=0x100
+encounter 24 enemies=ONMORAKI,ALP,ONMORAKI flags=0x100
 
-encounter 25 enemies=99,74,74,99 flags=0x100
+encounter 25 enemies=ONMORAKI,ALP,ALP,ONMORAKI flags=0x100
 
-encounter 26 enemies=72,40,72 flags=0x104
+encounter 26 enemies=EMPUSA_048,COCKATRICE_028,EMPUSA_048 flags=0x104
 
-encounter 27 enemies=74 flags=0x100
+encounter 27 enemies=ALP flags=0x100
 
-encounter 28 enemies=74,74,74,74 flags=0x100
+encounter 28 enemies=ALP,ALP,ALP,ALP flags=0x100
 
-encounter 29 enemies=99,286,99 flags=0x100
+encounter 29 enemies=ONMORAKI,COCKATRICE_11E,ONMORAKI flags=0x100
 
-encounter 30 enemies=99,72,99 flags=0x100
+encounter 30 enemies=ONMORAKI,EMPUSA_048,ONMORAKI flags=0x100
 
-encounter 31 enemies=72,72,72 flags=0x100
+encounter 31 enemies=EMPUSA_048,EMPUSA_048,EMPUSA_048 flags=0x100
 
-encounter 32 enemies=74,40,74 flags=0x100
+encounter 32 enemies=ALP,COCKATRICE_028,ALP flags=0x100
 
-encounter 33 enemies=0,88 flags=0x5050100
+encounter 33 enemies=0,MOU_RYO flags=0x5050100
 
-encounter 34 enemies=88,88 flags=0x5050100
+encounter 34 enemies=MOU_RYO,MOU_RYO flags=0x5050100
 
-encounter 35 enemies=88,88,88 flags=0x5050100
+encounter 35 enemies=MOU_RYO,MOU_RYO,MOU_RYO flags=0x5050100
 
-encounter 36 enemies=51,51,51,51,51 flags=0x3050000
+encounter 36 enemies=BLOB,BLOB,BLOB,BLOB,BLOB flags=0x3050000
 
-encounter 37 enemies=90,90,90,90 flags=0x3050000
+encounter 37 enemies=GHOUL_05A,GHOUL_05A,GHOUL_05A,GHOUL_05A flags=0x3050000
 
-encounter 38 enemies=28 flags=0x2000
+encounter 38 enemies=BADB_CATHA_01C flags=0x2000
 
-encounter 39 enemies=28,28 flags=0x32000
+encounter 39 enemies=BADB_CATHA_01C,BADB_CATHA_01C flags=0x32000
 
-encounter 40 enemies=28,28,28 flags=0x3002000
+encounter 40 enemies=BADB_CATHA_01C,BADB_CATHA_01C,BADB_CATHA_01C flags=0x3002000
 
-encounter 41 enemies=46
+encounter 41 enemies=BAPHOMET_02E
 
-encounter 42 enemies=55
+encounter 42 enemies=LILIM_037
 
-encounter 43 enemies=55,55
+encounter 43 enemies=LILIM_037,LILIM_037
 
-encounter 44 enemies=55,55,55
+encounter 44 enemies=LILIM_037,LILIM_037,LILIM_037
 
-encounter 45 enemies=54,54
+encounter 45 enemies=JACK_FROST_036,JACK_FROST_036
 
-encounter 46 enemies=54,54,54
+encounter 46 enemies=JACK_FROST_036,JACK_FROST_036,JACK_FROST_036
 
-encounter 47 enemies=54,54,54,54 flags=0x4
+encounter 47 enemies=JACK_FROST_036,JACK_FROST_036,JACK_FROST_036,JACK_FROST_036 flags=0x4
 
-encounter 48 enemies=54,54,54,54,54 flags=0x4
+encounter 48 enemies=JACK_FROST_036,JACK_FROST_036,JACK_FROST_036,JACK_FROST_036,JACK_FROST_036 flags=0x4
 
-encounter 49 enemies=70
+encounter 49 enemies=SHIISAA
 
-encounter 50 enemies=70,70
+encounter 50 enemies=SHIISAA,SHIISAA
 
-encounter 51 enemies=70,70,70
+encounter 51 enemies=SHIISAA,SHIISAA,SHIISAA
 
-encounter 52 enemies=70,70,70,70,70
+encounter 52 enemies=SHIISAA,SHIISAA,SHIISAA,SHIISAA,SHIISAA
 
-encounter 53 enemies=38
+encounter 53 enemies=NOZUCHI
 
-encounter 54 enemies=38,38
+encounter 54 enemies=NOZUCHI,NOZUCHI
 
-encounter 55 enemies=38,38,38,38
+encounter 55 enemies=NOZUCHI,NOZUCHI,NOZUCHI,NOZUCHI
 
-encounter 56 enemies=87 backgrounds=224,3
+encounter 56 enemies=GYU_KI_057 backgrounds=224,3
 
-encounter 57 enemies=24
+encounter 57 enemies=MACHA_018
 
-encounter 58 enemies=24,24
+encounter 58 enemies=MACHA_018,MACHA_018
 
-encounter 59 enemies=24,24,24
+encounter 59 enemies=MACHA_018,MACHA_018,MACHA_018
 
-encounter 60 enemies=46,46
+encounter 60 enemies=BAPHOMET_02E,BAPHOMET_02E
 
-encounter 61 enemies=46,82,46
+encounter 61 enemies=BAPHOMET_02E,TURDAK_052,BAPHOMET_02E
 
-encounter 62 enemies=21
+encounter 62 enemies=BLACK_OOZE
 
-encounter 63 enemies=74,72,88 flags=0x100
+encounter 63 enemies=ALP,EMPUSA_048,MOU_RYO flags=0x100
 
-encounter 64 enemies=74,72,72,88 flags=0x100
+encounter 64 enemies=ALP,EMPUSA_048,EMPUSA_048,MOU_RYO flags=0x100
 
-encounter 65 enemies=56,102 flags=0x100
+encounter 65 enemies=SLIME,PRETA flags=0x100
 
-encounter 66 enemies=56,56,102 flags=0x100
+encounter 66 enemies=SLIME,SLIME,PRETA flags=0x100
 
-encounter 67 enemies=56,56,102,102 flags=0x100
+encounter 67 enemies=SLIME,SLIME,PRETA,PRETA flags=0x100
 
-encounter 68 enemies=56,72,56 flags=0x100
+encounter 68 enemies=SLIME,EMPUSA_048,SLIME flags=0x100
 
-encounter 69 enemies=102,90,90,102
+encounter 69 enemies=PRETA,GHOUL_05A,GHOUL_05A,PRETA
 
-encounter 70 enemies=102,89,102
+encounter 70 enemies=PRETA,YAKA,PRETA
 
-encounter 71 enemies=102,102,89,102,102
+encounter 71 enemies=PRETA,PRETA,YAKA,PRETA,PRETA
 
-encounter 72 enemies=52,52
+encounter 72 enemies=APSARAS,APSARAS
 
-encounter 73 enemies=52,52,52
+encounter 73 enemies=APSARAS,APSARAS,APSARAS
 
-encounter 74 enemies=85 flags=0x30000
+encounter 74 enemies=IKUSA_055 flags=0x30000
 
-encounter 75 enemies=85,85 flags=0x30000
+encounter 75 enemies=IKUSA_055,IKUSA_055 flags=0x30000
 
-encounter 76 enemies=85,85,85 flags=0x30004
+encounter 76 enemies=IKUSA_055,IKUSA_055,IKUSA_055 flags=0x30004
 
-encounter 77 enemies=51,68,51
+encounter 77 enemies=BLOB,NEKOMATA,BLOB
 
-encounter 78 enemies=85,85,85,85 flags=0x4
+encounter 78 enemies=IKUSA_055,IKUSA_055,IKUSA_055,IKUSA_055 flags=0x4
 
-encounter 79 enemies=68,85,68
+encounter 79 enemies=NEKOMATA,IKUSA_055,NEKOMATA
 
-encounter 80 enemies=100
+encounter 80 enemies=APIS_064
 
-encounter 81 enemies=100,100
+encounter 81 enemies=APIS_064,APIS_064
 
-encounter 82 enemies=100,100,100
+encounter 82 enemies=APIS_064,APIS_064,APIS_064
 
-encounter 83 enemies=68,85,85,68
+encounter 83 enemies=NEKOMATA,IKUSA_055,IKUSA_055,NEKOMATA
 
-encounter 84 enemies=28,27,28 flags=0x30000
+encounter 84 enemies=BADB_CATHA_01C,ARCHANGEL_01B,BADB_CATHA_01C flags=0x30000
 
-encounter 85 enemies=71,27,71
+encounter 85 enemies=BICORN_047,ARCHANGEL_01B,BICORN_047
 
-encounter 86 enemies=68
+encounter 86 enemies=NEKOMATA
 
-encounter 87 enemies=68,68
+encounter 87 enemies=NEKOMATA,NEKOMATA
 
-encounter 88 enemies=68,68,68
+encounter 88 enemies=NEKOMATA,NEKOMATA,NEKOMATA
 
-encounter 89 enemies=85,100,85
+encounter 89 enemies=IKUSA_055,APIS_064,IKUSA_055
 
-encounter 90 enemies=28,71,28 flags=0x30000
+encounter 90 enemies=BADB_CATHA_01C,BICORN_047,BADB_CATHA_01C flags=0x30000
 
-encounter 91 enemies=27,100,27
+encounter 91 enemies=ARCHANGEL_01B,APIS_064,ARCHANGEL_01B
 
-encounter 92 enemies=100,85,100
+encounter 92 enemies=APIS_064,IKUSA_055,APIS_064
 
-encounter 93 enemies=47,47
+encounter 93 enemies=SUCCUBUS,SUCCUBUS
 
-encounter 94 enemies=47,47,47
+encounter 94 enemies=SUCCUBUS,SUCCUBUS,SUCCUBUS
 
-encounter 95 enemies=100,47,100
+encounter 95 enemies=APIS_064,SUCCUBUS,APIS_064
 
-encounter 96 enemies=56
+encounter 96 enemies=SLIME
 
-encounter 97 enemies=56,56 flags=0x100
+encounter 97 enemies=SLIME,SLIME flags=0x100
 
-encounter 98 enemies=56,56,56 flags=0x100
+encounter 98 enemies=SLIME,SLIME,SLIME flags=0x100
 
-encounter 99 enemies=56,56,56,56 flags=0x100
+encounter 99 enemies=SLIME,SLIME,SLIME,SLIME flags=0x100
 
-encounter 100 enemies=71
+encounter 100 enemies=BICORN_047
 
-encounter 101 enemies=71,71
+encounter 101 enemies=BICORN_047,BICORN_047
 
-encounter 102 enemies=71,71,71
+encounter 102 enemies=BICORN_047,BICORN_047,BICORN_047
 
-encounter 103 enemies=72,89,72
+encounter 103 enemies=EMPUSA_048,YAKA,EMPUSA_048
 
-encounter 104 enemies=38,89,38
+encounter 104 enemies=NOZUCHI,YAKA,NOZUCHI
 
-encounter 105 enemies=88,88,72,88,88
+encounter 105 enemies=MOU_RYO,MOU_RYO,EMPUSA_048,MOU_RYO,MOU_RYO
 
-encounter 106 enemies=70,70,70,70
+encounter 106 enemies=SHIISAA,SHIISAA,SHIISAA,SHIISAA
 
-encounter 107 enemies=38,38,38
+encounter 107 enemies=NOZUCHI,NOZUCHI,NOZUCHI
 
-encounter 108 enemies=51,89,51
+encounter 108 enemies=BLOB,YAKA,BLOB
 
-encounter 109 enemies=51,40,51
+encounter 109 enemies=BLOB,COCKATRICE_028,BLOB
 
-encounter 110 enemies=90,40,90
+encounter 110 enemies=GHOUL_05A,COCKATRICE_028,GHOUL_05A
 
-encounter 111 enemies=38,90,38
+encounter 111 enemies=NOZUCHI,GHOUL_05A,NOZUCHI
 
-encounter 112 enemies=56,12,56
+encounter 112 enemies=SLIME,OKUNINUSHI,SLIME
 
-encounter 113 enemies=27
+encounter 113 enemies=ARCHANGEL_01B
 
-encounter 114 enemies=27,27
+encounter 114 enemies=ARCHANGEL_01B,ARCHANGEL_01B
 
-encounter 115 enemies=27,27,27
+encounter 115 enemies=ARCHANGEL_01B,ARCHANGEL_01B,ARCHANGEL_01B
 
-encounter 116 enemies=14
+encounter 116 enemies=VALKYRIE_00E
 
-encounter 117 enemies=14,14
+encounter 117 enemies=VALKYRIE_00E,VALKYRIE_00E
 
-encounter 118 enemies=14,14,14
+encounter 118 enemies=VALKYRIE_00E,VALKYRIE_00E,VALKYRIE_00E
 
-encounter 119 enemies=39
+encounter 119 enemies=TAN_KI
 
-encounter 120 enemies=69
+encounter 120 enemies=KELPIE_045
 
-encounter 121 enemies=69,69
+encounter 121 enemies=KELPIE_045,KELPIE_045
 
-encounter 122 enemies=69,69,69
+encounter 122 enemies=KELPIE_045,KELPIE_045,KELPIE_045
 
-encounter 123 enemies=82
+encounter 123 enemies=TURDAK_052
 
-encounter 124 enemies=82,82
+encounter 124 enemies=TURDAK_052,TURDAK_052
 
-encounter 125 enemies=82,82,82
+encounter 125 enemies=TURDAK_052,TURDAK_052,TURDAK_052
 
-encounter 126 enemies=47,14,68
+encounter 126 enemies=SUCCUBUS,VALKYRIE_00E,NEKOMATA
 
-encounter 127 enemies=14,82,47
+encounter 127 enemies=VALKYRIE_00E,TURDAK_052,SUCCUBUS
 
-encounter 128 enemies=69,14,69
+encounter 128 enemies=KELPIE_045,VALKYRIE_00E,KELPIE_045
 
-encounter 129 enemies=68,14,68
+encounter 129 enemies=NEKOMATA,VALKYRIE_00E,NEKOMATA
 
-encounter 130 enemies=47,14,47
+encounter 130 enemies=SUCCUBUS,VALKYRIE_00E,SUCCUBUS
 
-encounter 131 enemies=49
+encounter 131 enemies=ONKOT_031
 
-encounter 132 enemies=49,49
+encounter 132 enemies=ONKOT_031,ONKOT_031
 
-encounter 133 enemies=49,49,49
+encounter 133 enemies=ONKOT_031,ONKOT_031,ONKOT_031
 
-encounter 134 enemies=49,49,49,49
+encounter 134 enemies=ONKOT_031,ONKOT_031,ONKOT_031,ONKOT_031
 
-encounter 135 enemies=69,47,69
+encounter 135 enemies=KELPIE_045,SUCCUBUS,KELPIE_045
 
-encounter 136 enemies=68,82,68
+encounter 136 enemies=NEKOMATA,TURDAK_052,NEKOMATA
 
-encounter 137 enemies=64
+encounter 137 enemies=NUE_040
 
-encounter 138 enemies=64,64
+encounter 138 enemies=NUE_040,NUE_040
 
-encounter 139 enemies=64,64,64
+encounter 139 enemies=NUE_040,NUE_040,NUE_040
 
-encounter 140 enemies=64,69,64
+encounter 140 enemies=NUE_040,KELPIE_045,NUE_040
 
-encounter 141 enemies=80,80
+encounter 141 enemies=PHANTOM,PHANTOM
 
-encounter 142 enemies=80,80,80
+encounter 142 enemies=PHANTOM,PHANTOM,PHANTOM
 
-encounter 143 enemies=80,80,80,80 flags=0x4
+encounter 143 enemies=PHANTOM,PHANTOM,PHANTOM,PHANTOM flags=0x4
 
-encounter 144 enemies=80,80,80,80,80 flags=0x4
+encounter 144 enemies=PHANTOM,PHANTOM,PHANTOM,PHANTOM,PHANTOM flags=0x4
 
-encounter 145 enemies=65
+encounter 145 enemies=CAI_ZHI
 
-encounter 146 enemies=65,65
+encounter 146 enemies=CAI_ZHI,CAI_ZHI
 
-encounter 147 enemies=65,65,65
+encounter 147 enemies=CAI_ZHI,CAI_ZHI,CAI_ZHI
 
-encounter 148 enemies=65,65,65,65
+encounter 148 enemies=CAI_ZHI,CAI_ZHI,CAI_ZHI,CAI_ZHI
 
-encounter 149 enemies=15
+encounter 149 enemies=ATAVAKA_00F
 
-encounter 150 enemies=15,15
+encounter 150 enemies=ATAVAKA_00F,ATAVAKA_00F
 
-encounter 151 enemies=78,15,78
+encounter 151 enemies=PURSKI,ATAVAKA_00F,PURSKI
 
-encounter 152 enemies=22 flags=0x1000
+encounter 152 enemies=GURR flags=0x1000
 
-encounter 153 enemies=22,22 flags=0x1000
+encounter 153 enemies=GURR,GURR flags=0x1000
 
-encounter 154 enemies=22,22,22 flags=0x1000
+encounter 154 enemies=GURR,GURR,GURR flags=0x1000
 
-encounter 155 enemies=73
+encounter 155 enemies=ISORA
 
-encounter 156 enemies=73,73
+encounter 156 enemies=ISORA,ISORA
 
-encounter 157 enemies=73,73,73
+encounter 157 enemies=ISORA,ISORA,ISORA
 
-encounter 158 enemies=80
+encounter 158 enemies=PHANTOM
 
-encounter 159 enemies=93,93
+encounter 159 enemies=NAGA,NAGA
 
-encounter 160 enemies=93,93,93
+encounter 160 enemies=NAGA,NAGA,NAGA
 
-encounter 161 enemies=58
+encounter 161 enemies=TAOWN
 
-encounter 162 enemies=80,93,80
+encounter 162 enemies=PHANTOM,NAGA,PHANTOM
 
-encounter 163 enemies=80,93,93,80
+encounter 163 enemies=PHANTOM,NAGA,NAGA,PHANTOM
 
-encounter 164 enemies=73,93,73
+encounter 164 enemies=ISORA,NAGA,ISORA
 
-encounter 165 enemies=86
+encounter 165 enemies=CHATTERSKULL
 
-encounter 166 enemies=80,86,80
+encounter 166 enemies=PHANTOM,CHATTERSKULL,PHANTOM
 
-encounter 167 enemies=58,58
+encounter 167 enemies=TAOWN,TAOWN
 
-encounter 168 enemies=64,47,64
+encounter 168 enemies=NUE_040,SUCCUBUS,NUE_040
 
-encounter 169 enemies=58,58,58
+encounter 169 enemies=TAOWN,TAOWN,TAOWN
 
-encounter 170 enemies=86,86
+encounter 170 enemies=CHATTERSKULL,CHATTERSKULL
 
-encounter 171 enemies=86,86,86
+encounter 171 enemies=CHATTERSKULL,CHATTERSKULL,CHATTERSKULL
 
-encounter 172 enemies=86,86,86,86
+encounter 172 enemies=CHATTERSKULL,CHATTERSKULL,CHATTERSKULL,CHATTERSKULL
 
-encounter 173 enemies=86,86,86,86,86
+encounter 173 enemies=CHATTERSKULL,CHATTERSKULL,CHATTERSKULL,CHATTERSKULL,CHATTERSKULL
 
-encounter 174 enemies=49,84,49
+encounter 174 enemies=ONKOT_031,FOMOR_054,ONKOT_031
 
-encounter 175 enemies=52,84,52
+encounter 175 enemies=APSARAS,FOMOR_054,APSARAS
 
-encounter 176 enemies=54 flags=0x30000
+encounter 176 enemies=JACK_FROST_036 flags=0x30000
 
-encounter 177 enemies=50,48,50
+encounter 177 enemies=PYRO_JACK_032,JINN_030,PYRO_JACK_032
 
-encounter 178 enemies=50,50
+encounter 178 enemies=PYRO_JACK_032,PYRO_JACK_032
 
-encounter 179 enemies=50,50,50
+encounter 179 enemies=PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032
 
-encounter 180 enemies=50,50,50,50 flags=0x4
+encounter 180 enemies=PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032 flags=0x4
 
-encounter 181 enemies=50,50,50,50,50 flags=0x4
+encounter 181 enemies=PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032,PYRO_JACK_032 flags=0x4
 
-encounter 182 enemies=66
+encounter 182 enemies=UNICORN_042
 
-encounter 183 enemies=66,66
+encounter 183 enemies=UNICORN_042,UNICORN_042
 
-encounter 184 enemies=66,66,66
+encounter 184 enemies=UNICORN_042,UNICORN_042,UNICORN_042
 
-encounter 185 enemies=84
+encounter 185 enemies=FOMOR_054
 
-encounter 186 enemies=84,84
+encounter 186 enemies=FOMOR_054,FOMOR_054
 
-encounter 187 enemies=84,84,84
+encounter 187 enemies=FOMOR_054,FOMOR_054,FOMOR_054
 
-encounter 188 enemies=23
+encounter 188 enemies=VIRTUE
 
-encounter 189 enemies=23,23
+encounter 189 enemies=VIRTUE,VIRTUE
 
-encounter 190 enemies=23,23,23
+encounter 190 enemies=VIRTUE,VIRTUE,VIRTUE
 
-encounter 191 enemies=48
+encounter 191 enemies=JINN_030
 
-encounter 192 enemies=48,48
+encounter 192 enemies=JINN_030,JINN_030
 
-encounter 193 enemies=48,48,48
+encounter 193 enemies=JINN_030,JINN_030,JINN_030
 
-encounter 194 enemies=63
+encounter 194 enemies=THOTH
 
-encounter 195 enemies=63,63
+encounter 195 enemies=THOTH,THOTH
 
-encounter 196 enemies=63,63,63
+encounter 196 enemies=THOTH,THOTH,THOTH
 
-encounter 197 enemies=45
+encounter 197 enemies=CU_CHULAINN_02D
 
-encounter 198 enemies=45,45
+encounter 198 enemies=CU_CHULAINN_02D,CU_CHULAINN_02D
 
-encounter 199 enemies=25,25,25
+encounter 199 enemies=PRINCIPALITY,PRINCIPALITY,PRINCIPALITY
 
-encounter 200 enemies=25,23,25
+encounter 200 enemies=PRINCIPALITY,VIRTUE,PRINCIPALITY
 
-encounter 201 enemies=50,63
+encounter 201 enemies=PYRO_JACK_032,THOTH
 
-encounter 202 enemies=23,25,23
+encounter 202 enemies=VIRTUE,PRINCIPALITY,VIRTUE
 
-encounter 203 enemies=66,45,66
+encounter 203 enemies=UNICORN_042,CU_CHULAINN_02D,UNICORN_042
 
-encounter 204 enemies=63,45,63
+encounter 204 enemies=THOTH,CU_CHULAINN_02D,THOTH
 
-encounter 205 enemies=62,62 flags=0xa040000
+encounter 205 enemies=RAIJU,RAIJU flags=0xa040000
 
-encounter 206 enemies=62,62,62 flags=0xa040000
+encounter 206 enemies=RAIJU,RAIJU,RAIJU flags=0xa040000
 
-encounter 207 enemies=62,62,62,62 flags=0xa040000
+encounter 207 enemies=RAIJU,RAIJU,RAIJU,RAIJU flags=0xa040000
 
-encounter 208 enemies=62,78,62
+encounter 208 enemies=RAIJU,PURSKI,RAIJU
 
-encounter 209 enemies=78
+encounter 209 enemies=PURSKI
 
-encounter 210 enemies=78,78
+encounter 210 enemies=PURSKI,PURSKI
 
-encounter 211 enemies=78,78,78
+encounter 211 enemies=PURSKI,PURSKI,PURSKI
 
-encounter 212 enemies=44
+encounter 212 enemies=QUEEN_MAB
 
-encounter 213 enemies=44,44
+encounter 213 enemies=QUEEN_MAB,QUEEN_MAB
 
-encounter 214 enemies=44,44,44
+encounter 214 enemies=QUEEN_MAB,QUEEN_MAB,QUEEN_MAB
 
-encounter 215 enemies=53,53 flags=0x3000000
+encounter 215 enemies=HIGH_PIXIE,HIGH_PIXIE flags=0x3000000
 
-encounter 216 enemies=53,53,53 flags=0x3000000
+encounter 216 enemies=HIGH_PIXIE,HIGH_PIXIE,HIGH_PIXIE flags=0x3000000
 
-encounter 217 enemies=53,53,53,53 flags=0x3000000
+encounter 217 enemies=HIGH_PIXIE,HIGH_PIXIE,HIGH_PIXIE,HIGH_PIXIE flags=0x3000000
 
-encounter 218 enemies=15
+encounter 218 enemies=ATAVAKA_00F
 
-encounter 219 enemies=15,15
+encounter 219 enemies=ATAVAKA_00F,ATAVAKA_00F
 
-encounter 220 enemies=38,90,90,38
+encounter 220 enemies=NOZUCHI,GHOUL_05A,GHOUL_05A,NOZUCHI
 
-encounter 221 enemies=30
+encounter 221 enemies=GORGON
 
-encounter 222 enemies=30,30
+encounter 222 enemies=GORGON,GORGON
 
-encounter 223 enemies=30,30,30
+encounter 223 enemies=GORGON,GORGON,GORGON
 
-encounter 224 enemies=62,30,62 flags=0xa030000
+encounter 224 enemies=RAIJU,GORGON,RAIJU flags=0xa030000
 
-encounter 225 enemies=4
+encounter 225 enemies=SATI
 
-encounter 226 enemies=4,4
+encounter 226 enemies=SATI,SATI
 
-encounter 227 enemies=4,4,4
+encounter 227 enemies=SATI,SATI,SATI
 
-encounter 228 enemies=32,32
+encounter 228 enemies=YURLUNGUR,YURLUNGUR
 
-encounter 229 enemies=24,89,24
+encounter 229 enemies=MACHA_018,YAKA,MACHA_018
 
-encounter 230 enemies=51,24,51
+encounter 230 enemies=BLOB,MACHA_018,BLOB
 
-encounter 231 enemies=32,4,32
+encounter 231 enemies=YURLUNGUR,SATI,YURLUNGUR
 
-encounter 232 enemies=13
+encounter 232 enemies=HANUMAN
 
-encounter 233 enemies=62,13,62 flags=0xa030000
+encounter 233 enemies=RAIJU,HANUMAN,RAIJU flags=0xa030000
 
-encounter 234 enemies=4,13,4
+encounter 234 enemies=SATI,HANUMAN,SATI
 
-encounter 235 enemies=15,13,15
+encounter 235 enemies=ATAVAKA_00F,HANUMAN,ATAVAKA_00F
 
-encounter 236 enemies=77
+encounter 236 enemies=GIRIMEHKALA_04D
 
-encounter 237 enemies=62,77,62 flags=0xa030000
+encounter 237 enemies=RAIJU,GIRIMEHKALA_04D,RAIJU flags=0xa030000
 
-encounter 238 enemies=38,24,38
+encounter 238 enemies=NOZUCHI,MACHA_018,NOZUCHI
 
-encounter 239 enemies=53,44,53 flags=0x3000000
+encounter 239 enemies=HIGH_PIXIE,QUEEN_MAB,HIGH_PIXIE flags=0x3000000
 
-encounter 240 enemies=44,13,15
+encounter 240 enemies=QUEEN_MAB,HANUMAN,ATAVAKA_00F
 
-encounter 241 enemies=73,37
+encounter 241 enemies=ISORA,MIZUCHI
 
-encounter 242 enemies=73,37,73
+encounter 242 enemies=ISORA,MIZUCHI,ISORA
 
-encounter 243 enemies=37,37
+encounter 243 enemies=MIZUCHI,MIZUCHI
 
-encounter 244 enemies=37,37,37
+encounter 244 enemies=MIZUCHI,MIZUCHI,MIZUCHI
 
-encounter 245 enemies=17
+encounter 245 enemies=KARASU
 
-encounter 246 enemies=17,17
+encounter 246 enemies=KARASU,KARASU
 
-encounter 247 enemies=17,17,17
+encounter 247 enemies=KARASU,KARASU,KARASU
 
-encounter 248 enemies=41
+encounter 248 enemies=DECARABIA
 
-encounter 249 enemies=41,41
+encounter 249 enemies=DECARABIA,DECARABIA
 
-encounter 250 enemies=41,41,41
+encounter 250 enemies=DECARABIA,DECARABIA,DECARABIA
 
-encounter 251 enemies=41,41,41,41
+encounter 251 enemies=DECARABIA,DECARABIA,DECARABIA,DECARABIA
 
-encounter 252 enemies=67 flags=0x1000
+encounter 252 enemies=MOTHMAN flags=0x1000
 
-encounter 253 enemies=41,67,41
+encounter 253 enemies=DECARABIA,MOTHMAN,DECARABIA
 
-encounter 254 enemies=41,17,41
+encounter 254 enemies=DECARABIA,KARASU,DECARABIA
 
-encounter 255 enemies=94,95,96,97
+encounter 255 enemies=SAKI_MITAMA,KUSI_MITAMA,NIGI_MITAMA,ARA_MITAMA
 
 encounter 256 voice=1 backgrounds=222,2 flags=0x50d bgm=3
 
-encounter 257 voice=1 enemies=284,284 backgrounds=222,3 flags=0x50d bgm=5
+encounter 257 voice=1 enemies=GHOUL_11C,GHOUL_11C backgrounds=222,3 flags=0x50d bgm=5
 
-encounter 258 voice=1 enemies=257 backgrounds=222,4 flags=0x50d bgm=4 event=901
+encounter 258 voice=1 enemies=HAYAGRIVA backgrounds=222,4 flags=0x50d bgm=4 event=901
 
-encounter 259 voice=1 enemies=0,258 backgrounds=223,4 flags=0x50b bgm=4 event=902
+encounter 259 voice=1 enemies=0,CAMAZOTZ_102 backgrounds=223,4 flags=0x50b bgm=4 event=902
 
-encounter 260 voice=1 next=284 enemies=299,299,299,299 backgrounds=224,4 flags=0xa00050b bgm=3
+encounter 260 voice=1 next=284 enemies=IKUSA_12B,IKUSA_12B,IKUSA_12B,IKUSA_12B backgrounds=224,4 flags=0xa00050b bgm=3
 
-encounter 261 voice=1 enemies=0,261 backgrounds=224,5 flags=0x50d bgm=6 event=903
+encounter 261 voice=1 enemies=0,USAS backgrounds=224,5 flags=0x50d bgm=6 event=903
 
-encounter 262 voice=1 enemies=0,259 backgrounds=223,4 flags=0x203050b bgm=4 event=904
+encounter 262 voice=1 enemies=0,CAMAZOTZ_103 backgrounds=223,4 flags=0x203050b bgm=4 event=904
 
-encounter 263 voice=1 enemies=262 backgrounds=225,5 flags=0xd0b bgm=6 event=905
+encounter 263 voice=1 enemies=AGNI_106 backgrounds=225,5 flags=0xd0b bgm=6 event=905
 
-encounter 264 voice=1 enemies=264,263 backgrounds=225,6 flags=0x50d bgm=4 event=906
+encounter 264 voice=1 enemies=RAHU_BODY,RAHU_HEAD backgrounds=225,6 flags=0x50d bgm=4 event=906
 
-encounter 265 voice=1 enemies=260 backgrounds=226,3 flags=0x50b bgm=4 event=907
+encounter 265 voice=1 enemies=CAMAZOTZ_104 backgrounds=226,3 flags=0x50b bgm=4 event=907
 
-encounter 266 voice=1 enemies=266,302,303 backgrounds=227,4 flags=0x50d bgm=6 event=908
+encounter 266 voice=1 enemies=CERBERUS_R,CERBERUS_C,CERBERUS_L backgrounds=227,4 flags=0x50d bgm=6 event=908
 
-encounter 267 voice=1 enemies=270,270,270,270,270,270 backgrounds=228,6 flags=0x450d bgm=4 event=909
+encounter 267 voice=1 enemies=RAVANA_10E,RAVANA_10E,RAVANA_10E,RAVANA_10E,RAVANA_10E,RAVANA_10E backgrounds=228,6 flags=0x450d bgm=4 event=909
 
-encounter 268 voice=1 enemies=276,276 backgrounds=230,6 flags=0x50d bgm=4 event=916
+encounter 268 voice=1 enemies=TEMPLE_GUARD_114,TEMPLE_GUARD_114 backgrounds=230,6 flags=0x50d bgm=4 event=916
 
-encounter 269 voice=1 enemies=281 backgrounds=230,10 flags=0x450d bgm=7 event=911
+encounter 269 voice=1 enemies=HARIHARA_119 backgrounds=230,10 flags=0x450d bgm=7 event=911
 
-encounter 270 voice=1 enemies=317,318,321,283,320,319,322 backgrounds=230,11 flags=0xc50d bgm=8 event=912
+encounter 270 voice=1 enemies=FIRE_CORE,WATER_CORE,EARTH_CORE,HARIHARA_11B,WIND_CORE,ELEC_CORE,GOLD_CORE backgrounds=230,11 flags=0xc50d bgm=8 event=912
 
-encounter 271 voice=1 enemies=286 backgrounds=222,2 flags=0x50b bgm=3
+encounter 271 voice=1 enemies=COCKATRICE_11E backgrounds=222,2 flags=0x50b bgm=3
 
-encounter 272 voice=1 enemies=287,287 backgrounds=222,1 flags=0x50b bgm=3
+encounter 272 voice=1 enemies=EMPUSA_11F,EMPUSA_11F backgrounds=222,1 flags=0x50b bgm=3
 
-encounter 273 voice=1 enemies=288 backgrounds=224,6 flags=0x50b bgm=3
+encounter 273 voice=1 enemies=TARRASQUE_120 backgrounds=224,6 flags=0x50b bgm=3
 
-encounter 274 voice=1 enemies=291,291,291 backgrounds=223,1 flags=0x70d bgm=3
+encounter 274 voice=1 enemies=MACHA_123,MACHA_123,MACHA_123 backgrounds=223,1 flags=0x70d bgm=3
 
-encounter 275 voice=1 enemies=102,102,89,102,102 backgrounds=223,1 flags=0x50b bgm=3
+encounter 275 voice=1 enemies=PRETA,PRETA,YAKA,PRETA,PRETA backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 276 voice=1 next=326 enemies=89,89,89 backgrounds=223,1 flags=0x50b bgm=3
+encounter 276 voice=1 next=326 enemies=YAKA,YAKA,YAKA backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 277 voice=1 enemies=99,99 backgrounds=222,1 flags=0x50d bgm=5
+encounter 277 voice=1 enemies=ONMORAKI,ONMORAKI backgrounds=222,1 flags=0x50d bgm=5
 
-encounter 278 voice=1 enemies=285,285,269,285,285 backgrounds=228,5 flags=0x1405050d bgm=3
+encounter 278 voice=1 enemies=NIDHOGGR_11D,NIDHOGGR_11D,NIDHOGGR_10D,NIDHOGGR_11D,NIDHOGGR_11D backgrounds=228,5 flags=0x1405050d bgm=3
 
-encounter 279 voice=1 enemies=304 backgrounds=225,5 flags=0xd0d bgm=6 event=914
+encounter 279 voice=1 enemies=AGNI_130 backgrounds=225,5 flags=0xd0d bgm=6 event=914
 
-encounter 280 voice=1 enemies=305,305 backgrounds=224,1 flags=0x50d bgm=3
+encounter 280 voice=1 enemies=ARCHANGEL_131,ARCHANGEL_131 backgrounds=224,1 flags=0x50d bgm=3
 
-encounter 281 voice=1 enemies=329 backgrounds=224,1 flags=0x50d bgm=3
+encounter 281 voice=1 enemies=VALKYRIE_149 backgrounds=224,1 flags=0x50d bgm=3
 
-encounter 282 voice=1 enemies=298,296,298 backgrounds=224,1 flags=0x40b bgm=3
+encounter 282 voice=1 enemies=UZUME_12A,BICORN_128,UZUME_12A backgrounds=224,1 flags=0x40b bgm=3
 
-encounter 283 voice=1 enemies=299,300,299 backgrounds=224,4 flags=0x50d bgm=3
+encounter 283 voice=1 enemies=IKUSA_12B,TURDAK_12C,IKUSA_12B backgrounds=224,4 flags=0x50d bgm=3
 
-encounter 284 voice=1 next=283 enemies=299,299,299,299 backgrounds=224,1 flags=0x50d bgm=3
+encounter 284 voice=1 next=283 enemies=IKUSA_12B,IKUSA_12B,IKUSA_12B,IKUSA_12B backgrounds=224,1 flags=0x50d bgm=3
 
-encounter 285 voice=1 enemies=271 backgrounds=228,6 flags=0x50d bgm=4 event=910
+encounter 285 voice=1 enemies=RAVANA_10F backgrounds=228,6 flags=0x50d bgm=4 event=910
 
-encounter 286 voice=1 enemies=295 backgrounds=223,1 flags=0x50b bgm=3
+encounter 286 voice=1 enemies=APIS_127 backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 287 voice=1 enemies=295,295 backgrounds=223,1 flags=0x50b bgm=3
+encounter 287 voice=1 enemies=APIS_127,APIS_127 backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 288 voice=1 enemies=295,295,295 backgrounds=223,1 flags=0x50d bgm=3
+encounter 288 voice=1 enemies=APIS_127,APIS_127,APIS_127 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 289 voice=1 next=290 enemies=307,307,307 backgrounds=223,1 flags=0x50d bgm=3
+encounter 289 voice=1 next=290 enemies=KELPIE_133,KELPIE_133,KELPIE_133 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 290 voice=1 next=291 enemies=307,307,307 backgrounds=223,1 flags=0x50b bgm=3
+encounter 290 voice=1 next=291 enemies=KELPIE_133,KELPIE_133,KELPIE_133 backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 291 voice=1 next=292 enemies=307,307,307 backgrounds=223,1 flags=0x50d bgm=3
+encounter 291 voice=1 next=292 enemies=KELPIE_133,KELPIE_133,KELPIE_133 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 292 voice=1 enemies=307 backgrounds=223,1 flags=0x50b bgm=3
+encounter 292 voice=1 enemies=KELPIE_133 backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 293 voice=1 next=294 enemies=308,308 backgrounds=223,1 flags=0x50d bgm=3
+encounter 293 voice=1 next=294 enemies=NUE_134,NUE_134 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 294 voice=1 next=295 enemies=308,308,308 backgrounds=223,1 flags=0x50d bgm=3
+encounter 294 voice=1 next=295 enemies=NUE_134,NUE_134,NUE_134 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 295 voice=1 next=296 enemies=308,308,308 backgrounds=223,1 flags=0x50d bgm=3
+encounter 295 voice=1 next=296 enemies=NUE_134,NUE_134,NUE_134 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 296 voice=1 next=297 enemies=308,308,308 backgrounds=223,1 flags=0x50d bgm=3
+encounter 296 voice=1 next=297 enemies=NUE_134,NUE_134,NUE_134 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 297 voice=1 enemies=308 backgrounds=223,1 flags=0x50d bgm=3
+encounter 297 voice=1 enemies=NUE_134 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 298 voice=1 next=299 enemies=309,309 backgrounds=223,1 flags=0x50d bgm=3
+encounter 298 voice=1 next=299 enemies=ONKOT_135,ONKOT_135 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 299 voice=1 next=300 enemies=309,309,309 backgrounds=223,1 flags=0x50d bgm=3
+encounter 299 voice=1 next=300 enemies=ONKOT_135,ONKOT_135,ONKOT_135 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 300 voice=1 enemies=309,309,309,309 backgrounds=223,1 flags=0x50d bgm=3
+encounter 300 voice=1 enemies=ONKOT_135,ONKOT_135,ONKOT_135,ONKOT_135 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 301 voice=1 enemies=309,309,309,309 backgrounds=223,1 flags=0x50d bgm=3
+encounter 301 voice=1 enemies=ONKOT_135,ONKOT_135,ONKOT_135,ONKOT_135 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 302 voice=1 enemies=310 backgrounds=223,1 flags=0x50d bgm=3
+encounter 302 voice=1 enemies=ATAVAKA_136 backgrounds=223,1 flags=0x50d bgm=3
 
-encounter 303 voice=1 enemies=81,81,81 backgrounds=226,1 flags=0x50b bgm=3
+encounter 303 voice=1 enemies=SUI_KI,SUI_KI,SUI_KI backgrounds=226,1 flags=0x50b bgm=3
 
-encounter 304 voice=1 enemies=83,81,79 backgrounds=227,1 flags=0x50d bgm=3
+encounter 304 voice=1 enemies=KIN_KI,SUI_KI,FUU_KI backgrounds=227,1 flags=0x50d bgm=3
 
-encounter 305 voice=1 enemies=81,79 backgrounds=227,1 flags=0x50d bgm=3
+encounter 305 voice=1 enemies=SUI_KI,FUU_KI backgrounds=227,1 flags=0x50d bgm=3
 
-encounter 306 voice=1 enemies=327,328 backgrounds=225,2 flags=0x50d bgm=3
+encounter 306 voice=1 enemies=JACK_FROST_147,PYRO_JACK_148 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 307 voice=1 enemies=93,93,93 backgrounds=226,2 flags=0x50b bgm=3
+encounter 307 voice=1 enemies=NAGA,NAGA,NAGA backgrounds=226,2 flags=0x50b bgm=3
 
-encounter 308 voice=1 enemies=58,58 backgrounds=226,2 flags=0x50b bgm=3
+encounter 308 voice=1 enemies=TAOWN,TAOWN backgrounds=226,2 flags=0x50b bgm=3
 
-encounter 309 voice=1 enemies=86,86,86 backgrounds=226,2 flags=0x50b bgm=3
+encounter 309 voice=1 enemies=CHATTERSKULL,CHATTERSKULL,CHATTERSKULL backgrounds=226,2 flags=0x50b bgm=3
 
-encounter 310 voice=1 enemies=80,22,80 backgrounds=226,2 flags=0x50b bgm=3
+encounter 310 voice=1 enemies=PHANTOM,GURR,PHANTOM backgrounds=226,2 flags=0x50b bgm=3
 
-encounter 311 voice=1 enemies=37,79,37 backgrounds=226,1 flags=0x50d bgm=3
+encounter 311 voice=1 enemies=MIZUCHI,FUU_KI,MIZUCHI backgrounds=226,1 flags=0x50d bgm=3
 
-encounter 312 voice=1 enemies=331,330,316 backgrounds=240,1 flags=0x3050b bgm=13 event=920
+encounter 312 voice=1 enemies=GIRIMEHKALA_14B,CU_CHULAINN_14A,DEMI_FIEND backgrounds=240,1 flags=0x3050b bgm=13 event=920
 
-encounter 313 voice=1 enemies=278 backgrounds=230,8 flags=0x50b bgm=4
+encounter 313 voice=1 enemies=GARUDA_116 backgrounds=230,8 flags=0x50b bgm=4
 
-encounter 314 voice=1 next=313 enemies=279 backgrounds=230,8 flags=0x50d bgm=4
+encounter 314 voice=1 next=313 enemies=JATAYU_117 backgrounds=230,8 flags=0x50d bgm=4
 
-encounter 315 voice=1 enemies=267 backgrounds=228,5 flags=0x50d bgm=3
+encounter 315 voice=1 enemies=CATOBLEPAS_10B backgrounds=228,5 flags=0x50d bgm=3
 
-encounter 316 voice=1 enemies=0,268 backgrounds=228,5 flags=0x403050d bgm=3
+encounter 316 voice=1 enemies=0,ISIS_10C backgrounds=228,5 flags=0x403050d bgm=3
 
-encounter 317 voice=1 enemies=280 backgrounds=230,9 flags=0x50d bgm=6
+encounter 317 voice=1 enemies=ANANTA backgrounds=230,9 flags=0x50d bgm=6
 
-encounter 318 voice=1 enemies=265 backgrounds=228,7 flags=0x50d bgm=4 event=918
+encounter 318 voice=1 enemies=METATRON backgrounds=228,7 flags=0x50d bgm=4 event=918
 
-encounter 319 voice=1 enemies=277 backgrounds=230,7 flags=0x50d bgm=6 event=915
+encounter 319 voice=1 enemies=VASUKI backgrounds=230,7 flags=0x50d bgm=6 event=915
 
-encounter 320 voice=1 enemies=0,311 backgrounds=225,7 flags=0x50d bgm=3
+encounter 320 voice=1 enemies=0,KING_FROST backgrounds=225,7 flags=0x50d bgm=3
 
-encounter 321 voice=1 enemies=286 backgrounds=223,1 flags=0x50b bgm=3
+encounter 321 voice=1 enemies=COCKATRICE_11E backgrounds=223,1 flags=0x50b bgm=3
 
-encounter 322 voice=1 enemies=312 backgrounds=222,2 flags=0x50b bgm=1
+encounter 322 voice=1 enemies=FENG_HUANG backgrounds=222,2 flags=0x50b bgm=1
 
-encounter 323 voice=1 enemies=315 backgrounds=223,2 flags=0x50b bgm=1
+encounter 323 voice=1 enemies=BAIHU backgrounds=223,2 flags=0x50b bgm=1
 
-encounter 324 voice=1 enemies=313 backgrounds=228,1 flags=0x50b bgm=1
+encounter 324 voice=1 enemies=LONG backgrounds=228,1 flags=0x50b bgm=1
 
-encounter 325 voice=1 enemies=314 backgrounds=224,1 flags=0x50b bgm=1
+encounter 325 voice=1 enemies=GUI_XIAN backgrounds=224,1 flags=0x50b bgm=1
 
-encounter 326 voice=1 next=327 enemies=89,89,89,89,89 backgrounds=222,2 flags=0x50d bgm=3
+encounter 326 voice=1 next=327 enemies=YAKA,YAKA,YAKA,YAKA,YAKA backgrounds=222,2 flags=0x50d bgm=3
 
-encounter 327 voice=1 enemies=290 backgrounds=224,3 flags=0x50b bgm=3
+encounter 327 voice=1 enemies=GYU_KI_122 backgrounds=224,3 flags=0x50b bgm=3
 
-encounter 328 voice=1 enemies=30 backgrounds=222,2 flags=0x50d bgm=3
+encounter 328 voice=1 enemies=GORGON backgrounds=222,2 flags=0x50d bgm=3
 
-encounter 329 voice=1 enemies=274 backgrounds=227,5 flags=0x50d bgm=3
+encounter 329 voice=1 enemies=OROCHI backgrounds=227,5 flags=0x50d bgm=3
 
-encounter 330 voice=1 enemies=272 backgrounds=222,5 flags=0x50d bgm=3
+encounter 330 voice=1 enemies=BEELZEBUB_110 backgrounds=222,5 flags=0x50d bgm=3
 
-encounter 331 voice=1 enemies=273 backgrounds=227,6 flags=0x50d bgm=4 event=919
+encounter 331 voice=1 enemies=BEELZEBUB_111 backgrounds=227,6 flags=0x50d bgm=4 event=919
 
-encounter 332 voice=1 enemies=275 backgrounds=230,12 flags=0x50b bgm=6 event=917
+encounter 332 voice=1 enemies=HUANG_LONG backgrounds=230,12 flags=0x50b bgm=6 event=917
 
-encounter 333 voice=1 enemies=340 backgrounds=225,2 flags=0x50d bgm=3
+encounter 333 voice=1 enemies=JACK_FROST_154 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 334 voice=1 enemies=338 backgrounds=225,2 flags=0x50d bgm=3
+encounter 334 voice=1 enemies=JINN_152 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 335 voice=1 enemies=339 backgrounds=225,2 flags=0x50d bgm=3
+encounter 335 voice=1 enemies=FOMOR_153 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 336 voice=1 enemies=337 backgrounds=225,2 flags=0x50d bgm=3
+encounter 336 voice=1 enemies=CU_CHULAINN_151 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 337 voice=1 enemies=336 backgrounds=225,2 flags=0x50d bgm=3
+encounter 337 voice=1 enemies=TITANIA_150 backgrounds=225,2 flags=0x50d bgm=3
 
-encounter 338 voice=1 enemies=87 backgrounds=224,3 flags=0x50b bgm=3
+encounter 338 voice=1 enemies=GYU_KI_057 backgrounds=224,3 flags=0x50b bgm=3
 
-encounter 339 voice=1 enemies=102,90,102 backgrounds=223,1 flags=0x102 bgm=3
+encounter 339 voice=1 enemies=PRETA,GHOUL_05A,PRETA backgrounds=223,1 flags=0x102 bgm=3
 
-encounter 340 voice=1 enemies=276,276 backgrounds=230,14 flags=0x50d bgm=3
+encounter 340 voice=1 enemies=TEMPLE_GUARD_114,TEMPLE_GUARD_114 backgrounds=230,14 flags=0x50d bgm=3
 
 encounter 341 voice=1 backgrounds=222,2 flags=0x50d bgm=3
 
@@ -1022,405 +1022,405 @@ encounter 510 voice=1 backgrounds=222,2 flags=0x50d bgm=3
 
 encounter 511 voice=1 backgrounds=222,2 flags=0x50d bgm=3
 
-encounter 512 next=201 enemies=57 flags=0x2
+encounter 512 next=201 enemies=PIXIE_039 flags=0x2
 
-encounter 513 enemies=39
+encounter 513 enemies=TAN_KI
 
-encounter 514 enemies=57
+encounter 514 enemies=PIXIE_039
 
-encounter 515 next=516 enemies=73 flags=0x2
+encounter 515 next=516 enemies=ISORA flags=0x2
 
-encounter 516 enemies=42
+encounter 516 enemies=FORNEUS
 
-encounter 517 enemies=67,67 flags=0x1000
+encounter 517 enemies=MOTHMAN,MOTHMAN flags=0x1000
 
-encounter 518 enemies=102,102 flags=0x100
+encounter 518 enemies=PRETA,PRETA flags=0x100
 
-encounter 519 enemies=102,102,102 flags=0x100
+encounter 519 enemies=PRETA,PRETA,PRETA flags=0x100
 
-encounter 520 enemies=102,102,102,102 flags=0x100
+encounter 520 enemies=PRETA,PRETA,PRETA,PRETA flags=0x100
 
-encounter 521 enemies=102,102,102,102,102
+encounter 521 enemies=PRETA,PRETA,PRETA,PRETA,PRETA
 
-encounter 522 enemies=51
+encounter 522 enemies=BLOB
 
-encounter 523 enemies=51,51
+encounter 523 enemies=BLOB,BLOB
 
-encounter 524 enemies=51,51,51
+encounter 524 enemies=BLOB,BLOB,BLOB
 
-encounter 525 enemies=51,51,89,51,51
+encounter 525 enemies=BLOB,BLOB,YAKA,BLOB,BLOB
 
-encounter 526 enemies=51,51,51,51
+encounter 526 enemies=BLOB,BLOB,BLOB,BLOB
 
-encounter 527 enemies=51,24,24,51
+encounter 527 enemies=BLOB,MACHA_018,MACHA_018,BLOB
 
-encounter 528 enemies=38,24,24,38
+encounter 528 enemies=NOZUCHI,MACHA_018,MACHA_018,NOZUCHI
 
-encounter 529 enemies=47,71,47
+encounter 529 enemies=SUCCUBUS,BICORN_047,SUCCUBUS
 
-encounter 530 enemies=47,71,71,47
+encounter 530 enemies=SUCCUBUS,BICORN_047,BICORN_047,SUCCUBUS
 
-encounter 531 enemies=47,27,47
+encounter 531 enemies=SUCCUBUS,ARCHANGEL_01B,SUCCUBUS
 
-encounter 532 enemies=64,14,64
+encounter 532 enemies=NUE_040,VALKYRIE_00E,NUE_040
 
-encounter 533 enemies=68,64,47
+encounter 533 enemies=NEKOMATA,NUE_040,SUCCUBUS
 
-encounter 534 enemies=64,82,64
+encounter 534 enemies=NUE_040,TURDAK_052,NUE_040
 
-encounter 535 enemies=64,49,64
+encounter 535 enemies=NUE_040,ONKOT_031,NUE_040
 
-encounter 536 enemies=14,49,82
+encounter 536 enemies=VALKYRIE_00E,ONKOT_031,TURDAK_052
 
-encounter 537 enemies=49,82,49
+encounter 537 enemies=ONKOT_031,TURDAK_052,ONKOT_031
 
-encounter 538 enemies=82,49,82
+encounter 538 enemies=TURDAK_052,ONKOT_031,TURDAK_052
 
-encounter 539 enemies=58,58,58
+encounter 539 enemies=TAOWN,TAOWN,TAOWN
 
-encounter 540 enemies=58,63,58
+encounter 540 enemies=TAOWN,THOTH,TAOWN
 
-encounter 541 enemies=63,63,63
+encounter 541 enemies=THOTH,THOTH,THOTH
 
-encounter 542 enemies=70,63,70
+encounter 542 enemies=SHIISAA,THOTH,SHIISAA
 
-encounter 543 enemies=21,21,21,21
+encounter 543 enemies=BLACK_OOZE,BLACK_OOZE,BLACK_OOZE,BLACK_OOZE
 
-encounter 544 enemies=21,21,21
+encounter 544 enemies=BLACK_OOZE,BLACK_OOZE,BLACK_OOZE
 
-encounter 545 enemies=51,21,51
+encounter 545 enemies=BLOB,BLACK_OOZE,BLOB
 
-encounter 546 enemies=20
+encounter 546 enemies=HORUS
 
-encounter 547 enemies=39
+encounter 547 enemies=TAN_KI
 
-encounter 548 enemies=62,62
+encounter 548 enemies=RAIJU,RAIJU
 
-encounter 549 enemies=62,62,62
+encounter 549 enemies=RAIJU,RAIJU,RAIJU
 
-encounter 550 enemies=55,47,55
+encounter 550 enemies=LILIM_037,SUCCUBUS,LILIM_037
 
-encounter 551 enemies=47,47,47
+encounter 551 enemies=SUCCUBUS,SUCCUBUS,SUCCUBUS
 
-encounter 552 enemies=55,55,55
+encounter 552 enemies=LILIM_037,LILIM_037,LILIM_037
 
-encounter 553 enemies=5,5,5
+encounter 553 enemies=KUSHINADA,KUSHINADA,KUSHINADA
 
-encounter 554 enemies=5,92,5
+encounter 554 enemies=KUSHINADA,KIKURI_HIME,KUSHINADA
 
-encounter 555 enemies=92,5,92
+encounter 555 enemies=KIKURI_HIME,KUSHINADA,KIKURI_HIME
 
-encounter 556 enemies=92,92,92
+encounter 556 enemies=KIKURI_HIME,KIKURI_HIME,KIKURI_HIME
 
-encounter 557 enemies=43,43,43
+encounter 557 enemies=TITANIA_02B,TITANIA_02B,TITANIA_02B
 
-encounter 558 enemies=4,3
+encounter 558 enemies=SATI,PARVATI_003
 
-encounter 559 enemies=4,4,4
+encounter 559 enemies=SATI,SATI,SATI
 
-encounter 560 enemies=3,3,3
+encounter 560 enemies=PARVATI_003,PARVATI_003,PARVATI_003
 
-encounter 561 enemies=4,1,4
+encounter 561 enemies=SATI,LAKSMI,SATI
 
-encounter 562 enemies=1,1,1
+encounter 562 enemies=LAKSMI,LAKSMI,LAKSMI
 
-encounter 563 enemies=2,1
+encounter 563 enemies=ISIS_002,LAKSMI
 
-encounter 564 enemies=2,2,2
+encounter 564 enemies=ISIS_002,ISIS_002,ISIS_002
 
-encounter 565 enemies=325
+encounter 565 enemies=PIXIE_145
 
-encounter 566 enemies=32,32
+encounter 566 enemies=YURLUNGUR,YURLUNGUR
 
-encounter 567 enemies=32,30,32
+encounter 567 enemies=YURLUNGUR,GORGON,YURLUNGUR
 
-encounter 568 enemies=30,30,30
+encounter 568 enemies=GORGON,GORGON,GORGON
 
-encounter 569 enemies=93,30,93
+encounter 569 enemies=NAGA,GORGON,NAGA
 
-encounter 570 enemies=21,30,21
+encounter 570 enemies=BLACK_OOZE,GORGON,BLACK_OOZE
 
-encounter 571 enemies=21,30,30,21
+encounter 571 enemies=BLACK_OOZE,GORGON,GORGON,BLACK_OOZE
 
-encounter 572 enemies=93,93,93
+encounter 572 enemies=NAGA,NAGA,NAGA
 
-encounter 573 enemies=34
+encounter 573 enemies=NIDHOGGR_022
 
-encounter 574 enemies=33 flags=0x2
+encounter 574 enemies=GIRIMEHKALA_021 flags=0x2
 
-encounter 575 enemies=29,29
+encounter 575 enemies=SAMAEL,SAMAEL
 
-encounter 576 enemies=20
+encounter 576 enemies=HORUS
 
-encounter 577 enemies=11,11
+encounter 577 enemies=ARAHABAKI_00B,ARAHABAKI_00B
 
-encounter 578 enemies=61,5,61
+encounter 578 enemies=SENRI,KUSHINADA,SENRI
 
-encounter 579 enemies=61,92,61
+encounter 579 enemies=SENRI,KIKURI_HIME,SENRI
 
-encounter 580 enemies=61,61,61
+encounter 580 enemies=SENRI,SENRI,SENRI
 
-encounter 581 next=575 enemies=32,32
+encounter 581 next=575 enemies=YURLUNGUR,YURLUNGUR
 
-encounter 582 next=575 enemies=32,30,32
+encounter 582 next=575 enemies=YURLUNGUR,GORGON,YURLUNGUR
 
-encounter 583 next=575 enemies=30,30,30
+encounter 583 next=575 enemies=GORGON,GORGON,GORGON
 
-encounter 584 next=575 enemies=93,30,93
+encounter 584 next=575 enemies=NAGA,GORGON,NAGA
 
-encounter 585 next=575 enemies=21,30,21
+encounter 585 next=575 enemies=BLACK_OOZE,GORGON,BLACK_OOZE
 
-encounter 586 next=575 enemies=21,30,30,21
+encounter 586 next=575 enemies=BLACK_OOZE,GORGON,GORGON,BLACK_OOZE
 
-encounter 587 next=575 enemies=93,93,93
+encounter 587 next=575 enemies=NAGA,NAGA,NAGA
 
-encounter 588 next=575 enemies=34
+encounter 588 next=575 enemies=NIDHOGGR_022
 
-encounter 589 next=577 enemies=55,47,55
+encounter 589 next=577 enemies=LILIM_037,SUCCUBUS,LILIM_037
 
-encounter 590 next=577 enemies=47,47,47
+encounter 590 next=577 enemies=SUCCUBUS,SUCCUBUS,SUCCUBUS
 
-encounter 591 next=577 enemies=55,55,55
+encounter 591 next=577 enemies=LILIM_037,LILIM_037,LILIM_037
 
-encounter 592 next=577 enemies=5,5,5
+encounter 592 next=577 enemies=KUSHINADA,KUSHINADA,KUSHINADA
 
-encounter 593 next=577 enemies=5,92,5
+encounter 593 next=577 enemies=KUSHINADA,KIKURI_HIME,KUSHINADA
 
-encounter 594 next=577 enemies=92,5,92
+encounter 594 next=577 enemies=KIKURI_HIME,KUSHINADA,KIKURI_HIME
 
-encounter 595 next=577 enemies=92,92,92
+encounter 595 next=577 enemies=KIKURI_HIME,KIKURI_HIME,KIKURI_HIME
 
-encounter 596 next=577 enemies=43,43,43
+encounter 596 next=577 enemies=TITANIA_02B,TITANIA_02B,TITANIA_02B
 
-encounter 597 next=577 enemies=4,3
+encounter 597 next=577 enemies=SATI,PARVATI_003
 
-encounter 598 next=577 enemies=4,4,4
+encounter 598 next=577 enemies=SATI,SATI,SATI
 
-encounter 599 next=577 enemies=3,3,3
+encounter 599 next=577 enemies=PARVATI_003,PARVATI_003,PARVATI_003
 
-encounter 600 next=577 enemies=4,1,4
+encounter 600 next=577 enemies=SATI,LAKSMI,SATI
 
-encounter 601 next=577 enemies=1,1,1
+encounter 601 next=577 enemies=LAKSMI,LAKSMI,LAKSMI
 
-encounter 602 next=577 enemies=2,1
+encounter 602 next=577 enemies=ISIS_002,LAKSMI
 
-encounter 603 next=577 enemies=2,2,2
+encounter 603 next=577 enemies=ISIS_002,ISIS_002,ISIS_002
 
-encounter 604 enemies=70,58,63,70
+encounter 604 enemies=SHIISAA,TAOWN,THOTH,SHIISAA
 
-encounter 605 enemies=75 flags=0x1000
+encounter 605 enemies=ONGYO_KI flags=0x1000
 
-encounter 606 enemies=50,50,63
+encounter 606 enemies=PYRO_JACK_032,PYRO_JACK_032,THOTH
 
-encounter 607 enemies=48,63
+encounter 607 enemies=JINN_030,THOTH
 
-encounter 608 enemies=48,48,63
+encounter 608 enemies=JINN_030,JINN_030,THOTH
 
-encounter 609 enemies=63,45,63
+encounter 609 enemies=THOTH,CU_CHULAINN_02D,THOTH
 
-encounter 610 enemies=63,45,66
+encounter 610 enemies=THOTH,CU_CHULAINN_02D,UNICORN_042
 
-encounter 611 enemies=25,46
+encounter 611 enemies=PRINCIPALITY,BAPHOMET_02E
 
-encounter 612 enemies=83,81,79
+encounter 612 enemies=KIN_KI,SUI_KI,FUU_KI
 
-encounter 613 enemies=93,79,93
+encounter 613 enemies=NAGA,FUU_KI,NAGA
 
-encounter 614 enemies=30,81,30
+encounter 614 enemies=GORGON,SUI_KI,GORGON
 
-encounter 615 enemies=32,83,32
+encounter 615 enemies=YURLUNGUR,KIN_KI,YURLUNGUR
 
-encounter 616 next=605 enemies=83,81,79
+encounter 616 next=605 enemies=KIN_KI,SUI_KI,FUU_KI
 
-encounter 617 next=575 enemies=93,79,93
+encounter 617 next=575 enemies=NAGA,FUU_KI,NAGA
 
-encounter 618 next=575 enemies=30,81,30
+encounter 618 next=575 enemies=GORGON,SUI_KI,GORGON
 
-encounter 619 next=575 enemies=32,83,32
+encounter 619 next=575 enemies=YURLUNGUR,KIN_KI,YURLUNGUR
 
-encounter 620 enemies=5,7,92
+encounter 620 enemies=KUSHINADA,UZUME_007,KIKURI_HIME
 
-encounter 621 next=577 enemies=325
+encounter 621 next=577 enemies=PIXIE_145
 
-encounter 622 enemies=7,7,7
+encounter 622 enemies=UZUME_007,UZUME_007,UZUME_007
 
-encounter 623 next=577 enemies=7,7,7
+encounter 623 next=577 enemies=UZUME_007,UZUME_007,UZUME_007
 
-encounter 624 next=577 enemies=5,7,92
+encounter 624 next=577 enemies=KUSHINADA,UZUME_007,KIKURI_HIME
 
-encounter 625 enemies=76,76,76
+encounter 625 enemies=SHIKI_OUJI,SHIKI_OUJI,SHIKI_OUJI
 
-encounter 626 enemies=76,12,76
+encounter 626 enemies=SHIKI_OUJI,OKUNINUSHI,SHIKI_OUJI
 
-encounter 627 enemies=10,12,10
+encounter 627 enemies=WU_KONG,OKUNINUSHI,WU_KONG
 
-encounter 628 enemies=10,10,10
+encounter 628 enemies=WU_KONG,WU_KONG,WU_KONG
 
-encounter 629 enemies=70,12,70
+encounter 629 enemies=SHIISAA,OKUNINUSHI,SHIISAA
 
-encounter 630 enemies=65,58,93
+encounter 630 enemies=CAI_ZHI,TAOWN,NAGA
 
-encounter 631 enemies=65,58,65
+encounter 631 enemies=CAI_ZHI,TAOWN,CAI_ZHI
 
-encounter 632 enemies=80,22,80
+encounter 632 enemies=PHANTOM,GURR,PHANTOM
 
-encounter 633 enemies=58,22,58
+encounter 633 enemies=TAOWN,GURR,TAOWN
 
-encounter 634 enemies=86,22,86
+encounter 634 enemies=CHATTERSKULL,GURR,CHATTERSKULL
 
-encounter 635 enemies=65,22,65
+encounter 635 enemies=CAI_ZHI,GURR,CAI_ZHI
 
-encounter 636 enemies=58,22,65
+encounter 636 enemies=TAOWN,GURR,CAI_ZHI
 
-encounter 637 enemies=18
+encounter 637 enemies=HRESVELGR
 
-encounter 638 enemies=67,67,67 flags=0x1000
+encounter 638 enemies=MOTHMAN,MOTHMAN,MOTHMAN flags=0x1000
 
-encounter 639 enemies=41,73,41
+encounter 639 enemies=DECARABIA,ISORA,DECARABIA
 
-encounter 640 enemies=37,17,41
+encounter 640 enemies=MIZUCHI,KARASU,DECARABIA
 
-encounter 641 enemies=37
+encounter 641 enemies=MIZUCHI
 
-encounter 642 enemies=32,30,32
+encounter 642 enemies=YURLUNGUR,GORGON,YURLUNGUR
 
-encounter 643 enemies=16,16
+encounter 643 enemies=RAKSHASA,RAKSHASA
 
-encounter 644 enemies=16,16,16
+encounter 644 enemies=RAKSHASA,RAKSHASA,RAKSHASA
 
-encounter 645 enemies=91
+encounter 645 enemies=TEMPLE_GUARD_05B
 
-encounter 646 enemies=91,91
+encounter 646 enemies=TEMPLE_GUARD_05B,TEMPLE_GUARD_05B
 
-encounter 647 enemies=91,91,91
+encounter 647 enemies=TEMPLE_GUARD_05B,TEMPLE_GUARD_05B,TEMPLE_GUARD_05B
 
-encounter 648 enemies=91,16,91
+encounter 648 enemies=TEMPLE_GUARD_05B,RAKSHASA,TEMPLE_GUARD_05B
 
-encounter 649 enemies=21,21,16,21,21
+encounter 649 enemies=BLACK_OOZE,BLACK_OOZE,RAKSHASA,BLACK_OOZE,BLACK_OOZE
 
-encounter 650 enemies=77,77
+encounter 650 enemies=GIRIMEHKALA_04D,GIRIMEHKALA_04D
 
-encounter 651 enemies=77,13
+encounter 651 enemies=GIRIMEHKALA_04D,HANUMAN
 
-encounter 652 enemies=34,91
+encounter 652 enemies=NIDHOGGR_022,TEMPLE_GUARD_05B
 
-encounter 653 enemies=34
+encounter 653 enemies=NIDHOGGR_022
 
-encounter 654 enemies=8 flags=0x1000
+encounter 654 enemies=PAZUZU flags=0x1000
 
-encounter 655 enemies=8,8 flags=0x1000
+encounter 655 enemies=PAZUZU,PAZUZU flags=0x1000
 
-encounter 656 enemies=19
+encounter 656 enemies=SPARNA
 
-encounter 657 enemies=22,19,22
+encounter 657 enemies=GURR,SPARNA,GURR
 
-encounter 658 enemies=19,8
+encounter 658 enemies=SPARNA,PAZUZU
 
-encounter 659 enemies=19,8,19
+encounter 659 enemies=SPARNA,PAZUZU,SPARNA
 
-encounter 660 enemies=9
+encounter 660 enemies=GANESHA
 
-encounter 661 enemies=43
+encounter 661 enemies=TITANIA_02B
 
-encounter 662 enemies=43,43
+encounter 662 enemies=TITANIA_02B,TITANIA_02B
 
-encounter 663 enemies=8,19,8
+encounter 663 enemies=PAZUZU,SPARNA,PAZUZU
 
-encounter 664 enemies=43,19,43
+encounter 664 enemies=TITANIA_02B,SPARNA,TITANIA_02B
 
-encounter 665 enemies=91,19,91
+encounter 665 enemies=TEMPLE_GUARD_05B,SPARNA,TEMPLE_GUARD_05B
 
-encounter 666 enemies=8,8,8
+encounter 666 enemies=PAZUZU,PAZUZU,PAZUZU
 
-encounter 667 enemies=91,8,91
+encounter 667 enemies=TEMPLE_GUARD_05B,PAZUZU,TEMPLE_GUARD_05B
 
-encounter 668 enemies=59
+encounter 668 enemies=CATOBLEPAS_03B
 
-encounter 669 enemies=3
+encounter 669 enemies=PARVATI_003
 
-encounter 670 enemies=3,9,3
+encounter 670 enemies=PARVATI_003,GANESHA,PARVATI_003
 
-encounter 671 enemies=77,9 flags=0x4
+encounter 671 enemies=GIRIMEHKALA_04D,GANESHA flags=0x4
 
-encounter 672 enemies=9,77
+encounter 672 enemies=GANESHA,GIRIMEHKALA_04D
 
-encounter 673 enemies=91,9,91
+encounter 673 enemies=TEMPLE_GUARD_05B,GANESHA,TEMPLE_GUARD_05B
 
-encounter 674 enemies=91,59,91
+encounter 674 enemies=TEMPLE_GUARD_05B,CATOBLEPAS_03B,TEMPLE_GUARD_05B
 
-encounter 675 enemies=3,3
+encounter 675 enemies=PARVATI_003,PARVATI_003
 
-encounter 676 enemies=3,8,3
+encounter 676 enemies=PARVATI_003,PAZUZU,PARVATI_003
 
-encounter 677 enemies=75,75 flags=0x1000
+encounter 677 enemies=ONGYO_KI,ONGYO_KI flags=0x1000
 
-encounter 678 enemies=2,2
+encounter 678 enemies=ISIS_002,ISIS_002
 
-encounter 679 enemies=1,1
+encounter 679 enemies=LAKSMI,LAKSMI
 
-encounter 680 enemies=91,2,91
+encounter 680 enemies=TEMPLE_GUARD_05B,ISIS_002,TEMPLE_GUARD_05B
 
-encounter 681 enemies=91,1,91
+encounter 681 enemies=TEMPLE_GUARD_05B,LAKSMI,TEMPLE_GUARD_05B
 
-encounter 682 enemies=59,59
+encounter 682 enemies=CATOBLEPAS_03B,CATOBLEPAS_03B
 
-encounter 683 enemies=59,9
+encounter 683 enemies=CATOBLEPAS_03B,GANESHA
 
-encounter 684 enemies=3,59,3
+encounter 684 enemies=PARVATI_003,CATOBLEPAS_03B,PARVATI_003
 
-encounter 685 enemies=59,2
+encounter 685 enemies=CATOBLEPAS_03B,ISIS_002
 
-encounter 686 enemies=3,9,3
+encounter 686 enemies=PARVATI_003,GANESHA,PARVATI_003
 
-encounter 687 enemies=43,3,43
+encounter 687 enemies=TITANIA_02B,PARVATI_003,TITANIA_02B
 
-encounter 688 enemies=3,2,3
+encounter 688 enemies=PARVATI_003,ISIS_002,PARVATI_003
 
-encounter 689 enemies=1,2,3
+encounter 689 enemies=LAKSMI,ISIS_002,PARVATI_003
 
-encounter 690 enemies=75,75,75 flags=0x1000
+encounter 690 enemies=ONGYO_KI,ONGYO_KI,ONGYO_KI flags=0x1000
 
-encounter 691 enemies=9,9
+encounter 691 enemies=GANESHA,GANESHA
 
-encounter 692 enemies=1,9,1
+encounter 692 enemies=LAKSMI,GANESHA,LAKSMI
 
-encounter 693 enemies=19,19 flags=0x1000
+encounter 693 enemies=SPARNA,SPARNA flags=0x1000
 
-encounter 694 enemies=29
+encounter 694 enemies=SAMAEL
 
-encounter 695 enemies=31
+encounter 695 enemies=JATAYU_01F
 
-encounter 696 enemies=26
+encounter 696 enemies=GARUDA_01A
 
-encounter 697 next=649 enemies=21,21,21,21
+encounter 697 next=649 enemies=BLACK_OOZE,BLACK_OOZE,BLACK_OOZE,BLACK_OOZE
 
-encounter 698 enemies=19,19,19 flags=0x1000
+encounter 698 enemies=SPARNA,SPARNA,SPARNA flags=0x1000
 
-encounter 699 enemies=43,9,43
+encounter 699 enemies=TITANIA_02B,GANESHA,TITANIA_02B
 
-encounter 700 enemies=6,6
+encounter 700 enemies=SARASVATI,SARASVATI
 
-encounter 701 enemies=23,6,23
+encounter 701 enemies=VIRTUE,SARASVATI,VIRTUE
 
-encounter 702 enemies=6,45,6
+encounter 702 enemies=SARASVATI,CU_CHULAINN_02D,SARASVATI
 
-encounter 703 enemies=6,63,6
+encounter 703 enemies=SARASVATI,THOTH,SARASVATI
 
-encounter 704 enemies=50,6,50
+encounter 704 enemies=PYRO_JACK_032,SARASVATI,PYRO_JACK_032
 
-encounter 705 enemies=36
+encounter 705 enemies=TARRASQUE_024
 
-encounter 768 enemies=97,97,97 flags=0x50c bgm=1
+encounter 768 enemies=ARA_MITAMA,ARA_MITAMA,ARA_MITAMA flags=0x50c bgm=1
 
-encounter 769 enemies=97,97,97,97 flags=0x50c bgm=1
+encounter 769 enemies=ARA_MITAMA,ARA_MITAMA,ARA_MITAMA,ARA_MITAMA flags=0x50c bgm=1
 
-encounter 770 enemies=96,96,96,96 flags=0x50c bgm=1
+encounter 770 enemies=NIGI_MITAMA,NIGI_MITAMA,NIGI_MITAMA,NIGI_MITAMA flags=0x50c bgm=1
 
-encounter 771 enemies=95,95,95,95 flags=0x50c bgm=1
+encounter 771 enemies=KUSI_MITAMA,KUSI_MITAMA,KUSI_MITAMA,KUSI_MITAMA flags=0x50c bgm=1
 
-encounter 772 enemies=94,94,94 flags=0x50c bgm=1
+encounter 772 enemies=SAKI_MITAMA,SAKI_MITAMA,SAKI_MITAMA flags=0x50c bgm=1
 
-encounter 773 enemies=94,94,94,94 flags=0x50c bgm=1
+encounter 773 enemies=SAKI_MITAMA,SAKI_MITAMA,SAKI_MITAMA,SAKI_MITAMA flags=0x50c bgm=1
 
 encounter 774 flags=0x50c bgm=1
 
@@ -1428,51 +1428,51 @@ encounter 775 flags=0x50c bgm=1
 
 encounter 776 flags=0x50c bgm=1
 
-encounter 777 enemies=341 flags=0x50a bgm=1
+encounter 777 enemies=OMOIKANE_155 flags=0x50a bgm=1
 
-encounter 778 enemies=343,343,343 flags=0x50a bgm=1
+encounter 778 enemies=OMOIKANE_157,OMOIKANE_157,OMOIKANE_157 flags=0x50a bgm=1
 
-encounter 779 enemies=98 flags=0x50a bgm=1
+encounter 779 enemies=OMOIKANE_062 flags=0x50a bgm=1
 
-encounter 780 enemies=98,98 flags=0x50a bgm=1
+encounter 780 enemies=OMOIKANE_062,OMOIKANE_062 flags=0x50a bgm=1
 
-encounter 781 enemies=98,98 flags=0x50a bgm=1
+encounter 781 enemies=OMOIKANE_062,OMOIKANE_062 flags=0x50a bgm=1
 
-encounter 782 enemies=341,341 flags=0x50a bgm=1
+encounter 782 enemies=OMOIKANE_155,OMOIKANE_155 flags=0x50a bgm=1
 
-encounter 783 enemies=341,341,341 flags=0x50a bgm=1
+encounter 783 enemies=OMOIKANE_155,OMOIKANE_155,OMOIKANE_155 flags=0x50a bgm=1
 
-encounter 784 enemies=342 flags=0x50a bgm=1
+encounter 784 enemies=OMOIKANE_156 flags=0x50a bgm=1
 
-encounter 785 enemies=342,342 flags=0x50a bgm=1
+encounter 785 enemies=OMOIKANE_156,OMOIKANE_156 flags=0x50a bgm=1
 
-encounter 786 enemies=342,342,342 flags=0x50a bgm=1
+encounter 786 enemies=OMOIKANE_156,OMOIKANE_156,OMOIKANE_156 flags=0x50a bgm=1
 
-encounter 787 enemies=343 flags=0x50a bgm=1
+encounter 787 enemies=OMOIKANE_157 flags=0x50a bgm=1
 
-encounter 788 enemies=343,343 flags=0x50a bgm=1
+encounter 788 enemies=OMOIKANE_157,OMOIKANE_157 flags=0x50a bgm=1
 
-encounter 789 item=2 item_count=1 enemies=51 flags=0x10a
+encounter 789 item=2 item_count=1 enemies=BLOB flags=0x10a
 
-encounter 790 item=2 item_count=1 enemies=85,85 backgrounds=223,2 flags=0x10a
+encounter 790 item=2 item_count=1 enemies=IKUSA_055,IKUSA_055 backgrounds=223,2 flags=0x10a
 
-encounter 791 item=6 item_count=1 enemies=308,308 backgrounds=224,2 flags=0x10a
+encounter 791 item=6 item_count=1 enemies=NUE_134,NUE_134 backgrounds=224,2 flags=0x10a
 
-encounter 792 item=6 item_count=1 enemies=58,58 backgrounds=225,2 flags=0x10a
+encounter 792 item=6 item_count=1 enemies=TAOWN,TAOWN backgrounds=225,2 flags=0x10a
 
-encounter 793 item=11 item_count=1 enemies=67,67 backgrounds=226,1 flags=0x10a
+encounter 793 item=11 item_count=1 enemies=MOTHMAN,MOTHMAN backgrounds=226,1 flags=0x10a
 
-encounter 794 item=33 item_count=1 enemies=30,30 backgrounds=227,3 flags=0x10a
+encounter 794 item=33 item_count=1 enemies=GORGON,GORGON backgrounds=227,3 flags=0x10a
 
-encounter 795 item=32 item_count=1 enemies=29 backgrounds=230,1 flags=0x10a
+encounter 795 item=32 item_count=1 enemies=SAMAEL backgrounds=230,1 flags=0x10a
 
-encounter 796 item=34 item_count=1 enemies=43,43 backgrounds=228,1 flags=0x10a
+encounter 796 item=34 item_count=1 enemies=TITANIA_02B,TITANIA_02B backgrounds=228,1 flags=0x10a
 
-encounter 797 item=11 item_count=1 enemies=46,46 flags=0x10a
+encounter 797 item=11 item_count=1 enemies=BAPHOMET_02E,BAPHOMET_02E flags=0x10a
 
-encounter 798 item=12 item_count=1 enemies=75,75,75 backgrounds=232,1 flags=0x10a
+encounter 798 item=12 item_count=1 enemies=ONGYO_KI,ONGYO_KI,ONGYO_KI backgrounds=232,1 flags=0x10a
 
-encounter 799 item=10 item_count=1 enemies=76,76,76 backgrounds=233,2 flags=0x10a
+encounter 799 item=10 item_count=1 enemies=SHIKI_OUJI,SHIKI_OUJI,SHIKI_OUJI backgrounds=233,2 flags=0x10a
 
 encounter 800 flags=0x10a
 

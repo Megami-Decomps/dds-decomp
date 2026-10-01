@@ -227,7 +227,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     )
     n.rule(
         "battle_tbl",
-        f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $in $out",
+        f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $context $in $out",
         description="battle table $in",
     )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
@@ -416,6 +416,21 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 source = source.relative_to(ROOT)
                 output = battle_output_dir / f"{source.stem.upper()}.TBL"
                 dependencies = ["tools/battle_tbl.py"]
+                context = ""
+                message_source = source.with_name("msg.tblasm")
+                skill_source = source.with_name("skill.tblasm")
+                unit_source = source.with_name("unit.tblasm")
+                message_dependencies = (
+                    "tools/msg1.py",
+                    "tools/dds1_msg1_chars.tsv",
+                    str(source.with_name("msg-items.msgasm")),
+                    str(source.with_name("msg-skills.msgasm")),
+                    str(source.with_name("msg-status-help.msgasm")),
+                    str(source.with_name("msg-command-help.msgasm")),
+                )
+                if source.stem in {"aicalc", "encount", "unit"}:
+                    dependencies.extend((str(message_source), *message_dependencies))
+                    context = f"--messages {message_source} --skills {skill_source}"
                 if source.stem == "aicalc":
                     dependencies.extend(
                         (
@@ -423,29 +438,26 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                             "tools/flw0_symbolic.py",
                             "tools/flw0_semantic.py",
                             "tools/flw0_profiles.py",
-                            "tools/msg1.py",
-                            "tools/dds1_msg1_chars.tsv",
                             str(source.with_name("aicalc-ai.bfasm")),
                             str(source.with_name("aicalc-formulas.bfasm")),
+                            str(skill_source),
+                            str(unit_source),
                         )
                     )
+                    context += f" --units {unit_source}"
+                elif source.stem == "encount":
+                    dependencies.extend((str(skill_source), str(unit_source)))
+                    context += f" --units {unit_source}"
+                elif source.stem == "unit":
+                    dependencies.append(str(skill_source))
                 elif source.stem == "msg":
-                    dependencies.extend(
-                        (
-                            "tools/msg1.py",
-                            "tools/dds1_msg1_chars.tsv",
-                            str(source.with_name("msg-items.msgasm")),
-                            str(source.with_name("msg-skills.msgasm")),
-                            str(source.with_name("msg-status-help.msgasm")),
-                            str(source.with_name("msg-command-help.msgasm")),
-                        )
-                    )
+                    dependencies.extend(message_dependencies)
                 n.build(
                     str(output),
                     "battle_tbl",
                     str(source),
                     implicit=dependencies,
-                    variables={"outdir": str(output.parent)},
+                    variables={"outdir": str(output.parent), "context": context},
                 )
                 battle_outputs.append(str(output))
             battle_stamp = battle_output_dir / "battle_tables.ok"
