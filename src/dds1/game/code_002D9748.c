@@ -34,8 +34,8 @@ typedef struct SdfTextParam {
     u32 unk34; /* 0x34 */
     SdfSubParam *primarySubParam; /* 0x38 */
     SdfSubParam *secondarySubParam; /* 0x3C */
-    f32 unk40; /* 0x40 */
-    f32 unk44; /* 0x44 */
+    f32 scalarPairFirst; /* 0x40 */
+    f32 scalarPairSecond; /* 0x44 */
     u8 pad48[0x40]; /* 0x48 */
     f32 overrideFirst; /* 0x88 */
     f32 overrideSecond; /* 0x8C */
@@ -547,8 +547,8 @@ void sdfCopySecondaryTextScalars(SdfTextParam *param, const f32 *input) {
 }
 
 void sdfSetTextScalarPair(SdfTextParam *param, f32 first, f32 second) {
-    param->unk40 = first;
-    param->unk44 = second;
+    param->scalarPairFirst = first;
+    param->scalarPairSecond = second;
     param->dirtyFlags = param->dirtyFlags | 0xC0;
 }
 
