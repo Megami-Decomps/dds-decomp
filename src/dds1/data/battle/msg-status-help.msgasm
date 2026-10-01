@@ -1,0 +1,2361 @@
+messages msg1
+  message jyokyohelp_000_1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "It's a bug if this MES appears_01"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_000_2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "It's a bug if this MES appears_02"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAD_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is overcome by hunger!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAD_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is overcome by hunger!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_CURSE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has been cursed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_CURSE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has been cursed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ACHE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has overeaten and cannot move."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ACHE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has overeaten and cannot move."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SLEEP_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is asleep..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SLEEP_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is asleep..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_AVOID_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Missed completely!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_AVOID_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Attack failed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BACKATK_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "It's a bug if this MES appears_03"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BACKATK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "The enemy attacked from behind!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ESCAPE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "It's a bug if this MES appears_04"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ESCAPE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " ran away..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SHIFT_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " joined the front line!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SHIFT_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy reinforcements appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MP_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Insufficient MP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MP_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Insufficient MP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HP_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Insufficient HP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HP_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Insufficient HP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TARUN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened enemy's physical attacks!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TARUN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Physical attacks weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKAN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened enemy's magic attacks!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKAN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Magic attacks weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened enemy's defense!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Defense weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SUKUN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reduced enemy's accuracy/agility!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SUKUN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Accuracy/agility reduced!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DEKAJA_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cancelled all -kaja effects on enemy!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DEKAJA_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "All -kaja effects cancelled!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TARUK_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Physical attacks improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TARUK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy's physical attacks improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKAK_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Magic improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKAK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy's magic improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUK_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Defense improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy's defense improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SUKUK_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Accuracy/agility improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SUKUK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy's accuracy/agility improved!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TETORAJA_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-expel/death shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TETORAJA_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-expel/death shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TETORAK_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created physical-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TETORAK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-physical shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKARAK_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created magic-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAKARAK_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-magic shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-physical shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-physical shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_BREAK_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-fire shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_BREAK_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-fire shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-ice shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-ice shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-electric shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-electric shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_BREA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-force shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_BREA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-force shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_BREAK_P speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-earth shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_BREAK_E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-earth shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HAMA_BREAK_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-expel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HAMA_BREAK_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-expel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_JYUSATU_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-death shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_JYUSATU_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-death shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MIRYO_BREAK_P speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-charm shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MIRYO_BREAK_E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-charm shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DOKU_BREAK_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-poison shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DOKU_BREAK_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-poison shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAFU_BREAK_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-mute shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MAFU_BREAK_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-mute shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KONRAN_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-panic shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KONRAN_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-panic shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SINKEI_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created anti-nerve shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SINKEI_BREAK_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Anti-nerve shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_KYUSYU speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created physical-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_KYUSYU speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Physical-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_KYUSYU_P speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created fire-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_KYUSYU_E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Fire-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_KYUSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created ice-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_KYUSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Ice-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_KYUSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created electric-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_KYUSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Electric-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_KYUS speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created force-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_KYUS speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Force-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_KYUSYU_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created earth-absorb shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_KYUSYU_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Earth-absorb shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_HANSYA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created physical-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BUTURI_HANSYA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Physical-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_HANSYA_P speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created fire-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KAEN_HANSYA_E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Fire-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created ice-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HYOKETU_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Ice-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created electric-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DENGEKI_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Electric-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_HANS speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created force-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SYOUGEKI_HANS speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Force-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_HANSYA_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created earth-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TIHEN_HANSYA_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Earth-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HAMA_HANSYA_P speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created expel-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HAMA_HANSYA_E speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Expel-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_JYUSATU_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Created death-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_JYUSATU_HANSY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Death-repel shield appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_IATU_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Set an anti-escape trap!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_IATU_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reserve"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NON_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reserve"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NON_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "No help arrived..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_EFFECTIVE_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Already in effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_EFFECTIVE_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Already in effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NO_EFFECT_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "No effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NO_EFFECT_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "No effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is confused!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is confused!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_EAT_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " started to attack randomly!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_EAT_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " started to attack randomly!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_UTU_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reserve"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_UTU_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is frightened..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_BONYARI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is dumbfounded..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_BONYARI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is dumbfounded..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_ITEM_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reserve"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PANIC_ITEM_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " dropped!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_RETURN_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " withdrew from battle!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_RETURN_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " wandered away..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_ATTACK_PL speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " turned against the party!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_ATTACK_EN speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " turned against the party!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_CHARM_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is charmed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_CHARM_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is charmed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_STONE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " was turned to stone!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_STONE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " was turned to stone!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_BAT_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Transformed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAD_BAT_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Transformed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SILENT_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text "'s magic is sealed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SILENT_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text "'s magic is sealed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_LIFE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Everyone is alive."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_LIFE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Everyone is alive."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FULL_EFFECT1_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Limit reached."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FULL_EFFECT1_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Limit reached."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FULL_EFFECT2_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Already in effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FULL_EFFECT2_ speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Already in effect."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ENC_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reinforcements appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ENC_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reinforcements appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RIKAM_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " was revived!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RIKAM_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " was revived!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OTAKE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened enemy's physical attacks drastically!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OTAKE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Physical attacks drastically weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DARKS_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened enemy's magic attacks drastically!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DARKS_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Magic attacks drastically weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FOG_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Reduced enemy's accuracy/agility drastically!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FOG_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Accuracy/agility drastically reduced!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TYOUHA_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enraged! (Weakened defense drastically)"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TYOUHA_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enraged! (Defense drastically weakened)"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RANDA_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Weakened overall combat performance!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RANDA_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Overall combat performance weakened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KIAI_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is focusing for a powerful attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KIAI_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is focusing for a powerful attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SEISIN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is focusing for a powerful magic attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_SEISIN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is focusing for a powerful magic attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DEKUN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "All -nda effects cancelled!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DEKUN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cancelled all -nda effects on enemy!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT1_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Gained a large quantity of Atma Points!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT1_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Gained a large quantity of Atma Points!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT2_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Failed to devour prey."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT2_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Failed to devour prey."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DECO1_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " became a decoy!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DECO1_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " became a decoy!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DECO2_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " drew the attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_DECO2_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "The decoy drew the attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TAERU_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " survived the attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TAERU_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "The enemy survived the attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT3_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be devoured!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HUNT3_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be devoured!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NONESCAPE_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Failed to escape!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_NONESCAPE_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Failed to escape!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FUIUTI_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Ambushed! No time to transform!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_FUIUTI_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Ambushed! No time to transform!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MURETUDOI_PLA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_MURETUDOI_ENE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " appeared!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_EP_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " gained EP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_EP_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " gained EP!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KYOHI_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Refused to devour..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_KYOHI_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Refused to devour..."
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_INAI_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "No target!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_INAI_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "No target!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUIN_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " cannot move!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_RAKUIN_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " cannot move!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OWARU_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy's defense lowered!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OWARU_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Defense lowered!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_K_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a fire-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_K_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a fire-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_H_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an ice-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_H_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an ice-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_D_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an electric-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_D_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an electric-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_S_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a force-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_S_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a force-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_T_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an earth-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_T_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created an earth-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_B_PLAY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a physical-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_PURUPA_B_ENEM speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Harihara created a physical-repel shield!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OBIE_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is frightened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_OBIE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " is frightened!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ACHE_ON_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " got a stomachache!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ACHE_ON_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " got a stomachache!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_LINKAGE_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "A powerful Combo!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_LINKAGE_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Enemy Combo attack!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAT_OFF_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Returned to normal!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_BAT_OFF_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Returned to normal!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ANA_OFF_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be analyzed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_ANA_OFF_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be analyzed!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HOKAKU_PLAYER speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has been captured!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_HOKAKU_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 06 01 ff
+      text " has been captured!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TUKAENO_PLAYE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be used right now!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage
+  message jyokyohelp_TUKAENO_ENEMY speaker=none
+    page
+      control f2 08 ff ff
+      control f2 06 02 ff
+      control f2 02 05 ff
+      control f2 06 01 ff
+      text "Cannot be used right now!"
+      control f2 06 02 ff
+      newline
+    endpage
+  endmessage

@@ -446,6 +446,61 @@ end
         ):
             battle_tbl.validate_aicalc_references(invalid)
 
+    def test_message_semantic_structure_and_references(self) -> None:
+        expected = {
+            "dds1": (
+                (256, 98, 384, 384, 192, 32, 16, 624, 64, 256),
+                (192, 607, 210, 9),
+            ),
+            "dds2": (
+                (256, 176, 384, 384, 256, 32, 32, 672, 48),
+                (256, 672, 254, 9),
+            ),
+        }
+        for game, (text_counts, bank_counts) in expected.items():
+            with self.subTest(game=game):
+                source = ROOT / f"src/{game}/data/battle/msg.tblasm"
+                table = battle_tbl.parse_message_source(
+                    source.read_text(encoding="utf-8"), source.parent
+                )
+                self.assertEqual(tuple(map(len, table.text_tables)), text_counts)
+                self.assertEqual(
+                    tuple(
+                        len(battle_tbl.msg1.decode(bank).dialogs)
+                        for bank in table.message_banks
+                    ),
+                    bank_counts,
+                )
+                self.assertEqual(
+                    battle_tbl.decode_message(battle_tbl.encode_message(table)), table
+                )
+                unit = battle_tbl.parse_unit_source(
+                    (ROOT / f"src/{game}/data/battle/unit.tblasm").read_text()
+                )
+                skill = battle_tbl.parse_skill_source(
+                    (ROOT / f"src/{game}/data/battle/skill.tblasm").read_text()
+                )
+                battle_tbl.validate_message_references(table, unit, skill)
+
+        dds2_source = ROOT / "src/dds2/data/battle/msg.tblasm"
+        dds2 = battle_tbl.parse_message_source(
+            dds2_source.read_text(encoding="utf-8"), dds2_source.parent
+        )
+        names = {
+            profile.directive: values
+            for profile, values in zip(dds2.profile.text_profiles, dds2.text_tables)
+        }
+        self.assertEqual(names["enemy-name"][1], "Skadi")
+        self.assertEqual(names["skill-name"][1], "Agi")
+        self.assertEqual(names["skill-family-name"][2], "Element Repel Skill")
+
+        text_tables = list(dds2.text_tables)
+        enemy_names = list(text_tables[3])
+        enemy_names[0] = "x" * 17
+        text_tables[3] = tuple(enemy_names)
+        with self.assertRaisesRegex(battle_tbl.BattleTableError, "row is 17 bytes"):
+            battle_tbl.encode_message(replace(dds2, text_tables=tuple(text_tables)))
+
     def test_tracked_battle_corpus_hashes(self) -> None:
         for game in ("dds1", "dds2"):
             manifest = ROOT / f"config/{game}/battle_tables.sha1"
@@ -473,6 +528,12 @@ end
                     data = battle_tbl.encode_aicalc(model)
                     rendered = battle_tbl.render_aicalc_source(
                         battle_tbl.decode_aicalc(data)
+                    )
+                elif name == "msg":
+                    model = battle_tbl.parse_message_source(source_text, source.parent)
+                    data = battle_tbl.encode_message(model)
+                    rendered = battle_tbl.render_message_source(
+                        battle_tbl.decode_message(data)
                     )
                 else:
                     self.fail(f"unhandled tracked battle table {name}")

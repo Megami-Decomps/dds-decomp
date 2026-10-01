@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import shlex
 import struct
@@ -13,6 +14,7 @@ from pathlib import Path
 
 import flw0
 import flw0_symbolic
+import msg1
 
 
 class BattleTableError(ValueError):
@@ -399,6 +401,67 @@ class AiCalcTable:
     weighted_tables: tuple[tuple[WeightedValue, ...], ...]
     ai_script: bytes
     formula_script: bytes
+
+
+@dataclass(frozen=True)
+class MessageTextProfile:
+    directive: str
+    width: int
+    count: int
+
+
+@dataclass(frozen=True)
+class MessageProfile:
+    name: str
+    text_profiles: tuple[MessageTextProfile, ...]
+    bank_counts: tuple[int, int, int, int]
+
+
+MESSAGE_PROFILES = {
+    profile.name: profile
+    for profile in (
+        MessageProfile(
+            "dds1",
+            (
+                MessageTextProfile("affinity-description", 45, 256),
+                MessageTextProfile("tribe-name", 19, 98),
+                MessageTextProfile("enemy-description", 189, 384),
+                MessageTextProfile("enemy-name", 17, 384),
+                MessageTextProfile("item-name", 25, 192),
+                MessageTextProfile("actor-name", 17, 32),
+                MessageTextProfile("race-name", 7, 16),
+                MessageTextProfile("skill-name", 17, 624),
+                MessageTextProfile("token-label", 17, 64),
+                MessageTextProfile("reserved-label", 17, 256),
+            ),
+            (192, 607, 210, 9),
+        ),
+        MessageProfile(
+            "dds2",
+            (
+                MessageTextProfile("affinity-description", 45, 256),
+                MessageTextProfile("tribe-name", 19, 176),
+                MessageTextProfile("enemy-description", 189, 384),
+                MessageTextProfile("enemy-name", 17, 384),
+                MessageTextProfile("item-name", 25, 256),
+                MessageTextProfile("actor-name", 17, 32),
+                MessageTextProfile("race-name", 7, 32),
+                MessageTextProfile("skill-name", 17, 672),
+                MessageTextProfile("skill-family-name", 33, 48),
+            ),
+            (256, 672, 254, 9),
+        ),
+    )
+}
+
+MESSAGE_BANK_KINDS = ("items", "skills", "status-help", "command-help")
+
+
+@dataclass(frozen=True)
+class MessageTable:
+    profile: MessageProfile
+    text_tables: tuple[tuple[str, ...], ...]
+    message_banks: tuple[bytes, ...]
 
 
 def default_zone(profile: EncountProfile) -> Zone:
@@ -1520,6 +1583,145 @@ def validate_aicalc_references(table: AiCalcTable, skill: SkillTable | None = No
                         )
 
 
+def _message_profile_from_segments(segments: tuple[bytes, ...]) -> MessageProfile:
+    for profile in MESSAGE_PROFILES.values():
+        fixed_sizes = tuple(row.width * row.count for row in profile.text_profiles)
+        if len(segments) != len(fixed_sizes) + len(MESSAGE_BANK_KINDS):
+            continue
+        if tuple(map(len, segments[: len(fixed_sizes)])) == fixed_sizes:
+            return profile
+    sizes = ", ".join(f"{len(segment):#x}" for segment in segments)
+    raise BattleTableError(f"unsupported MSG segment sizes: {sizes}")
+
+
+def _decode_text_table(data: bytes, row: MessageTextProfile) -> tuple[str, ...]:
+    values: list[str] = []
+    for index in range(row.count):
+        value = data[index * row.width : (index + 1) * row.width]
+        text, separator, padding = value.partition(b"\0")
+        if not separator:
+            raise BattleTableError(
+                f"{row.directive} {index} has no terminator in its {row.width}-byte row"
+            )
+        if any(padding):
+            raise BattleTableError(f"{row.directive} {index} has nonzero padding")
+        try:
+            values.append(text.decode("ascii"))
+        except UnicodeDecodeError as exc:
+            raise BattleTableError(f"{row.directive} {index} is not ASCII") from exc
+    return tuple(values)
+
+
+def _encode_text_table(values: tuple[str, ...], row: MessageTextProfile) -> bytes:
+    if len(values) != row.count:
+        raise BattleTableError(
+            f"{row.directive} needs {row.count} rows, found {len(values)}"
+        )
+    output = bytearray()
+    for index, text in enumerate(values):
+        try:
+            value = text.encode("ascii")
+        except UnicodeEncodeError as exc:
+            raise BattleTableError(f"{row.directive} {index} is not ASCII") from exc
+        if len(value) >= row.width:
+            raise BattleTableError(
+                f"{row.directive} {index} needs {len(value) + 1} bytes, "
+                f"but its row is {row.width} bytes"
+            )
+        output.extend(value)
+        output.extend(bytes(row.width - len(value)))
+    return bytes(output)
+
+
+def decode_message(data: bytes) -> MessageTable:
+    """Decode and validate a retail DDS1 or DDS2 ``MSG.TBL``."""
+
+    segments = _split_segments(data)
+    profile = _message_profile_from_segments(segments)
+    fixed_count = len(profile.text_profiles)
+    text_tables = tuple(
+        _decode_text_table(segment, row)
+        for segment, row in zip(segments[:fixed_count], profile.text_profiles)
+    )
+    banks = tuple(segments[fixed_count:])
+    for kind, expected, bank in zip(MESSAGE_BANK_KINDS, profile.bank_counts, banks):
+        try:
+            decoded = msg1.decode(bank)
+        except msg1.Msg1Error as exc:
+            raise BattleTableError(f"invalid {kind} message bank: {exc}") from exc
+        if len(decoded.dialogs) != expected:
+            raise BattleTableError(
+                f"{kind} message bank needs {expected} dialogs, "
+                f"found {len(decoded.dialogs)}"
+            )
+    return MessageTable(profile, text_tables, banks)
+
+
+def encode_message(table: MessageTable) -> bytes:
+    """Encode one message table to its exact physical profile."""
+
+    profile = MESSAGE_PROFILES.get(table.profile.name)
+    if profile != table.profile:
+        raise BattleTableError(f"unknown or modified MSG profile {table.profile.name!r}")
+    if len(table.text_tables) != len(profile.text_profiles):
+        raise BattleTableError(
+            f"{profile.name} MSG needs {len(profile.text_profiles)} text tables"
+        )
+    if len(table.message_banks) != len(MESSAGE_BANK_KINDS):
+        raise BattleTableError("MSG needs four message banks")
+    segments = [
+        _encode_text_table(values, row)
+        for values, row in zip(table.text_tables, profile.text_profiles)
+    ]
+    for kind, expected, bank in zip(
+        MESSAGE_BANK_KINDS, profile.bank_counts, table.message_banks
+    ):
+        try:
+            decoded = msg1.decode(bank)
+            canonical = msg1.encode(decoded)
+        except msg1.Msg1Error as exc:
+            raise BattleTableError(f"invalid {kind} message bank: {exc}") from exc
+        if canonical != bank:
+            raise BattleTableError(f"{kind} message bank is not canonical")
+        if len(decoded.dialogs) != expected:
+            raise BattleTableError(f"{kind} message bank needs {expected} dialogs")
+        segments.append(bank)
+    return _join_segments(tuple(segments))
+
+
+def validate_message_references(
+    table: MessageTable,
+    unit: UnitTable | None = None,
+    skill: SkillTable | None = None,
+) -> None:
+    """Validate message ID domains against the paired UNIT and SKILL tables."""
+
+    rows = {
+        profile.directive: values
+        for profile, values in zip(table.profile.text_profiles, table.text_tables)
+    }
+    if unit is not None:
+        if table.profile.name != unit.profile.name:
+            raise BattleTableError(
+                f"cannot join {table.profile.name} MSG with {unit.profile.name} UNIT"
+            )
+        if len(rows["enemy-name"]) != len(unit.enemies):
+            raise BattleTableError("enemy-name rows do not cover the UNIT enemy domain")
+        if len(rows["enemy-description"]) != len(unit.enemies):
+            raise BattleTableError(
+                "enemy-description rows do not cover the UNIT enemy domain"
+            )
+    if skill is not None:
+        if table.profile.name != skill.profile.name:
+            raise BattleTableError(
+                f"cannot join {table.profile.name} MSG with {skill.profile.name} SKILL"
+            )
+        if len(rows["skill-name"]) < len(skill.action_attributes):
+            raise BattleTableError("skill-name rows do not cover the SKILL ID domain")
+        if len(rows["item-name"]) != len(skill.items):
+            raise BattleTableError("item-name rows do not cover the SKILL item domain")
+
+
 def validate_encount_unit(encount: EncountTable, unit: UnitTable) -> None:
     """Validate encounter enemy IDs against the paired UNIT profile."""
 
@@ -1771,6 +1973,114 @@ def _read_flw0_source(path: Path, kind: str) -> bytes:
         return flw0.parse_source(source).to_bytes()
     except flw0.Flw0Error as exc:
         raise BattleTableError(f"invalid {kind} script {path}: {exc}") from exc
+
+
+def _read_message_source(path: Path, kind: str) -> bytes:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BattleTableError(f"cannot read {kind} message source {path}: {exc}") from exc
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(text.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful or _tokens(meaningful[0][1], meaningful[0][0]) != [
+        "messages",
+        "msg1",
+    ]:
+        raise BattleTableError(f"{kind} message source must begin with 'messages msg1'")
+    try:
+        return msg1.parse_source(meaningful[1:])
+    except msg1.Msg1Error as exc:
+        raise BattleTableError(f"invalid {kind} message source {path}: {exc}") from exc
+
+
+def parse_message_source(text: str, source_dir: Path = Path(".")) -> MessageTable:
+    """Assemble MSG source and its four sibling MSG1 source files."""
+
+    meaningful = [
+        (number, line.strip())
+        for number, line in enumerate(text.splitlines(), 1)
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        raise BattleTableError("empty battle table source")
+    first_number, first_line = meaningful[0]
+    first = _tokens(first_line, first_number)
+    if len(first) != 4 or first[:2] != ["battle-table", "1"]:
+        raise BattleTableError(
+            "source must begin with 'battle-table 1 kind=message profile=PROFILE'"
+        )
+    header = _fields(first[2:], first_number, {"kind", "profile"}, "header")
+    if header.get("kind") != "message":
+        raise BattleTableError("MSG source needs kind=message")
+    try:
+        profile = MESSAGE_PROFILES[header["profile"]]
+    except KeyError as exc:
+        raise BattleTableError(f"unknown MSG profile {header.get('profile')!r}") from exc
+
+    table_by_directive = {
+        row.directive: (index, row)
+        for index, row in enumerate(profile.text_profiles)
+    }
+    text_tables: list[list[str | None]] = [
+        [None] * row.count for row in profile.text_profiles
+    ]
+    bank_files: dict[str, tuple[int, str]] = {}
+    for line_number, line in meaningful[1:]:
+        tokens = _tokens(line, line_number)
+        directive = tokens[0]
+        if directive == "message-bank":
+            if len(tokens) < 3 or tokens[1] not in MESSAGE_BANK_KINDS:
+                raise BattleTableError(
+                    f"line {line_number}: expected message-bank KIND file=PATH"
+                )
+            fields = _fields(tokens[2:], line_number, {"file"}, "message bank")
+            if set(fields) != {"file"}:
+                raise BattleTableError(f"line {line_number}: message bank needs file=PATH")
+            kind = tokens[1]
+            if kind in bank_files:
+                raise BattleTableError(f"line {line_number}: duplicate {kind} message bank")
+            bank_files[kind] = (line_number, fields["file"])
+            continue
+        try:
+            table_index, row = table_by_directive[directive]
+        except KeyError as exc:
+            raise BattleTableError(
+                f"line {line_number}: unknown MSG directive {directive!r}"
+            ) from exc
+        if len(tokens) != 3:
+            raise BattleTableError(
+                f"line {line_number}: {directive} needs an index and quoted text"
+            )
+        row_index = _index(tokens[1], line_number, row.count, f"{directive} index")
+        if text_tables[table_index][row_index] is not None:
+            raise BattleTableError(f"line {line_number}: duplicate {directive} {row_index}")
+        text_tables[table_index][row_index] = tokens[2]
+
+    missing_banks = set(MESSAGE_BANK_KINDS) - set(bank_files)
+    if missing_banks:
+        raise BattleTableError(
+            f"MSG source is missing message banks: {', '.join(sorted(missing_banks))}"
+        )
+    complete_tables: list[tuple[str, ...]] = []
+    for row, values in zip(profile.text_profiles, text_tables):
+        missing = [index for index, value in enumerate(values) if value is None]
+        if missing:
+            raise BattleTableError(f"MSG source is missing {row.directive} {missing[0]}")
+        complete_tables.append(tuple(value for value in values if value is not None))
+    banks = tuple(
+        _read_message_source(source_dir / bank_files[kind][1], kind)
+        for kind in MESSAGE_BANK_KINDS
+    )
+    table = MessageTable(
+        profile,
+        tuple(complete_tables),
+        banks,
+    )
+    encode_message(table)
+    return table
 
 
 def parse_aicalc_source(text: str, source_dir: Path = Path(".")) -> AiCalcTable:
@@ -3107,6 +3417,30 @@ def render_aicalc_source(
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_message_source(
+    table: MessageTable,
+    bank_files: tuple[str, ...] = (
+        "msg-items.msgasm",
+        "msg-skills.msgasm",
+        "msg-status-help.msgasm",
+        "msg-command-help.msgasm",
+    ),
+) -> str:
+    """Render canonical MSG table source with sibling message-bank references."""
+
+    encode_message(table)
+    lines = [f"battle-table 1 kind=message profile={table.profile.name}", ""]
+    for kind, path in zip(MESSAGE_BANK_KINDS, bank_files):
+        lines.append(f"message-bank {kind} file={path}")
+    for row, values in zip(table.profile.text_profiles, table.text_tables):
+        lines.extend(("", f"# {row.count} rows, {row.width} bytes each"))
+        lines.extend(
+            f"{row.directive} {index} {json.dumps(value)}"
+            for index, value in enumerate(values)
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _read(path: Path) -> bytes:
     try:
         return path.read_bytes()
@@ -3129,6 +3463,15 @@ def _command_disassemble(args: argparse.Namespace) -> None:
     segments = _split_segments(data)
     segment_count = len(segments)
     if (
+        segment_count in {13, 14}
+        and all(segment[8:12] == b"MSG1" for segment in segments[-4:])
+    ):
+        table = decode_message(data)
+        bank_names = tuple(f"{args.output.stem}-{kind}.msgasm" for kind in MESSAGE_BANK_KINDS)
+        for name, bank in zip(bank_names, table.message_banks):
+            _write_text(args.output.parent / name, "\n".join(msg1.render(bank)) + "\n")
+        source = render_message_source(table, bank_names)
+    elif (
         segment_count in {4, 5}
         and len(segments[0]) == 0x20A00
         and all(segment[8:12] == b"FLW0" for segment in segments[-2:])
@@ -3192,6 +3535,8 @@ def _command_assemble(args: argparse.Namespace) -> None:
         data = encode_skill(parse_skill_source(source))
     elif header.get("kind") == "aicalc":
         data = encode_aicalc(parse_aicalc_source(source, args.input.parent))
+    elif header.get("kind") == "message":
+        data = encode_message(parse_message_source(source, args.input.parent))
     else:
         raise BattleTableError(f"unsupported battle table kind {header.get('kind')!r}")
     _write_bytes(args.output, data)
