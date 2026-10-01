@@ -8,9 +8,15 @@ extern void kwlnTaskSetUserValue(void* task, u32 value);
 extern void* func_002CFEB8(s32 a0);
 extern void sdfReleaseChipBlock(void* ptr);
 extern void* memcpy(void* dst, void* src, s32 n);
-extern void* D_003297D0[];
-extern void* D_003297D4[];
-extern void* D_003297D8[];
+/* One dispatch row per mode: three function pointers, 12 bytes each. The three
+ * columns are consecutive symbols, D_003297D0 / D_003297D4 / D_003297D8. */
+typedef struct AdminDispatch {
+    void (*entry)(void);
+    void (*destroy)(void);
+    void (*cleanup)(void);
+} AdminDispatch;
+
+extern AdminDispatch D_003297D0[];
 extern u8 D_003BA848[];
 
 /* Configure administrative state from three caller-supplied parameters. */
@@ -66,15 +72,15 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102C58);
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102CD8);
 
-/* Per-mode entry of the admin dispatch table: three function pointers, 12 bytes each; D_003297D4 holds the second (destroy). */
-void func_00102E58(void* task)
-{
-    AdminWork* work;
-    void (*destroy)(void);
+/* Run the mode's destroy callback (the row's second pointer), then free the
+ * attached data block and the task itself. */
+void func_00102E58(void* task) {
+    AdminWork* work = kwlnTaskGetUserValue(task);
+    s32 mode = work->unk08;
 
-    work = kwlnTaskGetUserValue(task);
-    if (work->unk08 >= 0) {
-        destroy = (void (*)(void))D_003297D4[work->unk08 * 3];
+    if (mode >= 0) {
+        void (*destroy)(void) = D_003297D0[mode].destroy;
+
         if (destroy != NULL) {
             destroy();
         }
