@@ -59,8 +59,8 @@ typedef struct SdfEnemyVitals {
 
 /* Two-byte runtime-mode entries; the signed second byte selects script 0x18. */
 typedef struct SdfUnitMode {
-    u8 pad00;           /* 0x00 */
-    s8 mode;            /* 0x01 */
+    s8 code; /* 0x00: used as a resource index by sound/UI consumers */
+    s8 kind; /* 0x01: 5 selects the alternate unit script */
 } SdfUnitMode;
 
 extern u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed);
@@ -355,7 +355,7 @@ s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
         flags = D_003BAA50[unitIndex * 0x38];
@@ -378,7 +378,7 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].mode == 5) {
+    if (((SdfUnitMode *)D_003BAA4C)[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
         flags = D_003BAA50[unitIndex * 0x38];

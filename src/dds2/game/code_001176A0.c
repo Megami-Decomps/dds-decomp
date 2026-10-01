@@ -50,7 +50,7 @@ typedef struct EvtScaledValue {
 
 typedef struct SdfRuntime {
     u8 pad00[0x30];
-    u32 allocation;
+    s32 backingAllocation; /* 0x30: handle returned by scene allocator */
     u32 firstTick;
     u32 secondTick;
     u8 pad3C[0xA20];
@@ -220,7 +220,7 @@ void sdfCreateRuntimeTask(void) {
     u8 *state = (u8 *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x1E840);
-    ((SdfRuntime *)state)->allocation = (s32)mem;
+    ((SdfRuntime *)state)->backingAllocation = (s32)mem;
     ((SdfRuntime *)state)->firstTick = 0;
     ((SdfRuntime *)state)->secondTick = 0;
     kwlnTaskCreate(D_00435DB0, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
@@ -233,7 +233,7 @@ void sdfDestroyRuntimeTask(void) {
 
     kwlnTaskDestroyWithHierarchyByName(D_00435DB0, 0);
     func_00117A80();
-    allocation = ((SdfRuntime *)D_00435DD0)->allocation;
+    allocation = ((SdfRuntime *)D_00435DD0)->backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
     func_003297C8(allocation);
     D_00435DD0 = 0;

@@ -74,7 +74,7 @@ typedef struct EvtViewer {
 
 /* Bounds are reset from the currently observed value. */
 typedef struct EvtRange {
-    u8 pad0[0x10];
+    u8 pad00[0x10];
     s32 min;
     s32 max;
     s32 value;

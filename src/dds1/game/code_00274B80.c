@@ -803,7 +803,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuRefreshEntries);
 
 typedef struct SkillInfo {
-    u8 pad0[0x20];
+    u8 pad00[0x20];
     u32 count;
     u16 codes[14];
 } SkillInfo;
