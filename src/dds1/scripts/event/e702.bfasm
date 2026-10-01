@@ -1,0 +1,44 @@
+flw0 2
+profile dds1
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=0 float=0
+
+procedure e702_main reserved=0x00000000
+jump_label _2 reserved=0x00000000
+jump_label _1 reserved=0x00000000
+
+code
+e702_main:
+  PROC e702_main
+  COMM 0x000d
+  PUSHIS 0
+  PUSHIS 85
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _2
+  PUSHIS 672
+  COMM 0x0066
+  GOTO _1
+_2:
+  PUSHIS 0
+  PUSHIS 86
+  COMM 0x0007
+  PUSHREG
+  EQ
+  IF _1
+  PUSHIS 673
+  COMM 0x0066
+  GOTO _1
+_1:
+  COMM 0x002e
+  END
+end
+
+messages
+end
+
+strings
+  zero 240
+end
