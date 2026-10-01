@@ -1211,9 +1211,7 @@ typedef struct BattleFieldBlocks {
     s32 fieldTB;
 } BattleFieldBlocks;
 
-#define VU_LOAD10(p) __asm__ volatile(".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
 
-#define VU_STORE10(p) __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(p))
 
 extern f32 *D_0037F770[];
 
