@@ -29,7 +29,39 @@ void func_00188050(void) {
 
 INCLUDE_ASM(const s32, "game/code_00187DB0", func_00188068);
 
-INCLUDE_ASM(const s32, "game/code_00187DB0", func_001880D8);
+extern void func_00187DB0(void *arg, s32 value, s32 flag);
+
+typedef struct BlurRectWork {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    u8 unk0C[4];
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+} BlurRectWork;
+
+void func_001880D8(BlurRectWork *w) {
+    f32 sc = (f32)w->unk00 * 1.4f;
+    s32 a = w->unk04 + 0x1000;
+    s32 b = (w->unk08 + 0xE00) >> 1;
+    s32 c = (s32)sc;
+    s32 d = a + c;
+    s32 e;
+
+    a -= c;
+    c >>= 1;
+    w->unk14 = a;
+    e = b + c;
+    b -= c;
+    w->unk1C = d;
+    w->unk18 = b;
+    w->unk20 = e;
+    func_00187DB0(w->unk0C, w->unk24, 1);
+}
 
 typedef struct EffClonedBody {
     u32 w[13];
