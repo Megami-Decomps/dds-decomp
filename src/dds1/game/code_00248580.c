@@ -177,11 +177,12 @@ s32 mnuCreateDualPercentPanel(s32 resource, s32 context) {
     return panel;
 }
 
-void mnuReleaseDualPercentPanel(s32 arg0) {
-    if (arg0 != 0) {
+/* Release both texture sets and the backing allocation for the panel pair. */
+void mnuReleaseDualPercentPanel(s32 panel) {
+    if (panel != 0) {
         mnuReleaseSpriteTextures();
-        mnuReleaseSpriteTextures((s32)arg0 + 0x54);
-        sdfReleaseChipBlock(arg0);
+        mnuReleaseSpriteTextures((s32)panel + 0x54);
+        sdfReleaseChipBlock(panel);
         return;
     }
 }

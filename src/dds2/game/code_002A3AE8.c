@@ -76,13 +76,13 @@ u32 func_002A3C78(void) {
     return *((SpriteMenuList *)((SpriteMenuState *)D_00437A40)->list)->selected;
 }
 
-void mnuSelectMenuListCursorByAdvance(s32 steps) {
+void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
     mnuSelectFirstListNode(((SpriteMenuState *)D_00437A40)->list);
-    if (0 < steps) {
+    if (0 < advanceCount) {
         do {
-            steps = steps - 1;
+            advanceCount = advanceCount - 1;
             mnuAdvanceListCursorDefault(((SpriteMenuState *)D_00437A40)->list);
-        } while (steps != 0);
+        } while (advanceCount != 0);
     }
 }
 
