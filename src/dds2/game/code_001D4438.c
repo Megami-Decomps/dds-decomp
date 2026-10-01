@@ -1192,8 +1192,6 @@ typedef struct SoundCursor {
     u16 unk_0E;
 } SoundCursor;
 
-#define CURSOR ((SoundCursor *)D_003BD7D0)
-
 extern char D_00418C58[];
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
