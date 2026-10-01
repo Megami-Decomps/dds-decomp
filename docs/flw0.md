@@ -413,6 +413,25 @@ tables and both implementations:
 | `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
 | `SET_SOLAR_OVERLAY_MODE` | `0x0C3` | 1 | Selects the solar-overlay opacity mode |
+| `REQUEST_ALTERNATE_FIELD_SEQUENCE` | `0x100` | 2 | Starts an alternate field sequence from a mode and resource name |
+| `SET_FIELD_ENVIRONMENT` | `0x101` | 2 | Applies a field-environment selector and value |
+| `ENABLE_FIELD_MODELS` | `0x103` | 4 | Enables the selected field model set and applies its transition mode |
+| `DISABLE_FIELD_MODELS` | `0x104` | 4 | Disables the selected field model set and applies its transition mode |
+| `ENABLE_FIELD_ANIMATION` | `0x105` | 4 | Enables animation for the selected field object set |
+| `DISABLE_FIELD_ANIMATION` | `0x106` | 4 | Disables animation for the selected field object set |
+| `ENABLE_FIELD_COLLISION` | `0x107` | 3 | Enables collision for a selected field room or room set |
+| `DISABLE_FIELD_COLLISION` | `0x108` | 3 | Disables collision for a selected field room or room set |
+| `ENABLE_FIELD_MODEL_GROUP` | `0x109` | 3 | Enables a numeric field-model group |
+| `DISABLE_FIELD_MODEL_GROUP` | `0x10A` | 3 | Disables a numeric field-model group |
+| `ENABLE_FIELD_NPCS` | `0x10E` | 3 | Enables NPC state for a selected field room or room set |
+| `DISABLE_FIELD_NPCS` | `0x10F` | 3 | Disables NPC state for a selected field room or room set |
+| `SET_FIELD_GIMMICK_DISPLAY` | `0x110` | 4 | Applies a display value to a selected field gimmick entry |
+| `ENABLE_FIELD_MAP_ENTRY` | `0x111` | 3 | Enables a selected field-map entry |
+| `DISABLE_FIELD_MAP_ENTRY` | `0x112` | 3 | Disables a selected field-map entry |
+| `SET_FIELD_CAMERA_TABLE` | `0x113` | 1 | Selects the current field camera-table value |
+| `READ_TREASURE_TABLE_VALUE` | `0x114` | 1 | Returns one of the current room's five treasure-table values |
+| `MARK_CURRENT_TREASURE_OPENED` | `0x115` | 0 | Marks the current task's treasure object as opened |
+| `TEST_CURRENT_TREASURE_OPENED` | `0x116` | 0 | Returns whether the current task's treasure object is already open |
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
@@ -424,8 +443,8 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The reviewed set names 41,752 of 53,389 native calls in the complete DDS1
-corpus and 29,786 of 38,839 calls in the complete DDS2 corpus. It also makes
+The reviewed set names 43,600 of 53,389 native calls in the complete DDS1
+corpus and 31,095 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic
