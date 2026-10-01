@@ -997,8 +997,14 @@ s32 mnuHasPopupSelectionFlag(s32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C4038);
 
+/* Popup state retains the entry address at +0x44, as in DDS1. */
+typedef struct MenuPopupState {
+    u8 pad00[0x44];
+    s32 entryAddress;
+} MenuPopupState;
+
 u8 mnuIsPopupEntryValue(s32 item, s32 value) {
-    return *(s32 *)(item + 0x44) == value;
+    return ((MenuPopupState *)item)->entryAddress == value;
 }
 
 void mnuSetPopupEntry(s32 out, s32 entry) {
@@ -1026,8 +1032,8 @@ void mnuAttachAndMarkMenuEntry(s32 out, s32 entry) {
 }
 
 void mnuBindPresentMenuEntry(s32 item, u32 out) {
-    if (*(s32 *)(item + 0x44) != 0) {
-        mnuSetPopupEntryFlagged(out, *(s32 *)(item + 0x44));
+    if (((MenuPopupState *)item)->entryAddress != 0) {
+        mnuSetPopupEntryFlagged(out, ((MenuPopupState *)item)->entryAddress);
         return;
     }
 }

@@ -208,11 +208,11 @@ void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w) {
     if ((s32)group[1] > 0) {
         do {
             memset(node, 0, 0x50);
-            *(f32 *)(node + 0x20) = x;
+            ((MnuModelNode *)node)->tertiary[0] = x;
             index++;
-            *(f32 *)(node + 0x24) = y;
-            *(f32 *)(node + 0x28) = z;
-            *(f32 *)(node + 0x2c) = w;
+            ((MnuModelNode *)node)->tertiary[1] = y;
+            ((MnuModelNode *)node)->tertiary[2] = z;
+            ((MnuModelNode *)node)->tertiary[3] = w;
             node += 0x50;
         } while (index < (s32)group[1]);
     }
@@ -235,7 +235,7 @@ void func_0031C208(s32 *list) {
     s16 index = 0;
     if (list[1] > 0) {
         do {
-            u32 model = *(u32 *)(node + 0x40);
+            u32 model = (u32)((MnuModelNode *)node)->model;
             node += 0x50;
             if (model != 0) {
                 mdlDestroyContext(model);
@@ -278,7 +278,7 @@ void func_0031C3C8(s32 *list, s8 value) {
 
     if (list[1] > 0) {
         do {
-            u32 active = *(u32 *)(node + 0x44) & 1;
+            u32 active = ((MnuModelNode *)node)->flags & 1;
 
             if (active == 1) {
                 func_0031C900(node, value);
@@ -376,12 +376,12 @@ void func_0031C630(u8 *node) {
     f32 vec[4];
 
     func_00328160(vec);
-    *(f32 *)(node + 0x10) = vec[0];
-    *(f32 *)(node + 0x14) = vec[1];
-    *(f32 *)(node + 0x18) = vec[2];
-    *(f32 *)(node + 0x1C) = vec[3];
+    ((MnuModelNode *)node)->secondary[0] = vec[0];
+    ((MnuModelNode *)node)->secondary[1] = vec[1];
+    ((MnuModelNode *)node)->secondary[2] = vec[2];
+    ((MnuModelNode *)node)->secondary[3] = vec[3];
     VU0_LOAD_VF(vf10, node + 0x10);
-    func_00232AD0(*(u32 *)(node + 0x40));
+    func_00232AD0((u32)((MnuModelNode *)node)->model);
 }
 
 INCLUDE_ASM(const s32, "game/code_0031B188", func_0031C688);
@@ -407,9 +407,9 @@ void func_0031C8A8(void) {
 }
 
 void func_0031C8B0(u8 *node, u8 value) {
-    u32 broadcast = mdlGetBroadcastValue(*(u32 *)(node + 0x40)) & 0xFFFFFF;
+    u32 broadcast = mdlGetBroadcastValue((u32)((MnuModelNode *)node)->model) & 0xFFFFFF;
 
-    mdlBroadcastMasked(*(u32 *)(node + 0x40), broadcast | ((u32)value << 24));
+    mdlBroadcastMasked((u32)((MnuModelNode *)node)->model, broadcast | ((u32)value << 24));
 }
 
 void func_0031C900(u8 *node, s8 selector) {
