@@ -1455,7 +1455,38 @@ s32 btlCheckSpecialAbility(s32 arg0, s32 ability) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AD118);
+typedef struct DatSkillOwner {
+    u16 flags;
+    u16 unk2;
+    u16 partyIndex;
+    u8 unk6[0x1C];
+    u16 skills[0x18];
+} DatSkillOwner;
+
+typedef struct DatPartyMember {
+    u8 unk0[0x18];
+    u16 skills[8];
+    u8 unk28[0x24];
+} DatPartyMember;
+
+s32 func_001AD118(DatSkillOwner *unit, s32 skill) {
+    s32 i;
+
+    if (!(unit->flags & 0x20)) {
+        for (i = 0; i < 8; i++) {
+            if (unit->skills[i] == skill) {
+                return 1;
+            }
+        }
+    } else {
+        for (i = 0; i < 8; i++) {
+            if (((DatPartyMember *)datEnemyRecords)[unit->partyIndex].skills[i] == skill) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 btlDoesEnabledStatusMatchCurrentId(s32 status, u32 value) {
     if (*(u16 *)status & 0x20) {
