@@ -2006,7 +2006,52 @@ void btlReleaseAllEntities(void) {
     } while (i < 8);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020EA40", func_00216B00);
+/* Record table owned by a motion container: 0x20-byte header, then 0x10-byte records. */
+typedef struct MotionRecord {
+    u8 pad00[4];
+    s16 slot;       /* 0x04: index into the owner's object slots */
+    u8 pad06[2];
+    void *resource; /* 0x08 */
+    u8 pad0C[4];
+} MotionRecord;
+
+typedef struct MotionRecordTable {
+    u8 header[0x20];
+    MotionRecord entries[1];
+} MotionRecordTable;
+
+typedef struct MotionObject {
+    u8 pad00[0x28];
+    s16 recordIndex; /* 0x28 */
+    s16 slot;        /* 0x2A */
+} MotionObject;
+
+typedef struct MotionOwner {
+    u8 pad00[0xC];
+    MotionRecordTable *records; /* 0x0C */
+    u8 pad10[8];
+    void *heap;                 /* 0x18 */
+    MotionObject *first;        /* 0x1C: object created for slot 0 */
+    MotionObject *slots[1];     /* 0x20 */
+} MotionOwner;
+
+extern MotionObject *func_002DB230();
+
+/* Creates the object for record `index`; the record is reached as table->entries[index]
+   at each use (the repeated array address is what keeps two address registers live). */
+MotionObject *func_00216B00(MotionOwner *owner, s32 index) {
+    void *resource = owner->records->entries[index].resource;
+    s16 slot = owner->records->entries[index].slot;
+    MotionObject *object = func_002DB230(owner->heap, resource);
+
+    object->recordIndex = index;
+    owner->slots[slot] = object;
+    object->slot = slot;
+    if (slot == 0) {
+        owner->first = object;
+    }
+    return object;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A72F0);
 
