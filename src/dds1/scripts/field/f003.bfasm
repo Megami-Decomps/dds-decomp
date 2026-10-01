@@ -1,0 +1,9924 @@
+flw0 2
+profile dds1
+
+header word00=0x00000000 word0c=0x00000000 word18=0x00000000 word1c=0x00000000
+locals int=81 float=0
+
+procedure hirakenai_label reserved=0x00000000
+procedure badkaifuku_label reserved=0x00000000
+procedure kireta_label reserved=0x00000000
+procedure itembox_label reserved=0x00000000
+procedure warp_label reserved=0x00000000
+procedure doorwarp_label reserved=0x00000000
+procedure dexitwarp_label reserved=0x00000000
+procedure dinwarp_label reserved=0x00000000
+procedure runwarp_label reserved=0x00000000
+procedure anawarp_label reserved=0x00000000
+procedure tobiwarp_label reserved=0x00000000
+procedure hasigo_label reserved=0x00000000
+procedure heal_label reserved=0x00000000
+procedure save_label reserved=0x00000000
+procedure npctalk_label reserved=0x00000000
+procedure elvstart_label reserved=0x00000000
+procedure suikomi_label reserved=0x00000000
+procedure baria_label reserved=0x00000000
+procedure proc_0012 name="003_001_k_01npc_01" reserved=0x00000000
+procedure proc_0013 name="003_001_k_01npc_02" reserved=0x00000000
+procedure proc_0014 name="003_001_k_01npc_03" reserved=0x00000000
+procedure proc_0015 name="003_001_k_01npc_04" reserved=0x00000000
+procedure proc_0016 name="003_001_k_01npc_05" reserved=0x00000000
+procedure proc_0017 name="003_001_k_01npc_06" reserved=0x00000000
+procedure proc_0018 name="003_001_k_01npc_07" reserved=0x00000000
+procedure proc_0019 name="003_001_k_01npc_08" reserved=0x00000000
+procedure proc_001a name="003_001_k_01npc_09" reserved=0x00000000
+procedure proc_001b name="003_001_k_01npc_10" reserved=0x00000000
+procedure proc_001c name="003_001_k_01npc_11" reserved=0x00000000
+procedure proc_001d name="003_003_k_01npc_01" reserved=0x00000000
+procedure proc_001e name="003_003_k_01npc_02" reserved=0x00000000
+procedure proc_001f name="003_003_k_01npc_03" reserved=0x00000000
+procedure proc_0020 name="003_003_k_01npc_04" reserved=0x00000000
+procedure proc_0021 name="003_003_k_01npc_05" reserved=0x00000000
+procedure proc_0022 name="003_003_k_01npc_06" reserved=0x00000000
+procedure proc_0023 name="003_003_k_01npc_07" reserved=0x00000000
+procedure proc_0024 name="003_003_k_01npc_08" reserved=0x00000000
+procedure proc_0025 name="003_003_k_01npc_09" reserved=0x00000000
+procedure proc_0026 name="003_003_k_01npc_10" reserved=0x00000000
+procedure proc_0027 name="003_003_k_01npc_11" reserved=0x00000000
+procedure proc_0028 name="003_003_k_01npc_12" reserved=0x00000000
+procedure proc_0029 name="003_003_k_01npc_13" reserved=0x00000000
+procedure proc_002a name="001_start" reserved=0x00000000
+procedure proc_002b name="003_start" reserved=0x00000000
+procedure proc_002c name="001_test" reserved=0x00000000
+jump_label _1 reserved=0x00000000
+jump_label _3 reserved=0x00000000
+jump_label _5 reserved=0x00000000
+jump_label _7 reserved=0x00000000
+jump_label _12 reserved=0x00000000
+jump_label _11 reserved=0x00000000
+jump_label _14 reserved=0x00000000
+jump_label _13 reserved=0x00000000
+jump_label _16 reserved=0x00000000
+jump_label _15 reserved=0x00000000
+jump_label _18 reserved=0x00000000
+jump_label _17 reserved=0x00000000
+jump_label _20 reserved=0x00000000
+jump_label _19 reserved=0x00000000
+jump_label _22 reserved=0x00000000
+jump_label _21 reserved=0x00000000
+jump_label _25 reserved=0x00000000
+jump_label _26 reserved=0x00000000
+jump_label _27 reserved=0x00000000
+jump_label _28 reserved=0x00000000
+jump_label _29 reserved=0x00000000
+jump_label _30 reserved=0x00000000
+jump_label _24 reserved=0x00000000
+jump_label _32 reserved=0x00000000
+jump_label _31 reserved=0x00000000
+jump_label _34 reserved=0x00000000
+jump_label _33 reserved=0x00000000
+jump_label _36 reserved=0x00000000
+jump_label _35 reserved=0x00000000
+jump_label _37 reserved=0x00000000
+jump_label _9 reserved=0x00000000
+jump_label _10 reserved=0x00000000
+jump_label _39 reserved=0x00000000
+jump_label _43 reserved=0x00000000
+jump_label _45 reserved=0x00000000
+jump_label _41 reserved=0x00000000
+jump_label _42 reserved=0x00000000
+jump_label _50 reserved=0x00000000
+jump_label _49 reserved=0x00000000
+jump_label _51 reserved=0x00000000
+jump_label _53 reserved=0x00000000
+jump_label _47 reserved=0x00000000
+jump_label _48 reserved=0x00000000
+jump_label _57 reserved=0x00000000
+jump_label _55 reserved=0x00000000
+jump_label _56 reserved=0x00000000
+jump_label _61 reserved=0x00000000
+jump_label _59 reserved=0x00000000
+jump_label _60 reserved=0x00000000
+jump_label _65 reserved=0x00000000
+jump_label _67 reserved=0x00000000
+jump_label _70 reserved=0x00000000
+jump_label _69 reserved=0x00000000
+jump_label _71 reserved=0x00000000
+jump_label _73 reserved=0x00000000
+jump_label _76 reserved=0x00000000
+jump_label _75 reserved=0x00000000
+jump_label _78 reserved=0x00000000
+jump_label _77 reserved=0x00000000
+jump_label _79 reserved=0x00000000
+jump_label _63 reserved=0x00000000
+jump_label _64 reserved=0x00000000
+jump_label _82 reserved=0x00000000
+jump_label _81 reserved=0x00000000
+jump_label _85 reserved=0x00000000
+jump_label _83 reserved=0x00000000
+jump_label _84 reserved=0x00000000
+jump_label _89 reserved=0x00000000
+jump_label _87 reserved=0x00000000
+jump_label _88 reserved=0x00000000
+jump_label _93 reserved=0x00000000
+jump_label _95 reserved=0x00000000
+jump_label _97 reserved=0x00000000
+jump_label _99 reserved=0x00000000
+jump_label _101 reserved=0x00000000
+jump_label _103 reserved=0x00000000
+jump_label _105 reserved=0x00000000
+jump_label _107 reserved=0x00000000
+jump_label _110 reserved=0x00000000
+jump_label _111 reserved=0x00000000
+jump_label _112 reserved=0x00000000
+jump_label _113 reserved=0x00000000
+jump_label _114 reserved=0x00000000
+jump_label _115 reserved=0x00000000
+jump_label _116 reserved=0x00000000
+jump_label _117 reserved=0x00000000
+jump_label _118 reserved=0x00000000
+jump_label _119 reserved=0x00000000
+jump_label _120 reserved=0x00000000
+jump_label _109 reserved=0x00000000
+jump_label _122 reserved=0x00000000
+jump_label _91 reserved=0x00000000
+jump_label _92 reserved=0x00000000
+jump_label _126 reserved=0x00000000
+jump_label _128 reserved=0x00000000
+jump_label _130 reserved=0x00000000
+jump_label _132 reserved=0x00000000
+jump_label _135 reserved=0x00000000
+jump_label _134 reserved=0x00000000
+jump_label _138 reserved=0x00000000
+jump_label _137 reserved=0x00000000
+jump_label _140 reserved=0x00000000
+jump_label _139 reserved=0x00000000
+jump_label _141 reserved=0x00000000
+jump_label _143 reserved=0x00000000
+jump_label _145 reserved=0x00000000
+jump_label _147 reserved=0x00000000
+jump_label _149 reserved=0x00000000
+jump_label _124 reserved=0x00000000
+jump_label _125 reserved=0x00000000
+jump_label _152 reserved=0x00000000
+jump_label _153 reserved=0x00000000
+jump_label _154 reserved=0x00000000
+jump_label _155 reserved=0x00000000
+jump_label _156 reserved=0x00000000
+jump_label _151 reserved=0x00000000
+jump_label _160 reserved=0x00000000
+jump_label _158 reserved=0x00000000
+jump_label _159 reserved=0x00000000
+jump_label _163 reserved=0x00000000
+jump_label _164 reserved=0x00000000
+jump_label _162 reserved=0x00000000
+jump_label _168 reserved=0x00000000
+jump_label _169 reserved=0x00000000
+jump_label _167 reserved=0x00000000
+jump_label _171 reserved=0x00000000
+jump_label _172 reserved=0x00000000
+jump_label _170 reserved=0x00000000
+jump_label _174 reserved=0x00000000
+jump_label _175 reserved=0x00000000
+jump_label _173 reserved=0x00000000
+jump_label _176 reserved=0x00000000
+jump_label _178 reserved=0x00000000
+jump_label _181 reserved=0x00000000
+jump_label _180 reserved=0x00000000
+jump_label _182 reserved=0x00000000
+jump_label _165 reserved=0x00000000
+jump_label _166 reserved=0x00000000
+jump_label _184 reserved=0x00000000
+jump_label _189 reserved=0x00000000
+jump_label _190 reserved=0x00000000
+jump_label _191 reserved=0x00000000
+jump_label _188 reserved=0x00000000
+jump_label _192 reserved=0x00000000
+jump_label _186 reserved=0x00000000
+jump_label _187 reserved=0x00000000
+jump_label _194 reserved=0x00000000
+jump_label _196 reserved=0x00000000
+jump_label _198 reserved=0x00000000
+jump_label _200 reserved=0x00000000
+jump_label _205 reserved=0x00000000
+jump_label _206 reserved=0x00000000
+jump_label _207 reserved=0x00000000
+jump_label _208 reserved=0x00000000
+jump_label _204 reserved=0x00000000
+jump_label _209 reserved=0x00000000
+jump_label _212 reserved=0x00000000
+jump_label _211 reserved=0x00000000
+jump_label _215 reserved=0x00000000
+jump_label _216 reserved=0x00000000
+jump_label _217 reserved=0x00000000
+jump_label _218 reserved=0x00000000
+jump_label _219 reserved=0x00000000
+jump_label _220 reserved=0x00000000
+jump_label _221 reserved=0x00000000
+jump_label _222 reserved=0x00000000
+jump_label _223 reserved=0x00000000
+jump_label _224 reserved=0x00000000
+jump_label _225 reserved=0x00000000
+jump_label _226 reserved=0x00000000
+jump_label _214 reserved=0x00000000
+jump_label _227 reserved=0x00000000
+jump_label _202 reserved=0x00000000
+jump_label _203 reserved=0x00000000
+jump_label _229 reserved=0x00000000
+jump_label _231 reserved=0x00000000
+jump_label _233 reserved=0x00000000
+jump_label _235 reserved=0x00000000
+jump_label _240 reserved=0x00000000
+jump_label _241 reserved=0x00000000
+jump_label _242 reserved=0x00000000
+jump_label _243 reserved=0x00000000
+jump_label _239 reserved=0x00000000
+jump_label _244 reserved=0x00000000
+jump_label _247 reserved=0x00000000
+jump_label _248 reserved=0x00000000
+jump_label _249 reserved=0x00000000
+jump_label _250 reserved=0x00000000
+jump_label _251 reserved=0x00000000
+jump_label _252 reserved=0x00000000
+jump_label _253 reserved=0x00000000
+jump_label _254 reserved=0x00000000
+jump_label _255 reserved=0x00000000
+jump_label _256 reserved=0x00000000
+jump_label _257 reserved=0x00000000
+jump_label _258 reserved=0x00000000
+jump_label _259 reserved=0x00000000
+jump_label _246 reserved=0x00000000
+jump_label _260 reserved=0x00000000
+jump_label _237 reserved=0x00000000
+jump_label _238 reserved=0x00000000
+jump_label _262 reserved=0x00000000
+jump_label _264 reserved=0x00000000
+jump_label _266 reserved=0x00000000
+jump_label _268 reserved=0x00000000
+jump_label _273 reserved=0x00000000
+jump_label _274 reserved=0x00000000
+jump_label _275 reserved=0x00000000
+jump_label _276 reserved=0x00000000
+jump_label _272 reserved=0x00000000
+jump_label _277 reserved=0x00000000
+jump_label _280 reserved=0x00000000
+jump_label _281 reserved=0x00000000
+jump_label _279 reserved=0x00000000
+jump_label _284 reserved=0x00000000
+jump_label _283 reserved=0x00000000
+jump_label _287 reserved=0x00000000
+jump_label _288 reserved=0x00000000
+jump_label _289 reserved=0x00000000
+jump_label _290 reserved=0x00000000
+jump_label _291 reserved=0x00000000
+jump_label _292 reserved=0x00000000
+jump_label _293 reserved=0x00000000
+jump_label _286 reserved=0x00000000
+jump_label _294 reserved=0x00000000
+jump_label _270 reserved=0x00000000
+jump_label _271 reserved=0x00000000
+jump_label _296 reserved=0x00000000
+jump_label _298 reserved=0x00000000
+jump_label _300 reserved=0x00000000
+jump_label _302 reserved=0x00000000
+jump_label _307 reserved=0x00000000
+jump_label _308 reserved=0x00000000
+jump_label _309 reserved=0x00000000
+jump_label _310 reserved=0x00000000
+jump_label _306 reserved=0x00000000
+jump_label _311 reserved=0x00000000
+jump_label _314 reserved=0x00000000
+jump_label _315 reserved=0x00000000
+jump_label _316 reserved=0x00000000
+jump_label _317 reserved=0x00000000
+jump_label _313 reserved=0x00000000
+jump_label _318 reserved=0x00000000
+jump_label _304 reserved=0x00000000
+jump_label _305 reserved=0x00000000
+jump_label _323 reserved=0x00000000
+jump_label _324 reserved=0x00000000
+jump_label _325 reserved=0x00000000
+jump_label _326 reserved=0x00000000
+jump_label _327 reserved=0x00000000
+jump_label _328 reserved=0x00000000
+jump_label _322 reserved=0x00000000
+jump_label _329 reserved=0x00000000
+jump_label _320 reserved=0x00000000
+jump_label _321 reserved=0x00000000
+jump_label _334 reserved=0x00000000
+jump_label _335 reserved=0x00000000
+jump_label _336 reserved=0x00000000
+jump_label _337 reserved=0x00000000
+jump_label _338 reserved=0x00000000
+jump_label _339 reserved=0x00000000
+jump_label _340 reserved=0x00000000
+jump_label _333 reserved=0x00000000
+jump_label _341 reserved=0x00000000
+jump_label _331 reserved=0x00000000
+jump_label _332 reserved=0x00000000
+jump_label _346 reserved=0x00000000
+jump_label _345 reserved=0x00000000
+jump_label _347 reserved=0x00000000
+jump_label _343 reserved=0x00000000
+jump_label _344 reserved=0x00000000
+jump_label _351 reserved=0x00000000
+jump_label _349 reserved=0x00000000
+jump_label _350 reserved=0x00000000
+jump_label _356 reserved=0x00000000
+jump_label _355 reserved=0x00000000
+jump_label _358 reserved=0x00000000
+jump_label _353 reserved=0x00000000
+jump_label _354 reserved=0x00000000
+jump_label _362 reserved=0x00000000
+jump_label _360 reserved=0x00000000
+jump_label _361 reserved=0x00000000
+jump_label _367 reserved=0x00000000
+jump_label _368 reserved=0x00000000
+jump_label _366 reserved=0x00000000
+jump_label _369 reserved=0x00000000
+jump_label _364 reserved=0x00000000
+jump_label _365 reserved=0x00000000
+jump_label _374 reserved=0x00000000
+jump_label _375 reserved=0x00000000
+jump_label _373 reserved=0x00000000
+jump_label _376 reserved=0x00000000
+jump_label _371 reserved=0x00000000
+jump_label _372 reserved=0x00000000
+jump_label _381 reserved=0x00000000
+jump_label _382 reserved=0x00000000
+jump_label _380 reserved=0x00000000
+jump_label _383 reserved=0x00000000
+jump_label _378 reserved=0x00000000
+jump_label _379 reserved=0x00000000
+jump_label _388 reserved=0x00000000
+jump_label _387 reserved=0x00000000
+jump_label _389 reserved=0x00000000
+jump_label _385 reserved=0x00000000
+jump_label _386 reserved=0x00000000
+jump_label _393 reserved=0x00000000
+jump_label _391 reserved=0x00000000
+jump_label _392 reserved=0x00000000
+jump_label _397 reserved=0x00000000
+jump_label _395 reserved=0x00000000
+jump_label _396 reserved=0x00000000
+jump_label _401 reserved=0x00000000
+jump_label _399 reserved=0x00000000
+jump_label _400 reserved=0x00000000
+jump_label _406 reserved=0x00000000
+jump_label _407 reserved=0x00000000
+jump_label _408 reserved=0x00000000
+jump_label _405 reserved=0x00000000
+jump_label _409 reserved=0x00000000
+jump_label _403 reserved=0x00000000
+jump_label _404 reserved=0x00000000
+jump_label _414 reserved=0x00000000
+jump_label _415 reserved=0x00000000
+jump_label _413 reserved=0x00000000
+jump_label _416 reserved=0x00000000
+jump_label _411 reserved=0x00000000
+jump_label _412 reserved=0x00000000
+jump_label _421 reserved=0x00000000
+jump_label _422 reserved=0x00000000
+jump_label _420 reserved=0x00000000
+jump_label _423 reserved=0x00000000
+jump_label _418 reserved=0x00000000
+jump_label _419 reserved=0x00000000
+jump_label _428 reserved=0x00000000
+jump_label _429 reserved=0x00000000
+jump_label _427 reserved=0x00000000
+jump_label _430 reserved=0x00000000
+jump_label _425 reserved=0x00000000
+jump_label _426 reserved=0x00000000
+jump_label _435 reserved=0x00000000
+jump_label _434 reserved=0x00000000
+jump_label _436 reserved=0x00000000
+jump_label _432 reserved=0x00000000
+jump_label _433 reserved=0x00000000
+jump_label _441 reserved=0x00000000
+jump_label _440 reserved=0x00000000
+jump_label _442 reserved=0x00000000
+jump_label _438 reserved=0x00000000
+jump_label _439 reserved=0x00000000
+jump_label _445 reserved=0x00000000
+jump_label _444 reserved=0x00000000
+jump_label _448 reserved=0x00000000
+jump_label _447 reserved=0x00000000
+jump_label _449 reserved=0x00000000
+jump_label _451 reserved=0x00000000
+jump_label _454 reserved=0x00000000
+jump_label _453 reserved=0x00000000
+jump_label _456 reserved=0x00000000
+jump_label _455 reserved=0x00000000
+jump_label _457 reserved=0x00000000
+jump_label _460 reserved=0x00000000
+jump_label _459 reserved=0x00000000
+
+code
+hirakenai_label:
+  PROC hirakenai_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHMSG COMP_OPENERROR
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+badkaifuku_label:
+  PROC badkaifuku_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHMSG BAD_KAIFUKUSITAYO
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+kireta_label:
+  PROC kireta_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _1
+  PUSHMSG COMP_LIGHTMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _1
+_1:
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _3
+  PUSHMSG COMP_REFUTOMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _3
+_3:
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _5
+  PUSHMSG COMP_REBERAMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _5
+_5:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x01f1
+  PUSHREG
+  EQ
+  IF _7
+  PUSHMSG COMP_ESTOMAEND
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _7
+_7:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+itembox_label:
+  PROC itembox_label
+_9:
+  PUSHIS 1
+  IF _10
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _37
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM 0x0116
+  PUSHREG
+  IF _36
+  PUSHMSG TAKARA_STILLGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _35
+_36:
+  PUSHIS 0
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0000
+  PUSHIS 1
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0001
+  PUSHIS 2
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0002
+  PUSHIS 3
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0003
+  PUSHIS 4
+  COMM 0x0114
+  PUSHREG
+  POPLIX 0x0004
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _12
+  PUSHMSG HOSEKI
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _11
+_12:
+  PUSHMSG TAKARA
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _11
+_11:
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _14
+  PUSHIS 172
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _13
+_14:
+  PUSHIS 176
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0005
+  GOTO _13
+_13:
+  PUSHIS 0
+  PUSHLIX 0x0005
+  EQ
+  IF _34
+  PUSHIS 1
+  PUSHLIX 0x0003
+  EQ
+  IF _25
+  COMM 0x0115
+  PUSHLIX 0x0004
+  COMM 0x0166
+  END
+  GOTO _24
+_25:
+  PUSHIS 2
+  PUSHLIX 0x0003
+  EQ
+  IF _26
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 100
+  PUSHIS 15
+  COMM 0x00ab
+  PUSHIS 15
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 15
+  PUSHIS 100
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 1
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _24
+_26:
+  PUSHIS 3
+  PUSHLIX 0x0003
+  EQ
+  IF _27
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 2
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _24
+_27:
+  PUSHIS 4
+  PUSHLIX 0x0003
+  EQ
+  IF _28
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 4
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE_POISON
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _24
+_28:
+  PUSHIS 5
+  PUSHLIX 0x0003
+  EQ
+  IF _29
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 5
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE_ACHE
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _24
+_29:
+  PUSHIS 6
+  PUSHLIX 0x0003
+  EQ
+  IF _30
+  COMM 0x0115
+  PUSHIS 35
+  COMM 0x011b
+  COMM 0x011c
+  PUSHIS 200
+  PUSHIS 20
+  COMM 0x00ab
+  PUSHIS 20
+  PUSHIS 1
+  PUSHIS 0
+  COMM 0x001a
+  PUSHIS 20
+  PUSHIS 200
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 6
+  COMM 0x013a
+  PUSHMSG TAKARA_DAMAGE_CLOSE
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _24
+_30:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  LE
+  IF _22
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _16
+  PUSHIS 34
+  COMM 0x011b
+  GOTO _15
+_16:
+  PUSHIS 33
+  COMM 0x011b
+  GOTO _15
+_15:
+  COMM 0x011c
+  COMM 0x0115
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 0
+  PUSHLIX 0x0001
+  EQ
+  IF _20
+  PUSHMSG TAKARA_KARAGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _19
+_20:
+  PUSHIS 3
+  PUSHLIX 0x0001
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 0
+  PUSHLIX 0x0002
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 127
+  PUSHLIX 0x0001
+  LE
+  PUSHIS 96
+  PUSHLIX 0x0001
+  GE
+  AND
+  IF _18
+  PUSHMSG TAKARA_GET2
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _17
+_18:
+  PUSHMSG TAKARA_GET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _17
+_17:
+  PUSHLIX 0x0002
+  PUSHLIX 0x0001
+  COMM 0x0070
+  GOTO _19
+_19:
+  COMM 0x011f
+  COMM 0x0121
+  GOTO _21
+_22:
+  PUSHIS 3
+  PUSHLIX 0x0000
+  EQ
+  IF _21
+  COMM 0x0115
+  PUSHIS 32
+  COMM 0x0214
+  PUSHIS 0
+  PUSHLIX 0x0004
+  PUSHIS 0
+  COMM 0x0071
+  PUSHMSG TAKARA_MAKA_GET
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0004
+  COMM 0x0139
+  GOTO _21
+_21:
+  GOTO _24
+_24:
+  GOTO _33
+_34:
+  PUSHIS 1
+  PUSHLIX 0x0000
+  EQ
+  IF _32
+  PUSHMSG HOSEKI_NOGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _31
+_32:
+  PUSHMSG TAKARA_NOGET
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _31
+_31:
+  GOTO _33
+_33:
+  GOTO _35
+_35:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _37
+_37:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _9
+_10:
+  END
+warp_label:
+  PROC warp_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0219
+  PUSHREG
+  POPLIX 0x0006
+  PUSHIS 1
+  PUSHLIX 0x0006
+  EQ
+  IF _39
+  COMM 0x0204
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHF 0x3e051eb8
+  PUSHF 0x00000000
+  PUSHF 0x3dcccccd
+  PUSHIS 2
+  PUSHIS 175
+  PUSHIS 60
+  COMM 0x00ef
+  PUSHIS 101
+  PUSHIS 132
+  PUSHIS 132
+  PUSHIS 132
+  COMM 0x00f0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 256
+  COMM 0x00f1
+  PUSHIS 1
+  COMM 0x00f2
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  COMM 0x00f3
+  GOTO _39
+_39:
+  COMM 0x0202
+  END
+  END
+doorwarp_label:
+  PROC doorwarp_label
+_41:
+  PUSHIS 1
+  IF _42
+  COMM 0x0203
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _45
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0007
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0008
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0007
+  EQ
+  IF _43
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _43
+_43:
+  PUSHIS 20
+  PUSHLIX 0x0008
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _45
+_45:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _41
+_42:
+  END
+dexitwarp_label:
+  PROC dexitwarp_label
+_47:
+  PUSHIS 1
+  IF _48
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _53
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM 0x020d
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG EXITWARP
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 0
+  PUSHIS 170
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _50
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  GOTO _49
+_50:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _49
+_49:
+  PUSHIS 0
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x0009
+  PUSHIS 1
+  COMM 0x020c
+  PUSHREG
+  POPLIX 0x000a
+  COMM 0x0204
+  PUSHIS 40
+  PUSHLIX 0x0009
+  EQ
+  IF _51
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _51
+_51:
+  PUSHIS 45
+  PUSHLIX 0x000a
+  COMM SCREEN_FADE_B
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _53
+_53:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _47
+_48:
+  END
+dinwarp_label:
+  PROC dinwarp_label
+_55:
+  PUSHIS 1
+  IF _56
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _57
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0204
+  PUSHIS 45
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 45
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+  GOTO _57
+_57:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _55
+_56:
+  END
+runwarp_label:
+  PROC runwarp_label
+  COMM 0x0203
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0204
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0202
+  END
+anawarp_label:
+  PROC anawarp_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM 0x0203
+  COMM 0x0204
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 6
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIX 0x0000
+  COMM 0x0049
+  COMM 0x0202
+  END
+tobiwarp_label:
+  PROC tobiwarp_label
+_59:
+  PUSHIS 1
+  IF _60
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _61
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 37
+  COMM 0x011b
+  COMM 0x0204
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHIS 0
+  PUSHIS 4
+  PUSHIS 4
+  PUSHIS 5
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x011c
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+  GOTO _61
+_61:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _59
+_60:
+  END
+hasigo_label:
+  PROC hasigo_label
+  PUSHIS 0
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000c
+  PUSHIS 3
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000f
+  PUSHIS 1
+  POPLIX 0x000b
+_63:
+  PUSHLIX 0x000b
+  IF _64
+  PUSHIS 0
+  PUSHLIX 0x000c
+  EQ
+  IF _78
+  PUSHIS 0
+  PUSHLIX 0x000f
+  EQ
+  IF _70
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _65
+  PUSHIS 0
+  POPLIX 0x000b
+  GOTO _65
+_65:
+  GOTO _69
+_70:
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _67
+  PUSHIS 0
+  POPLIX 0x000b
+  GOTO _67
+_67:
+  GOTO _69
+_69:
+  GOTO _77
+_78:
+  PUSHIS 0
+  PUSHLIX 0x000f
+  EQ
+  IF _76
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _71
+  PUSHIS 0
+  POPLIX 0x000b
+  GOTO _71
+_71:
+  GOTO _75
+_76:
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x021d
+  PUSHREG
+  EQ
+  IF _73
+  PUSHIS 0
+  POPLIX 0x000b
+  GOTO _73
+_73:
+  GOTO _75
+_75:
+  GOTO _77
+_77:
+  PUSHIS 1
+  PUSHLIX 0x000b
+  EQ
+  IF _79
+  COMM WAIT_FOR_TIMER_START
+  GOTO _79
+_79:
+  GOTO _63
+_64:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 36
+  COMM 0x011b
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 1
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000d
+  PUSHIS 2
+  COMM 0x0208
+  PUSHREG
+  POPLIX 0x000e
+  PUSHLIX 0x000e
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x000d
+  PUSHIX 0x0000
+  COMM 0x004a
+  COMM 0x0204
+  PUSHIS 0
+  PUSHLIX 0x000c
+  EQ
+  IF _82
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 8
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  GOTO _81
+_82:
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 9
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  GOTO _81
+_81:
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 11
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x011c
+  PUSHIS 49
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+heal_label:
+  PROC heal_label
+_83:
+  PUSHIS 1
+  IF _84
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _85
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 900
+  COMM 0x020f
+  END
+  GOTO _85
+_85:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _83
+_84:
+  END
+save_label:
+  PROC save_label
+_87:
+  PUSHIS 1
+  IF _88
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _89
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 901
+  COMM 0x020f
+  END
+  GOTO _89
+_89:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _87
+_88:
+  END
+npctalk_label:
+  PROC npctalk_label
+  COMM 0x0207
+  PUSHREG
+  POPLIX 0x0016
+  PUSHIS 1
+  POPLIX 0x0017
+_91:
+  PUSHLIX 0x0017
+  IF _92
+  PUSHIS 0
+  PUSHLIX 0x0016
+  EQ
+  IF _110
+  PUSHIS 0
+  POPLIX 0x0017
+  END
+  GOTO _109
+_110:
+  PUSHIS 1
+  PUSHLIX 0x0016
+  EQ
+  IF _111
+  PUSHIS 1
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _93
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _93
+_93:
+  GOTO _109
+_111:
+  PUSHIS 2
+  PUSHLIX 0x0016
+  EQ
+  IF _112
+  PUSHIS 1
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _95
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _95
+_95:
+  GOTO _109
+_112:
+  PUSHIS 100
+  PUSHLIX 0x0016
+  EQ
+  IF _113
+  PUSHIS 1
+  PUSHIS 2
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _97
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _97
+_97:
+  GOTO _109
+_113:
+  PUSHIS 101
+  PUSHLIX 0x0016
+  EQ
+  IF _114
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _109
+_114:
+  PUSHIS 102
+  PUSHLIX 0x0016
+  EQ
+  IF _115
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _99
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _99
+_99:
+  GOTO _109
+_115:
+  PUSHIS 103
+  PUSHLIX 0x0016
+  EQ
+  IF _116
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _109
+_116:
+  PUSHIS 104
+  PUSHLIX 0x0016
+  EQ
+  IF _117
+  PUSHIS 1
+  PUSHIS 6
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _101
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _101
+_101:
+  GOTO _109
+_117:
+  PUSHIS 105
+  PUSHLIX 0x0016
+  EQ
+  IF _118
+  PUSHIS 1
+  PUSHIS 7
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _103
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _103
+_103:
+  GOTO _109
+_118:
+  PUSHIS 106
+  PUSHLIX 0x0016
+  EQ
+  IF _119
+  PUSHIS 1
+  PUSHIS 10
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _105
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _105
+_105:
+  GOTO _109
+_119:
+  PUSHIS 107
+  PUSHLIX 0x0016
+  EQ
+  IF _120
+  PUSHIS 1
+  PUSHIS 11
+  COMM 0x005e
+  PUSHREG
+  EQ
+  IF _107
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _107
+_107:
+  GOTO _109
+_120:
+  PUSHIS 199
+  PUSHLIX 0x0016
+  EQ
+  IF _109
+  PUSHIS 0
+  POPLIX 0x0017
+  GOTO _109
+_109:
+  PUSHIS 1
+  PUSHLIX 0x0017
+  EQ
+  IF _122
+  COMM WAIT_FOR_TIMER_START
+  GOTO _122
+_122:
+  GOTO _91
+_92:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  POPLIX 0x0011
+  PUSHIS 0
+  POPLIX 0x0015
+  COMM 0x01fe
+  PUSHREG
+  POPLIX 0x0018
+_124:
+  PUSHIS 1
+  IF _125
+  PUSHIS 10
+  PUSHLIX 0x0011
+  LT
+  IF _140
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0011
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0011
+  GOTO _139
+_140:
+  PUSHIS 0
+  POPLIX 0x0010
+  PUSHIS 0
+  PUSHLIX 0x0011
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0012
+  PUSHIS 2
+  PUSHLIX 0x0011
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0019
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0012
+  EQ
+  IF _138
+  PUSHIS 1
+  PUSHLIX 0x0015
+  EQ
+  IF _128
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHLIX 0x0019
+  EQ
+  IF _126
+  PUSHLIX 0x0018
+  COMM 0x01e1
+  GOTO _126
+_126:
+  PUSHIS 0
+  POPLIX 0x0015
+  GOTO _128
+_128:
+  GOTO _137
+_138:
+  PUSHIS 1
+  PUSHLIX 0x0011
+  COMM 0x0206
+  PUSHREG
+  POPLIX 0x0013
+  PUSHIS 0
+  PUSHLIX 0x0015
+  EQ
+  IF _132
+  PUSHIS 1
+  POPLIX 0x0015
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 0
+  PUSHLIX 0x0019
+  EQ
+  IF _130
+  PUSHTYPE5 ppos01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0018
+  COMM 0x01e0
+  GOTO _130
+_130:
+  GOTO _132
+_132:
+  PUSHIS 0
+  PUSHLIX 0x0012
+  EQ
+  IF _135
+  PUSHLIX 0x0013
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _134
+_135:
+  PUSHIS 1
+  PUSHLIX 0x0012
+  EQ
+  IF _134
+  PUSHLIX 0x0013
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0010
+  GOTO _134
+_134:
+  GOTO _137
+_137:
+  PUSHLIX 0x0010
+  PUSHLIX 0x0011
+  COMM 0x0205
+  PUSHREG
+  POPLIX 0x0011
+  COMM WAIT_FOR_TIMER_START
+  GOTO _139
+_139:
+  PUSHIS 200
+  PUSHLIX 0x0011
+  GE
+  IF _141
+  END
+  GOTO _141
+_141:
+  PUSHIS 100
+  PUSHLIX 0x0011
+  EQ
+  IF _145
+  PUSHIS 1
+  PUSHLIX 0x0015
+  EQ
+  IF _143
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x0018
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0015
+  GOTO _143
+_143:
+  COMM 0x020e
+  END
+  GOTO _145
+_145:
+  PUSHIS 0
+  PUSHLIX 0x0011
+  EQ
+  IF _149
+  PUSHIS 1
+  PUSHLIX 0x0015
+  EQ
+  IF _147
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x0018
+  COMM 0x01e1
+  PUSHIS 0
+  POPLIX 0x0015
+  GOTO _147
+_147:
+  PUSHIS 7
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  GOTO _149
+_149:
+  GOTO _124
+_125:
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  END
+elvstart_label:
+  PROC elvstart_label
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHTYPE5 str_01cam_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  POPLIX 0x001b
+  PUSHIS 0
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001c
+  PUSHIS 14
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0023
+  PUSHIS 2
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001d
+  PUSHIS 3
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001e
+  PUSHIS 4
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x001f
+  PUSHIS 5
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0020
+  PUSHIS 6
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0021
+  PUSHIS 7
+  COMM 0x0200
+  PUSHREG
+  POPLIX 0x0022
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 4
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM 0x004b
+  PUSHLIX 0x001b
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHLIX 0x0023
+  PUSHLIX 0x0023
+  COMM 0x0209
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG WARP_ELV_MSG
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  PUSHLIX 0x001c
+  EQ
+  IF _152
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 1
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 195
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_152:
+  PUSHIS 2
+  PUSHLIX 0x001c
+  EQ
+  IF _153
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 1
+  COMM 0x0071
+  PUSHLIX 0x0023
+  COMM 0x0040
+  PUSHIS 2
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 196
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_153:
+  PUSHIS 3
+  PUSHLIX 0x001c
+  EQ
+  IF _154
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 2
+  COMM 0x0071
+  PUSHLIX 0x0023
+  COMM 0x0040
+  PUSHIS 3
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 197
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_154:
+  PUSHIS 4
+  PUSHLIX 0x001c
+  EQ
+  IF _155
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 3
+  COMM 0x0071
+  PUSHLIX 0x0023
+  COMM 0x0040
+  PUSHIS 4
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 198
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_155:
+  PUSHIS 5
+  PUSHLIX 0x001c
+  EQ
+  IF _156
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 4
+  COMM 0x0071
+  PUSHLIX 0x0023
+  COMM 0x0040
+  PUSHIS 5
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 199
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_156:
+  PUSHIS 6
+  PUSHLIX 0x001c
+  EQ
+  IF _151
+  PUSHIS 4
+  PUSHLIX 0x001d
+  PUSHIS 0
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001e
+  PUSHIS 1
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x001f
+  PUSHIS 2
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0020
+  PUSHIS 3
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0021
+  PUSHIS 4
+  COMM 0x0071
+  PUSHIS 4
+  PUSHLIX 0x0022
+  PUSHIS 5
+  COMM 0x0071
+  PUSHLIX 0x0023
+  COMM 0x0040
+  PUSHIS 6
+  PUSHIS 3
+  COMM 0x013c
+  PUSHIS 200
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x001a
+  GOTO _151
+_151:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHLIX 0x001c
+  PUSHLIX 0x001a
+  EQ
+  IF _163
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _162
+_163:
+  PUSHLIX 0x0023
+  PUSHLIX 0x001a
+  EQ
+  IF _164
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _162
+_164:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 4
+  PUSHIS 10
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIX 0x0000
+  COMM 0x0049
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0214
+  PUSHLIX 0x001a
+  PUSHLIX 0x0023
+  COMM 0x0209
+  PUSHIS 4
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0024
+_158:
+  PUSHIS 1
+  PUSHLIX 0x0024
+  NEQ
+  IF _159
+  PUSHIS 2
+  PUSHLIX 0x0024
+  EQ
+  IF _160
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0215
+  COMM 0x020a
+  PUSHLIX 0x001a
+  COMM 0x0201
+  END
+  GOTO _160
+_160:
+  COMM WAIT_FOR_TIMER_START
+  COMM 0x020b
+  PUSHREG
+  POPLIX 0x0024
+  GOTO _158
+_159:
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 46
+  COMM 0x0215
+  PUSHIS 47
+  COMM 0x0214
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  GOTO _162
+_162:
+  PUSHIS 48
+  COMM 0x0214
+  PUSHIS 0
+  PUSHTYPE5 str_01path_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHTYPE5 str_01all_d01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006b
+  PUSHIS 0
+  PUSHTYPE5 str_01path_02
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHTYPE5 str_01all_d02
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006b
+  PUSHTYPE5 str_01all_d01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  COMM 0x006c
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x020a
+  PUSHLIX 0x001a
+  COMM 0x0201
+  END
+suikomi_label:
+  PROC suikomi_label
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 6
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 6
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0029
+  PUSHIS 1
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0026
+  PUSHIS 2
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0025
+  PUSHIS 3
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0027
+  PUSHIS 4
+  COMM 0x01fa
+  PUSHREG
+  POPLIX 0x0028
+  PUSHIS 39
+  COMM 0x011b
+  COMM 0x011c
+  PUSHLIX 0x0027
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0111
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x0026
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 2
+  PUSHIS 25
+  PUSHIS 3
+  PUSHLIX 0x0028
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHLIX 0x0025
+  COMM 0x0019
+  PUSHLIX 0x0029
+  PUSHIS 2
+  COMM 0x0015
+  PUSHREG
+  POPLIX 0x002a
+  PUSHLIX 0x0026
+  PUSHLIX 0x002a
+  COMM 0x004a
+  PUSHLIX 0x002a
+  COMM 0x0124
+  PUSHIS 2
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHLIX 0x002a
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 6
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 20
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 20
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x0202
+  END
+  END
+baria_label:
+  PROC baria_label
+  PUSHIS 0
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002b
+  PUSHIS 1
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002c
+  PUSHIS 2
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002d
+  PUSHIS 3
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002e
+  PUSHIS 4
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002e
+  PUSHIS 5
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x002f
+  PUSHIS 6
+  COMM 0x01fb
+  PUSHREG
+  POPLIX 0x0031
+  PUSHIS 0
+  PUSHLIX 0x002f
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _184
+_165:
+  PUSHIS 1
+  IF _166
+  PUSHIS 9
+  COMM 0x005e
+  PUSHREG
+  IF _182
+  PUSHIS 0
+  PUSHLIX 0x002b
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _181
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2560
+  PUSHLIX 0x002b
+  EQ
+  IF _168
+  PUSHMSG FLD_BLUEICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _167
+_168:
+  PUSHIS 2561
+  PUSHLIX 0x002b
+  EQ
+  IF _169
+  PUSHMSG FLD_YERWICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _167
+_169:
+  PUSHMSG FLD_REDICE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _167
+_167:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  COMM RELEASE_CURRENT_OBJECT
+  END
+  GOTO _180
+_181:
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 2560
+  PUSHLIX 0x002b
+  EQ
+  IF _171
+  PUSHTYPE5 fld_f_bin_ICE_b_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0030
+  GOTO _170
+_171:
+  PUSHIS 2561
+  PUSHLIX 0x002b
+  EQ
+  IF _172
+  PUSHTYPE5 fld_f_bin_ICE_y_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0030
+  GOTO _170
+_172:
+  PUSHTYPE5 fld_f_bin_ICE_r_BED
+  COMM 0x00cd
+  PUSHREG
+  POPLIX 0x0030
+  GOTO _170
+_170:
+  PUSHLIX 0x002d
+  PUSHLIX 0x0030
+  COMM 0x009d
+  PUSHLIX 0x002c
+  COMM 0x0012
+  COMM 0x0068
+  PUSHREG
+  POPIX 0x0000
+  PUSHLIX 0x002d
+  PUSHIX 0x0000
+  COMM 0x004a
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2560
+  PUSHLIX 0x002b
+  EQ
+  IF _174
+  PUSHMSG FLD_BLUEICE_KEYHAVE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _173
+_174:
+  PUSHIS 2561
+  PUSHLIX 0x002b
+  EQ
+  IF _175
+  PUSHMSG FLD_YERWICE_KEYHAVE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _173
+_175:
+  PUSHMSG FLD_REDICE_KEYHAVE
+  COMM MESSAGE_REQUEST_AND_POLL
+  GOTO _173
+_173:
+  PUSHMSG FLD_ICE_BREAK
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 208
+  COMM 0x0003
+  PUSHREG
+  EQ
+  IF _178
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 32
+  COMM 0x011b
+  PUSHIS 3
+  PUSHIS 10
+  PUSHIS 10
+  PUSHIS 24
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 60
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHLIX 0x0030
+  COMM 0x00ce
+  COMM 0x011c
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  PUSHIS 1
+  COMM SCREEN_FADE_B
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 0
+  PUSHTYPE5 BARIA
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHTYPE5 BARIA_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 0
+  PUSHIS 2
+  PUSHIX 0x0000
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 15
+  PUSHIS 1
+  COMM SCREEN_FADE_A
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 30
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHLIX 0x0030
+  COMM 0x009b
+  COMM 0x011f
+  COMM 0x0121
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHLIX 0x002f
+  COMM SET_MODEL_FLAG
+  PUSHIS 1
+  MINUS
+  PUSHLIX 0x0031
+  NEQ
+  IF _176
+  PUSHLIX 0x0031
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0111
+  GOTO _176
+_176:
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  END
+  GOTO _178
+_178:
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM 0x00a4
+  PUSHIS 1
+  MINUS
+  COMM 0x0012
+  PUSHIS 10
+  PUSHIS 0
+  COMM SCREEN_FADE_A
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM RELEASE_CURRENT_OBJECT
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  GOTO _180
+_180:
+  GOTO _182
+_182:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _165
+_166:
+  GOTO _184
+_184:
+  END
+  END
+proc_0012:
+  PROC proc_0012
+_186:
+  PUSHIS 1
+  IF _187
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _192
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_01
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0032
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _189
+  PUSHMSG sera_04a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG sera_04b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0032
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _188
+_189:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _190
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG sera_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0032
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _188
+_190:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _191
+  PUSHMSG sera_02a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0032
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG sera_02b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0032
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _188
+_191:
+  PUSHTYPE5 ppos01_3
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0032
+  COMM 0x01e0
+  PUSHMSG sera_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG sera_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0032
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0032
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _188
+_188:
+  GOTO _192
+_192:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _186
+_187:
+  END
+proc_0013:
+  PROC proc_0013
+  PUSHIS 0
+  POPLIX 0x0035
+  PUSHIS 1
+  PUSHIS 1728
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _194
+  PUSHIS 1
+  PUSHLIX 0x0035
+  ADD
+  POPLIX 0x0035
+  GOTO _194
+_194:
+  PUSHIS 1
+  PUSHIS 1730
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _196
+  PUSHIS 1
+  PUSHLIX 0x0035
+  ADD
+  POPLIX 0x0035
+  GOTO _196
+_196:
+  PUSHIS 1
+  PUSHIS 1729
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _198
+  PUSHIS 1
+  PUSHLIX 0x0035
+  ADD
+  POPLIX 0x0035
+  GOTO _198
+_198:
+  PUSHIS 1
+  PUSHIS 1731
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _200
+  PUSHIS 1
+  PUSHLIX 0x0035
+  ADD
+  POPLIX 0x0035
+  GOTO _200
+_200:
+_202:
+  PUSHIS 1
+  IF _203
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _227
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_02
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0033
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2058
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _209
+  PUSHIS 4
+  PUSHLIX 0x0035
+  EQ
+  IF _205
+  PUSHMSG heat_SISEI_05a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_4
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_SISEI_05b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _204
+_205:
+  PUSHIS 3
+  PUSHLIX 0x0035
+  EQ
+  IF _206
+  PUSHMSG heat_SISEI_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _204
+_206:
+  PUSHIS 2
+  PUSHLIX 0x0035
+  EQ
+  IF _207
+  PUSHMSG heat_SISEI_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_5
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_SISEI_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _204
+_207:
+  PUSHIS 1
+  PUSHLIX 0x0035
+  EQ
+  IF _208
+  PUSHTYPE5 ppos01_6
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_SISEI_02a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_SISEI_02b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _204
+_208:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_SISEI_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _204
+_204:
+  GOTO _209
+_209:
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _215
+  PUSHTYPE5 ppos01_7
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_12a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_12b
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_215:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _216
+  PUSHTYPE5 ppos01_8
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_11
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_216:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _217
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_10
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_217:
+  PUSHIS 31
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _218
+  PUSHTYPE5 k_01pos_02
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_09
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_218:
+  PUSHIS 26
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _219
+  PUSHMSG heat_08a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_08b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_219:
+  PUSHIS 23
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _220
+  PUSHTYPE5 ppos01_9
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_06
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_220:
+  PUSHIS 22
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _221
+  PUSHTYPE5 ppos01_10
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_05
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_221:
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _222
+  PUSHTYPE5 k_01pos_01
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_222:
+  PUSHIS 9
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _223
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 k_01pos_01_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_223:
+  PUSHIS 8
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _224
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 k_01pos_01_3
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_224:
+  PUSHIS 6
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _225
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 k_01pos_01_4
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_225:
+  PUSHIS 4
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _226
+  PUSHTYPE5 ppos01_11
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_13
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _214
+_226:
+  PUSHTYPE5 k_01pos_01_5
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0033
+  COMM 0x01e0
+  PUSHMSG heat_00
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 12
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0034
+  PUSHIS 0
+  PUSHLIX 0x0034
+  EQ
+  IF _212
+  PUSHMSG heat_00_ans0
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _211
+_212:
+  PUSHIS 1
+  PUSHLIX 0x0034
+  EQ
+  IF _211
+  PUSHMSG heat_00_ans1
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0033
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0033
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _211
+_211:
+  GOTO _214
+_214:
+  GOTO _227
+_227:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _202
+_203:
+  END
+proc_0014:
+  PROC proc_0014
+  PUSHIS 0
+  POPLIX 0x0037
+  PUSHIS 1
+  PUSHIS 1728
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _229
+  PUSHIS 1
+  PUSHLIX 0x0037
+  ADD
+  POPLIX 0x0037
+  GOTO _229
+_229:
+  PUSHIS 1
+  PUSHIS 1730
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _231
+  PUSHIS 1
+  PUSHLIX 0x0037
+  ADD
+  POPLIX 0x0037
+  GOTO _231
+_231:
+  PUSHIS 1
+  PUSHIS 1729
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _233
+  PUSHIS 1
+  PUSHLIX 0x0037
+  ADD
+  POPLIX 0x0037
+  GOTO _233
+_233:
+  PUSHIS 1
+  PUSHIS 1731
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _235
+  PUSHIS 1
+  PUSHLIX 0x0037
+  ADD
+  POPLIX 0x0037
+  GOTO _235
+_235:
+_237:
+  PUSHIS 1
+  IF _238
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _260
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_03
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0036
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2058
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _244
+  PUSHIS 4
+  PUSHLIX 0x0037
+  EQ
+  IF _240
+  PUSHTYPE5 ppos01_12
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_SISEI_05a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 13
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_SISEI_05b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _239
+_240:
+  PUSHIS 3
+  PUSHLIX 0x0037
+  EQ
+  IF _241
+  PUSHMSG aljira_SISEI_04a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_13
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_SISEI_04b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _239
+_241:
+  PUSHIS 2
+  PUSHLIX 0x0037
+  EQ
+  IF _242
+  PUSHMSG aljira_SISEI_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_SISEI_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _239
+_242:
+  PUSHIS 1
+  PUSHLIX 0x0037
+  EQ
+  IF _243
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 13
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_SISEI_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _239
+_243:
+  PUSHMSG aljira_SISEI_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _239
+_239:
+  GOTO _244
+_244:
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _247
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 13
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_14
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_247:
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _248
+  PUSHTYPE5 ppos01_14
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_13
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_248:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _249
+  PUSHTYPE5 ppos01_15
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_12
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_249:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _250
+  PUSHTYPE5 ppos01_16
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_11
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_250:
+  PUSHIS 31
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _251
+  PUSHTYPE5 k_01pos_02_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_10
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_251:
+  PUSHIS 26
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _252
+  PUSHTYPE5 ppos01_17
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_09
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_252:
+  PUSHIS 25
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _253
+  PUSHTYPE5 ppos01_18
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_08
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_253:
+  PUSHIS 23
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _254
+  PUSHMSG aljira_07a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_19
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_07b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_254:
+  PUSHIS 22
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _255
+  PUSHMSG aljira_06a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_20
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_06b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_255:
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _256
+  PUSHMSG aljira_05a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_21
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_05b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_256:
+  PUSHIS 9
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _257
+  PUSHTYPE5 ppos01_22
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_257:
+  PUSHIS 8
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _258
+  PUSHTYPE5 ppos01_23
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG aljira_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_258:
+  PUSHIS 4
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _259
+  PUSHTYPE5 ppos01_24
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_15a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  PUSHMSG aljira_15b
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_259:
+  PUSHMSG aljira_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_25
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0036
+  COMM 0x01e0
+  PUSHMSG aljira_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0036
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0036
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _246
+_246:
+  GOTO _260
+_260:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _237
+_238:
+  END
+proc_0015:
+  PROC proc_0015
+  PUSHIS 0
+  POPLIX 0x003a
+  PUSHIS 1
+  PUSHIS 1728
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _262
+  PUSHIS 1
+  PUSHLIX 0x003a
+  ADD
+  POPLIX 0x003a
+  GOTO _262
+_262:
+  PUSHIS 1
+  PUSHIS 1730
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _264
+  PUSHIS 1
+  PUSHLIX 0x003a
+  ADD
+  POPLIX 0x003a
+  GOTO _264
+_264:
+  PUSHIS 1
+  PUSHIS 1729
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _266
+  PUSHIS 1
+  PUSHLIX 0x003a
+  ADD
+  POPLIX 0x003a
+  GOTO _266
+_266:
+  PUSHIS 1
+  PUSHIS 1731
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _268
+  PUSHIS 1
+  PUSHLIX 0x003a
+  ADD
+  POPLIX 0x003a
+  GOTO _268
+_268:
+_270:
+  PUSHIS 1
+  IF _271
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _294
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_04
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0038
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2058
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _277
+  PUSHIS 4
+  PUSHLIX 0x003a
+  EQ
+  IF _273
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_SISEI_05a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 ppos01_26
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_SISEI_05b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _272
+_273:
+  PUSHIS 3
+  PUSHLIX 0x003a
+  EQ
+  IF _274
+  PUSHTYPE5 ppos01_27
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_SISEI_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _272
+_274:
+  PUSHIS 2
+  PUSHLIX 0x003a
+  EQ
+  IF _275
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_SISEI_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _272
+_275:
+  PUSHIS 1
+  PUSHLIX 0x003a
+  EQ
+  IF _276
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_SISEI_02a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 ppos01_28
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_SISEI_02b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _272
+_276:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_SISEI_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 ppos01_29
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_SISEI_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _272
+_272:
+  GOTO _277
+_277:
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _287
+  PUSHMSG gale_08a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_30
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_08b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 77
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0039
+  PUSHIS 0
+  PUSHLIX 0x0039
+  EQ
+  IF _284
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_08_ans0
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 79
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0039
+  PUSHIS 0
+  PUSHLIX 0x0039
+  EQ
+  IF _280
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_08_0_ans0
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _279
+_280:
+  PUSHIS 1
+  PUSHLIX 0x0039
+  EQ
+  IF _281
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_08_0_ans1
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _279
+_281:
+  PUSHIS 2
+  PUSHLIX 0x0039
+  EQ
+  IF _279
+  PUSHMSG gale_08_0_ans2
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _279
+_279:
+  GOTO _283
+_284:
+  PUSHIS 1
+  PUSHLIX 0x0039
+  EQ
+  IF _283
+  PUSHMSG gale_08_ans1
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _283
+_283:
+  GOTO _286
+_287:
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _288
+  PUSHTYPE5 ppos01_31
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 2
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 7
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_07a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 2
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_07b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_288:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _289
+  PUSHTYPE5 ppos01_32
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 2
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 7
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_06
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_289:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _290
+  PUSHTYPE5 ppos01_33
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_05
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_290:
+  PUSHIS 31
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _291
+  PUSHTYPE5 k_01pos_02_3
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_291:
+  PUSHIS 26
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _292
+  PUSHMSG gale_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHTYPE5 ppos01_34
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_03c
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_292:
+  PUSHIS 25
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _293
+  PUSHTYPE5 ppos01_35
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0038
+  COMM 0x01e0
+  PUSHMSG gale_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_293:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0038
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0038
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _286
+_286:
+  GOTO _294
+_294:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _270
+_271:
+  END
+proc_0016:
+  PROC proc_0016
+  PUSHIS 0
+  POPLIX 0x003c
+  PUSHIS 1
+  PUSHIS 1728
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _296
+  PUSHIS 1
+  PUSHLIX 0x003c
+  ADD
+  POPLIX 0x003c
+  GOTO _296
+_296:
+  PUSHIS 1
+  PUSHIS 1730
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _298
+  PUSHIS 1
+  PUSHLIX 0x003c
+  ADD
+  POPLIX 0x003c
+  GOTO _298
+_298:
+  PUSHIS 1
+  PUSHIS 1729
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _300
+  PUSHIS 1
+  PUSHLIX 0x003c
+  ADD
+  POPLIX 0x003c
+  GOTO _300
+_300:
+  PUSHIS 1
+  PUSHIS 1731
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  IF _302
+  PUSHIS 1
+  PUSHLIX 0x003c
+  ADD
+  POPLIX 0x003c
+  GOTO _302
+_302:
+_304:
+  PUSHIS 1
+  IF _305
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _318
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_05
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003b
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 2058
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _311
+  PUSHIS 4
+  PUSHLIX 0x003c
+  EQ
+  IF _307
+  PUSHTYPE5 ppos01_36
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHMSG ciero_SISEI_05
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _306
+_307:
+  PUSHIS 3
+  PUSHLIX 0x003c
+  EQ
+  IF _308
+  PUSHTYPE5 ppos01_37
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHMSG ciero_SISEI_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _306
+_308:
+  PUSHIS 2
+  PUSHLIX 0x003c
+  EQ
+  IF _309
+  PUSHTYPE5 ppos01_38
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 14
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_SISEI_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _306
+_309:
+  PUSHIS 1
+  PUSHLIX 0x003c
+  EQ
+  IF _310
+  PUSHTYPE5 ppos01_39
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 15
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_SISEI_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _306
+_310:
+  PUSHTYPE5 ppos01_40
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 14
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_SISEI_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _306
+_306:
+  GOTO _311
+_311:
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _314
+  PUSHMSG ciero_05a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_41
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 15
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_05b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _313
+_314:
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _315
+  PUSHTYPE5 k_01pos_03
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHMSG ciero_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _313
+_315:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _316
+  PUSHTYPE5 k_01pos_03_2
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHMSG ciero_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _313
+_316:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _317
+  PUSHTYPE5 k_01pos_02_4
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHMSG ciero_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _313
+_317:
+  PUSHTYPE5 ppos01_42
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003b
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _313
+_313:
+  GOTO _318
+_318:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _304
+_305:
+  END
+proc_0017:
+  PROC proc_0017
+_320:
+  PUSHIS 1
+  IF _321
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _329
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_06
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003d
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _323
+  PUSHTYPE5 ppos01_43
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 10
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_01_06
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 5
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_323:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _324
+  PUSHTYPE5 ppos01_44
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_01_05
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_324:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _325
+  PUSHMSG npc_01_04a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_45
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHMSG npc_01_04b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_325:
+  PUSHIS 26
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _326
+  PUSHTYPE5 ppos01_46
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_01_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_326:
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _327
+  PUSHTYPE5 k_01pos_01_6
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHMSG npc_01_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_327:
+  PUSHIS 8
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _328
+  PUSHTYPE5 ppos01_47
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_01_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_328:
+  PUSHTYPE5 ppos01_48
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003d
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_01_00
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _322
+_322:
+  GOTO _329
+_329:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _320
+_321:
+  END
+proc_0018:
+  PROC proc_0018
+_331:
+  PUSHIS 1
+  IF _332
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _341
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_07
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003e
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _334
+  PUSHTYPE5 ppos01_49
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHMSG npc_02_06
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_334:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _335
+  PUSHTYPE5 ppos01_50
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_05
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_335:
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _336
+  PUSHTYPE5 ppos01_51
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_04
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_336:
+  PUSHIS 31
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _337
+  PUSHTYPE5 ppos01_52
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_337:
+  PUSHIS 26
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _338
+  PUSHTYPE5 ppos01_53
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_338:
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _339
+  PUSHTYPE5 ppos01_54
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_339:
+  PUSHIS 8
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _340
+  PUSHTYPE5 ppos01_55
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_340:
+  PUSHTYPE5 ppos01_56
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_02_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _333
+_333:
+  GOTO _341
+_341:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _331
+_332:
+  END
+proc_0019:
+  PROC proc_0019
+_343:
+  PUSHIS 1
+  IF _344
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _347
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_08
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x003f
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _346
+  PUSHTYPE5 ppos01_57
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003f
+  COMM 0x01e0
+  PUSHMSG npc_08_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003f
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _345
+_346:
+  PUSHTYPE5 ppos01_58
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x003f
+  COMM 0x01e0
+  PUSHMSG npc_08_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x003f
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x003f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _345
+_345:
+  GOTO _347
+_347:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _343
+_344:
+  END
+proc_001a:
+  PROC proc_001a
+_349:
+  PUSHIS 1
+  IF _350
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _351
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_09
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0040
+  PUSHTYPE5 ppos01_59
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0040
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0040
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG npc_09_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0040
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0040
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _351
+_351:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _349
+_350:
+  END
+proc_001b:
+  PROC proc_001b
+_353:
+  PUSHIS 1
+  IF _354
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _358
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_10
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0041
+  PUSHTYPE5 ppos01_60
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0041
+  COMM 0x01e0
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG npc_001_10_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 123
+  COMM 0x0003
+  PUSHREG
+  POPLIX 0x0042
+  PUSHIS 0
+  PUSHLIX 0x0042
+  EQ
+  IF _356
+  PUSHMSG npc_001_10_01_ans0
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0041
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0041
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _355
+_356:
+  PUSHIS 1
+  PUSHLIX 0x0042
+  EQ
+  IF _355
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0041
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_001_10_01_ans1
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0041
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0041
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _355
+_355:
+  GOTO _358
+_358:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _353
+_354:
+  END
+proc_001c:
+  PROC proc_001c
+_360:
+  PUSHIS 1
+  IF _361
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _362
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_11
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0043
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 5
+  PUSHLIX 0x0043
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 4
+  PUSHLIX 0x0043
+  COMM 0x004b
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG aljira_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0043
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 4
+  PUSHLIX 0x0043
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _362
+_362:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _360
+_361:
+  END
+proc_001d:
+  PROC proc_001d
+_364:
+  PUSHIS 1
+  IF _365
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _369
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_01_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0044
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _367
+  PUSHMSG ciero_003_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_61
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0044
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_003_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0044
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _366
+_367:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _368
+  PUSHTYPE5 ppos01_62
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0044
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_003_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0044
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _366
+_368:
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 15
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG ciero_003_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_63
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0044
+  COMM 0x01e0
+  PUSHMSG ciero_003_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0044
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0044
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _366
+_366:
+  GOTO _369
+_369:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _364
+_365:
+  END
+proc_001e:
+  PROC proc_001e
+_371:
+  PUSHIS 1
+  IF _372
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _376
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_02_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0045
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _374
+  PUSHTYPE5 ppos01_64
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0045
+  COMM 0x01e0
+  PUSHMSG gale_003_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0045
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0045
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _373
+_374:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _375
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 2
+  PUSHLIX 0x0045
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_003_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0045
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0045
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _373
+_375:
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 3
+  PUSHLIX 0x0045
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG gale_003_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0045
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0045
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _373
+_373:
+  GOTO _376
+_376:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _371
+_372:
+  END
+proc_001f:
+  PROC proc_001f
+_378:
+  PUSHIS 1
+  IF _379
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _383
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_03_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0046
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _381
+  PUSHMSG npc_07_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 5
+  PUSHLIX 0x0046
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_07_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0046
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0046
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _380
+_381:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _382
+  PUSHMSG npc_07_02a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_65
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0046
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0046
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_07_02b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0046
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0046
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _380
+_382:
+  PUSHMSG npc_07_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0046
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0046
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _380
+_380:
+  GOTO _383
+_383:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _378
+_379:
+  END
+proc_0020:
+  PROC proc_0020
+_385:
+  PUSHIS 1
+  IF _386
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _389
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_04_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0047
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _388
+  PUSHMSG npc_06_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0047
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 14
+  PUSHLIX 0x0047
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _387
+_388:
+  PUSHMSG npc_06_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_66
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0047
+  COMM 0x01e0
+  PUSHMSG npc_06_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0047
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 14
+  PUSHLIX 0x0047
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _387
+_387:
+  GOTO _389
+_389:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _385
+_386:
+  END
+proc_0021:
+  PROC proc_0021
+_391:
+  PUSHIS 1
+  IF _392
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _393
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_05_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0048
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG npc_03_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0048
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0048
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _393
+_393:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _391
+_392:
+  END
+proc_0022:
+  PROC proc_0022
+_395:
+  PUSHIS 1
+  IF _396
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _397
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_06_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0049
+  PUSHTYPE5 ppos01_67
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0049
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0049
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG rupa_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0049
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0049
+  COMM PREPARE_UNIT_MOTION_STATE
+  COMM 0x0216
+  PUSHIS 15
+  PUSHIS 0
+  COMM SCREEN_FADE_B
+  PUSHIS 15
+  COMM WAIT_FOR_TIMER_LIMIT
+  PUSHIS 646
+  PUSHIS 27
+  PUSHIS 1
+  COMM 0x0097
+  PUSHIS 646
+  COMM CALL_EVENT
+  END
+  GOTO _397
+_397:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _395
+_396:
+  END
+proc_0023:
+  PROC proc_0023
+_399:
+  PUSHIS 1
+  IF _400
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _401
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_07_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004a
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG npc_04_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004a
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004a
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _401
+_401:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _399
+_400:
+  END
+proc_0024:
+  PROC proc_0024
+_403:
+  PUSHIS 1
+  IF _404
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _409
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_08_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004b
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _406
+  PUSHTYPE5 ppos01_68
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004b
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_003_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _405
+_406:
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _407
+  PUSHTYPE5 ppos01_69
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004b
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 8
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_003_04a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_003_04b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _405
+_407:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _408
+  PUSHMSG heat_003_02a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_70
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004b
+  COMM 0x01e0
+  PUSHMSG heat_003_02b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _405
+_408:
+  PUSHTYPE5 k_01pos_01_7
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004b
+  COMM 0x01e0
+  PUSHMSG heat_003_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG heat_003_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004b
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004b
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _405
+_405:
+  GOTO _409
+_409:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _403
+_404:
+  END
+proc_0025:
+  PROC proc_0025
+_411:
+  PUSHIS 1
+  IF _412
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _416
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_09_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004c
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _414
+  PUSHMSG npc_05_03a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_71
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004c
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004c
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_05_03b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004c
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004c
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _413
+_414:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _415
+  PUSHTYPE5 k_01pos_01_8
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004c
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 13
+  PUSHLIX 0x004c
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_05_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004c
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004c
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _413
+_415:
+  PUSHTYPE5 k_01pos_01_9
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004c
+  COMM 0x01e0
+  PUSHMSG npc_05_01
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004c
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004c
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _413
+_413:
+  GOTO _416
+_416:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _411
+_412:
+  END
+proc_0026:
+  PROC proc_0026
+_418:
+  PUSHIS 1
+  IF _419
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _423
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_10_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004d
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _421
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x004d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG sera_003_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _420
+_421:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _422
+  PUSHTYPE5 ppos01_72
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004d
+  COMM 0x01e0
+  PUSHMSG sera_003_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _420
+_422:
+  PUSHMSG sera_003_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_73
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004d
+  COMM 0x01e0
+  PUSHMSG sera_003_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004d
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004d
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _420
+_420:
+  GOTO _423
+_423:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _418
+_419:
+  END
+proc_0027:
+  PROC proc_0027
+_425:
+  PUSHIS 1
+  IF _426
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _430
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_11_2
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004e
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _428
+  PUSHMSG arujila_003_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _427
+_428:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _429
+  PUSHTYPE5 ppos01_74
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004e
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG arujila_003_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _427
+_429:
+  PUSHMSG arujila_003_01a
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHTYPE5 ppos01_75
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004e
+  COMM 0x01e0
+  PUSHMSG arujila_003_01b
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004e
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004e
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _427
+_427:
+  GOTO _430
+_430:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _425
+_426:
+  END
+proc_0028:
+  PROC proc_0028
+_432:
+  PUSHIS 1
+  IF _433
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _436
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_12
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x004f
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _435
+  PUSHTYPE5 ppos01_76
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x004f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_03_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004f
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _434
+_435:
+  PUSHTYPE5 ppos01_77
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x004f
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x004f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_03_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x004f
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x004f
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _434
+_434:
+  GOTO _436
+_436:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _432
+_433:
+  END
+proc_0029:
+  PROC proc_0029
+_438:
+  PUSHIS 1
+  IF _439
+  PUSHIS 1
+  COMM 0x005e
+  PUSHREG
+  IF _442
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 2
+  COMM SET_SOLAR_OVERLAY_MODE
+  PUSHTYPE5 k_01npc_13
+  COMM 0x01ff
+  PUSHREG
+  POPLIX 0x0050
+  PUSHTYPE5 ppos01_78
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0050
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHIS 46
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _441
+  PUSHTYPE5 ppos01_79
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x01e0
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 1
+  PUSHLIX 0x0050
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_04_03
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0050
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0050
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _440
+_441:
+  PUSHTYPE5 ppos01_80
+  COMM READ_SECONDARY_WORLD_ID_VALUE
+  PUSHREG
+  PUSHLIX 0x0050
+  COMM 0x01e0
+  PUSHIS 3
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 12
+  PUSHLIX 0x0050
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHMSG npc_04_02
+  COMM MESSAGE_REQUEST_AND_POLL
+  PUSHLIX 0x0050
+  COMM 0x01e1
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 0
+  PUSHIS 20
+  PUSHIS 10
+  PUSHIS 0
+  PUSHLIX 0x0050
+  COMM PREPARE_UNIT_MOTION_STATE
+  PUSHIS 3
+  COMM SET_SOLAR_OVERLAY_MODE
+  COMM RELEASE_CURRENT_OBJECT
+  COMM WAIT_FOR_TIMER_START
+  END
+  GOTO _440
+_440:
+  GOTO _442
+_442:
+  COMM WAIT_FOR_TIMER_START
+  GOTO _438
+_439:
+  END
+proc_002a:
+  PROC proc_002a
+  PUSHIS 12
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _445
+  PUSHIS 2063
+  COMM CLEAR_MODEL_FLAG
+  GOTO _444
+_445:
+  PUSHIS 6
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _444
+  PUSHIS 2063
+  COMM SET_MODEL_FLAG
+  GOTO _444
+_444:
+  PUSHIS 6
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _448
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _447
+_448:
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _447
+_447:
+  PUSHIS 1043
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _449
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_03
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x010a
+  GOTO _449
+_449:
+  PUSHIS 0
+  PUSHIS 1049
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  EQ
+  PUSHIS 50
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  AND
+  IF _451
+  COMM RESTORE_CAMERA_NODE_MODE
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG hungry
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 10
+  PUSHIS 100
+  PUSHIS 1
+  COMM 0x001a
+  PUSHIS 10
+  COMM WAIT_FOR_TIMER_LIMIT
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG hungry02
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1
+  COMM 0x013a
+  PUSHIS 1049
+  COMM SET_MODEL_FLAG
+  COMM RELEASE_CURRENT_OBJECT
+  GOTO _451
+_451:
+  END
+proc_002b:
+  PROC proc_002b
+  PUSHIS 41
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _454
+  PUSHTYPE5 atari_hoji_01
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0107
+  PUSHTYPE5 atari_hoji_02
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0107
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_3
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _453
+_454:
+  PUSHTYPE5 atari_hoji_01_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHTYPE5 atari_hoji_02_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_4
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_4
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _453
+_453:
+  PUSHIS 44
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _456
+  PUSHTYPE5 atari_hoji_03
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0107
+  GOTO _455
+_456:
+  PUSHTYPE5 atari_hoji_03_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0108
+  GOTO _455
+_455:
+  PUSHIS 1043
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _457
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_03_2
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 1
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x010a
+  GOTO _457
+_457:
+  END
+proc_002c:
+  PROC proc_002c
+  COMM RESTORE_CAMERA_NODE_MODE
+  PUSHIS 9
+  COMM TEST_MODEL_FLAG
+  PUSHREG
+  IF _460
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_5
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_5
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  GOTO _459
+_460:
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_01_6
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0103
+  PUSHIS 0
+  PUSHTYPE5 md_hoji_02_6
+  PUSHIS 0
+  PUSHIS 0
+  COMM 0x0104
+  GOTO _459
+_459:
+  COMM ACTIVATE_MESSAGE_PANEL
+  PUSHMSG BLUE_GET_KARI
+  COMM MESSAGE_REQUEST_AND_POLL
+  COMM FINISH_SCRIPT_MESSAGE_WINDOW
+  PUSHIS 1053
+  COMM SET_MODEL_FLAG
+  PUSHIS 2053
+  COMM CLEAR_MODEL_FLAG
+  COMM RELEASE_CURRENT_OBJECT
+  END
+end
+
+messages msg1
+  select YES_NO ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message hungry speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph and the party feel hungry..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message hungry02 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> They grew weak from hunger."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message BLUE_GET_KARI speaker=0
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Obtained the Blue Clue skill."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "This skill comes after the"
+      newline
+      text "amplification of atma, but"
+      newline
+      text "suppose that you earned it."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Also, it's not necessary to"
+      newline
+      text "set a skill in order to"
+      newline
+      text "use it at this time."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_01a speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'm alright."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_01b speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Please don't do anything"
+      newline
+      text "dangerous."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_02a speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Lupa is on the other side of town..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_02b speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I don't know why I have this feeling,"
+      newline
+      text "but... I'm sure of it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_03 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Serph, do you think that"
+      newline
+      text "Lupa is okay?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_04a speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I couldn't save him..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_04b speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I must really seem useless..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_00 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They fear us."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select heat_00_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Why?"
+    endoption
+    option
+      control f2 08 ff ff
+      text "What is fear?"
+    endoption
+  endselect
+  message heat_00_ans0 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We will find out soon."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_00_ans1 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Just look around."
+      newline
+      text "It cannot be explained."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_13 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Do you see \"fear\" now?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_01a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What an annoying woman."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_01b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Well, if she changes her mind,"
+      newline
+      text "I'll just grab that guy over there."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_02 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What a buncha losers!"
+      newline
+      text "I'll never end up like them."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_03 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What a buncha losers!"
+      newline
+      text "I'll never end up like them."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_04 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "These newbies have guts."
+      newline
+      text "I like that in a meal."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_05 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I know you're hungry, but try to"
+      newline
+      text "wait a little longer."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_06 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I know you're hungry, but try to"
+      newline
+      text "wait a little longer."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_08a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "That chunky bastard!"
+      newline
+      text "If he does anything to Sera..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_08b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...I'll tear out his heart and"
+      newline
+      text "hang it from that damn citadel."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_09 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sera, aren't you hungry?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_10 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What's that loser want with"
+      newline
+      text "us, now?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_11 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I never knew Gale could get so"
+      newline
+      text "worked up."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Why's he talking about finding"
+      newline
+      text "someone?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_12a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It doesn't matter who Sera really is."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_12b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I'm going to protect her!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_01 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Damn these bastards!"
+      newline
+      text "Makin' us waste our time..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_02a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It's not like we can help people"
+      newline
+      text "who have already been devoured."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_02b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hurry up! We need to find Sera!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_03a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "You care too much about others,"
+      newline
+      text "y'know that?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_03b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If we're gonna do this,"
+      newline
+      text "then hurry the hell up, already!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_04 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sera... don't do anything stupid."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_05a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What a waste of time."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_SISEI_05b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Okay, everyone's happy."
+      newline
+      text "Let's get going!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_01a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They are entirely vulnerable."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_01b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What happened to the Vanguards?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_15a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Where are you going, Serph?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_15b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Harley escaped further into"
+      newline
+      text "their base."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_03 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "A defeated Tribe follows the leader"
+      newline
+      text "of the victorious Tribe."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "That's the law."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_04 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "A defeated Tribe follows the leader"
+      newline
+      text "of the victorious Tribe."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "That's the law."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_05a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Why are we here, of all places?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_05b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Serph, try to keep our battles"
+      newline
+      text "to a minimum."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_06a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Comrades..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_06b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I wonder if we're \"comrades\" too."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_07a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Comrades..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_07b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I wonder if we're \"comrades\" too."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_08 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Serph, worry about Sera for now."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_09 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They're going to trap you by using"
+      newline
+      text "Sera as a shield."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "You should really stay here..."
+      newline
+      text "But, I know you aren't going to listen."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_10 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Hm..."
+      newline
+      text "Has Sera eaten anything since"
+      newline
+      text "we found her?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_11 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This must not be the place."
+      newline
+      text "Svadhisthana is huge."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_12 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Come to think of it..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Gale asked me what could make"
+      newline
+      text "a woman cry."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I told him something probably"
+      newline
+      text "made her sad... But why would"
+      newline
+      text "he ask a question like that?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_13 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Come to think of it..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Gale asked me what could make"
+      newline
+      text "a woman cry."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I told him something probably"
+      newline
+      text "made her sad... But why would"
+      newline
+      text "he ask a question like that?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_14 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If I was devoured, then I couldn't"
+      newline
+      text "be here now, could I?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_01 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Nobody's here... Don't tell me"
+      newline
+      text "they've all been...!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_02 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This couldn't have happened at"
+      newline
+      text "a worse time!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_03a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This Atma crap only accomplishes"
+      newline
+      text "one thing."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_03b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What good is a world where one"
+      newline
+      text "person stands alone on the bodies"
+      newline
+      text "of his slain enemies?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_04a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We've killed three of them,"
+      newline
+      text "so that means their boss must"
+      newline
+      text "be in the final area."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_04b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...But, something doesn't seem"
+      newline
+      text "right, don't you think?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_05a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Let's get back to the tower,"
+      newline
+      text "Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_SISEI_05b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It's time to face our destiny, and"
+      newline
+      text "learn the truth about our lives."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_01 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What are comrades?"
+      newline
+      text "I do not comprehend."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_02 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They do not pose a threat."
+      newline
+      text "We should return to headquarters"
+      newline
+      text "immediately."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_03a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Mick's plan is obvious."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_03b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sera's safety is guaranteed,"
+      newline
+      text "but we will be unable to move"
+      newline
+      text "against our enemy."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_03c speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "For the moment, we can only"
+      newline
+      text "prepare by increasing our combat"
+      newline
+      text "abilities."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_04 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "So, she has no need to consume food"
+      newline
+      text "for energy?  I do not comprehend..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_05 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We should find out Lupa's intentions."
+      newline
+      text "Let us hurry, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_06 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We must attack Varin immediately."
+      newline
+      text "Don't let Lupa's sacrifice be"
+      newline
+      text "in vain."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "If you aren't ready, then I will"
+      newline
+      text "lead the Embryon into battle."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_07a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Are you going to dishonor"
+      newline
+      text "Lupa's memory?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_07b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We must attack Varin immediately."
+      newline
+      text "Don't let Lupa's sacrifice be"
+      newline
+      text "in vain."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "If you aren't ready, then I will"
+      newline
+      text "lead the Embryon into battle."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_08a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I originally accepted this power"
+      newline
+      text "without question..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "But, killing Lupa taught me of"
+      newline
+      text "pain and regret."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_08b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Why has the Temple cursed us with"
+      newline
+      text "this Atma?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select gale_08_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Perhaps they are testing us."
+    endoption
+    option
+      control f2 08 ff ff
+      text "I do not know."
+    endoption
+  endselect
+  message gale_08_ans0 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What is there to test?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select gale_08_0_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Atma."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Ourselves."
+    endoption
+    option
+      control f2 08 ff ff
+      text "That I do not know..."
+    endoption
+  endselect
+  message gale_08_0_ans0 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The Atma... Demonic power..."
+      newline
+      text "They collect data as we devour"
+      newline
+      text "each other."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "This is possible..."
+      newline
+      text "But, to what end?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_08_0_ans1 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Yes, that would be ironic."
+      newline
+      text "But, what is there to gain from"
+      newline
+      text "testing us?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_08_0_ans2 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "That's true--if we knew the answer,"
+      newline
+      text "we wouldn't be in this mess."
+      newline
+      text "Let's ask them ourselves."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_08_ans1 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "That's true--if we knew the answer,"
+      newline
+      text "we wouldn't be in this mess."
+      newline
+      text "Let's ask them ourselves."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_01a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They either fled, or were"
+      newline
+      text "devoured."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_01b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Whichever case, the report seems"
+      newline
+      text "to be true."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_02a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Dealing with them will not change"
+      newline
+      text "our situation."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_02b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "However, they did kill some"
+      newline
+      text "of our comrades."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "This could be considered revenge"
+      newline
+      text "for such needless killing."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_03 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If we are victorious, then all"
+      newline
+      text "wars will end."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I truly hope that this comes"
+      newline
+      text "to pass."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_04 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "There isn't time to lose."
+      newline
+      text "If we're going to eliminate them,"
+      newline
+      text "let's do it quickly."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_05a speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sera knows all about this world,"
+      newline
+      text "and everything about us."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_SISEI_05b speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Let's head for the Temple, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_01 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Heat is violent when he be"
+      newline
+      text "devourin' someone. It's a bit"
+      newline
+      text "harsh for girls to watch."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_02 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Ohhh... Sera likes you, bro."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Don't ask me how, but I know dis."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_03 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Even Gale be growin' impatient"
+      newline
+      text "for once."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "C'mon, let's go brudda."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_04 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Even Gale be growin' impatient"
+      newline
+      text "for once."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "C'mon, let's go brudda."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_05a speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Argilla been devoured...?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_05b speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "If dat be true, it means dere be"
+      newline
+      text "demons like us in Nirvana..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_SISEI_01 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What de hell dey want now?"
+      newline
+      text "We already won, ja?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_SISEI_02 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What should we do, bro?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_SISEI_03 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It sucks dat we gotta deal wit"
+      newline
+      text "dis instead of just going to"
+      newline
+      text "de Temple."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_SISEI_04 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Three places down, ja?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Let's look for deir boss, then!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_SISEI_05 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "All our comrades were s'posed ta"
+      newline
+      text "go to Nirvana wit' us..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_00 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Harley is dead."
+      newline
+      text "We will follow the Embryon."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Harley is dead."
+      newline
+      text "We will follow the Embryon."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_01b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Harley is dead."
+      newline
+      text "We will follow the Embryon."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_02 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Rookies are trying to form a new"
+      newline
+      text "Tribe, using this as their"
+      newline
+      text "headquarters."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_03 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Rookies keep springing up, no matter"
+      newline
+      text "how many of them we devour."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "They're like machines."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_04a speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "So, that's the black-haired girl."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_04b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "As she said, Lupa is waiting"
+      newline
+      text "over there."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_05 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Rookies keep springing up, no matter"
+      newline
+      text "how many of them we devour."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "They're like machines."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_01_06 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Wars raged constantly in the country"
+      newline
+      text "I used to live in..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "W-Wait... What am I saying?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We will obey Junkyard law."
+      newline
+      text "You are the new boss."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_01b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We will obey Junkyard law."
+      newline
+      text "You are the new boss."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_02 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "As their numbers increase, they are"
+      newline
+      text "becoming much more of a burden."
+      newline
+      text "What will we do, sir?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_03 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Those rookies are still resisting."
+      newline
+      text "I can't devour any more of them..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Can you handle them, sir?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_04 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Those rookies are still resisting."
+      newline
+      text "I can't devour any more of them..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Can you handle them, sir?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_05 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Those rookies are still resisting."
+      newline
+      text "I can't devour any more of them..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Can you handle them, sir?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_02_06 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "There's no point in fighting the rookies"
+      newline
+      text "now, sir."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_08_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "New leader, are you adequately"
+      newline
+      text "supplied?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Use the Vendor efficiently to"
+      newline
+      text "avoid being injured in battle."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_08_02 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sir, the cell exchange rate seems"
+      newline
+      text "to fluctuate."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "If you plan carefully for the best"
+      newline
+      text "rate, you will earn more Macca."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_09_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Harley is dead."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He left something important in"
+      newline
+      text "his room before he fell."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_001_10_01 speaker=7
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Sir, rookies are encroaching on"
+      newline
+      text "our territory."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select npc_001_10_01_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "It is of little concern."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Rookies?"
+    endoption
+  endselect
+  message npc_001_10_01_ans0 speaker=7
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Yes, sir."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_001_10_01_ans1 speaker=7
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Perhaps the light affected your"
+      newline
+      text "memory more seriously than you"
+      newline
+      text "first thought, sir."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Rookies are newcomers."
+      newline
+      text "We were once rookies, as well."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Rookies form into groups and"
+      newline
+      text "become a Tribe. They are then"
+      newline
+      text "bound to the law, and Nirvana."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message aljira_02 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Get back... to the base."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_003_01a speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Dat's true! If it didn't flow"
+      newline
+      text "somewhere, den dis town would be"
+      newline
+      text "completely flooded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_003_01b speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Why didn't we notice sumthing so"
+      newline
+      text "obvious, eh?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_003_02 speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I wonder if dis \"honor\" thing"
+      newline
+      text "is inside me, too."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_003_03a speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "To think... Gale was always de"
+      newline
+      text "stickler for da rules..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message ciero_003_03b speaker=5
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Lupa musta been some guy, to"
+      newline
+      text "turn that around."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_003_01 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I see. I missed it completely."
+      newline
+      text "There is a path for rain to"
+      newline
+      text "travel underground."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_003_02 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Honor is in me, as well...?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message gale_003_03 speaker=4
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Tribe color no longer has any"
+      newline
+      text "meaning. Prove yourself, as"
+      newline
+      text "an individual."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_07_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Such a dignified man would surely"
+      newline
+      text "learn from his defeat."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_07_02a speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "You can't make them all surrender."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "While they would make good allies,"
+      newline
+      text "we'll have to kill them if they"
+      newline
+      text "resist."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_07_02b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "You can kill them, but they"
+      newline
+      text "won't be defeated."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_07_03a speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I understand what he means..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Our soul is immortal, and our"
+      newline
+      text "feelings eternal. My mother told"
+      newline
+      text "me that, once..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_07_03b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Did I... have a mother...?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_06_01a speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Lupa of the Wolves..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "He has the \"Lavaflow\" Atma, and"
+      newline
+      text "is an expert fighter."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_06_01b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Those who attack him are defeated"
+      newline
+      text "instantly."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_06_02 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "That kick was fast..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Gale is a force to be reckoned with."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_03_01 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "This is an official visit from"
+      newline
+      text "the Wolves. Treat us with respect."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message rupa_01 speaker=9
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We have met once before, but allow"
+      newline
+      text "me to introduce myself formally."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I am Lupa, leader of the Wolves."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I am sorry for my previous"
+      newline
+      text "discourtesy. I should have known"
+      newline
+      text "you are a reasonable man."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "I trust you will forgive me."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_04_01 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We are Lupa's attendants. Allow us"
+      newline
+      text "to be admitted into the presence of"
+      newline
+      text "the Embryon's leader."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_01a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "So that's Lupa..."
+      newline
+      text "Looks tougher than I expected."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_01b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "...Still no match for me, though."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_02a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Damn that Varin!"
+      newline
+      text "Does he know something about Sera?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_02b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "C'mon, Serph."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_04a speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "What the hell are you talking"
+      newline
+      text "about? If you die, it's all over!"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_04b speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Nobody's going to use me."
+      newline
+      text "I'll survive, and have it all"
+      newline
+      text "to myself."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message heat_003_03 speaker=2
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I don't give a damn about souls"
+      newline
+      text "or recycled information."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Let's find Sera."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_05_01 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "They came out of that hole."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_05_02 speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Varin defeated them by "
+      newline
+      text "himself!?"
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "What kind of monster is he?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_05_03a speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "There may be a place underground..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_05_03b speaker=6
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "The rain is so natural that I never"
+      newline
+      text "really noticed it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_003_01a speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "A river of reincarnation flows"
+      newline
+      text "from the rain of the dead."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "Within the egg's shell, lost souls"
+      newline
+      text "continue their circulation..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_003_01b speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "No... It shouldn't be like this..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_003_02 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I..."
+      newline
+      text "I don't want to go any further..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message sera_003_03 speaker=1
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Why did God establish this cycle?"
+      newline
+      text "It only multiplies sadness..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message arujila_003_01a speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Those who die are purified in the"
+      newline
+      text "clouds and become rain."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "The Karma Temple then grants them"
+      newline
+      text "a new life..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message arujila_003_01b speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "That must be why..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message arujila_003_02 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "How does Varin know about Sera?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message arujila_003_03 speaker=3
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "I felt something from Jinana,"
+      newline
+      text "too... so I think I understand."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_03_02 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We are all ships in the vast sea"
+      newline
+      text "of life. Hold your heads high like"
+      newline
+      text "wind-blown sails..."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "The compass which shows us the way"
+      newline
+      text "lies in our hearts."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_03_03 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "We vowed service to Lupa. Forgive"
+      newline
+      text "us, but we will not abandon the color"
+      newline
+      text "of the Wolves."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_04_02 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Cherish honor and believe in"
+      newline
+      text "yourself. That is the law of"
+      newline
+      text "the Wolves."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message npc_04_03 speaker=8
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "Do you know of the soul?"
+      newline
+      text "It carries the information of"
+      newline
+      text "one's feelings."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "If someone inherits his soul, then"
+      newline
+      text "Lupa will not truly die. Just like..."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message EXITWARP speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Leave the area?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select EXITWARP_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message HOSEKI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A strange object hovers in midair."
+      newline
+      text "Touch it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select HOSEKI_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message HOSEKI_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph decided not to touch it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message HOSEKI_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A strange object lies on the floor."
+      newline
+      text "Touch it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select TAKARA_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message TAKARA_NOGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph decided not to touch it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_STILLGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Nothing happened."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_GET2 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "> That's the substance the Temple is"
+      newline
+      text "looking for. It can be traded in for"
+      newline
+      text "Macca."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_MAKA_GET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      text " Macca"
+      control f2 02 01 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph's party took damage."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_POISON speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph's party took damage,"
+      newline
+      text "and was poisoned."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_ACHE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph's party took damage,"
+      newline
+      text "and had stomach aches."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_DAMAGE_CLOSE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Serph's party took damage"
+      newline
+      text "and had magic sealed."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARA_KARAGET speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> It was empty."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message TAKARASAGASI speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> "
+      control f2 03 03 ff
+      text " found something."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "........."
+      newline
+      control f1 04
+    endpage
+    page
+      control f2 08 ff ff
+      text "> Obtained "
+      control f2 02 05 ff
+      control f2 03 01 ff
+      control f2 02 01 ff
+      text " x "
+      control f2 03 02 ff
+      text "."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_OPENERROR speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Cannot be used here."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message BAD_KAIFUKUSITAYO speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Due to the decline in"
+      newline
+      text "Solar Noise, Serph's party was"
+      newline
+      text "relieved of abnormal status."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_LIGHTMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The light's effect faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_ESTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The anti-demon field faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REBERAMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The demon attraction faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message COMP_REFUTOMAEND speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> The floating effect faded."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message WARP_ELV_MSG speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Select a floor."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select WARP_ELV_SEL1 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL2 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL3 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL4 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL5 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  select WARP_ELV_SEL6 ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      control f2 03 06 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 05 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 04 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 03 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 02 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      control f2 03 01 ff
+      text "."
+    endoption
+    option
+      control f2 08 ff ff
+      text "Cancel."
+    endoption
+  endselect
+  message FLD_BLUEICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A blue wall stands in the way."
+      newline
+      text "The Blue Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_REDICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A red wall stands in the way."
+      newline
+      text "The Red Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_YERWICE_KEYHAVE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A yellow wall stands in the way."
+      newline
+      text "The Yellow Key may destroy it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_BLUEICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A blue wall stands in the way."
+      newline
+      text "Serph cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_REDICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A red wall stands in the way."
+      newline
+      text "Serph cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_YERWICE speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> A yellow wall stands in the way."
+      newline
+      text "Serph cannot pass through it."
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message FLD_ICE_BREAK speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "> Destroy it?"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select FLD_ICE_BREAK_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes."
+    endoption
+    option
+      control f2 08 ff ff
+      text "No."
+    endoption
+  endselect
+  message INFTEST0 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "INFTEST0"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INFTEST1 speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "INFTEST1"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  select INFTEST1_SEL ext=0 pattern=0 reserved=0 trailing=00
+    option
+      control f2 08 ff ff
+      text "Yes"
+    endoption
+    option
+      control f2 08 ff ff
+      text "No"
+    endoption
+  endselect
+  message INFTEST1_YES speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "INFTEST1_YES"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  message INFTEST1_NO speaker=none
+    page
+      control f2 08 ff ff
+      control f2 07 07 ff
+      text "INFTEST1_NO"
+      newline
+      control f1 04
+    endpage
+  endmessage
+  speaker 0
+    text "Alpha ROM message"
+  endspeaker
+  speaker 1
+    text "Sera"
+  endspeaker
+  speaker 2
+    text "Heat"
+  endspeaker
+  speaker 3
+    text "Argilla"
+  endspeaker
+  speaker 4
+    text "Gale"
+  endspeaker
+  speaker 5
+    text "Cielo"
+  endspeaker
+  speaker 6
+    text "Ex-member of the Vanguards"
+  endspeaker
+  speaker 7
+    text "Member of the Embryon"
+  endspeaker
+  speaker 8
+    text "Member of the Wolves"
+  endspeaker
+  speaker 9
+    text "Lupa"
+  endspeaker
+end
+
+strings count=0
+  string ppos01 "ppos01"
+  string str_01cam_01 "01cam_01"
+  string str_01all_d01 "01all_d01"
+  string str_01path_01 "01path_01"
+  string str_01all_d02 "01all_d02"
+  string str_01path_02 "01path_02"
+  string str_01all_d01_2 "01all_d01"
+  string fld_f_bin_ICE_b_BED "/fld/f/bin/ICE_b.BED"
+  string fld_f_bin_ICE_y_BED "/fld/f/bin/ICE_y.BED"
+  string fld_f_bin_ICE_r_BED "/fld/f/bin/ICE_r.BED"
+  string BARIA "BARIA"
+  string BARIA_2 "BARIA"
+  string k_01npc_01 "k_01npc_01"
+  string ppos01_2 "ppos01"
+  string ppos01_3 "ppos01"
+  string k_01npc_02 "k_01npc_02"
+  string ppos01_4 "ppos01"
+  string ppos01_5 "ppos01"
+  string ppos01_6 "ppos01"
+  string ppos01_7 "ppos01"
+  string ppos01_8 "ppos01"
+  string k_01pos_02 "k_01pos_02"
+  string ppos01_9 "ppos01"
+  string ppos01_10 "ppos01"
+  string k_01pos_01 "k_01pos_01"
+  string k_01pos_01_2 "k_01pos_01"
+  string k_01pos_01_3 "k_01pos_01"
+  string k_01pos_01_4 "k_01pos_01"
+  string ppos01_11 "ppos01"
+  string k_01pos_01_5 "k_01pos_01"
+  string k_01npc_03 "k_01npc_03"
+  string ppos01_12 "ppos01"
+  string ppos01_13 "ppos01"
+  string ppos01_14 "ppos01"
+  string ppos01_15 "ppos01"
+  string ppos01_16 "ppos01"
+  string k_01pos_02_2 "k_01pos_02"
+  string ppos01_17 "ppos01"
+  string ppos01_18 "ppos01"
+  string ppos01_19 "ppos01"
+  string ppos01_20 "ppos01"
+  string ppos01_21 "ppos01"
+  string ppos01_22 "ppos01"
+  string ppos01_23 "ppos01"
+  string ppos01_24 "ppos01"
+  string ppos01_25 "ppos01"
+  string k_01npc_04 "k_01npc_04"
+  string ppos01_26 "ppos01"
+  string ppos01_27 "ppos01"
+  string ppos01_28 "ppos01"
+  string ppos01_29 "ppos01"
+  string ppos01_30 "ppos01"
+  string ppos01_31 "ppos01"
+  string ppos01_32 "ppos01"
+  string ppos01_33 "ppos01"
+  string k_01pos_02_3 "k_01pos_02"
+  string ppos01_34 "ppos01"
+  string ppos01_35 "ppos01"
+  string k_01npc_05 "k_01npc_05"
+  string ppos01_36 "ppos01"
+  string ppos01_37 "ppos01"
+  string ppos01_38 "ppos01"
+  string ppos01_39 "ppos01"
+  string ppos01_40 "ppos01"
+  string ppos01_41 "ppos01"
+  string k_01pos_03 "k_01pos_03"
+  string k_01pos_03_2 "k_01pos_03"
+  string k_01pos_02_4 "k_01pos_02"
+  string ppos01_42 "ppos01"
+  string k_01npc_06 "k_01npc_06"
+  string ppos01_43 "ppos01"
+  string ppos01_44 "ppos01"
+  string ppos01_45 "ppos01"
+  string ppos01_46 "ppos01"
+  string k_01pos_01_6 "k_01pos_01"
+  string ppos01_47 "ppos01"
+  string ppos01_48 "ppos01"
+  string k_01npc_07 "k_01npc_07"
+  string ppos01_49 "ppos01"
+  string ppos01_50 "ppos01"
+  string ppos01_51 "ppos01"
+  string ppos01_52 "ppos01"
+  string ppos01_53 "ppos01"
+  string ppos01_54 "ppos01"
+  string ppos01_55 "ppos01"
+  string ppos01_56 "ppos01"
+  string k_01npc_08 "k_01npc_08"
+  string ppos01_57 "ppos01"
+  string ppos01_58 "ppos01"
+  string k_01npc_09 "k_01npc_09"
+  string ppos01_59 "ppos01"
+  string k_01npc_10 "k_01npc_10"
+  string ppos01_60 "ppos01"
+  string k_01npc_11 "k_01npc_11"
+  string k_01npc_01_2 "k_01npc_01"
+  string ppos01_61 "ppos01"
+  string ppos01_62 "ppos01"
+  string ppos01_63 "ppos01"
+  string k_01npc_02_2 "k_01npc_02"
+  string ppos01_64 "ppos01"
+  string k_01npc_03_2 "k_01npc_03"
+  string ppos01_65 "ppos01"
+  string k_01npc_04_2 "k_01npc_04"
+  string ppos01_66 "ppos01"
+  string k_01npc_05_2 "k_01npc_05"
+  string k_01npc_06_2 "k_01npc_06"
+  string ppos01_67 "ppos01"
+  string k_01npc_07_2 "k_01npc_07"
+  string k_01npc_08_2 "k_01npc_08"
+  string ppos01_68 "ppos01"
+  string ppos01_69 "ppos01"
+  string ppos01_70 "ppos01"
+  string k_01pos_01_7 "k_01pos_01"
+  string k_01npc_09_2 "k_01npc_09"
+  string ppos01_71 "ppos01"
+  string k_01pos_01_8 "k_01pos_01"
+  string k_01pos_01_9 "k_01pos_01"
+  string k_01npc_10_2 "k_01npc_10"
+  string ppos01_72 "ppos01"
+  string ppos01_73 "ppos01"
+  string k_01npc_11_2 "k_01npc_11"
+  string ppos01_74 "ppos01"
+  string ppos01_75 "ppos01"
+  string k_01npc_12 "k_01npc_12"
+  string ppos01_76 "ppos01"
+  string ppos01_77 "ppos01"
+  string k_01npc_13 "k_01npc_13"
+  string ppos01_78 "ppos01"
+  string ppos01_79 "ppos01"
+  string ppos01_80 "ppos01"
+  string md_hoji_01 "md_hoji_01"
+  string md_hoji_02 "md_hoji_02"
+  string md_hoji_01_2 "md_hoji_01"
+  string md_hoji_02_2 "md_hoji_02"
+  string md_hoji_03 "md_hoji_03"
+  string atari_hoji_01 "atari_hoji_01"
+  string atari_hoji_02 "atari_hoji_02"
+  string md_hoji_01_3 "md_hoji_01"
+  string md_hoji_02_3 "md_hoji_02"
+  string atari_hoji_01_2 "atari_hoji_01"
+  string atari_hoji_02_2 "atari_hoji_02"
+  string md_hoji_01_4 "md_hoji_01"
+  string md_hoji_02_4 "md_hoji_02"
+  string atari_hoji_03 "atari_hoji_03"
+  string atari_hoji_03_2 "atari_hoji_03"
+  string md_hoji_03_2 "md_hoji_03"
+  string md_hoji_01_5 "md_hoji_01"
+  string md_hoji_02_5 "md_hoji_02"
+  string md_hoji_01_6 "md_hoji_01"
+  string md_hoji_02_6 "md_hoji_02"
+end

@@ -1,0 +1,57 @@
+flw0 1
+profile dds1
+
+header word00=0x00000000 declared_size=0x0000017c word0c=0x00000000 int_locals=0 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0x17c
+
+section 0 type=0 stride=0x20 count=1 offset=0x60
+  proc "test3" pc=0 reserved=0x00000000
+end
+
+section 1 type=1 stride=0x20 count=2 offset=0x80
+  label "_1" pc=5 reserved=0x00000000
+  label "_2" pc=46 reserved=0x00000000
+end
+
+section 2 type=2 stride=0x4 count=47 offset=0xc0
+  0000: PROC 0x0000  # "test3"
+  0001: PUSHIS 0x000a
+  0002: COMM 0x004d
+  0003: PUSHIS 0x0078
+  0004: POPIX 0x0000
+  0005: PUSHIS 0x0001
+  0006: IF 0x0001  # "_2"
+  0007: PUSHI 0x00020001
+  0009: COMM 0x0012
+  000a: PUSHIX 0x0000
+  000b: COMM WAIT_FOR_TIMER_LIMIT
+  000c: PUSHI 0x00020002
+  000e: COMM 0x0012
+  000f: PUSHI 0x0003000a
+  0011: PUSHI 0x00020002
+  0013: COMM 0x0013
+  0014: PUSHI 0x00020002
+  0016: COMM 0x0055
+  0017: PUSHIX 0x0000
+  0018: COMM WAIT_FOR_TIMER_LIMIT
+  0019: PUSHI 0x00020003
+  001b: COMM 0x0012
+  001c: PUSHIX 0x0000
+  001d: COMM WAIT_FOR_TIMER_LIMIT
+  001e: PUSHI 0x00020004
+  0020: COMM 0x0012
+  0021: PUSHIX 0x0000
+  0022: COMM WAIT_FOR_TIMER_LIMIT
+  0023: PUSHI 0x00020005
+  0025: COMM 0x0012
+  0026: PUSHIX 0x0000
+  0027: COMM WAIT_FOR_TIMER_LIMIT
+  0028: PUSHI 0x00020006
+  002a: COMM 0x0012
+  002b: PUSHIX 0x0000
+  002c: COMM WAIT_FOR_TIMER_LIMIT
+  002d: GOTO 0x0000  # "_1"
+  002e: END
+end
+
+section 3 type=3 stride=0x1 count=0 offset=0x17c
+end
