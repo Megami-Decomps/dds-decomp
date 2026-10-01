@@ -272,7 +272,28 @@ void *frFontCloneEntryResource(u8 index, s32 option) {
     return dst;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019CB30);
+extern u16 func_0019B870(s32 index);
+extern u16 func_0019B890(s32 index);
+extern FrFontRecord *func_0019C9D0(s32 first, s32 second, void *resource, s32 count);
+
+/* Return the cached item for `id` in the glyph's font slot (taking a reference),
+ * or clone the slot resource and create and cache a new one. */
+FrFontRecord *func_0019CB30(FrFontGlyph *glyph, s32 id) {
+    FrFontEntry *entry = &D_00452720.entries[glyph->u14.b[1]];
+    FrFontRecord *item = ((FrFontRecord **)entry->slots)[id];
+    void *resource;
+
+    if (item != NULL) {
+        item->refs++;
+        return item;
+    }
+    resource = frFontCloneEntryResource(glyph->u14.b[1], id);
+    item = func_0019C9D0(func_0019B870(glyph->u14.b[1]), func_0019B890(glyph->u14.b[1]), resource, 1);
+    item->id = id;
+    ((FrFontRecord **)entry->slots)[id] = item;
+    D_00452720.count++;
+    return item;
+}
 
 /* Initialize a glyph record while retaining only the high bits of its flags. */
 void frFontSetupGlyph(FrFontGlyph *glyph, s16 glyphId, s8 byte1, s8 byte0, s32 flags, s8 byte2) {
