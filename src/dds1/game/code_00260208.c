@@ -102,7 +102,34 @@ s32 mnuStaffTickState(MenuCommandWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260670);
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_002609D8);
+/* Phase machine of the menu command: phases 4, 5 and 8 wait ten frames before reporting themselves, 6 and 7 report at once. */
+s32 func_002609D8(MenuCommandWork *work) {
+    switch (work->mode) {
+    case 4:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames > 10.0f) {
+            return 4;
+        }
+        break;
+    case 5:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames > 10.0f) {
+            return 5;
+        }
+        break;
+    case 7:
+        return 7;
+    case 8:
+        work->frames = work->frames + 1;
+        if ((f32)work->frames >= 10.0f) {
+            return 8;
+        }
+        break;
+    case 6:
+        return 6;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00260208", func_00260AB0);
 

@@ -66,7 +66,42 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuDrawObject *object, s32 drawArg) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296018);
+typedef struct MenuChild {
+    u8 pad00[0x58];
+    struct MenuChild *next; /* 0x58 */
+} MenuChild;
+
+typedef struct MenuDrawList {
+    u8 pad00[0xC];
+    s32 count;                 /* 0x0C */
+    u8 pad10[8];
+    MenuChild *first;          /* 0x18 */
+    u8 pad1C[0x10];
+    void (*draw)(s32, s32, s32, struct MenuDrawList *, MenuChild *, s32); /* 0x2C */
+    s32 *delay;                /* 0x30: countdown ticking once per draw */
+} MenuDrawList;
+
+/* Tick the list's countdown, then run its draw callback on up to `count` linked children. */
+void func_00296018(s32 x, s32 y, s32 z, u8 *object, s32 drawArg) {
+    MenuDrawList *list = (MenuDrawList *)object;
+    MenuChild *child;
+    s32 i;
+
+    if (list->delay != NULL) {
+        if (*list->delay != 0) {
+            *list->delay = *list->delay - 1;
+        }
+    }
+    i = 0;
+    child = list->first;
+    while (i < list->count && child != NULL) {
+        if (list->draw != NULL) {
+            list->draw(x, y, z, list, child, drawArg);
+        }
+        i++;
+        child = child->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_002960F0);
 
