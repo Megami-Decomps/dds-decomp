@@ -60,17 +60,25 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", func_00102BC8);
 
 extern void* kwlnTaskGetUserValue(void* task);
 extern void sdfReleaseChipBlock(void* ptr);
-extern void* D_003847D4[];
-
-/* Per-mode entry of the admin dispatch table: three function pointers, 12 bytes each; D_003847D4 holds the second (destroy). */
-void func_00102D48(void* task)
-{
-    AdminWork* work;
+/* One dispatch row per mode: three function pointers, 12 bytes each. The three
+ * columns are consecutive symbols, D_003847D0 / D_003847D4 / D_003847D8. */
+typedef struct AdminDispatch {
+    void (*entry)(void);
     void (*destroy)(void);
+    void (*cleanup)(void);
+} AdminDispatch;
 
-    work = kwlnTaskGetUserValue(task);
-    if (work->unk08 >= 0) {
-        destroy = (void (*)(void))D_003847D4[work->unk08 * 3];
+extern AdminDispatch D_003847D0[];
+
+/* Run the mode's destroy callback (the row's second pointer), then free the
+ * attached data block and the task itself. */
+void func_00102D48(void* task) {
+    AdminWork* work = kwlnTaskGetUserValue(task);
+    s32 mode = work->unk08;
+
+    if (mode >= 0) {
+        void (*destroy)(void) = D_003847D0[mode].destroy;
+
         if (destroy != NULL) {
             destroy();
         }
