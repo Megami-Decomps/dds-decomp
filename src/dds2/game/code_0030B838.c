@@ -92,7 +92,7 @@ extern void sdfCounterTickCountdown(void);
 
 extern void mnuTickMapTimers(void);
 
-extern s32 func_0030D438(void);
+extern void func_0030D438(void);
 
 extern s32 func_0030BD10();
 
@@ -356,10 +356,10 @@ void sdfDestroyActiveCounterRuntime(void) {
     sdfCounterDestroyRuntime(D_004388C4);
 }
 
-s64 sdfCounterTickCountdownAndMapTimers(void) {
+void sdfCounterTickCountdownAndMapTimers(void) {
     sdfCounterTickCountdown();
     mnuTickMapTimers();
-    return func_0030D438();
+    func_0030D438();
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C690);
@@ -492,7 +492,24 @@ void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
     timer->frames = 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030D438);
+/* Advance the timer's position transition one frame (3-frame lerp start -> target). */
+void func_0030D438(void) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_004388C4)->timer;
+    s32 frames = timer->frames;
+    f32 t;
+
+    if (frames != 0) {
+        frames = --timer->frames;
+    }
+    t = (f32)frames / 3.0f;
+    if (frames != 0) {
+        timer->curX = timer->startX * t + timer->targetX * (1.0f - t);
+        timer->curY = timer->startY * t + timer->targetY * (1.0f - t);
+    } else {
+        timer->curX = timer->targetX;
+        timer->curY = timer->targetY;
+    }
+}
 
 void func_0030D4F8(void) {
 }

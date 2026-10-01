@@ -319,7 +319,24 @@ void sdfCounterStartTimerPositionTransition(s16 x, s16 y) {
     timer->frames = 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C5C70);
+/* Advance the timer's position transition one frame (3-frame lerp start -> target). */
+void func_002C5C70(void) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)D_003BD274)->timer;
+    s32 frames = timer->frames;
+    f32 t;
+
+    if (frames != 0) {
+        frames = --timer->frames;
+    }
+    t = (f32)frames / 3.0f;
+    if (frames != 0) {
+        timer->curX = timer->startX * t + timer->targetX * (1.0f - t);
+        timer->curY = timer->startY * t + timer->targetY * (1.0f - t);
+    } else {
+        timer->curX = timer->targetX;
+        timer->curY = timer->targetY;
+    }
+}
 
 void func_002C5D30(void) {
 }
