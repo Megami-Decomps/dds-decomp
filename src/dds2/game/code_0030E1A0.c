@@ -312,14 +312,18 @@ void sdfVec3ScaleInPlace(float factor, float *vector) {
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030F8D0);
 
+typedef struct Vector4 {
+    float x, y, z, w;
+} Vector4;
+
 float fldVectorLength(float *v) {
     return fsqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
 float fldNormalizedVectorDot(float *left, float *right) {
-    struct Vector4 { float x, y, z, w; } a, b;
-    a = *(struct Vector4 *)left;
-    b = *(struct Vector4 *)right;
+    Vector4 a, b;
+    a = *(Vector4 *)left;
+    b = *(Vector4 *)right;
     func_0030F8D0(&a.x);
     func_0030F8D0(&b.x);
     return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -333,10 +337,9 @@ float *b;
 }
 
 void func_0030FA28(float *out, float *left, float *right) {
-    struct Vector4 { float x, y, z, w; } a, b;
-
-    a = *(struct Vector4 *)left;
-    b = *(struct Vector4 *)right;
+    Vector4 a, b;
+    a = *(Vector4 *)left;
+    b = *(Vector4 *)right;
     func_0030F8D0(&a.x);
     func_0030F8D0(&b.x);
     out[0] = a.y * b.z - a.z * b.y;
