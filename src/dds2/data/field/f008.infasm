@@ -1,0 +1,6 @@
+inf 1
+
+set 1 kind=event area=0 action=3 event_hit=2 event="01d_02"
+  flag 0 id=0 off=row0 on=0
+  row 0 kind=message message=112 go=0,0,0,0 flag_off=0 flag_on=0 view=0 ex=0
+end

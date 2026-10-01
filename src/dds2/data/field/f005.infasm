@@ -1,0 +1,5 @@
+inf 1
+
+set 1 kind=event area=0 action=1 event_hit=7 event="01d_03"
+  flag 0 id=0 off=warp on=0
+end

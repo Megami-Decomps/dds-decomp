@@ -14,6 +14,7 @@ Pipeline per version (see README.md):
   link               mips-ps2-decompals-ld with splat's script -> objcopy -O binary
   check              sha1sum -c config/<v>/checksum.sha1 (the output IS the retail ELF file)
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
+  INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
 edit that changes code or data shows up as a checksum failure.
@@ -211,6 +212,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"mkdir -p $outdir && {sys.executable} tools/flw0.py assemble $in $out",
         description="flw0 $in",
     )
+    n.rule(
+        "inf",
+        f"mkdir -p $outdir && {sys.executable} tools/inf.py assemble --messages $messages $in $out",
+        description="inf $in",
+    )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
     n.newline()
 
@@ -308,6 +314,43 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             n.build(f"{version}-scripts", "phony", str(script_stamp))
             version_outputs.append(str(script_stamp))
 
+        inf_manifest = Path("config") / version / "field_inf.sha1"
+        if (ROOT / inf_manifest).exists():
+            inf_source_dir = Path("src") / version / "data" / "field"
+            inf_output_dir = Path("build") / version / "data" / "field"
+            inf_sources = sorted((ROOT / inf_source_dir).glob("*.infasm"))
+            inf_outputs = []
+            for source in inf_sources:
+                source = source.relative_to(ROOT)
+                output = inf_output_dir / source.with_suffix(".inf").name
+                messages = (
+                    Path("src")
+                    / version
+                    / "scripts"
+                    / "field"
+                    / source.with_suffix(".bfasm").name
+                )
+                n.build(
+                    str(output),
+                    "inf",
+                    str(source),
+                    implicit=[
+                        "tools/inf.py",
+                        "tools/flw0.py",
+                        "tools/flw0_symbolic.py",
+                        "tools/flw0_profiles.py",
+                        "tools/msg1.py",
+                        "tools/dds1_msg1_chars.tsv",
+                        str(messages),
+                    ],
+                    variables={"outdir": str(output.parent), "messages": str(messages)},
+                )
+                inf_outputs.append(str(output))
+            inf_stamp = inf_output_dir / "field_inf.ok"
+            n.build(str(inf_stamp), "check", str(inf_manifest), implicit=inf_outputs)
+            n.build(f"{version}-field-data", "phony", str(inf_stamp))
+            version_outputs.append(str(inf_stamp))
+
         n.build(version, "phony", version_outputs)
         defaults.append(version)
         (ROOT / "config" / version / "checksum.sha1").write_text(f"{VERSIONS[version]['elf_sha1']}  {image}\n")
@@ -338,6 +381,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             if manifest.exists():
                 configure_inputs.append(str(manifest.relative_to(ROOT)))
                 break
+        inf_manifest = ROOT / "config" / version / "field_inf.sha1"
+        if inf_manifest.exists():
+            configure_inputs.append(str(inf_manifest.relative_to(ROOT)))
     n.build("build.ninja", "configure", implicit=configure_inputs,
             variables={"args": " ".join(sys.argv[1:])})
     n.default(defaults)
