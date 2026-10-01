@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+/* Polled in a spin-wait below; its writer is outside this C unit. */
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 D_00438A00;

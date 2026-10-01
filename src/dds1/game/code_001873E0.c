@@ -70,6 +70,8 @@ EffBlurWork2 *effCloneBlurWorkWithSlots(EffBlurWork2 *src) {
     EffBlurSlot2 *slot;
     s32 i = 0;
 
+    /* Copy through size (offset 0x28), but not the owned setting,
+       resource, or slot pointer initialized for this clone below. */
     memcpy(work, src, 0x2C);
     work->resource = allocation;
     work->slots = (EffBlurSlot2 *)((u8 *)work + 0x38);

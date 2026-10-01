@@ -29,6 +29,8 @@ extern SdfTexHead *D_003BD9E4;
 extern SdfTexHead *D_003BD9E0;
 extern s8 D_003BD300[2];
 
+/* Busy-buffer index is published by the slot setters and polled below;
+ * volatile prevents the wait loop from reusing an earlier read. */
 extern volatile s8 D_003BD302;
 extern SdfTex *D_003BD308;
 extern u8 D_003BD9E8;

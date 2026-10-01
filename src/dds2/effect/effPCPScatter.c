@@ -103,7 +103,7 @@ typedef struct PcpScatterWork8 {
     f32 unk4C;
     f32 unk50;
     u8 pad54[0x28];
-    u32 *values; /* assigned by effSetScatterDuplicatedHandles; element meaning not yet known */
+    u32 *duplicatedHandles; /* 0x7C: also used by the linked-work copy constructor */
 } PcpScatterWork8;
 
 typedef struct PcpScatterWork2 {
@@ -290,8 +290,8 @@ void func_00179168(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effSetScatterDuplicatedHandles(PcpScatterWork8 *work, u32 *values) {
-    work->values = values;
+void effSetScatterDuplicatedHandles(PcpScatterWork8 *work, u32 *handles) {
+    work->duplicatedHandles = handles;
 }
 
 void effScatterScaleParticleValues(float scale, PcpScatterWork8 *work) {
@@ -329,9 +329,9 @@ typedef struct {
     f32 unk50;
     u8 pad54[4];
     u8 duplicateParticles;
-    u8 pad69[7];
+    u8 pad59[7];
     u32 particlesPerGroup;
-    u8 pad6C[0xC];
+    u8 pad64[0xC];
     PcpScatterPool *childWork;
     u32 ownedResource;
     u32 duplicatedCount;

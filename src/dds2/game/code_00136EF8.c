@@ -577,6 +577,8 @@ s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 coun
             return -1;
         }
         if (dist < 0.0f) {
+            /* The mode-1 plane uses a fixed 45-unit inset, unlike the
+               other projections, which use the caller's margin. */
             if (mode == 1) {
                 best = dist + 45.0f;
             } else {

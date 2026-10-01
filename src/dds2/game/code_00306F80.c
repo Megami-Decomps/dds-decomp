@@ -83,6 +83,8 @@ typedef struct GridListOwner {
     GridListNode *list; /* 0x10 */
 } GridListOwner;
 
+/* Result bit 1: the linked list contains at least owner->count successors. */
+enum { GRID_LIST_HAS_COUNT_FOLLOWERS = 2 };
 
 typedef struct GridDrawWork {
     u8 pad00[0xC];
@@ -686,15 +688,16 @@ u32 itfGetGridListLinkFlags(GridListOwner *owner) {
     if (node == 0) {
         return 0;
     }
+    /* Bit 0 reports whether the first node owns a head object. */
     flags = node->head != 0;
     for (i = 0; i < owner->count; i++) {
         node = node->next;
         if (node == 0) {
-            flags &= ~2;
+            flags &= ~GRID_LIST_HAS_COUNT_FOLLOWERS;
             return flags;
         }
     }
-    flags |= 2;
+    flags |= GRID_LIST_HAS_COUNT_FOLLOWERS;
     return flags;
 }
 

@@ -23,6 +23,8 @@ typedef struct PanelDefinition {
     s32 a18;
     s32 a1C;
     u8 pad20[0xC];
+    /* Secondary four-value parameter set, stored before the kind-specific
+       D_003B4420 notification; the values' individual roles are unknown. */
     s32 a2C;
     s32 a30;
     s32 a34;

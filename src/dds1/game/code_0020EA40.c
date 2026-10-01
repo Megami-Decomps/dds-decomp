@@ -774,6 +774,8 @@ s32 btlIndexListNoExpiredEntryCodes(void *list, s32 command) {
 
     for (i = 0; i < count; i++) {
         entry = btlGetIndexListEntry(list, i);
+        /* The row's +0x28 word is BtlCommandRecord.requiredEntryFlags.
+           Keep this loop-invariant load per entry to match the original. */
         flags = *(s32 *)(D_003BAA50 + command * 0x38 + 0x28);
         switch (flags) {
         case 0x800:
