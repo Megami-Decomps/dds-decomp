@@ -181,17 +181,17 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_001035F8);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_001037C0);
 
-void kwlnDrawSpriteCell(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void kwlnDrawSpriteCell(u32 list, s32 col, s32 row, s32 cols, s32 rows) {
     s32 cw = 0xC0, ch = 0x60;
-    sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, 0xFEFFFF,
-                                           arg3 * cw + ch, arg4 * ch + 0x30,
+    sdfAppendPacket(list, func_0011D3E8(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+                                           cols * cw + ch, rows * ch + 0x30,
                                            0x60000000, 0x40806020));
 }
 
-void kwlnDrawSpriteCellZ(u32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+void kwlnDrawSpriteCellZ(u32 list, s32 col, s32 row, s32 cols, s32 rows, s32 z) {
     s32 cw = 0xC0, ch = 0x60;
-    sdfAppendPacket(arg0, func_0011D3E8(arg1 * 0x10 + 0x6FD0, arg2 * 8 + 0x78E8, arg5,
-                                           arg3 * cw + ch, arg4 * ch + 0x30,
+    sdfAppendPacket(list, func_0011D3E8(col * 0x10 + 0x6FD0, row * 8 + 0x78E8, z,
+                                           cols * cw + ch, rows * ch + 0x30,
                                            0x60000000, 0x40806020));
 }
 
@@ -452,10 +452,10 @@ void func_00105888(void) {
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
-u64 evtBuildFrameStatePacketList(s32 arg0) {
+u64 evtBuildFrameStatePacketList(s32 stateIndex) {
     u64 list = sdfCreateResetPacketList();
 
-    sdfAppendPacket(list, D_003C2620 + arg0 * 0x160 + func_00100518() * 0xB0);
+    sdfAppendPacket(list, D_003C2620 + stateIndex * 0x160 + func_00100518() * 0xB0);
     return list;
 }
 
@@ -670,8 +670,8 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106268);
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00106368);
 
-void func_00106488(f32 arg0) {
-    D_003245EC[0] = arg0;
+void func_00106488(f32 value) {
+    D_003245EC[0] = value;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
