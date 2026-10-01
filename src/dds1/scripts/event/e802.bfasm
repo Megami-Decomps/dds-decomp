@@ -14,164 +14,140 @@ jump_label _7 reserved=0x00000000
 code
 e802_main:
   PROC e802_main
-  PUSHIS 0
-  PUSHIS 1044
+  push 0
+  push 1044
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push 0
   COMM 0x011e
   PUSHREG
   EQ
   AND
   IF _1
-  PUSHIS 1044
-  COMM SET_MODEL_FLAG
+  SET_MODEL_FLAG(1044)
   COMM 0x01e8
-  PUSHIS 1
-  PUSHIS 802
+  push 1
+  push 802
   COMM 0x0021
   PUSHREG
   COMM 0x0022
   PUSHREG
   COMM WAIT_FOR_TASK_REMOVAL
-  PUSHIS 0
+  push 0
   COMM 0x001e
-  GOTO _1
+  goto _1
 _1:
-  PUSHIS 802
+  push 802
   COMM 0x00c8
-  PUSHIS 0
+  push 0
   COMM 0x011d
-  PUSHIS 1
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 3
-  PUSHIS 802
+  SCREEN_FADE_B(0, 1)
+  push 3
+  push 802
   COMM 0x00ca
-  PUSHF 0x3f800000
-  PUSHF 0x3f99999a
-  PUSHF 0x3f800000
-  PUSHIS 0
+  push float32(1.0, bits=0x3f800000)
+  push float32(1.2000000476837158, bits=0x3f99999a)
+  push float32(1.0, bits=0x3f800000)
+  push 0
   COMM 0x00b4
-  PUSHF 0x3e3851ec
-  PUSHF 0x3f6b851f
-  PUSHF 0x3ea8f5c3
-  MINUS
-  PUSHIS 0
+  push float32(0.18000000715255737, bits=0x3e3851ec)
+  push float32(0.9200000166893005, bits=0x3f6b851f)
+  push -float32(0.33000001311302185, bits=0x3ea8f5c3)
+  push 0
   COMM 0x00b5
-  PUSHF 0x3e4ccccd
-  PUSHF 0x3dcccccd
-  PUSHF 0x3e4ccccd
-  PUSHIS 0
+  push float32(0.20000000298023224, bits=0x3e4ccccd)
+  push float32(0.10000000149011612, bits=0x3dcccccd)
+  push float32(0.20000000298023224, bits=0x3e4ccccd)
+  push 0
   COMM 0x00b6
-  PUSHIS 1
-  PUSHIS 0
-  PUSHF 0x3ef0a3d7
-  PUSHIS 0
+  push 1
+  push 0
+  push float32(0.4699999988079071, bits=0x3ef0a3d7)
+  push 0
   COMM 0x00bb
-  PUSHIS 9000
-  PUSHIS 180
-  PUSHIS 1600
-  PUSHIS 245
-  PUSHIS 0
+  push 9000
+  push 180
+  push 1600
+  push 245
+  push 0
   COMM 0x00bc
-  PUSHIS 0
-  PUSHIS 1
-  PUSHIS 17
+  push 0
+  push 1
+  push 17
   COMM 0x0014
-  PUSHIS 80
-  MINUS
-  PUSHIS 0
+  push -(80)
+  push 0
   COMM 0x0048
-  PUSHIS 4
-  PUSHIS 802
+  push 4
+  push 802
   COMM 0x00c9
   PUSHREG
   POPLIX 0x0000
-  PUSHTYPE5 str_01pos_01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0000
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHTYPE5 str_01cam_01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHLIX 0x0000
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], result)
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
+  ADD_EFFECT_UNIT_TO_WORLD(result)
+  push local_int[0]
   COMM 0x00ae
-  PUSHF 0x3ecccccd
-  PUSHF 0x3f000000
-  PUSHF 0x3f000000
-  PUSHF 0x3f666666
-  PUSHF 0x3f800000
-  PUSHF 0x3f8ccccd
-  PUSHIS 0
-  PUSHLIX 0x0000
+  push float32(0.4000000059604645, bits=0x3ecccccd)
+  push float32(0.5, bits=0x3f000000)
+  push float32(0.5, bits=0x3f000000)
+  push float32(0.8999999761581421, bits=0x3f666666)
+  push float32(1.0, bits=0x3f800000)
+  push float32(1.100000023841858, bits=0x3f8ccccd)
+  push 0
+  push local_int[0]
   COMM 0x00af
-  PUSHF 0x3eb851ec
-  MINUS
-  PUSHF 0x3f19999a
-  PUSHF 0x3e3851ec
-  MINUS
-  PUSHIS 0
-  PUSHLIX 0x0000
+  push -float32(0.36000001430511475, bits=0x3eb851ec)
+  push float32(0.6000000238418579, bits=0x3f19999a)
+  push -float32(0.18000000715255737, bits=0x3e3851ec)
+  push 0
+  push local_int[0]
   COMM 0x00b0
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
+  SCREEN_FADE_A(0, 10)
 _3:
-  PUSHIS 1
+  push 1
   COMM 0x011e
   PUSHREG
   IF _4
-  PUSHIS 4
-  PUSHIS 0
+  push 4
+  push 0
   COMM 0x011e
   PUSHREG
   EQ
   IF _5
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
+  SCREEN_FADE_B(0, 15)
+  WAIT_FOR_TIMER_LIMIT(15)
+  SCREEN_FADE_A(0, 15)
+  WAIT_FOR_TIMER_LIMIT(15)
+  push 0
   COMM 0x011d
-  GOTO _5
+  goto _5
 _5:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _3
+  WAIT_FOR_TIMER_START()
+  goto _3
 _4:
-  PUSHIS 1
-  PUSHIS 0
+  push 1
+  push 0
   COMM 0x011e
   PUSHREG
   EQ
   IF _7
-  PUSHIS 1
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _7
+  WAIT_FOR_TIMER_LIMIT(1)
+  goto _7
 _7:
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM RESET_DRAW_EFFECTS
-  COMM RESET_FIELD_EFFECTS
-  PUSHLIX 0x0000
+  SCREEN_FADE_B(0, 10)
+  WAIT_FOR_TIMER_LIMIT(10)
+  RESET_DRAW_EFFECTS()
+  RESET_FIELD_EFFECTS()
+  push local_int[0]
   COMM 0x0016
   COMM 0x0023
-  PUSHIS 0
+  push 0
   COMM 0x011d
-  END
+  return
 end
 
 messages msg1

@@ -13,81 +13,74 @@ jump_label _1 reserved=0x00000000
 code
 e907_main:
   PROC e907_main
-  PUSHMSG MSG_000
-  COMM MESSAGE_REQUEST_AND_POLL
-  END
+  MESSAGE_REQUEST_AND_POLL(message(MSG_000))
+  return
 e907_dead:
   PROC e907_dead
   COMM 0x0161
   PUSHREG
   POPLIX 0x0000
   COMM 0x003e
-  PUSHIS 98
-  PUSHLIX 0x0000
-  EQ
-  IF _2
-  PUSHIS 2
-  COMM 0x01ce
-  PUSHIS 98
-  PUSHIS 310
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 0
-  PUSHIS 98
-  COMM 0x0198
-  PUSHIS 3
-  COMM 0x01ce
-  PUSHIS 80
-  PUSHIS 310
-  PUSHIS 1
-  COMM 0x0197
-  GOTO _1
-_2:
-  PUSHIS 99
-  PUSHLIX 0x0000
-  EQ
-  IF _3
-  PUSHIS 1
-  COMM 0x01ce
-  PUSHIS 99
-  PUSHIS 309
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 0
-  PUSHIS 99
-  COMM 0x0198
-  PUSHIS 3
-  COMM 0x01ce
-  PUSHIS 80
-  PUSHIS 309
-  PUSHIS 1
-  COMM 0x0197
-  GOTO _1
-_3:
-  PUSHIS 0
-  COMM 0x01ce
-  PUSHIS 100
-  PUSHIS 308
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 0
-  PUSHIS 100
-  COMM 0x0198
-  PUSHIS 3
-  COMM 0x01ce
-  PUSHIS 80
-  PUSHIS 308
-  PUSHIS 1
-  COMM 0x0197
-  PUSHIS 100
-  POPLIX 0x0000
-  GOTO _1
+  if (local_int[0] == 98) {
+    push 2
+    COMM 0x01ce
+    push 98
+    push 310
+    push 1
+    COMM 0x0197
+    push 0
+    push 98
+    COMM 0x0198
+    push 3
+    COMM 0x01ce
+    push 80
+    push 310
+    push 1
+    COMM 0x0197
+  } else {
+  _2:
+    if (local_int[0] == 99) {
+      push 1
+      COMM 0x01ce
+      push 99
+      push 309
+      push 1
+      COMM 0x0197
+      push 0
+      push 99
+      COMM 0x0198
+      push 3
+      COMM 0x01ce
+      push 80
+      push 309
+      push 1
+      COMM 0x0197
+    } else {
+    _3:
+      push 0
+      COMM 0x01ce
+      push 100
+      push 308
+      push 1
+      COMM 0x0197
+      push 0
+      push 100
+      COMM 0x0198
+      push 3
+      COMM 0x01ce
+      push 80
+      push 308
+      push 1
+      COMM 0x0197
+      local_int[0] = 100
+      goto _1
+    }
+  }
 _1:
-  PUSHIS 24
-  MINUS
-  PUSHIS 80
+  push -(24)
+  push 80
   COMM 0x0198
-  END
+  return
 end
 
 messages msg1

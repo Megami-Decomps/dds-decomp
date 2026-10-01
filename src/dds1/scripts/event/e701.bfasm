@@ -11,35 +11,33 @@ jump_label _1 reserved=0x00000000
 code
 e701_main:
   PROC e701_main
-  COMM WAIT_FOR_TIMER_START
-  PUSHIS 0
-  PUSHIS 74
+  WAIT_FOR_TIMER_START()
+  push 0
+  push 74
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _2
-  PUSHEVENT e657
-  COMM CALL_EVENT
-  GOTO _1
+  CALL_EVENT(event(e657))
+  goto _1
 _2:
-  PUSHIS 0
-  PUSHIS 75
+  push 0
+  push 75
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
-  PUSHIS 1
-  PUSHIS 74
+  push 1
+  push 74
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   AND
   IF _1
-  PUSHEVENT e659
-  COMM CALL_EVENT
-  GOTO _1
+  CALL_EVENT(event(e659))
+  goto _1
 _1:
   COMM 0x002e
-  END
+  return
 end
 
 messages

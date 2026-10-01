@@ -357,4839 +357,3121 @@ jump_label _379 reserved=0x00000000
 code
 hirakenai_label:
   PROC hirakenai_label
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHMSG COMP_OPENERROR
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
+  RESTORE_CAMERA_NODE_MODE()
+  ACTIVATE_MESSAGE_PANEL()
+  SET_SOLAR_OVERLAY_MODE(6)
+  MESSAGE_REQUEST_AND_POLL(message(COMP_OPENERROR))
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  RELEASE_CURRENT_OBJECT()
+  SET_SOLAR_OVERLAY_MODE(7)
+  return
 badkaifuku_label:
   PROC badkaifuku_label
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHMSG BAD_KAIFUKUSITAYO
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
+  RESTORE_CAMERA_NODE_MODE()
+  ACTIVATE_MESSAGE_PANEL()
+  SET_SOLAR_OVERLAY_MODE(6)
+  MESSAGE_REQUEST_AND_POLL(message(BAD_KAIFUKUSITAYO))
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  RELEASE_CURRENT_OBJECT()
+  SET_SOLAR_OVERLAY_MODE(7)
+  return
 kireta_label:
   PROC kireta_label
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 1
-  PUSHIS 0
+  RESTORE_CAMERA_NODE_MODE()
+  ACTIVATE_MESSAGE_PANEL()
+  SET_SOLAR_OVERLAY_MODE(6)
+  push 1
+  push 0
   COMM 0x01f1
   PUSHREG
   EQ
   IF _1
-  PUSHMSG COMP_LIGHTMAEND
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _1
+  MESSAGE_REQUEST_AND_POLL(message(COMP_LIGHTMAEND))
+  goto _1
 _1:
-  PUSHIS 1
-  PUSHIS 1
+  push 1
+  push 1
   COMM 0x01f1
   PUSHREG
   EQ
   IF _3
-  PUSHMSG COMP_REFUTOMAEND
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _3
+  MESSAGE_REQUEST_AND_POLL(message(COMP_REFUTOMAEND))
+  goto _3
 _3:
-  PUSHIS 1
-  PUSHIS 2
+  push 1
+  push 2
   COMM 0x01f1
   PUSHREG
   EQ
   IF _5
-  PUSHMSG COMP_REBERAMAEND
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _5
+  MESSAGE_REQUEST_AND_POLL(message(COMP_REBERAMAEND))
+  goto _5
 _5:
-  PUSHIS 1
-  PUSHIS 3
+  push 1
+  push 3
   COMM 0x01f1
   PUSHREG
   EQ
   IF _7
-  PUSHMSG COMP_ESTOMAEND
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _7
+  MESSAGE_REQUEST_AND_POLL(message(COMP_ESTOMAEND))
+  goto _7
 _7:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  RELEASE_CURRENT_OBJECT()
+  SET_SOLAR_OVERLAY_MODE(7)
+  return
 itembox_label:
   PROC itembox_label
 _9:
-  PUSHIS 1
-  IF _10
-  PUSHIS 1
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _37
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM 0x0116
-  PUSHREG
-  IF _36
-  PUSHMSG TAKARA_STILLGET
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _35
-_36:
-  PUSHIS 0
-  COMM 0x0114
-  PUSHREG
-  POPLIX 0x0000
-  PUSHIS 1
-  COMM 0x0114
-  PUSHREG
-  POPLIX 0x0001
-  PUSHIS 2
-  COMM 0x0114
-  PUSHREG
-  POPLIX 0x0002
-  PUSHIS 3
-  COMM 0x0114
-  PUSHREG
-  POPLIX 0x0003
-  PUSHIS 4
-  COMM 0x0114
-  PUSHREG
-  POPLIX 0x0004
-  PUSHIS 1
-  PUSHLIX 0x0000
-  EQ
-  IF _12
-  PUSHMSG HOSEKI
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _11
-_12:
-  PUSHMSG TAKARA
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _11
-_11:
-  PUSHIS 1
-  PUSHIS 3
-  COMM 0x013c
-  PUSHIS 1
-  PUSHLIX 0x0000
-  EQ
-  IF _14
-  PUSHSELECT HOSEKI_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0005
-  GOTO _13
-_14:
-  PUSHSELECT TAKARA_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0005
-  GOTO _13
-_13:
-  PUSHIS 0
-  PUSHLIX 0x0005
-  EQ
-  IF _34
-  PUSHIS 1
-  PUSHLIX 0x0003
-  EQ
-  IF _25
-  COMM 0x0115
-  PUSHLIX 0x0004
-  COMM 0x0166
-  END
-  GOTO _24
-_25:
-  PUSHIS 2
-  PUSHLIX 0x0003
-  EQ
-  IF _26
-  COMM 0x0115
-  PUSHIS 35
-  COMM 0x011b
-  COMM 0x011c
-  PUSHIS 100
-  PUSHIS 15
-  COMM 0x00ab
-  PUSHIS 15
-  PUSHIS 1
-  PUSHIS 0
-  COMM 0x001a
-  PUSHIS 15
-  PUSHIS 100
-  PUSHIS 1
-  COMM 0x001a
-  PUSHIS 1
-  COMM 0x013a
-  PUSHMSG TAKARA_DAMAGE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _24
-_26:
-  PUSHIS 3
-  PUSHLIX 0x0003
-  EQ
-  IF _27
-  COMM 0x0115
-  PUSHIS 35
-  COMM 0x011b
-  COMM 0x011c
-  PUSHIS 200
-  PUSHIS 20
-  COMM 0x00ab
-  PUSHIS 20
-  PUSHIS 1
-  PUSHIS 0
-  COMM 0x001a
-  PUSHIS 20
-  PUSHIS 200
-  PUSHIS 1
-  COMM 0x001a
-  PUSHIS 2
-  COMM 0x013a
-  PUSHMSG TAKARA_DAMAGE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _24
-_27:
-  PUSHIS 4
-  PUSHLIX 0x0003
-  EQ
-  IF _28
-  COMM 0x0115
-  PUSHIS 35
-  COMM 0x011b
-  COMM 0x011c
-  PUSHIS 200
-  PUSHIS 20
-  COMM 0x00ab
-  PUSHIS 20
-  PUSHIS 1
-  PUSHIS 0
-  COMM 0x001a
-  PUSHIS 20
-  PUSHIS 200
-  PUSHIS 1
-  COMM 0x001a
-  PUSHIS 4
-  COMM 0x013a
-  PUSHMSG TAKARA_DAMAGE_POISON
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _24
-_28:
-  PUSHIS 5
-  PUSHLIX 0x0003
-  EQ
-  IF _29
-  COMM 0x0115
-  PUSHIS 35
-  COMM 0x011b
-  COMM 0x011c
-  PUSHIS 200
-  PUSHIS 20
-  COMM 0x00ab
-  PUSHIS 20
-  PUSHIS 1
-  PUSHIS 0
-  COMM 0x001a
-  PUSHIS 20
-  PUSHIS 200
-  PUSHIS 1
-  COMM 0x001a
-  PUSHIS 5
-  COMM 0x013a
-  PUSHMSG TAKARA_DAMAGE_ACHE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _24
-_29:
-  PUSHIS 6
-  PUSHLIX 0x0003
-  EQ
-  IF _30
-  COMM 0x0115
-  PUSHIS 35
-  COMM 0x011b
-  COMM 0x011c
-  PUSHIS 200
-  PUSHIS 20
-  COMM 0x00ab
-  PUSHIS 20
-  PUSHIS 1
-  PUSHIS 0
-  COMM 0x001a
-  PUSHIS 20
-  PUSHIS 200
-  PUSHIS 1
-  COMM 0x001a
-  PUSHIS 6
-  COMM 0x013a
-  PUSHMSG TAKARA_DAMAGE_CLOSE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _24
-_30:
-  PUSHIS 1
-  PUSHLIX 0x0000
-  LE
-  IF _22
-  PUSHIS 1
-  PUSHLIX 0x0000
-  EQ
-  IF _16
-  PUSHIS 34
-  COMM 0x011b
-  GOTO _15
-_16:
-  PUSHIS 33
-  COMM 0x011b
-  GOTO _15
-_15:
-  COMM 0x011c
-  COMM 0x0115
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 45
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 0
-  PUSHLIX 0x0001
-  EQ
-  IF _20
-  PUSHMSG TAKARA_KARAGET
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _19
-_20:
-  PUSHIS 3
-  PUSHLIX 0x0001
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 0
-  PUSHLIX 0x0002
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 127
-  PUSHLIX 0x0001
-  LE
-  PUSHIS 96
-  PUSHLIX 0x0001
-  GE
-  AND
-  IF _18
-  PUSHMSG TAKARA_GET2
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _17
-_18:
-  PUSHMSG TAKARA_GET
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _17
-_17:
-  PUSHLIX 0x0002
-  PUSHLIX 0x0001
-  COMM 0x0070
-  GOTO _19
-_19:
-  COMM 0x011f
-  COMM 0x0121
-  GOTO _21
-_22:
-  PUSHIS 3
-  PUSHLIX 0x0000
-  EQ
-  IF _21
-  COMM 0x0115
-  PUSHIS 32
-  COMM 0x0214
-  PUSHIS 0
-  PUSHLIX 0x0004
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHMSG TAKARA_MAKA_GET
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0004
-  COMM 0x0139
-  GOTO _21
-_21:
-  GOTO _24
-_24:
-  GOTO _33
-_34:
-  PUSHIS 1
-  PUSHLIX 0x0000
-  EQ
-  IF _32
-  PUSHMSG HOSEKI_NOGET
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _31
-_32:
-  PUSHMSG TAKARA_NOGET
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _31
-_31:
-  GOTO _33
-_33:
-  GOTO _35
-_35:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
-  GOTO _37
-_37:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _9
+  while (1) {
+    push 1
+    push 9
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _37
+    RESTORE_CAMERA_NODE_MODE()
+    ACTIVATE_MESSAGE_PANEL()
+    SET_SOLAR_OVERLAY_MODE(6)
+    COMM 0x0116
+    PUSHREG
+    IF _36
+    MESSAGE_REQUEST_AND_POLL(message(TAKARA_STILLGET))
+    goto _35
+  _36:
+    push 0
+    COMM 0x0114
+    PUSHREG
+    POPLIX 0x0000
+    push 1
+    COMM 0x0114
+    PUSHREG
+    POPLIX 0x0001
+    push 2
+    COMM 0x0114
+    PUSHREG
+    POPLIX 0x0002
+    push 3
+    COMM 0x0114
+    PUSHREG
+    POPLIX 0x0003
+    push 4
+    COMM 0x0114
+    PUSHREG
+    POPLIX 0x0004
+    if (local_int[0] == 1) {
+      MESSAGE_REQUEST_AND_POLL(message(HOSEKI))
+    } else {
+    _12:
+      MESSAGE_REQUEST_AND_POLL(message(TAKARA))
+      goto _11
+    }
+  _11:
+    push 1
+    push 3
+    COMM 0x013c
+    if (local_int[0] == 1) {
+      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(HOSEKI_SEL))
+    } else {
+    _14:
+      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(TAKARA_SEL))
+      goto _13
+    }
+  _13:
+    if_not (local_int[5] == 0) goto _34
+    if (local_int[3] == 1) {
+      COMM 0x0115
+      push local_int[4]
+      COMM 0x0166
+      return
+    } else {
+    _25:
+      if (local_int[3] == 2) {
+        COMM 0x0115
+        push 35
+        COMM 0x011b
+        COMM 0x011c
+        push 100
+        push 15
+        COMM 0x00ab
+        push 15
+        push 1
+        push 0
+        COMM 0x001a
+        push 15
+        push 100
+        push 1
+        COMM 0x001a
+        push 1
+        COMM 0x013a
+        MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
+        COMM 0x011f
+        COMM 0x0121
+      } else {
+      _26:
+        if (local_int[3] == 3) {
+          COMM 0x0115
+          push 35
+          COMM 0x011b
+          COMM 0x011c
+          push 200
+          push 20
+          COMM 0x00ab
+          push 20
+          push 1
+          push 0
+          COMM 0x001a
+          push 20
+          push 200
+          push 1
+          COMM 0x001a
+          push 2
+          COMM 0x013a
+          MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE))
+          COMM 0x011f
+          COMM 0x0121
+        } else {
+        _27:
+          if (local_int[3] == 4) {
+            COMM 0x0115
+            push 35
+            COMM 0x011b
+            COMM 0x011c
+            push 200
+            push 20
+            COMM 0x00ab
+            push 20
+            push 1
+            push 0
+            COMM 0x001a
+            push 20
+            push 200
+            push 1
+            COMM 0x001a
+            push 4
+            COMM 0x013a
+            MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_POISON))
+            COMM 0x011f
+            COMM 0x0121
+          } else {
+          _28:
+            if (local_int[3] == 5) {
+              COMM 0x0115
+              push 35
+              COMM 0x011b
+              COMM 0x011c
+              push 200
+              push 20
+              COMM 0x00ab
+              push 20
+              push 1
+              push 0
+              COMM 0x001a
+              push 20
+              push 200
+              push 1
+              COMM 0x001a
+              push 5
+              COMM 0x013a
+              MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_ACHE))
+              COMM 0x011f
+              COMM 0x0121
+            } else {
+            _29:
+              if (local_int[3] == 6) {
+                COMM 0x0115
+                push 35
+                COMM 0x011b
+                COMM 0x011c
+                push 200
+                push 20
+                COMM 0x00ab
+                push 20
+                push 1
+                push 0
+                COMM 0x001a
+                push 20
+                push 200
+                push 1
+                COMM 0x001a
+                push 6
+                COMM 0x013a
+                MESSAGE_REQUEST_AND_POLL(message(TAKARA_DAMAGE_CLOSE))
+                COMM 0x011f
+                COMM 0x0121
+              } else {
+              _30:
+                if (local_int[0] <= 1) {
+                  if (local_int[0] == 1) {
+                    push 34
+                    COMM 0x011b
+                  } else {
+                  _16:
+                    push 33
+                    COMM 0x011b
+                    goto _15
+                  }
+                _15:
+                  COMM 0x011c
+                  COMM 0x0115
+                  FINISH_SCRIPT_MESSAGE_WINDOW()
+                  WAIT_FOR_TIMER_LIMIT(45)
+                  ACTIVATE_MESSAGE_PANEL()
+                  if (local_int[1] == 0) {
+                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_KARAGET))
+                  } else {
+                  _20:
+                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
+                    SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
+                    if (local_int[1] >= 96 && local_int[1] <= 127) {
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET2))
+                    } else {
+                    _18:
+                      MESSAGE_REQUEST_AND_POLL(message(TAKARA_GET))
+                      goto _17
+                    }
+                  _17:
+                    push local_int[2]
+                    push local_int[1]
+                    COMM 0x0070
+                    goto _19
+                  }
+                _19:
+                  COMM 0x011f
+                  COMM 0x0121
+                } else {
+                _22:
+                  if (local_int[0] == 3) {
+                    COMM 0x0115
+                    push 32
+                    COMM 0x0214
+                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                    MESSAGE_REQUEST_AND_POLL(message(TAKARA_MAKA_GET))
+                    push local_int[4]
+                    COMM 0x0139
+                  }
+                }
+              _21:
+                goto _24
+              }
+            }
+          }
+        }
+      }
+    }
+  _24:
+    goto _33
+  _34:
+    if (local_int[0] == 1) {
+      MESSAGE_REQUEST_AND_POLL(message(HOSEKI_NOGET))
+    } else {
+    _32:
+      MESSAGE_REQUEST_AND_POLL(message(TAKARA_NOGET))
+      goto _31
+    }
+  _31:
+    goto _33
+  _33:
+    goto _35
+  _35:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    RELEASE_CURRENT_OBJECT()
+    SET_SOLAR_OVERLAY_MODE(7)
+    return
+    goto _37
+  _37:
+    WAIT_FOR_TIMER_START()
+  }
 _10:
-  END
+  return
 warp_label:
   PROC warp_label
-  COMM RESTORE_CAMERA_NODE_MODE
+  RESTORE_CAMERA_NODE_MODE()
   COMM 0x0219
   PUSHREG
   POPLIX 0x0006
-  PUSHIS 1
-  PUSHLIX 0x0006
-  EQ
-  IF _39
-  COMM 0x0204
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHF 0x3e051eb8
-  PUSHF 0x00000000
-  PUSHF 0x3dcccccd
-  PUSHIS 2
-  PUSHIS 175
-  PUSHIS 60
-  COMM 0x00ef
-  PUSHIS 101
-  PUSHIS 132
-  PUSHIS 132
-  PUSHIS 132
-  COMM 0x00f0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 256
-  COMM 0x00f1
-  PUSHIS 1
-  COMM 0x00f2
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  PUSHIS 1
-  COMM SCREEN_FADE_B
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  COMM 0x00f3
-  GOTO _39
+  if (local_int[6] == 1) {
+    COMM 0x0204
+    WAIT_FOR_TIMER_LIMIT(20)
+    push 0
+    push float32(0.12999999523162842, bits=0x3e051eb8)
+    push float32(0.0, bits=0x00000000)
+    push float32(0.10000000149011612, bits=0x3dcccccd)
+    push 2
+    push 175
+    push 60
+    COMM 0x00ef
+    push 101
+    push 132
+    push 132
+    push 132
+    COMM 0x00f0
+    push 0
+    push 0
+    push 256
+    COMM 0x00f1
+    push 1
+    COMM 0x00f2
+    WAIT_FOR_TIMER_LIMIT(20)
+    SCREEN_FADE_B(1, 30)
+    WAIT_FOR_TIMER_LIMIT(30)
+    push 0
+    COMM 0x00f3
+  }
 _39:
   COMM 0x0202
-  END
-  END
+  return
+  return
 doorwarp_label:
   PROC doorwarp_label
 _41:
-  PUSHIS 1
-  IF _42
-  COMM 0x0203
-  PUSHIS 1
-  PUSHIS 2
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _45
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 0
-  COMM 0x020c
-  PUSHREG
-  POPLIX 0x0007
-  PUSHIS 1
-  COMM 0x020c
-  PUSHREG
-  POPLIX 0x0008
-  COMM 0x0204
-  PUSHIS 40
-  PUSHLIX 0x0007
-  EQ
-  IF _43
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _43
-_43:
-  PUSHIS 20
-  PUSHLIX 0x0008
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x0202
-  END
-  GOTO _45
-_45:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _41
+  while (1) {
+    COMM 0x0203
+    push 1
+    push 2
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _45
+    RESTORE_CAMERA_NODE_MODE()
+    push 0
+    COMM 0x020c
+    PUSHREG
+    POPLIX 0x0007
+    push 1
+    COMM 0x020c
+    PUSHREG
+    POPLIX 0x0008
+    COMM 0x0204
+    if (local_int[7] == 40) {
+      WAIT_FOR_TIMER_LIMIT(20)
+    }
+  _43:
+    SCREEN_FADE_B(local_int[8], 20)
+    WAIT_FOR_TIMER_LIMIT(20)
+    COMM 0x0202
+    return
+    goto _45
+  _45:
+    WAIT_FOR_TIMER_START()
+  }
 _42:
-  END
+  return
 dexitwarp_label:
   PROC dexitwarp_label
 _47:
-  PUSHIS 1
-  IF _48
-  PUSHIS 1
-  PUSHIS 10
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _53
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM 0x020d
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG EXITWARP
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 1
-  PUSHIS 3
-  COMM 0x013c
-  PUSHIS 0
-  PUSHSELECT EXITWARP_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  EQ
-  IF _50
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  GOTO _49
-_50:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
-  GOTO _49
-_49:
-  PUSHIS 0
-  COMM 0x020c
-  PUSHREG
-  POPLIX 0x0009
-  PUSHIS 1
-  COMM 0x020c
-  PUSHREG
-  POPLIX 0x000a
-  COMM 0x0204
-  PUSHIS 40
-  PUSHLIX 0x0009
-  EQ
-  IF _51
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _51
-_51:
-  PUSHIS 45
-  PUSHLIX 0x000a
-  COMM SCREEN_FADE_B
-  PUSHIS 45
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x0202
-  END
-  GOTO _53
-_53:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _47
+  while (1) {
+    push 1
+    push 10
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _53
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(6)
+    COMM 0x020d
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(EXITWARP))
+    push 1
+    push 3
+    COMM 0x013c
+    push 0
+    push selection(EXITWARP_SEL)
+    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _50
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    goto _49
+  _50:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    RELEASE_CURRENT_OBJECT()
+    SET_SOLAR_OVERLAY_MODE(7)
+    return
+    goto _49
+  _49:
+    push 0
+    COMM 0x020c
+    PUSHREG
+    POPLIX 0x0009
+    push 1
+    COMM 0x020c
+    PUSHREG
+    POPLIX 0x000a
+    COMM 0x0204
+    if (local_int[9] == 40) {
+      WAIT_FOR_TIMER_LIMIT(20)
+    }
+  _51:
+    SCREEN_FADE_B(local_int[10], 45)
+    WAIT_FOR_TIMER_LIMIT(45)
+    COMM 0x0202
+    return
+    goto _53
+  _53:
+    WAIT_FOR_TIMER_START()
+  }
 _48:
-  END
+  return
 dinwarp_label:
   PROC dinwarp_label
 _55:
-  PUSHIS 1
-  IF _56
-  PUSHIS 1
-  PUSHIS 11
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _57
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM 0x0204
-  PUSHIS 45
-  PUSHIS 1
-  COMM SCREEN_FADE_B
-  PUSHIS 45
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x0202
-  END
-  GOTO _57
-_57:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _55
+  while (1) {
+    push 1
+    push 11
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _57
+    RESTORE_CAMERA_NODE_MODE()
+    COMM 0x0204
+    SCREEN_FADE_B(1, 45)
+    WAIT_FOR_TIMER_LIMIT(45)
+    COMM 0x0202
+    return
+    goto _57
+  _57:
+    WAIT_FOR_TIMER_START()
+  }
 _56:
-  END
+  return
 runwarp_label:
   PROC runwarp_label
   COMM 0x0203
-  COMM RESTORE_CAMERA_NODE_MODE
+  RESTORE_CAMERA_NODE_MODE()
   COMM 0x0204
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
+  WAIT_FOR_TIMER_LIMIT(15)
   COMM 0x0202
-  END
+  return
 anawarp_label:
   PROC anawarp_label
-  COMM RESTORE_CAMERA_NODE_MODE
+  RESTORE_CAMERA_NODE_MODE()
   COMM 0x0203
   COMM 0x0204
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHIS 0
-  PUSHIS 4
-  PUSHIS 4
-  PUSHIS 6
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIX 0x0000
-  COMM WAIT_FOR_UNIT_MOTION
+  global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+  PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
+  WAIT_FOR_UNIT_MOTION(global_int[0])
   COMM 0x0202
-  END
+  return
 tobiwarp_label:
   PROC tobiwarp_label
 _59:
-  PUSHIS 1
-  IF _60
-  PUSHIS 1
-  PUSHIS 3
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _61
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 37
-  COMM 0x011b
-  COMM 0x0204
-  PUSHIS 4
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHIS 0
-  PUSHIS 4
-  PUSHIS 4
-  PUSHIS 5
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x011c
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x011f
-  COMM 0x0121
-  COMM 0x0202
-  END
-  GOTO _61
-_61:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _59
+  while (1) {
+    push 1
+    push 3
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _61
+    RESTORE_CAMERA_NODE_MODE()
+    push 37
+    COMM 0x011b
+    COMM 0x0204
+    WAIT_FOR_TIMER_LIMIT(4)
+    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 5, 4, 4, 0)
+    WAIT_FOR_TIMER_LIMIT(30)
+    COMM 0x011c
+    WAIT_FOR_TIMER_LIMIT(30)
+    COMM 0x011f
+    COMM 0x0121
+    COMM 0x0202
+    return
+    goto _61
+  _61:
+    WAIT_FOR_TIMER_START()
+  }
 _60:
-  END
+  return
 hasigo_label:
   PROC hasigo_label
-  PUSHIS 0
+  push 0
   COMM 0x0208
   PUSHREG
   POPLIX 0x000c
-  PUSHIS 3
+  push 3
   COMM 0x0208
   PUSHREG
   POPLIX 0x000f
-  PUSHIS 1
-  POPLIX 0x000b
+  local_int[11] = 1
 _63:
-  PUSHLIX 0x000b
-  IF _64
-  PUSHIS 0
-  PUSHLIX 0x000c
-  EQ
-  IF _78
-  PUSHIS 0
-  PUSHLIX 0x000f
-  EQ
-  IF _70
-  PUSHIS 1
-  PUSHIS 6
-  COMM 0x005e
+  if_not (local_int[11]) goto _64
+  if_not (local_int[12] == 0) goto _78
+  if_not (local_int[15] == 0) goto _70
+  push 1
+  push 6
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _65
-  PUSHIS 0
-  POPLIX 0x000b
-  GOTO _65
+  local_int[11] = 0
+  goto _65
 _65:
-  GOTO _69
+  goto _69
 _70:
-  PUSHIS 1
-  PUSHIS 6
+  push 1
+  push 6
   COMM 0x021d
   PUSHREG
   EQ
   IF _67
-  PUSHIS 0
-  POPLIX 0x000b
-  GOTO _67
+  local_int[11] = 0
+  goto _67
 _67:
-  GOTO _69
+  goto _69
 _69:
-  GOTO _77
+  goto _77
 _78:
-  PUSHIS 0
-  PUSHLIX 0x000f
-  EQ
-  IF _76
-  PUSHIS 1
-  PUSHIS 7
-  COMM 0x005e
+  if_not (local_int[15] == 0) goto _76
+  push 1
+  push 7
+  COMM ACTION_WINDOW_REQUEST_AND_POLL
   PUSHREG
   EQ
   IF _71
-  PUSHIS 0
-  POPLIX 0x000b
-  GOTO _71
+  local_int[11] = 0
+  goto _71
 _71:
-  GOTO _75
+  goto _75
 _76:
-  PUSHIS 1
-  PUSHIS 7
+  push 1
+  push 7
   COMM 0x021d
   PUSHREG
   EQ
   IF _73
-  PUSHIS 0
-  POPLIX 0x000b
-  GOTO _73
+  local_int[11] = 0
+  goto _73
 _73:
-  GOTO _75
+  goto _75
 _75:
-  GOTO _77
+  goto _77
 _77:
-  PUSHIS 1
-  PUSHLIX 0x000b
-  EQ
-  IF _79
-  COMM WAIT_FOR_TIMER_START
-  GOTO _79
+  if (local_int[11] == 1) {
+    WAIT_FOR_TIMER_START()
+  }
 _79:
-  GOTO _63
+  goto _63
 _64:
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 36
+  RESTORE_CAMERA_NODE_MODE()
+  SET_SOLAR_OVERLAY_MODE(6)
+  push 36
   COMM 0x011b
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
+  SCREEN_FADE_B(0, 15)
+  WAIT_FOR_TIMER_LIMIT(15)
+  push 1
   COMM 0x0208
   PUSHREG
   POPLIX 0x000d
-  PUSHIS 2
+  push 2
   COMM 0x0208
   PUSHREG
   POPLIX 0x000e
-  PUSHLIX 0x000e
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHLIX 0x000d
-  PUSHIX 0x0000
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
+  ADD_EFFECT_UNIT_TO_WORLD(local_int[14])
+  global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[13])
   COMM 0x0204
-  PUSHIS 0
-  PUSHLIX 0x000c
-  EQ
-  IF _82
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 8
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  GOTO _81
-_82:
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 9
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  GOTO _81
+  if (local_int[12] == 0) {
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 8, 0, 0, 1)
+  } else {
+  _82:
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 9, 0, 0, 1)
+    goto _81
+  }
 _81:
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 11
-  COMM WAIT_FOR_TIMER_LIMIT
+  SCREEN_FADE_A(0, 15)
+  WAIT_FOR_TIMER_LIMIT(11)
   COMM 0x011c
-  PUSHIS 49
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 20
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
+  WAIT_FOR_TIMER_LIMIT(49)
+  SCREEN_FADE_B(0, 20)
+  WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121
   COMM 0x0202
-  END
+  return
 heal_label:
   PROC heal_label
 _83:
-  PUSHIS 1
-  IF _84
-  PUSHIS 1
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _85
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 20
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 900
-  COMM 0x020f
-  END
-  GOTO _85
-_85:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _83
+  while (1) {
+    push 1
+    push 9
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _85
+    RESTORE_CAMERA_NODE_MODE()
+    SCREEN_FADE_B(0, 20)
+    WAIT_FOR_TIMER_LIMIT(20)
+    push 900
+    COMM 0x020f
+    return
+    goto _85
+  _85:
+    WAIT_FOR_TIMER_START()
+  }
 _84:
-  END
+  return
 save_label:
   PROC save_label
 _87:
-  PUSHIS 1
-  IF _88
-  PUSHIS 1
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _89
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 20
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 901
-  COMM 0x020f
-  END
-  GOTO _89
-_89:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _87
+  while (1) {
+    push 1
+    push 9
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _89
+    RESTORE_CAMERA_NODE_MODE()
+    SCREEN_FADE_B(0, 20)
+    WAIT_FOR_TIMER_LIMIT(20)
+    push 901
+    COMM 0x020f
+    return
+    goto _89
+  _89:
+    WAIT_FOR_TIMER_START()
+  }
 _88:
-  END
+  return
 npctalk_label:
   PROC npctalk_label
   COMM 0x0207
   PUSHREG
   POPLIX 0x0016
-  PUSHIS 1
-  POPLIX 0x0017
+  local_int[23] = 1
 _91:
-  PUSHLIX 0x0017
-  IF _92
-  PUSHIS 0
-  PUSHLIX 0x0016
-  EQ
-  IF _110
-  PUSHIS 0
-  POPLIX 0x0017
-  END
-  GOTO _109
-_110:
-  PUSHIS 1
-  PUSHLIX 0x0016
-  EQ
-  IF _111
-  PUSHIS 1
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _93
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _93
-_93:
-  GOTO _109
-_111:
-  PUSHIS 2
-  PUSHLIX 0x0016
-  EQ
-  IF _112
-  PUSHIS 1
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _95
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _95
-_95:
-  GOTO _109
-_112:
-  PUSHIS 100
-  PUSHLIX 0x0016
-  EQ
-  IF _113
-  PUSHIS 1
-  PUSHIS 2
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _97
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _97
-_97:
-  GOTO _109
-_113:
-  PUSHIS 101
-  PUSHLIX 0x0016
-  EQ
-  IF _114
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _109
-_114:
-  PUSHIS 102
-  PUSHLIX 0x0016
-  EQ
-  IF _115
-  PUSHIS 1
-  PUSHIS 3
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _99
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _99
-_99:
-  GOTO _109
-_115:
-  PUSHIS 103
-  PUSHLIX 0x0016
-  EQ
-  IF _116
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _109
-_116:
-  PUSHIS 104
-  PUSHLIX 0x0016
-  EQ
-  IF _117
-  PUSHIS 1
-  PUSHIS 6
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _101
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _101
-_101:
-  GOTO _109
-_117:
-  PUSHIS 105
-  PUSHLIX 0x0016
-  EQ
-  IF _118
-  PUSHIS 1
-  PUSHIS 7
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _103
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _103
-_103:
-  GOTO _109
-_118:
-  PUSHIS 106
-  PUSHLIX 0x0016
-  EQ
-  IF _119
-  PUSHIS 1
-  PUSHIS 10
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _105
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _105
-_105:
-  GOTO _109
-_119:
-  PUSHIS 107
-  PUSHLIX 0x0016
-  EQ
-  IF _120
-  PUSHIS 1
-  PUSHIS 11
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _107
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _107
-_107:
-  GOTO _109
-_120:
-  PUSHIS 199
-  PUSHLIX 0x0016
-  EQ
-  IF _109
-  PUSHIS 0
-  POPLIX 0x0017
-  GOTO _109
+  if_not (local_int[23]) goto _92
+  if (local_int[22] == 0) {
+    local_int[23] = 0
+    return
+  } else {
+  _110:
+    if_not (local_int[22] == 1) goto _111
+    push 1
+    push 1
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _93
+    local_int[23] = 0
+    goto _93
+  _93:
+    goto _109
+  _111:
+    if_not (local_int[22] == 2) goto _112
+    push 1
+    push 9
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _95
+    local_int[23] = 0
+    goto _95
+  _95:
+    goto _109
+  _112:
+    if_not (local_int[22] == 100) goto _113
+    push 1
+    push 2
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _97
+    local_int[23] = 0
+    goto _97
+  _97:
+    goto _109
+  _113:
+    if (local_int[22] == 101) {
+      local_int[23] = 0
+    } else {
+    _114:
+      if_not (local_int[22] == 102) goto _115
+      push 1
+      push 3
+      COMM ACTION_WINDOW_REQUEST_AND_POLL
+      PUSHREG
+      EQ
+      IF _99
+      local_int[23] = 0
+      goto _99
+    _99:
+      goto _109
+    _115:
+      if (local_int[22] == 103) {
+        local_int[23] = 0
+      } else {
+      _116:
+        if_not (local_int[22] == 104) goto _117
+        push 1
+        push 6
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
+        PUSHREG
+        EQ
+        IF _101
+        local_int[23] = 0
+        goto _101
+      _101:
+        goto _109
+      _117:
+        if_not (local_int[22] == 105) goto _118
+        push 1
+        push 7
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
+        PUSHREG
+        EQ
+        IF _103
+        local_int[23] = 0
+        goto _103
+      _103:
+        goto _109
+      _118:
+        if_not (local_int[22] == 106) goto _119
+        push 1
+        push 10
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
+        PUSHREG
+        EQ
+        IF _105
+        local_int[23] = 0
+        goto _105
+      _105:
+        goto _109
+      _119:
+        if_not (local_int[22] == 107) goto _120
+        push 1
+        push 11
+        COMM ACTION_WINDOW_REQUEST_AND_POLL
+        PUSHREG
+        EQ
+        IF _107
+        local_int[23] = 0
+        goto _107
+      _107:
+        goto _109
+      _120:
+        if (local_int[22] == 199) {
+          local_int[23] = 0
+        }
+      }
+    }
+  }
 _109:
-  PUSHIS 1
-  PUSHLIX 0x0017
-  EQ
-  IF _122
-  COMM WAIT_FOR_TIMER_START
-  GOTO _122
+  if (local_int[23] == 1) {
+    WAIT_FOR_TIMER_START()
+  }
 _122:
-  GOTO _91
+  goto _91
 _92:
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 6
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 1
-  POPLIX 0x0011
-  PUSHIS 0
-  POPLIX 0x0015
+  RESTORE_CAMERA_NODE_MODE()
+  SET_SOLAR_OVERLAY_MODE(6)
+  local_int[17] = 1
+  local_int[21] = 0
   COMM 0x01fe
   PUSHREG
   POPLIX 0x0018
 _124:
-  PUSHIS 1
-  IF _125
-  PUSHIS 10
-  PUSHLIX 0x0011
-  LT
-  IF _140
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0011
-  COMM 0x0205
-  PUSHREG
-  POPLIX 0x0011
-  GOTO _139
-_140:
-  PUSHIS 0
-  POPLIX 0x0010
-  PUSHIS 0
-  PUSHLIX 0x0011
-  COMM 0x0206
-  PUSHREG
-  POPLIX 0x0012
-  PUSHIS 2
-  PUSHLIX 0x0011
-  COMM 0x0206
-  PUSHREG
-  POPLIX 0x0019
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0012
-  EQ
-  IF _138
-  PUSHIS 1
-  PUSHLIX 0x0015
-  EQ
-  IF _128
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHLIX 0x0019
-  EQ
-  IF _126
-  PUSHLIX 0x0018
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  GOTO _126
-_126:
-  PUSHIS 0
-  POPLIX 0x0015
-  GOTO _128
-_128:
-  GOTO _137
-_138:
-  PUSHIS 1
-  PUSHLIX 0x0011
-  COMM 0x0206
-  PUSHREG
-  POPLIX 0x0013
-  PUSHIS 0
-  PUSHLIX 0x0015
-  EQ
-  IF _132
-  PUSHIS 1
-  POPLIX 0x0015
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 0
-  PUSHLIX 0x0019
-  EQ
-  IF _130
-  PUSHTYPE5 ppos01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0018
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  GOTO _130
-_130:
-  GOTO _132
-_132:
-  PUSHIS 0
-  PUSHLIX 0x0012
-  EQ
-  IF _135
-  PUSHLIX 0x0013
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _134
-_135:
-  PUSHIS 1
-  PUSHLIX 0x0012
-  EQ
-  IF _134
-  PUSHLIX 0x0013
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0010
-  GOTO _134
-_134:
-  GOTO _137
-_137:
-  PUSHLIX 0x0010
-  PUSHLIX 0x0011
-  COMM 0x0205
-  PUSHREG
-  POPLIX 0x0011
-  COMM WAIT_FOR_TIMER_START
-  GOTO _139
+  if_not (1) goto _125
+  if (local_int[17] < 10) {
+    push -(1)
+    push local_int[17]
+    COMM 0x0205
+    PUSHREG
+    POPLIX 0x0011
+  } else {
+  _140:
+    local_int[16] = 0
+    push 0
+    push local_int[17]
+    COMM 0x0206
+    PUSHREG
+    POPLIX 0x0012
+    push 2
+    push local_int[17]
+    COMM 0x0206
+    PUSHREG
+    POPLIX 0x0019
+    if_not (local_int[18] == -(1)) goto _138
+    if (local_int[21] == 1) {
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      if (local_int[25] == 0) {
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
+      }
+    _126:
+      local_int[21] = 0
+    }
+  _128:
+    goto _137
+  _138:
+    push 1
+    push local_int[17]
+    COMM 0x0206
+    PUSHREG
+    POPLIX 0x0013
+    if_not (local_int[21] == 0) goto _132
+    local_int[21] = 1
+    ACTIVATE_MESSAGE_PANEL()
+    if (local_int[25] == 0) {
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[24], result)
+    }
+  _130:
+    goto _132
+  _132:
+    if (local_int[18] == 0) {
+      MESSAGE_REQUEST_AND_POLL(local_int[19])
+    } else {
+    _135:
+      if (local_int[18] == 1) {
+        local_int[16] = MESSAGE_SELECTION_REQUEST_AND_POLL(local_int[19])
+      }
+    }
+  _134:
+    goto _137
+  _137:
+    push local_int[16]
+    push local_int[17]
+    COMM 0x0205
+    PUSHREG
+    POPLIX 0x0011
+    WAIT_FOR_TIMER_START()
+    goto _139
+  }
 _139:
-  PUSHIS 200
-  PUSHLIX 0x0011
-  GE
-  IF _141
-  END
-  GOTO _141
+  if (local_int[17] >= 200) {
+    return
+  }
 _141:
-  PUSHIS 100
-  PUSHLIX 0x0011
-  EQ
-  IF _145
-  PUSHIS 1
-  PUSHLIX 0x0015
-  EQ
-  IF _143
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHLIX 0x0018
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  POPLIX 0x0015
-  GOTO _143
-_143:
-  COMM 0x020e
-  END
-  GOTO _145
+  if (local_int[17] == 100) {
+    if (local_int[21] == 1) {
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
+      local_int[21] = 0
+    }
+  _143:
+    COMM 0x020e
+    return
+  }
 _145:
-  PUSHIS 0
-  PUSHLIX 0x0011
-  EQ
-  IF _149
-  PUSHIS 1
-  PUSHLIX 0x0015
-  EQ
-  IF _147
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHLIX 0x0018
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  POPLIX 0x0015
-  GOTO _147
-_147:
-  PUSHIS 7
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _149
+  if (local_int[17] == 0) {
+    if (local_int[21] == 1) {
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[24])
+      local_int[21] = 0
+    }
+  _147:
+    SET_SOLAR_OVERLAY_MODE(7)
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    RELEASE_CURRENT_OBJECT()
+    return
+  }
 _149:
-  GOTO _124
+  goto _124
 _125:
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  END
+  RELEASE_CURRENT_OBJECT()
+  return
+  return
 elvstart_label:
   PROC elvstart_label
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHTYPE5 str_01cam_01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  POPLIX 0x001b
-  PUSHIS 0
+  global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+  local_int[27] = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
+  push 0
   COMM 0x0200
   PUSHREG
   POPLIX 0x001c
-  PUSHIS 14
+  push 14
   COMM 0x0200
   PUSHREG
   POPLIX 0x0023
-  PUSHIS 2
+  push 2
   COMM 0x0200
   PUSHREG
   POPLIX 0x001d
-  PUSHIS 3
+  push 3
   COMM 0x0200
   PUSHREG
   POPLIX 0x001e
-  PUSHIS 4
+  push 4
   COMM 0x0200
   PUSHREG
   POPLIX 0x001f
-  PUSHIS 5
+  push 5
   COMM 0x0200
   PUSHREG
   POPLIX 0x0020
-  PUSHIS 6
+  push 6
   COMM 0x0200
   PUSHREG
   POPLIX 0x0021
-  PUSHIS 7
+  push 7
   COMM 0x0200
   PUSHREG
   POPLIX 0x0022
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 4
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 2
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 2
-  PUSHIX 0x0000
-  COMM SET_UNIT_VALUE
-  PUSHLIX 0x001b
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHLIX 0x0023
-  PUSHLIX 0x0023
+  RESTORE_CAMERA_NODE_MODE()
+  SET_SOLAR_OVERLAY_MODE(4)
+  PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
+  SET_UNIT_VALUE(global_int[0], 2)
+  ADD_EFFECT_UNIT_TO_WORLD(local_int[27])
+  SCREEN_FADE_A(0, 15)
+  push local_int[35]
+  push local_int[35]
   COMM 0x0209
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG WARP_ELV_MSG
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 1
-  PUSHLIX 0x001c
-  EQ
-  IF _152
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 1
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL1
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
-_152:
-  PUSHIS 2
-  PUSHLIX 0x001c
-  EQ
-  IF _153
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001e
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x0023
-  COMM 0x0040
-  PUSHIS 2
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL2
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
-_153:
-  PUSHIS 3
-  PUSHLIX 0x001c
-  EQ
-  IF _154
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001e
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001f
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x0023
-  COMM 0x0040
-  PUSHIS 3
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL3
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
-_154:
-  PUSHIS 4
-  PUSHLIX 0x001c
-  EQ
-  IF _155
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001e
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001f
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0020
-  PUSHIS 3
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x0023
-  COMM 0x0040
-  PUSHIS 4
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL4
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
-_155:
-  PUSHIS 5
-  PUSHLIX 0x001c
-  EQ
-  IF _156
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001e
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001f
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0020
-  PUSHIS 3
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0021
-  PUSHIS 4
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x0023
-  COMM 0x0040
-  PUSHIS 5
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL5
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
-_156:
-  PUSHIS 6
-  PUSHLIX 0x001c
-  EQ
-  IF _151
-  PUSHIS 4
-  PUSHLIX 0x001d
-  PUSHIS 0
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001e
-  PUSHIS 1
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x001f
-  PUSHIS 2
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0020
-  PUSHIS 3
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0021
-  PUSHIS 4
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHIS 4
-  PUSHLIX 0x0022
-  PUSHIS 5
-  COMM SET_MESSAGE_WINDOW_GEOMETRY
-  PUSHLIX 0x0023
-  COMM 0x0040
-  PUSHIS 6
-  PUSHIS 3
-  COMM 0x013c
-  PUSHSELECT WARP_ELV_SEL6
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x001a
-  GOTO _151
+  ACTIVATE_MESSAGE_PANEL()
+  MESSAGE_REQUEST_AND_POLL(message(WARP_ELV_MSG))
+  if (local_int[28] == 1) {
+    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+    push 1
+    push 3
+    COMM 0x013c
+    local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL1))
+  } else {
+  _152:
+    if (local_int[28] == 2) {
+      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
+      push local_int[35]
+      COMM 0x0040
+      push 2
+      push 3
+      COMM 0x013c
+      local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL2))
+    } else {
+    _153:
+      if (local_int[28] == 3) {
+        SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+        SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
+        SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
+        push local_int[35]
+        COMM 0x0040
+        push 3
+        push 3
+        COMM 0x013c
+        local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL3))
+      } else {
+      _154:
+        if (local_int[28] == 4) {
+          SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
+          SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
+          push local_int[35]
+          COMM 0x0040
+          push 4
+          push 3
+          COMM 0x013c
+          local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL4))
+        } else {
+        _155:
+          if (local_int[28] == 5) {
+            SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
+            SET_MESSAGE_WINDOW_GEOMETRY(4, local_int[33], 4)
+            push local_int[35]
+            COMM 0x0040
+            push 5
+            push 3
+            COMM 0x013c
+            local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL5))
+          } else {
+          _156:
+            if (local_int[28] == 6) {
+              SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[29], 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[30], 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(2, local_int[31], 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(3, local_int[32], 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(4, local_int[33], 4)
+              SET_MESSAGE_WINDOW_GEOMETRY(5, local_int[34], 4)
+              push local_int[35]
+              COMM 0x0040
+              push 6
+              push 3
+              COMM 0x013c
+              local_int[26] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(WARP_ELV_SEL6))
+            }
+          }
+        }
+      }
+    }
+  }
 _151:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHLIX 0x001c
-  PUSHLIX 0x001a
-  EQ
-  IF _163
-  PUSHIS 4
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _162
-_163:
-  PUSHLIX 0x0023
-  PUSHLIX 0x001a
-  EQ
-  IF _164
-  PUSHIS 4
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _162
-_164:
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 4
-  PUSHIS 10
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIX 0x0000
-  COMM WAIT_FOR_UNIT_MOTION
-  PUSHIS 4
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 46
-  COMM 0x0214
-  PUSHLIX 0x001a
-  PUSHLIX 0x0023
-  COMM 0x0209
-  PUSHIS 4
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x020b
-  PUSHREG
-  POPLIX 0x0024
-_158:
-  PUSHIS 1
-  PUSHLIX 0x0024
-  NEQ
-  IF _159
-  PUSHIS 2
-  PUSHLIX 0x0024
-  EQ
-  IF _160
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 46
-  COMM 0x0215
-  COMM 0x020a
-  PUSHLIX 0x001a
-  COMM 0x0201
-  END
-  GOTO _160
-_160:
-  COMM WAIT_FOR_TIMER_START
-  COMM 0x020b
-  PUSHREG
-  POPLIX 0x0024
-  GOTO _158
-_159:
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 46
-  COMM 0x0215
-  PUSHIS 47
-  COMM 0x0214
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  GOTO _162
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  if (local_int[26] == local_int[28]) {
+    WAIT_FOR_TIMER_LIMIT(4)
+  } else {
+  _163:
+    if (local_int[26] == local_int[35]) {
+      WAIT_FOR_TIMER_LIMIT(4)
+    } else {
+    _164:
+      PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 4, 20, 0)
+      WAIT_FOR_UNIT_MOTION(global_int[0])
+      WAIT_FOR_TIMER_LIMIT(4)
+      push 46
+      COMM 0x0214
+      push local_int[26]
+      push local_int[35]
+      COMM 0x0209
+      WAIT_FOR_TIMER_LIMIT(4)
+      WAIT_FOR_TIMER_LIMIT(20)
+      COMM 0x020b
+      PUSHREG
+      POPLIX 0x0024
+    _158:
+      while (local_int[36] != 1) {
+        if (local_int[36] == 2) {
+          SCREEN_FADE_B(0, 15)
+          WAIT_FOR_TIMER_LIMIT(15)
+          push 46
+          COMM 0x0215
+          COMM 0x020a
+          push local_int[26]
+          COMM 0x0201
+          return
+        }
+      _160:
+        WAIT_FOR_TIMER_START()
+        COMM 0x020b
+        PUSHREG
+        POPLIX 0x0024
+      }
+    _159:
+      WAIT_FOR_TIMER_LIMIT(20)
+      push 46
+      COMM 0x0215
+      push 47
+      COMM 0x0214
+      WAIT_FOR_TIMER_LIMIT(20)
+      goto _162
+    }
+  }
 _162:
-  PUSHIS 48
+  push 48
   COMM 0x0214
-  PUSHIS 0
-  PUSHTYPE5 str_01path_01
+  push 0
+  push string(str_01path_01)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
-  PUSHTYPE5 str_01all_d01
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01))
+  push result
+  COMM MOVE_OBJECT_ALONG_PATH
+  push 0
+  push string(str_01path_02)
   COMM READ_SECONDARY_WORLD_ID_VALUE
   PUSHREG
-  COMM 0x006b
-  PUSHIS 0
-  PUSHTYPE5 str_01path_02
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 str_01all_d02
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x006b
-  PUSHTYPE5 str_01all_d01_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d02))
+  push result
+  COMM MOVE_OBJECT_ALONG_PATH
+  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_d01_2))
+  push result
   COMM 0x006c
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
+  WAIT_FOR_TIMER_LIMIT(20)
+  SCREEN_FADE_B(0, 15)
+  WAIT_FOR_TIMER_LIMIT(15)
   COMM 0x020a
-  PUSHLIX 0x001a
+  push local_int[26]
   COMM 0x0201
-  END
+  return
 suikomi_label:
   PROC suikomi_label
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 6
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 6
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
+  RESTORE_CAMERA_NODE_MODE()
+  SCREEN_FADE_B(0, 6)
+  WAIT_FOR_TIMER_LIMIT(6)
+  push 0
   COMM 0x01fa
   PUSHREG
   POPLIX 0x0029
-  PUSHIS 1
+  push 1
   COMM 0x01fa
   PUSHREG
   POPLIX 0x0026
-  PUSHIS 2
+  push 2
   COMM 0x01fa
   PUSHREG
   POPLIX 0x0025
-  PUSHIS 3
+  push 3
   COMM 0x01fa
   PUSHREG
   POPLIX 0x0027
-  PUSHIS 4
+  push 4
   COMM 0x01fa
   PUSHREG
   POPLIX 0x0028
-  PUSHIS 39
+  push 39
   COMM 0x011b
   COMM 0x011c
-  PUSHLIX 0x0027
-  PUSHIS 0
-  PUSHIS 0
+  push local_int[39]
+  push 0
+  push 0
   COMM 0x0111
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHLIX 0x0026
-  PUSHIX 0x0000
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 2
-  PUSHIS 25
-  PUSHIS 3
-  PUSHLIX 0x0028
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHLIX 0x0025
-  COMM ADD_FLAGGED_EFFECT_UNIT_TO_WORLD
-  PUSHLIX 0x0029
-  PUSHIS 2
+  global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[38])
+  PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[40], 3, 25, 2)
+  ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(local_int[37])
+  push local_int[41]
+  push 2
   COMM 0x0015
   PUSHREG
   POPLIX 0x002a
-  PUSHLIX 0x0026
-  PUSHLIX 0x002a
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHLIX 0x002a
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[42], local_int[38])
+  push local_int[42]
   COMM 0x0124
-  PUSHIS 2
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHLIX 0x002a
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 6
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 60
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 20
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
+  PREPARE_UNIT_MOTION_STATE(local_int[42], 0, 0, 0, 2)
+  SCREEN_FADE_A(0, 6)
+  WAIT_FOR_TIMER_LIMIT(60)
+  SCREEN_FADE_B(0, 20)
+  WAIT_FOR_TIMER_LIMIT(20)
   COMM 0x011f
   COMM 0x0121
   COMM 0x0202
-  END
-  END
+  return
+  return
 baria_label:
   PROC baria_label
-  PUSHIS 0
+  push 0
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002b
-  PUSHIS 1
+  push 1
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002c
-  PUSHIS 2
+  push 2
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002d
-  PUSHIS 3
+  push 3
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002e
-  PUSHIS 4
+  push 4
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002e
-  PUSHIS 5
+  push 5
   COMM 0x01fb
   PUSHREG
   POPLIX 0x002f
-  PUSHIS 6
+  push 6
   COMM 0x01fb
   PUSHREG
   POPLIX 0x0031
-  PUSHIS 0
-  PUSHLIX 0x002f
+  push 0
+  push local_int[47]
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _184
 _165:
-  PUSHIS 1
-  IF _166
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  IF _182
-  PUSHIS 0
-  PUSHLIX 0x002b
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _181
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 2560
-  PUSHLIX 0x002b
-  EQ
-  IF _168
-  PUSHMSG FLD_BLUEICE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _167
-_168:
-  PUSHIS 2561
-  PUSHLIX 0x002b
-  EQ
-  IF _169
-  PUSHMSG FLD_YERWICE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _167
-_169:
-  PUSHMSG FLD_REDICE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _167
-_167:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _180
-_181:
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 2560
-  PUSHLIX 0x002b
-  EQ
-  IF _171
-  PUSHTYPE5 fld_f_bin_ICE_b_BED
-  COMM 0x00cd
-  PUSHREG
-  POPLIX 0x0030
-  GOTO _170
-_171:
-  PUSHIS 2561
-  PUSHLIX 0x002b
-  EQ
-  IF _172
-  PUSHTYPE5 fld_f_bin_ICE_y_BED
-  COMM 0x00cd
-  PUSHREG
-  POPLIX 0x0030
-  GOTO _170
-_172:
-  PUSHTYPE5 fld_f_bin_ICE_r_BED
-  COMM 0x00cd
-  PUSHREG
-  POPLIX 0x0030
-  GOTO _170
-_170:
-  PUSHLIX 0x002d
-  PUSHLIX 0x0030
-  COMM 0x009d
-  PUSHLIX 0x002c
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHLIX 0x002d
-  PUSHIX 0x0000
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 1
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 2
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 2560
-  PUSHLIX 0x002b
-  EQ
-  IF _174
-  PUSHMSG FLD_BLUEICE_KEYHAVE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _173
-_174:
-  PUSHIS 2561
-  PUSHLIX 0x002b
-  EQ
-  IF _175
-  PUSHMSG FLD_YERWICE_KEYHAVE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _173
-_175:
-  PUSHMSG FLD_REDICE_KEYHAVE
-  COMM MESSAGE_REQUEST_AND_POLL
-  GOTO _173
-_173:
-  PUSHMSG FLD_ICE_BREAK
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHSELECT FLD_ICE_BREAK_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  EQ
-  IF _178
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 32
-  COMM 0x011b
-  PUSHIS 3
-  PUSHIS 10
-  PUSHIS 10
-  PUSHIS 24
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 60
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHLIX 0x0030
-  COMM 0x00ce
-  COMM 0x011c
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  PUSHIS 1
-  COMM SCREEN_FADE_B
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHTYPE5 BARIA
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0104
-  PUSHTYPE5 BARIA_2
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0108
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 2
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 15
-  PUSHIS 1
-  COMM SCREEN_FADE_A
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHLIX 0x0030
-  COMM 0x009b
-  COMM 0x011f
-  COMM 0x0121
-  COMM 0x00a4
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHLIX 0x002f
-  COMM SET_MODEL_FLAG
-  PUSHIS 1
-  MINUS
-  PUSHLIX 0x0031
-  NEQ
-  IF _176
-  PUSHLIX 0x0031
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0111
-  GOTO _176
-_176:
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  END
-  GOTO _178
-_178:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x00a4
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM RELEASE_CURRENT_OBJECT
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  GOTO _180
-_180:
-  GOTO _182
-_182:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _165
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _182
+    push 0
+    push local_int[43]
+    COMM TEST_MODEL_FLAG
+    PUSHREG
+    EQ
+    IF _181
+    RESTORE_CAMERA_NODE_MODE()
+    ACTIVATE_MESSAGE_PANEL()
+    if (local_int[43] == 2560) {
+      MESSAGE_REQUEST_AND_POLL(message(FLD_BLUEICE))
+    } else {
+    _168:
+      if (local_int[43] == 2561) {
+        MESSAGE_REQUEST_AND_POLL(message(FLD_YERWICE))
+      } else {
+      _169:
+        MESSAGE_REQUEST_AND_POLL(message(FLD_REDICE))
+        goto _167
+      }
+    }
+  _167:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    RELEASE_CURRENT_OBJECT()
+    return
+    goto _180
+  _181:
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    if (local_int[43] == 2560) {
+      push string(fld_f_bin_ICE_b_BED)
+      COMM 0x00cd
+      PUSHREG
+      POPLIX 0x0030
+    } else {
+    _171:
+      if (local_int[43] == 2561) {
+        push string(fld_f_bin_ICE_y_BED)
+        COMM 0x00cd
+        PUSHREG
+        POPLIX 0x0030
+      } else {
+      _172:
+        push string(fld_f_bin_ICE_r_BED)
+        COMM 0x00cd
+        PUSHREG
+        POPLIX 0x0030
+        goto _170
+      }
+    }
+  _170:
+    push local_int[45]
+    push local_int[48]
+    COMM 0x009d
+    ADD_EFFECT_UNIT_TO_WORLD(local_int[44])
+    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[45])
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 1)
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    if (local_int[43] == 2560) {
+      MESSAGE_REQUEST_AND_POLL(message(FLD_BLUEICE_KEYHAVE))
+    } else {
+    _174:
+      if (local_int[43] == 2561) {
+        MESSAGE_REQUEST_AND_POLL(message(FLD_YERWICE_KEYHAVE))
+      } else {
+      _175:
+        MESSAGE_REQUEST_AND_POLL(message(FLD_REDICE_KEYHAVE))
+        goto _173
+      }
+    }
+  _173:
+    MESSAGE_REQUEST_AND_POLL(message(FLD_ICE_BREAK))
+    push 0
+    push selection(FLD_ICE_BREAK_SEL)
+    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _178
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    WAIT_FOR_TIMER_LIMIT(10)
+    push 32
+    COMM 0x011b
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
+    WAIT_FOR_TIMER_LIMIT(60)
+    push 0
+    push local_int[48]
+    COMM 0x00ce
+    COMM 0x011c
+    WAIT_FOR_TIMER_LIMIT(30)
+    WAIT_FOR_TIMER_LIMIT(30)
+    SCREEN_FADE_B(1, 30)
+    WAIT_FOR_TIMER_LIMIT(30)
+    push 0
+    push string(BARIA)
+    push 0
+    push 0
+    COMM 0x0104
+    push string(BARIA_2)
+    push 0
+    push 0
+    COMM 0x0108
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
+    SCREEN_FADE_A(1, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    WAIT_FOR_TIMER_LIMIT(30)
+    SCREEN_FADE_B(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    push local_int[48]
+    COMM 0x009b
+    COMM 0x011f
+    COMM 0x0121
+    COMM 0x00a4
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    SCREEN_FADE_A(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    SET_MODEL_FLAG(local_int[47])
+    if (local_int[49] != -(1)) {
+      push local_int[49]
+      push 0
+      push 0
+      COMM 0x0111
+    }
+  _176:
+    RELEASE_CURRENT_OBJECT()
+    SET_SOLAR_OVERLAY_MODE(3)
+    return
+    goto _178
+  _178:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    COMM 0x00a4
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    RELEASE_CURRENT_OBJECT()
+    SET_SOLAR_OVERLAY_MODE(3)
+    goto _180
+  _180:
+    goto _182
+  _182:
+    WAIT_FOR_TIMER_START()
+  }
 _166:
-  GOTO _184
+  goto _184
 _184:
-  END
-  END
+  return
+  return
 proc_0012:
   PROC proc_0012
 _186:
-  PUSHIS 1
-  IF _187
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _191
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_01
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0032
-  PUSHTYPE5 ppos01_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0032
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _189
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0032
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_001_01_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0032
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0032
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _188
-_189:
-  PUSHIS 9
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _190
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0032
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_001_01_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0032
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0032
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _188
-_190:
-  PUSHMSG npc_001_01_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0032
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0032
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _188
-_188:
-  GOTO _191
-_191:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _186
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _191
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_01)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0032
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2))
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[50], result)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(12)
+    if (result) {
+      PREPARE_UNIT_MOTION_STATE(local_int[50], 1, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_01_02))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[50])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[50], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _189:
+      result = TEST_MODEL_FLAG(9)
+      if (result) {
+        PREPARE_UNIT_MOTION_STATE(local_int[50], 1, 10, 20, 0)
+        MESSAGE_REQUEST_AND_POLL(message(npc_001_01_01))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[50])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[50], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _190:
+        MESSAGE_REQUEST_AND_POLL(message(npc_001_01_03))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[50])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[50], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+        goto _188
+      }
+    }
+  _188:
+    goto _191
+  _191:
+    WAIT_FOR_TIMER_START()
+  }
 _187:
-  END
+  return
 proc_0013:
   PROC proc_0013
 _193:
-  PUSHIS 1
-  IF _194
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _207
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_02
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0033
-  PUSHTYPE5 ppos01_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0033
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _205
-  PUSHMSG npc_05_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT npc_05_03_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0034
-  PUSHIS 0
-  PUSHLIX 0x0034
-  EQ
-  IF _196
-  PUSHMSG npc_05_03_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _195
-_196:
-  PUSHIS 1
-  PUSHLIX 0x0034
-  EQ
-  IF _195
-  PUSHMSG npc_05_03_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _195
-_195:
-  GOTO _204
-_205:
-  PUSHIS 9
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _206
-  PUSHMSG npc_05_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT npc_05_02_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0034
-  PUSHIS 0
-  PUSHLIX 0x0034
-  EQ
-  IF _199
-  PUSHMSG npc_05_02_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _198
-_199:
-  PUSHIS 1
-  PUSHLIX 0x0034
-  EQ
-  IF _198
-  PUSHMSG npc_05_02_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _198
-_198:
-  GOTO _204
-_206:
-  PUSHMSG npc_001_02_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT npc_001_02_01_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0034
-  PUSHIS 0
-  PUSHLIX 0x0034
-  EQ
-  IF _202
-  PUSHMSG npc_001_02_01_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _201
-_202:
-  PUSHIS 1
-  PUSHLIX 0x0034
-  EQ
-  IF _201
-  PUSHMSG npc_001_02_01_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0033
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0033
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _201
-_201:
-  GOTO _204
-_204:
-  GOTO _207
-_207:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _193
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _207
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_02)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0033
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_3))
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[51], result)
+    PREPARE_UNIT_MOTION_STATE(local_int[51], 1, 10, 20, 0)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(12)
+    if_not (result) goto _205
+    MESSAGE_REQUEST_AND_POLL(message(npc_05_03))
+    local_int[52] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(npc_05_03_SEL))
+    if (local_int[52] == 0) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_05_03_ans0))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _196:
+      if (local_int[52] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(npc_05_03_ans1))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      }
+    }
+  _195:
+    goto _204
+  _205:
+    result = TEST_MODEL_FLAG(9)
+    if_not (result) goto _206
+    MESSAGE_REQUEST_AND_POLL(message(npc_05_02))
+    local_int[52] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(npc_05_02_SEL))
+    if (local_int[52] == 0) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_05_02_ans0))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _199:
+      if (local_int[52] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(npc_05_02_ans1))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      }
+    }
+  _198:
+    goto _204
+  _206:
+    MESSAGE_REQUEST_AND_POLL(message(npc_001_02_01))
+    local_int[52] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(npc_001_02_01_SEL))
+    if (local_int[52] == 0) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_02_01_ans0))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _202:
+      if (local_int[52] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(npc_001_02_01_ans1))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[51])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[51], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      }
+    }
+  _201:
+    goto _204
+  _204:
+    goto _207
+  _207:
+    WAIT_FOR_TIMER_START()
+  }
 _194:
-  END
+  return
 proc_0014:
   PROC proc_0014
 _209:
-  PUSHIS 1
-  IF _210
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _221
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_03
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0035
-  PUSHTYPE5 ppos01_4
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0035
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _219
-  PUSHMSG npc_001_03_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT npc_001_03_03_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0036
-  PUSHIS 0
-  PUSHLIX 0x0036
-  EQ
-  IF _212
-  PUSHMSG npc_001_03_03_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _211
-_212:
-  PUSHIS 1
-  PUSHLIX 0x0036
-  EQ
-  IF _211
-  PUSHMSG npc_001_03_03_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _211
-_211:
-  GOTO _218
-_219:
-  PUSHIS 9
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _220
-  PUSHMSG npc_001_03_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _218
-_220:
-  PUSHMSG npc_001_03_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT npc_001_03_01_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x0036
-  PUSHIS 0
-  PUSHLIX 0x0036
-  EQ
-  IF _215
-  PUSHMSG npc_001_03_01_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _214
-_215:
-  PUSHIS 1
-  PUSHLIX 0x0036
-  EQ
-  IF _216
-  PUSHMSG npc_001_03_01_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _214
-_216:
-  PUSHIS 2
-  PUSHLIX 0x0036
-  EQ
-  IF _214
-  PUSHMSG npc_001_03_01_ans2
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0035
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0035
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _214
-_214:
-  GOTO _218
-_218:
-  GOTO _221
-_221:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _209
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _221
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_03)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0035
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_4))
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[53], result)
+    PREPARE_UNIT_MOTION_STATE(local_int[53], 1, 10, 20, 0)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(12)
+    if_not (result) goto _219
+    MESSAGE_REQUEST_AND_POLL(message(npc_001_03_03))
+    local_int[54] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(npc_001_03_03_SEL))
+    if (local_int[54] == 0) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_03_03_ans0))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _212:
+      if (local_int[54] == 1) {
+        MESSAGE_REQUEST_AND_POLL(message(npc_001_03_03_ans1))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      }
+    }
+  _211:
+    goto _218
+  _219:
+    result = TEST_MODEL_FLAG(9)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_03_02))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _220:
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_03_01))
+      local_int[54] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(npc_001_03_01_SEL))
+      if (local_int[54] == 0) {
+        MESSAGE_REQUEST_AND_POLL(message(npc_001_03_01_ans0))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _215:
+        if (local_int[54] == 1) {
+          MESSAGE_REQUEST_AND_POLL(message(npc_001_03_01_ans1))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _216:
+          if (local_int[54] == 2) {
+            MESSAGE_REQUEST_AND_POLL(message(npc_001_03_01_ans2))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[53])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[53], 0, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+          }
+        }
+      }
+    _214:
+      goto _218
+    }
+  _218:
+    goto _221
+  _221:
+    WAIT_FOR_TIMER_START()
+  }
 _210:
-  END
+  return
 proc_0015:
   PROC proc_0015
 _223:
-  PUSHIS 1
-  IF _224
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _227
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_04
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0037
-  PUSHTYPE5 ppos01_5
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0037
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0037
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _226
-  PUSHMSG npc_001_04_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0037
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0037
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _225
-_226:
-  PUSHMSG npc_001_04_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0037
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0037
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _225
-_225:
-  GOTO _227
-_227:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _223
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _227
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_04)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0037
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_5))
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[55], result)
+    PREPARE_UNIT_MOTION_STATE(local_int[55], 1, 10, 20, 0)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(12)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_04_02))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[55])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[55], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _226:
+      MESSAGE_REQUEST_AND_POLL(message(npc_001_04_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[55])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[55], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+      goto _225
+    }
+  _225:
+    goto _227
+  _227:
+    WAIT_FOR_TIMER_START()
+  }
 _224:
-  END
+  return
 proc_0016:
   PROC proc_0016
 _229:
-  PUSHIS 1
-  IF _230
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _233
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 22
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _232
-  PUSHMSG sera_004_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _231
-_232:
-  PUSHMSG sera_004_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _231
-_231:
-  GOTO _233
-_233:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _229
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _233
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(22)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(sera_004_02))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _232:
+      MESSAGE_REQUEST_AND_POLL(message(sera_004_01))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+      goto _231
+    }
+  _231:
+    goto _233
+  _233:
+    WAIT_FOR_TIMER_START()
+  }
 _230:
-  END
+  return
 proc_0017:
   PROC proc_0017
 _235:
-  PUSHIS 1
-  IF _236
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _237
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_02_2
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0039
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG heat_004_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0039
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0039
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _237
-_237:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _235
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_02_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0039
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(heat_004_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[57])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[57], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _237:
+    WAIT_FOR_TIMER_START()
+  }
 _236:
-  END
+  return
 proc_0018:
   PROC proc_0018
 _239:
-  PUSHIS 1
-  IF _240
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _241
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_03_2
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x003a
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x003a
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 2
-  PUSHLIX 0x003a
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG arujila_004_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003a
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003a
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _241
-_241:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _239
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_03_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x003a
+      PREPARE_UNIT_MOTION_STATE(local_int[58], 3, 10, 20, 0)
+      SET_UNIT_VALUE(local_int[58], 2)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(arujila_004_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[58])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[58], 2, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _241:
+    WAIT_FOR_TIMER_START()
+  }
 _240:
-  END
+  return
 proc_0019:
   PROC proc_0019
 _243:
-  PUSHIS 1
-  IF _244
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _245
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_04_2
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x003b
-  PUSHTYPE5 ppos01_6
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x003b
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x003b
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG gale_004_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003b
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x003b
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _245
-_245:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _243
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_04_2)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x003b
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_6))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[59], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[59], 3, 10, 20, 0)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(gale_004_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[59])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[59], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _245:
+    WAIT_FOR_TIMER_START()
+  }
 _244:
-  END
+  return
 proc_001a:
   PROC proc_001a
 _247:
-  PUSHIS 1
-  IF _248
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _249
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_05
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x003c
-  PUSHTYPE5 ppos01_7
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x003c
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 2
-  PUSHLIX 0x003c
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG ciero_004_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003c
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003c
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _249
-_249:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _247
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_05)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x003c
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_7))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[60], result)
+      SET_UNIT_VALUE(local_int[60], 2)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(ciero_004_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[60])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[60], 2, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _249:
+    WAIT_FOR_TIMER_START()
+  }
 _248:
-  END
+  return
 proc_001b:
   PROC proc_001b
 _251:
-  PUSHIS 1
-  IF _252
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _253
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG sera_004_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003d
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _253
-_253:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _251
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(sera_004_02))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[61])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _253:
+    WAIT_FOR_TIMER_START()
+  }
 _252:
-  END
+  return
 proc_001c:
   PROC proc_001c
 _255:
-  PUSHIS 1
-  IF _256
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _264
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_01_2
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x003e
-  PUSHTYPE5 ppos01_8
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x003e
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 4
-  PUSHLIX 0x003e
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 2
-  PUSHLIX 0x003e
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 16
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _263
-  PUSHIS 973
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _261
-  PUSHMSG sera_03_2
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003e
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003e
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _260
-_261:
-  PUSHMSG sera_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHSELECT sera_03_SEL
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  POPLIX 0x003f
-  PUSHIS 0
-  PUSHLIX 0x003f
-  EQ
-  IF _258
-  PUSHMSG sera_ans0
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 973
-  COMM SET_MODEL_FLAG
-  PUSHLIX 0x003e
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003e
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _257
-_258:
-  PUSHIS 1
-  PUSHLIX 0x003f
-  EQ
-  IF _257
-  PUSHMSG sera_ans1
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 973
-  COMM SET_MODEL_FLAG
-  PUSHLIX 0x003e
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003e
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _257
-_257:
-  GOTO _260
-_260:
-  GOTO _262
-_263:
-  PUSHMSG sera_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x003e
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x003e
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _262
-_262:
-  GOTO _264
-_264:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _255
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _264
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_01_2)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x003e
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_8))
+    QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[62], result)
+    PREPARE_UNIT_MOTION_STATE(local_int[62], 4, 10, 20, 0)
+    SET_UNIT_VALUE(local_int[62], 2)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(16)
+    if_not (result) goto _263
+    result = TEST_MODEL_FLAG(973)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(sera_03_2))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[62])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[62], 2, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _261:
+      MESSAGE_REQUEST_AND_POLL(message(sera_03))
+      local_int[63] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(sera_03_SEL))
+      if (local_int[63] == 0) {
+        MESSAGE_REQUEST_AND_POLL(message(sera_ans0))
+        SET_MODEL_FLAG(973)
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[62])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[62], 2, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _258:
+        if (local_int[63] == 1) {
+          MESSAGE_REQUEST_AND_POLL(message(sera_ans1))
+          SET_MODEL_FLAG(973)
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[62])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[62], 2, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        }
+      }
+    _257:
+      goto _260
+    }
+  _260:
+    goto _262
+  _263:
+    MESSAGE_REQUEST_AND_POLL(message(sera_01))
+    CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[62])
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    PREPARE_UNIT_MOTION_STATE(local_int[62], 2, 10, 20, 0)
+    SET_SOLAR_OVERLAY_MODE(3)
+    RELEASE_CURRENT_OBJECT()
+    WAIT_FOR_TIMER_START()
+    return
+    goto _262
+  _262:
+    goto _264
+  _264:
+    WAIT_FOR_TIMER_START()
+  }
 _256:
-  END
+  return
 proc_001d:
   PROC proc_001d
 _266:
-  PUSHIS 1
-  IF _267
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _274
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_02_3
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0040
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 23
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _269
-  PUSHMSG heat_08
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_269:
-  PUSHIS 16
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _270
-  PUSHTYPE5 ppos01_9
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0040
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG heat_06
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_270:
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _271
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG heat_05
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_271:
-  PUSHIS 8
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _272
-  PUSHMSG heat_04
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_272:
-  PUSHIS 4
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _273
-  PUSHTYPE5 ppos01_10
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0040
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG heat_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_273:
-  PUSHTYPE5 ppos01_11
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0040
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG heat_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0040
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0040
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _268
-_268:
-  GOTO _274
-_274:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _266
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _274
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_02_3)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0040
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(23)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(heat_08))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _269:
+      result = TEST_MODEL_FLAG(16)
+      if (result) {
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_9))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
+        MESSAGE_REQUEST_AND_POLL(message(heat_06))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _270:
+        result = TEST_MODEL_FLAG(12)
+        if (result) {
+          PREPARE_UNIT_MOTION_STATE(local_int[64], 1, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(heat_05))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _271:
+          result = TEST_MODEL_FLAG(8)
+          if (result) {
+            MESSAGE_REQUEST_AND_POLL(message(heat_04))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+          } else {
+          _272:
+            result = TEST_MODEL_FLAG(4)
+            if (result) {
+              result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_10))
+              QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
+              MESSAGE_REQUEST_AND_POLL(message(heat_03))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+            } else {
+            _273:
+              result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_11))
+              QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[64], result)
+              MESSAGE_REQUEST_AND_POLL(message(heat_01))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[64])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[64], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+              goto _268
+            }
+          }
+        }
+      }
+    }
+  _268:
+    goto _274
+  _274:
+    WAIT_FOR_TIMER_START()
+  }
 _267:
-  END
+  return
 proc_001e:
   PROC proc_001e
 _276:
-  PUSHIS 1
-  IF _277
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _284
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_03_3
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0041
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 16
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _279
-  PUSHMSG arujila_06a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 12
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG arujila_06b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_279:
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _280
-  PUSHMSG arujila_05a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_12
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0041
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG arujila_05b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_280:
-  PUSHIS 8
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _281
-  PUSHTYPE5 ppos01_13
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0041
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG arujila_04
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_281:
-  PUSHIS 4
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _282
-  PUSHMSG arujila_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_282:
-  PUSHIS 2
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _283
-  PUSHTYPE5 ppos01_14
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0041
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG arujila_02
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_283:
-  PUSHTYPE5 ppos01_15
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0041
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG arujila_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0041
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0041
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _278
-_278:
-  GOTO _284
-_284:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _276
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _284
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_03_3)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0041
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(16)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(arujila_06a))
+      PREPARE_UNIT_MOTION_STATE(local_int[65], 12, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(arujila_06b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _279:
+      result = TEST_MODEL_FLAG(12)
+      if (result) {
+        MESSAGE_REQUEST_AND_POLL(message(arujila_05a))
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_12))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], result)
+        MESSAGE_REQUEST_AND_POLL(message(arujila_05b))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _280:
+        result = TEST_MODEL_FLAG(8)
+        if (result) {
+          result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_13))
+          QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], result)
+          PREPARE_UNIT_MOTION_STATE(local_int[65], 1, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(arujila_04))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _281:
+          result = TEST_MODEL_FLAG(4)
+          if (result) {
+            MESSAGE_REQUEST_AND_POLL(message(arujila_03))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+          } else {
+          _282:
+            result = TEST_MODEL_FLAG(2)
+            if (result) {
+              result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_14))
+              QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], result)
+              MESSAGE_REQUEST_AND_POLL(message(arujila_02))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+            } else {
+            _283:
+              result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_15))
+              QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[65], result)
+              MESSAGE_REQUEST_AND_POLL(message(arujila_01))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[65])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[65], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+              goto _278
+            }
+          }
+        }
+      }
+    }
+  _278:
+    goto _284
+  _284:
+    WAIT_FOR_TIMER_START()
+  }
 _277:
-  END
+  return
 proc_001f:
   PROC proc_001f
 _286:
-  PUSHIS 1
-  IF _287
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _294
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_04_3
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0042
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 23
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _289
-  PUSHTYPE5 ppos01_16
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0042
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_07
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_289:
-  PUSHIS 16
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _290
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_06a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_17
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0042
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_06b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_290:
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _291
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_05a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_18
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0042
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_05b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_291:
-  PUSHIS 8
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _292
-  PUSHTYPE5 ppos01_19
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0042
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG gale_04
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_292:
-  PUSHIS 4
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _293
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_03
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_293:
-  PUSHTYPE5 ppos01_20
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0042
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG gale_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0042
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0042
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _288
-_288:
-  GOTO _294
-_294:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _286
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _294
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_04_3)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0042
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(23)
+    if (result) {
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_16))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[66], 1, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(gale_07))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _289:
+      result = TEST_MODEL_FLAG(16)
+      if (result) {
+        PREPARE_UNIT_MOTION_STATE(local_int[66], 3, 10, 20, 0)
+        MESSAGE_REQUEST_AND_POLL(message(gale_06a))
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_17))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+        PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+        MESSAGE_REQUEST_AND_POLL(message(gale_06b))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _290:
+        result = TEST_MODEL_FLAG(12)
+        if (result) {
+          PREPARE_UNIT_MOTION_STATE(local_int[66], 3, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(gale_05a))
+          result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_18))
+          QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+          PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(gale_05b))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _291:
+          result = TEST_MODEL_FLAG(8)
+          if (result) {
+            result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_19))
+            QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+            MESSAGE_REQUEST_AND_POLL(message(gale_04))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+          } else {
+          _292:
+            result = TEST_MODEL_FLAG(4)
+            if (result) {
+              PREPARE_UNIT_MOTION_STATE(local_int[66], 2, 10, 20, 0)
+              MESSAGE_REQUEST_AND_POLL(message(gale_03))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+            } else {
+            _293:
+              result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_20))
+              QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[66], result)
+              MESSAGE_REQUEST_AND_POLL(message(gale_01))
+              CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[66])
+              FINISH_SCRIPT_MESSAGE_WINDOW()
+              PREPARE_UNIT_MOTION_STATE(local_int[66], 0, 10, 20, 0)
+              SET_SOLAR_OVERLAY_MODE(3)
+              RELEASE_CURRENT_OBJECT()
+              WAIT_FOR_TIMER_START()
+              return
+              goto _288
+            }
+          }
+        }
+      }
+    }
+  _288:
+    goto _294
+  _294:
+    WAIT_FOR_TIMER_START()
+  }
 _287:
-  END
+  return
 proc_0020:
   PROC proc_0020
 _296:
-  PUSHIS 1
-  IF _297
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _303
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_05_2
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0043
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 16
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _299
-  PUSHTYPE5 ppos01_21
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_06
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0043
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _298
-_299:
-  PUSHIS 12
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _300
-  PUSHMSG ciero_05a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_22
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_05b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0043
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _298
-_300:
-  PUSHIS 8
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _301
-  PUSHTYPE5 k_01pos_02
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_04
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0043
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _298
-_301:
-  PUSHIS 4
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _302
-  PUSHMSG ciero_03a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_23
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_03b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0043
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _298
-_302:
-  PUSHTYPE5 ppos01_24
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 k_01pos_01
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0043
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG ciero_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0043
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 2
-  PUSHLIX 0x0043
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _298
-_298:
-  GOTO _303
-_303:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _296
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _303
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_05_2)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0043
+    SET_UNIT_VALUE(local_int[67], 2)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(16)
+    if (result) {
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_21))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+      MESSAGE_REQUEST_AND_POLL(message(ciero_06))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[67], 2, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _299:
+      result = TEST_MODEL_FLAG(12)
+      if (result) {
+        MESSAGE_REQUEST_AND_POLL(message(ciero_05a))
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_22))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+        MESSAGE_REQUEST_AND_POLL(message(ciero_05b))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[67], 2, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _300:
+        result = TEST_MODEL_FLAG(8)
+        if (result) {
+          result = READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_02))
+          QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+          MESSAGE_REQUEST_AND_POLL(message(ciero_04))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[67], 2, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _301:
+          result = TEST_MODEL_FLAG(4)
+          if (result) {
+            MESSAGE_REQUEST_AND_POLL(message(ciero_03a))
+            result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_23))
+            QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+            MESSAGE_REQUEST_AND_POLL(message(ciero_03b))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[67], 2, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+          } else {
+          _302:
+            result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_24))
+            QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+            MESSAGE_REQUEST_AND_POLL(message(ciero_01a))
+            result = READ_SECONDARY_WORLD_ID_VALUE(string(k_01pos_01))
+            QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[67], result)
+            MESSAGE_REQUEST_AND_POLL(message(ciero_01b))
+            CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[67])
+            FINISH_SCRIPT_MESSAGE_WINDOW()
+            PREPARE_UNIT_MOTION_STATE(local_int[67], 2, 10, 20, 0)
+            SET_SOLAR_OVERLAY_MODE(3)
+            RELEASE_CURRENT_OBJECT()
+            WAIT_FOR_TIMER_START()
+            return
+            goto _298
+          }
+        }
+      }
+    }
+  _298:
+    goto _303
+  _303:
+    WAIT_FOR_TIMER_START()
+  }
 _297:
-  END
+  return
 proc_0021:
   PROC proc_0021
 _305:
-  PUSHIS 1
-  IF _306
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _307
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_06
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0044
-  PUSHIS 3
-  PUSHLIX 0x0044
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG sera_02a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_25
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0044
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 5
-  PUSHLIX 0x0044
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG sera_02b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0044
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x0044
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _307
-_307:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _305
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_06)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0044
+      SET_UNIT_VALUE(local_int[68], 3)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(sera_02a))
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_25))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[68], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[68], 5, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(sera_02b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[68])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[68], 3, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _307:
+    WAIT_FOR_TIMER_START()
+  }
 _306:
-  END
+  return
 proc_0022:
   PROC proc_0022
 _309:
-  PUSHIS 1
-  IF _310
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _313
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_01_3
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0045
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 1056
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _312
-  PUSHMSG npc_008_01_02a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_26
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0045
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0045
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_008_01_02b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0045
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0045
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _311
-_312:
-  PUSHTYPE5 ppos01_27
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0045
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_008_01_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0045
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_008_01_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0045
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _311
-_311:
-  GOTO _313
-_313:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _309
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _313
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_01_3)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0045
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(1056)
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(message(npc_008_01_02a))
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_26))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[69], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[69], 1, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(npc_008_01_02b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[69])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[69], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _312:
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_27))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[69], result)
+      MESSAGE_REQUEST_AND_POLL(message(npc_008_01_01a))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[69])
+      MESSAGE_REQUEST_AND_POLL(message(npc_008_01_01b))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[69], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+      goto _311
+    }
+  _311:
+    goto _313
+  _313:
+    WAIT_FOR_TIMER_START()
+  }
 _310:
-  END
+  return
 proc_0023:
   PROC proc_0023
 _315:
-  PUSHIS 1
-  IF _316
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _319
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_01_4
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0046
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 27
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _318
-  PUSHTYPE5 ppos01_28
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0046
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0046
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_01_02a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHMSG npc_021_01_02b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0046
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_01_02c
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0046
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _317
-_318:
-  PUSHMSG npc_021_01_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0046
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0046
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _317
-_317:
-  GOTO _319
-_319:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _315
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _319
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_01_4)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0046
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(27)
+    if (result) {
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_28))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[70], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[70], 1, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_01_02a))
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_01_02b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[70])
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_01_02c))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[70], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _318:
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_01_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[70])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[70], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+      goto _317
+    }
+  _317:
+    goto _319
+  _319:
+    WAIT_FOR_TIMER_START()
+  }
 _316:
-  END
+  return
 proc_0024:
   PROC proc_0024
 _321:
-  PUSHIS 1
-  IF _322
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _327
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_02_4
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0047
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 50
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _324
-  PUSHTYPE5 ppos01_29
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0047
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_02_04a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_02_04b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0047
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _323
-_324:
-  PUSHIS 44
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _325
-  PUSHTYPE5 ppos01_30
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0047
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_02_03a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_02_03b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0047
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _323
-_325:
-  PUSHIS 41
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _326
-  PUSHTYPE5 ppos01_31
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0047
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_02_02a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_02_02b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0047
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _323
-_326:
-  PUSHTYPE5 ppos01_32
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0047
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_02_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_02_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0047
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0047
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _323
-_323:
-  GOTO _327
-_327:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _321
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _327
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_02_4)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0047
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(50)
+    if (result) {
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_29))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_02_04a))
+      PREPARE_UNIT_MOTION_STATE(local_int[71], 1, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_02_04b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[71])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[71], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _324:
+      result = TEST_MODEL_FLAG(44)
+      if (result) {
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_30))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_02_03a))
+        PREPARE_UNIT_MOTION_STATE(local_int[71], 1, 10, 20, 0)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_02_03b))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[71])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[71], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _325:
+        result = TEST_MODEL_FLAG(41)
+        if (result) {
+          result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_31))
+          QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+          MESSAGE_REQUEST_AND_POLL(message(npc_021_02_02a))
+          PREPARE_UNIT_MOTION_STATE(local_int[71], 1, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(npc_021_02_02b))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[71])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[71], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+        } else {
+        _326:
+          result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_32))
+          QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[71], result)
+          MESSAGE_REQUEST_AND_POLL(message(npc_021_02_01a))
+          PREPARE_UNIT_MOTION_STATE(local_int[71], 1, 10, 20, 0)
+          MESSAGE_REQUEST_AND_POLL(message(npc_021_02_01b))
+          CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[71])
+          FINISH_SCRIPT_MESSAGE_WINDOW()
+          PREPARE_UNIT_MOTION_STATE(local_int[71], 0, 10, 20, 0)
+          SET_SOLAR_OVERLAY_MODE(3)
+          RELEASE_CURRENT_OBJECT()
+          WAIT_FOR_TIMER_START()
+          return
+          goto _323
+        }
+      }
+    }
+  _323:
+    goto _327
+  _327:
+    WAIT_FOR_TIMER_START()
+  }
 _322:
-  END
+  return
 proc_0025:
   PROC proc_0025
 _329:
-  PUSHIS 1
-  IF _330
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _334
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_03_4
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0048
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 50
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _332
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHTYPE5 ppos01_33
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0048
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_03_02a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0048
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_03_02b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_34
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0048
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_03_02c
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0048
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _331
-_332:
-  PUSHIS 41
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  IF _333
-  PUSHTYPE5 ppos01_35
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0048
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 3
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 15
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_03_03a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 3
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 13
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_03_03b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_03_03c
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0048
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _331
-_333:
-  PUSHTYPE5 ppos01_36
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0048
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG npc_021_03_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0048
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 3
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 16
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG npc_021_03_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0048
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0048
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _331
-_331:
-  GOTO _334
-_334:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _329
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if_not (result) goto _334
+    RESTORE_CAMERA_NODE_MODE()
+    SET_SOLAR_OVERLAY_MODE(2)
+    push string(k_01npc_03_4)
+    COMM 0x01ff
+    PUSHREG
+    POPLIX 0x0048
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    result = TEST_MODEL_FLAG(50)
+    if (result) {
+      PREPARE_UNIT_MOTION_STATE(local_int[72], 1, 10, 20, 0)
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_33))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], result)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_03_02a))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+      PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_03_02b))
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_34))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], result)
+      MESSAGE_REQUEST_AND_POLL(message(npc_021_03_02c))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    } else {
+    _332:
+      result = TEST_MODEL_FLAG(41)
+      if (result) {
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_35))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], result)
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 15, 10, 20, 3)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_03_03a))
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 13, 10, 20, 3)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_03_03b))
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 1, 10, 20, 0)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_03_03c))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+      } else {
+      _333:
+        result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_36))
+        QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[72], result)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_03_01a))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 16, 10, 20, 3)
+        MESSAGE_REQUEST_AND_POLL(message(npc_021_03_01b))
+        CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[72])
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        PREPARE_UNIT_MOTION_STATE(local_int[72], 0, 10, 20, 0)
+        SET_SOLAR_OVERLAY_MODE(3)
+        RELEASE_CURRENT_OBJECT()
+        WAIT_FOR_TIMER_START()
+        return
+        goto _331
+      }
+    }
+  _331:
+    goto _334
+  _334:
+    WAIT_FOR_TIMER_START()
+  }
 _330:
-  END
+  return
 proc_0026:
   PROC proc_0026
 _336:
-  PUSHIS 1
-  IF _337
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _338
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_01_5
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x0049
-  PUSHTYPE5 ppos01_37
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x0049
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 1
-  PUSHLIX 0x0049
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG arujila_27_01
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x0049
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x0049
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _338
-_338:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _336
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_01_5)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x0049
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_37))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[73], result)
+      PREPARE_UNIT_MOTION_STATE(local_int[73], 1, 10, 20, 0)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(arujila_27_01))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[73])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[73], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _338:
+    WAIT_FOR_TIMER_START()
+  }
 _337:
-  END
+  return
 proc_0027:
   PROC proc_0027
 _340:
-  PUSHIS 1
-  IF _341
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _342
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_02_5
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x004a
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 3
-  PUSHLIX 0x004a
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG gale_027_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHTYPE5 ppos01_38
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHLIX 0x004a
-  COMM QUEUE_WORLD_OBJECT_PENDING_VALUE
-  PUSHMSG gale_027_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHLIX 0x004a
-  COMM CLEAR_WORLD_OBJECT_PENDING_VALUE
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 0
-  PUSHLIX 0x004a
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _342
-_342:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _340
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_02_5)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x004a
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      PREPARE_UNIT_MOTION_STATE(local_int[74], 3, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(gale_027_01a))
+      result = READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_38))
+      QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[74], result)
+      MESSAGE_REQUEST_AND_POLL(message(gale_027_01b))
+      CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[74])
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[74], 0, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _342:
+    WAIT_FOR_TIMER_START()
+  }
 _341:
-  END
+  return
 proc_0028:
   PROC proc_0028
 _344:
-  PUSHIS 1
-  IF _345
-  PUSHIS 1
-  COMM 0x005e
-  PUSHREG
-  IF _346
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 2
-  COMM SET_SOLAR_OVERLAY_MODE
-  PUSHTYPE5 k_01npc_03_5
-  COMM 0x01ff
-  PUSHREG
-  POPLIX 0x004b
-  PUSHIS 12
-  PUSHLIX 0x004b
-  COMM SET_UNIT_VALUE
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG ciero_027_01a
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 13
-  PUSHLIX 0x004b
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHMSG ciero_027_01b
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 0
-  PUSHIS 20
-  PUSHIS 10
-  PUSHIS 12
-  PUSHLIX 0x004b
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  COMM WAIT_FOR_TIMER_START
-  END
-  GOTO _346
-_346:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _344
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(1)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      SET_SOLAR_OVERLAY_MODE(2)
+      push string(k_01npc_03_5)
+      COMM 0x01ff
+      PUSHREG
+      POPLIX 0x004b
+      SET_UNIT_VALUE(local_int[75], 12)
+      WAIT_FOR_TIMER_LIMIT(10)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(ciero_027_01a))
+      PREPARE_UNIT_MOTION_STATE(local_int[75], 13, 10, 20, 0)
+      MESSAGE_REQUEST_AND_POLL(message(ciero_027_01b))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      PREPARE_UNIT_MOTION_STATE(local_int[75], 12, 10, 20, 0)
+      SET_SOLAR_OVERLAY_MODE(3)
+      RELEASE_CURRENT_OBJECT()
+      WAIT_FOR_TIMER_START()
+      return
+    }
+  _346:
+    WAIT_FOR_TIMER_START()
+  }
 _345:
-  END
+  return
 proc_0029:
   PROC proc_0029
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push string(md_01all_10)
+  push 0
+  push 0
   COMM 0x0106
-  END
+  return
 proc_002a:
   PROC proc_002a
 _348:
-  PUSHIS 1
-  IF _349
-  PUSHIS 1
-  PUSHIS 5
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _350
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 96
-  COMM 0x0214
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10_2
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0105
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHTYPE5 str_01pos_07
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHTYPE5 str_01cam_01_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 40
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHTYPE5 str_01path_01_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 str_01all_02
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x006b
-  PUSHIS 75
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 589
-  COMM CLEAR_MODEL_FLAG
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 90
-  COMM 0x020f
-  END
-  GOTO _350
-_350:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _348
+  while (1) {
+    push 1
+    push 5
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _350
+    RESTORE_CAMERA_NODE_MODE()
+    push 96
+    COMM 0x0214
+    push 0
+    push string(md_01all_10_2)
+    push 0
+    push 0
+    COMM 0x0105
+    WAIT_FOR_TIMER_LIMIT(20)
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07))
+    push result
+    COMM READ_CURRENT_WORLD_OBJECT_ID
+    PUSHREG
+    COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2))
+    ADD_EFFECT_UNIT_TO_WORLD(result)
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    WAIT_FOR_TIMER_LIMIT(40)
+    push 0
+    push string(str_01path_01_2)
+    COMM READ_SECONDARY_WORLD_ID_VALUE
+    PUSHREG
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_02))
+    push result
+    COMM MOVE_OBJECT_ALONG_PATH
+    WAIT_FOR_TIMER_LIMIT(75)
+    CLEAR_MODEL_FLAG(589)
+    SCREEN_FADE_B(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    push 90
+    COMM 0x020f
+    return
+    goto _350
+  _350:
+    WAIT_FOR_TIMER_START()
+  }
 _349:
-  END
+  return
 proc_002b:
   PROC proc_002b
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10_3
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push string(md_01all_10_3)
+  push 0
+  push 0
   COMM 0x0106
-  END
+  return
 proc_002c:
   PROC proc_002c
 _352:
-  PUSHIS 1
-  IF _353
-  PUSHIS 1
-  PUSHIS 5
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _354
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 96
-  COMM 0x0214
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10_4
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0105
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHTYPE5 str_01pos_03
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHTYPE5 str_01cam_01_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 40
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHTYPE5 str_01path_01_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 str_01all_02_2
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x006b
-  PUSHIS 75
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 91
-  COMM 0x020f
-  END
-  GOTO _354
-_354:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _352
+  while (1) {
+    push 1
+    push 5
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _354
+    RESTORE_CAMERA_NODE_MODE()
+    push 96
+    COMM 0x0214
+    push 0
+    push string(md_01all_10_4)
+    push 0
+    push 0
+    COMM 0x0105
+    WAIT_FOR_TIMER_LIMIT(20)
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03))
+    push result
+    COMM READ_CURRENT_WORLD_OBJECT_ID
+    PUSHREG
+    COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_3))
+    ADD_EFFECT_UNIT_TO_WORLD(result)
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    WAIT_FOR_TIMER_LIMIT(40)
+    push 0
+    push string(str_01path_01_3)
+    COMM READ_SECONDARY_WORLD_ID_VALUE
+    PUSHREG
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_02_2))
+    push result
+    COMM MOVE_OBJECT_ALONG_PATH
+    WAIT_FOR_TIMER_LIMIT(75)
+    SCREEN_FADE_B(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    push 91
+    COMM 0x020f
+    return
+    goto _354
+  _354:
+    WAIT_FOR_TIMER_START()
+  }
 _353:
-  END
+  return
 proc_002d:
   PROC proc_002d
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10_5
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push string(md_01all_10_5)
+  push 0
+  push 0
   COMM 0x0106
-  END
+  return
 proc_002e:
   PROC proc_002e
 _356:
-  PUSHIS 1
-  IF _357
-  PUSHIS 1
-  PUSHIS 5
-  COMM 0x005e
-  PUSHREG
-  EQ
-  IF _358
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 96
-  COMM 0x0214
-  PUSHIS 0
-  PUSHTYPE5 md_01all_10_6
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0105
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHTYPE5 str_01pos_04
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHTYPE5 str_01cam_01_4
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 40
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHTYPE5 str_01path_01_4
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHTYPE5 str_01all_02_3
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x006b
-  PUSHIS 75
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 92
-  COMM 0x020f
-  END
-  GOTO _358
-_358:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _356
+  while (1) {
+    push 1
+    push 5
+    COMM ACTION_WINDOW_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _358
+    RESTORE_CAMERA_NODE_MODE()
+    push 96
+    COMM 0x0214
+    push 0
+    push string(md_01all_10_6)
+    push 0
+    push 0
+    COMM 0x0105
+    WAIT_FOR_TIMER_LIMIT(20)
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04))
+    push result
+    COMM READ_CURRENT_WORLD_OBJECT_ID
+    PUSHREG
+    COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_4))
+    ADD_EFFECT_UNIT_TO_WORLD(result)
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    WAIT_FOR_TIMER_LIMIT(40)
+    push 0
+    push string(str_01path_01_4)
+    COMM READ_SECONDARY_WORLD_ID_VALUE
+    PUSHREG
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01all_02_3))
+    push result
+    COMM MOVE_OBJECT_ALONG_PATH
+    WAIT_FOR_TIMER_LIMIT(75)
+    SCREEN_FADE_B(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    push 92
+    COMM 0x020f
+    return
+    goto _358
+  _358:
+    WAIT_FOR_TIMER_START()
+  }
 _357:
-  END
+  return
 proc_002f:
   PROC proc_002f
-  PUSHIS 0
-  PUSHTYPE5 md_hoji_02
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push string(md_hoji_02)
+  push 0
+  push 0
   COMM 0x0104
-  PUSHTYPE5 atari_hoji_02
-  PUSHIS 0
-  PUSHIS 0
+  push string(atari_hoji_02)
+  push 0
+  push 0
   COMM 0x0108
-  PUSHIS 0
-  PUSHTYPE5 md_hoji_03
-  PUSHIS 0
-  PUSHIS 0
+  push 0
+  push string(md_hoji_03)
+  push 0
+  push 0
   COMM 0x0103
-  PUSHTYPE5 atari_hoji_03
-  PUSHIS 0
-  PUSHIS 0
+  push string(atari_hoji_03)
+  push 0
+  push 0
   COMM 0x0107
-  END
+  return
 proc_0030:
   PROC proc_0030
-  PUSHIS 0
-  PUSHIS 1056
+  push 0
+  push 1056
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _368
 _360:
-  PUSHIS 1
-  IF _361
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  IF _366
-  PUSHIS 0
-  PUSHIS 2560
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _365
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG BLUEICE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _364
-_365:
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHTYPE5 str_01cam_02
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHTYPE5 str_01pos_08
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  PUSHIX 0x0000
-  COMM ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG BLUEICE
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHMSG ICE_BREAK
-  COMM MESSAGE_REQUEST_AND_POLL
-  PUSHIS 0
-  PUSHSELECT YES_NO
-  COMM MESSAGE_SELECTION_REQUEST_AND_POLL
-  PUSHREG
-  EQ
-  IF _362
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 0
-  PUSHIS 10
-  PUSHIS 10
-  PUSHIS 10
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIX 0x0000
-  COMM WAIT_FOR_UNIT_MOTION
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1
-  PUSHTYPE5 md_01hoji_01
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0104
-  PUSHTYPE5 atari_hoji_01
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0108
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  PUSHIS 1
-  COMM SCREEN_FADE_B
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 1
-  COMM SCREEN_FADE_A
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 30
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x00a4
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 15
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 15
-  COMM WAIT_FOR_TIMER_LIMIT
-  PUSHIS 1056
-  COMM SET_MODEL_FLAG
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _362
-_362:
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_B
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM 0x00a4
-  PUSHIS 1
-  MINUS
-  COMM ADD_EFFECT_UNIT_TO_WORLD
-  PUSHIS 10
-  PUSHIS 0
-  COMM SCREEN_FADE_A
-  PUSHIS 10
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM RELEASE_CURRENT_OBJECT
-  GOTO _364
-_364:
-  GOTO _366
-_366:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _360
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _366
+    push 0
+    push 2560
+    COMM TEST_MODEL_FLAG
+    PUSHREG
+    EQ
+    IF _365
+    RESTORE_CAMERA_NODE_MODE()
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(BLUEICE))
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    RELEASE_CURRENT_OBJECT()
+    return
+    goto _364
+  _365:
+    RESTORE_CAMERA_NODE_MODE()
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_02))
+    ADD_EFFECT_UNIT_TO_WORLD(result)
+    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_08))
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(BLUEICE))
+    MESSAGE_REQUEST_AND_POLL(message(ICE_BREAK))
+    push 0
+    push selection(YES_NO)
+    COMM MESSAGE_SELECTION_REQUEST_AND_POLL
+    PUSHREG
+    EQ
+    IF _362
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    WAIT_FOR_TIMER_LIMIT(30)
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 10, 10, 0)
+    WAIT_FOR_UNIT_MOTION(global_int[0])
+    WAIT_FOR_TIMER_LIMIT(30)
+    push 1
+    push string(md_01hoji_01)
+    push 0
+    push 0
+    COMM 0x0104
+    push string(atari_hoji_01)
+    push 0
+    push 0
+    COMM 0x0108
+    WAIT_FOR_TIMER_LIMIT(15)
+    SCREEN_FADE_B(1, 30)
+    WAIT_FOR_TIMER_LIMIT(30)
+    SCREEN_FADE_A(1, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    WAIT_FOR_TIMER_LIMIT(30)
+    SCREEN_FADE_B(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    COMM 0x00a4
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    SCREEN_FADE_A(0, 15)
+    WAIT_FOR_TIMER_LIMIT(15)
+    SET_MODEL_FLAG(1056)
+    WAIT_FOR_TIMER_LIMIT(20)
+    RELEASE_CURRENT_OBJECT()
+    return
+    goto _362
+  _362:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    SCREEN_FADE_B(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    COMM 0x00a4
+    ADD_EFFECT_UNIT_TO_WORLD(-(1))
+    SCREEN_FADE_A(0, 10)
+    WAIT_FOR_TIMER_LIMIT(10)
+    RELEASE_CURRENT_OBJECT()
+    goto _364
+  _364:
+    goto _366
+  _366:
+    WAIT_FOR_TIMER_START()
+  }
 _361:
-  GOTO _368
+  goto _368
 _368:
-  END
+  return
 proc_0031:
   PROC proc_0031
-  PUSHIS 0
-  PUSHIS 1057
+  push 0
+  push 1057
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _376
 _370:
-  PUSHIS 1
-  IF _371
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  IF _374
-  PUSHIS 0
-  PUSHIS 1053
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _373
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG ICE_DONTHAVE
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _372
-_373:
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM READ_CURRENT_WORLD_OBJECT_ID
-  PUSHREG
-  POPIX 0x0000
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 0
-  PUSHIS 10
-  PUSHIX 0x0000
-  COMM PREPARE_UNIT_MOTION_STATE
-  PUSHIX 0x0000
-  COMM WAIT_FOR_UNIT_MOTION
-  PUSHIS 1
-  PUSHTYPE5 md_01hoji_01_2
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0104
-  PUSHTYPE5 atari_hoji_01_2
-  PUSHIS 0
-  PUSHIS 0
-  COMM 0x0108
-  PUSHIS 1057
-  COMM SET_MODEL_FLAG
-  PUSHIS 20
-  COMM WAIT_FOR_TIMER_LIMIT
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _372
-_372:
-  GOTO _374
-_374:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _370
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if_not (result) goto _374
+    push 0
+    push 1053
+    COMM TEST_MODEL_FLAG
+    PUSHREG
+    EQ
+    IF _373
+    RESTORE_CAMERA_NODE_MODE()
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(ICE_DONTHAVE))
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    RELEASE_CURRENT_OBJECT()
+    return
+    goto _372
+  _373:
+    RESTORE_CAMERA_NODE_MODE()
+    global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
+    PREPARE_UNIT_MOTION_STATE(global_int[0], 10, 0, 0, 0)
+    WAIT_FOR_UNIT_MOTION(global_int[0])
+    push 1
+    push string(md_01hoji_01_2)
+    push 0
+    push 0
+    COMM 0x0104
+    push string(atari_hoji_01_2)
+    push 0
+    push 0
+    COMM 0x0108
+    SET_MODEL_FLAG(1057)
+    WAIT_FOR_TIMER_LIMIT(20)
+    RELEASE_CURRENT_OBJECT()
+    return
+    goto _372
+  _372:
+    goto _374
+  _374:
+    WAIT_FOR_TIMER_START()
+  }
 _371:
-  GOTO _376
+  goto _376
 _376:
-  END
+  return
 proc_0032:
   PROC proc_0032
 _378:
-  PUSHIS 1
-  IF _379
-  PUSHIS 9
-  COMM 0x005e
-  PUSHREG
-  IF _380
-  COMM RESTORE_CAMERA_NODE_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG ICE_DONTHAVE_Y
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  COMM RELEASE_CURRENT_OBJECT
-  END
-  GOTO _380
-_380:
-  COMM WAIT_FOR_TIMER_START
-  GOTO _378
+  while (1) {
+    result = ACTION_WINDOW_REQUEST_AND_POLL(9)
+    if (result) {
+      RESTORE_CAMERA_NODE_MODE()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(ICE_DONTHAVE_Y))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      RELEASE_CURRENT_OBJECT()
+      return
+    }
+  _380:
+    WAIT_FOR_TIMER_START()
+  }
 _379:
-  END
+  return
 proc_0033:
   PROC proc_0033
-  COMM RESTORE_CAMERA_NODE_MODE
-  PUSHIS 0
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM ACTIVATE_MESSAGE_PANEL
-  PUSHMSG HEAT_JOIN
-  COMM MESSAGE_REQUEST_AND_POLL
-  COMM FINISH_SCRIPT_MESSAGE_WINDOW
-  PUSHIS 3
-  COMM SET_SOLAR_OVERLAY_MODE
-  COMM RELEASE_CURRENT_OBJECT
-  END
+  RESTORE_CAMERA_NODE_MODE()
+  SET_SOLAR_OVERLAY_MODE(0)
+  ACTIVATE_MESSAGE_PANEL()
+  MESSAGE_REQUEST_AND_POLL(message(HEAT_JOIN))
+  FINISH_SCRIPT_MESSAGE_WINDOW()
+  SET_SOLAR_OVERLAY_MODE(3)
+  RELEASE_CURRENT_OBJECT()
+  return
 end
 
 messages msg1
