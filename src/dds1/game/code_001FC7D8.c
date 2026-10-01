@@ -1,14 +1,6 @@
 #include "common.h"
 #include "btl.h"
 
-typedef struct BtlJyokyoOwner {
-    u8 pad00[0x120];
-    u16 flags;       /* 0x120 */
-    u8 pad122[2];
-    u16 unk124;      /* 0x124 */
-    u8 pad126[8];
-    u16 statusFlags; /* 0x12E */
-} BtlJyokyoOwner;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
@@ -40,15 +32,10 @@ extern void btlAppendSelfAfterTargetScan();
 extern void func_00203CA8();
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
-typedef struct EffChildCounters {
-    u8 pad00[0x318];
-    u8 firstCountdown;
-    u8 secondCountdown;
-} EffChildCounters;
 
 typedef struct EffCounterOwner {
     u8 pad00[0x20];
-    EffChildCounters *child;
+    BtlUnit *unit; /* 0x20: battle unit retained by the effect argument block */
 } EffCounterOwner;
 
 
@@ -76,13 +63,13 @@ extern u32 btlRollAiBucket(void);
  * If bit 5 is the sole low status bit, the final check uses an external value. */
 s32 func_001FCB50(BtlTask *task) {
     s32 result = 0;
-    BtlJyokyoOwner *unit = (BtlJyokyoOwner *)task->unit;
+    BtlUnit *unit = task->unit;
     u16 flags;
 
     if (task->flags & 0x40) {
         return result;
     }
-    flags = unit->statusFlags;
+    flags = unit->conditionFlags;
     if (!(flags & 0x20)) {
         return result;
     }
@@ -104,28 +91,23 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD170);
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD3C0);
 
-typedef struct BtlEffOwner {
-    u8 pad00[0x108];
-    u64 ownerData;    /* 0x108: copied to the effect object */
-    s32 flags;        /* 0x110: bit 9 controls the returned offset */
-} BtlEffOwner;
 
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
 
-s32 effOffsetIfOwnerFlagClear(BtlEffOwner *owner, s32 base) {
-    return base + (((owner->flags >> 9) ^ 1U) & 1);
+s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
+    return base + ((((s32)owner->flags >> 9) ^ 1U) & 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
 
 void effDecrementFirstCountdown(EffCounterOwner *owner) {
     u8 remaining;
-    EffChildCounters *child;
+    BtlUnit *unit;
 
-    child = owner->child;
-    remaining = child->firstCountdown;
+    unit = owner->unit;
+    remaining = unit->firstCountdown;
     if (remaining != 0) {
-        child->firstCountdown = remaining + 0xff;
+        unit->firstCountdown = remaining + 0xff;
     }
 }
 
@@ -157,14 +139,14 @@ extern void func_001FD5C8();
 /* Link block hung off a freshly created effect object. */
 typedef struct BtlEffLinkEx {
     u8 pad00[0x20];
-    BtlEffOwner *owner; /* 0x20 */
+    BtlUnit *owner; /* 0x20 */
     s32 arg;            /* 0x24 */
     s32 unk28;          /* 0x28 */
     u8 pad2C[4];
     u8 kind;            /* 0x30 */
 } BtlEffLinkEx;
 
-BtlEffObj *btlCreateLinkedEffectTask(BtlEffOwner *owner, s32 arg, u8 kind) {
+BtlEffObj *btlCreateLinkedEffectTask(BtlUnit *owner, s32 arg, u8 kind) {
     BtlEffObj *obj = btlAllocTask(0x34);
     BtlEffLinkEx *link;
 
@@ -179,7 +161,7 @@ BtlEffObj *btlCreateLinkedEffectTask(BtlEffOwner *owner, s32 arg, u8 kind) {
         break;
     }
     obj->flags |= 2;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = func_001FD5C8;
     obj->destroy = effDecrementFirstCountdown;
     link = (BtlEffLinkEx *)btlGetTaskArguments(obj);
@@ -194,24 +176,24 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDA78);
 
 void effDecrementSecondCountdown(EffCounterOwner *owner) {
     u8 remaining;
-    EffChildCounters *child;
+    BtlUnit *unit;
 
-    child = owner->child;
-    remaining = child->secondCountdown;
+    unit = owner->unit;
+    remaining = unit->secondCountdown;
     if (remaining != 0) {
-        child->secondCountdown = remaining + 0xff;
+        unit->secondCountdown = remaining + 0xff;
     }
 }
 
 
 typedef struct BtlExtendedLink {
     u8 pad00[0x20];
-    BtlEffOwner *owner; /* 0x20 */
+    BtlUnit *owner; /* 0x20 */
     s32 state;          /* 0x24 */
     u8 parameter;       /* 0x28 */
 } BtlExtendedLink;
 
-BtlEffObj *btlCreateEffectCounterTask(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffectCounterTask(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0x2C);
     BtlExtendedLink *link;
 
@@ -219,7 +201,7 @@ BtlEffObj *btlCreateEffectCounterTask(BtlEffOwner *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x3B;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = func_001FDA78;
     obj->destroy = effDecrementSecondCountdown;
     link = (BtlExtendedLink *)btlGetTaskArguments(obj);
@@ -233,7 +215,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDF98);
 
 extern void func_001FDF98();
 
-BtlEffObj *btlCreateEffObjD(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -241,7 +223,7 @@ BtlEffObj *btlCreateEffObjD(BtlEffOwner *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x40;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = func_001FDF98;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
@@ -268,7 +250,7 @@ s32 btlPollTimedTaskLink(BtlObjLink *link) {
 
 extern s32 btlPollTimedTaskLink();
 
-BtlEffObj *btlCreateOwnerLinkedTimedTask(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -276,7 +258,7 @@ BtlEffObj *btlCreateOwnerLinkedTimedTask(BtlEffOwner *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x41;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = btlPollTimedTaskLink;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
@@ -289,7 +271,7 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE228);
 
 extern void func_001FE228();
 
-BtlEffObj *btlCreateEffObjA(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffObjA(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -298,7 +280,7 @@ BtlEffObj *btlCreateEffObjA(BtlEffOwner *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        obj->ownerData = owner->identity;
     }
     obj->update = func_001FE228;
     link = btlGetTaskArguments(obj);
@@ -318,11 +300,11 @@ typedef struct BtlJyokyoState {
 
 s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
     BtlJyokyoState *state = (BtlJyokyoState *)func_001A17F0();
-    BtlJyokyoOwner *owner = link->owner;
+    BtlUnit *owner = link->owner;
 
     if (link->unk8 == 0) {
         if (owner != NULL) {
-            func_0019C590(state->id, 0, owner->unk124, (owner->flags & 0x20) ? 0xE : 0xF);
+            func_0019C590(state->id, 0, owner->mode, (owner->statBits & 0x20) ? 0xE : 0xF);
         }
         func_003003F0("JYOKYO ID : %d\n", state->id);
         btlReplaceDialogTasksAndQueueMessage(state->id, link->arg);
@@ -334,7 +316,7 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
     return 0;
 }
 
-BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffObjB(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -343,7 +325,7 @@ BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        obj->ownerData = owner->identity;
     }
     obj->update = btlJyokyoEffectUpdate;
     link = btlGetTaskArguments(obj);
@@ -355,15 +337,15 @@ BtlEffObj *btlCreateEffObjB(BtlEffOwner *owner, s32 arg) {
 
 s32 func_001FE500(BtlObjLink *link) {
     s32 work = func_001A17F0();
-    s32 actor = link->owner;
+    BtlUnit *actor = link->owner;
 
-    if (actor != 0 && !(((BtlJyokyoOwner *)actor)->statusFlags & 1)) {
+    if (actor != 0 && !(actor->conditionFlags & 1)) {
         return 1;
     }
     if (link->unk8 == 0) {
         if (actor != 0) {
-            func_0019C590(((BtlJyokyoState *)work)->alternateId, 0, ((BtlJyokyoOwner *)actor)->unk124,
-                          (((BtlJyokyoOwner *)actor)->flags & 0x20) ? 0xE : 0xF);
+            func_0019C590(((BtlJyokyoState *)work)->alternateId, 0, actor->mode,
+                          (actor->statBits & 0x20) ? 0xE : 0xF);
         }
         btlReplaceDialogTasksAndQueueMessage(((BtlJyokyoState *)work)->alternateId, link->arg);
     }
@@ -374,7 +356,7 @@ s32 func_001FE500(BtlObjLink *link) {
     return 0;
 }
 
-BtlEffObj *btlCreateEffObjC(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateEffObjC(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -383,7 +365,7 @@ BtlEffObj *btlCreateEffObjC(BtlEffOwner *owner, s32 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        obj->ownerData = owner->identity;
     }
     obj->update = func_001FE500;
     link = btlGetTaskArguments(obj);
@@ -397,7 +379,7 @@ u32 func_001FE658(void) {
     return 1;
 }
 
-BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
+BtlEffObj *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -405,7 +387,7 @@ BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x3E;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = func_001FE658;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
@@ -416,12 +398,12 @@ BtlEffObj *btlCreateEffectTask3E(BtlEffOwner *owner, u16 arg) {
 
 s32 btlPollTimedPresentationTask(BtlObjLink *link) {
     BtlJyokyoState *state = (BtlJyokyoState *)func_001A17F0();
-    BtlJyokyoOwner *owner = (BtlJyokyoOwner *)link->owner;
+    BtlUnit *owner = link->owner;
 
     if (link->unk8 == 0) {
         if (owner != NULL) {
-            func_0019C590(state->thirdId, 0, owner->unk124,
-                          (owner->flags & 0x20) ? 1 : 2);
+            func_0019C590(state->thirdId, 0, owner->mode,
+                          (owner->statBits & 0x20) ? 1 : 2);
         }
         btlReplaceDialogTasksAndQueueMessage(state->thirdId, link->arg);
     }
@@ -434,7 +416,7 @@ s32 btlPollTimedPresentationTask(BtlObjLink *link) {
 
 extern s32 btlPollTimedPresentationTask();
 
-BtlEffObj *btlCreateOwnerLinkedTimedPresentation(BtlEffOwner *owner, s32 arg) {
+BtlEffObj *btlCreateOwnerLinkedTimedPresentation(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -442,7 +424,7 @@ BtlEffObj *btlCreateOwnerLinkedTimedPresentation(BtlEffOwner *owner, s32 arg) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x3F;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = btlPollTimedPresentationTask;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
@@ -467,7 +449,7 @@ s32 btlPollEffectWaitTask(BtlObjLink *link) {
     return 0;
 }
 
-BtlEffObj *btlCreateEffectWaitTask(BtlEffOwner *owner, u16 arg) {
+BtlEffObj *btlCreateEffectWaitTask(BtlUnit *owner, u16 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -476,7 +458,7 @@ BtlEffObj *btlCreateEffectWaitTask(BtlEffOwner *owner, u16 arg) {
     obj->flags |= 2;
     obj->unk10 = 0;
     if (owner != NULL) {
-        obj->ownerData = owner->ownerData;
+        obj->ownerData = owner->identity;
     }
     obj->update = btlPollEffectWaitTask;
     link = btlGetTaskArguments(obj);
@@ -512,7 +494,7 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
     return 0;
 }
 
-BtlEffObj *btlCreateEffectTask44(BtlEffOwner *owner) {
+BtlEffObj *btlCreateEffectTask44(BtlUnit *owner) {
     BtlEffObj *obj = btlAllocTask(8);
     BtlObjLink *link;
 
@@ -520,7 +502,7 @@ BtlEffObj *btlCreateEffectTask44(BtlEffOwner *owner) {
     obj->unk10 = 0;
     obj->flags |= 2;
     obj->id = 0x44;
-    obj->ownerData = owner->ownerData;
+    obj->ownerData = owner->identity;
     obj->update = btlWaitEffectTask;
     link = btlGetTaskArguments(obj);
     link->owner = owner;
@@ -599,12 +581,12 @@ void btlClearNodeFlags(void) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 btlDispatchPackedActionWithScratch(s32 context, BtlJyokyoOwner *owner, s32 mask) {
+s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     s32 result;
 
     btlActionScratchWork = (s32)work;
-    work[1] = owner->unk124;
+    work[1] = owner->mode;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfReleaseChipBlock(btlActionScratchWork);
@@ -638,21 +620,21 @@ typedef struct AiSpecies {
 } AiSpecies;
 
 extern AiSpecies *D_003BAA24;
-extern void func_001FF560(BtlJyokyoOwner *unit, u16 species, s32 *row, s32 arg);
+extern void func_001FF560(BtlUnit *unit, u16 species, s32 *row, s32 arg);
 extern u32 btlPickWeightedAiSlot();
 extern s32 btlRunAiAction();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 func_001FED20(BtlTask *task) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
-    BtlJyokyoOwner *unit;
+    BtlUnit *unit;
     u16 species;
     s32 row;
     s32 index;
 
-    unit = (BtlJyokyoOwner *)task->unit;
+    unit = task->unit;
     btlActionScratchWork = (s32)work;
-    species = unit->unk124;
+    species = unit->mode;
     work[0] = (s32)task;
     work[1] = species;
     func_001FF560(unit, species, &row, 0);

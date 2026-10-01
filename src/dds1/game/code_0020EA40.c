@@ -72,45 +72,6 @@ extern void func_003014F0(char *, const char *, const char *, s32);
 
 extern s32 func_001A17F0(void);
 
-typedef struct BtlUnit {
-    u8 unk_00[0x90];
-    s32 bodyOffsetXBits; /* 0x90: preserve integer stores to the vector components */
-    f32 bodyOffsetY;
-    f32 bodyOffsetZ;
-    s32 bodyOffsetWBits;
-    u8 unk_A0[0x10];
-    f32 height;
-    f32 reach;
-    f32 positionB8;
-    f32 positionBC;
-    u8 unk_C0[8];
-    u32 species;
-    u8 unk_CC[0x14];
-    s32 displaySpecies; /* 0xE0 */
-    u8 unk_E4[8];
-    s32 unk_EC;
-    u8 unk_F0[0x18];
-    u64 identity; /* 0x108: compared to exclude the current actor */
-    u32 flags;
-    u32 stateFlags; /* 0x114: second unit status word, not a command index */
-    u8 unk_118[4];
-    u8 lookupId;      /* 0x11C */
-    u8 unk_11D[3];
-    u16 statBits; /* 0x120: base of the stat accessors */
-    u8 unk_122[2];
-    u16 mode;
-    u8 unk_126[4];
-    u16 unk_12A;      /* 0x12A */
-    u8 unk_12C[2];
-    u16 conditionFlags; /* 0x12E: mirrors DDS2's conditionFlags */
-    u8 unk_130[0x180];
-    s16 actionSlot;   /* 0x2B0 */
-    u8 unk_2B2[0x6A];
-    u32 unk_31C;
-    struct BtlUnitModel *model;
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
-} BtlUnit;
 struct BattleModelEntry;
 
 typedef struct BtlState {

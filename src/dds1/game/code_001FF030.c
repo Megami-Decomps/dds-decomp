@@ -85,56 +85,6 @@ extern char D_003A5988[];
 
 extern void btlDebugPrintf(const char *, ...);
 
-typedef struct BtlUnit {
-    u8 unk_00[0x30];
-    f32 position[4]; /* 0x30: world position, target of btlSetUnitPosition */
-    f32 rotation[4]; /* 0x40: world orientation, target of btlSetUnitRotation */
-    u8 unk_50[0x30];
-    f32 scale;      /* 0x80: scales the camera-framing extents */
-    u8 unk_84[0xC];
-    s32 bodyOffsetXBits; /* 0x90: preserve integer stores of the vector bits */
-    f32 bodyOffsetY;
-    f32 bodyOffsetZ;
-    s32 bodyOffsetWBits;
-    u8 unk_A0[0x10];
-    f32 height;     /* 0xB0: vertical camera-framing extent */
-    f32 reach;      /* 0xB4: lateral camera-framing extent */
-    f32 positionB8;
-    f32 positionBC;
-    u8 unk_C0[8];
-    u32 species;
-    u8 unk_CC[0x14];
-    s32 displaySpecies; /* 0xE0 */
-    u8 unk_E4[8];
-    s32 unk_EC;
-    u32 unk_F0;
-    u8 unk_F4[0xC];
-    u8 unk_100[8];
-    u64 identity; /* 0x108: compared to exclude the current actor */
-    /* Required to match: keep status words flat; scans still load both at once. */
-    u32 flags; /* 0x110: scans read this and the following word together */
-    u32 unk_114;
-    u8 unk_118[4];
-    u8 lookupId;      /* 0x11C */
-    u8 unk_11D[3];
-    u16 statBits;     /* 0x120: unit stat flags and base of stat accessors */
-    u8 unk_122[2];
-    u16 mode;
-    u16 hp;           /* 0x126 */
-    u16 maxHp;        /* 0x128 */
-    u16 unk_12A;      /* 0x12A */
-    u8 unk_12C[2];
-    u16 conditionFlags; /* 0x12E: condition masks including 0x800/0x2000 */
-    u8 unk_130[4];
-    u16 actionTime;   /* 0x134: tick count of the unit's last action */
-    u8 unk_136[0x17A];
-    s16 actionSlot;   /* 0x2B0 */
-    u8 unk_2B2[0x6A];
-    u32 unk_31C;
-    struct BtlUnitModel *model;
-    u8 unk_324[0x20];
-    struct BtlUnit *next;
-} BtlUnit;
 
 
 typedef struct BtlState {
@@ -1319,7 +1269,7 @@ s32 btlUnitHasEitherSpecialAction(void *unit) {
 s32 btlActionMatchesUnit(u8 *unit, s32 action) {
     s32 *battle = (s32 *)*btlActionScratchWork;
     if (battle[0x148 / 4] == action) {
-        if (((BtlUnit *)unit)->unk_114 & 0x1000) {
+        if (((BtlUnit *)unit)->stateFlags & 0x1000) {
             return 1;
         }
     }
@@ -2232,14 +2182,14 @@ void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit) {
             ((BtlUnit *)unit)->flags = flags | 0x1000;
             ((BtlUnit *)unit)->statBits |= 0x1000;
             if (((BtlState *)battle)->battleMode == 0x107) {
-                ((BtlUnit *)unit)->unk_114 |= 0x200;
+                ((BtlUnit *)unit)->stateFlags |= 0x200;
             }
         }
     } else {
         ((BtlUnit *)unit)->flags = flags | 0x1000;
         ((BtlUnit *)unit)->displaySpecies = 0x132;
     }
-    ((BtlUnit *)unit)->unk_114 |= 0x20;
+    ((BtlUnit *)unit)->stateFlags |= 0x20;
 }
 
 void btlNormalizeDefaultPlayerDisplaySpecies(s32 unit) {
@@ -2309,14 +2259,14 @@ void btlBeginEffectActorFadeOut(void) {
     BattleEffectState *effect = ((BtlState *)func_001A17F0())->effect;
     BtlUnit *actor = *(BtlUnit **)effect;
     if (actor != 0) {
-        u32 state = actor->unk_114;
+        u32 state = actor->stateFlags;
         u32 flags = actor->flags;
         state &= ~0x80;
         state &= ~0x100;
         flags |= 0x100;
         *(BtlUnit **)effect = 0;
         actor->flags = flags;
-        actor->unk_114 = state;
+        actor->stateFlags = state;
         func_001D5990(actor);
         actor->flags |= 8;
         /* +0x10 is a float in this effect variant, but a u32 in BattleEffectState. */
@@ -2588,16 +2538,16 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->model->flags &= ~1;
+            *other->ext->flags &= ~1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->model->flags &= ~1;
+            *other->ext->flags &= ~1;
         } else {
-            *other->model->flags |= 1;
+            *other->ext->flags |= 1;
         }
         return 0;
     }
@@ -2627,16 +2577,16 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
             return 1;
         }
         if (unit == requestedUnit) {
-            *other->model->flags |= 1;
+            *other->ext->flags |= 1;
             return 1;
         }
         if (other != requestedUnit) {
             return 1;
         }
         if (unit->flags & 4) {
-            *other->model->flags &= ~1;
+            *other->ext->flags &= ~1;
         } else {
-            *other->model->flags |= 1;
+            *other->ext->flags |= 1;
         }
         return 0;
     }
@@ -2862,7 +2812,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     if ((((BtlUnit *)unit)->flags & 2) == 0) {
         return 1;
     }
-    model = (u8 *)((BtlUnit *)unit)->model->flags;
+    model = (u8 *)((BtlUnit *)unit)->ext->flags;
     descriptor = (u8 *)((BtlNamedChunkHolder *)model)->chunk;
     index = sdfNamedChunkFindId(descriptor, query);
     if (index == -1) {
@@ -2917,7 +2867,7 @@ void btlMarkSpecialUnit(u8 *unit) {
             return;
         }
     }
-    ((BtlUnit *)unit)->unk_114 |= 0x200;
+    ((BtlUnit *)unit)->stateFlags |= 0x200;
 }
 
 u8 *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
@@ -3190,11 +3140,11 @@ u8 *unit;
         return;
     }
     battleData = *(u8 **)(func_001A17F0() + 0x694);
-    ((BtlUnit *)unit)->unk_114 |= 0x200;
+    ((BtlUnit *)unit)->stateFlags |= 0x200;
     ((BtlUnit *)unit)->height = 100.0f;
     ((BtlUnit *)unit)->reach = 25.0f;
-    ((BtlUnit *)unit)->positionB8 = 100.0f;
-    ((BtlUnit *)unit)->positionBC = 25.0f;
+    ((BtlUnit *)unit)->unkB8 = 100.0f;
+    ((BtlUnit *)unit)->unkBC = 25.0f;
     if (((BtlBossEffectPayload *)battleData)->selectedId != ((BtlUnit *)unit)->lookupId) {
         entry = (u8 *)btlFindUnitByActor(unit);
         if (entry != 0) {
@@ -3287,7 +3237,7 @@ void btlStepFocusAngle(void) {
     if (unit == NULL) {
         return;
     }
-    mdlGetNodeField2C((s32)player->model->flags, 0);
+    mdlGetNodeField2C((s32)player->ext->flags, 0);
     if (slot[2] & 4) {
         if ((slot[1] & 0xFF000000) != 0x80000000) {
             slot[1] += 0x10000000;
@@ -3297,7 +3247,7 @@ void btlStepFocusAngle(void) {
             slot[1] += 0xF0000000;
         }
     }
-    func_00221EF0(((BtlUnit *)*(u32 **)slot)->model, 0, slot[1]);
+    func_00221EF0(((BtlUnit *)*(u32 **)slot)->ext, 0, slot[1]);
 }
 
 typedef struct BtlEffectTarget {
