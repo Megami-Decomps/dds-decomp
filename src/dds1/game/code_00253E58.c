@@ -45,66 +45,56 @@ s32 func_00254288(void) {
     nodeNext = func_002CB3B8(D_003BC4CC, 1);
     func_00255E08(nodePrev, 0x80, 0x52);
     level = *(s32 *)(nodePrev + 0x1C);
-    if (level == 1) {
-        goto case1;
+    switch (level) {
+    case 0:
+        frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
+        scaled = (s32)(frac * 128.0f);
+        func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
+        func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+        func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
+        func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
+        break;
+    case 2:
+        frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
+        frac = 1.0f - frac;
+        scaled = (s32)(frac * 128.0f);
+        func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
+        func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
+        func_00254758(0, 0, 0, 0x80, 0x53);
+        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+        func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
+        func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
+        break;
+    case 1:
+        /* frac keeps its 0.0f initializer when raw == 0. */
+        raw = *(s32 *)(nodeNext + 0x550);
+        if (raw > 0) {
+            frac = (f32)raw / 10.0f;
+        } else if (raw < 0) {
+            frac = (f32)(-raw) / 10.0f;
+        }
+        frac = 1.0f - sdfSinPoly(frac * 3.14159265f);
+        func_0024E5A0(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
+        mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
+        func_0025D2F8(0, 0, 1, (s32)(frac * 128.0f), nodeNext, 0x53);
+        func_00254758(0, 0, 1, 0x80, 0x53);
+        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
+        func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
+        cost = mnuGetSelectedNodeValue();
+        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, 0x80, 0x53);
+        func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
+        break;
+    default:
+        break;
     }
-    if (level >= 2) {
-        goto ge2;
-    }
-    if (level != 0) {
-        goto tail;
-    }
-    goto case0;
-ge2:
-    if (level != 2) {
-        goto tail;
-    }
-    goto case2;
-case0:
-    frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
-    scaled = (s32)(frac * 128.0f);
-    func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
-    mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
-    func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
-    func_00254758(0, 0, 1, 0x80, 0x53);
-    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-    func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
-    cost = mnuGetSelectedNodeValue();
-    mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
-    func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
-    goto tail;
-case2:
-    frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
-    frac = 1.0f - frac;
-    scaled = (s32)(frac * 128.0f);
-    func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
-    mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
-    func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
-    func_00254758(0, 0, 0, 0x80, 0x53);
-    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-    func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
-    cost = mnuGetSelectedNodeValue();
-    mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
-    func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
-    goto tail;
-case1:
-    raw = *(s32 *)(nodeNext + 0x550);
-    if (raw > 0) {
-        frac = (f32)raw / 10.0f;
-    } else if (raw < 0) {
-        frac = (f32)(-raw) / 10.0f;
-    }
-    frac = 1.0f - sdfSinPoly(frac * 3.14159265f);
-    func_0024E5A0(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
-    mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
-    func_0025D2F8(0, 0, 1, (s32)(frac * 128.0f), nodeNext, 0x53);
-    func_00254758(0, 0, 1, 0x80, 0x53);
-    func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-    func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
-    cost = mnuGetSelectedNodeValue();
-    mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, 0x80, 0x53);
-    func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
-tail:
     mnuChooseDisplaySpriteKindFromEntryFlags(nodeNext, 0x80, 0x53);
     func_0024E260(0, 0, 0, 0x80, 0xD, 0x53);
     return 0;
