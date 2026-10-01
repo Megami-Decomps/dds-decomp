@@ -20,6 +20,7 @@ import flw0
 import flw0_profiles
 import flw0_symbolic
 import flw0_view
+import msg1
 
 
 def _named_row(name: str, start_pc: int, reserved: int = 0) -> bytes:
@@ -206,6 +207,40 @@ class Flw0Tests(unittest.TestCase):
         self.assertNotIn("declared_size", source)
         self.assertNotIn("physical_size", source)
         self.assertEqual(flw0.parse_source(source).to_bytes(), original)
+
+    def test_msg1_source_round_trip_relayouts_dialogs_and_relocations(self) -> None:
+        bank = msg1.Bank(
+            (
+                msg1.Message(
+                    "HELLO",
+                    0,
+                    (
+                        bytes.fromhex("f208ffff") + b"Hello\n" + bytes.fromhex("f104"),
+                        b"",
+                        b"Second page",
+                    ),
+                ),
+                msg1.Selection("CHOICE", 0, 0, 0, (b"Yes", b"No"), b"\0"),
+            ),
+            (bytes.fromhex("83f48dd48ee1"),),
+        )
+        binary = msg1.encode(bank)
+        self.assertEqual(msg1.decode(binary), bank)
+        rendered = msg1.render(binary)
+        self.assertIn("  message HELLO speaker=0", rendered)
+        self.assertIn('      text "Hello"', rendered)
+        self.assertIn("      control f2 08 ff ff", rendered)
+        self.assertIn("  select CHOICE ext=0 pattern=0 reserved=0 trailing=00", rendered)
+        self.assertIn("    glyphs 83f4 8dd4 8ee1", rendered)
+        content = [(index, line.strip()) for index, line in enumerate(rendered[1:], 1)]
+        self.assertEqual(msg1.parse_source(content), binary)
+
+        edited = [line.replace('text "Hello"', 'text "A longer greeting"') for line in rendered]
+        edited_content = [(index, line.strip()) for index, line in enumerate(edited[1:], 1)]
+        edited_binary = msg1.parse_source(edited_content)
+        self.assertIn(b"A longer greeting", edited_binary)
+        self.assertGreater(len(edited_binary), len(binary))
+        self.assertEqual(msg1.encode(msg1.decode(edited_binary)), edited_binary)
 
     def test_symbolic_source_resolves_names_and_relayouts(self) -> None:
         source = """\
@@ -644,6 +679,11 @@ end
         self.assertEqual(len(records), 104)
 
         versions = {1: 0, 2: 0}
+        message_banks = 0
+        dialogs = 0
+        pages = 0
+        options = 0
+        speakers = 0
         for expected, source in records:
             with self.subTest(source=source.name):
                 text = source.read_text(encoding="utf-8")
@@ -652,7 +692,34 @@ end
                 self.assertIn("\nprofile dds1\n", text)
                 rebuilt = flw0.parse_source(text).to_bytes()
                 self.assertEqual(sha1(rebuilt).hexdigest(), expected)
+                script = flw0.parse(rebuilt)
+                message_data = script.section_bytes(script.sections[3])
+                if message_data:
+                    message_banks += 1
+                    bank = msg1.decode(message_data)
+                    dialogs += len(bank.dialogs)
+                    speakers += len(bank.speakers)
+                    pages += sum(
+                        len(dialog.pages)
+                        for dialog in bank.dialogs
+                        if isinstance(dialog, msg1.Message)
+                    )
+                    options += sum(
+                        len(dialog.options)
+                        for dialog in bank.dialogs
+                        if isinstance(dialog, msg1.Selection)
+                    )
+                    if version == 1:
+                        self.assertIn("\n  msg1\n", text)
+                        self.assertEqual(flw0.render_source(script, "dds1"), text)
+                    else:
+                        self.assertIn("\nmessages msg1\n", text)
+                        self.assertEqual(flw0_symbolic.render(script, "dds1"), text)
         self.assertEqual(versions, {1: 7, 2: 97})
+        self.assertEqual(
+            (message_banks, dialogs, pages, options, speakers),
+            (36, 179, 257, 16, 27),
+        )
 
 
 if __name__ == "__main__":

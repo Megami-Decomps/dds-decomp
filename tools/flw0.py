@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Iterable
 
 import flw0_profiles
+import msg1
 
 
 HEADER_SIZE = 0x20
@@ -633,6 +634,14 @@ def render_source(flw0: Flw0File, profile_name: str | None = None) -> str:
                     string_rendering[3] if string_rendering is not None else None,
                 )
             )
+        elif section.type_id == 3 and section.element_size == 1 and payload:
+            try:
+                message_lines = msg1.render(payload)
+            except msg1.Msg1Error:
+                lines.extend(_render_raw_payload(payload))
+            else:
+                lines.append("  msg1")
+                lines.extend(message_lines[1:])
         elif string_rendering is not None and section.index == string_rendering[0]:
             lines.extend(string_rendering[2])
             covered_size = string_rendering[1]
@@ -777,6 +786,24 @@ def _parse_named_payload(
 
 
 def _parse_raw_payload(content: list[tuple[int, str]], section: Section) -> bytes:
+    if content:
+        first_number, first_line = content[0]
+        if _tokens(first_line, first_number) == ["msg1"]:
+            if section.type_id != 3 or section.element_size != 1:
+                raise Flw0Error(
+                    f"line {first_number}: msg1 is only valid in a byte-wide type-3 section"
+                )
+            try:
+                payload = msg1.parse_source(content[1:])
+            except msg1.Msg1Error as exc:
+                raise Flw0Error(str(exc)) from exc
+            if len(payload) != section.logical_size:
+                raise Flw0Error(
+                    f"section {section.index}: MSG1 payload has {len(payload)} bytes, "
+                    f"expected {section.logical_size}"
+                )
+            return payload
+
     chunks: list[bytes] = []
     size = 0
     for line_number, line in content:
