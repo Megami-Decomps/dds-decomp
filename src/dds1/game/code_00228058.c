@@ -167,6 +167,7 @@ u32 evtHideSky(void) {
 u32 func_00228408(void) {
     s32 id;
 
+    /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
     if (scrGetCommandTimer() == 0) {
         evtPreloadBgm(scrReadIntParameter(0));
     } else {
@@ -338,14 +339,14 @@ u32 func_002287C0(s32 task) {
     }
     overlay = kwlnTaskGetUserValue(task);
     state = D_003BAA00;
-    alpha = *(f32 *)&D_003BBDB8;
+    alpha = D_003BBDB8;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
                 alpha = 1.0f;
             }
-            *(f32 *)&D_003BBDB8 = alpha;
+            D_003BBDB8 = alpha;
         }
     } else {
         if (alpha > f) {
@@ -353,7 +354,7 @@ u32 func_002287C0(s32 task) {
             if (alpha < f) {
                 alpha = f;
             }
-            *(f32 *)&D_003BBDB8 = alpha;
+            D_003BBDB8 = alpha;
         }
     }
     if ((D_003BAA00->flags & 2) != 0) {
