@@ -481,9 +481,9 @@ void func_00163238(ParReleaseRecord *record) {
 
 /* Draw parameter block filled per strip by func_00164CB0. */
 typedef struct ParDrawState {
-    s16 width;    /* 0x00 */
-    s16 height;   /* 0x02 */
-    s16 flags;    /* 0x04 */
+    u16 width;    /* 0x00 */
+    u16 height;   /* 0x02 */
+    u16 flags;    /* 0x04 */
     u8 pad06[2];
     s32 unk08;
     void *unk0C;
