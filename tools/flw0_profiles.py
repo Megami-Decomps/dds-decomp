@@ -10,6 +10,7 @@ class NativeCommand:
     command_id: int
     name: str
     stack_pop: int
+    writes_result: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -29,12 +30,22 @@ class CommandProfile:
 DDS1 = CommandProfile(
     "dds1",
     (
-        NativeCommand(0x043, "RESET_DRAW_EFFECTS", 0),
-        NativeCommand(0x046, "RETURN_TO_TITLE", 0),
-        NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0),
-        NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1),
-        NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2),
-        NativeCommand(0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0),
+        NativeCommand(0x000, "MESSAGE_REQUEST_AND_POLL", 1, writes_result=False),
+        NativeCommand(0x001, "ACTIVATE_MESSAGE_PANEL", 0, writes_result=False),
+        NativeCommand(
+            0x002, "FINISH_SCRIPT_MESSAGE_WINDOW", 0, writes_result=False
+        ),
+        NativeCommand(0x00E, "WAIT_FOR_TIMER_LIMIT", 1, writes_result=False),
+        NativeCommand(0x00F, "SCREEN_FADE_A", 2, writes_result=False),
+        NativeCommand(0x043, "RESET_DRAW_EFFECTS", 0, writes_result=False),
+        NativeCommand(0x046, "RETURN_TO_TITLE", 0, writes_result=False),
+        NativeCommand(0x066, "CALL_EVENT", 1, writes_result=False),
+        NativeCommand(0x099, "RESET_FIELD_EFFECTS", 0, writes_result=False),
+        NativeCommand(0x0A7, "WAIT_FOR_TASK_REMOVAL", 1, writes_result=False),
+        NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2, writes_result=True),
+        NativeCommand(
+            0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0, writes_result=False
+        ),
     ),
 )
 

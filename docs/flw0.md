@@ -16,7 +16,8 @@ Use `--symbolic` to derive source whose layout can change:
 python3 tools/flw0.py disassemble --symbolic event.bf event.bfasm
 ```
 
-Select a command profile when native command names are known for the game:
+Select a command profile when native command names are known for the game. The
+profile works with both physical and symbolic source:
 
 ```sh
 python3 tools/flw0.py disassemble --symbolic --profile dds1 event.bf event.bfasm
@@ -103,18 +104,24 @@ profile dds1
   COMM WAIT_FOR_TASK_REMOVAL
 ```
 
-The DDS1 profile currently contains the six commands used by `e670`. Their IDs,
-handlers, and stack consumption were checked against the DDS1 PS2 command table
-and runtime code:
+The DDS1 profile contains a reviewed cutscene cluster. Its IDs, handlers, and
+stack consumption were checked against the DDS1 PS2 command table and runtime
+code:
 
 | Source name | ID | Stack values consumed | DDS1 handler behavior |
 |---|---:|---:|---|
-| `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
+| `MESSAGE_REQUEST_AND_POLL` | `0x000` | 1 | Starts a message entry or waits for its current work |
+| `ACTIVATE_MESSAGE_PANEL` | `0x001` | 0 | Activates the current message panel |
+| `FINISH_SCRIPT_MESSAGE_WINDOW` | `0x002` | 0 | Waits for and finishes the active script message window |
+| `WAIT_FOR_TIMER_LIMIT` | `0x00E` | 1 | Waits until the command timer reaches a limit |
+| `SCREEN_FADE_A` | `0x00F` | 2 | Starts the selected screen fade when its timer reaches zero |
 | `RESET_DRAW_EFFECTS` | `0x043` | 0 | Clears draw transitions and effect enables |
-| `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
-| `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
-| `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
 | `RETURN_TO_TITLE` | `0x046` | 0 | Requests the title scene |
+| `CALL_EVENT` | `0x066` | 1 | Submits an event request and clears named processes |
+| `RESET_FIELD_EFFECTS` | `0x099` | 0 | Resets field draw, sway, sky, and fade state |
+| `WAIT_FOR_TASK_REMOVAL` | `0x0A7` | 1 | Waits until a task ID leaves the task queues |
+| `CREATE_POLYGON_MOVIE` | `0x0AA` | 2 | Creates an EventViewer task and returns its task ID |
+| `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
 valid for commands outside the reviewed profile. A name is rejected when the
@@ -139,6 +146,46 @@ ninja dds1-scripts
 The normal `ninja dds1` target also includes this check. Expected output hashes
 live in `config/dds1/event_scripts.sha1`, so verification does not require the
 original BF files.
+
+## Reading view
+
+The exact assembly remains deliberately close to the VM. Use `view` when you
+want to read its stack operations as expressions and profiled calls:
+
+```sh
+python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm
+```
+
+Tracked source supplies its own command profile. Pass one explicitly when
+viewing an older or external source that does not declare one:
+
+```sh
+python3 tools/flw0.py view --profile dds1 event.bfasm
+```
+
+The output keeps one PC-anchored statement for every instruction. For example,
+the task creation and wait in `e670` become:
+
+```text
+  0004: push 1
+  0005: push 670
+  0006: result = CREATE_POLYGON_MOVIE(1, 670)
+  0007: push result
+  0008: WAIT_FOR_TASK_REMOVAL(result)
+```
+
+This is a derived reading aid, not another source format. An unprofiled native
+command is printed numerically and invalidates the inferred stack; later
+self-contained pushes can still form known arguments. Procedure and jump-label
+entries also start with unknown stack state. Unsupported instructions stay
+visible at their original PC instead of being guessed away. Float literals
+retain their exact bit pattern. Every one of the 315 `PUSHTYPE5` operands in the
+tracked corpus lands on a NUL-delimited ASCII run in section 4, so the view
+shows both the byte offset and that observed text while retaining the
+conservative `type5_ref` name. The current profile resolves 1,334 of the
+corpus's 3,881 native-command instructions and reaches every tracked event
+file. Binary expressions follow the VM's verified order: the top stack value
+is the left operand and the next value is the right operand.
 
 ## Physical source
 
