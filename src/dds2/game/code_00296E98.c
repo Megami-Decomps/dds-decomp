@@ -134,7 +134,11 @@ INCLUDE_ASM(const s32, "game/code_00296E98", func_00297250);
 
 INCLUDE_ASM(const s32, "game/code_00296E98", func_00297320);
 
-/* Phase machine of the menu command: phases 4, 5 and 8 wait ten frames before reporting themselves, 6 and 7 report at once. */
+/* Phase machine of the menu command: phases 4, 5 and 8 wait for the frame
+ * counter to pass 10.0f before reporting themselves, 6 and 7 report at once.
+ * The counter is compared as a float because retail loads 10.0f into $f1 and
+ * converts the counter with cvt.s.w (lui at,0x4120 / mtc1 / cvt.s.w / c.lt.s).
+ * Phase 8 uses c.le.s, so it fires one frame earlier than 4 and 5. */
 s32 func_00297898(MenuActionOwner *work) {
     switch (work->mode) {
     case 4:

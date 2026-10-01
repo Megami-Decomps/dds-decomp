@@ -50,7 +50,12 @@ u32 dds3GetAdminTaskValue(void) {
 
 extern void *func_002CFEB8(s32 size);
 
-/* Replace the admin task's attached data block (copied, max 0x100 bytes) and set its mode byte and flags. */
+/* Replace the admin task's attached data block (copied, max 0x100 bytes) and set
+ * its mode byte and flags. The outer guard skips everything when data is NULL or
+ * the size is over 0x100 (retail: beqz data / sltiu size,257 -> skip), so the
+ * body only ever runs for a present block of at most 0x100 bytes; the inner
+ * `if (data != NULL)` is therefore always true and is kept to match the store
+ * order retail produces. */
 void func_001028E8(s32 value, void *data, u32 size, s32 flag) {
     AdminWork *work;
     void *old;
