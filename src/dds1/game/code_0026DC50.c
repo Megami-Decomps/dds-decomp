@@ -4,7 +4,16 @@ extern void sdfReleaseChipBlock(void *);
 
 extern void func_0026FFF8(s32);
 
-INCLUDE_ASM(const s32, "game/code_0026DC50", func_0026DC50);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+
+void func_0026DC50(void) {
+    func_00134CD8();
+    mnuDrawSprite(0, 0, 0, 0, 0, 8, 0x52);
+    mnuDrawSprite(0, 0, 0, 0, 0, 0xC, 0x52);
+    mnuDrawSprite(0, 0, 0, 0, 0, 9, 0x52);
+    mnuDrawSprite(0, 0, 0, 0, 0, 0, 0x52);
+    mnuDrawSprite(0, 0, 0, 0, 0, 0xB, 0x52);
+}
 
 void func_0026DD10(void) {
     func_0026FFF8(0);
