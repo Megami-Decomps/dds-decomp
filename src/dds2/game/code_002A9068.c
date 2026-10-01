@@ -16,6 +16,12 @@ extern s8 D_00437B72;
 
 extern s32 D_00435DD0;
 
+/* Item quantities are byte-indexed in the shared save-state block. */
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
 extern s8 D_00437B73;
 
 extern void func_003297C8(u32);
@@ -130,7 +136,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         i--;
     } while (i >= 0);
     for (i = 0xC0; i < 0x100; i++) {
-        *(u8 *)(i + D_00435DD0 + 0x1340) = 0;
+        ((SaveItemCounts *)D_00435DD0)->counts[i] = 0;
         mnuClearEntryBlocked(i);
     }
     mdlFlagClear(0x901);
@@ -541,19 +547,28 @@ s32 movAreTitleEffectsReady(s32 mode, u32 *state) {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
 
+/* Final title-effect handles follow the four packet groups and sprite list. */
+typedef struct TitleEffectHandles {
+    u8 pad00[0xC4];
+    u32 groupA;
+    u32 groupB;
+    u32 additional[9];
+    u32 finalGroup;
+} TitleEffectHandles;
+
 /* Release the title screen's effect sprites and resource slot sets. */
 s64 func_002A9A40(u8 *work) {
     u32 *handles;
     s32 i;
 
     mnuReleaseTitleEffectSprites((u32 *)(work + 0x60));
-    effDestroyResourceSlotSet(*(u32 *)(work + 0xC4));
-    effDestroyResourceSlotSet(*(u32 *)(work + 0xC8));
-    handles = (u32 *)(work + 0xCC);
+    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupA);
+    effDestroyResourceSlotSet(((TitleEffectHandles *)work)->groupB);
+    handles = ((TitleEffectHandles *)work)->additional;
     for (i = 8; i >= 0; i--) {
         effDestroyResourceSlotSet(*handles++);
     }
-    return effDestroyResourceSlotSet(*(u32 *)(work + 0xF0));
+    return effDestroyResourceSlotSet(((TitleEffectHandles *)work)->finalGroup);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9AB8);
@@ -888,21 +903,33 @@ void func_002AAC98(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f) {
     func_002AAC70(a, b, c, d, e, 0, f);
 }
 
+typedef struct CampDrawPosition {
+    u8 pad00[0xE6C];
+    s32 fixedPointOffset; /* 0xE6C: source shifted left by four */
+    u8 padE70[0x6C];
+    s32 sourceOffset;     /* 0xEDC */
+} CampDrawPosition;
+
+typedef struct CampDrawContext {
+    u8 pad00[0x18];
+    CampDrawPosition *position;
+} CampDrawContext;
+
 /* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
  * displays the background, and all other kinds reset the highlight alpha. */
 void func_002AACB8(s32 kind, s32 task) {
     u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     CampVisualWork *visual = (CampVisualWork *)work;
     s32 ctx;
-    s32 sub;
+    CampDrawPosition *sub;
 
     mnuDrawCampIconBackdrop(work + 0x11C, 0x20);
     switch (kind) {
     case 2:
         func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->drawContext, 0x19, 0x53);
         ctx = visual->drawContext;
-        sub = *(s32 *)(ctx + 0x18);
-        *(s32 *)(sub + 0xE6C) = (*(s32 *)(sub + 0xEDC) + 0x40) << 4;
+        sub = ((CampDrawContext *)ctx)->position;
+        sub->fixedPointOffset = (sub->sourceOffset + 0x40) << 4;
         func_00306CD0(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, ctx, 0x17, 0x53);
         if (visual->highlightOpacity < 0x100) {
             visual->highlightOpacity += 0x10;
@@ -913,8 +940,8 @@ void func_002AACB8(s32 kind, s32 task) {
         break;
     case 1:
         ctx = visual->drawContext;
-        sub = *(s32 *)(ctx + 0x18);
-        *(s32 *)(sub + 0xE6C) = *(s32 *)(sub + 0xEDC) << 4;
+        sub = ((CampDrawContext *)ctx)->position;
+        sub->fixedPointOffset = sub->sourceOffset << 4;
         func_00306CD0(0x1140, 0x2E0, 0, visual->backgroundOpacity, 0, ctx, 0x17, 0x53);
     default:
         visual->highlightOpacity = 0;

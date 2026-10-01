@@ -31,6 +31,26 @@ typedef struct {
 
 extern SceneEntry D_0036BE38[];
 
+/* Fields initialized and released around the scene's 0x5B0-byte work block. */
+typedef struct MenuSceneWork {
+    s32 allocationHandle; /* 0x000 */
+    u8 pad004[0x480];
+    s32 gridHandle;       /* 0x484 */
+    u8 pad488[0xB8];
+    s32 coordinateA;      /* 0x540 */
+    s32 coordinateB;      /* 0x544 */
+} MenuSceneWork;
+
+typedef struct MenuSceneMetadata {
+    u8 pad00[0x23C];
+    s32 displayedCurrency;
+} MenuSceneMetadata;
+
+typedef struct DatGameCounters {
+    u8 pad00[0x3C];
+    s32 currency;
+} DatGameCounters;
+
 extern void sdfReleaseChipBlock(void *);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250E88);
@@ -62,20 +82,20 @@ s32 mnuCreateSceneWork(void) {
     u8 *work = (u8 *)sdfMemoryGetBlockAddress(handle);
 
     memset(work, 0, MNU_SCENE_WORK_SIZE);
-    *(s32 *)work = handle;
+    ((MenuSceneWork *)work)->allocationHandle = handle;
     func_00250978((s32)work);
-    *(s32 *)(work + 0x540) = 0;
-    *(s32 *)(work + 0x544) = 0;
-    *(s32 *)(func_002CB3B8(D_003BC4CC, -1) + 0x23C) = *(s32 *)(D_003BAA00 + 0x3C);
+    ((MenuSceneWork *)work)->coordinateA = 0;
+    ((MenuSceneWork *)work)->coordinateB = 0;
+    ((MenuSceneMetadata *)func_002CB3B8(D_003BC4CC, -1))->displayedCurrency = ((DatGameCounters *)D_003BAA00)->currency;
     mnuCopySceneCoordinates((s32)work);
     return (s32)work;
 }
 
 void mnuReleaseSceneContext(s32 unused, s32 context) {
     func_002CB3B8(D_003BC4CC, -1);
-    sdfDestroyGridWork(*(s32 *)(context + 0x484));
+    sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
     mnuReleaseDisplayListNodes(context + 0x584);
-    func_002D0918(*(s32 *)context);
+    func_002D0918(((MenuSceneWork *)context)->allocationHandle);
     mnuResetWorkFloats();
 }
 
@@ -104,7 +124,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_002530D8);
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
 void mnuReinitializeSceneGrid(s32 context) {
-    sdfDestroyGridWork(*(s32 *)(context + 0x484));
+    sdfDestroyGridWork(((MenuSceneWork *)context)->gridHandle);
     func_00250978(context);
     mnuCopySceneCoordinates(context);
 }
