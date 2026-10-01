@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    PathEntry16 *unk4;
+    PathEntry16 *entries;
 } PathData18;
 
 typedef struct {
@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    PathEntry40 *unk4;
+    PathEntry40 *entries;
 } PathData20;
 
 typedef struct {
@@ -45,14 +45,14 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    s32 unk4;
+    s32 flags;
     s32 unk8;
-    f32 unkC;
-    s32 unk10;
+    f32 time;
+    s32 bufferHandle;
     PathData14 *unk14;
-    PathData18 *unk18;
+    PathData18 *vectorData;
     s32 unk1C;
-    PathData20 *unk20;
+    PathData20 *sampleData;
 } PathObj;
 
 void func_00116DE8(s32 *arg0, f32 *arg1, void *arg2, f32 arg3);
@@ -61,7 +61,7 @@ void effMiscQuaternionNlerpVU(void *arg0, f32 arg1);
 void *memset(void *s, s32 c, u32 n);
 
 void dds3FreePathObject(PathObj *path) {
-    effFreeBuffers(path->unk10);
+    effFreeBuffers(path->bufferHandle);
     sdfReleaseChipBlock(path);
 }
 
@@ -74,10 +74,10 @@ void dds3PreparePathVectorPair(PathObj *arg) {
     PathEntry16 *base;
     PathEntry16 *p1;
     PathEntry16 *p2;
-    if (arg->unk4 & 2) {
-        data = arg->unk18;
-        func_00116DE8(&idx, &frac, data, arg->unkC);
-        base = data->unk4;
+    if (arg->flags & 2) {
+        data = arg->vectorData;
+        func_00116DE8(&idx, &frac, data, arg->time);
+        base = data->entries;
         p1 = &base[idx];
         VU0_LOAD_VF_MEMORY(vf10, p1);
         p2 = &base[idx] + 1;
@@ -95,10 +95,10 @@ void func_00117340(PathObj *path, PathOut *out) {
     PathData20 *data;
     PathEntry40 *entries;
 
-    if (path->unk4 & 0x10) {
-        data = path->unk20;
-        func_00116DE8(&index, &fraction, data, path->unkC);
-        entries = data->unk4;
+    if (path->flags & 0x10) {
+        data = path->sampleData;
+        func_00116DE8(&index, &fraction, data, path->time);
+        entries = data->entries;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[2]);
