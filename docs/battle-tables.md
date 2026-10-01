@@ -2,7 +2,7 @@
 
 `tools/battle_tbl.py` converts the core battle data tables used by both games
 to editable `.tblasm` source. It currently supports `ENCOUNT.TBL`, `UNIT.TBL`,
-and `SKILL.TBL`:
+`SKILL.TBL`, and `AICALC.TBL`:
 
 ```sh
 python3 tools/battle_tbl.py disassemble ENCOUNT.TBL encount.tblasm
@@ -11,6 +11,8 @@ python3 tools/battle_tbl.py disassemble UNIT.TBL unit.tblasm
 python3 tools/battle_tbl.py assemble unit.tblasm UNIT.TBL
 python3 tools/battle_tbl.py disassemble SKILL.TBL skill.tblasm
 python3 tools/battle_tbl.py assemble skill.tblasm SKILL.TBL
+python3 tools/battle_tbl.py disassemble AICALC.TBL aicalc.tblasm
+python3 tools/battle_tbl.py assemble aicalc.tblasm AICALC.TBL
 ninja dds1-battle-data dds2-battle-data
 ```
 
@@ -176,3 +178,69 @@ The DDS2-only profile rows expose five stat bonuses and their tier. The corpus
 checks validate group references and every skill ID stored by party and enemy
 unit records, including passive IDs that have an attribute row but no
 executable action row.
+
+## Battle AI and formulas
+
+`AICALC.TBL` holds the enemy decision tables, shared calculation words, and
+the FLW0 programs that implement enemy AI and battle formulas:
+
+| Segment | DDS1 | DDS2 | Contents |
+|---:|---:|---:|---|
+| 0 | 384 × `0x15c` | 384 × `0x15c` | Per-enemy decision data and weighted actions |
+| 1 | `0xa6c` | `0xc14` | Calculation words consumed by battle formulas |
+| 2 | — | 32 × `0x20` | DDS2 weighted value tables |
+| 2 / 3 | `0x2f9fe` | `0x38138` | Enemy-AI FLW0 program |
+| 3 / 4 | `0x219c` | `0x257c` | Battle-formula FLW0 program |
+
+Each enemy has three decision tiers. A tier evaluates three packed predicates
+and uses their truth pattern to read one of eight route bytes. Retail routes
+normally select one of seven groups or use `8` to continue to another tier.
+Each group contains five `{weight, action, effect}` choices. The source makes
+those boundaries explicit while retaining numeric selector IDs where the
+predicate or effect handler has not earned a stable gameplay name:
+
+```text
+enemy-ai 2 script=ai_ishisu_zako
+  decision 0 predicates=50:2,22:2,25:0 routes=0,8,8,2,8,8,8,8
+  choice 0 0 weight=100 action=special:0
+  choice 1 0 weight=50 action=skill:86
+  choice 5 0 weight=100 action=preset:1:4
+end
+```
+
+A packed predicate or effect writes `selector:argument`; the physical word
+uses its high 10 bits for the native handler selector and its low 22 bits for
+the argument. Action values distinguish direct `skill` IDs, six native
+`preset` families, DDS2 `weighted` tables, and built-in `special` actions.
+Direct skill actions are checked against the paired `SKILL.TBL`. Script
+references use the actual procedure names from the AI program rather than
+bare table indices.
+
+DDS2's separate weighted tables contain eight `{value, weight}` entries. Zero
+entries are omitted from source:
+
+```text
+weighted-table 2
+  entry 0 value=42 weight=20
+  entry 1 value=39 weight=20
+  entry 2 value=90 weight=20
+end
+```
+
+The calculation segment remains an indexed word table because its consumers
+assign meaning to ranges rather than one uniform record type. Words that are
+ordinary finite `f32` values use decimals; other bit patterns stay explicit.
+
+The two embedded programs live beside the table as `aicalc-ai.bfasm` and
+`aicalc-formulas.bfasm`. They use the same exact symbolic and structured FLW0
+source as field and event scripts. DDS1 contributes 72 named AI procedures and
+29 formula procedures; DDS2 contributes 89 and 32. Assembly resolves their
+labels, rebuilds both containers, inserts them into the table, and verifies the
+complete retail hash.
+
+The formula program also names the native calculation context rather than
+leaving its dispatch IDs as `COMM` operands. For example, hit-rate code can
+refer directly to `CALC_SOURCE_LEVEL()`, `CALC_TARGET_STAT(3)`, and
+`CALC_ACTION_HIT_LEVEL()`, then return through `CALC_SET_RESULT(...)`.
+Lookup curves whose exact gameplay role remains uncertain retain neutral
+`CALC_LEVEL_FACTOR_*` names.
