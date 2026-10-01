@@ -13,6 +13,7 @@ Pipeline per version (see README.md):
                      rewritten for ee-as by tools/eeas_compat.py
   link               mips-ps2-decompals-ld with splat's script -> objcopy -O binary
   check              sha1sum -c config/<v>/checksum.sha1 (the output IS the retail ELF file)
+  FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
 edit that changes code or data shows up as a checksum failure.
@@ -205,6 +206,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     )
     n.rule("objcopy", f"{OBJCOPY} -O binary $in $out", description="objcopy $out")
     n.rule("check", "sha1sum --quiet -c $in && touch $out", description="check $in")
+    n.rule(
+        "flw0",
+        f"mkdir -p $outdir && {sys.executable} tools/flw0.py assemble $in $out",
+        description="flw0 $in",
+    )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
     n.newline()
 
@@ -264,7 +270,39 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         n.build(str(image), "objcopy", str(elf))
         stamp = Path("build") / version / f"{serial}.ok"
         n.build(str(stamp), "check", f"config/{version}/checksum.sha1", implicit=[str(image)])
-        n.build(version, "phony", str(stamp))
+        version_outputs = [str(stamp)]
+
+        script_manifest = Path("config") / version / "event_scripts.sha1"
+        script_source_dir = Path("src") / version / "scripts" / "event"
+        if (ROOT / script_manifest).exists():
+            script_outputs = []
+            for source in sorted((ROOT / script_source_dir).glob("*.bfasm")):
+                source = source.relative_to(ROOT)
+                output = (
+                    Path("build")
+                    / version
+                    / "scripts"
+                    / "event"
+                    / source.with_suffix(".bf").name
+                )
+                n.build(
+                    str(output),
+                    "flw0",
+                    str(source),
+                    implicit=[
+                        "tools/flw0.py",
+                        "tools/flw0_profiles.py",
+                        "tools/flw0_symbolic.py",
+                    ],
+                    variables={"outdir": str(output.parent)},
+                )
+                script_outputs.append(str(output))
+            script_stamp = Path("build") / version / "scripts" / "event.ok"
+            n.build(str(script_stamp), "check", str(script_manifest), implicit=script_outputs)
+            n.build(f"{version}-scripts", "phony", str(script_stamp))
+            version_outputs.append(str(script_stamp))
+
+        n.build(version, "phony", version_outputs)
         defaults.append(version)
         (ROOT / "config" / version / "checksum.sha1").write_text(f"{VERSIONS[version]['elf_sha1']}  {image}\n")
         n.newline()
@@ -286,7 +324,13 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.build("report", "phony", ["report.json"] + reports)
 
     configure_inputs = ["configure.py", "config/versions.json"] + [
-        f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions] + [f"config/{v}/symbol_addrs.txt" for v in versions]
+        f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
+    ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
+    configure_inputs += [
+        f"config/{v}/event_scripts.sha1"
+        for v in versions
+        if (ROOT / "config" / v / "event_scripts.sha1").exists()
+    ]
     n.build("build.ninja", "configure", implicit=configure_inputs,
             variables={"args": " ".join(sys.argv[1:])})
     n.default(defaults)

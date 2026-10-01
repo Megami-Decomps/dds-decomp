@@ -79,9 +79,10 @@ later addresses and offsets without hand-editing bookkeeping.
 The symbolic disassembler accepts the standard DDS five-section layout and
 canonical 32-byte name rows. It rejects irregular layouts rather than hiding
 bytes; use version 1 for those files. Message and string payloads remain raw
-until their internal formats are understood. In the current DDS1 event corpus,
-97 of 104 files use the canonical layout and round-trip exactly through this
-form; the other seven remain exact through version 1.
+until their internal formats are understood. The tracked DDS1 event corpus has
+97 symbolic sources and seven lossless physical sources whose nonzero trailing
+bytes lie outside the five declared sections (`e503`, `e510`, `e697`, `e705`,
+`e802`, `e807`, and `e809`).
 
 ### Native command profiles
 
@@ -122,12 +123,22 @@ kept separate because the same command ID can differ between engine versions;
 for example, DDS1 `0x1E7` consumes no stack values and does not have Nocturne
 HD's two-argument behavior.
 
-The first tracked script is `src/dds1/scripts/event/e670.bfasm`. Assemble it
-with the same command as any other source:
+The repository tracks all 104 available DDS1 event scripts under
+`src/dds1/scripts/event`. Assemble one source directly with:
 
 ```sh
 python3 tools/flw0.py assemble src/dds1/scripts/event/e670.bfasm e670.bf
 ```
+
+After configuring the repository, assemble and verify the complete corpus with:
+
+```sh
+ninja dds1-scripts
+```
+
+The normal `ninja dds1` target also includes this check. Expected output hashes
+live in `config/dds1/event_scripts.sha1`, so verification does not require the
+original BF files.
 
 ## Physical source
 
