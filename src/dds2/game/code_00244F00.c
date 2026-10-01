@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u32 D_00438FA8;
+extern s32 D_00438FA8;
 
-extern u32 D_00438FAC;
+extern s32 D_00438FAC;
 
 void evtInitializeVisualData(s32 arg0);
 
@@ -57,7 +57,39 @@ void evtInitializeVisualData(s32 object) {
 
 INCLUDE_ASM(const s32, "game/code_00244F00", func_00245590);
 
-INCLUDE_ASM(const s32, "game/code_00244F00", evtAdvanceSolarOverlayFadeAndDraw);
+extern s32 evtGetMirroredSolarPhase(void);
+extern void func_00245590(u32);
+extern void evtDrawFadingSolarOverlayFrame(s32, s32, s32, s32, s32, u32, s32);
+
+void evtAdvanceSolarOverlayFadeAndDraw(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5) {
+    s32 mirrored;
+    mirrored = (s8)evtGetMirroredSolarPhase();
+    func_00245590(arg4);
+    if ((D_00438FA4 & 1) != 0) {
+        if ((D_00438FA4 & 2) != 0) {
+            if (D_00438FA8 < D_00438FAC) {
+                D_00438FA8++;
+            } else {
+                D_00438FA4 = 0;
+            }
+        } else if ((D_00438FA4 & 4) != 0) {
+            if (D_00438FA8 > 0) {
+                D_00438FA8--;
+            } else {
+                D_00438FA4 &= ~1;
+            }
+        }
+        if ((D_00438FA4 & 1) != 0) {
+            f32 ratio = (f32)D_00438FA8 / (f32)D_00438FAC;
+            s32 scaled = (s32)((f32)arg3 * ratio);
+            evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, scaled, mirrored, arg4, arg5);
+            return;
+        }
+    }
+    if ((D_00438FA4 & 4) == 0) {
+        evtDrawFadingSolarOverlayFrame(arg0, arg1, arg2, arg3, mirrored, arg4, arg5);
+    }
+}
 
 s32 evtHasSolarOverlayTransitionState(void) {
     return D_00438FA4 != 0;
