@@ -132,60 +132,13 @@ typedef struct {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void sdfVuMultiplyPrimaryByScratch(void) {
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmulax.xyzw ACC, vf28, vf20x \n"
-        "vmadday.xyzw ACC, vf29, vf20y \n"
-        "vmaddaz.xyzw ACC, vf30, vf20z \n"
-        "vmaddw.xyzw vf2, vf31, vf20w \n"
-        "vmulax.xyzw ACC, vf28, vf21x \n"
-        "vmadday.xyzw ACC, vf29, vf21y \n"
-        "vmaddaz.xyzw ACC, vf30, vf21z \n"
-        "vmaddw.xyzw vf3, vf31, vf21w \n"
-        "vmulax.xyzw ACC, vf28, vf22x \n"
-        "vmadday.xyzw ACC, vf29, vf22y \n"
-        "vmaddaz.xyzw ACC, vf30, vf22z \n"
-        "vmaddw.xyzw vf4, vf31, vf22w \n"
-        "vmulax.xyzw ACC, vf28, vf23x \n"
-        "vmadday.xyzw ACC, vf29, vf23y \n"
-        "vmaddaz.xyzw ACC, vf30, vf23z \n"
-        "vmaddw.xyzw vf31, vf31, vf23w \n"
-        "vmove.xyzw vf28, vf2        \n"
-        "vmove.xyzw vf29, vf3        \n"
-        "vmove.xyzw vf30, vf4        \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+        VU0_MATRIX4_MUL_PRIMARY_LEFT();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf20-vf23 (4x4 product) */
 void sdfVuMultiplyScratchByPrimary(void) {
-    __asm__ volatile (
-        ".set noreorder               \n"
-        "vmulax.xyzw ACC, vf20, vf28x \n"
-        "vmadday.xyzw ACC, vf21, vf28y \n"
-        "vmaddaz.xyzw ACC, vf22, vf28z \n"
-        "vmaddw.xyzw vf28, vf23, vf28w \n"
-        "vmulax.xyzw ACC, vf20, vf29x \n"
-        "vmadday.xyzw ACC, vf21, vf29y \n"
-        "vmaddaz.xyzw ACC, vf22, vf29z \n"
-        "vmaddw.xyzw vf29, vf23, vf29w \n"
-        "vmulax.xyzw ACC, vf20, vf30x \n"
-        "vmadday.xyzw ACC, vf21, vf30y \n"
-        "vmaddaz.xyzw ACC, vf22, vf30z \n"
-        "vmaddw.xyzw vf30, vf23, vf30w \n"
-        "vmulax.xyzw ACC, vf20, vf31x \n"
-        "vmadday.xyzw ACC, vf21, vf31y \n"
-        "vmaddaz.xyzw ACC, vf22, vf31z \n"
-        "vmaddw.xyzw vf31, vf23, vf31w \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+        VU0_MATRIX4_MUL_SCRATCH_LEFT();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */

@@ -143,27 +143,5 @@ void sdfComposeVuMatrixFromRegisters(void)
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
 void sdfMultiplyVuMatrixInPlace(void)
 {
-    __asm__ volatile (
-        ".set noreorder                              \n"
-        "vmulax.xyzw ACC, vf24, vf28x                \n"
-        "vmadday.xyzw ACC, vf25, vf28y               \n"
-        "vmaddaz.xyzw ACC, vf26, vf28z               \n"
-        "vmaddw.xyzw vf28, vf27, vf28w               \n"
-        "vmulax.xyzw ACC, vf24, vf29x                \n"
-        "vmadday.xyzw ACC, vf25, vf29y               \n"
-        "vmaddaz.xyzw ACC, vf26, vf29z               \n"
-        "vmaddw.xyzw vf29, vf27, vf29w               \n"
-        "vmulax.xyzw ACC, vf24, vf30x                \n"
-        "vmadday.xyzw ACC, vf25, vf30y               \n"
-        "vmaddaz.xyzw ACC, vf26, vf30z               \n"
-        "vmaddw.xyzw vf30, vf27, vf30w               \n"
-        "vmulax.xyzw ACC, vf24, vf31x                \n"
-        "vmadday.xyzw ACC, vf25, vf31y               \n"
-        "vmaddaz.xyzw ACC, vf26, vf31z               \n"
-        "vmaddw.xyzw vf31, vf27, vf31w               \n"
-        ".set reorder"
-        :
-        :
-        : "memory"
-    );
+        VU0_MATRIX4_MUL_BANK_B_LEFT();
 }
