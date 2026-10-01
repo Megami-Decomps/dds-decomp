@@ -43,10 +43,8 @@ e503_main:
   PUSHREG
   POPIX 0x0002
   PREPARE_UNIT_MOTION_STATE(global_int[2], 1, 0, 10, 1)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p02))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p00))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(p02)))
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(p00)))
   push float32(0.8999999761581421, bits=0x3f666666)
   push float32(0.699999988079071, bits=0x3f333333)
   push float32(0.699999988079071, bits=0x3f333333)
@@ -73,17 +71,12 @@ e503_main:
   push 255
   push 0
   COMM 0x00bc
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Camera01)))
   SCREEN_FADE_A(0, 40)
-  result = CREATE_SCRIPT_TASK(procedure(e503_010), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e503_020), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e503_030), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  result = CREATE_SCRIPT_TASK(procedure(e503_040), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e503_010), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e503_020), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e503_030), -(1)))
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e503_040), -(1)))
   if_not (global_int[13] == 1) goto _4
   goto CUT1
   goto _3
@@ -97,8 +90,7 @@ _4:
   COMM 0x0016
   COMM 0x004e
   SCREEN_FADE_A(0, 40)
-  result = CREATE_POLYGON_MOVIE(500, 2)
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(500, 2))
   SCREEN_FADE_B(0, 240)
   WAIT_FOR_TIMER_LIMIT(240)
   push 3
@@ -115,11 +107,9 @@ _4:
   PUSHREG
   POPIX 0x0002
   PREPARE_UNIT_MOTION_STATE(global_int[2], 1, 0, 0, 1)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p03))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(p03)))
   PREPARE_UNIT_MOTION_STATE(global_int[1], 1, 0, 10, 3)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p01))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[2], READ_SECONDARY_WORLD_ID_VALUE(string(p01)))
   push float32(0.30000001192092896, bits=0x3e99999a)
   push float32(1.100000023841858, bits=0x3f8ccccd)
   push float32(1.7999999523162842, bits=0x3fe66666)
@@ -147,8 +137,7 @@ _4:
   push 0
   COMM 0x00bc
   SCREEN_FADE_A(0, 240)
-  result = CREATE_SCRIPT_TASK(procedure(e503_050), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e503_050), -(1)))
 CUT1:
   SCREEN_FADE_B(0, 60)
   WAIT_FOR_TIMER_LIMIT(60)
@@ -183,8 +172,7 @@ _5:
   } else {
   _6:
     if (global_int[13] == 1) {
-      result = CREATE_POLYGON_MOVIE(500, 2)
-      WAIT_FOR_TASK_REMOVAL(result)
+      WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(500, 2))
     }
   }
 _3:
@@ -194,42 +182,29 @@ _8:
 e503_010:
   PROC e503_010
   PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 2)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera01_MOTION))
-  push result
-  push string(Camera01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera01_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera01_2))
   COMM 0x0013
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light01))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light01))
   push 0
   push global_int[1]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light01_2))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light01_2))
   push 0
   push global_int[2]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light01_MOTION))
-  push result
-  push string(light01_3)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light01_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light01_3))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light01_4))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light01_4))
   COMM 0x00e8
   WAIT_FOR_TIMER_LIMIT(240)
   return
 e503_020:
   PROC e503_020
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera02))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera02_MOTION))
-  push result
-  push string(Camera02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Camera02)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera02_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera02_2))
   COMM 0x0013
   WAIT_FOR_TIMER_LIMIT(30)
   ACTIVATE_MESSAGE_PANEL()
@@ -241,13 +216,9 @@ e503_020:
   return
 e503_030:
   PROC e503_030
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera03))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera03_MOTION))
-  push result
-  push string(Camera03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Camera03)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera03_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera03_2))
   COMM 0x0013
   WAIT_FOR_TIMER_LIMIT(30)
   ACTIVATE_MESSAGE_PANEL()
@@ -259,16 +230,11 @@ e503_030:
   return
 e503_040:
   PROC e503_040
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera04))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_MOTION))
-  push result
-  push string(Camera04_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Camera04)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_2))
   COMM 0x0013
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_3))
   COMM 0x00b7
   WAIT_FOR_TIMER_LIMIT(30)
   ACTIVATE_MESSAGE_PANEL()
@@ -284,11 +250,9 @@ e503_040:
     WAIT_FOR_TIMER_LIMIT(30)
     PREPARE_UNIT_MOTION_STATE(global_int[2], 0, 0, 10, 2)
     WAIT_FOR_TIMER_LIMIT(1)
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_4))
-    push result
+    push READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_4))
     COMM 0x00b8
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_5))
-    push result
+    push READ_SECONDARY_WORLD_ID_VALUE(string(Camera04_5))
     COMM 0x0055
   } else {
   _11:
@@ -302,51 +266,37 @@ _10:
   return
 e503_050:
   PROC e503_050
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera06))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_MOTION))
-  push result
-  push string(Camera06_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Camera06)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_2))
   COMM 0x0013
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_3))
   COMM 0x00b7
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02))
   push 0
   push global_int[1]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02_2))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_2))
   push 0
   push global_int[2]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02_MOTION))
-  push result
-  push string(light02_3)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_3))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02_4))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light02_4))
   COMM 0x00e8
   push string(event_e500_e503_effect_EFF01_D3P)
   COMM 0x009a
   PUSHREG
   POPLIX 0x0000
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p05))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(p05))
   push local_int[0]
   COMM 0x009d
   result = CREATE_SCRIPT_TASK(procedure(e503_060_cam1), 0)
   WAIT_FOR_TIMER_LIMIT(20)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_4))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_4))
   COMM 0x00b8
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_5))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(Camera06_5))
   COMM 0x0055
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(LILITH_008))

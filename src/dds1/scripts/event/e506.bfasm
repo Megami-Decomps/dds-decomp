@@ -28,17 +28,14 @@ e506_main:
     COMM 0x0015
     PUSHREG
     POPIX 0x0001
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3))
-    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+    ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_3)))
     PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
     push 0
     push 0
     push 0
     push 0
     push 1
-    push string(p00)
-    COMM READ_SECONDARY_WORLD_ID_VALUE
-    PUSHREG
+    push READ_SECONDARY_WORLD_ID_VALUE(string(p00))
     push global_int[1]
     COMM 0x008b
     push float32(0.4399999976158142, bits=0x3ee147ae)
@@ -67,13 +64,9 @@ e506_main:
     push 255
     push 0
     COMM 0x00bc
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01))
-    ADD_EFFECT_UNIT_TO_WORLD(result)
-    result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION))
-    push result
-    push string(Cam01_2)
-    COMM READ_SECONDARY_WORLD_ID_VALUE
-    PUSHREG
+    ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Cam01)))
+    push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION))
+    push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_2))
     COMM 0x0013
     SCREEN_FADE_A(0, 40)
     WAIT_FOR_TIMER_LIMIT(125)
@@ -91,17 +84,14 @@ e506_main:
       COMM 0x0015
       PUSHREG
       POPIX 0x0001
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3_2))
-      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_3_2)))
       PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
       push 0
       push 0
       push 0
       push 0
       push 1
-      push string(p00_2)
-      COMM READ_SECONDARY_WORLD_ID_VALUE
-      PUSHREG
+      push READ_SECONDARY_WORLD_ID_VALUE(string(p00_2))
       push global_int[1]
       COMM 0x008b
       push float32(0.4399999976158142, bits=0x3ee147ae)
@@ -130,13 +120,9 @@ e506_main:
       push 255
       push 0
       COMM 0x00bc
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_3))
-      ADD_EFFECT_UNIT_TO_WORLD(result)
-      result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_2))
-      push result
-      push string(Cam01_4)
-      COMM READ_SECONDARY_WORLD_ID_VALUE
-      PUSHREG
+      ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_3)))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_2))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_4))
       COMM 0x0013
       SCREEN_FADE_A(0, 40)
       result = CREATE_SCRIPT_TASK(procedure(dist_blur03), -(1))
@@ -151,17 +137,14 @@ e506_main:
         COMM 0x0015
         PUSHREG
         POPIX 0x0001
-        result = READ_SECONDARY_WORLD_ID_VALUE(string(str_3_3))
-        ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], result)
+        ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[1], READ_SECONDARY_WORLD_ID_VALUE(string(str_3_3)))
         PREPARE_UNIT_MOTION_STATE(global_int[1], 0, 0, 0, 1)
         push 0
         push 0
         push 0
         push 0
         push 1
-        push string(p00_3)
-        COMM READ_SECONDARY_WORLD_ID_VALUE
-        PUSHREG
+        push READ_SECONDARY_WORLD_ID_VALUE(string(p00_3))
         push global_int[1]
         COMM 0x008b
         push float32(0.4399999976158142, bits=0x3ee147ae)
@@ -190,13 +173,9 @@ e506_main:
         push 255
         push 0
         COMM 0x00bc
-        result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_5))
-        ADD_EFFECT_UNIT_TO_WORLD(result)
-        result = READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_3))
-        push result
-        push string(Cam01_6)
-        COMM READ_SECONDARY_WORLD_ID_VALUE
-        PUSHREG
+        ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_5)))
+        push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_MOTION_3))
+        push READ_SECONDARY_WORLD_ID_VALUE(string(Cam01_6))
         COMM 0x0013
         SCREEN_FADE_A(0, 40)
         result = CREATE_SCRIPT_TASK(procedure(mul_blur01), -(1))

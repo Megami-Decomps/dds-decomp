@@ -72,24 +72,9 @@ e704_main:
   COMM 0x0141
   PUSHREG
   POPLIX 0x0002
-  push 1
-  push 118
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _49
-  push 1
-  push 129
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _26
-  push 1
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _13
+  if_not (TEST_MODEL_FLAG(118) == 1) goto _49
+  if_not (TEST_MODEL_FLAG(129) == 1) goto _26
+  if_not (TEST_MODEL_FLAG(96) == 1) goto _13
   if (local_int[0] == 3) {
     SET_MODEL_FLAG(146)
   } else {
@@ -106,12 +91,7 @@ e704_main:
 _1:
   goto _12
 _13:
-  push 0
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _12
+  if_not (TEST_MODEL_FLAG(96) == 0) goto _12
   if (local_int[0] == 3) {
     SET_MODEL_FLAG(146)
   } else {
@@ -138,18 +118,8 @@ _8:
 _12:
   goto _25
 _26:
-  push 0
-  push 129
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _25
-  push 1
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _23
+  if_not (TEST_MODEL_FLAG(129) == 0) goto _25
+  if_not (TEST_MODEL_FLAG(96) == 1) goto _23
   if (local_int[0] == 3) {
     SET_MODEL_FLAG(146)
   } else {
@@ -174,37 +144,17 @@ _26:
 _18:
   goto _22
 _23:
-  push 0
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _22
-  SET_MODEL_FLAG(146)
-  goto _22
+  if (TEST_MODEL_FLAG(96) == 0) {
+    SET_MODEL_FLAG(146)
+  }
 _22:
   goto _25
 _25:
   goto _48
 _49:
-  push 0
-  push 118
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _48
-  push 1
-  push 129
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _46
-  push 1
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _36
+  if_not (TEST_MODEL_FLAG(118) == 0) goto _48
+  if_not (TEST_MODEL_FLAG(129) == 1) goto _46
+  if_not (TEST_MODEL_FLAG(96) == 1) goto _36
   if (local_int[0] == 1) {
     SET_MODEL_FLAG(145)
   } else {
@@ -229,58 +179,29 @@ _49:
 _31:
   goto _35
 _36:
-  push 0
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _35
-  SET_MODEL_FLAG(145)
-  goto _35
+  if (TEST_MODEL_FLAG(96) == 0) {
+    SET_MODEL_FLAG(145)
+  }
 _35:
   goto _45
 _46:
-  push 0
-  push 129
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _45
-  push 1
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _43
-  SET_MODEL_FLAG(147)
-  goto _42
-_43:
-  push 0
-  push 96
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _42
-  SET_MODEL_FLAG(148)
-  push 1
-  push 78
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _40
-  push 1
-  push 113
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _38
-  SET_MODEL_FLAG(149)
-  CLEAR_MODEL_FLAG(148)
-  goto _38
-_38:
-  goto _40
-_40:
-  goto _42
+  if_not (TEST_MODEL_FLAG(129) == 0) goto _45
+  if (TEST_MODEL_FLAG(96) == 1) {
+    SET_MODEL_FLAG(147)
+  } else {
+  _43:
+    if_not (TEST_MODEL_FLAG(96) == 0) goto _42
+    SET_MODEL_FLAG(148)
+    if_not (TEST_MODEL_FLAG(78) == 1) goto _40
+    if (TEST_MODEL_FLAG(113) == 1) {
+      SET_MODEL_FLAG(149)
+      CLEAR_MODEL_FLAG(148)
+    }
+  _38:
+    goto _40
+  _40:
+    goto _42
+  }
 _42:
   goto _45
 _45:
@@ -322,8 +243,7 @@ _48:
   push 1
   push 614
   COMM 0x008e
-  result = CREATE_SCRIPT_TASK(procedure(e704_010), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
+  WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010), -(1)))
   global_int[4] = 1
   SCREEN_FADE_B(1, 100)
   WAIT_FOR_TIMER_LIMIT(120)
@@ -335,27 +255,18 @@ _48:
   push 614
   COMM 0x0090
   WAIT_FOR_TIMER_LIMIT(10)
-  push 0
-  push 146
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _51
-  SET_MODEL_FLAG(2308)
-  goto _51
+  if (TEST_MODEL_FLAG(146) == 0) {
+    SET_MODEL_FLAG(2308)
+  }
 _51:
   COMM 0x0023
   COMM 0x002e
   return
 e704_010:
   PROC e704_010
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
-  push result
-  push string(cam01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam01)))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_2))
   COMM 0x0013
   WAIT_FOR_TIMER_LIMIT(180)
   SCREEN_FADE_A(1, 120)
@@ -408,55 +319,29 @@ e704_010:
   COMM 0x0142
   WAIT_FOR_TIMER_LIMIT(60)
   local_int[3] = CREATE_SCRIPT_TASK(procedure(e704_010_1), -(1))
-  push 1
-  push 146
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _54
-  result = CREATE_SCRIPT_TASK(procedure(e704_010_AS), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  goto _53
-_54:
-  push 1
-  push 145
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _55
-  result = CREATE_SCRIPT_TASK(procedure(e704_010_AY), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  goto _53
-_55:
-  push 1
-  push 147
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _56
-  result = CREATE_SCRIPT_TASK(procedure(e704_010_AM), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  goto _53
-_56:
-  push 1
-  push 149
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _57
-  result = CREATE_SCRIPT_TASK(procedure(e704_010_B), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  goto _53
-_57:
-  push 1
-  push 148
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _53
-  result = CREATE_SCRIPT_TASK(procedure(e704_010_B), -(1))
-  WAIT_FOR_TASK_REMOVAL(result)
-  goto _53
+  if (TEST_MODEL_FLAG(146) == 1) {
+    WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010_AS), -(1)))
+  } else {
+  _54:
+    if (TEST_MODEL_FLAG(145) == 1) {
+      WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010_AY), -(1)))
+    } else {
+    _55:
+      if (TEST_MODEL_FLAG(147) == 1) {
+        WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010_AM), -(1)))
+      } else {
+      _56:
+        if (TEST_MODEL_FLAG(149) == 1) {
+          WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010_B), -(1)))
+        } else {
+        _57:
+          if (TEST_MODEL_FLAG(148) == 1) {
+            WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(e704_010_B), -(1)))
+          }
+        }
+      }
+    }
+  }
 _53:
   DESTROY_REGISTERED_TASK(local_int[3])
   return

@@ -17,236 +17,202 @@ code
 e703_main:
   PROC e703_main
   WAIT_FOR_TIMER_START()
-  push 0
-  push 81
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  IF _4
-  CALL_EVENT(event(e670))
-  goto _3
-_4:
-  push 0
-  push 150
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  push 1
-  push 115
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
-  AND
-  IF _3
-  push 676
-  COMM 0x008d
-  push 10
-  push 676
-  COMM 0x0021
-  PUSHREG
-  POPIX 0x0002
-  result = CREATE_SCRIPT_TASK(procedure(e703_010_1), 0)
-  push global_int[2]
-  COMM 0x0022
-  PUSHREG
-  POPLIX 0x0000
-  push 30
-  push 676
-  COMM 0x0021
-  PUSHREG
-  POPIX 0x0005
-  WAIT_FOR_TIMER_LIMIT(950)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p_motion_root_T3))
-  push result
-  COMM 0x0016
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pyram1_T3))
-  push result
-  COMM 0x0016
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(player_a_PB))
-  push result
-  COMM 0x0016
-  WAIT_FOR_TASK_REMOVAL(local_int[0])
-  result = CREATE_SCRIPT_TASK(procedure(e676_010_1), -(1))
-  result = CREATE_SCRIPT_TASK(procedure(e676_010_2), -(1))
-  push 12
-  COMM 0x0050
-  COMM 0x016b
-  RESET_FIELD_EFFECTS()
-  RESET_DRAW_EFFECTS()
-_1:
-  COMM 0x0052
-  PUSHREG
-  IF _2
-  WAIT_FOR_TIMER_START()
-  goto _1
-_2:
-  COMM 0x0051
-  COMM 0x0023
-  RESET_FIELD_EFFECTS()
-  RESET_DRAW_EFFECTS()
-  push global_int[5]
-  COMM 0x0022
-  PUSHREG
-  COMM WAIT_FOR_TASK_REMOVAL
-  push 1
-  push 1
-  push 1
-  COMM 0x001a
-  push 1
-  push 55
-  push 1
-  COMM 0x001a
-  COMM 0x0023
-  WAIT_FOR_TIMER_START()
-  RESET_FIELD_EFFECTS()
-  RESET_DRAW_EFFECTS()
-  push 703
-  COMM 0x00c8
-  push 4
-  push 703
-  COMM 0x00ca
-  SCREEN_FADE_B(0, 1)
-  push 617
-  COMM 0x008d
-  push 0
-  push 1
-  push 12
-  COMM 0x0014
-  push -(63)
-  push 0
-  COMM 0x0048
-  push 2
-  push 703
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0007
-  push 3
-  push 703
-  COMM 0x00c9
-  PUSHREG
-  POPIX 0x0006
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p01))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(p02))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[7], result)
-  push float32(0.37599998712539673, bits=0x3ec08312)
-  push float32(0.3140000104904175, bits=0x3ea0c49c)
-  push float32(0.25099998712539673, bits=0x3e808312)
-  push 0
-  COMM 0x00bb
-  push 20000
-  push 255
-  push 19999
-  push 255
-  push 0
-  COMM 0x00bc
-  push float32(0.699999988079071, bits=0x3f333333)
-  push float32(0.699999988079071, bits=0x3f333333)
-  push float32(0.699999988079071, bits=0x3f333333)
-  push 0
-  COMM 0x00b4
-  push float32(0.699999988079071, bits=0x3f333333)
-  push float32(0.4000000059604645, bits=0x3ecccccd)
-  push float32(0.699999988079071, bits=0x3f333333)
-  push 0
-  COMM 0x00b5
-  push float32(0.20000000298023224, bits=0x3e4ccccd)
-  push float32(0.20000000298023224, bits=0x3e4ccccd)
-  push float32(0.20000000298023224, bits=0x3e4ccccd)
-  push 0
-  COMM 0x00b6
-  push 0
-  push 20
-  push 0
-  COMM 0x0047
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light01))
-  push result
-  push 0
-  push global_int[6]
-  COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light02))
-  push result
-  push 0
-  push global_int[7]
-  COMM 0x00c4
-  PREPARE_UNIT_MOTION_STATE(global_int[6], 8, 0, 0, 1)
-  PREPARE_UNIT_MOTION_STATE(global_int[7], 0, 0, 0, 1)
-  push 1
-  push 617
-  COMM 0x008e
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
-  push result
-  push string(cam01_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  SCREEN_FADE_A(0, 60)
-  WAIT_FOR_TIMER_LIMIT(90)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_1))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  WAIT_FOR_TIMER_LIMIT(45)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_2))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  WAIT_FOR_TIMER_LIMIT(30)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam02))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam02_MOTION))
-  push result
-  push string(cam02_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  WAIT_FOR_TIMER_LIMIT(30)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_3))
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_4))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  WAIT_FOR_TIMER_LIMIT(20)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam03))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(cam03_MOTION))
-  push result
-  push string(cam03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
-  COMM 0x0013
-  WAIT_FOR_TIMER_LIMIT(20)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_5))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  WAIT_FOR_TIMER_LIMIT(30)
-  SCREEN_FADE_B(1, 10)
-  WAIT_FOR_TIMER_LIMIT(10)
-  COMM 0x0045
-  push global_int[7]
-  COMM 0x0016
-  SCREEN_FADE_A(1, 10)
-  WAIT_FOR_TIMER_LIMIT(10)
-  WAIT_FOR_TIMER_LIMIT(20)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(MSG_010_6))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  WAIT_FOR_TIMER_LIMIT(30)
-  SCREEN_FADE_B(0, 60)
-  WAIT_FOR_TIMER_LIMIT(150)
-  COMM 0x0023
-  RESET_FIELD_EFFECTS()
-  RESET_DRAW_EFFECTS()
-  SET_MODEL_FLAG(150)
-  CLEAR_MODEL_FLAG(986)
-  SET_MODEL_FLAG(2152)
-  SET_MODEL_FLAG(2152)
-  CLEAR_MODEL_FLAG(1358)
-  SET_MODEL_FLAG(1359)
-  CLEAR_MODEL_FLAG(1230)
-  CLEAR_MODEL_FLAG(1142)
-  CLEAR_MODEL_FLAG(1289)
-  CLEAR_MODEL_FLAG(1392)
-  goto _3
+  if (TEST_MODEL_FLAG(81) == 0) {
+    CALL_EVENT(event(e670))
+  } else {
+  _4:
+    if (TEST_MODEL_FLAG(115) == 1 && TEST_MODEL_FLAG(150) == 0) {
+      push 676
+      COMM 0x008d
+      push 10
+      push 676
+      COMM 0x0021
+      PUSHREG
+      POPIX 0x0002
+      result = CREATE_SCRIPT_TASK(procedure(e703_010_1), 0)
+      push global_int[2]
+      COMM 0x0022
+      PUSHREG
+      POPLIX 0x0000
+      push 30
+      push 676
+      COMM 0x0021
+      PUSHREG
+      POPIX 0x0005
+      WAIT_FOR_TIMER_LIMIT(950)
+      push READ_SECONDARY_WORLD_ID_VALUE(string(p_motion_root_T3))
+      COMM 0x0016
+      push READ_SECONDARY_WORLD_ID_VALUE(string(pyram1_T3))
+      COMM 0x0016
+      push READ_SECONDARY_WORLD_ID_VALUE(string(player_a_PB))
+      COMM 0x0016
+      WAIT_FOR_TASK_REMOVAL(local_int[0])
+      result = CREATE_SCRIPT_TASK(procedure(e676_010_1), -(1))
+      result = CREATE_SCRIPT_TASK(procedure(e676_010_2), -(1))
+      push 12
+      COMM 0x0050
+      COMM 0x016b
+      RESET_FIELD_EFFECTS()
+      RESET_DRAW_EFFECTS()
+    _1:
+      COMM 0x0052
+      PUSHREG
+      IF _2
+      WAIT_FOR_TIMER_START()
+      goto _1
+    _2:
+      COMM 0x0051
+      COMM 0x0023
+      RESET_FIELD_EFFECTS()
+      RESET_DRAW_EFFECTS()
+      push global_int[5]
+      COMM 0x0022
+      PUSHREG
+      COMM WAIT_FOR_TASK_REMOVAL
+      push 1
+      push 1
+      push 1
+      COMM 0x001a
+      push 1
+      push 55
+      push 1
+      COMM 0x001a
+      COMM 0x0023
+      WAIT_FOR_TIMER_START()
+      RESET_FIELD_EFFECTS()
+      RESET_DRAW_EFFECTS()
+      push 703
+      COMM 0x00c8
+      push 4
+      push 703
+      COMM 0x00ca
+      SCREEN_FADE_B(0, 1)
+      push 617
+      COMM 0x008d
+      push 0
+      push 1
+      push 12
+      COMM 0x0014
+      push -(63)
+      push 0
+      COMM 0x0048
+      push 2
+      push 703
+      COMM 0x00c9
+      PUSHREG
+      POPIX 0x0007
+      push 3
+      push 703
+      COMM 0x00c9
+      PUSHREG
+      POPIX 0x0006
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(p01)))
+      ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[7], READ_SECONDARY_WORLD_ID_VALUE(string(p02)))
+      push float32(0.37599998712539673, bits=0x3ec08312)
+      push float32(0.3140000104904175, bits=0x3ea0c49c)
+      push float32(0.25099998712539673, bits=0x3e808312)
+      push 0
+      COMM 0x00bb
+      push 20000
+      push 255
+      push 19999
+      push 255
+      push 0
+      COMM 0x00bc
+      push float32(0.699999988079071, bits=0x3f333333)
+      push float32(0.699999988079071, bits=0x3f333333)
+      push float32(0.699999988079071, bits=0x3f333333)
+      push 0
+      COMM 0x00b4
+      push float32(0.699999988079071, bits=0x3f333333)
+      push float32(0.4000000059604645, bits=0x3ecccccd)
+      push float32(0.699999988079071, bits=0x3f333333)
+      push 0
+      COMM 0x00b5
+      push float32(0.20000000298023224, bits=0x3e4ccccd)
+      push float32(0.20000000298023224, bits=0x3e4ccccd)
+      push float32(0.20000000298023224, bits=0x3e4ccccd)
+      push 0
+      COMM 0x00b6
+      push 0
+      push 20
+      push 0
+      COMM 0x0047
+      push READ_SECONDARY_WORLD_ID_VALUE(string(light01))
+      push 0
+      push global_int[6]
+      COMM 0x00c4
+      push READ_SECONDARY_WORLD_ID_VALUE(string(light02))
+      push 0
+      push global_int[7]
+      COMM 0x00c4
+      PREPARE_UNIT_MOTION_STATE(global_int[6], 8, 0, 0, 1)
+      PREPARE_UNIT_MOTION_STATE(global_int[7], 0, 0, 0, 1)
+      push 1
+      push 617
+      COMM 0x008e
+      ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam01)))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_MOTION))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam01_2))
+      COMM 0x0013
+      SCREEN_FADE_A(0, 60)
+      WAIT_FOR_TIMER_LIMIT(90)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_1))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      WAIT_FOR_TIMER_LIMIT(45)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_2))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      WAIT_FOR_TIMER_LIMIT(30)
+      ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam02)))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam02_MOTION))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam02_2))
+      COMM 0x0013
+      WAIT_FOR_TIMER_LIMIT(30)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_3))
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_4))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      WAIT_FOR_TIMER_LIMIT(20)
+      ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(cam03)))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam03_MOTION))
+      push READ_SECONDARY_WORLD_ID_VALUE(string(cam03_2))
+      COMM 0x0013
+      WAIT_FOR_TIMER_LIMIT(20)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_5))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      WAIT_FOR_TIMER_LIMIT(30)
+      SCREEN_FADE_B(1, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      COMM 0x0045
+      push global_int[7]
+      COMM 0x0016
+      SCREEN_FADE_A(1, 10)
+      WAIT_FOR_TIMER_LIMIT(10)
+      WAIT_FOR_TIMER_LIMIT(20)
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(MSG_010_6))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      WAIT_FOR_TIMER_LIMIT(30)
+      SCREEN_FADE_B(0, 60)
+      WAIT_FOR_TIMER_LIMIT(150)
+      COMM 0x0023
+      RESET_FIELD_EFFECTS()
+      RESET_DRAW_EFFECTS()
+      SET_MODEL_FLAG(150)
+      CLEAR_MODEL_FLAG(986)
+      SET_MODEL_FLAG(2152)
+      SET_MODEL_FLAG(2152)
+      CLEAR_MODEL_FLAG(1358)
+      SET_MODEL_FLAG(1359)
+      CLEAR_MODEL_FLAG(1230)
+      CLEAR_MODEL_FLAG(1142)
+      CLEAR_MODEL_FLAG(1289)
+      CLEAR_MODEL_FLAG(1392)
+    }
+  }
 _3:
   COMM 0x002e
   return

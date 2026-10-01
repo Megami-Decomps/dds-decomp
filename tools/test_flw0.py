@@ -450,8 +450,9 @@ class Flw0Tests(unittest.TestCase):
         path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
         script = flw0.parse_source(path.read_text(encoding="utf-8"))
         source = flw0_symbolic.render(script, "dds1", semantic=True)
-        self.assertIn("result = CREATE_POLYGON_MOVIE(670, 1)", source)
-        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", source)
+        self.assertIn(
+            "WAIT_FOR_TASK_REMOVAL(CREATE_POLYGON_MOVIE(670, 1))", source
+        )
         self.assertNotIn("  PUSHIS 670", source)
         self.assertEqual(flw0.parse_source(source).to_bytes(), script.to_bytes())
 
@@ -554,6 +555,53 @@ class Flw0Tests(unittest.TestCase):
             flw0_semantic.parse_expression(
                 "CONTENT_KIND", 1, flw0_profiles.DDS1
             )
+
+        result_condition = flw0.parse(
+            _fixture(
+                [
+                    flw0.OPCODE_IDS["PROC"],
+                    (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                    (6 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                    (0x21D << 16) | flw0.OPCODE_IDS["COMM"],
+                    flw0.OPCODE_IDS["PUSHREG"],
+                    flw0.OPCODE_IDS["EQ"],
+                    flw0.OPCODE_IDS["IF"],
+                    flw0.OPCODE_IDS["END"],
+                ],
+                jump_rows=(("done", 7),),
+            )
+        )
+        result_source = flw0_symbolic.render(
+            result_condition, "dds1", semantic=True
+        )
+        self.assertIn(
+            "if_not (ACTION_WINDOW_REQUEST_AND_POLL_DIRECT(6) == 1) goto done",
+            result_source,
+        )
+        self.assertEqual(
+            flw0.parse_source(result_source).to_bytes(), result_condition.to_bytes()
+        )
+
+        labelled_result = flw0.parse(
+            _fixture(
+                [
+                    flw0.OPCODE_IDS["PROC"],
+                    (0x068 << 16) | flw0.OPCODE_IDS["COMM"],
+                    flw0.OPCODE_IDS["PUSHREG"],
+                    flw0.OPCODE_IDS["POPLIX"],
+                    flw0.OPCODE_IDS["END"],
+                ],
+                jump_rows=(("capture", 2),),
+            )
+        )
+        labelled_source = flw0_symbolic.render(
+            labelled_result, "dds1", semantic=True
+        )
+        self.assertIn("result = READ_CURRENT_WORLD_OBJECT_ID()", labelled_source)
+        self.assertIn("capture:\n  PUSHREG", labelled_source)
+        self.assertEqual(
+            flw0.parse_source(labelled_source).to_bytes(), labelled_result.to_bytes()
+        )
 
     def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
         self.assertEqual(
@@ -662,8 +710,8 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 2344, 736),
-            "dds2": (126, 1797, 1190),
+            "dds1": (129, 3983, 736),
+            "dds2": (126, 3328, 1190),
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0

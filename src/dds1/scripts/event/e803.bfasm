@@ -12,11 +12,7 @@ jump_label _4 reserved=0x00000000
 code
 e803_main:
   PROC e803_main
-  push 0
-  push 1045
-  COMM TEST_MODEL_FLAG
-  PUSHREG
-  EQ
+  push TEST_MODEL_FLAG(1045) == 0
   push 0
   push 0
   COMM 0x011e
@@ -193,96 +189,73 @@ _1:
   COMM 0x00cb
   PUSHREG
   POPLIX 0x0017
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos01))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos01))
   push local_int[1]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos02))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos02))
   push local_int[2]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos03))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos03))
   push local_int[3]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos06))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos06))
   push local_int[4]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos09))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos09))
   push local_int[5]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos22))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos22))
   push local_int[6]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos20))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos20))
   push local_int[7]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos18))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos18))
   push local_int[8]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos16))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos16))
   push local_int[9]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos10))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos10))
   push local_int[10]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos11))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos11))
   push local_int[11]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos24))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos24))
   push local_int[12]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos25))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos25))
   push local_int[13]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos26))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos26))
   push local_int[14]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos27))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos27))
   push local_int[15]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos05))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos05))
   push local_int[16]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos04))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos04))
   push local_int[17]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos07))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos07))
   push local_int[18]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos08))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos08))
   push local_int[19]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos17))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos17))
   push local_int[20]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos19))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos19))
   push local_int[21]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos14))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos14))
   push local_int[22]
   COMM 0x009d
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(pos15))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(pos15))
   push local_int[23]
   COMM 0x009d
   push 4
@@ -290,10 +263,8 @@ _1:
   COMM 0x00c9
   PUSHREG
   POPLIX 0x0000
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01))
-  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], result)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01))
-  ADD_EFFECT_UNIT_TO_WORLD(result)
+  ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
+  ADD_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01)))
   push local_int[0]
   COMM 0x00ae
   push float32(0.4000000059604645, bits=0x3ecccccd)

@@ -96,19 +96,14 @@ e809_main:
   PUSHREG
   POPIX 0x000c
   SET_UNIT_LOW_FLAG(global_int[12])
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03))
   push 40
   push global_int[12]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION))
-  push result
-  push string(light03_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_2))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_3))
   COMM 0x00e8
   global_int[15] = CREATE_SCRIPT_TASK(procedure(e809_010_2), -(1))
 _1:
@@ -129,19 +124,14 @@ _2:
   return
   goto _3
 _3:
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04))
   push 30
   push global_int[12]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_MOTION))
-  push result
-  push string(light04_2)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_MOTION))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_2))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light04_3))
   COMM 0x00e8
   WAIT_FOR_TIMER_LIMIT(30)
   push 12
@@ -206,19 +196,14 @@ _3:
   push global_int[8]
   COMM 0x0168
   WAIT_FOR_TIMER_LIMIT(100)
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_4))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_4))
   push 130
   push global_int[12]
   COMM 0x00c4
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION_2))
-  push result
-  push string(light03_5)
-  COMM READ_SECONDARY_WORLD_ID_VALUE
-  PUSHREG
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_MOTION_2))
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_5))
   COMM 0x00c6
-  result = READ_SECONDARY_WORLD_ID_VALUE(string(light03_6))
-  push result
+  push READ_SECONDARY_WORLD_ID_VALUE(string(light03_6))
   COMM 0x00e8
   global_int[13] = CREATE_SCRIPT_TASK(procedure(e809_010_1), -(1))
   WAIT_FOR_TIMER_LIMIT(80)
