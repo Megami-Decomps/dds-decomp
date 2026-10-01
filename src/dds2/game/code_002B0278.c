@@ -228,11 +228,6 @@ extern s64 func_002C4038(s32, s32 *, u64, u64);
 
 /* Menu state handler installer: the call is inlined at each use, so callers
  * return its result through a real call rather than a sibcall. */
-typedef struct StaffFadeState {
-    u8 pad0[0x1DB0];
-    s32 fadeA;
-    s32 fadeB;
-} StaffFadeState;
 
 typedef struct MenuListNode MenuListNode;
 
@@ -323,11 +318,38 @@ struct MenuWindowContainer {
     u32 state;             /* 0x94 */
 };
 
-/* Menu-owned window and selection state (only offsets shared by these handlers). */
-typedef struct MenuPartyRuntime {
-    u8 pad00[8];
+typedef struct PartyEntryCopy {
+    u16 flags;
+    u16 pad02;
+    u16 displayId; /* 0x04: used to select a party display asset */
+    u16 pad06;
+    u32 word[0x6F];
+} PartyEntryCopy; /* 0x1C4 bytes, versus 0x1A4 in DDS1 */
+
+/* One allocated party-selection work area: original/current/backup entries,
+ * saved panel payloads, and fade state all belong to this same allocation. */
+typedef struct PartyMenuData {
+    s32 allocation;
+    u8 pad04[4];
     MenuWindowContainer *primaryWindow; /* 0x08 */
-    u8 pad0C[4];
+    PartyEntryCopy original[5];         /* 0x0C */
+    PartyEntryCopy current[5];          /* 0x8E0 */
+    s32 activeCount;                    /* 0x11B4 */
+    PartyEntryCopy backup[5];           /* 0x11B8 */
+    s32 selection;                      /* 0x1A8C */
+    u8 panelSnapshots[5][0xA0]; /* 0x1A90: copied panel subrecords */
+    s32 fadeA;                 /* 0x1DB0 */
+    s32 fadeB;                 /* 0x1DB4 */
+    u8 pad1DB8[0x20];
+    s32 freezePanel; /* 0x1DD8: set on transition; skips the panel update */
+} PartyMenuData; /* 0x1DDC: native party-selection allocation */
+
+/* Byte-offset copies keep their field displacement tied to the owner layout. */
+#define PARTY_BACKUP_OFFSET ((s32)&((PartyMenuData *)0)->backup)
+
+/* Staff/skill-menu work prefix, separate from the party-selection allocation. */
+typedef struct MenuPartyRuntime {
+    u8 pad00[0x10];
     s32 staffMode; /* 0x10 */
     s32 staffView; /* 0x14: selects the input mask and panel view */
     s32 staffSelection; /* 0x18: chosen list entry */
@@ -337,8 +359,6 @@ typedef struct MenuPartyRuntime {
     s32 activeMark; /* 0x28 */
     u8 pad2C[8];
     u32 selectedIndex; /* 0x34: compared with MenuListNode.index */
-    u8 pad38[0x1DA0];
-    s32 state1DD8; /* 0x1DD8: checked before func_002B2408 */
 } MenuPartyRuntime;
 
 /* The idle-motion timer shares the party work area with other menu states. */
@@ -556,22 +576,9 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0FA0);
 
 void mnuDestroyPartySelectionWindow(s32 context) {
-    mnuDestroyWindowContainer((u32)((MenuPartyRuntime *)((MenuContext *)context)->party)->primaryWindow);
+    mnuDestroyWindowContainer((u32)((PartyMenuData *)((MenuContext *)context)->party)->primaryWindow);
 }
 
-typedef struct PartyEntryCopy {
-    u16 flags;
-    u16 pad02;
-    u32 word[0x70];
-} PartyEntryCopy; /* 0x1C4 bytes, versus 0x1A4 in DDS1 */
-
-typedef struct PartyMenuData {
-    u8 pad00[0x8E0];
-    PartyEntryCopy current[5];
-    s32 activeCount; /* 0x11B4 */
-    PartyEntryCopy backup[5];
-    s32 selection;   /* 0x1A8C */
-} PartyMenuData;
 
 /* Snapshot the five party entries and cap the menu's displayed slot count. */
 void mnuCopyPartyEntries(context)
@@ -608,20 +615,20 @@ void mnuRestorePartyEntriesAndRefresh(context)
 s32 context;
 {
     PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
-    u16 *entry = (u16 *)menu->current;
+    PartyEntryCopy *entry = menu->current;
     s32 i;
     s32 backupOffset;
     s32 panel;
 
     for (i = 0; i < 5; i++) {
-        if (*entry & 1) {
+        if (entry->flags & 1) {
             func_002B12B0(i, -3, 1, context);
         }
-        entry += 0x1C4 / 2;
+        entry++;
     }
     backupOffset = 0;
     for (i = 4; i >= 0; i--) {
-        *(PartyEntryCopy *)(backupOffset + datGameState + 0xA60) = *(PartyEntryCopy *)(backupOffset + (s32)menu + 0x11B8);
+        *(PartyEntryCopy *)(backupOffset + datGameState + 0xA60) = *(PartyEntryCopy *)(backupOffset + (s32)menu + PARTY_BACKUP_OFFSET);
         backupOffset += 0x1C4;
     }
     panel = context + 0x284;
@@ -659,7 +666,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     for (i = 0; i < 5; i++) {
         *(u32 *)(context + 0x300 + i * 0x2138) |= 0x40;
     }
-    for (node = (s32)((MenuPartyRuntime *)menu)->primaryWindow->list->first;
+    for (node = (s32)menu->primaryWindow->list->first;
          node != 0; node = (s32)((MenuListNode *)node)->next) {
         ((MenuListNode *)node)->flags48 &= ~1;
     }
@@ -675,22 +682,22 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B18E8);
 
 u32 mnuReleasePartySelectionResources(void) {
     s32 context = kwlnTaskGetUserValue();
-    u32 *selection = (u32 *)((MenuContext *)context)->party;
+    PartyMenuData *selection = (PartyMenuData *)((MenuContext *)context)->party;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_002B0D70(context);
-    func_003297C8(*selection);
+    func_003297C8(selection->allocation);
     return 1;
 }
 
 void mnuPreparePartyPanelTransition(s32 menu) {
-    s32 party = ((MenuContext *)menu)->party;
+    PartyMenuData *party = (PartyMenuData *)((MenuContext *)menu)->party;
 
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(menu + 0x54, D_003E7588);
     mnuConfigurePanelResource(((MenuContext *)menu)->panelHandle, ((MenuContext *)menu)->displayHandle, 0, 1);
     func_002BAF50(((MenuContext *)menu)->imageHandle, menu + 0xB10C);
-    ((MenuPartyRuntime *)party)->state1DD8 = 1;
+    party->freezePanel = 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
@@ -698,7 +705,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1C68);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1EA8);
 
 /* Two-stage fade: B rises first when opening, A falls first when closing. */
-void mnuUpdateStaffFade(s32 opening, StaffFadeState *state) {
+void mnuUpdateStaffFade(s32 opening, PartyMenuData *state) {
     if (opening == 0) {
         if (state->fadeA > 0) {
             state->fadeA -= 0x10;
@@ -734,22 +741,22 @@ void mnuUpdateStaffFade(s32 opening, StaffFadeState *state) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2408);
 
-/* Preserve the raw list loads here: spelling them as runtime/list fields
- * changes this handler's compiled instruction sequence despite identical offsets. */
+/* Update the final-row flag, draw the panel, and suppress its contents update
+ * once the party transition has frozen it. */
 s64 mnuOpenStaffPartySelectionPanel(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u8 *menu = (u8 *)((MenuContext *)context)->party;
-    s32 list;
+    PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
+    MenuList *list;
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(0x17);
-    list = *(s32 *)(*(s32 *)(menu + 8) + 0x18);
-    if (mnuIsFinalItemIndex(**(s32 **)(list + 0x1c), list)) {
-        **(u32 **)(*(s32 *)(menu + 8) + 0x18) |= 0x10;
+    list = menu->primaryWindow->list;
+    if (mnuIsFinalItemIndex(list->cursor->index, (s32)list)) {
+        menu->primaryWindow->list->stateFlags |= 0x10;
     } else {
-        **(u32 **)(*(s32 *)(menu + 8) + 0x18) &= ~0x10;
+        menu->primaryWindow->list->stateFlags &= ~0x10;
     }
     func_002BB0E8(0x1e0, 0x350, 0, context + 0xb10c, 0x53);
-    if (((MenuPartyRuntime *)menu)->state1DD8 == 0) {
+    if (menu->freezePanel == 0) {
         func_002B2408(context);
     }
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
