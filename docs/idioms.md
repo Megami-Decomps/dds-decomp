@@ -680,6 +680,16 @@ computed. Natural source shapes that flip it:
    `u8 *node = body; body += headerSize;` (DDS2 `func_002E2E28` and 15 more,
    `move $3,$2; move $4,$3; addu $3,$3,$17`). Where retail does give
    `headerSize` the higher register (DDS2 `func_002E24A8`) the sum form is right.
+5. **Straight-line setters: derive the store order.** In a function with no
+   branch every parameter is a local qty, each with 2 refs, so the shortest
+   live range (entry copy to its store) gets the lowest saved register. sched1
+   then reorders the independent stores; on toys the emitted order is: the
+   object store with the higher source position, the work store with the
+   highest source position, the other object store, then the remaining work
+   stores ascending. Work out the live lengths retail's register order needs,
+   solve for the store order, and write the source in the order that produces
+   it (DDS1 `func_001168F0` / DDS2 `func_00116B58`: predicted, matched first
+   try). This is a derivation from the allocator, not a search.
 
 Unresolved: a saved register initialised as a copy of another holding the same
 constant (`move $16,$19` for `i` from `bestIndex = 0`, DDS1 `func_00202F90`,
