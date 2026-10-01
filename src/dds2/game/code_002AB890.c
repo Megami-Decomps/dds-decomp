@@ -14,13 +14,6 @@ extern void func_002AAE80(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-
-extern void func_002BB0E8(s32, s32, s32, s32, s32);
-
-extern void func_002AA7A0(s32, s32);
-
-extern u8 D_003E7050[];
 
 typedef struct MenuResourceSet {
     u8 pad00[8];
@@ -129,7 +122,22 @@ s32 func_002ACBF8(void) {
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACC50);
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ACE58);
+extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
+extern void func_002BB0E8(s32, s32, s32, s32, s32);
+extern void func_002AA7A0(s32, s32);
+extern u8 D_003E7050[];
+
+s64 func_002ACE58(s32 callback) {
+    s32 context = kwlnTaskGetUserValue();
+    func_002AAE80(callback);
+    mnuCreateStaffImageSprite(4);
+    func_002AAC98(0,
+        ((MenuStaffContext *)context)->activeWindow->window->selectedNode->label,
+        (s32)D_003E7050, context, 1, 0x53);
+    func_002BB0E8(0x1e0, 0x350, 0, (s32)((MenuStaffContext *)context)->tail, 0x53);
+    func_002AA7A0(0, ((MenuStaffContext *)context)->group);
+    return menuSetHandler(context, 1, callback);
+}
 
 s64 mnuFinishStaffReturnPopup(s32 callback) {
     return menuSetHandler(kwlnTaskGetUserValue(), 2, callback);
