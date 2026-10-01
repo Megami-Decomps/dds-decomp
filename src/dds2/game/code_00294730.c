@@ -27,6 +27,15 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00294758);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294930);
 
+extern struct {
+    u8 pad00[0xCA];
+    s16 unkCA;
+    s16 unkCC;
+    s16 unkCE;
+} D_003D03F0;
+extern u8 *D_00438FC8;
+
+
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294B40);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294C68);
@@ -117,7 +126,31 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_002969D8);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296AF8);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296B48);
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
+extern void frFontSetChainFlag(s32, u8);
+extern void func_0019D550(s32, s32, s32);
+extern void frFontQueueGlyphInSelectedSlot(s32);
+extern char D_00437980[];
+
+void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
+    char text[16];
+    s32 value;
+    s32 glyph;
+
+    func_00306CD0(
+        x + D_003D03F0.unkCC * 16,
+        y + D_003D03F0.unkCE * 8,
+        z, scale, 0, *(s32 *)(D_00438FC8 + 0x68),
+        D_003D03F0.unkCA, option
+    );
+    value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
+    func_0035C860(text, D_00437980, 0);
+    glyph = func_0019F798(x + 0x1910, y + 0x290, z, value, text, 0);
+    frFontSetChainFlag(glyph, 4);
+    func_0019D550(glyph, 1, option);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00296C58);
 
