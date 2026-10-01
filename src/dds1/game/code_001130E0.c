@@ -1,15 +1,29 @@
 #include "common.h"
 #include "pcp_vu0.h"
 
+/* Follow record the object tracks (angle, flags and kind at the end of a longer record). */
+typedef struct EffFollowRec {
+    u8 pad00[0x98];
+    f32 angle;   /* 0x98 */
+    u8 pad9C[0xC];
+    u32 flags;   /* 0xA8 */
+    s16 kind;    /* 0xAC */
+} EffFollowRec;
+
+typedef struct EffModelHolder {
+    u8 pad00[0xC];
+    void *model; /* 0x0C */
+} EffModelHolder;
+
 typedef struct EffectObjectData {
     u32 handle;
     u32 word04;
-    u32 word08;
-    u32 word0C;
+    EffFollowRec *transitionWork; /* 0x08: object transition work */
+    EffModelHolder *modelHolder; /* 0x0C: effect model holder */
     s32 activeId;
     u32 word14;
     u32 word18;
-    u32 pendingValue;
+    s32 pendingValue;
     u32 timer;
 } EffectObjectData;
 
@@ -30,7 +44,7 @@ u32 func_001130E0(EffectObject *obj) {
 }
 
 u32 func_001130F0(EffectObject *obj) {
-    return obj->data->word08;
+    return (u32)obj->data->transitionWork;
 }
 
 void func_00113100(EffectObject *obj, u32 value) {
@@ -91,16 +105,127 @@ void evtDestroyEffectObjectData(EffectObject *obj) {
     if (data->handle != -1) {
         data->handle = -1;
     }
-    if (data->word08 != 0) {
-        evtReleaseUnitTransitionWork(data->word08);
-        data->word08 = 0;
+    if (data->transitionWork != 0) {
+        evtReleaseUnitTransitionWork(data->transitionWork);
+        data->transitionWork = 0;
     }
     func_00111B40(obj);
-    func_00111840(data->word0C);
+    func_00111840(data->modelHolder);
     sdfReleaseChipBlock(obj->data);
 }
 
-INCLUDE_ASM(const s32, "game/code_001130E0", func_001135B0);
+typedef struct EffLocalNode {
+    u8 pad00[0x40];
+    u128 vec40; /* 0x40 */
+    u128 vec50; /* 0x50 */
+    u128 vec60; /* 0x60 */
+    u8 pad70[0x60];
+} EffLocalNode; /* 0xD0, a transform node built on the stack */
+
+typedef struct EffVec4 {
+    f32 v[4];
+} EffVec4;
+
+extern EffVec4 D_0039F720;
+extern EffVec4 D_0039F730;
+extern s32 dds3TestObjectFlags(EffectObject *, s32);
+extern s32 effObjTestNodeFlags(f32 *, s32);
+extern void effObjInnerVecInit(EffLocalNode *);
+extern s32 func_00222ED8(EffLocalNode *, EffectObject *);
+extern void effObjMulInnerThirdVec(EffectObject *, u128 *);
+extern void effObjQuatMulInnerSecondVec(EffectObject *, u128 *);
+extern void effObjAddInnerFirstVec(EffectObject *, u128 *);
+extern void effObjClearNodeFlags(f32 *, s32);
+extern f32 sdfSinPoly(f32);
+extern void mdlStoreTertiaryVectorVU(void *);
+extern void mdlStorePrimaryVectorVU(void *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
+extern void effMiscNormalizeVU(void);
+extern void effMiscAxisAngleToQuaternionVU(f32);
+extern void effMiscQuatMultiplyVU(void);
+extern void effObjInnerVecBackup(f32 *);
+extern void func_00113AF0(EffectObject *);
+extern void func_00113338(EffectObject *);
+extern void func_001131E0(EffectObject *, s32);
+extern s32 func_00117650(s32);
+
+/* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
+s32 func_001135B0(EffectObject *obj) {
+    EffVec4 axis = D_0039F730;
+    EffLocalNode node;
+    EffectObjectData *data;
+    void *model;
+    s32 flag;
+
+    data = obj->data;
+    flag = 0;
+    if (data->transitionWork != 0) {
+        effObjInnerVecInit(&node);
+        if (func_00222ED8(&node, obj) != 0) {
+            effObjMulInnerThirdVec(obj, &node.vec60);
+            effObjQuatMulInnerSecondVec(obj, &node.vec50);
+            effObjAddInnerFirstVec(obj, &node.vec40);
+        }
+    }
+    model = data->modelHolder->model;
+    if (model != NULL && effObjTestNodeFlags(obj->source, 1) == 1) {
+        effObjClearNodeFlags(obj->source, 1);
+        if (data->transitionWork != 0) {
+            if (data->transitionWork->kind == 0 || data->transitionWork->kind == 3) {
+                if (data->transitionWork->flags & 0x40) {
+                    flag = 1;
+                }
+            }
+            if (data->transitionWork->flags & 0x400000) {
+                flag = 1;
+            }
+        }
+        VU0_LOAD_VF(vf10, &obj->source[0x18]);
+        if (data->transitionWork != 0 && flag != 0) {
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_MOVE_VF(vf10, vf0);
+            VU0_CLEAR_W(vf10);
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.01f, "vaddx.x vf10, vf0, vf2x");
+            VU0_SCALAR_OP_CLOBBER(sdfSinPoly(data->transitionWork->angle) * 0.004f, "vaddx.y vf10, vf0, vf2x");
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_ADD(vf10, vf10, vf11);
+        }
+        mdlStoreTertiaryVectorVU(model);
+        VU0_LOAD_VF(vf10, &obj->source[0x14]);
+        effMiscNormalizeVU();
+        if (data->transitionWork != 0 && flag != 0) {
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_LOAD_VF(vf10, &axis);
+            effMiscAxisAngleToQuaternionVU(sdfSinPoly(data->transitionWork->angle) * 0.006f);
+            effMiscQuatMultiplyVU();
+        }
+        if (data->word18 & 1) {
+            VU0_LOAD_VF(vf11, &D_0039F720);
+            effMiscQuatMultiplyVU();
+        }
+        mdlUpdateContextRotationBasisFromQuaternion(model);
+        if (effObjTestNodeFlags(obj->source, 8)) {
+            VU0_LOAD_VF(vf10, &obj->source[0x1C]);
+            VU0_SET_W_ONE(vf10);
+        } else {
+            VU0_LOAD_VF(vf10, &obj->source[0x10]);
+            VU0_SET_W_ONE(vf10);
+        }
+        mdlStorePrimaryVectorVU(model);
+        effObjInnerVecBackup(obj->source);
+    }
+    if (!dds3TestObjectFlags(obj, 0x100)) {
+        func_00113AF0(obj);
+    }
+    if (dds3TestObjectFlags(obj, 0x2000)) {
+        if (data->pendingValue != 0) {
+            func_001131E0(obj, func_00117650(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingValue, 0x11)));
+        } else {
+            func_00113338(obj);
+        }
+    }
+    return 1;
+}
 
 typedef struct FollowTargetInfo {
     u32 flags;       /* 0x00 */
@@ -131,12 +256,10 @@ typedef struct FollowTransition {
     FollowConfig *config; /* 0x0C */
 } FollowTransition;
 
-extern s32 dds3TestObjectFlags(EffectObject *, s32);
 extern void func_001122F0(void *, EffectObject *);
 extern void func_0011ECC8(EffectObject *);
 extern FollowTransition *func_00113008(EffectObject *);
 extern s32 sdfLoadMapRecordPositionVector(s32, s32);
-extern s32 effObjTestNodeFlags(f32 *, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 extern u8 D_00325788[];
 
@@ -258,7 +381,7 @@ void func_00113DA8(void) {
 }
 
 void func_00113DC0(EffectObject *obj, u32 value) {
-    obj->data->word0C = value;
+    obj->data->modelHolder = (EffModelHolder *)value;
 }
 
 void func_00113DD0(EffectObject *obj, u32 value) {
@@ -275,11 +398,11 @@ u32 func_00113DE0(u64 id) {
 }
 
 void evtSetObjectTransitionWork(EffectObject *obj, u32 value) {
-    obj->data->word08 = value;
+    obj->data->transitionWork = (EffFollowRec *)value;
 }
 
 u32 evtGetObjectTransitionWork(EffectObject *obj) {
-    return obj->data->word08;
+    return (u32)obj->data->transitionWork;
 }
 
 void func_00113E40(u32 value) {
