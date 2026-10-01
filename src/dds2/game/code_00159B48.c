@@ -438,7 +438,53 @@ void billSetChildHalfExtents(s32 billboard, float width, float height) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_00159FF8);
+extern u8 D_003846F0[];
+extern u8 D_0037F610[];
+extern u8 D_0037F650[];
+extern u8 D_0037F660[];
+extern u8 D_003AA9B0[];
+extern void func_00336C10(void *);
+extern f32 sdfAtan2(f32, f32);
+
+/* vu0 routine: computes the projected angle between two vectors */
+f32 func_00159FF8(const void *position, const void *offset) {
+    f32 delta[4];
+    f32 projectedPosition[4];
+    f32 projectedOffset[4];
+
+    VU0_LOAD_MATRIX(D_003846F0);
+    func_00336C10(D_0037F610);
+    VU0_LOAD_VF(vf10, position);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF(vf11, D_0037F650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, projectedPosition);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_LOAD_VF(vf11, D_003AA9B0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF(vf11, D_0037F650);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F660);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, projectedOffset);
+
+    delta[0] = projectedPosition[0] - projectedOffset[0];
+    delta[1] = projectedPosition[1] - projectedOffset[1];
+    delta[2] = 0.0f;
+    VU0_LOAD_VF(vf10, delta);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, delta);
+    return sdfAtan2(delta[1], delta[0]);
+}
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
 
