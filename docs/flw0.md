@@ -465,12 +465,19 @@ tables and both implementations:
 | `QUEUE_WORLD_OBJECT_PENDING_VALUE` | `0x1E0` | 2 | Arms a selected world object with a pending value |
 | `CLEAR_WORLD_OBJECT_PENDING_VALUE` | `0x1E1` | 1 | Clears a selected world object's pending value and starts its reset timer |
 | `CLEAR_PROCESS_CONTROL_FLAG` | `0x1E7` | 0 | Clears the script-process control flag |
+| `CONSUME_FIELD_SKILL_END_NOTICE` | `0x1F1` | 1 | Clears and reports a pending Lightoma, Liftoma, Riberama, or Estoma expiration notice |
 | `READ_SUCTION_WARP_VALUE` | `0x1FA` | 1 | Returns a state, object, map-entry, or motion value for the selected suction warp |
 | `READ_BARRIER_VALUE` | `0x1FB` | 1 | Returns a model flag, object, completion flag, or map entry for the selected barrier |
+| `READ_CURRENT_SCENE_SELECTION_RESOURCE` | `0x1FE` | 0 | Returns the resource attached to the selected scene entry, or zero |
 | `FIND_FIELD_EFFECT_BY_NAME` | `0x1FF` | 1 | Finds a field effect by its type-5 name and returns its handle |
 | `READ_ELEVATOR_TABLE_VALUE` | `0x200` | 1 | Returns a value from the selected elevator-destination row |
+| `ADVANCE_FIELD_INTERACTION` | `0x205` | 2 | Selects and applies the next field-interaction row for a line and choice |
+| `READ_FIELD_INTERACTION_VALUE` | `0x206` | 2 | Returns the row type, message ID, or flag from a field-interaction row |
+| `READ_FIELD_INTERACTION_KIND` | `0x207` | 0 | Classifies the current field interaction for the shared action-window loop |
 | `READ_LADDER_TABLE_VALUE` | `0x208` | 1 | Returns the direction, object IDs, or action-window mode for the selected ladder warp |
+| `POLL_ELEVATOR_MOVE_STATE` | `0x20B` | 0 | Returns the tracked elevator camera-move state and starts its final move when ready |
 | `READ_DOOR_WARP_VALUE` | `0x20C` | 1 | Returns the motion duration or fade mode for the selected door warp |
+| `READ_WARP_EFFECT_MODE` | `0x219` | 0 | Returns the warp-effect selector; both DDS implementations return zero |
 | `ACTION_WINDOW_REQUEST_AND_POLL_DIRECT` | `0x21D` | 1 | Requests or polls an action-window message without the actor-entry precheck and returns `-1`, `0`, or `1` |
 
 The assembler resolves these names to numeric operands. `COMM 0xNNNN` remains
@@ -486,8 +493,14 @@ their script consumers establish the field's role. Barrier selectors `3` and
 selector `5` remain numeric because their meanings are incomplete or differ
 between the games.
 
-The reviewed set names 44,544 of 53,389 native calls in the complete DDS1
-corpus and 32,306 of 38,839 calls in the complete DDS2 corpus. It also makes
+The field-interaction commands read the current `.INF` state machine. Column
+`0` is the row type and column `1` is its message ID. Column `2` is a confirmed
+row flag, but its full role is not yet established, so it remains numeric.
+`READ_WARP_EFFECT_MODE` is retained by the shared warp procedure even though
+both DDS handlers are stubs that return zero.
+
+The reviewed set names 45,297 of 53,389 native calls in the complete DDS1
+corpus and 32,983 of 38,839 calls in the complete DDS2 corpus. It also makes
 the adjacent message-command pattern safe to recognize, producing 188 symbolic
 DDS1 message references in the original event slice, 2,368 across complete
 DDS1, and 1,910 symbolic DDS2 references. Every other command and every dynamic

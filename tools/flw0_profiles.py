@@ -156,6 +156,22 @@ SHARED_DDS_COMMANDS = (
     ),
     NativeCommand(0x1E7, "CLEAR_PROCESS_CONTROL_FLAG", 0, writes_result=False),
     NativeCommand(
+        0x1F1,
+        "CONSUME_FIELD_SKILL_END_NOTICE",
+        1,
+        writes_result=True,
+        argument_symbols=(
+            IntegerSymbols(
+                (
+                    (0, "LIGHTOMA"),
+                    (1, "LIFTOMA"),
+                    (2, "RIBERAMA"),
+                    (3, "ESTOMA"),
+                )
+            ),
+        ),
+    ),
+    NativeCommand(
         0x1FA,
         "READ_SUCTION_WARP_VALUE",
         1,
@@ -189,6 +205,12 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(
+        0x1FE,
+        "READ_CURRENT_SCENE_SELECTION_RESOURCE",
+        0,
+        writes_result=True,
+    ),
     NativeCommand(0x1FF, "FIND_FIELD_EFFECT_BY_NAME", 1, writes_result=True),
     NativeCommand(
         0x200,
@@ -204,6 +226,18 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(0x205, "ADVANCE_FIELD_INTERACTION", 2, writes_result=True),
+    NativeCommand(
+        0x206,
+        "READ_FIELD_INTERACTION_VALUE",
+        2,
+        writes_result=True,
+        argument_symbols=(
+            None,
+            IntegerSymbols(((0, "ROW_TYPE"), (1, "MESSAGE_ID"))),
+        ),
+    ),
+    NativeCommand(0x207, "READ_FIELD_INTERACTION_KIND", 0, writes_result=True),
     NativeCommand(
         0x208,
         "READ_LADDER_TABLE_VALUE",
@@ -220,6 +254,7 @@ SHARED_DDS_COMMANDS = (
             ),
         ),
     ),
+    NativeCommand(0x20B, "POLL_ELEVATOR_MOVE_STATE", 0, writes_result=True),
     NativeCommand(
         0x20C,
         "READ_DOOR_WARP_VALUE",
@@ -229,6 +264,7 @@ SHARED_DDS_COMMANDS = (
             IntegerSymbols(((0, "MOTION_DURATION"), (1, "FADE_MODE"))),
         ),
     ),
+    NativeCommand(0x219, "READ_WARP_EFFECT_MODE", 0, writes_result=True),
     NativeCommand(
         0x21D,
         "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT",
