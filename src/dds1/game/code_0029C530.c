@@ -2591,11 +2591,11 @@ void effDispatchDestroyOp(EffClassWork *work) {
 u8 *effCreateActiveResource(EffClassWork *work) {
     u8 *effect;
     if (D_0037E8A0[work->kind].createActiveResource == NULL) {
-        effect = effCreateResourceInstanceA(*(u16 *)((u8 *)work + 0x2C), work->payload, 0);
+        effect = effCreateResourceInstanceA(work->kind, work->payload, 0);
     } else {
-        effect = effAllocateActiveInstanceWork(*(u16 *)((u8 *)work + 0x2C), work->payload);
+        effect = effAllocateActiveInstanceWork(work->kind, work->payload);
         /* Required to match: typed resource/kind fields change this store's codegen. */
-        *(void **)(effect + 0x30) = (void *)D_0037E8A0[*(s32 *)((u8 *)work + 0x2C)].createActiveResource(work);
+        *(void **)(effect + 0x30) = (void *)D_0037E8A0[work->kind].createActiveResource(work);
         D_0037E8A0[work->kind].fn(effect);
     }
     return effect;
@@ -3094,7 +3094,7 @@ void effDestroyClassWork(EffClassWork *work) {
 }
 
 void effCreateClassWorkFromRequest(EffClassWork *work) {
-    effPayloadPointerSet(*(u16 *)((u8 *)work + 0x2c), work->payload);
+    effPayloadPointerSet(work->kind, work->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
@@ -3944,7 +3944,7 @@ void effDestroyClassResourceWork(EffClassWork *work) {
 }
 
 void effPayloadPointerGet(EffClassWork *work) {
-    effCreateClassResourceWork(*(u16 *)((u8 *)work + 0x2c), work->payload);
+    effCreateClassResourceWork(work->kind, work->payload);
 }
 
 void effResetDispatchCounter(EffClassWork *work) {
@@ -4708,7 +4708,7 @@ void effDestroyBlockResourceWork(EffClassWork *work) {
 }
 
 u8 *effDuplicateActiveResourceB(EffClassWork *work) {
-    u8 *effect = effAllocateBlock(*(u16 *)((u8 *)work + 0x2C), work->payload);
+    u8 *effect = effAllocateBlock(work->kind, work->payload);
     u32 active = D_0037ED08[work->kind].createActiveResource(work);
     s32 kind = work->kind;
     ((EffClassWork *)effect)->resource = active;
@@ -5283,7 +5283,7 @@ void effDispatchCleanupOp(EffClassWork *work) {
 }
 
 u8 *effRecreateActiveByClass(EffClassWork *work) {
-    u8 *effect = effAllocateBlockWithModel(*(u16 *)((u8 *)work + 0x2C), work->payload);
+    u8 *effect = effAllocateBlockWithModel(work->kind, work->payload);
     u32 resource = D_0037ED90[work->kind].createActiveResource(work);
     s32 kind = work->kind;
     ((EffClassWork *)effect)->resource = resource;
