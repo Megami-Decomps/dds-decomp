@@ -2,9 +2,9 @@
 
 extern s32 D_00438930;
 
-extern u32 D_0043891C;
+extern u8 *D_0043891C;
 
-extern s32 func_00317FE0(u32);
+extern s32 func_00317FE0(u8 *);
 
 extern u32 D_00438918;
 
@@ -22,11 +22,13 @@ extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 
 extern void mnuResumeEffectQueueFrameAdvance(void);
 
-extern void func_00317AD0(u32 handle);
+extern void func_00317AD0(u8 *handle);
+
+extern void func_00318068(u8 *handle);
 
 extern void *func_003292A8(s32 size);
 
-extern u32 sdfMemoryGetBlockAddress(void *block);
+extern void *sdfMemoryGetBlockAddress(void *block);
 
 u32 mdlAdvanceViewerPackageTask(void);
 
@@ -89,7 +91,7 @@ void func_00316E70(void) {
 }
 
 void mdlCreateViewerPackageTask(void) {
-    u32 handle;
+    u8 *handle;
 
     D_00435BB0 = 0;
     D_00435BAC = 1;
