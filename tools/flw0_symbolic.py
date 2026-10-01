@@ -120,6 +120,7 @@ def _render_instruction(
     procedure_symbols: list[str],
     jump_symbols: list[str],
     command_profile: flw0_profiles.CommandProfile | None,
+    string_symbols: dict[int, str],
 ) -> tuple[str, int]:
     raw = words[pc].raw
     opcode = raw & 0xFFFF
@@ -139,6 +140,8 @@ def _render_instruction(
         return f"  {name} {procedure_symbols[operand]}", pc + 1
     if opcode in _JUMP_LABEL_OPCODES and operand < len(jump_symbols):
         return f"  {name} {jump_symbols[operand]}", pc + 1
+    if opcode == flw0.OPCODE_IDS["PUSHTYPE5"] and operand in string_symbols:
+        return f"  {name} {string_symbols[operand]}", pc + 1
     if opcode == _COMMAND_OPCODE and command_profile is not None:
         command = command_profile.by_id.get(operand)
         if command is not None:
@@ -170,6 +173,9 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     jump_symbols = [
         _unique_symbol(row.name, "label", row.row_index, used) for row in jump_labels
     ]
+    string_lines, string_symbols = flw0._render_string_payload(
+        script.section_bytes(script.sections[4]), flw0._type5_offsets(script), used
+    )
     symbols_at_pc: dict[int, list[str]] = {}
     for row, symbol in zip(procedures, procedure_symbols):
         symbols_at_pc.setdefault(row.start_pc, []).append(symbol)
@@ -214,7 +220,12 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
         for symbol in symbols_at_pc.get(pc, ()):
             lines.append(f"{symbol}:")
         instruction, next_pc = _render_instruction(
-            words, pc, procedure_symbols, jump_symbols, command_profile
+            words,
+            pc,
+            procedure_symbols,
+            jump_symbols,
+            command_profile,
+            string_symbols,
         )
         lines.append(instruction)
         pc = next_pc
@@ -230,7 +241,7 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
     lines.extend(("end", "", "messages"))
     lines.extend(_raw_block(script.section_bytes(script.sections[3])))
     lines.extend(("end", "", "strings"))
-    lines.extend(_raw_block(script.section_bytes(script.sections[4])))
+    lines.extend(string_lines)
     lines.append("end")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -278,6 +289,7 @@ def _parse_code(
     procedures: list[Declaration],
     jump_labels: list[Declaration],
     command_profile: flw0_profiles.CommandProfile | None,
+    string_symbols: dict[str, int],
 ) -> tuple[bytes, dict[str, int]]:
     words: list[int | SymbolReference] = []
     labels: dict[str, int] = {}
@@ -324,6 +336,18 @@ def _parse_code(
                 f"line {line_number}: {mnemonic} takes one value"
             )
         operand_text = tokens[1]
+        if opcode == flw0.OPCODE_IDS["PUSHTYPE5"] and _SYMBOL.fullmatch(operand_text):
+            if operand_text not in string_symbols:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: unknown string {operand_text!r}"
+                )
+            offset = string_symbols[operand_text]
+            if offset >= 1 << 16:
+                raise flw0.Flw0Error(
+                    f"line {line_number}: string offset does not fit in 16 bits"
+                )
+            words.append((offset << 16) | opcode)
+            continue
         if opcode == _COMMAND_OPCODE and _SYMBOL.fullmatch(operand_text):
             if command_profile is None:
                 raise flw0.Flw0Error(
@@ -469,13 +493,13 @@ def parse(text: str) -> flw0.Flw0File:
         raise flw0.Flw0Error("procedure and jump-label symbols must be unique")
 
     command_profile = _get_profile(*profile_record) if profile_record else None
+    string_data, string_symbols = flw0._parse_string_payload(blocks["strings"])
     code, labels = _parse_code(
-        blocks["code"], procedures, jump_labels, command_profile
+        blocks["code"], procedures, jump_labels, command_profile, string_symbols
     )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
     message_data = _parse_raw_block(blocks["messages"])
-    string_data = _parse_raw_block(blocks["strings"])
     payloads = (
         procedure_data,
         jump_label_data,

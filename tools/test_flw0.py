@@ -260,6 +260,101 @@ end
         self.assertEqual(len(grown.to_bytes()), len(script.to_bytes()) + 4)
         self.assertIn("PUSHIS -1", flw0_symbolic.render(grown))
 
+    def test_symbolic_strings_relocate_named_type5_operands(self) -> None:
+        source = """\
+flw0 2
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  PROC main
+  PUSHTYPE5 camera
+  PUSHTYPE5 camera_2
+  END
+end
+messages
+end
+strings
+  string camera "cam01" # first copy
+  string camera_2 "cam01"
+  zero 3
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            [word.operand_u16 for word in script.code_words()[1:3]], [0, 6]
+        )
+        self.assertEqual(
+            script.section_bytes(script.sections[4]), b"cam01\0cam01\0\0\0\0"
+        )
+        rendered = flw0_symbolic.render(script)
+        self.assertIn('string cam01 "cam01"', rendered)
+        self.assertIn('string cam01_2 "cam01"', rendered)
+        self.assertEqual(flw0.parse_source(rendered).to_bytes(), script.to_bytes())
+
+        grown = flw0.parse_source(
+            source.replace('camera "cam01" # first copy', 'camera "camera01"')
+        )
+        self.assertEqual(
+            [word.operand_u16 for word in grown.code_words()[1:3]], [0, 9]
+        )
+
+    def test_symbolic_string_falls_back_for_opaque_reference(self) -> None:
+        source = """\
+flw0 2
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=0 float=0
+procedure main
+code
+main:
+  PROC main
+  PUSHTYPE5 0x0001
+  END
+end
+messages
+end
+strings
+  bytes ff0000
+end
+"""
+        script = flw0.parse_source(source)
+        rendered = flw0_symbolic.render(script)
+        self.assertIn("PUSHTYPE5 0x0001", rendered)
+        self.assertIn("bytes ff0000", rendered)
+        self.assertEqual(flw0.parse_source(rendered).to_bytes(), script.to_bytes())
+
+        with self.assertRaisesRegex(flw0.Flw0Error, "unknown string 'missing'"):
+            flw0.parse_source(source.replace("PUSHTYPE5 0x0001", "PUSHTYPE5 missing"))
+
+    def test_physical_source_names_strings_past_logical_type4_end(self) -> None:
+        path = TOOLS.parent / "src/dds1/scripts/event/e503.bfasm"
+        script = flw0.parse_source(path.read_text(encoding="utf-8"))
+        rendered = flw0.render_source(script, "dds1")
+        self.assertIn("section 4 type=4 stride=0x1 count=48", rendered)
+        self.assertIn("extent=0x174", rendered)
+        self.assertIn('string Camera01_MOTION "Camera01_MOTION"', rendered)
+        self.assertIn("PUSHTYPE5 Camera01_MOTION", rendered)
+        self.assertEqual(flw0.parse_source(rendered).to_bytes(), script.to_bytes())
+        without_extent = rendered.replace(" extent=0x174", "")
+        with self.assertRaisesRegex(flw0.Flw0Error, "exceeds declared extent"):
+            flw0.parse_source(without_extent)
+
+    def test_physical_named_strings_require_one_type4_section(self) -> None:
+        source = """\
+flw0 1
+header word00=0 declared_size=0 word0c=0 int_locals=0 float_locals=0 word18=0 word1c=0 physical_size=0x42
+section 0 type=4 stride=1 count=0 offset=0
+end
+section 1 type=4 stride=1 count=0 offset=0x40 extent=2
+  string value "x"
+end
+"""
+        with self.assertRaisesRegex(
+            flw0.Flw0Error, "named strings require exactly one type-4 section"
+        ):
+            flw0.parse_source(source)
+
     def test_symbolic_source_rejects_unresolved_names(self) -> None:
         source = """\
 flw0 2
