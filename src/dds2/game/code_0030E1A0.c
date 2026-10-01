@@ -347,11 +347,74 @@ void func_0030FA28(float *out, float *left, float *right) {
     out[2] = a.x * b.y - a.y * b.x;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FAF0);
+/* Rotate rows 1 and 2 of the matrix about the X axis by `angle`. */
+void func_0030FAF0(SdfMat4 *mat, f32 angle) {
+    SdfMat4 r;
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FD50);
+    r.m[0] = mat->m[0];
+    r.m[1] = mat->m[1];
+    r.m[2] = mat->m[2];
+    r.m[3] = mat->m[3];
+    r.m[4] = mat->m[4] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[8] * sdfSinPoly(angle);
+    r.m[5] = mat->m[5] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[9] * sdfSinPoly(angle);
+    r.m[6] = mat->m[6] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[10] * sdfSinPoly(angle);
+    r.m[7] = mat->m[7] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[11] * sdfSinPoly(angle);
+    r.m[8] = mat->m[4] * -sdfSinPoly(angle) + mat->m[8] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[9] = mat->m[5] * -sdfSinPoly(angle) + mat->m[9] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[10] = mat->m[6] * -sdfSinPoly(angle) + mat->m[10] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[11] = mat->m[7] * -sdfSinPoly(angle) + mat->m[11] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[12] = mat->m[12];
+    r.m[13] = mat->m[13];
+    r.m[14] = mat->m[14];
+    r.m[15] = mat->m[15];
+    *mat = r;
+}
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030FFB0);
+/* Rotate rows 0 and 2 of the matrix about the Y axis by `angle`. */
+void func_0030FD50(SdfMat4 *mat, f32 angle) {
+    SdfMat4 r;
+
+    r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[8] * -sdfSinPoly(angle);
+    r.m[1] = mat->m[1] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[9] * -sdfSinPoly(angle);
+    r.m[2] = mat->m[2] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[10] * -sdfSinPoly(angle);
+    r.m[3] = mat->m[3] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[11] * -sdfSinPoly(angle);
+    r.m[4] = mat->m[4];
+    r.m[5] = mat->m[5];
+    r.m[6] = mat->m[6];
+    r.m[7] = mat->m[7];
+    r.m[8] = mat->m[0] * sdfSinPoly(angle) + mat->m[8] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[9] = mat->m[1] * sdfSinPoly(angle) + mat->m[9] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[10] = mat->m[2] * sdfSinPoly(angle) + mat->m[10] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[11] = mat->m[3] * sdfSinPoly(angle) + mat->m[11] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[12] = mat->m[12];
+    r.m[13] = mat->m[13];
+    r.m[14] = mat->m[14];
+    r.m[15] = mat->m[15];
+    *mat = r;
+}
+
+/* Rotate rows 0 and 1 of the matrix about the Z axis by `angle`. */
+void func_0030FFB0(SdfMat4 *mat, f32 angle) {
+    SdfMat4 r;
+
+    r.m[0] = mat->m[0] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[4] * sdfSinPoly(angle);
+    r.m[1] = mat->m[1] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[5] * sdfSinPoly(angle);
+    r.m[2] = mat->m[2] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[6] * sdfSinPoly(angle);
+    r.m[3] = mat->m[3] * sdfEvaluateCosineViaSinePhaseShift(angle) + mat->m[7] * sdfSinPoly(angle);
+    r.m[4] = mat->m[0] * -sdfSinPoly(angle) + mat->m[4] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[5] = mat->m[1] * -sdfSinPoly(angle) + mat->m[5] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[6] = mat->m[2] * -sdfSinPoly(angle) + mat->m[6] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[7] = mat->m[3] * -sdfSinPoly(angle) + mat->m[7] * sdfEvaluateCosineViaSinePhaseShift(angle);
+    r.m[8] = mat->m[8];
+    r.m[9] = mat->m[9];
+    r.m[10] = mat->m[10];
+    r.m[11] = mat->m[11];
+    r.m[12] = mat->m[12];
+    r.m[13] = mat->m[13];
+    r.m[14] = mat->m[14];
+    r.m[15] = mat->m[15];
+    *mat = r;
+}
 
 /* Transpose through a local copy so source and destination may alias. */
 void sdfTransposeMatrix(SdfMat4 *dst, SdfMat4 *src) {
