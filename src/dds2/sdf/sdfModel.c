@@ -335,17 +335,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     );
     sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->transformed;
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "sqc2 vf28, 0(%0)        \n"
-        "sqc2 vf29, 16(%0)       \n"
-        "sqc2 vf30, 32(%0)       \n"
-        "sqc2 vf31, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (transformed)
-        : "memory"
-    );
+    VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
         func_0033AEA8(address + (frame << 7));
@@ -367,17 +357,7 @@ void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame) {
     u8 *scale;
     SdfList *list;
 
-    __asm__ volatile (
-        ".set noreorder          \n"
-        "lqc2 vf28, 0(%0)        \n"
-        "lqc2 vf29, 16(%0)       \n"
-        "lqc2 vf30, 32(%0)       \n"
-        "lqc2 vf31, 48(%0)       \n"
-        ".set reorder"
-        :
-        : "r" (transform)
-        : "memory"
-    );
+    VU0_LOAD_MATRIX(transform);
     scale = model->scaleVector;
     __asm__ volatile (
         "lqc2 vf10, 0(%0)"

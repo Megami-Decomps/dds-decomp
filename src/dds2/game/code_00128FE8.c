@@ -1185,14 +1185,7 @@ void fldProjectPointSetup(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003846F0) : "memory");
+    VU0_LOAD_MATRIX_MEMORY(D_003846F0);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F610);
     __asm__ volatile (
         ".set noreorder\n"
@@ -1236,14 +1229,7 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_00384790) : "memory");
+    VU0_LOAD_MATRIX_MEMORY(D_00384790);
     sdfPostmultiplyVuMatrixFromMemory(D_0037F9B0);
     __asm__ volatile (
         ".set noreorder\n"
@@ -1285,14 +1271,7 @@ void fldProjectPointSetupAlt(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
 void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003846F0) : "memory");
+    VU0_LOAD_MATRIX_MEMORY(D_003846F0);
     matrix = D_0037F610;
     sdfPostmultiplyVuMatrixFromMemory(matrix);
     __asm__ volatile (
@@ -1650,14 +1629,7 @@ void fldSubmitModelPacket(s32 textureId, u8 *modelData) {
     sdfConsInitDmaPacketHeader(header, sdfTexGetPrimaryBuffer(textureId), sdfTexGetPrimaryBufferSize(textureId));
     sdfAppendReferencePacket(command, header);
     func_003365B8(((FldModelPacketInput *)modelData)->angle);
-    __asm__ volatile(
-        ".set noreorder\n"
-        "sqc2 vf28, 0(%0)\n"
-        "sqc2 vf29, 16(%0)\n"
-        "sqc2 vf30, 32(%0)\n"
-        "sqc2 vf31, 48(%0)\n"
-        ".set reorder"
-        : : "r"(mat) : "memory");
+    VU0_STORE_MATRIX(mat);
     packet = sdfAllocPacketAligned(0x38);
     sdfInitGeometryDmaPacket(packet, mat);
     sdfAppendPacket(command, packet);
