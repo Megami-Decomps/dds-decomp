@@ -2285,7 +2285,7 @@ ai_1:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
     SET_MODEL_FLAG(3041)
-    COMM 0x0032
+    AI_SELECT_WAIT()
     AI_APPEND_SELF_TO_TARGETS()
   }
 _1:
@@ -2389,22 +2389,17 @@ _9:
         return
       } else {
       _16:
-        push TEST_MODEL_FLAG(3044) == 1
-        push 1
-        COMM 0x01a3
-        PUSHREG
-        EQ
-        AND
-        IF _17
-        CLEAR_MODEL_FLAG(3044)
-        AI_SELECT_SKILL(384)
-        COMM 0x003c
-        return
-        goto _13
-      _17:
-        AI_SELECT_TABLE_ACTION()
-        return
-        goto _13
+        if (AI_CONTEXT_FLAG_TWO_SET() == 1 && TEST_MODEL_FLAG(3044) == 1) {
+          CLEAR_MODEL_FLAG(3044)
+          AI_SELECT_SKILL(384)
+          COMM 0x003c
+          return
+        } else {
+        _17:
+          AI_SELECT_TABLE_ACTION()
+          return
+          goto _13
+        }
       }
     }
   }
@@ -2439,174 +2434,160 @@ _18:
     CLEAR_MODEL_FLAG(3044)
   }
 _22:
-  push TEST_MODEL_FLAG(3044) == 1
-  push AI_ACTOR_HISTORY_COUNTER() == 0
-  push 1
-  COMM 0x01a0
-  PUSHREG
-  EQ
-  AND
-  OR
-  IF _39
-  if (TEST_MODEL_FLAG(3042) == 0) {
-    if (TEST_MODEL_FLAG(3050) == 0) {
-      AI_CLEAR_SCENE_TRANSITION()
-      AI_SET_CAMERA_BLEND_START(float32(280.5, bits=0x438c4000), -float32(115.0, bits=0x42e60000), -float32(64.30000305175781, bits=0x4280999a), float32(0.08500000089406967, bits=0x3dae147b), float32(0.4519999921321869, bits=0x3ee76c8b), float32(0.03500000014901161, bits=0x3d0f5c29), float32(0.8769999742507935, bits=0x3f608312))
-      AI_SET_CAMERA_BLEND_END(float32(301.8999938964844, bits=0x4396f333), -float32(111.80000305175781, bits=0x42df999a), -float32(10.199999809265137, bits=0x41233333), float32(0.0820000022649765, bits=0x3da7ef9e), float32(0.5230000019073486, bits=0x3f05e354), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.8370000123977661, bits=0x3f5645a2))
-      AI_RUN_CAMERA_BLEND(40, 25)
-      ACTIVATE_MESSAGE_PANEL()
-      MESSAGE_REQUEST_AND_POLL(message(KAMA01_01))
-      AI_QUEUE_UNBOUND_COMMAND_SOUND()
-      MESSAGE_REQUEST_AND_POLL(message(KAMA01_01_02))
-      FINISH_SCRIPT_MESSAGE_WINDOW()
-      AI_BEGIN_SCENE_TRANSITION()
-      SET_MODEL_FLAG(3050)
-    }
-  _24:
-    AI_SELECT_SKILL(55)
-    AI_SELECT_ACTION_TARGETS()
-    SET_MODEL_FLAG(3044)
-    SET_MODEL_FLAG(3042)
-    return
-  } else {
-  _37:
-    if_not (TEST_MODEL_FLAG(3043) == 0) goto _38
-    local_int[4] = RANDOM_ONE_TO(100)
-    if (local_int[4] <= 85 && TEST_MODEL_FLAG(3045) == 0) {
-      AI_SELECT_SKILL(4)
+  if (AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000() == 1 && AI_ACTOR_HISTORY_COUNTER() == 0 || TEST_MODEL_FLAG(3044) == 1) {
+    if (TEST_MODEL_FLAG(3042) == 0) {
+      if (TEST_MODEL_FLAG(3050) == 0) {
+        AI_CLEAR_SCENE_TRANSITION()
+        AI_SET_CAMERA_BLEND_START(float32(280.5, bits=0x438c4000), -float32(115.0, bits=0x42e60000), -float32(64.30000305175781, bits=0x4280999a), float32(0.08500000089406967, bits=0x3dae147b), float32(0.4519999921321869, bits=0x3ee76c8b), float32(0.03500000014901161, bits=0x3d0f5c29), float32(0.8769999742507935, bits=0x3f608312))
+        AI_SET_CAMERA_BLEND_END(float32(301.8999938964844, bits=0x4396f333), -float32(111.80000305175781, bits=0x42df999a), -float32(10.199999809265137, bits=0x41233333), float32(0.0820000022649765, bits=0x3da7ef9e), float32(0.5230000019073486, bits=0x3f05e354), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.8370000123977661, bits=0x3f5645a2))
+        AI_RUN_CAMERA_BLEND(40, 25)
+        ACTIVATE_MESSAGE_PANEL()
+        MESSAGE_REQUEST_AND_POLL(message(KAMA01_01))
+        AI_QUEUE_UNBOUND_COMMAND_SOUND()
+        MESSAGE_REQUEST_AND_POLL(message(KAMA01_01_02))
+        FINISH_SCRIPT_MESSAGE_WINDOW()
+        AI_BEGIN_SCENE_TRANSITION()
+        SET_MODEL_FLAG(3050)
+      }
+    _24:
+      AI_SELECT_SKILL(55)
       AI_SELECT_ACTION_TARGETS()
-      SET_MODEL_FLAG(3043)
-      SET_MODEL_FLAG(3045)
+      SET_MODEL_FLAG(3044)
+      SET_MODEL_FLAG(3042)
       return
     } else {
-    _27:
-      if (local_int[4] <= 85 && TEST_MODEL_FLAG(3045) == 1) {
-        AI_SELECT_SKILL(13)
+    _37:
+      if_not (TEST_MODEL_FLAG(3043) == 0) goto _38
+      local_int[4] = RANDOM_ONE_TO(100)
+      if (local_int[4] <= 85 && TEST_MODEL_FLAG(3045) == 0) {
+        AI_SELECT_SKILL(4)
         AI_SELECT_ACTION_TARGETS()
         SET_MODEL_FLAG(3043)
-        CLEAR_MODEL_FLAG(3045)
+        SET_MODEL_FLAG(3045)
         return
       } else {
-      _28:
-        if (local_int[4] <= 90) {
-          AI_SELECT_SKILL(183)
+      _27:
+        if (local_int[4] <= 85 && TEST_MODEL_FLAG(3045) == 1) {
+          AI_SELECT_SKILL(13)
           AI_SELECT_ACTION_TARGETS()
           SET_MODEL_FLAG(3043)
+          CLEAR_MODEL_FLAG(3045)
           return
         } else {
-        _29:
-          if (local_int[4] <= 95) {
-            AI_SELECT_SKILL(181)
+        _28:
+          if (local_int[4] <= 90) {
+            AI_SELECT_SKILL(183)
             AI_SELECT_ACTION_TARGETS()
             SET_MODEL_FLAG(3043)
             return
           } else {
-          _30:
-            if (local_int[4] <= 100) {
-              AI_SELECT_SKILL(184)
+          _29:
+            if (local_int[4] <= 95) {
+              AI_SELECT_SKILL(181)
               AI_SELECT_ACTION_TARGETS()
               SET_MODEL_FLAG(3043)
               return
+            } else {
+            _30:
+              if (local_int[4] <= 100) {
+                AI_SELECT_SKILL(184)
+                AI_SELECT_ACTION_TARGETS()
+                SET_MODEL_FLAG(3043)
+                return
+              }
             }
           }
         }
       }
-    }
-  _26:
-    goto _36
-  _38:
-    local_int[4] = RANDOM_ONE_TO(100)
-    if (local_int[4] <= 70) {
-      AI_SELECT_SKILL(422)
-      AI_SELECT_ACTION_TARGETS()
-      return
-    } else {
-    _33:
-      if (local_int[4] <= 90) {
-        AI_SELECT_SKILL(116)
+    _26:
+      goto _36
+    _38:
+      local_int[4] = RANDOM_ONE_TO(100)
+      if (local_int[4] <= 70) {
+        AI_SELECT_SKILL(422)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
-      _34:
-        if (local_int[4] <= 100) {
-          AI_SELECT_BASIC_ATTACK()
+      _33:
+        if (local_int[4] <= 90) {
+          AI_SELECT_SKILL(116)
           AI_SELECT_ACTION_TARGETS()
-          return
-        }
-      }
-    }
-  _32:
-    goto _36
-  }
-_36:
-  return
-  goto _39
-_39:
-  push 0
-  COMM 0x01a0
-  PUSHREG
-  EQ
-  push AI_UNIT_HP_AT_OR_BELOW_RATE(99) == 1
-  AND
-  IF _52
-  if (TEST_MODEL_FLAG(3040) == 0) {
-    local_int[3] = local_int[3] + 5
-    local_int[2] = local_int[2] + local_int[3]
-  }
-_41:
-  if (local_int[2] > 100 - 40 && AI_ACTOR_HISTORY_COUNTER() == 0 || TEST_MODEL_FLAG(3041) == 1) {
-    if (TEST_MODEL_FLAG(3042) == 0) {
-      AI_SELECT_SKILL(55)
-      AI_SELECT_ACTION_TARGETS()
-      SET_MODEL_FLAG(3041)
-      SET_MODEL_FLAG(3042)
-      return
-    } else {
-    _48:
-      if (TEST_MODEL_FLAG(3043) == 0) {
-        AI_SELECT_SKILL(391)
-        AI_SELECT_ACTION_TARGETS()
-        SET_MODEL_FLAG(3043)
-        return
-      } else {
-      _49:
-        local_int[4] = RANDOM_ONE_TO(100)
-        if (local_int[4] <= 85 || TEST_MODEL_FLAG(3040) == 0) {
-          AI_SELECT_SKILL(422)
-          AI_SELECT_ACTION_TARGETS()
-          SET_MODEL_FLAG(3043)
-          SET_MODEL_FLAG(3040)
           return
         } else {
-        _44:
-          if (local_int[4] <= 95) {
-            AI_SELECT_SKILL(116)
+        _34:
+          if (local_int[4] <= 100) {
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_ACTION_TARGETS()
+            return
+          }
+        }
+      }
+    _32:
+      goto _36
+    }
+  _36:
+    return
+  }
+_39:
+  if (AI_UNIT_HP_AT_OR_BELOW_RATE(99) == 1 && AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000() == 0) {
+    if (TEST_MODEL_FLAG(3040) == 0) {
+      local_int[3] = local_int[3] + 5
+      local_int[2] = local_int[2] + local_int[3]
+    }
+  _41:
+    if (local_int[2] > 100 - 40 && AI_ACTOR_HISTORY_COUNTER() == 0 || TEST_MODEL_FLAG(3041) == 1) {
+      if (TEST_MODEL_FLAG(3042) == 0) {
+        AI_SELECT_SKILL(55)
+        AI_SELECT_ACTION_TARGETS()
+        SET_MODEL_FLAG(3041)
+        SET_MODEL_FLAG(3042)
+        return
+      } else {
+      _48:
+        if (TEST_MODEL_FLAG(3043) == 0) {
+          AI_SELECT_SKILL(391)
+          AI_SELECT_ACTION_TARGETS()
+          SET_MODEL_FLAG(3043)
+          return
+        } else {
+        _49:
+          local_int[4] = RANDOM_ONE_TO(100)
+          if (local_int[4] <= 85 || TEST_MODEL_FLAG(3040) == 0) {
+            AI_SELECT_SKILL(422)
             AI_SELECT_ACTION_TARGETS()
             SET_MODEL_FLAG(3043)
             SET_MODEL_FLAG(3040)
             return
           } else {
-          _45:
-            if (local_int[4] <= 100) {
-              AI_SELECT_BASIC_ATTACK()
+          _44:
+            if (local_int[4] <= 95) {
+              AI_SELECT_SKILL(116)
               AI_SELECT_ACTION_TARGETS()
               SET_MODEL_FLAG(3043)
               SET_MODEL_FLAG(3040)
               return
+            } else {
+            _45:
+              if (local_int[4] <= 100) {
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_ACTION_TARGETS()
+                SET_MODEL_FLAG(3043)
+                SET_MODEL_FLAG(3040)
+                return
+              }
             }
           }
+        _43:
+          goto _47
         }
-      _43:
-        goto _47
       }
+    _47:
+      return
     }
-  _47:
+  _50:
+    AI_SELECT_TABLE_ACTION()
     return
   }
-_50:
-  AI_SELECT_TABLE_ACTION()
-  return
-  goto _52
 _52:
   AI_SELECT_TABLE_ACTION()
   return
@@ -2614,38 +2595,35 @@ AllEscape_MeriBeru:
   PROC AllEscape_MeriBeru
   if (TEST_MODEL_FLAG(2056) == 1) {
     local_int[5] = RANDOM_ONE_TO(100)
-    push 1
-    COMM 0x01a2
-    PUSHREG
-    EQ
-    IF _59
-    if (TEST_MODEL_FLAG(3040) == 1 || local_int[5] < 75) {
-      COMM 0x0031
-      AI_APPEND_SELF_TO_TARGETS()
+    if (AI_BATTLE_READY_WITH_ZERO_TURNS() == 1) {
+      if (TEST_MODEL_FLAG(3040) == 1 || local_int[5] < 75) {
+        AI_SELECT_ESCAPE()
+        AI_APPEND_SELF_TO_TARGETS()
+        return
+      } else {
+      _55:
+        AI_SELECT_TABLE_ACTION()
+        return
+        goto _54
+      }
+    _54:
       return
     } else {
-    _55:
-      AI_SELECT_TABLE_ACTION()
+    _59:
+      if (local_int[5] < 80) {
+        AI_SELECT_ESCAPE()
+        AI_APPEND_SELF_TO_TARGETS()
+        return
+      } else {
+      _57:
+        AI_SELECT_TABLE_ACTION()
+        return
+        goto _56
+      }
+    _56:
       return
-      goto _54
+      goto _58
     }
-  _54:
-    return
-    goto _58
-  _59:
-    if (local_int[5] < 80) {
-      COMM 0x0031
-      AI_APPEND_SELF_TO_TARGETS()
-      return
-    } else {
-    _57:
-      AI_SELECT_TABLE_ACTION()
-      return
-      goto _56
-    }
-  _56:
-    return
-    goto _58
   _58:
     return
   }
@@ -2655,15 +2633,11 @@ _60:
 AI_Ushasu:
   PROC AI_Ushasu
   if (TEST_MODEL_FLAG(3040) == 0 && AI_UNIT_HP_AT_OR_BELOW_RATE(75) == 0) {
-    push 1
-    COMM 0x01a3
-    PUSHREG
-    EQ
-    IF _62
-    AI_SELECT_SKILL(61)
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _62
+    if (AI_CONTEXT_FLAG_TWO_SET() == 1) {
+      AI_SELECT_SKILL(61)
+      AI_SELECT_ACTION_TARGETS()
+      return
+    }
   _62:
     AI_SELECT_TABLE_ACTION()
     return
@@ -2700,42 +2674,17 @@ AI_Ushasu:
     } else {
     _69:
       if (TEST_MODEL_FLAG(3044) == 0 && local_int[7] < 40 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1)) {
-        push 301
-        push 203
-        COMM 0x00e2
+        AI_SELECT_ACTION_BY_KIND(203, 301)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _70:
-        push TEST_MODEL_FLAG(3042) == 1 && local_int[6] < 20 || TEST_MODEL_FLAG(3043) == 1 && local_int[6] < 95
-        push AI_ENEMY_HAS_ACTION(428) == 1
-        push 0
-        push 8
-        COMM 0x0081
-        PUSHREG
-        EQ
-        push 0
-        push 32
-        COMM 0x0081
-        PUSHREG
-        EQ
-        push 0
-        push 16
-        COMM 0x0081
-        PUSHREG
-        EQ
-        push TEST_MODEL_FLAG(3044) == 0
-        AND
-        AND
-        AND
-        AND
-        AND
-        IF _68
-        SET_MODEL_FLAG(3044)
-        AI_SELECT_SKILL(428)
-        AI_SELECT_ACTION_TARGETS()
-        return
-        goto _68
+        if (TEST_MODEL_FLAG(3044) == 0 && AI_ANY_ENEMY_HAS_ACTION_MASK(16) == 0 && AI_ANY_ENEMY_HAS_ACTION_MASK(32) == 0 && AI_ANY_ENEMY_HAS_ACTION_MASK(8) == 0 && AI_ENEMY_HAS_ACTION(428) == 1 && (TEST_MODEL_FLAG(3042) == 1 && local_int[6] < 20 || TEST_MODEL_FLAG(3043) == 1 && local_int[6] < 95)) {
+          SET_MODEL_FLAG(3044)
+          AI_SELECT_SKILL(428)
+          AI_SELECT_ACTION_TARGETS()
+          return
+        }
       }
     }
   _68:
@@ -2753,17 +2702,13 @@ AI_Apisu:
     if (TEST_MODEL_FLAG(3042) == 0) {
       if (TEST_MODEL_FLAG(3041) == 0) {
         SET_MODEL_FLAG(3041)
-        push 71
-        push 195
-        COMM 0x00e2
+        AI_SELECT_ACTION_BY_KIND(195, 71)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
       _75:
         SET_MODEL_FLAG(3042)
-        push 71
-        push 195
-        COMM 0x00e2
+        AI_SELECT_ACTION_BY_KIND(195, 71)
         AI_SELECT_ACTION_TARGETS()
         return
         goto _74
@@ -2772,9 +2717,7 @@ AI_Apisu:
       return
     } else {
     _77:
-      push 70
-      push 195
-      COMM 0x00e2
+      AI_SELECT_ACTION_BY_KIND(195, 70)
       AI_SELECT_ACTION_TARGETS()
       return
       goto _76
@@ -2788,96 +2731,83 @@ _78:
   return
 AI_Onkotto:
   PROC AI_Onkotto
-  push 0
-  COMM 0x01a0
-  PUSHREG
-  EQ
-  push AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1
-  AND
-  IF _87
-  local_int[9] = RANDOM_ONE_TO(100)
-  if (TEST_MODEL_FLAG(3040) == 0) {
-    local_int[10] = local_int[10] + 5
-    local_int[9] = local_int[9] + local_int[10]
-    return
-  }
-_80:
-  if (local_int[9] > 100 - 40 || TEST_MODEL_FLAG(3041) == 1) {
-    if (TEST_MODEL_FLAG(3042) == 0) {
-      AI_SELECT_SKILL(55)
-      AI_SELECT_ACTION_TARGETS()
-      SET_MODEL_FLAG(3041)
-      SET_MODEL_FLAG(3042)
+  if (AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1 && AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000() == 0) {
+    local_int[9] = RANDOM_ONE_TO(100)
+    if (TEST_MODEL_FLAG(3040) == 0) {
+      local_int[10] = local_int[10] + 5
+      local_int[9] = local_int[9] + local_int[10]
       return
-    } else {
-    _83:
-      if (TEST_MODEL_FLAG(3043) == 0) {
-        AI_SELECT_SKILL(183)
+    }
+  _80:
+    if (local_int[9] > 100 - 40 || TEST_MODEL_FLAG(3041) == 1) {
+      if (TEST_MODEL_FLAG(3042) == 0) {
+        AI_SELECT_SKILL(55)
         AI_SELECT_ACTION_TARGETS()
-        SET_MODEL_FLAG(3043)
+        SET_MODEL_FLAG(3041)
+        SET_MODEL_FLAG(3042)
         return
       } else {
-      _84:
-        AI_SELECT_SKILL(130)
-        AI_SELECT_ACTION_TARGETS()
-        SET_MODEL_FLAG(3040)
-        CLEAR_MODEL_FLAG(3041)
-        CLEAR_MODEL_FLAG(3042)
-        CLEAR_MODEL_FLAG(3043)
-        return
-        goto _82
+      _83:
+        if (TEST_MODEL_FLAG(3043) == 0) {
+          AI_SELECT_SKILL(183)
+          AI_SELECT_ACTION_TARGETS()
+          SET_MODEL_FLAG(3043)
+          return
+        } else {
+        _84:
+          AI_SELECT_SKILL(130)
+          AI_SELECT_ACTION_TARGETS()
+          SET_MODEL_FLAG(3040)
+          CLEAR_MODEL_FLAG(3041)
+          CLEAR_MODEL_FLAG(3042)
+          CLEAR_MODEL_FLAG(3043)
+          return
+          goto _82
+        }
       }
+    _82:
+      return
     }
-  _82:
+  _85:
+    AI_SELECT_TABLE_ACTION()
     return
   }
-_85:
-  AI_SELECT_TABLE_ACTION()
-  return
-  goto _87
 _87:
   AI_SELECT_TABLE_ACTION()
   return
 AI_AkuEnjeru:
   PROC AI_AkuEnjeru
-  push TEST_MODEL_FLAG(3041) == 1
-  push 1
-  push 8
-  COMM 0x01ad
-  PUSHREG
-  EQ
-  OR
-  IF _93
-  if (TEST_MODEL_FLAG(3042) == 0) {
-    SET_MODEL_FLAG(3041)
-    SET_MODEL_FLAG(3042)
-    AI_SELECT_SKILL(134)
-    AI_SELECT_ACTION_TARGETS()
-    return
-  } else {
-  _92:
-    CLEAR_MODEL_FLAG(3041)
-    CLEAR_MODEL_FLAG(3042)
-    local_int[11] = RANDOM_ONE_TO(100)
-    if (local_int[11] < 50) {
+  if (AI_ANY_ENEMY_CURRENT_ACTION_MATCHES(8) == 1 || TEST_MODEL_FLAG(3041) == 1) {
+    if (TEST_MODEL_FLAG(3042) == 0) {
+      SET_MODEL_FLAG(3041)
+      SET_MODEL_FLAG(3042)
       AI_SELECT_SKILL(134)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _90:
-      AI_SELECT_SKILL(130)
-      AI_SELECT_ACTION_TARGETS()
+    _92:
+      CLEAR_MODEL_FLAG(3041)
+      CLEAR_MODEL_FLAG(3042)
+      local_int[11] = RANDOM_ONE_TO(100)
+      if (local_int[11] < 50) {
+        AI_SELECT_SKILL(134)
+        AI_SELECT_ACTION_TARGETS()
+        return
+      } else {
+      _90:
+        AI_SELECT_SKILL(130)
+        AI_SELECT_ACTION_TARGETS()
+        return
+        goto _89
+      }
+    _89:
       return
-      goto _89
+      goto _91
     }
-  _89:
+  _91:
+    AI_SELECT_TABLE_ACTION()
     return
-    goto _91
   }
-_91:
-  AI_SELECT_TABLE_ACTION()
-  return
-  goto _93
 _93:
   AI_SELECT_TABLE_ACTION()
   return
@@ -2912,66 +2842,52 @@ _95:
     CLEAR_MODEL_FLAG(3047)
   }
 _99:
-  push TEST_MODEL_FLAG(3044) == 1 && TEST_MODEL_FLAG(3049) == 0
-  push AI_ACTOR_HISTORY_COUNTER() == 0
-  push TEST_MODEL_FLAG(3049) == 0
-  push 0
-  COMM 0x01a0
-  PUSHREG
-  EQ
-  AND
-  AND
-  OR
-  IF _107
-  if (TEST_MODEL_FLAG(3042) == 0) {
-    AI_SELECT_SKILL(56)
-    AI_SELECT_ACTION_TARGETS()
-    SET_MODEL_FLAG(3044)
-    SET_MODEL_FLAG(3042)
-    return
-  } else {
-  _102:
-    if (TEST_MODEL_FLAG(3043) == 0) {
-      AI_SELECT_SKILL(422)
+  if (AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000() == 0 && TEST_MODEL_FLAG(3049) == 0 && AI_ACTOR_HISTORY_COUNTER() == 0 || TEST_MODEL_FLAG(3044) == 1 && TEST_MODEL_FLAG(3049) == 0) {
+    if (TEST_MODEL_FLAG(3042) == 0) {
+      AI_SELECT_SKILL(56)
       AI_SELECT_ACTION_TARGETS()
-      SET_MODEL_FLAG(3043)
+      SET_MODEL_FLAG(3044)
+      SET_MODEL_FLAG(3042)
       return
     } else {
-    _103:
-      if (TEST_MODEL_FLAG(3046) == 0) {
-        push 324
-        push 204
-        COMM 0x00e2
+    _102:
+      if (TEST_MODEL_FLAG(3043) == 0) {
+        AI_SELECT_SKILL(422)
         AI_SELECT_ACTION_TARGETS()
-        SET_MODEL_FLAG(3046)
+        SET_MODEL_FLAG(3043)
         return
       } else {
-      _104:
-        if (TEST_MODEL_FLAG(3047) == 0) {
-          push 324
-          push 204
-          COMM 0x00e2
+      _103:
+        if (TEST_MODEL_FLAG(3046) == 0) {
+          AI_SELECT_ACTION_BY_KIND(204, 324)
           AI_SELECT_ACTION_TARGETS()
-          SET_MODEL_FLAG(3047)
+          SET_MODEL_FLAG(3046)
           return
         } else {
-        _105:
-          if (TEST_MODEL_FLAG(3048) == 0) {
-            AI_SELECT_SKILL(342)
+        _104:
+          if (TEST_MODEL_FLAG(3047) == 0) {
+            AI_SELECT_ACTION_BY_KIND(204, 324)
             AI_SELECT_ACTION_TARGETS()
-            SET_MODEL_FLAG(3045)
-            SET_MODEL_FLAG(3049)
+            SET_MODEL_FLAG(3047)
             return
+          } else {
+          _105:
+            if (TEST_MODEL_FLAG(3048) == 0) {
+              AI_SELECT_SKILL(342)
+              AI_SELECT_ACTION_TARGETS()
+              SET_MODEL_FLAG(3045)
+              SET_MODEL_FLAG(3049)
+              return
+            }
           }
         }
       }
     }
+  _101:
+    return
+    AI_SELECT_TABLE_ACTION()
+    return
   }
-_101:
-  return
-  AI_SELECT_TABLE_ACTION()
-  return
-  goto _107
 _107:
   if (AI_ENEMY_COUNT_AT_MOST(1) == 1) {
     if (TEST_MODEL_FLAG(3052) == 0 && AI_ENEMY_COUNT_AT_MOST(1) == 1) {
@@ -2980,7 +2896,7 @@ _107:
       ACTIVATE_MESSAGE_PANEL()
       MESSAGE_REQUEST_AND_POLL(message(KAMA02_03))
       FINISH_SCRIPT_MESSAGE_WINDOW()
-      COMM 0x01d1
+      AI_CLEAR_SPECIAL_ENEMY_ENTRY_FLAGS()
       WAIT_FOR_TIMER_LIMIT(15)
       AI_QUEUE_ACTOR_COMMAND_SOUND()
       ACTIVATE_MESSAGE_PANEL()
@@ -3035,13 +2951,7 @@ _107:
     return
   }
 _120:
-  push TEST_MODEL_FLAG(3049) == 1
-  push 1
-  COMM 0x01a0
-  PUSHREG
-  EQ
-  AND
-  IF _129
+  if_not (AI_ACTOR_AVAILABLE_WITH_STAT_FLAG_2000() == 1 && TEST_MODEL_FLAG(3049) == 1) goto _129
   if (TEST_MODEL_FLAG(3050) == 0 && AI_ENEMY_COUNT_AT_MOST(1) == 0) {
     AI_CLEAR_SCENE_TRANSITION()
     AI_SET_CAMERA_BLEND_START(-float32(534.0, bits=0x44058000), -float32(25.299999237060547, bits=0x41ca6666), float32(772.2999877929688, bits=0x44411333), -float32(0.02199999988079071, bits=0x3cb43958), -float32(0.949999988079071, bits=0x3f733333), float32(0.05900000035762787, bits=0x3d71a9fc), float32(0.2720000147819519, bits=0x3e8b4396))
@@ -3262,18 +3172,7 @@ AI_Keruberosu_Left:
     SET_MODEL_FLAG(3041)
   }
 _169:
-  push 0
-  push 302
-  COMM 0x0085
-  PUSHREG
-  EQ
-  push 0
-  push 266
-  COMM 0x0085
-  PUSHREG
-  EQ
-  AND
-  IF _173
+  if_not (AI_HAS_OTHER_ENEMY_UNIT_MODE(266) == 0 && AI_HAS_OTHER_ENEMY_UNIT_MODE(302) == 0) goto _173
   if (AI_ANY_PLAYER_PASSES_QUERY(2) == 1) {
     SET_MODEL_FLAG(3056)
   } else {
@@ -3284,89 +3183,45 @@ _169:
 _171:
   goto _173
 _173:
-  push AI_ENEMY_HAS_ACTION(427) == 1
-  push AI_ENEMY_COUNT_AT_MOST(2) == 0
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3041) == 1 && local_int[17] < 20
-  AND
-  AND
-  AND
-  IF _176
-  AI_SELECT_SKILL(427)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _175
-_176:
-  push AI_ENEMY_HAS_ACTION(430) == 1
-  push AI_ENEMY_COUNT_AT_MOST(1) == 0
-  push AI_ENEMY_COUNT_AT_MOST(2) == 1
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3041) == 1 && local_int[17] < 20
-  AND
-  AND
-  AND
-  AND
-  IF _177
-  AI_SELECT_SKILL(430)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _175
-_177:
-  push AI_UNIT_HP_AT_OR_BELOW_RATE(30) == 1
-  push 1
-  push 50
-  COMM 0x007c
-  PUSHREG
-  EQ
-  OR
-  push local_int[17] < 30
-  AND
-  IF _178
-  AI_SELECT_SKILL(161)
-  COMM 0x015b
-  return
-  goto _175
-_178:
-  push 1
-  push 302
-  COMM 0x0085
-  PUSHREG
-  EQ
-  push AI_SCENE_FADE_COUNT() == 1
-  AND
-  push local_int[17] < 30
-  OR
-  IF _179
-  AI_SELECT_SKILL(161)
-  COMM 0x01b1
-  return
-  goto _175
-_179:
-  push local_int[17] < 30 + 30
-  push 0
-  push 302
-  COMM 0x0085
-  PUSHREG
-  EQ
-  AND
-  IF _180
-  AI_SELECT_SKILL(426)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _175
-_180:
-  AI_SELECT_SKILL(62)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _175
+  if (TEST_MODEL_FLAG(3041) == 1 && local_int[17] < 20 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_COUNT_AT_MOST(2) == 0 && AI_ENEMY_HAS_ACTION(427) == 1) {
+    AI_SELECT_SKILL(427)
+    AI_SELECT_ACTION_TARGETS()
+    return
+  } else {
+  _176:
+    if (TEST_MODEL_FLAG(3041) == 1 && local_int[17] < 20 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_COUNT_AT_MOST(2) == 1 && AI_ENEMY_COUNT_AT_MOST(1) == 0 && AI_ENEMY_HAS_ACTION(430) == 1) {
+      AI_SELECT_SKILL(430)
+      AI_SELECT_ACTION_TARGETS()
+      return
+    } else {
+    _177:
+      if (local_int[17] < 30 && (AI_BOSS_HP_AT_OR_BELOW_RATE(50) == 1 || AI_UNIT_HP_AT_OR_BELOW_RATE(30) == 1)) {
+        AI_SELECT_SKILL(161)
+        AI_SELECT_LOWEST_LEVEL_TARGET()
+        return
+      } else {
+      _178:
+        if (local_int[17] < 30 || AI_SCENE_FADE_COUNT() == 1 && AI_HAS_OTHER_ENEMY_UNIT_MODE(302) == 1) {
+          AI_SELECT_SKILL(161)
+          AI_SELECT_OTHER_TARGET_OR_SELF()
+          return
+        } else {
+        _179:
+          if (AI_HAS_OTHER_ENEMY_UNIT_MODE(302) == 0 && local_int[17] < 30 + 30) {
+            AI_SELECT_SKILL(426)
+            AI_SELECT_ACTION_TARGETS()
+            return
+          } else {
+          _180:
+            AI_SELECT_SKILL(62)
+            AI_SELECT_ACTION_TARGETS()
+            return
+            goto _175
+          }
+        }
+      }
+    }
+  }
 _175:
   AI_SELECT_TABLE_ACTION()
   return
@@ -3381,17 +3236,13 @@ AI_Keruberosu_Right:
     goto _181
   }
 _181:
-  push 0
-  push 3
-  COMM 0x019b
-  PUSHREG
-  EQ
-  IF _184
-  SET_MODEL_FLAG(3045)
-  goto _183
-_184:
-  CLEAR_MODEL_FLAG(3045)
-  goto _183
+  if (AI_ANY_ENEMY_PASSES_QUERY(3) == 0) {
+    SET_MODEL_FLAG(3045)
+  } else {
+  _184:
+    CLEAR_MODEL_FLAG(3045)
+    goto _183
+  }
 _183:
   if (AI_ANY_ENEMY_ACTION_MODE_ZERO(12) == 1) {
     SET_MODEL_FLAG(3051)
@@ -3449,111 +3300,73 @@ _195:
     goto _197
   }
 _197:
-  push AI_ENEMY_HAS_ACTION(427) == 1
-  push AI_ENEMY_COUNT_AT_MOST(2) == 0
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3041) == 1 && local_int[18] < 20
-  AND
-  AND
-  AND
-  IF _200
-  AI_SELECT_SKILL(427)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _199
-_200:
-  push AI_ENEMY_HAS_ACTION(430) == 1
-  push AI_ENEMY_COUNT_AT_MOST(1) == 0
-  push AI_ENEMY_COUNT_AT_MOST(2) == 1
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3041) == 1 && local_int[18] < 20
-  AND
-  AND
-  AND
-  AND
-  IF _201
-  AI_SELECT_SKILL(430)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _199
-_201:
-  push local_int[18] < 50 || TEST_MODEL_FLAG(3044) == 0
-  push 0
-  push 303
-  COMM 0x0085
-  PUSHREG
-  EQ
-  push 0
-  push 302
-  COMM 0x0085
-  PUSHREG
-  EQ
-  AND
-  AND
-  push TEST_MODEL_FLAG(3044) == 0 && TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0
-  OR
-  push AI_SCENE_FADE_COUNT() == 1
-  AND
-  IF _202
-  AI_SELECT_SKILL(394)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _199
-_202:
-  if (TEST_MODEL_FLAG(3045) == 1 && (TEST_MODEL_FLAG(3041) == 0 || local_int[18] < 15)) {
-    AI_SELECT_SKILL(357)
+  if (TEST_MODEL_FLAG(3041) == 1 && local_int[18] < 20 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_COUNT_AT_MOST(2) == 0 && AI_ENEMY_HAS_ACTION(427) == 1) {
+    AI_SELECT_SKILL(427)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
-  _203:
-    if (TEST_MODEL_FLAG(3044) == 1 && (TEST_MODEL_FLAG(3051) == 1 || local_int[18] < 15 + 10)) {
-      AI_SELECT_SKILL(180)
+  _200:
+    if (TEST_MODEL_FLAG(3041) == 1 && local_int[18] < 20 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_COUNT_AT_MOST(2) == 1 && AI_ENEMY_COUNT_AT_MOST(1) == 0 && AI_ENEMY_HAS_ACTION(430) == 1) {
+      AI_SELECT_SKILL(430)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _204:
-      if (TEST_MODEL_FLAG(3046) == 1 && (local_int[18] < 15 + 10 + 10 || TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
-        AI_SELECT_SKILL(177)
+    _201:
+      if (AI_SCENE_FADE_COUNT() == 1 && (TEST_MODEL_FLAG(3044) == 0 && TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0 || AI_HAS_OTHER_ENEMY_UNIT_MODE(302) == 0 && AI_HAS_OTHER_ENEMY_UNIT_MODE(303) == 0 && (local_int[18] < 50 || TEST_MODEL_FLAG(3044) == 0))) {
+        AI_SELECT_SKILL(394)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
-      _205:
-        if (TEST_MODEL_FLAG(3047) == 1 && (local_int[18] < 15 + 10 + 10 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
-          AI_SELECT_SKILL(178)
+      _202:
+        if (TEST_MODEL_FLAG(3045) == 1 && (TEST_MODEL_FLAG(3041) == 0 || local_int[18] < 15)) {
+          AI_SELECT_SKILL(357)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
-        _206:
-          if (TEST_MODEL_FLAG(3048) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
-            AI_SELECT_SKILL(181)
+        _203:
+          if (TEST_MODEL_FLAG(3044) == 1 && (TEST_MODEL_FLAG(3051) == 1 || local_int[18] < 15 + 10)) {
+            AI_SELECT_SKILL(180)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
-          _207:
-            if (TEST_MODEL_FLAG(3049) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
-              AI_SELECT_SKILL(184)
+          _204:
+            if (TEST_MODEL_FLAG(3046) == 1 && (local_int[18] < 15 + 10 + 10 || TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
+              AI_SELECT_SKILL(177)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
-            _208:
-              if (TEST_MODEL_FLAG(3050) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 + 15 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0)) {
-                AI_SELECT_SKILL(183)
+            _205:
+              if (TEST_MODEL_FLAG(3047) == 1 && (local_int[18] < 15 + 10 + 10 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
+                AI_SELECT_SKILL(178)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
-              _209:
-                AI_SELECT_SKILL(67)
-                AI_SELECT_ACTION_TARGETS()
-                return
-                goto _199
+              _206:
+                if (TEST_MODEL_FLAG(3048) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3049) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
+                  AI_SELECT_SKILL(181)
+                  AI_SELECT_ACTION_TARGETS()
+                  return
+                } else {
+                _207:
+                  if (TEST_MODEL_FLAG(3049) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3050) == 0)) {
+                    AI_SELECT_SKILL(184)
+                    AI_SELECT_ACTION_TARGETS()
+                    return
+                  } else {
+                  _208:
+                    if (TEST_MODEL_FLAG(3050) == 1 && (local_int[18] < 15 + 10 + 10 + 15 + 20 + 15 + 15 || TEST_MODEL_FLAG(3046) == 0 && TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3049) == 0)) {
+                      AI_SELECT_SKILL(183)
+                      AI_SELECT_ACTION_TARGETS()
+                      return
+                    } else {
+                    _209:
+                      AI_SELECT_SKILL(67)
+                      AI_SELECT_ACTION_TARGETS()
+                      return
+                      goto _199
+                    }
+                  }
+                }
               }
             }
           }
@@ -3567,12 +3380,7 @@ _199:
 AI_Keruberosu_Center:
   PROC AI_Keruberosu_Center
   local_int[19] = RANDOM_ONE_TO(100)
-  push 0
-  push 266
-  COMM 0x0085
-  PUSHREG
-  EQ
-  IF _212
+  if_not (AI_HAS_OTHER_ENEMY_UNIT_MODE(266) == 0) goto _212
   if (AI_ANY_PLAYER_PASSES_QUERY(2) == 1) {
     SET_MODEL_FLAG(3056)
   } else {
@@ -3633,31 +3441,23 @@ _222:
   goto _227
 _228:
   local_int[20] = RANDOM_ONE_TO(100)
-  push AI_ENEMY_HAS_ACTION(427) == 1
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push local_int[20] <= 50 && TEST_MODEL_FLAG(3041) == 1
-  AND
-  AND
-  IF _225
-  AI_SELECT_SKILL(427)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _224
-_225:
-  if (local_int[20] <= 50) {
-    AI_SELECT_SKILL(2)
+  if (local_int[20] <= 50 && TEST_MODEL_FLAG(3041) == 1 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_HAS_ACTION(427) == 1) {
+    AI_SELECT_SKILL(427)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
-  _226:
-    AI_SELECT_SKILL(5)
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _224
+  _225:
+    if (local_int[20] <= 50) {
+      AI_SELECT_SKILL(2)
+      AI_SELECT_ACTION_TARGETS()
+      return
+    } else {
+    _226:
+      AI_SELECT_SKILL(5)
+      AI_SELECT_ACTION_TARGETS()
+      return
+      goto _224
+    }
   }
 _224:
   goto _227
@@ -3732,37 +3532,29 @@ _240:
   goto _246
 _247:
   local_int[20] = RANDOM_ONE_TO(100)
-  push AI_ENEMY_HAS_ACTION(430) == 1
-  push 0
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  push local_int[20] <= 40 && TEST_MODEL_FLAG(3041) == 1
-  AND
-  AND
-  IF _243
-  AI_SELECT_SKILL(430)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _242
-_243:
-  if (local_int[20] <= 40) {
-    AI_SELECT_SKILL(2)
+  if (local_int[20] <= 40 && TEST_MODEL_FLAG(3041) == 1 && AI_ANY_PLAYER_BLOCKS_ELEMENT(2) == 0 && AI_ENEMY_HAS_ACTION(430) == 1) {
+    AI_SELECT_SKILL(430)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
-  _244:
-    if (local_int[20] <= 60) {
-      AI_SELECT_SKILL(5)
+  _243:
+    if (local_int[20] <= 40) {
+      AI_SELECT_SKILL(2)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _245:
-      AI_SELECT_SKILL(3)
-      AI_SELECT_ACTION_TARGETS()
-      return
-      goto _242
+    _244:
+      if (local_int[20] <= 60) {
+        AI_SELECT_SKILL(5)
+        AI_SELECT_ACTION_TARGETS()
+        return
+      } else {
+      _245:
+        AI_SELECT_SKILL(3)
+        AI_SELECT_ACTION_TARGETS()
+        return
+        goto _242
+      }
     }
   }
 _242:
@@ -4197,19 +3989,11 @@ _312:
     return
   } else {
   _316:
-    push 397
-    COMM 0x01c8
-    PUSHREG
-    push 1
-    COMM 0x01a3
-    PUSHREG
-    EQ
-    OR
-    IF _315
-    AI_SELECT_BASIC_ATTACK()
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _315
+    if (AI_CONTEXT_FLAG_TWO_SET() == 1 || AI_ANY_ENEMY_HAS_QUEUED_ACTION(397)) {
+      AI_SELECT_BASIC_ATTACK()
+      AI_SELECT_ACTION_TARGETS()
+      return
+    }
   }
 _315:
   if_not (local_int[31] <= 30) goto _329
@@ -4248,14 +4032,7 @@ _331:
 _324:
   goto _328
 _332:
-  push 502
-  COMM 0x01c9
-  PUSHREG
-  push 365
-  COMM 0x01c9
-  PUSHREG
-  OR
-  IF _328
+  if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(365) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(502)) goto _328
   if (local_int[31] <= 60) {
     AI_SELECT_TABLE_ACTION()
     return
@@ -4342,9 +4119,7 @@ _342:
   return
 m2_kerupi:
   PROC m2_kerupi
-  COMM 0x01b7
-  PUSHREG
-  POPLIX 0x0020
+  local_int[32] = AI_BATTLE_PHASE()
   if (local_int[32] == 0) {
     local_int[32] = RANDOM_ONE_TO(100)
     if (local_int[32] <= 50) {
@@ -4375,23 +4150,16 @@ m2_kerupi:
       return
     }
   _348:
-    push 6
-    COMM 0x01bb
-    PUSHREG
-    IF _355
-    push 1
-    push 6
-    COMM 0x019b
-    PUSHREG
-    EQ
-    IF _351
-    AI_SELECT_SKILL(123)
-    AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(32767)
-    goto _350
-  _351:
-    AI_SELECT_SKILL(341)
-    AI_SELECT_ACTION_TARGETS()
-    goto _350
+    if_not (AI_ANY_PLAYER_CURRENT_ACTION_MATCHES(6)) goto _355
+    if (AI_ANY_ENEMY_PASSES_QUERY(6) == 1) {
+      AI_SELECT_SKILL(123)
+      AI_SELECT_TARGETS_WITHOUT_ACTION_MASK(32767)
+    } else {
+    _351:
+      AI_SELECT_SKILL(341)
+      AI_SELECT_ACTION_TARGETS()
+      goto _350
+    }
   _350:
     goto _354
   _355:
@@ -4466,9 +4234,7 @@ _366:
   return
 m2_nue:
   PROC m2_nue
-  COMM 0x01b7
-  PUSHREG
-  POPLIX 0x0021
+  local_int[33] = AI_BATTLE_PHASE()
   if (local_int[33] == 0) {
     if_not (AI_ANY_PLAYER_NOT_ACTION_MODE_ZERO(7) == 1) goto _373
     local_int[33] = RANDOM_ONE_TO(100)
@@ -4583,9 +4349,7 @@ _394:
   return
 m2_onkot:
   PROC m2_onkot
-  COMM 0x01b7
-  PUSHREG
-  POPLIX 0x0022
+  local_int[34] = AI_BATTLE_PHASE()
   if (local_int[34] == 0) {
     local_int[34] = RANDOM_ONE_TO(100)
     if (local_int[34] <= 50) {
@@ -4843,46 +4607,40 @@ AI_RAFU1:
     }
   }
 _451:
-  push 0
-  push 1
-  COMM 0x007f
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3047) == 0 && AI_EFFECT_ACTIVE() == 1
-  AND
-  IF _456
-  AI_CLEAR_SCENE_TRANSITION()
-  AI_SET_CAMERA_BLEND_START(float32(122.5, bits=0x42f50000), -float32(192.89999389648438, bits=0x4340e666), -float32(222.89999389648438, bits=0x435ee666), -float32(0.1720000058412552, bits=0x3e3020c5), float32(0.14499999582767487, bits=0x3e147ae1), -float32(0.03700000047683716, bits=0x3d178d50), float32(0.9649999737739563, bits=0x3f770a3d))
-  AI_SET_CAMERA_BLEND_END(float32(131.0, bits=0x43030000), -float32(79.9000015258789, bits=0x429fcccd), -float32(257.70001220703125, bits=0x4380d99a), -float32(0.2240000069141388, bits=0x3e656042), float32(0.14399999380111694, bits=0x3e1374bc), -float32(0.04399999976158142, bits=0x3d343958), float32(0.9539999961853027, bits=0x3f743958))
-  AI_RUN_CAMERA_BLEND(40, 15)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(RAFU_01))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  AI_BEGIN_SCENE_TRANSITION()
-  SET_MODEL_FLAG(3047)
-  SET_MODEL_FLAG(3046)
-  AI_SELECT_SKILL(393)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _455
-_456:
-  if (TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3046) == 1 && AI_EFFECT_ACTIVE() == 1) {
+  if (TEST_MODEL_FLAG(3047) == 0 && AI_EFFECT_ACTIVE() == 1 && AI_PLAYER_COUNT_AT_MOST(1) == 0) {
     AI_CLEAR_SCENE_TRANSITION()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
+    AI_SET_CAMERA_BLEND_START(float32(122.5, bits=0x42f50000), -float32(192.89999389648438, bits=0x4340e666), -float32(222.89999389648438, bits=0x435ee666), -float32(0.1720000058412552, bits=0x3e3020c5), float32(0.14499999582767487, bits=0x3e147ae1), -float32(0.03700000047683716, bits=0x3d178d50), float32(0.9649999737739563, bits=0x3f770a3d))
+    AI_SET_CAMERA_BLEND_END(float32(131.0, bits=0x43030000), -float32(79.9000015258789, bits=0x429fcccd), -float32(257.70001220703125, bits=0x4380d99a), -float32(0.2240000069141388, bits=0x3e656042), float32(0.14399999380111694, bits=0x3e1374bc), -float32(0.04399999976158142, bits=0x3d343958), float32(0.9539999961853027, bits=0x3f743958))
+    AI_RUN_CAMERA_BLEND(40, 15)
     ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(RAFU_02))
-    AI_SET_CAMERA_BLEND_START(-float32(330.79998779296875, bits=0x43a56666), -float32(55.79999923706055, bits=0x425f3333), -float32(255.1999969482422, bits=0x437f3333), -float32(0.16099999845027924, bits=0x3e24dd2f), -float32(0.31700000166893005, bits=0x3ea24dd3), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.9240000247955322, bits=0x3f6c8b44))
-    AI_SET_CAMERA_BLEND_END(-float32(269.5, bits=0x4386c000), -float32(154.3000030517578, bits=0x431a4ccd), -float32(151.60000610351562, bits=0x4317999a), -float32(0.18799999356269836, bits=0x3e408312), -float32(0.3149999976158142, bits=0x3ea147ae), float32(0.050999999046325684, bits=0x3d50e560), float32(0.9190000295639038, bits=0x3f6b4396))
-    AI_RUN_CAMERA_BLEND(40, 10)
-    MESSAGE_REQUEST_AND_POLL(message(RAFU_02_02))
+    MESSAGE_REQUEST_AND_POLL(message(RAFU_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    SET_MODEL_FLAG(3048)
-    SET_MODEL_FLAG(3040)
-    SET_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(56)
+    SET_MODEL_FLAG(3047)
+    SET_MODEL_FLAG(3046)
+    AI_SELECT_SKILL(393)
     AI_SELECT_ACTION_TARGETS()
     return
+  } else {
+  _456:
+    if (TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3046) == 1 && AI_EFFECT_ACTIVE() == 1) {
+      AI_CLEAR_SCENE_TRANSITION()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(RAFU_02))
+      AI_SET_CAMERA_BLEND_START(-float32(330.79998779296875, bits=0x43a56666), -float32(55.79999923706055, bits=0x425f3333), -float32(255.1999969482422, bits=0x437f3333), -float32(0.16099999845027924, bits=0x3e24dd2f), -float32(0.31700000166893005, bits=0x3ea24dd3), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.9240000247955322, bits=0x3f6c8b44))
+      AI_SET_CAMERA_BLEND_END(-float32(269.5, bits=0x4386c000), -float32(154.3000030517578, bits=0x431a4ccd), -float32(151.60000610351562, bits=0x4317999a), -float32(0.18799999356269836, bits=0x3e408312), -float32(0.3149999976158142, bits=0x3ea147ae), float32(0.050999999046325684, bits=0x3d50e560), float32(0.9190000295639038, bits=0x3f6b4396))
+      AI_RUN_CAMERA_BLEND(40, 10)
+      MESSAGE_REQUEST_AND_POLL(message(RAFU_02_02))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_BEGIN_SCENE_TRANSITION()
+      SET_MODEL_FLAG(3048)
+      SET_MODEL_FLAG(3040)
+      SET_MODEL_FLAG(3045)
+      AI_SELECT_SKILL(56)
+      AI_SELECT_ACTION_TARGETS()
+      return
+    }
   }
 _455:
   if_not (AI_ENEMY_COUNT_AT_MOST(1) && AI_EFFECT_ACTIVE() == 0) goto _463
@@ -4920,7 +4678,7 @@ _463:
   _464:
     if (AI_EFFECT_ACTIVE() == 0) {
       AI_SELECT_SKILL(369)
-      COMM 0x01c4
+      AI_APPEND_EFFECT_ACTOR_TO_TARGETS()
       return
     }
   }
@@ -4951,8 +4709,7 @@ _462:
 _466:
   if (TEST_MODEL_FLAG(3045) == 1 && TEST_MODEL_FLAG(3040) == 1 && AI_EFFECT_ACTIVE() == 1) {
     AI_SELECT_SKILL(161)
-    push 263
-    COMM 0x0037
+    AI_SELECT_TARGET_BY_ID(263)
     SET_MODEL_FLAG(3041)
     CLEAR_MODEL_FLAG(3040)
     return
@@ -5050,30 +4807,24 @@ _483:
     return
   } else {
   _486:
-    push 0
-    push 1
-    COMM 0x007f
-    PUSHREG
-    EQ
-    push TEST_MODEL_FLAG(3045) == 0 && local_int[40] <= local_int[37] && AI_EFFECT_ACTIVE() == 1
-    AND
-    IF _487
-    SET_MODEL_FLAG(3046)
-    AI_SELECT_SKILL(393)
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _485
-  _487:
-    if (local_int[40] <= local_int[38] && AI_EFFECT_ACTIVE() == 1) {
-      AI_SELECT_SKILL(392)
+    if (TEST_MODEL_FLAG(3045) == 0 && local_int[40] <= local_int[37] && AI_EFFECT_ACTIVE() == 1 && AI_PLAYER_COUNT_AT_MOST(1) == 0) {
+      SET_MODEL_FLAG(3046)
+      AI_SELECT_SKILL(393)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _488:
-      AI_SELECT_BASIC_ATTACK()
-      AI_SELECT_ACTION_TARGETS()
-      return
-      goto _485
+    _487:
+      if (local_int[40] <= local_int[38] && AI_EFFECT_ACTIVE() == 1) {
+        AI_SELECT_SKILL(392)
+        AI_SELECT_ACTION_TARGETS()
+        return
+      } else {
+      _488:
+        AI_SELECT_BASIC_ATTACK()
+        AI_SELECT_ACTION_TARGETS()
+        return
+        goto _485
+      }
     }
   }
 _485:
@@ -5112,46 +4863,40 @@ AI_RAFU2:
     }
   }
 _489:
-  push 0
-  push 1
-  COMM 0x007f
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3047) == 0 && AI_EFFECT_ACTIVE() == 1
-  AND
-  IF _494
-  AI_CLEAR_SCENE_TRANSITION()
-  AI_SET_CAMERA_BLEND_START(float32(122.5, bits=0x42f50000), -float32(192.89999389648438, bits=0x4340e666), -float32(222.89999389648438, bits=0x435ee666), -float32(0.1720000058412552, bits=0x3e3020c5), float32(0.14499999582767487, bits=0x3e147ae1), -float32(0.03700000047683716, bits=0x3d178d50), float32(0.9649999737739563, bits=0x3f770a3d))
-  AI_SET_CAMERA_BLEND_END(float32(131.0, bits=0x43030000), -float32(79.9000015258789, bits=0x429fcccd), -float32(257.70001220703125, bits=0x4380d99a), -float32(0.2240000069141388, bits=0x3e656042), float32(0.14399999380111694, bits=0x3e1374bc), -float32(0.04399999976158142, bits=0x3d343958), float32(0.9539999961853027, bits=0x3f743958))
-  AI_RUN_CAMERA_BLEND(40, 15)
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(RAFU_01))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  AI_BEGIN_SCENE_TRANSITION()
-  SET_MODEL_FLAG(3047)
-  SET_MODEL_FLAG(3046)
-  AI_SELECT_SKILL(393)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _493
-_494:
-  if (TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3046) == 1 && AI_EFFECT_ACTIVE() == 1) {
+  if (TEST_MODEL_FLAG(3047) == 0 && AI_EFFECT_ACTIVE() == 1 && AI_PLAYER_COUNT_AT_MOST(1) == 0) {
     AI_CLEAR_SCENE_TRANSITION()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
+    AI_SET_CAMERA_BLEND_START(float32(122.5, bits=0x42f50000), -float32(192.89999389648438, bits=0x4340e666), -float32(222.89999389648438, bits=0x435ee666), -float32(0.1720000058412552, bits=0x3e3020c5), float32(0.14499999582767487, bits=0x3e147ae1), -float32(0.03700000047683716, bits=0x3d178d50), float32(0.9649999737739563, bits=0x3f770a3d))
+    AI_SET_CAMERA_BLEND_END(float32(131.0, bits=0x43030000), -float32(79.9000015258789, bits=0x429fcccd), -float32(257.70001220703125, bits=0x4380d99a), -float32(0.2240000069141388, bits=0x3e656042), float32(0.14399999380111694, bits=0x3e1374bc), -float32(0.04399999976158142, bits=0x3d343958), float32(0.9539999961853027, bits=0x3f743958))
+    AI_RUN_CAMERA_BLEND(40, 15)
     ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(RAFU_02))
-    AI_SET_CAMERA_BLEND_START(-float32(330.79998779296875, bits=0x43a56666), -float32(55.79999923706055, bits=0x425f3333), -float32(255.1999969482422, bits=0x437f3333), -float32(0.16099999845027924, bits=0x3e24dd2f), -float32(0.31700000166893005, bits=0x3ea24dd3), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.9240000247955322, bits=0x3f6c8b44))
-    AI_SET_CAMERA_BLEND_END(-float32(269.5, bits=0x4386c000), -float32(154.3000030517578, bits=0x431a4ccd), -float32(151.60000610351562, bits=0x4317999a), -float32(0.18799999356269836, bits=0x3e408312), -float32(0.3149999976158142, bits=0x3ea147ae), float32(0.050999999046325684, bits=0x3d50e560), float32(0.9190000295639038, bits=0x3f6b4396))
-    AI_RUN_CAMERA_BLEND(40, 10)
-    MESSAGE_REQUEST_AND_POLL(message(RAFU_02_02))
+    MESSAGE_REQUEST_AND_POLL(message(RAFU_01))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    SET_MODEL_FLAG(3048)
-    SET_MODEL_FLAG(3040)
-    SET_MODEL_FLAG(3045)
-    AI_SELECT_SKILL(56)
+    SET_MODEL_FLAG(3047)
+    SET_MODEL_FLAG(3046)
+    AI_SELECT_SKILL(393)
     AI_SELECT_ACTION_TARGETS()
     return
+  } else {
+  _494:
+    if (TEST_MODEL_FLAG(3048) == 0 && TEST_MODEL_FLAG(3046) == 1 && AI_EFFECT_ACTIVE() == 1) {
+      AI_CLEAR_SCENE_TRANSITION()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(RAFU_02))
+      AI_SET_CAMERA_BLEND_START(-float32(330.79998779296875, bits=0x43a56666), -float32(55.79999923706055, bits=0x425f3333), -float32(255.1999969482422, bits=0x437f3333), -float32(0.16099999845027924, bits=0x3e24dd2f), -float32(0.31700000166893005, bits=0x3ea24dd3), float32(0.041999999433755875, bits=0x3d2c0831), float32(0.9240000247955322, bits=0x3f6c8b44))
+      AI_SET_CAMERA_BLEND_END(-float32(269.5, bits=0x4386c000), -float32(154.3000030517578, bits=0x431a4ccd), -float32(151.60000610351562, bits=0x4317999a), -float32(0.18799999356269836, bits=0x3e408312), -float32(0.3149999976158142, bits=0x3ea147ae), float32(0.050999999046325684, bits=0x3d50e560), float32(0.9190000295639038, bits=0x3f6b4396))
+      AI_RUN_CAMERA_BLEND(40, 10)
+      MESSAGE_REQUEST_AND_POLL(message(RAFU_02_02))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_BEGIN_SCENE_TRANSITION()
+      SET_MODEL_FLAG(3048)
+      SET_MODEL_FLAG(3040)
+      SET_MODEL_FLAG(3045)
+      AI_SELECT_SKILL(56)
+      AI_SELECT_ACTION_TARGETS()
+      return
+    }
   }
 _493:
   if_not (AI_ENEMY_COUNT_AT_MOST(1)) goto _500
@@ -5209,8 +4954,7 @@ _500:
 _502:
   if (TEST_MODEL_FLAG(3045) == 1 && TEST_MODEL_FLAG(3040) == 1 && AI_EFFECT_ACTIVE() == 1) {
     AI_SELECT_SKILL(161)
-    push 263
-    COMM 0x0037
+    AI_SELECT_TARGET_BY_ID(263)
     SET_MODEL_FLAG(3041)
     CLEAR_MODEL_FLAG(3040)
     return
@@ -5308,29 +5052,23 @@ _519:
     return
   } else {
   _522:
-    push 0
-    push 1
-    COMM 0x007f
-    PUSHREG
-    EQ
-    push TEST_MODEL_FLAG(3045) == 0 && local_int[46] <= local_int[43] && AI_EFFECT_ACTIVE() == 1
-    AND
-    IF _523
-    SET_MODEL_FLAG(3046)
-    AI_SELECT_SKILL(393)
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _521
-  _523:
-    if (local_int[46] <= local_int[44] && AI_EFFECT_ACTIVE() == 1) {
-      AI_SELECT_SKILL(392)
+    if (TEST_MODEL_FLAG(3045) == 0 && local_int[46] <= local_int[43] && AI_EFFECT_ACTIVE() == 1 && AI_PLAYER_COUNT_AT_MOST(1) == 0) {
+      SET_MODEL_FLAG(3046)
+      AI_SELECT_SKILL(393)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _524:
-      AI_SELECT_TABLE_ACTION()
-      return
-      goto _521
+    _523:
+      if (local_int[46] <= local_int[44] && AI_EFFECT_ACTIVE() == 1) {
+        AI_SELECT_SKILL(392)
+        AI_SELECT_ACTION_TARGETS()
+        return
+      } else {
+      _524:
+        AI_SELECT_TABLE_ACTION()
+        return
+        goto _521
+      }
     }
   }
 _521:
@@ -5353,31 +5091,21 @@ AI_Hanuman:
           AI_SELECT_SKILL(181)
         } else {
         _528:
-          push 0
-          push int32(2097150)
-          COMM 0x019b
-          PUSHREG
-          EQ
-          push local_int[47] < 20 + 20 + 20
-          AND
-          IF _529
-          AI_SELECT_SKILL(353)
-          goto _525
-        _529:
-          if (local_int[47] < 20 + 20 + 20 + 20 && AI_ENEMY_COUNT_AT_MOST(2) == 1) {
-            push 4
-            push 195
-            COMM 0x00e2
+          if (local_int[47] < 20 + 20 + 20 && AI_ANY_ENEMY_PASSES_QUERY(int32(2097150)) == 0) {
+            AI_SELECT_SKILL(353)
           } else {
-          _530:
-            if (local_int[47] < 20 + 20 + 20 + 20 + 20 && AI_ENEMY_COUNT_AT_MOST(2) == 1) {
-              push 78
-              push 195
-              COMM 0x00e2
+          _529:
+            if (local_int[47] < 20 + 20 + 20 + 20 && AI_ENEMY_COUNT_AT_MOST(2) == 1) {
+              AI_SELECT_ACTION_BY_KIND(195, 4)
             } else {
-            _531:
-              AI_SELECT_BASIC_ATTACK()
-              goto _525
+            _530:
+              if (local_int[47] < 20 + 20 + 20 + 20 + 20 && AI_ENEMY_COUNT_AT_MOST(2) == 1) {
+                AI_SELECT_ACTION_BY_KIND(195, 78)
+              } else {
+              _531:
+                AI_SELECT_BASIC_ATTACK()
+                goto _525
+              }
             }
           }
         }
@@ -5402,72 +5130,54 @@ neazu_s:
     goto _534
   }
 _534:
-  push 65
-  COMM 0x007c
-  PUSHREG
-  push AI_UNIT_HP_AT_OR_BELOW_RATE(10)
-  OR
-  push local_int[49] < 30
-  AND
-  IF _541
-  AI_SELECT_SKILL(161)
-  COMM 0x007d
-  return
-  goto _540
-_541:
-  push 1
-  COMM 0x01a6
-  PUSHREG
-  push 4
-  SUB
-  COMM AI_ENEMY_COUNT_AT_MOST
-  PUSHREG
-  EQ
-  push local_int[49] < 30 + 25
-  AND
-  IF _542
-  push 285
-  push 195
-  COMM 0x00e2
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _540
-_542:
-  if (local_int[49] < 30 + 25 + 35) {
-    AI_SELECT_SKILL(12)
-    push 3
-    COMM 0x00e7
+  if (local_int[49] < 30 && (AI_UNIT_HP_AT_OR_BELOW_RATE(10) || AI_BOSS_HP_AT_OR_BELOW_RATE(65))) {
+    AI_SELECT_SKILL(161)
+    AI_SELECT_LOWEST_HP_RATE_TARGET()
     return
   } else {
-  _543:
-    if (local_int[49] < 30 + 25 + 35 + 5) {
-      AI_SELECT_SKILL(112)
-      if (TEST_MODEL_FLAG(3056) == 1) {
-        AI_SELECT_TARGETS_WITH_ACTION_MASK(4)
-        return
-      } else {
-      _537:
-        AI_SELECT_ACTION_TARGETS()
-        return
-        goto _536
-      }
-    _536:
+  _541:
+    if (local_int[49] < 30 + 25 && AI_ENEMY_COUNT_AT_MOST(4 - AI_SPECIAL_MODE_EFFECT_VALUE()) == 1) {
+      AI_SELECT_ACTION_BY_KIND(195, 285)
+      AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _544:
-      AI_SELECT_BASIC_ATTACK()
-      if (TEST_MODEL_FLAG(3056) == 1) {
-        AI_SELECT_TARGETS_WITH_ACTION_MASK(4)
+    _542:
+      if (local_int[49] < 30 + 25 + 35) {
+        AI_SELECT_SKILL(12)
+        AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT(3)
         return
       } else {
-      _539:
-        AI_SELECT_ACTION_TARGETS()
-        return
-        goto _538
+      _543:
+        if (local_int[49] < 30 + 25 + 35 + 5) {
+          AI_SELECT_SKILL(112)
+          if (TEST_MODEL_FLAG(3056) == 1) {
+            AI_SELECT_TARGETS_WITH_ACTION_MASK(4)
+            return
+          } else {
+          _537:
+            AI_SELECT_ACTION_TARGETS()
+            return
+            goto _536
+          }
+        _536:
+          return
+        } else {
+        _544:
+          AI_SELECT_BASIC_ATTACK()
+          if (TEST_MODEL_FLAG(3056) == 1) {
+            AI_SELECT_TARGETS_WITH_ACTION_MASK(4)
+            return
+          } else {
+          _539:
+            AI_SELECT_ACTION_TARGETS()
+            return
+            goto _538
+          }
+        _538:
+          return
+          goto _540
+        }
       }
-    _538:
-      return
-      goto _540
     }
   }
 _540:
@@ -5488,20 +5198,13 @@ _545:
     CLEAR_MODEL_FLAG(3049)
   }
 _547:
-  push 1
-  COMM 0x01a6
-  PUSHREG
-  push 4
-  SUB
-  COMM AI_ENEMY_COUNT_AT_MOST
-  PUSHREG
-  EQ
-  IF _550
-  SET_MODEL_FLAG(3046)
-  goto _549
-_550:
-  CLEAR_MODEL_FLAG(3046)
-  goto _549
+  if (AI_ENEMY_COUNT_AT_MOST(4 - AI_SPECIAL_MODE_EFFECT_VALUE()) == 1) {
+    SET_MODEL_FLAG(3046)
+  } else {
+  _550:
+    CLEAR_MODEL_FLAG(3046)
+    goto _549
+  }
 _549:
   if (AI_ENEMY_COUNT_AT_MOST(1) == 1) {
     SET_MODEL_FLAG(3047)
@@ -5522,156 +5225,142 @@ _551:
   }
 _553:
   local_int[50] = RANDOM_ONE_TO(100)
-  push local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1
-  push 0
-  push 0
-  COMM 0x019b
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3047) == 0
-  AND
-  AND
-  IF _566
-  AI_SELECT_SKILL(349)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _565
-_566:
-  if (TEST_MODEL_FLAG(3049) == 0 && (local_int[50] < 15 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1 || local_int[50] < 15 && TEST_MODEL_FLAG(3045) == 1 || TEST_MODEL_FLAG(3047) == 1 && (TEST_MODEL_FLAG(3042) == 1 || TEST_MODEL_FLAG(3043) == 1 || TEST_MODEL_FLAG(3044) == 1))) {
-    SET_MODEL_FLAG(3049)
-    AI_SELECT_SKILL(55)
+  if (TEST_MODEL_FLAG(3047) == 0 && AI_ANY_ENEMY_PASSES_QUERY(0) == 0 && (local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1)) {
+    AI_SELECT_SKILL(349)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
-  _567:
-    if (TEST_MODEL_FLAG(3046) == 1 && (local_int[50] < 30 && TEST_MODEL_FLAG(3041) == 1 || local_int[50] < 15 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1 || TEST_MODEL_FLAG(3047) == 1 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1 || TEST_MODEL_FLAG(3043) == 1 || TEST_MODEL_FLAG(3044) == 1))) {
-      push 285
-      push 195
-      COMM 0x00e2
+  _566:
+    if (TEST_MODEL_FLAG(3049) == 0 && (local_int[50] < 15 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1 || local_int[50] < 15 && TEST_MODEL_FLAG(3045) == 1 || TEST_MODEL_FLAG(3047) == 1 && (TEST_MODEL_FLAG(3042) == 1 || TEST_MODEL_FLAG(3043) == 1 || TEST_MODEL_FLAG(3044) == 1))) {
+      SET_MODEL_FLAG(3049)
+      AI_SELECT_SKILL(55)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _568:
-      if (local_int[50] < 30 && TEST_MODEL_FLAG(3041) == 1) {
-        AI_SELECT_SKILL(112)
+    _567:
+      if (TEST_MODEL_FLAG(3046) == 1 && (local_int[50] < 30 && TEST_MODEL_FLAG(3041) == 1 || local_int[50] < 15 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 && TEST_MODEL_FLAG(3044) == 1 || TEST_MODEL_FLAG(3047) == 1 && (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1 || TEST_MODEL_FLAG(3043) == 1 || TEST_MODEL_FLAG(3044) == 1))) {
+        AI_SELECT_ACTION_BY_KIND(195, 285)
         AI_SELECT_ACTION_TARGETS()
         return
       } else {
-      _569:
-        if (local_int[50] < 15 + 25 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 + 30 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 + 35 && TEST_MODEL_FLAG(3044) == 1 || local_int[50] < 15 + 30 && TEST_MODEL_FLAG(3045) == 1 || TEST_MODEL_FLAG(3049) == 1 && TEST_MODEL_FLAG(3045) == 1) {
-          if (AI_ANY_ENEMY_ACTION_MODE_ZERO(12) == 1 || AI_UNIT_ACTION_MODE_ZERO(12) == 1) {
-            AI_SELECT_SKILL(180)
-            AI_SELECT_ACTION_TARGETS()
-            return
-          } else {
-          _556:
-            if (AI_ANY_PLAYER_ACTION_MODE_ZERO(11) == 1) {
-              AI_SELECT_SKILL(185)
+      _568:
+        if (local_int[50] < 30 && TEST_MODEL_FLAG(3041) == 1) {
+          AI_SELECT_SKILL(112)
+          AI_SELECT_ACTION_TARGETS()
+          return
+        } else {
+        _569:
+          if (local_int[50] < 15 + 25 && TEST_MODEL_FLAG(3042) == 1 || local_int[50] < 10 + 30 && TEST_MODEL_FLAG(3043) == 1 || local_int[50] < 10 + 35 && TEST_MODEL_FLAG(3044) == 1 || local_int[50] < 15 + 30 && TEST_MODEL_FLAG(3045) == 1 || TEST_MODEL_FLAG(3049) == 1 && TEST_MODEL_FLAG(3045) == 1) {
+            if (AI_ANY_ENEMY_ACTION_MODE_ZERO(12) == 1 || AI_UNIT_ACTION_MODE_ZERO(12) == 1) {
+              AI_SELECT_SKILL(180)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
-            _557:
-              if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(12) == 1) {
-                AI_SELECT_SKILL(180)
+            _556:
+              if (AI_ANY_PLAYER_ACTION_MODE_ZERO(11) == 1) {
+                AI_SELECT_SKILL(185)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
-              _558:
-                if (AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0 || AI_UNIT_ACTION_MODE_ZERO(2) == 0) {
-                  AI_SELECT_SKILL(184)
+              _557:
+                if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(12) == 1) {
+                  AI_SELECT_SKILL(180)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
-                _559:
-                  if (AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0 || AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
-                    AI_SELECT_SKILL(181)
+                _558:
+                  if (AI_ANY_ENEMY_ACTION_MODE_ZERO(2) == 0 || AI_UNIT_ACTION_MODE_ZERO(2) == 0) {
+                    AI_SELECT_SKILL(184)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   } else {
-                  _560:
-                    if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(11) == 1) {
-                      AI_SELECT_SKILL(185)
+                  _559:
+                    if (AI_ANY_ENEMY_ACTION_MODE_ZERO(0) == 0 || AI_UNIT_ACTION_MODE_ZERO(0) == 0) {
+                      AI_SELECT_SKILL(181)
                       AI_SELECT_ACTION_TARGETS()
                       return
                     } else {
-                    _561:
-                      if (TEST_MODEL_FLAG(3047) == 1) {
-                        AI_SELECT_SKILL(15)
+                    _560:
+                      if (AI_ANY_PLAYER_PASSES_ACTION_CHECK(11) == 1) {
+                        AI_SELECT_SKILL(185)
                         AI_SELECT_ACTION_TARGETS()
                         return
                       } else {
-                      _562:
-                        AI_SELECT_SKILL(112)
-                        AI_SELECT_ACTION_TARGETS()
-                        return
-                        goto _555
+                      _561:
+                        if (TEST_MODEL_FLAG(3047) == 1) {
+                          AI_SELECT_SKILL(15)
+                          AI_SELECT_ACTION_TARGETS()
+                          return
+                        } else {
+                        _562:
+                          AI_SELECT_SKILL(112)
+                          AI_SELECT_ACTION_TARGETS()
+                          return
+                          goto _555
+                        }
                       }
                     }
                   }
                 }
               }
             }
-          }
-        _555:
-          return
-        } else {
-        _570:
-          if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3041) == 1 && local_int[50] < 30 + 5 + 50) {
-            SET_MODEL_FLAG(3042)
-            CLEAR_MODEL_FLAG(3041)
-            AI_SELECT_SKILL(417)
-            push 285
-            COMM 0x0037
+          _555:
             return
           } else {
-          _571:
-            if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3042) == 1 && local_int[50] < 15 + 25 + 45) {
-              SET_MODEL_FLAG(3043)
-              CLEAR_MODEL_FLAG(3042)
-              AI_SELECT_SKILL(370)
-              push 285
-              COMM 0x0037
+          _570:
+            if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3041) == 1 && local_int[50] < 30 + 5 + 50) {
+              SET_MODEL_FLAG(3042)
+              CLEAR_MODEL_FLAG(3041)
+              AI_SELECT_SKILL(417)
+              AI_SELECT_TARGET_BY_ID(285)
               return
             } else {
-            _572:
-              if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3043) == 1 && local_int[50] < 10 + 30 + 30) {
-                SET_MODEL_FLAG(3044)
-                CLEAR_MODEL_FLAG(3043)
-                AI_SELECT_SKILL(371)
-                push 285
-                COMM 0x0037
+            _571:
+              if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3042) == 1 && local_int[50] < 15 + 25 + 45) {
+                SET_MODEL_FLAG(3043)
+                CLEAR_MODEL_FLAG(3042)
+                AI_SELECT_SKILL(370)
+                AI_SELECT_TARGET_BY_ID(285)
                 return
               } else {
-              _573:
-                if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3044) == 1 && (AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 0 && local_int[50] < 10 + 35 + 25 || AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1 && local_int[50] < 10 + 35 + 25 + 30)) {
-                  SET_MODEL_FLAG(3045)
-                  CLEAR_MODEL_FLAG(3044)
-                  AI_SELECT_SKILL(372)
-                  push 285
-                  COMM 0x0037
+              _572:
+                if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3043) == 1 && local_int[50] < 10 + 30 + 30) {
+                  SET_MODEL_FLAG(3044)
+                  CLEAR_MODEL_FLAG(3043)
+                  AI_SELECT_SKILL(371)
+                  AI_SELECT_TARGET_BY_ID(285)
                   return
                 } else {
-                _574:
-                  if (TEST_MODEL_FLAG(3045) == 1 && (AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 0 && local_int[50] < 15 + 30 + 25 || AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1 && local_int[50] < 15 + 30 + 25 + 30)) {
-                    AI_SELECT_SKILL(48)
-                    AI_SELECT_ACTION_TARGETS()
+                _573:
+                  if (TEST_MODEL_FLAG(3047) == 0 && TEST_MODEL_FLAG(3044) == 1 && (AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 0 && local_int[50] < 10 + 35 + 25 || AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1 && local_int[50] < 10 + 35 + 25 + 30)) {
+                    SET_MODEL_FLAG(3045)
+                    CLEAR_MODEL_FLAG(3044)
+                    AI_SELECT_SKILL(372)
+                    AI_SELECT_TARGET_BY_ID(285)
                     return
                   } else {
-                  _575:
-                    if (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1) {
-                      AI_SELECT_BASIC_ATTACK()
+                  _574:
+                    if (TEST_MODEL_FLAG(3045) == 1 && (AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 0 && local_int[50] < 15 + 30 + 25 || AI_UNIT_HP_AT_OR_BELOW_RATE(50) == 1 && local_int[50] < 15 + 30 + 25 + 30)) {
+                      AI_SELECT_SKILL(48)
                       AI_SELECT_ACTION_TARGETS()
                       return
                     } else {
-                    _564:
-                      AI_SELECT_SKILL(420)
-                      AI_SELECT_ACTION_TARGETS()
+                    _575:
+                      if (TEST_MODEL_FLAG(3041) == 1 || TEST_MODEL_FLAG(3042) == 1) {
+                        AI_SELECT_BASIC_ATTACK()
+                        AI_SELECT_ACTION_TARGETS()
+                        return
+                      } else {
+                      _564:
+                        AI_SELECT_SKILL(420)
+                        AI_SELECT_ACTION_TARGETS()
+                        return
+                        goto _563
+                      }
+                    _563:
                       return
-                      goto _563
+                      goto _565
                     }
-                  _563:
-                    return
-                    goto _565
                   }
                 }
               }
@@ -5694,7 +5383,7 @@ karu_gard:
     } else {
     _577:
       AI_SELECT_SKILL(398)
-      COMM 0x01af
+      AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
       return
       goto _576
     }
@@ -5703,103 +5392,101 @@ karu_gard:
   } else {
   _598:
     if (AI_SCENE_FADE_COUNT() == 2) {
-      COMM 0x01c0
-      PUSHREG
-      IF _593
-      local_int[52] = RANDOM_ONE_TO(100)
-      if (local_int[52] <= 80) {
-        if (AI_UNIT_HP_AT_OR_BELOW_RATE(50)) {
-          AI_SELECT_SKILL(59)
-          AI_SELECT_ACTION_TARGETS()
+      if (AI_ALL_PLAYERS_HAVE_FLAG_1000()) {
+        local_int[52] = RANDOM_ONE_TO(100)
+        if (local_int[52] <= 80) {
+          if (AI_UNIT_HP_AT_OR_BELOW_RATE(50)) {
+            AI_SELECT_SKILL(59)
+            AI_SELECT_ACTION_TARGETS()
+            return
+          } else {
+          _579:
+            AI_SELECT_SKILL(58)
+            AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
+            return
+            goto _578
+          }
+        _578:
           return
         } else {
-        _579:
-          AI_SELECT_SKILL(58)
-          COMM 0x01c1
-          return
-          goto _578
+        _581:
+          if (local_int[52] <= 90) {
+            AI_SELECT_SKILL(398)
+            AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
+            return
+          } else {
+          _582:
+            AI_SELECT_SKILL(382)
+            AI_SELECT_ACTION_TARGETS()
+            return
+            goto _580
+          }
         }
-      _578:
+      _580:
         return
       } else {
-      _581:
-        if (local_int[52] <= 90) {
-          AI_SELECT_SKILL(398)
-          COMM 0x01af
+      _593:
+        if (AI_ALL_PLAYERS_LACK_FLAG_1000()) {
+          local_int[52] = RANDOM_ONE_TO(100)
+          if (AI_UNIT_HP_AT_OR_BELOW_RATE(50)) {
+            if (local_int[52] <= 90) {
+              AI_SELECT_SKILL(398)
+              AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
+              return
+            } else {
+            _584:
+              AI_SELECT_SKILL(382)
+              AI_SELECT_ACTION_TARGETS()
+              return
+              goto _583
+            }
+          _583:
+            return
+          } else {
+          _588:
+            if (local_int[52] <= 50) {
+              AI_SELECT_SKILL(398)
+              AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
+              return
+            } else {
+            _586:
+              AI_SELECT_SKILL(382)
+              AI_SELECT_ACTION_TARGETS()
+              return
+              goto _585
+            }
+          _585:
+            return
+            goto _587
+          }
+        _587:
           return
         } else {
-        _582:
-          AI_SELECT_SKILL(382)
-          AI_SELECT_ACTION_TARGETS()
+        _594:
+          local_int[52] = RANDOM_ONE_TO(100)
+          if (local_int[52] <= 40) {
+            AI_SELECT_SKILL(58)
+            AI_SELECT_PLAYER_TARGET_WITH_FLAG_1000()
+            return
+          } else {
+          _590:
+            if (local_int[52] <= 70) {
+              AI_SELECT_SKILL(398)
+              AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
+              return
+            } else {
+            _591:
+              AI_SELECT_SKILL(382)
+              AI_SELECT_ACTION_TARGETS()
+              return
+              goto _589
+            }
+          }
+        _589:
           return
-          goto _580
+          goto _592
         }
       }
-    _580:
-      return
-      goto _592
-    _593:
-      COMM 0x01bf
-      PUSHREG
-      IF _594
-      local_int[52] = RANDOM_ONE_TO(100)
-      if (AI_UNIT_HP_AT_OR_BELOW_RATE(50)) {
-        if (local_int[52] <= 90) {
-          AI_SELECT_SKILL(398)
-          COMM 0x01af
-          return
-        } else {
-        _584:
-          AI_SELECT_SKILL(382)
-          AI_SELECT_ACTION_TARGETS()
-          return
-          goto _583
-        }
-      _583:
-        return
-      } else {
-      _588:
-        if (local_int[52] <= 50) {
-          AI_SELECT_SKILL(398)
-          COMM 0x01af
-          return
-        } else {
-        _586:
-          AI_SELECT_SKILL(382)
-          AI_SELECT_ACTION_TARGETS()
-          return
-          goto _585
-        }
-      _585:
-        return
-        goto _587
-      }
-    _587:
-      return
-      goto _592
-    _594:
-      local_int[52] = RANDOM_ONE_TO(100)
-      if (local_int[52] <= 40) {
-        AI_SELECT_SKILL(58)
-        COMM 0x01c1
-        return
-      } else {
-      _590:
-        if (local_int[52] <= 70) {
-          AI_SELECT_SKILL(398)
-          COMM 0x01af
-          return
-        } else {
-        _591:
-          AI_SELECT_SKILL(382)
-          AI_SELECT_ACTION_TARGETS()
-          return
-          goto _589
-        }
-      }
-    _589:
-      return
-      goto _592
     _592:
       return
     } else {
@@ -5807,7 +5494,7 @@ karu_gard:
       local_int[52] = RANDOM_ONE_TO(100)
       if (local_int[52] <= 50) {
         AI_SELECT_SKILL(398)
-        COMM 0x01af
+        AI_SELECT_PLAYER_TARGET_WITHOUT_FLAG_1000()
         return
       } else {
       _596:
@@ -6216,9 +5903,7 @@ _679:
             SET_MODEL_FLAG(3041)
             CLEAR_MODEL_FLAG(3042)
             SET_MODEL_FLAG(3051)
-            push 333
-            push 205
-            COMM 0x00e2
+            AI_SELECT_ACTION_BY_KIND(205, 333)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
@@ -6226,9 +5911,7 @@ _679:
             if (TEST_MODEL_FLAG(3040) == 1 && TEST_MODEL_FLAG(3042) == 0) {
               SET_MODEL_FLAG(3042)
               CLEAR_MODEL_FLAG(3043)
-              push 332
-              push 205
-              COMM 0x00e2
+              AI_SELECT_ACTION_BY_KIND(205, 332)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
@@ -6236,9 +5919,7 @@ _679:
               if (TEST_MODEL_FLAG(3040) == 1 && TEST_MODEL_FLAG(3043) == 0) {
                 SET_MODEL_FLAG(3043)
                 CLEAR_MODEL_FLAG(3044)
-                push 334
-                push 205
-                COMM 0x00e2
+                AI_SELECT_ACTION_BY_KIND(205, 334)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
@@ -6247,9 +5928,7 @@ _679:
                   SET_MODEL_FLAG(3044)
                   CLEAR_MODEL_FLAG(3045)
                   SET_MODEL_FLAG(3052)
-                  push 335
-                  push 205
-                  COMM 0x00e2
+                  AI_SELECT_ACTION_BY_KIND(205, 335)
                   AI_SELECT_ACTION_TARGETS()
                   return
                 } else {
@@ -6257,9 +5936,7 @@ _679:
                   if (TEST_MODEL_FLAG(3040) == 1 && TEST_MODEL_FLAG(3045) == 0) {
                     SET_MODEL_FLAG(3045)
                     CLEAR_MODEL_FLAG(3046)
-                    push 330
-                    push 205
-                    COMM 0x00e2
+                    AI_SELECT_ACTION_BY_KIND(205, 330)
                     AI_SELECT_ACTION_TARGETS()
                     return
                   } else {
@@ -6267,9 +5944,7 @@ _679:
                     if (TEST_MODEL_FLAG(3040) == 1 && TEST_MODEL_FLAG(3046) == 0) {
                       SET_MODEL_FLAG(3046)
                       CLEAR_MODEL_FLAG(3041)
-                      push 331
-                      push 205
-                      COMM 0x00e2
+                      AI_SELECT_ACTION_BY_KIND(205, 331)
                       AI_SELECT_ACTION_TARGETS()
                       return
                     } else {
@@ -6940,9 +6615,7 @@ _794:
       AI_SET_CAMERA_BLEND_START(-float32(12.899999618530273, bits=0x414e6666), -float32(338.1000061035156, bits=0x43a90ccd), -float32(388.1000061035156, bits=0x43c20ccd), -float32(0.0860000029206276, bits=0x3db020c5), -float32(0.017000000923871994, bits=0x3c8b4396), -float32(0.003000000026077032, bits=0x3b449ba6), float32(0.9869999885559082, bits=0x3f7cac08))
       AI_SET_CAMERA_BLEND_END(float32(9.5, bits=0x41180000), -float32(219.0, bits=0x435b0000), -float32(1194.5999755859375, bits=0x44955333), -float32(0.02500000037252903, bits=0x3ccccccd), float32(0.0010000000474974513, bits=0x3a83126f), -float32(0.004999999888241291, bits=0x3ba3d70a), float32(0.9900000095367432, bits=0x3f7d70a4))
       AI_RUN_CAMERA_BLEND(40, 20)
-      push 700
-      push 40
-      COMM 0x00ab
+      START_SCREEN_QUAKE(40, 700)
       MESSAGE_REQUEST_AND_POLL(message(suza_05_02))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       AI_BEGIN_SCENE_TRANSITION()
@@ -6964,9 +6637,7 @@ _794:
       AI_SET_CAMERA_BLEND_START(-float32(12.899999618530273, bits=0x414e6666), -float32(338.1000061035156, bits=0x43a90ccd), -float32(388.1000061035156, bits=0x43c20ccd), -float32(0.0860000029206276, bits=0x3db020c5), -float32(0.017000000923871994, bits=0x3c8b4396), -float32(0.003000000026077032, bits=0x3b449ba6), float32(0.9869999885559082, bits=0x3f7cac08))
       AI_SET_CAMERA_BLEND_END(float32(9.5, bits=0x41180000), -float32(219.0, bits=0x435b0000), -float32(1194.5999755859375, bits=0x44955333), -float32(0.02500000037252903, bits=0x3ccccccd), float32(0.0010000000474974513, bits=0x3a83126f), -float32(0.004999999888241291, bits=0x3ba3d70a), float32(0.9900000095367432, bits=0x3f7d70a4))
       AI_RUN_CAMERA_BLEND(40, 15)
-      push 500
-      push 40
-      COMM 0x00ab
+      START_SCREEN_QUAKE(40, 500)
       MESSAGE_REQUEST_AND_POLL(message(suza_04_3))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       AI_BEGIN_SCENE_TRANSITION()
@@ -6975,10 +6646,7 @@ _794:
     goto _801
   }
 _801:
-  push 2
-  COMM 0x01c6
-  PUSHREG
-  IF _809
+  if_not (AI_ANY_PLAYER_BLOCKS_ELEMENT(2)) goto _809
   local_int[80] = AI_SCENE_FADE_COUNT()
   if_not (local_int[80] > 1) goto _808
   if (AI_UNIT_ACTION_MODE_ZERO(2)) {
@@ -7015,9 +6683,7 @@ _809:
       AI_SET_CAMERA_BLEND_START(-float32(12.899999618530273, bits=0x414e6666), -float32(338.1000061035156, bits=0x43a90ccd), -float32(388.1000061035156, bits=0x43c20ccd), -float32(0.0860000029206276, bits=0x3db020c5), -float32(0.017000000923871994, bits=0x3c8b4396), -float32(0.003000000026077032, bits=0x3b449ba6), float32(0.9869999885559082, bits=0x3f7cac08))
       AI_SET_CAMERA_BLEND_END(float32(9.5, bits=0x41180000), -float32(219.0, bits=0x435b0000), -float32(1194.5999755859375, bits=0x44955333), -float32(0.02500000037252903, bits=0x3ccccccd), float32(0.0010000000474974513, bits=0x3a83126f), -float32(0.004999999888241291, bits=0x3ba3d70a), float32(0.9900000095367432, bits=0x3f7d70a4))
       AI_RUN_CAMERA_BLEND(40, 15)
-      push 500
-      push 40
-      COMM 0x00ab
+      START_SCREEN_QUAKE(40, 500)
       MESSAGE_REQUEST_AND_POLL(message(suza_03_2))
       FINISH_SCRIPT_MESSAGE_WINDOW()
       AI_BEGIN_SCENE_TRANSITION()
@@ -7441,48 +7107,31 @@ _886:
   if_not (TEST_MODEL_FLAG(3063) == 0) goto _903
   SET_MODEL_FLAG(3063)
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push 184
-    COMM 0x01c9
-    PUSHREG
-    push 183
-    COMM 0x01c9
-    PUSHREG
-    push 182
-    COMM 0x01c9
-    PUSHREG
-    push 181
-    COMM 0x01c9
-    PUSHREG
-    OR
-    OR
-    OR
-    push TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0
-    AND
-    IF _888
-    SET_MODEL_FLAG(3058)
-    AI_CLEAR_SCENE_TRANSITION()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02))
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_BEGIN_SCENE_TRANSITION()
-    goto _888
+    if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0 && (AI_ANY_PLAYER_HAS_QUEUED_ACTION(181) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(182) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(183) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(184))) {
+      SET_MODEL_FLAG(3058)
+      AI_CLEAR_SCENE_TRANSITION()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02))
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_BEGIN_SCENE_TRANSITION()
+    }
   _888:
     AI_SELECT_SKILL(185)
     AI_SELECT_ACTION_TARGETS()
@@ -7579,48 +7228,31 @@ _907:
   if_not (TEST_MODEL_FLAG(3062) == 0) goto _929
   SET_MODEL_FLAG(3062)
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push 184
-    COMM 0x01c9
-    PUSHREG
-    push 183
-    COMM 0x01c9
-    PUSHREG
-    push 182
-    COMM 0x01c9
-    PUSHREG
-    push 181
-    COMM 0x01c9
-    PUSHREG
-    OR
-    OR
-    OR
-    push TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0
-    AND
-    IF _909
-    SET_MODEL_FLAG(3058)
-    AI_CLEAR_SCENE_TRANSITION()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02))
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_BEGIN_SCENE_TRANSITION()
-    goto _909
+    if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0 && (AI_ANY_PLAYER_HAS_QUEUED_ACTION(181) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(182) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(183) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(184))) {
+      SET_MODEL_FLAG(3058)
+      AI_CLEAR_SCENE_TRANSITION()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02))
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_BEGIN_SCENE_TRANSITION()
+    }
   _909:
     AI_SELECT_SKILL(185)
     AI_SELECT_ACTION_TARGETS()
@@ -7700,48 +7332,31 @@ _928:
   goto _942
 _944:
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push 184
-    COMM 0x01c9
-    PUSHREG
-    push 183
-    COMM 0x01c9
-    PUSHREG
-    push 182
-    COMM 0x01c9
-    PUSHREG
-    push 181
-    COMM 0x01c9
-    PUSHREG
-    OR
-    OR
-    OR
-    push TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0
-    AND
-    IF _930
-    SET_MODEL_FLAG(3058)
-    AI_CLEAR_SCENE_TRANSITION()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02))
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_QUEUE_UNBOUND_COMMAND_SOUND()
-    ACTIVATE_MESSAGE_PANEL()
-    MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
-    FINISH_SCRIPT_MESSAGE_WINDOW()
-    AI_BEGIN_SCENE_TRANSITION()
-    goto _930
+    if (TEST_MODEL_FLAG(3058) == 0 && TEST_MODEL_FLAG(3071) == 0 && (AI_ANY_PLAYER_HAS_QUEUED_ACTION(181) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(182) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(183) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(184))) {
+      SET_MODEL_FLAG(3058)
+      AI_CLEAR_SCENE_TRANSITION()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02))
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_A))
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_B))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(-float32(629.7999877929688, bits=0x441d7333), -float32(21.5, bits=0x41ac0000), -float32(341.1000061035156, bits=0x43aa8ccd), -float32(0.11299999803304672, bits=0x3de76c8b), -float32(0.414000004529953, bits=0x3ed3f7cf), float32(0.035999998450279236, bits=0x3d1374bc), float32(0.8930000066757202, bits=0x3f649ba6))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_2))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_MOVE_CAMERA(float32(436.1000061035156, bits=0x43da0ccd), -float32(920.5999755859375, bits=0x44662666), -float32(83.4000015258789, bits=0x42a6cccd), float32(0.38100001215934753, bits=0x3ec3126f), float32(0.3490000069141388, bits=0x3eb2b021), float32(0.14399999380111694, bits=0x3e1374bc), float32(0.8330000042915344, bits=0x3f553f7d))
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_3))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_QUEUE_UNBOUND_COMMAND_SOUND()
+      ACTIVATE_MESSAGE_PANEL()
+      MESSAGE_REQUEST_AND_POLL(message(genbu_02_4))
+      FINISH_SCRIPT_MESSAGE_WINDOW()
+      AI_BEGIN_SCENE_TRANSITION()
+    }
   _930:
     AI_SELECT_SKILL(185)
     AI_SELECT_ACTION_TARGETS()
@@ -7807,44 +7422,28 @@ _942:
 AI_Yamata:
   PROC AI_Yamata
   if_not (AI_GLOBAL_HISTORY_COUNTER() == 0) goto _964
-  push 1
-  push 74
-  COMM 0x01c9
-  PUSHREG
-  EQ
-  push 1
-  push 73
-  COMM 0x01c9
-  PUSHREG
-  EQ
-  OR
-  IF _947
-  AI_CLEAR_SCENE_TRANSITION()
-  AI_QUEUE_UNBOUND_COMMAND_SOUND()
-  ACTIVATE_MESSAGE_PANEL()
-  if (TEST_MODEL_FLAG(3056) == 1) {
-    MESSAGE_REQUEST_AND_POLL(message(YAMA_02))
-  } else {
-  _946:
-    SET_MODEL_FLAG(3056)
-    MESSAGE_REQUEST_AND_POLL(message(YAMA_01))
-    goto _945
+  if (AI_ANY_PLAYER_HAS_QUEUED_ACTION(73) == 1 || AI_ANY_PLAYER_HAS_QUEUED_ACTION(74) == 1) {
+    AI_CLEAR_SCENE_TRANSITION()
+    AI_QUEUE_UNBOUND_COMMAND_SOUND()
+    ACTIVATE_MESSAGE_PANEL()
+    if (TEST_MODEL_FLAG(3056) == 1) {
+      MESSAGE_REQUEST_AND_POLL(message(YAMA_02))
+    } else {
+    _946:
+      SET_MODEL_FLAG(3056)
+      MESSAGE_REQUEST_AND_POLL(message(YAMA_01))
+      goto _945
+    }
+  _945:
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    AI_BEGIN_SCENE_TRANSITION()
   }
-_945:
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  AI_BEGIN_SCENE_TRANSITION()
-  goto _947
 _947:
   CLEAR_MODEL_FLAG(3041)
   CLEAR_MODEL_FLAG(3042)
   CLEAR_MODEL_FLAG(3043)
   CLEAR_MODEL_FLAG(3044)
-  push 0
-  push 2
-  COMM 0x014b
-  PUSHREG
-  EQ
-  IF _963
+  if_not (AI_UNIT_MP_AT_OR_BELOW_RATE(2) == 0) goto _963
   local_int[82] = RANDOM_ONE_TO(100)
   if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(12) == 1) {
     SET_MODEL_FLAG(3061)
@@ -7895,19 +7494,15 @@ _955:
 _957:
   goto _962
 _963:
-  push 1
-  push 12
-  COMM 0x019c
-  PUSHREG
-  EQ
-  IF _961
-  SET_MODEL_FLAG(3042)
-  CLEAR_MODEL_FLAG(3052)
-  CLEAR_MODEL_FLAG(3053)
-  goto _960
-_961:
-  SET_MODEL_FLAG(3043)
-  goto _960
+  if (AI_ALL_PLAYERS_PASS_QUERY(12) == 1) {
+    SET_MODEL_FLAG(3042)
+    CLEAR_MODEL_FLAG(3052)
+    CLEAR_MODEL_FLAG(3053)
+  } else {
+  _961:
+    SET_MODEL_FLAG(3043)
+    goto _960
+  }
 _960:
   goto _962
 _962:
@@ -7987,7 +7582,7 @@ _964:
         }
       _972:
         AI_SELECT_SKILL(383)
-        COMM 0x01cb
+        AI_SELECT_HIGHEST_MP_TARGET()
         return
         goto _974
       }
@@ -8226,21 +7821,17 @@ _996:
             return
           } else {
           _1020:
-            push 1
-            push 0
-            COMM 0x019c
-            PUSHREG
-            EQ
-            IF _1021
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_ACTION_TARGETS()
-            return
-            goto _1019
-          _1021:
-            AI_SELECT_SKILL(48)
-            AI_SELECT_ACTION_TARGETS()
-            return
-            goto _1019
+            if (AI_ALL_PLAYERS_PASS_QUERY(0) == 1) {
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_ACTION_TARGETS()
+              return
+            } else {
+            _1021:
+              AI_SELECT_SKILL(48)
+              AI_SELECT_ACTION_TARGETS()
+              return
+              goto _1019
+            }
           }
         _1019:
           return
@@ -8662,37 +8253,33 @@ _1074:
             return
           } else {
           _1108:
-            push 1
-            push 0
-            COMM 0x019c
-            PUSHREG
-            EQ
-            IF _1109
-            if (local_int[86] < 40) {
-              AI_SELECT_SKILL(127)
-              AI_SELECT_ACTION_TARGETS()
+            if (AI_ALL_PLAYERS_PASS_QUERY(0) == 1) {
+              if (local_int[86] < 40) {
+                AI_SELECT_SKILL(127)
+                AI_SELECT_ACTION_TARGETS()
+              } else {
+              _1104:
+                AI_SELECT_SKILL(418)
+                AI_SELECT_ACTION_TARGETS()
+                goto _1103
+              }
+            _1103:
+              return
             } else {
-            _1104:
-              AI_SELECT_SKILL(418)
-              AI_SELECT_ACTION_TARGETS()
-              goto _1103
+            _1109:
+              if (local_int[86] < 40) {
+                AI_SELECT_SKILL(127)
+                AI_SELECT_ACTION_TARGETS()
+              } else {
+              _1106:
+                AI_SELECT_SKILL(48)
+                AI_SELECT_ACTION_TARGETS()
+                goto _1105
+              }
+            _1105:
+              return
+              goto _1107
             }
-          _1103:
-            return
-            goto _1107
-          _1109:
-            if (local_int[86] < 40) {
-              AI_SELECT_SKILL(127)
-              AI_SELECT_ACTION_TARGETS()
-            } else {
-            _1106:
-              AI_SELECT_SKILL(48)
-              AI_SELECT_ACTION_TARGETS()
-              goto _1105
-            }
-          _1105:
-            return
-            goto _1107
           }
         _1107:
           return
@@ -9744,31 +9331,26 @@ _1326:
   _1332:
     goto _1334
   _1334:
-    push 1
-    push 0
-    COMM 0x01c6
-    PUSHREG
-    EQ
-    IF _1340
-    if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(10) == 1) {
-      AI_SELECT_SKILL(48)
-    } else {
-    _1339:
-      local_int[87] = RANDOM_ONE_TO(100)
-      if (local_int[87] <= 50) {
+    if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
+      if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(10) == 1) {
         AI_SELECT_SKILL(48)
       } else {
-      _1337:
-        AI_SELECT_SKILL(192)
-        goto _1336
+      _1339:
+        local_int[87] = RANDOM_ONE_TO(100)
+        if (local_int[87] <= 50) {
+          AI_SELECT_SKILL(48)
+        } else {
+        _1337:
+          AI_SELECT_SKILL(192)
+          goto _1336
+        }
+      _1336:
+        goto _1338
       }
-    _1336:
-      goto _1338
+    _1338:
+      AI_SELECT_ACTION_TARGETS()
+      return
     }
-  _1338:
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _1340
   _1340:
     if (AI_ANY_ENEMY_PASSES_ACTION_CHECK(10) == 1) {
       AI_SELECT_SKILL(419)
@@ -9870,12 +9452,7 @@ _1364:
   goto _1366
 _1366:
   if_not (TEST_MODEL_FLAG(3067) == 0) goto _1388
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1374
+  if_not (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) goto _1374
   local_int[87] = RANDOM_ONE_TO(100)
   if (local_int[87] <= 50) {
     AI_SELECT_SKILL(177)
@@ -9928,16 +9505,11 @@ _1377:
 _1379:
   goto _1381
 _1381:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1383
-  AI_SELECT_SKILL(33)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1383
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
+    AI_SELECT_SKILL(33)
+    AI_SELECT_ACTION_TARGETS()
+    return
+  }
 _1383:
   local_int[87] = RANDOM_ONE_TO(100)
   if (local_int[87] <= 50) {
@@ -10004,27 +9576,23 @@ _1400:
 _1402:
   goto _1404
 _1404:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1409
-  AI_SELECT_SKILL(184)
-  goto _1408
-_1409:
-  if (local_int[87] <= 50) {
-    AI_SELECT_SKILL(419)
-  } else {
-  _1407:
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
     AI_SELECT_SKILL(184)
-    goto _1406
+  } else {
+  _1409:
+    if (local_int[87] <= 50) {
+      AI_SELECT_SKILL(419)
+    } else {
+    _1407:
+      AI_SELECT_SKILL(184)
+      goto _1406
+    }
+  _1406:
+    SET_MODEL_FLAG(3054)
+    AI_SELECT_ACTION_TARGETS()
+    return
+    goto _1408
   }
-_1406:
-  SET_MODEL_FLAG(3054)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1408
 _1408:
   goto _1422
 _1423:
@@ -10048,16 +9616,11 @@ _1412:
 _1414:
   goto _1416
 _1416:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1418
-  AI_SELECT_SKILL(42)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1418
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
+    AI_SELECT_SKILL(42)
+    AI_SELECT_ACTION_TARGETS()
+    return
+  }
 _1418:
   local_int[87] = RANDOM_ONE_TO(100)
   if (local_int[87] <= 50) {
@@ -10124,28 +9687,24 @@ _1435:
 _1437:
   goto _1439
 _1439:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1444
-  AI_SELECT_SKILL(179)
-  goto _1443
-_1444:
-  local_int[87] = RANDOM_ONE_TO(100)
-  if (local_int[87] <= 50) {
-    AI_SELECT_SKILL(419)
-  } else {
-  _1442:
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
     AI_SELECT_SKILL(179)
-    goto _1441
+  } else {
+  _1444:
+    local_int[87] = RANDOM_ONE_TO(100)
+    if (local_int[87] <= 50) {
+      AI_SELECT_SKILL(419)
+    } else {
+    _1442:
+      AI_SELECT_SKILL(179)
+      goto _1441
+    }
+  _1441:
+    SET_MODEL_FLAG(3054)
+    AI_SELECT_ACTION_TARGETS()
+    return
+    goto _1443
   }
-_1441:
-  SET_MODEL_FLAG(3054)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1443
 _1443:
   goto _1457
 _1458:
@@ -10169,16 +9728,11 @@ _1447:
 _1449:
   goto _1451
 _1451:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1453
-  AI_SELECT_SKILL(6)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1453
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
+    AI_SELECT_SKILL(6)
+    AI_SELECT_ACTION_TARGETS()
+    return
+  }
 _1453:
   local_int[87] = RANDOM_ONE_TO(100)
   if (local_int[87] <= 50) {
@@ -10234,12 +9788,7 @@ _1468:
   goto _1470
 _1470:
   if_not (TEST_MODEL_FLAG(3067) == 0) goto _1492
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1478
+  if_not (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) goto _1478
   if (local_int[87] <= 50) {
     AI_SELECT_SKILL(179)
   } else {
@@ -10291,16 +9840,11 @@ _1481:
 _1483:
   goto _1485
 _1485:
-  push 1
-  push 0
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _1487
-  AI_SELECT_SKILL(15)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _1487
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
+    AI_SELECT_SKILL(15)
+    AI_SELECT_ACTION_TARGETS()
+    return
+  }
 _1487:
   local_int[87] = RANDOM_ONE_TO(100)
   if (local_int[87] <= 50) {
@@ -10326,7 +9870,7 @@ _1493:
     WAIT_FOR_TIMER_LIMIT(30)
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    COMM 0x00f5
+    AI_RESTORE_BATTLE_CAMERA()
   }
 _1495:
   if_not (TEST_MODEL_FLAG(3055) == 0) goto _1508
@@ -10371,27 +9915,23 @@ _1508:
     return
   } else {
   _1515:
-    push 1
-    push 0
-    COMM 0x01c6
-    PUSHREG
-    EQ
-    IF _1513
-    AI_SELECT_SKILL(48)
-    goto _1512
-  _1513:
-    local_int[87] = RANDOM_ONE_TO(100)
-    if (local_int[87] <= 50) {
-      AI_SELECT_SKILL(419)
-    } else {
-    _1511:
+    if (AI_ANY_PLAYER_BLOCKS_ELEMENT(0) == 1) {
       AI_SELECT_SKILL(48)
-      goto _1510
+    } else {
+    _1513:
+      local_int[87] = RANDOM_ONE_TO(100)
+      if (local_int[87] <= 50) {
+        AI_SELECT_SKILL(419)
+      } else {
+      _1511:
+        AI_SELECT_SKILL(48)
+        goto _1510
+      }
+    _1510:
+      AI_SELECT_ACTION_TARGETS()
+      return
+      goto _1512
     }
-  _1510:
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _1512
   _1512:
     goto _1514
   }
@@ -11659,9 +11199,7 @@ _1758:
 AI_bafo:
   PROC AI_bafo
   if (AI_ACTOR_HISTORY_COUNTER() == 0 && TEST_MODEL_FLAG(3055) == 0) {
-    push 324
-    push 195
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(195, 324)
     AI_SELECT_ACTION_TARGETS()
     SET_MODEL_FLAG(3055)
     SET_MODEL_FLAG(3047)
@@ -12177,9 +11715,7 @@ _1854:
       }
     }
   _1856:
-    push 268
-    push 195
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(195, 268)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -12219,9 +11755,7 @@ _1873:
       SET_MODEL_FLAG(3060)
     }
   _1868:
-    push 268
-    push 195
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(195, 268)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -12269,14 +11803,7 @@ _1872:
   _1881:
     goto _1885
   _1890:
-    push 502
-    COMM 0x01c9
-    PUSHREG
-    push 365
-    COMM 0x01c9
-    PUSHREG
-    OR
-    IF _1885
+    if_not (AI_ANY_PLAYER_HAS_QUEUED_ACTION(365) || AI_ANY_PLAYER_HAS_QUEUED_ACTION(502)) goto _1885
     if (AI_ANY_PLAYER_HAS_ACTION(7) == 0) {
       AI_SELECT_TABLE_ACTION()
       return
@@ -12888,38 +12415,32 @@ _1997:
           _2022:
             if (TEST_MODEL_FLAG(3050) == 1) {
               CLEAR_MODEL_FLAG(3050)
-              push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-              push 1
-              push 0
-              COMM 0x0089
-              PUSHREG
-              EQ
-              AND
-              IF _2012
-              if (local_int[105] <= 50) {
-                AI_SELECT_SKILL(65)
-              } else {
-              _2010:
-                AI_SELECT_SKILL(66)
-                goto _2009
-              }
-            _2009:
-              AI_SELECT_TARGET_PASSING_QUERY(9)
-              goto _2011
-            _2012:
-              if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-              } else {
-              _2013:
-                if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-                  AI_SELECT_BASIC_ATTACK()
-                  AI_SELECT_TARGET_PASSING_QUERY(0)
+              if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                if (local_int[105] <= 50) {
+                  AI_SELECT_SKILL(65)
                 } else {
-                _2014:
+                _2010:
+                  AI_SELECT_SKILL(66)
+                  goto _2009
+                }
+              _2009:
+                AI_SELECT_TARGET_PASSING_QUERY(9)
+              } else {
+              _2012:
+                if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
                   AI_SELECT_BASIC_ATTACK()
-                  COMM 0x007d
-                  goto _2011
+                  AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+                } else {
+                _2013:
+                  if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                    AI_SELECT_BASIC_ATTACK()
+                    AI_SELECT_TARGET_PASSING_QUERY(0)
+                  } else {
+                  _2014:
+                    AI_SELECT_BASIC_ATTACK()
+                    AI_SELECT_LOWEST_HP_RATE_TARGET()
+                    goto _2011
+                  }
                 }
               }
             _2011:
@@ -13023,38 +12544,32 @@ _2203:
           _2045:
             if (TEST_MODEL_FLAG(3050) == 1) {
               CLEAR_MODEL_FLAG(3050)
-              push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-              push 1
-              push 0
-              COMM 0x0089
-              PUSHREG
-              EQ
-              AND
-              IF _2035
-              if (local_int[105] <= 50) {
-                AI_SELECT_SKILL(65)
-              } else {
-              _2033:
-                AI_SELECT_SKILL(66)
-                goto _2032
-              }
-            _2032:
-              AI_SELECT_TARGET_PASSING_QUERY(9)
-              goto _2034
-            _2035:
-              if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-              } else {
-              _2036:
-                if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-                  AI_SELECT_BASIC_ATTACK()
-                  AI_SELECT_TARGET_PASSING_QUERY(0)
+              if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                if (local_int[105] <= 50) {
+                  AI_SELECT_SKILL(65)
                 } else {
-                _2037:
+                _2033:
+                  AI_SELECT_SKILL(66)
+                  goto _2032
+                }
+              _2032:
+                AI_SELECT_TARGET_PASSING_QUERY(9)
+              } else {
+              _2035:
+                if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
                   AI_SELECT_BASIC_ATTACK()
-                  COMM 0x007d
-                  goto _2034
+                  AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+                } else {
+                _2036:
+                  if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                    AI_SELECT_BASIC_ATTACK()
+                    AI_SELECT_TARGET_PASSING_QUERY(0)
+                  } else {
+                  _2037:
+                    AI_SELECT_BASIC_ATTACK()
+                    AI_SELECT_LOWEST_HP_RATE_TARGET()
+                    goto _2034
+                  }
                 }
               }
             _2034:
@@ -13112,38 +12627,32 @@ _2204:
         CLEAR_MODEL_FLAG(3047)
         SET_MODEL_FLAG(3048)
         if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(32)) {
-          push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-          push 1
-          push 0
-          COMM 0x0089
-          PUSHREG
-          EQ
-          AND
-          IF _2052
-          if (local_int[105] <= 50) {
-            AI_SELECT_SKILL(65)
-          } else {
-          _2050:
-            AI_SELECT_SKILL(66)
-            goto _2049
-          }
-        _2049:
-          AI_SELECT_TARGET_PASSING_QUERY(9)
-          goto _2051
-        _2052:
-          if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-          } else {
-          _2053:
-            if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-              AI_SELECT_BASIC_ATTACK()
-              AI_SELECT_TARGET_PASSING_QUERY(0)
+          if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+            if (local_int[105] <= 50) {
+              AI_SELECT_SKILL(65)
             } else {
-            _2054:
+            _2050:
+              AI_SELECT_SKILL(66)
+              goto _2049
+            }
+          _2049:
+            AI_SELECT_TARGET_PASSING_QUERY(9)
+          } else {
+          _2052:
+            if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
               AI_SELECT_BASIC_ATTACK()
-              COMM 0x007d
-              goto _2051
+              AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+            } else {
+            _2053:
+              if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_TARGET_PASSING_QUERY(0)
+              } else {
+              _2054:
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_LOWEST_HP_RATE_TARGET()
+                goto _2051
+              }
             }
           }
         _2051:
@@ -13162,38 +12671,32 @@ _2204:
           CLEAR_MODEL_FLAG(3048)
           SET_MODEL_FLAG(3049)
           if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(32)) {
-            push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-            push 1
-            push 0
-            COMM 0x0089
-            PUSHREG
-            EQ
-            AND
-            IF _2060
-            if (local_int[105] <= 50) {
-              AI_SELECT_SKILL(65)
-            } else {
-            _2058:
-              AI_SELECT_SKILL(66)
-              goto _2057
-            }
-          _2057:
-            AI_SELECT_TARGET_PASSING_QUERY(9)
-            goto _2059
-          _2060:
-            if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-              AI_SELECT_BASIC_ATTACK()
-              AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-            } else {
-            _2061:
-              if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_TARGET_PASSING_QUERY(0)
+            if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+              if (local_int[105] <= 50) {
+                AI_SELECT_SKILL(65)
               } else {
-              _2062:
+              _2058:
+                AI_SELECT_SKILL(66)
+                goto _2057
+              }
+            _2057:
+              AI_SELECT_TARGET_PASSING_QUERY(9)
+            } else {
+            _2060:
+              if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
                 AI_SELECT_BASIC_ATTACK()
-                COMM 0x007d
-                goto _2059
+                AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+              } else {
+              _2061:
+                if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                  AI_SELECT_BASIC_ATTACK()
+                  AI_SELECT_TARGET_PASSING_QUERY(0)
+                } else {
+                _2062:
+                  AI_SELECT_BASIC_ATTACK()
+                  AI_SELECT_LOWEST_HP_RATE_TARGET()
+                  goto _2059
+                }
               }
             }
           _2059:
@@ -13212,55 +12715,49 @@ _2204:
             CLEAR_MODEL_FLAG(3049)
             SET_MODEL_FLAG(3050)
             if_not (AI_ALL_PLAYERS_HAVE_ACTION_MASK(256)) goto _2076
-            push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-            push 1
-            push 0
-            COMM 0x0089
-            PUSHREG
-            EQ
-            AND
-            IF _2073
-            if (local_int[105] <= 50) {
-              AI_SELECT_SKILL(65)
-            } else {
-            _2066:
-              AI_SELECT_SKILL(66)
-              goto _2065
-            }
-          _2065:
-            AI_SELECT_TARGET_PASSING_QUERY(9)
-            goto _2072
-          _2073:
-            if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2074
-            if (AI_SCENE_FADE_COUNT() == 2) {
-              AI_SELECT_SKILL(192)
-              AI_SELECT_ACTION_TARGETS()
-            } else {
-            _2068:
-              if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+            if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+              if (local_int[105] <= 50) {
+                AI_SELECT_SKILL(65)
               } else {
-              _2069:
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_TARGET_PASSING_QUERY(0)
-                goto _2067
+              _2066:
+                AI_SELECT_SKILL(66)
+                goto _2065
               }
-            }
-          _2067:
-            goto _2072
-          _2074:
-            if (AI_SCENE_FADE_COUNT() == 2) {
-              AI_SELECT_SKILL(192)
-              AI_SELECT_ACTION_TARGETS()
+            _2065:
+              AI_SELECT_TARGET_PASSING_QUERY(9)
             } else {
-            _2071:
-              AI_SELECT_BASIC_ATTACK()
-              COMM 0x007d
-              goto _2070
+            _2073:
+              if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2074
+              if (AI_SCENE_FADE_COUNT() == 2) {
+                AI_SELECT_SKILL(192)
+                AI_SELECT_ACTION_TARGETS()
+              } else {
+              _2068:
+                if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
+                  AI_SELECT_BASIC_ATTACK()
+                  AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+                } else {
+                _2069:
+                  AI_SELECT_BASIC_ATTACK()
+                  AI_SELECT_TARGET_PASSING_QUERY(0)
+                  goto _2067
+                }
+              }
+            _2067:
+              goto _2072
+            _2074:
+              if (AI_SCENE_FADE_COUNT() == 2) {
+                AI_SELECT_SKILL(192)
+                AI_SELECT_ACTION_TARGETS()
+              } else {
+              _2071:
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_LOWEST_HP_RATE_TARGET()
+                goto _2070
+              }
+            _2070:
+              goto _2072
             }
-          _2070:
-            goto _2072
           _2072:
             goto _2075
           _2076:
@@ -13305,55 +12802,49 @@ _2205:
     CLEAR_MODEL_FLAG(3045)
     SET_MODEL_FLAG(3046)
     if_not (AI_ALL_PLAYERS_HAVE_ACTION_MASK(256)) goto _2097
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2094
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
-    } else {
-    _2087:
-      AI_SELECT_SKILL(66)
-      goto _2086
-    }
-  _2086:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2093
-  _2094:
-    if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2095
-    if (AI_SCENE_FADE_COUNT() == 2) {
-      AI_SELECT_SKILL(192)
-      AI_SELECT_ACTION_TARGETS()
-    } else {
-    _2089:
-      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
       } else {
-      _2090:
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGET_PASSING_QUERY(0)
-        goto _2088
+      _2087:
+        AI_SELECT_SKILL(66)
+        goto _2086
       }
-    }
-  _2088:
-    goto _2093
-  _2095:
-    if (AI_SCENE_FADE_COUNT() == 2) {
-      AI_SELECT_SKILL(192)
-      AI_SELECT_ACTION_TARGETS()
+    _2086:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
     } else {
-    _2092:
-      AI_SELECT_BASIC_ATTACK()
-      COMM 0x007d
-      goto _2091
+    _2094:
+      if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2095
+      if (AI_SCENE_FADE_COUNT() == 2) {
+        AI_SELECT_SKILL(192)
+        AI_SELECT_ACTION_TARGETS()
+      } else {
+      _2089:
+        if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+        } else {
+        _2090:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGET_PASSING_QUERY(0)
+          goto _2088
+        }
+      }
+    _2088:
+      goto _2093
+    _2095:
+      if (AI_SCENE_FADE_COUNT() == 2) {
+        AI_SELECT_SKILL(192)
+        AI_SELECT_ACTION_TARGETS()
+      } else {
+      _2092:
+        AI_SELECT_BASIC_ATTACK()
+        AI_SELECT_LOWEST_HP_RATE_TARGET()
+        goto _2091
+      }
+    _2091:
+      goto _2093
     }
-  _2091:
-    goto _2093
   _2093:
     goto _2096
   _2097:
@@ -13373,93 +12864,81 @@ _2205:
     } else {
     _2118:
       if (TEST_MODEL_FLAG(3047) == 1) {
-        push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-        push 1
-        push 0
-        COMM 0x0089
-        PUSHREG
-        EQ
-        AND
-        IF _2106
-        if (local_int[105] <= 50) {
-          AI_SELECT_SKILL(65)
-        } else {
-        _2099:
-          AI_SELECT_SKILL(66)
-          goto _2098
-        }
-      _2098:
-        AI_SELECT_TARGET_PASSING_QUERY(9)
-        goto _2105
-      _2106:
-        if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2107
-        if (AI_SCENE_FADE_COUNT() == 2) {
-          AI_SELECT_SKILL(192)
-          AI_SELECT_ACTION_TARGETS()
-        } else {
-        _2101:
-          if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+        if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          if (local_int[105] <= 50) {
+            AI_SELECT_SKILL(65)
           } else {
-          _2102:
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGET_PASSING_QUERY(0)
-            goto _2100
+          _2099:
+            AI_SELECT_SKILL(66)
+            goto _2098
           }
-        }
-      _2100:
-        goto _2105
-      _2107:
-        if (AI_SCENE_FADE_COUNT() == 2) {
-          AI_SELECT_SKILL(192)
-          AI_SELECT_ACTION_TARGETS()
+        _2098:
+          AI_SELECT_TARGET_PASSING_QUERY(9)
         } else {
-        _2104:
-          AI_SELECT_BASIC_ATTACK()
-          COMM 0x007d
-          goto _2103
+        _2106:
+          if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2107
+          if (AI_SCENE_FADE_COUNT() == 2) {
+            AI_SELECT_SKILL(192)
+            AI_SELECT_ACTION_TARGETS()
+          } else {
+          _2101:
+            if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+            } else {
+            _2102:
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_TARGET_PASSING_QUERY(0)
+              goto _2100
+            }
+          }
+        _2100:
+          goto _2105
+        _2107:
+          if (AI_SCENE_FADE_COUNT() == 2) {
+            AI_SELECT_SKILL(192)
+            AI_SELECT_ACTION_TARGETS()
+          } else {
+          _2104:
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_LOWEST_HP_RATE_TARGET()
+            goto _2103
+          }
+        _2103:
+          goto _2105
         }
-      _2103:
-        goto _2105
       _2105:
         return
       } else {
       _2119:
         SET_MODEL_FLAG(3045)
         if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(32)) {
-          push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-          push 1
-          push 0
-          COMM 0x0089
-          PUSHREG
-          EQ
-          AND
-          IF _2111
-          if (local_int[105] <= 50) {
-            AI_SELECT_SKILL(65)
-          } else {
-          _2109:
-            AI_SELECT_SKILL(66)
-            goto _2108
-          }
-        _2108:
-          AI_SELECT_TARGET_PASSING_QUERY(9)
-          goto _2110
-        _2111:
-          if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-          } else {
-          _2112:
-            if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-              AI_SELECT_BASIC_ATTACK()
-              AI_SELECT_TARGET_PASSING_QUERY(0)
+          if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+            if (local_int[105] <= 50) {
+              AI_SELECT_SKILL(65)
             } else {
-            _2113:
+            _2109:
+              AI_SELECT_SKILL(66)
+              goto _2108
+            }
+          _2108:
+            AI_SELECT_TARGET_PASSING_QUERY(9)
+          } else {
+          _2111:
+            if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
               AI_SELECT_BASIC_ATTACK()
-              COMM 0x007d
-              goto _2110
+              AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+            } else {
+            _2112:
+              if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_TARGET_PASSING_QUERY(0)
+              } else {
+              _2113:
+                AI_SELECT_BASIC_ATTACK()
+                AI_SELECT_LOWEST_HP_RATE_TARGET()
+                goto _2110
+              }
             }
           }
         _2110:
@@ -13500,55 +12979,49 @@ _2206:
       CLEAR_MODEL_FLAG(3046)
       SET_MODEL_FLAG(3047)
       if_not (AI_ALL_PLAYERS_HAVE_ACTION_MASK(256)) goto _2133
-      push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-      push 1
-      push 0
-      COMM 0x0089
-      PUSHREG
-      EQ
-      AND
-      IF _2130
-      if (local_int[105] <= 50) {
-        AI_SELECT_SKILL(65)
-      } else {
-      _2123:
-        AI_SELECT_SKILL(66)
-        goto _2122
-      }
-    _2122:
-      AI_SELECT_TARGET_PASSING_QUERY(9)
-      goto _2129
-    _2130:
-      if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2131
-      if (AI_SCENE_FADE_COUNT() == 2) {
-        AI_SELECT_SKILL(192)
-        AI_SELECT_ACTION_TARGETS()
-      } else {
-      _2125:
-        if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-          AI_SELECT_BASIC_ATTACK()
-          AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+      if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+        if (local_int[105] <= 50) {
+          AI_SELECT_SKILL(65)
         } else {
-        _2126:
-          AI_SELECT_BASIC_ATTACK()
-          AI_SELECT_TARGET_PASSING_QUERY(0)
-          goto _2124
+        _2123:
+          AI_SELECT_SKILL(66)
+          goto _2122
         }
-      }
-    _2124:
-      goto _2129
-    _2131:
-      if (AI_SCENE_FADE_COUNT() == 2) {
-        AI_SELECT_SKILL(192)
-        AI_SELECT_ACTION_TARGETS()
+      _2122:
+        AI_SELECT_TARGET_PASSING_QUERY(9)
       } else {
-      _2128:
-        AI_SELECT_BASIC_ATTACK()
-        COMM 0x007d
-        goto _2127
+      _2130:
+        if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2131
+        if (AI_SCENE_FADE_COUNT() == 2) {
+          AI_SELECT_SKILL(192)
+          AI_SELECT_ACTION_TARGETS()
+        } else {
+        _2125:
+          if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+          } else {
+          _2126:
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_TARGET_PASSING_QUERY(0)
+            goto _2124
+          }
+        }
+      _2124:
+        goto _2129
+      _2131:
+        if (AI_SCENE_FADE_COUNT() == 2) {
+          AI_SELECT_SKILL(192)
+          AI_SELECT_ACTION_TARGETS()
+        } else {
+        _2128:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_LOWEST_HP_RATE_TARGET()
+          goto _2127
+        }
+      _2127:
+        goto _2129
       }
-    _2127:
-      goto _2129
     _2129:
       goto _2132
     _2133:
@@ -13560,55 +13033,49 @@ _2206:
     } else {
     _2148:
       if (TEST_MODEL_FLAG(3047) == 1) {
-        push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-        push 1
-        push 0
-        COMM 0x0089
-        PUSHREG
-        EQ
-        AND
-        IF _2142
-        if (local_int[105] <= 50) {
-          AI_SELECT_SKILL(65)
-        } else {
-        _2135:
-          AI_SELECT_SKILL(66)
-          goto _2134
-        }
-      _2134:
-        AI_SELECT_TARGET_PASSING_QUERY(9)
-        goto _2141
-      _2142:
-        if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2143
-        if (AI_SCENE_FADE_COUNT() == 2) {
-          AI_SELECT_SKILL(192)
-          AI_SELECT_ACTION_TARGETS()
-        } else {
-        _2137:
-          if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+        if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          if (local_int[105] <= 50) {
+            AI_SELECT_SKILL(65)
           } else {
-          _2138:
-            AI_SELECT_BASIC_ATTACK()
-            AI_SELECT_TARGET_PASSING_QUERY(0)
-            goto _2136
+          _2135:
+            AI_SELECT_SKILL(66)
+            goto _2134
           }
-        }
-      _2136:
-        goto _2141
-      _2143:
-        if (AI_SCENE_FADE_COUNT() == 2) {
-          AI_SELECT_SKILL(192)
-          AI_SELECT_ACTION_TARGETS()
+        _2134:
+          AI_SELECT_TARGET_PASSING_QUERY(9)
         } else {
-        _2140:
-          AI_SELECT_BASIC_ATTACK()
-          COMM 0x007d
-          goto _2139
+        _2142:
+          if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) goto _2143
+          if (AI_SCENE_FADE_COUNT() == 2) {
+            AI_SELECT_SKILL(192)
+            AI_SELECT_ACTION_TARGETS()
+          } else {
+          _2137:
+            if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+            } else {
+            _2138:
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_TARGET_PASSING_QUERY(0)
+              goto _2136
+            }
+          }
+        _2136:
+          goto _2141
+        _2143:
+          if (AI_SCENE_FADE_COUNT() == 2) {
+            AI_SELECT_SKILL(192)
+            AI_SELECT_ACTION_TARGETS()
+          } else {
+          _2140:
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_LOWEST_HP_RATE_TARGET()
+            goto _2139
+          }
+        _2139:
+          goto _2141
         }
-      _2139:
-        goto _2141
       _2141:
         return
       } else {
@@ -13634,38 +13101,32 @@ _2146:
 _2207:
   if_not (TEST_MODEL_FLAG(3053)) goto _2208
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2153
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
-    } else {
-    _2151:
-      AI_SELECT_SKILL(66)
-      goto _2150
-    }
-  _2150:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2152
-  _2153:
-    if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-      AI_SELECT_BASIC_ATTACK()
-      AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-    } else {
-    _2154:
-      if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGET_PASSING_QUERY(0)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
       } else {
-      _2155:
+      _2151:
+        AI_SELECT_SKILL(66)
+        goto _2150
+      }
+    _2150:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
+    } else {
+    _2153:
+      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
         AI_SELECT_BASIC_ATTACK()
-        COMM 0x007d
-        goto _2152
+        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+      } else {
+      _2154:
+        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGET_PASSING_QUERY(0)
+        } else {
+        _2155:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_LOWEST_HP_RATE_TARGET()
+          goto _2152
+        }
       }
     }
   _2152:
@@ -13674,38 +13135,32 @@ _2207:
   _2165:
     SET_MODEL_FLAG(3045)
     if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(32)) {
-      push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-      push 1
-      push 0
-      COMM 0x0089
-      PUSHREG
-      EQ
-      AND
-      IF _2159
-      if (local_int[105] <= 50) {
-        AI_SELECT_SKILL(65)
-      } else {
-      _2157:
-        AI_SELECT_SKILL(66)
-        goto _2156
-      }
-    _2156:
-      AI_SELECT_TARGET_PASSING_QUERY(9)
-      goto _2158
-    _2159:
-      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-      } else {
-      _2160:
-        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-          AI_SELECT_BASIC_ATTACK()
-          AI_SELECT_TARGET_PASSING_QUERY(0)
+      if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+        if (local_int[105] <= 50) {
+          AI_SELECT_SKILL(65)
         } else {
-        _2161:
+        _2157:
+          AI_SELECT_SKILL(66)
+          goto _2156
+        }
+      _2156:
+        AI_SELECT_TARGET_PASSING_QUERY(9)
+      } else {
+      _2159:
+        if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
           AI_SELECT_BASIC_ATTACK()
-          COMM 0x007d
-          goto _2158
+          AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+        } else {
+        _2160:
+          if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_TARGET_PASSING_QUERY(0)
+          } else {
+          _2161:
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_LOWEST_HP_RATE_TARGET()
+            goto _2158
+          }
         }
       }
     _2158:
@@ -13725,38 +13180,32 @@ _2164:
 _2208:
   if_not (TEST_MODEL_FLAG(3055)) goto _2209
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2169
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
-    } else {
-    _2167:
-      AI_SELECT_SKILL(66)
-      goto _2166
-    }
-  _2166:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2168
-  _2169:
-    if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-      AI_SELECT_BASIC_ATTACK()
-      AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-    } else {
-    _2170:
-      if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGET_PASSING_QUERY(0)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
       } else {
-      _2171:
+      _2167:
+        AI_SELECT_SKILL(66)
+        goto _2166
+      }
+    _2166:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
+    } else {
+    _2169:
+      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
         AI_SELECT_BASIC_ATTACK()
-        COMM 0x007d
-        goto _2168
+        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+      } else {
+      _2170:
+        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGET_PASSING_QUERY(0)
+        } else {
+        _2171:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_LOWEST_HP_RATE_TARGET()
+          goto _2168
+        }
       }
     }
   _2168:
@@ -13774,38 +13223,32 @@ _2172:
 _2209:
   if_not (TEST_MODEL_FLAG(3051)) goto _2210
   if (TEST_MODEL_FLAG(3045) == 1) {
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2177
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
-    } else {
-    _2175:
-      AI_SELECT_SKILL(66)
-      goto _2174
-    }
-  _2174:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2176
-  _2177:
-    if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-      AI_SELECT_BASIC_ATTACK()
-      AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-    } else {
-    _2178:
-      if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGET_PASSING_QUERY(0)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
       } else {
-      _2179:
+      _2175:
+        AI_SELECT_SKILL(66)
+        goto _2174
+      }
+    _2174:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
+    } else {
+    _2177:
+      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
         AI_SELECT_BASIC_ATTACK()
-        COMM 0x007d
-        goto _2176
+        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+      } else {
+      _2178:
+        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGET_PASSING_QUERY(0)
+        } else {
+        _2179:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_LOWEST_HP_RATE_TARGET()
+          goto _2176
+        }
       }
     }
   _2176:
@@ -13814,38 +13257,32 @@ _2209:
   _2189:
     SET_MODEL_FLAG(3045)
     if (AI_ALL_PLAYERS_HAVE_ACTION_MASK(256)) {
-      push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-      push 1
-      push 0
-      COMM 0x0089
-      PUSHREG
-      EQ
-      AND
-      IF _2183
-      if (local_int[105] <= 50) {
-        AI_SELECT_SKILL(65)
-      } else {
-      _2181:
-        AI_SELECT_SKILL(66)
-        goto _2180
-      }
-    _2180:
-      AI_SELECT_TARGET_PASSING_QUERY(9)
-      goto _2182
-    _2183:
-      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-      } else {
-      _2184:
-        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-          AI_SELECT_BASIC_ATTACK()
-          AI_SELECT_TARGET_PASSING_QUERY(0)
+      if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+        if (local_int[105] <= 50) {
+          AI_SELECT_SKILL(65)
         } else {
-        _2185:
+        _2181:
+          AI_SELECT_SKILL(66)
+          goto _2180
+        }
+      _2180:
+        AI_SELECT_TARGET_PASSING_QUERY(9)
+      } else {
+      _2183:
+        if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
           AI_SELECT_BASIC_ATTACK()
-          COMM 0x007d
-          goto _2182
+          AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+        } else {
+        _2184:
+          if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_TARGET_PASSING_QUERY(0)
+          } else {
+          _2185:
+            AI_SELECT_BASIC_ATTACK()
+            AI_SELECT_LOWEST_HP_RATE_TARGET()
+            goto _2182
+          }
         }
       }
     _2182:
@@ -13865,64 +13302,52 @@ _2188:
 _2210:
   if_not (TEST_MODEL_FLAG(3052)) goto _2202
   if (AI_SCENE_FADE_COUNT() == 2) {
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2193
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
+      } else {
+      _2191:
+        AI_SELECT_SKILL(66)
+        goto _2190
+      }
+    _2190:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
     } else {
-    _2191:
-      AI_SELECT_SKILL(66)
-      goto _2190
+    _2193:
+      AI_SELECT_SKILL(192)
+      AI_SELECT_ACTION_TARGETS()
+      goto _2192
     }
-  _2190:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2192
-  _2193:
-    AI_SELECT_SKILL(192)
-    AI_SELECT_ACTION_TARGETS()
-    goto _2192
   _2192:
     return
   } else {
   _2201:
-    push AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1
-    push 1
-    push 0
-    COMM 0x0089
-    PUSHREG
-    EQ
-    AND
-    IF _2197
-    if (local_int[105] <= 50) {
-      AI_SELECT_SKILL(65)
-    } else {
-    _2195:
-      AI_SELECT_SKILL(66)
-      goto _2194
-    }
-  _2194:
-    AI_SELECT_TARGET_PASSING_QUERY(9)
-    goto _2196
-  _2197:
-    if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
-      AI_SELECT_BASIC_ATTACK()
-      AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
-    } else {
-    _2198:
-      if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
-        AI_SELECT_BASIC_ATTACK()
-        AI_SELECT_TARGET_PASSING_QUERY(0)
+    if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+      if (local_int[105] <= 50) {
+        AI_SELECT_SKILL(65)
       } else {
-      _2199:
+      _2195:
+        AI_SELECT_SKILL(66)
+        goto _2194
+      }
+    _2194:
+      AI_SELECT_TARGET_PASSING_QUERY(9)
+    } else {
+    _2197:
+      if (AI_ANY_PLAYER_HAS_ACTION_MASK(8)) {
         AI_SELECT_BASIC_ATTACK()
-        COMM 0x007d
-        goto _2196
+        AI_SELECT_TARGETS_WITH_ACTION_MASK(8)
+      } else {
+      _2198:
+        if (AI_ANY_PLAYER_PASSES_QUERY(0) == 1 && AI_UNIT_HP_AT_OR_BELOW_RATE(70) == 1) {
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_TARGET_PASSING_QUERY(0)
+        } else {
+        _2199:
+          AI_SELECT_BASIC_ATTACK()
+          AI_SELECT_LOWEST_HP_RATE_TARGET()
+          goto _2196
+        }
       }
     }
   _2196:
@@ -14253,47 +13678,41 @@ _2280:
         return
       } else {
       _2285:
-        push 0
-        push int32(2097150)
-        COMM 0x019b
-        PUSHREG
-        EQ
-        push local_int[113] < 15 + 16 + 12
-        AND
-        IF _2286
-        AI_SELECT_SKILL(349)
-        AI_SELECT_ACTION_TARGETS()
-        return
-        goto _2282
-      _2286:
-        if (local_int[113] < 15 + 16 + 12 + 15) {
-          AI_SELECT_SKILL(15)
+        if (local_int[113] < 15 + 16 + 12 && AI_ANY_ENEMY_PASSES_QUERY(int32(2097150)) == 0) {
+          AI_SELECT_SKILL(349)
           AI_SELECT_ACTION_TARGETS()
           return
         } else {
-        _2287:
-          if (local_int[113] < 15 + 16 + 12 + 15 + 7) {
-            AI_SELECT_SKILL(47)
+        _2286:
+          if (local_int[113] < 15 + 16 + 12 + 15) {
+            AI_SELECT_SKILL(15)
             AI_SELECT_ACTION_TARGETS()
             return
           } else {
-          _2288:
-            if (local_int[113] < 15 + 16 + 12 + 15 + 7 + 15) {
-              AI_SELECT_SKILL(112)
+          _2287:
+            if (local_int[113] < 15 + 16 + 12 + 15 + 7) {
+              AI_SELECT_SKILL(47)
               AI_SELECT_ACTION_TARGETS()
               return
             } else {
-            _2289:
-              if (local_int[113] < 15 + 16 + 12 + 15 + 7 + 15 + 7) {
-                AI_SELECT_SKILL(87)
+            _2288:
+              if (local_int[113] < 15 + 16 + 12 + 15 + 7 + 15) {
+                AI_SELECT_SKILL(112)
                 AI_SELECT_ACTION_TARGETS()
                 return
               } else {
-              _2290:
-                AI_SELECT_BASIC_ATTACK()
-                AI_SELECT_ACTION_TARGETS()
-                return
-                goto _2282
+              _2289:
+                if (local_int[113] < 15 + 16 + 12 + 15 + 7 + 15 + 7) {
+                  AI_SELECT_SKILL(87)
+                  AI_SELECT_ACTION_TARGETS()
+                  return
+                } else {
+                _2290:
+                  AI_SELECT_BASIC_ATTACK()
+                  AI_SELECT_ACTION_TARGETS()
+                  return
+                  goto _2282
+                }
               }
             }
           }
@@ -14339,9 +13758,7 @@ _2291:
       }
     }
   _2293:
-    push 2
-    push 195
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(195, 2)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -14369,9 +13786,7 @@ _2308:
       }
     }
   _2300:
-    push 2
-    push 195
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(195, 2)
     AI_SELECT_ACTION_TARGETS()
     return
   }
@@ -14793,14 +14208,9 @@ girime_zako:
     SET_MODEL_FLAG(3046)
   } else {
   _2397:
-    push 1
-    push 53
-    COMM 0x0085
-    PUSHREG
-    EQ
-    IF _2396
-    SET_MODEL_FLAG(3047)
-    goto _2396
+    if (AI_HAS_OTHER_ENEMY_UNIT_MODE(53) == 1) {
+      SET_MODEL_FLAG(3047)
+    }
   }
 _2396:
   goto _2399
@@ -14862,9 +14272,7 @@ _2408:
   } else {
   _2413:
     if (TEST_MODEL_FLAG(3042) == 1 && local_int[118] < 55) {
-      push 53
-      push 195
-      COMM 0x00e2
+      AI_SELECT_ACTION_BY_KIND(195, 53)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
@@ -14915,9 +14323,8 @@ _2408:
               _2410:
                 FINISH_SCRIPT_MESSAGE_WINDOW()
                 AI_BEGIN_SCENE_TRANSITION()
-                push 574
-                COMM 0x003b
-                COMM 0x0031
+                AI_SET_BATTLE_REQUEST_ARGUMENT(574)
+                AI_SELECT_ESCAPE()
                 AI_APPEND_SELF_TO_TARGETS()
                 return
               } else {
@@ -14942,128 +14349,102 @@ rakusha_zako:
   local_int[119] = RANDOM_ONE_TO(100)
   local_int[120] = RANDOM_ONE_TO(100)
   local_int[121] = RANDOM_ONE_TO(100)
-  push local_int[120] < 30
-  push AI_ENEMY_COUNT_AT_MOST(1) == 0
-  push 1
-  push 16
-  COMM 0x0085
-  PUSHREG
-  EQ
-  push AI_GLOBAL_HISTORY_COUNTER() == 0
-  AND
-  AND
-  AND
-  IF _2429
-  if (AI_ENEMY_COUNT_AT_MOST(2) == 1) {
-    SET_MODEL_FLAG(3045)
-    CLEAR_MODEL_FLAG(3046)
-  } else {
-  _2422:
-    CLEAR_MODEL_FLAG(3045)
-    SET_MODEL_FLAG(3046)
-    goto _2421
-  }
-_2421:
-  SET_MODEL_FLAG(3044)
-  AI_CLEAR_SCENE_TRANSITION()
-  if (TEST_MODEL_FLAG(3045) == 1 && local_int[121] < 33) {
-    AI_SET_CAMERA_BLEND_START(-float32(295.6000061035156, bits=0x4393cccd), -float32(87.9000015258789, bits=0x42afcccd), -float32(1.600000023841858, bits=0x3fcccccd), -float32(0.09099999815225601, bits=0x3dba5e35), -float32(0.46000000834465027, bits=0x3eeb851f), float32(0.03500000014901161, bits=0x3d0f5c29), float32(0.871999979019165, bits=0x3f5f3b64))
-    AI_SET_CAMERA_BLEND_END(-float32(257.20001220703125, bits=0x4380999a), -float32(87.0999984741211, bits=0x42ae3333), -float32(43.099998474121094, bits=0x422c6666), -float32(0.09399999678134918, bits=0x3dc08312), -float32(0.37299999594688416, bits=0x3ebef9db), float32(0.026000000536441803, bits=0x3cd4fdf4), float32(0.9129999876022339, bits=0x3f69ba5e))
-    AI_RUN_CAMERA_BLEND(float32(40.0, bits=0x42200000), float32(30.0, bits=0x41f00000))
-  } else {
-  _2424:
-    if (TEST_MODEL_FLAG(3045) == 1 && local_int[121] < 66) {
-      AI_SET_CAMERA_BLEND_START(-float32(310.0, bits=0x439b0000), -float32(462.0, bits=0x43e70000), -float32(828.5, bits=0x444f2000), float32(0.18400000035762787, bits=0x3e3c6a7f), -float32(0.20499999821186066, bits=0x3e51eb85), -float32(0.04800000041723251, bits=0x3d449ba6), float32(0.9509999752044678, bits=0x3f7374bc))
-      AI_SET_CAMERA_BLEND_END(-float32(39.099998474121094, bits=0x421c6666), -float32(468.5, bits=0x43ea4000), -float32(939.9000244140625, bits=0x446af99a), float32(0.1899999976158142, bits=0x3e428f5c), -float32(0.02199999988079071, bits=0x3cb43958), -float32(0.013000000268220901, bits=0x3c54fdf4), float32(0.972000002861023, bits=0x3f78d4fe))
+  if (AI_GLOBAL_HISTORY_COUNTER() == 0 && AI_HAS_OTHER_ENEMY_UNIT_MODE(16) == 1 && AI_ENEMY_COUNT_AT_MOST(1) == 0 && local_int[120] < 30) {
+    if (AI_ENEMY_COUNT_AT_MOST(2) == 1) {
+      SET_MODEL_FLAG(3045)
+      CLEAR_MODEL_FLAG(3046)
+    } else {
+    _2422:
+      CLEAR_MODEL_FLAG(3045)
+      SET_MODEL_FLAG(3046)
+      goto _2421
+    }
+  _2421:
+    SET_MODEL_FLAG(3044)
+    AI_CLEAR_SCENE_TRANSITION()
+    if (TEST_MODEL_FLAG(3045) == 1 && local_int[121] < 33) {
+      AI_SET_CAMERA_BLEND_START(-float32(295.6000061035156, bits=0x4393cccd), -float32(87.9000015258789, bits=0x42afcccd), -float32(1.600000023841858, bits=0x3fcccccd), -float32(0.09099999815225601, bits=0x3dba5e35), -float32(0.46000000834465027, bits=0x3eeb851f), float32(0.03500000014901161, bits=0x3d0f5c29), float32(0.871999979019165, bits=0x3f5f3b64))
+      AI_SET_CAMERA_BLEND_END(-float32(257.20001220703125, bits=0x4380999a), -float32(87.0999984741211, bits=0x42ae3333), -float32(43.099998474121094, bits=0x422c6666), -float32(0.09399999678134918, bits=0x3dc08312), -float32(0.37299999594688416, bits=0x3ebef9db), float32(0.026000000536441803, bits=0x3cd4fdf4), float32(0.9129999876022339, bits=0x3f69ba5e))
       AI_RUN_CAMERA_BLEND(float32(40.0, bits=0x42200000), float32(30.0, bits=0x41f00000))
     } else {
-    _2425:
-      if (TEST_MODEL_FLAG(3046) == 1 && local_int[121] < 33) {
-        AI_SET_CAMERA_BLEND_START(-float32(357.70001220703125, bits=0x43b2d99a), -float32(185.5, bits=0x43398000), -float32(14.199999809265137, bits=0x41633333), float32(0.02199999988079071, bits=0x3cb43958), -float32(0.4490000009536743, bits=0x3ee5e354), -float32(0.020999999716877937, bits=0x3cac0831), float32(0.8830000162124634, bits=0x3f620c4a))
-        AI_SET_CAMERA_BLEND_END(-float32(339.29998779296875, bits=0x43a9a666), -float32(72.80000305175781, bits=0x4291999a), -float32(77.9000015258789, bits=0x429bcccd), -float32(0.10899999737739563, bits=0x3ddf3b64), -float32(0.382999986410141, bits=0x3ec41893), float32(0.03400000184774399, bits=0x3d0b4396), float32(0.9070000052452087, bits=0x3f683127))
+    _2424:
+      if (TEST_MODEL_FLAG(3045) == 1 && local_int[121] < 66) {
+        AI_SET_CAMERA_BLEND_START(-float32(310.0, bits=0x439b0000), -float32(462.0, bits=0x43e70000), -float32(828.5, bits=0x444f2000), float32(0.18400000035762787, bits=0x3e3c6a7f), -float32(0.20499999821186066, bits=0x3e51eb85), -float32(0.04800000041723251, bits=0x3d449ba6), float32(0.9509999752044678, bits=0x3f7374bc))
+        AI_SET_CAMERA_BLEND_END(-float32(39.099998474121094, bits=0x421c6666), -float32(468.5, bits=0x43ea4000), -float32(939.9000244140625, bits=0x446af99a), float32(0.1899999976158142, bits=0x3e428f5c), -float32(0.02199999988079071, bits=0x3cb43958), -float32(0.013000000268220901, bits=0x3c54fdf4), float32(0.972000002861023, bits=0x3f78d4fe))
         AI_RUN_CAMERA_BLEND(float32(40.0, bits=0x42200000), float32(30.0, bits=0x41f00000))
       } else {
-      _2426:
-        if (TEST_MODEL_FLAG(3046) == 1 && local_int[121] < 66) {
-          AI_SET_CAMERA_BLEND_START(float32(214.5, bits=0x43568000), -float32(35.70000076293945, bits=0x420ecccd), float32(677.0999755859375, bits=0x44294666), -float32(0.007000000216066837, bits=0x3be56042), -float32(0.9860000014305115, bits=0x3f7c6a7f), float32(0.05700000002980232, bits=0x3d6978d5), -float32(0.0820000022649765, bits=0x3da7ef9e))
-          AI_SET_CAMERA_BLEND_END(-float32(255.5, bits=0x437f8000), -float32(48.900001525878906, bits=0x4243999a), float32(631.4000244140625, bits=0x441dd99a), -float32(0.023000000044703484, bits=0x3cbc6a7f), -float32(0.9710000157356262, bits=0x3f789375), float32(0.05299999937415123, bits=0x3d591687), float32(0.18799999356269836, bits=0x3e408312))
+      _2425:
+        if (TEST_MODEL_FLAG(3046) == 1 && local_int[121] < 33) {
+          AI_SET_CAMERA_BLEND_START(-float32(357.70001220703125, bits=0x43b2d99a), -float32(185.5, bits=0x43398000), -float32(14.199999809265137, bits=0x41633333), float32(0.02199999988079071, bits=0x3cb43958), -float32(0.4490000009536743, bits=0x3ee5e354), -float32(0.020999999716877937, bits=0x3cac0831), float32(0.8830000162124634, bits=0x3f620c4a))
+          AI_SET_CAMERA_BLEND_END(-float32(339.29998779296875, bits=0x43a9a666), -float32(72.80000305175781, bits=0x4291999a), -float32(77.9000015258789, bits=0x429bcccd), -float32(0.10899999737739563, bits=0x3ddf3b64), -float32(0.382999986410141, bits=0x3ec41893), float32(0.03400000184774399, bits=0x3d0b4396), float32(0.9070000052452087, bits=0x3f683127))
           AI_RUN_CAMERA_BLEND(float32(40.0, bits=0x42200000), float32(30.0, bits=0x41f00000))
         } else {
-        _2427:
-          AI_QUEUE_UNBOUND_COMMAND_SOUND()
-          goto _2423
+        _2426:
+          if (TEST_MODEL_FLAG(3046) == 1 && local_int[121] < 66) {
+            AI_SET_CAMERA_BLEND_START(float32(214.5, bits=0x43568000), -float32(35.70000076293945, bits=0x420ecccd), float32(677.0999755859375, bits=0x44294666), -float32(0.007000000216066837, bits=0x3be56042), -float32(0.9860000014305115, bits=0x3f7c6a7f), float32(0.05700000002980232, bits=0x3d6978d5), -float32(0.0820000022649765, bits=0x3da7ef9e))
+            AI_SET_CAMERA_BLEND_END(-float32(255.5, bits=0x437f8000), -float32(48.900001525878906, bits=0x4243999a), float32(631.4000244140625, bits=0x441dd99a), -float32(0.023000000044703484, bits=0x3cbc6a7f), -float32(0.9710000157356262, bits=0x3f789375), float32(0.05299999937415123, bits=0x3d591687), float32(0.18799999356269836, bits=0x3e408312))
+            AI_RUN_CAMERA_BLEND(float32(40.0, bits=0x42200000), float32(30.0, bits=0x41f00000))
+          } else {
+          _2427:
+            AI_QUEUE_UNBOUND_COMMAND_SOUND()
+            goto _2423
+          }
         }
       }
     }
+  _2423:
+    ACTIVATE_MESSAGE_PANEL()
+    MESSAGE_REQUEST_AND_POLL(message(RAKUSHASA_01))
+    FINISH_SCRIPT_MESSAGE_WINDOW()
+    AI_BEGIN_SCENE_TRANSITION()
+  } else {
+  _2429:
+    CLEAR_MODEL_FLAG(3044)
+    goto _2428
   }
-_2423:
-  ACTIVATE_MESSAGE_PANEL()
-  MESSAGE_REQUEST_AND_POLL(message(RAKUSHASA_01))
-  FINISH_SCRIPT_MESSAGE_WINDOW()
-  AI_BEGIN_SCENE_TRANSITION()
-  goto _2428
-_2429:
-  CLEAR_MODEL_FLAG(3044)
-  goto _2428
 _2428:
-  push 0
-  push int32(2097150)
-  COMM 0x019b
-  PUSHREG
-  EQ
-  push TEST_MODEL_FLAG(3044) == 0 && local_int[119] < 25
-  AND
-  IF _2431
-  AI_SELECT_SKILL(364)
-  AI_SELECT_ACTION_TARGETS()
-  return
-  goto _2430
-_2431:
-  if (TEST_MODEL_FLAG(3044) == 0 && local_int[119] < 25 + 25) {
-    AI_SELECT_SKILL(129)
+  if (TEST_MODEL_FLAG(3044) == 0 && local_int[119] < 25 && AI_ANY_ENEMY_PASSES_QUERY(int32(2097150)) == 0) {
+    AI_SELECT_SKILL(364)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
-  _2432:
-    push local_int[119] < 25 + 25 + 25
-    push 0
-    COMM 0x01a2
-    PUSHREG
-    EQ
-    push TEST_MODEL_FLAG(3044) == 0
-    AND
-    AND
-    IF _2433
-    AI_SELECT_SKILL(66)
-    AI_SELECT_ACTION_TARGETS()
-    return
-    goto _2430
-  _2433:
-    if (TEST_MODEL_FLAG(3044) == 0) {
-      AI_SELECT_SKILL(132)
+  _2431:
+    if (TEST_MODEL_FLAG(3044) == 0 && local_int[119] < 25 + 25) {
+      AI_SELECT_SKILL(129)
       AI_SELECT_ACTION_TARGETS()
       return
     } else {
-    _2434:
-      if (TEST_MODEL_FLAG(3044) == 1 && local_int[119] < 33) {
-        AI_SELECT_SKILL(131)
-        push 0
-        COMM 0x00e7
+    _2432:
+      if (TEST_MODEL_FLAG(3044) == 0 && AI_BATTLE_READY_WITH_ZERO_TURNS() == 0 && local_int[119] < 25 + 25 + 25) {
+        AI_SELECT_SKILL(66)
+        AI_SELECT_ACTION_TARGETS()
         return
       } else {
-      _2435:
-        if (TEST_MODEL_FLAG(3044) == 1 && local_int[119] < 33 + 33) {
-          AI_SELECT_SKILL(116)
-          push 0
-          COMM 0x00e7
+      _2433:
+        if (TEST_MODEL_FLAG(3044) == 0) {
+          AI_SELECT_SKILL(132)
+          AI_SELECT_ACTION_TARGETS()
           return
         } else {
-        _2436:
-          AI_SELECT_BASIC_ATTACK()
-          push 0
-          COMM 0x00e7
-          return
-          goto _2430
+        _2434:
+          if (TEST_MODEL_FLAG(3044) == 1 && local_int[119] < 33) {
+            AI_SELECT_SKILL(131)
+            AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT(0)
+            return
+          } else {
+          _2435:
+            if (TEST_MODEL_FLAG(3044) == 1 && local_int[119] < 33 + 33) {
+              AI_SELECT_SKILL(116)
+              AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT(0)
+              return
+            } else {
+            _2436:
+              AI_SELECT_BASIC_ATTACK()
+              AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT(0)
+              return
+              goto _2430
+            }
+          }
         }
       }
     }
@@ -15081,23 +14462,13 @@ ganesha_zako:
     goto _2437
   }
 _2437:
-  push 0
-  push 56
-  COMM 0x01c8
-  PUSHREG
-  EQ
-  push 0
-  push 55
-  COMM 0x01c8
-  PUSHREG
-  EQ
-  AND
-  IF _2440
-  CLEAR_MODEL_FLAG(3058)
-  goto _2439
-_2440:
-  SET_MODEL_FLAG(3058)
-  goto _2439
+  if (AI_ANY_ENEMY_HAS_QUEUED_ACTION(55) == 0 && AI_ANY_ENEMY_HAS_QUEUED_ACTION(56) == 0) {
+    CLEAR_MODEL_FLAG(3058)
+  } else {
+  _2440:
+    SET_MODEL_FLAG(3058)
+    goto _2439
+  }
 _2439:
   local_int[122] = RANDOM_ONE_TO(100)
   if (AI_ANY_PLAYER_HAS_ACTION_MASK(2) == 1) {
@@ -15187,17 +14558,13 @@ _2453:
 _2455:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(3) == 1) goto _2460
   SET_MODEL_FLAG(3042)
-  push 1
-  push 3
-  COMM 0x0089
-  PUSHREG
-  EQ
-  IF _2458
-  SET_MODEL_FLAG(3043)
-  goto _2457
-_2458:
-  CLEAR_MODEL_FLAG(3043)
-  goto _2457
+  if (AI_NO_PLAYER_BLOCKS_QUERY(3) == 1) {
+    SET_MODEL_FLAG(3043)
+  } else {
+  _2458:
+    CLEAR_MODEL_FLAG(3043)
+    goto _2457
+  }
 _2457:
   goto _2459
 _2460:
@@ -15205,31 +14572,23 @@ _2460:
   CLEAR_MODEL_FLAG(3043)
   goto _2459
 _2459:
-  push 1
-  push 3
-  COMM 0x01c6
-  PUSHREG
-  EQ
-  IF _2462
-  SET_MODEL_FLAG(3044)
-  goto _2461
-_2462:
-  CLEAR_MODEL_FLAG(3044)
-  goto _2461
+  if (AI_ANY_PLAYER_BLOCKS_ELEMENT(3) == 1) {
+    SET_MODEL_FLAG(3044)
+  } else {
+  _2462:
+    CLEAR_MODEL_FLAG(3044)
+    goto _2461
+  }
 _2461:
   if_not (AI_ANY_PLAYER_PASSES_QUERY(0) == 1) goto _2466
   SET_MODEL_FLAG(3045)
-  push 1
-  push 0
-  COMM 0x0089
-  PUSHREG
-  EQ
-  IF _2464
-  SET_MODEL_FLAG(3046)
-  goto _2463
-_2464:
-  CLEAR_MODEL_FLAG(3046)
-  goto _2463
+  if (AI_NO_PLAYER_BLOCKS_QUERY(0) == 1) {
+    SET_MODEL_FLAG(3046)
+  } else {
+  _2464:
+    CLEAR_MODEL_FLAG(3046)
+    goto _2463
+  }
 _2463:
   goto _2465
 _2466:
@@ -15247,9 +14606,7 @@ _2465:
 _2467:
   local_int[123] = RANDOM_ONE_TO(100)
   if (local_int[123] < 45 && TEST_MODEL_FLAG(3047) == 1) {
-    push 323
-    push 211
-    COMM 0x00e2
+    AI_SELECT_ACTION_BY_KIND(211, 323)
     AI_SELECT_ACTION_TARGETS()
     return
   } else {
@@ -15444,17 +14801,13 @@ girime_deka:
 _2494:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   AI_BEGIN_SCENE_TRANSITION()
-  push 0
-  push 60
-  COMM 0x00df
-  PUSHREG
-  EQ
-  IF _2497
-  SET_MODEL_FLAG(3041)
-  goto _2496
-_2497:
-  CLEAR_MODEL_FLAG(3041)
-  goto _2496
+  if (AI_COUNTER_REACHED_LIMIT(60) == 0) {
+    SET_MODEL_FLAG(3041)
+  } else {
+  _2497:
+    CLEAR_MODEL_FLAG(3041)
+    goto _2496
+  }
 _2496:
   goto _2498
 _2499:
@@ -15471,7 +14824,7 @@ _2499:
     MESSAGE_REQUEST_AND_POLL(message(giri_03e))
     FINISH_SCRIPT_MESSAGE_WINDOW()
     AI_BEGIN_SCENE_TRANSITION()
-    COMM 0x0031
+    AI_SELECT_ESCAPE()
     AI_APPEND_SELF_TO_TARGETS()
     return
   }
