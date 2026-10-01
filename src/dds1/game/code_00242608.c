@@ -286,6 +286,24 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->variant = 0;
 }
 
+typedef struct CampKeyNode {
+    u16 frame;
+    u8 pad02[0xA];
+    s16 condition;             /* 0xC */
+    u8 pad0E[0x22];
+    struct CampKeyNode *next;  /* 0x30 */
+    struct CampKeyNode *alt;   /* 0x34 */
+} CampKeyNode;
+
+typedef struct CampKeyTrack {
+    s32 type;
+    u8 pad04[0x18];
+    s16 base;                  /* 0x1C */
+    u8 pad1E[0x36];
+    CampKeyNode *first;        /* 0x54 */
+    CampKeyNode *fallback;     /* 0x58 */
+} CampKeyTrack;
+
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
 
 typedef struct CampWindowDefaults {
@@ -322,24 +340,6 @@ void mnuInitializeCampListLayoutDefaults(CampWindowDefaults *w) {
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00243048);
-
-typedef struct CampKeyNode {
-    u16 frame;
-    u8 pad02[0xA];
-    s16 condition;             /* 0xC */
-    u8 pad0E[0x22];
-    struct CampKeyNode *next;  /* 0x30 */
-    struct CampKeyNode *alt;   /* 0x34 */
-} CampKeyNode;
-
-typedef struct CampKeyTrack {
-    s32 type;
-    u8 pad04[0x18];
-    s16 base;                  /* 0x1C */
-    u8 pad1E[0x36];
-    CampKeyNode *first;        /* 0x54 */
-    CampKeyNode *fallback;     /* 0x58 */
-} CampKeyTrack;
 
 extern s32 evtViewerTestIndexedCondition(u32);
 
