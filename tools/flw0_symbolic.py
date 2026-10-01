@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import flw0
 import flw0_profiles
+import msg1
 
 
 _SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
@@ -238,8 +239,17 @@ def render(script: flw0.Flw0File, profile_name: str | None = None) -> str:
         )
     for symbol in symbols_at_pc.get(pc, ()):
         lines.append(f"{symbol}:")
-    lines.extend(("end", "", "messages"))
-    lines.extend(_raw_block(script.section_bytes(script.sections[3])))
+    lines.append("end")
+    lines.append("")
+    message_data = script.section_bytes(script.sections[3])
+    if message_data:
+        try:
+            lines.extend(msg1.render(message_data))
+        except msg1.Msg1Error:
+            lines.append("messages")
+            lines.extend(_raw_block(message_data))
+    else:
+        lines.append("messages")
     lines.extend(("end", "", "strings"))
     lines.extend(string_lines)
     lines.append("end")
@@ -429,6 +439,7 @@ def parse(text: str) -> flw0.Flw0File:
     procedures: list[Declaration] = []
     jump_labels: list[Declaration] = []
     blocks: dict[str, list[tuple[int, str]]] = {}
+    messages_are_msg1 = False
     index = 1
     while index < len(meaningful):
         line_number, line = meaningful[index]
@@ -459,7 +470,10 @@ def parse(text: str) -> flw0.Flw0File:
             index += 1
             continue
         if directive in ("code", "messages", "strings"):
-            if len(tokens) != 1 or directive in blocks:
+            valid_header = len(tokens) == 1 or (
+                directive == "messages" and tokens == ["messages", "msg1"]
+            )
+            if not valid_header or directive in blocks:
                 raise flw0.Flw0Error(f"line {line_number}: invalid {directive} block")
             content: list[tuple[int, str]] = []
             index += 1
@@ -469,6 +483,8 @@ def parse(text: str) -> flw0.Flw0File:
             if index == len(meaningful):
                 raise flw0.Flw0Error(f"line {line_number}: block has no 'end'")
             blocks[directive] = content
+            if directive == "messages" and len(tokens) == 2:
+                messages_are_msg1 = True
             index += 1
             continue
         raise flw0.Flw0Error(
@@ -499,7 +515,13 @@ def parse(text: str) -> flw0.Flw0File:
     )
     procedure_data = _named_payload(procedures, labels)
     jump_label_data = _named_payload(jump_labels, labels)
-    message_data = _parse_raw_block(blocks["messages"])
+    if messages_are_msg1:
+        try:
+            message_data = msg1.parse_source(blocks["messages"])
+        except msg1.Msg1Error as exc:
+            raise flw0.Flw0Error(str(exc)) from exc
+    else:
+        message_data = _parse_raw_block(blocks["messages"])
     payloads = (
         procedure_data,
         jump_label_data,
