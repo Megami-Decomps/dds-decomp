@@ -1725,13 +1725,15 @@ void fldClearMenuEntries(void) {
     D_003BAF2C = 0;
 }
 
+/* One of the 32 field object slots. Field names match the DDS2 copy of this
+ * struct (src/dds2/game/code_001442D0.c), which is already reviewed. */
 typedef struct {
     s32 unk0;
-    s32 unk4;
+    s32 id;
     s32 unk8;
-    s32 unkC;
+    s32 activationRequested;
     u8 pad10[0x14];
-    s32 unk24;
+    s32 effectNode;
     u8 pad28[8];
 } FldObj30; /* 0x30 bytes */
 
@@ -1748,14 +1750,14 @@ void fldResetObjectSlots(void) {
 
     D_003BAF80 = 0;
     for (i = 0; i < 32; i++) {
-        D_003D50A0[i].unk4 = -1;
+        D_003D50A0[i].id = -1;
         D_003D50A0[i].unk0 = 0;
         D_003D50A0[i].unk8 = 0;
-        D_003D50A0[i].unkC = 0;
-        if (D_003D50A0[i].unk24 != 0) {
-            effDestroyNode(D_003D50A0[i].unk24);
+        D_003D50A0[i].activationRequested = 0;
+        if (D_003D50A0[i].effectNode != 0) {
+            effDestroyNode(D_003D50A0[i].effectNode);
         }
-        D_003D50A0[i].unk24 = 0;
+        D_003D50A0[i].effectNode = 0;
     }
     D_003BAF70 = 0;
     D_003BAF7C = 0;
@@ -1779,8 +1781,8 @@ void fldActivateObjectById(s32 id) {
     s32 i;
 
     for (i = 0; i < D_003BAF80; i++) {
-        if (D_003D50A0[i].unk4 == id && D_003D50A0[i].unk8 == 0) {
-            D_003D50A0[i].unkC = 1;
+        if (D_003D50A0[i].id == id && D_003D50A0[i].unk8 == 0) {
+            D_003D50A0[i].activationRequested = 1;
         }
     }
 }
@@ -1789,17 +1791,17 @@ void fldReleaseObjectSlots(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (D_003D50A0[i].unk24 != 0) {
-            effDestroyNode(D_003D50A0[i].unk24);
-            D_003D50A0[i].unk24 = 0;
+        if (D_003D50A0[i].effectNode != 0) {
+            effDestroyNode(D_003D50A0[i].effectNode);
+            D_003D50A0[i].effectNode = 0;
         }
     }
     D_003BAF80 = 0;
     for (i = 0; i < 32; i++) {
-        D_003D50A0[i].unk4 = -1;
+        D_003D50A0[i].id = -1;
         D_003D50A0[i].unk0 = 0;
         D_003D50A0[i].unk8 = 0;
-        D_003D50A0[i].unkC = 0;
+        D_003D50A0[i].activationRequested = 0;
     }
 }
 
