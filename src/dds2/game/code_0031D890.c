@@ -118,9 +118,33 @@ void itfReleaseCompactSlot(u32 *flags) {
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E020);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E198);
+extern void itfFadeSetTint(u32 tint);
 
-INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E240);
+void func_0031E198(u8 *work) {
+    itfFadeSetTint(*(u32 *)(work + 0x34));
+    memset(work + 0xB4, 0, 0x18);
+    memset(work + 0xCC, 0, 0x1C);
+    memset(work + 0xE8, 0, 0x1C);
+    memset(work + 0x104, 0, 0x48);
+    memset(work + 0x14C, 0, 0x1C);
+    memset(work + 0x168, 0, 0x1C);
+    memset(work + 0x184, 0, 0x18);
+    memset(work + 0x1B8, 0, 0x1C);
+}
+
+extern void itfFadeClearTint(void);
+
+void func_0031E240(u8 *work) {
+    itfFadeClearTint();
+    memset(work + 0xB4, 0, 0x18);
+    memset(work + 0xCC, 0, 0x1C);
+    memset(work + 0xE8, 0, 0x1C);
+    memset(work + 0x104, 0, 0x48);
+    memset(work + 0x14C, 0, 0x1C);
+    memset(work + 0x168, 0, 0x1C);
+    memset(work + 0x184, 0, 0x18);
+    memset(work + 0x1B8, 0, 0x1C);
+}
 
 INCLUDE_ASM(const s32, "game/code_0031D890", func_0031E2E8);
 
