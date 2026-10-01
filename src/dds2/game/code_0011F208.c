@@ -546,8 +546,8 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad) {
 }
 
 
-void fldStepColorChannelByCurrentPad(u32 *arg0, s32 arg1) {
-    fldStepColorChannelByPad(arg0, arg1, (s8 *)D_0037F530);
+void fldStepColorChannelByCurrentPad(u32 *color, s32 channel) {
+    fldStepColorChannelByPad(color, channel, (s8 *)D_0037F530);
 }
 
 void fldFormatSecondsText(f32 value, char *out) {

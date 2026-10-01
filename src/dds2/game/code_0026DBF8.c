@@ -2899,9 +2899,9 @@ void btlReleasePanelASprite(u32 obj) {
     mnuFreeMantraSparkleEmitter(((MantraPanelSpriteView *)obj)->spriteHandle);
 }
 
-s32 btlDrawPanelA(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
-    func_0026E788(x, y, 0, a3, 0x77, 0, packet);
-    func_0026E788(x, y, 0, a3, 0x89, 0, packet);
+s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
+    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
+    func_0026E788(x, y, 0, amount, 0x89, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
@@ -2998,9 +2998,9 @@ void btlReleasePanelBSprites(s32 obj) {
     mnuReleaseMantraPanelBurstPool((u32 *)((MantraPanelSpriteView *)obj)->burstPool);
 }
 
-s32 btlDrawPanelB(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
-    func_0026E788(x, y, 0, a3, 0x77, 0, packet);
-    func_0026E788(x, y, 0, a3, 0x87, 0, packet);
+s32 btlDrawPanelB(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
+    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
+    func_0026E788(x, y, 0, amount, 0x87, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0xffffff, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
@@ -3018,12 +3018,12 @@ void mnuDrawMantraBackdropWithGsTest(void) {
 void func_0027FB68(void) {
 }
 
-s32 btlDrawPanelC(s32 x, s32 y, u32 a2, u32 a3, u32 a4, u32 a5, u32 packet) {
+s32 btlDrawPanelC(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 packet) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
-    func_0026E788(x, y, 0, a3, 0x77, 0, packet);
-    func_0026E788(x, y, 0, a3, 0x9A, 0, packet);
+    func_0026E788(x, y, 0, amount, 0x77, 0, packet);
+    func_0026E788(x, y, 0, amount, 0x9A, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     func_00308808((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);

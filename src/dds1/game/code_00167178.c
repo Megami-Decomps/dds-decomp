@@ -28,8 +28,10 @@ u32 func_001673C0(u32 arg0) {
     return arg0;
 }
 
-void func_001673C8(s32 arg0, u32 arg1) {
-    *(u32 *)(arg0 + 0x120) = arg1;
+/* Sets the blend colour word of a resource handle (see the blur caller in
+   code_00185E18.c). */
+void func_001673C8(u32 handle, u32 color) {
+    *(u32 *)(handle + 0x120) = color;
 }
 
 INCLUDE_ASM(const s32, "game/code_00167178", func_001673D0);

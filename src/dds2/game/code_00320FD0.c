@@ -195,15 +195,15 @@ u8 * func_00321238(void) {
     return (u8 *)&mnuStepCounterState;
 }
 
-void mnuSetResourceProgressCadence(u8 arg0, u8 arg1) {
-    mnuStepCounterState.limit = arg0;
-    mnuStepCounterState.step = arg1;
+void mnuSetResourceProgressCadence(u8 limit, u8 step) {
+    mnuStepCounterState.limit = limit;
+    mnuStepCounterState.step = step;
 }
 
-void mnuResetProgressLimitAndStep(u8 arg0, u8 arg1) {
+void mnuResetProgressLimitAndStep(u8 limit, u8 step) {
     memset(&mnuStepCounterState, 0, 8);
-    mnuStepCounterState.limit = arg0;
-    mnuStepCounterState.step = arg1;
+    mnuStepCounterState.limit = limit;
+    mnuStepCounterState.step = step;
 }
 
 s32 mnuAdvanceCursorStepUntilThreshold(void) {
@@ -222,9 +222,9 @@ void mnuResetResourceProgressCounters(void) {
     mnuStepCounterState.total = 0;
 }
 
-void func_00321318(u32 arg0, u32 arg1) {
-    mnuResourceRecords = arg0;
-    D_004390C4 = arg1;
+void func_00321318(u32 records, u32 count) {
+    mnuResourceRecords = records;
+    D_004390C4 = count;
 }
 
 /* The externally owned table stores 28-byte records. */
