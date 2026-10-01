@@ -408,7 +408,6 @@ s32 func_001A2F60(void) {
     s32 first;
     s32 second;
     s32 third;
-    s32 i;
 
     if (cursor->window < 0) {
         return 1;
@@ -420,9 +419,8 @@ s32 func_001A2F60(void) {
     second = scrReadIntParameter(1);
     third = scrReadIntParameter(2);
     cursor->items[cursor->unk6].second = first;
-    i = cursor->unk6;
-    cursor->items[i].third = third;
-    cursor->items[i].first = second;
+    cursor->items[cursor->unk6].first = second;
+    cursor->items[cursor->unk6].third = third;
     cursor->unk6++;
     return 1;
 }

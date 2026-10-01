@@ -53,7 +53,30 @@ void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     func_003417A8(0x170, 0, packet, 0x20);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_00342040);
+typedef struct SndListenerState {
+    s32 header[2];
+    s32 value[6];
+} SndListenerState;
+
+extern SndListenerState D_004779B0;
+
+/* Scale six world-space values and send them to the sound engine when they changed. */
+void func_00342040(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
+    SndListenerState state;
+
+    state.value[0] = a * 0.1f;
+    state.value[1] = b * 0.1f;
+    state.value[2] = c * 0.1f;
+    state.value[3] = d * 0.1f;
+    state.value[4] = e * 0.1f;
+    state.value[5] = f * 0.1f;
+    if (D_004779B0.value[0] != state.value[0] || D_004779B0.value[1] != state.value[1] ||
+        D_004779B0.value[2] != state.value[2] || D_004779B0.value[3] != state.value[3] ||
+        D_004779B0.value[4] != state.value[4] || D_004779B0.value[5] != state.value[5]) {
+        func_003417A8(0x160, 0, &state, 0x20);
+        D_004779B0 = state;
+    }
+}
 
 typedef struct SndTrackSlot {
     s32 id;      /* 0x00 */
@@ -62,16 +85,21 @@ typedef struct SndTrackSlot {
     u8 pad06[2];
 } SndTrackSlot;
 
+typedef struct FE7AA40Slots {
+    /* 0x000 */ u8 pad000[0x190];
+    /* 0x190 */ SndTrackSlot slots[13];
+} FE7AA40Slots;
+
 /* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
    current track, else 0. */
 s32 func_00342168(s32 packed) {
+    FE7AA40Slots *work = (FE7AA40Slots *)D_0047AA40;
     s32 id = packed >> 16;
-    u8 *base = D_0047AA40;
     SndTrackSlot *slot;
     s32 i;
 
-    func_003666D8(base, base + 0x8D0);
-    slot = (SndTrackSlot *)(base + 0x190);
+    func_003666D8(work, (u8 *)work + 0x8D0);
+    slot = work->slots;
     for (i = 0; i < 13; i++) {
         if (slot->id == id) {
             return 1;
@@ -81,7 +109,38 @@ s32 func_00342168(s32 packed) {
     return D_00438B80 == id ? 2 : 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00341FE8", func_003421E8);
+extern s32 func_0035C860();
+extern void func_002A1040();
+extern void sdfSleepWithAlarm();
+extern void (*D_00438B98)(void);
+
+/* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
+void func_003421E8(s32 packed) {
+    char name[0x10];
+    char path[0x100];
+    s32 status = func_00342168(packed);
+    s32 id;
+
+    switch (status) {
+    case 0:
+        id = packed >> 16;
+        func_0035C860(name, "MIDI%04X.SMG", id);
+        func_002A1040(path, name);
+        func_003417A8(0xA0, 0, path, strlen(path) + 1);
+        D_00438B80 = id;
+        break;
+    case 1:
+        break;
+    case 2:
+        do {
+            sdfSleepWithAlarm(2);
+            if (D_00438B98 != NULL) {
+                D_00438B98();
+            }
+        } while (func_00342168(packed) != 1);
+        break;
+    }
+}
 
 u32 sndSendFilenameCommand(char *filename) {
     u32 length = strlen(filename);
