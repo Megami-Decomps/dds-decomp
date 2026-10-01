@@ -12,8 +12,7 @@ jump_label _3 reserved=0x00000000
 code
 e802_main:
   PROC e802_main
-  push 802
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(802)
   SCREEN_FADE_B(0, 1)
   push 3
   push 802
@@ -51,11 +50,7 @@ e802_main:
   push -(105)
   push 0
   COMM 0x0048
-  push 4
-  push 802
-  COMM 0x00c9
-  PUSHREG
-  POPLIX 0x0000
+  local_int[0] = BIND_MODEL_MOTION_SOUND(802, 4)
   if (TEST_MODEL_FLAG(1065)) {
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(local_int[0], READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01)))
   } else {

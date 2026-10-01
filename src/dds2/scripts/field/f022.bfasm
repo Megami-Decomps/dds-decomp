@@ -773,9 +773,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1624,9 +1622,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1704,9 +1700,7 @@ _207:
       QUEUE_WORLD_OBJECT_PENDING_VALUE(local_int[52], READ_SECONDARY_WORLD_ID_VALUE(string(ppos01_2)))
       SET_MESSAGE_WINDOW_GEOMETRY(0, 225, 3)
       MESSAGE_REQUEST_AND_POLL(message(npc01_022_001_02))
-      push 1
-      push 225
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(225, 1)
       SET_MODEL_FLAG(451)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[52])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -1799,9 +1793,7 @@ _221:
     _224:
       SET_MESSAGE_WINDOW_GEOMETRY(0, 225, 3)
       MESSAGE_REQUEST_AND_POLL(message(npc02_022_002_02))
-      push 1
-      push 225
-      COMM 0x0070
+      CHANGE_ITEM_COUNT(225, 1)
       SET_MODEL_FLAG(451)
       CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[55])
       FINISH_SCRIPT_MESSAGE_WINDOW()
@@ -2843,21 +2835,15 @@ proc_0035:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_4))
     push local_int[78]
     COMM 0x009d
-    push 0
-    push local_int[78]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[78], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_3))
     push local_int[79]
     COMM 0x009d
-    push 0
-    push local_int[79]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[79], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_4))
     push local_int[80]
     COMM 0x009d
-    push 0
-    push local_int[80]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[80], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     COMM 0x011f
     COMM 0x0121
@@ -2907,19 +2893,13 @@ _379:
   MESSAGE_REQUEST_AND_POLL(message(FE02_KARMA06))
   FINISH_SCRIPT_MESSAGE_WINDOW()
   SET_MODEL_FLAG(2305)
-  push 1
-  push 193
-  COMM 0x0070
+  CHANGE_ITEM_COUNT(193, 1)
   if (TEST_MODEL_FLAG(2907)) {
-    push 1
-    push 242
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(242, 1)
   }
 _381:
   if (TEST_MODEL_FLAG(2976)) {
-    push 1
-    push 248
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(248, 1)
   }
 _383:
   SET_SOLAR_OVERLAY_MODE(3)
@@ -3011,27 +2991,19 @@ proc_0038:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_22_2))
     push local_int[85]
     COMM 0x009d
-    push 0
-    push local_int[85]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[85], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_22_3))
     push local_int[86]
     COMM 0x009d
-    push 0
-    push local_int[86]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[86], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_2))
     push local_int[87]
     COMM 0x009d
-    push 0
-    push local_int[87]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[87], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_13_2))
     push local_int[88]
     COMM 0x009d
-    push 0
-    push local_int[88]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[88], 0)
     SET_MODEL_FLAG(1165)
     SET_MODEL_FLAG(1163)
     CLEAR_MODEL_FLAG(1164)
@@ -3509,21 +3481,15 @@ proc_0043:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_4))
     push local_int[92]
     COMM 0x009d
-    push 0
-    push local_int[92]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[92], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_5))
     push local_int[93]
     COMM 0x009d
-    push 0
-    push local_int[93]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[93], 0)
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_15_3))
     push local_int[94]
     COMM 0x009d
-    push 0
-    push local_int[94]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[94], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     COMM 0x011f
     COMM 0x0121
@@ -4347,9 +4313,7 @@ boss_battle:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_5))
     push local_int[100]
     COMM 0x009d
-    push 0
-    push local_int[100]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[100], 0)
     WAIT_FOR_TIMER_LIMIT(25)
     COMM 0x011f
     COMM 0x0121
@@ -4369,9 +4333,7 @@ boss_after:
   SET_SOLAR_OVERLAY_MODE(0)
   SET_MESSAGE_WINDOW_GEOMETRY(0, 115, 3)
   SET_MODEL_FLAG(2448)
-  push 1
-  push 115
-  COMM 0x0070
+  CHANGE_ITEM_COUNT(115, 1)
   ACTIVATE_MESSAGE_PANEL()
   MESSAGE_REQUEST_AND_POLL(message(BOSS_AFTER))
   FINISH_SCRIPT_MESSAGE_WINDOW()

@@ -81,8 +81,7 @@ e703_main:
       WAIT_FOR_TIMER_START()
       RESET_FIELD_EFFECTS()
       RESET_DRAW_EFFECTS()
-      push 703
-      COMM 0x00c8
+      WAIT_FOR_CAMP_TASK(703)
       push 4
       push 703
       COMM 0x00ca
@@ -96,16 +95,8 @@ e703_main:
       push -(63)
       push 0
       COMM 0x0048
-      push 2
-      push 703
-      COMM 0x00c9
-      PUSHREG
-      POPIX 0x0007
-      push 3
-      push 703
-      COMM 0x00c9
-      PUSHREG
-      POPIX 0x0006
+      global_int[7] = BIND_MODEL_MOTION_SOUND(703, 2)
+      global_int[6] = BIND_MODEL_MOTION_SOUND(703, 3)
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[6], READ_SECONDARY_WORLD_ID_VALUE(string(p01)))
       ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[7], READ_SECONDARY_WORLD_ID_VALUE(string(p02)))
       push float32(0.37599998712539673, bits=0x3ec08312)

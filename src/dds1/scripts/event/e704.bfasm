@@ -58,8 +58,7 @@ jump_label _61 reserved=0x00000000
 code
 e704_main:
   PROC e704_main
-  push 614
-  COMM 0x00c8
+  WAIT_FOR_CAMP_TASK(614)
   push 614
   COMM 0x008d
   global_int[4] = 0

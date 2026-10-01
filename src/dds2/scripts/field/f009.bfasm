@@ -577,9 +577,7 @@ _9:
                           goto _21
                         }
                       _21:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _23
                       }
                     _23:
@@ -1428,9 +1426,7 @@ _195:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[50]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[50], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1879,9 +1875,7 @@ _257:
         ACTIVATE_MESSAGE_PANEL()
         SET_MESSAGE_WINDOW_GEOMETRY(0, 107, 3)
         MESSAGE_REQUEST_AND_POLL(message(npc10_009_001_02_03))
-        push 1
-        push 107
-        COMM 0x0070
+        CHANGE_ITEM_COUNT(107, 1)
         SET_MODEL_FLAG(434)
         SET_MODEL_FLAG(229)
         CLEAR_WORLD_OBJECT_PENDING_VALUE(local_int[61])

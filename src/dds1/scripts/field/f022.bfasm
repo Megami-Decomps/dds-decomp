@@ -635,9 +635,7 @@ _9:
                           goto _17
                         }
                       _17:
-                        push local_int[2]
-                        push local_int[1]
-                        COMM 0x0070
+                        CHANGE_ITEM_COUNT(local_int[1], local_int[2])
                         goto _19
                       }
                     _19:
@@ -1407,9 +1405,7 @@ _165:
         COMM 0x011b
         PREPARE_UNIT_MOTION_STATE(global_int[0], 24, 10, 10, 3)
         WAIT_FOR_TIMER_LIMIT(60)
-        push 0
-        push local_int[48]
-        COMM 0x00ce
+        SET_EFFECT_MODEL_CUT(local_int[48], 0)
         COMM 0x011c
         WAIT_FOR_TIMER_LIMIT(30)
         WAIT_FOR_TIMER_LIMIT(30)
@@ -1561,8 +1557,7 @@ proc_0015:
   if (TEST_MODEL_FLAG(1088) == 0) {
     RESTORE_CAMERA_NODE_MODE()
     SET_SOLAR_OVERLAY_MODE(0)
-    push 0
-    COMM 0x001f
+    FADE_BACKGROUND_IN(0)
     push 0
     push 22
     COMM 0x01f0
@@ -1979,9 +1974,7 @@ proc_001e:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_11))
     push local_int[55]
     COMM 0x009d
-    push 0
-    push local_int[55]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[55], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     push 0
     push 38
@@ -2027,15 +2020,9 @@ proc_001f:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_01))
     push local_int[58]
     COMM 0x009d
-    push 0
-    push local_int[56]
-    COMM 0x00ce
-    push 0
-    push local_int[57]
-    COMM 0x00ce
-    push 0
-    push local_int[58]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[56], 0)
+    SET_EFFECT_MODEL_CUT(local_int[57], 0)
+    SET_EFFECT_MODEL_CUT(local_int[58], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     push 0
     push 38
@@ -3226,9 +3213,7 @@ _352:
     }
   _354:
     SET_MODEL_FLAG(1728)
-    push 1
-    push 132
-    COMM 0x0070
+    CHANGE_ITEM_COUNT(132, 1)
     CLEAR_MODEL_FLAG(1101)
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_13)))
     local_int[72] = CREATE_FLAGGED_EFFECT_OBJECT(string(fld_f_bin_DVILIZE_BED_2))
@@ -3262,9 +3247,7 @@ _352:
     push READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_3))
     push local_int[72]
     COMM 0x009d
-    push 0
-    push local_int[72]
-    COMM 0x00ce
+    SET_EFFECT_MODEL_CUT(local_int[72], 0)
     WAIT_FOR_TIMER_LIMIT(30)
     push 0
     push 38
