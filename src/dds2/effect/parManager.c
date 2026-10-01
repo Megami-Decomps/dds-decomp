@@ -6,15 +6,19 @@
 
 #include "eff.h"
 
+enum {
+    PAR_BURST_RANDOM_AXIS = 1
+};
+
 typedef struct {
     u8 pad[0x30];    /* 0x0 */
     u16 kind;        /* 0x30 */
     u8 pad32[6];     /* 0x32 */
     f32 scale;       /* 0x38 */
     u8 pad3C[0x68];  /* 0x3C */
-    u32 unkA4;       /* 0xA4 copied to unkFC by parRestartKind */
+    u32 restartStepCount; /* 0xA4 copied to pendingRestartSteps on restart */
     u8 padA8[0x54];  /* 0xA8 */
-    void *unkFC;     /* 0xFC */
+    void *pendingRestartSteps; /* 0xFC native updater treats this word as a count, not a pointer */
     u8 pad100[0x40]; /* 0x100 */
     u16 dispatchIndex; /* 0x140 selects D_0034E250/D_0034E258/D_0034E2F0 */
     u16 restartFlag; /* 0x142 read by parGetRestartFlag, set to 1 by parRestartKind */
@@ -28,9 +32,9 @@ typedef struct {
 } ParNode;
 
 typedef struct {
-    u8 pad[4];
-    u16 flag;       /* 0x4 */
-    u8 pad6[10];
+    u8 pad[4];   /* 0x0 native renderer reads a point-buffer address */
+    u16 pointCount; /* 0x4 number of billboard points emitted from this slot */
+    u8 pad6[10]; /* 0x6 includes packed color at +0x8 and billboard scale at +0xC */
 } ParSlot; /* 0x10 bytes */
 
 typedef struct {
@@ -52,6 +56,7 @@ extern ParDispatch D_003AAB80[];
 
 extern ParDispatch D_003AAB88[];
 
+/* Release a non-null child, then the object's resources and chip block. */
 void parReleaseObject(ParObj *obj) {
     s32 child;
 
@@ -70,38 +75,40 @@ typedef struct {
 
 typedef struct {
     f32 origin[4];
-    f32 headSpeed;
+    f32 billboardScale;
     u8 pad14[0x10];
-    s32 frameCount;
+    s32 lifetimeFrames;
     u8 pad28[8];
-    u8 sub[0x64];
-    f32 speedJitter;
-    f32 spinJitter;
+    u8 kindState[0x64];
+    f32 billboardScaleJitter;
+    f32 initialPhaseJitter;
     u8 pad9C[0x14];
     f32 matrix[16];
     u8 padF0[8];
     ParBurstBuffer *buffer;
     u8 padFC[0x54];
-    u8 mode;
+    u8 axisMode;
     u8 pad151[3];
-    u32 spread;
-    f32 speed;
-    u32 unk15C;
-    f32 f160;
-    f32 jitterA;
-    f32 jitterB;
+    u32 spawnDelayFrames;
+    f32 initialRadius;
+    u32 rotationStepDegrees; /* native lwc1 reads float bits; retain the existing u32 view */
+    f32 targetRadius;
+    f32 initialRadiusJitter;
+    f32 targetRadiusJitter;
 } ParBurstEmitter;
 
+/* The native updater rotates radialOffset and rebuilds position = origin +
+   radialOffset; it does not integrate this vector as a velocity. */
 typedef struct {
-    f32 pos[4];
-    f32 vel[3];
+    f32 position[4];
+    f32 radialOffset[3];
     u8 pad1C[4];
     s32 age;
     u32 color;
-    f32 speed;
-    f32 spin;
-    f32 axis[3];
-    f32 rate;
+    f32 billboardScale;
+    f32 initialPhaseRadians; /* initialized as a full-turn phase; later use is not established */
+    f32 rotationAxis[3];
+    f32 radiusStep;
 } ParBurstPacket;
 
 extern s32 effMiscRand(void *);
@@ -110,66 +117,71 @@ extern u8 D_003AA868[];
 extern u8 D_00451F20[];
 extern void parDispatchKindInit(void *, u32);
 
-void func_00160B98(ParBurstEmitter *effect, u32 index) {
+/* Initialize one 64-byte particle record and its kind-specific state. Negative
+   ages delay activation; radial distance changes toward a jittered target over
+   lifetimeFrames. RNG calls and the pre-transform length measurement stay in
+   their original order. */
+void func_00160B98(ParBurstEmitter *effect, u32 particleIndex) {
     ParBurstPacket *packet = (ParBurstPacket *)effect->buffer->records;
-    f32 tmp[4];
-    f32 speed;
-    f32 jitter;
-    f32 length;
+    f32 direction[4];
+    f32 initialRadius;
+    f32 jitterFactor;
+    f32 initialRadiusLength;
 
-    packet += index;
+    packet += particleIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand(D_00451F20) % (effect->spread + 1));
-    speed = effect->speed;
-    jitter = effect->jitterA;
-    tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    tmp[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    VU0_LOAD_VF(vf10, tmp);
+    packet->age = -(effMiscRand(D_00451F20) % (effect->spawnDelayFrames + 1));
+    initialRadius = effect->initialRadius;
+    jitterFactor = effect->initialRadiusJitter;
+    direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    direction[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    direction[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, tmp);
-    packet->vel[0] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[0];
-    packet->vel[1] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[1];
-    packet->vel[2] = speed * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) * tmp[2];
-    VU0_LOAD_VF(vf10, packet->vel);
-    VU0_LENGTH_VF10(length);
+    VU0_STORE_VF(vf10, direction);
+    /* Each component gets a separate jitter sample, not one shared radius draw. */
+    packet->radialOffset[0] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
+    packet->radialOffset[1] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
+    packet->radialOffset[2] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
+    VU0_LOAD_VF(vf10, packet->radialOffset);
+    VU0_LENGTH_VF10(initialRadiusLength);
     VU0_LOAD_MATRIX(effect->matrix);
-    VU0_LOAD_VF(vf10, packet->vel);
+    VU0_LOAD_VF(vf10, packet->radialOffset);
     VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, packet->vel);
-    packet->pos[0] = packet->vel[0] + effect->origin[0];
-    packet->pos[1] = packet->vel[1] + effect->origin[1];
-    packet->pos[2] = packet->vel[2] + effect->origin[2];
-    if (effect->mode == 1) {
-        tmp[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-        tmp[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-        tmp[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-        VU0_LOAD_VF(vf10, tmp);
+    VU0_STORE_VF_UNCLOBBERED(vf10, packet->radialOffset);
+    packet->position[0] = packet->radialOffset[0] + effect->origin[0];
+    packet->position[1] = packet->radialOffset[1] + effect->origin[1];
+    packet->position[2] = packet->radialOffset[2] + effect->origin[2];
+    if (effect->axisMode == PAR_BURST_RANDOM_AXIS) {
+        direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        direction[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        direction[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF(vf10, tmp);
-        packet->axis[0] = tmp[0];
-        packet->axis[1] = tmp[1];
-        packet->axis[2] = tmp[2];
+        VU0_STORE_VF(vf10, direction);
+        packet->rotationAxis[0] = direction[0];
+        packet->rotationAxis[1] = direction[1];
+        packet->rotationAxis[2] = direction[2];
     } else {
-        packet->axis[0] = 0;
-        packet->axis[1] = -1.0f;
-        packet->axis[2] = 0;
+        packet->rotationAxis[0] = 0;
+        packet->rotationAxis[1] = -1.0f;
+        packet->rotationAxis[2] = 0;
     }
-    jitter = effect->jitterB;
-    packet->rate = (effect->f160 * (effMiscRandUnitFloat(D_003AA868) * jitter +
-                                    (1.0f - jitter)) - length) /
-                   effect->frameCount;
-    jitter = effect->speedJitter;
-    packet->speed = effect->headSpeed * (effMiscRandUnitFloat(D_003AA868) * jitter +
-                                         (1.0f - jitter));
-    jitter = effect->spinJitter;
-    if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) *
+    jitterFactor = effect->targetRadiusJitter;
+    packet->radiusStep = (effect->targetRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor +
+                                    (1.0f - jitterFactor)) - initialRadiusLength) /
+                   effect->lifetimeFrames;
+    jitterFactor = effect->billboardScaleJitter;
+    packet->billboardScale = effect->billboardScale * (effMiscRandUnitFloat(D_003AA868) * jitterFactor +
+                                         (1.0f - jitterFactor));
+    jitterFactor = effect->initialPhaseJitter;
+    if (jitterFactor != 0) {
+        packet->initialPhaseRadians = (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) *
                        (3.14159265f * 2.0f);
     } else {
-        packet->spin = 0;
+        packet->initialPhaseRadians = 0;
     }
-    parDispatchKindInit(effect->sub, index);
+    parDispatchKindInit(effect->kindState, particleIndex);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00160EF8);
@@ -180,6 +192,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001616A8);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001617F8);
 
+/* Release the allocation handle stored in this node, not the node itself. */
 void effParReleaseNodeResource(ParNode *node) {
     func_003297C8(node->resource);
 }
@@ -190,8 +203,9 @@ INCLUDE_ASM(const s32, "effect/parManager", func_00161958);
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161A10);
 
-void parClearSlotFlag(ParTable *table, s32 index) {
-    table->slots[index].flag = 0;
+/* Disable this slot's billboard points by clearing its count, not a bit flag. */
+void parClearSlotFlag(ParTable *table, s32 slotIndex) {
+    table->slots[slotIndex].pointCount = 0;
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161B38);
@@ -216,36 +230,40 @@ u32 effParModulateColors(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-void parCreateIndexed(s32 index, void *arg) {
-    ParObj *newobj;
+/* Create through the selected dispatch entry and record its index; returns void. */
+void parCreateIndexed(s32 dispatchIndex, void *creationData) {
+    ParObj *createdObject;
 
-    newobj = D_003AAB80[index].func(arg);
-    newobj->dispatchIndex = index;
+    createdObject = D_003AAB80[dispatchIndex].func(creationData);
+    createdObject->dispatchIndex = dispatchIndex;
 }
 
+/* Invoke the selected command with the existing empty argument list. */
 void parDispatchByKind(ParObj *obj) {
     D_003AAB88[obj->dispatchIndex].func();
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161FE8);
 
+/* Create another object of the same dispatch index; the existing call forwards
+   no explicit arguments and this interface does not return the new object. */
 void parCloneKind(ParObj *obj) {
-    ParObj *newobj;
+    ParObj *createdObject;
 
-    newobj = D_003AAB80[obj->dispatchIndex].func();
-    newobj->dispatchIndex = obj->dispatchIndex;
+    createdObject = D_003AAB80[obj->dispatchIndex].func();
+    createdObject->dispatchIndex = obj->dispatchIndex;
 }
 
-/* Reissues the dispatch callback and arms the restart flag. */
+/* Reissue the callback, reload the native updater's repeat count, and arm restart. */
 void parRestartKind(ParObj *obj) {
     D_003AAC20[obj->dispatchIndex]();
-    obj->unkFC = (void *)obj->unkA4;
+    obj->pendingRestartSteps = (void *)obj->restartStepCount;
     obj->restartFlag = 1;
 }
 
 extern void (*D_003AAC58[])(ParObj *, f32);
 
-/* Reissue the dispatch callback, scale the kind-specific value for kinds 2..4, then restart. */
+/* Call the selected entry with factor, additionally scale kinds 2..4, then restart. */
 void parScaleAndRestartKind(ParObj *obj, f32 factor) {
     D_003AAC58[obj->dispatchIndex](obj, factor);
     switch (obj->kind) {
@@ -262,12 +280,14 @@ void parScaleAndRestartKind(ParObj *obj, f32 factor) {
     parRestartKind(obj);
 }
 
+/* Return the full 16-bit restart state without converting it to a boolean. */
 u16 parGetRestartFlag(ParObj *obj) {
     return obj->restartFlag;
 }
 
-void func_001622D8(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+/* Copy one 16-byte vector with the existing EE/VU copy primitive. */
+void func_001622D8(void *destination, void *source) {
+    PCP_COPY_VECTOR(destination, source);
 }
 
 /* vu0 routine: effect+0xB0 = matrix * effect+0x100 via sdfComposeVuMatrixFromRegisters */
