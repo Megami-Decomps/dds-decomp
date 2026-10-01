@@ -232,6 +232,8 @@ extern char D_00436FF0[];
 
 extern char D_00436FF8[];
 
+extern char D_004370C0[]; /* "%5.2f" */
+
 /* Assemble the resource request in a temporary buffer before loading it. */
 
 #define MDL_PART_OBJECT 3
@@ -1454,7 +1456,7 @@ void func_00236B20(void) {
         sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]"));
     }
     step = D_00453550.unk0C != 0 ? 2 : 0;
-    sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, "%5.2f", D_00453550.unk54));
+    sdfAppendPacket(D_00453550.packetList, sdfCreateFormattedSifCommand(0x8B00, 0x79C0, 0xFF0080, step, D_004370C0, D_00453550.unk54));
 }
 
 u32 func_00236D50(void) {
@@ -2330,6 +2332,8 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004370A8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370B0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370B8);
+
+INCLUDE_SDATA(const s32, "game/code_00233660", D_004370C0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004370C8);
 
