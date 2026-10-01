@@ -198,22 +198,22 @@ s32 func_00113AB0(EffectObject *obj) {
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
     if (sdfLoadMapRecordPositionVector(target->info->mapRecord, 0)) {
         VU0_STORE_VF(vf10, vec);
-        vec[1] = pickMode == 1 ? target->offsetY : obj->source[0x44 / 4];
-        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0xC4 / 4]);
+        vec[1] = pickMode == 1 ? target->offsetY : obj->source[0x11];
+        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     } else {
         if (effObjTestNodeFlags(obj->source, 8)) {
-            vec[0] = obj->source[0x70 / 4];
-            vec[1] = obj->source[0x74 / 4];
-            vec[2] = obj->source[0x78 / 4];
+            vec[0] = obj->source[0x1C];
+            vec[1] = obj->source[0x1D];
+            vec[2] = obj->source[0x1E];
         } else {
-            vec[0] = obj->source[0x40 / 4];
-            vec[1] = obj->source[0x44 / 4];
-            vec[2] = obj->source[0x48 / 4];
+            vec[0] = obj->source[0x10];
+            vec[1] = obj->source[0x11];
+            vec[2] = obj->source[0x12];
         }
         if (pickMode == 1) {
             vec[1] = target->offsetY;
         }
-        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0xC4 / 4]);
+        func_001200E8(level, vec[0], vec[1], vec[2], obj->source[0x31]);
     }
     return 1;
 }

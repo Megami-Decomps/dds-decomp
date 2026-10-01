@@ -394,7 +394,7 @@ void fldReleaseCameraColorEffect(void) {
 }
 
 typedef struct FldSaveHeader {
-    u32 word[0x54 / 4];
+    u32 word[0x15]; /* 0x54 bytes */
 } FldSaveHeader;
 
 extern FldCameraSetting fldAppliedCameraSettings[];
@@ -1053,7 +1053,7 @@ void fldLoadInfoTable(s32 field) {
 }
 
 typedef struct FldSaveBlock {
-    u32 word[0x3B80 / 4];
+    u32 word[0xEE0]; /* 0x3B80 bytes */
 } FldSaveBlock;
 
 void func_00140180(FldSaveBlock *src) {
@@ -1532,7 +1532,7 @@ void fldLoadActorWaypointTable(s32 field) {
 }
 
 typedef struct FldWaypointBlock {
-    u32 word[0x6D00 / 4];
+    u32 word[0x1B40]; /* 0x6D00 bytes */
 } FldWaypointBlock;
 
 void fldCopyActorWaypointTable(FldWaypointBlock *src) {
