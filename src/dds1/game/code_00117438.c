@@ -45,13 +45,16 @@ typedef struct SdfPartyUnit {
     u16 flags;          /* 0x00 */
     u8 pad02[2];
     u16 unitId;         /* 0x04 */
-    u8 pad06[0x16];
+    u16 hp;             /* 0x06 */
+    u16 maxHp;          /* 0x08 */
+    u8 pad0A[0x12];
     u16 hpBonus;        /* 0x1C */
     u16 mpBonus;        /* 0x1E */
 } SdfPartyUnit;
 
 typedef struct SdfEnemyVitals {
-    u8 pad00[8];
+    u32 flags;          /* 0x00 */
+    u8 pad04[4];
     u16 maxHp;          /* 0x08 */
     u8 pad0A[2];
     u16 maxMp;          /* 0x0C */
@@ -407,7 +410,104 @@ void sdfDispatchSubCmd(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_001189A0);
+extern s32 D_003BAA5C;
+extern s32 func_00119750(u32);
+extern u32 func_00119520(SdfPackedValue *, s32);
+extern s32 datUnitHasSkill(SdfPackedValue *, s32);
+extern s32 effMiscRandMod(s32, s32);
+extern void func_003003F0(const char *, ...);
+extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
+
+/* Per-slot battle record (0x38 bytes) in D_003BAA50. */
+typedef struct SdfBattleSlot {
+    u8 pad00[0x24];
+    u8 type;        /* 0x24: 1/3 = skill-scaled hit roll, 2 = bit query */
+    u8 chance;      /* 0x25: hit chance in percent, >= 100 always hits */
+    u16 mask;       /* 0x26: candidate channel bits */
+    u8 pad28[8];
+    s32 mode;       /* 0x30 */
+    u8 pad34[4];
+} SdfBattleSlot;
+
+#define SDF_BATTLE_SLOT(i) ((SdfBattleSlot *)(D_003BAA50 + (i) * 0x38))
+
+/* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
+u32 func_001189A0(s32 index, s32 queryArg, SdfPackedValue *packed) {
+    u16 list[16];
+    u16 count;
+    u16 bit;
+    u16 mask;
+    s32 ratio = 100;
+    u32 kind;
+    s32 scaled;
+    s32 hit;
+    u16 flag;
+
+    mask = SDF_BATTLE_SLOT(index)->mask;
+    if (SDF_BATTLE_SLOT(index)->type == 3) {
+        count = 0;
+        for (bit = 0; bit < 16; bit++) {
+            if ((mask >> bit) & 1) {
+                list[count] = bit;
+                count++;
+            }
+        }
+        mask = 1 << list[effMiscRandMod(0, count)];
+    }
+    if (mask != 0 && (SDF_BATTLE_SLOT(index)->type == 1 || SDF_BATTLE_SLOT(index)->type == 3)) {
+        kind = func_00119750(mask);
+        if (!(SDF_BATTLE_SLOT(index)->mode == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
+            if (func_00119520(packed, kind) & 0x170000) {
+                return 0;
+            }
+        }
+        switch (kind) {
+        case 3:
+            if (datUnitHasSkill(packed, 0x23E)) {
+                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x1F0) * (f32)ratio);
+            }
+            break;
+        case 4:
+            if (datUnitHasSkill(packed, 0x23F)) {
+                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x1F8) * (f32)ratio);
+            }
+            break;
+        case 9:
+            if (datUnitHasSkill(packed, 0x243)) {
+                ratio = (u32)(*(f32 *)(D_003BAA5C + 0x218) * (f32)ratio);
+            }
+            break;
+        }
+    }
+    flag = mask & 1;
+    if (flag) {
+        SdfPartyUnit *actor = (SdfPartyUnit *)packed;
+
+        if (actor->hp * 100 / actor->maxHp >= 25) {
+            mask &= 0xFFFE;
+        } else if (!(*(u16 *)queryArg & 4)) {
+            mask &= 0xFFFE;
+        } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
+                   (((SdfEnemyVitals *)(D_003BAA1C + actor->unitId * 76))->flags & 0x440) != 0) {
+            mask &= 0xFFFE;
+        }
+    }
+    if (mask & 0x8000) {
+        if (packed->flagsAndValue & 0x1804) {
+            mask &= 0x7FFF;
+        }
+    }
+    if (mask == 0) {
+        return 0;
+    }
+    hit = 1;
+    if (SDF_BATTLE_SLOT(index)->chance < 100) {
+        scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
+        func_003003F0(D_0039F980, scaled, ratio, mask);
+        hit = effMiscRandMod(0, 100) < scaled;
+    }
+    return hit ? mask : 0;
+}
 
 u32 sdfQueryChannelValue(s32 channel, s32 arg1, SdfPackedValue *item) {
     u32 result;

@@ -182,7 +182,72 @@ void func_00158FA8(ParBurstEmitter *effect, u32 particleIndex) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159308);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001596E8);
+/* Colour-ramp setup for a particle emitter: masks the three colours to 24 bits, derives the fade-in/out
+   steps from the alpha byte, then the per-channel (colour0 -> colour1 -> colour2) steps per frame. */
+typedef struct ParColorRamp {
+    s32 mode;          /* 0x00: 1 = no ramp, 2 = ramp color0->color1 only */
+    u32 color0;        /* 0x04 */
+    u32 color1;        /* 0x08 */
+    u32 color2;        /* 0x0C */
+    u32 alpha;         /* 0x10 */
+    s32 fadeInFrames;  /* 0x14 */
+    s32 fadeOutFrames; /* 0x18 */
+    s32 frames;        /* 0x1C */
+    s32 rampFrames;    /* 0x20 */
+    f32 r01;           /* 0x24 per-channel step color0 -> color1 */
+    f32 r12;           /* 0x28 per-channel step color1 -> color2 */
+    f32 g01;           /* 0x2C */
+    f32 g12;           /* 0x30 */
+    f32 b01;           /* 0x34 */
+    f32 b12;           /* 0x38 */
+    u32 fadeIn;        /* 0x3C */
+    u32 fadeOut;       /* 0x40 */
+} ParColorRamp;
+
+void func_001596E8(ParColorRamp *p, s32 frames) {
+    u32 alpha;
+    f32 span;
+    u32 a, b;
+
+    p->color0 &= 0xFFFFFF;
+    p->color1 &= 0xFFFFFF;
+    p->color2 &= 0xFFFFFF;
+    alpha = p->alpha << 24;
+    p->fadeIn = alpha;
+    if (p->fadeInFrames > 0) {
+        p->fadeIn = alpha / p->fadeInFrames;
+    }
+    p->fadeOut = alpha;
+    if (p->fadeOutFrames > 0) {
+        p->fadeOut = alpha / p->fadeOutFrames;
+    }
+    p->frames = frames;
+    if (p->mode == 1) {
+        return;
+    }
+    if (p->mode == 2) {
+        p->rampFrames = frames;
+    } else {
+        p->rampFrames = frames >> 1;
+    }
+    span = p->rampFrames;
+    if (span == 0) {
+        span = 1.0f;
+    }
+    a = p->color1;
+    b = p->color0;
+    p->r01 = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
+    p->g01 = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
+    p->b01 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
+    if (p->mode == 2) {
+        return;
+    }
+    a = p->color2;
+    b = p->color1;
+    p->r12 = ((f32)(a & 0xFF) - (f32)(b & 0xFF)) / span;
+    p->g12 = ((f32)((a >> 8) & 0xFF) - (f32)((b >> 8) & 0xFF)) / span;
+    p->b12 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159AB8);
 
