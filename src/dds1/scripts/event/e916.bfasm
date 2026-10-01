@@ -10,7 +10,7 @@ code
 e916_main:
   PROC e916_main
   PUSHIS 0
-  COMM 0x0000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 end
 

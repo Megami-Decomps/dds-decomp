@@ -1,4 +1,5 @@
 flw0 1
+profile dds1
 
 header word00=0x00000000 declared_size=0x00000cde word0c=0x00000000 int_locals=6 float_locals=0 word18=0x00000000 word1c=0x00000000 physical_size=0xd53
 
@@ -132,7 +133,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   007c: PUSHREG
   007d: IF 0x0001  # "_2"
   007e: PUSHIS 0x0001
-  007f: COMM 0x000e
+  007f: COMM WAIT_FOR_TIMER_LIMIT
   0080: GOTO 0x0000  # "_1"
   0081: PUSHIX 0x000f
   0082: COMM 0x00a6
@@ -162,7 +163,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   009a: PUSHREG
   009b: COMM 0x00e8
   009c: PUSHIS 0x001e
-  009d: COMM 0x000e
+  009d: COMM WAIT_FOR_TIMER_LIMIT
   009e: PUSHIS 0x000c
   009f: PUSHIS 0x0329
   00a0: COMM 0x00d0
@@ -173,7 +174,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   00a5: PUSHIX 0x0006
   00a6: COMM 0x0168
   00a7: PUSHIS 0x007d
-  00a8: COMM 0x000e
+  00a8: COMM WAIT_FOR_TIMER_LIMIT
   00a9: PUSHIS 0x0001
   00aa: PUSHF 0x3f6d0e56
   00ac: PUSHF 0x3c23d70a
@@ -190,7 +191,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   00b8: PUSHIS 0x0005
   00b9: COMM 0x00ed
   00ba: PUSHIS 0x0005
-  00bb: COMM 0x000e
+  00bb: COMM WAIT_FOR_TIMER_LIMIT
   00bc: PUSHIS 0x0000
   00bd: COMM 0x011d
   00be: PUSHIS 0x0000
@@ -227,7 +228,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   00dd: PUSHIX 0x0008
   00de: COMM 0x0168
   00df: PUSHIS 0x0064
-  00e0: COMM 0x000e
+  00e0: COMM WAIT_FOR_TIMER_LIMIT
   00e1: PUSHTYPE5 0x004e
   00e2: COMM 0x0094
   00e3: PUSHREG
@@ -252,17 +253,17 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   00f6: PUSHREG
   00f7: POPIX 0x000d
   00f8: PUSHIS 0x0050
-  00f9: COMM 0x000e
+  00f9: COMM WAIT_FOR_TIMER_LIMIT
   00fa: PUSHIS 0x0001
   00fb: COMM 0x011d
   00fc: PUSHIS 0x0014
-  00fd: COMM 0x000e
+  00fd: COMM WAIT_FOR_TIMER_LIMIT
   00fe: PUSHIS 0x0003
   00ff: COMM 0x011e
   0100: PUSHREG
   0101: IF 0x0004  # "_6"
   0102: PUSHIS 0x0001
-  0103: COMM 0x000e
+  0103: COMM WAIT_FOR_TIMER_LIMIT
   0104: GOTO 0x0003  # "_5"
   0105: PUSHIX 0x000d
   0106: COMM 0x00a6
@@ -272,7 +273,7 @@ section 2 type=2 stride=0x4 count=354 offset=0x270
   010a: PUSHIS 0x0000
   010b: COMM 0x0010
   010c: PUSHIS 0x000f
-  010d: COMM 0x000e
+  010d: COMM WAIT_FOR_TIMER_LIMIT
   010e: COMM 0x0023
   010f: END
   0110: PROC 0x0001  # "e809_010_1"

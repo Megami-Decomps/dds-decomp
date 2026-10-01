@@ -11,7 +11,7 @@ code
 e903_main:
   PROC e903_main
   PUSHIS 0
-  COMM 0x0000
+  COMM MESSAGE_REQUEST_AND_POLL
   END
 e903_dead:
   PROC e903_dead

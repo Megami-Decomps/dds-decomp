@@ -58,6 +58,7 @@ python tools/extract.py          # -> orig/dds1/SLUS_209.74, orig/dds2/SLUS_211.
 python configure.py              # split with splat, write build.ninja and objdiff.json
 ninja                            # build and verify every extracted version (or: ninja dds1)
 ninja dds1-scripts               # assemble and verify all tracked DDS1 event scripts
+python3 tools/flw0.py view src/dds1/scripts/event/e670.bfasm  # readable script view
 ```
 
 `ninja`'s last step runs `sha1sum --quiet -c` on each built ELF
