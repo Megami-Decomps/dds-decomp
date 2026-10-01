@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    PathEntry40 *unk4;
+    PathEntry40 *entries;
 } PathData20;
 
 typedef struct {
@@ -39,7 +39,7 @@ typedef struct {
     PathData14 *unk14;
     PathData18 *vectorData;
     s32 unk1C;
-    PathData20 *unk20;
+    PathData20 *sampleData;
 } PathObj;
 
 typedef struct {
@@ -98,9 +98,9 @@ void func_001170D8(PathObj *path, PathOut *out) {
     PathEntry40 *entries;
 
     if (path->flags & 0x10) {
-        data = path->unk20;
+        data = path->sampleData;
         func_00116B80(&index, &fraction, path->time, data);
-        entries = data->unk4;
+        entries = data->entries;
         VU0_SET_VF10_COMPONENT(x, entries[index + 1].f[0]);
         VU0_SET_VF10_COMPONENT(y, entries[index + 1].f[1]);
         VU0_SET_VF10_COMPONENT(z, entries[index + 1].f[2]);
