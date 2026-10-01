@@ -1246,6 +1246,18 @@ end
             "READ_DOOR_WARP_VALUE": (0x20C, 1, True),
             "READ_WARP_EFFECT_MODE": (0x219, 0, True),
             "ACTION_WINDOW_REQUEST_AND_POLL_DIRECT": (0x21D, 1, True),
+            "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
+            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
+            "TRACE_BATTLE_RETREAT": (0x0E4, 0, False),
+            "TRACE_BATTLE_ALL_RETREAT": (0x0E5, 0, False),
+            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
+            "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT": (0x0E7, 1, False),
+            "AI_MOVE_CAMERA": (0x0F4, 7, False),
+            "TRACE_BATTLE_CAMERA_ORIGINAL": (0x0F5, 0, False),
+            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
+            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
+            "TRACE_BATTLE_CAMERA_TWO_SHOT": (0x0FB, 0, False),
+            "TRACE_BATTLE_CAMERA_OBSTRUCTION": (0x0FC, 0, False),
             "CALC_SET_RESULT": (0x16C, 1, False),
             "CALC_SOURCE_LEVEL": (0x16D, 0, True),
             "CALC_TARGET_LEVEL": (0x16E, 0, True),
@@ -1315,12 +1327,6 @@ end
             "AI_NO_PLAYER_BLOCKS_QUERY": (0x089, 1, True),
             "AI_UNIT_PASSES_ACTION_TEN_CHECK": (0x08C, 0, True),
             "START_SCREEN_QUAKE": (0x0AB, 2, False),
-            "AI_COUNTER_REACHED_LIMIT": (0x0DF, 1, True),
-            "AI_SELECT_ACTION_BY_KIND": (0x0E2, 2, False),
-            "AI_RESET_COMMAND_CONTEXT": (0x0E6, 0, False),
-            "AI_SELECT_LOWEST_HP_TARGET_BLOCKING_ELEMENT": (0x0E7, 1, False),
-            "AI_RESTORE_BATTLE_CAMERA": (0x0F5, 0, False),
-            "AI_QUEUE_ACTOR_COMMAND_SOUND": (0x0FA, 0, False),
             "AI_ACTOR_HISTORY_COUNTER": (0x14C, 0, True),
             "AI_SELECT_LOWEST_LEVEL_TARGET": (0x15B, 0, False),
             "AI_ANY_PLAYER_PASSES_QUERY": (0x19A, 1, True),
@@ -1366,7 +1372,6 @@ end
             "AI_ANY_ENEMY_HAS_ACTION_MASK": (0x081, 1, True),
             "AI_ANY_PLAYER_HAS_ACTION_MASK": (0x082, 1, True),
             "AI_ALL_PLAYERS_HAVE_ACTION_MASK": (0x083, 1, True),
-            "AI_MOVE_CAMERA": (0x0F4, 7, False),
             "AI_UNIT_MP_AT_OR_BELOW_RATE": (0x14B, 1, True),
             "AI_ENEMY_HAS_ACTION": (0x19E, 1, True),
             "AI_ANY_ENEMY_CURRENT_ACTION_MATCHES": (0x1AD, 1, True),
@@ -1384,7 +1389,6 @@ end
             "AI_HAS_PLAYER_UNIT_MODE": (0x084, 1, True),
             "AI_TURN_COUNT": (0x0E0, 0, True),
             "AI_SELECT_DIRECT_ACTION": (0x0E1, 1, False),
-            "AI_ENABLE_COMMAND_STATE_FLAG": (0x0F6, 0, False),
             "AI_LINKED_ACTION_SCENE_ACTIVE": (0x122, 0, True),
             "AI_HAS_ELIGIBLE_QUEUED_SPECIAL_ACTION": (0x141, 0, True),
             "AI_HAS_FLAG_800000": (0x151, 1, True),
@@ -1794,7 +1798,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 45765)
+        self.assertEqual(profiled_command_uses, 45795)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1848,8 +1852,8 @@ end
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 84372, 10913),
-            "dds2": (140, 64473, 6730),
+            "dds1": (143, 84333, 10874),
+            "dds2": (140, 64462, 6719),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -2026,7 +2030,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 45765)
+            (code_words, commands, profiled_commands), (168829, 53389, 45795)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -2155,7 +2159,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-            (33257, 1910, 287),
+            (33283, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
