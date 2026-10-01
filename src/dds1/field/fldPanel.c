@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern u32 D_003BAE74;
-extern void *kwlnTaskGetUserValue(void);
+extern void *kwlnTaskGetUserValue();
 extern void sdfReleaseChipBlock(void *);
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -28,9 +28,21 @@ void fldDestroyPanelTaskIfPresent(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_00141190);
+void *func_00141190(s32 value) {
+    void *panelState;
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_001411C0);
+    panelState = kwlnTaskGetUserValue(D_003BAE74);
+    *(s16 *)((char *)panelState + 4) = value;
+    return panelState;
+}
+
+void *func_001411C0(s32 value) {
+    void *panelState;
+
+    panelState = kwlnTaskGetUserValue(D_003BAE74);
+    *(s16 *)((char *)panelState + 2) = value;
+    return panelState;
+}
 
 INCLUDE_SDATA(const s32, "field/fldPanel", D_003BAE74);
 

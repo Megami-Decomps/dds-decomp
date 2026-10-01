@@ -2,7 +2,7 @@
 
 extern u32 D_00436204;
 
-extern u64 kwlnTaskGetUserValue(void);
+extern void *kwlnTaskGetUserValue();
 
 extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -28,9 +28,21 @@ void fldDestroyPanelTaskIfPresent(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_00144270);
+void *func_00144270(s32 value) {
+    void *panelState;
 
-INCLUDE_ASM(const s32, "field/fldPanel", func_001442A0);
+    panelState = kwlnTaskGetUserValue(D_00436204);
+    *(s16 *)((char *)panelState + 4) = value;
+    return panelState;
+}
+
+void *func_001442A0(s32 value) {
+    void *panelState;
+
+    panelState = kwlnTaskGetUserValue(D_00436204);
+    *(s16 *)((char *)panelState + 2) = value;
+    return panelState;
+}
 
 INCLUDE_SDATA(const s32, "field/fldPanel", D_00436204);
 
