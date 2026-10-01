@@ -15,7 +15,7 @@ typedef struct SoundQueue {
 
 extern SoundQueue itfMesWork;
 
-typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 unk24; } UiSprite;
+typedef struct UiSprite { u8 pad0[0x20]; s32 unk20; s32 screenY; } UiSprite;
 
 typedef struct UiPanelPlacement {
     UiSprite *frame;
@@ -146,6 +146,7 @@ void frFontEnableNodeContextModes(s32 node) {
     }
 }
 
+/* Initialize panel placement and retain its screen-space Y coordinate. */
 void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     UiPos *pos = &panel->pos;
     UiPanelPlacement *place = &panel->place;
@@ -158,7 +159,7 @@ void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
     }
     spriteTop = pos->y + place->offsetY;
     itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->offsetX, spriteTop, pos->x + place->rightX, pos->y + place->bottomY, panel->unkC);
-    place->sprite->unk24 = spriteTop;
+    place->sprite->screenY = spriteTop;
     func_00199A20(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
