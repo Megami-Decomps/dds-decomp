@@ -187,4 +187,25 @@ typedef struct SdfThreadNode {
     s32 threadId;               /* 0x04 */
 } SdfThreadNode;
 
+/* Draw-node vector slots (SdfDrawNode vectors array indices). */
+#define SDF_DRAW_TRANSLATION_VECTOR 0
+#define SDF_DRAW_SCALE_VECTOR 1
+#define SDF_DRAW_X_AXIS_VECTOR 2
+#define SDF_DRAW_Y_AXIS_VECTOR 3
+#define SDF_DRAW_Z_AXIS_VECTOR 4
+
+/* SDF chunk fourCC values (little-endian byte order). */
+#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
+#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
+#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
+
+/* Enemy unit kind for SDF lookups. */
+#define SDF_UNIT_ENEMY 0x20
+
+/* Free-list kind for SDF pools. */
+#define SDF_POOL_FREE_KIND 0xFFFF
+
+/* Alternate item setup mode for SDF model entries. */
+#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
+
 #endif /* SDF_H */

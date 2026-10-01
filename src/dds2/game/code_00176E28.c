@@ -1,5 +1,5 @@
 #include "common.h"
-
+#include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -29,10 +29,6 @@ typedef struct EffRecordPool {
     u32 resource;   /* 0x68: released by sdfQueueAssetRelease */
     u32 buffer;     /* 0x6C: freed by func_003297C8 */
 } EffRecordPool;
-
-#define EFFECT_RING_START_ANGLE (-1.5707963f)
-
-#define EFFECT_RING_FULL_TURN (6.2831853f)
 
 /* Ring (fan) effect: a copy of the 0x58-byte parameter block followed by
  * `count` vertices spread evenly around the circle from -pi/2. */

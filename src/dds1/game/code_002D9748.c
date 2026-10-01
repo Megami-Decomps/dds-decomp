@@ -53,10 +53,6 @@ typedef struct SdfMapPositionRecord {
     u8 pad08[0x38];
 } SdfMapPositionRecord;
 
-#define SDF_CHUNK_MAP_POSITIONS 0x534F504D /* "MPOS" in little-endian byte order */
-#define SDF_CHUNK_UNIQUE_VALUE 0x51494e55 /* "UNIQ" in little-endian byte order */
-#define SDF_CHUNK_LOD_VALUE 0x43444f4c /* "LODC" in little-endian byte order */
-
 typedef struct SdfResourceList {
     u32 unk0;
     s16 count;

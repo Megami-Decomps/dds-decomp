@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
@@ -53,8 +54,6 @@ typedef struct {
     void *system;       /* 0x5C */
     u32 handle;         /* 0x60 */
 } EffThunderVectorWork; /* 0x64 */
-
-#define EFF_THUNDER_FRAGMENT_GREY 0x80808080
 
 /* Two independently sampled ranges and a constant greyscale color. */
 typedef struct {

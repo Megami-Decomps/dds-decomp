@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -22,12 +23,6 @@ extern void func_0029AC20(s32, s32);
 
 extern void func_0026C900(void);
 
-extern s64 func_002C4038(s32, s32 *, u64, u64);
-
-static inline s64 menuRunPanel(s32 context, u64 mode, u64 arg) {
-    return func_002C4038(context + 8, (s32 *)(context + 0x54), mode, arg);
-}
-
 void func_0029AA48(MenuLayoutContext *context) {
     mnuDrawCampIconBackdrop((s32)context->menuList, 0x20);
 }
@@ -44,7 +39,7 @@ s64 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     }
     func_0029AA48((MenuLayoutContext *)context);
     func_0029AC20(context, 0);
-    return menuRunPanel(context, 1, request);
+    return menuSetHandler(context, 1, request);
 }
 
 s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
@@ -54,7 +49,7 @@ s64 mnuAdvanceSkillPanelToNextMenu(s32 request) {
         return 0;
     }
     func_0026C900();
-    return menuRunPanel(context, 2, request);
+    return menuSetHandler(context, 2, request);
 }
 
 /* The five signed config bytes reserve space before the selected entry width. */

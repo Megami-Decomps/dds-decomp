@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff.h"
 #include "pcp_vu0.h"
 
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -1249,10 +1250,6 @@ void func_0016BE48(PcpFlashWork4 *work)
     handle->renderScale = work->renderScale;
     func_00170380(handle);
 }
-
-#define EFFECT_RING_START_ANGLE (-1.5707963f)
-#define EFFECT_RING_FULL_TURN (6.2831853f)
-
 
 /* The orbit-arc particles follow the same work header used by its draw and
    angle-update passes; this is an allocation container, not a second view. */

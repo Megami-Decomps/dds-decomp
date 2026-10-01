@@ -16,9 +16,6 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_003D64C8[];
 
-#define MENU_SUM_MINIMUM 99
-#define MENU_SUM_COUNT 5
-
 typedef struct MenuSumBytes {
     u8 pad00[0x16];
     s8 values[MENU_SUM_COUNT];
