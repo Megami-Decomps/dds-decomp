@@ -1567,107 +1567,68 @@ _9:
     RESTORE_CAMERA_NODE_MODE()
     ACTIVATE_MESSAGE_PANEL()
     SET_SOLAR_OVERLAY_MODE(6)
-    COMM 0x0116
-    PUSHREG
-    IF _36
-    MESSAGE_REQUEST_AND_POLL(204)
-    goto _35
-  _36:
-    push 0
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0000
-    push 1
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0001
-    push 2
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0002
-    push 3
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0003
-    push 4
-    COMM 0x0114
-    PUSHREG
-    POPLIX 0x0004
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(197)
+    result = TEST_CURRENT_TREASURE_OPENED()
+    if (result) {
+      MESSAGE_REQUEST_AND_POLL(204)
     } else {
-    _12:
-      MESSAGE_REQUEST_AND_POLL(201)
-      goto _11
-    }
-  _11:
-    push 1
-    push 3
-    COMM 0x013c
-    if (local_int[0] == 1) {
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(198)
-    } else {
-    _14:
-      local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(202)
-      goto _13
-    }
-  _13:
-    if_not (local_int[5] == 0) goto _34
-    if (local_int[3] == 1) {
-      COMM 0x0115
-      push local_int[4]
-      COMM 0x0166
-      return
-    } else {
-    _25:
-      if (local_int[3] == 2) {
-        COMM 0x0115
-        push 35
-        COMM 0x011b
-        COMM 0x011c
-        push 100
-        push 15
-        COMM 0x00ab
-        push 15
-        push 1
-        push 0
-        COMM 0x001a
-        push 15
-        push 100
-        push 1
-        COMM 0x001a
-        push 1
-        COMM 0x013a
-        MESSAGE_REQUEST_AND_POLL(208)
-        COMM 0x011f
-        COMM 0x0121
+    _36:
+      local_int[0] = READ_TREASURE_TABLE_VALUE(0)
+      local_int[1] = READ_TREASURE_TABLE_VALUE(1)
+      local_int[2] = READ_TREASURE_TABLE_VALUE(2)
+      local_int[3] = READ_TREASURE_TABLE_VALUE(3)
+      local_int[4] = READ_TREASURE_TABLE_VALUE(4)
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(197)
       } else {
-      _26:
-        if (local_int[3] == 3) {
-          COMM 0x0115
+      _12:
+        MESSAGE_REQUEST_AND_POLL(201)
+        goto _11
+      }
+    _11:
+      push 1
+      push 3
+      COMM 0x013c
+      if (local_int[0] == 1) {
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(198)
+      } else {
+      _14:
+        local_int[5] = MESSAGE_SELECTION_REQUEST_AND_POLL(202)
+        goto _13
+      }
+    _13:
+      if_not (local_int[5] == 0) goto _34
+      if (local_int[3] == 1) {
+        MARK_CURRENT_TREASURE_OPENED()
+        push local_int[4]
+        COMM 0x0166
+        return
+      } else {
+      _25:
+        if (local_int[3] == 2) {
+          MARK_CURRENT_TREASURE_OPENED()
           push 35
           COMM 0x011b
           COMM 0x011c
-          push 200
-          push 20
+          push 100
+          push 15
           COMM 0x00ab
-          push 20
+          push 15
           push 1
           push 0
           COMM 0x001a
-          push 20
-          push 200
+          push 15
+          push 100
           push 1
           COMM 0x001a
-          push 2
+          push 1
           COMM 0x013a
           MESSAGE_REQUEST_AND_POLL(208)
           COMM 0x011f
           COMM 0x0121
         } else {
-        _27:
-          if (local_int[3] == 4) {
-            COMM 0x0115
+        _26:
+          if (local_int[3] == 3) {
+            MARK_CURRENT_TREASURE_OPENED()
             push 35
             COMM 0x011b
             COMM 0x011c
@@ -1682,15 +1643,15 @@ _9:
             push 200
             push 1
             COMM 0x001a
-            push 4
+            push 2
             COMM 0x013a
-            MESSAGE_REQUEST_AND_POLL(209)
+            MESSAGE_REQUEST_AND_POLL(208)
             COMM 0x011f
             COMM 0x0121
           } else {
-          _28:
-            if (local_int[3] == 5) {
-              COMM 0x0115
+          _27:
+            if (local_int[3] == 4) {
+              MARK_CURRENT_TREASURE_OPENED()
               push 35
               COMM 0x011b
               COMM 0x011c
@@ -1705,15 +1666,15 @@ _9:
               push 200
               push 1
               COMM 0x001a
-              push 5
+              push 4
               COMM 0x013a
-              MESSAGE_REQUEST_AND_POLL(210)
+              MESSAGE_REQUEST_AND_POLL(209)
               COMM 0x011f
               COMM 0x0121
             } else {
-            _29:
-              if (local_int[3] == 6) {
-                COMM 0x0115
+            _28:
+              if (local_int[3] == 5) {
+                MARK_CURRENT_TREASURE_OPENED()
                 push 35
                 COMM 0x011b
                 COMM 0x011c
@@ -1728,85 +1689,109 @@ _9:
                 push 200
                 push 1
                 COMM 0x001a
-                push 6
+                push 5
                 COMM 0x013a
-                MESSAGE_REQUEST_AND_POLL(211)
+                MESSAGE_REQUEST_AND_POLL(210)
                 COMM 0x011f
                 COMM 0x0121
               } else {
-              _30:
-                if (local_int[0] <= 1) {
-                  if (local_int[0] == 1) {
-                    push 34
-                    COMM 0x011b
-                  } else {
-                  _16:
-                    push 33
-                    COMM 0x011b
-                    goto _15
-                  }
-                _15:
+              _29:
+                if (local_int[3] == 6) {
+                  MARK_CURRENT_TREASURE_OPENED()
+                  push 35
+                  COMM 0x011b
                   COMM 0x011c
-                  COMM 0x0115
-                  FINISH_SCRIPT_MESSAGE_WINDOW()
-                  WAIT_FOR_TIMER_LIMIT(45)
-                  ACTIVATE_MESSAGE_PANEL()
-                  if (local_int[1] == 0) {
-                    MESSAGE_REQUEST_AND_POLL(212)
-                  } else {
-                  _20:
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
-                    SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
-                    if (local_int[1] >= 96 && local_int[1] <= 127) {
-                      MESSAGE_REQUEST_AND_POLL(206)
-                    } else {
-                    _18:
-                      MESSAGE_REQUEST_AND_POLL(205)
-                      goto _17
-                    }
-                  _17:
-                    push local_int[2]
-                    push local_int[1]
-                    COMM 0x0070
-                    goto _19
-                  }
-                _19:
+                  push 200
+                  push 20
+                  COMM 0x00ab
+                  push 20
+                  push 1
+                  push 0
+                  COMM 0x001a
+                  push 20
+                  push 200
+                  push 1
+                  COMM 0x001a
+                  push 6
+                  COMM 0x013a
+                  MESSAGE_REQUEST_AND_POLL(211)
                   COMM 0x011f
                   COMM 0x0121
                 } else {
-                _22:
-                  if (local_int[0] == 3) {
-                    COMM 0x0115
-                    push 32
-                    COMM 0x0214
-                    SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
-                    MESSAGE_REQUEST_AND_POLL(207)
-                    push local_int[4]
-                    COMM 0x0139
+                _30:
+                  if (local_int[0] <= 1) {
+                    if (local_int[0] == 1) {
+                      push 34
+                      COMM 0x011b
+                    } else {
+                    _16:
+                      push 33
+                      COMM 0x011b
+                      goto _15
+                    }
+                  _15:
+                    COMM 0x011c
+                    MARK_CURRENT_TREASURE_OPENED()
+                    FINISH_SCRIPT_MESSAGE_WINDOW()
+                    WAIT_FOR_TIMER_LIMIT(45)
+                    ACTIVATE_MESSAGE_PANEL()
+                    if (local_int[1] == 0) {
+                      MESSAGE_REQUEST_AND_POLL(212)
+                    } else {
+                    _20:
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[1], 3)
+                      SET_MESSAGE_WINDOW_GEOMETRY(1, local_int[2], 0)
+                      if (local_int[1] >= 96 && local_int[1] <= 127) {
+                        MESSAGE_REQUEST_AND_POLL(206)
+                      } else {
+                      _18:
+                        MESSAGE_REQUEST_AND_POLL(205)
+                        goto _17
+                      }
+                    _17:
+                      push local_int[2]
+                      push local_int[1]
+                      COMM 0x0070
+                      goto _19
+                    }
+                  _19:
+                    COMM 0x011f
+                    COMM 0x0121
+                  } else {
+                  _22:
+                    if (local_int[0] == 3) {
+                      MARK_CURRENT_TREASURE_OPENED()
+                      push 32
+                      COMM 0x0214
+                      SET_MESSAGE_WINDOW_GEOMETRY(0, local_int[4], 0)
+                      MESSAGE_REQUEST_AND_POLL(207)
+                      push local_int[4]
+                      COMM 0x0139
+                    }
                   }
+                _21:
+                  goto _24
                 }
-              _21:
-                goto _24
               }
             }
           }
         }
       }
+    _24:
+      goto _33
+    _34:
+      if (local_int[0] == 1) {
+        MESSAGE_REQUEST_AND_POLL(199)
+      } else {
+      _32:
+        MESSAGE_REQUEST_AND_POLL(203)
+        goto _31
+      }
+    _31:
+      goto _33
+    _33:
+      goto _35
     }
-  _24:
-    goto _33
-  _34:
-    if (local_int[0] == 1) {
-      MESSAGE_REQUEST_AND_POLL(199)
-    } else {
-    _32:
-      MESSAGE_REQUEST_AND_POLL(203)
-      goto _31
-    }
-  _31:
-    goto _33
-  _33:
-    goto _35
   _35:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     RELEASE_CURRENT_OBJECT()
@@ -2636,10 +2621,7 @@ suikomi_label:
   push 39
   COMM 0x011b
   COMM 0x011c
-  push local_int[39]
-  push 0
-  push 0
-  COMM 0x0111
+  ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[39])
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], local_int[38])
   PREPARE_UNIT_MOTION_STATE(global_int[0], local_int[40], 3, 25, 2)
@@ -2798,15 +2780,8 @@ _165:
     WAIT_FOR_TIMER_LIMIT(30)
     SCREEN_FADE_B(1, 30)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 0
-    push string(BARIA)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(BARIA_2)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_MODELS(0, 0, string(BARIA), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(BARIA_2))
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 0, 0, 0)
     SCREEN_FADE_A(1, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -2823,10 +2798,7 @@ _165:
     WAIT_FOR_TIMER_LIMIT(15)
     SET_MODEL_FLAG(local_int[47])
     if (local_int[49] != -(1)) {
-      push local_int[49]
-      push 0
-      push 0
-      COMM 0x0111
+      ENABLE_FIELD_MAP_ENTRY(0, 0, local_int[49])
     }
   _176:
     RELEASE_CURRENT_OBJECT()
@@ -2862,28 +2834,11 @@ proc_0012:
   PUSHREG
   EQ
   IF _189
-  push 0
-  push string(md_hoji_01)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01)
-  push 0
-  push 0
-  COMM 0x0108
-  push string(atari_hoji_02)
-  push 0
-  push 0
-  COMM 0x0108
-  push string(atari_hoji_03)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01))
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02))
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03))
   goto _188
 _189:
   push 0
@@ -2892,29 +2847,11 @@ _189:
   PUSHREG
   EQ
   IF _186
-  push string(atari_hoji_01_2)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_03_2)
-  push 0
-  push 0
-  COMM 0x0108
-  push 0
-  push string(md_hoji_01_2)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_3)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_2)
-  push 0
-  push 0
-  COMM 0x0104
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_2))
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_2))
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_01_2), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_3), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_2), 0)
   push 50
   push 6
   COMM 0x0015
@@ -2935,10 +2872,7 @@ _189:
   SET_UNIT_VALUE(global_int[5], 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_16))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[5], result)
-  push string(atari_hoji_02_2)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_2))
   goto _186
 _186:
   goto _188
@@ -2982,9 +2916,7 @@ _188:
   WAIT_FOR_TIMER_LIMIT(60)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
-  push 0
-  push 6
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(6, 0)
   COMM 0x00a4
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
   ACTIVATE_MESSAGE_PANEL()
@@ -2994,9 +2926,7 @@ _188:
   FINISH_SCRIPT_MESSAGE_WINDOW()
   push 1
   COMM 0x0093
-  push 0
-  push 16
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(16, 0)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_2))
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_01_MOTION))
@@ -3009,9 +2939,7 @@ _188:
   MESSAGE_REQUEST_AND_POLL(4)
   WAIT_FOR_TIMER_LIMIT(15)
   MESSAGE_REQUEST_AND_POLL(5)
-  push 0
-  push 6
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(6, 0)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03))
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION))
@@ -3021,9 +2949,7 @@ _188:
   PUSHREG
   COMM 0x0013
   MESSAGE_REQUEST_AND_POLL(6)
-  push 30
-  push 16
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(16, 30)
   WAIT_FOR_TIMER_LIMIT(15)
   MESSAGE_REQUEST_AND_POLL(7)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -3031,9 +2957,7 @@ _188:
   WAIT_FOR_TIMER_LIMIT(10)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04))
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
-  push 0
-  push 6
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(6, 0)
   SCREEN_FADE_A(0, 10)
   WAIT_FOR_TIMER_LIMIT(10)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_04_MOTION))
@@ -3043,9 +2967,7 @@ _188:
   PUSHREG
   COMM 0x0013
   MESSAGE_REQUEST_AND_POLL(8)
-  push 30
-  push 16
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(16, 30)
   WAIT_FOR_TIMER_LIMIT(15)
   MESSAGE_REQUEST_AND_POLL(9)
   push 0
@@ -3056,9 +2978,7 @@ _188:
   ACTIVATE_MESSAGE_PANEL()
   COMM 0x00a4
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
-  push 0
-  push 6
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(6, 0)
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   MESSAGE_REQUEST_AND_POLL(49)
@@ -3258,23 +3178,11 @@ _192:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_01_4)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_4), 0)
     WAIT_FOR_TIMER_LIMIT(10)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_01_5)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_02_3)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_5), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_02_3), 0)
     push 107
     COMM 0x0215
     ACTIVATE_MESSAGE_PANEL()
@@ -3314,14 +3222,8 @@ _192:
     COMM 0x0016
     COMM 0x00a4
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_02_3)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_03_3)
-    push 0
-    push 0
-    COMM 0x0107
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_3))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_3))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     SET_SOLAR_OVERLAY_MODE(7)
@@ -3521,10 +3423,7 @@ proc_0017:
   IF _238
   RESTORE_CAMERA_NODE_MODE()
   SET_MODEL_FLAG(1307)
-  push 1
-  push 0
-  push 0
-  COMM 0x010a
+  DISABLE_FIELD_MODEL_GROUP(0, 0, 1)
   global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
   SET_SOLAR_OVERLAY_MODE(0)
   push 0
@@ -3688,10 +3587,7 @@ _238:
   AND
   AND
   IF _240
-  push 1
-  push 0
-  push 0
-  COMM 0x010a
+  DISABLE_FIELD_MODEL_GROUP(0, 0, 1)
   goto _240
 _240:
   return
@@ -3869,10 +3765,7 @@ _264:
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     COMM 0x0013
-    push 1
-    push 0
-    push 0
-    COMM 0x0109
+    ENABLE_FIELD_MODEL_GROUP(0, 0, 1)
     MESSAGE_REQUEST_AND_POLL(56)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_3))
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
@@ -3924,10 +3817,7 @@ _264:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_02_4))
     push result
     COMM MOVE_OBJECT_ALONG_PATH
-    push string(atari_hoji_02_4)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_4))
     WAIT_FOR_TIMER_LIMIT(20)
     push 10
     push 60
@@ -4030,10 +3920,7 @@ _264:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_01_6))
     push result
     COMM MOVE_OBJECT_ALONG_PATH
-    push string(atari_hoji_01_3)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_3))
     WAIT_FOR_TIMER_LIMIT(20)
     push 10
     push 60
@@ -4447,51 +4334,17 @@ proc_0026:
   PUSHREG
   EQ
   IF _318
-  push 0
-  push string(md_hoji_03_2)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_7)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_5)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_4)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_2), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_7), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_5), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_4))
   goto _317
 _318:
-  push 0
-  push string(md_hoji_05)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_8)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_6)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_5)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_3), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_8), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_6), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_5))
   goto _317
 _317:
   return
@@ -4510,39 +4363,18 @@ proc_0027:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_04)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_05_2)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_2), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_9)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_7)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_9), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_7), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_10_3)
-  push 37
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(37, string(str_01pos_10_3))
   return
   return
 proc_0028:
@@ -4553,51 +4385,17 @@ proc_0028:
   PUSHREG
   EQ
   IF _320
-  push 0
-  push string(md_hoji_03_4)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_10)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_8)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_6)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_4), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_10), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_8), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_6))
   goto _319
 _320:
-  push 0
-  push string(md_hoji_08)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_5)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_11)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_9)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_7)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_5), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_11), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_9), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_7))
   goto _319
 _319:
   push 1
@@ -4606,51 +4404,17 @@ _319:
   PUSHREG
   EQ
   IF _322
-  push 0
-  push string(md_hoji_06)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_04_2)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_02_5)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_2), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_3), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_5))
   goto _321
 _322:
-  push 0
-  push string(md_hoji_10)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_2)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_3)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_05_4)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_02_6)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_2), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_3), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_4), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_6))
   goto _321
 _321:
   push 1
@@ -4709,39 +4473,18 @@ proc_0029:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_07)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_08_2)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_2), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_12)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_10)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_12), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_10), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_11)
-  push 39
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(39, string(str_01pos_11))
   return
   return
 proc_002a:
@@ -4759,39 +4502,18 @@ proc_002a:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_09)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_10_2)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_2), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_04_4)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_05_5)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_4), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_5), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 3
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_12_2)
-  push 38
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(38, string(str_01pos_12_2))
   return
   return
 proc_002b:
@@ -4854,51 +4576,17 @@ proc_002c:
   PUSHREG
   EQ
   IF _334
-  push 0
-  push string(md_hoji_03_6)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_13)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_11)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_8)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_6), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_13), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_11), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_8))
   goto _333
 _334:
-  push 0
-  push string(md_hoji_05_6)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_7)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_14)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_12)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_9)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_6), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_7), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_14), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_12), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_9))
   goto _333
 _333:
   return
@@ -4917,39 +4605,18 @@ proc_002d:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_04_5)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_05_7)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_5), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_7), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_15)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_13)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_15), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_13), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_10_4)
-  push 41
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(41, string(str_01pos_10_4))
   return
   return
 proc_002e:
@@ -4960,51 +4627,17 @@ proc_002e:
   PUSHREG
   EQ
   IF _336
-  push 0
-  push string(md_hoji_03_8)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_16)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_14)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_10)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_8), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_16), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_14), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_10))
   goto _335
 _336:
-  push 0
-  push string(md_hoji_08_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_9)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_17)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_15)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_11)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_3), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_9), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_17), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_15), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_11))
   goto _335
 _335:
   push 1
@@ -5013,51 +4646,17 @@ _335:
   PUSHREG
   EQ
   IF _338
-  push 0
-  push string(md_hoji_06_3)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_04_6)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_8)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_02_7)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_3), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_6), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_8), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_7))
   goto _337
 _338:
-  push 0
-  push string(md_hoji_10_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_4)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_7)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_05_9)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_02_8)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_3), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_4), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_7), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_9), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_8))
   goto _337
 _337:
   return
@@ -5076,39 +4675,18 @@ proc_002f:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_07_2)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_08_4)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_2), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_4), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_18)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_16)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_18), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_16), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_12_3)
-  push 42
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(42, string(str_01pos_12_3))
   return
   return
 proc_0030:
@@ -5126,39 +4704,18 @@ proc_0030:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_09_2)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_10_4)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_2), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_4), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_04_8)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_05_10)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_8), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_10), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 3
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_14_2)
-  push 43
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(43, string(str_01pos_14_2))
   return
   return
 proc_0031:
@@ -5169,51 +4726,17 @@ proc_0031:
   PUSHREG
   EQ
   IF _340
-  push 0
-  push string(md_hoji_03_10)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_19)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_17)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_12)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_10), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_19), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_17), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_12))
   goto _339
 _340:
-  push 0
-  push string(md_hoji_05_11)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_11)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_20)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_18)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_13)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_11), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_11), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_20), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_18), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_13))
   goto _339
 _339:
   return
@@ -5232,39 +4755,18 @@ proc_0032:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_04_9)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_05_12)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_9), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_12), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_21)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_19)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_21), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_19), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_17_2)
-  push 44
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(44, string(str_01pos_17_2))
   return
   return
 proc_0033:
@@ -5275,51 +4777,17 @@ proc_0033:
   PUSHREG
   EQ
   IF _342
-  push 0
-  push string(md_hoji_03_12)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_01_22)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_02_20)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_01_14)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_12), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_22), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_20), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_14))
   goto _341
 _342:
-  push 0
-  push string(md_hoji_10_5)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_03_13)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_01_23)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_02_21)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_15)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_5), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_13), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_23), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_21), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_15))
   goto _341
 _341:
   push 1
@@ -5328,51 +4796,17 @@ _341:
   PUSHREG
   EQ
   IF _344
-  push 0
-  push string(md_hoji_06_5)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_04_10)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_05_13)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_02_9)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_5), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_04_10), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_13), 0)
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_9))
   goto _343
 _344:
-  push 0
-  push string(md_hoji_08_5)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_06_6)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_04_11)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_05_14)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_02_10)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_5), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_6), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_11), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_14), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_10))
   goto _343
 _343:
   return
@@ -5391,39 +4825,18 @@ proc_0034:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_09_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_10_6)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_3), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_6), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_01_24)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_02_22)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_01_24), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_02_22), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 2
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_18_2)
-  push 45
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 2)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(45, string(str_01pos_18_2))
   return
   return
 proc_0035:
@@ -5441,39 +4854,18 @@ proc_0035:
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
   SCREEN_FADE_A(0, 5)
   WAIT_FOR_TIMER_LIMIT(5)
-  push 1
-  push string(md_hoji_07_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_08_6)
-  push 0
-  push 0
-  COMM 0x0103
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_3), 1)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_6), 1)
   WAIT_FOR_TIMER_LIMIT(30)
   PREPARE_UNIT_MOTION_STATE(global_int[0], 6, 4, 4, 0)
   WAIT_FOR_TIMER_LIMIT(17)
   push 96
   COMM 0x0214
-  push 0
-  push string(md_hoji_04_12)
-  push 0
-  push 0
-  COMM 0x0105
-  push 0
-  push string(md_hoji_05_15)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_04_12), 0)
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_05_15), 0)
   WAIT_FOR_UNIT_MOTION(global_int[0])
-  push 3
-  push 0
-  push 0
-  COMM 0x0111
-  push string(str_01pos_20)
-  push 40
-  COMM 0x0100
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 3)
+  REQUEST_ALTERNATE_FIELD_SEQUENCE(40, string(str_01pos_20))
   return
   return
 proc_0036:
@@ -5575,10 +4967,7 @@ proc_0038:
     RELEASE_CURRENT_OBJECT()
   }
 _351:
-  push string(atari_hoji_01_16)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_16))
   push 1
   push 1374
   COMM TEST_MODEL_FLAG
@@ -5591,10 +4980,7 @@ _351:
   PUSHREG
   EQ
   IF _353
-  push string(atari_hoji_01_17)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_17))
   push 54
   push 6
   COMM 0x0015
@@ -5665,10 +5051,7 @@ _359:
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_17_3))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
-    push string(atari_hoji_01_18)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_18))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     ACTIVATE_MESSAGE_PANEL()
@@ -5843,10 +5226,7 @@ proc_003e:
     RELEASE_CURRENT_OBJECT()
   }
 _377:
-  push string(atari_hoji_01_19)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_19))
   push 1
   push 1374
   COMM TEST_MODEL_FLAG
@@ -5859,10 +5239,7 @@ _377:
   PUSHREG
   EQ
   IF _379
-  push string(atari_hoji_01_20)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_20))
   push 48
   push 6
   COMM 0x0015
@@ -5923,10 +5300,7 @@ _385:
     SET_MODEL_FLAG(1309)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push string(atari_hoji_01_21)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_21))
     push 1
     push 140
     COMM 0x0070
@@ -6739,10 +6113,7 @@ proc_0050:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_04_13))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_03_4)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_4))
   WAIT_FOR_TIMER_LIMIT(20)
   push 10
   push 60
@@ -6792,10 +6163,7 @@ _449:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_03_14))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_04)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_04))
   WAIT_FOR_TIMER_LIMIT(20)
   push 10
   push 60
@@ -6845,10 +6213,7 @@ _453:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_02_23))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_02_11)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_11))
   WAIT_FOR_TIMER_LIMIT(20)
   push 10
   push 60
@@ -7048,10 +6413,7 @@ proc_0054:
   WAIT_FOR_TIMER_LIMIT(10)
   push 100
   COMM 0x0214
-  push string(atari_hoji_03_5)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_5))
   push 0
   push string(path_hoji_06)
   COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -7108,10 +6470,7 @@ _478:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_07_4))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_02_12)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_02_12))
   WAIT_FOR_TIMER_LIMIT(20)
   push 10
   push 60
@@ -7243,16 +6602,8 @@ proc_0057:
   PUSHREG
   EQ
   IF _490
-  push 0
-  push string(md_hoji_07_5)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_08_7)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_5), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_7), 0)
   goto _490
 _490:
   push 0
@@ -7261,16 +6612,8 @@ _490:
   PUSHREG
   EQ
   IF _492
-  push 0
-  push string(md_hoji_11)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_12)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_11), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_12), 0)
   goto _492
 _492:
   push 0
@@ -7279,11 +6622,7 @@ _492:
   PUSHREG
   EQ
   IF _494
-  push 0
-  push string(md_hoji_06_8)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_8), 0)
   goto _494
 _494:
   push 0
@@ -7292,11 +6631,7 @@ _494:
   PUSHREG
   EQ
   IF _496
-  push 0
-  push string(md_hoji_10_7)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_7), 0)
   goto _496
 _496:
   push 0
@@ -8109,11 +7444,7 @@ proc_005a:
   WAIT_FOR_TIMER_LIMIT(10)
   push 99
   COMM 0x0214
-  push 1
-  push string(md_hoji_10_8)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_8), 1)
   WAIT_FOR_TIMER_LIMIT(45)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
@@ -8204,22 +7535,10 @@ _516:
     SET_MODEL_FLAG(1357)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_07_6)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_6), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_07_7)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_08_8)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_7), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_8), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(160)
@@ -8307,22 +7626,10 @@ _527:
     SET_MODEL_FLAG(1358)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_11_2)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_11_2), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_11_3)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_12_2)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_3), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_12_2), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(161)
@@ -8421,16 +7728,8 @@ _538:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         push 98
         COMM 0x0214
-        push 0
-        push string(md_hoji_05_17)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_06_9)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_17), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_9), 0)
         push 0
         push string(path_hoji_06_2)
         COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -8530,16 +7829,8 @@ _538:
     result = CREATE_SCRIPT_TASK(procedure(proc_0059), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push string(md_hoji_06_12)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_05_19)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_12), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_19), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_0058), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     SET_SOLAR_OVERLAY_MODE(3)
@@ -9746,11 +9037,7 @@ proc_0073:
   PUSHREG
   EQ
   IF _615
-  push 0
-  push string(md_hoji_06_13)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_13), 0)
   goto _615
 _615:
   push 0
@@ -9775,11 +9062,7 @@ _617:
   PUSHREG
   EQ
   IF _619
-  push 0
-  push string(md_hoji_11_4)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_11_4), 0)
   goto _619
 _619:
   push 0
@@ -9788,16 +9071,8 @@ _619:
   PUSHREG
   EQ
   IF _621
-  push 0
-  push string(md_hoji_07_8)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_08_9)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_8), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_9), 0)
   goto _621
 _621:
   push 0
@@ -9806,16 +9081,8 @@ _621:
   PUSHREG
   EQ
   IF _623
-  push 0
-  push string(md_hoji_09_4)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_10_9)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_09_4), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_9), 0)
   goto _623
 _623:
   push 1
@@ -11426,11 +10693,7 @@ proc_0076:
   WAIT_FOR_TIMER_LIMIT(10)
   push 99
   COMM 0x0214
-  push 1
-  push string(md_hoji_11_5)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_5), 1)
   WAIT_FOR_TIMER_LIMIT(45)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
@@ -11521,22 +10784,10 @@ _719:
     SET_MODEL_FLAG(1359)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_07_9)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_9), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_07_10)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_08_10)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_10), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_10), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(162)
@@ -11624,22 +10875,10 @@ _730:
     SET_MODEL_FLAG(1360)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_09_5)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_09_5), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_09_6)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_10_10)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_6), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_10), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(163)
@@ -11743,16 +10982,8 @@ _741:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         push 98
         COMM 0x0214
-        push 0
-        push string(md_hoji_05_21)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_06_14)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_21), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_14), 0)
         push 0
         push string(path_hoji_06_4)
         COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -11854,16 +11085,8 @@ _741:
     COMM MOVE_OBJECT_ALONG_PATH
     CLEAR_MODEL_FLAG(1292)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push string(md_hoji_06_17)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_05_23)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_17), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_23), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_0074), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     result = CREATE_SCRIPT_TASK(procedure(proc_0076), 0)
@@ -15018,16 +14241,8 @@ proc_009b:
   ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(result)
   SCREEN_FADE_A(0, 10)
   WAIT_FOR_TIMER_LIMIT(45)
-  push 1
-  push string(md_hoji_11_6)
-  push 0
-  push 0
-  COMM 0x0104
-  push 1
-  push string(md_hoji_12_3)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_6), 1)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_12_3), 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_03_MOTION_3))
   push result
   push string(str_01cam_03_8)
@@ -15050,10 +14265,7 @@ proc_009b:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(md_hoji_13))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_01_22)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_22))
   WAIT_FOR_TIMER_LIMIT(20)
   push 10
   push 60
@@ -15084,18 +14296,10 @@ proc_009c:
   PUSHREG
   EQ
   IF _1006
-  push 1
-  push string(md_hoji_11_7)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_7), 1)
   goto _1005
 _1006:
-  push 1
-  push string(md_hoji_11_8)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_11_8), 1)
   goto _1005
 _1005:
   return
@@ -15107,18 +14311,10 @@ proc_009d:
   PUSHREG
   EQ
   IF _1008
-  push 1
-  push string(md_hoji_12_4)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_12_4), 1)
   goto _1007
 _1008:
-  push 1
-  push string(md_hoji_12_5)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_12_5), 1)
   goto _1007
 _1007:
   return
@@ -15130,11 +14326,7 @@ proc_009e:
   PUSHREG
   EQ
   IF _1009
-  push 0
-  push string(md_hoji_08_11)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_11), 0)
   goto _1009
 _1009:
   push 0
@@ -15143,11 +14335,7 @@ _1009:
   PUSHREG
   EQ
   IF _1011
-  push 0
-  push string(md_hoji_10_11)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_11), 0)
   goto _1011
 _1011:
   push 0
@@ -15156,11 +14344,7 @@ _1011:
   PUSHREG
   EQ
   IF _1013
-  push 1
-  push string(md_hoji_11_9)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_11_9), 1)
   goto _1013
 _1013:
   push 0
@@ -15169,11 +14353,7 @@ _1013:
   PUSHREG
   EQ
   IF _1015
-  push 1
-  push string(md_hoji_12_6)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_12_6), 1)
   goto _1015
 _1015:
   push 0
@@ -16292,16 +15472,8 @@ _1065:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         push 98
         COMM 0x0214
-        push 0
-        push string(md_hoji_07_12)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_08_12)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_12), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_12), 0)
         push 0
         push string(path_hoji_08)
         COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -16415,16 +15587,8 @@ _1065:
     result = CREATE_SCRIPT_TASK(procedure(proc_0098), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push string(md_hoji_08_15)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_07_14)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_15), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_07_14), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_0099), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     result = CREATE_SCRIPT_TASK(procedure(proc_009a), 0)
@@ -16523,16 +15687,8 @@ _1082:
         FINISH_SCRIPT_MESSAGE_WINDOW()
         push 98
         COMM 0x0214
-        push 0
-        push string(md_hoji_09_8)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_10_12)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_8), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_12), 0)
         push 0
         push string(path_hoji_10)
         COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -16646,16 +15802,8 @@ _1082:
     result = CREATE_SCRIPT_TASK(procedure(proc_0098), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push string(md_hoji_10_15)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_09_10)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_15), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_09_10), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_0099), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     result = CREATE_SCRIPT_TASK(procedure(proc_009a), 0)
@@ -17585,11 +16733,7 @@ proc_00b2:
   PUSHREG
   EQ
   IF _1207
-  push 0
-  push string(md_hoji_14)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_14), 0)
   goto _1207
 _1207:
   push 0
@@ -17598,11 +16742,7 @@ _1207:
   PUSHREG
   EQ
   IF _1209
-  push 0
-  push string(md_hoji_06_20)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_20), 0)
   goto _1209
 _1209:
   push 0
@@ -17611,16 +16751,8 @@ _1209:
   PUSHREG
   EQ
   IF _1211
-  push 0
-  push string(md_hoji_07_15)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_08_16)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_15), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_08_16), 0)
   goto _1211
 _1211:
   push 0
@@ -17629,16 +16761,8 @@ _1211:
   PUSHREG
   EQ
   IF _1213
-  push 0
-  push string(md_hoji_09_11)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_10_16)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_09_11), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_16), 0)
   goto _1213
 _1213:
   push 0
@@ -18021,11 +17145,7 @@ proc_00b5:
   WAIT_FOR_TIMER_LIMIT(20)
   push 99
   COMM 0x0214
-  push 1
-  push string(md_hoji_14_2)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_14_2), 1)
   WAIT_FOR_TIMER_LIMIT(45)
   SCREEN_FADE_B(0, 20)
   WAIT_FOR_TIMER_LIMIT(20)
@@ -18116,22 +17236,10 @@ _1229:
     SET_MODEL_FLAG(1355)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_07_16)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_07_16), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_07_17)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_08_17)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_17), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_17), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(158)
@@ -18219,22 +17327,10 @@ _1240:
     SET_MODEL_FLAG(1356)
     push 107
     COMM 0x0214
-    push 0
-    push string(md_hoji_09_12)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_09_12), 0)
     WAIT_FOR_TIMER_LIMIT(60)
-    push 0
-    push string(md_hoji_09_13)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_10_17)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_13), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_17), 0)
     push 107
     COMM 0x0215
     MESSAGE_REQUEST_AND_POLL(159)
@@ -18354,16 +17450,8 @@ _1251:
         WAIT_FOR_TIMER_LIMIT(10)
         push 98
         COMM 0x0214
-        push 0
-        push string(md_hoji_05_27)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_06_21)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_27), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_21), 0)
         push 0
         push string(path_hoji_06_8)
         COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -18381,16 +17469,8 @@ _1251:
         return
         goto _1253
       _1253:
-        push 0
-        push string(md_hoji_05_28)
-        push 0
-        push 0
-        COMM 0x0104
-        push 0
-        push string(md_hoji_06_23)
-        push 0
-        push 0
-        COMM 0x0103
+        DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_28), 0)
+        ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_23), 0)
         push 98
         COMM 0x0214
         push 0
@@ -18490,16 +17570,8 @@ _1251:
     result = CREATE_SCRIPT_TASK(procedure(proc_00b4), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     WAIT_FOR_TIMER_LIMIT(25)
-    push 0
-    push string(md_hoji_06_26)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_05_30)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_26), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_30), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_00b3), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     SET_SOLAR_OVERLAY_MODE(3)
@@ -18780,15 +17852,8 @@ proc_00c0:
   PUSHREG
   EQ
   IF _1304
-  push string(atari_hoji_05)
-  push 0
-  push 0
-  COMM 0x0108
-  push 0
-  push string(md_hoji_05_31)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05))
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_31), 0)
   goto _1304
 _1304:
   push 0
@@ -18797,49 +17862,17 @@ _1304:
   PUSHREG
   EQ
   IF _1307
-  push string(atari_hoji_12)
-  push 0
-  push 0
-  COMM 0x0108
-  push string(atari_hoji_13)
-  push 0
-  push 0
-  COMM 0x0108
-  push 0
-  push string(md_hoji_09_14)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_10_18)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_11_10)
-  push 0
-  push 0
-  COMM 0x0104
-  push 12
-  push 0
-  push 0
-  COMM 0x0112
-  push 13
-  push 0
-  push 0
-  COMM 0x0112
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12))
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13))
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_09_14), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_18), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_10), 0)
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 12)
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 13)
   goto _1306
 _1307:
-  push 0
-  push string(md_hoji_08_18)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_09_15)
-  push 0
-  push 0
-  COMM 0x0103
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_08_18), 0)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_09_15), 0)
   goto _1306
 _1306:
   push 0
@@ -19203,24 +18236,10 @@ _1324:
     EQ
     IF _1327
     SET_MODEL_FLAG(1330)
-    push string(atari_hoji_03_6)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_03_21)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_05_2)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_05_32)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_6))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_21), 0)
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_2))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_05_32), 0)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(10)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_7))
@@ -19240,42 +18259,14 @@ _1324:
     goto _1326
   _1327:
     SET_MODEL_FLAG(1330)
-    push string(atari_hoji_03_7)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_03_22)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_05_3)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_05_33)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_12_2)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_10_19)
-    push 0
-    push 0
-    COMM 0x0103
-    push string(atari_hoji_13_2)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_11_11)
-    push 0
-    push 0
-    COMM 0x0104
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_7))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_22), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_3))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_33), 0)
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_2))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_19), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_2))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_11_11), 0)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(10)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_8))
@@ -19303,24 +18294,10 @@ _1324:
     EQ
     IF _1329
     CLEAR_MODEL_FLAG(1330)
-    push string(atari_hoji_03_8)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_03_23)
-    push 0
-    push 0
-    COMM 0x0103
-    push string(atari_hoji_05_4)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_05_34)
-    push 0
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_8))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_03_23), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_4))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_34), 0)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(10)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_9))
@@ -19340,42 +18317,14 @@ _1324:
     goto _1328
   _1329:
     CLEAR_MODEL_FLAG(1330)
-    push string(atari_hoji_03_9)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_03_24)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_05_5)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_05_35)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_12_3)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_10_20)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_13_3)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_11_12)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_9))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_03_24), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_5))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_35), 0)
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_3))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_10_20), 0)
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_3))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_11_12), 0)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(10)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_07_10))
@@ -19474,14 +18423,8 @@ _1340:
     IF _1343
     SET_MODEL_FLAG(1331)
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 4
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 4)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 8)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -19492,14 +18435,8 @@ _1340:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_11)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_07)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -19519,14 +18456,10 @@ _1340:
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 0)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_7))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
-    push string(atari_hoji_07_2)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_2))
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SET_SOLAR_OVERLAY_MODE(1)
@@ -19579,14 +18512,8 @@ _1348:
     IF _1351
     SET_MODEL_FLAG(1331)
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 9)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -19597,22 +18524,13 @@ _1348:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_11_2)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_07_3)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_2))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_3))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
     COMM 0x0214
-    push string(atari_hoji_11_3)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_3))
     local_int[66] = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_13))
     push 0
     push string(path_hoji_02_9)
@@ -19630,15 +18548,11 @@ _1348:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_4))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SET_SOLAR_OVERLAY_MODE(1)
-    push string(atari_hoji_07_4)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_4))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     RELEASE_CURRENT_OBJECT()
@@ -19699,18 +18613,9 @@ _1356:
     PUSHREG
     EQ
     IF _1359
-    push 6
-    push 0
-    push 0
-    COMM 0x0112
-    push 10
-    push 0
-    push 0
-    COMM 0x0111
-    push 12
-    push 0
-    push 0
-    COMM 0x0112
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 6)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 12)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -19721,14 +18626,8 @@ _1356:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_07_5)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_11_4)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_5))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_4))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -19750,14 +18649,10 @@ _1356:
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_07_6)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_6))
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -19765,27 +18660,12 @@ _1356:
     return
     goto _1358
   _1359:
-    push 6
-    push 0
-    push 0
-    COMM 0x0112
-    push 10
-    push 0
-    push 0
-    COMM 0x0111
-    push 12
-    push 0
-    push 0
-    COMM 0x0112
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 6)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 12)
     SCREEN_FADE_B(0, 15)
-    push string(atari_hoji_07_7)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_11_5)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_7))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_5))
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_23_3))
@@ -19795,11 +18675,7 @@ _1356:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 0
-    push string(md_hoji_11_13)
-    push 0
-    push 0
-    COMM 0x0103
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_11_13), 0)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -19821,15 +18697,11 @@ _1356:
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_05_2))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SET_SOLAR_OVERLAY_MODE(1)
-    push string(atari_hoji_07_8)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_8))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     RELEASE_CURRENT_OBJECT()
@@ -19843,22 +18715,10 @@ _1356:
     PUSHREG
     EQ
     IF _1361
-    push 6
-    push 0
-    push 0
-    COMM 0x0112
-    push 10
-    push 0
-    push 0
-    COMM 0x0112
-    push 12
-    push 0
-    push 0
-    COMM 0x0111
-    push 13
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 6)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 12)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 13)
     SET_MODEL_FLAG(1329)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -19866,14 +18726,8 @@ _1356:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_07_9)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_11_6)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_9))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_6))
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     PREPARE_UNIT_MOTION_STATE(global_int[0], 16, 1, 15, 3)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_23_4))
@@ -19896,53 +18750,17 @@ _1356:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push string(atari_hoji_03_11)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_05_7)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_09)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_10)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_07_10)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_08)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_12_4)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_11_7)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_05_36)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_09_16)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_10_21)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_03_11))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_05_7))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_10))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_08))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_4))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_7))
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_05_36), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_09_16), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_21), 0)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_2))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
@@ -20013,35 +18831,19 @@ _1356:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 13
-    push 0
-    push 0
-    COMM 0x0111
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 13)
     SET_SOLAR_OVERLAY_MODE(1)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     goto _1360
   _1361:
-    push 6
-    push 0
-    push 0
-    COMM 0x0112
-    push 10
-    push 0
-    push 0
-    COMM 0x0112
-    push 12
-    push 0
-    push 0
-    COMM 0x0111
-    push 13
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 6)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 12)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 13)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -20052,31 +18854,12 @@ _1356:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_09_2)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_10_2)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_11_8)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_08_2)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_12_5)
-    push 0
-    push 0
-    COMM 0x0107
-    push 0
-    push string(md_hoji_10_22)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_2))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_2))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_8))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_08_2))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_5))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_10_22), 0)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -20098,15 +18881,11 @@ _1356:
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_07_3))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SET_SOLAR_OVERLAY_MODE(1)
-    push string(atari_hoji_07_11)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_11))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     goto _1360
@@ -20159,14 +18938,8 @@ _1370:
     IF _1373
     SET_MODEL_FLAG(1331)
     FINISH_SCRIPT_MESSAGE_WINDOW()
-    push 7
-    push 0
-    push 0
-    COMM 0x0112
-    push 11
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 7)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 11)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
@@ -20177,14 +18950,8 @@ _1370:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_07_12)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_11_9)
-    push 0
-    push 0
-    COMM 0x0108
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_12))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_9))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -20205,15 +18972,11 @@ _1370:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_04_2))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 0)
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
     SET_SOLAR_OVERLAY_MODE(1)
-    push string(atari_hoji_07_13)
-    push 0
-    push 0
-    COMM 0x0107
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_07_13))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     RELEASE_CURRENT_OBJECT()
@@ -20245,14 +19008,8 @@ proc_00ca:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(2)
   CLEAR_MODEL_FLAG(1331)
-  push 8
-  push 0
-  push 0
-  COMM 0x0112
-  push 4
-  push 0
-  push 0
-  COMM 0x0111
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 4)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_11_5))
@@ -20268,10 +19025,7 @@ proc_00ca:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_01_24))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_11_10)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_10))
   WAIT_FOR_TIMER_LIMIT(55)
   push 101
   COMM 0x0215
@@ -20297,14 +19051,8 @@ proc_00cb:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(2)
   CLEAR_MODEL_FLAG(1331)
-  push 9
-  push 0
-  push 0
-  COMM 0x0112
-  push 5
-  push 0
-  push 0
-  COMM 0x0111
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 9)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 5)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_12_3))
@@ -20320,10 +19068,7 @@ proc_00cb:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_14))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_11_11)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_11))
   WAIT_FOR_TIMER_LIMIT(55)
   push 101
   COMM 0x0215
@@ -20370,18 +19115,9 @@ proc_00cc:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_03_12))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_11_12)
-  push 0
-  push 0
-  COMM 0x0107
-  push 10
-  push 0
-  push 0
-  COMM 0x0112
-  push 6
-  push 0
-  push 0
-  COMM 0x0111
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_12))
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 10)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 6)
   goto _1382
 _1383:
   push 1
@@ -20391,22 +19127,10 @@ _1383:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_13_5))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_13_6)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_11_13)
-  push 0
-  push 0
-  COMM 0x0107
-  push 10
-  push 0
-  push 0
-  COMM 0x0112
-  push 6
-  push 0
-  push 0
-  COMM 0x0111
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_6))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_13))
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 10)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 6)
   goto _1382
 _1382:
   WAIT_FOR_TIMER_LIMIT(55)
@@ -20434,14 +19158,8 @@ proc_00cd:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(2)
   CLEAR_MODEL_FLAG(1331)
-  push 11
-  push 0
-  push 0
-  COMM 0x0112
-  push 7
-  push 0
-  push 0
-  COMM 0x0111
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 11)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 7)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_14_3))
@@ -20457,10 +19175,7 @@ proc_00cd:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_04_3))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_11_14)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_14))
   WAIT_FOR_TIMER_LIMIT(55)
   push 101
   COMM 0x0215
@@ -20486,14 +19201,8 @@ proc_00ce:
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(2)
   CLEAR_MODEL_FLAG(1331)
-  push 12
-  push 0
-  push 0
-  COMM 0x0112
-  push 6
-  push 0
-  push 0
-  COMM 0x0111
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 12)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 6)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01cam_16_3))
@@ -20509,10 +19218,7 @@ proc_00ce:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_12_7))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_10_3)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_3))
   WAIT_FOR_TIMER_LIMIT(55)
   push 101
   COMM 0x0215
@@ -20520,10 +19226,7 @@ proc_00ce:
   WAIT_FOR_TIMER_LIMIT(15)
   COMM 0x00a4
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
-  push string(atari_hoji_11_15)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_15))
   SET_SOLAR_OVERLAY_MODE(1)
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -20541,14 +19244,8 @@ proc_00cf:
   IF _1390
   RESTORE_CAMERA_NODE_MODE()
   SET_SOLAR_OVERLAY_MODE(2)
-  push 12
-  push 0
-  push 0
-  COMM 0x0112
-  push 6
-  push 0
-  push 0
-  COMM 0x0111
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 12)
+  ENABLE_FIELD_MAP_ENTRY(0, 0, 6)
   CLEAR_MODEL_FLAG(1331)
   SCREEN_FADE_B(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -20565,10 +19262,7 @@ proc_00cf:
   result = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_12_8))
   push result
   COMM MOVE_OBJECT_ALONG_PATH
-  push string(atari_hoji_10_4)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_4))
   WAIT_FOR_TIMER_LIMIT(55)
   push 101
   COMM 0x0215
@@ -20576,10 +19270,7 @@ proc_00cf:
   WAIT_FOR_TIMER_LIMIT(15)
   SET_SOLAR_OVERLAY_MODE(1)
   COMM 0x00a4
-  push string(atari_hoji_11_16)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_16))
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
   SCREEN_FADE_A(0, 15)
   WAIT_FOR_TIMER_LIMIT(15)
@@ -21153,21 +19844,10 @@ proc_00d8:
   WAIT_FOR_TIMER_LIMIT(145)
   push 105
   COMM 0x0214
-  push 0
-  push string(md_hoji_13_2)
-  push 0
-  push 0
-  COMM 0x0105
+  ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_13_2), 0)
   WAIT_FOR_TIMER_LIMIT(70)
-  push 1
-  push string(md_hoji_13_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push string(atari_hoji_08_3)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_13_3), 1)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_08_3))
   WAIT_FOR_TIMER_LIMIT(60)
   push 105
   COMM 0x0215
@@ -21178,75 +19858,27 @@ _1411:
   return
 proc_00d9:
   PROC proc_00d9
-  push 2
-  push 0
-  push 0
-  COMM 0x010a
+  DISABLE_FIELD_MODEL_GROUP(0, 0, 2)
   push 0
   push 1328
   COMM TEST_MODEL_FLAG
   PUSHREG
   EQ
   IF _1413
-  push string(atari_hoji_11_17)
-  push 0
-  push 0
-  COMM 0x0108
-  push 0
-  push 10
-  COMM 0x0101
-  push 0
-  push string(md_hoji_01_32)
-  push 0
-  push 0
-  COMM 0x0103
-  push 0
-  push string(md_hoji_14_3)
-  push 0
-  push 0
-  COMM 0x0104
-  push 0
-  push string(md_hoji_13_4)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_hoji_15)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_25)
-  push 0
-  push 0
-  COMM 0x0108
-  push string(atari_hoji_09_3)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_12_9)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_15)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_10_5)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_13_7)
-  push 0
-  push 0
-  COMM 0x0107
-  push string(atari_hoji_14)
-  push 0
-  push 0
-  COMM 0x0107
-  push 13
-  push 0
-  push 0
-  COMM 0x0112
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_17))
+  SET_FIELD_ENVIRONMENT(10, 0)
+  ENABLE_FIELD_MODELS(0, 0, string(md_hoji_01_32), 0)
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_14_3), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_13_4), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_15), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_25))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_3))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_9))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_15))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_5))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_7))
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_14))
+  DISABLE_FIELD_MAP_ENTRY(0, 0, 13)
   goto _1413
 _1413:
   push 0
@@ -21255,11 +19887,7 @@ _1413:
   PUSHREG
   EQ
   IF _1415
-  push 0
-  push string(md_hoji_07_22)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_22), 0)
   goto _1415
 _1415:
   push 0
@@ -21268,11 +19896,7 @@ _1415:
   PUSHREG
   EQ
   IF _1417
-  push 0
-  push string(md_hoji_06_28)
-  push 0
-  push 0
-  COMM 0x0104
+  DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_28), 0)
   goto _1417
 _1417:
   push 1
@@ -21281,9 +19905,7 @@ _1417:
   PUSHREG
   EQ
   IF _1428
-  push 0
-  push 11
-  COMM 0x0101
+  SET_FIELD_ENVIRONMENT(11, 0)
   push 0
   push 1319
   COMM TEST_MODEL_FLAG
@@ -21625,16 +20247,8 @@ _1432:
     EQ
     IF _1435
     SET_MODEL_FLAG(1322)
-    push 0
-    push string(md_hoji_02_30)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_07_23)
-    push 0
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_02_30), 0)
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_23), 0)
     push 101
     COMM 0x0214
     local_int[70] = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_02_15))
@@ -21659,42 +20273,16 @@ _1432:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_18_4))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push string(atari_hoji_13_8)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_12_10)
-    push 0
-    push 0
-    COMM 0x0107
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0112
-    push 4
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_8))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_10))
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 4)
     goto _1434
   _1435:
-    push 0
-    push string(md_hoji_02_31)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_07_24)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_31), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_07_24), 0)
     push 101
     COMM 0x0214
     local_int[70] = READ_SECONDARY_WORLD_ID_VALUE(string(atari_hoji_07_14))
@@ -21714,22 +20302,10 @@ _1432:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_17_6))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push 5
-    push 0
-    push 0
-    COMM 0x0111
-    push 8
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0112
-    push 4
-    push 0
-    push 0
-    COMM 0x0112
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 4)
     goto _1434
   _1434:
     COMM 0x00a4
@@ -21803,43 +20379,19 @@ _1440:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_9))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push string(atari_hoji_12_11)
-    push 0
-    push 0
-    COMM 0x0108
-    push 0
-    push string(md_hoji_02_32)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_07_25)
-    push 0
-    push 0
-    COMM 0x0104
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_11))
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_02_32), 0)
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_07_25), 0)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0111
-    push 4
-    push 0
-    push 0
-    COMM 0x0112
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 4)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -21907,16 +20459,8 @@ _1446:
     EQ
     IF _1449
     CLEAR_MODEL_FLAG(1322)
-    push 0
-    push string(md_hoji_02_33)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_06_29)
-    push 0
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_02_33), 0)
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_29), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_00d7), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -21939,44 +20483,18 @@ _1446:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_02_10))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push string(atari_hoji_12_12)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_13_9)
-    push 0
-    push 0
-    COMM 0x0107
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0111
-    push 4
-    push 0
-    push 0
-    COMM 0x0112
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_12))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_9))
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 4)
     goto _1448
   _1449:
     CLEAR_MODEL_FLAG(1322)
     SET_MODEL_FLAG(1323)
-    push 0
-    push string(md_hoji_06_30)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_02_34)
-    push 0
-    push 0
-    COMM 0x0104
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_06_30), 0)
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_02_34), 0)
     result = CREATE_SCRIPT_TASK(procedure(proc_00d7), 0)
     WAIT_FOR_TASK_REMOVAL(result)
     result = CREATE_SCRIPT_TASK(procedure(proc_00d8), 0)
@@ -22001,22 +20519,10 @@ _1446:
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_14_3))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0111
-    push 9
-    push 0
-    push 0
-    COMM 0x0112
-    push 4
-    push 0
-    push 0
-    COMM 0x0112
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 4)
     goto _1448
   _1448:
     goto _1450
@@ -22097,44 +20603,20 @@ _1456:
     WAIT_FOR_TIMER_LIMIT(15)
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
-    push 0
-    push string(md_hoji_06_31)
-    push 0
-    push 0
-    COMM 0x0104
-    push 0
-    push string(md_hoji_02_35)
-    push 0
-    push 0
-    COMM 0x0103
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_06_31), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_02_35), 0)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_18_6))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_13_10)
-    push 0
-    push 0
-    COMM 0x0108
-    push 5
-    push 0
-    push 0
-    COMM 0x0112
-    push 8
-    push 0
-    push 0
-    COMM 0x0112
-    push 9
-    push 0
-    push 0
-    COMM 0x0112
-    push 4
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_13_10))
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 5)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 8)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 9)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 4)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -22192,14 +20674,8 @@ _1462:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_15_2)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_10_6)
-    push 0
-    push 0
-    COMM 0x0108
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_15_2))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_6))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -22223,21 +20699,14 @@ _1462:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_06_4))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 10
-    push 0
-    push 0
-    COMM 0x0112
-    push 7
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 7)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -22296,14 +20765,8 @@ _1470:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_15_3)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_10_7)
-    push 0
-    push 0
-    COMM 0x0107
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_15_3))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_10_7))
     CLEAR_MODEL_FLAG(1326)
     result = CREATE_SCRIPT_TASK(procedure(proc_00d7), 0)
     WAIT_FOR_TASK_REMOVAL(result)
@@ -22326,21 +20789,14 @@ _1470:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_13_4))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 10
-    push 0
-    push 0
-    COMM 0x0111
-    push 7
-    push 0
-    push 0
-    COMM 0x0112
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 10)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 7)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -22400,14 +20856,8 @@ _1478:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_14_2)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_09_4)
-    push 0
-    push 0
-    COMM 0x0107
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_14_2))
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_4))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     push 101
@@ -22431,21 +20881,14 @@ _1478:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_12_7))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 11
-    push 0
-    push 0
-    COMM 0x0112
-    push 6
-    push 0
-    push 0
-    COMM 0x0111
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 11)
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 6)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -22505,14 +20948,8 @@ _1486:
     push result
     COMM 0x00a3
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_14_3)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_09_5)
-    push 0
-    push 0
-    COMM 0x0108
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_14_3))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_5))
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     result = CREATE_SCRIPT_TASK(procedure(proc_00d7), 0)
@@ -22534,21 +20971,14 @@ _1486:
     SCREEN_FADE_B(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
     global_int[0] = READ_CURRENT_WORLD_OBJECT_ID()
-    push 0
-    COMM 0x0113
+    SET_FIELD_CAMERA_TABLE(0)
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_16_5))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     PREPARE_UNIT_MOTION_STATE(global_int[0], 2, 1, 20, 3)
     COMM 0x00a4
     ADD_EFFECT_UNIT_TO_WORLD(-(1))
-    push 11
-    push 0
-    push 0
-    COMM 0x0111
-    push 6
-    push 0
-    push 0
-    COMM 0x0112
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 11)
+    DISABLE_FIELD_MAP_ENTRY(0, 0, 6)
     SET_SOLAR_OVERLAY_MODE(1)
     SCREEN_FADE_A(0, 15)
     WAIT_FOR_TIMER_LIMIT(15)
@@ -22810,11 +21240,7 @@ _1510:
     COMM READ_SECONDARY_WORLD_ID_VALUE
     PUSHREG
     COMM 0x0013
-    push 0
-    push string(md_hoji_15_2)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_hoji_15_2), 0)
     WAIT_FOR_TIMER_LIMIT(42)
     push 10
     push 50
@@ -22827,15 +21253,8 @@ _1510:
     push 100
     push 20
     COMM 0x00ab
-    push 1
-    push string(md_hoji_01_33)
-    push 0
-    push 0
-    COMM 0x0104
-    push 2
-    push 0
-    push 0
-    COMM 0x0109
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_01_33), 1)
+    ENABLE_FIELD_MODEL_GROUP(0, 0, 2)
     push 0
     push string(str_01path_11_26)
     COMM READ_SECONDARY_WORLD_ID_VALUE
@@ -22844,29 +21263,12 @@ _1510:
     push result
     COMM MOVE_OBJECT_ALONG_PATH
     WAIT_FOR_TIMER_LIMIT(80)
-    push 0
-    push 11
-    COMM 0x0101
+    SET_FIELD_ENVIRONMENT(11, 0)
     WAIT_FOR_TIMER_LIMIT(50)
-    push 0
-    push string(md_hoji_15_3)
-    push 0
-    push 0
-    COMM 0x0106
-    push 0
-    push string(md_hoji_14_4)
-    push 0
-    push 0
-    COMM 0x0103
-    push 0
-    push string(md_hoji_15_4)
-    push 0
-    push 0
-    COMM 0x0104
-    push string(atari_hoji_11_18)
-    push 0
-    push 0
-    COMM 0x0107
+    DISABLE_FIELD_ANIMATION(0, 0, string(md_hoji_15_3), 0)
+    ENABLE_FIELD_MODELS(0, 0, string(md_hoji_14_4), 0)
+    DISABLE_FIELD_MODELS(0, 0, string(md_hoji_15_4), 0)
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_11_18))
     WAIT_FOR_TIMER_LIMIT(20)
     SCREEN_FADE_B(0, 20)
     WAIT_FOR_TIMER_LIMIT(20)
@@ -22892,32 +21294,17 @@ _1510:
     FINISH_SCRIPT_MESSAGE_WINDOW()
     SCREEN_FADE_B(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
-    push 13
-    push 0
-    push 0
-    COMM 0x0111
+    ENABLE_FIELD_MAP_ENTRY(0, 0, 13)
     push global_int[2]
     COMM 0x0016
     result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_41_2))
     ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[0], result)
     COMM 0x00a4
     ADD_FLAGGED_EFFECT_UNIT_TO_WORLD(-(1))
-    push string(atari_hoji_01_26)
-    push 0
-    push 0
-    COMM 0x0107
-    push string(atari_hoji_09_6)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_12_13)
-    push 0
-    push 0
-    COMM 0x0108
-    push string(atari_hoji_15_4)
-    push 0
-    push 0
-    COMM 0x0108
+    ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_26))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_09_6))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_12_13))
+    DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_15_4))
     SCREEN_FADE_A(0, 30)
     WAIT_FOR_TIMER_LIMIT(30)
     SET_SOLAR_OVERLAY_MODE(3)
@@ -23265,20 +21652,9 @@ proc_00f1:
   push result
   COMM 0x00a3
   ADD_EFFECT_UNIT_TO_WORLD(-(1))
-  push 0
-  push string(md_01d_01)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_01d_01b)
-  push 0
-  push 0
-  COMM 0x0106
-  push string(atari_hoji_01_27)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_01d_01), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_01d_01b), 0)
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_27))
   push 1
   push 1375
   COMM TEST_MODEL_FLAG
@@ -23295,10 +21671,7 @@ proc_00f1:
   SET_UNIT_VALUE(global_int[4], 1)
   result = READ_SECONDARY_WORLD_ID_VALUE(string(str_01pos_03_5))
   ATTACH_WORLD_OBJECT_TO_SOURCE_VECTOR(global_int[4], result)
-  push string(atari_hoji_01_28)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_28))
   goto _1572
 _1572:
   return
@@ -23313,16 +21686,8 @@ _1574:
     EQ
     IF _1576
     RESTORE_CAMERA_NODE_MODE()
-    push 0
-    push string(md_01d_01_2)
-    push 0
-    push 0
-    COMM 0x0105
-    push 0
-    push string(md_01d_01b_2)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_01d_01_2), 0)
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_01d_01b_2), 0)
     push 67
     COMM 0x0214
     SCREEN_FADE_B(0, 25)
@@ -23385,16 +21750,8 @@ _1582:
   return
 proc_00f4:
   PROC proc_00f4
-  push 0
-  push string(md_01d_02)
-  push 0
-  push 0
-  COMM 0x0106
-  push 0
-  push string(md_01d_02b)
-  push 0
-  push 0
-  COMM 0x0106
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_01d_02), 0)
+  DISABLE_FIELD_ANIMATION(0, 0, string(md_01d_02b), 0)
   push 1
   push 1737
   COMM TEST_MODEL_FLAG
@@ -23553,16 +21910,8 @@ _1592:
   _1597:
     push 67
     COMM 0x0214
-    push 0
-    push string(md_01d_02_2)
-    push 0
-    push 0
-    COMM 0x0105
-    push 0
-    push string(md_01d_02b_2)
-    push 0
-    push 0
-    COMM 0x0105
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_01d_02_2), 0)
+    ENABLE_FIELD_ANIMATION(0, 0, string(md_01d_02b_2), 0)
     SCREEN_FADE_B(0, 25)
     WAIT_FOR_TIMER_LIMIT(25)
     push string(str_01pos_01_11)
@@ -23683,10 +22032,7 @@ _1603:
   return
 proc_00f9:
   PROC proc_00f9
-  push string(atari_hoji_01_29)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_29))
   push 1
   push 1374
   COMM TEST_MODEL_FLAG
@@ -23699,10 +22045,7 @@ proc_00f9:
   PUSHREG
   EQ
   IF _1606
-  push string(atari_hoji_01_30)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_30))
   push 45
   push 6
   COMM 0x0015
@@ -23890,10 +22233,7 @@ _1626:
   return
 proc_00fb:
   PROC proc_00fb
-  push string(atari_hoji_01_31)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_31))
   push 1
   push 1374
   COMM TEST_MODEL_FLAG
@@ -23906,10 +22246,7 @@ proc_00fb:
   PUSHREG
   EQ
   IF _1628
-  push string(atari_hoji_01_32)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_32))
   push 84
   push 6
   COMM 0x0015
@@ -24021,10 +22358,7 @@ _1642:
   return
 proc_00fd:
   PROC proc_00fd
-  push string(atari_hoji_01_33)
-  push 0
-  push 0
-  COMM 0x0108
+  DISABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_33))
   push 1
   push 1374
   COMM TEST_MODEL_FLAG
@@ -24037,10 +22371,7 @@ proc_00fd:
   PUSHREG
   EQ
   IF _1644
-  push string(atari_hoji_01_34)
-  push 0
-  push 0
-  COMM 0x0107
+  ENABLE_FIELD_COLLISION(0, 0, string(atari_hoji_01_34))
   push 43
   push 6
   COMM 0x0015

@@ -81,6 +81,39 @@ SHARED_DDS_COMMANDS = (
     NativeCommand(0x0AA, "CREATE_POLYGON_MOVIE", 2, writes_result=True),
     NativeCommand(0x0C3, "SET_SOLAR_OVERLAY_MODE", 1, writes_result=False),
     NativeCommand(
+        0x100, "REQUEST_ALTERNATE_FIELD_SEQUENCE", 2, writes_result=False
+    ),
+    NativeCommand(0x101, "SET_FIELD_ENVIRONMENT", 2, writes_result=False),
+    NativeCommand(0x103, "ENABLE_FIELD_MODELS", 4, writes_result=False),
+    NativeCommand(0x104, "DISABLE_FIELD_MODELS", 4, writes_result=False),
+    NativeCommand(0x105, "ENABLE_FIELD_ANIMATION", 4, writes_result=False),
+    NativeCommand(0x106, "DISABLE_FIELD_ANIMATION", 4, writes_result=False),
+    NativeCommand(0x107, "ENABLE_FIELD_COLLISION", 3, writes_result=False),
+    NativeCommand(0x108, "DISABLE_FIELD_COLLISION", 3, writes_result=False),
+    NativeCommand(
+        0x109, "ENABLE_FIELD_MODEL_GROUP", 3, writes_result=False
+    ),
+    NativeCommand(
+        0x10A, "DISABLE_FIELD_MODEL_GROUP", 3, writes_result=False
+    ),
+    NativeCommand(0x10E, "ENABLE_FIELD_NPCS", 3, writes_result=False),
+    NativeCommand(0x10F, "DISABLE_FIELD_NPCS", 3, writes_result=False),
+    NativeCommand(
+        0x110, "SET_FIELD_GIMMICK_DISPLAY", 4, writes_result=False
+    ),
+    NativeCommand(0x111, "ENABLE_FIELD_MAP_ENTRY", 3, writes_result=False),
+    NativeCommand(0x112, "DISABLE_FIELD_MAP_ENTRY", 3, writes_result=False),
+    NativeCommand(0x113, "SET_FIELD_CAMERA_TABLE", 1, writes_result=False),
+    NativeCommand(
+        0x114, "READ_TREASURE_TABLE_VALUE", 1, writes_result=True
+    ),
+    NativeCommand(
+        0x115, "MARK_CURRENT_TREASURE_OPENED", 0, writes_result=False
+    ),
+    NativeCommand(
+        0x116, "TEST_CURRENT_TREASURE_OPENED", 0, writes_result=True
+    ),
+    NativeCommand(
         0x1E0, "QUEUE_WORLD_OBJECT_PENDING_VALUE", 2, writes_result=False
     ),
     NativeCommand(

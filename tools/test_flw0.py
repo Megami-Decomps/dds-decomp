@@ -611,8 +611,8 @@ end
     def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (129, 2290, 736),
-            "dds2": (126, 1751, 1190),
+            "dds1": (129, 2314, 736),
+            "dds2": (126, 1773, 1190),
         }
         for game, expected_counts in expected.items():
             files = ifs = loops = 0
@@ -1045,6 +1045,25 @@ end
             "WAIT_FOR_TASK_REMOVAL": (0x0A7, 1, False),
             "CREATE_POLYGON_MOVIE": (0x0AA, 2, True),
             "SET_SOLAR_OVERLAY_MODE": (0x0C3, 1, False),
+            "REQUEST_ALTERNATE_FIELD_SEQUENCE": (0x100, 2, False),
+            "SET_FIELD_ENVIRONMENT": (0x101, 2, False),
+            "ENABLE_FIELD_MODELS": (0x103, 4, False),
+            "DISABLE_FIELD_MODELS": (0x104, 4, False),
+            "ENABLE_FIELD_ANIMATION": (0x105, 4, False),
+            "DISABLE_FIELD_ANIMATION": (0x106, 4, False),
+            "ENABLE_FIELD_COLLISION": (0x107, 3, False),
+            "DISABLE_FIELD_COLLISION": (0x108, 3, False),
+            "ENABLE_FIELD_MODEL_GROUP": (0x109, 3, False),
+            "DISABLE_FIELD_MODEL_GROUP": (0x10A, 3, False),
+            "ENABLE_FIELD_NPCS": (0x10E, 3, False),
+            "DISABLE_FIELD_NPCS": (0x10F, 3, False),
+            "SET_FIELD_GIMMICK_DISPLAY": (0x110, 4, False),
+            "ENABLE_FIELD_MAP_ENTRY": (0x111, 3, False),
+            "DISABLE_FIELD_MAP_ENTRY": (0x112, 3, False),
+            "SET_FIELD_CAMERA_TABLE": (0x113, 1, False),
+            "READ_TREASURE_TABLE_VALUE": (0x114, 1, True),
+            "MARK_CURRENT_TREASURE_OPENED": (0x115, 0, False),
+            "TEST_CURRENT_TREASURE_OPENED": (0x116, 0, True),
             "QUEUE_WORLD_OBJECT_PENDING_VALUE": (0x1E0, 2, False),
             "CLEAR_WORLD_OBJECT_PENDING_VALUE": (0x1E1, 1, False),
             "CLEAR_PROCESS_CONTROL_FLAG": (0x1E7, 0, False),
@@ -1345,7 +1364,7 @@ end
                         )
         self.assertEqual(type5_uses, 7863)
         self.assertEqual(command_uses, 53389)
-        self.assertEqual(profiled_command_uses, 41752)
+        self.assertEqual(profiled_command_uses, 43600)
 
     def test_dds2_reading_view_uses_shared_stack_contracts(self) -> None:
         code = [
@@ -1369,6 +1388,17 @@ end
             (202 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (101 << 16) | flw0.OPCODE_IDS["PUSHIS"],
             (0x06B << 16) | flw0.OPCODE_IDS["COMM"],
+            *(
+                (value << 16) | flw0.OPCODE_IDS["PUSHIS"]
+                for value in range(1, 5)
+            ),
+            (0x103 << 16) | flw0.OPCODE_IDS["COMM"],
+            (4 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+            (0x114 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
+            (0x115 << 16) | flw0.OPCODE_IDS["COMM"],
+            (0x116 << 16) | flw0.OPCODE_IDS["COMM"],
+            flw0.OPCODE_IDS["PUSHREG"],
             flw0.OPCODE_IDS["END"],
         ]
         view = flw0_view.render(flw0.parse(_fixture(code)), "dds2")
@@ -1380,12 +1410,16 @@ end
         self.assertIn("SCREEN_FADE_B(30, 0)", view)
         self.assertIn("result = ACTION_WINDOW_REQUEST_AND_POLL(9)", view)
         self.assertIn("MOVE_OBJECT_ALONG_PATH(101, 202, 0)", view)
+        self.assertIn("ENABLE_FIELD_MODELS(4, 3, 2, 1)", view)
+        self.assertIn("result = READ_TREASURE_TABLE_VALUE(4)", view)
+        self.assertIn("MARK_CURRENT_TREASURE_OPENED()", view)
+        self.assertIn("result = TEST_CURRENT_TREASURE_OPENED()", view)
 
     def test_semantic_view_handles_both_tracked_corpora(self) -> None:
         root = TOOLS.parent
         expected = {
-            "dds1": (143, 92358, 18899),
-            "dds2": (140, 70818, 13075),
+            "dds1": (143, 87109, 13650),
+            "dds2": (140, 67338, 9595),
         }
         for game, expected_counts in expected.items():
             files = 0
@@ -1562,7 +1596,7 @@ end
             (72, 67, 2702, 3109, 1028, 184),
         )
         self.assertEqual(
-            (code_words, commands, profiled_commands), (168829, 53389, 41752)
+            (code_words, commands, profiled_commands), (168829, 53389, 43600)
         )
         self.assertEqual((font_directives, glyph_directives), (1154, 210))
         self.assertEqual(message_references, 2368)
@@ -1691,7 +1725,7 @@ end
                 totals["message_references"],
                 totals["selection_references"],
             ),
-                (29786, 1910, 287),
+                (31095, 1910, 287),
         )
         self.assertEqual(totals["event_references"], 43)
         self.assertEqual(totals["procedure_references"], 463)
