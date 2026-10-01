@@ -2089,20 +2089,26 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuFadeSpri
     }
 }
 
+/* Icon resource stored at the start of each 0x134-byte party panel slot. */
+typedef struct MenuPartyIconSlot {
+    u32 bundle;
+    u8 pad04[0x130];
+} MenuPartyIconSlot;
+
 void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource) {
     u32 sprites;
 
     sprites = func_0027F730(resource);
-    *(u32 *)(index * 0x134 + window + 0x15c) = sprites;
+    ((MenuPartyIconSlot *)(window + 0x15c))[index].bundle = sprites;
 }
 
 void mnuReleasePartyIconBundles(s32 window) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 *item = (s32 *)(window + 0x15c + i * 0x134);
-        if (*item != 0) {
-            mnuReleaseFourResourceList(*item);
-            *item = 0;
+        MenuPartyIconSlot *item = &((MenuPartyIconSlot *)(window + 0x15c))[i];
+        if (item->bundle != 0) {
+            mnuReleaseFourResourceList(item->bundle);
+            item->bundle = 0;
         }
     }
 }
@@ -2534,18 +2540,30 @@ void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 
     }
 }
 
+/* Each panel owns the color state blended with the neighboring panel. */
+typedef struct MenuBlendOwner {
+    u8 pad00[0x18];
+    s32 colorState;
+} MenuBlendOwner;
+
+typedef struct MenuBlendColors {
+    u8 pad00[0x14];
+    s32 output[4]; /* 0x14 */
+    u8 pad24[0x60];
+    s32 input[4];  /* 0x84 */
+} MenuBlendColors;
+
 void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     s32 i;
-    s32 ctx = *(s32 *)(dst + 0x18);
+    s32 ctx = ((MenuBlendOwner *)dst)->colorState;
 
     for (i = 0; i < 4; i++) {
-        s32 off = i * 4 + 0x80;
-        s32 result = uiBlendColors(*(s32 *)(ctx + off + 4),
-                                   *(s32 *)(*(s32 *)(src + 0x18) + off + 4),
+        s32 result = uiBlendColors(((MenuBlendColors *)ctx)->input[i],
+                                   ((MenuBlendColors *)((MenuBlendOwner *)src)->colorState)->input[i],
                                    (s32)amount / 2 + 0x80, ctx);
-        s32 current = *(s32 *)(dst + 0x18);
+        s32 current = ((MenuBlendOwner *)dst)->colorState;
         ctx = current;
-        *(s32 *)(current + i * 4 + 0x14) = result;
+        ((MenuBlendColors *)current)->output[i] = result;
     }
 }
 

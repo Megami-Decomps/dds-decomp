@@ -179,7 +179,8 @@ typedef struct MenuContext {
     s32 displayHandle;     /* 0x60 */
     s32 resourceHandle;    /* 0x64 */
     void *displayResource; /* 0x68 */
-    u8 pad6C[0x5C];
+    s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
+    u8 pad70[0x58];
     s32 labelHandle;       /* 0xC8 */
     u8 padCC[0x38];
     s32 imageHandle;       /* 0x104 */
@@ -299,7 +300,10 @@ typedef struct MenuPartyRuntime {
     MenuWindowContainer *primaryWindow; /* 0x08 */
     u8 pad0C[4];
     s32 staffMode; /* 0x10 */
-    u8 pad14[0x10];
+    s32 staffView; /* 0x14: selects the input mask and panel view */
+    s32 staffSelection; /* 0x18: chosen list entry */
+    s32 staffExit; /* 0x1C: signals the close transition */
+    u8 pad20[4];
     MenuWindowContainer *selectedWindow; /* 0x24 */
     s32 activeMark; /* 0x28 */
     u8 pad2C[8];
@@ -307,6 +311,13 @@ typedef struct MenuPartyRuntime {
     u8 pad38[0x1DA0];
     s32 state1DD8; /* 0x1DD8: checked before func_002B2408 */
 } MenuPartyRuntime;
+
+/* The idle-motion timer shares the party work area with other menu states. */
+typedef struct MenuVoiceState {
+    u8 pad00[0x28];
+    s32 idleFrames;
+    s32 motionSelection; /* -1 enables periodic motion */
+} MenuVoiceState;
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
@@ -784,7 +795,7 @@ s64 mnuStaffPopupUpdate(s32 callback) {
         window = (u8 *)(context + 0x284);
         func_002BD480(4, window);
         if (buttons & 1) {
-            *(s32 *)(menu + 0x18) = ((MenuList *)((MenuContext *)context)->selectionList)->cursor->index;
+            ((MenuPartyRuntime *)menu)->staffSelection = ((MenuList *)((MenuContext *)context)->selectionList)->cursor->index;
             mnuSetPopupEntry(popup, D_003E75E0);
             *(s32 *)(menu + 0x24) = 1;
         }
@@ -898,7 +909,7 @@ s64 mnuStaffBrowsePartyUpdate(s32 callback) {
     s32 *popup;
     u32 buttons;
     s64 state;
-    if (*(s32 *)(menu + 0x14) == 0) {
+    if (((MenuPartyRuntime *)menu)->staffView == 0) {
         buttons = func_002C44E8(0xC2);
     } else {
         buttons = func_002C44E8(2);
@@ -912,27 +923,27 @@ s64 mnuStaffBrowsePartyUpdate(s32 callback) {
         return 0;
     }
     state = *popup;
-    *(s32 *)(menu + 0x1C) = 0;
+    ((MenuPartyRuntime *)menu)->staffExit = 0;
     if (state == 0) {
         if (mnuStaffSwitchPartyPage(callback) != 0) {
             return 0;
         }
         if (buttons & 0xC0) {
-            if (*(s32 *)(menu + 0x10) == 0) {
-                *(s32 *)(menu + 0x10) = 1;
-                func_002B2C88(context + 0x284, 3, *(s32 *)(menu + 0x14), 1);
-                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, *(s32 *)(context + 0x6C), 0, 0);
+            if (((MenuPartyRuntime *)menu)->staffMode == 0) {
+                ((MenuPartyRuntime *)menu)->staffMode = 1;
+                func_002B2C88(context + 0x284, 3, ((MenuPartyRuntime *)menu)->staffView, 1);
+                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->alternateResource, 0, 0);
             } else {
-                *(s32 *)(menu + 0x10) = 0;
-                func_002B2C88(context + 0x284, 2, *(s32 *)(menu + 0x14), 0);
-                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, *(s32 *)(context + 0x68), 0, 0);
+                ((MenuPartyRuntime *)menu)->staffMode = 0;
+                func_002B2C88(context + 0x284, 2, ((MenuPartyRuntime *)menu)->staffView, 0);
+                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
             }
-            *(s32 *)(menu + 0x28) = 0;
+            ((MenuPartyRuntime *)menu)->activeMark = 0;
         }
         if (buttons & 2) {
             if (func_002C6CE8() != 1) {
                 evtStageTestStop();
-                *(s32 *)(menu + 0x1C) = 1;
+                ((MenuPartyRuntime *)menu)->staffExit = 1;
                 *(s32 *)(menu + 0x24) = 1;
                 mnuSetPopupEntryFlagged(popup, D_003E75C4);
             } else {
@@ -998,15 +1009,15 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3788);
 
 void mnuIdleVoiceTimer(s32 object) {
     u32 count;
-    if (*(s32 *)(object + 0x2c) == -1) {
+    if (((MenuVoiceState *)object)->motionSelection == -1) {
         if (func_002C6CE8() != 1) {
             if (evtStageTestHasPendingMotion() == 0) {
-                *(s32 *)(object + 0x28) += 1;
+                ((MenuVoiceState *)object)->idleFrames += 1;
             }
-            if (*(s32 *)(object + 0x28) >= 0x12d) {
+            if (((MenuVoiceState *)object)->idleFrames >= 0x12d) {
                 count = evtStageTestCountFlags(0);
                 evtStageTestQueueMotion(0, effMiscRand(0) % count);
-                *(s32 *)(object + 0x28) = 0;
+                ((MenuVoiceState *)object)->idleFrames = 0;
             }
         }
     }
@@ -3331,7 +3342,10 @@ typedef struct ScrollHandle {
 
 /* Three animation handles at the tail of the 0x48-byte scroll panel. */
 typedef struct MenuScrollPanel {
-    u8 pad00[0x3C];
+    u8 pad00[8];
+    u32 firstSprite;
+    u32 secondSprite;
+    u8 pad10[0x2C];
     ScrollHandle *handles[3];
 } MenuScrollPanel;
 
@@ -3371,8 +3385,8 @@ void mnuReleaseScrollPanelAnimations(menu)
 u8 *mnuCreateScrollPanel(u32 owner) {
     u8 *menu = (u8 *)func_00328D68(0x48);
     memset(menu, 0, 0x48);
-    *(u32 *)(menu + 8) = 0;
-    *(u32 *)(menu + 0xc) = 0;
+    ((MenuScrollPanel *)menu)->firstSprite = 0;
+    ((MenuScrollPanel *)menu)->secondSprite = 0;
     itfGridStorePosition(menu + 0x14, owner, 0x40);
     itfGridStorePosition(menu + 0x1c, owner, 0x41);
     itfGridStorePosition(menu + 0x24, owner, 0x44);
@@ -3700,24 +3714,30 @@ void mnuDrawFadeIcons(s32 a0, s32 a1, s32 a2, s32 a3, MenuFadeIcons *obj, s32 a5
     }
 }
 
+/* DDS2 party panels use a 0x2138-byte slot, unlike DDS1's 0x134-byte slot. */
+typedef struct MenuPartyIconSlot {
+    u32 bundle;
+    u8 pad04[0x2134];
+} MenuPartyIconSlot;
+
 void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
     u32 bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    *(u32 *)(index * 0x2138 + menu + 0x158) = bundle;
+    ((MenuPartyIconSlot *)(menu + 0x158))[index].bundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(u8 *menu) {
-    u8 *slot = menu + 0x158;
+    MenuPartyIconSlot *slot = (MenuPartyIconSlot *)(menu + 0x158);
     u32 i = 0;
     do {
-        u32 resource = *(u32 *)slot;
+        u32 resource = slot->bundle;
         i++;
         if (resource != 0) {
             func_002BC258((u32 *)resource);
-            *(u32 *)slot = 0;
+            slot->bundle = 0;
         }
-        slot += 0x2138;
+        slot++;
     } while (i < 5);
 }
 

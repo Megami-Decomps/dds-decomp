@@ -3,6 +3,21 @@
 /* Sliding menu bar: direction flag and 0..max position */
 typedef struct { s32 active; s32 pos; } SlideBar;
 
+/* Title menu's selected page, sequence timers and draw-task state. */
+typedef struct MenuTitleState {
+    u8 pad00[0x14];
+    s32 selectedPage;  /* 0x14 */
+    u8 pad18[4];
+    u32 sequenceTimer; /* 0x1C */
+    u8 pad20[4];
+    s32 overlayHandle; /* 0x24 */
+    u32 phase;         /* 0x28 */
+    u8 pad2C[0xE0];
+    u32 movieDrawActive; /* 0x10C */
+    u32 drawAlpha;       /* 0x110 */
+    u32 movieFrame;      /* 0x114 */
+} MenuTitleState;
+
 extern s32 D_00437A40;
 
 extern u16 D_00435BAC;
@@ -50,18 +65,18 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A55B8);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5890);
 
 void func_002A58C0(void) {
-    u8 *state = (u8 *)D_00437A40;
+    MenuTitleState *state = (MenuTitleState *)D_00437A40;
 
-    *(u32 *)(state + 0x28) = 0;
-    *(u32 *)(state + 0x14) = 0;
-    *(u32 *)(state + 0x1C) = 0;
+    state->phase = 0;
+    state->selectedPage = 0;
+    state->sequenceTimer = 0;
 }
 
 void func_002A58D8(void) {
-    u8 *state = (u8 *)D_00437A40;
+    MenuTitleState *state = (MenuTitleState *)D_00437A40;
 
-    *(u32 *)(state + 0x28) = 0;
-    *(u32 *)(state + 0x14) = 0;
+    state->phase = 0;
+    state->selectedPage = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A58E8);
@@ -86,30 +101,30 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5B08);
 
 void mnuTitleResetSequenceTimers(void) {
-    u32 *title = (u32 *)D_00437A40;
-    title[0x28 / 4] = 1;
-    title[0x1C / 4] = title[0x14 / 4] = 0;
+    MenuTitleState *title = (MenuTitleState *)D_00437A40;
+    title->phase = 1;
+    title->sequenceTimer = title->selectedPage = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5C58);
 
 void func_002A5E00(void) {
-    switch (*(u32 *)(D_00437A40 + 0x28)) {
+    switch (((MenuTitleState *)D_00437A40)->phase) {
     case 1:
-        func_002A5260(2, *(s32 *)(D_00437A40 + 0x14));
-        func_002A55B8(0, *(s32 *)(D_00437A40 + 0x14));
+        func_002A5260(2, ((MenuTitleState *)D_00437A40)->selectedPage);
+        func_002A55B8(0, ((MenuTitleState *)D_00437A40)->selectedPage);
         func_002A50E8(D_00437A40 + 0x100, 1, 1);
         return;
     case 0:
-        func_002A55B8(1, *(s32 *)(D_00437A40 + 0x14));
+        func_002A55B8(1, ((MenuTitleState *)D_00437A40)->selectedPage);
         func_002A50E8(D_00437A40 + 0x100, 1, 1);
         return;
     case 2:
-        mnuCallInitWide(0, 0, 0, *(s32 *)(D_00437A40 + 0x24), 0x53);
+        mnuCallInitWide(0, 0, 0, ((MenuTitleState *)D_00437A40)->overlayHandle, 0x53);
         return;
     case 3:
     case 4:
-        func_002A55B8(2, *(s32 *)(D_00437A40 + 0x14));
+        func_002A55B8(2, ((MenuTitleState *)D_00437A40)->selectedPage);
         func_002A50E8(D_00437A40 + 0x100, 1, 0);
         break;
     }
@@ -121,21 +136,21 @@ void func_002A5EE8(u32 arg0, s32 arg1) {
     func_002A7AF0();
     work = D_00437A40;
     if (D_00437A40 != 0) {
-        *(u32 *)(D_00437A40 + 0x10c) = 1;
+        ((MenuTitleState *)D_00437A40)->movieDrawActive = 1;
         if (arg1 == 0) {
-            *(u32 *)(work + 0x110) = 0x80;
+            ((MenuTitleState *)work)->drawAlpha = 0x80;
         }
         else {
-            *(u32 *)(work + 0x110) = 0;
+            ((MenuTitleState *)work)->drawAlpha = 0;
         }
-        *(u32 *)(D_00437A40 + 0x114) = 0;
+        ((MenuTitleState *)D_00437A40)->movieFrame = 0;
     }
 }
 
 void func_002A5F40(void) {
     mnuStopMovieDrawTask();
     if (D_00437A40 != 0) {
-        *(u32 *)(D_00437A40 + 0x10c) = 0;
+        ((MenuTitleState *)D_00437A40)->movieDrawActive = 0;
     }
 }
 
@@ -144,7 +159,7 @@ u32 func_002A5F68(void) {
 
     state = 0;
     if (D_00437A40 != 0) {
-        state = *(u32 *)(D_00437A40 + 0x10c);
+        state = ((MenuTitleState *)D_00437A40)->movieDrawActive;
     }
     return state;
 }
