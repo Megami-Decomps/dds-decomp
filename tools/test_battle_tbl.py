@@ -98,8 +98,8 @@ class BattleTableTests(unittest.TestCase):
             base_status=0x4000,
             support_type=0x2AA,
             support_points=-3,
-            death_type=25,
-            lookup_id=7,
+            hunt_rate=25,
+            affinity_effect=7,
             program=3,
             magic_base=-20,
             magic_limit=30000,
@@ -159,7 +159,11 @@ class BattleTableTests(unittest.TestCase):
             "DEFENSE_DOWN|EVASION_DOWN",
             source,
         )
-        self.assertIn("support_points=-3 death_type=25", source)
+        self.assertIn(
+            "support_points=-3 hunt_rate=25 affinity_effect=VOID_EXPEL "
+            "program=ESCAPE",
+            source,
+        )
         self.assertIn(
             "requirement 0x1ab conditions=skill:4,unit-mask:0x2,group:1", source
         )
@@ -174,12 +178,14 @@ class BattleTableTests(unittest.TestCase):
     def test_skill_action_symbols_retain_numeric_fallbacks(self) -> None:
         source = (
             "battle-table 1 kind=skill profile=dds2\n\n"
-            "action 1 use=FIELD|BATTLE effect_type=MAGIC target_type=3 "
+            "action 1 flags=DRAIN|0x1 use=FIELD|BATTLE effect_type=MAGIC "
+            "target_type=3 "
             "target_area=5 hp_type=16 "
             "ailment_type=INFLICT_ONE_RANDOM base_status=SHOCK|0x8000 "
-            "support_type=ATTACK_UP|DEFENSE_UP\n"
+            "support_type=ATTACK_UP|DEFENSE_UP affinity_effect=32 program=18\n"
         )
         action = battle_tbl.parse_skill_source(source).actions[1]
+        self.assertEqual(action.flags, 3)
         self.assertEqual(action.use, 3)
         self.assertEqual(action.effect_type, 1)
         self.assertEqual(action.target_type, 3)
@@ -188,6 +194,8 @@ class BattleTableTests(unittest.TestCase):
         self.assertEqual(action.ailment_type, 3)
         self.assertEqual(action.base_status, 0x8002)
         self.assertEqual(action.support_type, 0x41)
+        self.assertEqual(action.affinity_effect, 32)
+        self.assertEqual(action.program, 18)
 
         rendered = battle_tbl.render_skill_source(
             replace(
@@ -197,12 +205,13 @@ class BattleTableTests(unittest.TestCase):
             )
         )
         self.assertIn(
-            "use=FIELD|BATTLE effect_type=MAGIC target_type=3 "
+            "flags=DRAIN|0x1 use=FIELD|BATTLE effect_type=MAGIC target_type=3 "
             "target_area=5",
             rendered,
         )
         self.assertIn("hp_type=16 ailment_type=INFLICT_ONE_RANDOM", rendered)
         self.assertIn("base_status=SHOCK|0x8000", rendered)
+        self.assertIn("affinity_effect=32 program=18", rendered)
 
         with self.assertRaisesRegex(
             battle_tbl.BattleTableError, "invalid effect_type 'UNKNOWN'"
@@ -210,6 +219,33 @@ class BattleTableTests(unittest.TestCase):
             battle_tbl.parse_skill_source(
                 "battle-table 1 kind=skill profile=dds2\n"
                 "action 1 effect_type=UNKNOWN\n"
+            )
+
+    def test_skill_action_symbols_are_profile_specific(self) -> None:
+        source = (
+            "battle-table 1 kind=skill profile=dds2\n\n"
+            "action 1 affinity_effect=VOID_AILMENT program=GATE_TO_ABYSS\n"
+        )
+        action = battle_tbl.parse_skill_source(source).actions[1]
+        self.assertEqual(action.affinity_effect, 31)
+        self.assertEqual(action.program, 16)
+
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError,
+            "invalid affinity_effect 'VOID_AILMENT'",
+        ):
+            battle_tbl.parse_skill_source(
+                "battle-table 1 kind=skill profile=dds1\n"
+                "action 1 affinity_effect=VOID_AILMENT\n"
+            )
+
+        with self.assertRaisesRegex(
+            battle_tbl.BattleTableError,
+            "invalid program 'CANNIBALIZE'",
+        ):
+            battle_tbl.parse_skill_source(
+                "battle-table 1 kind=skill profile=dds2\n"
+                "action 1 program=CANNIBALIZE\n"
             )
 
     def test_invalid_skill_references_are_rejected(self) -> None:
