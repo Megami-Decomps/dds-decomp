@@ -16,6 +16,7 @@ Pipeline per version (see README.md):
   FLW0 (.bfasm)      tools/flw0.py assemble -> build/<v>/scripts/, then SHA-1 check
   INF (.infasm)      tools/inf.py assemble -> build/<v>/data/field/, then SHA-1 check
   WAP (.wapasm)      tools/wap.py assemble -> build/<v>/data/field/, then SHA-1 check
+  battle (.tblasm)   tools/battle_tbl.py assemble -> build/<v>/data/battle/, then SHA-1 check
 
 Every version is linked as a byte-identical copy of the retail executable, so any
 edit that changes code or data shows up as a checksum failure.
@@ -224,6 +225,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "--scripts $scripts --interactions $interactions $in $out",
         description="wap $in",
     )
+    n.rule(
+        "battle_tbl",
+        f"mkdir -p $outdir && {sys.executable} tools/battle_tbl.py assemble $in $out",
+        description="battle table $in",
+    )
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
     n.newline()
 
@@ -400,6 +406,33 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         if field_data_stamps:
             n.build(f"{version}-field-data", "phony", field_data_stamps)
 
+        battle_manifest = Path("config") / version / "battle_tables.sha1"
+        if (ROOT / battle_manifest).exists():
+            battle_source_dir = Path("src") / version / "data" / "battle"
+            battle_output_dir = Path("build") / version / "data" / "battle"
+            battle_sources = sorted((ROOT / battle_source_dir).glob("*.tblasm"))
+            battle_outputs = []
+            for source in battle_sources:
+                source = source.relative_to(ROOT)
+                output = battle_output_dir / f"{source.stem.upper()}.TBL"
+                n.build(
+                    str(output),
+                    "battle_tbl",
+                    str(source),
+                    implicit=["tools/battle_tbl.py"],
+                    variables={"outdir": str(output.parent)},
+                )
+                battle_outputs.append(str(output))
+            battle_stamp = battle_output_dir / "battle_tables.ok"
+            n.build(
+                str(battle_stamp),
+                "check",
+                str(battle_manifest),
+                implicit=battle_outputs,
+            )
+            n.build(f"{version}-battle-data", "phony", str(battle_stamp))
+            version_outputs.append(str(battle_stamp))
+
         n.build(version, "phony", version_outputs)
         defaults.append(version)
         (ROOT / "config" / version / "checksum.sha1").write_text(f"{VERSIONS[version]['elf_sha1']}  {image}\n")
@@ -436,6 +469,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         wap_manifest = ROOT / "config" / version / "field_wap.sha1"
         if wap_manifest.exists():
             configure_inputs.append(str(wap_manifest.relative_to(ROOT)))
+        battle_manifest = ROOT / "config" / version / "battle_tables.sha1"
+        if battle_manifest.exists():
+            configure_inputs.append(str(battle_manifest.relative_to(ROOT)))
     n.build("build.ninja", "configure", implicit=configure_inputs,
             variables={"args": " ".join(sys.argv[1:])})
     n.default(defaults)
