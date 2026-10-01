@@ -35,6 +35,12 @@ extern u8 D_003CE658[];
 
 extern s32 D_00435CC8;
 
+/* Item quantities occupy byte slots in the save-state block. */
+typedef struct SaveItemCounts {
+    u8 pad00[0x1340];
+    u8 counts[0x100];
+} SaveItemCounts;
+
 extern s32 sdfAllocatePacketList();
 
 extern void sdfCreateDescriptorPacket();
@@ -924,7 +930,7 @@ s32 func_0025FE70(void) {
         if (func_002C54B0(i) != 0) {
             continue;
         }
-        if (*(u8 *)(i + D_00435DD0 + 0x1340) == 0) {
+        if (((SaveItemCounts *)D_00435DD0)->counts[i] == 0) {
             continue;
         }
         if ((D_00435E38[i * 8] & 3) != 0) {
@@ -1319,7 +1325,7 @@ s32 func_00261040(s32 row, s32 column) {
     u8 *entry = D_003CDA88 + column * 0xC + row * 0xC0;
     s32 id = *(s32 *)(D_003CDA88 + column * 0xC + row * 0xC0 + 4);
 
-    if (entry[1] == 0 && func_002C54B0(id) != 0 && *(u8 *)(id + D_00435DD0 + 0x1340) != 0) {
+    if (entry[1] == 0 && func_002C54B0(id) != 0 && ((SaveItemCounts *)D_00435DD0)->counts[id] != 0) {
         id = *(u16 *)(entry + 8);
     }
     return id;
@@ -1335,15 +1341,15 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, s32 record) {
     if (mode == 1) {
         value -= ptyCountBulletItem(id);
     } else if (mode == 3) {
-        value = 1 - *(u8 *)(id + D_00435DD0 + 0x1340);
+        value = 1 - ((SaveItemCounts *)D_00435DD0)->counts[id];
     } else if (mode == 2) {
-        value = 1 - *(u8 *)(id + D_00435DD0 + 0x1340);
+        value = 1 - ((SaveItemCounts *)D_00435DD0)->counts[id];
     } else {
-        value = 99 - *(u8 *)(id + D_00435DD0 + 0x1340);
+        value = 99 - ((SaveItemCounts *)D_00435DD0)->counts[id];
     }
     if (func_00260B50(id) >= 0) {
         if (value >= 2) {
-            value = *(u8 *)(id + D_00435DD0 + 0x1340) == 0;
+            value = ((SaveItemCounts *)D_00435DD0)->counts[id] == 0;
         }
     }
     return value < 0 ? 0 : value;

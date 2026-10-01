@@ -76,6 +76,22 @@ typedef struct EvtUnit {
     s16 transitionDuration; /* 0x15e */
 } EvtUnit;
 
+/* Transition task payload; separate from the EvtUnit's overlapping fields. */
+typedef struct EvtTransitionWork {
+    u8 pad00[0x68];
+    s32 allocationHandle; /* 0x68 */
+    u8 pad6C[0x34];
+    s32 pathObject;       /* 0xA0 */
+    u8 padA4[0x14];
+    f32 motionScale;      /* 0xB8 */
+    u8 padBC[2];
+    s16 motionParamA;     /* 0xBE */
+    s16 motionParamB;     /* 0xC0 */
+    u8 padC2[0xE];
+    s8 firstSlot;         /* 0xD0 */
+    s8 secondSlot;        /* 0xD1 */
+} EvtTransitionWork;
+
 extern void func_001174C0(s32 path);
 extern void func_00116F38(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
@@ -296,15 +312,15 @@ s32 evtReleaseUnitTransitionWork(u8 *work) {
     if (work == NULL) {
         return 1;
     }
-    handle = *(s32 *)(work + 0x68);
+    handle = ((EvtTransitionWork *)work)->allocationHandle;
     *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
     if (handle != 0) {
         sdfReleaseChipBlock(handle);
-        *(s32 *)(work + 0x68) = 0;
+        ((EvtTransitionWork *)work)->allocationHandle = 0;
     }
-    if (*(s32 *)(work + 0xA0) != 0) {
-        dds3FreePathObject(*(s32 *)(work + 0xA0));
-        *(s32 *)(work + 0xA0) = 0;
+    if (((EvtTransitionWork *)work)->pathObject != 0) {
+        dds3FreePathObject(((EvtTransitionWork *)work)->pathObject);
+        ((EvtTransitionWork *)work)->pathObject = 0;
     }
     sdfReleaseChipBlock(work);
     return 1;
@@ -320,12 +336,12 @@ void func_00222278(EvtUnit *unit, u16 value)
 }
 
 void func_00222280(u8 *work, f32 value) {
-    *(f32 *)(work + 0xB8) = value;
+    ((EvtTransitionWork *)work)->motionScale = value;
 }
 
 void evtStoreUnitMotionShortParameters(u8 *work, s32 a, s32 b) {
-    *(s16 *)(work + 0xBE) = a;
-    *(s16 *)(work + 0xC0) = b;
+    ((EvtTransitionWork *)work)->motionParamA = a;
+    ((EvtTransitionWork *)work)->motionParamB = b;
 }
 
 s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
@@ -341,12 +357,12 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
 }
 
 void evtStoreUnitMotionSlotSelection(u8 *work, s32 a, s32 b) {
-    *(s8 *)(work + 0xD0) = a;
-    *(s8 *)(work + 0xD1) = b;
+    ((EvtTransitionWork *)work)->firstSlot = a;
+    ((EvtTransitionWork *)work)->secondSlot = b;
 }
 
 void evtActivateStoredUnitMotionSlot(u8 *work) {
-    evtConfigureUnitMotionSlot(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
+    evtConfigureUnitMotionSlot(work, ((EvtTransitionWork *)work)->firstSlot, ((EvtTransitionWork *)work)->secondSlot, 0, 0, 2);
 }
 
 void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {

@@ -52,6 +52,22 @@ typedef struct EventUnit {
     s8 valueD1;
 } EventUnit;
 
+/* Transition task payload; kept in step with the DDS1 event unit. */
+typedef struct EvtTransitionWork {
+    u8 pad00[0x68];
+    s32 allocationHandle; /* 0x68 */
+    u8 pad6C[0x34];
+    s32 pathObject;       /* 0xA0 */
+    u8 padA4[0x14];
+    f32 motionScale;      /* 0xB8 */
+    u8 padBC[2];
+    s16 motionParamA;     /* 0xBE */
+    s16 motionParamB;     /* 0xC0 */
+    u8 padC2[0xE];
+    s8 firstSlot;         /* 0xD0 */
+    s8 secondSlot;        /* 0xD1 */
+} EvtTransitionWork;
+
 typedef struct EvtEffObj {
     u8 pad00[0x1C];
     u8 *data;          /* 0x1c: point/direction records (+0x40, +0x50) */
@@ -332,15 +348,15 @@ s32 evtReleaseUnitTransitionWork(u8 *work) {
     if (work == NULL) {
         return 1;
     }
-    handle = *(s32 *)(work + 0x68);
+    handle = ((EvtTransitionWork *)work)->allocationHandle;
     *(s32 *)(*(u8 **)(*(u8 **)(work + 0x8C) + 0x18) + 0x80) = 0;
     if (handle != 0) {
         sdfReleaseChipBlock(handle);
-        *(s32 *)(work + 0x68) = 0;
+        ((EvtTransitionWork *)work)->allocationHandle = 0;
     }
-    if (*(s32 *)(work + 0xA0) != 0) {
-        dds3FreePathObject(*(s32 *)(work + 0xA0));
-        *(s32 *)(work + 0xA0) = 0;
+    if (((EvtTransitionWork *)work)->pathObject != 0) {
+        dds3FreePathObject(((EvtTransitionWork *)work)->pathObject);
+        ((EvtTransitionWork *)work)->pathObject = 0;
     }
     sdfReleaseChipBlock(work);
     return 1;
@@ -381,7 +397,7 @@ void evtStoreUnitMotionSlotSelection(EventUnit *unit, s32 first, s32 second) {
 }
 
 void evtActivateStoredUnitMotionSlot(u8 *work) {
-    evtConfigureUnitMotionSlot(work, *(s8 *)(work + 0xD0), *(s8 *)(work + 0xD1), 0, 0, 2);
+    evtConfigureUnitMotionSlot(work, ((EvtTransitionWork *)work)->firstSlot, ((EvtTransitionWork *)work)->secondSlot, 0, 0, 2);
 }
 
 void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 slot, s32 a, s32 b, s32 c, s32 mode) {
