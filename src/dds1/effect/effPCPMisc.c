@@ -38,6 +38,10 @@ typedef struct {
 
 
 typedef struct {
+    u32 word[9];
+} EffPCPCompactRes;
+
+typedef struct {
     u8 flags;
     u8 pad01[3];
     u32 unk04;
@@ -45,10 +49,7 @@ typedef struct {
     u32 unk0C;
     u32 unk10;
     u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
+    EffPCPCompactRes res;
 } EffPCPCompactParams;
 
 typedef struct {
@@ -2012,7 +2013,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_002CFEB8(0x3C);
-    work->resource = effCloneResourceTemplate(&params->unk18);
+    work->resource = effCloneResourceTemplate(&params->res);
     work->unk1C = 0;
     work->color = 0x80808080;
     work->flags = params->flags;
@@ -2021,7 +2022,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactParams *params) {
     work->unk28 = params->unk0C;
     work->unk2C = params->unk10;
     work->unk30 = params->unk14;
-    work->unk18 = params->unk24;
+    work->unk18 = params->res.word[3];
     return work;
 }
 
@@ -2049,24 +2050,10 @@ typedef struct {
     EffPCPRes44 res;
 } EffPCPParams44;
 
-typedef struct {
-    u32 word[9];
-} EffPCPCompactRes;
-
-typedef struct {
-    u8 flags;
-    u8 pad01[3];
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    u32 unk10;
-    u32 unk14;
-    EffPCPCompactRes res;
-} EffPCPCompactParams3C;
 
 
 void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
-    EffPCPCompactParams3C params;
+    EffPCPCompactParams params;
 
     params.flags = work->flags;
     params.unk04 = work->unk20;
@@ -2075,7 +2062,7 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     params.unk10 = work->unk2C;
     params.unk14 = work->unk30;
     params.res = *(EffPCPCompactRes *)work->resource;
-    effPcpCompactEffectCreate((EffPCPCompactParams *)&params);
+    effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
@@ -2112,7 +2099,7 @@ EffPCPCompactFadeWork *func_0017B690(EffPCPCompactParams *params) {
     EffPCPCompactFadeWork *work;
 
     work = func_002CFEB8(0x3C);
-    work->resource = effCloneBlurTemplate(&params->unk18);
+    work->resource = effCloneBlurTemplate(&params->res);
     work->unk1C = 0;
     work->color = 0x80808080;
     work->flags = params->flags;
@@ -2121,7 +2108,7 @@ EffPCPCompactFadeWork *func_0017B690(EffPCPCompactParams *params) {
     work->unk28 = params->unk0C;
     work->unk2C = params->unk10;
     work->unk30 = params->unk14;
-    work->unk18 = params->unk1C;
+    work->unk18 = params->res.word[1];
     return work;
 }
 
@@ -2343,7 +2330,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactParams *params
     EffPCPCompactWork *work;
 
     work = func_002CFEB8(0x38);
-    work->resource = func_00186F90(&params->unk18);
+    work->resource = func_00186F90(&params->res);
     work->flags = params->flags;
     work->unk14 = params->unk04;
     work->unk18 = params->unk08;
@@ -2352,7 +2339,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactParams *params
     work->unk2C = params->unk14;
     work->color20 = 0x80808080;
     work->unk30 = 0;
-    work->unk24 = params->unk24;
+    work->unk24 = params->res.word[3];
     return work;
 }
 
@@ -2396,7 +2383,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactParams *params) 
     EffPCPCompactWork *work;
 
     work = func_002CFEB8(0x38);
-    work->resource = effCloneBlurWorkWithSlots(&params->unk18);
+    work->resource = effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->flags;
     work->unk14 = params->unk04;
     work->unk18 = params->unk08;
@@ -2405,7 +2392,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactParams *params) 
     work->unk2C = params->unk14;
     work->color20 = 0x80808080;
     work->unk30 = 0;
-    work->unk24 = params->unk24;
+    work->unk24 = params->res.word[3];
     return work;
 }
 
@@ -4974,18 +4961,18 @@ void effPcpEventWorkInitEntries(EffPCPEventWork32 *work) {
     }
 }
 
-/* Seven floats: the head of an event work copied verbatim from its parameter block. */
+/* Leading float block of an event work, copied verbatim from its parameter block. */
 typedef struct {
     f32 word[7];
-} EffPCPEventHead28;
+} EffPCPEventParamHead;
 
 extern u32 effParamWorkCreate(s32 kind, void *params);
 
-/* Allocate an event work: copy the 0x1C-byte head, clear the links, then create the resource and owner from the optional parameters. */
-EffPCPEventWork32 *func_00183EE0(EffPCPEventHead28 *head, void *resourceParams, void *ownerParams) {
+/* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
+EffPCPEventWork32 *func_00183EE0(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPEventWork32 *work = func_002CFEB8(0x40);
 
-    *(EffPCPEventHead28 *)work = *head;
+    *(EffPCPEventParamHead *)work = *head;
     work->color = 0x80808080;
     work->scale = 1.0f;
     work->owner = 0;

@@ -5093,18 +5093,18 @@ void effPcpEventWorkInitEntries(EffPCPEventInitWork *work) {
     }
 }
 
-/* Seven floats: the head of an event work copied verbatim from its parameter block. */
+/* Leading float block of an event work, copied verbatim from its parameter block. */
 typedef struct {
     f32 word[7];
-} EffPCPEventHead28;
+} EffPCPEventParamHead;
 
 extern EffPCPEventOwner *func_00197D38(void *params);
 
-/* Allocate an event work: copy the 0x1C-byte head, clear the links, then create the resource and owner from the optional parameters. */
-void *func_0018BB38(EffPCPEventHead28 *head, void *resourceParams, void *ownerParams) {
+/* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
+void *func_0018BB38(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPEventInitWork *work = func_00328D68(0x40);
 
-    *(EffPCPEventHead28 *)work = *head;
+    *(EffPCPEventParamHead *)work = *head;
     work->color = 0x80808080;
     work->scale = 1.0f;
     work->owner = 0;
