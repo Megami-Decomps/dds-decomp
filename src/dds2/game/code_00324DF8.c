@@ -96,9 +96,7 @@ u64 func_00324F50(s32 owner, u64 resource) {
     return handle;
 }
 
-s64 mnuRemoveLinkedResourceByHandle(u32 *pair) {
-    return dds3RemoveListNodeAndNotify(pair[1], mnuFindResourceNodeByHandle(pair[1]));
-}
+INCLUDE_ASM(const s32, "game/code_00324DF8", mnuRemoveLinkedResourceByHandle);
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_00324FD0);
 

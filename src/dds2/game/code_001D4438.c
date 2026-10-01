@@ -1336,36 +1336,7 @@ extern s32 btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 /* Keep raw task/unit accesses: typed SceneTask/SceneActor fields change
  * instruction scheduling in this otherwise matching callback. */
-s64 btlReleaseIdleUnitSoundAndAdvanceTask(u8 *task) {
-    u8 *unit;
-    u8 *work;
-    s32 handle;
-    void (*hook)(u8 *);
-    work = (u8 *)func_001AA6F8();
-    unit = *(u8 **)(task + 0x18);
-    handle = *(s32 *)(unit + 0x318);
-    *(u32 *)(task + 8) &= ~0x100;
-    if (handle != 0 && sndIsResourceNodeReferencedOrActive(handle) == 0) {
-        sndFreeResourceNode(*(s32 *)(unit + 0x318));
-        *(s32 *)(unit + 0x318) = 0;
-    }
-    if (*(u32 *)(unit + 0x110) & 0x400) {
-        hook = *(void (**)(u8 *))(work + 0x700);
-        if (hook != 0) {
-            hook(task);
-        }
-    } else if (!(*(u16 *)(unit + 0x12E) & 0x4000)) {
-        if (*(s32 *)(unit + 0xC8) == 0x1F) {
-            func_001AA850(unit + 0x120, 0x1000);
-        }
-        *(s32 *)(unit + 0x110) = *(s32 *)(unit + 0x110) & ~0x20 & 0xF7FFFFFF;
-        btlFlagUnitDefeatCandidate(unit);
-        func_001E2758(unit);
-        btlStartTask(btlAllocateIndexedUnitEffectTask(unit, 0xE, 0, 1.0f));
-        fldAppendTaskToGroup(task);
-        btlDispatchStateHandler(task, 2);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_001D4438", btlReleaseIdleUnitSoundAndAdvanceTask);
 
 void func_001D4A30(s32 task) {
     ((SceneTask *)task)->flags = (((SceneTask *)task)->flags | 0x10) & ~0x200;

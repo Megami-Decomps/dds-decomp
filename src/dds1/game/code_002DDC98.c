@@ -321,17 +321,7 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
         void *sourceB = node->sourceB;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "lqc2 vf2, 0x40(%0)\n"
-            "lqc2 vf8, 0x30(%1)\n"
-            "lqc2 vf9, 0x30(%2)\n"
-            "vmulaw.xy ACC, vf8, vf0w\n"
-            "vmaddaw.xy ACC, vf9, vf2w\n"
-            "vmsubw.xy vf15, vf8, vf2w\n"
-            "sqc2 vf15, 0x30(%0)\n"
-            ".set reorder\n"
-            : : "r"(node), "r"(sourceA), "r"(sourceB) : "memory");
+        VU0_BLEND_NODE_XY(node, sourceA, sourceB);
         node = node->next;
     }
 }

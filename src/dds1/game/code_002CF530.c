@@ -18,12 +18,11 @@ extern void *func_002CFEB8();
 
 extern u32 D_003BD2CC;
 
-s64 sdfAllocateBlockBySizeThreshold(s64 size) {
+void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        sdfResourceRetainAddress(func_002D03F8());
-    } else {
-        func_002CFEB8(size);
+        return sdfResourceRetainAddress(func_002D03F8());
     }
+    return func_002CFEB8(size);
 }
 
 void sdfFreeMemoryFromEitherHeap(void *data) {

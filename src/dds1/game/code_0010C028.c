@@ -4,7 +4,7 @@ typedef struct ScriptContext {
     u8 pad0[0x18];
     s32 pc; /* 0x18 */
     s32 stackDepth; /* 0x1C: number of stack values */
-    u8 stackTypes[28]; /* 0x20 */
+    s8 stackTypes[28]; /* 0x20 */
     union {
         u32 stackValues[28];
         f32 stackFloats[28];
@@ -71,7 +71,31 @@ void scrPushTypeFourValue(ScriptContext *script, u32 value) {
     script->stackDepth = script->stackDepth + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopInt);
+typedef struct ScriptGlobals {
+    u8 pad00[0x40];
+    s32 ints[256];
+    f32 floats[256];
+} ScriptGlobals;
+
+extern ScriptGlobals *D_003BAA00;
+
+s32 bfStackPopInt(ScriptContext *script) {
+    s32 stackIndex = script->stackDepth;
+
+    script->stackDepth = stackIndex - 1;
+    switch (script->stackTypes[stackIndex - 1]) {
+    case 0:
+    case 4:
+        return script->stack.stackValues[script->stackDepth];
+    case 1:
+        return script->stack.stackFloats[script->stackDepth];
+    case 2:
+        return D_003BAA00->ints[script->stack.stackValues[script->stackDepth]];
+    case 3:
+        return D_003BAA00->floats[script->stack.stackValues[script->stackDepth]];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0010C028", bfStackPopFloat);
 

@@ -180,7 +180,26 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7760);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7BA8);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7D48);
+extern u8 *btlTrackedTaskHandles;
+extern u32 D_004367BC;
+
+s32 func_001C7D48(void) {
+    s64 first;
+    s64 second;
+
+    if (btlTrackedTaskHandles != 0) {
+        first = func_00101740(D_004367BC);
+        second = func_00101740(D_004367CC);
+        if (first == 0 && second == 0) {
+            return -128;
+        }
+        if (*(u32 *)(btlTrackedTaskHandles + 0x3C) & 0x100) {
+            return 0;
+        }
+        return *(s8 *)(btlTrackedTaskHandles + 0x3C);
+    }
+    return -128;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
 

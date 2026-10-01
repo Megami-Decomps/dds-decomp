@@ -123,9 +123,56 @@ void mnuReleaseBothVisualResourceTextures(MenuVisualWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_002485E0);
+extern s32 func_00197760(s32, s32, s32, s32, s32, s32);
+extern u8 D_00347C68[];
+extern u8 D_003482A8[];
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248658);
+void func_002485E0(s32 a0, s32 a1, s32 a2, s32 a3, s8 slot, s8 alternate) {
+    u8 *entry;
+    s32 handle;
+
+    if (alternate == 0) {
+        entry = D_00347C68 + slot * 32;
+    } else {
+        entry = D_003482A8 + slot * 32;
+    }
+    handle = func_00197760(a0, a1, a2, a3, (s32)entry, 0);
+    func_001958A0(handle, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(handle);
+}
+
+typedef struct BoxRecord {
+    u16 status; /* 0x00: bit 0 set when the record is in use */
+    u8 pad02[4];
+    u16 y0; /* 0x06 */
+    u16 y1; /* 0x08 */
+    u16 x0; /* 0x0A */
+    u16 x1; /* 0x0C */
+    u16 flags; /* 0x0E */
+} BoxRecord;
+
+s32 func_00248658(BoxRecord *box) {
+    f32 w = box->x1 - box->x0;
+    f32 h = box->y1 - box->y0;
+    s32 bonus = 0;
+
+    if (box->flags & 0x400) {
+        bonus = 100;
+    }
+    if (box->flags & 0x100) {
+        bonus += 50;
+    }
+    if (box->flags & 0x80) {
+        bonus += 100;
+    }
+    if (box->flags & 0x40) {
+        bonus += 100;
+    }
+    if (box->flags & 0x10) {
+        bonus += 100;
+    }
+    return (s32)h + (s32)(w * (w / 200.0f + 3.0f)) + bonus;
+}
 
 /* Mark entries whose required amount exceeds the current profile amount. */
 void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
@@ -218,7 +265,7 @@ typedef struct MenuThresholdEntry {
     s32 requiredAmount; /* 0x04 */
 } MenuThresholdEntry;
 
-extern s32 func_00248658(s32);
+extern s32 func_00248658(BoxRecord *box);
 
 extern s32 func_00248810(s32);
 

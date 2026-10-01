@@ -97,7 +97,13 @@ u8 dds3TestObjectFlags(u32 unused, u32 flags) {
     return (base->flags & flags) != 0;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BC8);
+void func_00111BC8(void *obj, void *data) {
+    ObjBase *base;
+
+    base = (ObjBase *)dds3GetObjectOwnedHandle(obj);
+    dds3GetExtData(obj);
+    base->extData = data;
+}
 
 void *dds3GetExtData(void) {
     return ((ObjBase *)dds3GetObjectOwnedHandle())->extData;
@@ -234,9 +240,7 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-s64 func_001129C8(void) {
-    return dds3InvokeSlot1Handler();
-}
+INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001129C8);
 
 s32 dds3InvokeSlot1Handler(void *object, void *context) {
     void *handler;

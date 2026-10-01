@@ -8111,9 +8111,7 @@ void btlRepositionPartyAroundBattleCenter(void) {
     func_002059F0(&v);
 }
 
-s64 func_00206090(void) {
-    return func_00205CC8(0x400);
-}
+INCLUDE_ASM(const s32, "game/code_001DD390", func_00206090);
 
 void btlMoveOtherUnitsAway(BtlUnit *unit) {
     f32 pos[4];

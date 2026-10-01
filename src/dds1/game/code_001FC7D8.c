@@ -211,9 +211,51 @@ BtlEffObj *btlCreateEffectCounterTask(BtlUnit *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FDF98);
+typedef struct BtlEffectSlots {
+    u8 pad00[0x1F8];
+    u32 flags; /* 0x1F8 */
+} BtlEffectSlots;
 
-extern void func_001FDF98();
+extern void func_001AD970(s32);
+extern s32 func_001AD928(void);
+extern void *btlGetIndexedUiResource();
+extern s32 D_003BAA8C;
+extern s32 D_00360458[];
+extern s32 D_00360460[];
+
+s32 func_001FDF98(BtlObjLink *link) {
+    s32 battleState = func_001A17F0();
+    BtlUnit *owner = link->owner;
+
+    if (link->elapsedTicks == 0) {
+        s32 resourceIndex = link->arg;
+
+        if (resourceIndex == 0) {
+            if ((*(u64 *)&owner->flags & 0x1400) != 0) {
+                if (((BtlEffectSlots *)battleState)->flags & 0x400) {
+                    if (owner->flags & 0x400) {
+                        func_001AD970(D_00360460[0]);
+                    } else {
+                        func_001AD970(D_00360458[0]);
+                    }
+                } else {
+                    func_001AD970(D_00360458[0]);
+                }
+            } else {
+                func_001AD970((s32)btlGetIndexedUiResource(owner));
+            }
+        } else {
+            func_001AD970(D_003BAA8C + resourceIndex * 17);
+        }
+    }
+    if (func_001AD928() == 0 || (u32)link->elapsedTicks >= 0x1E) {
+        return 1;
+    }
+    link->elapsedTicks++;
+    return 0;
+}
+
+extern s32 func_001FDF98();
 
 BtlEffObj *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
     BtlEffObj *obj = btlAllocTask(0xC);
@@ -267,9 +309,61 @@ BtlEffObj *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
     return obj;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FE228);
+extern u8 D_00360428[];
+extern u8 D_00360430[];
+extern s32 D_00360438[];
+extern s32 D_00360448[];
+extern s32 D_0036044C[];
+extern s32 D_00360450[];
 
-extern void func_001FE228();
+s32 func_001FE228(BtlObjLink *link) {
+    BtlUnit *owner;
+
+    func_001A17F0();
+    owner = link->owner;
+    if (link->elapsedTicks == 0) {
+        switch (link->arg) {
+        case 10:
+            func_001AD970((s32)D_00360428);
+            break;
+        case 5:
+            if (owner->flags & 0x1000) {
+                func_001AD970(D_00360448[0]);
+            } else {
+                func_001AD970(D_00360438[0]);
+            }
+            break;
+        case 6:
+            func_001AD970((s32)D_00360430);
+            break;
+        case 9:
+            func_001AD970(D_0036044C[0]);
+            break;
+        case 11:
+            func_001AD970(D_00360450[0]);
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 7:
+        case 8:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        default:
+            return 1;
+        }
+    }
+    if (func_001AD928() == 0 || (u32)link->elapsedTicks >= 0x1E) {
+        return 1;
+    }
+    link->elapsedTicks++;
+    return 0;
+}
+
+extern s32 func_001FE228();
 
 /* Preserve the owner's effect data in the new task. */
 BtlEffObj *btlCreateEffObjA(BtlUnit *owner, s32 arg) {

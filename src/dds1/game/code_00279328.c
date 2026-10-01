@@ -255,4 +255,31 @@ s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279328", ptySkillMenuHandlePageSwitch);
+extern void mnuRetreatListCursorDefault();
+extern void mnuAdvanceListCursorDefault();
+extern void mnuClearListFlagsOneAndTwo();
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+
+s32 ptySkillMenuHandlePageSwitch(s32 callback) {
+    s32 context = kwlnTaskGetUserValue();
+    s32 changed = 0;
+    u32 buttons = func_00285B20(0x300);
+
+    if (buttons & 0x100) {
+        mnuCloseSelectionAndReleasePartyPanel(callback);
+        mnuRetreatListCursorDefault(((SkillMenuContext *)context)->selection);
+        changed = 1;
+    }
+    if ((buttons & 0x200) && changed == 0) {
+        mnuCloseSelectionAndReleasePartyPanel(callback);
+        mnuAdvanceListCursorDefault(((SkillMenuContext *)context)->selection);
+        changed = 1;
+    }
+    mnuClearListFlagsOneAndTwo(((SkillMenuContext *)context)->selection);
+    if (changed != 0) {
+        ptySkillMenuOpenPartyPage(callback);
+        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        return 1;
+    }
+    return 0;
+}

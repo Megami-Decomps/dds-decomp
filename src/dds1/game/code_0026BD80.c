@@ -49,7 +49,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
 }
 
-s64 mnuDestroyMovieMenuSelectionList(void) {
+u32 mnuDestroyMovieMenuSelectionList(void) {
     return mnuDestroyListState(((MenuState *)D_003BC5D0)->linkedState);
 }
 
@@ -111,33 +111,33 @@ void mnuReleaseSpriteHandle(void) {
     }
 }
 
-extern s32 mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 /* These entry points differ only in the selected menu sound identifier. */
-s64 mnuStartMovieMenuSfx16(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
+void mnuStartMovieMenuSfx16(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x16, 0x53);
 }
 
-s64 mnuStartMovieMenuSfx17(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
+void mnuStartMovieMenuSfx17(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x17, 0x53);
 }
 
-s64 mnuStartMovieMenuSfx18(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
+void mnuStartMovieMenuSfx18(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x18, 0x53);
 }
 
-s64 func_0026C1F8(s32 parameter) {
-    return mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
+void func_0026C1F8(s32 parameter) {
+    mnuDrawSprite(0, 0, 0, parameter, 0, 0x1A, 0x53);
 }
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
 extern void sdfSubmitGsTestOneRegisterPacket(s32, s32);
-extern s32 func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
+extern void func_002C0DD8(s32, s32, s32, s32, s32, s32, s32);
 
-s64 mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
+void mnuDrawMovieMenuBackgroundQuad(s32 parameter) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x3E);
     sdfSubmitGsTestOneRegisterPacket(0x3000D, 0x3E);
-    return func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
+    func_002C0DD8(0, 0, 0, 0x2000, 0xE00, parameter, 0x3E);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C290);
@@ -155,11 +155,11 @@ INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C4B8);
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026C7E0);
 
-s64 mnuStartMovieMenuSfxGroup(void) {
+void mnuStartMovieMenuSfxGroup(void) {
     mnuDrawSprite(0, 0, 0, 0x80, 0, 6, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xD, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0xE, 0x53);
-    return mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
+    mnuDrawSprite(0, 0, 0, 0x80, 0, 0xF, 0x53);
 }
 
 void func_0026CAB0(void) {

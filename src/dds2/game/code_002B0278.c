@@ -161,7 +161,7 @@ extern u32 func_002B9FF8();
 
 extern s32 D_00435DD0;
 
-extern s64 mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
+extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuHideWindowHandlesKindFourFive(MenuIconState *);
 
@@ -601,7 +601,35 @@ s32 context;
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B12B0);
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B15F8);
+extern void func_002B12B0();
+extern void func_002BCAB0();
+
+void func_002B15F8(context)
+s32 context;
+{
+    PartyMenuData *menu = (PartyMenuData *)((MenuContext *)context)->party;
+    u16 *entry = (u16 *)menu->current;
+    s32 i;
+    s32 backupOffset;
+    s32 panel;
+
+    for (i = 0; i < 5; i++) {
+        if (*entry & 1) {
+            func_002B12B0(i, -3, 1, context);
+        }
+        entry += 0x1C4 / 2;
+    }
+    backupOffset = 0;
+    for (i = 4; i >= 0; i--) {
+        *(PartyEntryCopy *)(backupOffset + D_00435DD0 + 0xA60) = *(PartyEntryCopy *)(backupOffset + (s32)menu + 0x11B8);
+        backupOffset += 0x1C4;
+    }
+    panel = context + 0x284;
+    mnuReleasePartyPanelTextures(panel);
+    mnuInitPartyPanelSlots(context + 0xA928);
+    func_002BCA98(panel);
+    func_002BCAB0(panel);
+}
 
 s32 mnuCountActiveSlots(void) {
     s32 count = 0;
@@ -1081,7 +1109,21 @@ u32 mnuDestroySelectedPartyWindow(u32 callback) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuSeekFirstAvailableStaffListNode);
+void mnuSeekFirstAvailableStaffListNode(void) {
+    MenuPartyRuntime *party = (MenuPartyRuntime *)((MenuContext *)kwlnTaskGetUserValue())->party;
+    MenuListNode *node = party->selectedWindow->list->first;
+
+    while (node != NULL) {
+        u32 key = node->sortKeyPrimary;
+        if (!(node->flags48 & 1) && key != 0) {
+            break;
+        }
+        node = node->next;
+    }
+    if (node != NULL) {
+        mnuSeekListNode(node->index, party->selectedWindow->list);
+    }
+}
 
 MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -2940,7 +2982,7 @@ typedef struct MenuPosTable3 {
 
 extern MenuPosTable3 D_0042AF48;
 
-s64 mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg) {
+void mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s32 mode, s32 arg) {
     MenuPosTable3 table = D_0042AF48;
     s32 shade = state->sprite[0]->inner->shadeSource << 4;
     s32 i;
@@ -2968,7 +3010,7 @@ s64 mnuDrawIconPanelFade(s32 x, s32 y, s32 z, s32 alpha, MenuIconState *state, s
 
 extern MenuPosTable D_0042AF60;
 
-s64 mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
+void mnuDrawIconRow6(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
     MenuPosTable table = D_0042AF60;
     s32 i;
     for (i = 0; i < state->count; i++) {
@@ -2987,28 +3029,19 @@ typedef struct MenuOffsets {
 
 extern MenuOffsets D_0042AF90;
 
-s32 mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
+void mnuDrawIconPair(s32 x, s32 y, s32 z, s32 w, MenuIconState *state, s32 arg) {
     MenuOffsets offset = D_0042AF90;
     func_00306CD0(x + offset.x0, y + offset.y0, z, w, 1, state->sprite[0], 0, arg);
     func_00306CD0(x + offset.x1, y + offset.y1, z, w, 1, state->sprite[1], 0, arg);
 }
 
-extern s64 mnuDrawIconPanelFade();
+extern void mnuDrawIconPanelFade();
 
-extern s64 mnuDrawIconRow6();
+extern void mnuDrawIconRow6();
 
-extern s32 mnuDrawIconPair();
+extern void mnuDrawIconPair();
 
-s64 mnuDrawIconPanel(s32 a0, s32 a1, s32 a2, s32 a3, MenuIconState *state, s32 a5, s32 a6) {
-    switch (state->kind) {
-    case 0: case 1: case 2: case 3:
-        return mnuDrawIconPanelFade(a0, a1, a2, a3, state, a5, a6);
-    case 4:
-        return mnuDrawIconRow6(a0, a1, a2, 0x100, state, a6);
-    case 5:
-        return mnuDrawIconPair(a0, a1, a2, a3, state, a6);
-    }
-}
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuDrawIconPanel);
 
 void func_002BA7A8(u32 a0, u32 a1, u32 a2, u32 a3, MenuIconState *a4, u32 a5, u32 a6) {
     mnuDrawIconPanel(a0, a1, a2, a3, a4, a5, a6);

@@ -647,7 +647,28 @@ u32 mnuQueueNextMantraSelection(u32 state) {
     return item;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0026F778);
+/* Queue the previous selection, wrapping to the last list entry at the start. */
+u32 func_0026F778(u32 state) {
+    u32 item = mnuAppendDisplayListNode(state);
+    u32 *entries = ((MantraListState *)state)->entries;
+    if (item != 0) {
+        s32 prev;
+        u32 *current;
+        u32 *upcoming;
+        if (((MantraListState *)state)->index <= 0) {
+            prev = ((MantraListState *)state)->count - 1;
+        } else {
+            prev = ((MantraListState *)state)->index - 1;
+        }
+        ((MantraDisplayNode *)item)->transitionKind = 1;
+        current = entries + ((MantraListState *)state)->index;
+        upcoming = entries + prev;
+        ((MantraListState *)state)->index = prev;
+        ((MantraDisplayNode *)item)->fromValue = *current;
+        ((MantraDisplayNode *)item)->toValue = *upcoming;
+    }
+    return item;
+}
 
 u32 mnuAppendDisplayListNode(u32 state) {
     MantraDisplayNode *node = ((MantraListState *)state)->head;

@@ -79,9 +79,28 @@ void dds3ReleaseSoundSlotPool(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B290);
+SoundSlot *func_0031B290(void) {
+    SoundSlotPool *pool = (SoundSlotPool *)D_00438940;
+    SoundSlot *slot = pool->slots;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031B2E0);
+    for (i = 0; i < pool->count; i++, slot++) {
+        if (slot->sequence == 0) {
+            return slot;
+        }
+    }
+    return 0;
+}
+
+SoundSlot *func_0031B2E0(u32 sequence, u32 frames) {
+    SoundSlot *slot = func_0031B290();
+
+    if (slot != NULL) {
+        slot->sequence = sequence;
+        slot->remainingFrames = frames;
+    }
+    return slot;
+}
 
 /* Returns occupied sound slots to their default volume and pan when they expire. */
 void dds3UpdateSoundSlots(void) {

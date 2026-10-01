@@ -91,7 +91,11 @@ void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E608);
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E720);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+
+void func_0026E720(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 mode, s32 flag, s32 param) {
+    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), flag, sprite, mode, param);
+}
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E798);
 

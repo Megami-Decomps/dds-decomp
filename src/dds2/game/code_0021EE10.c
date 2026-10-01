@@ -1096,9 +1096,7 @@ u32 btlOffsetSpecialActionValue(ActionUnit *unit, u32 base) {
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00222450);
 
-s64 btlUnitWrapA(void) {
-    return func_00222450();
-}
+INCLUDE_ASM(const s32, "game/code_0021EE10", btlUnitWrapA);
 
 void btlUnitSetCameraOffset(u32 unit) {
     func_00217898(unit, unit + 0x30, unit + 0xc0, 0, 1,
@@ -1393,9 +1391,7 @@ INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224500);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_00224598);
 
-s64 btlUnitWrapB(void) {
-    return func_00224598();
-}
+INCLUDE_ASM(const s32, "game/code_0021EE10", btlUnitWrapB);
 
 INCLUDE_ASM(const s32, "game/code_0021EE10", func_002247D0);
 

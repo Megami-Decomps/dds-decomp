@@ -267,9 +267,7 @@ s8 func_0030BCE8(void) {
     return D_004388C0;
 }
 
-s64 func_0030BCF0(void) {
-    return func_0030BD10();
-}
+INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BCF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030BD10);
 
@@ -697,9 +695,7 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DBF0);
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030DE08);
 
-s64 sdfDrawUniformlyScaledSlotImage(f32 x) {
-    return func_0030DE08(x, x);
-}
+INCLUDE_ASM(const s32, "game/code_0030B838", sdfDrawUniformlyScaledSlotImage);
 
 /* Load the ten numbered "sname" tiles plus the two fixed local-map images. */
 s32 fldLoadLocalMapResources(void) {

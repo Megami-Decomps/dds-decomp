@@ -71,7 +71,7 @@ typedef struct BattleRuntimeState {
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     u8 pending;
     s8 active;
-    u8 unk_09[3];
+    u8 pad09[3];
     u32 options;
     u32 color10;
     u32 color14;
@@ -86,8 +86,8 @@ extern BattleRuntimeState D_00453060;
 typedef struct PadButtons {
     s8 unk_0;
     s8 stick;
-    u8 unk_2[2];
-    u8 b4, b5, b6, b7;
+    u8 pad02[2];
+    u8 pageUp, pageDown, up, down;
 } PadButtons;
 
 extern PadButtons D_0040B7D8[];
@@ -297,7 +297,7 @@ typedef struct BattleGroupNode {
     u16 group;
     u16 type;
     u8 flag;
-    u8 unk_0D[3];
+    u8 pad0D[3];
     s32 modelContext;
     s32 resourceList;
     s32 unk_18;
@@ -1024,9 +1024,7 @@ void btlStartPrimaryScriptTask(void) {
     battle->scriptFlags |= 1;
 }
 
-s64 btlReleaseScriptResourceA(void) {
-    return btlReleaseScriptResource();
-}
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseScriptResourceA);
 
 s32 btlHasScriptResource(void) {
     BtlState *battle = (BtlState *)func_001AA6F8();
@@ -1062,9 +1060,7 @@ void btlStartSecondaryScriptTask(void) {
     battle->scriptFlags |= 2;
 }
 
-s64 btlReleaseScriptResourceB(void) {
-    return btlReleaseScriptResource();
-}
+INCLUDE_ASM(const s32, "game/code_00227288", btlReleaseScriptResourceB);
 
 INCLUDE_RODATA(const s32, "game/code_00227288", D_0041B628);
 
@@ -2168,7 +2164,7 @@ typedef struct MenuList {
 } MenuList;
 
 s32 mnuListMoveCursor(MenuList *list) {
-    if (D_0040B7D8->b6 & 2) {
+    if (D_0040B7D8->up & 2) {
         if (list->cursor != 0) {
             list->cursor--;
             if (list->cursor == list->top && list->cursor != 0) {
@@ -2178,7 +2174,7 @@ s32 mnuListMoveCursor(MenuList *list) {
             list->cursor = list->count - 1;
             list->top = list->count - list->rows;
         }
-    } else if (D_0040B7D8->b7 & 2) {
+    } else if (D_0040B7D8->down & 2) {
         if (list->cursor >= list->count - 1) {
             list->cursor = 0;
             list->top = 0;
@@ -2188,7 +2184,7 @@ s32 mnuListMoveCursor(MenuList *list) {
                 list->top++;
             }
         }
-    } else if (D_0040B7D8->b5 & 2) {
+    } else if (D_0040B7D8->pageDown & 2) {
         if (list->top + list->rows * 2 < list->count) {
             list->top += list->rows;
             list->cursor += list->rows;
@@ -2196,7 +2192,7 @@ s32 mnuListMoveCursor(MenuList *list) {
             list->cursor = list->count - 1;
             list->top = list->count - list->rows;
         }
-    } else if (D_0040B7D8->b4 & 2) {
+    } else if (D_0040B7D8->pageUp & 2) {
         if (list->top >= list->rows) {
             list->top -= list->rows;
             list->cursor -= list->rows;

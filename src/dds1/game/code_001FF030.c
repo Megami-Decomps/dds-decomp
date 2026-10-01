@@ -147,8 +147,8 @@ INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF560);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FF8D8);
 
 /* Weighted pick of a table row: returns the first slot whose cumulative
-   weight reaches `roll` (btlRollAiBucket) among the five slots of row `index`. */
-u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 index) {
+   weight reaches `roll` (btlRollAiBucket) among the five slots of row `rowIndex`. */
+u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 rowIndex) {
     u32 roll;
     u32 total;
     u32 i;
@@ -157,7 +157,7 @@ u32 btlPickWeightedAiSlot(s32 unit, s32 species, s32 index) {
     roll = btlRollAiBucket();
     total = 0;
     for (i = 0; i < 5; i++) {
-        u32 weight = D_003BAA24[species].slot[index * 5 + i].weight;
+        u32 weight = D_003BAA24[species].slot[rowIndex * 5 + i].weight;
 
         total = (total + weight) & 0xFFFF;
         if (total >= roll && weight != 0) {
@@ -1998,7 +1998,7 @@ typedef struct BtlSlotEntry {
     u8 unk_0A[4];
     u16 unk_0E;
     u8 unk_10[0x12];
-    u16 data[24];
+    u16 effectData[24];
     u8 unk_52[0x1A4 - 0x52];
 } BtlSlotEntry;
 
@@ -2010,59 +2010,60 @@ typedef struct BtlSlotTable {
 extern BtlSlotTable *D_003BAA00;
 
 void btlSelectSlotEntries(void) {
-    s32 *effect = *(s32 **)((u8 *)func_001A17F0() + 0x694);
-    BtlSlotEntry *entry;
-    BtlSlotEntry *ready = NULL;
-    BtlSlotEntry *active = NULL;
+    s32 *effectState = *(s32 **)((u8 *)func_001A17F0() + 0x694);
+    BtlSlotEntry *slotEntry;
+    BtlSlotEntry *readyEntry = NULL;
+    BtlSlotEntry *activeEntry = NULL;
     u32 i;
-    entry = D_003BAA00->entry;
+    slotEntry = D_003BAA00->entry;
     for (i = 0; i < 5; i++) {
-        u16 flags = entry->flags;
-        effect[i] = flags;
+        u16 flags = slotEntry->flags;
+        effectState[i] = flags;
         if (flags & 1) {
-            if (entry->kind == 3) {
-                ready = entry;
+            if (slotEntry->kind == 3) {
+                readyEntry = slotEntry;
             }
-            if (entry->kind == 1) {
-                entry->flags = flags | 2;
-                active = entry;
+            if (slotEntry->kind == 1) {
+                slotEntry->flags = flags | 2;
+                activeEntry = slotEntry;
             } else {
-                entry->flags = flags & ~2;
+                slotEntry->flags = flags & ~2;
             }
         }
-        entry++;
+        slotEntry++;
     }
-    active->unk_0E = 0;
-    if (ready != NULL) {
-        ready->unk_0E = 0;
+    activeEntry->unk_0E = 0;
+    if (readyEntry != NULL) {
+        readyEntry->unk_0E = 0;
     }
-    memcpy((u8 *)effect + 0x14, active->data, 0x30);
+    memcpy((u8 *)effectState + 0x14, activeEntry->effectData, 0x30);
     for (i = 0; i < 24; i++) {
-        active->data[i] = 0;
+        activeEntry->effectData[i] = 0;
     }
-    active->unk_06 = active->unk_08;
+    activeEntry->unk_06 = activeEntry->unk_08;
 }
 
 void func_00205420(void) {
-    s32 *effect = *(s32 **)((u8 *)func_001A17F0() + 0x694);
-    BtlSlotEntry *selected = NULL;
+    s32 *effectState = *(s32 **)((u8 *)func_001A17F0() + 0x694);
+    BtlSlotEntry *activeEntry = NULL;
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        if (effect[i] & 1) {
-            if (effect[i] & 2) {
+        if (effectState[i] & 1) {
+            if (effectState[i] & 2) {
                 D_003BAA00->entry[i].flags |= 2;
             } else {
                 D_003BAA00->entry[i].flags &= ~2;
             }
             if (D_003BAA00->entry[i].kind == 1) {
-                selected = &D_003BAA00->entry[i];
+                activeEntry = &D_003BAA00->entry[i];
             }
         }
     }
-    memcpy(selected->data, (u8 *)effect + 0x14, 0x30);
-    selected->unk_06 = selected->unk_08;
+    memcpy(activeEntry->effectData, (u8 *)effectState + 0x14, 0x30);
+    activeEntry->unk_06 = activeEntry->unk_08;
 }
+
 
 void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit) {
     u8 *battle = (u8 *)func_001A17F0();

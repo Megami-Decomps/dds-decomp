@@ -32,7 +32,7 @@ typedef struct BattleRuntimeState {
     u8 fadeMode; /* selects the initial overlay alpha in btlInitFadeColors */
     u8 pending;
     s8 active;
-    u8 unk_09[3];
+    u8 pad09[3];
     u32 options;
     u32 color10;
     u32 color14;
@@ -310,9 +310,7 @@ void btlStartPrimaryScriptTask(void) {
     battle->scriptFlags |= 1;
 }
 
-s64 btlReleaseScriptResourceA(void) {
-    return btlReleaseScriptResource();
-}
+INCLUDE_ASM(const s32, "game/code_0020EA40", btlReleaseScriptResourceA);
 
 extern char D_003BB8C0[];
 
@@ -350,9 +348,7 @@ void btlStartSecondaryScriptTask(void) {
     battle->scriptFlags |= 2;
 }
 
-s64 btlReleaseScriptResourceB(void) {
-    return btlReleaseScriptResource();
-}
+INCLUDE_ASM(const s32, "game/code_0020EA40", btlReleaseScriptResourceB);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66C0);
 
@@ -1811,7 +1807,7 @@ typedef struct BattleGroupNode {
     u16 group;
     u16 type;
     u8 flag;
-    u8 unk_0D[3];
+    u8 pad0D[3];
     s32 modelContext;
     s32 resourceList;
     s32 unk_18;

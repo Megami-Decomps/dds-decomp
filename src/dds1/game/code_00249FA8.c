@@ -27,13 +27,31 @@ typedef struct MenuSlotState {
     s32 effect[5]; /* 0xA8: pairs at +0x08/+0x0C select the two effect slots */
     s32 cur;       /* 0xBC */
     s32 prev;      /* 0xC0 */
-    u8 padC4[0x20];
+    u8 padC4[0x18];
+    s32 unkDC;     /* 0xDC */
+    u8 padE0[4];
     s32 mode;      /* 0xE4 */
 } MenuSlotState;
 
 extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_00249FA8);
+extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(s32), void (*)(s32), void *);
+extern void *mnuTerminalCreateScene();
+extern void mnuPreparePopupAndDispatchSelection(s32);
+extern void func_0024A138(s32);
+extern void func_0024A170(s32);
+extern void mnuReleaseTerminalWorkAndResumeField(s32);
+
+s32 func_00249FA8(void) {
+    s32 result;
+    void *work = mnuTerminalCreateScene();
+
+    D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPreparePopupAndDispatchSelection, 0, work);
+    kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, func_0024A138, 0, work);
+    result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, func_0024A170, mnuReleaseTerminalWorkAndResumeField, work);
+    D_003BC3E0 = 1;
+    return result;
+}
 
 void fldStopSceneTasks(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003AF658, 0);
@@ -151,7 +169,30 @@ void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A570);
+INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
+
+INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF668);
+
+INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF678);
+
+INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
+
+void func_0024A570(u32 mode, s32 index, MenuSlotState *state) {
+    s32 table[4] = {3, 1, 2, 0x2D};
+
+    if (state->unkDC == 1) {
+        if (index == state->unkDC) {
+            index = 3;
+        }
+    }
+    if (index >= 0) {
+        state->prev = state->cur;
+        state->cur = table[index];
+    } else if (index == -2) {
+        state->prev = -1;
+    }
+    mnuTerminalConfigureEffects(mode, state);
+}
 
 INCLUDE_ASM(const s32, "game/code_00249FA8", func_0024A610);
 
@@ -193,16 +234,6 @@ u8 func_0024A6E8(SceneFrameOwner *scene) {
     index = fldGetModeFrameRecordIndex(scene);
     return scene->frameTable->records[index].unk14;
 }
-
-INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF658);
-
-INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF668);
-
-INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF678);
-
-INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF688);
-
-INCLUDE_RODATA(const s32, "game/code_00249FA8", D_003AF6A0);
 
 INCLUDE_SDATA(const s32, "game/code_00249FA8", D_003BC400);
 

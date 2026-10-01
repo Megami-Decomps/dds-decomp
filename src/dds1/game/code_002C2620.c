@@ -436,7 +436,36 @@ s32 fldLmapToggleOverlay(void) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C2620", func_002C3738);
+extern s32 sdfCounterGetDisplayValue(void);
+extern void mdlFlagClear(s32 flag);
+extern void mdlFlagSet(s32 flag);
+
+void func_002C3738(void) {
+    u32 flags = 1 << (sdfCounterGetDisplayValue() - 1);
+
+    if (flags & 8) {
+        mdlFlagClear(0x40A);
+    }
+    if (flags & 0x20) {
+        mdlFlagClear(0x40B);
+        mdlFlagSet(0x23A);
+        mdlFlagClear(0x23C);
+    }
+    if (flags & 0x40) {
+        mdlFlagClear(0x40C);
+    }
+    if (flags & 0x80) {
+        mdlFlagClear(0x40D);
+    }
+    if (flags & 0x100) {
+        mdlFlagClear(0x40E);
+        mdlFlagSet(0x23B);
+        mdlFlagClear(0x239);
+    }
+    if (flags & 0x200) {
+        mdlFlagClear(0x40F);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD238);
 
