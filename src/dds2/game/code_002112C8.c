@@ -1937,9 +1937,9 @@ void func_00217378(u8 *command, u8 *unused) {
         btlFlagUnitDefeatCandidate(target);
     }
     btlUnitGetMuzzlePosVU(user);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(userPos) : "memory");
+    VU0_STORE_VF(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);
-    __asm__ volatile(".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r"(targetPos) : "memory");
+    VU0_STORE_VF(vf10, targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
         ((BtlLinkedCommand *)command)->flags |= 0x200;

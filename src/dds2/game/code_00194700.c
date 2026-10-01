@@ -384,14 +384,7 @@ void func_001957E8(void) {
 
 void func_00195810(void) {
     u8 *matrix;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "lqc2 vf28, 0(%0)\n"
-        "lqc2 vf29, 0x10(%0)\n"
-        "lqc2 vf30, 0x20(%0)\n"
-        "lqc2 vf31, 0x30(%0)\n"
-        ".set reorder"
-        : : "r"(D_003846F0) : "memory");
+    VU0_LOAD_MATRIX(D_003846F0);
     matrix = D_0037F610;
     func_00336C10(matrix);
     __asm__ volatile (
@@ -470,10 +463,10 @@ u32 func_00195A30(u32 colorA, u32 colorB) {
     u32 unit = 0x3C000000;
     color1[0] = colorA;
     EE_MMI_RGBA_UNPACK(color1, unit);
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder");
+    VU0_MOVE_VF(vf11, vf10);
     color2[0] = colorB;
     EE_MMI_RGBA_UNPACK(color2, unit);
-    __asm__ volatile (".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder");
+    VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     return blended[0];

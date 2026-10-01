@@ -526,17 +526,8 @@ void effFlashUpdateWork1(PcpFlashWork1 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        ".set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
+        VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, axis);
     lifetime = work->lifetime;
     count = work->particleCount;
@@ -678,24 +669,7 @@ void effFlashSpawnRotatingParticle(PcpFlashWork2 *work, s32 index, void *orienta
 	vopmula.xyz ACC, $vf10, $vf11
 	vopmsub.xyz $vf10, $vf11, $vf10
 	.set reorder");
-    __asm__ volatile(
-        ".set noreorder
-	"
-        "vmul.xyz $vf2, $vf10, $vf10
-	"
-        "vmulax.w ACC, $vf0, $vf2x
-	"
-        "vmadday.w ACC, $vf0, $vf2y
-	"
-        "vmaddz.w $vf2, $vf0, $vf2z
-	"
-        "vrsqrt Q, $vf0w, $vf2w
-	"
-        "vwaitq
-	"
-        "vmulq.xyz $vf10, $vf10, Q
-	"
-        ".set reorder");
+        VU0_NORMALIZE_VF10();;
     __asm__ volatile(".set noreorder
 	sqc2 $vf10, 0(%0)
 	.set reorder" : : "r"(direction) : "memory");
@@ -819,7 +793,7 @@ void effFlashUpdateStreak(PcpFlashWork2 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     lifetime = work->lifetime;
     count = work->particleCount;
@@ -1423,7 +1397,7 @@ void effFlashUpdateWork6(PcpFlashWork6 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
     part = work->parts;
@@ -1606,17 +1580,8 @@ void effFlashUpdateWork7(PcpFlashWork7 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        ".set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
+        VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
     part = work->parts;
@@ -1821,7 +1786,7 @@ void effFlashUpdateWork8(PcpFlashWork8 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
     VU0_STORE_VF($vf10, &axis);
     count = work->particleCount;
     part = work->parts;
@@ -2215,17 +2180,8 @@ void effFlashUpdateWork10(PcpFlashWork10 *work) {
 
     VU0_LOAD_VF($vf10, D_0037F680);
     VU0_LOAD_VF($vf11, D_0037F690);
-    __asm__ volatile(".set noreorder\n\tvsub.xyzw $vf10, $vf10, $vf11\n\t.set reorder");
-    __asm__ volatile(
-        ".set noreorder\n\t"
-        "vmul.xyz $vf2, $vf10, $vf10\n\t"
-        "vmulax.w ACC, $vf0, $vf2x\n\t"
-        "vmadday.w ACC, $vf0, $vf2y\n\t"
-        "vmaddz.w $vf2, $vf0, $vf2z\n\t"
-        "vrsqrt Q, $vf0w, $vf2w\n\t"
-        "vwaitq\n\t"
-        "vmulq.xyz $vf10, $vf10, Q\n\t"
-        ".set reorder");
+        VU0_SUB(vf10, vf10, vf11);;
+        VU0_NORMALIZE_VF10();;
     VU0_STORE_VF($vf10, axis);
     count = work->particleCount;
     part = work->parts;
