@@ -10,9 +10,8 @@ typedef struct {
     u32 taskKey;
 } EvtCommandWork;
 
-extern s32 D_00435DD0;
 
-extern u32 D_004371F8;
+extern f32 D_004371F8;
 
 extern u32 D_00435CD4;
 
@@ -80,11 +79,10 @@ u32 func_00242D10(void) {
     if (entry == 0) {
         func_0010AE38(D_00422030, scrReadIntParameter(1));
         return 1;
-    } else {
-        task = evtCreateTaskWithValue(0x2AFE, entry);
-        func_00101968(work->taskKey, task);
-        scrSetIntegerReturnValue(task);
     }
+    task = evtCreateTaskWithValue(0x2AFE, entry);
+    func_00101968(work->taskKey, task);
+    scrSetIntegerReturnValue(task);
     return 1;
 }
 
@@ -191,6 +189,7 @@ u32 evtHideSky(void) {
 u32 func_00243068(void) {
     s32 id;
 
+    /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
     if (scrGetCommandTimer() == 0) {
         evtPreloadBgm(scrReadIntParameter(0));
     } else {
@@ -303,19 +302,21 @@ typedef struct {
     u32 extFlags;      /* 0xA58 */
 } SolarWorldState;
 
+extern SolarWorldState *D_00435DD0;
+
 void evtClearSolarOverlayControl(void) {
-    ((SolarWorldState *)D_00435DD0)->overlayFlag = 0;
+    D_00435DD0->overlayFlag = 0;
 }
 
 void func_00243320(void) {
-    ((SolarWorldState *)D_00435DD0)->unkA4C = 0;
+    D_00435DD0->unkA4C = 0;
 }
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetMirroredSolarPhase(void) {
     s32 phase;
 
-    phase = ((SolarWorldState *)D_00435DD0)->phase;
+    phase = D_00435DD0->phase;
     if (phase >= 9) {
         phase = 8 - (phase & 7);
     }
@@ -323,39 +324,39 @@ s32 evtGetMirroredSolarPhase(void) {
 }
 
 u8 evtGetSolarPhase(void) {
-    return ((SolarWorldState *)D_00435DD0)->phase;
+    return D_00435DD0->phase;
 }
 
 void evtSetSolarPhase(u8 phase) {
-    ((SolarWorldState *)D_00435DD0)->phase = phase & 0xf;
-    ((SolarWorldState *)D_00435DD0)->phaseTimer = 0;
+    D_00435DD0->phase = phase & 0xf;
+    D_00435DD0->phaseTimer = 0;
 }
 
 void evtEnableSolarPhaseAdvance(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 1;
+    D_00435DD0->flags = D_00435DD0->flags | 1;
 }
 
 void evtDisableSolarPhaseAdvance(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfe;
+    D_00435DD0->flags = D_00435DD0->flags & 0xfe;
 }
 
 void evtSetSolarOverlayFullyVisible(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 2;
-    *(f32 *)&D_004371F8 = 1.0f;
+    D_00435DD0->flags = D_00435DD0->flags | 2;
+    D_004371F8 = 1.0f;
     func_002457B8(0);
 }
 
 void evtSetSolarOverlayFullyTransparent(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
-    D_004371F8 = 0;
+    D_00435DD0->flags = D_00435DD0->flags & 0xfd;
+    D_004371F8 = 0.0f;
 }
 
 void evtEnableSolarOverlayAlpha(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags | 2;
+    D_00435DD0->flags = D_00435DD0->flags | 2;
 }
 
 void evtDisableSolarOverlayAlpha(void) {
-    ((SolarWorldState *)D_00435DD0)->flags = ((SolarWorldState *)D_00435DD0)->flags & 0xfd;
+    D_00435DD0->flags = D_00435DD0->flags & 0xfd;
 }
 
 u32 func_00243430(s32 task) {
@@ -369,15 +370,15 @@ u32 func_00243430(s32 task) {
         return 0;
     }
     overlay = kwlnTaskGetUserValue(task);
-    state = (SolarWorldState *)D_00435DD0;
-    alpha = *(f32 *)&D_004371F8;
+    state = D_00435DD0;
+    alpha = D_004371F8;
     if ((state->flags & 2) != 0) {
         if (alpha < 1.0f) {
             alpha += 0.1f;
             if (alpha > 1.0f) {
                 alpha = 1.0f;
             }
-            *(f32 *)&D_004371F8 = alpha;
+            D_004371F8 = alpha;
         }
     } else {
         if (alpha > f) {
@@ -385,10 +386,11 @@ u32 func_00243430(s32 task) {
             if (alpha < f) {
                 alpha = f;
             }
-            *(f32 *)&D_004371F8 = alpha;
+            D_004371F8 = alpha;
         }
     }
-    if ((((SolarWorldState *)D_00435DD0)->flags & 2) != 0) {
+    /* Two jal sites in retail: the DDS1 twin issues extra draw calls in the first arm, removed here. The flags are re-read from the global; the cached state copy does not match. */
+    if ((D_00435DD0->flags & 2) != 0) {
         func_00245618(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     } else if (alpha > 0.0f) {
         func_00245618(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
@@ -432,9 +434,9 @@ void func_00243740(void) {
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);
-    ((SolarWorldState *)D_00435DD0)->padA42 = 0;
-    ((SolarWorldState *)D_00435DD0)->overlayFlag = 0;
-    ((SolarWorldState *)D_00435DD0)->unkA4C = 0;
+    D_00435DD0->padA42 = 0;
+    D_00435DD0->overlayFlag = 0;
+    D_00435DD0->unkA4C = 0;
 }
 
 void evtStopSolarOverlay(void) {
