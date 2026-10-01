@@ -5,7 +5,7 @@
 typedef struct TransitionHost {
     u8 pad00[0xC4];
     void (*callbacks[2])(s32, struct TransitionHost *); /* 0xC4 */
-    u32 unkCC; /* 0xCC */
+    u32 forceCallbackIndexOne; /* 0xCC */
 } TransitionHost;
 
 typedef struct MenuFadeHost {
@@ -90,14 +90,13 @@ void evtRememberDispatchCallback(u32 callback, SceneTransition *transition) {
     transition->previousCallback = previous;
 }
 
-/* Call each registered transition callback once; the flag at +0xCC picks the
-   index they receive. */
+/* Dispatch registered transition callbacks, optionally forcing index one. */
 void mnuDispatchTransitionHostCallbacks(TransitionHost *host) {
     u32 i;
 
     for (i = 0; i < 2; i++) {
         if (host->callbacks[i] != NULL) {
-            host->callbacks[i](host->unkCC ? 1 : (s32)i, host);
+            host->callbacks[i](host->forceCallbackIndexOne ? 1 : (s32)i, host);
         }
     }
 }

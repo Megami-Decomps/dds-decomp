@@ -9,7 +9,7 @@ typedef struct EvtUnit {
     u8 pad00[0x04];     /* 0x00 */
     s32 objectId;       /* 0x04: returned to event scripts */
     u8 pad08[0x60];     /* 0x08 */
-    s32 unk68;          /* 0x68 */
+    s32 endpointWorkAddress; /* 0x68 */
     u32 value;          /* 0x6C: matches evtUnitManager */
     s128 vector;         /* 0x70: target vector copied by the setup helpers */
     u8 pad80[0x0C];     /* 0x80 */
@@ -448,6 +448,7 @@ s32 func_00223718(s32 id, f32 *out) {
     return 1;
 }
 
+/* Select a matching slot and write its endpoint render work. */
 void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
@@ -489,8 +490,8 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->unk68, &desc, color);
-    unit->value = unit->unk68;
+    func_002E1938(unit->endpointWorkAddress, &desc, color);
+    unit->value = unit->endpointWorkAddress;
 }
 
 /* Find the vector of the slot bound to `id`, else of the first slot in state 2. */

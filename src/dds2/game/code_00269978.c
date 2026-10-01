@@ -5,7 +5,7 @@
 typedef struct TransitionHost {
     u8 pad00[0xCC];
     void (*callbacks[2])(s32, struct TransitionHost *); /* 0xCC */
-    u32 unkD4; /* 0xD4 */
+    u32 forceCallbackIndexOne; /* 0xD4 */
 } TransitionHost;
 
 extern s64 evtGetMessageWindowControlState(void);
@@ -137,15 +137,14 @@ void evtRememberDispatchCallback(u32 callback, s32 address) {
     state->previousCallback = previous;
 }
 
-/* Call each registered transition callback once; the flag at +0xD4 picks the
-   index they receive. */
+/* Dispatch registered transition callbacks, optionally forcing index one. */
 void mnuDispatchTransitionHostCallbacks(s32 state) {
     TransitionHost *host = (TransitionHost *)state;
     u32 i;
 
     for (i = 0; i < 2; i++) {
         if (host->callbacks[i] != NULL) {
-            host->callbacks[i](host->unkD4 ? 1 : (s32)i, host);
+            host->callbacks[i](host->forceCallbackIndexOne ? 1 : (s32)i, host);
         }
     }
 }
@@ -335,6 +334,11 @@ u32 evtSelectFinalVisualNode(void) {
     return 1;
 }
 
+/* Parked: body is dspUpdateFlagEvent (src/dds1/game/code_0024CFB0.c) with
+ * menuSetHandler(state, 0, request), fldClassifyRemainingFrames instead of
+ * dspStartFlagEvent, and D_003CE97C. Everything matches except the polarity
+ * register of two guards: retail uses bnel $2,$0 (blez), mine picks the
+ * opposite compare. Draft: /home/raikaru/sandbox_L61_Ports/a900_parked.txt */
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A900);
 
 INCLUDE_ASM(const s32, "game/code_00269978", func_0026A998);
