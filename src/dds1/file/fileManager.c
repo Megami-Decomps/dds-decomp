@@ -20,8 +20,12 @@ typedef struct FileWork {
 typedef struct FileRequest {
     u8 pad00;
     u8 state; /* 0x01: ready when 6 */
-    u8 pad02[0x66];
+    u8 pad02[0xA];
+    u32 handle; /* 0x0C */
+    s32 size; /* 0x10 */
+    u8 pad14[0x54];
     u16 unk68;
+    u16 slot; /* 0x6A */
 } FileRequest;
 
 extern s32 fileIsRequestReadyInCurrentMode(FileRequest *file);
@@ -118,11 +122,23 @@ void func_00288C50(u32 id) {
 }
 
 /* Work area behind the fileMan task (see game/code_00288E70). */
+typedef struct FileManSlot {
+    FileRequest *request; /* 0x24 + 8 * slot */
+    u32 unk4;
+} FileManSlot;
+
 typedef struct FileManWork {
-    u8 pad00[8];
+    s32 sema;    /* 0x00 */
+    u8 pad04;
+    u8 nextSlot; /* 0x05 */
+    u8 pad06;
+    u8 freeSlots; /* 0x07 */
     void *unk8;  /* 0x08 */
     u8 pad0C[0xC];
     u32 unk18;   /* 0x18 */
+    u32 buffer;  /* 0x1C */
+    u8 pad20[4];
+    FileManSlot slots[4]; /* 0x24 */
 } FileManWork;
 
 extern FileManWork D_003DC658;
@@ -145,4 +161,39 @@ s32 c;
     func_00288CB8(a, b, c, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "file/fileManager", func_00288D68);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
+
+/* Claim the next of four read slots for a pending request and start its device read. */
+void func_00288D68(FileRequest *request) {
+    FileManWork *work = &D_003DC658;
+    u8 slot;
+    s32 size;
+
+    WaitSema(work->sema);
+    if (work->freeSlots == 0) {
+        SignalSema(work->sema);
+        return;
+    }
+    if (request->state != 3) {
+        SignalSema(work->sema);
+        return;
+    }
+    request->state = 4;
+    slot = work->nextSlot;
+    if (slot == 3) {
+        work->nextSlot = 0;
+    } else {
+        work->nextSlot = slot + 1;
+    }
+    request->slot = slot;
+    work->freeSlots--;
+    work->slots[slot].request = request;
+    size = request->size;
+    if (size > 0x10000) {
+        size = 0x10000;
+    }
+    SignalSema(work->sema);
+    sdfDevQueueRead(request->handle, work->buffer + (slot << 16), size);
+}
