@@ -1893,7 +1893,55 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00217470);
+extern f32 func_00353040(f32);
+extern f32 func_00353140(f32);
+extern f32 func_00353228(f32);
+extern void func_00336538(f32);
+
+/* Frame one unit approaching its target: out->position sits between the muzzle positions, pulled back along the
+   line by 0.6 of the gap; angle (degrees) swings the pull-back, mirrored when the command faces left (0x200). */
+void func_00217470(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f32 backLift, f32 angle) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 dir[4];
+    f32 extent;
+    f32 length;
+
+    user = btlGetTargetUnitForLink(command);
+    target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
+    extent = user->reach * user->scale;
+    out->fov = command->camera.fov;
+    btlUnitGetMuzzlePosVU(user);
+    VU0_STORE_VF(vf10, userPos);
+    userPos[1] += user->height * user->scale * frontLift;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+    targetPos[1] += target->height * target->scale * backLift;
+    VU0_LOAD_VF(vf10, targetPos);
+    VU0_LOAD_VF(vf11, userPos);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    length *= 0.6f;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, dir);
+    VU0_SCALE_VF_MFC1(vf10, length);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, out->position);
+    angle *= 0.017453293f;
+    extent += length * func_00353140(angle);
+    length *= func_00353040(angle);
+    length += extent / func_00353228(out->fov * 1.3333333f * 0.5f);
+    out->distance = length;
+    if (command->flags & 0x200) {
+        angle = -angle;
+    }
+    func_00336538(angle);
+    VU0_LOAD_VF(vf10, dir);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF(vf10, out->direction);
+}
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00217650);
 
@@ -1902,7 +1950,7 @@ extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlCopyMotionTransform();
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 extern void func_001E88A8();
-extern f32 func_00353228(f32);
+
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
 void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
@@ -2656,7 +2704,6 @@ s32 btlTriggerLinkedActionMotionAlternate(BtlLinkedCommand *command) {
     return 0;
 }
 
-extern void func_00217470(s32, s32, f32, f32, f32);
 
 s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
@@ -2671,7 +2718,7 @@ s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command) {
             if (target->mode != 0x136) {
                 return 0;
             }
-            func_00217470((s32)command, (s32)command, 0.0f, 0.1499999911f, 35.0f);
+            func_00217470(command, &command->camera, 0.0f, 0.1499999911f, 35.0f);
             command->camera.distance += 150.0f;
             func_001E88A8(command);
             return 1;
