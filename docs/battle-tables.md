@@ -181,8 +181,24 @@ split at their actual boundaries, so hit type and hit level, for example, can
 be edited independently:
 
 ```text
-action 1 use=2 effect_type=1 cost_type=2 cost=3 target_area=2 hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=1 hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
+action 1 use=BATTLE effect_type=MAGIC cost_type=MP cost=3 target_area=ENEMIES hit_type=1 hit_level=99 hits_min=1 hits_max=1 hp_type=DAMAGE hp_power=30 effect_percent=100 ailment_level=100 magic_base=20 magic_limit=31000
 ```
+
+The action source uses the selector domains implemented by the paired battle
+code. Availability and masks compose with `|`, so a recovery action can say
+`use=FIELD|BATTLE`, an all-party target can use `target_type=ALL` with
+`target_area=ALLIES`, and a complete debuff can say
+`support_type=ATTACK_DOWN|MAGIC_DOWN|ACCURACY_DOWN|DEFENSE_DOWN|EVASION_DOWN`.
+The same vocabulary covers HP and MP calculation modes, ailment application,
+and the status masks they consume. For example, `ailment_type=INFLICT` with
+`base_status=FREEZE` and `hp_type=MAX_HP_PERCENT_HEAL` expose the behavior that
+the native dispatchers select.
+
+Across the paired canonical sources, 5,282 of 5,347 populated values in these
+domains now use semantic names. The 65 values whose special target, status, or
+effect behavior is not yet established remain numeric. Numeric values and
+numeric flag terms stay valid exact fallbacks, including mixed forms such as
+`base_status=SHOCK|0x8000`.
 
 High skill IDs carry three tagged requirements. The source writes the tags as
 `skill`, `attribute-mask`, `unit-mask`, or `group`; `any` is an unconditional

@@ -246,6 +246,104 @@ SKILL_PROFILES = {
 }
 
 
+def _integer_symbols(*values: tuple[int, str]) -> flw0_profiles.IntegerSymbols:
+    return flw0_profiles.IntegerSymbols(values, complete=False)
+
+
+SKILL_ACTION_ENUMS = {
+    "effect_type": _integer_symbols(
+        (0, "PHYSICAL"),
+        (1, "MAGIC"),
+        (2, "HUNT"),
+    ),
+    "cost_type": _integer_symbols(
+        (0, "NONE"),
+        (1, "HP"),
+        (2, "MP"),
+    ),
+    "target_type": _integer_symbols(
+        (0, "SINGLE"),
+        (1, "ALL"),
+    ),
+    "target_area": _integer_symbols(
+        (2, "ENEMIES"),
+        (9, "ALLIES"),
+    ),
+    "target_rule": _integer_symbols(
+        (0, "SELECTED"),
+        (1, "USER"),
+        (2, "DEFEATED_ALLY"),
+    ),
+    "hp_type": _integer_symbols(
+        (0, "NONE"),
+        (1, "DAMAGE"),
+        (2, "HEAL"),
+        (3, "REDUCE_TO_THRESHOLD_DAMAGE"),
+        (4, "FIXED_DAMAGE"),
+        (5, "FIXED_HEAL"),
+        (6, "MAX_HP_SCALED_DAMAGE"),
+        (8, "CURRENT_HP_PERCENT_DAMAGE"),
+        (11, "MAX_HP_PERCENT_HEAL"),
+        (12, "DRAIN_DAMAGE"),
+        (14, "BASIC_ATTACK_DAMAGE"),
+    ),
+    "mp_type": _integer_symbols(
+        (0, "NONE"),
+        (5, "FIXED_HEAL"),
+        (11, "MAX_MP_PERCENT_HEAL"),
+        (12, "DRAIN_DAMAGE"),
+    ),
+    "ailment_type": _integer_symbols(
+        (0, "NONE"),
+        (1, "INFLICT"),
+        (2, "CURE"),
+        (3, "INFLICT_ONE_RANDOM"),
+    ),
+}
+
+
+SKILL_ACTION_FLAGS = {
+    "use": _integer_symbols(
+        (1, "FIELD"),
+        (2, "BATTLE"),
+    ),
+    "target_random": _integer_symbols(
+        (1, "RANDOM_TARGETS"),
+    ),
+    "base_status": _integer_symbols(
+        (0x0002, "SHOCK"),
+        (0x0004, "FREEZE"),
+        (0x0008, "SLEEP"),
+        (0x0010, "MUTE"),
+        (0x0020, "PANIC"),
+        (0x0040, "ACHE"),
+        (0x0080, "POISON"),
+        (0x0100, "PARALYSIS"),
+        (0x0200, "CHARM"),
+        (0x0400, "CURSE"),
+        (0x0800, "PETRIFY"),
+        (0x2000, "HUNGER"),
+        (0x4000, "DEATH"),
+    ),
+    "support_type": _integer_symbols(
+        (0x0001, "ATTACK_UP"),
+        (0x0002, "ATTACK_DOWN"),
+        (0x0004, "MAGIC_UP"),
+        (0x0008, "MAGIC_DOWN"),
+        (0x0010, "ACCURACY_UP"),
+        (0x0020, "ACCURACY_DOWN"),
+        (0x0040, "DEFENSE_UP"),
+        (0x0080, "DEFENSE_DOWN"),
+        (0x0100, "EVASION_UP"),
+        (0x0200, "EVASION_DOWN"),
+        (0x0400, "POWER_CHARGE"),
+        (0x0800, "CANCEL_BUFFS"),
+        (0x1000, "CANCEL_DEBUFFS"),
+        (0x2000, "MIND_CHARGE"),
+    ),
+}
+
+
 @dataclass(frozen=True)
 class SkillActionAttribute:
     action_attribute: int = 0
@@ -2054,6 +2152,20 @@ def _symbolic_integer(
     return _integer(text, line_number, context)
 
 
+def _symbolic_flags(
+    text: str,
+    line_number: int,
+    context: str,
+    symbols: flw0_profiles.IntegerSymbols,
+) -> int:
+    value = 0
+    for part in text.split("|"):
+        if not part:
+            raise BattleTableError(f"line {line_number}: empty {context} flag")
+        value |= _symbolic_integer(part, line_number, context, symbols)
+    return value
+
+
 def _symbolic_list(
     text: str,
     line_number: int,
@@ -2118,6 +2230,20 @@ def _symbolic_index(
 
 def _value(fields: dict[str, str], key: str, base: int, line: int) -> int:
     return _integer(fields[key], line, key) if key in fields else base
+
+
+def _skill_action_value(
+    fields: dict[str, str], key: str, line_number: int
+) -> int:
+    if key not in fields:
+        return 0
+    if key in SKILL_ACTION_FLAGS:
+        return _symbolic_flags(
+            fields[key], line_number, key, SKILL_ACTION_FLAGS[key]
+        )
+    return _symbolic_integer(
+        fields[key], line_number, key, SKILL_ACTION_ENUMS.get(key)
+    )
 
 
 def _bytes_field(
@@ -2665,7 +2791,7 @@ def parse_skill_source(text: str) -> SkillTable:
             fields = _fields(tokens[2:], line_number, action_fields, directive)
             row = SkillAction(
                 **{
-                    name: _value(fields, name, 0, line_number)
+                    name: _skill_action_value(fields, name, line_number)
                     for name in SkillAction.__dataclass_fields__
                 }
             )
@@ -3308,6 +3434,20 @@ def _symbolic_text_list(
     )
 
 
+def _symbolic_flags_text(
+    value: int, symbols: flw0_profiles.IntegerSymbols
+) -> str:
+    parts: list[str] = []
+    remaining = value
+    for flag, name in symbols.values:
+        if flag and remaining & flag == flag:
+            parts.append(name)
+            remaining &= ~flag
+    if remaining:
+        parts.append(f"{remaining:#x}")
+    return "|".join(parts) if parts else "0"
+
+
 def _trimmed(values: tuple[int, ...]) -> tuple[int, ...]:
     end = len(values)
     while end and values[end - 1] == 0:
@@ -3638,18 +3778,18 @@ def render_skill_source(table: SkillTable) -> str:
     lines.append("")
 
     action_renderers = (
-        ("flags", "hex"), ("use", "int"), ("effect_type", "int"),
-        ("cost_type", "int"), ("cost", "int"), ("cost_base", "int"),
-        ("target_type", "int"), ("target_area", "int"),
-        ("target_rule", "int"), ("target_random", "int"),
+        ("flags", "hex"), ("use", "symbol"), ("effect_type", "symbol"),
+        ("cost_type", "symbol"), ("cost", "int"), ("cost_base", "int"),
+        ("target_type", "symbol"), ("target_area", "symbol"),
+        ("target_rule", "symbol"), ("target_random", "symbol"),
         ("untargetable_status", "hex"), ("target_program", "int"),
         ("hit_type", "int"), ("hit_level", "int"),
         ("hit_program", "int"), ("hits_min", "int"),
-        ("hits_max", "int"), ("hp_type", "int"), ("hp_power", "int"),
-        ("mp_type", "int"), ("mp_power", "int"), ("hp_base", "int"),
+        ("hits_max", "int"), ("hp_type", "symbol"), ("hp_power", "int"),
+        ("mp_type", "symbol"), ("mp_power", "int"), ("hp_base", "int"),
         ("mp_base", "int"), ("effect_percent", "int"),
-        ("ailment_type", "int"), ("ailment_level", "int"),
-        ("base_status", "hex"), ("support_type", "hex"),
+        ("ailment_type", "symbol"), ("ailment_level", "int"),
+        ("base_status", "symbol"), ("support_type", "symbol"),
         ("support_points", "int"), ("death_type", "int"),
         ("lookup_id", "int"), ("program", "int"),
         ("magic_base", "int"), ("magic_limit", "int"),
@@ -3662,6 +3802,17 @@ def render_skill_source(table: SkillTable) -> str:
             value = getattr(row, attribute)
             if style == "hex":
                 _append_hex(fields, attribute, value)
+            elif style == "symbol":
+                if value:
+                    if attribute in SKILL_ACTION_FLAGS:
+                        text = _symbolic_flags_text(
+                            value, SKILL_ACTION_FLAGS[attribute]
+                        )
+                    else:
+                        text = _symbolic_text(
+                            value, SKILL_ACTION_ENUMS.get(attribute)
+                        )
+                    fields.append(f"{attribute}={text}")
             else:
                 _append(fields, attribute, value)
         lines.append(f"action {index} {' '.join(fields)}")
