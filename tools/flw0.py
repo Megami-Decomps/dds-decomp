@@ -1484,6 +1484,16 @@ def main() -> int:
         metavar="NAME",
         help="name native commands using a game-specific command profile",
     )
+    disassemble_parser.add_argument(
+        "--semantic",
+        action="store_true",
+        help="lift exact linear stack idioms into editable semantic statements",
+    )
+    disassemble_parser.add_argument(
+        "--structured",
+        action="store_true",
+        help="also recover canonical branches and loops as editable blocks",
+    )
 
     assemble_parser = commands.add_parser(
         "assemble", help="assemble physical or symbolic FLW0 source"
@@ -1528,8 +1538,15 @@ def main() -> int:
             if args.symbolic:
                 import flw0_symbolic
 
-                source = flw0_symbolic.render(script, args.profile)
+                source = flw0_symbolic.render(
+                    script,
+                    args.profile,
+                    semantic=args.semantic or args.structured,
+                    structured=args.structured,
+                )
             else:
+                if args.semantic or args.structured:
+                    parser.error("--semantic and --structured require --symbolic")
                 source = render_source(script, args.profile)
             if args.output is None:
                 print(source, end="")

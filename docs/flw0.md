@@ -23,6 +23,19 @@ profile works with both physical and symbolic source:
 python3 tools/flw0.py disassemble --symbolic --profile dds1 event.bf event.bfasm
 ```
 
+Add `--semantic` to produce editable expressions and statements wherever the
+instruction sequence has one exact lowering:
+
+```sh
+python3 tools/flw0.py disassemble --symbolic --semantic --profile dds1 event.bf event.bfasm
+```
+
+Use `--structured` to additionally recover exact canonical branches and loops:
+
+```sh
+python3 tools/flw0.py disassemble --symbolic --structured --profile dds1 event.bf event.bfasm
+```
+
 Assemble it again:
 
 ```sh
@@ -82,6 +95,80 @@ canonical 32-byte name rows. It rejects irregular layouts rather than hiding
 bytes; use version 1 for those files. It also accepts a short type-4 descriptor
 when `PUSHTYPE5` references account for the complete physical string pool, as
 described below.
+
+### Hybrid semantic code
+
+The version-2 code block may mix VM instructions with semantic statements.
+This is an exact source format rather than a reading view: every expression,
+assignment, call, and structured block expands to a fixed instruction
+sequence. For example:
+
+```text
+code
+main:
+  PROC main
+  CLEAR_PROCESS_CONTROL_FLAG()
+  local_int[0] = MESSAGE_SELECTION_REQUEST_AND_POLL(selection(CHOICE))
+  result = CREATE_SCRIPT_TASK(procedure(worker), -1)
+  WAIT_FOR_TASK_REMOVAL(result)
+  return
+end
+```
+
+Native call arguments use handler order. Argument zero is the VM stack top, so
+the compiler emits the arguments in reverse source order. Binary expressions
+follow the same rule. A 16-bit integer is written directly; `int32(value)`
+preserves a `PUSHI`, and `float32(value, bits=0xNNNNNNNN)` preserves the exact
+bits of a `PUSHF`. The typed constructors `message`, `selection`, `event`,
+`procedure`, and `string` lower to their existing symbolic pseudo-instructions.
+
+Assignments may target `global_int`, `global_float`, `local_int`, or
+`local_float`. A result-producing native call can be assigned directly, or it
+can be named as `result` and read later:
+
+```text
+  local_int[3] = READ_CURRENT_WORLD_OBJECT_ID()
+  result = CREATE_POLYGON_MOVIE(670, 1)
+  WAIT_FOR_TASK_REMOVAL(result)
+```
+
+Canonical branches and loops use ordinary blocks while retaining the labels
+already required by the exact jump table:
+
+```text
+again:
+  while (local_int[0] < 10) {
+    local_int[0] = local_int[0] + 1
+  }
+done:
+
+  if (local_int[0] != 0) {
+    SET_MODEL_FLAG(7)
+  } else {
+otherwise:
+    CLEAR_MODEL_FLAG(7)
+  }
+after_if:
+```
+
+A `while` needs its back-edge label immediately before the block and its exit
+label immediately after it. An `if` needs its end label immediately after the
+block; an `else` begins with the false-arm label. These labels preserve the
+original table identities and make the lowering explicit without exposing the
+branch opcodes in the body.
+
+Assembly remains valid anywhere in the same code block. The semantic
+disassembler lifts only linear instruction runs with a complete, verified
+stack contract. It flushes pending values before labels and leaves unknown
+commands, malformed words, and ambiguous stack state as instructions. This is
+the escape hatch that keeps partial decompilation exact.
+
+The structured disassembler additionally replaces canonical branch and
+back-edge sequences with the blocks above. It retains the linear semantic form
+when a region has an external entry, crossing control flow, an unknown
+condition, or a jump-table alias whose exact operand cannot be expressed by
+the block boundary. Structured output is therefore subject to the same exact
+assemble check as linear semantic output.
 
 ### Embedded messages
 

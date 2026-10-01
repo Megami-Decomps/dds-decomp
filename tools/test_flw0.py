@@ -19,6 +19,7 @@ if str(TOOLS) not in sys.path:
 
 import flw0
 import flw0_profiles
+import flw0_semantic
 import flw0_symbolic
 import flw0_view
 import msg1
@@ -444,6 +445,193 @@ class Flw0Tests(unittest.TestCase):
         self.assertNotIn("declared_size", source)
         self.assertNotIn("physical_size", source)
         self.assertEqual(flw0.parse_source(source).to_bytes(), original)
+
+    def test_semantic_source_lowers_exact_calls_assignments_and_expressions(self) -> None:
+        path = TOOLS.parent / "src/dds1/scripts/event/e670.bfasm"
+        script = flw0.parse_source(path.read_text(encoding="utf-8"))
+        source = flw0_symbolic.render(script, "dds1", semantic=True)
+        self.assertIn("result = CREATE_POLYGON_MOVIE(670, 1)", source)
+        self.assertIn("WAIT_FOR_TASK_REMOVAL(result)", source)
+        self.assertNotIn("  PUSHIS 670", source)
+        self.assertEqual(flw0.parse_source(source).to_bytes(), script.to_bytes())
+
+        expression = flw0_semantic.parse_expression(
+            "3 + local_int[2] * int32(70000)", 1, flw0_profiles.DDS1
+        )
+        self.assertEqual(
+            expression.lower(),
+            [
+                "PUSHI 70000",
+                "PUSHLIX 2",
+                "MUL",
+                "PUSHIS 3",
+                "ADD",
+            ],
+        )
+        self.assertEqual(
+            flw0_semantic.parse_expression("-1", 1, None).lower(),
+            ["PUSHIS -1"],
+        )
+        self.assertEqual(
+            flw0_semantic.parse_expression("-(1)", 1, None).lower(),
+            ["PUSHIS 1", "MINUS"],
+        )
+        nested_call = flw0_semantic.parse_expression(
+            "WAIT_FOR_TASK_REMOVAL(CREATE_SCRIPT_TASK(procedure(main), -1))",
+            1,
+            flw0_profiles.DDS1,
+        )
+        self.assertEqual(
+            nested_call.lower_call(),
+            [
+                "PUSHIS -1",
+                "PUSHPROC main",
+                "COMM CREATE_SCRIPT_TASK",
+                "PUSHREG",
+                "COMM WAIT_FOR_TASK_REMOVAL",
+            ],
+        )
+        self.assertEqual(
+            flw0_semantic.lower_code(
+                [(1, "WAIT_FOR_TIMER_LIMIT(local_int[0] == 1)")],
+                flw0_profiles.DDS1,
+            ),
+            [
+                (1, "PUSHIS 1"),
+                (1, "PUSHLIX 0"),
+                (1, "EQ"),
+                (1, "COMM WAIT_FOR_TIMER_LIMIT"),
+            ],
+        )
+
+    def test_semantic_source_compiles_canonical_if_else_and_while(self) -> None:
+        self.assertEqual(
+            flw0_semantic.lower_code(
+                [
+                    (1, "if (1) {"),
+                    (2, "WAIT_FOR_TIMER_LIMIT(1)"),
+                    (3, "}"),
+                    (4, "done:"),
+                ],
+                flw0_profiles.DDS1,
+            ),
+            [
+                (1, "PUSHIS 1"),
+                (1, "IF done"),
+                (2, "PUSHIS 1"),
+                (2, "COMM WAIT_FOR_TIMER_LIMIT"),
+                (1, "GOTO done"),
+                (4, "done:"),
+            ],
+        )
+        source = """\
+flw0 2
+profile dds1
+header word00=0 word0c=0 word18=0 word1c=0
+locals int=2 float=0
+procedure main
+jump_label otherwise
+jump_label after_if
+jump_label again
+jump_label done
+code
+main:
+  PROC main
+  if (local_int[0] != 0) {
+    WAIT_FOR_TIMER_LIMIT(1)
+  } else {
+otherwise:
+    WAIT_FOR_TIMER_LIMIT(2)
+  }
+after_if:
+again:
+  while (3 < local_int[1]) {
+    WAIT_FOR_TIMER_LIMIT(local_int[1])
+  }
+done:
+  return
+end
+messages
+end
+strings
+end
+"""
+        script = flw0.parse_source(source)
+        self.assertEqual(
+            [word.raw for word in script.code_words()],
+            [
+                flw0.OPCODE_IDS["PROC"],
+                flw0.OPCODE_IDS["PUSHIS"],
+                flw0.OPCODE_IDS["PUSHLIX"],
+                flw0.OPCODE_IDS["NEQ"],
+                flw0.OPCODE_IDS["IF"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+                (1 << 16) | flw0.OPCODE_IDS["GOTO"],
+                (2 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHLIX"],
+                (3 << 16) | flw0.OPCODE_IDS["PUSHIS"],
+                flw0.OPCODE_IDS["LT"],
+                (3 << 16) | flw0.OPCODE_IDS["IF"],
+                (1 << 16) | flw0.OPCODE_IDS["PUSHLIX"],
+                (0x00E << 16) | flw0.OPCODE_IDS["COMM"],
+                (2 << 16) | flw0.OPCODE_IDS["GOTO"],
+                flw0.OPCODE_IDS["END"],
+            ],
+        )
+        self.assertEqual(
+            [(row.name, row.start_pc) for row in script.named_rows(1)],
+            [
+                ("otherwise", 8),
+                ("after_if", 10),
+                ("again", 10),
+                ("done", 17),
+            ],
+        )
+
+    def test_semantic_renderer_round_trips_both_symbolic_corpora(self) -> None:
+        root = TOOLS.parent
+        expected_files = {"dds1": 129, "dds2": 126}
+        for game, expected in expected_files.items():
+            files = 0
+            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+                text = path.read_text(encoding="utf-8")
+                if not text.startswith("flw0 2\n"):
+                    continue
+                script = flw0.parse_source(text)
+                semantic = flw0_symbolic.render(script, game, semantic=True)
+                with self.subTest(source=path.relative_to(root)):
+                    self.assertEqual(
+                        flw0.parse_source(semantic).to_bytes(), script.to_bytes()
+                    )
+                files += 1
+            self.assertEqual(files, expected)
+
+    def test_structured_source_renderer_round_trips_both_symbolic_corpora(self) -> None:
+        root = TOOLS.parent
+        expected = {
+            "dds1": (129, 2218, 736),
+            "dds2": (126, 1509, 1190),
+        }
+        for game, expected_counts in expected.items():
+            files = ifs = loops = 0
+            for path in sorted((root / f"src/{game}/scripts").rglob("*.bfasm")):
+                text = path.read_text(encoding="utf-8")
+                if not text.startswith("flw0 2\n"):
+                    continue
+                script = flw0.parse_source(text)
+                structured = flw0_symbolic.render(script, game, structured=True)
+                with self.subTest(source=path.relative_to(root)):
+                    self.assertEqual(
+                        flw0.parse_source(structured).to_bytes(), script.to_bytes()
+                    )
+                for line in structured.splitlines():
+                    statement = line.lstrip()
+                    ifs += statement.startswith("if (")
+                    loops += statement.startswith("while (")
+                files += 1
+            self.assertEqual((files, ifs, loops), expected_counts)
 
     def test_msg1_source_round_trip_relayouts_dialogs_and_relocations(self) -> None:
         bank = msg1.Bank(
