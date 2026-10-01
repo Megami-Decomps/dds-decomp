@@ -646,30 +646,30 @@ calculation-word 0xa68 value=1.5
 enemy-ai 1
   decision 0 predicates=1:25,48:12,9:8 routes=4,1,4,4,2,3,4,8
   decision 1 predicates=62:55,62:56,62:47 routes=6,5,6,6,5,5,6,8
-  choice 0 0 weight=20 action=skill:47
-  choice 0 1 weight=10 action=skill:190
-  choice 0 2 weight=20 action=skill:76
-  choice 0 3 weight=20 action=skill:55
+  choice 0 0 weight=20 action=skill:MEGIDOLA_02F
+  choice 0 1 weight=10 action=skill:DEBILITATE_0BE
+  choice 0 2 weight=20 action=skill:DORMINA
+  choice 0 3 weight=20 action=skill:RAGE
   choice 0 4 weight=30 action=special:0
-  choice 1 0 weight=10 action=skill:47
-  choice 1 1 weight=1 action=skill:48
-  choice 1 2 weight=79 action=skill:76
-  choice 1 3 weight=10 action=skill:165
-  choice 2 0 weight=15 action=skill:47
-  choice 2 1 weight=1 action=skill:48
-  choice 2 2 weight=40 action=skill:190
-  choice 2 3 weight=40 action=skill:76
-  choice 2 4 weight=4 action=skill:165
-  choice 3 0 weight=5 action=skill:47
-  choice 3 1 weight=50 action=skill:76
-  choice 3 2 weight=30 action=skill:61
+  choice 1 0 weight=10 action=skill:MEGIDOLA_02F
+  choice 1 1 weight=1 action=skill:MEGIDOLAON_030
+  choice 1 2 weight=79 action=skill:DORMINA
+  choice 1 3 weight=10 action=skill:MEDIARAHAN_0A5
+  choice 2 0 weight=15 action=skill:MEGIDOLA_02F
+  choice 2 1 weight=1 action=skill:MEGIDOLAON_030
+  choice 2 2 weight=40 action=skill:DEBILITATE_0BE
+  choice 2 3 weight=40 action=skill:DORMINA
+  choice 2 4 weight=4 action=skill:MEDIARAHAN_0A5
+  choice 3 0 weight=5 action=skill:MEGIDOLA_02F
+  choice 3 1 weight=50 action=skill:DORMINA
+  choice 3 2 weight=30 action=skill:HAMAON
   choice 3 3 weight=15 action=special:0
-  choice 4 0 weight=75 action=skill:77
+  choice 4 0 weight=75 action=skill:CALM_DEATH
   choice 4 1 weight=25 action=special:0
-  choice 5 0 weight=5 action=skill:47
-  choice 5 1 weight=65 action=skill:76
+  choice 5 0 weight=5 action=skill:MEGIDOLA_02F
+  choice 5 1 weight=65 action=skill:DORMINA
   choice 5 2 weight=30 action=special:0
-  choice 6 0 weight=70 action=skill:76
+  choice 6 0 weight=70 action=skill:DORMINA
   choice 6 1 weight=30 action=special:0
 end
 
@@ -678,135 +678,135 @@ enemy-ai 2 script=ai_ishisu_zako
   decision 1 predicates=none,none,none routes=8,8,8,1,3,2,8,8
   decision 2 predicates=none,none,none routes=8,8,8,8,5,8,8,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=50 action=skill:86
-  choice 1 1 weight=30 action=skill:24
-  choice 1 2 weight=15 action=skill:87
+  choice 1 0 weight=50 action=skill:MARIN_KARIN
+  choice 1 1 weight=30 action=skill:MAZIODYNE_018
+  choice 1 2 weight=15 action=skill:ALLURE
   choice 1 3 weight=5 action=special:0
-  choice 2 0 weight=50 action=skill:184
+  choice 2 0 weight=50 action=skill:MAKAKAJA
   choice 2 1 weight=50 action=special:0
-  choice 3 0 weight=100 action=skill:24
-  choice 4 0 weight=100 action=skill:87
+  choice 3 0 weight=100 action=skill:MAZIODYNE_018
+  choice 4 0 weight=100 action=skill:ALLURE
   choice 5 0 weight=100 action=preset:1:4
-  choice 6 0 weight=100 action=skill:77
+  choice 6 0 weight=100 action=skill:CALM_DEATH
 end
 
 enemy-ai 3
   decision 0 predicates=42:500,10:536,none routes=8,8,6,8,6,8,8,8
   decision 1 predicates=1:50,36:0x1ffffe,9:536 routes=4,4,3,5,3,1,2,8
-  choice 0 0 weight=20 action=skill:33
-  choice 0 1 weight=20 action=skill:63
-  choice 0 2 weight=20 action=skill:349
-  choice 0 3 weight=20 action=skill:75
-  choice 0 4 weight=20 action=skill:73 effect=14:16
-  choice 1 0 weight=25 action=skill:33
-  choice 1 1 weight=25 action=skill:63
-  choice 1 2 action=skill:349
-  choice 1 3 weight=25 action=skill:75
-  choice 1 4 weight=25 action=skill:73 effect=14:16
-  choice 2 0 weight=33 action=skill:33
-  choice 2 1 weight=33 action=skill:63
-  choice 2 2 weight=34 action=skill:349
-  choice 2 3 action=skill:75
-  choice 2 4 action=skill:73 effect=14:16
-  choice 3 0 weight=25 action=skill:47
-  choice 3 1 weight=45 action=skill:87
-  choice 3 2 weight=15 action=skill:349
-  choice 3 3 weight=15 action=skill:164
-  choice 4 0 weight=30 action=skill:47
-  choice 4 1 weight=45 action=skill:87
-  choice 4 2 action=skill:349
-  choice 4 3 weight=25 action=skill:164
-  choice 5 0 weight=50 action=skill:33
-  choice 5 1 weight=50 action=skill:63
-  choice 5 2 action=skill:349
-  choice 5 3 action=skill:75
-  choice 5 4 action=skill:73 effect=14:16
-  choice 6 0 weight=30 action=skill:500
+  choice 0 0 weight=20 action=skill:MAZANDYNE_021
+  choice 0 1 weight=20 action=skill:MAHAMAON_03F
+  choice 0 2 weight=20 action=skill:PHYS_DRAIN_15D
+  choice 0 3 weight=20 action=skill:DREAM_HAZE
+  choice 0 4 weight=20 action=skill:MAKAJAM effect=14:16
+  choice 1 0 weight=25 action=skill:MAZANDYNE_021
+  choice 1 1 weight=25 action=skill:MAHAMAON_03F
+  choice 1 2 action=skill:PHYS_DRAIN_15D
+  choice 1 3 weight=25 action=skill:DREAM_HAZE
+  choice 1 4 weight=25 action=skill:MAKAJAM effect=14:16
+  choice 2 0 weight=33 action=skill:MAZANDYNE_021
+  choice 2 1 weight=33 action=skill:MAHAMAON_03F
+  choice 2 2 weight=34 action=skill:PHYS_DRAIN_15D
+  choice 2 3 action=skill:DREAM_HAZE
+  choice 2 4 action=skill:MAKAJAM effect=14:16
+  choice 3 0 weight=25 action=skill:MEGIDOLA_02F
+  choice 3 1 weight=45 action=skill:ALLURE
+  choice 3 2 weight=15 action=skill:PHYS_DRAIN_15D
+  choice 3 3 weight=15 action=skill:MEDIARAMA_0A4
+  choice 4 0 weight=30 action=skill:MEGIDOLA_02F
+  choice 4 1 weight=45 action=skill:ALLURE
+  choice 4 2 action=skill:PHYS_DRAIN_15D
+  choice 4 3 weight=25 action=skill:MEDIARAMA_0A4
+  choice 5 0 weight=50 action=skill:MAZANDYNE_021
+  choice 5 1 weight=50 action=skill:MAHAMAON_03F
+  choice 5 2 action=skill:PHYS_DRAIN_15D
+  choice 5 3 action=skill:DREAM_HAZE
+  choice 5 4 action=skill:MAKAJAM effect=14:16
+  choice 6 0 weight=30 action=skill:MAKAJAMON_1F4
   choice 6 1 weight=65 action=special:0
-  choice 6 2 weight=5 action=skill:0
+  choice 6 2 weight=5 action=skill:SKILL_000
 end
 
 enemy-ai 4
   decision 0 predicates=1:50,36:0x1ffffe,none routes=8,2,8,8,1,8,8,8
-  choice 0 0 weight=25 action=skill:3
-  choice 0 1 weight=25 action=skill:6
-  choice 0 2 weight=25 action=skill:63
-  choice 0 3 weight=25 action=skill:75
-  choice 1 0 weight=15 action=skill:6
-  choice 1 1 weight=15 action=skill:63
-  choice 1 2 weight=50 action=skill:336
-  choice 1 3 weight=20 action=skill:164
-  choice 2 0 weight=30 action=skill:6
-  choice 2 1 weight=30 action=skill:63
-  choice 2 2 weight=40 action=skill:164
+  choice 0 0 weight=25 action=skill:AGIDYNE
+  choice 0 1 weight=25 action=skill:MARAGIDYNE_006
+  choice 0 2 weight=25 action=skill:MAHAMAON_03F
+  choice 0 3 weight=25 action=skill:DREAM_HAZE
+  choice 1 0 weight=15 action=skill:MARAGIDYNE_006
+  choice 1 1 weight=15 action=skill:MAHAMAON_03F
+  choice 1 2 weight=50 action=skill:VOID_PHYS
+  choice 1 3 weight=20 action=skill:MEDIARAMA_0A4
+  choice 2 0 weight=30 action=skill:MARAGIDYNE_006
+  choice 2 1 weight=30 action=skill:MAHAMAON_03F
+  choice 2 2 weight=40 action=skill:MEDIARAMA_0A4
 end
 
 enemy-ai 5
   decision 0 predicates=1:99,50:11,none routes=8,8,8,8,2,1,8,8
-  choice 0 0 weight=25 action=skill:5
-  choice 0 1 weight=50 action=skill:184
-  choice 0 2 weight=25 action=skill:21
-  choice 1 0 weight=48 action=skill:5
-  choice 1 1 weight=47 action=skill:21
+  choice 0 0 weight=25 action=skill:MARAGION_005
+  choice 0 1 weight=50 action=skill:MAKAKAJA
+  choice 0 2 weight=25 action=skill:ZIODYNE
+  choice 1 0 weight=48 action=skill:MARAGION_005
+  choice 1 1 weight=47 action=skill:ZIODYNE
   choice 1 2 weight=5 action=special:0
-  choice 2 0 weight=23 action=skill:5
-  choice 2 1 weight=22 action=skill:21
-  choice 2 2 weight=50 action=skill:164
+  choice 2 0 weight=23 action=skill:MARAGION_005
+  choice 2 1 weight=22 action=skill:ZIODYNE
+  choice 2 2 weight=50 action=skill:MEDIARAMA_0A4
   choice 2 3 weight=5 action=special:0
 end
 
 enemy-ai 6
   decision 0 predicates=1:99,10:32,none routes=8,2,8,8,3,1,8,8
-  choice 0 0 weight=35 action=skill:84
-  choice 0 1 weight=35 action=skill:85
+  choice 0 0 weight=35 action=skill:TENTARAFOO
+  choice 0 1 weight=35 action=skill:SONIC_WAVE
   choice 0 2 weight=15 action=special:0
-  choice 0 3 weight=15 action=skill:22
-  choice 1 0 weight=70 action=skill:164
-  choice 1 1 weight=10 action=skill:50
+  choice 0 3 weight=15 action=skill:MAZIO_016
+  choice 1 0 weight=70 action=skill:MEDIARAMA_0A4
+  choice 1 1 weight=10 action=skill:MP_THIEF_032
   choice 1 2 weight=20 action=special:0
-  choice 2 0 weight=33 action=skill:84
-  choice 2 1 weight=33 action=skill:50
+  choice 2 0 weight=33 action=skill:TENTARAFOO
+  choice 2 1 weight=33 action=skill:MP_THIEF_032
   choice 2 2 weight=34 action=special:0
-  choice 3 0 weight=20 action=skill:84
-  choice 3 1 weight=25 action=skill:85
+  choice 3 0 weight=20 action=skill:TENTARAFOO
+  choice 3 1 weight=25 action=skill:SONIC_WAVE
   choice 3 2 weight=20 action=special:0
-  choice 3 3 weight=25 action=skill:164
-  choice 3 4 weight=10 action=skill:22
+  choice 3 3 weight=25 action=skill:MEDIARAMA_0A4
+  choice 3 4 weight=10 action=skill:MAZIO_016
 end
 
 enemy-ai 7
   decision 0 predicates=1:15,2:15,36:0x1ffffe routes=8,1,2,8,1,1,2,8
-  choice 0 0 action=skill:161 effect=1:0
-  choice 0 1 weight=30 action=skill:87
-  choice 0 2 weight=30 action=skill:34
-  choice 0 3 weight=20 action=skill:340
+  choice 0 0 action=skill:DIARAMA effect=1:0
+  choice 0 1 weight=30 action=skill:ALLURE
+  choice 0 2 weight=30 action=skill:SHOCK_WAVE
+  choice 0 3 weight=20 action=skill:VOID_FORCE
   choice 0 4 weight=20 action=special:0
-  choice 1 0 weight=45 action=skill:161 effect=1:0
-  choice 1 1 weight=5 action=skill:87
-  choice 1 2 weight=20 action=skill:34
-  choice 1 3 action=skill:340
+  choice 1 0 weight=45 action=skill:DIARAMA effect=1:0
+  choice 1 1 weight=5 action=skill:ALLURE
+  choice 1 2 weight=20 action=skill:SHOCK_WAVE
+  choice 1 3 action=skill:VOID_FORCE
   choice 1 4 weight=30 action=special:0
-  choice 2 0 action=skill:161 effect=1:0
-  choice 2 1 action=skill:87
-  choice 2 2 weight=50 action=skill:34
-  choice 2 3 action=skill:340
+  choice 2 0 action=skill:DIARAMA effect=1:0
+  choice 2 1 action=skill:ALLURE
+  choice 2 2 weight=50 action=skill:SHOCK_WAVE
+  choice 2 3 action=skill:VOID_FORCE
   choice 2 4 weight=50 action=special:0
 end
 
 enemy-ai 8
   decision 0 predicates=1:99,43:13,none routes=8,1,8,8,1,2,8,8
-  choice 0 0 weight=25 action=skill:3
-  choice 0 1 weight=25 action=skill:6
-  choice 0 2 weight=25 action=skill:79
-  choice 0 3 weight=25 action=skill:193
-  choice 1 0 weight=20 action=skill:6
-  choice 1 1 weight=20 action=skill:70
-  choice 1 2 weight=20 action=skill:79
-  choice 1 3 weight=20 action=skill:71 effect=14:2048
+  choice 0 0 weight=25 action=skill:AGIDYNE
+  choice 0 1 weight=25 action=skill:MARAGIDYNE_006
+  choice 0 2 weight=25 action=skill:STUN_WAVE
+  choice 0 3 weight=25 action=skill:MIND_CHARGE
+  choice 1 0 weight=20 action=skill:MARAGIDYNE_006
+  choice 1 1 weight=20 action=skill:BLOOD_CURSE
+  choice 1 2 weight=20 action=skill:STUN_WAVE
+  choice 1 3 weight=20 action=skill:STONE_GAZE effect=14:2048
   choice 1 4 weight=20 action=special:0
-  choice 2 0 weight=33 action=skill:3
-  choice 2 1 weight=33 action=skill:6
-  choice 2 2 weight=34 action=skill:79
+  choice 2 0 weight=33 action=skill:AGIDYNE
+  choice 2 1 weight=33 action=skill:MARAGIDYNE_006
+  choice 2 2 weight=34 action=skill:STUN_WAVE
 end
 
 enemy-ai 9 script=ganesha_zako
@@ -815,81 +815,81 @@ end
 
 enemy-ai 10
   decision 0 predicates=1:99,50:11,18:0 routes=2,2,2,3,2,1,4,8
-  choice 0 0 weight=25 action=skill:181
-  choice 0 1 weight=75 action=skill:192
-  choice 1 0 weight=50 action=skill:192
+  choice 0 0 weight=25 action=skill:TARUKAJA
+  choice 0 1 weight=75 action=skill:POWER_CHARGE
+  choice 1 0 weight=50 action=skill:POWER_CHARGE
   choice 1 1 weight=50 action=special:0
-  choice 2 0 weight=20 action=skill:128
-  choice 2 1 weight=5 action=skill:136
+  choice 2 0 weight=20 action=skill:DEATH_BLOW
+  choice 2 1 weight=5 action=skill:GENOCIDE_088
   choice 2 2 weight=75 action=special:0
   choice 3 0 weight=100 action=special:0
-  choice 4 0 weight=50 action=skill:181
+  choice 4 0 weight=50 action=skill:TARUKAJA
   choice 4 1 weight=50 action=special:0
 end
 
 enemy-ai 11
   decision 0 predicates=9:2048,35:0,1:99 routes=2,3,1,2,1,3,8,8
-  choice 0 0 weight=33 action=skill:137
-  choice 0 1 weight=33 action=skill:121
+  choice 0 0 weight=33 action=skill:GATE_OF_HELL
+  choice 0 1 weight=33 action=skill:HELL_THRUST
   choice 0 2 weight=34 action=special:0
   choice 1 0 weight=100 action=special:0 effect=2:2048
-  choice 2 0 weight=30 action=skill:52
-  choice 2 1 weight=50 action=skill:162
-  choice 2 2 weight=20 action=skill:190
-  choice 3 0 weight=70 action=skill:52
-  choice 3 1 weight=30 action=skill:190
+  choice 2 0 weight=30 action=skill:LAST_WORD
+  choice 2 1 weight=50 action=skill:DIARAHAN
+  choice 2 2 weight=20 action=skill:DEBILITATE_0BE
+  choice 3 0 weight=70 action=skill:LAST_WORD
+  choice 3 1 weight=30 action=skill:DEBILITATE_0BE
 end
 
 enemy-ai 12
   decision 0 predicates=13:7,31:8,36:0x1ffffe routes=1,1,2,2,1,3,2,8
-  choice 0 0 weight=10 action=skill:361
-  choice 0 1 action=skill:129
-  choice 0 2 weight=20 action=skill:125
+  choice 0 0 weight=10 action=skill:EXPEL_REPEL
+  choice 0 1 action=skill:CHI_BLAST
+  choice 0 2 weight=20 action=skill:SAKURA_RAGE
   choice 0 3 weight=35 action=special:0
-  choice 0 4 weight=35 action=skill:189
-  choice 1 0 action=skill:361
-  choice 1 1 action=skill:129
-  choice 1 2 weight=35 action=skill:125
+  choice 0 4 weight=35 action=skill:TAUNT
+  choice 1 0 action=skill:EXPEL_REPEL
+  choice 1 1 action=skill:CHI_BLAST
+  choice 1 2 weight=35 action=skill:SAKURA_RAGE
   choice 1 3 weight=60 action=special:0
-  choice 1 4 weight=5 action=skill:189
-  choice 2 0 action=skill:361
-  choice 2 1 action=skill:129
-  choice 2 2 weight=25 action=skill:125
+  choice 1 4 weight=5 action=skill:TAUNT
+  choice 2 0 action=skill:EXPEL_REPEL
+  choice 2 1 action=skill:CHI_BLAST
+  choice 2 2 weight=25 action=skill:SAKURA_RAGE
   choice 2 3 weight=45 action=special:0
-  choice 2 4 weight=30 action=skill:189
-  choice 3 0 weight=60 action=skill:361
-  choice 3 1 action=skill:129
-  choice 3 2 weight=5 action=skill:125
+  choice 2 4 weight=30 action=skill:TAUNT
+  choice 3 0 weight=60 action=skill:EXPEL_REPEL
+  choice 3 1 action=skill:CHI_BLAST
+  choice 3 2 weight=5 action=skill:SAKURA_RAGE
   choice 3 3 weight=20 action=special:0
-  choice 3 4 weight=15 action=skill:189
+  choice 3 4 weight=15 action=skill:TAUNT
 end
 
 enemy-ai 13 script=AI_Hanuman
   decision 0 predicates=50:0,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=50 action=skill:181
-  choice 0 1 weight=25 action=skill:136
+  choice 0 0 weight=50 action=skill:TARUKAJA
+  choice 0 1 weight=25 action=skill:GENOCIDE_088
   choice 0 2 weight=25 action=special:0
-  choice 1 0 action=skill:181
-  choice 1 1 weight=50 action=skill:136
+  choice 1 0 action=skill:TARUKAJA
+  choice 1 1 weight=50 action=skill:GENOCIDE_088
   choice 1 2 weight=50 action=special:0
 end
 
 enemy-ai 14 script=AllEscape_MeriBeru
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 1 weight=25 action=skill:126
-  choice 0 2 weight=25 action=skill:116
-  choice 0 3 weight=25 action=skill:130
-  choice 0 4 weight=25 action=skill:364
-  choice 1 1 weight=40 action=skill:126
-  choice 1 2 weight=30 action=skill:116
-  choice 1 3 weight=30 action=skill:130
-  choice 1 4 action=skill:364
+  choice 0 1 weight=25 action=skill:POWER_WAVE
+  choice 0 2 weight=25 action=skill:RAVING_SLASH
+  choice 0 3 weight=25 action=skill:MUTE_BLOW
+  choice 0 4 weight=25 action=skill:PHYS_REPEL_16C
+  choice 1 1 weight=40 action=skill:POWER_WAVE
+  choice 1 2 weight=30 action=skill:RAVING_SLASH
+  choice 1 3 weight=30 action=skill:MUTE_BLOW
+  choice 1 4 action=skill:PHYS_REPEL_16C
 end
 
 enemy-ai 15
-  choice 0 0 weight=30 action=skill:138
-  choice 0 1 weight=20 action=skill:46
-  choice 0 2 weight=20 action=skill:84
+  choice 0 0 weight=30 action=skill:EXECUTIONER
+  choice 0 1 weight=20 action=skill:MEGIDO_02E
+  choice 0 2 weight=20 action=skill:TENTARAFOO
   choice 0 3 weight=30 action=special:0
 end
 
@@ -899,319 +899,319 @@ end
 
 enemy-ai 17
   decision 0 predicates=1:99,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=40 action=skill:34
-  choice 0 1 weight=30 action=skill:60
-  choice 0 2 weight=30 action=skill:62
-  choice 1 0 weight=30 action=skill:34
-  choice 1 1 weight=20 action=skill:60
-  choice 1 2 weight=20 action=skill:62
-  choice 1 3 weight=10 action=skill:57
-  choice 1 4 weight=20 action=skill:138
+  choice 0 0 weight=40 action=skill:SHOCK_WAVE
+  choice 0 1 weight=30 action=skill:HAMA
+  choice 0 2 weight=30 action=skill:MAHAMA_03E
+  choice 1 0 weight=30 action=skill:SHOCK_WAVE
+  choice 1 1 weight=20 action=skill:HAMA
+  choice 1 2 weight=20 action=skill:MAHAMA_03E
+  choice 1 3 weight=10 action=skill:VANITY_039
+  choice 1 4 weight=20 action=skill:EXECUTIONER
 end
 
 enemy-ai 18
   decision 0 predicates=23:0,48:12,43:10 routes=8,8,2,2,3,1,2,8
-  choice 0 0 weight=20 action=skill:32
-  choice 0 1 weight=20 action=skill:57
+  choice 0 0 weight=20 action=skill:MAZANMA_020
+  choice 0 1 weight=20 action=skill:VANITY_039
   choice 0 2 weight=20 action=special:0
-  choice 0 3 weight=20 action=skill:192
-  choice 0 4 weight=20 action=skill:177
-  choice 1 0 weight=25 action=skill:32
-  choice 1 1 weight=25 action=skill:57
+  choice 0 3 weight=20 action=skill:POWER_CHARGE
+  choice 0 4 weight=20 action=skill:SUKUNDA
+  choice 1 0 weight=25 action=skill:MAZANMA_020
+  choice 1 1 weight=25 action=skill:VANITY_039
   choice 1 2 weight=25 action=special:0
-  choice 1 3 weight=25 action=skill:192
-  choice 1 4 action=skill:177
-  choice 2 0 action=skill:32
-  choice 2 1 action=skill:57
+  choice 1 3 weight=25 action=skill:POWER_CHARGE
+  choice 1 4 action=skill:SUKUNDA
+  choice 2 0 action=skill:MAZANMA_020
+  choice 2 1 action=skill:VANITY_039
   choice 2 2 weight=30 action=special:0
-  choice 2 3 weight=70 action=skill:126
-  choice 2 4 action=skill:177
-  choice 3 0 weight=25 action=skill:32
-  choice 3 1 action=skill:57
+  choice 2 3 weight=70 action=skill:POWER_WAVE
+  choice 2 4 action=skill:SUKUNDA
+  choice 3 0 weight=25 action=skill:MAZANMA_020
+  choice 3 1 action=skill:VANITY_039
   choice 3 2 weight=25 action=special:0
-  choice 3 3 weight=25 action=skill:192
-  choice 3 4 weight=25 action=skill:177
+  choice 3 3 weight=25 action=skill:POWER_CHARGE
+  choice 3 4 weight=25 action=skill:SUKUNDA
 end
 
 enemy-ai 19
   decision 0 predicates=1:99,48:12,42:505 routes=2,1,2,1,1,1,8,8
-  choice 0 0 weight=20 action=skill:33
-  choice 0 1 weight=20 action=skill:42
-  choice 0 2 weight=20 action=skill:177
-  choice 0 3 weight=20 action=skill:176
-  choice 0 4 weight=20 action=skill:178
-  choice 1 0 weight=20 action=skill:30
-  choice 1 1 weight=20 action=skill:33
-  choice 1 2 weight=20 action=skill:39
-  choice 1 3 weight=20 action=skill:42
+  choice 0 0 weight=20 action=skill:MAZANDYNE_021
+  choice 0 1 weight=20 action=skill:MATERADYNE_02A
+  choice 0 2 weight=20 action=skill:SUKUNDA
+  choice 0 3 weight=20 action=skill:TARUNDA
+  choice 0 4 weight=20 action=skill:RAKUNDA
+  choice 1 0 weight=20 action=skill:ZANDYNE
+  choice 1 1 weight=20 action=skill:MAZANDYNE_021
+  choice 1 2 weight=20 action=skill:TERADYNE
+  choice 1 3 weight=20 action=skill:MATERADYNE_02A
   choice 1 4 weight=20 action=special:0
-  choice 2 0 weight=24 action=skill:30
-  choice 2 1 weight=24 action=skill:33
-  choice 2 2 weight=24 action=skill:39
-  choice 2 3 weight=23 action=skill:42
-  choice 2 4 weight=5 action=skill:505
+  choice 2 0 weight=24 action=skill:ZANDYNE
+  choice 2 1 weight=24 action=skill:MAZANDYNE_021
+  choice 2 2 weight=24 action=skill:TERADYNE
+  choice 2 3 weight=23 action=skill:MATERADYNE_02A
+  choice 2 4 weight=5 action=skill:MEDIARAHAN_1F9
 end
 
 enemy-ai 20
   decision 0 predicates=1:80,48:12,57:0 routes=1,1,1,4,1,2,3,8
-  choice 0 0 weight=25 action=skill:64
-  choice 0 1 weight=25 action=skill:190
-  choice 0 2 weight=25 action=skill:365
+  choice 0 0 weight=25 action=skill:XANADU_040
+  choice 0 1 weight=25 action=skill:DEBILITATE_0BE
+  choice 0 2 weight=25 action=skill:MAGIC_REPEL_16D
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=30 action=skill:64
-  choice 1 1 weight=30 action=skill:15
-  choice 1 2 weight=30 action=skill:24
-  choice 1 3 weight=10 action=skill:162 effect=1:0
-  choice 2 0 weight=35 action=skill:64
-  choice 2 1 weight=30 action=skill:15
-  choice 2 2 action=skill:190
-  choice 2 3 weight=35 action=skill:365
-  choice 3 0 weight=35 action=skill:64
-  choice 3 1 weight=30 action=skill:24
-  choice 3 2 weight=35 action=skill:190
-  choice 3 3 action=skill:365
-  choice 4 0 weight=90 action=skill:64
-  choice 4 1 action=skill:190
-  choice 4 2 action=skill:365
+  choice 1 0 weight=30 action=skill:XANADU_040
+  choice 1 1 weight=30 action=skill:MABUFUDYNE_00F
+  choice 1 2 weight=30 action=skill:MAZIODYNE_018
+  choice 1 3 weight=10 action=skill:DIARAHAN effect=1:0
+  choice 2 0 weight=35 action=skill:XANADU_040
+  choice 2 1 weight=30 action=skill:MABUFUDYNE_00F
+  choice 2 2 action=skill:DEBILITATE_0BE
+  choice 2 3 weight=35 action=skill:MAGIC_REPEL_16D
+  choice 3 0 weight=35 action=skill:XANADU_040
+  choice 3 1 weight=30 action=skill:MAZIODYNE_018
+  choice 3 2 weight=35 action=skill:DEBILITATE_0BE
+  choice 3 3 action=skill:MAGIC_REPEL_16D
+  choice 4 0 weight=90 action=skill:XANADU_040
+  choice 4 1 action=skill:DEBILITATE_0BE
+  choice 4 2 action=skill:MAGIC_REPEL_16D
   choice 4 3 weight=10 action=special:0
 end
 
 enemy-ai 21
   decision 0 predicates=48:12,none,none routes=8,8,8,8,1,8,8,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=20 action=skill:46
-  choice 0 1 weight=20 action=skill:112
-  choice 0 2 weight=30 action=skill:127
-  choice 0 3 weight=20 action=skill:189
+  choice 0 0 weight=20 action=skill:MEGIDO_02E
+  choice 0 1 weight=20 action=skill:BODY_RUSH
+  choice 0 2 weight=30 action=skill:MIND_SCREAM
+  choice 0 3 weight=20 action=skill:TAUNT
   choice 0 4 weight=10 action=special:1
-  choice 1 0 weight=20 action=skill:46
-  choice 1 1 weight=40 action=skill:112
-  choice 1 2 weight=40 action=skill:127
-  choice 1 3 action=skill:189
+  choice 1 0 weight=20 action=skill:MEGIDO_02E
+  choice 1 1 weight=40 action=skill:BODY_RUSH
+  choice 1 2 weight=40 action=skill:MIND_SCREAM
+  choice 1 3 action=skill:TAUNT
   choice 1 4 action=special:1
-  choice 6 0 weight=20 action=skill:46
-  choice 6 1 weight=30 action=skill:112
-  choice 6 2 weight=30 action=skill:127
-  choice 6 3 weight=20 action=skill:189
+  choice 6 0 weight=20 action=skill:MEGIDO_02E
+  choice 6 1 weight=30 action=skill:BODY_RUSH
+  choice 6 2 weight=30 action=skill:MIND_SCREAM
+  choice 6 3 weight=20 action=skill:TAUNT
   choice 6 4 action=special:1
 end
 
 enemy-ai 22
   decision 0 predicates=1:99,50:11,none routes=8,8,8,8,1,2,8,8
-  choice 0 0 weight=25 action=skill:128
-  choice 0 1 weight=25 action=skill:182
-  choice 0 2 weight=25 action=skill:183
+  choice 0 0 weight=25 action=skill:DEATH_BLOW
+  choice 0 1 weight=25 action=skill:SUKUKAJA
+  choice 0 2 weight=25 action=skill:RAKUKAJA
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=50 action=skill:128
-  choice 1 1 action=skill:182
-  choice 1 2 action=skill:183
+  choice 1 0 weight=50 action=skill:DEATH_BLOW
+  choice 1 1 action=skill:SUKUKAJA
+  choice 1 2 action=skill:RAKUKAJA
   choice 1 3 weight=50 action=special:0
-  choice 2 0 weight=25 action=skill:128
-  choice 2 1 weight=25 action=skill:113
-  choice 2 2 weight=25 action=skill:114
-  choice 2 3 weight=25 action=skill:117
+  choice 2 0 weight=25 action=skill:DEATH_BLOW
+  choice 2 1 weight=25 action=skill:NEEDLE_RUSH
+  choice 2 2 weight=25 action=skill:POISON_DART
+  choice 2 3 weight=25 action=skill:DEATH_SPRAY
 end
 
 enemy-ai 23
   decision 0 predicates=36:0x1ffffe,5:2,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=25 action=skill:62
-  choice 0 1 weight=25 action=skill:61
-  choice 0 2 weight=25 action=skill:49
-  choice 0 3 weight=25 action=skill:362
+  choice 0 0 weight=25 action=skill:MAHAMA_03E
+  choice 0 1 weight=25 action=skill:HAMAON
+  choice 0 2 weight=25 action=skill:HP_THIEF_031
+  choice 0 3 weight=25 action=skill:DEATH_REPEL
   choice 0 4 action=preset:1:23
-  choice 1 0 weight=20 action=skill:62
-  choice 1 1 weight=30 action=skill:61
-  choice 1 2 weight=30 action=skill:49
-  choice 1 3 action=skill:362
+  choice 1 0 weight=20 action=skill:MAHAMA_03E
+  choice 1 1 weight=30 action=skill:HAMAON
+  choice 1 2 weight=30 action=skill:HP_THIEF_031
+  choice 1 3 action=skill:DEATH_REPEL
   choice 1 4 weight=20 action=special:0
-  choice 2 0 weight=20 action=skill:62
-  choice 2 1 weight=20 action=skill:61
-  choice 2 2 weight=20 action=skill:49
-  choice 2 3 weight=20 action=skill:362
+  choice 2 0 weight=20 action=skill:MAHAMA_03E
+  choice 2 1 weight=20 action=skill:HAMAON
+  choice 2 2 weight=20 action=skill:HP_THIEF_031
+  choice 2 3 weight=20 action=skill:DEATH_REPEL
   choice 2 4 weight=20 action=preset:1:23
-  choice 3 0 weight=30 action=skill:62
-  choice 3 1 weight=30 action=skill:61
-  choice 3 2 weight=20 action=skill:49
-  choice 3 3 action=skill:362
+  choice 3 0 weight=30 action=skill:MAHAMA_03E
+  choice 3 1 weight=30 action=skill:HAMAON
+  choice 3 2 weight=20 action=skill:HP_THIEF_031
+  choice 3 3 action=skill:DEATH_REPEL
   choice 3 4 weight=20 action=special:0
 end
 
 enemy-ai 24
   decision 0 predicates=50:2,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=30 action=skill:29
-  choice 0 1 weight=20 action=skill:50
-  choice 0 2 weight=15 action=skill:116
-  choice 0 3 weight=5 action=skill:184
+  choice 0 0 weight=30 action=skill:ZANMA
+  choice 0 1 weight=20 action=skill:MP_THIEF_032
+  choice 0 2 weight=15 action=skill:RAVING_SLASH
+  choice 0 3 weight=5 action=skill:MAKAKAJA
   choice 0 4 weight=30 action=special:0
-  choice 1 0 weight=100 action=skill:29
-  choice 1 1 action=skill:50
-  choice 1 2 action=skill:116
-  choice 1 3 action=skill:184
-  choice 2 0 action=skill:29
-  choice 2 1 weight=30 action=skill:50
-  choice 2 2 weight=40 action=skill:116
-  choice 2 3 weight=30 action=skill:184
+  choice 1 0 weight=100 action=skill:ZANMA
+  choice 1 1 action=skill:MP_THIEF_032
+  choice 1 2 action=skill:RAVING_SLASH
+  choice 1 3 action=skill:MAKAKAJA
+  choice 2 0 action=skill:ZANMA
+  choice 2 1 weight=30 action=skill:MP_THIEF_032
+  choice 2 2 weight=40 action=skill:RAVING_SLASH
+  choice 2 3 weight=30 action=skill:MAKAKAJA
 end
 
 enemy-ai 25
   decision 0 predicates=36:0x1ffffe,48:12,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=20 action=skill:62
-  choice 0 1 weight=20 action=skill:73
-  choice 0 2 weight=20 action=skill:178
-  choice 0 3 weight=20 action=skill:362
+  choice 0 0 weight=20 action=skill:MAHAMA_03E
+  choice 0 1 weight=20 action=skill:MAKAJAM
+  choice 0 2 weight=20 action=skill:RAKUNDA
+  choice 0 3 weight=20 action=skill:DEATH_REPEL
   choice 0 4 weight=20 action=special:0
-  choice 1 0 weight=30 action=skill:62
-  choice 1 1 weight=30 action=skill:73
-  choice 1 2 weight=20 action=skill:178
-  choice 1 3 action=skill:362
+  choice 1 0 weight=30 action=skill:MAHAMA_03E
+  choice 1 1 weight=30 action=skill:MAKAJAM
+  choice 1 2 weight=20 action=skill:RAKUNDA
+  choice 1 3 action=skill:DEATH_REPEL
   choice 1 4 weight=20 action=special:0
-  choice 2 0 weight=30 action=skill:62
-  choice 2 1 weight=20 action=skill:73
-  choice 2 2 action=skill:178
-  choice 2 3 weight=30 action=skill:362
+  choice 2 0 weight=30 action=skill:MAHAMA_03E
+  choice 2 1 weight=20 action=skill:MAKAJAM
+  choice 2 2 action=skill:RAKUNDA
+  choice 2 3 weight=30 action=skill:DEATH_REPEL
   choice 2 4 weight=20 action=special:0
-  choice 3 0 weight=25 action=skill:62
-  choice 3 1 weight=25 action=skill:73
-  choice 3 2 action=skill:178
-  choice 3 3 action=skill:362
+  choice 3 0 weight=25 action=skill:MAHAMA_03E
+  choice 3 1 weight=25 action=skill:MAKAJAM
+  choice 3 2 action=skill:RAKUNDA
+  choice 3 3 action=skill:DEATH_REPEL
   choice 3 4 weight=50 action=special:0
 end
 
 enemy-ai 26 script=garuuda_zako
   decision 0 predicates=14:13,1:60,none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=70 action=special:0
-  choice 0 1 weight=15 action=skill:63
-  choice 0 2 weight=15 action=skill:30
+  choice 0 1 weight=15 action=skill:MAHAMAON_03F
+  choice 0 2 weight=15 action=skill:ZANDYNE
   choice 1 0 weight=60 action=special:0
-  choice 1 1 weight=20 action=skill:63
-  choice 1 2 weight=20 action=skill:30
+  choice 1 1 weight=20 action=skill:MAHAMAON_03F
+  choice 1 2 weight=20 action=skill:ZANDYNE
   choice 2 0 weight=40 action=special:0
-  choice 2 1 action=skill:63
-  choice 2 2 weight=60 action=skill:30
+  choice 2 1 action=skill:MAHAMAON_03F
+  choice 2 2 weight=60 action=skill:ZANDYNE
 end
 
 enemy-ai 27
   decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=30 action=skill:60
-  choice 0 1 weight=30 action=skill:130
-  choice 0 2 weight=10 action=skill:343
+  choice 0 0 weight=30 action=skill:HAMA
+  choice 0 1 weight=30 action=skill:MUTE_BLOW
+  choice 0 2 weight=10 action=skill:VOID_DEATH
   choice 0 3 weight=30 action=special:0
-  choice 1 0 weight=50 action=skill:60
-  choice 1 1 weight=30 action=skill:130
+  choice 1 0 weight=50 action=skill:HAMA
+  choice 1 1 weight=30 action=skill:MUTE_BLOW
   choice 1 2 weight=20 action=special:0
-  choice 2 0 weight=30 action=skill:130
-  choice 2 1 weight=40 action=skill:134
-  choice 2 2 weight=10 action=skill:343
+  choice 2 0 weight=30 action=skill:MUTE_BLOW
+  choice 2 1 weight=40 action=skill:VILE_BLADE_086
+  choice 2 2 weight=10 action=skill:VOID_DEATH
   choice 2 3 weight=20 action=special:0
-  choice 3 0 weight=20 action=skill:130
-  choice 3 1 weight=20 action=skill:134
+  choice 3 0 weight=20 action=skill:MUTE_BLOW
+  choice 3 1 weight=20 action=skill:VILE_BLADE_086
   choice 3 2 weight=60 action=special:0
 end
 
 enemy-ai 28
   decision 0 predicates=5:2,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=20 action=skill:25
-  choice 0 2 weight=40 action=skill:114
+  choice 0 0 weight=20 action=skill:BOLT_FLARE
+  choice 0 2 weight=40 action=skill:POISON_DART
   choice 0 3 action=preset:1:28
   choice 0 4 weight=40 action=special:0
-  choice 1 0 weight=20 action=skill:25
-  choice 1 2 weight=20 action=skill:114
+  choice 1 0 weight=20 action=skill:BOLT_FLARE
+  choice 1 2 weight=20 action=skill:POISON_DART
   choice 1 3 weight=20 action=preset:1:28
   choice 1 4 weight=40 action=special:0
 end
 
 enemy-ai 29
   decision 0 predicates=1:50,36:0x1ffffe,24:10 routes=5,3,4,1,2,1,8,8
-  choice 0 0 weight=30 action=skill:139
-  choice 0 1 weight=30 action=skill:71 effect=14:2048
-  choice 0 2 weight=20 action=skill:59
-  choice 0 3 weight=20 action=skill:364
-  choice 1 0 weight=35 action=skill:139
-  choice 1 1 weight=35 action=skill:71 effect=14:2048
-  choice 1 2 weight=30 action=skill:59
-  choice 1 3 action=skill:364
-  choice 2 0 weight=30 action=skill:140
-  choice 2 1 weight=30 action=skill:57
-  choice 2 2 weight=20 action=skill:365
-  choice 2 3 weight=20 action=skill:50
-  choice 3 0 weight=35 action=skill:140
-  choice 3 1 weight=35 action=skill:57
-  choice 3 2 action=skill:365
-  choice 3 3 weight=30 action=skill:50
-  choice 4 0 weight=35 action=skill:140
-  choice 4 1 weight=35 action=skill:57
-  choice 4 2 weight=30 action=skill:365
-  choice 4 3 action=skill:50
-  choice 5 0 weight=50 action=skill:140
-  choice 5 1 weight=50 action=skill:57
-  choice 5 2 action=skill:365
-  choice 5 3 action=skill:50
+  choice 0 0 weight=30 action=skill:BLOODBATH
+  choice 0 1 weight=30 action=skill:STONE_GAZE effect=14:2048
+  choice 0 2 weight=20 action=skill:MAREVERT
+  choice 0 3 weight=20 action=skill:PHYS_REPEL_16C
+  choice 1 0 weight=35 action=skill:BLOODBATH
+  choice 1 1 weight=35 action=skill:STONE_GAZE effect=14:2048
+  choice 1 2 weight=30 action=skill:MAREVERT
+  choice 1 3 action=skill:PHYS_REPEL_16C
+  choice 2 0 weight=30 action=skill:REVELATION
+  choice 2 1 weight=30 action=skill:VANITY_039
+  choice 2 2 weight=20 action=skill:MAGIC_REPEL_16D
+  choice 2 3 weight=20 action=skill:MP_THIEF_032
+  choice 3 0 weight=35 action=skill:REVELATION
+  choice 3 1 weight=35 action=skill:VANITY_039
+  choice 3 2 action=skill:MAGIC_REPEL_16D
+  choice 3 3 weight=30 action=skill:MP_THIEF_032
+  choice 4 0 weight=35 action=skill:REVELATION
+  choice 4 1 weight=35 action=skill:VANITY_039
+  choice 4 2 weight=30 action=skill:MAGIC_REPEL_16D
+  choice 4 3 action=skill:MP_THIEF_032
+  choice 5 0 weight=50 action=skill:REVELATION
+  choice 5 1 weight=50 action=skill:VANITY_039
+  choice 5 2 action=skill:MAGIC_REPEL_16D
+  choice 5 3 action=skill:MP_THIEF_032
 end
 
 enemy-ai 30
   decision 0 predicates=1:50,36:0x1ffffe,9:2048 routes=3,2,3,3,1,8,3,8
-  choice 0 0 weight=25 action=skill:71 effect=14:2048
-  choice 0 1 weight=25 action=skill:126
-  choice 0 2 weight=25 action=skill:70
+  choice 0 0 weight=25 action=skill:STONE_GAZE effect=14:2048
+  choice 0 1 weight=25 action=skill:POWER_WAVE
+  choice 0 2 weight=25 action=skill:BLOOD_CURSE
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=25 action=skill:71 effect=14:2048
-  choice 1 1 weight=25 action=skill:126
-  choice 1 2 weight=25 action=skill:356
-  choice 1 3 weight=25 action=skill:350
-  choice 2 0 weight=50 action=skill:71 effect=14:2048
-  choice 2 1 weight=50 action=skill:126
+  choice 1 0 weight=25 action=skill:STONE_GAZE effect=14:2048
+  choice 1 1 weight=25 action=skill:POWER_WAVE
+  choice 1 2 weight=25 action=skill:FIRE_REPEL
+  choice 1 3 weight=25 action=skill:FIRE_DRAIN
+  choice 2 0 weight=50 action=skill:STONE_GAZE effect=14:2048
+  choice 2 1 weight=50 action=skill:POWER_WAVE
   choice 3 0 weight=75 action=special:0 effect=2:2048
-  choice 3 1 weight=25 action=skill:126
+  choice 3 1 weight=25 action=skill:POWER_WAVE
 end
 
 enemy-ai 31 script=jyatayu_zako
   decision 0 predicates=1:60,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=90 action=special:0
-  choice 0 1 action=skill:66
-  choice 0 2 weight=10 action=skill:66
+  choice 0 1 action=skill:MUDOON
+  choice 0 2 weight=10 action=skill:MUDOON
   choice 1 0 weight=75 action=special:0
-  choice 1 1 action=skill:66
-  choice 1 2 weight=25 action=skill:66
-  choice 1 3 action=skill:137
+  choice 1 1 action=skill:MUDOON
+  choice 1 2 weight=25 action=skill:MUDOON
+  choice 1 3 action=skill:GATE_OF_HELL
 end
 
 enemy-ai 32
   decision 0 predicates=1:50,36:0x1ffffe,5:3 routes=2,3,1,0,1,0,0,8
-  choice 0 0 weight=25 action=skill:126
-  choice 0 1 weight=25 action=skill:84
-  choice 0 2 weight=25 action=skill:79
+  choice 0 0 weight=25 action=skill:POWER_WAVE
+  choice 0 1 weight=25 action=skill:TENTARAFOO
+  choice 0 2 weight=25 action=skill:STUN_WAVE
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=20 action=skill:126
-  choice 1 1 weight=20 action=skill:84
-  choice 1 2 weight=20 action=skill:79
-  choice 1 3 weight=20 action=skill:359
+  choice 1 0 weight=20 action=skill:POWER_WAVE
+  choice 1 1 weight=20 action=skill:TENTARAFOO
+  choice 1 2 weight=20 action=skill:STUN_WAVE
+  choice 1 3 weight=20 action=skill:FORCE_REPEL
   choice 1 4 weight=20 action=preset:1:4
-  choice 2 0 weight=25 action=skill:126
-  choice 2 1 weight=25 action=skill:84
-  choice 2 2 weight=25 action=skill:79
+  choice 2 0 weight=25 action=skill:POWER_WAVE
+  choice 2 1 weight=25 action=skill:TENTARAFOO
+  choice 2 2 weight=25 action=skill:STUN_WAVE
   choice 2 3 weight=25 action=preset:1:4
-  choice 3 0 weight=34 action=skill:126
-  choice 3 1 weight=33 action=skill:84
-  choice 3 2 weight=33 action=skill:79
-  choice 4 0 weight=25 action=skill:126
-  choice 4 1 weight=25 action=skill:84
-  choice 4 2 weight=25 action=skill:79
-  choice 4 3 weight=25 action=skill:359
+  choice 3 0 weight=34 action=skill:POWER_WAVE
+  choice 3 1 weight=33 action=skill:TENTARAFOO
+  choice 3 2 weight=33 action=skill:STUN_WAVE
+  choice 4 0 weight=25 action=skill:POWER_WAVE
+  choice 4 1 weight=25 action=skill:TENTARAFOO
+  choice 4 2 weight=25 action=skill:STUN_WAVE
+  choice 4 3 weight=25 action=skill:FORCE_REPEL
 end
 
 enemy-ai 33 script=girime_deka
   decision 0 predicates=20:50,48:12,none routes=8,1,8,8,2,8,8,8
-  choice 0 0 weight=100 action=skill:132
-  choice 1 0 action=skill:190
-  choice 1 1 action=skill:66
-  choice 1 2 weight=50 action=skill:52
-  choice 1 3 weight=30 action=skill:132
-  choice 1 4 weight=20 action=skill:48
-  choice 2 0 weight=20 action=skill:190
-  choice 2 1 weight=10 action=skill:66
-  choice 2 2 weight=20 action=skill:52
-  choice 2 3 weight=20 action=skill:132
-  choice 2 4 weight=30 action=skill:48
+  choice 0 0 weight=100 action=skill:DEMON_RAGE
+  choice 1 0 action=skill:DEBILITATE_0BE
+  choice 1 1 action=skill:MUDOON
+  choice 1 2 weight=50 action=skill:LAST_WORD
+  choice 1 3 weight=30 action=skill:DEMON_RAGE
+  choice 1 4 weight=20 action=skill:MEGIDOLAON_030
+  choice 2 0 weight=20 action=skill:DEBILITATE_0BE
+  choice 2 1 weight=10 action=skill:MUDOON
+  choice 2 2 weight=20 action=skill:LAST_WORD
+  choice 2 3 weight=20 action=skill:DEMON_RAGE
+  choice 2 4 weight=30 action=skill:MEGIDOLAON_030
 end
 
 enemy-ai 34 script=neazu_zako
@@ -1224,72 +1224,72 @@ end
 
 enemy-ai 36 script=AllEscape_MeriBeru
   decision 0 predicates=9:2,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=70 action=skill:20
-  choice 0 1 weight=30 action=skill:22
-  choice 0 2 action=skill:119
-  choice 1 0 action=skill:20
-  choice 1 1 action=skill:22
-  choice 1 2 weight=100 action=skill:119
+  choice 0 0 weight=70 action=skill:ZIONGA
+  choice 0 1 weight=30 action=skill:MAZIO_016
+  choice 0 2 action=skill:MAD_RUSH
+  choice 1 0 action=skill:ZIONGA
+  choice 1 1 action=skill:MAZIO_016
+  choice 1 2 weight=100 action=skill:MAD_RUSH
 end
 
 enemy-ai 37
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=25 action=skill:12
-  choice 0 1 weight=25 action=skill:15
-  choice 0 2 weight=25 action=skill:84
-  choice 0 3 weight=25 action=skill:350
-  choice 1 0 weight=30 action=skill:12
-  choice 1 1 weight=30 action=skill:15
-  choice 1 2 weight=40 action=skill:84
-  choice 1 3 action=skill:350
+  choice 0 0 weight=25 action=skill:BUFUDYNE
+  choice 0 1 weight=25 action=skill:MABUFUDYNE_00F
+  choice 0 2 weight=25 action=skill:TENTARAFOO
+  choice 0 3 weight=25 action=skill:FIRE_DRAIN
+  choice 1 0 weight=30 action=skill:BUFUDYNE
+  choice 1 1 weight=30 action=skill:MABUFUDYNE_00F
+  choice 1 2 weight=40 action=skill:TENTARAFOO
+  choice 1 3 action=skill:FIRE_DRAIN
 end
 
 enemy-ai 38
   decision 0 predicates=6:2,9:6,none routes=8,0,8,8,8,2,8,8
   decision 1 predicates=1:60,5:1,20:10 routes=1,1,8,1,3,8,8,8
   choice 0 0 weight=50 action=special:0
-  choice 0 1 action=skill:119
-  choice 0 2 weight=40 action=skill:37
-  choice 0 3 weight=10 action=skill:40
+  choice 0 1 action=skill:MAD_RUSH
+  choice 0 2 weight=40 action=skill:TERA
+  choice 0 3 weight=10 action=skill:MATERA_028
   choice 1 0 weight=30 action=special:0
-  choice 1 1 weight=10 action=skill:37
-  choice 1 2 weight=20 action=skill:40
-  choice 1 3 weight=40 action=skill:119
+  choice 1 1 weight=10 action=skill:TERA
+  choice 1 2 weight=20 action=skill:MATERA_028
+  choice 1 3 weight=40 action=skill:MAD_RUSH
   choice 2 0 weight=35 action=special:0
-  choice 2 1 weight=20 action=skill:119
+  choice 2 1 weight=20 action=skill:MAD_RUSH
   choice 2 2 weight=25 action=special:0 effect=2:6
-  choice 2 3 weight=20 action=skill:37
+  choice 2 3 weight=20 action=skill:TERA
   choice 3 0 weight=50 action=special:0
-  choice 3 1 weight=10 action=skill:119
-  choice 3 2 weight=30 action=skill:37
-  choice 3 3 weight=10 action=skill:40
+  choice 3 1 weight=10 action=skill:MAD_RUSH
+  choice 3 2 weight=30 action=skill:TERA
+  choice 3 3 weight=10 action=skill:MATERA_028
 end
 
 enemy-ai 39
   decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=40 action=skill:85
-  choice 0 1 weight=30 action=skill:121
-  choice 0 2 weight=30 action=skill:127
-  choice 1 0 weight=50 action=skill:42
-  choice 1 1 weight=50 action=skill:127
+  choice 0 0 weight=40 action=skill:SONIC_WAVE
+  choice 0 1 weight=30 action=skill:HELL_THRUST
+  choice 0 2 weight=30 action=skill:MIND_SCREAM
+  choice 1 0 weight=50 action=skill:MATERADYNE_02A
+  choice 1 1 weight=50 action=skill:MIND_SCREAM
 end
 
 enemy-ai 40
   decision 0 predicates=20:8,1:90,none routes=8,2,8,8,1,8,8,8
-  choice 0 0 weight=90 action=skill:112
-  choice 0 1 action=skill:126
-  choice 0 2 action=skill:119
-  choice 0 3 action=skill:83
+  choice 0 0 weight=90 action=skill:BODY_RUSH
+  choice 0 1 action=skill:POWER_WAVE
+  choice 0 2 action=skill:MAD_RUSH
+  choice 0 3 action=skill:PULINPA
   choice 0 4 weight=10 action=special:0
-  choice 1 0 weight=50 action=skill:112
-  choice 1 1 weight=20 action=skill:126
-  choice 1 2 action=skill:119
-  choice 1 3 weight=30 action=skill:83
+  choice 1 0 weight=50 action=skill:BODY_RUSH
+  choice 1 1 weight=20 action=skill:POWER_WAVE
+  choice 1 2 action=skill:MAD_RUSH
+  choice 1 3 weight=30 action=skill:PULINPA
   choice 1 4 action=special:0
-  choice 2 0 weight=40 action=skill:112
-  choice 2 1 weight=30 action=skill:126
-  choice 2 2 weight=30 action=skill:119
-  choice 2 3 action=skill:83
+  choice 2 0 weight=40 action=skill:BODY_RUSH
+  choice 2 1 weight=30 action=skill:POWER_WAVE
+  choice 2 2 weight=30 action=skill:MAD_RUSH
+  choice 2 3 action=skill:PULINPA
   choice 2 4 action=special:0
 end
 
@@ -1297,67 +1297,67 @@ enemy-ai 41
   decision 0 predicates=1:50,43:13,52:0 routes=2,2,1,2,1,2,4,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,4,8,8,8
   choice 0 0 weight=25 action=special:0
-  choice 0 1 weight=25 action=skill:65
-  choice 0 2 weight=25 action=skill:70
-  choice 0 3 weight=25 action=skill:58
-  choice 1 0 weight=25 action=skill:3
-  choice 1 1 weight=25 action=skill:70
-  choice 1 2 weight=25 action=skill:193
-  choice 1 3 weight=25 action=skill:6
-  choice 2 0 weight=40 action=skill:3
-  choice 2 1 weight=60 action=skill:6
+  choice 0 1 weight=25 action=skill:MUDO
+  choice 0 2 weight=25 action=skill:BLOOD_CURSE
+  choice 0 3 weight=25 action=skill:REVERT
+  choice 1 0 weight=25 action=skill:AGIDYNE
+  choice 1 1 weight=25 action=skill:BLOOD_CURSE
+  choice 1 2 weight=25 action=skill:MIND_CHARGE
+  choice 1 3 weight=25 action=skill:MARAGIDYNE_006
+  choice 2 0 weight=40 action=skill:AGIDYNE
+  choice 2 1 weight=60 action=skill:MARAGIDYNE_006
   choice 3 0 weight=40 action=special:0
-  choice 3 1 weight=30 action=skill:65
-  choice 3 2 weight=30 action=skill:70
-  choice 3 3 action=skill:58
+  choice 3 1 weight=30 action=skill:MUDO
+  choice 3 2 weight=30 action=skill:BLOOD_CURSE
+  choice 3 3 action=skill:REVERT
   choice 4 0 weight=40 action=special:0
-  choice 4 1 action=skill:65
-  choice 4 2 weight=30 action=skill:70
-  choice 4 3 weight=30 action=skill:58
+  choice 4 1 action=skill:MUDO
+  choice 4 2 weight=30 action=skill:BLOOD_CURSE
+  choice 4 3 weight=30 action=skill:REVERT
 end
 
 enemy-ai 42
   decision 0 predicates=23:0,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=20 action=skill:12
-  choice 0 1 weight=20 action=skill:39
-  choice 0 2 weight=20 action=skill:66
-  choice 0 3 weight=20 action=skill:69
-  choice 0 4 weight=20 action=skill:71
-  choice 1 0 weight=20 action=skill:12
-  choice 1 1 weight=20 action=skill:39
-  choice 1 2 action=skill:66
-  choice 1 3 weight=30 action=skill:69
-  choice 1 4 weight=30 action=skill:71
+  choice 0 0 weight=20 action=skill:BUFUDYNE
+  choice 0 1 weight=20 action=skill:TERADYNE
+  choice 0 2 weight=20 action=skill:MUDOON
+  choice 0 3 weight=20 action=skill:CURSE
+  choice 0 4 weight=20 action=skill:STONE_GAZE
+  choice 1 0 weight=20 action=skill:BUFUDYNE
+  choice 1 1 weight=20 action=skill:TERADYNE
+  choice 1 2 action=skill:MUDOON
+  choice 1 3 weight=30 action=skill:CURSE
+  choice 1 4 weight=30 action=skill:STONE_GAZE
 end
 
 enemy-ai 43
   decision 0 predicates=48:12,42:506,1:99 routes=3,4,3,1,4,1,8,2
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=30 action=skill:6
-  choice 0 1 weight=30 action=skill:12
-  choice 0 2 weight=10 action=skill:177
-  choice 0 3 weight=10 action=skill:178
-  choice 0 4 weight=20 action=skill:165
-  choice 1 0 weight=40 action=skill:506
-  choice 1 1 weight=30 action=skill:3
-  choice 1 2 weight=30 action=skill:15
-  choice 2 0 weight=50 action=skill:6
-  choice 2 1 weight=30 action=skill:12
-  choice 2 2 weight=10 action=skill:177
-  choice 2 3 weight=10 action=skill:178
-  choice 2 4 action=skill:165
-  choice 3 0 weight=33 action=skill:6
-  choice 3 1 weight=33 action=skill:12
-  choice 3 2 action=skill:177
-  choice 3 3 action=skill:178
-  choice 3 4 weight=34 action=skill:165
-  choice 4 0 weight=50 action=skill:6
-  choice 4 1 weight=50 action=skill:12
-  choice 4 2 action=skill:177
-  choice 4 3 action=skill:178
-  choice 4 4 action=skill:165
-  choice 6 0 weight=25 action=skill:12
-  choice 6 1 weight=25 action=skill:3
+  choice 0 0 weight=30 action=skill:MARAGIDYNE_006
+  choice 0 1 weight=30 action=skill:BUFUDYNE
+  choice 0 2 weight=10 action=skill:SUKUNDA
+  choice 0 3 weight=10 action=skill:RAKUNDA
+  choice 0 4 weight=20 action=skill:MEDIARAHAN_0A5
+  choice 1 0 weight=40 action=skill:DEBILITATE_1FA
+  choice 1 1 weight=30 action=skill:AGIDYNE
+  choice 1 2 weight=30 action=skill:MABUFUDYNE_00F
+  choice 2 0 weight=50 action=skill:MARAGIDYNE_006
+  choice 2 1 weight=30 action=skill:BUFUDYNE
+  choice 2 2 weight=10 action=skill:SUKUNDA
+  choice 2 3 weight=10 action=skill:RAKUNDA
+  choice 2 4 action=skill:MEDIARAHAN_0A5
+  choice 3 0 weight=33 action=skill:MARAGIDYNE_006
+  choice 3 1 weight=33 action=skill:BUFUDYNE
+  choice 3 2 action=skill:SUKUNDA
+  choice 3 3 action=skill:RAKUNDA
+  choice 3 4 weight=34 action=skill:MEDIARAHAN_0A5
+  choice 4 0 weight=50 action=skill:MARAGIDYNE_006
+  choice 4 1 weight=50 action=skill:BUFUDYNE
+  choice 4 2 action=skill:SUKUNDA
+  choice 4 3 action=skill:RAKUNDA
+  choice 4 4 action=skill:MEDIARAHAN_0A5
+  choice 6 0 weight=25 action=skill:BUFUDYNE
+  choice 6 1 weight=25 action=skill:AGIDYNE
   choice 6 2 weight=50 action=special:0
 end
 
@@ -1365,192 +1365,192 @@ enemy-ai 44
   decision 0 predicates=1:99,50:11,57:0 routes=8,8,8,4,8,2,3,0
   decision 1 predicates=69:0,none,none routes=5,5,5,1,5,1,1,1
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=25 action=skill:184
-  choice 0 1 weight=25 action=skill:57
-  choice 0 2 weight=25 action=skill:365
+  choice 0 0 weight=25 action=skill:MAKAKAJA
+  choice 0 1 weight=25 action=skill:VANITY_039
+  choice 0 2 weight=25 action=skill:MAGIC_REPEL_16D
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=20 action=skill:3
-  choice 1 1 weight=20 action=skill:12
-  choice 1 2 weight=20 action=skill:21
-  choice 1 3 weight=20 action=skill:39
-  choice 1 4 weight=20 action=skill:30
-  choice 2 0 weight=33 action=skill:57
-  choice 2 1 weight=33 action=skill:365
+  choice 1 0 weight=20 action=skill:AGIDYNE
+  choice 1 1 weight=20 action=skill:BUFUDYNE
+  choice 1 2 weight=20 action=skill:ZIODYNE
+  choice 1 3 weight=20 action=skill:TERADYNE
+  choice 1 4 weight=20 action=skill:ZANDYNE
+  choice 2 0 weight=33 action=skill:VANITY_039
+  choice 2 1 weight=33 action=skill:MAGIC_REPEL_16D
   choice 2 2 weight=34 action=special:0
-  choice 3 0 weight=33 action=skill:184
-  choice 3 1 weight=33 action=skill:57
+  choice 3 0 weight=33 action=skill:MAKAKAJA
+  choice 3 1 weight=33 action=skill:VANITY_039
   choice 3 2 weight=34 action=special:0
-  choice 4 0 weight=50 action=skill:57
+  choice 4 0 weight=50 action=skill:VANITY_039
   choice 4 1 weight=50 action=special:0
-  choice 5 0 weight=25 action=skill:3
-  choice 5 1 weight=25 action=skill:15
-  choice 5 2 weight=17 action=skill:450
-  choice 5 3 weight=17 action=skill:442
-  choice 5 4 weight=16 action=skill:446
-  choice 6 0 weight=30 action=skill:184
-  choice 6 1 action=skill:57
-  choice 6 2 weight=20 action=skill:365
+  choice 5 0 weight=25 action=skill:AGIDYNE
+  choice 5 1 weight=25 action=skill:MABUFUDYNE_00F
+  choice 5 2 weight=17 action=skill:MATERADYNE_1C2
+  choice 5 3 weight=17 action=skill:MAZIODYNE_1BA
+  choice 5 4 weight=16 action=skill:MAZANDYNE_1BE
+  choice 6 0 weight=30 action=skill:MAKAKAJA
+  choice 6 1 action=skill:VANITY_039
+  choice 6 2 weight=20 action=skill:MAGIC_REPEL_16D
   choice 6 3 weight=50 action=special:0
 end
 
 enemy-ai 45
   decision 0 predicates=1:90,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=30 action=skill:131
-  choice 0 1 action=skill:132
-  choice 0 2 weight=30 action=skill:138
+  choice 0 0 weight=30 action=skill:SKULL_CLEAVE
+  choice 0 1 action=skill:DEMON_RAGE
+  choice 0 2 weight=30 action=skill:EXECUTIONER
   choice 0 3 weight=40 action=special:0
-  choice 1 0 weight=20 action=skill:131
-  choice 1 1 weight=50 action=skill:132
-  choice 1 2 weight=30 action=skill:138
+  choice 1 0 weight=20 action=skill:SKULL_CLEAVE
+  choice 1 1 weight=50 action=skill:DEMON_RAGE
+  choice 1 2 weight=30 action=skill:EXECUTIONER
   choice 1 3 action=special:0
 end
 
 enemy-ai 46
   decision 0 predicates=36:0x1ffffe,23:0,none routes=8,8,8,8,1,2,8,8
-  choice 0 0 weight=35 action=skill:2
-  choice 0 1 weight=25 action=skill:65
-  choice 0 2 weight=10 action=skill:66
-  choice 0 3 weight=10 action=skill:69
-  choice 0 4 weight=20 action=skill:342
-  choice 1 0 weight=40 action=skill:2
-  choice 1 1 weight=30 action=skill:65
-  choice 1 2 weight=20 action=skill:66
-  choice 1 3 weight=10 action=skill:69
-  choice 1 4 action=skill:342
-  choice 2 0 weight=40 action=skill:2
-  choice 2 1 action=skill:65
-  choice 2 2 action=skill:66
-  choice 2 3 weight=30 action=skill:69
-  choice 2 4 weight=30 action=skill:342
+  choice 0 0 weight=35 action=skill:AGILAO
+  choice 0 1 weight=25 action=skill:MUDO
+  choice 0 2 weight=10 action=skill:MUDOON
+  choice 0 3 weight=10 action=skill:CURSE
+  choice 0 4 weight=20 action=skill:VOID_EXPEL
+  choice 1 0 weight=40 action=skill:AGILAO
+  choice 1 1 weight=30 action=skill:MUDO
+  choice 1 2 weight=20 action=skill:MUDOON
+  choice 1 3 weight=10 action=skill:CURSE
+  choice 1 4 action=skill:VOID_EXPEL
+  choice 2 0 weight=40 action=skill:AGILAO
+  choice 2 1 action=skill:MUDO
+  choice 2 2 action=skill:MUDOON
+  choice 2 3 weight=30 action=skill:CURSE
+  choice 2 4 weight=30 action=skill:VOID_EXPEL
 end
 
 enemy-ai 47 script=AllEscape_MeriBeru
   decision 0 predicates=36:0x1ffffe,50:2,1:50 routes=5,3,5,4,1,2,4,8
-  choice 0 0 weight=20 action=skill:361
-  choice 0 1 weight=20 action=skill:358
-  choice 0 2 weight=40 action=skill:184
+  choice 0 0 weight=20 action=skill:EXPEL_REPEL
+  choice 0 1 weight=20 action=skill:ELEC_REPEL
+  choice 0 2 weight=40 action=skill:MAKAKAJA
   choice 0 3 weight=20 action=special:0
-  choice 1 0 action=skill:361
-  choice 1 1 action=skill:358
-  choice 1 2 weight=50 action=skill:184
+  choice 1 0 action=skill:EXPEL_REPEL
+  choice 1 1 action=skill:ELEC_REPEL
+  choice 1 2 weight=50 action=skill:MAKAKAJA
   choice 1 3 weight=50 action=special:0
-  choice 2 0 weight=30 action=skill:361
-  choice 2 1 weight=30 action=skill:358
-  choice 2 2 action=skill:184
+  choice 2 0 weight=30 action=skill:EXPEL_REPEL
+  choice 2 1 weight=30 action=skill:ELEC_REPEL
+  choice 2 2 action=skill:MAKAKAJA
   choice 2 3 weight=40 action=special:0
-  choice 3 0 action=skill:361
-  choice 3 1 action=skill:358
-  choice 3 2 action=skill:184
+  choice 3 0 action=skill:EXPEL_REPEL
+  choice 3 1 action=skill:ELEC_REPEL
+  choice 3 2 action=skill:MAKAKAJA
   choice 3 3 weight=100 action=special:0
-  choice 4 0 weight=10 action=skill:49
-  choice 4 1 weight=10 action=skill:50
-  choice 4 2 weight=50 action=skill:87
-  choice 4 3 weight=15 action=skill:350
-  choice 4 4 weight=15 action=skill:353
-  choice 5 0 weight=20 action=skill:49
-  choice 5 1 weight=20 action=skill:50
-  choice 5 2 weight=60 action=skill:87
-  choice 5 3 action=skill:350
-  choice 5 4 action=skill:353
+  choice 4 0 weight=10 action=skill:HP_THIEF_031
+  choice 4 1 weight=10 action=skill:MP_THIEF_032
+  choice 4 2 weight=50 action=skill:ALLURE
+  choice 4 3 weight=15 action=skill:FIRE_DRAIN
+  choice 4 4 weight=15 action=skill:FORCE_DRAIN
+  choice 5 0 weight=20 action=skill:HP_THIEF_031
+  choice 5 1 weight=20 action=skill:MP_THIEF_032
+  choice 5 2 weight=60 action=skill:ALLURE
+  choice 5 3 action=skill:FIRE_DRAIN
+  choice 5 4 action=skill:FORCE_DRAIN
 end
 
 enemy-ai 48 script=AI_Zin
-  choice 0 0 weight=100 action=skill:30
+  choice 0 0 weight=100 action=skill:ZANDYNE
 end
 
 enemy-ai 49 script=AllEscape_MeriBeru
   decision 0 predicates=50:11,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=35 action=skill:182
-  choice 0 1 weight=35 action=skill:183
-  choice 0 2 action=skill:130
+  choice 0 0 weight=35 action=skill:SUKUKAJA
+  choice 0 1 weight=35 action=skill:RAKUKAJA
+  choice 0 2 action=skill:MUTE_BLOW
   choice 0 3 weight=30 action=special:0
-  choice 1 0 action=skill:182
-  choice 1 1 action=skill:183
-  choice 1 2 weight=50 action=skill:130
+  choice 1 0 action=skill:SUKUKAJA
+  choice 1 1 action=skill:RAKUKAJA
+  choice 1 2 weight=50 action=skill:MUTE_BLOW
   choice 1 3 weight=50 action=special:0
 end
 
 enemy-ai 50
-  choice 0 0 weight=45 action=skill:2
-  choice 0 1 weight=45 action=skill:4
+  choice 0 0 weight=45 action=skill:AGILAO
+  choice 0 1 weight=45 action=skill:MARAGI_004
   choice 0 2 weight=10 action=special:0
 end
 
 enemy-ai 51
   decision 0 predicates=9:8,23:0,24:9 routes=8,8,1,8,1,2,0,3
-  choice 0 0 action=skill:39
-  choice 0 1 weight=70 action=skill:76
-  choice 0 2 action=skill:50 effect=2:8
+  choice 0 0 action=skill:TERADYNE
+  choice 0 1 weight=70 action=skill:DORMINA
+  choice 0 2 action=skill:MP_THIEF_032 effect=2:8
   choice 0 3 weight=30 action=special:0
-  choice 1 0 action=skill:39
-  choice 1 1 action=skill:76
-  choice 1 2 weight=80 action=skill:50 effect=2:8
+  choice 1 0 action=skill:TERADYNE
+  choice 1 1 action=skill:DORMINA
+  choice 1 2 weight=80 action=skill:MP_THIEF_032 effect=2:8
   choice 1 3 weight=20 action=special:0
-  choice 2 0 weight=100 action=skill:39
-  choice 2 1 action=skill:76
-  choice 2 2 action=skill:50 effect=2:8
+  choice 2 0 weight=100 action=skill:TERADYNE
+  choice 2 1 action=skill:DORMINA
+  choice 2 2 action=skill:MP_THIEF_032 effect=2:8
   choice 2 3 action=special:0
-  choice 3 0 weight=100 action=skill:39
-  choice 3 1 action=skill:76
-  choice 3 2 action=skill:50 effect=2:8
+  choice 3 0 weight=100 action=skill:TERADYNE
+  choice 3 1 action=skill:DORMINA
+  choice 3 2 action=skill:MP_THIEF_032 effect=2:8
   choice 3 3 action=special:0
 end
 
 enemy-ai 52
   decision 0 predicates=2:30,1:30,9:8 routes=8,1,8,8,1,1,8,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,3,8,8,8
-  choice 0 1 weight=30 action=skill:76
-  choice 0 2 weight=30 action=skill:73
+  choice 0 1 weight=30 action=skill:DORMINA
+  choice 0 2 weight=30 action=skill:MAKAJAM
   choice 0 3 weight=40 action=special:0
-  choice 1 0 weight=30 action=skill:161 effect=1:0
+  choice 1 0 weight=30 action=skill:DIARAMA effect=1:0
   choice 1 1 weight=30 action=special:0
-  choice 1 2 weight=20 action=skill:76
-  choice 1 4 weight=20 action=skill:73
-  choice 2 0 action=skill:75
-  choice 2 2 weight=50 action=skill:73
+  choice 1 2 weight=20 action=skill:DORMINA
+  choice 1 4 weight=20 action=skill:MAKAJAM
+  choice 2 0 action=skill:DREAM_HAZE
+  choice 2 2 weight=50 action=skill:MAKAJAM
   choice 2 3 weight=50 action=special:0
-  choice 3 1 weight=10 action=skill:76
-  choice 3 2 weight=30 action=skill:73
+  choice 3 1 weight=10 action=skill:DORMINA
+  choice 3 2 weight=30 action=skill:MAKAJAM
   choice 3 3 weight=60 action=special:0
 end
 
 enemy-ai 53
   decision 0 predicates=12:44,12:77,2:99 routes=8,8,8,3,1,2,8,8
-  choice 0 0 weight=20 action=skill:20
-  choice 0 1 weight=20 action=skill:23
-  choice 0 2 weight=10 action=skill:161 effect=1:0
+  choice 0 0 weight=20 action=skill:ZIONGA
+  choice 0 1 weight=20 action=skill:MAZIONGA_017
+  choice 0 2 weight=10 action=skill:DIARAMA effect=1:0
   choice 0 3 weight=50 action=preset:1:44
-  choice 1 0 weight=30 action=skill:20
-  choice 1 1 weight=40 action=skill:23
-  choice 1 2 weight=30 action=skill:161 effect=1:0
-  choice 2 0 weight=50 action=skill:20
-  choice 2 1 weight=50 action=skill:23
-  choice 2 2 action=skill:161 effect=3:77
-  choice 3 0 weight=20 action=skill:20
-  choice 3 1 weight=30 action=skill:23
-  choice 3 2 weight=50 action=skill:161 effect=3:77
+  choice 1 0 weight=30 action=skill:ZIONGA
+  choice 1 1 weight=40 action=skill:MAZIONGA_017
+  choice 1 2 weight=30 action=skill:DIARAMA effect=1:0
+  choice 2 0 weight=50 action=skill:ZIONGA
+  choice 2 1 weight=50 action=skill:MAZIONGA_017
+  choice 2 2 action=skill:DIARAMA effect=3:77
+  choice 3 0 weight=20 action=skill:ZIONGA
+  choice 3 1 weight=30 action=skill:MAZIONGA_017
+  choice 3 2 weight=50 action=skill:DIARAMA effect=3:77
 end
 
 enemy-ai 54
   decision 0 predicates=36:0x1ffffe,5:4,9:4 routes=4,3,4,4,1,2,4,8
-  choice 0 0 weight=40 action=skill:11
-  choice 0 1 weight=10 action=skill:164
-  choice 0 2 weight=30 action=skill:350
+  choice 0 0 weight=40 action=skill:BUFULA
+  choice 0 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 0 2 weight=30 action=skill:FIRE_DRAIN
   choice 0 3 action=preset:1:54
   choice 0 4 weight=20 action=special:0
-  choice 1 0 weight=50 action=skill:11
-  choice 1 1 weight=20 action=skill:164
-  choice 1 2 action=skill:350
+  choice 1 0 weight=50 action=skill:BUFULA
+  choice 1 1 weight=20 action=skill:MEDIARAMA_0A4
+  choice 1 2 action=skill:FIRE_DRAIN
   choice 1 3 action=preset:1:54
   choice 1 4 weight=30 action=special:0
-  choice 2 0 weight=40 action=skill:11
-  choice 2 1 weight=10 action=skill:164
-  choice 2 2 weight=30 action=skill:350
+  choice 2 0 weight=40 action=skill:BUFULA
+  choice 2 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 2 2 weight=30 action=skill:FIRE_DRAIN
   choice 2 3 weight=20 action=preset:1:54
   choice 2 4 action=special:0
-  choice 3 0 weight=40 action=skill:11
-  choice 3 1 weight=10 action=skill:164
-  choice 3 2 action=skill:350
+  choice 3 0 weight=40 action=skill:BUFULA
+  choice 3 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 3 2 action=skill:FIRE_DRAIN
   choice 3 3 weight=30 action=preset:1:54
   choice 3 4 weight=20 action=special:0
   choice 4 0 weight=100 action=special:0 effect=2:4
@@ -1559,63 +1559,63 @@ end
 enemy-ai 55
   decision 0 predicates=1:50,48:12,23:0 routes=8,1,8,8,1,2,3,8
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=25 action=skill:87
-  choice 0 2 weight=25 action=skill:176
+  choice 0 1 weight=25 action=skill:ALLURE
+  choice 0 2 weight=25 action=skill:TARUNDA
   choice 1 0 weight=30 action=special:0
-  choice 1 1 weight=70 action=skill:87
-  choice 1 2 action=skill:176
+  choice 1 1 weight=70 action=skill:ALLURE
+  choice 1 2 action=skill:TARUNDA
   choice 2 0 weight=50 action=special:0
-  choice 2 1 weight=50 action=skill:87
-  choice 2 2 action=skill:176
+  choice 2 1 weight=50 action=skill:ALLURE
+  choice 2 2 action=skill:TARUNDA
   choice 3 0 weight=50 action=special:0
-  choice 3 1 action=skill:87
-  choice 3 2 weight=50 action=skill:176
+  choice 3 1 action=skill:ALLURE
+  choice 3 2 weight=50 action=skill:TARUNDA
 end
 
 enemy-ai 56
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=50 action=skill:113
+  choice 0 1 weight=50 action=skill:NEEDLE_RUSH
 end
 
 enemy-ai 57
   decision 0 predicates=23:0,12:53,none routes=8,8,8,8,1,2,8,8
-  choice 0 0 weight=5 action=skill:19
-  choice 0 1 weight=20 action=skill:48
-  choice 0 2 weight=5 action=skill:160 effect=1:0
+  choice 0 0 weight=5 action=skill:ZIO
+  choice 0 1 weight=20 action=skill:MEGIDOLAON_030
+  choice 0 2 weight=5 action=skill:DIA effect=1:0
   choice 0 3 weight=70 action=preset:1:53
-  choice 1 0 action=skill:19
-  choice 1 1 weight=100 action=skill:48
-  choice 1 2 action=skill:160 effect=1:0
+  choice 1 0 action=skill:ZIO
+  choice 1 1 weight=100 action=skill:MEGIDOLAON_030
+  choice 1 2 action=skill:DIA effect=1:0
   choice 1 3 action=special:1
   choice 2 0 weight=100 action=special:1 effect=12:0
 end
 
 enemy-ai 58
   decision 0 predicates=1:99,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=30 action=skill:30
-  choice 0 1 weight=20 action=skill:121
+  choice 0 0 weight=30 action=skill:ZANDYNE
+  choice 0 1 weight=20 action=skill:HELL_THRUST
   choice 0 2 weight=50 action=special:0
-  choice 1 0 weight=25 action=skill:30
-  choice 1 1 weight=25 action=skill:121
-  choice 1 2 weight=25 action=skill:85
+  choice 1 0 weight=25 action=skill:ZANDYNE
+  choice 1 1 weight=25 action=skill:HELL_THRUST
+  choice 1 2 weight=25 action=skill:SONIC_WAVE
   choice 1 3 weight=25 action=special:0
 end
 
 enemy-ai 59
   decision 0 predicates=1:25,36:0x1ffffe,9:2048 routes=2,1,2,2,1,3,2,8
-  choice 0 0 weight=25 action=skill:42
-  choice 0 1 weight=25 action=skill:137
-  choice 0 2 weight=25 action=skill:360
+  choice 0 0 weight=25 action=skill:MATERADYNE_02A
+  choice 0 1 weight=25 action=skill:GATE_OF_HELL
+  choice 0 2 weight=25 action=skill:EARTH_REPEL
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=25 action=skill:137
-  choice 1 1 weight=25 action=skill:53
-  choice 1 2 weight=25 action=skill:49
+  choice 1 0 weight=25 action=skill:GATE_OF_HELL
+  choice 1 1 weight=25 action=skill:DEATH_MARCH
+  choice 1 2 weight=25 action=skill:HP_THIEF_031
   choice 1 3 weight=25 action=special:0
-  choice 2 0 weight=80 action=skill:112 effect=2:2048
+  choice 2 0 weight=80 action=skill:BODY_RUSH effect=2:2048
   choice 2 1 weight=20 action=special:0 effect=2:2048
-  choice 3 0 weight=33 action=skill:42
-  choice 3 1 weight=33 action=skill:137
-  choice 3 2 action=skill:360
+  choice 3 0 weight=33 action=skill:MATERADYNE_02A
+  choice 3 1 weight=33 action=skill:GATE_OF_HELL
+  choice 3 2 action=skill:EARTH_REPEL
   choice 3 3 weight=34 action=special:0
 end
 
@@ -1625,97 +1625,97 @@ end
 
 enemy-ai 61
   decision 0 predicates=24:20,24:5,none routes=8,2,8,8,1,2,8,8
-  choice 0 0 weight=30 action=skill:32
-  choice 0 1 weight=30 action=skill:30
-  choice 0 2 weight=30 action=skill:87
+  choice 0 0 weight=30 action=skill:MAZANMA_020
+  choice 0 1 weight=30 action=skill:ZANDYNE
+  choice 0 2 weight=30 action=skill:ALLURE
   choice 0 3 weight=10 action=special:0
-  choice 1 0 weight=80 action=skill:50
+  choice 1 0 weight=80 action=skill:MP_THIEF_032
   choice 1 1 weight=20 action=special:0
-  choice 2 0 weight=60 action=skill:87
+  choice 2 0 weight=60 action=skill:ALLURE
   choice 2 1 weight=40 action=special:0
 end
 
 enemy-ai 62
   decision 0 predicates=1:50,36:0x1ffffe,5:2 routes=2,3,1,0,4,0,0,8
-  choice 0 0 weight=25 action=skill:21
-  choice 0 1 weight=25 action=skill:24
-  choice 0 2 weight=25 action=skill:25
+  choice 0 0 weight=25 action=skill:ZIODYNE
+  choice 0 1 weight=25 action=skill:MAZIODYNE_018
+  choice 0 2 weight=25 action=skill:BOLT_FLARE
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=22 action=skill:21
-  choice 1 1 weight=22 action=skill:24
-  choice 1 2 weight=22 action=skill:66
-  choice 1 3 weight=22 action=skill:359
+  choice 1 0 weight=22 action=skill:ZIODYNE
+  choice 1 1 weight=22 action=skill:MAZIODYNE_018
+  choice 1 2 weight=22 action=skill:MUDOON
+  choice 1 3 weight=22 action=skill:FORCE_REPEL
   choice 1 4 weight=12 action=preset:1:62
-  choice 2 0 weight=29 action=skill:21
-  choice 2 1 weight=28 action=skill:24
-  choice 2 2 weight=28 action=skill:68
+  choice 2 0 weight=29 action=skill:ZIODYNE
+  choice 2 1 weight=28 action=skill:MAZIODYNE_018
+  choice 2 2 weight=28 action=skill:MAMUDOON_044
   choice 2 3 weight=15 action=preset:1:62
-  choice 3 0 weight=33 action=skill:21
-  choice 3 1 weight=33 action=skill:24
-  choice 3 2 weight=34 action=skill:66
-  choice 4 0 weight=25 action=skill:21
-  choice 4 1 weight=25 action=skill:24
-  choice 4 2 weight=25 action=skill:68
-  choice 4 3 weight=25 action=skill:359
+  choice 3 0 weight=33 action=skill:ZIODYNE
+  choice 3 1 weight=33 action=skill:MAZIODYNE_018
+  choice 3 2 weight=34 action=skill:MUDOON
+  choice 4 0 weight=25 action=skill:ZIODYNE
+  choice 4 1 weight=25 action=skill:MAZIODYNE_018
+  choice 4 2 weight=25 action=skill:MAMUDOON_044
+  choice 4 3 weight=25 action=skill:FORCE_REPEL
 end
 
 enemy-ai 63 script=AI_Tooto
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=50 action=skill:20
-  choice 0 1 weight=20 action=skill:24
-  choice 0 2 weight=10 action=skill:57
-  choice 0 3 weight=20 action=skill:362
-  choice 1 0 weight=60 action=skill:20
-  choice 1 1 weight=30 action=skill:24
-  choice 1 2 weight=10 action=skill:57
-  choice 1 3 action=skill:362
+  choice 0 0 weight=50 action=skill:ZIONGA
+  choice 0 1 weight=20 action=skill:MAZIODYNE_018
+  choice 0 2 weight=10 action=skill:VANITY_039
+  choice 0 3 weight=20 action=skill:DEATH_REPEL
+  choice 1 0 weight=60 action=skill:ZIONGA
+  choice 1 1 weight=30 action=skill:MAZIODYNE_018
+  choice 1 2 weight=10 action=skill:VANITY_039
+  choice 1 3 action=skill:DEATH_REPEL
   choice 5 0 action=special:0
-  choice 5 1 action=skill:2
-  choice 5 2 action=skill:4
-  choice 5 3 weight=100 action=skill:58
-  choice 5 4 action=skill:73
+  choice 5 1 action=skill:AGILAO
+  choice 5 2 action=skill:MARAGI_004
+  choice 5 3 weight=100 action=skill:REVERT
+  choice 5 4 action=skill:MAKAJAM
 end
 
 enemy-ai 64 script=AllEscape_MeriBeru
   decision 0 predicates=36:0x1ffffe,1:50,23:0 routes=8,2,8,8,1,2,3,8
-  choice 0 0 weight=25 action=skill:65
-  choice 0 1 weight=25 action=skill:115
-  choice 0 2 weight=25 action=skill:128
-  choice 0 3 weight=25 action=skill:353
-  choice 1 0 weight=30 action=skill:65
-  choice 1 1 weight=30 action=skill:115
-  choice 1 2 weight=40 action=skill:128
-  choice 1 3 action=skill:353
-  choice 2 0 weight=25 action=skill:65
-  choice 2 1 weight=25 action=skill:115
-  choice 2 2 action=skill:128
-  choice 2 3 action=skill:353
-  choice 2 4 weight=50 action=skill:49
-  choice 3 0 action=skill:65
-  choice 3 1 weight=40 action=skill:115
-  choice 3 2 weight=30 action=skill:128
-  choice 3 3 weight=30 action=skill:353
+  choice 0 0 weight=25 action=skill:MUDO
+  choice 0 1 weight=25 action=skill:VENOM_CLAW
+  choice 0 2 weight=25 action=skill:DEATH_BLOW
+  choice 0 3 weight=25 action=skill:FORCE_DRAIN
+  choice 1 0 weight=30 action=skill:MUDO
+  choice 1 1 weight=30 action=skill:VENOM_CLAW
+  choice 1 2 weight=40 action=skill:DEATH_BLOW
+  choice 1 3 action=skill:FORCE_DRAIN
+  choice 2 0 weight=25 action=skill:MUDO
+  choice 2 1 weight=25 action=skill:VENOM_CLAW
+  choice 2 2 action=skill:DEATH_BLOW
+  choice 2 3 action=skill:FORCE_DRAIN
+  choice 2 4 weight=50 action=skill:HP_THIEF_031
+  choice 3 0 action=skill:MUDO
+  choice 3 1 weight=40 action=skill:VENOM_CLAW
+  choice 3 2 weight=30 action=skill:DEATH_BLOW
+  choice 3 3 weight=30 action=skill:FORCE_DRAIN
 end
 
 enemy-ai 65
   decision 0 predicates=42:449,5:2,48:12 routes=1,2,2,2,1,2,3,8
-  choice 0 0 weight=20 action=skill:38
-  choice 0 1 weight=20 action=skill:2
-  choice 0 2 weight=20 action=skill:176
-  choice 0 3 weight=20 action=skill:121
-  choice 0 4 weight=20 action=skill:43
-  choice 1 0 weight=30 action=skill:449
-  choice 1 1 weight=20 action=skill:121
-  choice 1 2 weight=30 action=skill:43
-  choice 1 3 weight=20 action=skill:2
-  choice 2 0 weight=25 action=skill:38
-  choice 2 1 weight=25 action=skill:2
-  choice 2 2 action=skill:176
-  choice 2 3 weight=40 action=skill:121
+  choice 0 0 weight=20 action=skill:TERAZI
+  choice 0 1 weight=20 action=skill:AGILAO
+  choice 0 2 weight=20 action=skill:TARUNDA
+  choice 0 3 weight=20 action=skill:HELL_THRUST
+  choice 0 4 weight=20 action=skill:AVALANCHE
+  choice 1 0 weight=30 action=skill:MATERAZI_1C1
+  choice 1 1 weight=20 action=skill:HELL_THRUST
+  choice 1 2 weight=30 action=skill:AVALANCHE
+  choice 1 3 weight=20 action=skill:AGILAO
+  choice 2 0 weight=25 action=skill:TERAZI
+  choice 2 1 weight=25 action=skill:AGILAO
+  choice 2 2 action=skill:TARUNDA
+  choice 2 3 weight=40 action=skill:HELL_THRUST
   choice 2 4 weight=10 action=preset:1:65
-  choice 3 0 weight=40 action=skill:2
-  choice 3 1 action=skill:176
-  choice 3 2 weight=40 action=skill:121
+  choice 3 0 weight=40 action=skill:AGILAO
+  choice 3 1 action=skill:TARUNDA
+  choice 3 2 weight=40 action=skill:HELL_THRUST
   choice 3 3 weight=20 action=preset:1:65
 end
 
@@ -1723,79 +1723,79 @@ enemy-ai 66
   decision 0 predicates=1:20,2:20,none routes=8,1,8,8,1,1,8,8
   decision 1 predicates=none,none,none routes=8,1,8,8,1,1,8,8
   choice 0 0 weight=30 action=special:0
-  choice 0 1 weight=30 action=skill:112
-  choice 0 2 weight=40 action=skill:60
-  choice 0 3 action=skill:161 effect=1:0
+  choice 0 1 weight=30 action=skill:BODY_RUSH
+  choice 0 2 weight=40 action=skill:HAMA
+  choice 0 3 action=skill:DIARAMA effect=1:0
   choice 1 0 weight=20 action=special:0
-  choice 1 1 weight=20 action=skill:112
-  choice 1 2 weight=40 action=skill:60
-  choice 1 3 weight=20 action=skill:161 effect=1:0
+  choice 1 1 weight=20 action=skill:BODY_RUSH
+  choice 1 2 weight=40 action=skill:HAMA
+  choice 1 3 weight=20 action=skill:DIARAMA effect=1:0
 end
 
 enemy-ai 67
   decision 0 predicates=1:50,36:0x1ffffe,none routes=8,2,8,8,1,2,8,8
-  choice 0 0 weight=30 action=skill:21
-  choice 0 1 weight=30 action=skill:23
-  choice 0 2 weight=20 action=skill:83
+  choice 0 0 weight=30 action=skill:ZIODYNE
+  choice 0 1 weight=30 action=skill:MAZIONGA_017
+  choice 0 2 weight=20 action=skill:PULINPA
   choice 0 3 weight=20 action=special:0
-  choice 1 0 weight=30 action=skill:21
-  choice 1 1 weight=30 action=skill:23
-  choice 1 2 weight=40 action=skill:354
-  choice 2 0 weight=30 action=skill:21
-  choice 2 1 weight=30 action=skill:23
+  choice 1 0 weight=30 action=skill:ZIODYNE
+  choice 1 1 weight=30 action=skill:MAZIONGA_017
+  choice 1 2 weight=40 action=skill:EARTH_DRAIN
+  choice 2 0 weight=30 action=skill:ZIODYNE
+  choice 2 1 weight=30 action=skill:MAZIONGA_017
   choice 2 2 weight=40 action=special:0
 end
 
 enemy-ai 68 script=AllEscape_MeriBeru
   decision 0 predicates=36:0x1ffffe,50:11,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=20 action=skill:124
-  choice 0 1 weight=20 action=skill:37
-  choice 0 2 weight=30 action=skill:86
-  choice 0 3 weight=10 action=skill:182
-  choice 0 4 weight=20 action=skill:339
-  choice 1 0 weight=30 action=skill:124
-  choice 1 1 weight=20 action=skill:37
-  choice 1 2 weight=40 action=skill:38
-  choice 1 3 weight=10 action=skill:182
-  choice 1 4 action=skill:339
-  choice 2 0 weight=40 action=skill:124
-  choice 2 1 weight=20 action=skill:37
-  choice 2 2 weight=20 action=skill:38
-  choice 2 3 action=skill:182
-  choice 2 4 weight=20 action=skill:339
-  choice 3 0 weight=40 action=skill:124
-  choice 3 1 weight=30 action=skill:37
-  choice 3 2 weight=30 action=skill:38
-  choice 3 3 action=skill:182
-  choice 3 4 action=skill:339
+  choice 0 0 weight=20 action=skill:CHARM_SLASH
+  choice 0 1 weight=20 action=skill:TERA
+  choice 0 2 weight=30 action=skill:MARIN_KARIN
+  choice 0 3 weight=10 action=skill:SUKUKAJA
+  choice 0 4 weight=20 action=skill:VOID_ELEC
+  choice 1 0 weight=30 action=skill:CHARM_SLASH
+  choice 1 1 weight=20 action=skill:TERA
+  choice 1 2 weight=40 action=skill:TERAZI
+  choice 1 3 weight=10 action=skill:SUKUKAJA
+  choice 1 4 action=skill:VOID_ELEC
+  choice 2 0 weight=40 action=skill:CHARM_SLASH
+  choice 2 1 weight=20 action=skill:TERA
+  choice 2 2 weight=20 action=skill:TERAZI
+  choice 2 3 action=skill:SUKUKAJA
+  choice 2 4 weight=20 action=skill:VOID_ELEC
+  choice 3 0 weight=40 action=skill:CHARM_SLASH
+  choice 3 1 weight=30 action=skill:TERA
+  choice 3 2 weight=30 action=skill:TERAZI
+  choice 3 3 action=skill:SUKUKAJA
+  choice 3 4 action=skill:VOID_ELEC
 end
 
 enemy-ai 69 flags=0x8 script=AllEscape_MeriBeru
   decision 0 predicates=1:10,36:0x1ffffe,48:12 routes=4,2,3,4,1,2,3,8
-  choice 0 0 weight=25 action=skill:177
-  choice 0 1 weight=10 action=skill:23
-  choice 0 2 weight=25 action=skill:123
-  choice 0 3 weight=10 action=skill:337
+  choice 0 0 weight=25 action=skill:SUKUNDA
+  choice 0 1 weight=10 action=skill:MAZIONGA_017
+  choice 0 2 weight=25 action=skill:COMATOSE
+  choice 0 3 weight=10 action=skill:VOID_FIRE
   choice 0 4 weight=30 action=special:0
-  choice 1 0 weight=10 action=skill:177
-  choice 1 1 weight=35 action=skill:23
-  choice 1 2 weight=15 action=skill:123
-  choice 1 3 weight=5 action=skill:337
+  choice 1 0 weight=10 action=skill:SUKUNDA
+  choice 1 1 weight=35 action=skill:MAZIONGA_017
+  choice 1 2 weight=15 action=skill:COMATOSE
+  choice 1 3 weight=5 action=skill:VOID_FIRE
   choice 1 4 weight=35 action=special:0
-  choice 2 0 weight=20 action=skill:177
-  choice 2 1 weight=20 action=skill:23
-  choice 2 2 weight=30 action=skill:123
-  choice 2 3 action=skill:337
+  choice 2 0 weight=20 action=skill:SUKUNDA
+  choice 2 1 weight=20 action=skill:MAZIONGA_017
+  choice 2 2 weight=30 action=skill:COMATOSE
+  choice 2 3 action=skill:VOID_FIRE
   choice 2 4 weight=30 action=special:0
-  choice 3 0 action=skill:177
-  choice 3 1 weight=30 action=skill:23
-  choice 3 2 weight=20 action=skill:123
-  choice 3 3 weight=20 action=skill:337
+  choice 3 0 action=skill:SUKUNDA
+  choice 3 1 weight=30 action=skill:MAZIONGA_017
+  choice 3 2 weight=20 action=skill:COMATOSE
+  choice 3 3 weight=20 action=skill:VOID_FIRE
   choice 3 4 weight=30 action=special:0
-  choice 4 0 action=skill:177
-  choice 4 1 weight=30 action=skill:23
-  choice 4 2 weight=30 action=skill:123
-  choice 4 3 action=skill:337
+  choice 4 0 action=skill:SUKUNDA
+  choice 4 1 weight=30 action=skill:MAZIONGA_017
+  choice 4 2 weight=30 action=skill:COMATOSE
+  choice 4 3 action=skill:VOID_FIRE
   choice 4 4 weight=40 action=special:0
 end
 
@@ -1804,95 +1804,95 @@ enemy-ai 70
   decision 1 predicates=2:40,34:70,12:70 routes=8,1,8,8,6,0,0,1
   decision 2 predicates=36:6,31:6,none routes=8,8,8,8,0,2,8,2
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=15 action=skill:22
-  choice 0 2 weight=5 action=skill:164
-  choice 0 3 weight=30 action=skill:192
+  choice 0 1 weight=15 action=skill:MAZIO_016
+  choice 0 2 weight=5 action=skill:MEDIARAMA_0A4
+  choice 0 3 weight=30 action=skill:POWER_CHARGE
   choice 1 0 weight=20 action=special:0
-  choice 1 1 weight=10 action=skill:22
-  choice 1 2 weight=60 action=skill:164
-  choice 1 3 weight=10 action=skill:192
-  choice 2 0 weight=40 action=skill:354
+  choice 1 1 weight=10 action=skill:MAZIO_016
+  choice 1 2 weight=60 action=skill:MEDIARAMA_0A4
+  choice 1 3 weight=10 action=skill:POWER_CHARGE
+  choice 2 0 weight=40 action=skill:EARTH_DRAIN
   choice 2 1 weight=30 action=special:0
-  choice 2 2 weight=30 action=skill:22
+  choice 2 2 weight=30 action=skill:MAZIO_016
   choice 3 0 weight=15 action=special:0
-  choice 3 1 weight=85 action=skill:192
+  choice 3 1 weight=85 action=skill:POWER_CHARGE
   choice 4 0 weight=100 action=special:0
   choice 5 0 weight=40 action=special:0
-  choice 5 1 weight=30 action=skill:22
-  choice 5 2 action=skill:163
-  choice 5 3 weight=30 action=skill:192
+  choice 5 1 weight=30 action=skill:MAZIO_016
+  choice 5 2 action=skill:MEDIA_0A3
+  choice 5 3 weight=30 action=skill:POWER_CHARGE
   choice 6 0 weight=60 action=special:0
-  choice 6 1 weight=10 action=skill:22
-  choice 6 2 weight=20 action=skill:164
-  choice 6 3 weight=10 action=skill:192
+  choice 6 1 weight=10 action=skill:MAZIO_016
+  choice 6 2 weight=20 action=skill:MEDIARAMA_0A4
+  choice 6 3 weight=10 action=skill:POWER_CHARGE
 end
 
 enemy-ai 71
   decision 0 predicates=1:50,5:2,none routes=3,2,8,8,1,8,8,8
-  choice 0 0 weight=20 action=skill:19
-  choice 0 1 weight=40 action=skill:20
-  choice 0 2 weight=40 action=skill:118
-  choice 1 0 weight=40 action=skill:118
+  choice 0 0 weight=20 action=skill:ZIO
+  choice 0 1 weight=40 action=skill:ZIONGA
+  choice 0 2 weight=40 action=skill:STUN_NEEDLE
+  choice 1 0 weight=40 action=skill:STUN_NEEDLE
   choice 1 1 action=preset:1:28
   choice 1 2 weight=20 action=special:0
-  choice 1 3 weight=40 action=skill:20
-  choice 2 0 weight=30 action=skill:118
+  choice 1 3 weight=40 action=skill:ZIONGA
+  choice 2 0 weight=30 action=skill:STUN_NEEDLE
   choice 2 1 weight=10 action=preset:1:28
   choice 2 2 weight=20 action=special:0
-  choice 2 3 weight=40 action=skill:20
+  choice 2 3 weight=40 action=skill:ZIONGA
 end
 
 enemy-ai 72
   decision 1 predicates=5:1,29:13,23:0 routes=5,8,3,8,1,3,3,8
   decision 2 predicates=none,1:30,1:50 routes=8,8,8,8,8,2,4,8
   choice 0 0 weight=80 action=special:0
-  choice 0 1 action=skill:179
-  choice 0 2 weight=20 action=skill:10
+  choice 0 1 action=skill:MAKANDA
+  choice 0 2 weight=20 action=skill:BUFU
   choice 1 0 weight=10 action=special:0
-  choice 1 1 action=skill:179
-  choice 1 2 weight=80 action=skill:13
-  choice 1 3 weight=10 action=skill:10
+  choice 1 1 action=skill:MAKANDA
+  choice 1 2 weight=80 action=skill:MABUFU_00D
+  choice 1 3 weight=10 action=skill:BUFU
   choice 2 0 weight=10 action=special:0
-  choice 2 1 action=skill:179
-  choice 2 2 weight=30 action=skill:13
-  choice 2 3 weight=60 action=skill:10
+  choice 2 1 action=skill:MAKANDA
+  choice 2 2 weight=30 action=skill:MABUFU_00D
+  choice 2 3 weight=60 action=skill:BUFU
   choice 3 0 weight=60 action=special:0
-  choice 3 1 weight=40 action=skill:10
+  choice 3 1 weight=40 action=skill:BUFU
   choice 4 0 weight=30 action=special:0
-  choice 4 1 action=skill:179
-  choice 4 2 weight=20 action=skill:13
-  choice 4 3 weight=50 action=skill:10
+  choice 4 1 action=skill:MAKANDA
+  choice 4 2 weight=20 action=skill:MABUFU_00D
+  choice 4 3 weight=50 action=skill:BUFU
   choice 5 0 weight=10 action=special:0
-  choice 5 1 action=skill:179
-  choice 5 2 weight=60 action=skill:13
-  choice 5 3 weight=30 action=skill:10
+  choice 5 1 action=skill:MAKANDA
+  choice 5 2 weight=60 action=skill:MABUFU_00D
+  choice 5 3 weight=30 action=skill:BUFU
   choice 6 0 weight=100 action=special:0
 end
 
 enemy-ai 73
   decision 0 predicates=36:0x1ffffe,50:11,5:2 routes=2,3,2,4,1,3,2,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,8,8,8,8
-  choice 0 0 weight=25 action=skill:16
-  choice 0 1 weight=25 action=skill:184
-  choice 0 2 weight=25 action=skill:352
-  choice 0 3 weight=25 action=skill:353
+  choice 0 0 weight=25 action=skill:FROST_BREATH
+  choice 0 1 weight=25 action=skill:MAKAKAJA
+  choice 0 2 weight=25 action=skill:ELEC_DRAIN
+  choice 0 3 weight=25 action=skill:FORCE_DRAIN
   choice 0 4 action=preset:1:73
-  choice 1 0 weight=50 action=skill:16
-  choice 1 1 weight=50 action=skill:184
-  choice 1 2 action=skill:352
-  choice 1 3 action=skill:353
+  choice 1 0 weight=50 action=skill:FROST_BREATH
+  choice 1 1 weight=50 action=skill:MAKAKAJA
+  choice 1 2 action=skill:ELEC_DRAIN
+  choice 1 3 action=skill:FORCE_DRAIN
   choice 1 4 action=preset:1:73
-  choice 2 0 weight=40 action=skill:16
-  choice 2 1 weight=40 action=skill:184
-  choice 2 2 action=skill:352
-  choice 2 3 action=skill:353
+  choice 2 0 weight=40 action=skill:FROST_BREATH
+  choice 2 1 weight=40 action=skill:MAKAKAJA
+  choice 2 2 action=skill:ELEC_DRAIN
+  choice 2 3 action=skill:FORCE_DRAIN
   choice 2 4 weight=20 action=preset:1:73
-  choice 3 0 weight=40 action=skill:11
-  choice 3 1 weight=30 action=skill:16
+  choice 3 0 weight=40 action=skill:BUFULA
+  choice 3 1 weight=30 action=skill:FROST_BREATH
   choice 3 2 weight=30 action=special:0
   choice 3 3 action=preset:1:73
-  choice 4 0 weight=30 action=skill:11
-  choice 4 1 weight=30 action=skill:16
+  choice 4 0 weight=30 action=skill:BUFULA
+  choice 4 1 weight=30 action=skill:FROST_BREATH
   choice 4 2 weight=30 action=special:0
   choice 4 3 weight=10 action=preset:1:73
   choice 5 0 weight=100 action=special:1
@@ -1903,135 +1903,135 @@ enemy-ai 74
   decision 1 predicates=5:1,23:0,1:20 routes=8,8,0,8,1,3,8,8
   decision 2 predicates=2:40,34:74,12:74 routes=8,6,8,8,0,1,1,6
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=20 action=skill:160 effect=1:0
-  choice 0 2 weight=20 action=skill:75
-  choice 0 3 weight=10 action=skill:37
+  choice 0 1 weight=20 action=skill:DIA effect=1:0
+  choice 0 2 weight=20 action=skill:DREAM_HAZE
+  choice 0 3 weight=10 action=skill:TERA
   choice 1 0 weight=60 action=special:0
-  choice 1 1 weight=20 action=skill:75
-  choice 1 2 weight=5 action=skill:160 effect=1:0
-  choice 1 3 weight=15 action=skill:37
-  choice 2 0 weight=60 action=skill:160 effect=1:0
-  choice 2 1 weight=10 action=skill:75
+  choice 1 1 weight=20 action=skill:DREAM_HAZE
+  choice 1 2 weight=5 action=skill:DIA effect=1:0
+  choice 1 3 weight=15 action=skill:TERA
+  choice 2 0 weight=60 action=skill:DIA effect=1:0
+  choice 2 1 weight=10 action=skill:DREAM_HAZE
   choice 2 2 weight=15 action=special:0
-  choice 2 3 weight=15 action=skill:37
+  choice 2 3 weight=15 action=skill:TERA
   choice 3 0 weight=60 action=special:0
-  choice 3 1 weight=10 action=skill:37
-  choice 3 2 weight=30 action=skill:75
-  choice 3 3 action=skill:160 effect=1:0
+  choice 3 1 weight=10 action=skill:TERA
+  choice 3 2 weight=30 action=skill:DREAM_HAZE
+  choice 3 3 action=skill:DIA effect=1:0
   choice 4 0 weight=80 action=special:0
-  choice 4 1 weight=10 action=skill:37
-  choice 4 2 weight=10 action=skill:75
-  choice 4 3 weight=5 action=skill:160 effect=1:0
-  choice 5 0 weight=90 action=skill:160 effect=3:40
+  choice 4 1 weight=10 action=skill:TERA
+  choice 4 2 weight=10 action=skill:DREAM_HAZE
+  choice 4 3 weight=5 action=skill:DIA effect=1:0
+  choice 5 0 weight=90 action=skill:DIA effect=3:40
   choice 5 1 weight=10 action=special:0
-  choice 6 0 weight=70 action=skill:160 effect=1:0
-  choice 6 1 weight=15 action=skill:75
+  choice 6 0 weight=70 action=skill:DIA effect=1:0
+  choice 6 1 weight=15 action=skill:DREAM_HAZE
   choice 6 2 weight=10 action=special:0
-  choice 6 3 weight=5 action=skill:37
+  choice 6 3 weight=5 action=skill:TERA
 end
 
 enemy-ai 75
   decision 0 predicates=42:511,35:0x100618,56:0 routes=1,1,1,2,1,2,2,8
   decision 1 predicates=5:2,none,none routes=8,8,8,8,3,8,8,8
-  choice 0 0 weight=48 action=skill:1
-  choice 0 1 weight=2 action=skill:68
-  choice 0 2 weight=47 action=skill:10
-  choice 0 3 weight=2 action=skill:63
-  choice 0 4 weight=1 action=skill:52
-  choice 1 0 weight=13 action=skill:1
-  choice 1 1 weight=12 action=skill:68
-  choice 1 2 weight=13 action=skill:10
-  choice 1 3 weight=12 action=skill:63
-  choice 1 4 weight=50 action=skill:511
+  choice 0 0 weight=48 action=skill:AGI
+  choice 0 1 weight=2 action=skill:MAMUDOON_044
+  choice 0 2 weight=47 action=skill:BUFU
+  choice 0 3 weight=2 action=skill:MAHAMAON_03F
+  choice 0 4 weight=1 action=skill:LAST_WORD
+  choice 1 0 weight=13 action=skill:AGI
+  choice 1 1 weight=12 action=skill:MAMUDOON_044
+  choice 1 2 weight=13 action=skill:BUFU
+  choice 1 3 weight=12 action=skill:MAHAMAON_03F
+  choice 1 4 weight=50 action=skill:MEGIDOLAON_1FF
   choice 2 0 weight=55 action=special:0
-  choice 2 1 weight=45 action=skill:52
-  choice 3 0 weight=43 action=skill:1
-  choice 3 1 weight=2 action=skill:68
-  choice 3 2 weight=43 action=skill:10
-  choice 3 3 weight=2 action=skill:63
+  choice 2 1 weight=45 action=skill:LAST_WORD
+  choice 3 0 weight=43 action=skill:AGI
+  choice 3 1 weight=2 action=skill:MAMUDOON_044
+  choice 3 2 weight=43 action=skill:BUFU
+  choice 3 3 weight=2 action=skill:MAHAMAON_03F
   choice 3 4 weight=10 action=preset:1:75
 end
 
 enemy-ai 76
   decision 0 predicates=36:0x1ffffe,1:10,none routes=8,1,8,8,1,2,8,8
-  choice 0 0 weight=100 action=skill:356
-  choice 1 0 weight=33 action=skill:62
-  choice 1 1 weight=33 action=skill:61
+  choice 0 0 weight=100 action=skill:FIRE_REPEL
+  choice 1 0 weight=33 action=skill:MAHAMA_03E
+  choice 1 1 weight=33 action=skill:HAMAON
   choice 1 2 weight=34 action=special:0
-  choice 2 0 weight=33 action=skill:63
-  choice 2 1 weight=33 action=skill:61
+  choice 2 0 weight=33 action=skill:MAHAMAON_03F
+  choice 2 1 weight=33 action=skill:HAMAON
   choice 2 2 weight=34 action=special:0
 end
 
 enemy-ai 77 script=girime_zako
   decision 0 predicates=none,none,23:0 routes=8,8,8,8,8,8,1,8
-  choice 0 0 weight=25 action=skill:132
-  choice 0 1 weight=25 action=skill:66
-  choice 0 2 weight=25 action=skill:3
+  choice 0 0 weight=25 action=skill:DEMON_RAGE
+  choice 0 1 weight=25 action=skill:MUDOON
+  choice 0 2 weight=25 action=skill:AGIDYNE
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=25 action=skill:132
-  choice 1 1 weight=25 action=skill:190
-  choice 1 2 weight=25 action=skill:3
+  choice 1 0 weight=25 action=skill:DEMON_RAGE
+  choice 1 1 weight=25 action=skill:DEBILITATE_0BE
+  choice 1 2 weight=25 action=skill:AGIDYNE
   choice 1 3 weight=25 action=special:0
 end
 
 enemy-ai 78
   decision 0 predicates=1:99,50:11,42:433 routes=3,1,3,2,1,2,8,8
   decision 1 predicates=14:10,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=50 action=skill:192
-  choice 0 1 weight=25 action=skill:30
-  choice 0 2 weight=25 action=skill:3
-  choice 1 0 weight=25 action=skill:120
-  choice 1 1 weight=25 action=skill:131
-  choice 1 2 weight=25 action=skill:161
+  choice 0 0 weight=50 action=skill:POWER_CHARGE
+  choice 0 1 weight=25 action=skill:ZANDYNE
+  choice 0 2 weight=25 action=skill:AGIDYNE
+  choice 1 0 weight=25 action=skill:DOUBLE_SLASH
+  choice 1 1 weight=25 action=skill:SKULL_CLEAVE
+  choice 1 2 weight=25 action=skill:DIARAMA
   choice 1 3 weight=25 action=special:0
-  choice 2 0 weight=50 action=skill:30
-  choice 2 1 weight=50 action=skill:3
-  choice 3 0 weight=50 action=skill:438
-  choice 3 1 weight=25 action=skill:131
-  choice 3 2 weight=25 action=skill:161
+  choice 2 0 weight=50 action=skill:ZANDYNE
+  choice 2 1 weight=50 action=skill:AGIDYNE
+  choice 3 0 weight=50 action=skill:MABUFUDYNE_1B6
+  choice 3 1 weight=25 action=skill:SKULL_CLEAVE
+  choice 3 2 weight=25 action=skill:DIARAMA
 end
 
 enemy-ai 79
   decision 0 predicates=36:0x1ffffe,42:446,none routes=8,1,8,8,1,2,1,8
-  choice 0 0 weight=60 action=skill:30
-  choice 0 1 weight=10 action=skill:344
-  choice 0 2 weight=10 action=skill:356
-  choice 0 3 weight=10 action=skill:360
-  choice 0 4 weight=10 action=skill:358
-  choice 1 0 weight=60 action=skill:30
-  choice 1 1 action=skill:344
-  choice 1 2 action=skill:356
-  choice 1 3 action=skill:360
+  choice 0 0 weight=60 action=skill:ZANDYNE
+  choice 0 1 weight=10 action=skill:VOID_CHARM
+  choice 0 2 weight=10 action=skill:FIRE_REPEL
+  choice 0 3 weight=10 action=skill:EARTH_REPEL
+  choice 0 4 weight=10 action=skill:ELEC_REPEL
+  choice 1 0 weight=60 action=skill:ZANDYNE
+  choice 1 1 action=skill:VOID_CHARM
+  choice 1 2 action=skill:FIRE_REPEL
+  choice 1 3 action=skill:EARTH_REPEL
   choice 1 4 weight=40 action=special:0
-  choice 2 0 weight=30 action=skill:30
-  choice 2 1 weight=50 action=skill:446
-  choice 2 2 action=skill:356
-  choice 2 3 action=skill:360
+  choice 2 0 weight=30 action=skill:ZANDYNE
+  choice 2 1 weight=50 action=skill:MAZANDYNE_1BE
+  choice 2 2 action=skill:FIRE_REPEL
+  choice 2 3 action=skill:EARTH_REPEL
   choice 2 4 weight=20 action=special:0
 end
 
 enemy-ai 80
   decision 0 predicates=36:0x1ffffe,1:99,23:0 routes=8,3,8,8,1,2,4,8
-  choice 0 0 weight=25 action=skill:46
-  choice 0 1 weight=25 action=skill:65
-  choice 0 2 weight=25 action=skill:353
+  choice 0 0 weight=25 action=skill:MEGIDO_02E
+  choice 0 1 weight=25 action=skill:MUDO
+  choice 0 2 weight=25 action=skill:FORCE_DRAIN
   choice 0 3 weight=25 action=special:0
-  choice 1 0 weight=30 action=skill:46
-  choice 1 1 weight=40 action=skill:65
-  choice 1 2 action=skill:353
+  choice 1 0 weight=30 action=skill:MEGIDO_02E
+  choice 1 1 weight=40 action=skill:MUDO
+  choice 1 2 action=skill:FORCE_DRAIN
   choice 1 3 weight=30 action=special:0
-  choice 2 0 weight=25 action=skill:70
-  choice 2 1 weight=25 action=skill:65
-  choice 2 2 weight=25 action=skill:67
-  choice 2 3 weight=25 action=skill:353
-  choice 3 0 weight=40 action=skill:70
-  choice 3 1 weight=30 action=skill:65
-  choice 3 2 weight=30 action=skill:67
-  choice 3 3 action=skill:353
-  choice 4 0 weight=30 action=skill:46
-  choice 4 1 action=skill:65
-  choice 4 2 weight=30 action=skill:353
+  choice 2 0 weight=25 action=skill:BLOOD_CURSE
+  choice 2 1 weight=25 action=skill:MUDO
+  choice 2 2 weight=25 action=skill:MAMUDO_043
+  choice 2 3 weight=25 action=skill:FORCE_DRAIN
+  choice 3 0 weight=40 action=skill:BLOOD_CURSE
+  choice 3 1 weight=30 action=skill:MUDO
+  choice 3 2 weight=30 action=skill:MAMUDO_043
+  choice 3 3 action=skill:FORCE_DRAIN
+  choice 4 0 weight=30 action=skill:MEGIDO_02E
+  choice 4 1 action=skill:MUDO
+  choice 4 2 weight=30 action=skill:FORCE_DRAIN
   choice 4 3 weight=40 action=special:0
 end
 
@@ -2039,228 +2039,228 @@ enemy-ai 81
   decision 0 predicates=42:438,none,none routes=8,8,8,8,1,8,8,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,8,8,8,8
   choice 0 0 weight=34 action=special:0
-  choice 0 1 weight=33 action=skill:12
-  choice 0 2 weight=33 action=skill:126
-  choice 1 0 weight=50 action=skill:438
+  choice 0 1 weight=33 action=skill:BUFUDYNE
+  choice 0 2 weight=33 action=skill:POWER_WAVE
+  choice 1 0 weight=50 action=skill:MABUFUDYNE_1B6
   choice 1 1 weight=20 action=special:0
-  choice 1 2 weight=20 action=skill:12
-  choice 1 3 weight=10 action=skill:126
-  choice 6 0 weight=100 action=skill:12
+  choice 1 2 weight=20 action=skill:BUFUDYNE
+  choice 1 3 weight=10 action=skill:POWER_WAVE
+  choice 6 0 weight=100 action=skill:BUFUDYNE
 end
 
 enemy-ai 82 script=AllEscape_MeriBeru
   decision 0 predicates=43:10,36:0x1ffffe,none routes=8,1,8,8,1,2,8,8
-  choice 0 0 weight=15 action=skill:135
-  choice 0 1 weight=20 action=skill:117
-  choice 0 2 weight=30 action=skill:192
-  choice 0 3 weight=5 action=skill:345
+  choice 0 0 weight=15 action=skill:VENOM_FANG
+  choice 0 1 weight=20 action=skill:DEATH_SPRAY
+  choice 0 2 weight=30 action=skill:POWER_CHARGE
+  choice 0 3 weight=5 action=skill:VOID_POISON
   choice 0 4 weight=30 action=special:0
-  choice 1 0 action=skill:135
-  choice 1 1 weight=50 action=skill:117
-  choice 1 2 action=skill:192
-  choice 1 3 action=skill:345
+  choice 1 0 action=skill:VENOM_FANG
+  choice 1 1 weight=50 action=skill:DEATH_SPRAY
+  choice 1 2 action=skill:POWER_CHARGE
+  choice 1 3 action=skill:VOID_POISON
   choice 1 4 weight=50 action=special:0
-  choice 2 0 weight=20 action=skill:135
-  choice 2 1 weight=20 action=skill:117
-  choice 2 2 weight=30 action=skill:192
-  choice 2 3 action=skill:345
+  choice 2 0 weight=20 action=skill:VENOM_FANG
+  choice 2 1 weight=20 action=skill:DEATH_SPRAY
+  choice 2 2 weight=30 action=skill:POWER_CHARGE
+  choice 2 3 action=skill:VOID_POISON
   choice 2 4 weight=30 action=special:0
 end
 
 enemy-ai 83
   decision 0 predicates=8:512,2:30,42:442 routes=8,1,1,2,1,2,3,8
-  choice 0 0 weight=70 action=skill:21
-  choice 0 1 action=skill:164
+  choice 0 0 weight=70 action=skill:ZIODYNE
+  choice 0 1 action=skill:MEDIARAMA_0A4
   choice 0 2 weight=30 action=special:0
-  choice 0 3 action=skill:167
-  choice 1 0 action=skill:21
-  choice 1 1 action=skill:164
+  choice 0 3 action=skill:ME_PATRA_0A7
+  choice 1 0 action=skill:ZIODYNE
+  choice 1 1 action=skill:MEDIARAMA_0A4
   choice 1 2 action=special:0
-  choice 1 3 weight=100 action=skill:167
-  choice 2 0 weight=50 action=skill:21
-  choice 2 1 weight=25 action=skill:164
+  choice 1 3 weight=100 action=skill:ME_PATRA_0A7
+  choice 2 0 weight=50 action=skill:ZIODYNE
+  choice 2 1 weight=25 action=skill:MEDIARAMA_0A4
   choice 2 2 weight=25 action=special:0
-  choice 2 3 action=skill:167
-  choice 3 0 weight=50 action=skill:442
-  choice 3 1 weight=30 action=skill:21
+  choice 2 3 action=skill:ME_PATRA_0A7
+  choice 3 0 weight=50 action=skill:MAZIODYNE_1BA
+  choice 3 1 weight=30 action=skill:ZIODYNE
   choice 3 2 weight=10 action=special:0
-  choice 3 3 weight=10 action=skill:164
+  choice 3 3 weight=10 action=skill:MEDIARAMA_0A4
 end
 
 enemy-ai 84
   decision 0 predicates=9:4,36:0x1ffffe,none routes=8,1,8,8,1,2,8,8
-  choice 0 0 weight=40 action=skill:11
-  choice 0 1 weight=20 action=skill:12
-  choice 0 2 weight=20 action=skill:16
-  choice 0 3 weight=20 action=skill:339
+  choice 0 0 weight=40 action=skill:BUFULA
+  choice 0 1 weight=20 action=skill:BUFUDYNE
+  choice 0 2 weight=20 action=skill:FROST_BREATH
+  choice 0 3 weight=20 action=skill:VOID_ELEC
   choice 1 0 weight=70 action=special:0 effect=2:4
-  choice 1 1 weight=30 action=skill:121 effect=2:4
-  choice 2 0 weight=40 action=skill:11
-  choice 2 1 weight=20 action=skill:12
-  choice 2 2 weight=40 action=skill:16
-  choice 2 3 action=skill:339
+  choice 1 1 weight=30 action=skill:HELL_THRUST effect=2:4
+  choice 2 0 weight=40 action=skill:BUFULA
+  choice 2 1 weight=20 action=skill:BUFUDYNE
+  choice 2 2 weight=40 action=skill:FROST_BREATH
+  choice 2 3 action=skill:VOID_ELEC
 end
 
 enemy-ai 85
   decision 0 predicates=1:40,5:2,none routes=8,1,8,8,2,8,8,8
-  choice 0 0 weight=20 action=skill:116
-  choice 0 1 weight=50 action=skill:40
-  choice 0 2 weight=30 action=skill:121
+  choice 0 0 weight=20 action=skill:RAVING_SLASH
+  choice 0 1 weight=50 action=skill:MATERA_028
+  choice 0 2 weight=30 action=skill:HELL_THRUST
   choice 0 3 action=preset:1:85
-  choice 1 0 action=skill:116
-  choice 1 1 weight=40 action=skill:40
-  choice 1 2 weight=40 action=skill:121
+  choice 1 0 action=skill:RAVING_SLASH
+  choice 1 1 weight=40 action=skill:MATERA_028
+  choice 1 2 weight=40 action=skill:HELL_THRUST
   choice 1 3 weight=20 action=preset:1:85
-  choice 2 0 action=skill:116
-  choice 2 1 weight=50 action=skill:40
-  choice 2 2 weight=50 action=skill:121
+  choice 2 0 action=skill:RAVING_SLASH
+  choice 2 1 weight=50 action=skill:MATERA_028
+  choice 2 2 weight=50 action=skill:HELL_THRUST
   choice 2 3 action=preset:1:85
 end
 
 enemy-ai 86
   decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,2,1,8,8
   decision 1 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=25 action=skill:66
-  choice 0 1 weight=25 action=skill:131
-  choice 0 2 weight=25 action=skill:342
-  choice 0 3 weight=25 action=skill:340
-  choice 1 0 weight=25 action=skill:53
-  choice 1 1 weight=25 action=skill:131
-  choice 1 2 weight=25 action=skill:342
-  choice 1 3 weight=25 action=skill:340
-  choice 2 0 weight=25 action=skill:66
-  choice 2 1 weight=75 action=skill:131
-  choice 2 2 action=skill:342
-  choice 2 3 action=skill:340
+  choice 0 0 weight=25 action=skill:MUDOON
+  choice 0 1 weight=25 action=skill:SKULL_CLEAVE
+  choice 0 2 weight=25 action=skill:VOID_EXPEL
+  choice 0 3 weight=25 action=skill:VOID_FORCE
+  choice 1 0 weight=25 action=skill:DEATH_MARCH
+  choice 1 1 weight=25 action=skill:SKULL_CLEAVE
+  choice 1 2 weight=25 action=skill:VOID_EXPEL
+  choice 1 3 weight=25 action=skill:VOID_FORCE
+  choice 2 0 weight=25 action=skill:MUDOON
+  choice 2 1 weight=75 action=skill:SKULL_CLEAVE
+  choice 2 2 action=skill:VOID_EXPEL
+  choice 2 3 action=skill:VOID_FORCE
   choice 2 4 action=special:0
-  choice 3 0 weight=20 action=skill:53
-  choice 3 1 weight=30 action=skill:131
-  choice 3 2 weight=40 action=skill:66
+  choice 3 0 weight=20 action=skill:DEATH_MARCH
+  choice 3 1 weight=30 action=skill:SKULL_CLEAVE
+  choice 3 2 weight=40 action=skill:MUDOON
   choice 3 3 weight=10 action=special:0
-  choice 6 0 action=skill:66
-  choice 6 1 weight=100 action=skill:131
-  choice 6 2 action=skill:342
-  choice 6 3 action=skill:340
+  choice 6 0 action=skill:MUDOON
+  choice 6 1 weight=100 action=skill:SKULL_CLEAVE
+  choice 6 2 action=skill:VOID_EXPEL
+  choice 6 3 action=skill:VOID_FORCE
 end
 
 enemy-ai 87
   decision 0 predicates=18:0,23:0,none routes=8,8,8,8,1,2,8,8
   choice 0 0 action=special:0
-  choice 0 1 weight=50 action=skill:192
-  choice 0 2 weight=50 action=skill:112
+  choice 0 1 weight=50 action=skill:POWER_CHARGE
+  choice 0 2 weight=50 action=skill:BODY_RUSH
   choice 1 0 action=special:0
-  choice 1 1 action=skill:192
-  choice 1 2 weight=50 action=skill:112
-  choice 1 3 weight=50 action=skill:119
+  choice 1 1 action=skill:POWER_CHARGE
+  choice 1 2 weight=50 action=skill:BODY_RUSH
+  choice 1 3 weight=50 action=skill:MAD_RUSH
   choice 2 0 action=special:0
-  choice 2 1 weight=100 action=skill:192
-  choice 2 2 action=skill:112
+  choice 2 1 weight=100 action=skill:POWER_CHARGE
+  choice 2 2 action=skill:BODY_RUSH
 end
 
 enemy-ai 88
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=20 action=skill:4
-  choice 0 2 weight=40 action=skill:338
+  choice 0 0 weight=20 action=skill:MARAGI_004
+  choice 0 2 weight=40 action=skill:VOID_ICE
   choice 0 3 weight=40 action=special:0
-  choice 1 0 weight=10 action=skill:4
-  choice 1 2 action=skill:338
+  choice 1 0 weight=10 action=skill:MARAGI_004
+  choice 1 2 action=skill:VOID_ICE
   choice 1 3 weight=90 action=special:0
 end
 
 enemy-ai 89
   decision 0 predicates=36:2,50:11,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=10 action=skill:182
-  choice 0 1 weight=20 action=skill:183
-  choice 0 2 weight=20 action=skill:184
-  choice 0 3 weight=25 action=skill:337
+  choice 0 0 weight=10 action=skill:SUKUKAJA
+  choice 0 1 weight=20 action=skill:RAKUKAJA
+  choice 0 2 weight=20 action=skill:MAKAKAJA
+  choice 0 3 weight=25 action=skill:VOID_FIRE
   choice 0 4 weight=25 action=special:0
-  choice 1 0 weight=5 action=skill:182
-  choice 1 1 weight=20 action=skill:183
-  choice 1 2 weight=40 action=skill:184
-  choice 1 3 action=skill:337
+  choice 1 0 weight=5 action=skill:SUKUKAJA
+  choice 1 1 weight=20 action=skill:RAKUKAJA
+  choice 1 2 weight=40 action=skill:MAKAKAJA
+  choice 1 3 action=skill:VOID_FIRE
   choice 1 4 weight=35 action=special:0
-  choice 2 0 action=skill:182
-  choice 2 1 action=skill:183
-  choice 2 2 action=skill:184
-  choice 2 3 weight=30 action=skill:337
+  choice 2 0 action=skill:SUKUKAJA
+  choice 2 1 action=skill:RAKUKAJA
+  choice 2 2 action=skill:MAKAKAJA
+  choice 2 3 weight=30 action=skill:VOID_FIRE
   choice 2 4 weight=70 action=special:0
-  choice 3 0 action=skill:182
-  choice 3 1 action=skill:183
-  choice 3 2 action=skill:184
-  choice 3 3 action=skill:337
+  choice 3 0 action=skill:SUKUKAJA
+  choice 3 1 action=skill:RAKUKAJA
+  choice 3 2 action=skill:MAKAKAJA
+  choice 3 3 action=skill:VOID_FIRE
   choice 3 4 weight=100 action=special:0
 end
 
 enemy-ai 90 script=AI_GOOL2
   decision 0 predicates=1:50,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=30 action=special:0
-  choice 0 1 weight=70 action=skill:112
+  choice 0 1 weight=70 action=skill:BODY_RUSH
   choice 1 0 weight=50 action=special:0
-  choice 1 1 weight=50 action=skill:115
-  choice 6 0 weight=80 action=skill:49
+  choice 1 1 weight=50 action=skill:VENOM_CLAW
+  choice 6 0 weight=80 action=skill:HP_THIEF_031
   choice 6 1 weight=20 action=special:0
 end
 
 enemy-ai 91
   decision 0 predicates=1:99,5:1,none routes=8,2,8,8,1,8,8,8
-  choice 0 0 weight=30 action=skill:398
-  choice 0 1 weight=35 action=skill:58
-  choice 0 2 weight=35 action=skill:382
-  choice 1 0 weight=35 action=skill:398
-  choice 1 1 weight=30 action=skill:58
-  choice 1 2 weight=25 action=skill:59
-  choice 1 3 weight=10 action=skill:382
-  choice 2 0 weight=30 action=skill:398
-  choice 2 1 weight=25 action=skill:58
-  choice 2 2 weight=15 action=skill:59
-  choice 2 3 weight=10 action=skill:382
+  choice 0 0 weight=30 action=skill:IMPALE
+  choice 0 1 weight=35 action=skill:REVERT
+  choice 0 2 weight=35 action=skill:ATTACK_17E
+  choice 1 0 weight=35 action=skill:IMPALE
+  choice 1 1 weight=30 action=skill:REVERT
+  choice 1 2 weight=25 action=skill:MAREVERT
+  choice 1 3 weight=10 action=skill:ATTACK_17E
+  choice 2 0 weight=30 action=skill:IMPALE
+  choice 2 1 weight=25 action=skill:REVERT
+  choice 2 2 weight=15 action=skill:MAREVERT
+  choice 2 3 weight=10 action=skill:ATTACK_17E
   choice 2 4 weight=20 action=preset:1:91
 end
 
 enemy-ai 92
   decision 0 predicates=9:4,35:0x100018,36:0x1ffffe routes=1,1,1,4,1,3,3,8
-  choice 0 0 weight=40 action=skill:6
-  choice 0 1 weight=50 action=skill:365
+  choice 0 0 weight=40 action=skill:MARAGIDYNE_006
+  choice 0 1 weight=50 action=skill:MAGIC_REPEL_16D
   choice 0 2 weight=10 action=special:0
   choice 1 0 weight=100 action=special:0 effect=2:4
-  choice 2 0 weight=40 action=skill:15
-  choice 2 1 weight=50 action=skill:365
+  choice 2 0 weight=40 action=skill:MABUFUDYNE_00F
+  choice 2 1 weight=50 action=skill:MAGIC_REPEL_16D
   choice 2 2 weight=10 action=special:0
-  choice 3 0 weight=80 action=skill:6
+  choice 3 0 weight=80 action=skill:MARAGIDYNE_006
   choice 3 1 weight=20 action=special:0
-  choice 4 0 weight=80 action=skill:15
+  choice 4 0 weight=80 action=skill:MABUFUDYNE_00F
   choice 4 1 weight=20 action=special:0
 end
 
 enemy-ai 93
   decision 0 predicates=50:11,1:99,36:0x1ffffe routes=3,2,3,3,1,2,3,8
-  choice 0 0 weight=60 action=skill:20
-  choice 0 1 weight=20 action=skill:181
+  choice 0 0 weight=60 action=skill:ZIONGA
+  choice 0 1 weight=20 action=skill:TARUKAJA
   choice 0 2 weight=20 action=special:0
-  choice 1 0 weight=70 action=skill:20
-  choice 1 1 action=skill:181
+  choice 1 0 weight=70 action=skill:ZIONGA
+  choice 1 1 action=skill:TARUKAJA
   choice 1 2 weight=30 action=special:0
-  choice 2 0 weight=50 action=skill:20
-  choice 2 1 weight=20 action=skill:121
+  choice 2 0 weight=50 action=skill:ZIONGA
+  choice 2 1 weight=20 action=skill:HELL_THRUST
   choice 2 2 weight=10 action=special:0
-  choice 2 3 weight=20 action=skill:337
-  choice 3 0 weight=60 action=skill:20
-  choice 3 1 weight=20 action=skill:121
+  choice 2 3 weight=20 action=skill:VOID_FIRE
+  choice 3 0 weight=60 action=skill:ZIONGA
+  choice 3 1 weight=20 action=skill:HELL_THRUST
   choice 3 2 weight=20 action=special:0
-  choice 3 3 action=skill:337
+  choice 3 3 action=skill:VOID_FIRE
 end
 
 enemy-ai 94
   decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
-  choice 0 0 weight=30 action=skill:181
-  choice 0 1 weight=20 action=skill:182
-  choice 0 2 weight=20 action=skill:183
-  choice 0 3 weight=20 action=skill:184
+  choice 0 0 weight=30 action=skill:TARUKAJA
+  choice 0 1 weight=20 action=skill:SUKUKAJA
+  choice 0 2 weight=20 action=skill:RAKUKAJA
+  choice 0 3 weight=20 action=skill:MAKAKAJA
   choice 0 4 weight=10 action=special:1 effect=12:0
-  choice 1 0 action=skill:181
-  choice 1 1 action=skill:182
-  choice 1 2 action=skill:183
-  choice 1 3 action=skill:184
+  choice 1 0 action=skill:TARUKAJA
+  choice 1 1 action=skill:SUKUKAJA
+  choice 1 2 action=skill:RAKUKAJA
+  choice 1 3 action=skill:MAKAKAJA
   choice 1 4 weight=100 action=special:1 effect=12:0
   choice 2 0 weight=50 action=special:1 effect=12:0
   choice 2 1 weight=50 action=special:0
@@ -2268,15 +2268,15 @@ end
 
 enemy-ai 95
   decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
-  choice 0 0 weight=20 action=skill:181
-  choice 0 1 weight=30 action=skill:182
-  choice 0 2 weight=20 action=skill:183
-  choice 0 3 weight=20 action=skill:184
+  choice 0 0 weight=20 action=skill:TARUKAJA
+  choice 0 1 weight=30 action=skill:SUKUKAJA
+  choice 0 2 weight=20 action=skill:RAKUKAJA
+  choice 0 3 weight=20 action=skill:MAKAKAJA
   choice 0 4 weight=10 action=special:1 effect=12:0
-  choice 1 0 action=skill:181
-  choice 1 1 action=skill:182
-  choice 1 2 action=skill:183
-  choice 1 3 action=skill:184
+  choice 1 0 action=skill:TARUKAJA
+  choice 1 1 action=skill:SUKUKAJA
+  choice 1 2 action=skill:RAKUKAJA
+  choice 1 3 action=skill:MAKAKAJA
   choice 1 4 weight=100 action=special:1 effect=12:0
   choice 2 0 weight=50 action=special:1 effect=12:0
   choice 2 1 weight=50 action=special:0
@@ -2284,15 +2284,15 @@ end
 
 enemy-ai 96
   decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
-  choice 0 0 weight=20 action=skill:181
-  choice 0 1 weight=20 action=skill:182
-  choice 0 2 weight=30 action=skill:183
-  choice 0 3 weight=20 action=skill:184
+  choice 0 0 weight=20 action=skill:TARUKAJA
+  choice 0 1 weight=20 action=skill:SUKUKAJA
+  choice 0 2 weight=30 action=skill:RAKUKAJA
+  choice 0 3 weight=20 action=skill:MAKAKAJA
   choice 0 4 weight=10 action=special:1 effect=12:0
-  choice 1 0 action=skill:181
-  choice 1 1 action=skill:182
-  choice 1 2 action=skill:183
-  choice 1 3 action=skill:184
+  choice 1 0 action=skill:TARUKAJA
+  choice 1 1 action=skill:SUKUKAJA
+  choice 1 2 action=skill:RAKUKAJA
+  choice 1 3 action=skill:MAKAKAJA
   choice 1 4 weight=100 action=special:1 effect=12:0
   choice 2 0 weight=50 action=special:1 effect=12:0
   choice 2 1 weight=50 action=special:0
@@ -2300,15 +2300,15 @@ end
 
 enemy-ai 97
   decision 0 predicates=50:11,1:50,1:90 routes=8,1,8,8,1,2,1,8
-  choice 0 0 weight=20 action=skill:181
-  choice 0 1 weight=20 action=skill:182
-  choice 0 2 weight=20 action=skill:183
-  choice 0 3 weight=30 action=skill:184
+  choice 0 0 weight=20 action=skill:TARUKAJA
+  choice 0 1 weight=20 action=skill:SUKUKAJA
+  choice 0 2 weight=20 action=skill:RAKUKAJA
+  choice 0 3 weight=30 action=skill:MAKAKAJA
   choice 0 4 weight=10 action=special:1 effect=12:0
-  choice 1 0 action=skill:181
-  choice 1 1 action=skill:182
-  choice 1 2 action=skill:183
-  choice 1 3 action=skill:184
+  choice 1 0 action=skill:TARUKAJA
+  choice 1 1 action=skill:SUKUKAJA
+  choice 1 2 action=skill:RAKUKAJA
+  choice 1 3 action=skill:MAKAKAJA
   choice 1 4 weight=100 action=special:1 effect=12:0
   choice 2 0 weight=50 action=special:1 effect=12:0
   choice 2 1 weight=50 action=special:0
@@ -2317,65 +2317,65 @@ end
 enemy-ai 98 script=ai_omoikane
   decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,1,1,1,3,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=50 action=skill:190
+  choice 0 0 weight=50 action=skill:DEBILITATE_0BE
   choice 0 1 weight=50 action=special:1 effect=12:0
   choice 1 0 weight=100 action=special:1 effect=12:0
-  choice 2 0 weight=20 action=skill:190
+  choice 2 0 weight=20 action=skill:DEBILITATE_0BE
   choice 2 1 weight=80 action=special:1 effect=12:0
-  choice 3 0 weight=10 action=skill:190
+  choice 3 0 weight=10 action=skill:DEBILITATE_0BE
   choice 3 1 weight=90 action=special:1 effect=12:0
-  choice 6 0 weight=100 action=skill:190
+  choice 6 0 weight=100 action=skill:DEBILITATE_0BE
 end
 
 enemy-ai 99
   decision 0 predicates=none,5:2,none routes=8,8,8,8,8,1,8,8
   decision 2 predicates=9:8,none,none routes=8,8,8,8,4,8,8,8
   choice 0 0 weight=60 action=special:0
-  choice 0 1 weight=40 action=skill:1
+  choice 0 1 weight=40 action=skill:AGI
   choice 1 0 weight=30 action=special:0
-  choice 1 1 weight=70 action=skill:1
-  choice 2 0 weight=70 action=skill:1
+  choice 1 1 weight=70 action=skill:AGI
+  choice 2 0 weight=70 action=skill:AGI
   choice 2 2 weight=30 action=special:0
-  choice 3 0 action=skill:1
+  choice 3 0 action=skill:AGI
   choice 3 2 weight=100 action=special:0
   choice 4 0 weight=95 action=special:0
-  choice 4 1 weight=5 action=skill:1
+  choice 4 1 weight=5 action=skill:AGI
   choice 6 0 weight=85 action=special:0
-  choice 6 1 weight=15 action=skill:1
+  choice 6 1 weight=15 action=skill:AGI
 end
 
 enemy-ai 100
   decision 0 predicates=1:99,36:0x1ffffe,50:11 routes=3,3,1,3,1,2,1,8
-  choice 0 0 weight=20 action=skill:181
-  choice 0 1 weight=5 action=skill:182
-  choice 0 2 weight=20 action=skill:183
-  choice 0 3 weight=25 action=skill:184
-  choice 0 4 weight=30 action=skill:354
-  choice 1 0 weight=30 action=skill:1
-  choice 1 1 weight=30 action=skill:2
-  choice 1 2 weight=20 action=skill:127
-  choice 1 3 weight=20 action=skill:354
-  choice 2 0 weight=30 action=skill:181
-  choice 2 1 weight=5 action=skill:182
-  choice 2 2 weight=30 action=skill:183
-  choice 2 3 weight=35 action=skill:184
-  choice 2 4 action=skill:354
-  choice 3 0 weight=30 action=skill:1
-  choice 3 1 weight=40 action=skill:2
-  choice 3 2 weight=30 action=skill:127
-  choice 3 3 action=skill:354
+  choice 0 0 weight=20 action=skill:TARUKAJA
+  choice 0 1 weight=5 action=skill:SUKUKAJA
+  choice 0 2 weight=20 action=skill:RAKUKAJA
+  choice 0 3 weight=25 action=skill:MAKAKAJA
+  choice 0 4 weight=30 action=skill:EARTH_DRAIN
+  choice 1 0 weight=30 action=skill:AGI
+  choice 1 1 weight=30 action=skill:AGILAO
+  choice 1 2 weight=20 action=skill:MIND_SCREAM
+  choice 1 3 weight=20 action=skill:EARTH_DRAIN
+  choice 2 0 weight=30 action=skill:TARUKAJA
+  choice 2 1 weight=5 action=skill:SUKUKAJA
+  choice 2 2 weight=30 action=skill:RAKUKAJA
+  choice 2 3 weight=35 action=skill:MAKAKAJA
+  choice 2 4 action=skill:EARTH_DRAIN
+  choice 3 0 weight=30 action=skill:AGI
+  choice 3 1 weight=40 action=skill:AGILAO
+  choice 3 2 weight=30 action=skill:MIND_SCREAM
+  choice 3 3 action=skill:EARTH_DRAIN
 end
 
 enemy-ai 102
   decision 0 predicates=1:50,5:3,none routes=8,1,8,8,2,8,8,8
-  choice 0 0 weight=25 action=skill:19
-  choice 0 1 weight=25 action=skill:28
-  choice 0 2 action=skill:112
+  choice 0 0 weight=25 action=skill:ZIO
+  choice 0 1 weight=25 action=skill:ZAN
+  choice 0 2 action=skill:BODY_RUSH
   choice 0 3 weight=50 action=special:0
-  choice 1 0 weight=50 action=skill:112
+  choice 1 0 weight=50 action=skill:BODY_RUSH
   choice 1 1 weight=25 action=special:1
   choice 1 2 weight=25 action=preset:1:102
-  choice 2 0 weight=50 action=skill:112
+  choice 2 0 weight=50 action=skill:BODY_RUSH
   choice 2 1 weight=50 action=special:1
 end
 
@@ -2384,75 +2384,75 @@ enemy-ai 257 script=ai_2
   decision 1 predicates=6:2,35:2,1:50 routes=8,0,0,6,8,8,2,8
   decision 2 predicates=1:80,none,23:0 routes=8,8,8,8,1,8,1,8
   choice 0 0 weight=100 action=special:0
-  choice 0 1 action=skill:113
-  choice 0 2 action=skill:4
+  choice 0 1 action=skill:NEEDLE_RUSH
+  choice 0 2 action=skill:MARAGI_004
   choice 1 0 weight=100 action=special:0
-  choice 1 1 action=skill:4
-  choice 1 2 action=skill:113
+  choice 1 1 action=skill:MARAGI_004
+  choice 1 2 action=skill:NEEDLE_RUSH
   choice 2 0 weight=100 action=special:0
-  choice 2 1 action=skill:4
-  choice 2 2 action=skill:113
+  choice 2 1 action=skill:MARAGI_004
+  choice 2 2 action=skill:NEEDLE_RUSH
   choice 6 0 weight=100 action=special:0
-  choice 6 1 action=skill:4
-  choice 6 2 action=skill:113
+  choice 6 1 action=skill:MARAGI_004
+  choice 6 2 action=skill:NEEDLE_RUSH
 end
 
 enemy-ai 258 script=AI_Kamasosso_No1
   choice 0 0 weight=30 action=special:0
-  choice 0 1 weight=35 action=skill:49
-  choice 0 2 action=skill:34
-  choice 0 3 weight=35 action=skill:116
-  choice 0 4 action=skill:391
+  choice 0 1 weight=35 action=skill:HP_THIEF_031
+  choice 0 2 action=skill:SHOCK_WAVE
+  choice 0 3 weight=35 action=skill:RAVING_SLASH
+  choice 0 4 action=skill:SPIRAL_EDGE
   choice 1 0 action=special:0
-  choice 1 1 action=skill:49
-  choice 1 2 action=skill:34
-  choice 1 3 action=skill:116
-  choice 1 4 action=skill:391
+  choice 1 1 action=skill:HP_THIEF_031
+  choice 1 2 action=skill:SHOCK_WAVE
+  choice 1 3 action=skill:RAVING_SLASH
+  choice 1 4 action=skill:SPIRAL_EDGE
   choice 2 0 action=special:0
-  choice 2 1 action=skill:49
-  choice 2 2 action=skill:34
-  choice 2 3 action=skill:116
-  choice 2 4 action=skill:391
+  choice 2 1 action=skill:HP_THIEF_031
+  choice 2 2 action=skill:SHOCK_WAVE
+  choice 2 3 action=skill:RAVING_SLASH
+  choice 2 4 action=skill:SPIRAL_EDGE
   choice 3 0 action=special:0
-  choice 3 1 action=skill:49
-  choice 3 2 action=skill:34
-  choice 3 3 action=skill:116
-  choice 3 4 action=skill:391
+  choice 3 1 action=skill:HP_THIEF_031
+  choice 3 2 action=skill:SHOCK_WAVE
+  choice 3 3 action=skill:RAVING_SLASH
+  choice 3 4 action=skill:SPIRAL_EDGE
   choice 4 0 action=special:0
-  choice 4 1 action=skill:49
-  choice 4 2 action=skill:34
-  choice 4 3 action=skill:116
-  choice 4 4 action=skill:391
+  choice 4 1 action=skill:HP_THIEF_031
+  choice 4 2 action=skill:SHOCK_WAVE
+  choice 4 3 action=skill:RAVING_SLASH
+  choice 4 4 action=skill:SPIRAL_EDGE
   choice 5 0 action=special:0
-  choice 5 1 action=skill:49
-  choice 5 2 action=skill:34
-  choice 5 3 action=skill:116
-  choice 5 4 action=skill:391
+  choice 5 1 action=skill:HP_THIEF_031
+  choice 5 2 action=skill:SHOCK_WAVE
+  choice 5 3 action=skill:RAVING_SLASH
+  choice 5 4 action=skill:SPIRAL_EDGE
   choice 6 0 action=special:0
-  choice 6 1 action=skill:49
-  choice 6 2 action=skill:34
-  choice 6 3 action=skill:116
-  choice 6 4 action=skill:391
+  choice 6 1 action=skill:HP_THIEF_031
+  choice 6 2 action=skill:SHOCK_WAVE
+  choice 6 3 action=skill:RAVING_SLASH
+  choice 6 4 action=skill:SPIRAL_EDGE
 end
 
 enemy-ai 259 script=AI_Kamasosso_No2
   decision 0 predicates=5:1,1:35,none routes=8,2,8,8,1,8,8,8
   decision 1 predicates=5:1,none,none routes=8,8,8,8,8,8,8,8
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=50 action=skill:29
-  choice 0 2 action=skill:31
-  choice 0 3 action=skill:116
+  choice 0 1 weight=50 action=skill:ZANMA
+  choice 0 2 action=skill:MAZAN_01F
+  choice 0 3 action=skill:RAVING_SLASH
   choice 0 4 action=preset:1:63
-  choice 1 0 action=skill:349
-  choice 1 1 weight=50 action=skill:389
-  choice 1 2 weight=50 action=skill:391
-  choice 1 3 action=skill:353
-  choice 1 4 action=skill:354
-  choice 2 0 weight=25 action=skill:349
-  choice 2 1 weight=30 action=skill:389
-  choice 2 2 weight=45 action=skill:391
-  choice 2 3 action=skill:353
-  choice 2 4 action=skill:354
+  choice 1 0 action=skill:PHYS_DRAIN_15D
+  choice 1 1 weight=50 action=skill:LEECH
+  choice 1 2 weight=50 action=skill:SPIRAL_EDGE
+  choice 1 3 action=skill:FORCE_DRAIN
+  choice 1 4 action=skill:EARTH_DRAIN
+  choice 2 0 weight=25 action=skill:PHYS_DRAIN_15D
+  choice 2 1 weight=30 action=skill:LEECH
+  choice 2 2 weight=45 action=skill:SPIRAL_EDGE
+  choice 2 3 action=skill:FORCE_DRAIN
+  choice 2 4 action=skill:EARTH_DRAIN
 end
 
 enemy-ai 260 script=AI_Kamasosso_No3
@@ -2460,81 +2460,81 @@ enemy-ai 260 script=AI_Kamasosso_No3
   decision 1 predicates=10:0x1000,9:0x1000,none routes=8,8,8,8,2,3,8,8
   decision 2 predicates=none,none,22:2 routes=8,8,8,8,8,8,4,8
   choice 0 0 weight=40 action=special:0
-  choice 0 1 action=skill:390 effect=14:0x1000
-  choice 0 2 weight=30 action=skill:29
-  choice 0 3 action=skill:192
-  choice 0 4 weight=30 action=skill:69
+  choice 0 1 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 0 2 weight=30 action=skill:ZANMA
+  choice 0 3 action=skill:POWER_CHARGE
+  choice 0 4 weight=30 action=skill:CURSE
   choice 1 0 weight=60 action=special:0
-  choice 1 1 action=skill:390 effect=14:0x1000
-  choice 1 2 weight=20 action=skill:29
-  choice 1 3 action=skill:192
-  choice 1 4 weight=20 action=skill:69
+  choice 1 1 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 1 2 weight=20 action=skill:ZANMA
+  choice 1 3 action=skill:POWER_CHARGE
+  choice 1 4 weight=20 action=skill:CURSE
   choice 2 0 weight=50 action=special:0
-  choice 2 1 action=skill:390 effect=14:0x1000
-  choice 2 2 weight=30 action=skill:29
-  choice 2 3 weight=10 action=skill:192
-  choice 2 4 weight=10 action=skill:69
+  choice 2 1 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 2 2 weight=30 action=skill:ZANMA
+  choice 2 3 weight=10 action=skill:POWER_CHARGE
+  choice 2 4 weight=10 action=skill:CURSE
   choice 3 0 weight=10 action=special:0
-  choice 3 1 weight=60 action=skill:390 effect=14:0x1000
-  choice 3 2 weight=10 action=skill:29
-  choice 3 3 weight=20 action=skill:192
-  choice 3 4 action=skill:69
+  choice 3 1 weight=60 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 3 2 weight=10 action=skill:ZANMA
+  choice 3 3 weight=20 action=skill:POWER_CHARGE
+  choice 3 4 action=skill:CURSE
   choice 4 0 weight=15 action=special:0
-  choice 4 1 weight=50 action=skill:390 effect=14:0x1000
-  choice 4 2 weight=10 action=skill:29
-  choice 4 3 weight=15 action=skill:192
-  choice 4 4 weight=10 action=skill:69
+  choice 4 1 weight=50 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 4 2 weight=10 action=skill:ZANMA
+  choice 4 3 weight=15 action=skill:POWER_CHARGE
+  choice 4 4 weight=10 action=skill:CURSE
   choice 5 0 weight=60 action=special:0
-  choice 5 1 action=skill:390 effect=14:0x1000
-  choice 5 2 weight=20 action=skill:29
-  choice 5 3 action=skill:192
-  choice 5 4 weight=20 action=skill:69
+  choice 5 1 action=skill:ZOTZILAHA_BANE effect=14:0x1000
+  choice 5 2 weight=20 action=skill:ZANMA
+  choice 5 3 action=skill:POWER_CHARGE
+  choice 5 4 weight=20 action=skill:CURSE
 end
 
 enemy-ai 261 script=AI_Ushasu
   decision 0 predicates=8:16,none,23:0 routes=8,8,8,8,1,8,3,8
   decision 1 predicates=8:32,8:8,none routes=8,8,8,8,2,3,8,8
   choice 0 0 weight=5 action=special:0
-  choice 0 1 weight=30 action=skill:386
-  choice 0 2 weight=20 action=skill:60
-  choice 0 3 weight=20 action=skill:86
-  choice 0 4 weight=25 action=skill:121
+  choice 0 1 weight=30 action=skill:WHIRLWIND
+  choice 0 2 weight=20 action=skill:HAMA
+  choice 0 3 weight=20 action=skill:MARIN_KARIN
+  choice 0 4 weight=25 action=skill:HELL_THRUST
   choice 1 0 weight=5 action=special:0
-  choice 1 1 weight=15 action=skill:386
-  choice 1 2 weight=50 action=skill:168 effect=2:16
-  choice 1 3 weight=20 action=skill:86
-  choice 1 4 weight=10 action=skill:121
+  choice 1 1 weight=15 action=skill:WHIRLWIND
+  choice 1 2 weight=50 action=skill:CLOSDI effect=2:16
+  choice 1 3 weight=20 action=skill:MARIN_KARIN
+  choice 1 4 weight=10 action=skill:HELL_THRUST
   choice 2 0 weight=5 action=special:0
-  choice 2 1 weight=15 action=skill:386
-  choice 2 2 weight=50 action=skill:166 effect=2:32
-  choice 2 3 weight=20 action=skill:86
-  choice 2 4 weight=10 action=skill:121
+  choice 2 1 weight=15 action=skill:WHIRLWIND
+  choice 2 2 weight=50 action=skill:PATRA effect=2:32
+  choice 2 3 weight=20 action=skill:MARIN_KARIN
+  choice 2 4 weight=10 action=skill:HELL_THRUST
   choice 3 0 weight=5 action=special:0
-  choice 3 1 weight=15 action=skill:386
-  choice 3 2 weight=50 action=skill:166 effect=2:8
-  choice 3 3 weight=20 action=skill:86
-  choice 3 4 weight=10 action=skill:121
+  choice 3 1 weight=15 action=skill:WHIRLWIND
+  choice 3 2 weight=50 action=skill:PATRA effect=2:8
+  choice 3 3 weight=20 action=skill:MARIN_KARIN
+  choice 3 4 weight=10 action=skill:HELL_THRUST
   choice 4 0 action=special:0
-  choice 4 1 action=skill:386
-  choice 4 2 action=skill:60
-  choice 4 3 action=skill:86
-  choice 4 4 action=skill:121
+  choice 4 1 action=skill:WHIRLWIND
+  choice 4 2 action=skill:HAMA
+  choice 4 3 action=skill:MARIN_KARIN
+  choice 4 4 action=skill:HELL_THRUST
   choice 5 0 action=special:0
-  choice 5 1 action=skill:386
-  choice 5 2 action=skill:60
-  choice 5 3 action=skill:86
-  choice 5 4 action=skill:121
+  choice 5 1 action=skill:WHIRLWIND
+  choice 5 2 action=skill:HAMA
+  choice 5 3 action=skill:MARIN_KARIN
+  choice 5 4 action=skill:HELL_THRUST
   choice 6 0 action=special:0
-  choice 6 1 action=skill:386
-  choice 6 2 action=skill:60
-  choice 6 3 action=skill:86
-  choice 6 4 action=skill:121
+  choice 6 1 action=skill:WHIRLWIND
+  choice 6 2 action=skill:HAMA
+  choice 6 3 action=skill:MARIN_KARIN
+  choice 6 4 action=skill:HELL_THRUST
 end
 
 enemy-ai 262 script=HEAT_1
   choice 0 0 weight=100 action=special:0
   choice 1 0 weight=65 action=special:0
-  choice 1 1 weight=35 action=skill:1
+  choice 1 1 weight=35 action=skill:AGI
 end
 
 enemy-ai 263 script=AI_RAFU1
@@ -2543,7 +2543,7 @@ end
 
 enemy-ai 264 script=AI_RAFU2
   choice 0 0 weight=50 action=special:0
-  choice 0 1 weight=50 action=skill:392
+  choice 0 1 weight=50 action=skill:DRAGON_QUAKE
 end
 
 enemy-ai 265 script=ai_metatoron
@@ -2558,12 +2558,12 @@ enemy-ai 267 script=ai_katobu
   decision 0 predicates=none,none,none routes=8,8,8,8,8,8,6,8
   decision 1 predicates=none,none,none routes=8,8,8,8,4,2,1,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=100 action=skill:39
-  choice 2 0 weight=100 action=skill:42
-  choice 3 0 weight=100 action=skill:71 effect=14:2048
-  choice 4 0 weight=100 action=skill:71 effect=14:2048
-  choice 5 0 weight=100 action=skill:137
-  choice 6 0 weight=100 action=skill:137
+  choice 1 0 weight=100 action=skill:TERADYNE
+  choice 2 0 weight=100 action=skill:MATERADYNE_02A
+  choice 3 0 weight=100 action=skill:STONE_GAZE effect=14:2048
+  choice 4 0 weight=100 action=skill:STONE_GAZE effect=14:2048
+  choice 5 0 weight=100 action=skill:GATE_OF_HELL
+  choice 6 0 weight=100 action=skill:GATE_OF_HELL
 end
 
 enemy-ai 268 script=ai_ishisu
@@ -2571,16 +2571,16 @@ enemy-ai 268 script=ai_ishisu
   decision 1 predicates=none,none,none routes=8,8,8,1,3,2,8,8
   decision 2 predicates=none,none,none routes=8,8,8,8,5,8,8,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=50 action=skill:86
-  choice 1 1 weight=30 action=skill:24
-  choice 1 2 weight=15 action=skill:87
+  choice 1 0 weight=50 action=skill:MARIN_KARIN
+  choice 1 1 weight=30 action=skill:MAZIODYNE_018
+  choice 1 2 weight=15 action=skill:ALLURE
   choice 1 3 weight=5 action=special:0
-  choice 2 0 weight=50 action=skill:184
+  choice 2 0 weight=50 action=skill:MAKAKAJA
   choice 2 1 weight=50 action=special:0
-  choice 3 0 weight=100 action=skill:24
-  choice 4 0 weight=100 action=skill:87
+  choice 3 0 weight=100 action=skill:MAZIODYNE_018
+  choice 4 0 weight=100 action=skill:ALLURE
   choice 5 0 weight=100 action=preset:1:4
-  choice 6 0 weight=100 action=skill:77
+  choice 6 0 weight=100 action=skill:CALM_DEATH
 end
 
 enemy-ai 269 script=neazu_b
@@ -2590,12 +2590,12 @@ end
 enemy-ai 270
   decision 0 predicates=4:5,21:4,none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=20 action=skill:39
-  choice 1 1 weight=20 action=skill:30
-  choice 1 2 weight=20 action=skill:21
-  choice 1 3 weight=20 action=skill:3
-  choice 1 4 weight=20 action=skill:12
-  choice 2 0 weight=100 action=skill:47
+  choice 1 0 weight=20 action=skill:TERADYNE
+  choice 1 1 weight=20 action=skill:ZANDYNE
+  choice 1 2 weight=20 action=skill:ZIODYNE
+  choice 1 3 weight=20 action=skill:AGIDYNE
+  choice 1 4 weight=20 action=skill:BUFUDYNE
+  choice 2 0 weight=100 action=skill:MEGIDOLA_02F
 end
 
 enemy-ai 271 script=AI_RAVAN
@@ -2608,7 +2608,7 @@ enemy-ai 272 script=AI_BeruzeHum
 end
 
 enemy-ai 273 script=AI_BeruzeFly
-  choice 0 0 weight=100 action=skill:418
+  choice 0 0 weight=100 action=skill:ATTACK_1A2
   choice 1 0 weight=100 action=special:0
   choice 2 0 weight=100 action=special:0
   choice 3 0 weight=100 action=special:0
@@ -2624,7 +2624,7 @@ enemy-ai 275 script=AI_Kouryuu
 end
 
 enemy-ai 276 script=karu_gard
-  choice 0 0 weight=100 action=skill:382
+  choice 0 0 weight=100 action=skill:ATTACK_17E
 end
 
 enemy-ai 277 script=ai_vasuki
@@ -2632,75 +2632,75 @@ enemy-ai 277 script=ai_vasuki
   decision 1 predicates=60:0,35:3,35:4 routes=4,5,1,4,1,5,8,8
   decision 2 predicates=none,none,none routes=8,8,8,8,6,8,8,8
   choice 0 0 weight=40 action=special:0
-  choice 0 1 weight=10 action=skill:399
-  choice 0 2 action=skill:24
-  choice 0 3 action=skill:47
-  choice 0 4 weight=50 action=skill:85
+  choice 0 1 weight=10 action=skill:HIMA_ALAYA
+  choice 0 2 action=skill:MAZIODYNE_018
+  choice 0 3 action=skill:MEGIDOLA_02F
+  choice 0 4 weight=50 action=skill:SONIC_WAVE
   choice 1 0 weight=5 action=special:0
-  choice 1 1 weight=75 action=skill:399
-  choice 1 2 action=skill:24
-  choice 1 3 weight=10 action=skill:47
-  choice 1 4 weight=10 action=skill:85
+  choice 1 1 weight=75 action=skill:HIMA_ALAYA
+  choice 1 2 action=skill:MAZIODYNE_018
+  choice 1 3 weight=10 action=skill:MEGIDOLA_02F
+  choice 1 4 weight=10 action=skill:SONIC_WAVE
   choice 2 0 weight=100 action=special:0 effect=2:2
-  choice 2 1 action=skill:399
-  choice 2 2 action=skill:24
-  choice 2 3 action=skill:47
-  choice 2 4 action=skill:85
+  choice 2 1 action=skill:HIMA_ALAYA
+  choice 2 2 action=skill:MAZIODYNE_018
+  choice 2 3 action=skill:MEGIDOLA_02F
+  choice 2 4 action=skill:SONIC_WAVE
   choice 3 0 weight=100 action=special:0 effect=2:4
-  choice 3 1 action=skill:399
-  choice 3 2 action=skill:24
-  choice 3 3 action=skill:47
-  choice 3 4 action=skill:85
+  choice 3 1 action=skill:HIMA_ALAYA
+  choice 3 2 action=skill:MAZIODYNE_018
+  choice 3 3 action=skill:MEGIDOLA_02F
+  choice 3 4 action=skill:SONIC_WAVE
   choice 4 0 weight=5 action=special:0
-  choice 4 1 action=skill:399
-  choice 4 2 action=skill:24
-  choice 4 3 weight=70 action=skill:47
-  choice 4 4 weight=25 action=skill:85
+  choice 4 1 action=skill:HIMA_ALAYA
+  choice 4 2 action=skill:MAZIODYNE_018
+  choice 4 3 weight=70 action=skill:MEGIDOLA_02F
+  choice 4 4 weight=25 action=skill:SONIC_WAVE
   choice 5 0 weight=5 action=special:0
-  choice 5 1 action=skill:399
-  choice 5 2 weight=50 action=skill:24
-  choice 5 3 weight=20 action=skill:47
-  choice 5 4 weight=25 action=skill:85
+  choice 5 1 action=skill:HIMA_ALAYA
+  choice 5 2 weight=50 action=skill:MAZIODYNE_018
+  choice 5 3 weight=20 action=skill:MEGIDOLA_02F
+  choice 5 4 weight=25 action=skill:SONIC_WAVE
   choice 6 0 weight=90 action=special:0
-  choice 6 1 weight=10 action=skill:399
-  choice 6 2 action=skill:24
-  choice 6 3 action=skill:47
-  choice 6 4 action=skill:85
+  choice 6 1 weight=10 action=skill:HIMA_ALAYA
+  choice 6 2 action=skill:MAZIODYNE_018
+  choice 6 3 action=skill:MEGIDOLA_02F
+  choice 6 4 action=skill:SONIC_WAVE
 end
 
 enemy-ai 278 script=garuuda
   decision 0 predicates=14:13,1:60,none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=70 action=special:0
-  choice 0 1 weight=15 action=skill:63
-  choice 0 2 weight=15 action=skill:30
+  choice 0 1 weight=15 action=skill:MAHAMAON_03F
+  choice 0 2 weight=15 action=skill:ZANDYNE
   choice 1 0 weight=60 action=special:0
-  choice 1 1 weight=20 action=skill:63
-  choice 1 2 weight=20 action=skill:30
+  choice 1 1 weight=20 action=skill:MAHAMAON_03F
+  choice 1 2 weight=20 action=skill:ZANDYNE
   choice 2 0 weight=40 action=special:0
-  choice 2 1 action=skill:63
-  choice 2 2 weight=60 action=skill:30
+  choice 2 1 action=skill:MAHAMAON_03F
+  choice 2 2 weight=60 action=skill:ZANDYNE
 end
 
 enemy-ai 279 script=jyatayu
   decision 0 predicates=1:60,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=90 action=special:0
-  choice 0 1 action=skill:66
-  choice 0 2 weight=10 action=skill:68
+  choice 0 1 action=skill:MUDOON
+  choice 0 2 weight=10 action=skill:MAMUDOON_044
   choice 1 0 weight=75 action=special:0
-  choice 1 1 action=skill:66
-  choice 1 2 weight=25 action=skill:68
-  choice 1 3 action=skill:137
+  choice 1 1 action=skill:MUDOON
+  choice 1 2 weight=25 action=skill:MAMUDOON_044
+  choice 1 3 action=skill:GATE_OF_HELL
 end
 
 enemy-ai 280 script=ai_ananta
   choice 0 0 weight=100 action=special:0
-  choice 1 0 weight=100 action=skill:178
-  choice 2 0 weight=50 action=skill:180
-  choice 2 1 weight=50 action=skill:185
-  choice 3 0 weight=100 action=skill:127
-  choice 4 0 weight=100 action=skill:140
-  choice 5 0 weight=100 action=skill:74
-  choice 6 0 weight=100 action=skill:192
+  choice 1 0 weight=100 action=skill:RAKUNDA
+  choice 2 0 weight=50 action=skill:DEKUNDA_0B4
+  choice 2 1 weight=50 action=skill:DEKAJA_0B9
+  choice 3 0 weight=100 action=skill:MIND_SCREAM
+  choice 4 0 weight=100 action=skill:REVELATION
+  choice 5 0 weight=100 action=skill:MAKAJAMON_04A
+  choice 6 0 weight=100 action=skill:POWER_CHARGE
 end
 
 enemy-ai 281 script=ai_hari_vis
@@ -2715,43 +2715,43 @@ enemy-ai 283 script=ai_hari_las
   decision 0 predicates=1:20,20:70,5:1 routes=8,6,6,6,8,8,2,8
   decision 1 predicates=20:70,1:50,5:2 routes=8,8,8,8,8,2,4,8
   decision 2 predicates=20:60,1:80,5:5 routes=8,2,8,8,3,3,0,5
-  choice 0 0 weight=40 action=skill:421
-  choice 0 1 weight=10 action=skill:378
-  choice 0 2 weight=10 action=skill:57
-  choice 0 3 weight=40 action=skill:70
-  choice 2 0 weight=40 action=skill:421
-  choice 2 1 weight=10 action=skill:378
-  choice 2 2 weight=30 action=skill:57
-  choice 2 3 weight=20 action=skill:70
-  choice 3 0 weight=30 action=skill:421
-  choice 3 1 weight=30 action=skill:378
-  choice 3 2 weight=20 action=skill:57
-  choice 3 3 weight=20 action=skill:70
-  choice 4 0 weight=35 action=skill:421
-  choice 4 1 weight=35 action=skill:378
-  choice 4 2 weight=10 action=skill:57
-  choice 4 3 weight=20 action=skill:70
-  choice 5 0 weight=40 action=skill:421
-  choice 5 1 weight=20 action=skill:378
-  choice 5 2 weight=10 action=skill:57
-  choice 5 3 weight=30 action=skill:70
-  choice 6 0 weight=15 action=skill:421
-  choice 6 1 weight=35 action=skill:378
-  choice 6 2 weight=20 action=skill:57
-  choice 6 3 weight=30 action=skill:70
+  choice 0 0 weight=40 action=skill:ATTACK_1A5
+  choice 0 1 weight=10 action=skill:HUNGER_WAVE_17A
+  choice 0 2 weight=10 action=skill:VANITY_039
+  choice 0 3 weight=40 action=skill:BLOOD_CURSE
+  choice 2 0 weight=40 action=skill:ATTACK_1A5
+  choice 2 1 weight=10 action=skill:HUNGER_WAVE_17A
+  choice 2 2 weight=30 action=skill:VANITY_039
+  choice 2 3 weight=20 action=skill:BLOOD_CURSE
+  choice 3 0 weight=30 action=skill:ATTACK_1A5
+  choice 3 1 weight=30 action=skill:HUNGER_WAVE_17A
+  choice 3 2 weight=20 action=skill:VANITY_039
+  choice 3 3 weight=20 action=skill:BLOOD_CURSE
+  choice 4 0 weight=35 action=skill:ATTACK_1A5
+  choice 4 1 weight=35 action=skill:HUNGER_WAVE_17A
+  choice 4 2 weight=10 action=skill:VANITY_039
+  choice 4 3 weight=20 action=skill:BLOOD_CURSE
+  choice 5 0 weight=40 action=skill:ATTACK_1A5
+  choice 5 1 weight=20 action=skill:HUNGER_WAVE_17A
+  choice 5 2 weight=10 action=skill:VANITY_039
+  choice 5 3 weight=30 action=skill:BLOOD_CURSE
+  choice 6 0 weight=15 action=skill:ATTACK_1A5
+  choice 6 1 weight=35 action=skill:HUNGER_WAVE_17A
+  choice 6 2 weight=20 action=skill:VANITY_039
+  choice 6 3 weight=30 action=skill:BLOOD_CURSE
 end
 
 enemy-ai 284
   decision 0 predicates=1:20,20:30,none routes=8,6,8,8,2,8,8,8
   decision 2 predicates=1:80,none,23:0 routes=8,8,8,8,1,8,2,8
   choice 0 0 weight=90 action=special:0
-  choice 0 1 weight=10 action=skill:112
+  choice 0 1 weight=10 action=skill:BODY_RUSH
   choice 1 0 weight=70 action=special:0
-  choice 1 1 weight=30 action=skill:112
+  choice 1 1 weight=30 action=skill:BODY_RUSH
   choice 2 0 weight=90 action=special:0
-  choice 2 1 weight=10 action=skill:112
+  choice 2 1 weight=10 action=skill:BODY_RUSH
   choice 6 0 weight=90 action=special:0
-  choice 6 1 weight=10 action=skill:112
+  choice 6 1 weight=10 action=skill:BODY_RUSH
 end
 
 enemy-ai 285 script=neazu_s
@@ -2762,38 +2762,38 @@ enemy-ai 286 script=AI_Kokato
   decision 0 predicates=1:20,none,none routes=8,8,8,8,1,8,8,8
   decision 2 predicates=none,none,23:0 routes=8,8,8,8,8,8,3,8
   choice 0 0 weight=80 action=special:0
-  choice 0 1 weight=20 action=skill:112
+  choice 0 1 weight=20 action=skill:BODY_RUSH
   choice 1 0 weight=50 action=special:0
-  choice 1 1 weight=50 action=skill:112
+  choice 1 1 weight=50 action=skill:BODY_RUSH
   choice 3 0 weight=100 action=special:0
-  choice 3 1 action=skill:112
-  choice 5 0 weight=90 action=skill:112
-  choice 5 1 action=skill:126
-  choice 5 2 action=skill:119
-  choice 5 3 action=skill:83
+  choice 3 1 action=skill:BODY_RUSH
+  choice 5 0 weight=90 action=skill:BODY_RUSH
+  choice 5 1 action=skill:POWER_WAVE
+  choice 5 2 action=skill:MAD_RUSH
+  choice 5 3 action=skill:PULINPA
   choice 5 4 weight=10 action=special:0
-  choice 6 0 weight=40 action=skill:112
-  choice 6 1 weight=30 action=skill:126
-  choice 6 2 weight=30 action=skill:119
-  choice 6 3 action=skill:83
+  choice 6 0 weight=40 action=skill:BODY_RUSH
+  choice 6 1 weight=30 action=skill:POWER_WAVE
+  choice 6 2 weight=30 action=skill:MAD_RUSH
+  choice 6 3 action=skill:PULINPA
   choice 6 4 action=special:0
 end
 
 enemy-ai 287 script=AI_Enpusa
   decision 1 predicates=none,none,none routes=8,8,8,8,0,8,8,8
   choice 0 0 action=special:0
-  choice 0 1 weight=20 action=skill:13
-  choice 0 2 weight=80 action=skill:10
+  choice 0 1 weight=20 action=skill:MABUFU_00D
+  choice 0 2 weight=80 action=skill:BUFU
 end
 
 enemy-ai 288
   decision 0 predicates=9:2,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=70 action=skill:20
-  choice 0 1 weight=30 action=skill:22
-  choice 0 2 action=skill:119
-  choice 1 0 action=skill:20
-  choice 1 1 action=skill:22
-  choice 1 2 weight=100 action=skill:119
+  choice 0 0 weight=70 action=skill:ZIONGA
+  choice 0 1 weight=30 action=skill:MAZIO_016
+  choice 0 2 action=skill:MAD_RUSH
+  choice 1 0 action=skill:ZIONGA
+  choice 1 1 action=skill:MAZIO_016
+  choice 1 2 weight=100 action=skill:MAD_RUSH
 end
 
 enemy-ai 289
@@ -2801,57 +2801,57 @@ enemy-ai 289
   decision 1 predicates=34:55,none,1:80 routes=8,8,8,8,2,8,1,8
   decision 2 predicates=5:1,23:0,13:1 routes=8,5,8,8,8,3,4,8
   choice 0 0 weight=35 action=special:0
-  choice 0 1 weight=25 action=skill:86
-  choice 0 2 weight=40 action=skill:176
+  choice 0 1 weight=25 action=skill:MARIN_KARIN
+  choice 0 2 weight=40 action=skill:TARUNDA
   choice 1 0 weight=70 action=special:0
-  choice 1 1 weight=20 action=skill:86
-  choice 1 2 weight=10 action=skill:176
+  choice 1 1 weight=20 action=skill:MARIN_KARIN
+  choice 1 2 weight=10 action=skill:TARUNDA
   choice 2 0 weight=30 action=special:0
-  choice 2 1 weight=30 action=skill:86
-  choice 2 2 weight=40 action=skill:176
+  choice 2 1 weight=30 action=skill:MARIN_KARIN
+  choice 2 2 weight=40 action=skill:TARUNDA
   choice 3 0 weight=40 action=special:0
-  choice 3 1 weight=30 action=skill:86
-  choice 3 2 weight=30 action=skill:176
+  choice 3 1 weight=30 action=skill:MARIN_KARIN
+  choice 3 2 weight=30 action=skill:TARUNDA
   choice 4 0 weight=80 action=special:0
-  choice 4 1 weight=20 action=skill:86
+  choice 4 1 weight=20 action=skill:MARIN_KARIN
   choice 5 0 weight=1 action=special:0
-  choice 5 1 weight=99 action=skill:86
+  choice 5 1 weight=99 action=skill:MARIN_KARIN
 end
 
 enemy-ai 290
   decision 0 predicates=18:0,23:0,none routes=8,8,8,8,1,2,8,8
   choice 0 0 action=special:0
-  choice 0 1 weight=50 action=skill:192
-  choice 0 2 weight=50 action=skill:112
+  choice 0 1 weight=50 action=skill:POWER_CHARGE
+  choice 0 2 weight=50 action=skill:BODY_RUSH
   choice 1 0 action=special:0
-  choice 1 1 action=skill:192
-  choice 1 2 weight=100 action=skill:112
+  choice 1 1 action=skill:POWER_CHARGE
+  choice 1 2 weight=100 action=skill:BODY_RUSH
   choice 2 0 action=special:0
-  choice 2 1 weight=100 action=skill:192
-  choice 2 2 action=skill:112
+  choice 2 1 weight=100 action=skill:POWER_CHARGE
+  choice 2 2 action=skill:BODY_RUSH
 end
 
 enemy-ai 291
   decision 0 predicates=50:2,35:5,none routes=8,2,8,8,1,2,8,8
-  choice 0 0 weight=30 action=skill:29
-  choice 0 1 weight=30 action=skill:50
-  choice 0 2 action=skill:116
-  choice 0 3 weight=10 action=skill:184
+  choice 0 0 weight=30 action=skill:ZANMA
+  choice 0 1 weight=30 action=skill:MP_THIEF_032
+  choice 0 2 action=skill:RAVING_SLASH
+  choice 0 3 weight=10 action=skill:MAKAKAJA
   choice 0 4 weight=30 action=special:0
-  choice 1 0 weight=100 action=skill:29
-  choice 1 1 action=skill:50
-  choice 1 2 action=skill:116
-  choice 1 3 action=skill:184
-  choice 2 0 action=skill:29
-  choice 2 1 weight=30 action=skill:50
-  choice 2 2 action=skill:116
-  choice 2 3 weight=30 action=skill:184
+  choice 1 0 weight=100 action=skill:ZANMA
+  choice 1 1 action=skill:MP_THIEF_032
+  choice 1 2 action=skill:RAVING_SLASH
+  choice 1 3 action=skill:MAKAKAJA
+  choice 2 0 action=skill:ZANMA
+  choice 2 1 weight=30 action=skill:MP_THIEF_032
+  choice 2 2 action=skill:RAVING_SLASH
+  choice 2 3 weight=30 action=skill:MAKAKAJA
   choice 2 4 weight=40 action=special:0
 end
 
 enemy-ai 292 script=AI_RAFU1
   choice 0 0 weight=100 action=special:0
-  choice 0 1 action=skill:393
+  choice 0 1 action=skill:DRAGON_THRASH
 end
 
 enemy-ai 294
@@ -2859,62 +2859,62 @@ enemy-ai 294
   decision 1 predicates=13:5,none,none routes=8,8,8,8,8,8,8,8
   decision 2 predicates=1:50,none,23:0 routes=8,8,8,8,1,8,3,8
   choice 0 0 weight=40 action=special:0
-  choice 0 1 weight=20 action=skill:31
-  choice 0 2 weight=10 action=skill:177
-  choice 0 3 weight=30 action=skill:83
+  choice 0 1 weight=20 action=skill:MAZAN_01F
+  choice 0 2 weight=10 action=skill:SUKUNDA
+  choice 0 3 weight=30 action=skill:PULINPA
   choice 1 0 weight=35 action=special:0
-  choice 1 1 weight=25 action=skill:31
-  choice 1 2 weight=5 action=skill:177
-  choice 1 3 weight=35 action=skill:83
+  choice 1 1 weight=25 action=skill:MAZAN_01F
+  choice 1 2 weight=5 action=skill:SUKUNDA
+  choice 1 3 weight=35 action=skill:PULINPA
   choice 2 0 weight=65 action=special:0
-  choice 2 1 weight=15 action=skill:31
-  choice 2 2 action=skill:177
-  choice 2 3 weight=20 action=skill:83
+  choice 2 1 weight=15 action=skill:MAZAN_01F
+  choice 2 2 action=skill:SUKUNDA
+  choice 2 3 weight=20 action=skill:PULINPA
   choice 3 0 weight=30 action=special:0
-  choice 3 1 weight=25 action=skill:31
-  choice 3 2 weight=35 action=skill:177
-  choice 3 3 weight=10 action=skill:83
+  choice 3 1 weight=25 action=skill:MAZAN_01F
+  choice 3 2 weight=35 action=skill:SUKUNDA
+  choice 3 3 weight=10 action=skill:PULINPA
   choice 6 0 weight=40 action=special:0
-  choice 6 1 weight=30 action=skill:31
-  choice 6 2 action=skill:177
-  choice 6 3 weight=30 action=skill:83
+  choice 6 1 weight=30 action=skill:MAZAN_01F
+  choice 6 2 action=skill:SUKUNDA
+  choice 6 3 weight=30 action=skill:PULINPA
 end
 
 enemy-ai 295 script=AI_Apisu
   decision 1 predicates=14:2,2:40,1:20 routes=8,2,2,8,1,8,8,0
   choice 0 0 weight=50 action=special:0
-  choice 0 1 action=skill:163 effect=1:0
-  choice 0 2 weight=50 action=skill:184
+  choice 0 1 action=skill:MEDIA_0A3 effect=1:0
+  choice 0 2 weight=50 action=skill:MAKAKAJA
   choice 0 3 action=preset:1:71
   choice 0 4 action=preset:1:70
   choice 1 0 weight=100 action=special:0
-  choice 1 1 action=skill:163 effect=1:0
-  choice 1 2 action=skill:184
+  choice 1 1 action=skill:MEDIA_0A3 effect=1:0
+  choice 1 2 action=skill:MAKAKAJA
   choice 1 3 action=preset:1:71
   choice 1 4 action=preset:1:70
   choice 2 0 weight=40 action=special:0
-  choice 2 1 weight=60 action=skill:163 effect=1:0
-  choice 2 2 action=skill:184
+  choice 2 1 weight=60 action=skill:MEDIA_0A3 effect=1:0
+  choice 2 2 action=skill:MAKAKAJA
   choice 2 3 action=preset:1:71
   choice 2 4 action=preset:1:70
   choice 3 0 action=special:0
-  choice 3 1 action=skill:163
-  choice 3 2 action=skill:184
+  choice 3 1 action=skill:MEDIA_0A3
+  choice 3 2 action=skill:MAKAKAJA
   choice 3 3 weight=100 action=preset:1:71
   choice 3 4 action=preset:1:70
   choice 4 0 action=special:0
-  choice 4 1 action=skill:163
-  choice 4 2 action=skill:184
+  choice 4 1 action=skill:MEDIA_0A3
+  choice 4 2 action=skill:MAKAKAJA
   choice 4 3 action=preset:1:71
   choice 4 4 weight=100 action=preset:1:70
   choice 5 0 action=special:0
-  choice 5 1 action=skill:163
-  choice 5 2 action=skill:184
+  choice 5 1 action=skill:MEDIA_0A3
+  choice 5 2 action=skill:MAKAKAJA
   choice 5 3 action=preset:1:71
   choice 5 4 action=preset:1:70
   choice 6 0 weight=30 action=special:0
-  choice 6 1 weight=60 action=skill:163
-  choice 6 2 weight=10 action=skill:184
+  choice 6 1 weight=60 action=skill:MEDIA_0A3
+  choice 6 2 weight=10 action=skill:MAKAKAJA
   choice 6 3 action=preset:1:71
   choice 6 4 action=preset:1:70
 end
@@ -2922,109 +2922,109 @@ end
 enemy-ai 296
   decision 0 predicates=12:298,23:0,31:12 routes=4,8,8,3,8,1,3,8
   choice 0 0 weight=90 action=special:0
-  choice 0 1 weight=5 action=skill:80
-  choice 0 2 weight=5 action=skill:85
-  choice 0 3 action=skill:346 effect=7:0
+  choice 0 1 weight=5 action=skill:FOUL_BREATH
+  choice 0 2 weight=5 action=skill:SONIC_WAVE
+  choice 0 3 action=skill:VOID_MUTE effect=7:0
   choice 1 0 weight=70 action=special:0
-  choice 1 1 weight=15 action=skill:80
-  choice 1 2 weight=15 action=skill:85
-  choice 1 3 action=skill:346 effect=7:0
+  choice 1 1 weight=15 action=skill:FOUL_BREATH
+  choice 1 2 weight=15 action=skill:SONIC_WAVE
+  choice 1 3 action=skill:VOID_MUTE effect=7:0
   choice 3 0 weight=10 action=special:0
-  choice 3 1 weight=5 action=skill:80
-  choice 3 2 weight=5 action=skill:85
-  choice 3 3 weight=80 action=skill:346 effect=7:0
+  choice 3 1 weight=5 action=skill:FOUL_BREATH
+  choice 3 2 weight=5 action=skill:SONIC_WAVE
+  choice 3 3 weight=80 action=skill:VOID_MUTE effect=7:0
   choice 4 0 action=special:0
-  choice 4 1 action=skill:80
-  choice 4 2 action=skill:85
-  choice 4 3 weight=100 action=skill:346 effect=7:0
+  choice 4 1 action=skill:FOUL_BREATH
+  choice 4 2 action=skill:SONIC_WAVE
+  choice 4 3 weight=100 action=skill:VOID_MUTE effect=7:0
 end
 
 enemy-ai 297 script=AI_Onkotto
   decision 0 predicates=43:6,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=70 action=special:0
-  choice 0 1 action=skill:130
-  choice 0 2 weight=30 action=skill:183
-  choice 0 3 action=skill:55
+  choice 0 1 action=skill:MUTE_BLOW
+  choice 0 2 weight=30 action=skill:RAKUKAJA
+  choice 0 3 action=skill:RAGE
   choice 1 0 weight=100 action=special:0
-  choice 1 1 action=skill:130
-  choice 1 2 action=skill:183
-  choice 1 3 action=skill:55
+  choice 1 1 action=skill:MUTE_BLOW
+  choice 1 2 action=skill:RAKUKAJA
+  choice 1 3 action=skill:RAGE
   choice 2 0 action=special:0
-  choice 2 1 action=skill:130
-  choice 2 2 action=skill:183
-  choice 2 3 action=skill:55
+  choice 2 1 action=skill:MUTE_BLOW
+  choice 2 2 action=skill:RAKUKAJA
+  choice 2 3 action=skill:RAGE
   choice 3 0 action=special:0
-  choice 3 1 action=skill:130
-  choice 3 2 action=skill:183
-  choice 3 3 action=skill:55
+  choice 3 1 action=skill:MUTE_BLOW
+  choice 3 2 action=skill:RAKUKAJA
+  choice 3 3 action=skill:RAGE
   choice 4 0 action=special:0
-  choice 4 1 action=skill:130
-  choice 4 2 action=skill:183
-  choice 4 3 action=skill:55
+  choice 4 1 action=skill:MUTE_BLOW
+  choice 4 2 action=skill:RAKUKAJA
+  choice 4 3 action=skill:RAGE
   choice 5 0 action=special:0
-  choice 5 1 action=skill:130
-  choice 5 2 action=skill:183
-  choice 5 3 action=skill:55
+  choice 5 1 action=skill:MUTE_BLOW
+  choice 5 2 action=skill:RAKUKAJA
+  choice 5 3 action=skill:RAGE
   choice 6 0 action=special:0
-  choice 6 1 action=skill:130
-  choice 6 2 action=skill:183
-  choice 6 3 action=skill:55
+  choice 6 1 action=skill:MUTE_BLOW
+  choice 6 2 action=skill:RAKUKAJA
+  choice 6 3 action=skill:RAGE
 end
 
 enemy-ai 298
   decision 1 predicates=11:296,2:40,1:20 routes=8,3,8,8,8,2,2,8
   choice 0 0 weight=20 action=special:0
-  choice 0 1 action=skill:161 effect=1:0
-  choice 0 2 weight=30 action=skill:87
-  choice 0 3 weight=50 action=skill:34
+  choice 0 1 action=skill:DIARAMA effect=1:0
+  choice 0 2 weight=30 action=skill:ALLURE
+  choice 0 3 weight=50 action=skill:SHOCK_WAVE
   choice 2 0 weight=10 action=special:0
-  choice 2 1 weight=30 action=skill:161 effect=1:0
-  choice 2 2 weight=30 action=skill:87
-  choice 2 3 weight=30 action=skill:34
+  choice 2 1 weight=30 action=skill:DIARAMA effect=1:0
+  choice 2 2 weight=30 action=skill:ALLURE
+  choice 2 3 weight=30 action=skill:SHOCK_WAVE
   choice 3 0 weight=10 action=special:0
-  choice 3 1 weight=60 action=skill:161 effect=1:0
-  choice 3 2 action=skill:87
-  choice 3 3 weight=30 action=skill:34
+  choice 3 1 weight=60 action=skill:DIARAMA effect=1:0
+  choice 3 2 action=skill:ALLURE
+  choice 3 3 weight=30 action=skill:SHOCK_WAVE
 end
 
 enemy-ai 299
   decision 0 predicates=1:40,5:2,none routes=8,1,8,8,2,8,8,8
-  choice 0 0 weight=20 action=skill:116
-  choice 0 1 weight=50 action=skill:40
-  choice 0 2 weight=30 action=skill:121
+  choice 0 0 weight=20 action=skill:RAVING_SLASH
+  choice 0 1 weight=50 action=skill:MATERA_028
+  choice 0 2 weight=30 action=skill:HELL_THRUST
   choice 0 3 action=preset:1:85
-  choice 1 0 action=skill:116
-  choice 1 1 weight=30 action=skill:40
-  choice 1 2 weight=50 action=skill:121
+  choice 1 0 action=skill:RAVING_SLASH
+  choice 1 1 weight=30 action=skill:MATERA_028
+  choice 1 2 weight=50 action=skill:HELL_THRUST
   choice 1 3 weight=20 action=preset:1:85
-  choice 2 0 weight=20 action=skill:116
-  choice 2 1 weight=40 action=skill:40
-  choice 2 2 weight=40 action=skill:121
+  choice 2 0 weight=20 action=skill:RAVING_SLASH
+  choice 2 1 weight=40 action=skill:MATERA_028
+  choice 2 2 weight=40 action=skill:HELL_THRUST
   choice 2 3 action=preset:1:85
 end
 
 enemy-ai 300
   decision 0 predicates=43:10,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=50 action=skill:117
-  choice 0 1 weight=30 action=skill:135
-  choice 0 2 weight=20 action=skill:192
-  choice 1 0 weight=70 action=skill:117
-  choice 1 1 weight=30 action=skill:135
-  choice 1 2 action=skill:192
+  choice 0 0 weight=50 action=skill:DEATH_SPRAY
+  choice 0 1 weight=30 action=skill:VENOM_FANG
+  choice 0 2 weight=20 action=skill:POWER_CHARGE
+  choice 1 0 weight=70 action=skill:DEATH_SPRAY
+  choice 1 1 weight=30 action=skill:VENOM_FANG
+  choice 1 2 action=skill:POWER_CHARGE
 end
 
 enemy-ai 301
   decision 1 predicates=7:16,14:12,none routes=8,8,8,8,2,1,8,8
   choice 0 0 weight=30 action=special:0
-  choice 0 1 weight=40 action=skill:112
-  choice 0 2 weight=30 action=skill:60
-  choice 0 3 action=skill:180
+  choice 0 1 weight=40 action=skill:BODY_RUSH
+  choice 0 2 weight=30 action=skill:HAMA
+  choice 0 3 action=skill:DEKUNDA_0B4
   choice 1 0 weight=20 action=special:0
-  choice 1 1 weight=30 action=skill:112
-  choice 1 2 weight=10 action=skill:60
-  choice 1 3 weight=40 action=skill:180
+  choice 1 1 weight=30 action=skill:BODY_RUSH
+  choice 1 2 weight=10 action=skill:HAMA
+  choice 1 3 weight=40 action=skill:DEKUNDA_0B4
   choice 2 0 weight=20 action=special:0
-  choice 2 1 weight=80 action=skill:112
+  choice 2 1 weight=80 action=skill:BODY_RUSH
 end
 
 enemy-ai 302 script=AI_Keruberosu_Center
@@ -3038,29 +3038,29 @@ end
 enemy-ai 304 script=HEAT_2
   choice 0 0 weight=100 action=special:0
   choice 1 0 weight=65 action=special:0
-  choice 1 1 weight=35 action=skill:1
+  choice 1 1 weight=35 action=skill:AGI
 end
 
 enemy-ai 305
   decision 0 predicates=36:0x1ffffe,1:50,none routes=8,3,8,8,1,2,8,8
-  choice 0 0 weight=40 action=skill:60
-  choice 0 1 weight=30 action=skill:130
-  choice 0 2 weight=10 action=skill:343
+  choice 0 0 weight=40 action=skill:HAMA
+  choice 0 1 weight=30 action=skill:MUTE_BLOW
+  choice 0 2 weight=10 action=skill:VOID_DEATH
   choice 0 3 weight=20 action=special:0
-  choice 1 0 weight=50 action=skill:60
-  choice 1 1 weight=30 action=skill:130
+  choice 1 0 weight=50 action=skill:HAMA
+  choice 1 1 weight=30 action=skill:MUTE_BLOW
   choice 1 2 weight=20 action=special:0
-  choice 2 0 weight=40 action=skill:130
-  choice 2 1 weight=30 action=skill:134
-  choice 2 2 weight=10 action=skill:343
+  choice 2 0 weight=40 action=skill:MUTE_BLOW
+  choice 2 1 weight=30 action=skill:VILE_BLADE_086
+  choice 2 2 weight=10 action=skill:VOID_DEATH
   choice 2 3 weight=20 action=special:0
-  choice 3 0 weight=40 action=skill:130
-  choice 3 1 weight=40 action=skill:134
+  choice 3 0 weight=40 action=skill:MUTE_BLOW
+  choice 3 1 weight=40 action=skill:VILE_BLADE_086
   choice 3 2 weight=20 action=special:0
   choice 6 0 action=special:0
-  choice 6 1 action=skill:60
-  choice 6 2 weight=50 action=skill:134
-  choice 6 3 weight=50 action=skill:130
+  choice 6 1 action=skill:HAMA
+  choice 6 2 weight=50 action=skill:VILE_BLADE_086
+  choice 6 3 weight=50 action=skill:MUTE_BLOW
 end
 
 enemy-ai 307 script=m2_kerupi
@@ -3080,7 +3080,7 @@ enemy-ai 310 script=m2_atabaku
 end
 
 enemy-ai 311 script=AI_KingFrost
-  choice 0 0 weight=100 action=skill:381
+  choice 0 0 weight=100 action=skill:ATTACK_17D
 end
 
 enemy-ai 312 script=ai_suzaku
@@ -3104,33 +3104,33 @@ enemy-ai 316 script=hitosyura
 end
 
 enemy-ai 317
-  choice 0 0 weight=80 action=skill:3
-  choice 0 1 weight=20 action=skill:5
+  choice 0 0 weight=80 action=skill:AGIDYNE
+  choice 0 1 weight=20 action=skill:MARAGION_005
 end
 
 enemy-ai 318
-  choice 0 0 weight=80 action=skill:12
-  choice 0 1 weight=20 action=skill:14
+  choice 0 0 weight=80 action=skill:BUFUDYNE
+  choice 0 1 weight=20 action=skill:MABUFULA_00E
 end
 
 enemy-ai 319
-  choice 0 0 weight=80 action=skill:21
-  choice 0 1 weight=20 action=skill:23
+  choice 0 0 weight=80 action=skill:ZIODYNE
+  choice 0 1 weight=20 action=skill:MAZIONGA_017
 end
 
 enemy-ai 320
-  choice 0 0 weight=80 action=skill:30
-  choice 0 1 weight=20 action=skill:32
+  choice 0 0 weight=80 action=skill:ZANDYNE
+  choice 0 1 weight=20 action=skill:MAZANMA_020
 end
 
 enemy-ai 321
-  choice 0 0 weight=80 action=skill:39
-  choice 0 1 weight=20 action=skill:41
+  choice 0 0 weight=80 action=skill:TERADYNE
+  choice 0 1 weight=20 action=skill:MATERAZI_029
 end
 
 enemy-ai 322
-  choice 0 0 weight=80 action=skill:131
-  choice 0 1 weight=20 action=skill:126
+  choice 0 0 weight=80 action=skill:SKULL_CLEAVE
+  choice 0 1 weight=20 action=skill:POWER_WAVE
 end
 
 enemy-ai 323
@@ -3138,57 +3138,57 @@ enemy-ai 323
   decision 1 predicates=50:0,50:2,35:3 routes=5,2,8,8,4,3,8,8
   decision 2 predicates=35:3,61:3,1:35 routes=6,5,8,8,5,8,8,8
   choice 0 0 weight=10 action=special:0
-  choice 0 1 weight=25 action=skill:11
-  choice 0 2 weight=15 action=skill:14
-  choice 0 3 weight=25 action=skill:184
-  choice 0 4 weight=25 action=skill:181
+  choice 0 1 weight=25 action=skill:BUFULA
+  choice 0 2 weight=15 action=skill:MABUFULA_00E
+  choice 0 3 weight=25 action=skill:MAKAKAJA
+  choice 0 4 weight=25 action=skill:TARUKAJA
   choice 1 0 weight=100 action=special:0 effect=2:4
   choice 2 0 weight=25 action=special:0
-  choice 2 1 weight=75 action=skill:11
+  choice 2 1 weight=75 action=skill:BUFULA
   choice 3 0 weight=5 action=special:0
-  choice 3 1 weight=20 action=skill:11
-  choice 3 2 weight=10 action=skill:14
-  choice 3 4 weight=65 action=skill:181
+  choice 3 1 weight=20 action=skill:BUFULA
+  choice 3 2 weight=10 action=skill:MABUFULA_00E
+  choice 3 4 weight=65 action=skill:TARUKAJA
   choice 4 0 weight=5 action=special:0
-  choice 4 1 weight=20 action=skill:11
-  choice 4 2 weight=10 action=skill:14
-  choice 4 3 weight=65 action=skill:184
+  choice 4 1 weight=20 action=skill:BUFULA
+  choice 4 2 weight=10 action=skill:MABUFULA_00E
+  choice 4 3 weight=65 action=skill:MAKAKAJA
   choice 5 0 weight=85 action=special:0
-  choice 5 1 weight=15 action=skill:11
+  choice 5 1 weight=15 action=skill:BUFULA
   choice 6 0 action=special:0
-  choice 6 1 action=skill:11
-  choice 6 2 weight=100 action=skill:14
-  choice 6 3 action=skill:184
-  choice 6 4 action=skill:181
+  choice 6 1 action=skill:BUFULA
+  choice 6 2 weight=100 action=skill:MABUFULA_00E
+  choice 6 3 action=skill:MAKAKAJA
+  choice 6 4 action=skill:TARUKAJA
 end
 
 enemy-ai 324 script=AI_bafo
   decision 0 predicates=14:12,13:11,none routes=8,8,8,8,1,2,8,8
-  choice 0 0 weight=40 action=skill:65
-  choice 0 1 weight=10 action=skill:66
-  choice 0 2 weight=10 action=skill:69
+  choice 0 0 weight=40 action=skill:MUDO
+  choice 0 1 weight=10 action=skill:MUDOON
+  choice 0 2 weight=10 action=skill:CURSE
   choice 0 3 weight=30 action=special:0
-  choice 0 4 weight=10 action=skill:118
-  choice 1 0 weight=40 action=skill:65
-  choice 1 1 weight=10 action=skill:66
-  choice 1 2 weight=10 action=skill:69
-  choice 1 3 weight=20 action=skill:180
-  choice 1 4 weight=20 action=skill:2
-  choice 2 0 weight=40 action=skill:65
-  choice 2 1 weight=10 action=skill:66
-  choice 2 2 weight=10 action=skill:118
-  choice 2 3 weight=20 action=skill:185
-  choice 2 4 weight=20 action=skill:2
+  choice 0 4 weight=10 action=skill:STUN_NEEDLE
+  choice 1 0 weight=40 action=skill:MUDO
+  choice 1 1 weight=10 action=skill:MUDOON
+  choice 1 2 weight=10 action=skill:CURSE
+  choice 1 3 weight=20 action=skill:DEKUNDA_0B4
+  choice 1 4 weight=20 action=skill:AGILAO
+  choice 2 0 weight=40 action=skill:MUDO
+  choice 2 1 weight=10 action=skill:MUDOON
+  choice 2 2 weight=10 action=skill:STUN_NEEDLE
+  choice 2 3 weight=20 action=skill:DEKAJA_0B9
+  choice 2 4 weight=20 action=skill:AGILAO
 end
 
 enemy-ai 325
   decision 0 predicates=1:99,1:50,none routes=8,2,8,8,1,8,8,8
-  choice 0 0 weight=50 action=skill:19
+  choice 0 0 weight=50 action=skill:ZIO
   choice 0 1 weight=50 action=special:0
-  choice 1 0 weight=33 action=skill:19
+  choice 1 0 weight=33 action=skill:ZIO
   choice 1 1 weight=33 action=special:0
-  choice 1 2 weight=34 action=skill:160
-  choice 2 0 weight=33 action=skill:48
+  choice 1 2 weight=34 action=skill:DIA
+  choice 2 0 weight=33 action=skill:MEGIDOLAON_030
   choice 2 1 weight=33 action=special:0
   choice 2 2 weight=34 action=special:1
 end
@@ -3196,200 +3196,200 @@ end
 enemy-ai 327 script=AI_JFrost
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=20 action=special:0
-  choice 0 1 weight=20 action=skill:14
-  choice 0 2 weight=20 action=skill:12
-  choice 0 3 weight=20 action=skill:350
+  choice 0 1 weight=20 action=skill:MABUFULA_00E
+  choice 0 2 weight=20 action=skill:BUFUDYNE
+  choice 0 3 weight=20 action=skill:FIRE_DRAIN
   choice 0 4 weight=20 action=special:0
   choice 1 0 weight=25 action=special:0
-  choice 1 1 weight=25 action=skill:14
-  choice 1 2 weight=25 action=skill:12
-  choice 1 3 action=skill:350
+  choice 1 1 weight=25 action=skill:MABUFULA_00E
+  choice 1 2 weight=25 action=skill:BUFUDYNE
+  choice 1 3 action=skill:FIRE_DRAIN
   choice 1 4 weight=25 action=special:0
 end
 
 enemy-ai 328 script=AI_JLantern
   decision 0 predicates=43:13,none,none routes=8,8,8,8,1,8,8,8
   choice 0 0 weight=10 action=special:0
-  choice 0 1 weight=20 action=skill:5
-  choice 0 2 weight=40 action=skill:2
-  choice 0 3 weight=30 action=skill:193
+  choice 0 1 weight=20 action=skill:MARAGION_005
+  choice 0 2 weight=40 action=skill:AGILAO
+  choice 0 3 weight=30 action=skill:MIND_CHARGE
   choice 1 0 action=special:0
-  choice 1 1 weight=30 action=skill:5
-  choice 1 2 weight=70 action=skill:2
-  choice 1 3 action=skill:176
+  choice 1 1 weight=30 action=skill:MARAGION_005
+  choice 1 2 weight=70 action=skill:AGILAO
+  choice 1 3 action=skill:TARUNDA
 end
 
 enemy-ai 329
   decision 0 predicates=36:0x1ffffe,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 1 weight=25 action=skill:126
-  choice 0 2 weight=25 action=skill:116
-  choice 0 3 weight=25 action=skill:130
-  choice 0 4 weight=25 action=skill:364
-  choice 1 1 weight=40 action=skill:126
-  choice 1 2 weight=30 action=skill:116
-  choice 1 3 weight=30 action=skill:130
-  choice 1 4 action=skill:364
+  choice 0 1 weight=25 action=skill:POWER_WAVE
+  choice 0 2 weight=25 action=skill:RAVING_SLASH
+  choice 0 3 weight=25 action=skill:MUTE_BLOW
+  choice 0 4 weight=25 action=skill:PHYS_REPEL_16C
+  choice 1 1 weight=40 action=skill:POWER_WAVE
+  choice 1 2 weight=30 action=skill:RAVING_SLASH
+  choice 1 3 weight=30 action=skill:MUTE_BLOW
+  choice 1 4 action=skill:PHYS_REPEL_16C
 end
 
 enemy-ai 330 script=hito_goei2
   decision 0 predicates=21:3,4:60,48:7 routes=2,2,3,3,1,2,3,8
-  choice 0 0 weight=25 action=skill:131
-  choice 0 1 weight=25 action=skill:138
-  choice 0 2 weight=25 action=skill:132
-  choice 0 3 weight=25 action=skill:125
-  choice 1 0 weight=100 action=skill:189
-  choice 2 0 weight=100 action=skill:173
-  choice 3 0 weight=50 action=skill:139
-  choice 3 1 weight=50 action=skill:140
+  choice 0 0 weight=25 action=skill:SKULL_CLEAVE
+  choice 0 1 weight=25 action=skill:EXECUTIONER
+  choice 0 2 weight=25 action=skill:DEMON_RAGE
+  choice 0 3 weight=25 action=skill:SAKURA_RAGE
+  choice 1 0 weight=100 action=skill:TAUNT
+  choice 2 0 weight=100 action=skill:RECARMDRA
+  choice 3 0 weight=50 action=skill:BLOODBATH
+  choice 3 1 weight=50 action=skill:REVELATION
 end
 
 enemy-ai 331 script=hito_goei2
   decision 0 predicates=4:60,21:3,48:12 routes=3,3,3,8,3,1,2,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,1,8,8,8
-  choice 0 0 weight=5 action=skill:68
-  choice 0 1 weight=40 action=skill:190
-  choice 0 2 weight=30 action=skill:132
-  choice 0 3 weight=25 action=skill:3
-  choice 1 0 weight=100 action=skill:68
-  choice 1 1 action=skill:190
-  choice 1 2 action=skill:132
-  choice 1 3 action=skill:3
-  choice 2 0 weight=15 action=skill:68
-  choice 2 1 action=skill:190
-  choice 2 2 weight=55 action=skill:132
-  choice 2 3 weight=30 action=skill:3
-  choice 3 0 weight=100 action=skill:173
+  choice 0 0 weight=5 action=skill:MAMUDOON_044
+  choice 0 1 weight=40 action=skill:DEBILITATE_0BE
+  choice 0 2 weight=30 action=skill:DEMON_RAGE
+  choice 0 3 weight=25 action=skill:AGIDYNE
+  choice 1 0 weight=100 action=skill:MAMUDOON_044
+  choice 1 1 action=skill:DEBILITATE_0BE
+  choice 1 2 action=skill:DEMON_RAGE
+  choice 1 3 action=skill:AGIDYNE
+  choice 2 0 weight=15 action=skill:MAMUDOON_044
+  choice 2 1 action=skill:DEBILITATE_0BE
+  choice 2 2 weight=55 action=skill:DEMON_RAGE
+  choice 2 3 weight=30 action=skill:AGIDYNE
+  choice 3 0 weight=100 action=skill:RECARMDRA
 end
 
 enemy-ai 332 script=hito_goei2
   decision 0 predicates=4:30,none,48:12 routes=8,2,8,8,2,8,1,8
   decision 1 predicates=none,none,none routes=8,8,8,8,2,8,8,8
-  choice 0 0 weight=30 action=skill:70
-  choice 0 1 weight=20 action=skill:137
-  choice 0 2 weight=20 action=skill:141
-  choice 0 3 weight=30 action=skill:190
-  choice 1 0 weight=40 action=skill:70
-  choice 1 1 weight=30 action=skill:137
-  choice 1 2 weight=30 action=skill:141
-  choice 1 3 action=skill:190
-  choice 2 0 weight=100 action=skill:173
+  choice 0 0 weight=30 action=skill:BLOOD_CURSE
+  choice 0 1 weight=20 action=skill:GATE_OF_HELL
+  choice 0 2 weight=20 action=skill:RAGNAROK
+  choice 0 3 weight=30 action=skill:DEBILITATE_0BE
+  choice 1 0 weight=40 action=skill:BLOOD_CURSE
+  choice 1 1 weight=30 action=skill:GATE_OF_HELL
+  choice 1 2 weight=30 action=skill:RAGNAROK
+  choice 1 3 action=skill:DEBILITATE_0BE
+  choice 2 0 weight=100 action=skill:RECARMDRA
 end
 
 enemy-ai 333 script=hito_goei
   decision 1 predicates=2:50,21:3,4:60 routes=3,8,3,3,2,1,3,8
-  choice 0 0 weight=20 action=skill:24
-  choice 0 1 weight=20 action=skill:48
-  choice 0 2 weight=20 action=skill:76
-  choice 0 3 weight=40 action=skill:57
-  choice 1 0 action=skill:160 effect=1:0
-  choice 1 1 action=skill:19
-  choice 1 2 weight=100 action=skill:48
+  choice 0 0 weight=20 action=skill:MAZIODYNE_018
+  choice 0 1 weight=20 action=skill:MEGIDOLAON_030
+  choice 0 2 weight=20 action=skill:DORMINA
+  choice 0 3 weight=40 action=skill:VANITY_039
+  choice 1 0 action=skill:DIA effect=1:0
+  choice 1 1 action=skill:ZIO
+  choice 1 2 weight=100 action=skill:MEGIDOLAON_030
   choice 1 3 action=special:0
-  choice 2 0 weight=20 action=skill:161 effect=1:0
-  choice 2 1 weight=40 action=skill:24
-  choice 2 2 weight=40 action=skill:57
-  choice 3 0 weight=100 action=skill:173
+  choice 2 0 weight=20 action=skill:DIARAMA effect=1:0
+  choice 2 1 weight=40 action=skill:MAZIODYNE_018
+  choice 2 2 weight=40 action=skill:VANITY_039
+  choice 3 0 weight=100 action=skill:RECARMDRA
 end
 
 enemy-ai 334 script=hito_goei2
   decision 1 predicates=48:12,4:30,none routes=8,2,8,8,1,2,8,8
-  choice 0 0 weight=20 action=skill:6
-  choice 0 1 weight=20 action=skill:24
-  choice 0 2 weight=20 action=skill:15
-  choice 0 3 weight=20 action=skill:178
-  choice 0 4 weight=20 action=skill:177
-  choice 1 0 weight=20 action=skill:6
-  choice 1 1 weight=40 action=skill:24
-  choice 1 2 weight=40 action=skill:15
-  choice 2 0 weight=100 action=skill:173
+  choice 0 0 weight=20 action=skill:MARAGIDYNE_006
+  choice 0 1 weight=20 action=skill:MAZIODYNE_018
+  choice 0 2 weight=20 action=skill:MABUFUDYNE_00F
+  choice 0 3 weight=20 action=skill:RAKUNDA
+  choice 0 4 weight=20 action=skill:SUKUNDA
+  choice 1 0 weight=20 action=skill:MARAGIDYNE_006
+  choice 1 1 weight=40 action=skill:MAZIODYNE_018
+  choice 1 2 weight=40 action=skill:MABUFUDYNE_00F
+  choice 2 0 weight=100 action=skill:RECARMDRA
 end
 
 enemy-ai 335 script=hito_goei
   decision 0 predicates=4:30,2:40,50:11 routes=3,3,3,1,3,2,1,8
-  choice 0 0 weight=20 action=skill:63
-  choice 0 1 weight=20 action=skill:181
-  choice 0 2 weight=20 action=skill:183
-  choice 0 3 weight=20 action=skill:182
-  choice 0 4 weight=20 action=skill:184
-  choice 1 0 weight=40 action=skill:63
-  choice 1 1 weight=50 action=skill:164 effect=1:0
-  choice 1 2 weight=10 action=skill:76
-  choice 2 0 weight=20 action=skill:164 effect=1:0
-  choice 2 1 weight=20 action=skill:181
-  choice 2 2 weight=20 action=skill:183
-  choice 2 3 weight=20 action=skill:182
-  choice 2 4 weight=20 action=skill:184
-  choice 3 0 weight=100 action=skill:173
+  choice 0 0 weight=20 action=skill:MAHAMAON_03F
+  choice 0 1 weight=20 action=skill:TARUKAJA
+  choice 0 2 weight=20 action=skill:RAKUKAJA
+  choice 0 3 weight=20 action=skill:SUKUKAJA
+  choice 0 4 weight=20 action=skill:MAKAKAJA
+  choice 1 0 weight=40 action=skill:MAHAMAON_03F
+  choice 1 1 weight=50 action=skill:MEDIARAMA_0A4 effect=1:0
+  choice 1 2 weight=10 action=skill:DORMINA
+  choice 2 0 weight=20 action=skill:MEDIARAMA_0A4 effect=1:0
+  choice 2 1 weight=20 action=skill:TARUKAJA
+  choice 2 2 weight=20 action=skill:RAKUKAJA
+  choice 2 3 weight=20 action=skill:SUKUKAJA
+  choice 2 4 weight=20 action=skill:MAKAKAJA
+  choice 3 0 weight=100 action=skill:RECARMDRA
 end
 
 enemy-ai 336
   decision 0 predicates=48:12,42:506,1:99 routes=3,4,3,1,4,1,8,2
-  choice 0 0 weight=20 action=skill:6
-  choice 0 1 weight=20 action=skill:12
-  choice 0 2 weight=20 action=skill:177
-  choice 0 3 weight=20 action=skill:178
-  choice 0 4 weight=20 action=skill:165
-  choice 1 0 weight=70 action=skill:506
-  choice 1 1 weight=15 action=skill:3
-  choice 1 2 weight=15 action=skill:15
-  choice 2 0 weight=25 action=skill:6
-  choice 2 1 weight=25 action=skill:12
-  choice 2 2 weight=25 action=skill:177
-  choice 2 3 weight=25 action=skill:178
-  choice 2 4 action=skill:165
-  choice 3 0 weight=33 action=skill:6
-  choice 3 1 weight=33 action=skill:12
-  choice 3 2 action=skill:177
-  choice 3 3 action=skill:178
-  choice 3 4 weight=34 action=skill:165
-  choice 4 0 weight=50 action=skill:6
-  choice 4 1 weight=50 action=skill:12
-  choice 4 2 action=skill:177
-  choice 4 3 action=skill:178
-  choice 4 4 action=skill:165
+  choice 0 0 weight=20 action=skill:MARAGIDYNE_006
+  choice 0 1 weight=20 action=skill:BUFUDYNE
+  choice 0 2 weight=20 action=skill:SUKUNDA
+  choice 0 3 weight=20 action=skill:RAKUNDA
+  choice 0 4 weight=20 action=skill:MEDIARAHAN_0A5
+  choice 1 0 weight=70 action=skill:DEBILITATE_1FA
+  choice 1 1 weight=15 action=skill:AGIDYNE
+  choice 1 2 weight=15 action=skill:MABUFUDYNE_00F
+  choice 2 0 weight=25 action=skill:MARAGIDYNE_006
+  choice 2 1 weight=25 action=skill:BUFUDYNE
+  choice 2 2 weight=25 action=skill:SUKUNDA
+  choice 2 3 weight=25 action=skill:RAKUNDA
+  choice 2 4 action=skill:MEDIARAHAN_0A5
+  choice 3 0 weight=33 action=skill:MARAGIDYNE_006
+  choice 3 1 weight=33 action=skill:BUFUDYNE
+  choice 3 2 action=skill:SUKUNDA
+  choice 3 3 action=skill:RAKUNDA
+  choice 3 4 weight=34 action=skill:MEDIARAHAN_0A5
+  choice 4 0 weight=50 action=skill:MARAGIDYNE_006
+  choice 4 1 weight=50 action=skill:BUFUDYNE
+  choice 4 2 action=skill:SUKUNDA
+  choice 4 3 action=skill:RAKUNDA
+  choice 4 4 action=skill:MEDIARAHAN_0A5
 end
 
 enemy-ai 337
-  choice 0 0 weight=25 action=skill:131
-  choice 0 1 weight=25 action=skill:132
-  choice 0 2 weight=25 action=skill:138
+  choice 0 0 weight=25 action=skill:SKULL_CLEAVE
+  choice 0 1 weight=25 action=skill:DEMON_RAGE
+  choice 0 2 weight=25 action=skill:EXECUTIONER
   choice 0 3 weight=25 action=special:0
 end
 
 enemy-ai 338 script=AI_Zin
-  choice 0 0 weight=100 action=skill:30
+  choice 0 0 weight=100 action=skill:ZANDYNE
 end
 
 enemy-ai 339
   decision 0 predicates=9:4,none,none routes=8,8,8,8,8,8,8,8
-  choice 0 0 weight=40 action=skill:11
-  choice 0 1 weight=20 action=skill:12
-  choice 0 2 weight=20 action=skill:16
-  choice 0 3 weight=20 action=skill:339
+  choice 0 0 weight=40 action=skill:BUFULA
+  choice 0 1 weight=20 action=skill:BUFUDYNE
+  choice 0 2 weight=20 action=skill:FROST_BREATH
+  choice 0 3 weight=20 action=skill:VOID_ELEC
   choice 1 0 weight=70 action=special:0 effect=2:4
-  choice 1 1 weight=30 action=skill:121 effect=2:4
+  choice 1 1 weight=30 action=skill:HELL_THRUST effect=2:4
 end
 
 enemy-ai 340
   decision 0 predicates=36:0x1ffffe,5:2,9:4 routes=4,3,4,3,1,2,4,8
-  choice 0 0 weight=30 action=skill:11
-  choice 0 1 weight=10 action=skill:164
-  choice 0 2 weight=25 action=skill:337
+  choice 0 0 weight=30 action=skill:BUFULA
+  choice 0 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 0 2 weight=25 action=skill:VOID_FIRE
   choice 0 3 weight=35 action=preset:1:54
   choice 0 4 action=special:0
-  choice 1 0 weight=40 action=skill:11
-  choice 1 1 weight=10 action=skill:164
-  choice 1 2 action=skill:337
+  choice 1 0 weight=40 action=skill:BUFULA
+  choice 1 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 1 2 action=skill:VOID_FIRE
   choice 1 3 weight=40 action=preset:1:54
   choice 1 4 weight=10 action=special:0
-  choice 2 0 weight=40 action=skill:11
-  choice 2 1 weight=10 action=skill:164
-  choice 2 2 weight=30 action=skill:337
+  choice 2 0 weight=40 action=skill:BUFULA
+  choice 2 1 weight=10 action=skill:MEDIARAMA_0A4
+  choice 2 2 weight=30 action=skill:VOID_FIRE
   choice 2 3 action=preset:1:54
   choice 2 4 weight=20 action=special:0
-  choice 3 0 weight=50 action=skill:11
-  choice 3 1 weight=20 action=skill:164
-  choice 3 2 action=skill:337
+  choice 3 0 weight=50 action=skill:BUFULA
+  choice 3 1 weight=20 action=skill:MEDIARAMA_0A4
+  choice 3 2 action=skill:VOID_FIRE
   choice 3 3 action=preset:1:54
   choice 3 4 weight=30 action=special:0
   choice 4 0 weight=100 action=special:0 effect=2:4
@@ -3398,38 +3398,38 @@ end
 enemy-ai 341 script=ai_omoikane
   decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,1,1,1,3,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=50 action=skill:190
+  choice 0 0 weight=50 action=skill:DEBILITATE_0BE
   choice 0 1 weight=50 action=special:1 effect=12:0
   choice 1 0 weight=100 action=special:1 effect=12:0
-  choice 2 0 weight=20 action=skill:190
+  choice 2 0 weight=20 action=skill:DEBILITATE_0BE
   choice 2 1 weight=80 action=special:1 effect=12:0
-  choice 3 0 weight=10 action=skill:190
+  choice 3 0 weight=10 action=skill:DEBILITATE_0BE
   choice 3 1 weight=90 action=special:1 effect=12:0
-  choice 6 0 weight=100 action=skill:190
+  choice 6 0 weight=100 action=skill:DEBILITATE_0BE
 end
 
 enemy-ai 342 script=ai_omoikane
   decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,3,1,1,3,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=50 action=skill:190
+  choice 0 0 weight=50 action=skill:DEBILITATE_0BE
   choice 0 1 weight=50 action=special:1 effect=12:0
   choice 1 0 weight=100 action=special:1 effect=12:0
-  choice 2 0 weight=20 action=skill:190
+  choice 2 0 weight=20 action=skill:DEBILITATE_0BE
   choice 2 1 weight=80 action=special:1 effect=12:0
-  choice 3 0 weight=10 action=skill:190
+  choice 3 0 weight=10 action=skill:DEBILITATE_0BE
   choice 3 1 weight=90 action=special:1 effect=12:0
-  choice 6 0 weight=100 action=skill:190
+  choice 6 0 weight=100 action=skill:DEBILITATE_0BE
 end
 
 enemy-ai 343 script=ai_omoikane
   decision 0 predicates=48:12,13:10,52:0 routes=1,1,1,3,1,1,3,8
   decision 2 predicates=23:0,none,none routes=8,8,8,8,6,8,8,8
-  choice 0 0 weight=50 action=skill:190
+  choice 0 0 weight=50 action=skill:DEBILITATE_0BE
   choice 0 1 weight=50 action=special:1 effect=12:0
   choice 1 0 weight=100 action=special:1 effect=12:0
-  choice 2 0 weight=20 action=skill:190
+  choice 2 0 weight=20 action=skill:DEBILITATE_0BE
   choice 2 1 weight=80 action=special:1 effect=12:0
-  choice 3 0 weight=10 action=skill:190
+  choice 3 0 weight=10 action=skill:DEBILITATE_0BE
   choice 3 1 weight=90 action=special:1 effect=12:0
-  choice 6 0 weight=100 action=skill:190
+  choice 6 0 weight=100 action=skill:DEBILITATE_0BE
 end
