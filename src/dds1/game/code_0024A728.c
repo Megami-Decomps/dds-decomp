@@ -38,7 +38,41 @@ INCLUDE_ASM(const s32, "game/code_0024A728", func_0024AE18);
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024AF58);
 
-INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B090);
+typedef struct GridPanelHost {
+    u8 pad00[0x64];
+    s32 grid;           /* 0x64 */
+    u8 pad68[0x38];
+    s32 settings[1];    /* 0xA0 */
+} GridPanelHost;
+
+extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
+
+/* Reset grid entry 0x1A, then configure it from the panel's setting slot chosen by `kind`. */
+void func_0024B090(u32 kind, GridPanelHost *host) {
+    s32 flags = 0;
+    s32 value = 0;
+    s32 slot = 0;
+
+    switch (kind) {
+    case 2:
+        flags = 2;
+        value = 4;
+        slot = 3;
+        break;
+    case 3:
+        flags = 2;
+        value = 7;
+        slot = 2;
+        break;
+    case 4:
+        value = 4;
+        slot = 3;
+        break;
+    }
+    itfSetGridEntryQuantizedAndRefresh(host->grid, 0x1A, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(host->grid, 0x1A, host->settings[slot], 0, value, flags);
+}
 
 INCLUDE_ASM(const s32, "game/code_0024A728", func_0024B168);
 

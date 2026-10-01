@@ -37,7 +37,13 @@ typedef struct FrFontSysLocal {
     void *unk154;           /* 0x154: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
     void *unk158;           /* 0x158: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
     void *unk15C;           /* 0x15C: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
-    u8 unk160[0x34];        /* 0x160 */
+    s32 width;              /* 0x160 */
+    s32 unk164;             /* 0x164 */
+    s32 height;             /* 0x168 */
+    s32 unk16C;             /* 0x16C */
+    s32 gsBuffer;           /* 0x170 */
+    s32 gsFormat;           /* 0x174 */
+    u8 unk178[0x1C];        /* 0x178 */
     void *glyphSlots[2];     /* 0x194: glyph chain slots */
 } FrFontSysLocal;
 
@@ -92,7 +98,9 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
 INCLUDE_ASM(const s32, "game/code_00193C08", func_00193FD0);
 
 extern volatile s32 D_003BD2EC; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
-extern void sceGsSetDefLoadImage(void *, s16, s32, s32, s32, s32, s32, s32);
+extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
+extern s32 func_002D03F8(s32);
+extern s32 sdfResourceRetainAddress(s32);
 extern void sceGsExecLoadImage(void *, s32);
 extern void sceGsSyncPath(s32, s32);
 extern void FlushCache(s32);
@@ -111,7 +119,27 @@ void sdfUploadGsImageUnderSemaphore(s16 buffer, s32 image) {
     SignalSema(D_003BD2EC);
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_001940B8);
+/* Upload the font's bitmap: clear a (width * height / 2)-byte block and load it to GS memory under the GS semaphore. */
+void func_001940B8(void) {
+    u8 loadImage[0x60];
+    s32 size;
+    s32 block;
+    void *image;
+
+    size = frFontWork.height * frFontWork.width;
+    size = (u32)size >> 1;
+    block = func_002D03F8(size);
+    image = (void *)sdfResourceRetainAddress(block);
+    memset(image, 0, size);
+    sceGsSetDefLoadImage(loadImage, (s16)frFontWork.gsBuffer, (s16)frFontWork.gsFormat, 0x14, 0, 0,
+                         (s16)frFontWork.width, (s16)frFontWork.height);
+    WaitSema(D_003BD2EC);
+    FlushCache(0);
+    sceGsExecLoadImage(loadImage, (s32)image);
+    sceGsSyncPath(0, 0);
+    SignalSema(D_003BD2EC);
+    func_002D0918((void *)block);
+}
 
 extern void *func_002EB028();
 extern void func_001944A0(s32, s32, void *);

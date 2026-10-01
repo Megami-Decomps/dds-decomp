@@ -635,9 +635,48 @@ void func_0033EC40(s8 value) {
     D_00438B1E = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EC48);
+extern s64 func_0036DE70();
+extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
+extern DevState *D_00438B08;
+extern DevState *D_00438B0C;
+extern u16 D_00438B1C;
 
-extern s64 func_0036DE70(void);
+/* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
+void func_0033EC48(DevState *state) {
+    ThreadEntry *worker;
+    s64 interrupts;
+    s32 wake = 0;
+    DevState *last;
+
+    interrupts = func_0036DE70(state);
+    worker = &D_0040BA10[state->workerIndex];
+    if (worker->threadId < 0) {
+        sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
+    }
+    state->unk4 = D_00438B0C;
+    if (D_00438B0C != NULL) {
+        D_00438B0C->unk0 = state;
+    } else {
+        D_00438B08 = state;
+    }
+    last = worker->last;
+    D_00438B0C = state;
+    state->workerPrev = last;
+    if (last != NULL) {
+        last->workerNext = state;
+    } else {
+        worker->first = state;
+        wake = 1;
+    }
+    worker->last = state;
+    D_00438B1C += 1;
+    if (interrupts != 0) {
+        EIntr();
+    }
+    if (wake != 0) {
+        SignalSema(worker->sema);
+    }
+}
 extern void EIntr(void);
 extern void sdfReleaseChipBlock(void *ptr);
 extern DevState *D_00438B14;

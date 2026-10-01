@@ -55,7 +55,9 @@ typedef struct DevState {
 typedef struct DevWorkerEntry {
     s32 handle; /* 0x00: thread ID at D_00398860, semaphore ID at D_00398864 */
     s32 semaphore; /* 0x04 */
-    u8 pad08[16];
+    struct DevState *first; /* 0x08 */
+    struct DevState *last; /* 0x0C */
+    u8 pad10[8];
 } DevWorkerEntry;
 
 extern u8 D_003BD42F;
@@ -614,7 +616,46 @@ void func_002E5D98(s32 value) {
     D_003BD42E = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E4720", func_002E5DA0);
+extern DevState *D_003BD418;
+extern DevState *D_003BD41C;
+extern u16 D_003BD42C;
+
+/* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
+void func_002E5DA0(DevState *state) {
+    DevWorkerEntry *worker;
+    s32 interrupts;
+    s32 wake = 0;
+    DevState *last;
+
+    interrupts = func_00312C08(state);
+    worker = &D_00398860[state->workerIndex];
+    if (worker->handle < 0) {
+        sdfEnsureDeviceWorkerThreadStarted(state->workerIndex);
+    }
+    state->unk4 = D_003BD41C;
+    if (D_003BD41C != NULL) {
+        D_003BD41C->unk0 = state;
+    } else {
+        D_003BD418 = state;
+    }
+    last = worker->last;
+    D_003BD41C = state;
+    state->workerPrev = last;
+    if (last != NULL) {
+        last->workerNext = state;
+    } else {
+        worker->first = state;
+        wake = 1;
+    }
+    worker->last = state;
+    D_003BD42C += 1;
+    if (interrupts != 0) {
+        EIntr();
+    }
+    if (wake != 0) {
+        SignalSema(worker->semaphore);
+    }
+}
 
 void sdfDevUnlinkAndFreeState(DevState *state) {
     DevState *prev;
