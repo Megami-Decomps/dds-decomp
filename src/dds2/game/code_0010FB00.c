@@ -72,7 +72,40 @@ void *dds3GetWorldEntryCallbackTarget(WorldEntry *entry) {
     return callbackTarget;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FCE8);
+typedef struct WorldNode {
+    u32 unk00; u32 unk04; u32 unk08; u32 unk0C; u32 unk10; u32 unk14;
+    s16 counter18; s16 counter1A; s16 counter1C; s16 counter1E;
+    u32 unk20; u32 unk24;
+} WorldNode;
+
+extern void *func_00328D68(s32 size);
+
+/* Allocate and clear a world node, then attach it as the object's entry.
+   The assignment order is load-bearing: ee-gcc hoists the last statement's
+   store out of the independent group, so counter1C stays last and the entry
+   store follows it. */
+s32 func_0010FCE8(WorldObject *object) {
+    WorldNode *node;
+
+    node = (WorldNode *)func_00328D68(0x28);
+    if (node == NULL) {
+        return 0;
+    }
+    node->unk00 = 0;
+    node->unk04 = 0;
+    node->unk08 = 0;
+    node->unk0C = 0;
+    node->unk10 = 0;
+    node->unk14 = 0;
+    node->counter18 = 0;
+    node->counter1A = -1;
+    node->counter1E = 0;
+    node->unk20 = 0;
+    node->unk24 = 0;
+    node->counter1C = -1;
+    object->entry = (WorldEntry *)node;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FD58);
 
