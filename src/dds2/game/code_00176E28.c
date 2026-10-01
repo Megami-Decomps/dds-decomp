@@ -66,6 +66,13 @@ typedef struct EffectRing {
     u8 *matrix;
 } EffectRing;
 
+/* The vertex array lives inside the same block, 0x28 past the header. */
+typedef struct EffectRingBlock {
+    EffectRing header;
+    u8 pad78[0x8];
+    EffectRingVertex vertices[1]; /* 0x80 */
+} EffectRingBlock;
+
 extern u32 func_003292A8(s32);
 
 extern u32 sdfResourceRetainAddress(u32);
