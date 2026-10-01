@@ -71,6 +71,13 @@ typedef struct {
     void (*callback)(void); /* 0x18 */
 } MapRequestState;
 
+/* The ring of nodes lives inside the same block, 0x2C past the header. */
+typedef struct MapRequestRing {
+    MapRequestState header;
+    u8 pad1C[0x28];
+    MapRequestNode nodes[1]; /* 0x44 */
+} MapRequestRing;
+
 extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
@@ -346,31 +353,32 @@ extern void *sdfMemoryGetBlockAddress(u32 handle);
 MapRequestState *func_002C7A60(s16 count, s16 arg) {
     s32 size = count * 0x20 + 0x44;
     u32 handle = func_002D03F8(size);
-    MapRequestState *pool = sdfMemoryGetBlockAddress(handle);
+    MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(handle);
+    MapRequestState *state = &pool->header;
     MapRequestNode *node;
     MapRequestNode *next;
     MapRequestNode *first;
     s32 n;
 
-    memset(pool, 0, size);
-    pool->handle = handle;
-    node = (MapRequestNode *)((u8 *)pool + 0x44);
-    pool->first = node;
-    pool->third = node;
-    pool->next = node;
+    memset(state, 0, size);
+    state->handle = handle;
+    node = pool->nodes;
+    state->first = node;
+    state->third = node;
+    state->next = node;
     for (n = count - 2; n != -1; n--) {
         next = node + 1;
         node->next = next;
         next->prev = node;
         node = node->next;
     }
-    first = pool->first;
+    first = state->first;
     node->next = first;
     first->prev = node;
-    pool->arg = arg;
-    pool->count = count;
-    pool->interval = 0;
-    return pool;
+    state->arg = arg;
+    state->count = count;
+    state->interval = 0;
+    return state;
 }
 
 s64 func_002C7B38(u32 *sprite) {
@@ -601,7 +609,43 @@ float sdfPowFloatByTruncatedExponent(float x, float y) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C9268);
 
-INCLUDE_ASM(const s32, "game/code_002C5FB8", func_002C94A8);
+typedef struct QuatF {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} QuatF;
+
+typedef struct Mat4F {
+    f32 m[16];
+} Mat4F;
+
+/* Convert a unit quaternion into a 4x4 rotation matrix (translation zero). */
+void func_002C94A8(Mat4F *out, QuatF *q) {
+    f32 xx = q->x * q->x;
+    f32 yy = q->y * q->y;
+    f32 zz = q->z * q->z;
+    f32 a = 1.0f - (yy + zz) * 2.0f;
+    f32 b = 1.0f - (xx + zz) * 2.0f;
+    f32 c = 1.0f - (xx + yy) * 2.0f;
+
+    out->m[0] = a;
+    out->m[1] = (q->x * q->y - q->w * q->z) * 2.0f;
+    out->m[2] = (q->w * q->y + q->x * q->z) * 2.0f;
+    out->m[3] = 0;
+    out->m[4] = (q->x * q->y + q->w * q->z) * 2.0f;
+    out->m[5] = b;
+    out->m[6] = (q->y * q->z - q->w * q->x) * 2.0f;
+    out->m[7] = 0;
+    out->m[8] = (q->x * q->z - q->w * q->y) * 2.0f;
+    out->m[9] = (q->y * q->z + q->w * q->x) * 2.0f;
+    out->m[10] = c;
+    out->m[11] = 0;
+    out->m[12] = 0;
+    out->m[13] = 0;
+    out->m[14] = 0;
+    out->m[15] = 1.0f;
+}
 
 void sdfVec4Add(float *dst, float *lhs, float *rhs) {
     *dst = *lhs + *rhs;

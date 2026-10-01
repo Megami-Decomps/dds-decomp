@@ -66,6 +66,13 @@ typedef struct SdfRing {
     s16 pad14;                      /* 0x14 */
 } SdfRing;
 
+/* The ring of nodes lives inside the same block, 0x2C past the header. */
+typedef struct SdfRingBlock {
+    SdfRing header;
+    u8 pad18[0x2C];
+    SdfRingNode nodes[1]; /* 0x44 */
+} SdfRingBlock;
+
 extern s32 func_003292A8(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
@@ -135,7 +142,8 @@ INCLUDE_ASM(const s32, "game/code_0030E1A0", func_0030ECC0);
 SdfRing *func_0030EE40(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     s32 allocation = func_003292A8(size);
-    SdfRing *ring = sdfMemoryGetBlockAddress(allocation);
+    SdfRingBlock *block = (SdfRingBlock *)sdfMemoryGetBlockAddress(allocation);
+    SdfRing *ring = &block->header;
     SdfRingNode *node;
     SdfRingNode *next;
     SdfRingNode *first;
@@ -143,7 +151,7 @@ SdfRing *func_0030EE40(s16 count, s16 limit) {
 
     memset(ring, 0, size);
     ring->allocation = allocation;
-    node = (SdfRingNode *)((u8 *)ring + 0x44);
+    node = block->nodes;
     ring->head = node;
     ring->last = node;
     ring->cursor = node;
@@ -384,7 +392,43 @@ float sdfPowFloatByTruncatedExponent(float x, float y) {
 
 INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310648);
 
-INCLUDE_ASM(const s32, "game/code_0030E1A0", func_00310888);
+typedef struct QuatF {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} QuatF;
+
+typedef struct Mat4F {
+    f32 m[16];
+} Mat4F;
+
+/* Convert a unit quaternion into a 4x4 rotation matrix (translation zero). */
+void func_00310888(Mat4F *out, QuatF *q) {
+    f32 xx = q->x * q->x;
+    f32 yy = q->y * q->y;
+    f32 zz = q->z * q->z;
+    f32 a = 1.0f - (yy + zz) * 2.0f;
+    f32 b = 1.0f - (xx + zz) * 2.0f;
+    f32 c = 1.0f - (xx + yy) * 2.0f;
+
+    out->m[0] = a;
+    out->m[1] = (q->x * q->y - q->w * q->z) * 2.0f;
+    out->m[2] = (q->w * q->y + q->x * q->z) * 2.0f;
+    out->m[3] = 0;
+    out->m[4] = (q->x * q->y + q->w * q->z) * 2.0f;
+    out->m[5] = b;
+    out->m[6] = (q->y * q->z - q->w * q->x) * 2.0f;
+    out->m[7] = 0;
+    out->m[8] = (q->x * q->z - q->w * q->y) * 2.0f;
+    out->m[9] = (q->y * q->z + q->w * q->x) * 2.0f;
+    out->m[10] = c;
+    out->m[11] = 0;
+    out->m[12] = 0;
+    out->m[13] = 0;
+    out->m[14] = 0;
+    out->m[15] = 1.0f;
+}
 
 void sdfVec4Add(float *out, float *left, float *right) {
     *out = *left + *right;
