@@ -5,12 +5,18 @@
 
 extern void *memcpy(void *, const void *, u32);
 
-/* Each slot has a 0x60-byte stride; only its resettable tail is known. */
+typedef struct EffBezierPoint {
+    f32 x;
+    f32 y;
+    f32 z;
+} EffBezierPoint;
+
+/* Each slot has a 0x60-byte stride: seven control points, the current segment, the curve parameter t and its step. */
 typedef struct Slot60 {
-    u8 pad[0x54];
-    s32 unk54;
-    s32 unk58;
-    f32 unk5C;
+    EffBezierPoint point[7];
+    s32 segment; /* 0x54 */
+    f32 t;       /* 0x58 */
+    f32 step;    /* 0x5C */
 } Slot60;
 
 typedef struct SlotTab {
@@ -150,9 +156,9 @@ SlotTab *effCreateSlotArray(u32 count) {
     if (count != 0) {
         do {
             index++;
-            slot->unk54 = 0;
-            slot->unk58 = 0;
-            slot->unk5C = 0.05f;
+            slot->segment = 0;
+            slot->t = 0;
+            slot->step = 0.05f;
             slot++;
         } while (index < count);
     }
@@ -160,20 +166,35 @@ SlotTab *effCreateSlotArray(u32 count) {
 }
 
 void effReleaseSlotArrayAllocation(EffArrHdr *header) {
-    func_003297C8(header->unk8);
+    func_003297C8(header->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00195EF8);
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_00196040);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_00196180);
+/* Evaluate the cubic Bezier made of control points segment..segment+3 at t into out (xyz, w = 1). */
+void func_00196180(Slot60 *slot, f32 *out) {
+    EffBezierPoint *p = &slot->point[slot->segment];
+    f32 t = slot->t;
+    f32 u = 1.0f - t;
+    f32 w[4]; /* never read; gcc drops the stores but keeps the frame slot */
+    f32 w0 = u * u * u;
+    f32 w1 = t * (u * u) * 3.0f;
+    f32 w2 = t * t * u * 3.0f;
+    f32 w3 = t * t * t;
+
+    out[0] = p[0].x * w0 + p[1].x * w1 + p[2].x * w2 + p[3].x * w3;
+    out[1] = p[0].y * w0 + p[1].y * w1 + p[2].y * w2 + p[3].y * w3;
+    out[2] = p[0].z * w0 + p[1].z * w1 + p[2].z * w2 + p[3].z * w3;
+    out[3] = 1.0f;
+}
 
 void effInitSlotTail(SlotTab *table, s32 index) {
     Slot60 *slot = &table->slots[index];
 
-    slot->unk5C = 0.05f;
-    slot->unk54 = slot->unk58 = 0;
+    slot->step = 0.05f;
+    slot->segment = slot->t = 0;
 }
 
 s32 effGetSlotAt(SlotTab *table, s32 index) {

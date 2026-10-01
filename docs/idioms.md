@@ -352,6 +352,16 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   register. Two separate pointers (`base = f(h); entry = base + ...`) merge the
   call-result copy into one pseudo and give a different register split
   (DDS2 `func_003074F0`; ~10 words off with every two-pointer variant).
+- A stack frame with no (or fewer) stack accesses than the C needs is an unread
+  local in the original source. gcc 2.96 deletes stores to a local array that
+  nothing reads but keeps its frame slot:
+  `float w[4]; w[0] = t * t; w[1] = t * t * t; return t + 1.0f;` compiles to
+  `addiu sp,-16 ... addiu sp,16` with no `swc1`. Use it only when retail has such
+  a frame, name/type it from the sibling (`f32 w[4];` like `effMathStepBezierSlot`,
+  `s32 blended[4];` like `effParModulateColors`), and comment it
+  `/* never read; gcc drops the stores but keeps the frame slot */`
+  (DDS1 `func_0018E548` frame 0x10 and `func_0015DE88` frame 0x20 with one
+  store, plus DDS2 twins). Not a way to change register allocation.
 
 ## Pointer and loop addressing
 
