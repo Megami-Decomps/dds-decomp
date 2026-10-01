@@ -344,6 +344,14 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
   `ldl/ldr`) lets the integer store go first and matches (DDS1 `func_00183EE0`,
   DDS2 `func_0018BB38`). When two heap stores come out in the wrong order, try
   the other scalar type for the copied block.
+- A walking pointer that is the call-result variable itself, plus a second
+  variable for the unmoved base: `cursor = f(h); base = cursor; cursor +=
+  *(u32 *)(cursor + 0xC); for (...; cursor += 8) { r = base + *(u32 *)(cursor + 4);`.
+  Retail then shows `daddu $3,$2,$0` (cursor = return value), `daddu $6,$3,$0`
+  (base copy, scheduled after the 0xC load) and `addu $3,$3,$2` advancing the same
+  register. Two separate pointers (`base = f(h); entry = base + ...`) merge the
+  call-result copy into one pseudo and give a different register split
+  (DDS2 `func_003074F0`; ~10 words off with every two-pointer variant).
 
 ## Pointer and loop addressing
 

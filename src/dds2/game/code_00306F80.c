@@ -262,7 +262,40 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     return object;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_003074F0);
+typedef struct ItfGridResource {
+    u32 handle;
+    u8 pad04[0x18];
+    u32 entryCount;
+} ItfGridResource;
+
+extern u8 *sdfResourceRetainAddress(u32);
+extern void sdfDecrementAllocationReferenceCount(u32);
+
+/* Return the address of entry `index` of the resource's 8-byte-stride offset table, or NULL when out of range. */
+u8 *func_003074F0(ItfGridResource *object, u32 index) {
+    u8 *base;
+    u8 *cursor;
+    u8 *result;
+    u32 count;
+    u32 i;
+
+    if (object->handle == 0) {
+        return 0;
+    }
+    cursor = sdfResourceRetainAddress(object->handle);
+    base = cursor;
+    count = object->entryCount;
+    cursor += *(u32 *)(cursor + 0xC);
+    for (i = 0; i < count; i++, cursor += 8) {
+        result = base + *(u32 *)(cursor + 4);
+        if (index == i) {
+            sdfDecrementAllocationReferenceCount(object->handle);
+            return result;
+        }
+    }
+    sdfDecrementAllocationReferenceCount(object->handle);
+    return 0;
+}
 
 /* Set the selected descriptor word's high control bits. */
 void itfSetGridDescriptorControlBit(s32 object, s32 index) {
